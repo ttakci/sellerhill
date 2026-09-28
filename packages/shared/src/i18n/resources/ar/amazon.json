@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "حسابات المشتري على Amazon",
+      "subtitle": "أدر حسابات المشتري على Amazon لتتبع الطلبات وجلب الأسعار",
+      "addButton": "إضافة حساب Amazon",
+      "noAccounts": "لا توجد حسابات Amazon مربوطة بعد",
+      "noAccountsDescription": "أضف حساب المشتري على Amazon لتتبع أسعار الطلبات وحالة الشحن تلقائياً",
+      "statusActive": "نشط",
+      "statusVerifying": "قيد التحقق",
+      "statusInvalid": "بيانات الدخول غير صحيحة",
+      "statusNeedsReauth": "يتطلب إعادة المصادقة",
+      "statusLocked": "مقفل",
+      "verifyButton": "تحقق",
+      "editButton": "تعديل",
+      "deleteButton": "حذف",
+      "deleteConfirmTitle": "حذف حساب Amazon",
+      "deleteConfirmMessage": "هل أنت متأكد من حذف حساب Amazon هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+      "lastVerified": "آخر تحقق",
+      "lastUsed": "آخر استخدام",
+      "never": "أبداً",
+      "addTitle": "إضافة حساب Amazon",
+      "editTitle": "تعديل حساب Amazon",
+      "labelField": "اسم الحساب",
+      "labelPlaceholder": "مثال: حسابي الشخصي على Amazon",
+      "emailField": "البريد الإلكتروني على Amazon",
+      "emailPlaceholder": "your-email@example.com",
+      "passwordField": "كلمة مرور Amazon",
+      "passwordPlaceholder": "أدخل كلمة مرور Amazon الخاصة بك",
+      "twoFactorField": "مفتاح 2FA السري",
+      "twoFactorPlaceholder": "اختياري، من إعدادات 2FA في Amazon",
+      "twoFactorInfo": "إذا كانت المصادقة الثنائية 2FA مفعّلة لديك، أدخل المفتاح السري من إعدادات أمان حساب Amazon",
+      "saveButton": "حفظ الحساب",
+      "savingButton": "جارٍ الحفظ...",
+      "verifyingButton": "جارٍ التحقق...",
+      "verifySuccess": "تم التحقق من حساب Amazon بنجاح",
+      "verifyFailed": "تعذّر التحقق من حساب Amazon. يرجى مراجعة بيانات الدخول.",
+      "saveSuccess": "تم حفظ حساب Amazon بنجاح",
+      "deleteSuccess": "تم حذف حساب Amazon بنجاح",
+      "errorSaving": "تعذّر حفظ حساب Amazon"
+    },
+    "linking": {
+      "title": "ربط طلب Amazon",
+      "selectAccount": "اختيار حساب Amazon",
+      "selectAccountPlaceholder": "اختر حساب Amazon...",
+      "orderId": "رقم طلب Amazon",
+      "orderIdPlaceholder": "مثال: 112-1234567-1234567",
+      "orderIdHelp": "أدخل رقم طلبك على Amazon (تجده في سجل الطلبات أو في رسالة التأكيد الإلكترونية)",
+      "linkButton": "ربط وجلب البيانات",
+      "linkingButton": "جارٍ الربط...",
+      "progressLoggingIn": "جارٍ تسجيل الدخول إلى Amazon...",
+      "progressNavigating": "جارٍ فتح صفحة الطلب...",
+      "progressScraping": "جارٍ جلب تفاصيل الطلب...",
+      "progressSaving": "جارٍ حفظ بيانات الطلب...",
+      "successTitle": "تم ربط طلب Amazon",
+      "successMessage": "تم جلب تفاصيل الطلب وربطه بنجاح",
+      "errorTitle": "تعذّر ربط الطلب",
+      "errorNoAccount": "يرجى إضافة حساب Amazon أولاً",
+      "errorScraping": "تعذّر جلب تفاصيل طلب Amazon. يرجى التحقق من رقم الطلب والمحاولة مرة أخرى.",
+      "errorInvalidCredentials": "بيانات دخول Amazon غير صحيحة. يرجى تحديث حسابك.",
+      "errorRateLimit": "عدد الطلبات كبير جداً. يرجى المحاولة لاحقاً.",
+      "costCaptureFailed": "تم العثور على طلب Amazon لكن تعذّرت قراءة تفاصيل التكلفة. بقي الربح على آخر قيمة معروفة.",
+      "noAccountsTitle": "لا توجد حسابات Amazon",
+      "noAccountsMessage": "عليك أولاً إضافة حساب مشتري على Amazon حتى تتمكن من ربط الطلبات.",
+      "addAccountLink": "إضافة حساب Amazon",
+      "noListingTitle": "استورد إدراج eBay هذا أولاً",
+      "noListingMessage": "لم يتم استيراد إدراج eBay الخاص بهذا الطلب، لذلك فالطلب غير مرتبط بأي إدراج. لا يزال بإمكانك ربط طلب Amazon والحصول على تكاليفه الفعلية، لكن عند شحنه لن يمكن إرسال رقم التتبع إلى eBay، لأن eBay يحتاج إلى بند الطلب الذي يحمله الإدراج. ولن تتم إعادة محاولة هذا الإرسال لاحقاً. استورد الإدراج أولاً وسيرتبط هذا الطلب به تلقائياً.",
+      "importListingButton": "استيراد الإدراج",
+      "linkAnywayButton": "الربط على أي حال"
+    },
+    "tracking": {
+      "statusPending": "قيد الانتظار",
+      "statusProcessing": "قيد المعالجة",
+      "statusShipped": "تم الشحن",
+      "statusDelivered": "تم التسليم",
+      "statusCancelled": "ملغى",
+      "statusReturned": "تم الإرجاع",
+      "eBaySyncShipped": "تم تحديد طلب eBay على أنه مشحون",
+      "eBaySyncDelivered": "تم تحديد طلب eBay على أنه تم تسليمه"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "الحساب",
+        "proxy": "البروكسي"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "استخدام هذا الحساب للتنفيذ التلقائي",
+      "autoFulfillEnabledHint": "عند التفعيل، تُشترى طلبات eBay المطابقة تلقائياً عبر حساب Amazon هذا (بالتناوب مع حساباتك الأخرى المفعّلة). يجب أن يكون مفتاح التنفيذ التلقائي الرئيسي في إعدادات المتجر مفعّلاً أيضاً، ويجب تحديد سقف للإنفاق أدناه.",
+      "autoFulfillCapTotal": "الحد الأقصى لإجمالي الطلب (سقف التنفيذ التلقائي)",
+      "autoFulfillCapTotalHint": "سقف الإنفاق لكل حساب (بالدولار الأمريكي). تتجاوز الطلبات التي يفوق إجماليها هذا المبلغ هذا الحساب. مطلوب لتفعيل التنفيذ التلقائي.",
+      "autoFulfillCapTotalPlaceholder": "مثال: 250",
+      "autoFulfillDryRun": "تشغيل تجريبي (تنفيذ المسار دون إتمام الطلب)",
+      "autoFulfillDryRunHint": "يشغّل مسار الدفع كاملاً حتى الخطوة التي تسبق تأكيد الطلب (دون تنفيذها) ليتم التقاط إجمالي المراجعة وعرضه."
+    },
+    "proxy": {
+      "sectionTitle": "البروكسي",
+      "stepSubtitle": "اختياري، مرّر أتمتة هذا الحساب عبر البروكسي الخاص بك",
+      "enabled": "تفعيل البروكسي",
+      "enabledHint": "استخدم خادم بروكسي لحماية حسابك",
+      "connectionType": "نوع الاتصال",
+      "host": "أدخل المضيف",
+      "port": "أدخل المنفذ",
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "hint": "اختياري. أضف بروكسي خاصاً بك لتمرير أتمتة هذا الحساب عبره، وهو مفيد إن أردت حماية إضافية من الحظر المرتبط بعنوان IP. اتركه معطّلاً وسيتصل الحساب مباشرة، وهذا هو الوضع الافتراضي المعتاد."
+    },
+    "marketplace": {
+      "label": "السوق",
+      "usOnlyNote": "سوق الولايات المتحدة (amazon.com) هو الوحيد المدعوم حالياً.",
+      "AMAZON_US": "الولايات المتحدة (amazon.com)",
+      "readOnlyHint": "لا يمكن تغيير السوق بعد إنشاء الحساب."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "حدّد حداً أقصى لإجمالي الطلب لتفعيل التنفيذ التلقائي على هذا الحساب.",
+      "proxyHostPortRequired": "أدخل المضيف والمنفذ لاستخدام البروكسي مع هذا الحساب.",
+      "unsupportedMarketplace": "سوق Amazon هذا غير متاح بعد.",
+      "twoFactorSecretRequired": "أضف المفتاح السري لتطبيق المصادقة (2FA) الخاص بالحساب. تطلب Amazon رمز تحقق في كل عملية تسجيل دخول آلية تقريباً، وهذا هو الرمز الوحيد الذي يمكننا الإجابة عنه نيابة عنك.",
+      "twoFactorSecretInvalid": "لا يبدو هذا مفتاحاً سرياً لتطبيق المصادقة. الصق مفتاح الإعداد من صفحة إعداد تطبيق المصادقة في Amazon (أحرف A–Z وأرقام 2–7)، وليس رمزاً من 6 أرقام."
+    }
+  }
+}

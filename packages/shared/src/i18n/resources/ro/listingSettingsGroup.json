@@ -1,0 +1,251 @@
+{
+  "listingSettingsGroup": {
+    "title": "Grupuri de setări pentru anunțuri",
+    "subtitle": "Gestionați și atribuiți șabloane de strategie anunțurilor dvs. de produse pentru optimizare automată.",
+    "loadingDescription": "Se preiau grupurile dvs. de anunțuri.",
+    "createNewGroup": "Creează un grup nou",
+    "editGroup": "Editează grupul de anunțuri",
+    "backToList": "Înapoi la grupuri",
+    "connectorSubtitle": "CONECTOR AMAZON → EBAY",
+    "groupDetails": "Detaliile grupului",
+    "groupName": "Numele grupului",
+    "groupNamePlaceholder": "ex.: Electronice premium",
+    "description": "Descriere",
+    "descriptionPlaceholder": "Introduceți note interne despre grup...",
+    "stripBrandFromTitle": "Elimină brandul din titlu",
+    "stripBrandFromTitleInfo": "Elimină automat numele brandului Amazon din titlul dvs. eBay. Se aplică doar anunțurilor noi.",
+    "aiTitleEnabled": "Titlu asistat de AI",
+    "aiTitleEnabledInfo": "Rescrie titlul eBay cu ajutorul AI și îl completează cu cuvinte cheie suplimentare. Doar pentru anunțuri noi; în caz de eșec revine la titlul obișnuit.",
+    "repricingStrategy": "Strategie de repreț",
+    "addPriceRange": "Adaugă interval de preț",
+    "removePriceRange": "Elimină intervalul de preț",
+    "minPrice": "Preț minim ($)",
+    "maxPrice": "Preț maxim ($)",
+    "profitMargin": "Marja de profit (%)",
+    "fixedProfit": "Profit fix ($)",
+    "priceRangeLabel": "Intervalul de preț {{index}}",
+    "stock": "Stoc",
+    "defaultQuantity": "Cantitate implicită",
+    "fees": "Comisioane",
+    "ebayFee": "Comision eBay",
+    "ebayFeePercent": "Comision eBay (%)",
+    "fixedFee": "Comision fix",
+    "fixedFeeAmount": "Comision fix ($)",
+    "tax": "Taxă",
+    "taxPercent": "Taxă (%)",
+    "templates": "Șablon",
+    "customTemplate": "Personalizat",
+    "predefinedTemplate": "Predefinit",
+    "selectTemplate": "Selectează șablonul",
+    "selectTemplatePlaceholder": "Alegeți un șablon predefinit...",
+    "htmlEditor": "Editor HTML",
+    "templatePlaceholder": "Introduceți șablonul HTML personalizat...",
+    "preview": "Previzualizare",
+    "livePreview": "Previzualizare live",
+    "editTemplate": "Editează acest șablon",
+    "darkModePreview": "Previzualizare în mod întunecat",
+    "desktopView": "Vizualizare desktop",
+    "mobileView": "Vizualizare mobil",
+    "renderingPreview": "Se generează previzualizarea...",
+    "saveChanges": "Salvează modificările",
+    "saving": "Se salvează...",
+    "cancel": "Anulează",
+    "delete": "Șterge",
+    "deleteGroup": "Șterge grupul",
+    "confirmDelete": "Sigur doriți să ștergeți acest grup?",
+    "confirmDeleteMessage": "Această acțiune nu poate fi anulată. Produsele care folosesc acest grup vor trebui realocate.",
+    "deleteSuccess": "Grupul a fost șters cu succes",
+    "deleteFailed": "Grupul nu a putut fi șters",
+    "productsCount_one": "{{count}} produs",
+    "productsCount_few": "{{count}} produse",
+    "productsCount_other": "{{count}} de produse",
+    "noProducts": "Niciun produs",
+    "statusActive": "Activ",
+    "statusDraft": "Ciornă",
+    "statusInactive": "Inactiv",
+    "card": {
+      "defaultQuantity": "Cantitate implicită",
+      "stockBuffer": "Rezervă de stoc",
+      "fee": "Comision",
+      "fixedFee": "Comision fix",
+      "customTemplate": "Șablon personalizat"
+    },
+    "emptyState": {
+      "title": "Niciun grup de anunțuri încă",
+      "description": "Creați primul grup pentru a începe să vă organizați anunțurile",
+      "action": "Creează un grup nou"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Magazin general",
+        "description": "O machetă cu conversie ridicată, bazată pe urgență, potrivită pentru orice produs general, cu insigne clare de încredere"
+      },
+      "ds-minimalist": {
+        "name": "Minimalist",
+        "description": "Machetă ultra-curată, pe o singură coloană, alb-negru, axată exclusiv pe specificații și încredere"
+      },
+      "ds-tech-gadgets": {
+        "name": "Gadgeturi tehnologice",
+        "description": "Machetă modernă, cu accente închise, ideală pentru electronice, cu un tabel de specificații proeminent"
+      },
+      "ds-home-decor": {
+        "name": "Casă și decorațiuni",
+        "description": "Machetă caldă și estetică, cu culori blânde, accent pe imaginile mari și o tipografie primitoare"
+      },
+      "ds-auto-parts": {
+        "name": "Piese auto",
+        "description": "Machetă tehnică cu contrast ridicat, cu avertismente clare de compatibilitate și un stil robust"
+      },
+      "ds-apparel-fashion": {
+        "name": "Îmbrăcăminte și modă",
+        "description": "Machetă elegantă în stil lookbook, cu accent pe tabelele de mărimi și îngrijirea materialelor"
+      },
+      "ds-beauty-health": {
+        "name": "Frumusețe și sănătate",
+        "description": "Design curat, de tip spa, cu secțiuni structurate pentru ingrediente și mod de utilizare"
+      },
+      "ds-pet-supplies": {
+        "name": "Articole pentru animale",
+        "description": "Machetă jucăușă, dar structurată, cu accente vii, axată pe siguranța materialelor și mărimi"
+      },
+      "ds-fitness-sports": {
+        "name": "Sport și fitness",
+        "description": "Machetă energică, cu tipografie îndrăzneață, axată pe durabilitate, materiale și stil de viață activ"
+      },
+      "ds-outdoor-survival": {
+        "name": "Aer liber și supraviețuire",
+        "description": "Machetă robustă, în tonuri pământii, axată pe durabilitate, rezistență la intemperii și specificații tactice"
+      },
+      "ds-toys-kids": {
+        "name": "Jucării pentru copii",
+        "description": "Machetă distractivă și colorată, axată pe certificările de siguranță și potrivirea cu vârsta"
+      },
+      "ds-kitchen-dining": {
+        "name": "Bucătărie și servire",
+        "description": "Machetă curată, în stil carte de rețete, axată pe siguranța materialelor și dimensiuni"
+      }
+    },
+    "validation": {
+      "nameRequired": "Numele grupului este obligatoriu",
+      "nameMinLength": "Numele grupului trebuie să aibă cel puțin 3 caractere",
+      "nameMaxLength": "Numele grupului nu poate depăși 100 de caractere",
+      "minPrice": "Prețul minim trebuie să fie mai mare decât 0",
+      "maxPrice": "Prețul maxim trebuie să fie mai mare decât 0",
+      "maxPriceGreaterThanMin": "Prețul maxim trebuie să fie mai mare decât prețul minim",
+      "profitRequired": "Este necesară fie marja de profit, fie profitul fix",
+      "profitMarginRange": "Marja de profit trebuie să fie între 0 și 100",
+      "fixedProfitMin": "Profitul fix trebuie să fie 0 sau mai mare",
+      "minQuantity": "Cantitatea trebuie să fie cel puțin 1",
+      "maxQuantity": "Cantitatea nu poate depăși 9999",
+      "maxFeePercent": "Procentul comisionului nu poate depăși 100%",
+      "minFeePercent": "Procentul comisionului trebuie să fie 0 sau mai mare",
+      "minFixedFee": "Comisionul fix trebuie să fie 0 sau mai mare",
+      "invalidNumber": "Introduceți un număr valid, fără zero la început (de exemplu 0.4, nu 04)",
+      "templateRequired": "Conținutul șablonului este obligatoriu",
+      "templateMinLength": "Șablonul trebuie să aibă cel puțin 10 caractere",
+      "predefinedTemplateRequired": "Selectați un șablon predefinit",
+      "minOnePriceRange": "Este necesar cel puțin un interval de preț",
+      "maxPriceRanges": "Sunt permise cel mult 10 intervale de preț",
+      "overlappingPriceRanges": "Intervalele de preț nu se pot suprapune",
+      "minStockBuffer": "Rezerva de stoc trebuie să fie 0 sau mai mare"
+    },
+    "errors": {
+      "loadFailed": "Grupurile de anunțuri nu au putut fi încărcate",
+      "saveFailed": "Modificările nu au putut fi salvate",
+      "createFailed": "Grupul nu a putut fi creat",
+      "updateFailed": "Grupul nu a putut fi actualizat",
+      "deleteFailed": "Grupul nu a putut fi șters",
+      "templateLoadFailed": "Șabloanele predefinite nu au putut fi încărcate",
+      "unauthorized": "Nu aveți permisiunea de a efectua această acțiune",
+      "notFound": "Grupul de anunțuri nu a fost găsit",
+      "networkError": "Eroare de rețea. Verificați conexiunea.",
+      "unknownError": "A apărut o eroare neașteptată"
+    },
+    "success": {
+      "created": "Grupul de anunțuri a fost creat cu succes",
+      "updated": "Grupul de anunțuri a fost actualizat cu succes",
+      "deleted": "Grupul de anunțuri a fost șters cu succes",
+      "saved": "Modificările au fost salvate cu succes"
+    },
+    "tooltips": {
+      "editGroup": "Editează grupul",
+      "deleteGroup": "Șterge grupul",
+      "addPriceRange": "Adaugă un alt interval de preț",
+      "removePriceRange": "Elimină acest interval de preț",
+      "toggleDarkMode": "Comută previzualizarea în mod întunecat",
+      "switchToDesktop": "Comută la vizualizarea desktop",
+      "switchToMobile": "Comută la vizualizarea mobil",
+      "copyTemplate": "Copiază HTML-ul șablonului",
+      "resetTemplate": "Resetează la șablonul implicit"
+    },
+    "help": {
+      "repricingStrategy": "Definiți mai multe intervale de preț cu marje de profit diferite. Produsele vor fi prețuite în funcție de intervalul lor de cost.",
+      "profitMargin": "Profit procentual calculat din costul produsului.",
+      "fixedProfit": "Sumă fixă în dolari adăugată la costul produsului.",
+      "ebayFee": "Procentul comisionului final de valoare eBay (de obicei 10-15%).",
+      "fixedFee": "Taxa fixă de listare eBay (de obicei $0.30).",
+      "tax": "Procentul taxei pe vânzări pentru locația dvs.",
+      "customTemplate": "Scrieți propriul șablon HTML, cu stil personalizat.",
+      "predefinedTemplate": "Alegeți dintre șabloane concepute profesional."
+    },
+    "editorTitle": "Editorul grupului de anunțuri",
+    "editorDescription": "Configurați setările anunțurilor, strategiile de preț și șabloanele.",
+    "generalSettings": "Setări generale",
+    "pricingStrategy": "Strategie de repreț",
+    "addRange": "Adaugă interval",
+    "calculator": {
+      "title": "Calculator de preț",
+      "subtitle": "Testați aceste setări — nu se salvează, este doar o previzualizare.",
+      "amazonPrice": "Prețul de achiziție Amazon",
+      "calculate": "Calculează",
+      "resultLabel": "Prețul de listare eBay",
+      "breakdown": {
+        "amazonPrice": "Prețul de achiziție Amazon",
+        "tax": "Taxa de achiziție Amazon ({{pct}})",
+        "trueCost": "Costul real (preț + taxă)",
+        "margin": "Marja de profit ({{pct}})",
+        "fallbackMargin": "Niciun interval nu s-a potrivit, marjă de rezervă ({{pct}})",
+        "fixedProfit": "Profit fix",
+        "netTarget": "Țintă înainte de comisioanele eBay",
+        "ebayFee": "Comision eBay ({{pct}})",
+        "fixedFee": "Comision fix",
+        "floorApplied": "Sub minimul eBay de $0.99, crescut la"
+      }
+    },
+    "feesAndTaxes": "Comisioane și taxe",
+    "amazonTaxRateNote": "Calculul prețului dvs. ia în considerare automat taxa estimată pe care o plătiți la cumpărarea de pe Amazon. Setați această rată în Setări magazin → Rata taxei pe vânzări Amazon.",
+    "stockControl": "Controlul stocului",
+    "ebayStockQuantity": "Stoc eBay",
+    "stockBuffer": "Rezervă de stoc",
+    "stockBufferDescription": "Cantitatea dvs. eBay este stocul Amazon minus această rezervă (niciodată sub 0), plafonată la valoarea Stocului eBay.",
+    "htmlTemplate": "Șablon HTML",
+    "custom": "Personalizat",
+    "predefined": "Predefinit",
+    "activeTemplate": "Șablon activ",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "FORMAT EBAY",
+    "sample": {
+      "productTitle": "Căști fără fir, cu anulare activă a zgomotului, baterie de 40 de ore",
+      "productDescription": "Anulare hibridă activă a zgomotului, carcasă de încărcare de 40 de ore și mod de joc cu latență redusă, în căști compacte pentru călătorii, muncă și antrenamente.",
+      "productSpecs": "<ul><li>Anulare activă a zgomotului</li><li>Autonomie a bateriei de 40 de ore</li><li>Compatibilitate Bluetooth universală</li><li>Microfon încorporat</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Deduceri"
+    },
+    "copyright": "© {{year}} Platforma SellerHill. Toate drepturile rezervate.",
+    "keywords": {
+      "title": "Cuvinte cheie disponibile",
+      "hint": "Scrieți-le între acolade duble; sunt înlocuite cu datele produsului la crearea anunțului.",
+      "items": {
+        "title": "Titlul produsului",
+        "product_description": "Descrierea produsului",
+        "feature_bullets": "Listă cu puncte de caracteristici",
+        "product_details": "Listă de specificații",
+        "main_image": "URL-ul imaginii principale a produsului",
+        "brand": "Brand",
+        "manufacturer": "Producător",
+        "category": "Categoria produsului"
+      }
+    }
+  }
+}

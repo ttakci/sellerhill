@@ -66,7 +66,7 @@ export type TranslationKeys = NestedKeyOf<TranslationResource>;
 /**
  * Supported languages
  */
-export type SupportedLanguage = 'en' | 'tr';
+export type SupportedLanguage = 'en' | 'tr' | 'ru' | 'hi' | 'ur' | 'ar' | 'az' | 'de' | 'fr' | 'es' | 'it' | 'ro' | 'uk' | 'zh' | 'pt';
 
 /**
  * Language configuration
@@ -90,5 +90,70 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     code: 'tr',
     name: 'Turkish',
     nativeName: 'Türkçe',
+  },
+  ru: {
+    code: 'ru',
+    name: 'Russian',
+    nativeName: 'Русский',
+  },
+  hi: {
+    code: 'hi',
+    name: 'Hindi',
+    nativeName: 'हिन्दी',
+  },
+  ur: {
+    code: 'ur',
+    name: 'Urdu',
+    nativeName: 'اردو',
+  },
+  ar: {
+    code: 'ar',
+    name: 'Arabic',
+    nativeName: 'العربية',
+  },
+  az: {
+    code: 'az',
+    name: 'Azerbaijani',
+    nativeName: 'Azərbaycanca',
+  },
+  de: {
+    code: 'de',
+    name: 'German',
+    nativeName: 'Deutsch',
+  },
+  fr: {
+    code: 'fr',
+    name: 'French',
+    nativeName: 'Français',
+  },
+  es: {
+    code: 'es',
+    name: 'Spanish',
+    nativeName: 'Español',
+  },
+  it: {
+    code: 'it',
+    name: 'Italian',
+    nativeName: 'Italiano',
+  },
+  ro: {
+    code: 'ro',
+    name: 'Romanian',
+    nativeName: 'Română',
+  },
+  uk: {
+    code: 'uk',
+    name: 'Ukrainian',
+    nativeName: 'Українська',
+  },
+  zh: {
+    code: 'zh',
+    name: 'Chinese (Simplified)',
+    nativeName: '简体中文',
+  },
+  pt: {
+    code: 'pt',
+    name: 'Portuguese',
+    nativeName: 'Português',
   },
 };

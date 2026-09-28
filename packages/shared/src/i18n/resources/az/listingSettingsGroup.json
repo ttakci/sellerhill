@@ -1,0 +1,250 @@
+{
+  "listingSettingsGroup": {
+    "title": "Parametr qrupları",
+    "subtitle": "Avtomatik optimallaşdırma üçün strategiya şablonlarını məhsul elanlarınıza təyin edin və idarə edin.",
+    "loadingDescription": "Elan qruplarınız yüklənir.",
+    "createNewGroup": "Yeni qrup yarat",
+    "editGroup": "Elan qrupunu redaktə et",
+    "backToList": "Qruplara qayıt",
+    "connectorSubtitle": "AMAZON → EBAY KONNEKTORU",
+    "groupDetails": "Qrup təfərrüatları",
+    "groupName": "Qrupun adı",
+    "groupNamePlaceholder": "məs., Premium elektronika",
+    "description": "Təsvir",
+    "descriptionPlaceholder": "Qrup üçün daxili qeydləri daxil edin...",
+    "stripBrandFromTitle": "Brendi başlıqdan sil",
+    "stripBrandFromTitleInfo": "Amazon brend adını eBay başlığınızdan avtomatik silir. Yalnız yeni elanlara tətbiq olunur.",
+    "aiTitleEnabled": "AI dəstəkli başlıq",
+    "aiTitleEnabledInfo": "eBay başlığınızı AI ilə yenidən yazır və əlavə açar sözlərlə doldurur. Yalnız yeni elanlar üçün; hər hansı uğursuzluqda adi başlığınıza qayıdır.",
+    "repricingStrategy": "Yenidən qiymətləndirmə strategiyası",
+    "addPriceRange": "Qiymət aralığı əlavə et",
+    "removePriceRange": "Qiymət aralığını sil",
+    "minPrice": "Min. qiymət ($)",
+    "maxPrice": "Maks. qiymət ($)",
+    "profitMargin": "Mənfəət marjası (%)",
+    "fixedProfit": "Sabit mənfəət ($)",
+    "priceRangeLabel": "Qiymət aralığı {{index}}",
+    "stock": "Stok",
+    "defaultQuantity": "Standart miqdar",
+    "fees": "Haqlar",
+    "ebayFee": "eBay haqqı",
+    "ebayFeePercent": "eBay haqqı (%)",
+    "fixedFee": "Sabit haqq",
+    "fixedFeeAmount": "Sabit haqq ($)",
+    "tax": "Vergi",
+    "taxPercent": "Vergi (%)",
+    "templates": "Şablon",
+    "customTemplate": "Fərdi",
+    "predefinedTemplate": "Hazır",
+    "selectTemplate": "Şablon seçin",
+    "selectTemplatePlaceholder": "Hazır şablon seçin...",
+    "htmlEditor": "HTML redaktoru",
+    "templatePlaceholder": "Fərdi HTML şablonunuzu daxil edin...",
+    "preview": "Önizləmə",
+    "livePreview": "Canlı önizləmə",
+    "editTemplate": "Bu şablonu redaktə et",
+    "darkModePreview": "Qaranlıq rejim önizləməsi",
+    "desktopView": "Masaüstü görünüşü",
+    "mobileView": "Mobil görünüş",
+    "renderingPreview": "Önizləmə hazırlanır...",
+    "saveChanges": "Dəyişiklikləri yadda saxla",
+    "saving": "Yadda saxlanılır...",
+    "cancel": "Ləğv et",
+    "delete": "Sil",
+    "deleteGroup": "Qrupu sil",
+    "confirmDelete": "Bu qrupu silmək istədiyinizə əminsiniz?",
+    "confirmDeleteMessage": "Bu əməliyyat geri qaytarıla bilməz. Bu qrupdan istifadə edən məhsullar yenidən təyin edilməlidir.",
+    "deleteSuccess": "Qrup uğurla silindi",
+    "deleteFailed": "Qrupu silmək alınmadı",
+    "productsCount_one": "{{count}} məhsul",
+    "productsCount_other": "{{count}} məhsul",
+    "noProducts": "Məhsul yoxdur",
+    "statusActive": "Aktiv",
+    "statusDraft": "Qaralama",
+    "statusInactive": "Qeyri-aktiv",
+    "card": {
+      "defaultQuantity": "Standart miqdar",
+      "stockBuffer": "Stok ehtiyatı",
+      "fee": "Komissiya",
+      "fixedFee": "Sabit haqq",
+      "customTemplate": "Fərdiləşdirilmiş şablon"
+    },
+    "emptyState": {
+      "title": "Hələ elan qrupu yoxdur",
+      "description": "Elanlarınızı təşkil etməyə başlamaq üçün ilk qrupunuzu yaradın",
+      "action": "Yeni qrup yarat"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Ümumi mağaza",
+        "description": "Aydın etibar nişanları olan istənilən ümumi məhsul üçün uyğun, yüksək konversiyalı və təcililik yaradan dizayn"
+      },
+      "ds-minimalist": {
+        "name": "Minimalist",
+        "description": "Yalnız spesifikasiyalara və etibara fokuslanan, ultra təmiz, tək sütunlu, ağ-qara dizayn"
+      },
+      "ds-tech-gadgets": {
+        "name": "Texnoloji qurğular",
+        "description": "Elektronika üçün ideal, qaranlıq vurğulu müasir dizayn; nəzərəçarpan spesifikasiya cədvəli ilə"
+      },
+      "ds-home-decor": {
+        "name": "Ev dekoru",
+        "description": "Yumşaq rənglər, iri şəkil vurğusu və isti tipoqrafiyası olan mehriban, estetik dizayn"
+      },
+      "ds-auto-parts": {
+        "name": "Avto ehtiyat hissələri",
+        "description": "Aydın uyğunluq xəbərdarlıqları və möhkəm üslubu olan yüksək kontrastlı texniki dizayn"
+      },
+      "ds-apparel-fashion": {
+        "name": "Geyim və moda",
+        "description": "Ölçü cədvəllərini və parça baxımını vurğulayan lookbook üslubunda zərif dizayn"
+      },
+      "ds-beauty-health": {
+        "name": "Gözəllik və sağlamlıq",
+        "description": "Tərkib və istifadə qaydası üçün strukturlaşdırılmış bölmələri olan spa kimi təmiz dizayn"
+      },
+      "ds-pet-supplies": {
+        "name": "Ev heyvanı ləvazimatları",
+        "description": "Material təhlükəsizliyinə və ölçülərə fokuslanan, parlaq vurğuları olan oynaq, lakin strukturlu dizayn"
+      },
+      "ds-fitness-sports": {
+        "name": "Fitnes və idman",
+        "description": "Davamlılığa, materiallara və aktiv həyat tərzinə fokuslanan yüksək enerjili, qalın şriftli dizayn"
+      },
+      "ds-outdoor-survival": {
+        "name": "Təbiətdə sağ qalma",
+        "description": "Davamlılığa, hava şəraitinə dözümlülüyə və taktiki spesifikasiyalara fokuslanan möhkəm, torpaq tonlu dizayn"
+      },
+      "ds-toys-kids": {
+        "name": "Uşaq oyuncaqları",
+        "description": "Təhlükəsizlik sertifikatlarına və yaşa uyğunluğa fokuslanan əyləncəli, rəngarəng dizayn"
+      },
+      "ds-kitchen-dining": {
+        "name": "Mətbəx və yemək",
+        "description": "Material təhlükəsizliyinə və ölçülərə fokuslanan, resept kitabı üslubunda təmiz dizayn"
+      }
+    },
+    "validation": {
+      "nameRequired": "Qrupun adı tələb olunur",
+      "nameMinLength": "Qrupun adı ən azı 3 simvol olmalıdır",
+      "nameMaxLength": "Qrupun adı 100 simvoldan çox olmamalıdır",
+      "minPrice": "Minimum qiymət 0-dan böyük olmalıdır",
+      "maxPrice": "Maksimum qiymət 0-dan böyük olmalıdır",
+      "maxPriceGreaterThanMin": "Maksimum qiymət minimum qiymətdən böyük olmalıdır",
+      "profitRequired": "Mənfəət marjası və ya sabit mənfəətdən biri tələb olunur",
+      "profitMarginRange": "Mənfəət marjası 0 ilə 100 arasında olmalıdır",
+      "fixedProfitMin": "Sabit mənfəət 0 və ya daha böyük olmalıdır",
+      "minQuantity": "Miqdar ən azı 1 olmalıdır",
+      "maxQuantity": "Miqdar 9999-u aşmamalıdır",
+      "maxFeePercent": "Haqq faizi 100%-i aşa bilməz",
+      "minFeePercent": "Haqq faizi 0 və ya daha böyük olmalıdır",
+      "minFixedFee": "Sabit haqq 0 və ya daha böyük olmalıdır",
+      "invalidNumber": "Əvvəlində sıfır olmayan düzgün ədəd daxil edin (məsələn, 04 yox, 0.4)",
+      "templateRequired": "Şablon məzmunu tələb olunur",
+      "templateMinLength": "Şablon ən azı 10 simvol olmalıdır",
+      "predefinedTemplateRequired": "Zəhmət olmasa hazır şablon seçin",
+      "minOnePriceRange": "Ən azı bir qiymət aralığı tələb olunur",
+      "maxPriceRanges": "Maksimum 10 qiymət aralığına icazə verilir",
+      "overlappingPriceRanges": "Qiymət aralıqları üst-üstə düşməməlidir",
+      "minStockBuffer": "Stok ehtiyatı 0 və ya daha böyük olmalıdır"
+    },
+    "errors": {
+      "loadFailed": "Elan qruplarını yükləmək alınmadı",
+      "saveFailed": "Dəyişiklikləri yadda saxlamaq alınmadı",
+      "createFailed": "Qrupu yaratmaq alınmadı",
+      "updateFailed": "Qrupu yeniləmək alınmadı",
+      "deleteFailed": "Qrupu silmək alınmadı",
+      "templateLoadFailed": "Hazır şablonları yükləmək alınmadı",
+      "unauthorized": "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur",
+      "notFound": "Elan qrupu tapılmadı",
+      "networkError": "Şəbəkə xətası. Zəhmət olmasa bağlantınızı yoxlayın.",
+      "unknownError": "Gözlənilməz xəta baş verdi"
+    },
+    "success": {
+      "created": "Elan qrupu uğurla yaradıldı",
+      "updated": "Elan qrupu uğurla yeniləndi",
+      "deleted": "Elan qrupu uğurla silindi",
+      "saved": "Dəyişikliklər uğurla yadda saxlanıldı"
+    },
+    "tooltips": {
+      "editGroup": "Qrupu redaktə et",
+      "deleteGroup": "Qrupu sil",
+      "addPriceRange": "Başqa qiymət aralığı əlavə et",
+      "removePriceRange": "Bu qiymət aralığını sil",
+      "toggleDarkMode": "Qaranlıq rejim önizləməsini dəyiş",
+      "switchToDesktop": "Masaüstü görünüşünə keç",
+      "switchToMobile": "Mobil görünüşə keç",
+      "copyTemplate": "Şablonun HTML-ni kopyala",
+      "resetTemplate": "Standart şablona sıfırla"
+    },
+    "help": {
+      "repricingStrategy": "Fərqli mənfəət marjaları olan bir neçə qiymət aralığı təyin edin. Məhsullar öz xərc aralığına görə qiymətləndiriləcək.",
+      "profitMargin": "Məhsulun xərcindən hesablanan faiz əsaslı mənfəət.",
+      "fixedProfit": "Məhsulun xərcinə əlavə olunan sabit dollar məbləği.",
+      "ebayFee": "eBay-in yekun dəyər haqqı faizi (adətən 10-15%).",
+      "fixedFee": "eBay-in sabit elan haqqı (adətən $0.30).",
+      "tax": "Yaşadığınız yer üçün satış vergisi faizi.",
+      "customTemplate": "Fərdi üslubla öz HTML şablonunuzu yazın.",
+      "predefinedTemplate": "Peşəkarcasına hazırlanmış şablonlardan seçin."
+    },
+    "editorTitle": "Elan qrupu redaktoru",
+    "editorDescription": "Elan parametrlərinizi, qiymət strategiyalarınızı və şablonlarınızı konfiqurasiya edin.",
+    "generalSettings": "Ümumi parametrlər",
+    "pricingStrategy": "Yenidən qiymətləndirmə strategiyası",
+    "addRange": "Aralıq əlavə et",
+    "calculator": {
+      "title": "Qiymət kalkulyatoru",
+      "subtitle": "Bu parametrləri sınayın — yadda saxlanılmır, yalnız önizləmədir.",
+      "amazonPrice": "Amazon alış qiyməti",
+      "calculate": "Hesabla",
+      "resultLabel": "eBay elan qiyməti",
+      "breakdown": {
+        "amazonPrice": "Amazon alış qiyməti",
+        "tax": "Amazon alış vergisi ({{pct}})",
+        "trueCost": "Real xərc (qiymət + vergi)",
+        "margin": "Mənfəət marjası ({{pct}})",
+        "fallbackMargin": "Heç bir aralıq uyğun gəlmədi, ehtiyat marja ({{pct}})",
+        "fixedProfit": "Sabit mənfəət",
+        "netTarget": "eBay haqlarından əvvəl hədəf",
+        "ebayFee": "eBay haqqı ({{pct}})",
+        "fixedFee": "Sabit haqq",
+        "floorApplied": "eBay-in $0.99 minimumundan aşağıdır, bu məbləğə qaldırıldı:"
+      }
+    },
+    "feesAndTaxes": "Haqlar və vergilər",
+    "amazonTaxRateNote": "Qiymət hesablamanız Amazon-dan alarkən ödədiyiniz təxmini vergini avtomatik nəzərə alır. Bu dərəcəni Mağaza parametrləri → Amazon satış vergisi dərəcəsi bölməsində təyin edin.",
+    "stockControl": "Stok nəzarəti",
+    "ebayStockQuantity": "eBay stoku",
+    "stockBuffer": "Stok ehtiyatı",
+    "stockBufferDescription": "eBay miqdarınız Amazon stokundan bu ehtiyatın çıxılmasına bərabərdir (heç vaxt 0-dan aşağı olmur) və eBay stoku dəyəri ilə məhdudlaşır.",
+    "htmlTemplate": "HTML şablonu",
+    "custom": "Fərdi",
+    "predefined": "Hazır",
+    "activeTemplate": "Aktiv şablon",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "EBAY FORMATI",
+    "sample": {
+      "productTitle": "Simsiz qulaqcıqlar, aktiv səs-küy ləğvi, 40 saat batareya",
+      "productDescription": "Səyahət, iş və məşq üçün yığcam qulaqcıqlarda hibrid aktiv səs-küy ləğvi, 40 saatlıq şarj qutusu və aşağı gecikməli oyun rejimi.",
+      "productSpecs": "<ul><li>Aktiv səs-küy ləğvi</li><li>40 saatlıq batareya ömrü</li><li>Universal Bluetooth uyğunluğu</li><li>Daxili mikrofon</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Çıxılmalar"
+    },
+    "copyright": "© {{year}} SellerHill Platform. Bütün hüquqlar qorunur.",
+    "keywords": {
+      "title": "Mövcud açar sözlər",
+      "hint": "Bunları cüt fiqurlu mötərizədə yazın; elan yaradılarkən məhsul məlumatları ilə əvəz olunacaq.",
+      "items": {
+        "title": "Məhsulun başlığı",
+        "product_description": "Məhsulun təsviri",
+        "feature_bullets": "Xüsusiyyətlər siyahısı",
+        "product_details": "Spesifikasiyalar siyahısı",
+        "main_image": "Əsas məhsul şəklinin URL-i",
+        "brand": "Brend",
+        "manufacturer": "İstehsalçı",
+        "category": "Məhsul kateqoriyası"
+      }
+    }
+  }
+}

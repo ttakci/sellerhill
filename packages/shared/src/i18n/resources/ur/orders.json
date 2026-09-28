@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "آرڈرز",
+      "subtitle": "{{count}} آرڈرز"
+    },
+    "overview": {
+      "viewAll": "سب دیکھیں",
+      "emptyTitle": "ابھی کوئی آرڈر نہیں",
+      "emptySubtitle": "سنک ہونے والی eBay سیلز یہاں نظر آئیں گی۔"
+    },
+    "carousel": {
+      "previous": "پچھلا",
+      "next": "اگلا"
+    },
+    "all": {
+      "title": "تمام آرڈرز",
+      "subtitle": "{{count}} نتائج",
+      "loadingTitle": "آرڈرز لوڈ ہو رہے ہیں",
+      "loadingSubtitle": "آپ کے تازہ ترین eBay آرڈرز حاصل کیے جا رہے ہیں۔",
+      "filtersTitle": "کوئی آرڈر آپ کے فلٹرز سے میل نہیں کھاتا",
+      "filtersSubtitle": "تاریخ کی حد، سٹیٹس یا سٹور وسیع کر کے دیکھیں۔",
+      "filtersAction": "فلٹرز صاف کریں",
+      "emptyTitle": "ابھی کوئی آرڈر نہیں",
+      "emptySubtitle": "eBay سنک چلتے ہی آرڈرز یہاں خودبخود نظر آنے لگیں گے۔"
+    },
+    "filters": {
+      "allStatuses": "تمام سٹیٹس",
+      "allStores": "تمام سٹورز",
+      "allTrackingStates": "ٹریکنگ کی تمام حالتیں",
+      "clearAll": "سب صاف کریں",
+      "resultCount": "{{count}} نتائج"
+    },
+    "stats": {
+      "totalSales": "کل سیلز",
+      "netProfit": "خالص منافع",
+      "activeOrders": "فعال آرڈرز",
+      "returnRate": "واپسی کی شرح",
+      "last24Hours": "پچھلے 24 گھنٹے",
+      "growth": "پچھلے مہینے کے مقابلے میں {{value}}%",
+      "profitGrowth": "پچھلے مہینے کے مقابلے میں {{value}}%",
+      "decrease": "پچھلے مہینے کے مقابلے میں {{value}}%"
+    },
+    "actions": {
+      "search": "آرڈرز، خریدار یا آئٹمز تلاش کریں...",
+      "last30Days": "پچھلے 30 دن",
+      "export": "ایکسپورٹ",
+      "convertTracking": "ٹریکنگ کنورٹ کریں"
+    },
+    "table": {
+      "orderNumber": "آرڈر #",
+      "product": "پروڈکٹ",
+      "date": "تاریخ",
+      "buyer": "خریدار",
+      "status": "سٹیٹس",
+      "salePrice": "سیل",
+      "purchasePrice": "لاگت",
+      "netProfit": "منافع",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "مکمل",
+      "shipped": "شپ ہو چکا",
+      "processing": "پروسیسنگ میں",
+      "cancelled": "منسوخ",
+      "pending": "زیر التوا",
+      "waiting_shipment": "شپمنٹ کا منتظر"
+    },
+    "fulfillmentState": {
+      "column": "Amazon تکمیل",
+      "purchased": "Amazon پر خریدا گیا",
+      "amazon_cancelled": "Amazon نے منسوخ کیا",
+      "action_required": "کارروائی درکار ہے",
+      "in_progress": "Amazon پر خریداری جاری ہے",
+      "not_automated": "خودکار نہیں",
+      "manual": "ہاتھ سے خریدا گیا",
+      "simulated": "ٹیسٹ رن — کوئی خریداری نہیں",
+      "filter": {
+        "all": "تکمیل کی تمام حالتیں"
+      },
+      "detail": {
+        "title": "Amazon تکمیل",
+        "amazonOrderId": "Amazon آرڈر",
+        "simulatedNotice": "یہ ایک ٹیسٹ رن ہے۔ کوئی Amazon آرڈر نہیں دیا گیا اور کوئی رقم نہیں کٹی — نیچے دی گئی لاگت اور منافع فرضی ہیں۔",
+        "actionRequiredNotice": "خریداری سے پہلے ہی آٹومیشن رک گئی۔ وجہ دیکھیں اور اس آرڈر کو ہاتھ سے پورا کریں۔",
+        "cancelledNotice": "Amazon کی خریداری منسوخ ہو گئی۔ eBay کی سیل اب بھی خریدار کو دینی ہے — اسے کسی اور طریقے سے پورا کریں۔",
+        "notAutomatedNotice": "اس آرڈر کے لیے خودکار آرڈرنگ بند ہے۔",
+        "attemptedAt": "آخری کوشش"
+      }
+    },
+    "tracking": {
+      "tracked": "SellerHill کی طرف سے ٹریک شدہ",
+      "untracked": "ٹریک نہیں ہو رہا",
+      "problem": {
+        "wrongPageType": "ٹریکنگ پرووائیڈر Amazon کا آرڈر پیج نہیں پڑھ سکا — ہو سکتا ہے اس کا فارمیٹ بدل گیا ہو۔ اسے خودکار طور پر دوبارہ آزمایا جائے گا۔",
+        "amazonSessionExpired": "اس آرڈر کو پڑھنے کے لیے استعمال ہونے والے Amazon سیشن کی میعاد ختم ہو چکی ہے اور اسے دوبارہ سائن ان کرنا ہوگا۔",
+        "trackingUrlMismatch": "Amazon کے آرڈر پیج پر ٹریکنگ لنک ہماری توقع کے مطابق نہیں تھا۔ اسے خودکار طور پر دوبارہ آزمایا جائے گا۔",
+        "needsTrackingUpload": "ٹریکنگ نمبر کنورٹ ہونے سے پہلے شپمنٹ کی تفصیلات اپ لوڈ ہونے کا انتظار ہے۔",
+        "updateNotApplied": "ٹریکنگ اپ ڈیٹ ابھی پرووائیڈر کی طرف سے لاگو نہیں ہوئی۔ اسے خودکار طور پر دوبارہ آزمایا جائے گا۔",
+        "assignValidation": "ٹریکنگ پرووائیڈر نے اس آرڈر کی شپمنٹ تفصیلات مسترد کر دیں۔",
+        "shipmentException": "ٹریکنگ پرووائیڈر نے اس شپمنٹ پر ایک استثنا رپورٹ کیا۔",
+        "trackingUpdateUnavailable": "ٹریکنگ پرووائیڈر ابھی اس شپمنٹ کو اپ ڈیٹ نہیں کر سکا۔",
+        "generic": "اس آرڈر کے ٹریکنگ کنورژن میں کوئی مسئلہ ہے۔ اسے خودکار طور پر دوبارہ آزمایا جائے گا۔"
+      }
+    },
+    "autoFulfill": {
+      "column": "خودکار تکمیل",
+      "status": {
+        "pending": "قطار میں",
+        "running": "چل رہا ہے",
+        "placed": "آرڈر دے دیا گیا",
+        "blocked": "رکا ہوا",
+        "failed": "ناکام",
+        "dry_run": "ڈرائی رن",
+        "skipped": "چھوڑ دیا گیا"
+      },
+      "reason": {
+        "no_asin": "پروڈکٹ Amazon پر نہیں ملی",
+        "captcha": "کیپچا درکار ہے",
+        "otp": "MFA/OTP چیلنج",
+        "login": "لاگ ان ناکام",
+        "out_of_stock": "اسٹاک ختم",
+        "address": "پتے میں مسئلہ",
+        "payment": "ادائیگی مسترد",
+        "cap": "لاگت کی حد سے زیادہ",
+        "no_confirmation": "تصدیق موصول نہیں ہوئی",
+        "proxy_required": "کوئی پراکسی کنفیگر نہیں",
+        "quota_exhausted": "ماہانہ کوٹہ ختم",
+        "cart": "کارٹ میں فرق",
+        "review_unreadable": "آرڈر کی کل رقم پڑھی نہیں جا سکی",
+        "subscription_suspended": "سبسکرپشن معطل",
+        "listing_over_plan_limit": "لسٹنگ پلان کی حد سے باہر",
+        "order_already_fulfilled": "پہلے ہی شپ ہو چکا — خریدنے کو کچھ نہیں",
+        "order_not_paid": "خریدار کی ادائیگی کا انتظار"
+      },
+      "reasonLabel": "وجہ: {{reason}}",
+      "amazonCancelledBadge": "Amazon نے منسوخ کیا",
+      "filter": {
+        "all": "تمام خودکار تکمیل",
+        "needsAttention": "توجہ درکار ہے"
+      }
+    },
+    "pagination": {
+      "showing": "{{total}} آرڈرز میں سے {{from}}-{{to}} دکھائے جا رہے ہیں"
+    },
+    "detail": {
+      "title": "آرڈر کی تفصیلات",
+      "loadingSubtitle": "آرڈر کی تفصیلات لوڈ ہو رہی ہیں…",
+      "notFoundTitle": "آرڈر نہیں ملا",
+      "notFoundSubtitle": "ہو سکتا ہے یہ آرڈر ہٹا دیا گیا ہو یا آپ کو اس تک رسائی نہ ہو۔",
+      "orderPlaced": "آرڈر دیا گیا",
+      "viewInvoice": "انوائس دیکھیں",
+      "printLabels": "لیبلز پرنٹ کریں",
+      "customerInfo": "کسٹمر کی معلومات",
+      "buyerPayment": "خریدار کی ادائیگی",
+      "ebaySummary": "eBay سیلز کا خلاصہ",
+      "whatBuyerPaid": "آپ کے خریدار نے کیا ادا کیا",
+      "whatYouEarned": "آپ نے کیا کمایا",
+      "earningsOrderTotal": "آرڈر کی کل رقم",
+      "ebayCollectedFromBuyer": "eBay نے خریدار سے وصول کیا",
+      "ebayCollectedTax": "سیلز ٹیکس",
+      "sellingCosts": "فروخت کے اخراجات",
+      "itemSubtotal": "آئٹم(ز) کا ذیلی مجموعہ",
+      "shippingHandling": "شپنگ اور ہینڈلنگ",
+      "totalBeforeTax": "ٹیکس سے پہلے کل",
+      "estimatedTax": "تخمینی ٹیکس",
+      "grandTotal": "مجموعی کل",
+      "paymentMethod": "ادائیگی کا طریقہ",
+      "subtotal": "ذیلی مجموعہ",
+      "shipping": "شپنگ",
+      "salesTax": "سیلز ٹیکس",
+      "orderTotal": "آرڈر کی کل رقم",
+      "feesCollected": "وصول کی گئی فیسیں",
+      "transactionFees": "ٹرانزیکشن فیس",
+      "adFee": "عمومی اشتہاری فیس",
+      "orderEarnings": "آرڈر کی کمائی",
+      "viewMore": "مزید تفصیلات دیکھیں",
+      "updateAmazon": "Amazon کی معلومات درج کریں",
+      "netProfitAnalysis": "خالص منافع کا تجزیہ",
+      "analysisDesc": "یہ حساب eBay سے آپ کی اصل کمائی (تمام پلیٹ فارم فیسوں اور ٹیکسوں کے بعد) میں سے Amazon کی اصل خریداری لاگت منہا کر کے نکالا جاتا ہے۔",
+      "calculation": "حساب",
+      "netProfitResult": "خالص منافع",
+      "roi": "ROI",
+      "shipTo": "بھیجنے کا پتہ",
+      "contact": "رابطہ",
+      "unknownProduct": "نامعلوم پروڈکٹ",
+      "copyAddress": "پتہ کاپی کریں",
+      "addressCopied": "پتہ کاپی ہو گیا!",
+      "copyName": "نام کاپی کریں",
+      "copyStreet": "گلی/سڑک کاپی کریں",
+      "copyStreet2": "ایڈریس لائن 2 کاپی کریں",
+      "copyCity": "شہر کاپی کریں",
+      "copyState": "صوبہ/ریاست کاپی کریں",
+      "copyZip": "زپ کوڈ کاپی کریں",
+      "copyCountry": "ملک/علاقہ کاپی کریں",
+      "copied": "کاپی ہو گیا",
+      "amazonCosts": "Amazon آرڈر کا خلاصہ",
+      "purchasePrice": "خریداری کی قیمت",
+      "amazonTax": "Amazon ٹیکس",
+      "amazonShipping": "Amazon شپنگ",
+      "totalAmazonCost": "Amazon کی کل لاگت",
+      "amazonTracking": "Amazon ٹریکنگ",
+      "convertedTracking": "کنورٹ شدہ ٹریکنگ",
+      "amazonOrder": "Amazon آرڈر",
+      "linkAmazon": "Amazon آرڈر لنک کریں",
+      "calcEarnings": "کمائی",
+      "calcPurchase": "خریداری",
+      "calcTax": "ٹیکس",
+      "calcShipping": "شپنگ",
+      "asin": "ASIN",
+      "ebayItemId": "eBay ID",
+      "quantity": "مقدار",
+      "unit": "یونٹ",
+      "sku": "SKU",
+      "na": "N/A"
+    },
+    "modal": {
+      "title": "Amazon آرڈر کی معلومات درج کریں",
+      "amazonUrl": "Amazon آرڈر کی تفصیل کا URL",
+      "trackingUrl": "ٹریکنگ URL (اختیاری)",
+      "taxAmount": "ٹیکس کی رقم ($)",
+      "shippingCost": "شپنگ کی لاگت ($)",
+      "infoText": "ٹیکس اور شپنگ کی لاگت درج کرنے سے اس آرڈر کا خالص منافع خودکار طور پر دوبارہ شمار ہو جائے گا۔",
+      "save": "تفصیلات محفوظ کریں",
+      "cancel": "منسوخ کریں",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "تخمینی",
+    "estimateNote": "تخمینی منافع — Amazon آرڈر دیے جانے پر حتمی ہو جائے گا۔ Amazon کی آخری معلوم قیمت پر مبنی؛ Amazon شپنگ شامل نہیں۔",
+    "footer": {
+      "copyright": "© 2026 SellerHill ای کامرس سولیوشنز۔ جملہ حقوق محفوظ ہیں۔"
+    },
+    "errors": {
+      "notFound": "آرڈر نہیں ملا۔",
+      "noTrackingYet": "اس آرڈر کا ابھی کوئی Amazon ٹریکنگ نمبر نہیں ہے — یہ شپ نہیں ہوا۔",
+      "conversionUnavailable": "ٹریکنگ ابھی کنورٹ نہیں ہو سکی۔ اپنے پلان کی حد اور کنورژن سیٹنگز چیک کریں، پھر دوبارہ کوشش کریں۔",
+      "conversionDone": "ٹریکنگ کنورٹ ہو گئی۔",
+      "orderNotTracked": "یہ آرڈر آپ کی کسی لسٹنگ سے لنک نہیں ہے، اس لیے کنورٹ شدہ ٹریکنگ نمبر کبھی eBay کو نہیں بھیجا جا سکتا۔ پہلے آرڈر کو اس کی لسٹنگ سے لنک کریں۔",
+      "trackingAlreadyPushed": "eBay کے پاس اس آرڈر کا اصل ٹریکنگ نمبر پہلے ہی موجود ہے اور اسے تبدیل نہیں کیا جا سکتا، اس لیے اب کنورٹ کرنے سے خریدار کو نظر آنے والی چیز نہیں بدلے گی۔",
+      "listingOverPlanLimit": "آرڈر آتے وقت اس آرڈر کی لسٹنگ آپ کے پلان کی لسٹنگ حد سے باہر تھی۔ حد سے باہر لسٹنگز کے آرڈرز کی شپمنٹ ٹریکنگ یا ٹریکنگ کنورژن نہیں ہوتی۔"
+    }
+  }
+}

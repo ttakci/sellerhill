@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Amazon खरीदार अकाउंट",
+      "subtitle": "ऑर्डर ट्रैकिंग और प्राइस स्क्रैपिंग के लिए अपने Amazon खरीदार अकाउंट प्रबंधित करें",
+      "addButton": "Amazon अकाउंट जोड़ें",
+      "noAccounts": "अभी तक कोई Amazon अकाउंट कनेक्ट नहीं है",
+      "noAccountsDescription": "ऑर्डर की कीमतें और शिपिंग स्टेटस अपने-आप ट्रैक करने के लिए अपना Amazon खरीदार अकाउंट जोड़ें",
+      "statusActive": "सक्रिय",
+      "statusVerifying": "सत्यापन जारी है",
+      "statusInvalid": "अमान्य क्रेडेंशियल",
+      "statusNeedsReauth": "दोबारा ऑथेंटिकेशन ज़रूरी",
+      "statusLocked": "लॉक",
+      "verifyButton": "सत्यापित करें",
+      "editButton": "संपादित करें",
+      "deleteButton": "हटाएँ",
+      "deleteConfirmTitle": "Amazon अकाउंट हटाएँ",
+      "deleteConfirmMessage": "क्या आप वाकई इस Amazon अकाउंट को हटाना चाहते हैं? यह कार्रवाई वापस नहीं की जा सकती।",
+      "lastVerified": "आख़िरी सत्यापन",
+      "lastUsed": "आख़िरी उपयोग",
+      "never": "कभी नहीं",
+      "addTitle": "Amazon अकाउंट जोड़ें",
+      "editTitle": "Amazon अकाउंट संपादित करें",
+      "labelField": "अकाउंट का नाम",
+      "labelPlaceholder": "जैसे, पर्सनल Amazon",
+      "emailField": "Amazon ईमेल",
+      "emailPlaceholder": "your-email@example.com",
+      "passwordField": "Amazon पासवर्ड",
+      "passwordPlaceholder": "अपना Amazon पासवर्ड दर्ज करें",
+      "twoFactorField": "2FA सीक्रेट की",
+      "twoFactorPlaceholder": "वैकल्पिक - Amazon की 2FA सेटिंग से",
+      "twoFactorInfo": "यदि आपने 2FA चालू किया है, तो अपने Amazon अकाउंट की सुरक्षा सेटिंग से सीक्रेट की दर्ज करें",
+      "saveButton": "अकाउंट सेव करें",
+      "savingButton": "सेव हो रहा है...",
+      "verifyingButton": "सत्यापित हो रहा है...",
+      "verifySuccess": "Amazon अकाउंट सफलतापूर्वक सत्यापित हो गया",
+      "verifyFailed": "Amazon अकाउंट सत्यापित नहीं हो सका। कृपया अपने क्रेडेंशियल जाँचें।",
+      "saveSuccess": "Amazon अकाउंट सफलतापूर्वक सेव हो गया",
+      "deleteSuccess": "Amazon अकाउंट सफलतापूर्वक हटा दिया गया",
+      "errorSaving": "Amazon अकाउंट सेव नहीं हो सका"
+    },
+    "linking": {
+      "title": "Amazon ऑर्डर लिंक करें",
+      "selectAccount": "Amazon अकाउंट चुनें",
+      "selectAccountPlaceholder": "कोई Amazon अकाउंट चुनें...",
+      "orderId": "Amazon ऑर्डर ID",
+      "orderIdPlaceholder": "जैसे, 112-1234567-1234567",
+      "orderIdHelp": "अपना Amazon ऑर्डर ID दर्ज करें (यह आपकी ऑर्डर हिस्ट्री या कन्फ़र्मेशन ईमेल में मिलेगा)",
+      "linkButton": "लिंक करें और स्क्रैप करें",
+      "linkingButton": "लिंक हो रहा है...",
+      "progressLoggingIn": "Amazon में लॉगिन हो रहा है...",
+      "progressNavigating": "ऑर्डर पेज खोला जा रहा है...",
+      "progressScraping": "ऑर्डर का विवरण स्क्रैप हो रहा है...",
+      "progressSaving": "ऑर्डर डेटा सेव हो रहा है...",
+      "successTitle": "Amazon ऑर्डर लिंक हो गया",
+      "successMessage": "ऑर्डर का विवरण स्क्रैप होकर सफलतापूर्वक लिंक हो गया है",
+      "errorTitle": "ऑर्डर लिंक नहीं हो सका",
+      "errorNoAccount": "कृपया पहले एक Amazon अकाउंट जोड़ें",
+      "errorScraping": "Amazon ऑर्डर का विवरण स्क्रैप नहीं हो सका। कृपया ऑर्डर ID जाँचकर दोबारा कोशिश करें।",
+      "errorInvalidCredentials": "Amazon क्रेडेंशियल अमान्य हैं। कृपया अपना अकाउंट अपडेट करें।",
+      "errorRateLimit": "बहुत अधिक रिक्वेस्ट। कृपया कुछ देर बाद दोबारा कोशिश करें।",
+      "costCaptureFailed": "Amazon ऑर्डर मिल गया, लेकिन लागत का विवरण पढ़ा नहीं जा सका। मुनाफ़ा आख़िरी ज्ञात मान पर ही रखा गया है।",
+      "noAccountsTitle": "कोई Amazon अकाउंट नहीं",
+      "noAccountsMessage": "ऑर्डर लिंक करने के लिए पहले एक Amazon खरीदार अकाउंट जोड़ना होगा।",
+      "addAccountLink": "Amazon अकाउंट जोड़ें",
+      "noListingTitle": "पहले यह eBay लिस्टिंग इंपोर्ट करें",
+      "noListingMessage": "इस ऑर्डर की eBay लिस्टिंग इंपोर्ट नहीं की गई है, इसलिए ऑर्डर किसी लिस्टिंग से लिंक नहीं है। आप फिर भी Amazon ऑर्डर लिंक करके उसकी असली लागत पा सकते हैं — लेकिन शिप होने पर ट्रैकिंग नंबर eBay को नहीं भेजा जा सकेगा, क्योंकि eBay को लिस्टिंग में मौजूद लाइन आइटम चाहिए। वह पुश बाद में दोबारा नहीं किया जाता। पहले लिस्टिंग इंपोर्ट करें, तो यह ऑर्डर अपने-आप उससे लिंक हो जाएगा।",
+      "importListingButton": "लिस्टिंग इंपोर्ट करें",
+      "linkAnywayButton": "फिर भी लिंक करें"
+    },
+    "tracking": {
+      "statusPending": "लंबित",
+      "statusProcessing": "प्रोसेस हो रहा है",
+      "statusShipped": "शिप हो गया",
+      "statusDelivered": "डिलीवर हो गया",
+      "statusCancelled": "रद्द",
+      "statusReturned": "वापस किया गया",
+      "eBaySyncShipped": "eBay ऑर्डर को शिप हुआ चिह्नित किया गया",
+      "eBaySyncDelivered": "eBay ऑर्डर को डिलीवर हुआ चिह्नित किया गया"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "अकाउंट",
+        "proxy": "प्रॉक्सी"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "ऑटो-फ़ुलफ़िलमेंट के लिए इस अकाउंट का उपयोग करें",
+      "autoFulfillEnabledHint": "चालू होने पर मैच होने वाले eBay ऑर्डर इसी Amazon अकाउंट से अपने-आप खरीदे जाते हैं (आपके दूसरे चालू अकाउंट के साथ बारी-बारी से)। स्टोर सेटिंग का मुख्य ऑटो-फ़ुलफ़िलमेंट टॉगल भी चालू होना चाहिए और नीचे खर्च की सीमा तय होनी चाहिए।",
+      "autoFulfillCapTotal": "अधिकतम ऑर्डर कुल (ऑटो-फ़ुलफ़िल सीमा)",
+      "autoFulfillCapTotalHint": "प्रति अकाउंट खर्च की ऊपरी सीमा (USD)। इस कुल से ऊपर के ऑर्डर यह अकाउंट छोड़ देते हैं। ऑटो-फ़ुलफ़िलमेंट चालू करने के लिए ज़रूरी है।",
+      "autoFulfillCapTotalPlaceholder": "जैसे, 250",
+      "autoFulfillDryRun": "ड्राई-रन (ऑर्डर दिए बिना पूरा फ़्लो चलाएँ)",
+      "autoFulfillDryRunHint": "Place Order से ठीक पहले तक पूरा चेकआउट फ़्लो चलाता है, ताकि रिव्यू टोटल दर्ज होकर जाँच के लिए दिखाया जा सके।"
+    },
+    "proxy": {
+      "sectionTitle": "प्रॉक्सी",
+      "stepSubtitle": "वैकल्पिक — इस अकाउंट का ऑटोमेशन अपने प्रॉक्सी से चलाएँ",
+      "enabled": "प्रॉक्सी चालू करें",
+      "enabledHint": "अपने अकाउंट की सुरक्षा के लिए प्रॉक्सी सर्वर का उपयोग करें",
+      "connectionType": "कनेक्शन का प्रकार",
+      "host": "होस्ट दर्ज करें",
+      "port": "पोर्ट दर्ज करें",
+      "username": "यूज़रनेम",
+      "password": "पासवर्ड",
+      "hint": "वैकल्पिक। इस अकाउंट का ऑटोमेशन अपने प्रॉक्सी से चलाने के लिए अपना प्रॉक्सी जोड़ें — IP के आधार पर होने वाले ब्लॉक से अतिरिक्त सुरक्षा चाहिए तो उपयोगी। इसे बंद रखें तो अकाउंट सीधे कनेक्ट होता है; यही सामान्य डिफ़ॉल्ट है।"
+    },
+    "marketplace": {
+      "label": "मार्केटप्लेस",
+      "usOnlyNote": "फ़िलहाल केवल संयुक्त राज्य अमेरिका (amazon.com) मार्केटप्लेस समर्थित है।",
+      "AMAZON_US": "संयुक्त राज्य अमेरिका (amazon.com)",
+      "readOnlyHint": "अकाउंट बनने के बाद मार्केटप्लेस बदला नहीं जा सकता।"
+    },
+    "errors": {
+      "autoFulfillCapRequired": "इस अकाउंट पर ऑटो-फ़ुलफ़िलमेंट चालू करने के लिए अधिकतम ऑर्डर कुल सेट करें।",
+      "proxyHostPortRequired": "इस अकाउंट के लिए प्रॉक्सी इस्तेमाल करने हेतु होस्ट और पोर्ट दर्ज करें।",
+      "unsupportedMarketplace": "यह Amazon मार्केटप्लेस अभी उपलब्ध नहीं है।",
+      "twoFactorSecretRequired": "अकाउंट की ऑथेंटिकेटर (2FA) सीक्रेट की जोड़ें। Amazon लगभग हर ऑटोमेटेड साइन-इन पर वेरिफ़िकेशन कोड माँगता है, और यही एकमात्र कोड है जिसका जवाब हम आपके लिए दे सकते हैं।",
+      "twoFactorSecretInvalid": "यह ऑथेंटिकेटर सीक्रेट की जैसी नहीं दिखती। Amazon के ऑथेंटिकेटर-ऐप सेटअप की सेटअप की (अक्षर A–Z और अंक 2–7) पेस्ट करें, 6 अंकों का कोड नहीं।"
+    }
+  }
+}

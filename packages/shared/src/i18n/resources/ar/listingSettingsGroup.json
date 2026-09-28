@@ -1,0 +1,254 @@
+{
+  "listingSettingsGroup": {
+    "title": "مجموعات إعدادات الإدراج",
+    "subtitle": "أدر قوالب الاستراتيجية وعيّنها لإدراجات منتجاتك من أجل التحسين التلقائي.",
+    "loadingDescription": "جارٍ جلب مجموعات الإدراج الخاصة بك.",
+    "createNewGroup": "إنشاء مجموعة جديدة",
+    "editGroup": "تعديل مجموعة الإدراج",
+    "backToList": "العودة إلى المجموعات",
+    "connectorSubtitle": "موصّل من AMAZON إلى EBAY",
+    "groupDetails": "تفاصيل المجموعة",
+    "groupName": "اسم المجموعة",
+    "groupNamePlaceholder": "مثال: إلكترونيات مميزة",
+    "description": "الوصف",
+    "descriptionPlaceholder": "أدخل ملاحظات داخلية عن المجموعة...",
+    "stripBrandFromTitle": "إزالة العلامة التجارية من العنوان",
+    "stripBrandFromTitleInfo": "يزيل اسم العلامة التجارية على Amazon من عنوانك على eBay تلقائياً. ينطبق على الإدراجات الجديدة فقط.",
+    "aiTitleEnabled": "عنوان بمساعدة الذكاء الاصطناعي",
+    "aiTitleEnabledInfo": "يعيد صياغة عنوانك على eBay بالذكاء الاصطناعي ويُثريه بكلمات مفتاحية إضافية. للإدراجات الجديدة فقط، ويعود إلى عنوانك العادي عند أي إخفاق.",
+    "repricingStrategy": "استراتيجية إعادة التسعير",
+    "addPriceRange": "إضافة نطاق سعري",
+    "removePriceRange": "إزالة النطاق السعري",
+    "minPrice": "الحد الأدنى للسعر ($)",
+    "maxPrice": "الحد الأقصى للسعر ($)",
+    "profitMargin": "هامش الربح (%)",
+    "fixedProfit": "ربح ثابت ($)",
+    "priceRangeLabel": "النطاق السعري {{index}}",
+    "stock": "المخزون",
+    "defaultQuantity": "الكمية الافتراضية",
+    "fees": "الرسوم",
+    "ebayFee": "رسوم eBay",
+    "ebayFeePercent": "رسوم eBay (%)",
+    "fixedFee": "رسوم ثابتة",
+    "fixedFeeAmount": "الرسوم الثابتة ($)",
+    "tax": "الضريبة",
+    "taxPercent": "الضريبة (%)",
+    "templates": "القالب",
+    "customTemplate": "مخصص",
+    "predefinedTemplate": "جاهز",
+    "selectTemplate": "اختيار القالب",
+    "selectTemplatePlaceholder": "اختر قالباً جاهزاً...",
+    "htmlEditor": "محرر HTML",
+    "templatePlaceholder": "أدخل قالب HTML المخصص الخاص بك...",
+    "preview": "معاينة",
+    "livePreview": "معاينة مباشرة",
+    "editTemplate": "تعديل هذا القالب",
+    "darkModePreview": "معاينة الوضع الداكن",
+    "desktopView": "عرض الحاسوب",
+    "mobileView": "عرض الهاتف",
+    "renderingPreview": "جارٍ إنشاء المعاينة...",
+    "saveChanges": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ...",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "deleteGroup": "حذف المجموعة",
+    "confirmDelete": "هل أنت متأكد من حذف هذه المجموعة؟",
+    "confirmDeleteMessage": "لا يمكن التراجع عن هذا الإجراء. ستحتاج المنتجات التي تستخدم هذه المجموعة إلى إعادة تعيين.",
+    "deleteSuccess": "تم حذف المجموعة بنجاح",
+    "deleteFailed": "تعذّر حذف المجموعة",
+    "productsCount_zero": "{{count}} منتج",
+    "productsCount_one": "منتج واحد",
+    "productsCount_two": "منتجان",
+    "productsCount_few": "{{count}} منتجات",
+    "productsCount_many": "{{count}} منتجاً",
+    "productsCount_other": "{{count}} منتج",
+    "noProducts": "لا توجد منتجات",
+    "statusActive": "نشط",
+    "statusDraft": "مسودة",
+    "statusInactive": "غير نشط",
+    "card": {
+      "defaultQuantity": "الكمية الافتراضية",
+      "stockBuffer": "هامش المخزون",
+      "fee": "العمولة",
+      "fixedFee": "رسوم ثابتة",
+      "customTemplate": "قالب مخصص"
+    },
+    "emptyState": {
+      "title": "لا توجد مجموعات إدراج بعد",
+      "description": "أنشئ أول مجموعة لك لبدء تنظيم إدراجاتك",
+      "action": "إنشاء مجموعة جديدة"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "متجر عام",
+        "description": "تصميم عالي التحويل يحفّز على الشراء، يناسب أي منتج عام مع شارات ثقة واضحة"
+      },
+      "ds-minimalist": {
+        "name": "بسيط",
+        "description": "تصميم شديد النظافة بعمود واحد وبالأبيض والأسود يركّز على المواصفات والثقة فقط"
+      },
+      "ds-tech-gadgets": {
+        "name": "أجهزة تقنية",
+        "description": "تصميم عصري بلمسات داكنة مثالي للإلكترونيات، مع جدول مواصفات بارز"
+      },
+      "ds-home-decor": {
+        "name": "ديكور المنزل",
+        "description": "تصميم دافئ وجمالي بألوان هادئة وتركيز على الصور الكبيرة وخطوط مريحة"
+      },
+      "ds-auto-parts": {
+        "name": "قطع غيار السيارات",
+        "description": "تصميم تقني عالي التباين مع تنبيهات واضحة للتوافق ومظهر متين"
+      },
+      "ds-apparel-fashion": {
+        "name": "أزياء وملابس",
+        "description": "تصميم أنيق بأسلوب الكتالوج يبرز جداول المقاسات والعناية بالأقمشة"
+      },
+      "ds-beauty-health": {
+        "name": "الجمال والصحة",
+        "description": "تصميم نظيف بأجواء السبا مع أقسام منظمة للمكونات وطريقة الاستخدام"
+      },
+      "ds-pet-supplies": {
+        "name": "مستلزمات الحيوانات الأليفة",
+        "description": "تصميم مرح ومنظم بألوان زاهية يركّز على سلامة المواد والمقاسات"
+      },
+      "ds-fitness-sports": {
+        "name": "اللياقة والرياضة",
+        "description": "تصميم حيوي بخطوط عريضة يركّز على المتانة والمواد ونمط الحياة النشط"
+      },
+      "ds-outdoor-survival": {
+        "name": "البقاء في الطبيعة",
+        "description": "تصميم متين بألوان ترابية يركّز على المتانة ومقاومة الطقس والمواصفات التكتيكية"
+      },
+      "ds-toys-kids": {
+        "name": "ألعاب الأطفال",
+        "description": "تصميم ممتع ومليء بالألوان يركّز على شهادات السلامة وملاءمة الفئة العمرية"
+      },
+      "ds-kitchen-dining": {
+        "name": "المطبخ والمائدة",
+        "description": "تصميم نظيف بأسلوب كتاب الوصفات يركّز على سلامة المواد والأبعاد"
+      }
+    },
+    "validation": {
+      "nameRequired": "اسم المجموعة مطلوب",
+      "nameMinLength": "يجب ألا يقل اسم المجموعة عن 3 أحرف",
+      "nameMaxLength": "يجب ألا يتجاوز اسم المجموعة 100 حرف",
+      "minPrice": "يجب أن يكون الحد الأدنى للسعر أكبر من 0",
+      "maxPrice": "يجب أن يكون الحد الأقصى للسعر أكبر من 0",
+      "maxPriceGreaterThanMin": "يجب أن يكون الحد الأقصى للسعر أكبر من الحد الأدنى",
+      "profitRequired": "يجب إدخال هامش الربح أو الربح الثابت",
+      "profitMarginRange": "يجب أن يكون هامش الربح بين 0 و100",
+      "fixedProfitMin": "يجب أن يكون الربح الثابت 0 أو أكثر",
+      "minQuantity": "يجب ألا تقل الكمية عن 1",
+      "maxQuantity": "يجب ألا تتجاوز الكمية 9999",
+      "maxFeePercent": "لا يمكن أن تتجاوز نسبة الرسوم 100%",
+      "minFeePercent": "يجب أن تكون نسبة الرسوم 0 أو أكثر",
+      "minFixedFee": "يجب أن تكون الرسوم الثابتة 0 أو أكثر",
+      "invalidNumber": "أدخل رقماً صحيحاً دون صفر في البداية (مثلاً 0.4 وليس 04)",
+      "templateRequired": "محتوى القالب مطلوب",
+      "templateMinLength": "يجب ألا يقل القالب عن 10 أحرف",
+      "predefinedTemplateRequired": "يرجى اختيار قالب جاهز",
+      "minOnePriceRange": "مطلوب نطاق سعري واحد على الأقل",
+      "maxPriceRanges": "يُسمح بـ 10 نطاقات سعرية كحد أقصى",
+      "overlappingPriceRanges": "لا يجوز أن تتداخل النطاقات السعرية",
+      "minStockBuffer": "يجب أن يكون هامش المخزون 0 أو أكثر"
+    },
+    "errors": {
+      "loadFailed": "تعذّر تحميل مجموعات الإدراج",
+      "saveFailed": "تعذّر حفظ التغييرات",
+      "createFailed": "تعذّر إنشاء المجموعة",
+      "updateFailed": "تعذّر تحديث المجموعة",
+      "deleteFailed": "تعذّر حذف المجموعة",
+      "templateLoadFailed": "تعذّر تحميل القوالب الجاهزة",
+      "unauthorized": "ليست لديك صلاحية تنفيذ هذا الإجراء",
+      "notFound": "مجموعة الإدراج غير موجودة",
+      "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+      "unknownError": "حدث خطأ غير متوقع"
+    },
+    "success": {
+      "created": "تم إنشاء مجموعة الإدراج بنجاح",
+      "updated": "تم تحديث مجموعة الإدراج بنجاح",
+      "deleted": "تم حذف مجموعة الإدراج بنجاح",
+      "saved": "تم حفظ التغييرات بنجاح"
+    },
+    "tooltips": {
+      "editGroup": "تعديل المجموعة",
+      "deleteGroup": "حذف المجموعة",
+      "addPriceRange": "إضافة نطاق سعري آخر",
+      "removePriceRange": "إزالة هذا النطاق السعري",
+      "toggleDarkMode": "تبديل معاينة الوضع الداكن",
+      "switchToDesktop": "التبديل إلى عرض الحاسوب",
+      "switchToMobile": "التبديل إلى عرض الهاتف",
+      "copyTemplate": "نسخ HTML القالب",
+      "resetTemplate": "إعادة التعيين إلى القالب الافتراضي"
+    },
+    "help": {
+      "repricingStrategy": "حدّد عدة نطاقات سعرية بهوامش ربح مختلفة. ستُسعَّر المنتجات وفق نطاق تكلفتها.",
+      "profitMargin": "ربح بنسبة مئوية يُحسب من تكلفة المنتج.",
+      "fixedProfit": "مبلغ ثابت بالدولار يُضاف إلى تكلفة المنتج.",
+      "ebayFee": "نسبة رسوم القيمة النهائية على eBay (عادةً 10-15%).",
+      "fixedFee": "رسوم الإدراج الثابتة على eBay (عادةً 0.30 دولار).",
+      "tax": "نسبة ضريبة المبيعات في موقعك.",
+      "customTemplate": "اكتب قالب HTML خاصاً بك بتنسيق مخصص.",
+      "predefinedTemplate": "اختر من بين قوالب مصممة باحترافية."
+    },
+    "editorTitle": "محرر مجموعة الإدراج",
+    "editorDescription": "اضبط إعدادات الإدراج واستراتيجيات التسعير والقوالب.",
+    "generalSettings": "الإعدادات العامة",
+    "pricingStrategy": "استراتيجية إعادة التسعير",
+    "addRange": "إضافة نطاق",
+    "calculator": {
+      "title": "حاسبة الأسعار",
+      "subtitle": "جرّب هذه الإعدادات، فهي غير محفوظة وللمعاينة فقط.",
+      "amazonPrice": "سعر الشراء من Amazon",
+      "calculate": "احسب",
+      "resultLabel": "سعر الإدراج على eBay",
+      "breakdown": {
+        "amazonPrice": "سعر الشراء من Amazon",
+        "tax": "ضريبة الشراء من Amazon ({{pct}})",
+        "trueCost": "التكلفة الفعلية (السعر + الضريبة)",
+        "margin": "هامش الربح ({{pct}})",
+        "fallbackMargin": "لم يطابق أي نطاق، هامش الربح البديل ({{pct}})",
+        "fixedProfit": "ربح ثابت",
+        "netTarget": "المستهدف قبل رسوم eBay",
+        "ebayFee": "رسوم eBay ({{pct}})",
+        "fixedFee": "رسوم ثابتة",
+        "floorApplied": "أقل من الحد الأدنى لدى eBay وهو 0.99 دولار، تم رفعه إلى"
+      }
+    },
+    "feesAndTaxes": "الرسوم والضرائب",
+    "amazonTaxRateNote": "يأخذ حساب السعر لديك تلقائياً في الاعتبار الضريبة التقديرية التي تدفعها عند الشراء من Amazon. حدّد هذه النسبة في إعدادات المتجر ← نسبة ضريبة المبيعات على Amazon.",
+    "stockControl": "التحكم في المخزون",
+    "ebayStockQuantity": "مخزون eBay",
+    "stockBuffer": "هامش المخزون",
+    "stockBufferDescription": "كمية eBay لديك هي مخزون Amazon مطروحاً منه هذا الهامش (دون أن تقل عن 0)، وبحد أقصى قيمة مخزون eBay.",
+    "htmlTemplate": "قالب HTML",
+    "custom": "مخصص",
+    "predefined": "جاهز",
+    "activeTemplate": "القالب النشط",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "تنسيق EBAY",
+    "sample": {
+      "productTitle": "سماعات أذن لاسلكية بخاصية إلغاء الضوضاء النشط وبطارية تدوم 40 ساعة",
+      "productDescription": "إلغاء ضوضاء نشط هجين، وعلبة شحن بطاقة 40 ساعة، ووضع ألعاب منخفض التأخير، في سماعات أذن صغيرة للسفر والعمل والتمارين.",
+      "productSpecs": "<ul><li>إلغاء الضوضاء النشط</li><li>عمر بطارية 40 ساعة</li><li>توافق Bluetooth عالمي</li><li>ميكروفون مدمج</li></ul>"
+    },
+    "drawer": {
+      "deductions": "الخصومات"
+    },
+    "copyright": "© {{year}} منصة SellerHill. جميع الحقوق محفوظة.",
+    "keywords": {
+      "title": "الكلمات المفتاحية المتاحة",
+      "hint": "اكتبها بين قوسين معقوصين مزدوجين، وتُستبدل ببيانات المنتج عند إنشاء الإدراج.",
+      "items": {
+        "title": "عنوان المنتج",
+        "product_description": "وصف المنتج",
+        "feature_bullets": "قائمة نقاط الميزات",
+        "product_details": "قائمة المواصفات",
+        "main_image": "رابط الصورة الرئيسية للمنتج",
+        "brand": "العلامة التجارية",
+        "manufacturer": "المصنّع",
+        "category": "فئة المنتج"
+      }
+    }
+  }
+}

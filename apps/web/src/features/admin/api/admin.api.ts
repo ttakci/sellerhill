@@ -11,6 +11,7 @@ import type {
   AdminUsersListDto,
   PlatformSettingsListDto,
   ProviderCostSummaryDto,
+  ProxyVerifyResult,
   EbayBudgetOverviewDto,
   UpsertAspectDefaultRequest,
   UserCostSummaryDto,
@@ -103,6 +104,12 @@ export const adminApi = baseApi.injectEndpoints({
     testAdminEmailSettings: builder.mutation<{ ok: boolean; error: string | null }, void>({
       query: () => ({ url: '/admin/settings/email/test', method: 'POST' }),
     }),
+    // `proxies` omitted tests the currently SAVED list (decrypted server-side,
+    // never returned); provided, it tests a draft before it's saved. Either
+    // way the response carries only `host:port` ids, never a credential.
+    verifyScraperProxies: builder.mutation<{ results: ProxyVerifyResult[] }, { proxies?: string } | void>({
+      query: (body) => ({ url: '/admin/settings/scraper/proxies/verify', method: 'POST', body: body ?? {} }),
+    }),
   }),
 });
 
@@ -119,6 +126,7 @@ export const {
   useUpdateAdminSettingMutation,
   useResetAdminSettingMutation,
   useTestAdminEmailSettingsMutation,
+  useVerifyScraperProxiesMutation,
   useGetAdminListingQualityQuery,
   useGetAdminAspectDefaultsQuery,
   useUpsertAdminAspectDefaultMutation,

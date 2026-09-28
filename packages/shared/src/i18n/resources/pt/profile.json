@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Gerencie as configurações da sua conta e suas informações pessoais.",
+    "personalInfo": "Informações pessoais",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "emailAddress": "E-mail",
+    "phone": "Telefone",
+    "bio": "Biografia",
+    "address": "Endereço",
+    "country": "País",
+    "cityState": "Cidade/Estado",
+    "postalCode": "CEP",
+    "taxId": "ID fiscal",
+    "edit": "Editar",
+    "home": "Início",
+    "defaultJobTitle": "Gerente de equipe",
+    "locationNotSet": "Localização não informada",
+    "defaultBio": "Gerente profissional de e-commerce.",
+    "updateSuccess": "Perfil atualizado com sucesso.",
+    "twitter": "URL do Twitter",
+    "linkedin": "URL do LinkedIn",
+    "instagram": "URL do Instagram",
+    "deactivateAccount": "Desativar conta",
+    "saveChanges": "Salvar todas as alterações",
+    "storeOwner": "Proprietário da loja"
+  }
+}

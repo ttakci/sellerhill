@@ -1,0 +1,251 @@
+{
+  "listingSettingsGroup": {
+    "title": "Gruppi di impostazioni delle inserzioni",
+    "subtitle": "Gestisci e assegna modelli di strategia alle inserzioni dei tuoi prodotti per un'ottimizzazione automatica.",
+    "loadingDescription": "Recupero dei tuoi gruppi di inserzioni.",
+    "createNewGroup": "Crea un nuovo gruppo",
+    "editGroup": "Modifica il gruppo di inserzioni",
+    "backToList": "Torna ai gruppi",
+    "connectorSubtitle": "CONNETTORE DA AMAZON A EBAY",
+    "groupDetails": "Dettagli del gruppo",
+    "groupName": "Nome del gruppo",
+    "groupNamePlaceholder": "es. Elettronica premium",
+    "description": "Descrizione",
+    "descriptionPlaceholder": "Inserisci le note interne del gruppo...",
+    "stripBrandFromTitle": "Rimuovi il marchio dal titolo",
+    "stripBrandFromTitleInfo": "Rimuove automaticamente il nome del marchio Amazon dal titolo eBay. Si applica solo alle nuove inserzioni.",
+    "aiTitleEnabled": "Titolo assistito dall'IA",
+    "aiTitleEnabledInfo": "Riscrive il titolo eBay con l'IA e lo arricchisce con parole chiave aggiuntive. Solo per le nuove inserzioni; in caso di errore si torna al titolo normale.",
+    "repricingStrategy": "Strategia di riprezzamento",
+    "addPriceRange": "Aggiungi una fascia di prezzo",
+    "removePriceRange": "Rimuovi la fascia di prezzo",
+    "minPrice": "Prezzo minimo ($)",
+    "maxPrice": "Prezzo massimo ($)",
+    "profitMargin": "Margine di profitto (%)",
+    "fixedProfit": "Profitto fisso ($)",
+    "priceRangeLabel": "Fascia di prezzo {{index}}",
+    "stock": "Stock",
+    "defaultQuantity": "Quantità predefinita",
+    "fees": "Commissioni",
+    "ebayFee": "Commissione eBay",
+    "ebayFeePercent": "Commissione eBay (%)",
+    "fixedFee": "Commissione fissa",
+    "fixedFeeAmount": "Commissione fissa ($)",
+    "tax": "Imposta",
+    "taxPercent": "Imposta (%)",
+    "templates": "Modello",
+    "customTemplate": "Personalizzato",
+    "predefinedTemplate": "Predefinito",
+    "selectTemplate": "Seleziona un modello",
+    "selectTemplatePlaceholder": "Scegli un modello predefinito...",
+    "htmlEditor": "Editor HTML",
+    "templatePlaceholder": "Inserisci il tuo modello HTML personalizzato...",
+    "preview": "Anteprima",
+    "livePreview": "Anteprima dal vivo",
+    "editTemplate": "Modifica questo modello",
+    "darkModePreview": "Anteprima in modalità scura",
+    "desktopView": "Vista desktop",
+    "mobileView": "Vista mobile",
+    "renderingPreview": "Generazione dell'anteprima...",
+    "saveChanges": "Salva le modifiche",
+    "saving": "Salvataggio...",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "deleteGroup": "Elimina il gruppo",
+    "confirmDelete": "Vuoi davvero eliminare questo gruppo?",
+    "confirmDeleteMessage": "L'operazione non può essere annullata. I prodotti che usano questo gruppo dovranno essere riassegnati.",
+    "deleteSuccess": "Gruppo eliminato correttamente",
+    "deleteFailed": "Impossibile eliminare il gruppo",
+    "productsCount_one": "{{count}} prodotto",
+    "productsCount_many": "{{count}} prodotti",
+    "productsCount_other": "{{count}} prodotti",
+    "noProducts": "Nessun prodotto",
+    "statusActive": "Attivo",
+    "statusDraft": "Bozza",
+    "statusInactive": "Inattivo",
+    "card": {
+      "defaultQuantity": "Quantità predefinita",
+      "stockBuffer": "Riserva di stock",
+      "fee": "Commissione",
+      "fixedFee": "Commissione fissa",
+      "customTemplate": "Modello personalizzato"
+    },
+    "emptyState": {
+      "title": "Ancora nessun gruppo di inserzioni",
+      "description": "Crea il tuo primo gruppo per iniziare a organizzare le tue inserzioni",
+      "action": "Crea un nuovo gruppo"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Negozio generico",
+        "description": "Un layout ad alta conversione, orientato all'urgenza, adatto a qualsiasi prodotto generico e con chiari badge di fiducia"
+      },
+      "ds-minimalist": {
+        "name": "Minimalista",
+        "description": "Layout ultra-pulito, a colonna singola, in bianco e nero, incentrato solo su specifiche e fiducia"
+      },
+      "ds-tech-gadgets": {
+        "name": "Gadget tecnologici",
+        "description": "Layout moderno con accenti scuri, ideale per l'elettronica, con una tabella delle specifiche in evidenza"
+      },
+      "ds-home-decor": {
+        "name": "Casa e arredamento",
+        "description": "Layout caldo ed estetico con colori tenui, grande risalto all'immagine e una tipografia accogliente"
+      },
+      "ds-auto-parts": {
+        "name": "Ricambi auto",
+        "description": "Layout tecnico ad alto contrasto con chiari avvisi di compatibilità e uno stile robusto"
+      },
+      "ds-apparel-fashion": {
+        "name": "Abbigliamento e moda",
+        "description": "Layout elegante in stile lookbook, che valorizza le tabelle delle taglie e la cura dei tessuti"
+      },
+      "ds-beauty-health": {
+        "name": "Bellezza e salute",
+        "description": "Design pulito in stile spa, con sezioni strutturate per gli ingredienti e le istruzioni d'uso"
+      },
+      "ds-pet-supplies": {
+        "name": "Articoli per animali",
+        "description": "Layout vivace ma strutturato con accenti brillanti, incentrato su sicurezza dei materiali e taglie"
+      },
+      "ds-fitness-sports": {
+        "name": "Fitness e sport",
+        "description": "Layout energico con tipografia decisa, incentrato su durata, materiali e stile di vita attivo"
+      },
+      "ds-outdoor-survival": {
+        "name": "Outdoor e sopravvivenza",
+        "description": "Layout robusto dai toni terrosi, incentrato su durata, resistenza alle intemperie e specifiche tattiche"
+      },
+      "ds-toys-kids": {
+        "name": "Giocattoli per bambini",
+        "description": "Layout divertente e colorato, incentrato su certificazioni di sicurezza e adeguatezza all'età"
+      },
+      "ds-kitchen-dining": {
+        "name": "Cucina e tavola",
+        "description": "Layout pulito in stile libro di ricette, incentrato su sicurezza dei materiali e dimensioni"
+      }
+    },
+    "validation": {
+      "nameRequired": "Il nome del gruppo è obbligatorio",
+      "nameMinLength": "Il nome del gruppo deve contenere almeno 3 caratteri",
+      "nameMaxLength": "Il nome del gruppo non deve superare 100 caratteri",
+      "minPrice": "Il prezzo minimo deve essere maggiore di 0",
+      "maxPrice": "Il prezzo massimo deve essere maggiore di 0",
+      "maxPriceGreaterThanMin": "Il prezzo massimo deve essere maggiore del prezzo minimo",
+      "profitRequired": "È obbligatorio indicare il margine di profitto o il profitto fisso",
+      "profitMarginRange": "Il margine di profitto deve essere compreso tra 0 e 100",
+      "fixedProfitMin": "Il profitto fisso deve essere 0 o maggiore",
+      "minQuantity": "La quantità deve essere almeno 1",
+      "maxQuantity": "La quantità non deve superare 9999",
+      "maxFeePercent": "La percentuale della commissione non può superare il 100%",
+      "minFeePercent": "La percentuale della commissione deve essere 0 o maggiore",
+      "minFixedFee": "La commissione fissa deve essere 0 o maggiore",
+      "invalidNumber": "Inserisci un numero valido senza zero iniziale (ad esempio 0.4, non 04)",
+      "templateRequired": "Il contenuto del modello è obbligatorio",
+      "templateMinLength": "Il modello deve contenere almeno 10 caratteri",
+      "predefinedTemplateRequired": "Seleziona un modello predefinito",
+      "minOnePriceRange": "È richiesta almeno una fascia di prezzo",
+      "maxPriceRanges": "Sono consentite al massimo 10 fasce di prezzo",
+      "overlappingPriceRanges": "Le fasce di prezzo non possono sovrapporsi",
+      "minStockBuffer": "La riserva di stock deve essere 0 o maggiore"
+    },
+    "errors": {
+      "loadFailed": "Impossibile caricare i gruppi di inserzioni",
+      "saveFailed": "Impossibile salvare le modifiche",
+      "createFailed": "Impossibile creare il gruppo",
+      "updateFailed": "Impossibile aggiornare il gruppo",
+      "deleteFailed": "Impossibile eliminare il gruppo",
+      "templateLoadFailed": "Impossibile caricare i modelli predefiniti",
+      "unauthorized": "Non hai l'autorizzazione per eseguire questa azione",
+      "notFound": "Gruppo di inserzioni non trovato",
+      "networkError": "Errore di rete. Controlla la connessione.",
+      "unknownError": "Si è verificato un errore imprevisto"
+    },
+    "success": {
+      "created": "Gruppo di inserzioni creato correttamente",
+      "updated": "Gruppo di inserzioni aggiornato correttamente",
+      "deleted": "Gruppo di inserzioni eliminato correttamente",
+      "saved": "Modifiche salvate correttamente"
+    },
+    "tooltips": {
+      "editGroup": "Modifica il gruppo",
+      "deleteGroup": "Elimina il gruppo",
+      "addPriceRange": "Aggiungi un'altra fascia di prezzo",
+      "removePriceRange": "Rimuovi questa fascia di prezzo",
+      "toggleDarkMode": "Attiva/disattiva l'anteprima in modalità scura",
+      "switchToDesktop": "Passa alla vista desktop",
+      "switchToMobile": "Passa alla vista mobile",
+      "copyTemplate": "Copia l'HTML del modello",
+      "resetTemplate": "Ripristina il modello predefinito"
+    },
+    "help": {
+      "repricingStrategy": "Definisci più fasce di prezzo con margini di profitto diversi. I prodotti verranno prezzati in base alla loro fascia di costo.",
+      "profitMargin": "Profitto in percentuale calcolato sul costo del prodotto.",
+      "fixedProfit": "Importo fisso in dollari aggiunto al costo del prodotto.",
+      "ebayFee": "Percentuale della commissione sul valore finale di eBay (in genere 10-15%).",
+      "fixedFee": "Commissione fissa di inserzione di eBay (in genere $0.30).",
+      "tax": "Percentuale dell'imposta sulle vendite per la tua località.",
+      "customTemplate": "Scrivi il tuo modello HTML con uno stile personalizzato.",
+      "predefinedTemplate": "Scegli tra modelli progettati da professionisti."
+    },
+    "editorTitle": "Editor del gruppo di inserzioni",
+    "editorDescription": "Configura le impostazioni delle inserzioni, le strategie di prezzo e i modelli.",
+    "generalSettings": "Impostazioni generali",
+    "pricingStrategy": "Strategia di riprezzamento",
+    "addRange": "Aggiungi una fascia",
+    "calculator": {
+      "title": "Calcolatore di prezzo",
+      "subtitle": "Prova queste impostazioni: non vengono salvate, è solo un'anteprima.",
+      "amazonPrice": "Prezzo d'acquisto su Amazon",
+      "calculate": "Calcola",
+      "resultLabel": "Prezzo di inserzione su eBay",
+      "breakdown": {
+        "amazonPrice": "Prezzo d'acquisto su Amazon",
+        "tax": "Imposte sull'acquisto Amazon ({{pct}})",
+        "trueCost": "Costo reale (prezzo + imposte)",
+        "margin": "Margine di profitto ({{pct}})",
+        "fallbackMargin": "Nessuna fascia corrispondente, margine di riserva ({{pct}})",
+        "fixedProfit": "Profitto fisso",
+        "netTarget": "Obiettivo prima delle commissioni eBay",
+        "ebayFee": "Commissione eBay ({{pct}})",
+        "fixedFee": "Commissione fissa",
+        "floorApplied": "Sotto il minimo eBay di $0.99, portato a"
+      }
+    },
+    "feesAndTaxes": "Commissioni e imposte",
+    "amazonTaxRateNote": "Il calcolo del prezzo tiene conto automaticamente delle imposte stimate che paghi acquistando da Amazon. Imposta questa aliquota in Impostazioni del negozio → Aliquota dell'imposta sulle vendite Amazon.",
+    "stockControl": "Controllo dello stock",
+    "ebayStockQuantity": "Stock eBay",
+    "stockBuffer": "Riserva di stock",
+    "stockBufferDescription": "La tua quantità su eBay è lo stock di Amazon meno questa riserva (mai sotto 0), limitata al valore dello stock eBay.",
+    "htmlTemplate": "Modello HTML",
+    "custom": "Personalizzato",
+    "predefined": "Predefinito",
+    "activeTemplate": "Modello attivo",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "FORMATO EBAY",
+    "sample": {
+      "productTitle": "Auricolari wireless con cancellazione attiva del rumore, batteria da 40 ore",
+      "productDescription": "Cancellazione attiva ibrida del rumore, una custodia di ricarica da 40 ore e una modalità gaming a bassa latenza, in auricolari compatti per viaggi, lavoro e allenamento.",
+      "productSpecs": "<ul><li>Cancellazione attiva del rumore</li><li>Autonomia della batteria di 40 ore</li><li>Compatibilità Bluetooth universale</li><li>Microfono integrato</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Detrazioni"
+    },
+    "copyright": "© {{year}} SellerHill Platform. Tutti i diritti riservati.",
+    "keywords": {
+      "title": "Parole chiave disponibili",
+      "hint": "Scrivile tra doppie parentesi graffe; vengono sostituite con i dati del prodotto quando l'inserzione viene creata.",
+      "items": {
+        "title": "Titolo del prodotto",
+        "product_description": "Descrizione del prodotto",
+        "feature_bullets": "Elenco puntato delle caratteristiche",
+        "product_details": "Elenco delle specifiche",
+        "main_image": "URL dell'immagine principale del prodotto",
+        "brand": "Marchio",
+        "manufacturer": "Produttore",
+        "category": "Categoria del prodotto"
+      }
+    }
+  }
+}

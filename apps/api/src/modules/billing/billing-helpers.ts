@@ -327,12 +327,21 @@ export function isStaleEvent(occurredAt: string | null, staleMinutes: number, no
 // ---------------------------------------------------------------------------
 
 /**
- * Stripe locale codes this app actively supports (the app only ships EN/TR
- * copy — see `i18n.config.ts`'s `supportedLngs`). Stripe accepts many more,
- * but sending one we never verified would be an unfounded promise.
+ * App languages Stripe Checkout / the Billing Portal can ALSO render in. This is
+ * a subset of `SUPPORTED_LOCALES`, not a copy of it: Stripe has no Hindi, Urdu,
+ * Arabic, Azerbaijani or Ukrainian Checkout, so a seller using those still gets
+ * the English Stripe pages (`resolveStripeLocale` falls back to `'en'`, never
+ * `'auto'`). Extend it only with a code Stripe's `locale` parameter documents
+ * (checked against the SDK's `Checkout.SessionCreateParams.Locale` union).
  */
-const SUPPORTED_STRIPE_LOCALES = ['en', 'tr'] as const;
+const SUPPORTED_STRIPE_LOCALES = ['en', 'tr', 'ru', 'de', 'fr', 'es', 'it', 'ro', 'zh', 'pt-BR'] as const;
 export type SupportedStripeLocale = (typeof SUPPORTED_STRIPE_LOCALES)[number];
+
+/**
+ * App codes that need a different Stripe code. The app's `pt` is Brazilian
+ * Portuguese, while Stripe's bare `pt` is European Portuguese.
+ */
+const STRIPE_LOCALE_ALIASES: Readonly<Record<string, SupportedStripeLocale>> = { pt: 'pt-BR' };
 
 /**
  * Resolve the Stripe Checkout/Billing Portal `locale` param from the `Accept-Language`
@@ -349,10 +358,11 @@ export type SupportedStripeLocale = (typeof SUPPORTED_STRIPE_LOCALES)[number];
  */
 export function resolveStripeLocale(acceptLanguage: string | undefined | null): SupportedStripeLocale {
   const primary = (acceptLanguage ?? '').split(',')[0]?.trim().toLowerCase();
-  const bare = primary?.split('-')[0];
-  return (SUPPORTED_STRIPE_LOCALES as readonly string[]).includes(bare ?? '')
-    ? (bare as SupportedStripeLocale)
-    : 'en';
+  const bare = primary?.split('-')[0] ?? '';
+  if (bare in STRIPE_LOCALE_ALIASES) {
+    return STRIPE_LOCALE_ALIASES[bare];
+  }
+  return (SUPPORTED_STRIPE_LOCALES as readonly string[]).includes(bare) ? (bare as SupportedStripeLocale) : 'en';
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { LegalDocumentKey, type LegalDocument, type SupportedLocale } from '@repo/shared';
+import { LegalDocumentKey, isValidLocale, type LegalDocument, type SupportedLocale } from '@repo/shared';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -18,7 +18,7 @@ export const LegalDocumentPageContainer = ({ documentKey }: LegalDocumentPageCon
 
   const language = i18n.language;
   const currentLocale = resolveLocale(
-    localeParam === 'en' || localeParam === 'tr' ? localeParam : null
+    localeParam && isValidLocale(localeParam) ? localeParam : null
   );
 
   /*

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 import type { UpdatePlatformSettingRequest } from '../../domain/admin/platform-settings.types';
 
@@ -12,4 +12,16 @@ export class UpdatePlatformSettingDto implements UpdatePlatformSettingRequest {
   @IsNotEmpty()
   @MaxLength(500)
   value!: string;
+}
+
+/**
+ * POST /admin/settings/scraper/proxies/verify — `proxies` is the same
+ * comma/newline-separated grammar as the `scraper.proxies` setting itself.
+ * Omitted, the server tests the CURRENTLY SAVED list instead of a draft.
+ */
+export class VerifyScraperProxiesDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  proxies?: string;
 }

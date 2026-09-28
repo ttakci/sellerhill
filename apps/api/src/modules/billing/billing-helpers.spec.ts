@@ -17,8 +17,38 @@ import {
   isProviderConfigured,
   isStaleEvent,
   resolveBillingConfig,
+  resolveStripeLocale,
 } from './billing-helpers';
 import { BillingProvider } from './billing.types';
+
+// ---------------------------------------------------------------------------
+// resolveStripeLocale
+// ---------------------------------------------------------------------------
+
+describe('resolveStripeLocale', () => {
+  it.each([
+    ['tr', 'tr'],
+    ['ru-RU,ru;q=0.9', 'ru'],
+    ['EN-us', 'en'],
+    ['de', 'de'],
+    ['zh', 'zh'],
+    // The app's `pt` is Brazilian; Stripe's bare `pt` is European.
+    ['pt', 'pt-BR'],
+    ['pt-BR', 'pt-BR'],
+  ])('maps %s to %s', (header, expected) => {
+    expect(resolveStripeLocale(header)).toBe(expected);
+  });
+
+  // Stripe Checkout has no Hindi, Urdu, Arabic, Azerbaijani or Ukrainian: sending
+  // one is an API error that would break checkout, so they must resolve to
+  // English, never pass through.
+  it.each(['hi', 'ur', 'ar', 'ar-MA', 'az', 'uk', '', undefined, null])(
+    'falls back to en for %p',
+    (header) => {
+      expect(resolveStripeLocale(header)).toBe('en');
+    },
+  );
+});
 
 
 // ---------------------------------------------------------------------------

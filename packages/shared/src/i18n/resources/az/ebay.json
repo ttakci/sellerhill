@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay mağazasını qoşun",
+      "subtitle": "Elanları və sifarişləri idarə etmək üçün eBay satıcı hesabınızı bağlayın",
+      "connectButton": "eBay hesabını qoş",
+      "connectingButton": "Qoşulur...",
+      "marketplaceLabel": "Bazar",
+      "marketplaceUS": "Amerika Birləşmiş Ştatları (eBay.com)",
+      "marketplaceUK": "Birləşmiş Krallıq (eBay.co.uk)",
+      "marketplaceDE": "Almaniya (eBay.de)",
+      "marketplaceFR": "Fransa (eBay.fr)",
+      "marketplaceIT": "İtaliya (eBay.it)",
+      "marketplaceES": "İspaniya (eBay.es)",
+      "marketplaceUsOnlyNote": "Hazırda yalnız Amerika Birləşmiş Ştatları (eBay.com) bazarı dəstəklənir.",
+      "successMessage": "eBay hesabı uğurla qoşuldu!",
+      "errorMessage": "eBay hesabını qoşmaq alınmadı",
+      "alreadyConnected": "Bu eBay hesabı artıq qoşulub"
+    },
+    "accounts": {
+      "title": "Qoşulmuş eBay hesabları",
+      "loadingDescription": "Qoşulmuş mağazalarınız yüklənir.",
+      "noAccounts": "Hələ heç bir eBay hesabı qoşulmayıb",
+      "statusActive": "Aktiv",
+      "statusRevoked": "Ləğv edilib",
+      "statusError": "Xəta",
+      "disconnectButton": "Bağlantını kəs",
+      "refreshTokenButton": "Tokeni yenilə"
+    },
+    "callback": {
+      "processing": "eBay bağlantısı emal olunur...",
+      "success": "eBay hesabı uğurla qoşuldu! İdarə panelinə yönləndirilir...",
+      "error": "eBay hesabını qoşmaq alınmadı. Zəhmət olmasa yenidən cəhd edin.",
+      "cancelled": "eBay bağlantısı ləğv edildi."
+    },
+    "errors": {
+      "invalidState": "Yanlış state parametri",
+      "authorizationFailed": "eBay avtorizasiyası alınmadı",
+      "tokenExchangeFailed": "Avtorizasiya kodunu tokenlərlə əvəzləmək alınmadı",
+      "accountAlreadyConnected": "Bu eBay mağazası başqa SellerHill hesabına qoşulub. Onu qoşduğunuz hesabla daxil olun; əgər ona giriş yoxdursa, dəstək xidməti ilə əlaqə saxlayın.",
+      "ebayTrialAlreadyUsed": "Bu eBay mağazası pulsuz sınaq müddətindən artıq istifadə edib. Onu qoşmaq üçün plan seçin.",
+      "noAuthorizationCode": "eBay-dən avtorizasiya kodu alınmadı",
+      "storeOwnedByAnotherAccount": "Bu eBay mağazası başqa SellerHill hesabı ilə əlaqələndirilib. Onu köçürmək üçün dəstək xidməti ilə əlaqə saxlayın.",
+      "accountNotFound": "Həmin eBay mağazası tapılmadı.",
+      "identityUnavailable": "eBay hesabınızı eBay ilə təsdiqləyə bilmədik. Heç nə qoşulmadı — zəhmət olmasa bir azdan yenidən cəhd edin."
+    },
+    "onboarding": {
+      "title": "eBay mağazanızı qoşun",
+      "header": "Bazar qurulumu",
+      "description": "Məhsullarınızı sinxronlaşdırmağa başlamaq üçün əvvəlcə eBay mağazanızı qoşmalısınız.",
+      "connectButton": "eBay hesabı",
+      "skipButton": "İndilik keç",
+      "usOnlyNote": "Hazırda yalnız ABŞ bazarı dəstəklənir. Daha çox region tezliklə əlavə olunacaq.",
+      "brandingDescription": "Bütün satış proseslərinizi tək mərkəzdən idarə etmək üçün eBay mağazanızı SellerHill-ə bağlayın."
+    }
+  }
+}

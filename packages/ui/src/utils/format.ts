@@ -99,6 +99,24 @@ export const formatDate = (
 const LOCALE_CONFIGS = {
   en: { locale: 'en-US' },
   tr: { locale: 'tr-TR' },
+  ru: { locale: 'ru-RU' },
+  // Indian digit grouping (12,34,567), which is how an Indian seller reads a figure.
+  hi: { locale: 'hi-IN' },
+  // `-u-nu-latn` pins Western digits 0-9 for the two right-to-left languages:
+  // an Arabic-script locale can default to Arabic-Indic digits, and every table,
+  // ID and SKU beside the figure is Latin — mixed digit systems in one row read
+  // as a bug. Urdu and Moroccan Arabic both write Latin digits in practice.
+  ur: { locale: 'ur-PK-u-nu-latn' },
+  ar: { locale: 'ar-MA-u-nu-latn' },
+  az: { locale: 'az-AZ' },
+  de: { locale: 'de-DE' },
+  fr: { locale: 'fr-FR' },
+  es: { locale: 'es-MX' },
+  it: { locale: 'it-IT' },
+  ro: { locale: 'ro-RO' },
+  uk: { locale: 'uk-UA' },
+  zh: { locale: 'zh-CN' },
+  pt: { locale: 'pt-BR' },
 } as const;
 
 /**
@@ -115,6 +133,6 @@ const LOCALE_CONFIGS = {
  * amounts as TRY even though the seller's store was still eBay US.
  */
 export const getLocaleConfig = (language: string): { locale: string } => {
-  const code = (language || 'en').toLowerCase().split('-')[0];
-  return code === 'tr' ? LOCALE_CONFIGS.tr : LOCALE_CONFIGS.en;
+  const code = (language || 'en').toLowerCase().split('-')[0] as keyof typeof LOCALE_CONFIGS;
+  return LOCALE_CONFIGS[code] ?? LOCALE_CONFIGS.en;
 };

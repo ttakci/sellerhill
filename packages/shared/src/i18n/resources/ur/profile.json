@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "پروفائل",
+    "subtitle": "اپنے اکاؤنٹ کی سیٹنگز اور ذاتی معلومات کا انتظام کریں۔",
+    "personalInfo": "ذاتی معلومات",
+    "firstName": "پہلا نام",
+    "lastName": "آخری نام",
+    "emailAddress": "ای میل ایڈریس",
+    "phone": "فون",
+    "bio": "تعارف",
+    "address": "پتہ",
+    "country": "ملک",
+    "cityState": "شہر/صوبہ",
+    "postalCode": "پوسٹل کوڈ",
+    "taxId": "ٹیکس آئی ڈی",
+    "edit": "ترمیم کریں",
+    "home": "ہوم",
+    "defaultJobTitle": "ٹیم مینیجر",
+    "locationNotSet": "مقام سیٹ نہیں کیا گیا",
+    "defaultBio": "پیشہ ور ای کامرس مینیجر۔",
+    "updateSuccess": "پروفائل کامیابی سے اپ ڈیٹ ہو گیا۔",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL",
+    "deactivateAccount": "اکاؤنٹ غیر فعال کریں",
+    "saveChanges": "تمام تبدیلیاں محفوظ کریں",
+    "storeOwner": "سٹور کے مالک"
+  }
+}

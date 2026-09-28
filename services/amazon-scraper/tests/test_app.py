@@ -92,3 +92,66 @@ def test_empty_proxy_list_retires_previous_workers(client):
     assert len(pool._proxies) == 1
     app.post_json("/v1/products", body(proxies=[]), headers={"X-Scraper-Secret": "s3cret"})
     assert pool._proxies == {}
+
+
+def _fake_probe(counts=None):
+    """Deterministic stand-in for `probe_proxy`: ok unless the host contains
+    "bad", so tests never make a real network call."""
+    def probe(proxy):
+        if counts is not None:
+            counts.append(proxy)
+        ok = "bad" not in proxy
+        return {"id": proxy.split("@")[-1], "ok": ok, "errorKind": None if ok else "unreachable", "latencyMs": 5}
+    return probe
+
+
+def test_verify_secret_required(client):
+    app, _ = client
+    res = app.post_json("/v1/proxies/verify", {"proxies": ["http://u:p@1.2.3.4:8000"]}, expect_errors=True)
+    assert res.status_int == 401
+
+
+def test_verify_returns_one_result_per_entry_in_order(client, monkeypatch):
+    app, _ = client
+    monkeypatch.setattr(app_module, "probe_proxy", _fake_probe())
+    proxies = ["http://u:p@1.2.3.4:8000", "http://u:p@5.6.7.8:9000"]
+    res = app.post_json("/v1/proxies/verify", {"proxies": proxies}, headers={"X-Scraper-Secret": "s3cret"})
+    assert [r["id"] for r in res.json["results"]] == ["1.2.3.4:8000", "5.6.7.8:9000"]
+    assert [r["ok"] for r in res.json["results"]] == [True, True]
+
+
+def test_verify_reports_a_bad_proxy_without_failing_the_others(client, monkeypatch):
+    app, _ = client
+    monkeypatch.setattr(app_module, "probe_proxy", _fake_probe())
+    proxies = ["http://u:p@1.2.3.4:8000", "http://u:p@bad.example:9000"]
+    res = app.post_json("/v1/proxies/verify", {"proxies": proxies}, headers={"X-Scraper-Secret": "s3cret"})
+    results = {r["id"]: r for r in res.json["results"]}
+    assert results["1.2.3.4:8000"]["ok"] is True
+    assert results["bad.example:9000"]["ok"] is False and results["bad.example:9000"]["errorKind"] == "unreachable"
+
+
+def test_verify_malformed_entry_is_invalid_without_probing(client, monkeypatch):
+    app, _ = client
+    calls = []
+    monkeypatch.setattr(app_module, "probe_proxy", _fake_probe(calls))
+    res = app.post_json("/v1/proxies/verify", {"proxies": ["not-a-proxy", "http://u:p@1.2.3.4:8000"]},
+                        headers={"X-Scraper-Secret": "s3cret"})
+    assert res.json["results"][0] == {"id": "?", "ok": False, "errorKind": "invalid", "latencyMs": None}
+    assert res.json["results"][1]["ok"] is True
+    assert calls == ["http://u:p@1.2.3.4:8000"]  # the malformed entry was never probed
+
+
+@pytest.mark.parametrize("bad", [{"proxies": "not-a-list"}, {"proxies": []}, {"proxies": ["x"] * 51}, {}])
+def test_verify_invalid_body_is_400(client, bad):
+    app, _ = client
+    assert app.post_json("/v1/proxies/verify", bad, headers={"X-Scraper-Secret": "s3cret"},
+                         expect_errors=True).status_int == 400
+
+
+def test_verify_never_logs_or_returns_credentials(client, monkeypatch, caplog):
+    app, _ = client
+    monkeypatch.setattr(app_module, "probe_proxy", _fake_probe())
+    res = app.post_json("/v1/proxies/verify", {"proxies": ["http://sensitive_user:sensitive_pass@1.2.3.4:8000"]},
+                        headers={"X-Scraper-Secret": "s3cret"})
+    assert "sensitive_user" not in json.dumps(res.json) and "sensitive_pass" not in json.dumps(res.json)
+    assert "sensitive_user" not in caplog.text and "sensitive_pass" not in caplog.text

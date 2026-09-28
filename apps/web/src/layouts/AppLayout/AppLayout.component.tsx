@@ -1,4 +1,4 @@
-import { ListingStatus } from '@repo/shared';
+import { ListingStatus, SUPPORTED_LOCALES } from '@repo/shared';
 import {
   Breadcrumb,
   ConfirmModal,
@@ -300,16 +300,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       <Icon name="chevron-down" size={12} />
                     </S.LanguageSelectTrigger>
                   }
-                  items={[
-                    {
-                      label: t('translation:languages.en'),
-                      onClick: () => onChangeLanguage('en'),
-                    },
-                    {
-                      label: t('translation:languages.tr'),
-                      onClick: () => onChangeLanguage('tr'),
-                    },
-                  ]}
+                  items={SUPPORTED_LOCALES.map((locale) => ({
+                    label: t(`translation:languages.${locale}`),
+                    onClick: () => onChangeLanguage(locale),
+                  }))}
                 />
 
                 <S.VerticalDivider />

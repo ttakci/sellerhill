@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Ordini",
+      "subtitle": "{{count}} ordini"
+    },
+    "overview": {
+      "viewAll": "Vedi tutti",
+      "emptyTitle": "Ancora nessun ordine",
+      "emptySubtitle": "Le vendite eBay sincronizzate compariranno qui."
+    },
+    "carousel": {
+      "previous": "Precedente",
+      "next": "Successivo"
+    },
+    "all": {
+      "title": "Tutti gli ordini",
+      "subtitle": "{{count}} risultati",
+      "loadingTitle": "Caricamento degli ordini",
+      "loadingSubtitle": "Recupero dei tuoi ultimi ordini eBay.",
+      "filtersTitle": "Nessun ordine corrisponde ai filtri",
+      "filtersSubtitle": "Prova ad ampliare l'intervallo di date, lo stato o il negozio.",
+      "filtersAction": "Cancella i filtri",
+      "emptyTitle": "Ancora nessun ordine",
+      "emptySubtitle": "Gli ordini compaiono qui automaticamente quando viene eseguita la sincronizzazione con eBay."
+    },
+    "filters": {
+      "allStatuses": "Tutti gli stati",
+      "allStores": "Tutti i negozi",
+      "allTrackingStates": "Tutti gli stati di tracciamento",
+      "clearAll": "Cancella tutto",
+      "resultCount": "{{count}} risultati"
+    },
+    "stats": {
+      "totalSales": "Vendite totali",
+      "netProfit": "Profitto netto",
+      "activeOrders": "Ordini attivi",
+      "returnRate": "Tasso di reso",
+      "last24Hours": "Ultime 24 ore",
+      "growth": "{{value}}% rispetto al mese scorso",
+      "profitGrowth": "{{value}}% rispetto al mese scorso",
+      "decrease": "{{value}}% rispetto al mese scorso"
+    },
+    "actions": {
+      "search": "Cerca ordini, acquirenti o articoli...",
+      "last30Days": "Ultimi 30 giorni",
+      "export": "Esporta",
+      "convertTracking": "Converti il tracciamento"
+    },
+    "table": {
+      "orderNumber": "N. ordine",
+      "product": "Prodotto",
+      "date": "Data",
+      "buyer": "Acquirente",
+      "status": "Stato",
+      "salePrice": "Vendita",
+      "purchasePrice": "Costo",
+      "netProfit": "Profitto",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Completato",
+      "shipped": "Spedito",
+      "processing": "In elaborazione",
+      "cancelled": "Annullato",
+      "pending": "In sospeso",
+      "waiting_shipment": "In attesa di spedizione"
+    },
+    "fulfillmentState": {
+      "column": "Evasione Amazon",
+      "purchased": "Acquistato su Amazon",
+      "amazon_cancelled": "Annullato da Amazon",
+      "action_required": "Azione richiesta",
+      "in_progress": "Acquisto su Amazon in corso",
+      "not_automated": "Non automatizzato",
+      "manual": "Acquistato a mano",
+      "simulated": "Prova — nessun acquisto",
+      "filter": {
+        "all": "Tutti gli stati di evasione"
+      },
+      "detail": {
+        "title": "Evasione Amazon",
+        "amazonOrderId": "Ordine Amazon",
+        "simulatedNotice": "Questa è una prova. Nessun ordine Amazon è stato effettuato e nessun importo è stato addebitato: i costi e il profitto qui sotto sono simulati.",
+        "actionRequiredNotice": "L'automazione si è fermata prima di acquistare. Controlla il motivo ed evadi questo ordine manualmente.",
+        "cancelledNotice": "L'acquisto su Amazon è stato annullato. La vendita su eBay è ancora dovuta all'acquirente: evadila in un altro modo.",
+        "notAutomatedNotice": "L'ordine automatico è disattivato per questo ordine.",
+        "attemptedAt": "Ultimo tentativo"
+      }
+    },
+    "tracking": {
+      "tracked": "Monitorato da SellerHill",
+      "untracked": "Non monitorato",
+      "problem": {
+        "wrongPageType": "Il fornitore del tracciamento non è riuscito a leggere la pagina dell'ordine Amazon: potrebbe averne cambiato il formato. Verrà ritentato automaticamente.",
+        "amazonSessionExpired": "La sessione Amazon usata per leggere questo ordine è scaduta e richiede un nuovo accesso.",
+        "trackingUrlMismatch": "Il link di tracciamento nella pagina dell'ordine Amazon non corrispondeva a quello previsto. Verrà ritentato automaticamente.",
+        "needsTrackingUpload": "In attesa del caricamento dei dettagli di spedizione prima di poter convertire il numero di tracciamento.",
+        "updateNotApplied": "L'aggiornamento del tracciamento non è ancora stato applicato dal fornitore. Verrà ritentato automaticamente.",
+        "assignValidation": "Il fornitore del tracciamento ha rifiutato i dettagli di spedizione di questo ordine.",
+        "shipmentException": "Il fornitore del tracciamento ha segnalato un'eccezione per questa spedizione.",
+        "trackingUpdateUnavailable": "Al momento il fornitore del tracciamento non è riuscito ad aggiornare questa spedizione.",
+        "generic": "C'è un problema con la conversione del tracciamento di questo ordine. Verrà ritentata automaticamente."
+      }
+    },
+    "autoFulfill": {
+      "column": "Evasione automatica",
+      "status": {
+        "pending": "In coda",
+        "running": "In esecuzione",
+        "placed": "Effettuato",
+        "blocked": "Bloccato",
+        "failed": "Non riuscito",
+        "dry_run": "Prova a secco",
+        "skipped": "Saltato"
+      },
+      "reason": {
+        "no_asin": "Prodotto non trovato su Amazon",
+        "captcha": "Captcha richiesto",
+        "otp": "Verifica MFA/OTP",
+        "login": "Accesso non riuscito",
+        "out_of_stock": "Esaurito",
+        "address": "Problema con l'indirizzo",
+        "payment": "Pagamento rifiutato",
+        "cap": "Oltre il limite di costo",
+        "no_confirmation": "Nessuna conferma",
+        "proxy_required": "Nessun proxy configurato",
+        "quota_exhausted": "Limite mensile raggiunto",
+        "cart": "Carrello non corrispondente",
+        "review_unreadable": "Totale dell'ordine illeggibile",
+        "subscription_suspended": "Abbonamento sospeso",
+        "listing_over_plan_limit": "Inserzione oltre il limite del piano",
+        "order_already_fulfilled": "Già spedito — nulla da acquistare",
+        "order_not_paid": "In attesa del pagamento dell'acquirente"
+      },
+      "reasonLabel": "Motivo: {{reason}}",
+      "amazonCancelledBadge": "Annullato da Amazon",
+      "filter": {
+        "all": "Tutta l'evasione automatica",
+        "needsAttention": "Richiede attenzione"
+      }
+    },
+    "pagination": {
+      "showing": "Visualizzazione di {{from}}-{{to}} su {{total}} ordini"
+    },
+    "detail": {
+      "title": "Dettagli dell'ordine",
+      "loadingSubtitle": "Recupero dei dettagli dell'ordine…",
+      "notFoundTitle": "Ordine non trovato",
+      "notFoundSubtitle": "Questo ordine potrebbe essere stato rimosso oppure non hai accesso.",
+      "orderPlaced": "Ordine effettuato",
+      "viewInvoice": "Vedi la fattura",
+      "printLabels": "Stampa le etichette",
+      "customerInfo": "Dati del cliente",
+      "buyerPayment": "Pagamento dell'acquirente",
+      "ebaySummary": "Riepilogo vendita eBay",
+      "whatBuyerPaid": "Cosa ha pagato il tuo acquirente",
+      "whatYouEarned": "Cosa hai guadagnato",
+      "earningsOrderTotal": "Totale dell'ordine",
+      "ebayCollectedFromBuyer": "Riscosso da eBay dall'acquirente",
+      "ebayCollectedTax": "Imposta sulle vendite",
+      "sellingCosts": "Costi di vendita",
+      "itemSubtotal": "Subtotale articoli",
+      "shippingHandling": "Spedizione e gestione",
+      "totalBeforeTax": "Totale prima delle imposte",
+      "estimatedTax": "Imposte stimate",
+      "grandTotal": "Totale complessivo",
+      "paymentMethod": "Metodo di pagamento",
+      "subtotal": "Subtotale",
+      "shipping": "Spedizione",
+      "salesTax": "Imposta sulle vendite",
+      "orderTotal": "Totale dell'ordine",
+      "feesCollected": "Commissioni trattenute",
+      "transactionFees": "Commissioni di transazione",
+      "adFee": "Commissione pubblicitaria generale",
+      "orderEarnings": "Utili dell'ordine",
+      "viewMore": "Vedi più dettagli",
+      "updateAmazon": "Inserisci i dati Amazon",
+      "netProfitAnalysis": "ANALISI DEL PROFITTO NETTO",
+      "analysisDesc": "Questo calcolo considera i tuoi utili effettivi da eBay dopo tutte le commissioni e le imposte della piattaforma, meno il costo d'acquisto originale su Amazon.",
+      "calculation": "Calcolo",
+      "netProfitResult": "Profitto netto",
+      "roi": "ROI",
+      "shipTo": "Spedire a",
+      "contact": "Contatto",
+      "unknownProduct": "Prodotto sconosciuto",
+      "copyAddress": "Copia l'indirizzo",
+      "addressCopied": "Indirizzo copiato!",
+      "copyName": "Copia il nome",
+      "copyStreet": "Copia la via",
+      "copyStreet2": "Copia la seconda riga dell'indirizzo",
+      "copyCity": "Copia la città",
+      "copyState": "Copia la regione/provincia",
+      "copyZip": "Copia il CAP",
+      "copyCountry": "Copia il paese/la regione",
+      "copied": "Copiato",
+      "amazonCosts": "Riepilogo ordine Amazon",
+      "purchasePrice": "Prezzo d'acquisto",
+      "amazonTax": "Imposte Amazon",
+      "amazonShipping": "Spedizione Amazon",
+      "totalAmazonCost": "Costo totale Amazon",
+      "amazonTracking": "Tracciamento Amazon",
+      "convertedTracking": "Tracciamento convertito",
+      "amazonOrder": "Ordine Amazon",
+      "linkAmazon": "Collega l'ordine Amazon",
+      "calcEarnings": "Utili",
+      "calcPurchase": "Acquisto",
+      "calcTax": "Imposte",
+      "calcShipping": "Spedizione",
+      "asin": "ASIN",
+      "ebayItemId": "ID eBay",
+      "quantity": "Quantità",
+      "unit": "unità",
+      "sku": "SKU",
+      "na": "N/D"
+    },
+    "modal": {
+      "title": "Inserisci i dati dell'ordine Amazon",
+      "amazonUrl": "URL dei dettagli dell'ordine Amazon",
+      "trackingUrl": "URL di tracciamento (facoltativo)",
+      "taxAmount": "Importo delle imposte ($)",
+      "shippingCost": "Costo di spedizione ($)",
+      "infoText": "Indicando imposte e costi di spedizione, il profitto netto di questo ordine viene ricalcolato automaticamente.",
+      "save": "Salva i dettagli",
+      "cancel": "Annulla",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Stimato",
+    "estimateNote": "Profitto stimato — si definisce quando l'ordine Amazon viene effettuato. Basato sull'ultimo prezzo Amazon noto; spedizione Amazon non inclusa.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Tutti i diritti riservati."
+    },
+    "errors": {
+      "notFound": "Ordine non trovato.",
+      "noTrackingYet": "Questo ordine non ha ancora un numero di tracciamento Amazon: non è stato spedito.",
+      "conversionUnavailable": "Al momento non è stato possibile convertire il tracciamento. Controlla il limite del piano e le impostazioni di conversione, poi riprova.",
+      "conversionDone": "Tracciamento convertito.",
+      "orderNotTracked": "Questo ordine non è collegato a nessuna delle tue inserzioni, quindi un numero di tracciamento convertito non potrebbe mai essere inviato a eBay. Collega prima l'ordine alla sua inserzione.",
+      "trackingAlreadyPushed": "eBay ha già il numero di tracciamento originale di questo ordine e non può essere sostituito, quindi convertirlo ora non cambierebbe ciò che vede l'acquirente.",
+      "listingOverPlanLimit": "L'inserzione di questo ordine era oltre il limite di inserzioni del tuo piano quando l'ordine è arrivato. Gli ordini delle inserzioni oltre il limite non ricevono il tracciamento della spedizione né la conversione del tracciamento."
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "Conectar tienda de eBay",
+      "subtitle": "Vincula tu cuenta de vendedor de eBay para administrar publicaciones y pedidos",
+      "connectButton": "Conectar cuenta de eBay",
+      "connectingButton": "Conectando...",
+      "marketplaceLabel": "Marketplace",
+      "marketplaceUS": "Estados Unidos (eBay.com)",
+      "marketplaceUK": "Reino Unido (eBay.co.uk)",
+      "marketplaceDE": "Alemania (eBay.de)",
+      "marketplaceFR": "Francia (eBay.fr)",
+      "marketplaceIT": "Italia (eBay.it)",
+      "marketplaceES": "España (eBay.es)",
+      "marketplaceUsOnlyNote": "Por ahora solo se admite el marketplace de Estados Unidos (eBay.com).",
+      "successMessage": "¡La cuenta de eBay se conectó correctamente!",
+      "errorMessage": "No se pudo conectar la cuenta de eBay",
+      "alreadyConnected": "Esta cuenta de eBay ya está conectada"
+    },
+    "accounts": {
+      "title": "Cuentas de eBay conectadas",
+      "loadingDescription": "Obteniendo tus tiendas conectadas.",
+      "noAccounts": "Aún no hay cuentas de eBay conectadas",
+      "statusActive": "Activa",
+      "statusRevoked": "Revocada",
+      "statusError": "Error",
+      "disconnectButton": "Desconectar",
+      "refreshTokenButton": "Actualizar token"
+    },
+    "callback": {
+      "processing": "Procesando la conexión con eBay...",
+      "success": "¡La cuenta de eBay se conectó correctamente! Redirigiendo al panel...",
+      "error": "No se pudo conectar la cuenta de eBay. Inténtalo de nuevo.",
+      "cancelled": "Se canceló la conexión con eBay."
+    },
+    "errors": {
+      "invalidState": "Parámetro de estado no válido",
+      "authorizationFailed": "Falló la autorización de eBay",
+      "tokenExchangeFailed": "No se pudo intercambiar el código de autorización por tokens",
+      "accountAlreadyConnected": "Esta tienda de eBay está conectada a otra cuenta de SellerHill. Inicia sesión con la cuenta a la que la conectaste; si no puedes acceder a ella, contacta con soporte.",
+      "ebayTrialAlreadyUsed": "Esta tienda de eBay ya usó su prueba gratuita. Elige un plan para conectarla.",
+      "noAuthorizationCode": "No se recibió ningún código de autorización de eBay",
+      "storeOwnedByAnotherAccount": "Esta tienda de eBay está vinculada a otra cuenta de SellerHill. Contacta con soporte para transferirla.",
+      "accountNotFound": "No se encontró esa tienda de eBay.",
+      "identityUnavailable": "No pudimos confirmar tu cuenta de eBay con eBay. No se conectó nada; inténtalo de nuevo en un momento."
+    },
+    "onboarding": {
+      "title": "Conecta tu tienda de eBay",
+      "header": "Configuración del marketplace",
+      "description": "Para empezar a sincronizar tus artículos, primero debes conectar tu tienda de eBay.",
+      "connectButton": "Cuenta de eBay",
+      "skipButton": "Omitir por ahora",
+      "usOnlyNote": "Por ahora solo se admite el marketplace de EE. UU. Pronto habrá más regiones.",
+      "brandingDescription": "Vincula tu tienda de eBay a SellerHill para administrar todos tus procesos de venta desde un solo lugar."
+    }
+  }
+}

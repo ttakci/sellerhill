@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Amazon 买家账号",
+      "subtitle": "管理您的 Amazon 买家账号，用于订单追踪和价格抓取",
+      "addButton": "添加 Amazon 账号",
+      "noAccounts": "尚未连接 Amazon 账号",
+      "noAccountsDescription": "添加您的 Amazon 买家账号，即可自动追踪订单价格和物流状态",
+      "statusActive": "正常",
+      "statusVerifying": "验证中",
+      "statusInvalid": "凭据无效",
+      "statusNeedsReauth": "需要重新验证",
+      "statusLocked": "已锁定",
+      "verifyButton": "验证",
+      "editButton": "编辑",
+      "deleteButton": "删除",
+      "deleteConfirmTitle": "删除 Amazon 账号",
+      "deleteConfirmMessage": "确定要删除此 Amazon 账号吗？此操作无法撤销。",
+      "lastVerified": "上次验证",
+      "lastUsed": "上次使用",
+      "never": "从未",
+      "addTitle": "添加 Amazon 账号",
+      "editTitle": "编辑 Amazon 账号",
+      "labelField": "账号名称",
+      "labelPlaceholder": "例如：个人 Amazon",
+      "emailField": "Amazon 邮箱",
+      "emailPlaceholder": "your-email@example.com",
+      "passwordField": "Amazon 密码",
+      "passwordPlaceholder": "输入您的 Amazon 密码",
+      "twoFactorField": "2FA 密钥",
+      "twoFactorPlaceholder": "可选，来自 Amazon 的 2FA 设置",
+      "twoFactorInfo": "如果您已启用 2FA，请输入 Amazon 账号安全设置中的密钥",
+      "saveButton": "保存账号",
+      "savingButton": "保存中…",
+      "verifyingButton": "验证中…",
+      "verifySuccess": "Amazon 账号验证成功",
+      "verifyFailed": "验证 Amazon 账号失败，请检查您的凭据。",
+      "saveSuccess": "Amazon 账号保存成功",
+      "deleteSuccess": "Amazon 账号删除成功",
+      "errorSaving": "保存 Amazon 账号失败"
+    },
+    "linking": {
+      "title": "关联 Amazon 订单",
+      "selectAccount": "选择 Amazon 账号",
+      "selectAccountPlaceholder": "选择一个 Amazon 账号…",
+      "orderId": "Amazon 订单号",
+      "orderIdPlaceholder": "例如：112-1234567-1234567",
+      "orderIdHelp": "输入您的 Amazon 订单号（可在订单历史或确认邮件中找到）",
+      "linkButton": "关联并抓取",
+      "linkingButton": "关联中…",
+      "progressLoggingIn": "正在登录 Amazon…",
+      "progressNavigating": "正在前往订单页面…",
+      "progressScraping": "正在抓取订单详情…",
+      "progressSaving": "正在保存订单数据…",
+      "successTitle": "Amazon 订单已关联",
+      "successMessage": "订单详情已成功抓取并关联",
+      "errorTitle": "关联订单失败",
+      "errorNoAccount": "请先添加 Amazon 账号",
+      "errorScraping": "无法抓取 Amazon 订单详情。请检查订单号后重试。",
+      "errorInvalidCredentials": "Amazon 凭据无效。请更新您的账号。",
+      "errorRateLimit": "请求过多，请稍后重试。",
+      "costCaptureFailed": "已找到 Amazon 订单，但无法读取成本明细。利润保持为最近一次已知的值。",
+      "noAccountsTitle": "没有 Amazon 账号",
+      "noAccountsMessage": "您需要先添加 Amazon 买家账号，才能关联订单。",
+      "addAccountLink": "添加 Amazon 账号",
+      "noListingTitle": "请先导入此 eBay 商品刊登",
+      "noListingMessage": "此订单对应的 eBay 商品刊登尚未导入，因此该订单没有关联到任何商品刊登。您仍然可以关联 Amazon 订单并获取其真实成本，但在发货时，物流单号无法发送到 eBay，因为 eBay 需要商品刊登所带有的订单项。该推送之后不会重试。请先导入商品刊登，此订单就会自动与之关联。",
+      "importListingButton": "导入商品刊登",
+      "linkAnywayButton": "仍然关联"
+    },
+    "tracking": {
+      "statusPending": "待处理",
+      "statusProcessing": "处理中",
+      "statusShipped": "已发货",
+      "statusDelivered": "已送达",
+      "statusCancelled": "已取消",
+      "statusReturned": "已退回",
+      "eBaySyncShipped": "eBay 订单已标记为已发货",
+      "eBaySyncDelivered": "eBay 订单已标记为已送达"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "账号",
+        "proxy": "代理"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "使用此账号进行自动履约",
+      "autoFulfillEnabledHint": "开启后，匹配的 eBay 订单会通过此 Amazon 账号自动采购（与您其他已启用的账号轮流使用）。店铺设置中的自动履约总开关也必须开启，并且必须在下方设置支出上限。",
+      "autoFulfillCapTotal": "订单金额上限（自动履约上限）",
+      "autoFulfillCapTotalHint": "每个账号的支出上限（美元）。超过此金额的订单会跳过此账号。启用自动履约时必填。",
+      "autoFulfillCapTotalPlaceholder": "例如：250",
+      "autoFulfillDryRun": "试运行（运行流程但不下单）",
+      "autoFulfillDryRunHint": "运行完整的结账流程，直至（不含）提交订单这一步，以便获取并展示订单核对总额供您查看。"
+    },
+    "proxy": {
+      "sectionTitle": "代理",
+      "stepSubtitle": "可选：让此账号的自动化通过您自己的代理运行",
+      "enabled": "启用代理",
+      "enabledHint": "使用代理服务器来保护您的账号",
+      "connectionType": "连接类型",
+      "host": "输入主机",
+      "port": "输入端口",
+      "username": "用户名",
+      "password": "密码",
+      "hint": "可选。添加您自己的代理，让此账号的自动化通过它运行，如果您希望对基于 IP 的封锁有额外防护，这会很有帮助。保持关闭则账号直接连接，这是正常的默认设置。"
+    },
+    "marketplace": {
+      "label": "站点",
+      "usOnlyNote": "目前仅支持美国（amazon.com）站点。",
+      "AMAZON_US": "美国（amazon.com）",
+      "readOnlyHint": "账号创建后无法更改站点。"
+    },
+    "errors": {
+      "autoFulfillCapRequired": "请设置订单金额上限，才能在此账号上启用自动履约。",
+      "proxyHostPortRequired": "请输入主机和端口，才能为此账号使用代理。",
+      "unsupportedMarketplace": "此 Amazon 站点暂不可用。",
+      "twoFactorSecretRequired": "请添加账号的验证器（2FA）密钥。Amazon 几乎在每次自动登录时都要求验证码，而这是我们唯一能代您应答的方式。",
+      "twoFactorSecretInvalid": "这看起来不像验证器密钥。请粘贴 Amazon 验证器应用设置中的设置密钥（字母 A–Z 和数字 2–7），而不是 6 位验证码。"
+    }
+  }
+}

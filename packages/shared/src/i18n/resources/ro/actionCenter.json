@@ -1,0 +1,229 @@
+{
+  "actionCenter": {
+    "title": "Acțiuni în așteptare",
+    "subtitle": "Tot ce vă așteaptă, cele mai urgente primele.",
+    "menu": "Acțiuni în așteptare",
+    "refresh": "Reîmprospătează",
+    "updatedAt": "Actualizat {{time}}",
+    "empty": {
+      "title": "Nimic nu vă așteaptă acum",
+      "description": "Nu există achiziții blocate, conexiuni întrerupte sau limite de plan. Elementele noi apar aici imediat ce ceva necesită o decizie."
+    },
+    "emptyFiltered": {
+      "title": "Nimic la acest nivel",
+      "description": "Nu există elemente cu această urgență. Reveniți la Toate pentru a vedea restul."
+    },
+    "loading": {
+      "title": "Se verifică ce vă așteaptă",
+      "description": "Se analizează comenzile, conexiunile, anunțurile și planul dvs."
+    },
+    "severity": {
+      "critical": "Critic",
+      "warning": "Avertisment",
+      "info": "Sugestie"
+    },
+    "filter": {
+      "ariaLabel": "Nivel de urgență",
+      "all": "Toate",
+      "critical": "Critice",
+      "warning": "Avertismente",
+      "info": "Sugestii"
+    },
+    "summary": {
+      "critical": "{{count}} critice",
+      "warning": "{{count}} avertismente",
+      "info": "{{count}} sugestii",
+      "total_one": "{{count}} element vă așteaptă",
+      "total_few": "{{count}} elemente vă așteaptă",
+      "total_other": "{{count}} de elemente vă așteaptă"
+    },
+    "breakdownLabel": "Motive",
+    "moreReasons": "+{{count}} în plus",
+    "groups": {
+      "orders": {
+        "title": "Comenzi",
+        "subtitle": "Vânzări cu un cumpărător care așteaptă la celălalt capăt."
+      },
+      "connections": {
+        "title": "Conexiuni",
+        "subtitle": "Conturile de magazin și de cumpărător pe care rulează automatizarea."
+      },
+      "listings": {
+        "title": "Anunțuri",
+        "subtitle": "Oferte active care nu aduc câștig."
+      },
+      "plan": {
+        "title": "Plan și capacitate",
+        "subtitle": "Limite care vor începe să refuze lucrări."
+      },
+      "setup": {
+        "title": "Configurare",
+        "subtitle": "Pașii de bază pentru ca SellerHill să lucreze pentru dvs."
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "Amazon a anulat o achiziție pe care ați plătit-o deja",
+        "description_one": "{{count}} comandă a fost anulată de Amazon. Vânzarea eBay este încă activă și încă datorată cumpărătorului — comandați din nou sau rambursați înainte ca eBay să o considere un defect.",
+        "description_few": "{{count}} comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă datorate cumpărătorilor — comandați-le din nou sau rambursați înainte ca eBay să le considere defecte.",
+        "description_other": "{{count}} de comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă datorate cumpărătorilor — comandați-le din nou sau rambursați înainte ca eBay să le considere defecte.",
+        "action": "Verifică comenzile"
+      },
+      "order_fulfillment_blocked": {
+        "title": "Achiziția automată s-a oprit înainte de plată",
+        "description_one": "{{count}} comandă a fost oprită de o verificare de siguranță, deci nu s-au mutat bani. Remediați motivul de mai jos și comanda poate continua.",
+        "description_few": "{{count}} comenzi au fost oprite de o verificare de siguranță, deci nu s-au mutat bani. Remediați motivele de mai jos și comenzile pot continua.",
+        "description_other": "{{count}} de comenzi au fost oprite de o verificare de siguranță, deci nu s-au mutat bani. Remediați motivele de mai jos și comenzile pot continua.",
+        "action": "Verifică comenzile"
+      },
+      "order_awaiting_purchase": {
+        "title": "Vândută, dar nimeni nu a cumpărat-o pe Amazon",
+        "description_one": "{{count}} comandă mai veche de {{hours}} ore nu are nicio achiziție Amazon și nicio automatizare în desfășurare. Nu va fi expediată decât dacă o cumpărați dvs.",
+        "description_few": "{{count}} comenzi mai vechi de {{hours}} ore nu au nicio achiziție Amazon și nicio automatizare în desfășurare. Nu vor fi expediate decât dacă le cumpărați dvs.",
+        "description_other": "{{count}} de comenzi mai vechi de {{hours}} ore nu au nicio achiziție Amazon și nicio automatizare în desfășurare. Nu vor fi expediate decât dacă le cumpărați dvs.",
+        "action": "Verifică comenzile"
+      },
+      "order_untracked": {
+        "title": "Vânzări din anunțuri pe care nu le urmăriți",
+        "description_one": "{{count}} comandă din ultimele {{days}} zile provine dintr-un articol eBay care nu este legat de un anunț SellerHill, deci costul și profitul ei nu pot fi calculate niciodată. Importați anunțul pentru a urmări vânzările viitoare.",
+        "description_few": "{{count}} comenzi din ultimele {{days}} zile provin din articole eBay care nu sunt legate de anunțuri SellerHill, deci costul și profitul lor nu pot fi calculate niciodată. Importați acele anunțuri pentru a urmări vânzările viitoare.",
+        "description_other": "{{count}} de comenzi din ultimele {{days}} zile provin din articole eBay care nu sunt legate de anunțuri SellerHill, deci costul și profitul lor nu pot fi calculate niciodată. Importați acele anunțuri pentru a urmări vânzările viitoare.",
+        "action": "Importă anunțuri"
+      },
+      "order_tracking_problem": {
+        "title": "Conversia numărului de urmărire are o problemă",
+        "description_one": "{{count}} comandă expediată are o problemă deschisă la furnizorul de urmărire. Până la rezolvare, acea comandă arată cumpărătorului dvs. numărul de urmărire Amazon original în loc de unul convertit.",
+        "description_few": "{{count}} comenzi expediate au probleme deschise la furnizorul de urmărire. Până la rezolvare, acele comenzi arată cumpărătorilor dvs. numerele de urmărire Amazon originale în loc de unele convertite.",
+        "description_other": "{{count}} de comenzi expediate au probleme deschise la furnizorul de urmărire. Până la rezolvare, acele comenzi arată cumpărătorilor dvs. numerele de urmărire Amazon originale în loc de unele convertite.",
+        "action": "Vezi comenzile"
+      },
+      "order_tracking_conversion_held": {
+        "title": "Comenzi nemarcate ca expediate pe eBay",
+        "description_one": "{{count}} comandă a fost expediată pe Amazon acum mai mult de {{hours}} ore, dar nu a fost marcată ca expediată pe eBay, deoarece numărul ei de urmărire nu a putut fi convertit. Nu trimitem niciodată cumpărătorului dvs. numărul de urmărire Amazon original. Remediați cauza și comanda se expediază automat — până atunci există riscul unui defect de expediere întârziată.",
+        "description_few": "{{count}} comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu au fost marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. Remediați cauza și comenzile se expediază automat — până atunci există riscul unor defecte de expediere întârziată.",
+        "description_other": "{{count}} de comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu au fost marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. Remediați cauza și comenzile se expediază automat — până atunci există riscul unor defecte de expediere întârziată.",
+        "action": "Vezi comenzile"
+      },
+      "ebay_account_disconnected": {
+        "title": "Un magazin eBay și-a pierdut conexiunea",
+        "description_one": "{{count}} magazin nu mai este autorizat. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru el până la reconectare.",
+        "description_few": "{{count}} magazine nu mai sunt autorizate. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru ele până la reconectare.",
+        "description_other": "{{count}} de magazine nu mai sunt autorizate. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru ele până la reconectare.",
+        "action": "Gestionează magazinele"
+      },
+      "amazon_account_needs_attention": {
+        "title": "Un cont de cumpărător Amazon nu se poate autentifica",
+        "description_one": "{{count}} cont de cumpărător nu reușește să se autentifice, deci nu se poate cumpăra nimic prin el.",
+        "description_few": "{{count}} conturi de cumpărător nu reușesc să se autentifice, deci nu se poate cumpăra nimic prin ele.",
+        "description_other": "{{count}} de conturi de cumpărător nu reușesc să se autentifice, deci nu se poate cumpăra nimic prin ele.",
+        "action": "Gestionează conturile"
+      },
+      "listing_job_failures": {
+        "title": "Anunțuri care nu au putut fi create",
+        "description_one": "{{count}} anunț a eșuat în ultimele {{days}} zile. Motivul vă spune dacă poate fi remediat din partea dvs.",
+        "description_few": "{{count}} anunțuri au eșuat în ultimele {{days}} zile. Motivele vă spun care pot fi remediate din partea dvs.",
+        "description_other": "{{count}} de anunțuri au eșuat în ultimele {{days}} zile. Motivele vă spun care pot fi remediate din partea dvs.",
+        "action": "Vezi sarcinile"
+      },
+      "listing_source_unavailable": {
+        "title": "Anunțuri active al căror produs Amazon este indisponibil sau ilizibil",
+        "description_one": "{{count}} anunț activ trimite către un produs Amazon indisponibil sau ale cărui date nu au putut fi citite. Verificați produsul și încheiați anunțul dacă a dispărut.",
+        "description_few": "{{count}} anunțuri active trimit către produse Amazon indisponibile sau ale căror date nu au putut fi citite. Verificați produsele și încheiați anunțurile care au dispărut.",
+        "description_other": "{{count}} de anunțuri active trimit către produse Amazon indisponibile sau ale căror date nu au putut fi citite. Verificați produsele și încheiați anunțurile care au dispărut.",
+        "action": "Verifică anunțurile"
+      },
+      "listing_out_of_stock": {
+        "title": "Anunțuri active cu cantitate zero",
+        "description_one": "{{count}} anunț activ apare pe eBay fără nimic de vândut. Nu aduce niciun câștig până când sursa își reface stocul.",
+        "description_few": "{{count}} anunțuri active apar pe eBay fără nimic de vândut. Nu aduc niciun câștig până când sursa își reface stocul.",
+        "description_other": "{{count}} de anunțuri active apar pe eBay fără nimic de vândut. Nu aduc niciun câștig până când sursa își reface stocul.",
+        "action": "Verifică anunțurile"
+      },
+      "listing_drafts_pending": {
+        "title": "Ciorne care nu au fost niciodată publicate",
+        "description_one": "{{count}} ciornă este pregătită și nu vă costă nimic — dar nici nu vinde nimic până nu devine activă.",
+        "description_few": "{{count}} ciorne sunt pregătite și nu vă costă nimic — dar nici nu vând nimic până nu devin active.",
+        "description_other": "{{count}} de ciorne sunt pregătite și nu vă costă nimic — dar nici nu vând nimic până nu devin active.",
+        "action": "Vezi ciornele"
+      },
+      "plan_listing_quota": {
+        "title": "Limita de anunțuri active este aproape atinsă",
+        "description": "Folosiți {{used}} din {{limit}} locuri pentru anunțuri. Anunțurile noi sunt refuzate după atingerea limitei; cele existente continuă să ruleze.",
+        "action": "Vezi planul"
+      },
+      "plan_ao_quota": {
+        "title": "Limita lunară de comenzi automate este aproape atinsă",
+        "description": "Ați folosit {{used}} din {{limit}} comenzi automate luna aceasta. După atingerea limitei, comenzile noi trebuie cumpărate manual până la resetarea lunii.",
+        "action": "Vezi planul"
+      },
+      "plan_past_due": {
+        "title": "Ultima dvs. plată a eșuat",
+        "description": "Actualizați metoda de plată pentru ca automatizarea să continue să funcționeze.",
+        "action": "Remediază plata"
+      },
+      "plan_trial_ending": {
+        "title": "Perioada dvs. de încercare se apropie de sfârșit",
+        "description_one": "A mai rămas {{count}} zi. Alegeți un plan pentru ca anunțurile și comenzile automate să continue să funcționeze.",
+        "description_few": "Au mai rămas {{count}} zile. Alegeți un plan pentru ca anunțurile și comenzile automate să continue să funcționeze.",
+        "description_other": "Au mai rămas {{count}} de zile. Alegeți un plan pentru ca anunțurile și comenzile automate să continue să funcționeze.",
+        "action": "Alege un plan"
+      },
+      "setup_no_ebay_store": {
+        "title": "Conectați-vă magazinul eBay",
+        "description": "Nimic altceva din SellerHill nu poate funcționa fără un magazin eBay conectat — anunțurile, comenzile și automatizarea depind toate de el. Acesta este lucrul de făcut primul.",
+        "action": "Conectează eBay"
+      },
+      "setup_no_amazon_account": {
+        "title": "Niciun cont de cumpărător Amazon încă",
+        "description": "Vindeți, dar nu există niciun cont Amazon de la care să cumpărați — fiecare comandă trebuie cumpărată manual. Adăugarea unuia activează îndeplinirea automată.",
+        "action": "Adaugă cont"
+      },
+      "setup_no_store_settings": {
+        "title": "Setările magazinului nu sunt încă configurate",
+        "description": "Originea expedierii și cuvintele cheie din lista neagră nu sunt încă setate. Acestea sunt folosite pentru calculul costurilor și pentru a împiedica publicarea anunțurilor cu conținut blocat.",
+        "action": "Configurează setările"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "Niciun grup de setări pentru anunțuri încă",
+        "description": "Un grup de setări pentru anunțuri definește regulile de preț, stoc și repreț — fiecare anunț are nevoie de unul, așa că nu puteți crea primul anunț fără el.",
+        "action": "Creează un grup"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "Achiziția automată este dezactivată",
+        "description": "Conturile dvs. Amazon sunt conectate, dar niciunul nu este autorizat să cumpere. Activați-o cu un plafon de cheltuieli și comenzile noi vor fi cumpărate pentru dvs.",
+        "action": "Activează"
+      },
+      "plan_conversion_quota": {
+        "title": "Limita lunară de conversii de urmărire este aproape atinsă",
+        "description": "Ați folosit {{used}} din {{limit}} conversii de urmărire luna aceasta. După atingerea limitei, comenzile sunt totuși expediate și eBay primește în continuare un număr de urmărire — dar va fi cel Amazon original, deci cumpărătorii vă pot vedea furnizorul.",
+        "action": "Vezi planul"
+      },
+      "plan_suspended": {
+        "title": "Automatizarea este suspendată",
+        "description": "Abonamentul dvs. nu mai este activ, deci anunțurile noi, actualizările de preț și stoc, achiziția automată și conversia numerelor de urmărire s-au oprit. Alegeți un plan pentru a relua — totul repornește de la sine.",
+        "action": "Alege un plan"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "Necesită reautentificare",
+        "invalid": "Date de autentificare invalide",
+        "locked": "Blocat de Amazon"
+      },
+      "sourceUnavailable": {
+        "removed": "indisponibil pe Amazon (cantitate setată la 0)",
+        "unreadable": "datele produsului nu au putut fi citite"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Pagină Amazon greșită",
+        "amazon_session_expired": "Sesiunea Amazon a expirat",
+        "tracking_url_mismatch": "Legătură de urmărire nepotrivită",
+        "needs_tracking_upload": "Se așteaptă detaliile expedierii",
+        "update_not_applied": "Actualizare încă neaplicată",
+        "assign_validation": "Respins de furnizor",
+        "shipment_exception": "Excepție a curierului",
+        "tracking_update_unavailable": "Furnizor indisponibil"
+      }
+    }
+  }
+}

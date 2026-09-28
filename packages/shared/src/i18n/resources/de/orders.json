@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Bestellungen",
+      "subtitle": "{{count}} Bestellungen"
+    },
+    "overview": {
+      "viewAll": "Alle anzeigen",
+      "emptyTitle": "Noch keine Bestellungen",
+      "emptySubtitle": "Synchronisierte eBay-Verkäufe erscheinen hier."
+    },
+    "carousel": {
+      "previous": "Zurück",
+      "next": "Weiter"
+    },
+    "all": {
+      "title": "Alle Bestellungen",
+      "subtitle": "{{count}} Ergebnisse",
+      "loadingTitle": "Bestellungen werden geladen",
+      "loadingSubtitle": "Ihre neuesten eBay-Bestellungen werden abgerufen.",
+      "filtersTitle": "Keine Bestellungen entsprechen Ihren Filtern",
+      "filtersSubtitle": "Erweitern Sie den Zeitraum oder ändern Sie Status oder Shop.",
+      "filtersAction": "Filter zurücksetzen",
+      "emptyTitle": "Noch keine Bestellungen",
+      "emptySubtitle": "Bestellungen erscheinen hier automatisch, sobald der eBay-Abgleich läuft."
+    },
+    "filters": {
+      "allStatuses": "Alle Status",
+      "allStores": "Alle Shops",
+      "allTrackingStates": "Alle Tracking-Status",
+      "clearAll": "Alle zurücksetzen",
+      "resultCount": "{{count}} Ergebnisse"
+    },
+    "stats": {
+      "totalSales": "Gesamtumsatz",
+      "netProfit": "Nettogewinn",
+      "activeOrders": "Aktive Bestellungen",
+      "returnRate": "Rücksendequote",
+      "last24Hours": "Letzte 24 Stunden",
+      "growth": "{{value}} % ggü. Vormonat",
+      "profitGrowth": "{{value}} % ggü. Vormonat",
+      "decrease": "{{value}} % ggü. Vormonat"
+    },
+    "actions": {
+      "search": "Bestellungen, Käufer oder Artikel suchen ...",
+      "last30Days": "Letzte 30 Tage",
+      "export": "Exportieren",
+      "convertTracking": "Sendungsnummer umwandeln"
+    },
+    "table": {
+      "orderNumber": "Bestellnr.",
+      "product": "Produkt",
+      "date": "Datum",
+      "buyer": "Käufer",
+      "status": "Status",
+      "salePrice": "Verkauf",
+      "purchasePrice": "Kosten",
+      "netProfit": "Gewinn",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Abgeschlossen",
+      "shipped": "Versendet",
+      "processing": "In Bearbeitung",
+      "cancelled": "Storniert",
+      "pending": "Ausstehend",
+      "waiting_shipment": "Wartet auf Versand"
+    },
+    "fulfillmentState": {
+      "column": "Amazon-Abwicklung",
+      "purchased": "Bei Amazon gekauft",
+      "amazon_cancelled": "Von Amazon storniert",
+      "action_required": "Handlung erforderlich",
+      "in_progress": "Wird bei Amazon gekauft",
+      "not_automated": "Nicht automatisiert",
+      "manual": "Manuell gekauft",
+      "simulated": "Testlauf – kein Kauf",
+      "filter": {
+        "all": "Alle Abwicklungsstatus"
+      },
+      "detail": {
+        "title": "Amazon-Abwicklung",
+        "amazonOrderId": "Amazon-Bestellung",
+        "simulatedNotice": "Dies ist ein Testlauf. Es wurde keine Amazon-Bestellung aufgegeben und kein Geld abgebucht – die folgenden Kosten und der Gewinn sind simuliert.",
+        "actionRequiredNotice": "Die Automatisierung wurde vor dem Kauf gestoppt. Prüfen Sie den Grund und wickeln Sie diese Bestellung manuell ab.",
+        "cancelledNotice": "Der Amazon-Einkauf wurde storniert. Der eBay-Verkauf ist dem Käufer weiterhin geschuldet – wickeln Sie ihn auf anderem Weg ab.",
+        "notAutomatedNotice": "Die automatische Bestellung ist für diese Bestellung deaktiviert.",
+        "attemptedAt": "Letzter Versuch"
+      }
+    },
+    "tracking": {
+      "tracked": "Von SellerHill verfolgt",
+      "untracked": "Nicht verfolgt",
+      "problem": {
+        "wrongPageType": "Der Tracking-Anbieter konnte die Bestellseite von Amazon nicht lesen – möglicherweise hat sich das Format geändert. Es wird automatisch erneut versucht.",
+        "amazonSessionExpired": "Die Amazon-Sitzung, mit der diese Bestellung gelesen wurde, ist abgelaufen und muss neu angemeldet werden.",
+        "trackingUrlMismatch": "Der Tracking-Link auf der Bestellseite von Amazon entsprach nicht unserer Erwartung. Es wird automatisch erneut versucht.",
+        "needsTrackingUpload": "Es wird auf das Hochladen der Versanddetails gewartet, bevor die Sendungsnummer umgewandelt werden kann.",
+        "updateNotApplied": "Die Tracking-Aktualisierung wurde vom Anbieter noch nicht angewendet. Es wird automatisch erneut versucht.",
+        "assignValidation": "Der Tracking-Anbieter hat die Versanddetails für diese Bestellung abgelehnt.",
+        "shipmentException": "Der Tracking-Anbieter hat für diese Sendung eine Ausnahme gemeldet.",
+        "trackingUpdateUnavailable": "Der Tracking-Anbieter konnte diese Sendung im Moment nicht aktualisieren.",
+        "generic": "Bei der Umwandlung der Sendungsnummer dieser Bestellung ist ein Problem aufgetreten. Es wird automatisch erneut versucht."
+      }
+    },
+    "autoFulfill": {
+      "column": "Auto-Abwicklung",
+      "status": {
+        "pending": "In der Warteschlange",
+        "running": "Läuft",
+        "placed": "Aufgegeben",
+        "blocked": "Blockiert",
+        "failed": "Fehlgeschlagen",
+        "dry_run": "Testlauf",
+        "skipped": "Übersprungen"
+      },
+      "reason": {
+        "no_asin": "Produkt bei Amazon nicht gefunden",
+        "captcha": "Captcha erforderlich",
+        "otp": "MFA/OTP-Abfrage",
+        "login": "Anmeldung fehlgeschlagen",
+        "out_of_stock": "Nicht auf Lager",
+        "address": "Adressproblem",
+        "payment": "Zahlung abgelehnt",
+        "cap": "Kostenlimit überschritten",
+        "no_confirmation": "Keine Bestätigung",
+        "proxy_required": "Kein Proxy konfiguriert",
+        "quota_exhausted": "Monatskontingent erreicht",
+        "cart": "Warenkorb weicht ab",
+        "review_unreadable": "Bestellsumme nicht lesbar",
+        "subscription_suspended": "Abonnement ausgesetzt",
+        "listing_over_plan_limit": "Angebot außerhalb des Tariflimits",
+        "order_already_fulfilled": "Bereits versendet – nichts zu kaufen",
+        "order_not_paid": "Wartet auf Zahlung des Käufers"
+      },
+      "reasonLabel": "Grund: {{reason}}",
+      "amazonCancelledBadge": "Von Amazon storniert",
+      "filter": {
+        "all": "Alle Auto-Abwicklungen",
+        "needsAttention": "Braucht Aufmerksamkeit"
+      }
+    },
+    "pagination": {
+      "showing": "Zeige {{from}}–{{to}} von {{total}} Bestellungen"
+    },
+    "detail": {
+      "title": "Bestelldetails",
+      "loadingSubtitle": "Bestelldetails werden abgerufen …",
+      "notFoundTitle": "Bestellung nicht gefunden",
+      "notFoundSubtitle": "Diese Bestellung wurde möglicherweise entfernt, oder Sie haben keinen Zugriff.",
+      "orderPlaced": "Bestellt am",
+      "viewInvoice": "Rechnung ansehen",
+      "printLabels": "Etiketten drucken",
+      "customerInfo": "Kundeninformationen",
+      "buyerPayment": "Zahlung des Käufers",
+      "ebaySummary": "eBay-Verkaufsübersicht",
+      "whatBuyerPaid": "Was Ihr Käufer bezahlt hat",
+      "whatYouEarned": "Was Sie verdient haben",
+      "earningsOrderTotal": "Bestellsumme",
+      "ebayCollectedFromBuyer": "Von eBay beim Käufer eingezogen",
+      "ebayCollectedTax": "Umsatzsteuer",
+      "sellingCosts": "Verkaufskosten",
+      "itemSubtotal": "Zwischensumme Artikel",
+      "shippingHandling": "Versand und Bearbeitung",
+      "totalBeforeTax": "Summe vor Steuern",
+      "estimatedTax": "Geschätzte Steuer",
+      "grandTotal": "Gesamtsumme",
+      "paymentMethod": "Zahlungsmethode",
+      "subtotal": "Zwischensumme",
+      "shipping": "Versand",
+      "salesTax": "Umsatzsteuer",
+      "orderTotal": "Bestellsumme",
+      "feesCollected": "Eingezogene Gebühren",
+      "transactionFees": "Transaktionsgebühren",
+      "adFee": "Werbegebühr allgemein",
+      "orderEarnings": "Bestellerlös",
+      "viewMore": "Weitere Details anzeigen",
+      "updateAmazon": "Amazon-Daten eingeben",
+      "netProfitAnalysis": "NETTOGEWINN-ANALYSE",
+      "analysisDesc": "Diese Berechnung berücksichtigt Ihre tatsächlichen Einnahmen von eBay nach Abzug aller Plattformgebühren und Steuern, abzüglich der ursprünglichen Amazon-Einkaufskosten.",
+      "calculation": "Berechnung",
+      "netProfitResult": "Nettogewinn",
+      "roi": "ROI",
+      "shipTo": "Lieferadresse",
+      "contact": "Kontakt",
+      "unknownProduct": "Unbekanntes Produkt",
+      "copyAddress": "Adresse kopieren",
+      "addressCopied": "Adresse kopiert!",
+      "copyName": "Namen kopieren",
+      "copyStreet": "Straße kopieren",
+      "copyStreet2": "Adresszeile 2 kopieren",
+      "copyCity": "Stadt kopieren",
+      "copyState": "Bundesland/Region kopieren",
+      "copyZip": "Postleitzahl kopieren",
+      "copyCountry": "Land/Region kopieren",
+      "copied": "Kopiert",
+      "amazonCosts": "Amazon-Bestellübersicht",
+      "purchasePrice": "Einkaufspreis",
+      "amazonTax": "Amazon-Steuer",
+      "amazonShipping": "Amazon-Versand",
+      "totalAmazonCost": "Amazon-Gesamtkosten",
+      "amazonTracking": "Amazon-Sendungsnummer",
+      "convertedTracking": "Umgewandelte Sendungsnummer",
+      "amazonOrder": "Amazon-Bestellung",
+      "linkAmazon": "Amazon-Bestellung verknüpfen",
+      "calcEarnings": "Erlös",
+      "calcPurchase": "Einkauf",
+      "calcTax": "Steuer",
+      "calcShipping": "Versand",
+      "asin": "ASIN",
+      "ebayItemId": "eBay-ID",
+      "quantity": "Menge",
+      "unit": "Stück",
+      "sku": "SKU",
+      "na": "k. A."
+    },
+    "modal": {
+      "title": "Amazon-Bestelldaten eingeben",
+      "amazonUrl": "URL der Amazon-Bestelldetails",
+      "trackingUrl": "Tracking-URL (optional)",
+      "taxAmount": "Steuerbetrag ($)",
+      "shippingCost": "Versandkosten ($)",
+      "infoText": "Wenn Sie Steuer und Versandkosten angeben, wird Ihr Nettogewinn für diese Bestellung automatisch neu berechnet.",
+      "save": "Details speichern",
+      "cancel": "Abbrechen",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Geschätzt",
+    "estimateNote": "Geschätzter Gewinn – wird endgültig, sobald die Amazon-Bestellung aufgegeben wurde. Basiert auf dem zuletzt bekannten Amazon-Preis; Amazon-Versand nicht enthalten.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Alle Rechte vorbehalten."
+    },
+    "errors": {
+      "notFound": "Bestellung nicht gefunden.",
+      "noTrackingYet": "Diese Bestellung hat noch keine Amazon-Sendungsnummer – sie wurde noch nicht versendet.",
+      "conversionUnavailable": "Die Sendungsnummer konnte im Moment nicht umgewandelt werden. Prüfen Sie Ihr Tariflimit und Ihre Umwandlungseinstellungen und versuchen Sie es erneut.",
+      "conversionDone": "Sendungsnummer umgewandelt.",
+      "orderNotTracked": "Diese Bestellung ist mit keinem Ihrer Angebote verknüpft, daher könnte eine umgewandelte Sendungsnummer nie an eBay gesendet werden. Verknüpfen Sie die Bestellung zuerst mit ihrem Angebot.",
+      "trackingAlreadyPushed": "eBay hat die ursprüngliche Sendungsnummer für diese Bestellung bereits erhalten, und sie kann nicht ersetzt werden. Eine Umwandlung würde daher nichts an dem ändern, was der Käufer sieht.",
+      "listingOverPlanLimit": "Das Angebot dieser Bestellung lag beim Eingang der Bestellung außerhalb des Angebotslimits Ihres Tarifs. Für Bestellungen aus Angeboten außerhalb des Limits gibt es weder Sendungsverfolgung noch Umwandlung von Sendungsnummern."
+    }
+  }
+}

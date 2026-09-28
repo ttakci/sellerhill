@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "仪表盘",
+    "subtitle": "销售、利润和商品刊登表现",
+    "greeting": "您好，{{name}}",
+    "selectStore": "选择店铺",
+    "allStores": "所有店铺",
+    "noData": "暂无数据",
+    "backToDashboard": "返回仪表盘",
+    "tabs": {
+      "cards": "卡片",
+      "chart": "图表",
+      "pnl": "损益表"
+    },
+    "today": "今天",
+    "thisWeek": "本周",
+    "thisMonth": "本月",
+    "thisYear": "今年",
+    "metrics": {
+      "sales": "销售额",
+      "units": "件数",
+      "orders": "订单",
+      "ordersUnits": "订单 / 件数",
+      "refunds": "退款",
+      "refundRate": "退款率",
+      "grossProfit": "毛利润",
+      "netProfit": "净利润",
+      "estimatedPayout": "预计回款",
+      "margin": "利润率",
+      "roi": "ROI",
+      "avgOrderValue": "平均订单额",
+      "costOfGoods": "商品成本",
+      "transactionFees": "交易费用",
+      "adFees": "广告费用",
+      "amazonShipping": "Amazon 运费",
+      "amazonTax": "Amazon 税费",
+      "revenueUncosted": "无成本数据的营收"
+    },
+    "card": {
+      "showMore": "更多详情",
+      "showLess": "收起详情",
+      "activeHint": "正在筛选下方列表"
+    },
+    "listingsSection": "商品刊登",
+    "ordersSection": "订单",
+    "listingsCount": "{{count}} 条有销售",
+    "ordersCount": "{{count}} 笔订单",
+    "viewAllListings": "查看全部",
+    "viewAllOrders": "查看全部",
+    "listingsEmptyTitle": "没有产生销售的商品刊登",
+    "listingsEmptySubtitle": "在所选时间段内收到订单的商品刊登会显示在这里。",
+    "ordersEmptyTitle": "此时间段内没有订单",
+    "ordersEmptySubtitle": "有销售产生后，所选时间段内的订单会显示在这里。",
+    "chart": {
+      "title": "表现",
+      "subtitle": "净利润与销量对比",
+      "summary": "周期汇总",
+      "granularity": {
+        "day": "30 天",
+        "week": "12 周",
+        "month": "12 个月"
+      },
+      "series": {
+        "netProfit": "净利润",
+        "sales": "销售额",
+        "units": "件数",
+        "refunds": "退款"
+      }
+    },
+    "pnl": {
+      "title": "损益表",
+      "subtitle": "最近 12 个月的逐月明细",
+      "parameter": "指标 / 周期",
+      "currentPeriod": "当前周期",
+      "heatmap": "热力图",
+      "export": "下载 CSV"
+    },
+    "groups": {
+      "revenue": "营收",
+      "costs": "成本",
+      "profit": "利润",
+      "ratios": "比率"
+    },
+    "profit": {
+      "confirmedLabel": "已确认",
+      "confirmedTooltip": "来自已获取真实 Amazon 成本的订单的利润。未知的成本绝不会被当作零。",
+      "estimatedLabel": "预估",
+      "estimatedTooltip": "等待 Amazon 履约的订单使用预估成本（按您配置的 {{rate}}% 税率估算 Amazon 税费）。",
+      "uncostedLabel": "无成本数据的营收",
+      "uncostedTooltip": "其 Amazon 成本尚无法确定的销售，仅显示营收，不暗示任何利润。"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "Підключити магазин eBay",
+      "subtitle": "Прив’яжіть свій акаунт продавця eBay, щоб керувати лістингами та замовленнями",
+      "connectButton": "Підключити акаунт eBay",
+      "connectingButton": "Підключення...",
+      "marketplaceLabel": "Майданчик",
+      "marketplaceUS": "США (eBay.com)",
+      "marketplaceUK": "Велика Британія (eBay.co.uk)",
+      "marketplaceDE": "Німеччина (eBay.de)",
+      "marketplaceFR": "Франція (eBay.fr)",
+      "marketplaceIT": "Італія (eBay.it)",
+      "marketplaceES": "Іспанія (eBay.es)",
+      "marketplaceUsOnlyNote": "Наразі підтримується лише майданчик США (eBay.com).",
+      "successMessage": "Акаунт eBay успішно підключено!",
+      "errorMessage": "Не вдалося підключити акаунт eBay",
+      "alreadyConnected": "Цей акаунт eBay уже підключено"
+    },
+    "accounts": {
+      "title": "Підключені акаунти eBay",
+      "loadingDescription": "Отримуємо ваші підключені магазини.",
+      "noAccounts": "Акаунти eBay ще не підключено",
+      "statusActive": "Активний",
+      "statusRevoked": "Відкликано",
+      "statusError": "Помилка",
+      "disconnectButton": "Відключити",
+      "refreshTokenButton": "Оновити токен"
+    },
+    "callback": {
+      "processing": "Обробка підключення eBay...",
+      "success": "Акаунт eBay успішно підключено! Переспрямування на панель...",
+      "error": "Не вдалося підключити акаунт eBay. Спробуйте ще раз.",
+      "cancelled": "Підключення eBay скасовано."
+    },
+    "errors": {
+      "invalidState": "Недійсний параметр стану",
+      "authorizationFailed": "Авторизація eBay не вдалася",
+      "tokenExchangeFailed": "Не вдалося обміняти код авторизації на токени",
+      "accountAlreadyConnected": "Цей магазин eBay підключено до іншого акаунта SellerHill. Увійдіть в акаунт, до якого ви його підключили; якщо доступу немає, зверніться до підтримки.",
+      "ebayTrialAlreadyUsed": "Цей магазин eBay уже використав свій безкоштовний пробний період. Оберіть тариф, щоб його підключити.",
+      "noAuthorizationCode": "Від eBay не отримано коду авторизації",
+      "storeOwnedByAnotherAccount": "Цей магазин eBay прив’язано до іншого акаунта SellerHill. Зверніться до підтримки, щоб його перенести.",
+      "accountNotFound": "Цей магазин eBay не знайдено.",
+      "identityUnavailable": "Не вдалося підтвердити ваш акаунт eBay через eBay. Нічого не підключено — спробуйте ще раз за мить."
+    },
+    "onboarding": {
+      "title": "Підключіть свій магазин eBay",
+      "header": "Налаштування майданчика",
+      "description": "Щоб розпочати синхронізацію ваших товарів, спершу потрібно підключити магазин eBay.",
+      "connectButton": "Акаунт eBay",
+      "skipButton": "Пропустити зараз",
+      "usOnlyNote": "Наразі підтримується лише майданчик США. Інші регіони з’являться згодом.",
+      "brandingDescription": "Прив’яжіть свій магазин eBay до SellerHill, щоб керувати всіма процесами продажів в одному місці."
+    }
+  }
+}

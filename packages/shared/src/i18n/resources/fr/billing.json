@@ -1,0 +1,331 @@
+{
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Gérez votre forfait d'abonnement, votre consommation et votre historique de facturation.",
+    "loadingSubtitle": "Chargement de vos informations de facturation…",
+    "unavailableTitle": "La facturation est indisponible",
+    "unavailableSubtitle": "Nous n'avons pas pu charger vos informations de facturation. Veuillez réessayer.",
+    "plans": {
+      "title": "Forfaits",
+      "subtitle": "Choisissez le forfait adapté à votre volume de ventes.",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "annualSavings": "Économisez 2 mois avec la facturation annuelle",
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "choosePlan": "Choisir {{plan}}",
+      "currentPlan": "Forfait actuel",
+      "switchPlan": "Passer à {{plan}}",
+      "contactSales": "Contacter les ventes",
+      "freeTrial": "Essai gratuit disponible",
+      "mostPopular": "Le plus populaire",
+      "informationalOnly": "L'application de la facturation est désactivée — les forfaits sont donnés à titre informatif. Toutes les fonctionnalités sont actuellement sans restriction.",
+      "free": {
+        "name": "Gratuit"
+      },
+      "trial": {
+        "name": "Essai gratuit",
+        "description": "Un essai de SellerHill limité dans le temps. Non achetable — il démarre automatiquement à votre inscription."
+      },
+      "lite": {
+        "name": "Lite",
+        "description": "Pour les vendeurs qui débutent avec un petit catalogue."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "Pour tester avec une sélection de produits ciblée."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "Pour les vendeurs indépendants avec un catalogue compact."
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Pour les vendeurs dont le catalogue grandit et dont le flux de commandes est régulier."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "Pour les vendeurs établis qui dépassent quelques milliers d'annonces."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Pour les vendeurs gérant un large catalogue sur plusieurs niches."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Pour les vendeurs à fort volume avec un catalogue de cinq mille annonces."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "Pour les vendeurs expérimentés gérant un grand catalogue repricé activement."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les exploitations professionnelles gérant dix mille annonces."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "Pour les grandes exploitations avec un catalogue de quinze mille annonces."
+      },
+      "business": {
+        "name": "Business",
+        "description": "Pour les entreprises multi-boutiques à vingt mille annonces."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Pour les plus grands catalogues, avec assistance prioritaire."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Un forfait retiré. Les abonnements existants continuent de fonctionner ; les nouvelles inscriptions choisissent parmi les forfaits ci-dessus."
+      },
+      "switchTo": "Passer à {{plan}}",
+      "switchDone": "Votre forfait a été modifié. Stripe calculera la différence au prorata sur votre prochaine facture.",
+      "planNamed": "Forfait {{plan}}"
+    },
+    "planChange": {
+      "title": "Confirmer le changement de forfait",
+      "upgradeBody": "Passage à {{plan}}. {{amount}} seront facturés maintenant. Votre prochaine facture sera de {{nextAmount}} le {{nextDate}}.",
+      "downgradeBody": "Passage à {{plan}} le {{date}}. Rien n'est facturé maintenant — vous gardez votre forfait actuel jusque-là.",
+      "listingLimitWarning": "Vous avez {{active}} annonces actives et le nouveau forfait en autorise {{limit}}. À partir du {{date}}, seules vos {{limit}} annonces les plus anciennes sont suivies ; les {{over}} autres ne bénéficient plus de la synchronisation des prix et du stock ni du traitement automatisé des commandes. Si vous souhaitez choisir quelles annonces restent suivies, terminez celles dont vous n'avez pas besoin avant cette date.",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Annonces actives",
+        "unit": "annonces",
+        "description": "Nombre maximal d'annonces actives sur l'ensemble de vos boutiques."
+      },
+      "amazon_orders_per_month": {
+        "label": "Commandes automatiques",
+        "unit": "commandes",
+        "description": "Nombre maximal de commandes Amazon passées pour vous (automatiquement ou liées à la main) par mois."
+      },
+      "unlimited": "Illimité",
+      "disabled": "Non inclus",
+      "of": "{{used}} sur {{limit}}",
+      "used": "{{used}} utilisé(s)",
+      "remaining": "{{remaining}} restant(s)",
+      "exceeded": "Limite dépassée",
+      "tracking_conversions_per_month": {
+        "label": "Conversions de suivi",
+        "unit": "conversions",
+        "description": "Nombre d'expéditions par mois qui reçoivent un numéro de suivi converti, afin que l'acheteur ne voie jamais votre fournisseur."
+      }
+    },
+    "subscription": {
+      "title": "Votre abonnement",
+      "plan": "Forfait",
+      "interval": "Périodicité de facturation",
+      "intervalValue": {
+        "monthly": "Facturation mensuelle",
+        "annual": "Facturation annuelle"
+      },
+      "status": {
+        "label": "Statut",
+        "trialing": "Essai",
+        "active": "Actif",
+        "cancelling": "Résiliation en cours",
+        "past_due": "Paiement en retard",
+        "canceled": "Résilié",
+        "ended": "Terminé"
+      },
+      "trial": {
+        "title": "Vous êtes en période d'essai gratuit",
+        "daysLeft": "{{count}} jour(s) restant(s)",
+        "lastDay": "Votre essai se termine aujourd'hui",
+        "endsOn": "L'essai se termine le {{date}}",
+        "expired": "Votre essai gratuit est terminé.",
+        "chooseAPlan": "Choisissez un forfait pour continuer à la fin de l'essai."
+      },
+      "currentPeriod": "Période en cours",
+      "nextRenewal": "Prochain renouvellement",
+      "canceledAt": "Résilié le",
+      "endedAt": "Terminé le",
+      "manage": "Gérer l'abonnement",
+      "updatePayment": "Mettre à jour le moyen de paiement",
+      "cancel": "Résilier l'abonnement",
+      "resume": "Reprendre l'abonnement",
+      "upgrade": "Passer à un forfait supérieur",
+      "downgrade": "Passer à un forfait inférieur",
+      "trialEnds": "Fin de l'essai",
+      "trialEnded": "Essai terminé",
+      "accessEnds": "Fin de l'accès",
+      "portal": "Moyen de paiement et factures",
+      "portalHint": "Ouvre Stripe pour mettre à jour votre carte, télécharger vos factures ou résilier.",
+      "manageHint": "Gérez ici votre moyen de paiement, votre forfait et vos factures.",
+      "nextCharge": "Prochain paiement : {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "Résiliation le {{date}} — aucun prélèvement supplémentaire après cette période",
+      "scheduledChange": "Passage à {{plan}} le {{date}}",
+      "scheduledChangeUnknownPlan": "Votre forfait change le {{date}}",
+      "cancelScheduledChange": "Annuler",
+      "scheduledChangeCancelled": "Votre changement de forfait a été annulé.",
+      "confirmCancelScheduledChangeTitle": "Annuler le changement de forfait",
+      "confirmCancelScheduledChangeMessage": "Voulez-vous vraiment annuler le changement de forfait programmé ? Vous resterez sur votre forfait actuel."
+    },
+    "paymentMethod": {
+      "title": "Moyen de paiement",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Expire le {{month}}/{{year}}",
+      "expiringSoon": "Cette carte expire bientôt. Mettez-la à jour pour éviter un échec de renouvellement.",
+      "change": "Modifier"
+    },
+    "invoices": {
+      "title": "Historique des factures",
+      "subtitle": "Tout ce que vous avez payé, directement depuis Stripe.",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Montant",
+      "status": "Statut",
+      "pdf": "Facture",
+      "download": "Télécharger",
+      "payNow": "Payer maintenant",
+      "empty": "Aucune facture pour le moment.",
+      "emptyDescription": "Vos factures apparaîtront ici dès que vous aurez un abonnement payant.",
+      "loading": "Chargement des factures…",
+      "loadingDescription": "Récupération de votre historique de factures depuis Stripe.",
+      "error": "Les factures n'ont pas pu être chargées.",
+      "errorDescription": "Une erreur s'est produite lors du chargement de votre historique de factures.",
+      "retry": "Réessayer",
+      "showMore": "Afficher plus",
+      "showMoreError": "Impossible de charger d'autres factures.",
+      "statusLabel": {
+        "paid": "Payée",
+        "open": "Ouverte",
+        "void": "Annulée",
+        "uncollectible": "Irrécouvrable",
+        "draft": "Brouillon"
+      }
+    },
+    "customer": {
+      "title": "Informations de facturation",
+      "billingEmail": "E-mail de facturation",
+      "status": {
+        "label": "Statut du compte",
+        "active": "Actif",
+        "locked": "Verrouillé",
+        "deleted": "Supprimé"
+      }
+    },
+    "transition": {
+      "full_access": "Accès complet — l'application de la facturation est désactivée. Toutes les fonctionnalités sont sans restriction.",
+      "active": "Votre abonnement est actif.",
+      "no_subscription": "Aucun abonnement actif. Choisissez un forfait pour activer la facturation.",
+      "past_due": "Le paiement de votre abonnement est en retard. Mettez à jour votre moyen de paiement pour rétablir l'accès."
+    },
+    "provider": {
+      "unconfiguredTitle": "Facturation non configurée",
+      "unconfiguredBody": "Le paiement et la gestion des abonnements sont indisponibles car aucun prestataire de facturation n'est connecté. Contactez votre opérateur."
+    },
+    "usage": {
+      "title": "Consommation sur cette période",
+      "subtitle": "La consommation est réinitialisée au début de votre prochaine période de facturation.",
+      "period": "Période",
+      "noOpenPeriod": "Aucune période de consommation active",
+      "status": {
+        "label": "Statut de la période",
+        "open": "Ouverte",
+        "closed": "Clôturée",
+        "finalized": "Finalisée"
+      }
+    },
+    "webhooks": {
+      "title": "Boîte de réception des webhooks",
+      "subtitle": "Événements récents du prestataire de facturation.",
+      "provider": "Prestataire",
+      "eventType": "Type d'événement",
+      "status": {
+        "label": "Statut",
+        "received": "Reçu",
+        "processing": "En cours de traitement",
+        "processed": "Traité",
+        "failed": "Échec"
+      },
+      "receivedAt": "Reçu",
+      "processedAt": "Traité",
+      "attempts": "Tentatives",
+      "empty": "Aucun événement webhook pour le moment"
+    },
+    "reservation": {
+      "title": "Réservations",
+      "subtitle": "Emplacements d'annonces et de commandes Amazon réservés sur votre forfait.",
+      "kind": {
+        "listing": "Annonce",
+        "amazon_order": "Commande Amazon"
+      },
+      "status": {
+        "label": "Statut",
+        "reserved": "Réservé",
+        "released": "Libéré",
+        "overage": "Dépassement"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "Vous avez atteint la limite de votre forfait. Passez à un forfait supérieur pour continuer.",
+      "no_active_subscription": "Aucun abonnement actif trouvé.",
+      "no_open_period": "Aucune période de consommation ouverte pour cette limite.",
+      "already_reserved": "Cette ressource est déjà réservée.",
+      "providerNotConfigured": "Les paiements ne sont pas encore activés sur cet environnement. Veuillez réessayer plus tard.",
+      "planNotMirrored": "Ce forfait n'est pas encore disponible à l'achat. Veuillez choisir un autre forfait ou contacter l'assistance.",
+      "checkoutFailed": "Le paiement n'a pas pu être lancé. Veuillez réessayer dans un instant — si le problème persiste, contactez l'assistance.",
+      "portalFailed": "Le portail de facturation n'a pas pu être ouvert. Veuillez réessayer dans un instant.",
+      "noCustomer": "Aucun compte de facturation pour le moment. Choisissez d'abord un forfait pour en créer un.",
+      "planNotFound": "Ce forfait est introuvable.",
+      "priceNotFound": "Aucun prix actif n'a été trouvé pour ce forfait.",
+      "ebayTrialAlreadyUsed": "Cette boutique eBay a déjà utilisé son essai gratuit. Choisissez un forfait pour continuer.",
+      "quotaExhausted": "Vous avez atteint la limite de votre forfait. Passez à un forfait supérieur pour continuer.",
+      "addonNotFound": "Ce pack de recharge est introuvable.",
+      "noSubscription": "Vous n'avez aucun abonnement actif à modifier.",
+      "planChangeFailed": "Le forfait n'a pas pu être modifié pour le moment. Veuillez réessayer ou utiliser « Gérer la facturation ».",
+      "subscriptionSuspended": "Votre abonnement n'est pas actif, la création de nouvelles annonces est donc suspendue. Choisissez un forfait pour reprendre — tout redémarre de lui-même.",
+      "subscriptionSuspendedOrders": "Votre abonnement n'est pas actif, l'automatisation des commandes est donc suspendue. Choisissez un forfait pour reprendre — tout redémarre de lui-même.",
+      "listingQuotaExhausted": "Vous avez utilisé toutes les annonces actives autorisées par votre forfait. Terminez une annonce pour libérer un emplacement, ou passez à un forfait supérieur.",
+      "alreadySubscribed": "Vous avez déjà un abonnement actif. Utilisez « Changer de forfait » pour le modifier au lieu de vous réabonner.",
+      "invoicesFailed": "L'historique des factures n'a pas pu être chargé. Veuillez réessayer dans un instant.",
+      "paymentRequiresAction": "Votre banque a demandé une confirmation supplémentaire pour cette carte, le changement de forfait a donc été annulé et vous restez sur votre forfait actuel. Ouvrez « Gérer la facturation » pour mettre à jour votre moyen de paiement, puis réessayez.",
+      "invalidCheckoutSession": "Ce lien de confirmation de paiement n'est pas valide."
+    },
+    "actions": {
+      "subscribe": "S'abonner",
+      "save": "Enregistrer les modifications",
+      "cancel": "Annuler"
+    },
+    "admin": {
+      "plans": {
+        "title": "Forfaits",
+        "subtitle": "Gérez les forfaits d'abonnement, les prix et les limites.",
+        "add": "Ajouter un forfait",
+        "edit": "Modifier le forfait",
+        "activate": "Activer",
+        "deactivate": "Désactiver",
+        "slug": "Slug",
+        "name": "Nom",
+        "description": "Description",
+        "isActive": "Actif",
+        "displayOrder": "Ordre d'affichage",
+        "prices": "Prix",
+        "limits": "Limites",
+        "providerProductId": "ID produit du prestataire",
+        "providerPriceId": "ID prix du prestataire",
+        "effectiveFrom": "Effectif à partir du",
+        "effectiveTo": "Effectif jusqu'au",
+        "amountMicros": "Montant (micros)",
+        "limitKey": "Clé de limite",
+        "limitValue": "Valeur de limite",
+        "unit": "Unité"
+      },
+      "webhooks": {
+        "title": "Boîte de réception des webhooks",
+        "subtitle": "Inspectez et rejouez les événements webhook du prestataire de facturation.",
+        "replay": "Rejouer"
+      }
+    },
+    "addons": {
+      "title": "Besoin de plus ce mois-ci ?",
+      "subtitle": "Vous avez utilisé vos conversions de suivi mensuelles. Rechargez pour continuer à masquer votre fournisseur jusqu'à la réinitialisation du mois.",
+      "buy": "Acheter",
+      "note": "Une recharge ne s'applique qu'au mois civil en cours, c'est pourquoi elle est proposée lorsque vous atteignez la limite plutôt qu'à l'avance. L'allocation de votre forfait est réinitialisée le 1er."
+    }
+  }
+}

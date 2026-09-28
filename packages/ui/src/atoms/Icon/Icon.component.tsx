@@ -13,6 +13,18 @@ const sizeMap = {
   lg: 24,
 };
 
+/** Directional glyphs that must point the other way when the document is RTL. */
+const MIRRORED_IN_RTL: ReadonlySet<string> = new Set([
+  'chevron-left',
+  'chevron-right',
+  'arrow-left',
+  'arrow-right',
+  'panel-left',
+  'panel-left-close',
+  'panel-left-open',
+  'log-out',
+]);
+
 /** Resolves a theme dot-path (e.g. 'brand.primary') to its color, else returns the input. */
 const resolveThemeColor = (theme: AppTheme, value: string): string => {
   if (value.includes('.')) {
@@ -55,6 +67,7 @@ export const Icon = ({
   return (
     <S.IconWrapper
       $size={numericSize}
+      $mirrorInRtl={MIRRORED_IN_RTL.has(name)}
       aria-hidden="true"
       className={className}
       // eslint-disable-next-line design-system/no-inline-styles -- pass-through style prop for consumer overrides

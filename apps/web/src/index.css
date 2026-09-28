@@ -8,7 +8,7 @@ body {
 
 body {
   margin: 0;
-  font-family: 'Lexend', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 0.875rem;
   line-height: 1.47;
   letter-spacing: 0;

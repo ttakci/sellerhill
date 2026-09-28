@@ -1,0 +1,114 @@
+{
+  "storeSettings": {
+    "title": "Shop-Konfiguration",
+    "subtitle": "Verwalten Sie globale Standort-, Validierungs- und Sperrlisten-Einstellungen für Ihre Shops.",
+    "saveChanges": "Änderungen speichern",
+    "viewLogs": "Protokolle anzeigen",
+    "globalSettings": "Einstellungen auf alle Shops anwenden",
+    "globalDescription": "Aktivieren Sie dies, um die folgende Konfiguration an alle verbundenen Shops zu übertragen. Deaktivieren Sie es, um einen bestimmten Shop auszuwählen.",
+    "selectStore": "Shop auswählen",
+    "selectStorePlaceholder": "Shop suchen und auswählen ...",
+    "locationSectionTitle": "Standorteinstellungen",
+    "locationSectionSubtitle": "Verwalten Sie die physische Adresse und Region Ihres Shops",
+    "country": "Land",
+    "state": "Bundesland/Standort",
+    "zipCode": "Postleitzahl",
+    "blacklistType_title": "Titel",
+    "blacklistType_description": "Beschreibung",
+    "blacklistType_feature_specification": "Merkmale und Spezifikationen",
+    "blacklistType_brand_manufacturer": "Marke und Hersteller",
+    "copyright": "© {{year}} SellerHill Platform. Alle Rechte vorbehalten.",
+    "amazonTaxRate": "Amazon-Umsatzsteuersatz (%)",
+    "amazonTaxRateDesc": "Geschätzter Amazon-Umsatzsteuersatz, der auf die Einkaufskosten angewendet wird. Er wird auf zwei Arten verwendet: Er erhöht den Preis Ihres eBay-Angebots, damit diese Kosten gedeckt sind, und – solange der Gewinn einer Bestellung noch vorläufig ist und die Amazon-Bestellung noch nicht aufgegeben wurde – schätzt er den Gewinn dieser Bestellung.",
+    "autoFulfillEnabled": "Amazon-Bestellungen nach eBay-Verkäufen automatisch aufgeben",
+    "autoFulfillEnabledHint": "Wenn aktiviert, kauft SellerHill den Artikel mit Ihrem verknüpften Käuferkonto bei Amazon. Deaktivieren Sie dies, um manuell zu bestellen.",
+    "autoFulfillEnabledInfo": "Aktivieren Sie dies erst, nachdem Sie ein Amazon-Käuferkonto verbunden und konfiguriert haben. Für die automatische Bestellung müssen außerdem die Einstellung zur automatischen Abwicklung und das Ausgabenlimit dieses Kontos aktiviert sein.",
+    "trackingConversionProvider": "Umwandlung von Sendungsnummern",
+    "trackingConversionProviderHint": "Echte Versandnummern werden unverändert weitergeleitet. Amazon Logistics (TBA) wird unverändert durchgereicht.",
+    "trackingConversionProviderLocal": "Integriert (lokal)",
+    "trackingConversionApiComingSoon": "Ein API-basierter Umwandlungsanbieter steht auf der Roadmap.",
+    "messaging": {
+      "title": "Käufernachrichten",
+      "subtitle": "Senden Sie Käufern automatisch Nachrichten zu wichtigen Zeitpunkten einer Bestellung. Optional und pro Ereignis.",
+      "masterEnable": "Automatische Käufernachrichten aktivieren",
+      "shippedWarning": "eBay sendet bereits eine Sendungsbenachrichtigung, wenn eine Bestellung als versendet markiert wird. Eine weitere Nachricht ist optional.",
+      "delayDays": "Verzögerung (Tage)",
+      "delayDaysOption_one": "{{count}} Tag",
+      "delayDaysOption_other": "{{count}} Tage",
+      "events": {
+        "order_received": "Bestellung eingegangen",
+        "shipped": "Versendet",
+        "delivered": "Zugestellt",
+        "feedback_request": "Bewertungsanfrage"
+      },
+      "eventDescriptions": {
+        "order_received": "Sendet die ausgewählte Nachricht, wenn eine neue passende eBay-Bestellung erstmals eingeht.",
+        "shipped": "Sendet die ausgewählte Nachricht, nachdem die Amazon-Sendungsverfolgung die Bestellung als versendet markiert hat. eBay sendet zusätzlich eine eigene Sendungsbenachrichtigung.",
+        "delivered": "Sendet die ausgewählte Nachricht, wenn die Amazon-Sendungsverfolgung die Zustellung bestätigt.",
+        "feedback_request": "Sendet die ausgewählte Bewertungsanfrage eine festgelegte Anzahl von Tagen nach der Zustellung."
+      },
+      "templateSource": "Vorlage",
+      "systemTemplate": "Standard",
+      "customTemplate": "Benutzerdefiniert",
+      "templates": {
+        "hub": {
+          "title": "Nachrichtenvorlagen",
+          "subtitle": "Ihre Vorlagen für automatische Käufernachrichten",
+          "addNew": {
+            "title": "Neue Nachrichtenvorlage",
+            "subtitle": "Verfassen Sie eine eigene Nachricht für ein Bestellereignis"
+          },
+          "viewAll": {
+            "title": "Alle"
+          }
+        },
+        "list": {
+          "title": "Nachrichtenvorlagen",
+          "subtitle": "Ihre Vorlagen für automatische Käufernachrichten ansehen, bearbeiten oder erstellen",
+          "allEvents": "Alle Ereignisse",
+          "empty": "Für dieses Ereignis gibt es noch keine Vorlagen",
+          "emptyDescription": "Erstellen Sie eine Vorlage, um für Käufernachrichten Ihre eigenen Formulierungen zu verwenden."
+        },
+        "create": {
+          "title": "Neue Nachrichtenvorlage",
+          "subtitle": "Verfassen Sie eine eigene Nachricht für ein Bestellereignis"
+        },
+        "edit": {
+          "title": "Nachrichtenvorlage bearbeiten",
+          "subtitle": "Diese Nachrichtenvorlage aktualisieren"
+        },
+        "name": "Name",
+        "event": "Ereignis",
+        "body": "Nachrichtentext",
+        "placeholders": "Platzhalter einfügen",
+        "preview": "Vorschau",
+        "save": "Speichern",
+        "delete": "Löschen",
+        "reset": "Auf Standard zurücksetzen",
+        "resetConfirm": "Die ursprüngliche Standardnachricht wiederherstellen? Ihre Änderungen am Text gehen verloren.",
+        "deleteConfirmDescription": "„{{name}}“ wird dauerhaft gelöscht. Wenn ein Nachrichtenereignis sie derzeit verwendet, sendet dieses Ereignis nichts mehr, bis Sie eine andere Vorlage auswählen."
+      }
+    },
+    "trackingConversionEnabled": "Sendungsnummern meines Lieferanten verbergen",
+    "trackingConversionEnabledHint": "Ihr Käufer sieht statt der ursprünglichen Amazon-Nummer eine neue Sendungsnummer unseres Tracking-Partners, sodass auf eBay nichts auf Ihren Lieferanten hinweist. Wenn eine Nummer nicht umgewandelt werden kann, greifen wir nie auf die Amazon-Nummer zurück – die Bestellung wird zurückgehalten und Ihnen stattdessen in den Offenen Aufgaben angezeigt.",
+    "trackingConversionScope": "Welche Versanddienstleister umwandeln",
+    "trackingConversionScopeAll": "Alle Versanddienstleister",
+    "trackingConversionScopeAmazonOnly": "Nur Amazon Logistics (TBA)",
+    "trackingConversionScopeHint": "Nummern von Amazon Logistics (TBA) verraten „Amazon“ unmissverständlich. Wenn nur diese umgewandelt werden, verbergen Sie das deutlichste Zeichen Ihres Lieferanten und verbrauchen deutlich weniger von Ihrem monatlichen Umwandlungskontingent. Die Umwandlung aller Versanddienstleister verbirgt mehr – eine von Amazon versendete UPS- oder USPS-Nummer lässt sich oft nachschlagen –, kostet aber mehr, und eBay wertet einen nativen Scan des Versanddienstleisters als stärkeren Zustellnachweis, falls ein Käufer behauptet, seine Ware sei nie angekommen.",
+    "trackingConvertManualOrders": "Manuell verknüpfte Bestellungen umwandeln",
+    "trackingConvertManualOrdersHint": "Eine Bestellung gilt als manuell verknüpft, wenn SellerHill den Amazon-Kauf nicht selbst getätigt hat: Sie haben ihn gekauft und die Bestellnummer eingegeben, oder das System hat ihn für Sie zugeordnet. Ist die automatische Bestellung deaktiviert, fällt jede Ihrer Bestellungen in diese Gruppe – wenn Sie dies deaktivieren, wird also keine Sendungsnummer umgewandelt, und Ihr Käufer sieht die rohe Amazon-Nummer. Standardmäßig aktiviert; ist es deaktiviert, können Sie diese Bestellungen weiterhin einzeln auf der Bestellseite umwandeln.",
+    "trackingExposure": {
+      "conversionOff": "Die Umwandlung von Sendungsnummern ist deaktiviert. Ihre Käufer sehen die rohe Sendungsnummer von Amazon (TBA…) und können Ihren Lieferanten direkt zurückverfolgen.",
+      "manualAll": "Da die automatische Bestellung deaktiviert ist, gilt JEDE Ihrer Bestellungen als manuell verknüpft. Bei deaktivierter Einstellung wird nichts umgewandelt – die rohe Amazon-Nummer, einschließlich TBA, geht an eBay und legt Ihren Lieferanten offen.",
+      "manualSome": "Von Ihnen manuell verknüpfte Bestellungen werden mit der rohen Amazon-Sendungsnummer (TBA…) versendet und legen bei diesen Bestellungen Ihren Lieferanten offen.",
+      "confirmConversionOff": "Wenn Sie die Umwandlung deaktivieren, sieht Ihr Käufer ab sofort bei jeder Bestellung die rohe Amazon-Sendungsnummer (TBA…), und Ihr Lieferant wird offengelegt. Eine einmal an eBay gesendete Sendungsnummer kann nicht mehr geändert werden. Möchten Sie sie wirklich deaktivieren?",
+      "confirmManualOff": "Wenn Sie dies deaktivieren, werden manuell verknüpfte Bestellungen mit der rohen Amazon-Sendungsnummer (TBA…) versendet. Bei deaktivierter automatischer Bestellung betrifft das alle Ihre Bestellungen. Eine einmal an eBay gesendete Sendungsnummer kann nicht mehr geändert werden. Möchten Sie es wirklich deaktivieren?",
+      "confirmDisable": "Trotzdem deaktivieren"
+    },
+    "address": {
+      "title": "Verkäuferadresse",
+      "description": "Wird als Artikelstandort in Ihren eBay-Angeboten veröffentlicht. eBay zeigt Käufern nur Stadt, Region und Land an.",
+      "city": "Stadt"
+    }
+  }
+}

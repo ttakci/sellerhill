@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "subtitle": "बिक्री, मुनाफ़ा और लिस्टिंग का प्रदर्शन",
+    "greeting": "नमस्ते, {{name}}",
+    "selectStore": "स्टोर चुनें",
+    "allStores": "सभी स्टोर",
+    "noData": "अभी कोई डेटा नहीं",
+    "backToDashboard": "डैशबोर्ड पर वापस जाएँ",
+    "tabs": {
+      "cards": "कार्ड",
+      "chart": "चार्ट",
+      "pnl": "P&L"
+    },
+    "today": "आज",
+    "thisWeek": "इस सप्ताह",
+    "thisMonth": "इस महीने",
+    "thisYear": "इस वर्ष",
+    "metrics": {
+      "sales": "बिक्री",
+      "units": "यूनिट",
+      "orders": "ऑर्डर",
+      "ordersUnits": "ऑर्डर / यूनिट",
+      "refunds": "रिफ़ंड",
+      "refundRate": "रिफ़ंड दर",
+      "grossProfit": "सकल मुनाफ़ा",
+      "netProfit": "शुद्ध मुनाफ़ा",
+      "estimatedPayout": "अनुमानित पेआउट",
+      "margin": "मार्जिन",
+      "roi": "ROI",
+      "avgOrderValue": "औसत ऑर्डर",
+      "costOfGoods": "प्रोडक्ट लागत",
+      "transactionFees": "ट्रांज़ैक्शन शुल्क",
+      "adFees": "विज्ञापन शुल्क",
+      "amazonShipping": "Amazon शिपिंग",
+      "amazonTax": "Amazon टैक्स",
+      "revenueUncosted": "लागत रहित राजस्व"
+    },
+    "card": {
+      "showMore": "अधिक विवरण",
+      "showLess": "कम विवरण",
+      "activeHint": "नीचे की सूचियाँ फ़िल्टर हो रही हैं"
+    },
+    "listingsSection": "लिस्टिंग",
+    "ordersSection": "ऑर्डर",
+    "listingsCount": "{{count}} में बिक्री हुई",
+    "ordersCount": "{{count}} ऑर्डर",
+    "viewAllListings": "सभी देखें",
+    "viewAllOrders": "सभी देखें",
+    "listingsEmptyTitle": "बिक्री वाली कोई लिस्टिंग नहीं",
+    "listingsEmptySubtitle": "चुनी गई अवधि में जिन लिस्टिंग पर ऑर्डर आए, वे यहाँ दिखेंगी।",
+    "ordersEmptyTitle": "इस अवधि में कोई ऑर्डर नहीं",
+    "ordersEmptySubtitle": "बिक्री आते ही चुनी गई अवधि के ऑर्डर यहाँ दिखाई देंगे।",
+    "chart": {
+      "title": "प्रदर्शन",
+      "subtitle": "बिक्री की मात्रा के मुकाबले शुद्ध मुनाफ़ा",
+      "summary": "अवधि का सारांश",
+      "granularity": {
+        "day": "30 दिन",
+        "week": "12 सप्ताह",
+        "month": "12 महीने"
+      },
+      "series": {
+        "netProfit": "शुद्ध मुनाफ़ा",
+        "sales": "बिक्री",
+        "units": "यूनिट",
+        "refunds": "रिफ़ंड"
+      }
+    },
+    "pnl": {
+      "title": "लाभ और हानि",
+      "subtitle": "पिछले 12 महीनों का महीने-दर-महीने ब्रेकडाउन",
+      "parameter": "मेट्रिक / अवधि",
+      "currentPeriod": "मौजूदा अवधि",
+      "heatmap": "हीट मैप",
+      "export": "CSV डाउनलोड करें"
+    },
+    "groups": {
+      "revenue": "राजस्व",
+      "costs": "लागत",
+      "profit": "मुनाफ़ा",
+      "ratios": "अनुपात"
+    },
+    "profit": {
+      "confirmedLabel": "पुष्ट",
+      "confirmedTooltip": "उन ऑर्डर का मुनाफ़ा जिनकी असली Amazon लागत दर्ज हो चुकी है। अज्ञात लागत को कभी शून्य नहीं गिना जाता।",
+      "estimatedLabel": "अनुमानित",
+      "estimatedTooltip": "Amazon फ़ुलफ़िलमेंट की प्रतीक्षा कर रहे ऑर्डर में अनुमानित लागत इस्तेमाल होती है (आपकी सेट की गई {{rate}}% दर पर Amazon टैक्स)।",
+      "uncostedLabel": "लागत रहित राजस्व",
+      "uncostedTooltip": "ऐसी बिक्री जिनकी Amazon लागत अभी तय नहीं हो सकी — केवल राजस्व, मुनाफ़े का कोई अनुमान नहीं।"
+    }
+  }
+}

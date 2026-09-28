@@ -1,0 +1,331 @@
+{
+  "billing": {
+    "title": "Facturare",
+    "subtitle": "Gestionați planul de abonament, utilizarea și istoricul facturării.",
+    "loadingSubtitle": "Se încarcă detaliile de facturare…",
+    "unavailableTitle": "Facturarea este indisponibilă",
+    "unavailableSubtitle": "Detaliile de facturare nu au putut fi încărcate. Încercați din nou.",
+    "plans": {
+      "title": "Planuri",
+      "subtitle": "Alegeți planul potrivit volumului dvs. de vânzări.",
+      "monthly": "Lunar",
+      "annual": "Anual",
+      "annualSavings": "Economisiți 2 luni cu facturarea anuală",
+      "perMonth": "/lună",
+      "perYear": "/an",
+      "choosePlan": "Alege {{plan}}",
+      "currentPlan": "Plan curent",
+      "switchPlan": "Treci la {{plan}}",
+      "contactSales": "Contactează vânzările",
+      "freeTrial": "Perioadă de încercare gratuită disponibilă",
+      "mostPopular": "Cel mai popular",
+      "informationalOnly": "Aplicarea facturării este dezactivată — planurile au doar rol informativ. Toate funcțiile sunt momentan nerestricționate.",
+      "free": {
+        "name": "Gratuit"
+      },
+      "trial": {
+        "name": "Încercare gratuită",
+        "description": "O încercare limitată în timp a SellerHill. Nu poate fi achiziționată — începe automat la înregistrare."
+      },
+      "lite": {
+        "name": "Lite",
+        "description": "Pentru vânzătorii care abia încep, cu un catalog mic."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "Pentru a testa terenul cu un set restrâns de produse."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "Pentru vânzătorii individuali cu un catalog compact."
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Pentru vânzătorii cu un catalog în creștere și un flux constant de comenzi."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "Pentru vânzătorii consacrați care depășesc câteva mii de anunțuri."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Pentru vânzătorii cu un catalog larg, pe mai multe nișe."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Pentru vânzătorii cu volum mare și un catalog de cinci mii de anunțuri."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "Pentru vânzătorii avansați care gestionează un catalog mare, repretuit activ."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pentru operațiunile profesionale cu zece mii de anunțuri."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "Pentru operațiunile mari, cu un catalog de cincisprezece mii de anunțuri."
+      },
+      "business": {
+        "name": "Business",
+        "description": "Pentru afacerile cu mai multe magazine, la douăzeci de mii de anunțuri."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Pentru cele mai mari cataloage, cu asistență prioritară."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Un plan retras. Abonamentele existente continuă să funcționeze; înregistrările noi aleg dintre planurile de mai sus."
+      },
+      "switchTo": "Treci la {{plan}}",
+      "switchDone": "Planul dvs. a fost schimbat. Stripe va calcula proporțional diferența la următoarea factură.",
+      "planNamed": "Planul {{plan}}"
+    },
+    "planChange": {
+      "title": "Confirmați schimbarea planului",
+      "upgradeBody": "Treceți la {{plan}}. Suma de {{amount}} va fi taxată acum. Următoarea factură va fi de {{nextAmount}} pe {{nextDate}}.",
+      "downgradeBody": "Treceți la {{plan}} pe {{date}}. Nu se taxează nimic acum — păstrați planul curent până atunci.",
+      "listingLimitWarning": "Aveți {{active}} anunțuri active, iar noul plan permite {{limit}}. Începând cu {{date}}, sunt urmărite doar cele mai vechi {{limit}} anunțuri ale dvs.; celelalte {{over}} nu mai primesc sincronizarea prețului/stocului și gestionarea automată a comenzilor. Dacă doriți să alegeți ce anunțuri rămân urmărite, încheiați-le pe cele de care nu aveți nevoie înainte de această dată.",
+      "confirm": "Confirmă",
+      "cancel": "Anulează"
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Anunțuri active",
+        "unit": "anunțuri",
+        "description": "Numărul maxim de anunțuri active în toate magazinele dvs."
+      },
+      "amazon_orders_per_month": {
+        "label": "Comenzi automate",
+        "unit": "comenzi",
+        "description": "Numărul maxim de comenzi Amazon plasate pentru dvs. (automat sau asociate manual) pe lună."
+      },
+      "unlimited": "Nelimitat",
+      "disabled": "Nu este inclus",
+      "of": "{{used}} din {{limit}}",
+      "used": "{{used}} utilizate",
+      "remaining": "{{remaining}} rămase",
+      "exceeded": "Limită depășită",
+      "tracking_conversions_per_month": {
+        "label": "Conversii de urmărire",
+        "unit": "conversii",
+        "description": "Câte expedieri pe lună primesc un număr de urmărire convertit, astfel încât cumpărătorul să nu vadă niciodată furnizorul dvs."
+      }
+    },
+    "subscription": {
+      "title": "Abonamentul dvs.",
+      "plan": "Plan",
+      "interval": "Interval de facturare",
+      "intervalValue": {
+        "monthly": "Facturare lunară",
+        "annual": "Facturare anuală"
+      },
+      "status": {
+        "label": "Stare",
+        "trialing": "Încercare",
+        "active": "Activ",
+        "cancelling": "Se anulează",
+        "past_due": "Restant",
+        "canceled": "Anulat",
+        "ended": "Încheiat"
+      },
+      "trial": {
+        "title": "Sunteți în perioada de încercare gratuită",
+        "daysLeft": "Zile rămase: {{count}}",
+        "lastDay": "Încercarea dvs. se încheie astăzi",
+        "endsOn": "Încercarea se încheie pe {{date}}",
+        "expired": "Perioada dvs. de încercare gratuită s-a încheiat.",
+        "chooseAPlan": "Alegeți un plan pentru a continua după încheierea încercării."
+      },
+      "currentPeriod": "Perioada curentă",
+      "nextRenewal": "Următoarea reînnoire",
+      "canceledAt": "Anulat pe",
+      "endedAt": "Încheiat pe",
+      "manage": "Gestionează abonamentul",
+      "updatePayment": "Actualizează metoda de plată",
+      "cancel": "Anulează abonamentul",
+      "resume": "Reia abonamentul",
+      "upgrade": "Treci la un plan superior",
+      "downgrade": "Treci la un plan inferior",
+      "trialEnds": "Încercarea se încheie",
+      "trialEnded": "Încercarea s-a încheiat",
+      "accessEnds": "Accesul se încheie",
+      "portal": "Metoda de plată și facturi",
+      "portalHint": "Deschide Stripe pentru a actualiza cardul, a descărca facturi sau a anula.",
+      "manageHint": "Gestionați aici metoda de plată, planul și facturile.",
+      "nextCharge": "Următoarea plată: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "Se anulează pe {{date}} — nu se mai taxează nimic după această perioadă",
+      "scheduledChange": "Trece la {{plan}} pe {{date}}",
+      "scheduledChangeUnknownPlan": "Planul dvs. se schimbă pe {{date}}",
+      "cancelScheduledChange": "Anulează",
+      "scheduledChangeCancelled": "Schimbarea planului dvs. a fost anulată.",
+      "confirmCancelScheduledChangeTitle": "Anulează schimbarea planului",
+      "confirmCancelScheduledChangeMessage": "Sigur doriți să anulați schimbarea programată a planului? Veți rămâne pe planul curent."
+    },
+    "paymentMethod": {
+      "title": "Metoda de plată",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Expiră {{month}}/{{year}}",
+      "expiringSoon": "Acest card expiră în curând. Actualizați-l pentru a evita o reînnoire eșuată.",
+      "change": "Schimbă"
+    },
+    "invoices": {
+      "title": "Istoricul facturilor",
+      "subtitle": "Tot ce ați plătit, direct din Stripe.",
+      "date": "Data",
+      "description": "Descriere",
+      "amount": "Sumă",
+      "status": "Stare",
+      "pdf": "Factură",
+      "download": "Descarcă",
+      "payNow": "Plătește acum",
+      "empty": "Nicio factură încă.",
+      "emptyDescription": "Facturile dvs. vor apărea aici după ce aveți un abonament plătit.",
+      "loading": "Se încarcă facturile…",
+      "loadingDescription": "Se preia istoricul facturilor din Stripe.",
+      "error": "Facturile nu au putut fi încărcate.",
+      "errorDescription": "Ceva nu a funcționat la încărcarea istoricului facturilor.",
+      "retry": "Încearcă din nou",
+      "showMore": "Arată mai multe",
+      "showMoreError": "Nu s-au putut încărca mai multe facturi.",
+      "statusLabel": {
+        "paid": "Plătită",
+        "open": "Deschisă",
+        "void": "Anulată",
+        "uncollectible": "Neîncasabilă",
+        "draft": "Ciornă"
+      }
+    },
+    "customer": {
+      "title": "Detalii de facturare",
+      "billingEmail": "E-mail de facturare",
+      "status": {
+        "label": "Starea contului",
+        "active": "Activ",
+        "locked": "Blocat",
+        "deleted": "Șters"
+      }
+    },
+    "transition": {
+      "full_access": "Acces complet — aplicarea facturării este dezactivată. Toate funcțiile sunt nerestricționate.",
+      "active": "Abonamentul dvs. este activ.",
+      "no_subscription": "Niciun abonament activ. Alegeți un plan pentru a activa facturarea.",
+      "past_due": "Abonamentul dvs. este restant. Actualizați metoda de plată pentru a restabili accesul."
+    },
+    "provider": {
+      "unconfiguredTitle": "Facturare neconfigurată",
+      "unconfiguredBody": "Finalizarea plății și gestionarea abonamentului sunt indisponibile deoarece nu este conectat niciun furnizor de facturare. Contactați operatorul."
+    },
+    "usage": {
+      "title": "Utilizarea în această perioadă",
+      "subtitle": "Utilizarea se resetează la începutul următoarei perioade de facturare.",
+      "period": "Perioadă",
+      "noOpenPeriod": "Nicio perioadă de utilizare activă",
+      "status": {
+        "label": "Starea perioadei",
+        "open": "Deschisă",
+        "closed": "Închisă",
+        "finalized": "Finalizată"
+      }
+    },
+    "webhooks": {
+      "title": "Căsuță webhook",
+      "subtitle": "Evenimente recente de la furnizorul de facturare.",
+      "provider": "Furnizor",
+      "eventType": "Tip eveniment",
+      "status": {
+        "label": "Stare",
+        "received": "Primit",
+        "processing": "Se procesează",
+        "processed": "Procesat",
+        "failed": "Eșuat"
+      },
+      "receivedAt": "Primit",
+      "processedAt": "Procesat",
+      "attempts": "Încercări",
+      "empty": "Niciun eveniment webhook încă"
+    },
+    "reservation": {
+      "title": "Rezervări",
+      "subtitle": "Locuri pentru anunțuri și comenzi Amazon rezervate în cadrul planului dvs.",
+      "kind": {
+        "listing": "Anunț",
+        "amazon_order": "Comandă Amazon"
+      },
+      "status": {
+        "label": "Stare",
+        "reserved": "Rezervat",
+        "released": "Eliberat",
+        "overage": "Depășire"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "Ați atins limita planului. Treceți la un plan superior pentru a continua.",
+      "no_active_subscription": "Nu s-a găsit niciun abonament activ.",
+      "no_open_period": "Nicio perioadă de utilizare deschisă pentru această limită.",
+      "already_reserved": "Această resursă este deja rezervată.",
+      "providerNotConfigured": "Plățile nu sunt încă activate în acest mediu. Încercați din nou mai târziu.",
+      "planNotMirrored": "Acest plan nu este încă disponibil pentru achiziție. Alegeți alt plan sau contactați asistența.",
+      "checkoutFailed": "Finalizarea plății nu a putut fi pornită. Încercați din nou peste puțin timp — dacă problema persistă, contactați asistența.",
+      "portalFailed": "Portalul de facturare nu a putut fi deschis. Încercați din nou peste puțin timp.",
+      "noCustomer": "Niciun cont de facturare încă. Alegeți mai întâi un plan pentru a-l configura.",
+      "planNotFound": "Planul respectiv nu a fost găsit.",
+      "priceNotFound": "Nu s-a găsit niciun preț activ pentru acel plan.",
+      "ebayTrialAlreadyUsed": "Acest magazin eBay și-a folosit deja încercarea gratuită. Alegeți un plan pentru a continua.",
+      "quotaExhausted": "Ați atins limita planului. Treceți la un plan superior pentru a continua.",
+      "addonNotFound": "Pachetul suplimentar respectiv nu a fost găsit.",
+      "noSubscription": "Nu aveți un abonament activ de modificat.",
+      "planChangeFailed": "Planul nu a putut fi schimbat acum. Încercați din nou sau folosiți „Gestionează facturarea”.",
+      "subscriptionSuspended": "Abonamentul dvs. nu este activ, deci anunțurile noi sunt puse pe pauză. Alegeți un plan pentru a relua — totul repornește de la sine.",
+      "subscriptionSuspendedOrders": "Abonamentul dvs. nu este activ, deci automatizarea comenzilor este pusă pe pauză. Alegeți un plan pentru a relua — totul repornește de la sine.",
+      "listingQuotaExhausted": "Ați folosit toate anunțurile active permise de plan. Încheiați un anunț pentru a elibera un loc sau treceți la un plan superior.",
+      "alreadySubscribed": "Aveți deja un abonament activ. Folosiți „Treci la alt plan” pentru a-l schimba, în loc să vă abonați din nou.",
+      "invoicesFailed": "Istoricul facturilor nu a putut fi încărcat. Încercați din nou peste puțin timp.",
+      "paymentRequiresAction": "Banca dvs. a cerut o confirmare suplimentară pentru acest card, așa că schimbarea planului a fost anulată și rămâneți pe planul curent. Deschideți „Gestionează facturarea” pentru a actualiza metoda de plată, apoi încercați din nou.",
+      "invalidCheckoutSession": "Acest link de confirmare a plății nu este valid."
+    },
+    "actions": {
+      "subscribe": "Abonează-te",
+      "save": "Salvează modificările",
+      "cancel": "Anulează"
+    },
+    "admin": {
+      "plans": {
+        "title": "Planuri",
+        "subtitle": "Gestionați planurile de abonament, prețurile și limitele.",
+        "add": "Adaugă plan",
+        "edit": "Editează planul",
+        "activate": "Activează",
+        "deactivate": "Dezactivează",
+        "slug": "Slug",
+        "name": "Nume",
+        "description": "Descriere",
+        "isActive": "Activ",
+        "displayOrder": "Ordine de afișare",
+        "prices": "Prețuri",
+        "limits": "Limite",
+        "providerProductId": "ID produs la furnizor",
+        "providerPriceId": "ID preț la furnizor",
+        "effectiveFrom": "În vigoare de la",
+        "effectiveTo": "În vigoare până la",
+        "amountMicros": "Sumă (micros)",
+        "limitKey": "Cheie limită",
+        "limitValue": "Valoare limită",
+        "unit": "Unitate"
+      },
+      "webhooks": {
+        "title": "Căsuță webhook",
+        "subtitle": "Inspectați și reluați evenimentele webhook ale furnizorului de facturare.",
+        "replay": "Reia"
+      }
+    },
+    "addons": {
+      "title": "Aveți nevoie de mai mult luna aceasta?",
+      "subtitle": "Ați folosit conversiile lunare de urmărire. Suplimentați-le pentru a vă ține furnizorul ascuns până la resetarea lunii.",
+      "buy": "Cumpără",
+      "note": "O suplimentare se aplică doar lunii calendaristice curente, motiv pentru care este oferită la atingerea limitei, nu în avans. Alocarea planului dvs. se resetează pe 1."
+    }
+  }
+}

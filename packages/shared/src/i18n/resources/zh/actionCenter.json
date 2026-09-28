@@ -1,0 +1,201 @@
+{
+  "actionCenter": {
+    "title": "待处理事项",
+    "subtitle": "所有等您处理的事项，最紧急的排在最前。",
+    "menu": "待处理事项",
+    "refresh": "刷新",
+    "updatedAt": "更新于 {{time}}",
+    "empty": {
+      "title": "目前没有需要您处理的事项",
+      "description": "没有被拦截的采购、失效的连接或套餐额度问题。一旦有事项需要您决策，就会立刻显示在这里。"
+    },
+    "emptyFiltered": {
+      "title": "此级别下没有事项",
+      "description": "没有此紧急程度的事项。切换回“全部”即可查看其余事项。"
+    },
+    "loading": {
+      "title": "正在检查需要您处理的事项",
+      "description": "正在检查您的订单、连接、商品刊登和套餐。"
+    },
+    "severity": {
+      "critical": "严重",
+      "warning": "警告",
+      "info": "建议"
+    },
+    "filter": {
+      "ariaLabel": "紧急程度",
+      "all": "全部",
+      "critical": "严重",
+      "warning": "警告",
+      "info": "建议"
+    },
+    "summary": {
+      "critical": "{{count}} 项严重",
+      "warning": "{{count}} 项警告",
+      "info": "{{count}} 项建议",
+      "total_other": "{{count}} 项事项需要您处理"
+    },
+    "breakdownLabel": "原因",
+    "moreReasons": "另有 {{count}} 项",
+    "groups": {
+      "orders": {
+        "title": "订单",
+        "subtitle": "有买家正在等待的销售订单。"
+      },
+      "connections": {
+        "title": "连接",
+        "subtitle": "自动化所依赖的店铺和买家账号。"
+      },
+      "listings": {
+        "title": "商品刊登",
+        "subtitle": "已上线但没有产生收益的商品刊登。"
+      },
+      "plan": {
+        "title": "套餐与容量",
+        "subtitle": "即将开始拒绝执行任务的额度限制。"
+      },
+      "setup": {
+        "title": "设置",
+        "subtitle": "让 SellerHill 为您正常运转的基础步骤。"
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "Amazon 取消了您已付款的采购",
+        "description_other": "有 {{count}} 笔订单在 Amazon 一侧被取消。这些 eBay 销售仍然有效，仍需向买家履约，请在 eBay 将其计为缺陷之前重新下单或退款。",
+        "action": "查看订单"
+      },
+      "order_fulfillment_blocked": {
+        "title": "自动采购在付款前被中止",
+        "description_other": "有 {{count}} 笔订单被安全检查拦截，因此没有产生任何扣款。解决下方所列的原因后，即可继续执行。",
+        "action": "查看订单"
+      },
+      "order_awaiting_purchase": {
+        "title": "已售出，但尚未在 Amazon 采购",
+        "description_other": "有 {{count}} 笔超过 {{hours}} 小时的订单尚未在 Amazon 采购，也没有任何自动化在处理。除非您自行采购，否则它们不会发货。",
+        "action": "查看订单"
+      },
+      "order_untracked": {
+        "title": "来自未追踪商品刊登的销售",
+        "description_other": "过去 {{days}} 天内有 {{count}} 笔订单来自未与 SellerHill 商品刊登关联的 eBay 商品，因此其成本和利润永远无法计算。导入这些商品刊登即可追踪未来的销售。",
+        "action": "导入商品刊登"
+      },
+      "order_tracking_problem": {
+        "title": "物流单号转换出现问题",
+        "description_other": "有 {{count}} 笔已发货订单与物流服务商之间存在未解决的问题。在问题解决之前，这些订单向买家显示的是原始的 Amazon 物流单号，而不是转换后的单号。",
+        "action": "查看订单"
+      },
+      "order_tracking_conversion_held": {
+        "title": "订单尚未在 eBay 标记为已发货",
+        "description_other": "有 {{count}} 笔订单在 {{hours}} 多小时前已在 Amazon 发货，但因物流单号无法转换，尚未在 eBay 标记为已发货。我们绝不会把原始的 Amazon 物流单号发给您的买家。解决原因后，订单会自动发货，在此之前存在延迟发货缺陷的风险。",
+        "action": "查看订单"
+      },
+      "ebay_account_disconnected": {
+        "title": "有 eBay 店铺失去了连接",
+        "description_other": "有 {{count}} 个店铺已不再获得授权。在您重新连接之前，这些店铺的订单同步、调价和发布都已停止。",
+        "action": "管理店铺"
+      },
+      "amazon_account_needs_attention": {
+        "title": "有 Amazon 买家账号无法登录",
+        "description_other": "有 {{count}} 个买家账号登录失败，因此无法通过它们采购任何商品。",
+        "action": "管理账号"
+      },
+      "listing_job_failures": {
+        "title": "未能创建的商品刊登",
+        "description_other": "过去 {{days}} 天内有 {{count}} 条商品刊登失败。失败原因会告诉您哪些问题可以由您自行解决。",
+        "action": "查看任务"
+      },
+      "listing_source_unavailable": {
+        "title": "对应的 Amazon 商品不可用或无法读取的在售商品刊登",
+        "description_other": "有 {{count}} 条在售商品刊登指向不可用或数据无法读取的 Amazon 商品。请检查这些商品，并结束已下架商品的刊登。",
+        "action": "查看商品刊登"
+      },
+      "listing_out_of_stock": {
+        "title": "数量为零的在售商品刊登",
+        "description_other": "有 {{count}} 条在售商品刊登正在 eBay 上展示，却没有可售库存。在货源补货之前，它们不会带来任何收益。",
+        "action": "查看商品刊登"
+      },
+      "listing_drafts_pending": {
+        "title": "从未发布的草稿",
+        "description_other": "有 {{count}} 份草稿已准备就绪，不会产生任何费用，但在上线之前也不会产生任何销售。",
+        "action": "查看草稿"
+      },
+      "plan_listing_quota": {
+        "title": "在售商品刊登数量即将达到上限",
+        "description": "您已使用 {{limit}} 个商品刊登名额中的 {{used}} 个。达到上限后将拒绝新的商品刊登；现有的商品刊登会继续运行。",
+        "action": "查看套餐"
+      },
+      "plan_ao_quota": {
+        "title": "每月自动订单数量即将达到上限",
+        "description": "本月您已使用 {{limit}} 笔自动订单中的 {{used}} 笔。达到上限后，新订单必须手动采购，直到下月重置。",
+        "action": "查看套餐"
+      },
+      "plan_past_due": {
+        "title": "您的上次付款失败",
+        "description": "请更新您的付款方式，以保持自动化持续运行。",
+        "action": "修复付款"
+      },
+      "plan_trial_ending": {
+        "title": "您的试用即将结束",
+        "description_other": "还剩 {{count}} 天。请选择一个套餐，以保持您的商品刊登和自动订单持续运行。",
+        "action": "选择套餐"
+      },
+      "setup_no_ebay_store": {
+        "title": "连接您的 eBay 店铺",
+        "description": "没有连接 eBay 店铺，SellerHill 中的其他功能都无法运行，商品刊登、订单和自动化都依赖于它。这是需要首先完成的一件事。",
+        "action": "连接 eBay"
+      },
+      "setup_no_amazon_account": {
+        "title": "尚无 Amazon 买家账号",
+        "description": "您正在销售，但没有可用于采购的 Amazon 账号，每笔订单都必须手动采购。添加一个账号即可启用自动履约。",
+        "action": "添加账号"
+      },
+      "setup_no_store_settings": {
+        "title": "尚未配置店铺设置",
+        "description": "您的发货地和黑名单关键词仍未设置。它们用于计算成本，并防止商品刊登带着被屏蔽的内容发布。",
+        "action": "配置设置"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "尚无刊登设置组",
+        "description": "刊登设置组定义了定价、库存和调价规则，每条商品刊登都需要一个，因此没有它就无法创建您的第一条商品刊登。",
+        "action": "创建设置组"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "自动采购已关闭",
+        "description": "您的 Amazon 账号已连接，但没有一个被允许采购。设置支出上限并开启后，新订单将由系统为您采购。",
+        "action": "开启"
+      },
+      "plan_conversion_quota": {
+        "title": "每月物流单号转换次数即将达到上限",
+        "description": "本月您已使用 {{limit}} 次物流单号转换中的 {{used}} 次。达到上限后，订单仍会发货，eBay 仍会收到物流单号，但那将是原始的 Amazon 单号，买家因此可以看到您的供应商。",
+        "action": "查看套餐"
+      },
+      "plan_suspended": {
+        "title": "自动化已暂停",
+        "description": "您的订阅已不再有效，因此新的商品刊登、价格和库存更新、自动采购以及物流单号转换均已停止。选择一个套餐即可恢复，一切都会自动重新开始。",
+        "action": "选择套餐"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "需要重新验证",
+        "invalid": "凭据无效",
+        "locked": "被 Amazon 锁定"
+      },
+      "sourceUnavailable": {
+        "removed": "在 Amazon 上不可用（数量已设为 0）",
+        "unreadable": "无法读取商品数据"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Amazon 页面错误",
+        "amazon_session_expired": "Amazon 会话已过期",
+        "tracking_url_mismatch": "物流链接不匹配",
+        "needs_tracking_upload": "等待发货信息",
+        "update_not_applied": "更新尚未生效",
+        "assign_validation": "被服务商拒绝",
+        "shipment_exception": "承运商异常",
+        "tracking_update_unavailable": "服务商不可用"
+      }
+    }
+  }
+}

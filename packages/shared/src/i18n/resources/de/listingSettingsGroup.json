@@ -1,0 +1,250 @@
+{
+  "listingSettingsGroup": {
+    "title": "Einstellungsgruppen für Angebote",
+    "subtitle": "Verwalten Sie Strategievorlagen und weisen Sie sie Ihren Produktangeboten für die automatische Optimierung zu.",
+    "loadingDescription": "Ihre Angebotsgruppen werden geladen.",
+    "createNewGroup": "Neue Gruppe erstellen",
+    "editGroup": "Angebotsgruppe bearbeiten",
+    "backToList": "Zurück zu den Gruppen",
+    "connectorSubtitle": "AMAZON-ZU-EBAY-KONNEKTOR",
+    "groupDetails": "Gruppendetails",
+    "groupName": "Gruppenname",
+    "groupNamePlaceholder": "z. B. Premium-Elektronik",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Interne Notizen zur Gruppe eingeben ...",
+    "stripBrandFromTitle": "Marke aus dem Titel entfernen",
+    "stripBrandFromTitleInfo": "Entfernt automatisch den Amazon-Markennamen aus Ihrem eBay-Titel. Gilt nur für neue Angebote.",
+    "aiTitleEnabled": "KI-gestützter Titel",
+    "aiTitleEnabledInfo": "Formuliert Ihren eBay-Titel mit KI um und ergänzt ihn um zusätzliche Schlüsselwörter. Nur für neue Angebote; bei jedem Fehler wird Ihr normaler Titel verwendet.",
+    "repricingStrategy": "Preisanpassungsstrategie",
+    "addPriceRange": "Preisbereich hinzufügen",
+    "removePriceRange": "Preisbereich entfernen",
+    "minPrice": "Mindestpreis ($)",
+    "maxPrice": "Höchstpreis ($)",
+    "profitMargin": "Gewinnmarge (%)",
+    "fixedProfit": "Fester Gewinn ($)",
+    "priceRangeLabel": "Preisbereich {{index}}",
+    "stock": "Bestand",
+    "defaultQuantity": "Standardmenge",
+    "fees": "Gebühren",
+    "ebayFee": "eBay-Gebühr",
+    "ebayFeePercent": "eBay-Gebühr (%)",
+    "fixedFee": "Feste Gebühr",
+    "fixedFeeAmount": "Feste Gebühr ($)",
+    "tax": "Steuer",
+    "taxPercent": "Steuer (%)",
+    "templates": "Vorlage",
+    "customTemplate": "Benutzerdefiniert",
+    "predefinedTemplate": "Vordefiniert",
+    "selectTemplate": "Vorlage auswählen",
+    "selectTemplatePlaceholder": "Vordefinierte Vorlage auswählen ...",
+    "htmlEditor": "HTML-Editor",
+    "templatePlaceholder": "Geben Sie Ihre eigene HTML-Vorlage ein ...",
+    "preview": "Vorschau",
+    "livePreview": "Live-Vorschau",
+    "editTemplate": "Diese Vorlage bearbeiten",
+    "darkModePreview": "Vorschau im dunklen Modus",
+    "desktopView": "Desktop-Ansicht",
+    "mobileView": "Mobile Ansicht",
+    "renderingPreview": "Vorschau wird erstellt ...",
+    "saveChanges": "Änderungen speichern",
+    "saving": "Wird gespeichert ...",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "deleteGroup": "Gruppe löschen",
+    "confirmDelete": "Möchten Sie diese Gruppe wirklich löschen?",
+    "confirmDeleteMessage": "Diese Aktion kann nicht rückgängig gemacht werden. Produkte, die diese Gruppe verwenden, müssen neu zugewiesen werden.",
+    "deleteSuccess": "Gruppe erfolgreich gelöscht",
+    "deleteFailed": "Die Gruppe konnte nicht gelöscht werden",
+    "productsCount_one": "{{count}} Produkt",
+    "productsCount_other": "{{count}} Produkte",
+    "noProducts": "Keine Produkte",
+    "statusActive": "Aktiv",
+    "statusDraft": "Entwurf",
+    "statusInactive": "Inaktiv",
+    "card": {
+      "defaultQuantity": "Standardmenge",
+      "stockBuffer": "Bestandspuffer",
+      "fee": "Provision",
+      "fixedFee": "Feste Gebühr",
+      "customTemplate": "Angepasste Vorlage"
+    },
+    "emptyState": {
+      "title": "Noch keine Angebotsgruppen",
+      "description": "Erstellen Sie Ihre erste Gruppe, um Ihre Angebote zu ordnen",
+      "action": "Neue Gruppe erstellen"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Gemischtwaren",
+        "description": "Ein konversionsstarkes, auf Dringlichkeit ausgelegtes Layout für jedes allgemeine Produkt mit deutlichen Vertrauenssiegeln"
+      },
+      "ds-minimalist": {
+        "name": "Minimalistisch",
+        "description": "Extrem aufgeräumtes, einspaltiges Schwarz-Weiß-Layout, das sich ganz auf Spezifikationen und Vertrauen konzentriert"
+      },
+      "ds-tech-gadgets": {
+        "name": "Tech-Gadgets",
+        "description": "Modernes Layout mit dunklen Akzenten, ideal für Elektronik, mit einer prominenten Spezifikationstabelle"
+      },
+      "ds-home-decor": {
+        "name": "Wohndeko",
+        "description": "Warmes, ästhetisches Layout mit sanften Farben, großem Bildschwerpunkt und gemütlicher Typografie"
+      },
+      "ds-auto-parts": {
+        "name": "Autoteile",
+        "description": "Kontrastreiches technisches Layout mit klaren Kompatibilitätshinweisen und robustem Stil"
+      },
+      "ds-apparel-fashion": {
+        "name": "Bekleidung und Mode",
+        "description": "Elegantes Lookbook-Layout mit Schwerpunkt auf Größentabellen und Pflegehinweisen"
+      },
+      "ds-beauty-health": {
+        "name": "Schönheit und Gesundheit",
+        "description": "Klares, spa-artiges Design mit strukturierten Abschnitten für Inhaltsstoffe und Anwendung"
+      },
+      "ds-pet-supplies": {
+        "name": "Tierbedarf",
+        "description": "Verspieltes, aber strukturiertes Layout mit hellen Akzenten, Schwerpunkt auf Materialsicherheit und Größen"
+      },
+      "ds-fitness-sports": {
+        "name": "Fitness und Sport",
+        "description": "Energiegeladenes Layout mit kräftiger Typografie, Schwerpunkt auf Langlebigkeit, Materialien und aktivem Lebensstil"
+      },
+      "ds-outdoor-survival": {
+        "name": "Outdoor und Survival",
+        "description": "Robustes, erdiges Layout mit Schwerpunkt auf Langlebigkeit, Wetterbeständigkeit und taktischen Spezifikationen"
+      },
+      "ds-toys-kids": {
+        "name": "Kinderspielzeug",
+        "description": "Buntes, verspieltes Layout mit Schwerpunkt auf Sicherheitszertifikaten und Altersempfehlung"
+      },
+      "ds-kitchen-dining": {
+        "name": "Küche und Essen",
+        "description": "Klares Layout im Stil eines Kochbuchs mit Schwerpunkt auf Materialsicherheit und Maßen"
+      }
+    },
+    "validation": {
+      "nameRequired": "Der Gruppenname ist erforderlich",
+      "nameMinLength": "Der Gruppenname muss mindestens 3 Zeichen lang sein",
+      "nameMaxLength": "Der Gruppenname darf 100 Zeichen nicht überschreiten",
+      "minPrice": "Der Mindestpreis muss größer als 0 sein",
+      "maxPrice": "Der Höchstpreis muss größer als 0 sein",
+      "maxPriceGreaterThanMin": "Der Höchstpreis muss größer als der Mindestpreis sein",
+      "profitRequired": "Entweder eine Gewinnmarge oder ein fester Gewinn ist erforderlich",
+      "profitMarginRange": "Die Gewinnmarge muss zwischen 0 und 100 liegen",
+      "fixedProfitMin": "Der feste Gewinn muss 0 oder größer sein",
+      "minQuantity": "Die Menge muss mindestens 1 betragen",
+      "maxQuantity": "Die Menge darf 9999 nicht überschreiten",
+      "maxFeePercent": "Der Gebührenprozentsatz darf 100 % nicht überschreiten",
+      "minFeePercent": "Der Gebührenprozentsatz muss 0 oder größer sein",
+      "minFixedFee": "Die feste Gebühr muss 0 oder größer sein",
+      "invalidNumber": "Geben Sie eine gültige Zahl ohne führende Null ein (zum Beispiel 0.4, nicht 04)",
+      "templateRequired": "Der Vorlageninhalt ist erforderlich",
+      "templateMinLength": "Die Vorlage muss mindestens 10 Zeichen lang sein",
+      "predefinedTemplateRequired": "Bitte wählen Sie eine vordefinierte Vorlage aus",
+      "minOnePriceRange": "Mindestens ein Preisbereich ist erforderlich",
+      "maxPriceRanges": "Maximal 10 Preisbereiche sind erlaubt",
+      "overlappingPriceRanges": "Preisbereiche dürfen sich nicht überschneiden",
+      "minStockBuffer": "Der Bestandspuffer muss 0 oder größer sein"
+    },
+    "errors": {
+      "loadFailed": "Die Angebotsgruppen konnten nicht geladen werden",
+      "saveFailed": "Die Änderungen konnten nicht gespeichert werden",
+      "createFailed": "Die Gruppe konnte nicht erstellt werden",
+      "updateFailed": "Die Gruppe konnte nicht aktualisiert werden",
+      "deleteFailed": "Die Gruppe konnte nicht gelöscht werden",
+      "templateLoadFailed": "Die vordefinierten Vorlagen konnten nicht geladen werden",
+      "unauthorized": "Sie haben keine Berechtigung für diese Aktion",
+      "notFound": "Angebotsgruppe nicht gefunden",
+      "networkError": "Netzwerkfehler. Bitte prüfen Sie Ihre Verbindung.",
+      "unknownError": "Ein unerwarteter Fehler ist aufgetreten"
+    },
+    "success": {
+      "created": "Angebotsgruppe erfolgreich erstellt",
+      "updated": "Angebotsgruppe erfolgreich aktualisiert",
+      "deleted": "Angebotsgruppe erfolgreich gelöscht",
+      "saved": "Änderungen erfolgreich gespeichert"
+    },
+    "tooltips": {
+      "editGroup": "Gruppe bearbeiten",
+      "deleteGroup": "Gruppe löschen",
+      "addPriceRange": "Weiteren Preisbereich hinzufügen",
+      "removePriceRange": "Diesen Preisbereich entfernen",
+      "toggleDarkMode": "Vorschau im dunklen Modus umschalten",
+      "switchToDesktop": "Zur Desktop-Ansicht wechseln",
+      "switchToMobile": "Zur mobilen Ansicht wechseln",
+      "copyTemplate": "Vorlagen-HTML kopieren",
+      "resetTemplate": "Auf Standardvorlage zurücksetzen"
+    },
+    "help": {
+      "repricingStrategy": "Legen Sie mehrere Preisbereiche mit unterschiedlichen Gewinnmargen fest. Produkte werden entsprechend ihrem Kostenbereich bepreist.",
+      "profitMargin": "Prozentualer Gewinn, berechnet auf Basis der Produktkosten.",
+      "fixedProfit": "Fester Dollarbetrag, der auf die Produktkosten aufgeschlagen wird.",
+      "ebayFee": "Prozentsatz der eBay-Verkaufsprovision (üblicherweise 10–15 %).",
+      "fixedFee": "Feste Angebotsgebühr von eBay (üblicherweise 0,30 $).",
+      "tax": "Umsatzsteuersatz für Ihren Standort.",
+      "customTemplate": "Schreiben Sie Ihre eigene HTML-Vorlage mit individuellem Styling.",
+      "predefinedTemplate": "Wählen Sie aus professionell gestalteten Vorlagen."
+    },
+    "editorTitle": "Editor für Angebotsgruppen",
+    "editorDescription": "Konfigurieren Sie Ihre Angebotseinstellungen, Preisstrategien und Vorlagen.",
+    "generalSettings": "Allgemeine Einstellungen",
+    "pricingStrategy": "Preisanpassungsstrategie",
+    "addRange": "Bereich hinzufügen",
+    "calculator": {
+      "title": "Preisrechner",
+      "subtitle": "Testen Sie diese Einstellungen – wird nicht gespeichert, nur eine Vorschau.",
+      "amazonPrice": "Amazon-Einkaufspreis",
+      "calculate": "Berechnen",
+      "resultLabel": "eBay-Angebotspreis",
+      "breakdown": {
+        "amazonPrice": "Amazon-Einkaufspreis",
+        "tax": "Steuer auf den Amazon-Einkauf ({{pct}})",
+        "trueCost": "Tatsächliche Kosten (Preis + Steuer)",
+        "margin": "Gewinnmarge ({{pct}})",
+        "fallbackMargin": "Kein Bereich passte, Ersatzmarge ({{pct}})",
+        "fixedProfit": "Fester Gewinn",
+        "netTarget": "Zielwert vor eBay-Gebühren",
+        "ebayFee": "eBay-Gebühr ({{pct}})",
+        "fixedFee": "Feste Gebühr",
+        "floorApplied": "Unter dem eBay-Minimum von 0,99 $, angehoben auf"
+      }
+    },
+    "feesAndTaxes": "Gebühren und Steuern",
+    "amazonTaxRateNote": "Ihre Preisberechnung berücksichtigt automatisch die geschätzte Steuer, die Sie beim Einkauf bei Amazon zahlen. Legen Sie diesen Satz unter Shop-Einstellungen → Amazon-Umsatzsteuersatz fest.",
+    "stockControl": "Bestandssteuerung",
+    "ebayStockQuantity": "eBay-Bestand",
+    "stockBuffer": "Bestandspuffer",
+    "stockBufferDescription": "Ihre eBay-Menge ergibt sich aus dem Amazon-Bestand abzüglich dieses Puffers (nie unter 0), begrenzt auf den Wert des eBay-Bestands.",
+    "htmlTemplate": "HTML-Vorlage",
+    "custom": "Benutzerdefiniert",
+    "predefined": "Vordefiniert",
+    "activeTemplate": "Aktive Vorlage",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "EBAY-FORMAT",
+    "sample": {
+      "productTitle": "Kabellose Ohrhörer, aktive Geräuschunterdrückung, 40 Std. Akku",
+      "productDescription": "Hybride aktive Geräuschunterdrückung, ein 40-Stunden-Ladeetui und ein Spielmodus mit geringer Latenz – in kompakten Ohrhörern für Reise, Arbeit und Training.",
+      "productSpecs": "<ul><li>Aktive Geräuschunterdrückung</li><li>40 Stunden Akkulaufzeit</li><li>Universelle Bluetooth-Kompatibilität</li><li>Integriertes Mikrofon</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Abzüge"
+    },
+    "copyright": "© {{year}} SellerHill Platform. Alle Rechte vorbehalten.",
+    "keywords": {
+      "title": "Verfügbare Schlüsselwörter",
+      "hint": "Schreiben Sie diese in doppelte geschweifte Klammern; sie werden beim Erstellen des Angebots durch die Produktdaten ersetzt.",
+      "items": {
+        "title": "Produkttitel",
+        "product_description": "Produktbeschreibung",
+        "feature_bullets": "Liste der Merkmale",
+        "product_details": "Liste der Spezifikationen",
+        "main_image": "URL des Hauptproduktbilds",
+        "brand": "Marke",
+        "manufacturer": "Hersteller",
+        "category": "Produktkategorie"
+      }
+    }
+  }
+}

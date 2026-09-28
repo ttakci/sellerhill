@@ -37,6 +37,7 @@
 //   PUT    /admin/settings/:key       — set an operator override
 //   DELETE /admin/settings/:key       — drop the override (back to env/default)
 //   POST   /admin/settings/email/test — verify SMTP settings (sends no mail)
+//   POST   /admin/settings/scraper/proxies/verify — lightweight per-proxy connectivity check
 
 import { InjectQueue } from '@nestjs/bullmq';
 import {
@@ -68,6 +69,7 @@ import {
   UsageEventSource,
   UsageMetric,
   UserRole,
+  VerifyScraperProxiesDto,
   type AdminAspectDefaultDto,
   type AdminAspectDefaultsListDto,
   type AdminBillingMetricsDto,
@@ -81,6 +83,7 @@ import {
   type AdminUsersListDto,
   type PlatformSettingsListDto,
   type ProviderCostSummaryDto,
+  type ProxyVerifyResult,
   type QueueHealthDto,
   type UserCostSummaryDto,
   type QueueObservationDto,
@@ -491,5 +494,22 @@ export class AdminController {
   @ApiForbiddenResponse({ description: 'User is not an admin' })
   async testEmailSettings(): Promise<{ ok: boolean; error: string | null }> {
     return this.emailService.verifyConnection();
+  }
+
+  @Post('settings/scraper/proxies/verify')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Test scraper proxy connectivity',
+    description:
+      'Probes each proxy with one small, non-Amazon request — never spends real scraping capacity. ' +
+      "With `proxies`, tests a draft before it's saved; omitted, tests the currently saved list. " +
+      'The response never carries a proxy value, only `host:port` and the outcome.',
+  })
+  @ApiOkResponse({ description: 'Per-proxy connectivity result' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async verifyScraperProxies(@Body() dto: VerifyScraperProxiesDto): Promise<{ results: ProxyVerifyResult[] }> {
+    const results = await this.adminService.verifyScraperProxies(dto.proxies);
+    return { results };
   }
 }

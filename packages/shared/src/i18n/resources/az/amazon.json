@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Amazon alıcı hesabları",
+      "subtitle": "Sifarişlərin izlənməsi və qiymətlərin toplanması üçün Amazon alıcı hesablarınızı idarə edin",
+      "addButton": "Amazon hesabı əlavə et",
+      "noAccounts": "Hələ heç bir Amazon hesabı qoşulmayıb",
+      "noAccountsDescription": "Sifariş qiymətlərini və çatdırılma statusunu avtomatik izləmək üçün Amazon alıcı hesabınızı əlavə edin",
+      "statusActive": "Aktiv",
+      "statusVerifying": "Yoxlanılır",
+      "statusInvalid": "Yanlış giriş məlumatları",
+      "statusNeedsReauth": "Yenidən avtorizasiya tələb olunur",
+      "statusLocked": "Bloklanıb",
+      "verifyButton": "Yoxla",
+      "editButton": "Redaktə et",
+      "deleteButton": "Sil",
+      "deleteConfirmTitle": "Amazon hesabını sil",
+      "deleteConfirmMessage": "Bu Amazon hesabını silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.",
+      "lastVerified": "Son yoxlama",
+      "lastUsed": "Son istifadə",
+      "never": "Heç vaxt",
+      "addTitle": "Amazon hesabı əlavə et",
+      "editTitle": "Amazon hesabını redaktə et",
+      "labelField": "Hesab adı",
+      "labelPlaceholder": "məs., Şəxsi Amazon",
+      "emailField": "Amazon e-poçtu",
+      "emailPlaceholder": "sizin-epoct@example.com",
+      "passwordField": "Amazon parolu",
+      "passwordPlaceholder": "Amazon parolunuzu daxil edin",
+      "twoFactorField": "2FA gizli açarı",
+      "twoFactorPlaceholder": "İxtiyari — Amazon 2FA parametrlərindən",
+      "twoFactorInfo": "2FA aktivdirsə, Amazon hesabınızın təhlükəsizlik parametrlərindəki gizli açarı daxil edin",
+      "saveButton": "Hesabı yadda saxla",
+      "savingButton": "Yadda saxlanılır...",
+      "verifyingButton": "Yoxlanılır...",
+      "verifySuccess": "Amazon hesabı uğurla yoxlanıldı",
+      "verifyFailed": "Amazon hesabını yoxlamaq alınmadı. Zəhmət olmasa giriş məlumatlarını yoxlayın.",
+      "saveSuccess": "Amazon hesabı uğurla yadda saxlanıldı",
+      "deleteSuccess": "Amazon hesabı uğurla silindi",
+      "errorSaving": "Amazon hesabını yadda saxlamaq alınmadı"
+    },
+    "linking": {
+      "title": "Amazon sifarişini əlaqələndir",
+      "selectAccount": "Amazon hesabını seçin",
+      "selectAccountPlaceholder": "Amazon hesabı seçin...",
+      "orderId": "Amazon sifariş ID-si",
+      "orderIdPlaceholder": "məs., 112-1234567-1234567",
+      "orderIdHelp": "Amazon sifariş ID-nizi daxil edin (sifariş tarixçəsində və ya təsdiq e-poçtunda tapa bilərsiniz)",
+      "linkButton": "Əlaqələndir və oxu",
+      "linkingButton": "Əlaqələndirilir...",
+      "progressLoggingIn": "Amazon-a daxil olunur...",
+      "progressNavigating": "Sifariş səhifəsinə keçilir...",
+      "progressScraping": "Sifariş təfərrüatları oxunur...",
+      "progressSaving": "Sifariş məlumatları yadda saxlanılır...",
+      "successTitle": "Amazon sifarişi əlaqələndirildi",
+      "successMessage": "Sifariş təfərrüatları oxundu və uğurla əlaqələndirildi",
+      "errorTitle": "Sifarişi əlaqələndirmək alınmadı",
+      "errorNoAccount": "Zəhmət olmasa əvvəlcə Amazon hesabı əlavə edin",
+      "errorScraping": "Amazon sifarişinin təfərrüatlarını oxumaq mümkün olmadı. Zəhmət olmasa sifariş ID-sini yoxlayıb yenidən cəhd edin.",
+      "errorInvalidCredentials": "Amazon giriş məlumatları yanlışdır. Zəhmət olmasa hesabınızı yeniləyin.",
+      "errorRateLimit": "Çox sayda sorğu. Zəhmət olmasa daha sonra yenidən cəhd edin.",
+      "costCaptureFailed": "Amazon sifarişi tapıldı, lakin xərc təfərrüatlarını oxumaq mümkün olmadı. Mənfəət son məlum dəyərdə saxlanıldı.",
+      "noAccountsTitle": "Amazon hesabı yoxdur",
+      "noAccountsMessage": "Sifarişləri əlaqələndirmək üçün əvvəlcə Amazon alıcı hesabı əlavə etməlisiniz.",
+      "addAccountLink": "Amazon hesabı əlavə et",
+      "noListingTitle": "Əvvəlcə bu eBay elanını idxal edin",
+      "noListingMessage": "Bu sifarişin eBay elanı idxal edilməyib, ona görə sifariş heç bir elana bağlı deyil. Amazon sifarişini yenə də əlaqələndirib onun real xərclərini əldə edə bilərsiniz — lakin sifariş göndəriləndə izləmə nömrəsi eBay-ə ötürülə bilməyəcək, çünki eBay-ə elanın daşıdığı sətir elementi lazımdır. Bu ötürmə sonradan təkrar cəhd edilmir. Əvvəlcə elanı idxal edin, bu sifariş ona avtomatik əlaqələndiriləcək.",
+      "importListingButton": "Elanı idxal et",
+      "linkAnywayButton": "Yenə də əlaqələndir"
+    },
+    "tracking": {
+      "statusPending": "Gözləyir",
+      "statusProcessing": "Emal olunur",
+      "statusShipped": "Göndərilib",
+      "statusDelivered": "Çatdırılıb",
+      "statusCancelled": "Ləğv edilib",
+      "statusReturned": "Geri qaytarılıb",
+      "eBaySyncShipped": "eBay sifarişi göndərilmiş kimi qeyd olundu",
+      "eBaySyncDelivered": "eBay sifarişi çatdırılmış kimi qeyd olundu"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Hesab",
+        "proxy": "Proksi"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Bu hesabdan avtomatik yerinə yetirmə üçün istifadə et",
+      "autoFulfillEnabledHint": "Aktiv olduqda, uyğun eBay sifarişləri bu Amazon hesabı vasitəsilə avtomatik alınır (digər aktiv hesablarınızla növbə ilə). Mağaza parametrlərindəki əsas Avtomatik yerinə yetirmə açarı da aktiv olmalı və aşağıda xərc limiti təyin edilməlidir.",
+      "autoFulfillCapTotal": "Maksimum sifariş məbləği (avtomatik yerinə yetirmə limiti)",
+      "autoFulfillCapTotalHint": "Hesab üzrə xərc həddi (USD). Bu məbləğdən yuxarı sifarişlər bu hesabı keçir. Avtomatik yerinə yetirməni aktiv etmək üçün tələb olunur.",
+      "autoFulfillCapTotalPlaceholder": "məs., 250",
+      "autoFulfillDryRun": "Sınaq rejimi (sifariş verilmədən axını icra et)",
+      "autoFulfillDryRunHint": "Sifariş təsdiqinə (daxil olmaqla deyil) qədər tam ödəniş axınını icra edir ki, yekun məbləğ qeydə alınıb yoxlanış üçün göstərilsin."
+    },
+    "proxy": {
+      "sectionTitle": "Proksi",
+      "stepSubtitle": "İxtiyari — bu hesabın avtomatlaşdırmasını öz proksinizlə yönləndirin",
+      "enabled": "Proksini aktiv et",
+      "enabledHint": "Hesabınızı qorumaq üçün proksi serverdən istifadə edin",
+      "connectionType": "Bağlantı növü",
+      "host": "Host daxil edin",
+      "port": "Port daxil edin",
+      "username": "İstifadəçi adı",
+      "password": "Parol",
+      "hint": "İxtiyari. Bu hesabın avtomatlaşdırmasını yönləndirmək üçün öz proksinizi əlavə edin — IP əsaslı bloklara qarşı əlavə qorunma istəyirsinizsə faydalıdır. Deaktiv saxlasanız, hesab birbaşa qoşulur; bu normal standart vəziyyətdir."
+    },
+    "marketplace": {
+      "label": "Bazar",
+      "usOnlyNote": "Hazırda yalnız Amerika Birləşmiş Ştatları (amazon.com) bazarı dəstəklənir.",
+      "AMAZON_US": "Amerika Birləşmiş Ştatları (amazon.com)",
+      "readOnlyHint": "Hesab yaradıldıqdan sonra bazar dəyişdirilə bilməz."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Bu hesabda avtomatik yerinə yetirməni aktiv etmək üçün maksimum sifariş məbləğini təyin edin.",
+      "proxyHostPortRequired": "Bu hesab üçün proksi istifadə etmək üçün host və port daxil edin.",
+      "unsupportedMarketplace": "Bu Amazon bazarı hələ mövcud deyil.",
+      "twoFactorSecretRequired": "Hesabın autentifikator (2FA) gizli açarını əlavə edin. Amazon demək olar ki, hər avtomatik girişdə təsdiq kodu tələb edir və biz yalnız bunu sizin əvəzinizə cavablandıra bilirik.",
+      "twoFactorSecretInvalid": "Bu autentifikator gizli açarına oxşamır. Amazon-un autentifikator tətbiqi qurulumundakı qurulum açarını (A–Z hərfləri və 2–7 rəqəmləri) yapışdırın, 6 rəqəmli kodu yox."
+    }
+  }
+}

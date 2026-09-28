@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "الطلبات",
+      "subtitle": "{{count}} طلبات"
+    },
+    "overview": {
+      "viewAll": "عرض الكل",
+      "emptyTitle": "لا توجد طلبات بعد",
+      "emptySubtitle": "ستظهر هنا مبيعات eBay التي تمت مزامنتها."
+    },
+    "carousel": {
+      "previous": "السابق",
+      "next": "التالي"
+    },
+    "all": {
+      "title": "جميع الطلبات",
+      "subtitle": "{{count}} نتائج",
+      "loadingTitle": "جارٍ تحميل الطلبات",
+      "loadingSubtitle": "جارٍ جلب أحدث طلبات eBay الخاصة بك.",
+      "filtersTitle": "لا توجد طلبات تطابق عوامل التصفية",
+      "filtersSubtitle": "جرّب توسيع نطاق التاريخ أو الحالة أو المتجر.",
+      "filtersAction": "مسح عوامل التصفية",
+      "emptyTitle": "لا توجد طلبات بعد",
+      "emptySubtitle": "تظهر الطلبات هنا تلقائياً بعد تشغيل مزامنة eBay."
+    },
+    "filters": {
+      "allStatuses": "جميع الحالات",
+      "allStores": "جميع المتاجر",
+      "allTrackingStates": "جميع حالات التتبع",
+      "clearAll": "مسح الكل",
+      "resultCount": "{{count}} نتائج"
+    },
+    "stats": {
+      "totalSales": "إجمالي المبيعات",
+      "netProfit": "صافي الربح",
+      "activeOrders": "الطلبات النشطة",
+      "returnRate": "نسبة الإرجاع",
+      "last24Hours": "آخر 24 ساعة",
+      "growth": "{{value}}% مقارنة بالشهر الماضي",
+      "profitGrowth": "{{value}}% مقارنة بالشهر الماضي",
+      "decrease": "{{value}}% مقارنة بالشهر الماضي"
+    },
+    "actions": {
+      "search": "ابحث في الطلبات أو المشترين أو المنتجات...",
+      "last30Days": "آخر 30 يوماً",
+      "export": "تصدير",
+      "convertTracking": "تحويل رقم التتبع"
+    },
+    "table": {
+      "orderNumber": "رقم الطلب",
+      "product": "المنتج",
+      "date": "التاريخ",
+      "buyer": "المشتري",
+      "status": "الحالة",
+      "salePrice": "البيع",
+      "purchasePrice": "التكلفة",
+      "netProfit": "الربح",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "مكتمل",
+      "shipped": "تم الشحن",
+      "processing": "قيد المعالجة",
+      "cancelled": "ملغى",
+      "pending": "قيد الانتظار",
+      "waiting_shipment": "بانتظار الشحن"
+    },
+    "fulfillmentState": {
+      "column": "التنفيذ عبر Amazon",
+      "purchased": "تم الشراء من Amazon",
+      "amazon_cancelled": "ألغته Amazon",
+      "action_required": "يتطلب إجراءً",
+      "in_progress": "جارٍ الشراء من Amazon",
+      "not_automated": "غير مؤتمت",
+      "manual": "تم الشراء يدوياً",
+      "simulated": "تشغيل تجريبي، دون شراء",
+      "filter": {
+        "all": "جميع حالات التنفيذ"
+      },
+      "detail": {
+        "title": "التنفيذ عبر Amazon",
+        "amazonOrderId": "طلب Amazon",
+        "simulatedNotice": "هذا تشغيل تجريبي. لم يتم إنشاء أي طلب على Amazon ولم يُخصم أي مبلغ، والتكاليف والأرباح أدناه محاكاة.",
+        "actionRequiredNotice": "توقفت الأتمتة قبل الشراء. راجع السبب ونفّذ هذا الطلب يدوياً.",
+        "cancelledNotice": "تم إلغاء عملية الشراء من Amazon. لا يزال بيع eBay مستحقاً للمشتري، فنفّذه بطريقة أخرى.",
+        "notAutomatedNotice": "الطلب التلقائي معطّل لهذا الطلب.",
+        "attemptedAt": "آخر محاولة"
+      }
+    },
+    "tracking": {
+      "tracked": "يتتبعه SellerHill",
+      "untracked": "غير متتبَّع",
+      "problem": {
+        "wrongPageType": "تعذّر على مزوّد التتبع قراءة صفحة طلب Amazon، فقد يكون تنسيقها قد تغيّر. ستُعاد المحاولة تلقائياً.",
+        "amazonSessionExpired": "انتهت جلسة Amazon المستخدمة لقراءة هذا الطلب وتحتاج إلى تسجيل الدخول من جديد.",
+        "trackingUrlMismatch": "لم يطابق رابط التتبع في صفحة طلب Amazon ما كنا نتوقعه. ستُعاد المحاولة تلقائياً.",
+        "needsTrackingUpload": "بانتظار رفع تفاصيل الشحنة قبل أن يمكن تحويل رقم التتبع.",
+        "updateNotApplied": "لم يطبّق المزوّد تحديث التتبع بعد. ستُعاد المحاولة تلقائياً.",
+        "assignValidation": "رفض مزوّد التتبع تفاصيل الشحنة الخاصة بهذا الطلب.",
+        "shipmentException": "أبلغ مزوّد التتبع عن استثناء في هذه الشحنة.",
+        "trackingUpdateUnavailable": "تعذّر على مزوّد التتبع تحديث هذه الشحنة حالياً.",
+        "generic": "هناك مشكلة في تحويل رقم التتبع لهذا الطلب. ستُعاد المحاولة تلقائياً."
+      }
+    },
+    "autoFulfill": {
+      "column": "التنفيذ التلقائي",
+      "status": {
+        "pending": "في الانتظار",
+        "running": "قيد التشغيل",
+        "placed": "تم الطلب",
+        "blocked": "محظور",
+        "failed": "فشل",
+        "dry_run": "تشغيل تجريبي",
+        "skipped": "تم التخطي"
+      },
+      "reason": {
+        "no_asin": "المنتج غير موجود على Amazon",
+        "captcha": "مطلوب حل Captcha",
+        "otp": "تحدّي المصادقة متعددة العوامل/OTP",
+        "login": "فشل تسجيل الدخول",
+        "out_of_stock": "نفد من المخزون",
+        "address": "مشكلة في العنوان",
+        "payment": "تم رفض الدفع",
+        "cap": "تجاوز سقف التكلفة",
+        "no_confirmation": "لا يوجد تأكيد",
+        "proxy_required": "لم يتم إعداد بروكسي",
+        "quota_exhausted": "تم بلوغ الحصة الشهرية",
+        "cart": "عدم تطابق السلة",
+        "review_unreadable": "تعذّرت قراءة إجمالي الطلب",
+        "subscription_suspended": "الاشتراك معلّق",
+        "listing_over_plan_limit": "الإدراج خارج حد الخطة",
+        "order_already_fulfilled": "تم شحنه بالفعل، لا شيء لشرائه",
+        "order_not_paid": "بانتظار دفع المشتري"
+      },
+      "reasonLabel": "السبب: {{reason}}",
+      "amazonCancelledBadge": "ألغته Amazon",
+      "filter": {
+        "all": "كل التنفيذ التلقائي",
+        "needsAttention": "يحتاج إلى اهتمام"
+      }
+    },
+    "pagination": {
+      "showing": "عرض {{from}}-{{to}} من أصل {{total}} طلب"
+    },
+    "detail": {
+      "title": "تفاصيل الطلب",
+      "loadingSubtitle": "جارٍ جلب تفاصيل الطلب…",
+      "notFoundTitle": "الطلب غير موجود",
+      "notFoundSubtitle": "ربما تمت إزالة هذا الطلب أو ليست لديك صلاحية الوصول إليه.",
+      "orderPlaced": "تاريخ الطلب",
+      "viewInvoice": "عرض الفاتورة",
+      "printLabels": "طباعة الملصقات",
+      "customerInfo": "معلومات العميل",
+      "buyerPayment": "دفعة المشتري",
+      "ebaySummary": "ملخص مبيعات eBay",
+      "whatBuyerPaid": "ما دفعه المشتري",
+      "whatYouEarned": "ما ربحته",
+      "earningsOrderTotal": "إجمالي الطلب",
+      "ebayCollectedFromBuyer": "ما حصّله eBay من المشتري",
+      "ebayCollectedTax": "ضريبة المبيعات",
+      "sellingCosts": "تكاليف البيع",
+      "itemSubtotal": "المجموع الفرعي للمنتجات",
+      "shippingHandling": "الشحن والمناولة",
+      "totalBeforeTax": "الإجمالي قبل الضريبة",
+      "estimatedTax": "الضريبة التقديرية",
+      "grandTotal": "الإجمالي الكلي",
+      "paymentMethod": "طريقة الدفع",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "الشحن",
+      "salesTax": "ضريبة المبيعات",
+      "orderTotal": "إجمالي الطلب",
+      "feesCollected": "الرسوم المحصّلة",
+      "transactionFees": "رسوم المعاملات",
+      "adFee": "رسوم الإعلانات العامة",
+      "orderEarnings": "أرباح الطلب",
+      "viewMore": "عرض مزيد من التفاصيل",
+      "updateAmazon": "إدخال معلومات Amazon",
+      "netProfitAnalysis": "تحليل صافي الربح",
+      "analysisDesc": "يأخذ هذا الحساب في الاعتبار أرباحك الفعلية من eBay بعد جميع رسوم المنصة والضرائب، مطروحاً منها تكلفة الشراء الأصلية من Amazon.",
+      "calculation": "الحساب",
+      "netProfitResult": "صافي الربح",
+      "roi": "العائد على الاستثمار",
+      "shipTo": "الشحن إلى",
+      "contact": "جهة الاتصال",
+      "unknownProduct": "منتج غير معروف",
+      "copyAddress": "نسخ العنوان",
+      "addressCopied": "تم نسخ العنوان!",
+      "copyName": "نسخ الاسم",
+      "copyStreet": "نسخ الشارع",
+      "copyStreet2": "نسخ السطر الثاني من العنوان",
+      "copyCity": "نسخ المدينة",
+      "copyState": "نسخ الجهة/المقاطعة",
+      "copyZip": "نسخ الرمز البريدي",
+      "copyCountry": "نسخ البلد/المنطقة",
+      "copied": "تم النسخ",
+      "amazonCosts": "ملخص طلب Amazon",
+      "purchasePrice": "سعر الشراء",
+      "amazonTax": "ضريبة Amazon",
+      "amazonShipping": "شحن Amazon",
+      "totalAmazonCost": "إجمالي تكلفة Amazon",
+      "amazonTracking": "تتبع Amazon",
+      "convertedTracking": "رقم التتبع المحوَّل",
+      "amazonOrder": "طلب Amazon",
+      "linkAmazon": "ربط طلب Amazon",
+      "calcEarnings": "الأرباح",
+      "calcPurchase": "الشراء",
+      "calcTax": "الضريبة",
+      "calcShipping": "الشحن",
+      "asin": "ASIN",
+      "ebayItemId": "معرّف eBay",
+      "quantity": "الكمية",
+      "unit": "وحدة",
+      "sku": "SKU",
+      "na": "غير متوفر"
+    },
+    "modal": {
+      "title": "إدخال معلومات طلب Amazon",
+      "amazonUrl": "رابط تفاصيل طلب Amazon",
+      "trackingUrl": "رابط التتبع (اختياري)",
+      "taxAmount": "مبلغ الضريبة ($)",
+      "shippingCost": "تكلفة الشحن ($)",
+      "infoText": "سيؤدي إدخال الضريبة وتكلفة الشحن إلى إعادة حساب صافي ربح هذا الطلب تلقائياً.",
+      "save": "حفظ التفاصيل",
+      "cancel": "إلغاء",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "تقديري",
+    "estimateNote": "ربح تقديري، يصبح نهائياً عند إتمام طلب Amazon. يعتمد على آخر سعر معروف على Amazon، ولا يشمل شحن Amazon.",
+    "footer": {
+      "copyright": "© 2026 حلول SellerHill للتجارة الإلكترونية. جميع الحقوق محفوظة."
+    },
+    "errors": {
+      "notFound": "الطلب غير موجود.",
+      "noTrackingYet": "ليس لهذا الطلب رقم تتبع من Amazon بعد، فلم يتم شحنه.",
+      "conversionUnavailable": "تعذّر تحويل رقم التتبع حالياً. تحقق من حد خطتك وإعدادات التحويل ثم حاول مرة أخرى.",
+      "conversionDone": "تم تحويل رقم التتبع.",
+      "orderNotTracked": "هذا الطلب غير مربوط بأحد إدراجاتك، لذلك لا يمكن إرسال رقم تتبع محوَّل إلى eBay. اربط الطلب بإدراجه أولاً.",
+      "trackingAlreadyPushed": "لدى eBay بالفعل رقم التتبع الأصلي لهذا الطلب ولا يمكن استبداله، لذلك لن يغيّر التحويل الآن ما يراه المشتري.",
+      "listingOverPlanLimit": "كان إدراج هذا الطلب خارج حد الإدراجات في خطتك عند وصول الطلب. الطلبات القادمة من إدراجات خارج الحد لا تحصل على تتبع للشحنة ولا على تحويل لرقم التتبع."
+    }
+  }
+}

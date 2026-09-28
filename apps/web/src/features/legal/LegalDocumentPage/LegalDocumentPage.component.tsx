@@ -1,4 +1,4 @@
-import { LegalBlockType, type LegalBlock } from '@repo/shared';
+import { LegalBlockType, SUPPORTED_LOCALES, type LegalBlock } from '@repo/shared';
 import { Dropdown, Icon, Logo, Text } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 
@@ -136,10 +136,10 @@ export const LegalDocumentPageComponent = ({
                 <Icon name="chevron-down" size={12} />
               </S.LanguageTrigger>
             }
-            items={[
-              { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
-              { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
-            ]}
+            items={SUPPORTED_LOCALES.map((locale) => ({
+              label: t(`translation:languages.${locale}`),
+              onClick: () => onLocaleChange(locale),
+            }))}
           />
         </S.HeaderActions>
       </S.Header>

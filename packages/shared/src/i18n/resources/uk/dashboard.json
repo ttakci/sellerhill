@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Панель",
+    "subtitle": "Продажі, прибуток і ефективність лістингів",
+    "greeting": "Вітаємо, {{name}}",
+    "selectStore": "Оберіть магазин",
+    "allStores": "Усі магазини",
+    "noData": "Даних поки немає",
+    "backToDashboard": "Назад до панелі",
+    "tabs": {
+      "cards": "Картки",
+      "chart": "Графік",
+      "pnl": "Прибутки та збитки"
+    },
+    "today": "Сьогодні",
+    "thisWeek": "Цього тижня",
+    "thisMonth": "Цього місяця",
+    "thisYear": "Цього року",
+    "metrics": {
+      "sales": "Продажі",
+      "units": "Одиниці",
+      "orders": "Замовлення",
+      "ordersUnits": "Замовлення / одиниці",
+      "refunds": "Повернення",
+      "refundRate": "Частка повернень",
+      "grossProfit": "Валовий прибуток",
+      "netProfit": "Чистий прибуток",
+      "estimatedPayout": "Орієнт. виплата",
+      "margin": "Маржа",
+      "roi": "ROI",
+      "avgOrderValue": "Сер. замовлення",
+      "costOfGoods": "Вартість товару",
+      "transactionFees": "Комісії за транзакції",
+      "adFees": "Витрати на рекламу",
+      "amazonShipping": "Доставка Amazon",
+      "amazonTax": "Податок Amazon",
+      "revenueUncosted": "Виручка без витрат"
+    },
+    "card": {
+      "showMore": "Докладніше",
+      "showLess": "Менше деталей",
+      "activeHint": "Фільтрує списки нижче"
+    },
+    "listingsSection": "Лістинги",
+    "ordersSection": "Замовлення",
+    "listingsCount": "З продажами: {{count}}",
+    "ordersCount": "Замовлень: {{count}}",
+    "viewAllListings": "Переглянути всі",
+    "viewAllOrders": "Переглянути всі",
+    "listingsEmptyTitle": "Немає лістингів із продажами",
+    "listingsEmptySubtitle": "Тут з’являться лістинги, що отримали замовлення за обраний період.",
+    "ordersEmptyTitle": "Немає замовлень за цей період",
+    "ordersEmptySubtitle": "Замовлення за обраний період з’являться тут, щойно надійдуть продажі.",
+    "chart": {
+      "title": "Результати",
+      "subtitle": "Чистий прибуток порівняно з обсягом продажів",
+      "summary": "Підсумок за період",
+      "granularity": {
+        "day": "30 днів",
+        "week": "12 тижнів",
+        "month": "12 місяців"
+      },
+      "series": {
+        "netProfit": "Чистий прибуток",
+        "sales": "Продажі",
+        "units": "Одиниці",
+        "refunds": "Повернення"
+      }
+    },
+    "pnl": {
+      "title": "Прибутки та збитки",
+      "subtitle": "Розбивка за останні 12 місяців помісячно",
+      "parameter": "Показник / період",
+      "currentPeriod": "Поточний період",
+      "heatmap": "Теплова карта",
+      "export": "Завантажити CSV"
+    },
+    "groups": {
+      "revenue": "Виручка",
+      "costs": "Витрати",
+      "profit": "Прибуток",
+      "ratios": "Співвідношення"
+    },
+    "profit": {
+      "confirmedLabel": "Підтверджений",
+      "confirmedTooltip": "Прибуток із замовлень, для яких зафіксовано реальні витрати на Amazon. Невідома вартість ніколи не вважається нульовою.",
+      "estimatedLabel": "Орієнтовний",
+      "estimatedTooltip": "Замовлення, що очікують виконання на Amazon, використовують орієнтовну вартість (податок Amazon за вашою налаштованою ставкою {{rate}}%).",
+      "uncostedLabel": "Виручка без витрат",
+      "uncostedTooltip": "Продажі, вартість яких на Amazon ще не вдалося визначити — лише виручка, без припущень щодо прибутку."
+    }
+  }
+}
