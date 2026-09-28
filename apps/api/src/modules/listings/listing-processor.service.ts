@@ -24,6 +24,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { deferralDelayMs } from '../../common/ebay-budget/ebay-call-budget.helpers';
 import { getCorrelation, withCorrelation } from '../../common/observability/correlation.context';
+import { runWithConcurrency } from '../../common/utils/concurrency';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
@@ -83,6 +84,25 @@ function listingsWorkerConcurrency(): number {
     return 2;
   }
   return Math.min(16, Math.max(1, Math.floor(raw)));
+}
+
+/**
+ * How many items of ONE batch are prepared concurrently (EPS uploads, LLM
+ * title, category + aspect resolution). The eBay WRITE stays one bulk call
+ * whatever this is — only the per-item preparation overlaps.
+ *
+ * Capped at 8 because each in-flight item can hold a pg client (the
+ * resolveProductData and EPS-resolver transactions) against a bounded pool,
+ * and because ~8 concurrent LLM title rewrites is where a free-tier provider
+ * starts answering 429 (which falls back to the deterministic title — safe,
+ * but a silently worse title). Env-only like LISTINGS_WORKER_CONCURRENCY.
+ */
+function listingItemConcurrency(): number {
+  const raw = Number(process.env.LISTING_BATCH_ITEM_CONCURRENCY ?? 5);
+  if (!Number.isFinite(raw)) {
+    return 5;
+  }
+  return Math.min(8, Math.max(1, Math.floor(raw)));
 }
 
 @Processor('listings', { concurrency: listingsWorkerConcurrency() })
@@ -214,6 +234,8 @@ export class ListingProcessorService extends WorkerHost {
     // batch could hold a pg client for up to ~80 minutes. Instead, one failure
     // here fails every uncached item immediately (retryable
     // PRODUCT_DATA_UNAVAILABLE via resolveProductData's `unavailable` branch).
+    const prefetchStartedAt = Date.now();
+    let uncachedCount = 0;
     let prefetched: Map<string, CreateFetchResult> | undefined;
     if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
       // Only ASINs the loop below can actually create: a malformed identifier
@@ -232,6 +254,7 @@ export class ListingProcessorService extends WorkerHost {
           uncached.push(item.asin);
         }
       }
+      uncachedCount = uncached.length;
       if (uncached.length > 0) {
         try {
           prefetched = await this.productSource.fetchForCreate(uncached, AmazonMarketplace.AMAZON_US);
@@ -246,11 +269,31 @@ export class ListingProcessorService extends WorkerHost {
       }
     }
 
-    for (const item of items) {
+    const prefetchMs = Date.now() - prefetchStartedAt;
+    const prepareStartedAt = Date.now();
+
+    // Items are prepared with bounded concurrency: everything per item here —
+    // the EPS image uploads, the LLM title rewrite, category + aspect
+    // resolution — is independent between items, and running it one item at a
+    // time made a 20-ASIN batch pay 20 × the full per-item latency. The eBay
+    // WRITE below stays exactly one bulk call either way. Cross-item safety:
+    // resolveProductData's advisory lock is per ASIN (deduped items → no
+    // contention), the EPS resolver's lock is per (product, store), and its
+    // upload pacing is enforced per store inside the resolver itself.
+    //
+    // A spent eBay quota is a platform condition, not a defect in one ASIN:
+    // the first EbayBudgetExhaustedError stops NEW items from starting (via
+    // the pool's shouldStop), in-flight items finish, and the whole batch is
+    // parked until the budget resets — same semantics as the sequential loop,
+    // where items after the exhausted one were never attempted and the job
+    // re-ran in full.
+    let budgetError: EbayBudgetExhaustedError | undefined;
+
+    const prepareItem = async (item: { asin: string; listingJobItemId: string }): Promise<void> => {
       try {
         if (await this.listingsService.isAsinListed(userId, item.asin)) {
           await this.recordDuplicate(jobId, userId, item.asin, item.listingJobItemId);
-          continue;
+          return;
         }
 
         const { productData, productId } = await this.resolveProductData(
@@ -311,7 +354,7 @@ export class ListingProcessorService extends WorkerHost {
           // Stop before every eBay call. Category and item specifics are
           // resolved at publish, so an abandoned draft costs no quota at all.
           await this.persistDraft(job.data, item, productId, listingData);
-          continue;
+          return;
         }
 
         const prepared = await this.ebayService.prepareListingDraft(
@@ -343,13 +386,28 @@ export class ListingProcessorService extends WorkerHost {
       } catch (error: unknown) {
         // A spent quota is a platform condition, not a defect in this ASIN:
         // park the whole batch rather than failing items that were never tried.
+        // Recorded here, deferred AFTER the pool drains — moveToDelayed must
+        // run once, not once per in-flight item.
         if (error instanceof EbayBudgetExhaustedError) {
-          await this.deferUntilBudgetResets(job, token, error);
+          budgetError ??= error;
           return;
         }
         await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, error);
       }
+    };
+
+    await runWithConcurrency(items, listingItemConcurrency(), prepareItem, () => budgetError !== undefined);
+
+    if (budgetError) {
+      await this.deferUntilBudgetResets(job, token, budgetError);
+      return;
     }
+
+    const prepareMs = Date.now() - prepareStartedAt;
+    this.logger.log(
+      `Batch timing for job ${jobId}: prefetch=${prefetchMs}ms (${uncachedCount} uncached), ` +
+        `prepare=${prepareMs}ms (${items.length} item(s), concurrency ${listingItemConcurrency()})`
+    );
 
     if (drafts.length === 0) {
       return;
@@ -360,6 +418,7 @@ export class ListingProcessorService extends WorkerHost {
     // default forever and the job would never reach a terminal state — which is
     // exactly what happened before this guard existed: two ASINs stuck showing
     // the initial status while the job stayed "processing" for good.
+    const publishStartedAt = Date.now();
     let outcomes: BulkListingOutcome[];
     try {
       outcomes = await this.ebayBulkService.createListings(accountId, merchantLocationKey, drafts);
@@ -454,7 +513,10 @@ export class ListingProcessorService extends WorkerHost {
     }
 
     const created = outcomes.filter((outcome) => outcome.ok).length;
-    this.logger.log(`Batch for job ${jobId}: ${created}/${drafts.length} listing(s) published`);
+    this.logger.log(
+      `Batch for job ${jobId}: ${created}/${drafts.length} listing(s) published ` +
+        `(publish=${Date.now() - publishStartedAt}ms)`
+    );
   }
 
   /**
