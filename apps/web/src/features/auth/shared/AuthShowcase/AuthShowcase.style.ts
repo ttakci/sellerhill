@@ -8,6 +8,7 @@
 
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
+import { Link } from 'react-router-dom';
 
 export const Panel = styled.div`
   position: relative;
@@ -75,7 +76,8 @@ export const DesktopShot = styled.img`
 export const PhoneFrame = styled.div`
   position: absolute;
   right: -${tkn('spacing.xl')};
-  bottom: -${tkn('spacing.lg')};
+  /* Hangs well below the desktop shot so the two read as a composition, not an overlap. */
+  bottom: -${tkn('spacing.xxxl')};
   width: 8rem;
   aspect-ratio: 9 / 19;
   border-radius: ${tkn('radius.xl')};
@@ -94,11 +96,12 @@ export const PhoneShot = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 22% top;
+  object-position: center top;
 `;
 
 export const Caption = styled.div`
-  margin-top: ${tkn('spacing.xxl')};
+  /* Clears the phone's overhang below the desktop shot. */
+  margin-top: calc(${tkn('spacing.xxxl')} + ${tkn('spacing.xl')});
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -127,4 +130,39 @@ export const SloganWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
+`;
+
+/** Home link around the logo — no chrome of its own, just a focus ring. */
+export const HomeLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  border-radius: ${tkn('radius.md')};
+
+  &:focus-visible {
+    outline: 2px solid ${tkn('colors.brand.primary')};
+    outline-offset: 2px;
+  }
+`;
+
+/**
+ * Below lg the showcase panel is hidden; this navy bar keeps the brand (and
+ * the way back to the landing page) on screen. Same navy as the landing
+ * navbar, because the logo's "SELLER" is white.
+ */
+export const MobileBar = styled.div`
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 100%;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  background: ${tkn('colors.sidebar.background')};
+
+  & img {
+    height: 1.875rem !important;
+    width: auto !important;
+  }
+
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    display: none;
+  }
 `;

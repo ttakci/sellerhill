@@ -1,35 +1,41 @@
 # Demo product photo credits
 
-These 20 images back the sign-up-free demo (`apps/web/src/features/demo/demoData.ts`)
-only — they are not used anywhere in the real product catalog. Each is a real,
-freely-licensed photo (CC0 / Public Domain Mark / CC BY / CC BY-SA), sourced via
-[Openverse](https://openverse.org) and [Wikimedia Commons](https://commons.wikimedia.org),
-picked for a generic match to the demo's fictional product (invented ASIN, brand
-and title) rather than for any specific real product. Center-cropped/padded to a
-640×640 square; no other edits.
+These 11 images back the sign-up-free demo (`apps/web/src/features/demo/demoData.ts`)
+and the landing page's template previews (`scripts/build-template-previews.mjs`).
+They are not used anywhere in the real product catalog.
 
-CC0 / Public Domain Mark entries require no attribution and are listed for
-traceability. CC BY / CC BY-SA entries are attributed below per license terms.
+**Rules for this folder (2026-09-27):**
+
+- **CC0 or Public Domain Mark only.** No CC BY / CC BY-SA — the landing page shows
+  these images and carries no attribution line, and a license that needs one is a
+  license we would be breaking. Stock-site licenses (Unsplash etc.) are out too:
+  they grant use of the photo, not of the product and brand in it.
+- **No brand may be visible.** A photo of a recognisable branded product (a logo,
+  a famous bottle, a signature design) is a trademark problem whatever the photo's
+  license says. Where a CC0/PD photo carried a small maker's mark, the mark was
+  painted over (both licenses allow modification); see "Edits" below.
+- The demo's products are all `Unbranded`, with invented ASINs and no real model
+  numbers or UPCs.
+
+All images are center-cropped/padded to a 640×640 square.
 
 | File | License | Creator | Source |
 |---|---|---|---|
 | wireless-earbuds.jpg | Public Domain Mark 1.0 | superbsavers | https://www.flickr.com/photos/52063601444 |
 | usb-c-charger.jpg | CC0 1.0 | shop8447 | https://www.flickr.com/photos/185514373@N06/49061301182 |
-| laptop-stand.jpg | CC BY 2.0 | Lotus823 | https://www.flickr.com/photos/81624203@N00/6266703808 |
-| water-bottle.jpg | CC BY-SA 4.0 | Schekinov Alexey Victorovich | https://commons.wikimedia.org/w/index.php?curid=81735876 |
 | desk-lamp.jpg | CC0 1.0 | shop8447 | https://www.flickr.com/photos/185514373@N06/49061488801 |
-| mechanical-keyboard.jpg | CC BY 2.0 | Triple-green | https://www.flickr.com/photos/66451944@N03/52766711146 |
 | bluetooth-speaker.jpg | CC0 1.0 | rawpixel | https://www.rawpixel.com/image/11524457/pink-waterproof-speaker-shower-glass |
 | memory-foam-pillow.jpg | CC0 1.0 | Jay Mantri | https://stocksnap.io/photo/pillows-sheets-M0YZ9Q79DZ |
-| cast-iron-skillet.jpg | CC BY 2.0 | Rachel Tayse | https://www.flickr.com/photos/11921146@N03/4404812413 |
 | yoga-mat.jpg | CC0 1.0 | rawpixel | https://www.rawpixel.com/ |
 | kitchen-scale.jpg | CC0 1.0 | shop8447 | https://www.flickr.com/photos/185514373@N06/49061906003 |
-| air-fryer.jpg | CC BY 4.0 | Ashley Pomeroy | https://commons.wikimedia.org/wiki/File:Air_Fryer_5458.jpg |
-| resistance-bands.jpg | Public Domain Mark 1.0 | 953031326 | https://www.flickr.com/photos/188096854@N08/49792949486 |
-| cable-management-box.jpg | Public Domain Mark 1.0 | Hardgrave Photography | https://www.flickr.com/photos/61023765@N04/42546189742 |
 | webcam.jpg | CC0 1.0 | rawpixel | https://www.rawpixel.com/ |
 | lunch-bag.jpg | CC0 1.0 | shop8447 | https://www.flickr.com/photos/185514373@N06/49061132756 |
 | milk-frother.jpg | CC0 1.0 | Ll1324 | https://commons.wikimedia.org/wiki/File:Milk_frother_wand_battery_powered.jpg |
 | dumbbell.jpg | Public Domain Mark 1.0 | mahsle7 | https://www.flickr.com/photos/195746505@N07/52113220577 |
-| vacuum-filter.jpg | CC BY-SA 2.0 | originaldaniel | https://www.flickr.com/photos/184613180@N08/50131456968 |
-| standing-desk-converter.jpg | CC BY-SA 2.0 | mastermaq | https://www.flickr.com/photos/24311648@N00/19548014198 |
+
+## Edits
+
+- `kitchen-scale.jpg` — maker's wordmark on the top plate painted out; the branded
+  batteries beside the scale removed.
+- `lunch-bag.jpg` — maker's name on the leather tag painted out (blank tag).
+- `wireless-earbuds.jpg` — maker's logo on both earbud caps painted out.

@@ -97,12 +97,12 @@ function round2(n: number): number {
 /**
  * Demo mode has no product catalog to photograph — the ASINs are invented,
  * so there is no real Amazon image to fetch. Instead every demo product
- * ships a real, freely-licensed (CC0/PDM/CC BY/CC BY-SA) photo of a generic
- * item matching its category, bundled as a static asset under
- * `apps/web/public/demo-products/` — same-origin, no network request at
- * runtime, keeping the demo's "zero external requests" rule (see CLAUDE.md)
- * intact. Attribution for the CC BY / CC BY-SA entries lives in
- * `apps/web/public/demo-products/CREDITS.md`.
+ * ships a public-domain (CC0 / Public Domain Mark) photo of an UNBRANDED item,
+ * bundled as a static asset under `apps/web/public/demo-products/` —
+ * same-origin, no network request at runtime, keeping the demo's "zero
+ * external requests" rule (see CLAUDE.md) intact. These photos also appear on
+ * the landing page, so no brand may be visible in them and no license may need
+ * attribution — see `apps/web/public/demo-products/CREDITS.md`.
  */
 function demoProductImage(slug: string): string {
   return `/demo-products/${slug}.jpg`;
@@ -133,21 +133,17 @@ interface DemoProduct {
 }
 
 const PRODUCTS: DemoProduct[] = [
-  { asin: 'B0C6K9VW20', title: 'VR Headset, Advanced All-In-One Virtual Reality', category: 'Consumer Electronics', brand: 'Meta', cost: 210.0, price: 399.0, slug: 'vr-headset', description: 'Immerse yourself in a virtual world with this advanced all-in-one VR headset. Enjoy high-resolution displays, built-in spatial audio, and an extensive library of games and apps without needing a PC or console.', features: ['High-resolution displays', 'Built-in spatial audio', 'Extensive app library'] },
-  { asin: 'B0C3H8NRQ0', title: 'Luxury Eau de Parfum, 50ml, Floral & Woody', category: 'Health & Beauty', brand: 'Tom Ford', cost: 85.0, price: 175.0, slug: 'luxury-perfume', description: 'Experience the ultimate luxury with this exquisite eau de parfum. Featuring a captivating blend of floral and woody notes, this long-lasting fragrance is perfect for any occasion.', features: ['50ml spray bottle', 'Floral & Woody notes', 'Long-lasting'] },
-  { asin: 'B08XYQ4M6E', title: 'Mechanical Gaming Keyboard, RGB, Cherry MX Switches', category: 'Computers/Tablets', brand: 'Keychron', cost: 55.2, price: 119.95, slug: 'mechanical-keyboard', description: 'Dominate your games with this mechanical keyboard featuring authentic Cherry MX switches. Customizable RGB lighting and a durable aluminum frame make it a must-have for any gamer or typist.', features: ['Cherry MX Switches', 'Customizable RGB lighting', 'Durable aluminum frame'] },
-  { asin: 'B08N5WRWN1', title: 'Active Noise Cancelling Headphones, Over-Ear', category: 'Consumer Electronics', brand: 'Sony', cost: 145.0, price: 298.0, slug: 'anc-headphones', description: 'Enjoy pure audio bliss with these over-ear headphones featuring industry-leading active noise cancellation. Up to 30 hours of battery life and touch controls for seamless operation.', features: ['Active Noise Cancelling', '30 hours battery life', 'Touch controls'] },
-  { asin: 'B0B3MPT7X1', title: 'Minimalist Automatic Watch, Sapphire Crystal', category: 'Jewelry & Watches', brand: 'Seiko', cost: 110.0, price: 249.99, slug: 'luxury-watch', description: 'Elevate your style with this minimalist automatic watch. Featuring a durable sapphire crystal, precise automatic movement, and a premium leather strap for timeless elegance.', features: ['Sapphire crystal', 'Automatic movement', 'Premium leather strap'] },
-  { asin: 'B07QK9ZM31', title: 'Professional Blender 1500W, Auto-iQ Technology', category: 'Home & Garden', brand: 'Ninja', cost: 75.0, price: 159.99, slug: 'professional-blender', description: 'Blend smoothies, crush ice, and puree ingredients with this powerful 1500W professional blender. Auto-iQ technology ensures perfect results with a single touch.', features: ['1500W power', 'Auto-iQ technology', 'Crushes ice'] },
-  { asin: 'B0CJ4X2LM0', title: '4K Camera Drone, 3-Axis Gimbal, 60 Min Flight Time', category: 'Consumer Electronics', brand: 'DJI', cost: 320.0, price: 599.0, slug: 'camera-drone', description: 'Capture stunning aerial photography in 4K resolution. This drone features a 3-axis gimbal for ultra-smooth video, intelligent flight modes, and an impressive 60-minute flight time.', features: ['4K resolution', '3-axis gimbal', '60 Min Flight Time'] },
-  { asin: 'B0C9M8N7P6', title: 'Smart Home Thermostat, Wi-Fi Enabled, Energy Saving', category: 'Home & Garden', brand: 'Nest', cost: 95.0, price: 189.0, slug: 'smart-thermostat', description: 'Save energy and stay comfortable with this smart Wi-Fi thermostat. Learns your habits and programs itself, while allowing you to control the temperature from anywhere using your phone.', features: ['Wi-Fi enabled', 'Energy saving', 'Learns your habits'] },
-  { asin: 'B09H7RT4K0', title: 'Ergonomic Office Chair with Lumbar Support', category: 'Home & Garden', brand: 'Herman Miller', cost: 350.0, price: 799.0, slug: 'ergonomic-chair', description: 'Work in comfort all day with this premium ergonomic office chair. Features adjustable lumbar support, breathable mesh material, and customizable armrests for perfect posture.', features: ['Adjustable lumbar support', 'Breathable mesh', 'Customizable armrests'] },
-  { asin: 'B07T5N9YQ0', title: 'Smart Security Camera, 1080p, 2-Way Audio', category: 'Consumer Electronics', brand: 'Ring', cost: 42.0, price: 89.95, slug: 'security-camera', description: 'Keep your home safe with this 1080p smart security camera. Features motion detection, night vision, and two-way audio to let you see, hear, and speak to visitors from anywhere.', features: ['1080p resolution', '2-Way Audio', 'Motion detection'] },
-  { asin: 'B00006JSU0', title: 'Robot Vacuum and Mop Combo, Lidar Navigation', category: 'Home & Garden', brand: 'Roborock', cost: 280.0, price: 549.99, slug: 'robot-vacuum', description: 'Effortlessly clean your floors with this advanced robot vacuum and mop combo. Lidar navigation creates accurate maps for efficient cleaning, while strong suction handles dirt and pet hair.', features: ['Lidar navigation', 'Mop combo', 'Strong suction'] },
-  { asin: 'B08RL5T7W0', title: 'Professional Percussion Massage Gun, Deep Tissue', category: 'Health & Beauty', brand: 'Theragun', cost: 120.0, price: 249.0, slug: 'massage-gun', description: 'Relieve muscle tension and accelerate recovery with this professional deep tissue massage gun. Features multiple speed settings, interchangeable attachments, and a quiet motor.', features: ['Deep tissue massage', 'Multiple speed settings', 'Interchangeable attachments'] },
-  { asin: 'B0BXQ9L4T0', title: 'Polarized Aviator Sunglasses, UV400 Protection', category: 'Apparel & Accessories', brand: 'Ray-Ban', cost: 65.0, price: 145.0, slug: 'aviator-sunglasses', description: 'Protect your eyes in style with these classic aviator sunglasses. Polarized lenses reduce glare and provide 100% UV400 protection against harmful rays.', features: ['Polarized lenses', 'UV400 protection', 'Classic aviator style'] },
-  { asin: 'B0C9TR5NK0', title: 'Adjustable Smart Dumbbells Set, App Connected', category: 'Sporting Goods', brand: 'Bowflex', cost: 210.0, price: 399.0, slug: 'smart-dumbbells', description: 'Transform your home gym with these adjustable smart dumbbells. Easily change weights with a simple turn, and connect to the fitness app to track your workouts and progress.', features: ['Adjustable weights', 'App connected', 'Space-saving'] },
-  { asin: 'B08LM2ZQ70', title: 'Premium Conical Burr Coffee Grinder, 40 Settings', category: 'Home & Garden', brand: 'Baratza', cost: 85.0, price: 169.95, slug: 'coffee-grinder', description: 'Unlock the full flavor of your coffee beans with this conical burr grinder. Offers 40 precise grind settings from espresso to French press, ensuring a perfect cup every time.', features: ['Conical burr grinder', '40 grind settings', 'Precise dosing'] },
+  { asin: 'B0SH2L4N8C', title: 'Insulated Lunch Bag, Leakproof Cooler Tote for Work & Picnic', category: 'Home & Garden', brand: 'Unbranded', cost: 9.8, price: 24.99, slug: 'lunch-bag', description: 'Keeps food cold for hours with thick foam insulation and a leakproof, wipe-clean liner. Sized for a full day out, with sturdy carry handles.', features: ['Thermal foam insulation', 'Leakproof, wipe-clean liner', 'Sturdy carry handles'] },
+  { asin: 'B0SH7P3K1D', title: 'Portable Shower Speaker, Waterproof, Suction Cup Mount', category: 'Consumer Electronics', brand: 'Unbranded', cost: 8.4, price: 21.99, slug: 'bluetooth-speaker', description: 'Take your music into the shower. A strong suction cup, splash-proof shell and simple button controls make this compact speaker easy to use anywhere.', features: ['Waterproof shell', 'Suction cup mount', 'Built-in microphone'] },
+  { asin: 'B0SH5M9R2E', title: 'Memory Foam Pillow, Cooling Gel, Contour Neck Support', category: 'Health & Beauty', brand: 'Unbranded', cost: 18.5, price: 44.99, slug: 'memory-foam-pillow', description: 'Contoured memory foam cradles your head and neck, while a cooling gel layer keeps the surface fresh through the night.', features: ['Ergonomic contour', 'Cooling gel layer', 'Washable cover'] },
+  { asin: 'B0SH4Q6T7F', title: 'Wireless Earbuds, Active Noise Cancelling, 40H Battery', category: 'Consumer Electronics', brand: 'Unbranded', cost: 22.0, price: 59.99, slug: 'wireless-earbuds', description: 'Hybrid active noise cancelling, a 40-hour charging case and a low-latency game mode, in earbuds that weigh under 5 grams each.', features: ['Active noise cancelling', '40 hours with the case', 'IPX5 water resistant'] },
+  { asin: 'B0SH8V2W5G', title: 'Clip-On LED Ring Light, 3 Color Modes, USB Powered', category: 'Health & Beauty', brand: 'Unbranded', cost: 7.9, price: 19.99, slug: 'desk-lamp', description: 'A flexible clip-on ring light for makeup, reading and video calls. Three color temperatures and ten brightness levels, powered from any USB port.', features: ['3 color modes', 'Flexible gooseneck', 'USB powered'] },
+  { asin: 'B0SH3X7Y9H', title: '65W USB-C Wall Charger with 2 Cables and Adapter', category: 'Computers/Tablets', brand: 'Unbranded', cost: 14.2, price: 34.99, slug: 'usb-c-charger', description: 'Fast-charge a laptop, tablet or phone from one compact wall charger. Includes two USB-C cables and a USB-A adapter.', features: ['65W fast charging', 'Foldable plug', 'Cables included'] },
+  { asin: 'B0SH6Z1A4J', title: 'Non-Slip Yoga Mat, 6mm Thick, Lightweight', category: 'Sporting Goods', brand: 'Unbranded', cost: 11.5, price: 29.99, slug: 'yoga-mat', description: 'A cushioned 6mm mat with a textured, non-slip surface for yoga, pilates and floor workouts. Light enough to carry to class.', features: ['6mm cushioning', 'Non-slip texture', 'Lightweight'] },
+  { asin: 'B0SH9B5C3K', title: 'Handheld Milk Frother, Battery Powered, Stainless Whisk', category: 'Home & Garden', brand: 'Unbranded', cost: 4.6, price: 14.99, slug: 'milk-frother', description: 'Whip up creamy foam for lattes, matcha and hot chocolate in seconds. A stainless steel whisk and a comfortable grip make it quick to use and easy to rinse.', features: ['Stainless steel whisk', 'Battery powered', 'Easy to clean'] },
+  { asin: 'B0SH1D8E6L', title: 'Digital Kitchen Scale, 0.1 oz Precision, Stainless Steel', category: 'Home & Garden', brand: 'Unbranded', cost: 9.2, price: 24.99, slug: 'kitchen-scale', description: 'Weigh ingredients to the gram for baking, meal prep and coffee. A bright backlit display and one-touch tare keep measuring fast.', features: ['0.1 oz / 1 g precision', 'Tare function', 'Backlit display'] },
+  { asin: 'B0SH4F2G7M', title: 'HD Webcam with Microphone, Clip-On, Plug and Play', category: 'Computers/Tablets', brand: 'Unbranded', cost: 12.8, price: 32.99, slug: 'webcam', description: 'Clear video for calls and streaming with a built-in microphone and a universal clip that fits laptops and monitors. No drivers needed.', features: ['HD video', 'Built-in microphone', 'Universal clip'] },
+  { asin: 'B0SH7H6J2N', title: 'Neoprene Dumbbell Pair with Jump Rope, Home Workout Set', category: 'Sporting Goods', brand: 'Unbranded', cost: 13.4, price: 34.99, slug: 'dumbbell', description: 'A pair of soft-coated dumbbells with a matching jump rope for quick home workouts. The neoprene coating is gentle on floors and easy to grip.', features: ['Neoprene coating', 'Non-slip grip', 'Jump rope included'] },
 ];
 
 /* ── Identity ─────────────────────────────────────────────────────────── */
@@ -204,17 +200,103 @@ export const DEMO_EBAY_ACCOUNTS = {
  * sequence). All other listings keep their 100+‑day spread and stay below.
  */
 const PINNED_LISTING_ASINS: readonly string[] = [
-  'B08N5WRWN1', // Active Noise Cancelling Headphones, Over-Ear — Sony
-  'B08XYQ4M6E', // Mechanical Gaming Keyboard, RGB, Cherry MX Switches — Keychron
-  'B0C3H8NRQ0', // Luxury Eau de Parfum, 50ml, Floral & Woody — Tom Ford
-  'B0C9M8N7P6', // Smart Home Thermostat, Wi-Fi Enabled, Energy Saving — Nest
-  'B0CJ4X2LM0', // 4K Camera Drone, 3-Axis Gimbal, 60 Min Flight Time — DJI
-  'B07QK9ZM31', // Professional Blender 1500W, Auto-iQ Technology — Ninja
-  'B0B3MPT7X1', // Minimalist Automatic Watch, Sapphire Crystal — Seiko
+  'B0SH4Q6T7F', // Wireless Earbuds, Active Noise Cancelling
+  'B0SH5M9R2E', // Memory Foam Pillow, Cooling Gel
+  'B0SH1D8E6L', // Digital Kitchen Scale
+  'B0SH8V2W5G', // Clip-On LED Ring Light
+  'B0SH7P3K1D', // Portable Shower Speaker
+  'B0SH3X7Y9H', // 65W USB-C Wall Charger
+  'B0SH9B5C3K', // Handheld Milk Frother
 ];
 
 /** An active listing already at quantity 0 (`i % 9 === 0`), shown as unavailable on Amazon. */
 const SOURCE_REMOVED_DEMO_INDEX = 9;
+
+/**
+ * Which Setting Group a sample listing belongs to. The groups are chosen to
+ * show what the feature is FOR — a seasonal campaign and category-specific
+ * strategies living side by side in one store — rather than generic
+ * "default / high margin" labels, so the settings screen and the landing
+ * screenshots taken from it tell the same story.
+ */
+function demoGroupFor(p: DemoProduct): { id: string; name: string } {
+  if (p.category === 'Health & Beauty' || p.category === 'Jewelry & Watches') {
+    return { id: 'demo-group-2', name: DEMO_GROUP_NAMES.mothersDay };
+  }
+  if (p.category === 'Consumer Electronics' || p.category === 'Computers/Tablets') {
+    return { id: 'demo-group-3', name: DEMO_GROUP_NAMES.electronics };
+  }
+  return { id: 'demo-group-1', name: DEMO_GROUP_NAMES.everyday };
+}
+
+/**
+ * Item specifics as the create path would publish them: a real value for
+ * every attribute the source catalogue carries, not a "Does not apply"
+ * placeholder. Three pinned products carry a full table (they are the ones
+ * the landing screenshots are taken from); every other product still gets a
+ * believable handful so no listing detail renders an empty specs card.
+ */
+const DEMO_RICH_SPECS: Record<string, Record<string, string>> = {
+  B0SH4Q6T7F: {
+    Brand: 'Unbranded',
+    Type: 'In-Ear (Earbud)',
+    'Form Factor': 'True Wireless',
+    Connectivity: 'Bluetooth 5.3',
+    'Noise Control': 'Active Noise Cancellation',
+    'Battery Life': '40 Hours',
+    'Charging Time': '1.5 Hours',
+    'Charging Case': 'USB-C',
+    Microphone: 'Built-In',
+    'Water Resistance': 'IPX5',
+    Color: 'Black',
+    Features: 'Touch Controls, Low-Latency Mode, Voice Assistant',
+    'Item Weight': '1.9 oz',
+    'Included Components': 'Charging Case, USB-C Cable, Ear Tips (3 Sizes)',
+  },
+  B0SH5M9R2E: {
+    Brand: 'Unbranded',
+    Type: 'Contour Pillow',
+    'Fill Material': 'Memory Foam',
+    Size: 'Standard',
+    Firmness: 'Medium Firm',
+    'Cover Material': 'Polyester Blend',
+    'Sleeping Position': 'Back, Side',
+    Color: 'White',
+    Features: 'Cooling Gel, Removable Cover, Hypoallergenic',
+    'Care Instructions': 'Machine Washable Cover',
+  },
+  B0SH1D8E6L: {
+    Brand: 'Unbranded',
+    Type: 'Digital Kitchen Scale',
+    'Maximum Weight': '11 lb',
+    Accuracy: '0.1 oz / 1 g',
+    Display: 'Backlit LCD',
+    Material: 'Stainless Steel',
+    'Power Source': 'Battery',
+    Units: 'g, oz, lb, ml',
+    Color: 'Silver',
+    Features: 'Tare Function, Auto Off, Low Battery Indicator',
+  },
+};
+
+function demoSpecsFor(p: DemoProduct): Record<string, string> {
+  const rich = DEMO_RICH_SPECS[p.asin];
+  if (rich) {
+    return rich;
+  }
+  const specs: Record<string, string> = { Brand: p.brand, Type: p.category };
+  (p.features ?? []).slice(0, 3).forEach((feature, index) => {
+    specs[`Feature ${index + 1}`] = feature;
+  });
+  return specs;
+}
+
+const DEMO_GROUP_NAMES = {
+  everyday: 'Everyday essentials',
+  mothersDay: "Mother's Day gifts",
+  electronics: 'Electronics',
+  automotive: 'Automotive',
+} as const;
 
 function buildListings(): ListingDto[] {
   const rand = seeded(97);
@@ -236,13 +318,14 @@ function buildListings(): ListingDto[] {
       title: p.title,
       description: p.description,
       features: p.features,
+      specs: demoSpecsFor(p),
       price: p.price,
       currency: DEMO_CURRENCY,
       quantity,
       imageUrls: [demoProductImage(p.slug)],
       ebayListingId: status === ListingStatus.DRAFT ? undefined : `1${(255000000000 + i * 137).toString()}`,
-      listingSettingsGroupId: 'demo-group-1',
-      listingSettingsGroupName: i % 3 === 0 ? 'High margin' : 'Default strategy',
+      listingSettingsGroupId: demoGroupFor(p).id,
+      listingSettingsGroupName: demoGroupFor(p).name,
       paymentPolicyId: 'demo-payment',
       shippingPolicyId: 'demo-shipping',
       returnPolicyId: 'demo-return',
@@ -290,6 +373,9 @@ export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
   new Set(PRODUCTS.map((p) => p.category))
 ).sort();
 
+/** Hours between two price/stock checks (four a day). */
+const REFRESH_STEP_HOURS = 6;
+
 /* ── Listing price/stock revision history ─────────────────────────────────
  * The revisions feature (drawer + `GET /listings/:id/revisions`) exists in
  * full; without fixtures the demo listing detail page just never shows the
@@ -329,7 +415,7 @@ export function demoListingRevisions(listingId: string): {
   // Floor of 24 so even a week-old listing spills past one page and shows the
   // "load more" control; an old listing climbs toward hundreds of rows.
   const rowCount = Math.min(240, Math.max(24, Math.round(daysListed * 0.9)));
-  const avgStepDays = Math.max(0.75, daysListed / rowCount);
+  const avgStepDays = Math.max(0.5, daysListed / rowCount);
 
   const rows: ReturnType<typeof demoListingRevisions> = [];
 
@@ -339,7 +425,12 @@ export function demoListingRevisions(listingId: string): {
   // (older) row's `previousX`.
   let newPrice = listing.price;
   let newQuantity = listing.quantity;
-  let hoursAgo = 6 + Math.floor(rand() * 18); // most recent change: within ~1 day
+  // Changes land on the refresh schedule — four checks a day, one every six
+  // hours — so the history reads like the cadence the product runs on. A check
+  // that found nothing to change writes no row, which is why rows skip slots.
+  const now = new Date();
+  const sinceLastCheck = (now.getUTCHours() % REFRESH_STEP_HOURS) + now.getUTCMinutes() / 60 - 0.05;
+  let hoursAgo = sinceLastCheck + REFRESH_STEP_HOURS * Math.floor(rand() * 3);
 
   for (let i = 0; i < rowCount; i += 1) {
     // Mostly small repricer nudges tracking a competitor; the occasional
@@ -372,7 +463,8 @@ export function demoListingRevisions(listingId: string): {
 
     newPrice = previousPrice;
     newQuantity = previousQuantity;
-    hoursAgo += Math.round(avgStepDays * (0.5 + rand()) * 24) + Math.floor(rand() * 12);
+    const slots = Math.max(1, Math.round((avgStepDays * (0.5 + rand()) * 24) / REFRESH_STEP_HOURS));
+    hoursAgo += slots * REFRESH_STEP_HOURS;
   }
 
   return rows; // newest-first
@@ -823,6 +915,21 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
   ].filter(Boolean) as ActionCenterSummaryDto['groups'][number]['items'];
 
   const listingItems = [
+    // A blacklist hit is the seller's own rule working as intended — the
+    // listing was stopped before a banned word reached a buyer — so the demo
+    // shows it the way a real account would see it: something to review.
+    {
+      key: ActionCenterItemKey.LISTING_JOB_FAILURES,
+      group: ActionCenterGroup.LISTINGS,
+      severity: ActionCenterSeverity.WARNING,
+      count: 3,
+      breakdown: [
+        { code: ListingFailureCode.BLACKLISTED_KEYWORD, count: 2 },
+        { code: ListingFailureCode.ZERO_STOCK, count: 1 },
+      ],
+      context: { days: 7 },
+      actionPath: '/listings/jobs',
+    },
     outOfStock > 0 && {
       key: ActionCenterItemKey.LISTING_OUT_OF_STOCK,
       group: ActionCenterGroup.LISTINGS,
@@ -1115,8 +1222,8 @@ function group(
 export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
   group(
     'demo-group-1',
-    'Default strategy',
-    'Everyday products. Margin tapers as price climbs.',
+    DEMO_GROUP_NAMES.everyday,
+    'Home and kitchen staples. Margin tapers as price climbs.',
     [
       { min: 0, max: 25, pct: 25 },
       { min: 25, max: 60, pct: 18 },
@@ -1129,26 +1236,39 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
   ),
   group(
     'demo-group-2',
-    'High margin',
-    'Slower-moving items where margin matters more than volume.',
+    DEMO_GROUP_NAMES.mothersDay,
+    'Seasonal campaign: gift-ready template, higher margin until mid-May.',
     [
-      { min: 0, max: 40, pct: 32 },
-      { min: 40, max: 500, pct: 24 },
+      { min: 0, max: 100, pct: 30 },
+      { min: 100, max: 500, pct: 22 },
     ],
     2,
     1,
-    'demo-tpl-ds-minimalist',
+    'demo-tpl-ds-beauty-health',
     { strip: true, aiTitle: true, aiDesc: true }
   ),
   group(
     'demo-group-3',
-    'Fast movers',
-    'Thin margin, higher quantity, no AI rewrite.',
-    [{ min: 0, max: 500, pct: 11 }],
-    5,
-    2,
+    DEMO_GROUP_NAMES.electronics,
+    'Spec-heavy template, larger stock buffer for fast-moving tech.',
+    [
+      { min: 0, max: 150, pct: 16 },
+      { min: 150, max: 1000, pct: 11 },
+    ],
+    4,
+    3,
     'demo-tpl-ds-tech-gadgets',
-    { strip: false, aiTitle: false, aiDesc: false }
+    { strip: true, aiTitle: true, aiDesc: false }
+  ),
+  group(
+    'demo-group-4',
+    DEMO_GROUP_NAMES.automotive,
+    'Car parts and accessories only: fitment-focused template.',
+    [{ min: 0, max: 500, pct: 20 }],
+    2,
+    2,
+    'demo-tpl-ds-auto-parts',
+    { strip: true, aiTitle: false, aiDesc: false }
   ),
 ];
 
@@ -1243,9 +1363,9 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
 ];
 
 const JOB_ASINS = [
-  'B0CJ4X2LMN', 'B09H7RT4KP', 'B08N5WRWNW', 'B07QK9ZM3T',
-  'B0B3MPT7XL', 'B0C6K9VW21', 'B08XYQ4M6D', 'B07T5N9YQ2',
-  'B00006JSUA', 'B09MTQ8FZ3', 'B0BV7K2QLM', 'B0C3H8NRQ4',
+  'B0SJ2A7C4D', 'B0SJ5E1F8G', 'B0SJ9H3K2L', 'B0SJ4M6N1P',
+  'B0SJ7Q2R5S', 'B0SJ1T8V3W', 'B0SJ6X4Y9Z', 'B0SJ3A5B7C',
+  'B0SJ8D2E6F', 'B0SJ2G9H4K', 'B0SJ5L1M8N', 'B0SJ7P3Q2R',
 ];
 
 export function demoJobItems(jobId: string): ListingJobItemDto[] {

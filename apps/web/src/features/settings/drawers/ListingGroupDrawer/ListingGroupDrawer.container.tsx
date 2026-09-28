@@ -220,21 +220,25 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       const base = templates.find((tpl: PredefinedTemplateResponse) => tpl.id === lastPredefinedId);
       return {
         htmlContent: watchedTemplates.customTemplateHtml || '',
+        // No ready-made template was picked first: preview with the same
+        // unbranded, public-domain sample product as the Tech Gadgets template.
         sampleData: base?.sampleData ?? {
           title: t('listingSettingsGroup.sample.productTitle'),
-          main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
+          main_image: '/template-samples/wireless-earbuds.jpg',
           product_description: t('listingSettingsGroup.sample.productDescription'),
+          has_features: '1',
+          has_details: '1',
           feature_bullets: [
-            'Industry-leading noise cancellation',
-            'Up to 30-hour battery life',
-            'Touch sensor controls',
-            'Quick attention mode',
+            'Active noise cancelling for travel and focus',
+            '40 hours total with the charging case',
+            'Low-latency mode for gaming',
+            'IPX5 sweat and water resistant',
           ],
           product_details: [
-            'Brand: SellerHill Audio',
-            'Connectivity: Bluetooth 5.0',
-            'Noise Cancelling: Yes',
-            'Color: Silver',
+            'Brand: Unbranded',
+            'Connectivity: Bluetooth 5.3',
+            'Battery Life: 40 Hours',
+            'Color: Black',
           ],
         },
       };

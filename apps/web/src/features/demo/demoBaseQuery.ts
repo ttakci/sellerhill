@@ -248,6 +248,38 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   return rows;
 }
 
+/* ── Template catalog ─────────────────────────────────────────────────── */
+
+/** The real catalog, written by `scripts/build-template-previews.mjs`. */
+const DEMO_TEMPLATE_CATALOG_URL = '/template-samples/catalog.json';
+
+interface DemoTemplateCatalogEntry {
+  slug: string;
+  htmlContent: string;
+  sampleData: Record<string, string | string[]>;
+}
+
+let demoTemplatesPromise: Promise<typeof DEMO_PREDEFINED_TEMPLATES> | null = null;
+
+/**
+ * The picker previews the REAL templates with their real sample products, from
+ * the same static file the landing gallery is built with — the demo has no API,
+ * and the placeholders alone would show an empty preview. Read once per page
+ * load; if the file is unavailable the placeholders are served instead.
+ */
+function loadDemoPredefinedTemplates(): Promise<typeof DEMO_PREDEFINED_TEMPLATES> {
+  demoTemplatesPromise ??= fetch(DEMO_TEMPLATE_CATALOG_URL)
+    .then((response) => (response.ok ? (response.json() as Promise<DemoTemplateCatalogEntry[]>) : []))
+    .then((entries) =>
+      DEMO_PREDEFINED_TEMPLATES.map((template) => {
+        const real = entries.find((entry) => entry.slug === template.slug);
+        return real ? { ...template, htmlContent: real.htmlContent, sampleData: real.sampleData } : template;
+      })
+    )
+    .catch(() => DEMO_PREDEFINED_TEMPLATES);
+  return demoTemplatesPromise;
+}
+
 /* ── Router ───────────────────────────────────────────────────────────── */
 
 export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -412,7 +444,7 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   }
 
   if (path === '/listing-settings-group/predefined-templates') {
-    return ok(DEMO_PREDEFINED_TEMPLATES);
+    return ok(await loadDemoPredefinedTemplates());
   }
 
   if (path === '/ebay/business-policies') {
