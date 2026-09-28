@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  ListingJobQueuedSummary,
   PolicyType,
   createListingsSchema,
   isValidAsinShape,
   parseAsins,
+  resolveListingJobQueuedSummary,
   type CreateListingsFormData,
   type CreateListingsRequest,
 } from '@repo/shared';
@@ -62,6 +64,25 @@ const writePreferences = (preferences: AddListingsDrawerPreferences) => {
     window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
   } catch {
     // Storage can be unavailable in privacy mode; the drawer must remain usable.
+  }
+};
+
+/**
+ * i18n key for the post-submit success toast. The draft/live split only
+ * matters when something was actually queued — an all-duplicates submission
+ * reads the same either way, since nothing happened.
+ */
+const resolveQueuedMessageKey = (summary: ListingJobQueuedSummary, asDraft: boolean): string => {
+  switch (summary) {
+    case ListingJobQueuedSummary.ALL_SKIPPED_DUPLICATES:
+      return 'listings:listings.success.allSkippedDuplicates';
+    case ListingJobQueuedSummary.QUEUED_WITH_SKIPPED_DUPLICATES:
+      return asDraft
+        ? 'listings:listings.success.queuedDraftWithSkipped'
+        : 'listings:listings.success.queuedWithSkipped';
+    case ListingJobQueuedSummary.ALL_QUEUED:
+    default:
+      return asDraft ? 'listings:listings.success.queuedDraft' : 'listings:listings.success.queued';
   }
 };
 
@@ -130,14 +151,16 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   React.useEffect(() => {
     if (isSuccess && submitData) {
       const wasDraft = lastSubmittedAsDraft.current;
+      const skipped = submitData.skippedDuplicateCount ?? 0;
+      const summary = resolveListingJobQueuedSummary(submitData.totalAsins, skipped);
       resetMutation();
       onClose();
       showMessage(
         {
           type: 'info',
           headerKey: 'translation:message.success.header',
-          descriptionKey: wasDraft ? 'listings:listings.success.queuedDraft' : 'listings:listings.success.queued',
-          descriptionParams: { count: submitData.totalAsins },
+          descriptionKey: resolveQueuedMessageKey(summary, wasDraft),
+          descriptionParams: { count: submitData.totalAsins, skipped },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
             onClick: () => {

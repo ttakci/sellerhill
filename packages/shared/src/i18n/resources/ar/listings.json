@@ -99,6 +99,7 @@
         "asin_not_found": "لم يتم العثور على ASIN، فلا يوجد منتج مطابق لهذا المعرّف.",
         "product_data_unavailable": "تعذّر جلب بيانات منتج Amazon لرقم ASIN هذا.",
         "source_price_unavailable": "تعذّرت قراءة سعر Amazon.",
+        "no_buy_box": "لا يعرض Amazon صندوق شراء (Buy Box) لهذا المنتج (يعرض فقط \"See All Buying Options\")، لذا لا يمكن إدراجه تلقائياً. أعد إضافة رمز ASIN عندما يعرض Amazon صندوق الشراء مجدداً.",
         "category_unresolved": "تعذّر على eBay مطابقة هذا المنتج مع فئة إدراج.",
         "category_aspects_unavailable": "بيانات خصائص المنتج لدى eBay غير متاحة مؤقتاً.",
         "aspect_missing": "يتطلب eBay خاصية المنتج {{aspects}} ولم نتمكن من استنتاج قيمة لها.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "تم إنشاء {{count}} إدراجاً بنجاح",
       "queued": "تم وضع {{count}} إدراجاً في قائمة المعالجة",
-      "queuedDraft": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار، ولن تُنشر إلى أن تنشرها بنفسك"
+      "queuedDraft": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار، ولن تُنشر إلى أن تنشرها بنفسك",
+      "queuedWithSkipped": "تم وضع {{count}} إدراجاً في قائمة المعالجة (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)",
+      "queuedDraftWithSkipped": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)، ولن تُنشر إلى أن تنشرها بنفسك",
+      "allSkippedDuplicates": "جميع {{skipped}} من رموز ASIN موجودة بالفعل في إدراجاتك — لم تبدأ أي عملية جديدة"
     },
     "errors": {
       "createFailed": "تعذّر إنشاء الإدراجات",

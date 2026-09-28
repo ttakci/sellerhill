@@ -36,6 +36,7 @@ export {
   EBAY_EPS_IMAGE_BASE_URL,
   extractEpsImageId,
   isEpsImageUrl,
+  readEpsImageDimensions,
   readEpsImageUrl,
   resolveDescriptionUrl,
   resolveGalleryUrls,
@@ -43,6 +44,7 @@ export {
 export { isValidTotpSecret, normalizeTotpSecret } from './utils/totp-secret';
 export { formatSourceStock } from './utils/source-stock';
 export { isValidProxyUrl, partitionProxyList, splitProxyList } from './utils/proxy-url';
+export { ListingJobQueuedSummary, resolveListingJobQueuedSummary } from './utils/listing-job-summary';
 export type { ProxyListPartition } from './utils/proxy-url';
 export {
   PlatformSettingDraftIssue,

@@ -28,6 +28,8 @@
  * the one that actually serves images. Do not assume it also serves
  * anything else this app calls.
  */
+import { EBAY_MIN_IMAGE_LONGEST_SIDE } from '../domain/listings/listings.constants';
+
 export const EBAY_EPS_IMAGE_BASE_URL = 'https://apim.ebay.com/commerce/media/v1_beta';
 
 const EPS_HOST = 'https://i.ebayimg.com/';
@@ -80,7 +82,68 @@ export function readEpsImageUrl(body: string): string | null {
  * one Amazon-hosted photo.
  */
 export function resolveGalleryUrls(sourceUrls: string[], epsBySource: Map<string, string>): string[] {
-  return (sourceUrls ?? []).map((source) => epsBySource.get(source) ?? source);
+  const gallery = (sourceUrls ?? []).map((source) => epsBySource.get(source) ?? source);
+  // eBay refuses the WHOLE listing when any picture is under its Picture
+  // Policy minimum — seen live on one 269x331 image Amazon had no hi-res for.
+  // Only EPS URLs are judged: eBay encodes their real size, a source URL's is
+  // unknown and is kept. If every image is too small the list is returned
+  // unfiltered: an empty gallery publishes with eBay's placeholder (a live
+  // listing with no photo), and eBay's own refusal is the better outcome.
+  const large = gallery.filter((url) => !isBelowPicturePolicy(url));
+  return large.length > 0 ? large : gallery;
+}
+
+function isBelowPicturePolicy(url: string): boolean {
+  const size = readEpsImageDimensions(url);
+  return size !== null && Math.max(size.width, size.height) < EBAY_MIN_IMAGE_LONGEST_SIDE;
+}
+
+/**
+ * The pixel size eBay encodes in an EPS URL: `https://i.ebayimg.com/00/s/<b64>/…`
+ * where `<b64>` is base64 of `"<width>X<height>"` (e.g. `MjY5WDMzMQ==` →
+ * `269X331`). Null for any URL not in that shape — the caller must then treat
+ * the size as unknown, never as small.
+ */
+export function readEpsImageDimensions(url: string): { width: number; height: number } | null {
+  if (!isEpsImageUrl(url)) {
+    return null;
+  }
+  // One path segment, so never a `/` — the unpadded form (`MTM2OFgxMjMy`) would
+  // otherwise run on into the next segment.
+  const encoded = /\/00\/s\/([A-Za-z0-9+]+={0,2})\//.exec(url)?.[1];
+  if (!encoded) {
+    return null;
+  }
+  const decoded = decodeBase64Ascii(encoded);
+  const match = decoded ? /^(\d{1,5})X(\d{1,5})$/.exec(decoded) : null;
+  return match ? { width: Number(match[1]), height: Number(match[2]) } : null;
+}
+
+const BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+/**
+ * Minimal base64 → ASCII, platform-free on purpose: this module runs in the
+ * browser (no `Buffer`) and in Node (where `atob` is not guaranteed on every
+ * supported version), and it only ever decodes a short `WxH` string.
+ */
+function decodeBase64Ascii(input: string): string | null {
+  const clean = input.replace(/=+$/, '');
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (const char of clean) {
+    const index = BASE64_ALPHABET.indexOf(char);
+    if (index === -1) {
+      return null;
+    }
+    value = (value << 6) | index;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      out += String.fromCharCode((value >> bits) & 0xff);
+    }
+  }
+  return out;
 }
 
 /**

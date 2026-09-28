@@ -22,6 +22,7 @@ import { normalizeScraperCommerce } from './source-product-normalizer';
 export type CreateFetchResult =
   | { kind: 'product'; product: ProductData }
   | { kind: 'not_found' }
+  | { kind: 'no_buy_box' }
   | { kind: 'unavailable'; outcome: SourceFetchOutcome };
 
 const MAX_ASINS_PER_REQUEST = 100;
@@ -82,6 +83,13 @@ export class ProductSourceService {
       }
       if (r.outcome === SourceFetchOutcome.NOT_FOUND) {
         out.set(asin, { kind: 'not_found' });
+        continue;
+      }
+      // Checked before the normalizer, which reads a page with neither price
+      // nor stock as a data failure ("product data unavailable", retried) —
+      // wrong for a page that was read fine and simply has nothing to buy.
+      if (r.outcome === SourceFetchOutcome.FOUND && r.signals?.noFeaturedOffer === true) {
+        out.set(asin, { kind: 'no_buy_box' });
         continue;
       }
       const observation = normalizeScraperCommerce(r, floor);

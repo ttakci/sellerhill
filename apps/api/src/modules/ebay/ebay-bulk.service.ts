@@ -358,6 +358,9 @@ export class EbayBulkService {
     for (const outcome of correlateBulkResponses(states, itemResponses, (state) => state.draft.sku)) {
       if (outcome.ok) {
         withItems.push(outcome.item);
+      } else if (this.retriesSystemError(outcome.item, outcome.entry?.errors)) {
+        // create-or-replace is idempotent: a replay just writes the item again.
+        retry.push(outcome.item);
       } else {
         settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry), undefined, outcome.entry?.errors));
       }
@@ -397,6 +400,12 @@ export class EbayBulkService {
         outcome.item.offerId = existing;
         await this.refreshOffer(context, existing, config, merchantLocationKey, outcome.item.draft);
         withOffers.push(outcome.item);
+        continue;
+      }
+      // A replay that finds the offer eBay did create after all is recovered by
+      // the existing-offer branch above, so this is safe either way.
+      if (this.retriesSystemError(outcome.item, outcome.entry?.errors)) {
+        retry.push(outcome.item);
         continue;
       }
       settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry), undefined, outcome.entry?.errors));
@@ -468,7 +477,7 @@ export class EbayBulkService {
         continue;
       }
 
-      if (isBulkSystemError(outcome.entry?.errors)) {
+      if (this.retriesSystemError(state, outcome.entry?.errors)) {
         // Transient eBay fault; the offer is orphaned and must go before a replay.
         await this.deleteOffer(context, state.offerId);
         state.offerId = undefined;
@@ -480,6 +489,16 @@ export class EbayBulkService {
     }
 
     return { settled, retry };
+  }
+
+  /**
+   * Replay an entry eBay failed with its own system error, while attempts
+   * remain. On the last attempt it is NOT queued for retry, so it settles with
+   * eBay's error entries — the retry loop would otherwise report it as
+   * ListingPublishExhaustedError, which reads as an item-specifics problem.
+   */
+  private retriesSystemError(state: DraftState, errors: EbayBulkError[] | undefined): boolean {
+    return isBulkSystemError(errors) && state.attempts < MAX_CREATE_ATTEMPTS;
   }
 
   private failure(

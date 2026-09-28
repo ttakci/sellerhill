@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN non trovato: non esiste alcun prodotto corrispondente a questo identificativo.",
         "product_data_unavailable": "Non è stato possibile recuperare i dati del prodotto Amazon per questo ASIN.",
         "source_price_unavailable": "Non è stato possibile leggere il prezzo Amazon.",
+        "no_buy_box": "Amazon non mostra alcuna Buy Box per questo prodotto (solo \"See All Buying Options\"), quindi non può essere messo in vendita automaticamente. Aggiungi di nuovo l'ASIN quando Amazon mostrerà di nuovo una Buy Box.",
         "category_unresolved": "eBay non è riuscito ad abbinare questo prodotto a una categoria di inserzione.",
         "category_aspects_unavailable": "I dati sulle caratteristiche dell'articolo di eBay sono stati temporaneamente non disponibili.",
         "aspect_missing": "eBay richiede la caratteristica dell'articolo {{aspects}} e non è stato possibile ricavarne un valore.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "{{count}} inserzioni create correttamente",
       "queued": "{{count}} inserzioni messe in coda per l'elaborazione",
-      "queuedDraft": "{{count}} inserzioni in bozza messe in coda — non andranno online finché non le pubblichi"
+      "queuedDraft": "{{count}} inserzioni in bozza messe in coda — non andranno online finché non le pubblichi",
+      "queuedWithSkipped": "{{count}} inserzioni messe in coda per l'elaborazione ({{skipped}} saltate — già presenti tra le tue inserzioni)",
+      "queuedDraftWithSkipped": "{{count}} inserzioni in bozza messe in coda ({{skipped}} saltate — già presenti tra le tue inserzioni) — non andranno online finché non le pubblichi",
+      "allSkippedDuplicates": "Tutti i {{skipped}} ASIN inseriti sono già tra le tue inserzioni — non è stata avviata alcuna nuova operazione"
     },
     "errors": {
       "createFailed": "Impossibile creare le inserzioni",

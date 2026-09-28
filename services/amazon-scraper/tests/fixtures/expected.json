@@ -47,5 +47,26 @@
     "isInStock": false,
     "onlyLeft": null,
     "imageCount": 4
+  },
+  "media_literal_initial": {
+    "asin": "B00DYWI6V6",
+    "quantityMax": 30,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 2
+  },
+  "buybox_beyond_window": {
+    "asin": "B0BX5VX8X7",
+    "quantityMax": 33,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 5
+  },
+  "no_featured_offer": {
+    "asin": "B00QTG2KV6",
+    "quantityMax": null,
+    "isInStock": null,
+    "onlyLeft": null,
+    "imageCount": 1
   }
 }
