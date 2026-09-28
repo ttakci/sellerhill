@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Hesab parametrlərinizi və şəxsi məlumatlarınızı idarə edin.",
+    "personalInfo": "Şəxsi məlumatlar",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "emailAddress": "E-poçt ünvanı",
+    "phone": "Telefon",
+    "bio": "Haqqında",
+    "address": "Ünvan",
+    "country": "Ölkə",
+    "cityState": "Şəhər/Region",
+    "postalCode": "Poçt indeksi",
+    "taxId": "VÖEN",
+    "edit": "Redaktə et",
+    "home": "Ana səhifə",
+    "defaultJobTitle": "Komanda meneceri",
+    "locationNotSet": "Məkan göstərilməyib",
+    "defaultBio": "Peşəkar e-ticarət meneceri.",
+    "updateSuccess": "Profil uğurla yeniləndi.",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL",
+    "deactivateAccount": "Hesabı deaktiv et",
+    "saveChanges": "Bütün dəyişiklikləri yadda saxla",
+    "storeOwner": "Mağaza sahibi"
+  }
+}

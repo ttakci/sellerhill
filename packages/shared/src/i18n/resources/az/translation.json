@@ -1,0 +1,952 @@
+{
+  "common": {
+    "brandName": "SellerHill",
+    "loading": "Yüklənir...",
+    "retry": "Yenidən cəhd et",
+    "ok": "OK",
+    "cancel": "Ləğv et",
+    "save": "Yadda saxla",
+    "delete": "Sil",
+    "back": "Geri",
+    "previous": "Əvvəlki",
+    "next": "Növbəti",
+    "continue": "Davam et",
+    "saveSuccess": "Dəyişikliklər uğurla yadda saxlanıldı",
+    "saveError": "Dəyişiklikləri yadda saxlamaq alınmadı",
+    "showing_info": "{{total}} qeydin {{from}}-{{to}} arası göstərilir",
+    "showing": "Göstərilir",
+    "of": "/",
+    "rowsPerPage": "Səhifədə qeyd sayı:",
+    "search": "Axtar...",
+    "noResults": "Nəticə tapılmadı",
+    "success": "Uğurlu",
+    "failed": "Uğursuz",
+    "views": {
+      "label": "Görünüş",
+      "grid": "Şəbəkə",
+      "table": "Cədvəl"
+    },
+    "actions": {
+      "refresh": "Yenilə",
+      "edit": "Redaktə et",
+      "delete": "Sil",
+      "filter": "Filtr",
+      "export": "İxrac et"
+    },
+    "privacy": "Məxfilik",
+    "support": "Dəstək",
+    "notSet": "Təyin edilməyib",
+    "notProvided": "Təqdim edilməyib",
+    "noCategory": "Kateqoriya yoxdur",
+    "details": "Təfərrüatlar",
+    "noBrand": "Brend məlumatı yoxdur",
+    "amazonLink": "AMAZON",
+    "unknownProduct": "Naməlum məhsul",
+    "languageCode": "az-AZ",
+    "select": "Seçin"
+  },
+  "validation": {
+    "required": "Bu sahə tələb olunur",
+    "countryRequired": "Zəhmət olmasa ölkə seçin",
+    "stateRequired": "Zəhmət olmasa ştat və ya məkan daxil edin",
+    "zipCodeRequired": "Zəhmət olmasa poçt indeksi daxil edin",
+    "invalidEmail": "Zəhmət olmasa düzgün e-poçt ünvanı daxil edin",
+    "invalidUrl": "Zəhmət olmasa düzgün URL daxil edin",
+    "invalidUuid": "Yanlış ID formatı",
+    "invalidPhone": "Zəhmət olmasa düzgün telefon nömrəsi daxil edin",
+    "invalidDate": "Zəhmət olmasa düzgün tarix daxil edin",
+    "mustBePositive": "Müsbət ədəd olmalıdır",
+    "minLength": "Ən azı {{min}} simvol olmalıdır",
+    "maxLength": "{{max}} simvoldan çox ola bilməz",
+    "onlyAlphanumeric": "Yalnız hərflərə, rəqəmlərə, boşluqlara, defislərə və alt cizgilərə icazə verilir",
+    "passwordRequirements": "Parolda böyük hərf, kiçik hərf və rəqəm olmalıdır",
+    "passwordStrength": "Parolda ən azı bir böyük hərf, bir kiçik hərf və bir rəqəm olmalıdır",
+    "passwordMismatch": "Parollar uyğun gəlmir",
+    "invalidStatus": "Zəhmət olmasa düzgün status seçin"
+  },
+  "dialog": {
+    "title": {
+      "info": "Məlumat",
+      "success": "Uğurlu",
+      "warning": "Xəbərdarlıq",
+      "error": "Xəta"
+    }
+  },
+  "message": {
+    "error": {
+      "header": "Xəta",
+      "goHome": "Ana səhifəyə keç",
+      "close": "Bağla",
+      "copyRequestId": "Sorğu ID-sini kopyala",
+      "requestIdCopied": "Sorğu ID-si mübadilə buferinə kopyalandı"
+    },
+    "success": {
+      "header": "Uğurlu",
+      "ok": "OK"
+    },
+    "warning": {
+      "header": "Xəbərdarlıq"
+    },
+    "info": {
+      "header": "Məlumat"
+    }
+  },
+  "errorBoundary": {
+    "title": "Xəta! Nəsə səhv getdi",
+    "message": "Narahatlığa görə üzr istəyirik. Tətbiqdə gözlənilməz xəta baş verdi.",
+    "reload": "Səhifəni yenilə",
+    "goHome": "Ana səhifəyə keç",
+    "details": "Xəta təfərrüatları (yalnız inkişaf üçün)"
+  },
+  "error": {
+    "resourceNotFound": "{{resourceId}} ID-li {{resourceName}} tapılmadı",
+    "validationFailed": "Yoxlama uğursuz oldu",
+    "unauthorized": "İcazəniz yoxdur",
+    "forbidden": "Giriş qadağandır",
+    "serverError": "Xəta baş verdi. Zəhmət olmasa daha sonra yenidən cəhd edin."
+  },
+  "products": {
+    "subtitle": "Bütün aktiv elanlarınız üçün məhsul təfərrüatlarına və Amazon məlumatlarına baxın."
+  },
+  "menu": {
+    "dashboard": "İdarə paneli",
+    "listings": "Elanlar",
+    "ebayListings": "eBay elanları",
+    "listingJobs": "Elan işləri",
+    "drafts": "Qaralamalar",
+    "products": "Məhsullar",
+    "inventory": "Anbar",
+    "orders": "Sifarişlər",
+    "stores": "Mağazalar",
+    "billing": "Ödənişlər",
+    "settings": "Parametrlər",
+    "admin": "Admin əməliyyatları",
+    "configuration": "Konfiqurasiya",
+    "storeSettings": "Mağaza parametrləri",
+    "listingSettingsGroups": "Parametr qrupları",
+    "amazonAccounts": "Amazon hesabları",
+    "reports": "Hesabatlar",
+    "support": "Dəstək",
+    "logout": "Çıxış",
+    "logoutConfirmTitle": "Xəbərdarlıq",
+    "logoutConfirmDescription": "Çıxmaq istədiyinizə əminsiniz?",
+    "logoutConfirmButton": "Çıx",
+    "editProfile": "Profili redaktə et"
+  },
+  "chatbot": {
+    "sidebarTitle": "Sualınız var?",
+    "ctaLabel": "Bizimlə əlaqə",
+    "openAria": "Dəstək söhbətini aç",
+    "unreadAria": "{{count}} oxunmamış dəstək mesajı",
+    "unreadOverflow": "99+",
+    "panelTitle": "Zon",
+    "welcomeMessage": "Salam, sizə necə kömək edə bilərəm?",
+    "placeholder": "Mesajınızı yazın…",
+    "placeholderReply": "Mesajınız üçün təşəkkürlər. Tam AI cavabları tezliklə əlçatan olacaq.",
+    "send": "Göndər",
+    "cancel": "Cavabı ləğv et",
+    "newConversation": "Yeni söhbət",
+    "conversations": "Söhbətlər",
+    "emptyTitle": "Söhbətə başlayın",
+    "emptyDescription": "Zon-dan elanlarınız, sifarişləriniz, parametrləriniz və ya hesabınız haqqında soruşun.",
+    "offline": "Oflayn rejimdəsiniz. Söhbət tarixçəniz hələ də əlçatandır.",
+    "loading": "Söhbətlər yüklənir…",
+    "connected": "Qoşulub",
+    "disconnected": "Yenidən qoşulur…",
+    "retry": "Cavabı yenidən cəhd et",
+    "refresh": "Söhbəti yenilə",
+    "minimize": "Kiçilt",
+    "expand": "Genişləndir",
+    "close": "Bağla"
+  },
+  "operator": {
+    "console": "Operator konsolu"
+  },
+  "header": {
+    "selectLanguage": "Dil seçin",
+    "notifications": "Bildirişlər",
+    "openMenu": "Menyunu aç",
+    "collapseSidebar": "Yan paneli yığ",
+    "expandSidebar": "Yan paneli aç"
+  },
+  "profile": {
+    "accountSettings": "Hesab parametrləri"
+  },
+  "languages": {
+    "en": "English",
+    "tr": "Türkçe",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "ur": "اردو",
+    "ar": "العربية",
+    "az": "Azərbaycanca"
+  },
+  "notifications": {
+    "comingSoonTitle": "Əməliyyat tezliklə",
+    "comingSoon": "Bu funksiya hazırda hazırlanır və tezliklə əlçatan olacaq."
+  },
+  "settingsHub": {
+    "title": "Parametrlər",
+    "subtitle": "Hesabınızı, inteqrasiyalarınızı və avtomatlaşdırmanı idarə edin",
+    "sections": {
+      "profile": {
+        "title": "Profil",
+        "subtitle": "Şəxsi məlumatlarınız və avatarınız",
+        "edit": "Şəxsi məlumatları redaktə et",
+        "nameLabel": "Tam ad",
+        "phoneLabel": "Telefon nömrəsi",
+        "emailLabel": "E-poçt ünvanı",
+        "tabs": {
+          "personalInfo": "Şəxsi məlumatlar",
+          "personalInfoSubtitle": "Adınız, əlaqə məlumatlarınız və avatarınız",
+          "connectedStores": "Qoşulmuş mağazalar"
+        }
+      },
+      "accounts": {
+        "title": "Qoşulmuş hesablar",
+        "ebay": {
+          "title": "eBay hesabı",
+          "subtitle": "Qoşulmuş eBay mağazalarınızı idarə edin"
+        },
+        "amazon": {
+          "title": "Amazon hesabı",
+          "subtitle": "Sifarişlərin oxunması üçün alıcı hesablarınızı idarə edin"
+        }
+      },
+      "ebay": {
+        "sellerId": "Satıcı ID-si",
+        "connectedSince": "Qoşulma tarixi",
+        "disconnect": {
+          "action": "Bağlantını kəs",
+          "confirmDescription": "Bağlantını kəsmək bu mağaza üçün sifariş sinxronizasiyasını, avtomatik alışı və izləmə yeniləmələrini dayandırır. Mövcud sifarişləriniz və elanlarınız saxlanılır, mağazanı sonradan yenidən qoşmaq hər şeyi bərpa edir. eBay tərəfində girişi də ləğv etmək üçün eBay-in \"Üçüncü tərəf tətbiq girişi\" parametrlərindən SellerHill-i silin.",
+          "confirmLabel": "Mağazanın bağlantısını kəs",
+          "success": "eBay mağazasının bağlantısı kəsildi."
+        },
+        "manageStores": {
+          "empty": "Hələ heç bir eBay mağazası qoşulmayıb"
+        }
+      },
+      "amazon": {
+        "noAccounts": "Heç bir Amazon hesabı qoşulmayıb",
+        "connectedSince": "Qoşulma tarixi",
+        "twoFactorOn": "2FA aktivdir",
+        "twoFactorOff": "2FA yoxdur",
+        "autoFulfillOn": "Avtomatik yerinə yetirmə aktiv · limit {{cap}}",
+        "autoFulfillOff": "Avtomatik yerinə yetirmə deaktiv",
+        "verificationError": {
+          "invalid_credentials": "Amazon e-poçtu və ya parolu rədd etdi. Giriş məlumatlarını yeniləyin və yenidən yoxlayın.",
+          "captcha": "Amazon captcha tələb etdi və avtomatik girişi blokladı. Bir azdan yenidən cəhd edin.",
+          "two_factor_required": "Bu hesabda 2FA aktivdir, lakin autentifikator gizli açarı saxlanılmayıb. 2FA gizli açarını əlavə edin və yenidən yoxlayın.",
+          "auth_not_proven": "Giriş tamamlanmadı. Giriş məlumatlarını və 2FA gizli açarını yoxlayın, sonra yenidən yoxlayın.",
+          "unexpected_login_page": "Amazon-un giriş axını avtomatik tamamlana bilmədi. Bir azdan yenidən cəhd edin; davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın.",
+          "transport": "Bu hesabı yoxlamaq üçün Amazon-a çatmaq mümkün olmadı. Bir azdan yenidən cəhd edin.",
+          "unknown": "Bu hesabı yoxlamaq mümkün olmadı. Bir azdan yenidən cəhd edin; davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın."
+        }
+      },
+      "storeConfig": {
+        "title": "Mağaza konfiqurasiyası",
+        "subtitle": "Ümumi məkan, yoxlama və regional parametrlər",
+        "edit": "Redaktə et",
+        "new": "Yeni",
+        "global": "Ümumi",
+        "country": "Ölkə",
+        "region": "Region",
+        "zipCode": "Poçt indeksi",
+        "noLocation": "Məkan təyin edilməyib",
+        "noConfigs": "Hələ mağaza konfiqurasiyası yoxdur"
+      },
+      "blacklist": {
+        "title": "Qara siyahının idarəsi",
+        "subtitle": "Məhsul elanları üçün qadağan olunmuş açar sözlər",
+        "manage": "İdarə et",
+        "keywordCount": "{{count}} açar söz"
+      },
+      "storeManagement": {
+        "title": "Mağaza konfiqurasiyası",
+        "subtitle": "Mağaza parametrləri və elan açar sözlərinin qara siyahısı",
+        "storeSettings": "Mağaza parametrləri",
+        "storeSettingsSubtitle": "Məkan, yoxlama və regional seçimlər",
+        "manageMessageTemplates": "Mesaj şablonları",
+        "manageMessageTemplatesSubtitle": "Avtomatik alıcı mesajı şablonlarınıza baxın, onları redaktə edin və yaradın",
+        "manageBlacklist": "Qara siyahını idarə et",
+        "manageBlacklistSubtitle": "Elan başlıqlarında, təsvirlərdə və xüsusiyyətlərdə bloklanacaq açar sözlər",
+        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur."
+      },
+      "listingGroups": {
+        "title": "Parametr qrupları",
+        "subtitle": "Yenidən qiymətləndirmə strategiyaları, stok məntiqi, mənfəət marjaları",
+        "manage": "Qrupları idarə et",
+        "manageSubtitle": "Qiymət və stok qruplarınıza baxın, onları redaktə edin və yaradın",
+        "viewAll": "Hamısına bax",
+        "create": "Yeni qrup yarat",
+        "createSubtitle": "Yeni yenidən qiymətləndirmə strategiyası və mənfəət marjası təyin edin",
+        "groupCount": "{{count}} qrup"
+      },
+      "account": {
+        "title": "Hesab və təhlükəsizlik",
+        "subtitle": "Parol seçimləri",
+        "changePassword": "Parolu dəyiş",
+        "changePasswordSubtitle": "Giriş parolunuzu yeniləyin"
+      }
+    },
+    "drawer": {
+      "profile": {
+        "title": "Şəxsi məlumatları redaktə et",
+        "subtitle": "Adınızı, əlaqə məlumatlarınızı və haqqınızda məlumatı yeniləyin",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-poçt",
+        "phone": "Telefon",
+        "phoneInvalid": "Seçilmiş ölkə üçün düzgün telefon nömrəsi daxil edin",
+        "phoneCountry": "Ölkə",
+        "phoneCountrySearch": "Ölkə axtar",
+        "bio": "Haqqında",
+        "address": "Ünvan"
+      },
+      "ebayAccounts": {
+        "title": "eBay hesabları",
+        "subtitle": "Qoşulmuş eBay mağazalarınız",
+        "addNew": {
+          "title": "Yeni eBay hesabı",
+          "subtitle": "eBay-in təhlükəsiz girişi ilə yeni mağazaya icazə verin"
+        },
+        "viewAll": {
+          "title": "Hamısı"
+        }
+      },
+      "ebayAccountsAll": {
+        "title": "Qoşulmuş mağazalar",
+        "subtitle": "Qoşulmuş bütün eBay mağazalarınız"
+      },
+      "amazonAccounts": {
+        "title": "Amazon hesabları",
+        "subtitle": "Sifarişlərin oxunması üçün alıcı hesablarınız",
+        "addNew": {
+          "title": "Yeni Amazon hesabı",
+          "subtitle": "Sifarişlərin oxunması üçün yeni alıcı hesabı qoşun"
+        },
+        "empty": {
+          "title": "Hələ alıcı hesabı yoxdur",
+          "description": "Sifarişlərinizi skan etmək və real xərcləri qeydə almaq üçün Amazon alıcı hesabı qoşun."
+        },
+        "viewAll": {
+          "title": "Hamısı"
+        }
+      },
+      "amazonAccountsAll": {
+        "title": "Qoşulmuş hesablar",
+        "subtitle": "Qoşulmuş bütün Amazon hesablarınız"
+      },
+      "amazonAdd": {
+        "title": "Amazon hesabı əlavə et",
+        "subtitle": "Sifarişlərin oxunması üçün giriş məlumatlarını təqdim edin",
+        "label": "Hesab etiketi",
+        "email": "E-poçt",
+        "password": "Parol",
+        "twoFactorSecret": "2FA gizli açarı",
+        "twoFactorSecretHint": "Tələb olunur. Amazon demək olar ki, hər avtomatik girişdə təsdiq kodu istəyir və autentifikator açarı yeganə cavabdır ki, biz onu sizin əvəzinizə verə bilərik. Amazon-un Giriş və Təhlükəsizlik parametrlərində autentifikator tətbiqini aktiv edin və qurulum açarını bura yapışdırın — 6 rəqəmli kodu yox. Mövcud hesabı redaktə edərkən saxlanılmış açarı qorumaq üçün bunu boş buraxın."
+      },
+      "amazonEdit": {
+        "title": "Amazon hesabını redaktə et",
+        "subtitle": "Etiketi və ya giriş məlumatlarını yeniləyin",
+        "label": "Hesab etiketi",
+        "email": "E-poçt",
+        "emailReadOnly": "E-poçt yaradıldıqdan sonra dəyişdirilə bilməz",
+        "password": "Yeni parol",
+        "passwordHint": "Cari parolu saxlamaq üçün boş buraxın",
+        "twoFactorSecret": "2FA gizli açarı",
+        "twoFactorHint": "Cari 2FA gizli açarını saxlamaq üçün boş buraxın",
+        "twoFactorBadgeSet": "2FA təyin edilib",
+        "twoFactorBadgeNotSet": "2FA təyin edilməyib"
+      },
+      "storeConfig": {
+        "titleEdit": "Mağaza konfiqurasiyasını redaktə et",
+        "titleNew": "Yeni mağaza konfiqurasiyası",
+        "subtitle": "Məkan və yoxlama qaydaları",
+        "global": "Ümumi (bütün mağazalar)",
+        "appliesTo": "Tətbiq olunur",
+        "validation": "Elan yoxlaması",
+        "validateTitle": "Məhsul başlıqlarını yoxla",
+        "validateDescription": "Məhsul təsvirlərini yoxla"
+      },
+      "storeSettings": {
+        "title": "Mağaza parametrləri",
+        "subtitle": "Seçilmiş əhatə üçün məkan və elan yoxlaması",
+        "global": "Ümumi (bütün mağazalar)",
+        "appliesTo": "Tətbiq olunur",
+        "checkBlacklist": "Qara siyahı açar sözlərini yoxla",
+        "checkBlacklistDesc": "Dərc etməzdən əvvəl elan başlıqlarını, təsvirlərini, xüsusiyyətlərini və brendi qara siyahınıza qarşı skan edin. Hər açar sözün öz sahə seçimi onun harada yoxlanılacağını müəyyən edir.",
+        "country": "Ölkə",
+        "countryPlaceholder": "Ölkə seçin",
+        "region": "Region",
+        "zipCode": "Poçt indeksi",
+        "steps": {
+          "address": "Ünvan",
+          "automation": "Avtomatlaşdırma",
+          "messaging": "Alıcı mesajları",
+          "blacklist": "Qara siyahı"
+        }
+      },
+      "blacklist": {
+        "manage": {
+          "title": "Qara siyahını idarə et",
+          "subtitle": "Seçilmiş əhatə üçün elan başlıqlarında, təsvirlərdə və xüsusiyyətlərdə bloklanan açar sözlər"
+        },
+        "add": {
+          "keyword": "Açar söz",
+          "keywordsLabel": "Açar sözlər",
+          "keywordsPlaceholder": "Açar sözləri daxil edin...",
+          "keywordsHint": "Açar sözləri hər sətirdə bir olmaqla və ya vergüllə ayıraraq daxil edin",
+          "typeLabel": "Bunlarda yoxla",
+          "type": {
+            "title": "Başlıq",
+            "description": "Təsvir",
+            "feature_specification": "Xüsusiyyətlər və spesifikasiyalar",
+            "brand_manufacturer": "Brend və istehsalçı"
+          },
+          "add": "Açar sözləri əlavə et",
+          "duplicate": "Bütün açar sözlər seçilmiş sahələri artıq əhatə edir",
+          "empty": "Zəhmət olmasa ən azı bir açar söz daxil edin",
+          "typeRequired": "Ən azı bir sahə seçin"
+        },
+        "list": {
+          "empty": "Seçilmiş əhatə üçün qara siyahı açar sözü yoxdur",
+          "noResults": "Axtarışınıza uyğun açar söz yoxdur",
+          "removeLabel": "Açar sözü sil",
+          "selectAll": "Hamısını seç",
+          "selectedCount": "{{count}} seçilib",
+          "bulkDelete": "Seçilmişləri sil",
+          "confirmBulkDeleteDescription": "{{count}} qara siyahı açar sözü silinsin? Bu geri qaytarıla bilməz."
+        }
+      },
+      "listingGroup": {
+        "list": {
+          "title": "Parametr qrupları",
+          "subtitle": "Yenidən qiymətləndirmə qruplarınıza baxın, onları redaktə edin və ya yaradın"
+        },
+        "all": {
+          "title": "Bütün qruplar",
+          "subtitle": "Qiymət və stok qaydalarını redaktə etmək üçün qrup seçin"
+        }
+      },
+      "password": {
+        "title": "Parolu dəyiş",
+        "subtitle": "Güclü və unikal parol seçin",
+        "current": "Cari parol",
+        "new": "Yeni parol",
+        "confirm": "Parolu təsdiqləyin",
+        "mismatch": "Parollar uyğun gəlmir",
+        "tooShort": "Parol ən azı 8 simvol olmalıdır",
+        "sameAsCurrent": "Yeni parol cari paroldan fərqli olmalıdır",
+        "successHeader": "Parol yeniləndi",
+        "successDescription": "Parolunuz uğurla dəyişdirildi."
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 SellerHill E-commerce Solutions. Bütün hüquqlar qorunur.",
+    "privacyPolicy": "Məxfilik siyasəti",
+    "termsOfService": "İstifadə şərtləri",
+    "contactSupport": "Dəstək ilə əlaqə"
+  },
+  "landing": {
+    "navbar": {
+      "features": "Funksiyalar",
+      "templates": "Şablonlar",
+      "profit": "Real mənfəət",
+      "pricing": "Qiymətlər",
+      "faq": "Suallar",
+      "login": "Daxil ol",
+      "getStarted": "Pulsuz başla",
+      "demo": "Demo",
+      "menu": {
+        "why": "Niyə SellerHill",
+        "groups": "Parametr qrupları",
+        "templates": "Elan şablonları",
+        "actions": "Gözləyən əməliyyatlar",
+        "specifics": "Məhsul xüsusiyyətləri",
+        "mobile": "Mobil",
+        "trust": "Təhlükəsizlik və məxfilik"
+      },
+      "about": "Haqqımızda"
+    },
+    "hero": {
+      "eyebrow": "Amazon → eBay avtomatlaşdırması",
+      "headline": "eBay mağazanız üçün tam avtomatlaşdırma.",
+      "headlineAccent": "Əlverişli qiymətə.",
+      "subheading": "Məhsul qrupu üzrə qiymət və şablon qaydaları, gündə dörd dəfə qiymət və stok yoxlaması, tam doldurulmuş məhsul xüsusiyyətləri, avtomatik sifarişlər və izləmə. Üstəlik, sizdən növbəti nəyin tələb olunduğunu dəqiq göstərən Gözləyən əməliyyatlar ekranı.",
+      "ctaPrimary": "Pulsuz başla",
+      "ctaSecondary": "Canlı demo",
+      "trialTitle": "1 AY PULSUZ SINAQ!",
+      "trialNoCard": "Kredit kartı tələb olunmur",
+      "trialCancelAnytime": "İstənilən vaxt ləğv edin",
+      "trialMobile": "Telefonunuzdan idarə edin",
+      "priceBadge": {
+        "caption": "əlverişli aylıq qiymət",
+        "per": "/AY"
+      },
+      "toast": {
+        "title": "Sifariş avtomatik verildi",
+        "text": "İzləmə nömrəsi eBay-ə yükləndi · indicə"
+      }
+    },
+    "proof": {
+      "sync": {
+        "value": "4×",
+        "label": "hər gün qiymət və stok yoxlaması"
+      },
+      "specifics": {
+        "value": "45",
+        "label": "hər elanda doldurulmuş məhsul xüsusiyyəti"
+      },
+      "templates": {
+        "value": "12",
+        "label": "peşəkar elan şablonu"
+      },
+      "trial": {
+        "value": "1 ay",
+        "label": "pulsuz sınaq, kartsız"
+      }
+    },
+    "why": {
+      "eyebrow": "Niyə SellerHill",
+      "sectionTitle": "Hər alət əsasları edir. Fərq qalan hər şeydədir.",
+      "sectionSubtitle": "Elan yaratmaq, sifariş vermək və izləmək bu kateqoriyada standartdır. SellerHill isə mağazanızı həqiqətən fərqli idarə etməyə imkan verən alətlər əlavə edir.",
+      "exclusive": "Yalnız SellerHill-də",
+      "groups": {
+        "title": "Hər məhsul qrupu üçün fərqli strategiya",
+        "description": "Bütün mağazanıza tək bir parametrlər toplusunu tətbiq etməyi dayandırın. Marja, elan şablonu, stok, stok ehtiyatı və haqq çıxılmalarını məhsul qrupu üzrə təyin edin: biri Analar günü üçün, digəri yalnız avtomobil hissələri üçün.",
+        "chipA": "Analar günü",
+        "chipB": "Avtomobil",
+        "chipC": "Elektronika",
+        "margin": "{{value}}% marja",
+        "buffer": "{{value}} ədəd ehtiyat"
+      },
+      "sync": {
+        "title": "Qiymət və stok gündə 4 dəfə izlənir",
+        "description": "Mənbə qiyməti və stoku hər gün dörd dəfə yoxlanılır və hər dəyişiklik eyni keçiddə eBay elanınıza çatır. Gündəlik yoxlama belə nadir olduqda, stokda olmayanı satmağı və zərər gətirən qiymətlərdə qalmağı dayandırırsınız.",
+        "caption": "Hər 6 saatdan bir yoxlama"
+      },
+      "specifics": {
+        "title": "Məhsul xüsusiyyətləri, həqiqətən doldurulmuş",
+        "description": "Tələb olunan sahələri \"Tətbiq olunmur\" ilə keçmirik. Hər atribut eBay kateqoriyasının qəbul etdiyi dəyərlə uyğunlaşdırılır ki, elanınız alıcıların filtrlərində görünsün.",
+        "others": "Digərləri",
+        "us": "SellerHill"
+      },
+      "actions": {
+        "title": "Gözləyən əməliyyatlar sizi yolda saxlayır",
+        "description": "İlişib qalmış sifariş, bağlantısı kəsilmiş hesab, stoku bitmiş elan… Sizdən gözlənilən hər şey bir ekranda, ən təcili olanlar əvvəldə.",
+        "rowA": "Təsdiqinizi gözləyən sifariş",
+        "rowB": "Qara siyahınız tərəfindən dayandırılmış elan",
+        "rowC": "Stoku bitmiş aktiv elan"
+      },
+      "supplier": {
+        "title": "Təchizatçınız heç vaxt görünmür",
+        "description": "Şəkillər eBay-in öz serverlərinə yüklənir, brendlər başlıqlardan çıxarılır və izləmə nömrələri avtomatik çevrilir. Qara siyahı açar sözləriniz hər elan aktiv olmazdan əvvəl yoxlanılır.",
+        "chipImages": "Şəkillər eBay-də saxlanılır",
+        "chipTracking": "İzləmə nömrəsi çevrilir",
+        "chipBlacklist": "Qara siyahı yoxlaması"
+      },
+      "price": {
+        "title": "Əlverişli avtomatlaşdırma",
+        "description": "Tam peşəkar avtomatlaşdırma dəsti xeyli aşağı aylıq haqla. Hər funksiya hər planda var; planlar yalnız elan və sifariş həcminə görə fərqlənir.",
+        "cta": "Planlara bax"
+      }
+    },
+    "groups": {
+      "eyebrow": "Parametr qrupları",
+      "sectionTitle": "Bir mağaza. Lazım olan qədər strategiya.",
+      "sectionSubtitle": "Parametr qrupu təkrar istifadə olunan dəstdir: qiymət qaydasını, elan şablonunu və stok parametrlərini bir dəfə təyin edin, sonra istədiyiniz məhsullara tətbiq edin. Mövsümi kampaniyalar, kateqoriyaya xas qaydalar və ya yüksək marjalı məhsullar üçün ayrı qruplar açın.",
+      "params": {
+        "margin": {
+          "title": "Mənfəət marjası",
+          "description": "Qiymət aralığına görə pilləli marja qaydaları."
+        },
+        "template": {
+          "title": "Elan şablonu",
+          "description": "Hər qrup üçün təsvir dizaynı."
+        },
+        "stock": {
+          "title": "Stok və stok ehtiyatı",
+          "description": "eBay-də göstərilən miqdar və onun təhlükəsizlik payı."
+        },
+        "fees": {
+          "title": "Haqq çıxılmaları",
+          "description": "eBay haqları və sabit xərclər qiymətə daxil edilir."
+        },
+        "content": {
+          "title": "Başlıq və məzmun",
+          "description": "Qrup üzrə brendin silinməsi və AI başlıqları."
+        }
+      },
+      "examplesTitle": "Nümunə qurulumlar",
+      "examples": {
+        "seasonal": {
+          "name": "Analar günü",
+          "note": "Mövsümi kampaniya: hədiyyəyə hazır şablon və mayın ortasınadək daha yüksək marja."
+        },
+        "category": {
+          "name": "Avtomobil",
+          "note": "Yalnız avtomobil hissələri: uyğunluğa fokuslanan şablon və öz stok ehtiyatı."
+        },
+        "electronics": {
+          "name": "Elektronika",
+          "note": "Spesifikasiya cədvəli şablonu və sürətlə satılanlar üçün daha geniş ehtiyat."
+        }
+      },
+      "screenCaption": "Demo hesabdan real Parametr qrupları ekranı"
+    },
+    "templates": {
+      "eyebrow": "Elan şablonları",
+      "sectionTitle": "Peşəkar görünən elanlar, dizayner lazım deyil.",
+      "sectionSubtitle": "12 hazır şablondan birini seçin və ya öz HTML-nizi yazın. Hər Parametr qrupu öz şablonundan istifadə edə bilər. Aşağıdakı önizləmələr real şablonlarımızla göstərilir.",
+      "names": {
+        "generalStore": "Ümumi mağaza",
+        "techGadgets": "Texnologiya",
+        "homeDecor": "Ev və dekor",
+        "kitchenDining": "Mətbəx",
+        "fitnessSports": "İdman və fitnes",
+        "outdoorSurvival": "Təbiət",
+        "beautyHealth": "Gözəllik və sağlamlıq",
+        "apparelFashion": "Geyim və moda",
+        "autoParts": "Avto hissələr",
+        "petSupplies": "Ev heyvanı ləvazimatları",
+        "toysKids": "Oyuncaq və uşaq",
+        "minimalist": "Minimalist"
+      },
+      "points": {
+        "editable": "Tam redaktə oluna bilər: şablonu açın və istədiyinizi dəyişin.",
+        "mobile": "Mobil uyğun: eBay tətbiqində də düzgün görünür.",
+        "clean": "Təchizatçı izi yoxdur: təsvirdə və şəkillərdə təchizatçınıza işarə edən heç nə yoxdur.",
+        "specs": "Məhsul xüsusiyyətləri və vurğular avtomatik yerləşdirilir."
+      },
+      "previewNote": "Canlı şablon, araşdırmaq üçün sürüşdürün",
+      "openFull": "Tam səhifədə aç"
+    },
+    "showcase": {
+      "eyebrow": "Məhsulun içində",
+      "sectionTitle": "Hər gün istifadə edəcəyiniz ekranlar.",
+      "sectionSubtitle": "Bunlar dizayn maketləri deyil; qeydiyyatsız demo hesabımızdakı real ekranlardır.",
+      "actionCenter": {
+        "title": "Gözləyən əməliyyatlar: növbəti tapşırığınız həmişə aydındır",
+        "detail": "Avtomatlaşdırmanın özü həll edə bilmədiyi hər şey bura düşür: təsdiq gözləyən sifarişlər, qara siyahınız tərəfindən dayandırılmış elanlar, bağlantısı kəsilmiş hesablar, bitmək üzrə olan plan limitləri. Hər maddə nə baş verdiyini, niyə vacib olduğunu və hara getmək lazım olduğunu bir kliklə göstərir.",
+        "point": "Yan paneldəki sayğac hər ekrandan sizi nə qədər işin gözlədiyini göstərir."
+      },
+      "itemSpecifics": {
+        "title": "eBay-in istədiyi məhsul xüsusiyyətləri, tam",
+        "detail": "SellerHill mənbə kataloqunda məhsul üçün olan hər atributu toplayır və eBay kateqoriyasının müəyyən etdiyi sahələrlə uyğunlaşdırır. Kateqoriya yalnız siyahıdakı dəyərləri qəbul edirsə, düzgününü seçir və hər elana 45-ə qədər xüsusiyyət göndərir.",
+        "point": "Alıcıların filtrlərində görünən elanlar axtarışda daha çox görünür."
+      },
+      "orders": {
+        "title": "Sifarişlər avtomatik verilir, izləmə avtomatik idarə olunur",
+        "detail": "Məhsul eBay-də satılanda sifariş mənbədə avtomatik verilir və birbaşa alıcınıza göndərilir. Göndəriləndən sonra izləmə nömrəsi çevrilib eBay-ə yüklənir, beləliklə alıcınız heç vaxt təchizatçınızı görmür.",
+        "point": "Hər sifariş üçün xərc limiti təyin edirsiniz; ondan yuxarı olanlar təsdiqinizi gözləyir."
+      },
+      "priceStock": {
+        "title": "Qiymət və stok gündə 4 dəfə sinxronlaşır",
+        "detail": "Hər elanın mənbə qiyməti və stoku gündə dörd dəfə yoxlanılır. Nəsə dəyişəndə eBay qiyməti Parametr qrupunuzun marja qaydası ilə yenidən hesablanır, stok isə ehtiyatınız çıxıldıqdan sonra yenilənir.",
+        "point": "Hər elan üçün qiyməti və ya miqdarı kilidləyin, ya da satışı bir klikləyə dayandırın."
+      }
+    },
+    "profit": {
+      "sectionTitle": "Gəlir mənfəət deyil. Həqiqətən nə qazandığınızı görün.",
+      "sectionSubtitle": "SellerHill təxmini marja tətbiq etmir. eBay-in sizə həqiqətən ödədiyini sifariş üçün həqiqətən ödədiyinizlə müqayisə edir və qalanı göstərir.",
+      "actuals": {
+        "title": "Hər iki tərəfdə real rəqəmlər",
+        "description": "eBay xalis qazancı real satışdan, sifariş xərci isə real mənbə sifarişindən gəlir. Arada heç nə fərz edilmir."
+      },
+      "confirmed": {
+        "title": "Təsdiqlənmiş mənfəət",
+        "description": "Tam əməliyyat məlumatlarından hesablanan mənfəət. Bu, üzərində plan qura biləcəyiniz rəqəmdir."
+      },
+      "estimated": {
+        "title": "Təxmini mənfəət",
+        "description": "Xərc məlumatları hələ tam olmadıqda mənfəət təxmini kimi işarələnir və təsdiqlənmiş cəminizdən ayrı saxlanılır."
+      },
+      "pnl": {
+        "title": "Aylar üzrə mənfəət və zərər",
+        "description": "On iki aylıq gəlir, xərc, marja və ROI bir ekranda, bir kliklə ixrac oluna bilər."
+      },
+      "tabs": {
+        "overview": "İcmal",
+        "chart": "Qrafik",
+        "pnl": "Mənfəət və zərər",
+        "perOrder": "Sifariş üzrə"
+      }
+    },
+    "mobile": {
+      "eyebrow": "Mobilə hazır",
+      "sectionTitle": "Masaüstündə etdiyiniz hər şey, telefonunuzdan.",
+      "sectionSubtitle": "Yükləmək üçün ayrıca tətbiq yoxdur. İnterfeys brauzerinizdə işləyir və istənilən ekran ölçüsünə uyğunlaşır; kart düzənləri onu telefonda oxumağı və istifadə etməyi asanlaşdırır.",
+      "bullets": {
+        "b1": "Sifarişləri, mənfəəti və gözləyən əməliyyatları yolda izləyin",
+        "b2": "Məhsul əlavə edin, elan parametrlərini dəyişin, satışı dayandırın",
+        "b3": "Quraşdırılacaq heç nə yoxdur; eyni hesab, eyni ekranlar"
+      },
+      "screens": {
+        "dashboard": "İdarə paneli",
+        "actions": "Gözləyən əməliyyatlar",
+        "orders": "Sifarişlər"
+      }
+    },
+    "trust": {
+      "eyebrow": "Təhlükəsizlik və məxfilik",
+      "sectionTitle": "Məlumatlarınız sizindir və elə də qalır.",
+      "sectionSubtitle": "Hesablarınızı avtomatlaşdırma platformasına qoşmaq etibar tələb edir. Nəyi saxladığımızı və nəyi saxlamadığımızı açıq yazırıq.",
+      "card": {
+        "title": "Kart nömrəniz bizə heç vaxt çatmır",
+        "description": "Ödənişlər Stripe-ın təhlükəsiz ödəniş səhifəsində qəbul olunur. Kart nömrənizi heç vaxt görmürük və saxlamırıq."
+      },
+      "session": {
+        "title": "Sessiya məlumatlarınız heç vaxt paylaşılmır",
+        "description": "Amazon hesabınızın giriş və sessiya məlumatları şifrələnmiş şəkildə saxlanılır, yalnız sizin öz əməliyyatlarınız üçün istifadə olunur və heç bir üçüncü tərəf tətbiqinə verilmir."
+      },
+      "policy": {
+        "title": "Siyasətlər sadə dildə",
+        "description": "Nəyi və niyə emal etdiyimiz Məxfilik siyasətimizdə, xidmətin şərtləri isə İstifadə şərtlərimizdə göstərilib. İstənilən vaxt oxuya bilərsiniz."
+      },
+      "privacyLink": "Məxfilik siyasəti",
+      "termsLink": "İstifadə şərtləri"
+    },
+    "about": {
+      "eyebrow": "Haqqımızda",
+      "sectionTitle": "Satışı içəridən tanıyan proqram komandası.",
+      "lead": "SellerHill 2B Trading, LLC tərəfindən hazırlanan proqram məhsuludur. 2022-ci ildə Vayominqdə qurulmuş komandamız bu işi Amazon və eBay-də satış edərək birbaşa öyrənib.",
+      "body": "SellerHill-i həmin satış təcrübəsini 20 illik proqram mühəndisliyi ilə birləşdirərək qururuq. Məqsədimiz satıcının gündəlik işini özü idarə edən, hər qərarı dəqiq məlumata əsaslandıran və həmin məlumatı qoruyan platformadır. Məhsulu ondan istifadə edən satıcıların rəyləri ilə inkişaf etdirməyə davam edirik.",
+      "facts": {
+        "experience": {
+          "title": "Real ehtiyaclardan doğan funksiyalar",
+          "description": "Parametr qrupları, tam məhsul xüsusiyyətləri və Gözləyən əməliyyatlar satış zamanı üzləşdiyimiz problemlərdən yarandı. Biz işi görən funksiyalar əlavə edirik, yalnız kağız üzərində yaxşı görünənləri yox."
+        },
+        "data": {
+          "title": "Dəqiq məlumat, şişirdilmiş rəqəm yoxdur",
+          "description": "Mənfəət real eBay qazancından və real Amazon xərcindən hesablanır. Sifarişin xərci hələ məlum olmadıqda, onu təxminlə doldurmuruq; aydın şəkildə göstəririk."
+        },
+        "security": {
+          "title": "Dizaynla gələn təhlükəsizlik",
+          "description": "Hesab giriş məlumatları şifrələnmiş saxlanılır və ödəniş məlumatları bizə çatmır. Təhlükəsizlik sonradan əlavə edilən funksiya deyil, arxitekturanın təməlidir."
+        }
+      }
+    },
+    "standard": {
+      "sectionTitle": "Və avtomatlaşdırma platformasından gözlədiyiniz hər şey.",
+      "sectionSubtitle": "Əsaslar tam və hamısı hər planda.",
+      "items": {
+        "bulkAsin": {
+          "title": "Kütləvi ASIN ilə elan",
+          "description": "Yüzlərlə ASIN yapışdırın, elanlar növbədə qurulsun."
+        },
+        "aiTitle": {
+          "title": "AI ilə optimallaşdırılmış başlıqlar",
+          "description": "Axtarış üçün bütün 80 simvoldan istifadə edən başlıqlar."
+        },
+        "autoOrder": {
+          "title": "Avtomatik sifarişlər",
+          "description": "Məhsul satılanda sifariş mənbədə verilir."
+        },
+        "tracking": {
+          "title": "İzləmə və çevirmə",
+          "description": "İzləmə nömrələri çevrilib eBay-ə yüklənir."
+        },
+        "messages": {
+          "title": "Avtomatik alıcı mesajları",
+          "description": "Sifariş, göndəriş, çatdırılma və rəy mesajları."
+        },
+        "multiStore": {
+          "title": "Bir neçə eBay mağazası",
+          "description": "Bütün mağazalarınızı bir hesabdan idarə edin."
+        },
+        "import": {
+          "title": "Mövcud elanların idxalı",
+          "description": "eBay-də artıq aktiv olan elanları SellerHill-ə gətirin."
+        },
+        "blacklist": {
+          "title": "Qara siyahı yoxlaması",
+          "description": "Qadağan olunmuş sözlər başlıqlarda, təsvirlərdə və xüsusiyyətlərdə axtarılır."
+        }
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "ASIN-dən avtomatlaşdırılmış mağazaya",
+      "sectionSubtitle": "Bir dəfə qurun, gündəlik iş artıq sizin olmasın.",
+      "step1": {
+        "title": "Hesablarınızı qoşun",
+        "description": "eBay mağazanızı və Amazon hesabınızı qoşun. Bir neçə dəqiqə çəkir və quraşdırılacaq heç nə yoxdur."
+      },
+      "step2": {
+        "title": "Parametr qruplarınızı yaradın",
+        "description": "Marja, şablon, stok və haqq qaydalarını məhsul qrupu üzrə bir dəfə təyin edin."
+      },
+      "step3": {
+        "title": "Məhsullarınızı əlavə edin",
+        "description": "ASIN-ləri yapışdırın və Parametr qrupu seçin. Elanlar tam məhsul xüsusiyyətləri ilə qurulur."
+      },
+      "step4": {
+        "title": "SellerHill idarə etsin",
+        "description": "Qiymət və stok gündə dörd dəfə sinxron qalır, sifarişlər verilir, izləmə idarə olunur və alıcı mesajları göndərilir."
+      },
+      "step5": {
+        "title": "Gözləyən əməliyyatları izləyin",
+        "description": "Qərarınızı tələb edən hər şey bir ekranda və hər sifarişdə real mənfəət."
+      }
+    },
+    "demo": {
+      "sectionTitle": "Qeydiyyatdan əvvəl SellerHill-i görün.",
+      "sectionSubtitle": "İdarə panelini, elanları, sifarişləri, Parametr qruplarını və Gözləyən əməliyyatları nümunə məlumatlarla araşdırın. Doldurulacaq heç nə, ləğv ediləcək heç nə yoxdur.",
+      "button": "Canlı demonu sına",
+      "note": "Hesab tələb olunmur · Kredit kartı yoxdur · Heç nə yadda saxlanılmır.",
+      "bullets": {
+        "b1": "Təsdiqlənmiş və təxmini mənfəətin yan-yana göstərildiyi real idarə paneli",
+        "b2": "Analar günü və Avtomobil kimi nümunə Parametr qrupları",
+        "b3": "Heç nə yadda saxlanılmır; istədiyiniz vaxt çıxın"
+      }
+    },
+    "pricing": {
+      "eyebrow": "Qiymətlər",
+      "sectionTitle": "Əlverişli avtomatlaşdırma.",
+      "sectionSubtitle": "Hər plan bütün funksiyaları əhatə edir. Planlar yalnız aktiv elanlara və aylıq sifariş həcminə görə fərqlənir, beləliklə digər alətlərin yalnız yüksək səviyyələr üçün saxladığı funksiyalar ən kiçik planda da sizindir.",
+      "billingNote": "İstənilən vaxt ləğv edin. Qiymətlərə tətbiq olunan yerlərdə yerli vergilər daxil deyil.",
+      "perMonth": "/ay",
+      "mostPopular": "Ən populyar",
+      "planCta": "Pulsuz başla",
+      "showAllPlans": "Bütün {{count}} plana bax",
+      "showFewerPlans": "Daha az plan göstər",
+      "notIncluded": "Daxil deyil",
+      "upToListings": "{{limit}} aktiv elana qədər",
+      "unlimitedListings": "Limitsiz aktiv elan",
+      "upToOrders": "Ayda {{limit}} avtomatik sifarişə qədər",
+      "unlimitedOrders": "Limitsiz avtomatik sifariş",
+      "upToConversions": "Ayda {{limit}} izləmə çevirməsi",
+      "unlimitedConversions": "Limitsiz izləmə çevirməsi",
+      "catalogError": "Canlı qiymətlər hazırda yüklənə bilmədi. Aşağıda plan icmalı göstərilir.",
+      "included": {
+        "groups": "Parametr qrupları və 12 elan şablonu",
+        "sync": "Gündə 4× qiymət və stok yoxlaması",
+        "specifics": "Tam eBay məhsul xüsusiyyətləri",
+        "autoOrder": "Avtomatik sifarişlər və izləmə",
+        "actions": "Gözləyən əməliyyatlar ekranı",
+        "profit": "Real mənfəət hesabatı",
+        "multiStore": "Bir neçə eBay mağazası",
+        "support": "E-poçt və söhbət dəstəyi"
+      },
+      "catalogFallback": {
+        "nano": {
+          "price": "$24.99",
+          "listings": "500 aktiv elana qədər",
+          "orders": "Ayda 100 avtomatik sifarişə qədər",
+          "conversions": "Ayda 50 izləmə çevirməsi"
+        },
+        "starter": {
+          "price": "$44.99",
+          "listings": "2,000 aktiv elana qədər",
+          "orders": "Ayda 300 avtomatik sifarişə qədər",
+          "conversions": "Ayda 150 izləmə çevirməsi"
+        },
+        "growth": {
+          "price": "$104.99",
+          "listings": "5,000 aktiv elana qədər",
+          "orders": "Ayda 600 avtomatik sifarişə qədər",
+          "conversions": "Ayda 300 izləmə çevirməsi"
+        },
+        "pro": {
+          "price": "$179.99",
+          "listings": "10,000 aktiv elana qədər",
+          "orders": "Ayda 1,000 avtomatik sifarişə qədər",
+          "conversions": "Ayda 500 izləmə çevirməsi"
+        }
+      }
+    },
+    "faq": {
+      "sectionTitle": "Tez-tez verilən suallar",
+      "sectionSubtitle": "Başlamazdan əvvəl bilməyə dəyər.",
+      "q1": {
+        "question": "Parametr qrupları nədir və niyə vacibdir?",
+        "answer": "Parametr qrupu marja qaydası, elan şablonu, stok, stok ehtiyatı və haqq çıxılmalarından ibarət təkrar istifadə olunan dəstdir. Bütün mağazanıza tək konfiqurasiya tətbiq etmək əvəzinə hər məhsul qrupuna öz strategiyasını verirsiniz: Analar günü məhsullarınız mövsümi marja və şablonla, avtomobil məhsullarınız öz qaydaları ilə işləyir. Məhsulları istədiyiniz vaxt qruplar arasında köçürə bilərsiniz."
+      },
+      "q2": {
+        "question": "Qiymət və stok sinxronizasiyası nə qədər tez-tez işləyir?",
+        "answer": "SellerHill elan etdiyiniz məhsulların mənbə qiymətini və stokunu gündə dörd dəfə yoxlayır. Qiymət və ya stok dəyişəndə uyğun eBay elanı eyni keçiddə yenilənir. Məhsul eBay-də satılanda isə stok növbəti yoxlamanı gözləmədən dərhal azaldılır."
+      },
+      "q3": {
+        "question": "Məhsul xüsusiyyətlərini necə doldurursunuz?",
+        "answer": "Mənbə kataloqunda məhsul üçün olan hər atributu toplayıb eBay kateqoriyasının müəyyən etdiyi sahələrlə uyğunlaşdırırıq. Kateqoriya yalnız müəyyən dəyərləri qəbul edirsə, siyahıdan düzgününü seçirik. Tələb olunan sahələri \"Tətbiq olunmur\" ilə keçmək əvəzinə real dəyərlərlə doldurur və hər elana 45-ə qədər xüsusiyyət göndəririk."
+      },
+      "q4": {
+        "question": "Avtomatik sifariş necə işləyir?",
+        "answer": "Alıcı eBay-də sifariş verəndə SellerHill qoşulmuş Amazon hesabınızdan uyğun sifarişi verir və alıcının ünvanına göndərir. Hər hesab üçün xərc limiti təyin edirsiniz; ondan yuxarı sifarişlər keçmir və Gözləyən əməliyyatlar ekranında təsdiqinizi gözləyir."
+      },
+      "q5": {
+        "question": "İzləmə nömrəsinin çevrilməsi nədir?",
+        "answer": "Mənbədən gələn izləmə nömrəsi məhsulun haradan gəldiyini üzə çıxara bilər. Çevirmə aktiv olduqda SellerHill onu eBay-ə yükləməzdən əvvəl fərqli, izlənə bilən nömrəyə çevirir. Çevirmənin aktiv olub-olmamasına və hansı daşıyıcıları əhatə etməsinə siz qərar verirsiniz."
+      },
+      "q6": {
+        "question": "Təchizatçımın adı elanlarımda görünəcək?",
+        "answer": "Xeyr. Məhsul şəkilləri eBay-in öz serverlərinə yüklənir, brendlər başlıqlardan çıxarıla bilər və təsvir şablonlarında təchizatçıya işarə edən heç nə olmur. Qara siyahınızdakı açar sözlər hər elan aktiv olmazdan əvvəl axtarılır; uyğun gələn elan dərc edilmir."
+      },
+      "q7": {
+        "question": "Gözləyən əməliyyatlar ekranı nə edir?",
+        "answer": "Avtomatlaşdırmanın özü həll edə bilmədiyi hər şey oraya düşür: təsdiq gözləyən sifarişlər, qara siyahınız tərəfindən dayandırılmış elanlar, bağlantısı kəsilmiş hesablar, stoku bitmiş aktiv elanlar və ya bitmək üzrə olan plan limitləri. Maddələr ən təcili olanlar əvvəldə olmaqla sıralanır və sizi birbaşa düzgün ekrana aparır."
+      },
+      "q8": {
+        "question": "Elan şablonlarını dəyişə bilərəmmi?",
+        "answer": "Bəli. 12 hazır şablondan birini seçin, istədiyinizi redaktə edin və ya öz HTML şablonunuzu yazın. Hər Parametr qrupu fərqli şablondan istifadə edə bilər, önizləmə isə yadda saxlamazdan əvvəl elanınızın eBay-də necə görünəcəyini göstərir."
+      },
+      "q9": {
+        "question": "Kart və ya hesab məlumatlarımı saxlayırsınız?",
+        "answer": "Kart nömrənizi saxlamırıq; ödənişlər Stripe-ın təhlükəsiz ödəniş səhifəsində qəbul olunur və kart məlumatlarınız bizə çatmır. Amazon hesabınızın giriş və sessiya məlumatları şifrələnmiş saxlanılır, yalnız sizin öz əməliyyatlarınız üçün istifadə olunur və heç bir üçüncü tərəf tətbiqi ilə paylaşılmır. Təfərrüatlar Məxfilik siyasətimizdədir."
+      },
+      "q10": {
+        "question": "Telefonumdan istifadə edə bilərəmmi?",
+        "answer": "Bəli. SellerHill brauzerinizdə işləyir və interfeys istənilən ekran ölçüsünə uyğunlaşır. Masaüstündə etdiyiniz hər şey, o cümlədən məhsul əlavə etmək, parametrləri dəyişmək və sifarişləri və gözləyən əməliyyatları izləmək telefonunuzdan işləyir, quraşdırılacaq tətbiq yoxdur."
+      },
+      "q11": {
+        "question": "Real mənfəət necə hesablanır?",
+        "answer": "SellerHill eBay-in satış üçün sizə həqiqətən ödədiyi xalis qazancı (eBay haqlarından sonra) götürür və sifariş üçün həqiqətən ödədiyinizi, vergi və çatdırılma daxil olmaqla, çıxır. Xərc məlumatları hələ tam olmayan sifarişlər \"təxmini\" kimi işarələnir və təsdiqlənmiş cəminizdən ayrı saxlanılır."
+      },
+      "q12": {
+        "question": "Ödənişdən əvvəl sınaya bilərəmmi?",
+        "answer": "Bəli, iki yolla. Canlı demo bütün tətbiqi nümunə məlumatlarla açır, qeydiyyat tələb olunmur. Və ya hesab yaradın və bir aylıq pulsuz sınağa başlayın, kredit kartı tələb olunmur."
+      }
+    },
+    "ctaBanner": {
+      "variant2": {
+        "headline": "Daha ağıllı avtomatlaşdırma. Daha aşağı qiymət.",
+        "subheading": "Məhsul qrupu üzrə strategiyalar, gündə dörd dəfə sinxronizasiya, tam məhsul xüsusiyyətləri və sizi yönləndirən Gözləyən əməliyyatlar ekranı. Bir ay pulsuz sınayın, kredit kartı tələb olunmur.",
+        "button": "Pulsuz başla"
+      }
+    },
+    "footer": {
+      "description": "SellerHill Amazon → eBay avtomatlaşdırma platformasıdır: məhsul qrupu üzrə strategiyalar, gündə dörd dəfə qiymət və stok yoxlaması, tam məhsul xüsusiyyətləri, avtomatik sifarişlər və izləmə, real mənfəət hesabatı.",
+      "product": "Məhsul",
+      "legal": "Hüquqi",
+      "links": {
+        "features": "Funksiyalar",
+        "pricing": "Qiymətlər",
+        "templates": "Şablonlar",
+        "profit": "Real mənfəət",
+        "demo": "Canlı demo"
+      },
+      "companyLinks": {
+        "contact": "Əlaqə"
+      },
+      "legalLinks": {
+        "privacy": "Məxfilik siyasəti",
+        "terms": "İstifadə şərtləri",
+        "cookies": "Kukilər"
+      },
+      "copyright": "© {{year}} SellerHill. Bütün hüquqlar qorunur."
+    }
+  },
+  "demo": {
+    "banner": {
+      "label": "Demo",
+      "description": "Nümunə məlumatlar — heç nə yadda saxlanılmır.",
+      "exit": "Demodan çıx",
+      "signUp": "Pulsuz hesab yarat"
+    },
+    "readonly": {
+      "title": "Yalnız oxumaq üçün demo",
+      "message": "Nümunə məlumatlarla dolu demonu araşdırırsınız, ona görə dəyişikliklər yadda saxlanıla bilməz. Bunu öz mağazanızda işlətmək üçün pulsuz hesab yaradın."
+    }
+  }
+}

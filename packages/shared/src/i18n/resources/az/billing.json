@@ -1,0 +1,331 @@
+{
+  "billing": {
+    "title": "Ödənişlər",
+    "subtitle": "Abunəlik planınızı, istifadənizi və ödəniş tarixçənizi idarə edin.",
+    "loadingSubtitle": "Ödəniş məlumatlarınız yüklənir…",
+    "unavailableTitle": "Ödənişlər əlçatmazdır",
+    "unavailableSubtitle": "Ödəniş məlumatlarınızı yükləyə bilmədik. Zəhmət olmasa yenidən cəhd edin.",
+    "plans": {
+      "title": "Planlar",
+      "subtitle": "Satış həcminizə uyğun planı seçin.",
+      "monthly": "Aylıq",
+      "annual": "İllik",
+      "annualSavings": "İllik ödənişlə 2 ay qənaət edin",
+      "perMonth": "/ay",
+      "perYear": "/il",
+      "choosePlan": "{{plan}} seç",
+      "currentPlan": "Cari plan",
+      "switchPlan": "{{plan}} planına keç",
+      "contactSales": "Satış şöbəsi ilə əlaqə",
+      "freeTrial": "Pulsuz sınaq mövcuddur",
+      "mostPopular": "Ən populyar",
+      "informationalOnly": "Ödəniş məhdudiyyətləri deaktivdir — planlar yalnız məlumat xarakterlidir. Bütün funksiyalar hazırda məhdudiyyətsizdir.",
+      "free": {
+        "name": "Pulsuz"
+      },
+      "trial": {
+        "name": "Pulsuz sınaq",
+        "description": "SellerHill-in müddətlə məhdud sınağı. Satın alına bilməz — qeydiyyatdan keçdikdə avtomatik başlayır."
+      },
+      "lite": {
+        "name": "Lite",
+        "description": "Kiçik kataloqla təzəcə başlayan satıcılar üçün."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "Məhdud məhsul çeşidi ilə bazarı yoxlamaq üçün."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "Yığcam kataloq idarə edən fərdi satıcılar üçün."
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Böyüyən kataloqu və sabit sifariş axını olan satıcılar üçün."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "Bir neçə min elandan çoxuna genişlənən təcrübəli satıcılar üçün."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Bir neçə nişdə geniş kataloq idarə edən satıcılar üçün."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Beş min elanlıq kataloqu olan yüksək həcmli satıcılar üçün."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "Böyük, aktiv şəkildə yenidən qiymətləndirilən kataloqu idarə edən güclü satıcılar üçün."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "On min elan idarə edən peşəkar əməliyyatlar üçün."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "On beş min elanlıq kataloqu olan iri əməliyyatlar üçün."
+      },
+      "business": {
+        "name": "Business",
+        "description": "İyirmi min elana çatan çoxmağazalı bizneslər üçün."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Ən böyük kataloqlar üçün, prioritet dəstək ilə."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Ləğv edilmiş plan. Mövcud abunəliklər işləməyə davam edir; yeni qeydiyyatlar yuxarıdakı planlardan seçir."
+      },
+      "switchTo": "{{plan}} planına keç",
+      "switchDone": "Planınız dəyişdirildi. Stripe fərqi növbəti fakturanızda mütənasib şəkildə hesablayacaq.",
+      "planNamed": "{{plan}} planı"
+    },
+    "planChange": {
+      "title": "Plan dəyişikliyini təsdiqləyin",
+      "upgradeBody": "{{plan}} planına keçilir. İndi {{amount}} tutulacaq. Növbəti fakturanız {{nextDate}} tarixində {{nextAmount}} olacaq.",
+      "downgradeBody": "{{plan}} planına {{date}} tarixində keçilir. İndi heç nə tutulmur — o vaxta qədər cari planınız qalır.",
+      "listingLimitWarning": "{{active}} aktiv elanınız var, yeni plan isə {{limit}} elana icazə verir. {{date}} tarixindən yalnız ən köhnə {{limit}} elanınız izlənəcək; qalan {{over}} elan üçün qiymət/stok sinxronizasiyası və avtomatik sifariş emalı dayanacaq. Hansı elanların izlənməsini seçmək istəyirsinizsə, həmin tarixdən əvvəl lazım olmayanları bitirin.",
+      "confirm": "Təsdiqlə",
+      "cancel": "Ləğv et"
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Aktiv elanlar",
+        "unit": "elan",
+        "description": "Bütün mağazalarınız üzrə maksimum aktiv elan sayı."
+      },
+      "amazon_orders_per_month": {
+        "label": "Avtomatik sifarişlər",
+        "unit": "sifariş",
+        "description": "Aylıq sizin üçün verilən (avtomatik və ya əl ilə əlaqələndirilən) maksimum Amazon sifarişi sayı."
+      },
+      "unlimited": "Limitsiz",
+      "disabled": "Daxil deyil",
+      "of": "{{limit}} içində {{used}}",
+      "used": "{{used}} istifadə olunub",
+      "remaining": "{{remaining}} qalıb",
+      "exceeded": "Limit aşılıb",
+      "tracking_conversions_per_month": {
+        "label": "İzləmə çevirmələri",
+        "unit": "çevirmə",
+        "description": "Aylıq neçə göndərişə çevrilmiş izləmə nömrəsi verilir ki, alıcı heç vaxt təchizatçınızı görməsin."
+      }
+    },
+    "subscription": {
+      "title": "Abunəliyiniz",
+      "plan": "Plan",
+      "interval": "Ödəniş dövrü",
+      "intervalValue": {
+        "monthly": "Aylıq ödəniş",
+        "annual": "İllik ödəniş"
+      },
+      "status": {
+        "label": "Status",
+        "trialing": "Sınaq",
+        "active": "Aktiv",
+        "cancelling": "Ləğv olunur",
+        "past_due": "Gecikmiş",
+        "canceled": "Ləğv edilib",
+        "ended": "Bitib"
+      },
+      "trial": {
+        "title": "Pulsuz sınaq müddətindəsiniz",
+        "daysLeft": "{{count}} gün qalıb",
+        "lastDay": "Sınaq müddətiniz bu gün bitir",
+        "endsOn": "Sınaq müddəti {{date}} tarixində bitir",
+        "expired": "Pulsuz sınaq müddətiniz bitib.",
+        "chooseAPlan": "Sınaq bitdikdən sonra davam etmək üçün plan seçin."
+      },
+      "currentPeriod": "Cari dövr",
+      "nextRenewal": "Növbəti yenilənmə",
+      "canceledAt": "Ləğv tarixi",
+      "endedAt": "Bitmə tarixi",
+      "manage": "Abunəliyi idarə et",
+      "updatePayment": "Ödəniş üsulunu yenilə",
+      "cancel": "Abunəliyi ləğv et",
+      "resume": "Abunəliyi bərpa et",
+      "upgrade": "Planı yüksəlt",
+      "downgrade": "Planı aşağı sal",
+      "trialEnds": "Sınaq bitir",
+      "trialEnded": "Sınaq bitib",
+      "accessEnds": "Giriş bitir",
+      "portal": "Ödəniş üsulu və fakturalar",
+      "portalHint": "Kartınızı yeniləmək, fakturaları yükləmək və ya ləğv etmək üçün Stripe-ı açır.",
+      "manageHint": "Ödəniş üsulunuzu, planınızı və fakturalarınızı buradan idarə edin.",
+      "nextCharge": "Növbəti ödəniş: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "{{date}} tarixində ləğv olunur — bu dövrdən sonra əlavə ödəniş tutulmayacaq",
+      "scheduledChange": "{{date}} tarixində {{plan}} planına keçir",
+      "scheduledChangeUnknownPlan": "Planınız {{date}} tarixində dəyişir",
+      "cancelScheduledChange": "Ləğv et",
+      "scheduledChangeCancelled": "Plan dəyişikliyiniz ləğv edildi.",
+      "confirmCancelScheduledChangeTitle": "Plan dəyişikliyini ləğv et",
+      "confirmCancelScheduledChangeMessage": "Planlaşdırılmış plan dəyişikliyini ləğv etmək istədiyinizə əminsiniz? Cari planınızda qalacaqsınız."
+    },
+    "paymentMethod": {
+      "title": "Ödəniş üsulu",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Bitmə tarixi {{month}}/{{year}}",
+      "expiringSoon": "Bu kartın müddəti tezliklə bitir. Uğursuz yenilənmənin qarşısını almaq üçün onu yeniləyin.",
+      "change": "Dəyiş"
+    },
+    "invoices": {
+      "title": "Faktura tarixçəsi",
+      "subtitle": "Ödədiyiniz hər şey, birbaşa Stripe-dan.",
+      "date": "Tarix",
+      "description": "Təsvir",
+      "amount": "Məbləğ",
+      "status": "Status",
+      "pdf": "Faktura",
+      "download": "Yüklə",
+      "payNow": "İndi ödə",
+      "empty": "Hələ faktura yoxdur.",
+      "emptyDescription": "Ödənişli abunəliyiniz olduqda fakturalarınız burada görünəcək.",
+      "loading": "Fakturalar yüklənir…",
+      "loadingDescription": "Faktura tarixçəniz Stripe-dan gətirilir.",
+      "error": "Fakturalar yüklənə bilmədi.",
+      "errorDescription": "Faktura tarixçəniz yüklənərkən xəta baş verdi.",
+      "retry": "Yenidən cəhd et",
+      "showMore": "Daha çox göstər",
+      "showMoreError": "Daha çox faktura yüklənə bilmədi.",
+      "statusLabel": {
+        "paid": "Ödənilib",
+        "open": "Açıq",
+        "void": "Etibarsız",
+        "uncollectible": "Yığılması mümkün olmayan",
+        "draft": "Qaralama"
+      }
+    },
+    "customer": {
+      "title": "Ödəniş məlumatları",
+      "billingEmail": "Ödəniş e-poçtu",
+      "status": {
+        "label": "Hesab statusu",
+        "active": "Aktiv",
+        "locked": "Bloklanıb",
+        "deleted": "Silinib"
+      }
+    },
+    "transition": {
+      "full_access": "Tam giriş — ödəniş məhdudiyyətləri deaktivdir. Bütün funksiyalar məhdudiyyətsizdir.",
+      "active": "Abunəliyiniz aktivdir.",
+      "no_subscription": "Aktiv abunəlik yoxdur. Ödənişləri aktiv etmək üçün plan seçin.",
+      "past_due": "Abunəliyiniz gecikib. Girişi bərpa etmək üçün ödəniş üsulunuzu yeniləyin."
+    },
+    "provider": {
+      "unconfiguredTitle": "Ödəniş konfiqurasiya olunmayıb",
+      "unconfiguredBody": "Ödəniş provayderi qoşulmadığı üçün ödəniş və abunəlik idarəetməsi əlçatmazdır. Operatorunuzla əlaqə saxlayın."
+    },
+    "usage": {
+      "title": "Bu dövrdə istifadə",
+      "subtitle": "İstifadə növbəti ödəniş dövrünün əvvəlində sıfırlanır.",
+      "period": "Dövr",
+      "noOpenPeriod": "Aktiv istifadə dövrü yoxdur",
+      "status": {
+        "label": "Dövr statusu",
+        "open": "Açıq",
+        "closed": "Bağlı",
+        "finalized": "Yekunlaşıb"
+      }
+    },
+    "webhooks": {
+      "title": "Webhook qutusu",
+      "subtitle": "Ödəniş provayderinin son hadisələri.",
+      "provider": "Provayder",
+      "eventType": "Hadisə növü",
+      "status": {
+        "label": "Status",
+        "received": "Qəbul edilib",
+        "processing": "Emal olunur",
+        "processed": "Emal edilib",
+        "failed": "Uğursuz"
+      },
+      "receivedAt": "Qəbul edilib",
+      "processedAt": "Emal edilib",
+      "attempts": "Cəhdlər",
+      "empty": "Hələ webhook hadisəsi yoxdur"
+    },
+    "reservation": {
+      "title": "Rezervasiyalar",
+      "subtitle": "Planınız üzrə rezerv edilmiş elan və Amazon sifariş yerləri.",
+      "kind": {
+        "listing": "Elan",
+        "amazon_order": "Amazon sifarişi"
+      },
+      "status": {
+        "label": "Status",
+        "reserved": "Rezerv edilib",
+        "released": "Azad edilib",
+        "overage": "Limit aşımı"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "Plan limitinizə çatmısınız. Davam etmək üçün planı yüksəldin.",
+      "no_active_subscription": "Aktiv abunəlik tapılmadı.",
+      "no_open_period": "Bu limit üçün açıq istifadə dövrü yoxdur.",
+      "already_reserved": "Bu resurs artıq rezerv edilib.",
+      "providerNotConfigured": "Ödənişlər bu mühitdə hələ aktiv deyil. Zəhmət olmasa daha sonra yenidən cəhd edin.",
+      "planNotMirrored": "Bu plan hələ satın alınmaq üçün əlçatan deyil. Zəhmət olmasa başqa plan seçin və ya dəstək xidməti ilə əlaqə saxlayın.",
+      "checkoutFailed": "Ödəniş başlana bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin — davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın.",
+      "portalFailed": "Ödəniş portalı açıla bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin.",
+      "noCustomer": "Hələ ödəniş hesabı yoxdur. Onu yaratmaq üçün əvvəlcə plan seçin.",
+      "planNotFound": "Bu plan tapılmadı.",
+      "priceNotFound": "Bu plan üçün aktiv qiymət tapılmadı.",
+      "ebayTrialAlreadyUsed": "Bu eBay mağazası pulsuz sınaq müddətindən artıq istifadə edib. Davam etmək üçün plan seçin.",
+      "quotaExhausted": "Plan limitinizə çatmısınız. Davam etmək üçün planı yüksəldin.",
+      "addonNotFound": "Bu əlavə paket tapılmadı.",
+      "noSubscription": "Dəyişdirmək üçün aktiv abunəliyiniz yoxdur.",
+      "planChangeFailed": "Plan hazırda dəyişdirilə bilmədi. Zəhmət olmasa yenidən cəhd edin və ya \"Ödənişləri idarə et\" bölməsindən istifadə edin.",
+      "subscriptionSuspended": "Abunəliyiniz aktiv deyil, ona görə yeni elanlar dayandırılıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
+      "subscriptionSuspendedOrders": "Abunəliyiniz aktiv deyil, ona görə sifariş avtomatlaşdırması dayandırılıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
+      "listingQuotaExhausted": "Planınızın icazə verdiyi bütün aktiv elanlardan istifadə etmisiniz. Yer boşaltmaq üçün bir elanı bitirin və ya planı yüksəldin.",
+      "alreadySubscribed": "Artıq aktiv abunəliyiniz var. Yenidən abunə olmaq əvəzinə onu dəyişmək üçün \"Plana keç\" seçimindən istifadə edin.",
+      "invoicesFailed": "Faktura tarixçəsi yüklənə bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin.",
+      "paymentRequiresAction": "Bankınız bu kart üçün əlavə təsdiq tələb etdi, ona görə plan dəyişikliyi ləğv edildi və siz hələ də cari plandasınız. Ödəniş üsulunuzu yeniləmək üçün “Ödənişləri idarə et” bölməsini açın, sonra yenidən cəhd edin.",
+      "invalidCheckoutSession": "Bu ödəniş təsdiqi bağlantısı etibarlı deyil."
+    },
+    "actions": {
+      "subscribe": "Abunə ol",
+      "save": "Dəyişiklikləri yadda saxla",
+      "cancel": "Ləğv et"
+    },
+    "admin": {
+      "plans": {
+        "title": "Planlar",
+        "subtitle": "Abunəlik planlarını, qiymətləri və limitləri idarə edin.",
+        "add": "Plan əlavə et",
+        "edit": "Planı redaktə et",
+        "activate": "Aktiv et",
+        "deactivate": "Deaktiv et",
+        "slug": "Slug",
+        "name": "Ad",
+        "description": "Təsvir",
+        "isActive": "Aktiv",
+        "displayOrder": "Göstərmə sırası",
+        "prices": "Qiymətlər",
+        "limits": "Limitlər",
+        "providerProductId": "Provayder məhsul ID-si",
+        "providerPriceId": "Provayder qiymət ID-si",
+        "effectiveFrom": "Qüvvəyə minmə tarixi",
+        "effectiveTo": "Qüvvədən düşmə tarixi",
+        "amountMicros": "Məbləğ (mikro)",
+        "limitKey": "Limit açarı",
+        "limitValue": "Limit dəyəri",
+        "unit": "Vahid"
+      },
+      "webhooks": {
+        "title": "Webhook qutusu",
+        "subtitle": "Ödəniş provayderinin webhook hadisələrinə baxın və yenidən göndərin.",
+        "replay": "Yenidən göndər"
+      }
+    },
+    "addons": {
+      "title": "Bu ay daha çox lazımdır?",
+      "subtitle": "Aylıq izləmə çevirmələrinizi istifadə etmisiniz. Ay sıfırlanana qədər təchizatçınızı gizlətməyə davam etmək üçün əlavə paket alın.",
+      "buy": "Al",
+      "note": "Əlavə paket yalnız cari təqvim ayına tətbiq olunur, buna görə əvvəlcədən yox, limitə çatdıqda təklif olunur. Plan limitiniz hər ayın 1-də sıfırlanır."
+    }
+  }
+}

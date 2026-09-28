@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay स्टोर कनेक्ट करें",
+      "subtitle": "लिस्टिंग और ऑर्डर प्रबंधित करने के लिए अपना eBay विक्रेता अकाउंट लिंक करें",
+      "connectButton": "eBay अकाउंट कनेक्ट करें",
+      "connectingButton": "कनेक्ट हो रहा है...",
+      "marketplaceLabel": "मार्केटप्लेस",
+      "marketplaceUS": "संयुक्त राज्य अमेरिका (eBay.com)",
+      "marketplaceUK": "यूनाइटेड किंगडम (eBay.co.uk)",
+      "marketplaceDE": "जर्मनी (eBay.de)",
+      "marketplaceFR": "फ़्रांस (eBay.fr)",
+      "marketplaceIT": "इटली (eBay.it)",
+      "marketplaceES": "स्पेन (eBay.es)",
+      "marketplaceUsOnlyNote": "फ़िलहाल केवल संयुक्त राज्य अमेरिका (eBay.com) मार्केटप्लेस समर्थित है।",
+      "successMessage": "eBay अकाउंट सफलतापूर्वक कनेक्ट हो गया!",
+      "errorMessage": "eBay अकाउंट कनेक्ट नहीं हो सका",
+      "alreadyConnected": "यह eBay अकाउंट पहले से कनेक्ट है"
+    },
+    "accounts": {
+      "title": "कनेक्टेड eBay अकाउंट",
+      "loadingDescription": "आपके कनेक्टेड स्टोर लोड हो रहे हैं।",
+      "noAccounts": "अभी तक कोई eBay अकाउंट कनेक्ट नहीं है",
+      "statusActive": "सक्रिय",
+      "statusRevoked": "रद्द किया गया",
+      "statusError": "त्रुटि",
+      "disconnectButton": "डिसकनेक्ट करें",
+      "refreshTokenButton": "टोकन रिफ़्रेश करें"
+    },
+    "callback": {
+      "processing": "eBay कनेक्शन प्रोसेस हो रहा है...",
+      "success": "eBay अकाउंट सफलतापूर्वक कनेक्ट हो गया! डैशबोर्ड पर भेजा जा रहा है...",
+      "error": "eBay अकाउंट कनेक्ट नहीं हो सका। कृपया दोबारा कोशिश करें।",
+      "cancelled": "eBay कनेक्शन रद्द कर दिया गया।"
+    },
+    "errors": {
+      "invalidState": "अमान्य state पैरामीटर",
+      "authorizationFailed": "eBay ऑथराइज़ेशन विफल रहा",
+      "tokenExchangeFailed": "ऑथराइज़ेशन कोड को टोकन में बदलने में विफल",
+      "accountAlreadyConnected": "यह eBay स्टोर किसी दूसरे SellerHill अकाउंट से कनेक्ट है। जिस अकाउंट से आपने इसे कनेक्ट किया था, उसी से साइन इन करें; यदि आप उस तक नहीं पहुँच पा रहे हैं, तो सपोर्ट से संपर्क करें।",
+      "ebayTrialAlreadyUsed": "इस eBay स्टोर का निःशुल्क ट्रायल पहले ही इस्तेमाल हो चुका है। इसे कनेक्ट करने के लिए कोई प्लान चुनें।",
+      "noAuthorizationCode": "eBay से कोई ऑथराइज़ेशन कोड नहीं मिला",
+      "storeOwnedByAnotherAccount": "यह eBay स्टोर किसी दूसरे SellerHill अकाउंट से जुड़ा है। इसे ट्रांसफ़र कराने के लिए सपोर्ट से संपर्क करें।",
+      "accountNotFound": "वह eBay स्टोर नहीं मिला।",
+      "identityUnavailable": "हम eBay से आपके eBay अकाउंट की पुष्टि नहीं कर सके। कुछ भी कनेक्ट नहीं हुआ — कृपया थोड़ी देर बाद दोबारा कोशिश करें।"
+    },
+    "onboarding": {
+      "title": "अपना eBay स्टोर कनेक्ट करें",
+      "header": "मार्केटप्लेस सेटअप",
+      "description": "अपने आइटम सिंक करना शुरू करने के लिए पहले अपना eBay स्टोर कनेक्ट करना होगा।",
+      "connectButton": "eBay अकाउंट",
+      "skipButton": "अभी छोड़ें",
+      "usOnlyNote": "फ़िलहाल केवल US मार्केटप्लेस समर्थित है। और क्षेत्र जल्द ही आएँगे।",
+      "brandingDescription": "अपनी सभी बिक्री प्रक्रियाओं को एक ही जगह से संभालने के लिए अपना eBay स्टोर SellerHill से लिंक करें।"
+    }
+  }
+}

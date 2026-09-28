@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Amazon بائر اکاؤنٹس",
+      "subtitle": "آرڈر ٹریکنگ اور قیمتوں کی سکریپنگ کے لیے اپنے Amazon بائر اکاؤنٹس کا انتظام کریں",
+      "addButton": "Amazon اکاؤنٹ شامل کریں",
+      "noAccounts": "ابھی کوئی Amazon اکاؤنٹ کنیکٹ نہیں",
+      "noAccountsDescription": "آرڈر کی قیمتوں اور شپنگ کی صورتحال کو خودکار طور پر ٹریک کرنے کے لیے اپنا Amazon بائر اکاؤنٹ شامل کریں",
+      "statusActive": "فعال",
+      "statusVerifying": "تصدیق ہو رہی ہے",
+      "statusInvalid": "غلط کریڈینشلز",
+      "statusNeedsReauth": "دوبارہ تصدیق درکار ہے",
+      "statusLocked": "لاک شدہ",
+      "verifyButton": "تصدیق کریں",
+      "editButton": "ترمیم کریں",
+      "deleteButton": "حذف کریں",
+      "deleteConfirmTitle": "Amazon اکاؤنٹ حذف کریں",
+      "deleteConfirmMessage": "کیا آپ واقعی اس Amazon اکاؤنٹ کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔",
+      "lastVerified": "آخری تصدیق",
+      "lastUsed": "آخری استعمال",
+      "never": "کبھی نہیں",
+      "addTitle": "Amazon اکاؤنٹ شامل کریں",
+      "editTitle": "Amazon اکاؤنٹ میں ترمیم کریں",
+      "labelField": "اکاؤنٹ کا نام",
+      "labelPlaceholder": "مثلاً: ذاتی Amazon",
+      "emailField": "Amazon ای میل",
+      "emailPlaceholder": "your-email@example.com",
+      "passwordField": "Amazon پاس ورڈ",
+      "passwordPlaceholder": "اپنا Amazon پاس ورڈ درج کریں",
+      "twoFactorField": "2FA سیکرٹ کی",
+      "twoFactorPlaceholder": "اختیاری - Amazon کی 2FA سیٹنگز سے",
+      "twoFactorInfo": "اگر آپ نے 2FA فعال کر رکھا ہے تو اپنے Amazon اکاؤنٹ کی سیکیورٹی سیٹنگز سے سیکرٹ کی درج کریں",
+      "saveButton": "اکاؤنٹ محفوظ کریں",
+      "savingButton": "محفوظ ہو رہا ہے...",
+      "verifyingButton": "تصدیق ہو رہی ہے...",
+      "verifySuccess": "Amazon اکاؤنٹ کی تصدیق کامیابی سے ہو گئی",
+      "verifyFailed": "Amazon اکاؤنٹ کی تصدیق نہیں ہو سکی۔ براہ کرم اپنے کریڈینشلز چیک کریں۔",
+      "saveSuccess": "Amazon اکاؤنٹ کامیابی سے محفوظ ہو گیا",
+      "deleteSuccess": "Amazon اکاؤنٹ کامیابی سے حذف ہو گیا",
+      "errorSaving": "Amazon اکاؤنٹ محفوظ نہیں ہو سکا"
+    },
+    "linking": {
+      "title": "Amazon آرڈر لنک کریں",
+      "selectAccount": "Amazon اکاؤنٹ منتخب کریں",
+      "selectAccountPlaceholder": "کوئی Amazon اکاؤنٹ منتخب کریں...",
+      "orderId": "Amazon آرڈر آئی ڈی",
+      "orderIdPlaceholder": "مثلاً: 112-1234567-1234567",
+      "orderIdHelp": "اپنا Amazon آرڈر آئی ڈی درج کریں (یہ آپ کی آرڈر ہسٹری یا تصدیقی ای میل میں ملے گا)",
+      "linkButton": "لنک اور سکریپ کریں",
+      "linkingButton": "لنک ہو رہا ہے...",
+      "progressLoggingIn": "Amazon میں لاگ ان ہو رہا ہے...",
+      "progressNavigating": "آرڈر کے صفحے پر جا رہا ہے...",
+      "progressScraping": "آرڈر کی تفصیلات حاصل کی جا رہی ہیں...",
+      "progressSaving": "آرڈر کا ڈیٹا محفوظ ہو رہا ہے...",
+      "successTitle": "Amazon آرڈر لنک ہو گیا",
+      "successMessage": "آرڈر کی تفصیلات کامیابی سے حاصل کر کے لنک کر دی گئی ہیں",
+      "errorTitle": "آرڈر لنک نہیں ہو سکا",
+      "errorNoAccount": "براہ کرم پہلے ایک Amazon اکاؤنٹ شامل کریں",
+      "errorScraping": "Amazon آرڈر کی تفصیلات حاصل نہیں ہو سکیں۔ براہ کرم آرڈر آئی ڈی چیک کر کے دوبارہ کوشش کریں۔",
+      "errorInvalidCredentials": "Amazon کے کریڈینشلز غلط ہیں۔ براہ کرم اپنا اکاؤنٹ اپ ڈیٹ کریں۔",
+      "errorRateLimit": "بہت زیادہ درخواستیں۔ براہ کرم بعد میں دوبارہ کوشش کریں۔",
+      "costCaptureFailed": "Amazon آرڈر مل گیا لیکن لاگت کی تفصیلات پڑھی نہیں جا سکیں۔ منافع آخری معلوم قدر پر برقرار رکھا گیا ہے۔",
+      "noAccountsTitle": "کوئی Amazon اکاؤنٹ نہیں",
+      "noAccountsMessage": "آرڈرز لنک کرنے کے لیے آپ کو پہلے ایک Amazon بائر اکاؤنٹ شامل کرنا ہوگا۔",
+      "addAccountLink": "Amazon اکاؤنٹ شامل کریں",
+      "noListingTitle": "پہلے یہ eBay لسٹنگ امپورٹ کریں",
+      "noListingMessage": "اس آرڈر کی eBay لسٹنگ امپورٹ نہیں کی گئی، اس لیے آرڈر کسی لسٹنگ سے لنک نہیں ہے۔ آپ پھر بھی Amazon آرڈر لنک کر کے اس کی اصل لاگت حاصل کر سکتے ہیں — لیکن جب یہ شپ ہوگا تو ٹریکنگ نمبر eBay کو نہیں بھیجا جا سکے گا، کیونکہ eBay کو وہ لائن آئٹم درکار ہے جو لسٹنگ کے ساتھ ہوتا ہے۔ یہ پش بعد میں دوبارہ نہیں کیا جاتا۔ پہلے لسٹنگ امپورٹ کریں تو یہ آرڈر خودبخود اس سے لنک ہو جائے گا۔",
+      "importListingButton": "لسٹنگ امپورٹ کریں",
+      "linkAnywayButton": "پھر بھی لنک کریں"
+    },
+    "tracking": {
+      "statusPending": "زیر التوا",
+      "statusProcessing": "پروسیسنگ میں",
+      "statusShipped": "شپ ہو چکا",
+      "statusDelivered": "ڈیلیور ہو گیا",
+      "statusCancelled": "منسوخ",
+      "statusReturned": "واپس آ گیا",
+      "eBaySyncShipped": "eBay آرڈر کو شپ شدہ نشان زد کر دیا گیا",
+      "eBaySyncDelivered": "eBay آرڈر کو ڈیلیور شدہ نشان زد کر دیا گیا"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "اکاؤنٹ",
+        "proxy": "پراکسی"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "اس اکاؤنٹ کو خودکار تکمیل کے لیے استعمال کریں",
+      "autoFulfillEnabledHint": "فعال ہونے پر مماثل eBay آرڈرز اس Amazon اکاؤنٹ کے ذریعے خودکار طور پر خریدے جاتے ہیں (آپ کے دیگر فعال اکاؤنٹس کے ساتھ باری باری)۔ سٹور سیٹنگز میں مرکزی خودکار تکمیل ٹوگل بھی آن ہونا چاہیے، اور نیچے خرچ کی حد مقرر ہونی چاہیے۔",
+      "autoFulfillCapTotal": "آرڈر کی زیادہ سے زیادہ کل رقم (خودکار تکمیل کی حد)",
+      "autoFulfillCapTotalHint": "فی اکاؤنٹ خرچ کی بالائی حد (USD)۔ اس رقم سے اوپر کے آرڈرز اس اکاؤنٹ کو چھوڑ دیتے ہیں۔ خودکار تکمیل فعال کرنے کے لیے لازمی ہے۔",
+      "autoFulfillCapTotalPlaceholder": "مثلاً: 250",
+      "autoFulfillDryRun": "ڈرائی رن (آرڈر دیے بغیر پورا عمل چلائیں)",
+      "autoFulfillDryRunHint": "آرڈر دینے سے پہلے تک پورا چیک آؤٹ عمل چلاتا ہے تاکہ ریویو کی کل رقم حاصل ہو کر جائزے کے لیے دکھائی جا سکے۔"
+    },
+    "proxy": {
+      "sectionTitle": "پراکسی",
+      "stepSubtitle": "اختیاری — اس اکاؤنٹ کی آٹومیشن اپنی پراکسی کے ذریعے چلائیں",
+      "enabled": "پراکسی فعال کریں",
+      "enabledHint": "اپنے اکاؤنٹ کے تحفظ کے لیے پراکسی سرور استعمال کریں",
+      "connectionType": "کنکشن کی قسم",
+      "host": "ہوسٹ درج کریں",
+      "port": "پورٹ درج کریں",
+      "username": "یوزر نیم",
+      "password": "پاس ورڈ",
+      "hint": "اختیاری۔ اس اکاؤنٹ کی آٹومیشن اپنی پراکسی کے ذریعے چلانے کے لیے اسے شامل کریں — IP کی بنیاد پر بلاک سے اضافی تحفظ چاہیں تو مفید ہے۔ اسے بند رکھیں تو اکاؤنٹ براہ راست کنیکٹ ہوتا ہے؛ یہی عام طریقہ ہے۔"
+    },
+    "marketplace": {
+      "label": "مارکیٹ پلیس",
+      "usOnlyNote": "فی الحال صرف ریاستہائے متحدہ (amazon.com) مارکیٹ پلیس سپورٹڈ ہے۔",
+      "AMAZON_US": "ریاستہائے متحدہ (amazon.com)",
+      "readOnlyHint": "اکاؤنٹ بننے کے بعد مارکیٹ پلیس تبدیل نہیں کیا جا سکتا۔"
+    },
+    "errors": {
+      "autoFulfillCapRequired": "اس اکاؤنٹ پر خودکار تکمیل فعال کرنے کے لیے آرڈر کی زیادہ سے زیادہ رقم مقرر کریں۔",
+      "proxyHostPortRequired": "اس اکاؤنٹ کے لیے پراکسی استعمال کرنے کے واسطے ہوسٹ اور پورٹ درج کریں۔",
+      "unsupportedMarketplace": "یہ Amazon مارکیٹ پلیس ابھی دستیاب نہیں ہے۔",
+      "twoFactorSecretRequired": "اکاؤنٹ کی authenticator (2FA) سیکرٹ کی شامل کریں۔ Amazon تقریباً ہر خودکار سائن ان پر تصدیقی کوڈ مانگتا ہے، اور یہی واحد کوڈ ہے جس کا جواب ہم آپ کی طرف سے دے سکتے ہیں۔",
+      "twoFactorSecretInvalid": "یہ authenticator سیکرٹ کی نہیں لگتی۔ Amazon کے authenticator-app سیٹ اپ سے سیٹ اپ کی پیسٹ کریں (حروف A–Z اور ہندسے 2–7)، 6 ہندسوں کا کوڈ نہیں۔"
+    }
+  }
+}

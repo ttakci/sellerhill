@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Профиль",
+    "subtitle": "Управляйте настройками аккаунта и личными данными.",
+    "personalInfo": "Личные данные",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "emailAddress": "Адрес электронной почты",
+    "phone": "Телефон",
+    "bio": "О себе",
+    "address": "Адрес",
+    "country": "Страна",
+    "cityState": "Город / регион",
+    "postalCode": "Почтовый индекс",
+    "taxId": "Налоговый ID",
+    "edit": "Изменить",
+    "home": "Главная",
+    "defaultJobTitle": "Руководитель команды",
+    "locationNotSet": "Местоположение не указано",
+    "defaultBio": "Профессиональный менеджер по электронной коммерции.",
+    "updateSuccess": "Профиль успешно обновлён.",
+    "twitter": "Ссылка на Twitter",
+    "linkedin": "Ссылка на LinkedIn",
+    "instagram": "Ссылка на Instagram",
+    "deactivateAccount": "Деактивировать аккаунт",
+    "saveChanges": "Сохранить все изменения",
+    "storeOwner": "Владелец магазина"
+  }
+}

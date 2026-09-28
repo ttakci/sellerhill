@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "المبيعات والأرباح وأداء الإدراجات",
+    "greeting": "مرحباً، {{name}}",
+    "selectStore": "اختيار المتجر",
+    "allStores": "جميع المتاجر",
+    "noData": "لا توجد بيانات بعد",
+    "backToDashboard": "العودة إلى لوحة التحكم",
+    "tabs": {
+      "cards": "البطاقات",
+      "chart": "الرسم البياني",
+      "pnl": "الأرباح والخسائر"
+    },
+    "today": "اليوم",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "thisYear": "هذه السنة",
+    "metrics": {
+      "sales": "المبيعات",
+      "units": "الوحدات",
+      "orders": "الطلبات",
+      "ordersUnits": "الطلبات / الوحدات",
+      "refunds": "المبالغ المستردة",
+      "refundRate": "نسبة الاسترداد",
+      "grossProfit": "الربح الإجمالي",
+      "netProfit": "صافي الربح",
+      "estimatedPayout": "المبلغ المحوّل المتوقع",
+      "margin": "هامش الربح",
+      "roi": "العائد على الاستثمار",
+      "avgOrderValue": "متوسط الطلب",
+      "costOfGoods": "تكلفة المنتج",
+      "transactionFees": "رسوم المعاملات",
+      "adFees": "رسوم الإعلانات",
+      "amazonShipping": "شحن Amazon",
+      "amazonTax": "ضريبة Amazon",
+      "revenueUncosted": "إيرادات بدون تكلفة"
+    },
+    "card": {
+      "showMore": "مزيد من التفاصيل",
+      "showLess": "تفاصيل أقل",
+      "activeHint": "تتم تصفية القوائم أدناه"
+    },
+    "listingsSection": "الإدراجات",
+    "ordersSection": "الطلبات",
+    "listingsCount": "{{count}} إدراجات بها مبيعات",
+    "ordersCount": "{{count}} طلبات",
+    "viewAllListings": "عرض الكل",
+    "viewAllOrders": "عرض الكل",
+    "listingsEmptyTitle": "لا توجد إدراجات بها مبيعات",
+    "listingsEmptySubtitle": "تظهر هنا الإدراجات التي تلقت طلبات خلال الفترة المحددة.",
+    "ordersEmptyTitle": "لا توجد طلبات في هذه الفترة",
+    "ordersEmptySubtitle": "ستظهر هنا طلبات الفترة المحددة بمجرد وصول المبيعات.",
+    "chart": {
+      "title": "الأداء",
+      "subtitle": "صافي الربح مقابل حجم المبيعات",
+      "summary": "ملخص الفترة",
+      "granularity": {
+        "day": "30 يوماً",
+        "week": "12 أسبوعاً",
+        "month": "12 شهراً"
+      },
+      "series": {
+        "netProfit": "صافي الربح",
+        "sales": "المبيعات",
+        "units": "الوحدات",
+        "refunds": "المبالغ المستردة"
+      }
+    },
+    "pnl": {
+      "title": "الأرباح والخسائر",
+      "subtitle": "تفصيل شهري لآخر 12 شهراً",
+      "parameter": "المؤشر / الفترة",
+      "currentPeriod": "الفترة الحالية",
+      "heatmap": "خريطة حرارية",
+      "export": "تنزيل CSV"
+    },
+    "groups": {
+      "revenue": "الإيرادات",
+      "costs": "التكاليف",
+      "profit": "الربح",
+      "ratios": "النسب"
+    },
+    "profit": {
+      "confirmedLabel": "مؤكد",
+      "confirmedTooltip": "أرباح الطلبات التي تم التقاط تكاليف Amazon الفعلية لها. التكلفة غير المعروفة لا تُحتسب صفراً أبداً.",
+      "estimatedLabel": "تقديري",
+      "estimatedTooltip": "تستخدم الطلبات التي تنتظر التنفيذ عبر Amazon تكلفة تقديرية (ضريبة Amazon بالنسبة التي حددتها وهي {{rate}}%).",
+      "uncostedLabel": "إيرادات بدون تكلفة",
+      "uncostedTooltip": "مبيعات لم يتم تحديد تكلفة Amazon الخاصة بها بعد، فهي إيرادات فقط دون احتساب أي ربح."
+    }
+  }
+}

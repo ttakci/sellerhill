@@ -1,0 +1,215 @@
+{
+  "actionCenter": {
+    "title": "Gözləyən əməliyyatlar",
+    "subtitle": "Sizdən gözlənilən hər şey, ən təcili olanlar əvvəldə.",
+    "menu": "Gözləyən əməliyyatlar",
+    "refresh": "Yenilə",
+    "updatedAt": "Yenilənib: {{time}}",
+    "empty": {
+      "title": "Hazırda sizdən heç nə tələb olunmur",
+      "description": "Bloklanmış alışlar, pozulmuş bağlantılar və ya plan limitləri yoxdur. Nəsə qərar tələb etdiyi anda yeni maddələr burada görünəcək."
+    },
+    "emptyFiltered": {
+      "title": "Bu səviyyədə heç nə yoxdur",
+      "description": "Bu təcililik səviyyəsində maddə yoxdur. Qalanlarını görmək üçün yenidən Hamısı seçiminə keçin."
+    },
+    "loading": {
+      "title": "Nəyin diqqətinizi tələb etdiyi yoxlanılır",
+      "description": "Sifarişləriniz, bağlantılarınız, elanlarınız və planınız nəzərdən keçirilir."
+    },
+    "severity": {
+      "critical": "Kritik",
+      "warning": "Xəbərdarlıq",
+      "info": "Təklif"
+    },
+    "filter": {
+      "ariaLabel": "Təcililik səviyyəsi",
+      "all": "Hamısı",
+      "critical": "Kritik",
+      "warning": "Xəbərdarlıq",
+      "info": "Təkliflər"
+    },
+    "summary": {
+      "critical": "{{count}} kritik",
+      "warning": "{{count}} xəbərdarlıq",
+      "info": "{{count}} təklif",
+      "total_one": "{{count}} maddə sizi gözləyir",
+      "total_other": "{{count}} maddə sizi gözləyir"
+    },
+    "breakdownLabel": "Səbəblər",
+    "moreReasons": "+{{count}} daha",
+    "groups": {
+      "orders": {
+        "title": "Sifarişlər",
+        "subtitle": "Digər tərəfdə alıcının gözlədiyi satışlar."
+      },
+      "connections": {
+        "title": "Bağlantılar",
+        "subtitle": "Avtomatlaşdırmanın işlədiyi mağaza və alıcı hesabları."
+      },
+      "listings": {
+        "title": "Elanlar",
+        "subtitle": "Aktiv olan, lakin gəlir gətirməyən təkliflər."
+      },
+      "plan": {
+        "title": "Plan və tutum",
+        "subtitle": "İşləri rədd etməyə başlayacaq limitlər."
+      },
+      "setup": {
+        "title": "Qurulum",
+        "subtitle": "SellerHill-i sizin üçün işlək etmək üçün əsas addımlar."
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "Amazon artıq ödədiyiniz alışı ləğv etdi",
+        "description_one": "{{count}} sifariş Amazon tərəfində ləğv edildi. eBay satışı hələ də qüvvədədir və alıcıya borcludur — eBay bunu qüsur saymadan əvvəl yenidən sifariş verin və ya pulu qaytarın.",
+        "description_other": "{{count}} sifariş Amazon tərəfində ləğv edildi. Həmin eBay satışları hələ də qüvvədədir və alıcılara borcludur — eBay bunları qüsur saymadan əvvəl yenidən sifariş verin və ya pulu qaytarın.",
+        "action": "Sifarişlərə bax"
+      },
+      "order_fulfillment_blocked": {
+        "title": "Avtomatik alış ödənişdən əvvəl dayandırıldı",
+        "description_one": "{{count}} sifariş təhlükəsizlik yoxlaması ilə dayandırıldı, ona görə pul köçürülmədi. Aşağıdakı səbəbi aradan qaldırın, sifariş davam edə bilər.",
+        "description_other": "{{count}} sifariş təhlükəsizlik yoxlaması ilə dayandırıldı, ona görə pul köçürülmədi. Aşağıdakı səbəbləri aradan qaldırın, sifarişlər davam edə bilər.",
+        "action": "Sifarişlərə bax"
+      },
+      "order_awaiting_purchase": {
+        "title": "Satılıb, lakin heç kim Amazon-dan almayıb",
+        "description_one": "{{hours}} saatdan köhnə {{count}} sifarişin Amazon alışı yoxdur və üzərində işləyən avtomatlaşdırma da yoxdur. Özünüz almasanız, göndərilməyəcək.",
+        "description_other": "{{hours}} saatdan köhnə {{count}} sifarişin Amazon alışı yoxdur və üzərində işləyən avtomatlaşdırma da yoxdur. Özünüz almasanız, göndərilməyəcək.",
+        "action": "Sifarişlərə bax"
+      },
+      "order_untracked": {
+        "title": "İzləmədiyiniz elanlardan gələn satışlar",
+        "description_one": "Son {{days}} gündə {{count}} sifariş SellerHill elanına bağlı olmayan eBay məhsulundan gəldi, buna görə onun xərci və mənfəəti heç vaxt hesablana bilməz. Gələcək satışları izləmək üçün elanı idxal edin.",
+        "description_other": "Son {{days}} gündə {{count}} sifariş SellerHill elanlarına bağlı olmayan eBay məhsullarından gəldi, buna görə onların xərci və mənfəəti heç vaxt hesablana bilməz. Gələcək satışları izləmək üçün həmin elanları idxal edin.",
+        "action": "Elanları idxal et"
+      },
+      "order_tracking_problem": {
+        "title": "İzləmə nömrəsinin çevrilməsində problem var",
+        "description_one": "Göndərilmiş {{count}} sifarişin izləmə provayderi ilə açıq problemi var. Problem həll olunanadək bu sifariş alıcınıza çevrilmiş nömrə əvəzinə orijinal Amazon izləmə nömrəsini göstərir.",
+        "description_other": "Göndərilmiş {{count}} sifarişin izləmə provayderi ilə açıq problemləri var. Problemlər həll olunanadək bu sifarişlər alıcılarınıza çevrilmiş nömrələr əvəzinə orijinal Amazon izləmə nömrələrini göstərir.",
+        "action": "Sifarişlərə bax"
+      },
+      "order_tracking_conversion_held": {
+        "title": "Sifarişlər eBay-də göndərilmiş kimi qeyd olunmayıb",
+        "description_one": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrəsi çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrəsini alıcınıza göndərmirik. Səbəbi aradan qaldırın, sifariş avtomatik göndəriləcək — o vaxta qədər gecikmiş göndəriş qüsuru riski var.",
+        "description_other": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrələri çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrələrini alıcılarınıza göndərmirik. Səbəbi aradan qaldırın, sifarişlər avtomatik göndəriləcək — o vaxta qədər gecikmiş göndəriş qüsuru riski var.",
+        "action": "Sifarişlərə bax"
+      },
+      "ebay_account_disconnected": {
+        "title": "eBay mağazası bağlantısını itirdi",
+        "description_one": "{{count}} mağazanın avtorizasiyası artıq yoxdur. Yenidən qoşana qədər onun üçün sifariş sinxronizasiyası, qiymət yenilənməsi və dərc dayandırılıb.",
+        "description_other": "{{count}} mağazanın avtorizasiyası artıq yoxdur. Yenidən qoşana qədər onlar üçün sifariş sinxronizasiyası, qiymət yenilənməsi və dərc dayandırılıb.",
+        "action": "Mağazaları idarə et"
+      },
+      "amazon_account_needs_attention": {
+        "title": "Amazon alıcı hesabı daxil ola bilmir",
+        "description_one": "{{count}} alıcı hesabında giriş uğursuz olur, ona görə onun vasitəsilə heç nə almaq mümkün deyil.",
+        "description_other": "{{count}} alıcı hesabında giriş uğursuz olur, ona görə onlar vasitəsilə heç nə almaq mümkün deyil.",
+        "action": "Hesabları idarə et"
+      },
+      "listing_job_failures": {
+        "title": "Yaradıla bilməyən elanlar",
+        "description_one": "Son {{days}} gündə {{count}} elan uğursuz oldu. Səbəb onun sizin tərəfdən düzəldilə bilib-bilmədiyini göstərir.",
+        "description_other": "Son {{days}} gündə {{count}} elan uğursuz oldu. Səbəblər hansılarının sizin tərəfdən düzəldilə biləcəyini göstərir.",
+        "action": "İşlərə bax"
+      },
+      "listing_source_unavailable": {
+        "title": "Amazon məhsulu əlçatmaz və ya oxunmaz olan aktiv elanlar",
+        "description_one": "{{count}} aktiv elan əlçatmaz olan və ya məlumatı oxuna bilməyən Amazon məhsuluna yönəlib. Məhsulu yoxlayın və o yoxdursa, elanı bitirin.",
+        "description_other": "{{count}} aktiv elan əlçatmaz olan və ya məlumatı oxuna bilməyən Amazon məhsullarına yönəlib. Məhsulları yoxlayın və olmayanların elanlarını bitirin.",
+        "action": "Elanlara bax"
+      },
+      "listing_out_of_stock": {
+        "title": "Miqdarı sıfır olan aktiv elanlar",
+        "description_one": "{{count}} aktiv elan eBay-də satılacaq heç nəyi olmadan görünür. Mənbə yenidən stoka gələnə qədər heç nə qazandırmır.",
+        "description_other": "{{count}} aktiv elan eBay-də satılacaq heç nəyi olmadan görünür. Mənbə yenidən stoka gələnə qədər heç nə qazandırmırlar.",
+        "action": "Elanlara bax"
+      },
+      "listing_drafts_pending": {
+        "title": "Heç vaxt dərc olunmamış qaralamalar",
+        "description_one": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir — lakin aktiv olana qədər heç nə də satmır.",
+        "description_other": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir — lakin aktiv olana qədər heç nə də satmır.",
+        "action": "Qaralamalara bax"
+      },
+      "plan_listing_quota": {
+        "title": "Aktiv elan limiti demək olar ki, dolub",
+        "description": "{{limit}} elan yerindən {{used}} yerdən istifadə edirsiniz. Limitə çatdıqdan sonra yeni elanlar rədd edilir; mövcud olanlar işləməyə davam edir.",
+        "action": "Plana bax"
+      },
+      "plan_ao_quota": {
+        "title": "Aylıq avtomatik sifariş limiti demək olar ki, dolub",
+        "description": "Bu ay {{limit}} avtomatik sifarişdən {{used}} qədərini istifadə etmisiniz. Limitə çatdıqdan sonra yeni sifarişlər ay sıfırlanana qədər əl ilə alınmalıdır.",
+        "action": "Plana bax"
+      },
+      "plan_past_due": {
+        "title": "Son ödənişiniz uğursuz oldu",
+        "description": "Avtomatlaşdırmanın işləməyə davam etməsi üçün ödəniş üsulunuzu yeniləyin.",
+        "action": "Ödənişi düzəlt"
+      },
+      "plan_trial_ending": {
+        "title": "Sınaq müddətiniz bitir",
+        "description_one": "{{count}} gün qalıb. Elanlarınızın və avtomatik sifarişlərinizin işləməyə davam etməsi üçün plan seçin.",
+        "description_other": "{{count}} gün qalıb. Elanlarınızın və avtomatik sifarişlərinizin işləməyə davam etməsi üçün plan seçin.",
+        "action": "Plan seç"
+      },
+      "setup_no_ebay_store": {
+        "title": "eBay mağazanızı qoşun",
+        "description": "eBay mağazası qoşulmadan SellerHill-də başqa heç nə işləyə bilməz — elanlar, sifarişlər və avtomatlaşdırma hamısı ondan asılıdır. Ən əvvəl bunu etməlisiniz.",
+        "action": "eBay-i qoş"
+      },
+      "setup_no_amazon_account": {
+        "title": "Hələ Amazon alıcı hesabı yoxdur",
+        "description": "Satış edirsiniz, lakin alış üçün Amazon hesabı yoxdur — hər sifariş əl ilə alınmalıdır. Hesab əlavə etmək avtomatik yerinə yetirməni aktiv edir.",
+        "action": "Hesab əlavə et"
+      },
+      "setup_no_store_settings": {
+        "title": "Mağaza parametrləri hələ konfiqurasiya olunmayıb",
+        "description": "Göndəriş məkanınız və qara siyahı açar sözləriniz hələ təyin edilməyib. Bunlar xərcləri hesablamaq və elanların bloklanmış məzmunla dərc olunmasının qarşısını almaq üçün istifadə olunur.",
+        "action": "Parametrləri konfiqurasiya et"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "Hələ parametr qrupu yoxdur",
+        "description": "Parametr qrupu qiymət, stok və yenidən qiymətləndirmə qaydalarını müəyyən edir — hər elanın birinə ehtiyacı var, ona görə onsuz ilk elanınızı yarada bilməzsiniz.",
+        "action": "Qrup yarat"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "Avtomatik alış deaktivdir",
+        "description": "Amazon hesablarınız qoşulub, lakin heç birinə alış icazəsi verilməyib. Xərc limiti ilə aktiv edin, yeni sifarişlər sizin üçün alınacaq.",
+        "action": "Aktiv et"
+      },
+      "plan_conversion_quota": {
+        "title": "Aylıq izləmə çevirmə limiti demək olar ki, dolub",
+        "description": "Bu ay {{limit}} izləmə çevirməsindən {{used}} qədərini istifadə etmisiniz. Limitə çatdıqdan sonra sifarişlər yenə də göndərilir və eBay yenə də izləmə nömrəsi alır — lakin bu, orijinal Amazon nömrəsi olacaq və alıcılar təchizatçınızı görə biləcək.",
+        "action": "Plana bax"
+      },
+      "plan_suspended": {
+        "title": "Avtomatlaşdırma dayandırılıb",
+        "description": "Abunəliyiniz artıq aktiv deyil, ona görə yeni elanlar, qiymət və stok yenilənmələri, avtomatik alış və izləmə çevirməsi dayanıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
+        "action": "Plan seç"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "Yenidən avtorizasiya tələb olunur",
+        "invalid": "Yanlış giriş məlumatları",
+        "locked": "Amazon tərəfindən bloklanıb"
+      },
+      "sourceUnavailable": {
+        "removed": "Amazon-da əlçatmazdır (miqdar 0 təyin edilib)",
+        "unreadable": "məhsul məlumatı oxuna bilmədi"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Yanlış Amazon səhifəsi",
+        "amazon_session_expired": "Amazon sessiyasının müddəti bitib",
+        "tracking_url_mismatch": "İzləmə bağlantısı uyğun gəlmir",
+        "needs_tracking_upload": "Göndəriş təfərrüatları gözlənilir",
+        "update_not_applied": "Yeniləmə hələ tətbiq olunmayıb",
+        "assign_validation": "Provayder tərəfindən rədd edilib",
+        "shipment_exception": "Daşıyıcı istisnası",
+        "tracking_update_unavailable": "Provayder əlçatmazdır"
+      }
+    }
+  }
+}
