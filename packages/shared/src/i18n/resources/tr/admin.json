@@ -115,6 +115,8 @@
       "keepaBalance": "Kalan Keepa token",
       "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan · proxy hatası · zaman aşımı)",
       "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}} · {{proxyError}} · {{expired}}",
+      "scraperLatency": "Scraper, ortalama sayfa turu · proxy başına işçi",
+      "scraperLatencyValue": "{{ms}} ms · {{threads}}",
       "refreshLag": "Yenileme gecikmesi",
       "refreshLagValue": "{{minutes}} dk",
       "syncsPerDay": "Ulaşılabilir günlük sync",

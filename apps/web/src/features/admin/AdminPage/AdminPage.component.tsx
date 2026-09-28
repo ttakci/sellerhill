@@ -150,6 +150,20 @@ export const AdminPageComponent = ({
                 </S.SummaryCard>
                 <S.SummaryCard>
                   <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.scraperLatency')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {typeof operations.scraperStats?.meanLatencyMs === 'number'
+                      ? t('admin.overview.scraperLatencyValue', {
+                          ms: operations.scraperStats.meanLatencyMs,
+                          // Every proxy runs the same worker count, so the first is representative.
+                          threads: operations.scraperStats.proxies[0]?.threads ?? '—',
+                        })
+                      : '—'}
+                  </Text>
+                </S.SummaryCard>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
                     {t('admin.overview.syncsPerDay')}
                   </Text>
                   <Text variant="metric" weight="semibold" numeric>

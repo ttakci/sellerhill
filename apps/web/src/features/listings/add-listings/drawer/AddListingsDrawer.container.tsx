@@ -23,6 +23,7 @@ import type {
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 
 const PREFERENCES_STORAGE_KEY = 'sellerhill:add-listings-preferences:v1';
 
@@ -152,8 +153,13 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
 
   React.useEffect(() => {
     if (submitError) {
-      const errorMsg =
-        (submitError as { data?: { message?: string } })?.data?.message || 'listings:listings.errors.createFailed';
+      // The API answers with an i18n KEY (`billing.errors.listingQuotaExhausted`),
+      // not a sentence. Handing it over raw made the dialog print the key itself,
+      // because it carries no namespace and resolved against `translation`.
+      const errorMsg = getErrorI18nKey(
+        submitError as Parameters<typeof getErrorI18nKey>[0],
+        'listings:listings.errors.createFailed'
+      );
       resetMutation();
       showMessage(
         {

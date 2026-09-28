@@ -33,6 +33,7 @@ import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
+import { isCreateCacheFresh } from './create-cache-freshness';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
@@ -208,6 +209,10 @@ export class ListingProcessorService extends WorkerHost {
       this.logger.log(`Job ${jobId} was cancelled; skipping a batch of ${items.length} ASIN(s)`);
       return;
     }
+    // Visible progress from the first second: the prefetch and the first
+    // item's preparation below take tens of seconds, and until now nothing
+    // told the seller the job had left the queue.
+    await this.listingsService.markJobProcessing(jobId);
 
     this.logger.log(
       `Processing batch of ${items.length} ASIN(s) for job ${jobId}${asDraft ? ' (drafts)' : ''}`
@@ -237,6 +242,7 @@ export class ListingProcessorService extends WorkerHost {
     const prefetchStartedAt = Date.now();
     let uncachedCount = 0;
     let prefetched: Map<string, CreateFetchResult> | undefined;
+    const cacheMaxAgeMs = await this.productSource.createCacheMaxAgeMs();
     if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
       // Only ASINs the loop below can actually create: a malformed identifier
       // fails as ASIN_NOT_FOUND without a fetch, an already-listed one is a
@@ -250,7 +256,7 @@ export class ListingProcessorService extends WorkerHost {
         if (await this.listingsService.isAsinListed(userId, item.asin)) {
           continue;
         }
-        if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin))) {
+        if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin), cacheMaxAgeMs)) {
           uncached.push(item.asin);
         }
       }
@@ -300,7 +306,8 @@ export class ListingProcessorService extends WorkerHost {
           item.asin,
           userId,
           AmazonMarketplace.AMAZON_US,
-          prefetched
+          prefetched,
+          cacheMaxAgeMs
         );
 
         // Drafts may hold a zero-stock ASIN so the seller can prepare it and
@@ -711,7 +718,8 @@ export class ListingProcessorService extends WorkerHost {
     asin: string,
     userId: string,
     marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
-    prefetched?: Map<string, CreateFetchResult>
+    prefetched?: Map<string, CreateFetchResult>,
+    cacheMaxAgeMs?: number
   ): Promise<{ productData: ProductData; productId: string }> {
     // A malformed identifier (wrong length/characters — never a leading-'B'
     // requirement) can never resolve to a real ASIN. Reject it here, before any
@@ -721,7 +729,8 @@ export class ListingProcessorService extends WorkerHost {
       throw new AsinNotFoundError(asin);
     }
 
-    const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
+    const maxAgeMs = cacheMaxAgeMs ?? (await this.productSource.createCacheMaxAgeMs());
+    const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace), maxAgeMs);
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
       return cached;
@@ -737,7 +746,10 @@ export class ListingProcessorService extends WorkerHost {
       ]);
 
       // Another worker may have fetched + cached while we waited on the lock.
-      const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
+      const cachedAfterLock = this.asUsableCache(
+        await this.listingsService.getProductByAsin(asin, marketplace),
+        maxAgeMs
+      );
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
         return cachedAfterLock;
@@ -808,7 +820,8 @@ export class ListingProcessorService extends WorkerHost {
     existing: {
       id: string;
       data: ProductData;
-    } | null
+    } | null,
+    cacheMaxAgeMs: number
   ): { productData: ProductData; productId: string } | null {
     // A row with no usable price (an out-of-stock page saved at 0, a legacy
     // Keepa `?? 0`) is a MISS: the refresh only visits products with an ACTIVE
@@ -816,12 +829,18 @@ export class ListingProcessorService extends WorkerHost {
     // seller who deletes the draft and re-adds the ASIN would be served the
     // same price-0 row for ever. A miss re-fetches, and the upsert replaces
     // the stored price.
+    //
+    // The same reasoning bounds the row's AGE: a row nothing refreshes can
+    // describe a product Amazon has since removed, and two such ASINs were
+    // published live from cache (see `isCreateCacheFresh`). Stale → miss →
+    // one page fetch, which either replaces the row or answers not found.
     if (
       existing &&
       existing.data.title &&
       existing.data.title !== 'Unknown Product' &&
       existing.data.imageUrls?.length > 0 &&
-      Number(existing.data.price?.current) > 0
+      Number(existing.data.price?.current) > 0 &&
+      isCreateCacheFresh(existing.data, Date.now(), cacheMaxAgeMs)
     ) {
       return {
         productData: existing.data,

@@ -43,10 +43,25 @@ _MAX_THREADS_PER_PROXY = 40
 _THREADS_PER_RPS = 4
 
 
-def threads_for_rate(rate, floor, cap=_MAX_THREADS_PER_PROXY):
-    """Workers one proxy needs to sustain `rate` requests/sec at ~2 s latency
-    (with headroom): ceil(rate * 4), never below `floor`, never above `cap`."""
-    return min(cap, max(floor, math.ceil(rate * _THREADS_PER_RPS)))
+_LATENCY_HEADROOM = 1.5
+
+
+def threads_for_rate(rate, floor, cap=_MAX_THREADS_PER_PROXY, latency_s=None):
+    """Workers one proxy needs to sustain `rate` requests/sec.
+
+    A worker is busy for one whole page round trip, so a proxy can complete at
+    most `threads / latency` pages per second whatever its rate budget says.
+    With no measurement the ~2 s assumption applies (ceil(rate * 4), headroom
+    included). Once the pool has measured its own latency the count follows
+    it — `rate * latency * 1.5` — because the fixed assumption was what held a
+    pool with 20 s round trips at 0.2 pages/s per proxy against a 1/s budget,
+    and no setting could reach the budget without knowing the latency.
+    Never below `floor`, never above `cap`, and never below the fixed
+    assumption (a fast proxy keeps its headroom)."""
+    per_rps = _THREADS_PER_RPS
+    if latency_s is not None and latency_s > 0:
+        per_rps = max(per_rps, latency_s * _LATENCY_HEADROOM)
+    return min(cap, max(floor, math.ceil(rate * per_rps)))
 
 
 class _Proxy:
@@ -93,7 +108,8 @@ class ProxyPool:
             for url in list(self._proxies):
                 if url not in wanted:
                     self._proxies.pop(url).retired.set()
-            wanted_threads = threads_for_rate(rate, self._threads_per_proxy, self._max_threads)
+            wanted_threads = threads_for_rate(rate, self._threads_per_proxy, self._max_threads,
+                                              latency_s=self._recent_latency_s(time.monotonic()))
             for url in proxies:
                 p = self._proxies.get(url)
                 if p is None:
@@ -104,6 +120,14 @@ class ProxyPool:
                 while p.threads < wanted_threads:
                     threading.Thread(target=self._worker, args=(p,), daemon=True).start()
                     p.threads += 1
+
+    def _recent_latency_s(self, now, window=3600):
+        """Mean page round trip over the last `window` seconds, in seconds, or
+        None before anything has been measured. Called with `_lock` held."""
+        latencies = [lat for ts, _, _, lat in self._events if lat is not None and now - ts <= window]
+        if not latencies:
+            return None
+        return (sum(latencies) / len(latencies)) / 1000.0
 
     def shutdown(self):
         self._stop.set()
@@ -250,5 +274,6 @@ class ProxyPool:
                 "requests1h": sum(1 for ts, _, pid, _ in events if pid == p.id and now - ts <= 3600),
                 "blocked1h": sum(1 for ts, o, pid, _ in events if pid == p.id and o == "blocked" and now - ts <= 3600),
                 "coolingDown": now < p.cool_until,
+                "threads": p.threads,
             } for p in proxies],
         }
