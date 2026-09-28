@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "İdarə paneli",
+    "subtitle": "Satışlar, mənfəət və elan göstəriciləri",
+    "greeting": "Salam, {{name}}",
+    "selectStore": "Mağaza seçin",
+    "allStores": "Bütün mağazalar",
+    "noData": "Hələ məlumat yoxdur",
+    "backToDashboard": "İdarə panelinə qayıt",
+    "tabs": {
+      "cards": "Kartlar",
+      "chart": "Qrafik",
+      "pnl": "Mənfəət və zərər"
+    },
+    "today": "Bu gün",
+    "thisWeek": "Bu həftə",
+    "thisMonth": "Bu ay",
+    "thisYear": "Bu il",
+    "metrics": {
+      "sales": "Satışlar",
+      "units": "Ədəd",
+      "orders": "Sifarişlər",
+      "ordersUnits": "Sifariş / Ədəd",
+      "refunds": "Geri qaytarmalar",
+      "refundRate": "Geri qaytarma dərəcəsi",
+      "grossProfit": "Ümumi mənfəət",
+      "netProfit": "Xalis mənfəət",
+      "estimatedPayout": "Təxmini ödəniş",
+      "margin": "Marja",
+      "roi": "ROI",
+      "avgOrderValue": "Orta sifariş",
+      "costOfGoods": "Məhsul maya dəyəri",
+      "transactionFees": "Əməliyyat haqları",
+      "adFees": "Reklam haqları",
+      "amazonShipping": "Amazon çatdırılması",
+      "amazonTax": "Amazon vergisi",
+      "revenueUncosted": "Maya dəyəri olmayan gəlir"
+    },
+    "card": {
+      "showMore": "Daha ətraflı",
+      "showLess": "Daha az ətraflı",
+      "activeHint": "Aşağıdakı siyahılar filtrlənir"
+    },
+    "listingsSection": "Elanlar",
+    "ordersSection": "Sifarişlər",
+    "listingsCount": "satışı olan {{count}}",
+    "ordersCount": "{{count}} sifariş",
+    "viewAllListings": "Hamısına bax",
+    "viewAllOrders": "Hamısına bax",
+    "listingsEmptyTitle": "Satışı olan elan yoxdur",
+    "listingsEmptySubtitle": "Seçilmiş dövrdə sifariş almış elanlar burada görünəcək.",
+    "ordersEmptyTitle": "Bu dövrdə sifariş yoxdur",
+    "ordersEmptySubtitle": "Satışlar başlayan kimi seçilmiş dövrün sifarişləri burada görünəcək.",
+    "chart": {
+      "title": "Göstəricilər",
+      "subtitle": "Xalis mənfəət və satış həcmi",
+      "summary": "Dövr üzrə xülasə",
+      "granularity": {
+        "day": "30 gün",
+        "week": "12 həftə",
+        "month": "12 ay"
+      },
+      "series": {
+        "netProfit": "Xalis mənfəət",
+        "sales": "Satışlar",
+        "units": "Ədəd",
+        "refunds": "Geri qaytarmalar"
+      }
+    },
+    "pnl": {
+      "title": "Mənfəət və zərər",
+      "subtitle": "Son 12 ayın aylar üzrə bölgüsü",
+      "parameter": "Göstərici / Dövr",
+      "currentPeriod": "Cari dövr",
+      "heatmap": "İstilik xəritəsi",
+      "export": "CSV yüklə"
+    },
+    "groups": {
+      "revenue": "Gəlir",
+      "costs": "Xərclər",
+      "profit": "Mənfəət",
+      "ratios": "Nisbətlər"
+    },
+    "profit": {
+      "confirmedLabel": "Təsdiqlənmiş",
+      "confirmedTooltip": "Real Amazon xərcləri qeydə alınmış sifarişlərin mənfəəti. Naməlum xərc heç vaxt sıfır kimi hesablanmır.",
+      "estimatedLabel": "Təxmini",
+      "estimatedTooltip": "Amazon-da yerinə yetirilməsi gözlənilən sifarişlər təxmini xərcdən istifadə edir (Amazon vergisi sizin təyin etdiyiniz {{rate}}% dərəcəsi ilə).",
+      "uncostedLabel": "Maya dəyəri olmayan gəlir",
+      "uncostedTooltip": "Amazon xərci hələ müəyyən edilə bilməyən satışlar — yalnız gəlir, mənfəət nəzərdə tutulmur."
+    }
+  }
+}

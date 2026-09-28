@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "ربط متجر eBay",
+      "subtitle": "اربط حساب البائع على eBay لإدارة الإدراجات والطلبات",
+      "connectButton": "ربط حساب eBay",
+      "connectingButton": "جارٍ الربط...",
+      "marketplaceLabel": "السوق",
+      "marketplaceUS": "الولايات المتحدة (eBay.com)",
+      "marketplaceUK": "المملكة المتحدة (eBay.co.uk)",
+      "marketplaceDE": "ألمانيا (eBay.de)",
+      "marketplaceFR": "فرنسا (eBay.fr)",
+      "marketplaceIT": "إيطاليا (eBay.it)",
+      "marketplaceES": "إسبانيا (eBay.es)",
+      "marketplaceUsOnlyNote": "سوق الولايات المتحدة (eBay.com) هو الوحيد المدعوم حالياً.",
+      "successMessage": "تم ربط حساب eBay بنجاح!",
+      "errorMessage": "تعذّر ربط حساب eBay",
+      "alreadyConnected": "حساب eBay هذا مربوط بالفعل"
+    },
+    "accounts": {
+      "title": "حسابات eBay المربوطة",
+      "loadingDescription": "جارٍ جلب متاجرك المربوطة.",
+      "noAccounts": "لا توجد حسابات eBay مربوطة بعد",
+      "statusActive": "نشط",
+      "statusRevoked": "ملغى",
+      "statusError": "خطأ",
+      "disconnectButton": "فصل الربط",
+      "refreshTokenButton": "تحديث الرمز"
+    },
+    "callback": {
+      "processing": "جارٍ معالجة الربط مع eBay...",
+      "success": "تم ربط حساب eBay بنجاح! جارٍ التحويل إلى لوحة التحكم...",
+      "error": "تعذّر ربط حساب eBay. يرجى المحاولة مرة أخرى.",
+      "cancelled": "تم إلغاء الربط مع eBay."
+    },
+    "errors": {
+      "invalidState": "معامل الحالة غير صالح",
+      "authorizationFailed": "فشل التفويض من eBay",
+      "tokenExchangeFailed": "تعذّر استبدال رمز التفويض بالرموز المطلوبة",
+      "accountAlreadyConnected": "متجر eBay هذا مربوط بحساب SellerHill آخر. سجّل الدخول بالحساب الذي ربطته به، وإذا تعذّر عليك الوصول إليه فتواصل مع الدعم.",
+      "ebayTrialAlreadyUsed": "استخدم متجر eBay هذا فترته التجريبية المجانية بالفعل. اختر خطة لربطه.",
+      "noAuthorizationCode": "لم يتم استلام رمز التفويض من eBay",
+      "storeOwnedByAnotherAccount": "متجر eBay هذا مرتبط بحساب SellerHill مختلف. تواصل مع الدعم لنقله.",
+      "accountNotFound": "لم يتم العثور على متجر eBay هذا.",
+      "identityUnavailable": "تعذّر تأكيد حساب eBay الخاص بك لدى eBay. لم يتم ربط أي شيء، يرجى المحاولة مرة أخرى بعد قليل."
+    },
+    "onboarding": {
+      "title": "اربط متجرك على eBay",
+      "header": "إعداد السوق",
+      "description": "لبدء مزامنة منتجاتك، عليك أولاً ربط متجرك على eBay.",
+      "connectButton": "حساب eBay",
+      "skipButton": "تخطي الآن",
+      "usOnlyNote": "سوق الولايات المتحدة هو الوحيد المدعوم حالياً. ستتوفر مناطق أخرى قريباً.",
+      "brandingDescription": "اربط متجرك على eBay بـ SellerHill لإدارة جميع عمليات البيع من مكان واحد."
+    }
+  }
+}

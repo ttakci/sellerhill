@@ -1,3 +1,4 @@
+import { SUPPORTED_LOCALES } from '@repo/shared';
 import { Dropdown, Icon, type IconName, Logo, TabNav } from '@repo/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -359,10 +360,10 @@ export const LandingPageComponent = ({
                   <Icon name="chevron-down" size={12} />
                 </S.LanguageTrigger>
               }
-              items={[
-                { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
-                { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
-              ]}
+              items={SUPPORTED_LOCALES.map((locale) => ({
+                label: t(`translation:languages.${locale}`),
+                onClick: () => onLocaleChange(locale),
+              }))}
             />
             <S.LoginButton $onDark type="button" onClick={onNavigateLogin}>
               <Icon name="user" size={18} />
@@ -1242,10 +1243,10 @@ export const LandingPageComponent = ({
                   <Icon name="chevron-down" size={12} />
                 </S.LanguageTrigger>
               }
-              items={[
-                { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
-                { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
-              ]}
+              items={SUPPORTED_LOCALES.map((locale) => ({
+                label: t(`translation:languages.${locale}`),
+                onClick: () => onLocaleChange(locale),
+              }))}
             />
           </S.FooterBrand>
           <S.FooterColumns>

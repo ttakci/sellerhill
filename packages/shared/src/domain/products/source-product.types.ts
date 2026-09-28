@@ -121,6 +121,30 @@ export interface ScraperOutcomeCounts {
   proxyError?: number;
 }
 
+/** Why a lightweight proxy connectivity check failed. Never carries the proxy value. */
+export enum ProxyVerifyErrorKind {
+  /** Not shaped like `scheme://[user:pass@]host:port` — never probed. */
+  INVALID = 'invalid',
+  /** The proxy itself refused the connection or its credentials (incl. HTTP 407). */
+  PROXY = 'proxy',
+  TIMEOUT = 'timeout',
+  DNS = 'dns',
+  UNREACHABLE = 'unreachable',
+  OTHER = 'other',
+}
+
+/**
+ * Result of probing ONE proxy with a small, non-Amazon request (the scraper's
+ * `POST /v1/proxies/verify`). `id` is `host:port` only — the credential is
+ * never returned, logged or rendered.
+ */
+export interface ProxyVerifyResult {
+  id: string;
+  ok: boolean;
+  errorKind: ProxyVerifyErrorKind | null;
+  latencyMs: number | null;
+}
+
 /** Scraper service health/usage snapshot (admin observability). */
 export interface ScraperStats {
   window1h: ScraperOutcomeCounts;

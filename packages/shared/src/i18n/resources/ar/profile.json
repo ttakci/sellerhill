@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "الملف الشخصي",
+    "subtitle": "إدارة إعدادات حسابك ومعلوماتك الشخصية.",
+    "personalInfo": "المعلومات الشخصية",
+    "firstName": "الاسم الشخصي",
+    "lastName": "الاسم العائلي",
+    "emailAddress": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "bio": "نبذة تعريفية",
+    "address": "العنوان",
+    "country": "البلد",
+    "cityState": "المدينة/الجهة",
+    "postalCode": "الرمز البريدي",
+    "taxId": "المعرّف الضريبي",
+    "edit": "تعديل",
+    "home": "الرئيسية",
+    "defaultJobTitle": "مدير الفريق",
+    "locationNotSet": "الموقع غير محدد",
+    "defaultBio": "مدير محترف في التجارة الإلكترونية.",
+    "updateSuccess": "تم تحديث الملف الشخصي بنجاح.",
+    "twitter": "رابط Twitter",
+    "linkedin": "رابط LinkedIn",
+    "instagram": "رابط Instagram",
+    "deactivateAccount": "تعطيل الحساب",
+    "saveChanges": "حفظ جميع التغييرات",
+    "storeOwner": "صاحب المتجر"
+  }
+}

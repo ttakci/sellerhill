@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Панель",
+    "subtitle": "Продажи, прибыль и эффективность листингов",
+    "greeting": "Здравствуйте, {{name}}",
+    "selectStore": "Выберите магазин",
+    "allStores": "Все магазины",
+    "noData": "Данных пока нет",
+    "backToDashboard": "Назад к панели",
+    "tabs": {
+      "cards": "Карточки",
+      "chart": "График",
+      "pnl": "P&L"
+    },
+    "today": "Сегодня",
+    "thisWeek": "Эта неделя",
+    "thisMonth": "Этот месяц",
+    "thisYear": "Этот год",
+    "metrics": {
+      "sales": "Продажи",
+      "units": "Единиц",
+      "orders": "Заказы",
+      "ordersUnits": "Заказы / единицы",
+      "refunds": "Возвраты",
+      "refundRate": "Доля возвратов",
+      "grossProfit": "Валовая прибыль",
+      "netProfit": "Чистая прибыль",
+      "estimatedPayout": "Ожид. выплата",
+      "margin": "Маржа",
+      "roi": "ROI",
+      "avgOrderValue": "Ср. заказ",
+      "costOfGoods": "Себестоимость товара",
+      "transactionFees": "Комиссии за транзакции",
+      "adFees": "Расходы на рекламу",
+      "amazonShipping": "Доставка Amazon",
+      "amazonTax": "Налог Amazon",
+      "revenueUncosted": "Выручка без затрат"
+    },
+    "card": {
+      "showMore": "Больше подробностей",
+      "showLess": "Меньше подробностей",
+      "activeHint": "Фильтрует списки ниже"
+    },
+    "listingsSection": "Листинги",
+    "ordersSection": "Заказы",
+    "listingsCount": "С продажами: {{count}}",
+    "ordersCount": "Заказов: {{count}}",
+    "viewAllListings": "Показать все",
+    "viewAllOrders": "Показать все",
+    "listingsEmptyTitle": "Нет листингов с продажами",
+    "listingsEmptySubtitle": "Здесь отображаются листинги, получившие заказы за выбранный период.",
+    "ordersEmptyTitle": "За этот период заказов нет",
+    "ordersEmptySubtitle": "Заказы за выбранный период появятся здесь, как только пойдут продажи.",
+    "chart": {
+      "title": "Эффективность",
+      "subtitle": "Чистая прибыль и объём продаж",
+      "summary": "Итоги периода",
+      "granularity": {
+        "day": "30 дней",
+        "week": "12 недель",
+        "month": "12 месяцев"
+      },
+      "series": {
+        "netProfit": "Чистая прибыль",
+        "sales": "Продажи",
+        "units": "Единиц",
+        "refunds": "Возвраты"
+      }
+    },
+    "pnl": {
+      "title": "Прибыли и убытки",
+      "subtitle": "Разбивка по месяцам за последние 12 месяцев",
+      "parameter": "Показатель / период",
+      "currentPeriod": "Текущий период",
+      "heatmap": "Тепловая карта",
+      "export": "Скачать CSV"
+    },
+    "groups": {
+      "revenue": "Выручка",
+      "costs": "Затраты",
+      "profit": "Прибыль",
+      "ratios": "Коэффициенты"
+    },
+    "profit": {
+      "confirmedLabel": "Подтверждённая",
+      "confirmedTooltip": "Прибыль по заказам, для которых получены реальные затраты на Amazon. Неизвестная стоимость никогда не считается нулевой.",
+      "estimatedLabel": "Ориентировочная",
+      "estimatedTooltip": "Для заказов, ожидающих исполнения на Amazon, используется ориентировочная стоимость (налог Amazon по заданной вами ставке {{rate}}%).",
+      "uncostedLabel": "Выручка без затрат",
+      "uncostedTooltip": "Продажи, стоимость которых на Amazon пока не определена, — только выручка, без предположений о прибыли."
+    }
+  }
+}

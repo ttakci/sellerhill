@@ -16,6 +16,7 @@ import { Provider } from 'react-redux';
 
 import { App } from './App';
 import { store } from './app/store';
+import { DirectionProvider } from './components/DirectionProvider';
 import { GlobalMessageModal } from './components/GlobalMessageModal';
 import { AuthBootstrap } from './features/auth/AuthBootstrap';
 import './i18n.config';
@@ -30,16 +31,18 @@ const ebayItemUrl = (itemId: string): string => buildEbayItemUrl(itemId, ebayEnv
 function RootProviders({ children }: { children: React.ReactNode }): React.ReactElement {
   const tree = (
     <Provider store={store}>
-      <ThemeProvider>
-        <MarketplaceProvider buildEbayItemUrl={ebayItemUrl} buildAmazonProductUrl={buildAmazonProductUrl}>
-          <UIProvider>
-            <AuthBootstrap>
-              {children}
-              <GlobalMessageModal />
-            </AuthBootstrap>
-          </UIProvider>
-        </MarketplaceProvider>
-      </ThemeProvider>
+      <DirectionProvider>
+        <ThemeProvider>
+          <MarketplaceProvider buildEbayItemUrl={ebayItemUrl} buildAmazonProductUrl={buildAmazonProductUrl}>
+            <UIProvider>
+              <AuthBootstrap>
+                {children}
+                <GlobalMessageModal />
+              </AuthBootstrap>
+            </UIProvider>
+          </MarketplaceProvider>
+        </ThemeProvider>
+      </DirectionProvider>
     </Provider>
   );
 

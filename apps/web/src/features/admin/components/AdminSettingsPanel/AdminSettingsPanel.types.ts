@@ -1,5 +1,5 @@
 import type { PlatformSettingCategory, PlatformSettingDto } from '@repo/shared';
-import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react';
+import type { ChangeEvent, FormEvent, KeyboardEvent, ReactNode } from 'react';
 
 export interface AdminSettingsPanelProps {
   /** Skip fetching until the admin role has been confirmed. */
@@ -59,4 +59,10 @@ export interface AdminSettingsPanelComponentProps {
   onResetConfirm: () => void;
   onResetCancel: () => void;
   onEmailTest: () => void;
+  /**
+   * Pre-built by the container, which owns rendering `ScraperProxiesEditorContainer`
+   * (its own state/RTK hooks) — `.component.tsx` may only compose it as a node,
+   * never render it directly, per the container/component hook split.
+   */
+  scraperProxiesEditor: ReactNode;
 }

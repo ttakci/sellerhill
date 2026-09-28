@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PlatformSettingKey } from '@repo/shared';
+import { DEFAULT_LOCALE, PlatformSettingKey, isValidLocale } from '@repo/shared';
 import type { Transporter } from 'nodemailer';
 import * as nodemailer from 'nodemailer';
 
@@ -115,14 +115,22 @@ export class EmailService {
   }
 
   /**
-   * Get email template from database
+   * Get email template from database.
+   *
+   * Templates are seeded for `en` and `tr` only, while the app now speaks more
+   * languages. A missing row for the user's locale falls back to the English one
+   * in the SAME query rather than returning nothing: the caller would otherwise
+   * skip the send, and for a password-reset or verification mail that means the
+   * user never receives the link at all. A locale-specific row, once seeded,
+   * wins automatically (`ORDER BY locale = $2 DESC`).
    */
   private async getTemplate(templateKey: string, locale: string = 'en'): Promise<EmailTemplate | null> {
     try {
       const templates = await this.databaseService.query<EmailTemplate>(
         `SELECT id, template_key, locale, subject, html_content, text_content, variables
          FROM email_templates
-         WHERE template_key = $1 AND locale = $2 AND is_active = true
+         WHERE template_key = $1 AND locale IN ($2, 'en') AND is_active = true
+         ORDER BY (locale = $2) DESC
          LIMIT 1`,
         [templateKey, locale]
       );
@@ -330,7 +338,7 @@ export class EmailService {
   private billingUrl(locale: string): string {
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL', { infer: true }) || 'http://localhost:5173';
-    const safeLocale = locale === 'tr' ? 'tr' : 'en';
+    const safeLocale = isValidLocale(locale) ? locale : DEFAULT_LOCALE;
     return `${frontendUrl}/${safeLocale}/billing`;
   }
 }

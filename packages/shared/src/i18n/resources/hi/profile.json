@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "subtitle": "अपने अकाउंट की सेटिंग और व्यक्तिगत जानकारी प्रबंधित करें।",
+    "personalInfo": "व्यक्तिगत जानकारी",
+    "firstName": "पहला नाम",
+    "lastName": "उपनाम",
+    "emailAddress": "ईमेल पता",
+    "phone": "फ़ोन",
+    "bio": "परिचय",
+    "address": "पता",
+    "country": "देश",
+    "cityState": "शहर/राज्य",
+    "postalCode": "पिन कोड",
+    "taxId": "टैक्स आईडी",
+    "edit": "संपादित करें",
+    "home": "होम",
+    "defaultJobTitle": "टीम मैनेजर",
+    "locationNotSet": "स्थान सेट नहीं है",
+    "defaultBio": "प्रोफ़ेशनल ई-कॉमर्स मैनेजर।",
+    "updateSuccess": "प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई।",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL",
+    "deactivateAccount": "अकाउंट निष्क्रिय करें",
+    "saveChanges": "सभी बदलाव सेव करें",
+    "storeOwner": "स्टोर मालिक"
+  }
+}

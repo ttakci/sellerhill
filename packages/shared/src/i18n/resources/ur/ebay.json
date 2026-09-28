@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay سٹور کنیکٹ کریں",
+      "subtitle": "لسٹنگز اور آرڈرز کا انتظام کرنے کے لیے اپنا eBay سیلر اکاؤنٹ لنک کریں",
+      "connectButton": "eBay اکاؤنٹ کنیکٹ کریں",
+      "connectingButton": "کنیکٹ ہو رہا ہے...",
+      "marketplaceLabel": "مارکیٹ پلیس",
+      "marketplaceUS": "ریاستہائے متحدہ (eBay.com)",
+      "marketplaceUK": "برطانیہ (eBay.co.uk)",
+      "marketplaceDE": "جرمنی (eBay.de)",
+      "marketplaceFR": "فرانس (eBay.fr)",
+      "marketplaceIT": "اٹلی (eBay.it)",
+      "marketplaceES": "سپین (eBay.es)",
+      "marketplaceUsOnlyNote": "فی الحال صرف ریاستہائے متحدہ (eBay.com) مارکیٹ پلیس سپورٹڈ ہے۔",
+      "successMessage": "eBay اکاؤنٹ کامیابی سے کنیکٹ ہو گیا!",
+      "errorMessage": "eBay اکاؤنٹ کنیکٹ کرنے میں ناکامی",
+      "alreadyConnected": "یہ eBay اکاؤنٹ پہلے ہی کنیکٹ ہے"
+    },
+    "accounts": {
+      "title": "کنیکٹڈ eBay اکاؤنٹس",
+      "loadingDescription": "آپ کے کنیکٹڈ سٹورز لوڈ ہو رہے ہیں۔",
+      "noAccounts": "ابھی کوئی eBay اکاؤنٹ کنیکٹ نہیں",
+      "statusActive": "فعال",
+      "statusRevoked": "منسوخ شدہ",
+      "statusError": "خرابی",
+      "disconnectButton": "ڈس کنیکٹ کریں",
+      "refreshTokenButton": "ٹوکن ریفریش کریں"
+    },
+    "callback": {
+      "processing": "eBay کنکشن پر کارروائی ہو رہی ہے...",
+      "success": "eBay اکاؤنٹ کامیابی سے کنیکٹ ہو گیا! ڈیش بورڈ پر بھیجا جا رہا ہے...",
+      "error": "eBay اکاؤنٹ کنیکٹ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔",
+      "cancelled": "eBay کنکشن منسوخ کر دیا گیا۔"
+    },
+    "errors": {
+      "invalidState": "غلط state پیرامیٹر",
+      "authorizationFailed": "eBay کی اجازت ناکام ہو گئی",
+      "tokenExchangeFailed": "اجازت کوڈ کو ٹوکنز سے تبدیل کرنے میں ناکامی",
+      "accountAlreadyConnected": "یہ eBay سٹور کسی دوسرے SellerHill اکاؤنٹ سے کنیکٹ ہے۔ اسی اکاؤنٹ سے سائن ان کریں جس سے آپ نے اسے کنیکٹ کیا تھا؛ اگر آپ اس تک رسائی نہیں رکھتے تو سپورٹ سے رابطہ کریں۔",
+      "ebayTrialAlreadyUsed": "اس eBay سٹور کا مفت ٹرائل پہلے ہی استعمال ہو چکا ہے۔ اسے کنیکٹ کرنے کے لیے کوئی پلان منتخب کریں۔",
+      "noAuthorizationCode": "eBay کی طرف سے کوئی اجازت کوڈ موصول نہیں ہوا",
+      "storeOwnedByAnotherAccount": "یہ eBay سٹور کسی دوسرے SellerHill اکاؤنٹ سے منسلک ہے۔ اسے منتقل کروانے کے لیے سپورٹ سے رابطہ کریں۔",
+      "accountNotFound": "وہ eBay سٹور نہیں ملا۔",
+      "identityUnavailable": "ہم eBay سے آپ کے eBay اکاؤنٹ کی تصدیق نہیں کر سکے۔ کچھ بھی کنیکٹ نہیں ہوا — براہ کرم تھوڑی دیر بعد دوبارہ کوشش کریں۔"
+    },
+    "onboarding": {
+      "title": "اپنا eBay سٹور کنیکٹ کریں",
+      "header": "مارکیٹ پلیس سیٹ اپ",
+      "description": "اپنی آئٹمز کی سنکنگ شروع کرنے کے لیے پہلے آپ کو اپنا eBay سٹور کنیکٹ کرنا ہوگا۔",
+      "connectButton": "eBay اکاؤنٹ",
+      "skipButton": "فی الحال چھوڑیں",
+      "usOnlyNote": "فی الحال صرف US مارکیٹ پلیس سپورٹڈ ہے۔ مزید علاقے جلد آ رہے ہیں۔",
+      "brandingDescription": "اپنی تمام فروخت کے عمل کو ایک ہی جگہ سے سنبھالنے کے لیے اپنا eBay سٹور SellerHill سے لنک کریں۔"
+    }
+  }
+}

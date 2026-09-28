@@ -3,7 +3,9 @@ export {
   DEFAULT_LOCALE,
   EMPTY_STRING,
   LOCALE_DISPLAY_NAMES,
+  RTL_LOCALES,
   SUPPORTED_LOCALES,
+  isRtlLocale,
   isValidLocale,
 } from './domain/common/common.constants';
 export type { SupportedLocale } from './domain/common/common.constants';

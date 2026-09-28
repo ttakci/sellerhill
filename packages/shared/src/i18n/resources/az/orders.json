@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Sifarişlər",
+      "subtitle": "{{count}} sifariş"
+    },
+    "overview": {
+      "viewAll": "Hamısına bax",
+      "emptyTitle": "Hələ sifariş yoxdur",
+      "emptySubtitle": "Sinxronlaşdırılmış eBay satışları burada görünəcək."
+    },
+    "carousel": {
+      "previous": "Əvvəlki",
+      "next": "Növbəti"
+    },
+    "all": {
+      "title": "Bütün sifarişlər",
+      "subtitle": "{{count}} nəticə",
+      "loadingTitle": "Sifarişlər yüklənir",
+      "loadingSubtitle": "Ən son eBay sifarişləriniz gətirilir.",
+      "filtersTitle": "Filtrlərinizə uyğun sifariş yoxdur",
+      "filtersSubtitle": "Tarix aralığını, statusu və ya mağazanı genişləndirməyə çalışın.",
+      "filtersAction": "Filtrləri təmizlə",
+      "emptyTitle": "Hələ sifariş yoxdur",
+      "emptySubtitle": "eBay sinxronizasiyası işlədikdən sonra sifarişlər burada avtomatik görünəcək."
+    },
+    "filters": {
+      "allStatuses": "Bütün statuslar",
+      "allStores": "Bütün mağazalar",
+      "allTrackingStates": "Bütün izləmə vəziyyətləri",
+      "clearAll": "Hamısını təmizlə",
+      "resultCount": "{{count}} nəticə"
+    },
+    "stats": {
+      "totalSales": "Ümumi satışlar",
+      "netProfit": "Xalis mənfəət",
+      "activeOrders": "Aktiv sifarişlər",
+      "returnRate": "Geri qaytarma dərəcəsi",
+      "last24Hours": "Son 24 saat",
+      "growth": "Keçən aya nisbətən {{value}}%",
+      "profitGrowth": "Keçən aya nisbətən {{value}}%",
+      "decrease": "Keçən aya nisbətən {{value}}%"
+    },
+    "actions": {
+      "search": "Sifariş, alıcı və ya məhsul axtarın...",
+      "last30Days": "Son 30 gün",
+      "export": "İxrac et",
+      "convertTracking": "İzləmə nömrəsini çevir"
+    },
+    "table": {
+      "orderNumber": "Sifariş №",
+      "product": "Məhsul",
+      "date": "Tarix",
+      "buyer": "Alıcı",
+      "status": "Status",
+      "salePrice": "Satış",
+      "purchasePrice": "Xərc",
+      "netProfit": "Mənfəət",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Tamamlanıb",
+      "shipped": "Göndərilib",
+      "processing": "Emal olunur",
+      "cancelled": "Ləğv edilib",
+      "pending": "Gözləyir",
+      "waiting_shipment": "Göndərişi gözləyir"
+    },
+    "fulfillmentState": {
+      "column": "Amazon-da yerinə yetirmə",
+      "purchased": "Amazon-dan alınıb",
+      "amazon_cancelled": "Amazon ləğv etdi",
+      "action_required": "Əməliyyat tələb olunur",
+      "in_progress": "Amazon-dan alınır",
+      "not_automated": "Avtomatlaşdırılmayıb",
+      "manual": "Əl ilə alınıb",
+      "simulated": "Sınaq icrası — alış yoxdur",
+      "filter": {
+        "all": "Bütün yerinə yetirmə vəziyyətləri"
+      },
+      "detail": {
+        "title": "Amazon-da yerinə yetirmə",
+        "amazonOrderId": "Amazon sifarişi",
+        "simulatedNotice": "Bu, sınaq icrasıdır. Amazon sifarişi verilməyib və heç bir pul çıxılmayıb — aşağıdakı xərclər və mənfəət simulyasiya olunub.",
+        "actionRequiredNotice": "Avtomatlaşdırma almadan əvvəl dayandı. Səbəbə baxın və bu sifarişi əl ilə yerinə yetirin.",
+        "cancelledNotice": "Amazon alışı ləğv edildi. eBay satışı hələ də alıcıya borcludur — onu başqa yolla yerinə yetirin.",
+        "notAutomatedNotice": "Bu sifariş üçün avtomatik sifariş deaktivdir.",
+        "attemptedAt": "Son cəhd"
+      }
+    },
+    "tracking": {
+      "tracked": "SellerHill tərəfindən izlənir",
+      "untracked": "İzlənmir",
+      "problem": {
+        "wrongPageType": "İzləmə provayderi Amazon-un sifariş səhifəsini oxuya bilmədi — format dəyişmiş ola bilər. Bu, avtomatik təkrar cəhd ediləcək.",
+        "amazonSessionExpired": "Bu sifarişi oxumaq üçün istifadə olunan Amazon sessiyasının müddəti bitib və yenidən daxil olmaq lazımdır.",
+        "trackingUrlMismatch": "Amazon-un sifariş səhifəsindəki izləmə bağlantısı gözlədiyimizə uyğun gəlmədi. Bu, avtomatik təkrar cəhd ediləcək.",
+        "needsTrackingUpload": "İzləmə nömrəsinin çevrilməsi üçün göndəriş təfərrüatlarının yüklənməsi gözlənilir.",
+        "updateNotApplied": "İzləmə yeniləməsi provayder tərəfindən hələ tətbiq olunmayıb. Bu, avtomatik təkrar cəhd ediləcək.",
+        "assignValidation": "İzləmə provayderi bu sifarişin göndəriş təfərrüatlarını rədd etdi.",
+        "shipmentException": "İzləmə provayderi bu göndəriş üzrə istisna bildirdi.",
+        "trackingUpdateUnavailable": "İzləmə provayderi bu göndərişi hazırda yeniləyə bilmədi.",
+        "generic": "Bu sifarişin izləmə nömrəsinin çevrilməsində problem var. Avtomatik təkrar cəhd ediləcək."
+      }
+    },
+    "autoFulfill": {
+      "column": "Avtomatik yerinə yetirmə",
+      "status": {
+        "pending": "Növbədə",
+        "running": "İcra olunur",
+        "placed": "Verilib",
+        "blocked": "Bloklanıb",
+        "failed": "Uğursuz",
+        "dry_run": "Sınaq icrası",
+        "skipped": "Keçilib"
+      },
+      "reason": {
+        "no_asin": "Məhsul Amazon-da tapılmadı",
+        "captcha": "Captcha tələb olunur",
+        "otp": "MFA/OTP yoxlaması",
+        "login": "Giriş uğursuz oldu",
+        "out_of_stock": "Stokda yoxdur",
+        "address": "Ünvan problemi",
+        "payment": "Ödəniş rədd edildi",
+        "cap": "Xərc limitini aşır",
+        "no_confirmation": "Təsdiq yoxdur",
+        "proxy_required": "Proksi konfiqurasiya olunmayıb",
+        "quota_exhausted": "Aylıq kvota dolub",
+        "cart": "Səbət uyğunsuzluğu",
+        "review_unreadable": "Sifariş məbləği oxunmadı",
+        "subscription_suspended": "Abunəlik dayandırılıb",
+        "listing_over_plan_limit": "Elan plan limitindən kənardadır",
+        "order_already_fulfilled": "Artıq göndərilib — alınacaq heç nə yoxdur",
+        "order_not_paid": "Alıcının ödənişi gözlənilir"
+      },
+      "reasonLabel": "Səbəb: {{reason}}",
+      "amazonCancelledBadge": "Amazon ləğv etdi",
+      "filter": {
+        "all": "Bütün avtomatik yerinə yetirmələr",
+        "needsAttention": "Diqqət tələb edir"
+      }
+    },
+    "pagination": {
+      "showing": "{{total}} sifarişdən {{from}}-{{to}} göstərilir"
+    },
+    "detail": {
+      "title": "Sifariş təfərrüatları",
+      "loadingSubtitle": "Sifariş təfərrüatları gətirilir…",
+      "notFoundTitle": "Sifariş tapılmadı",
+      "notFoundSubtitle": "Bu sifariş silinmiş ola bilər və ya ona girişiniz yoxdur.",
+      "orderPlaced": "Sifariş verilib",
+      "viewInvoice": "Fakturaya bax",
+      "printLabels": "Etiketləri çap et",
+      "customerInfo": "Müştəri məlumatı",
+      "buyerPayment": "Alıcının ödənişi",
+      "ebaySummary": "eBay satış xülasəsi",
+      "whatBuyerPaid": "Alıcınızın ödədiyi məbləğ",
+      "whatYouEarned": "Qazancınız",
+      "earningsOrderTotal": "Sifarişin cəmi",
+      "ebayCollectedFromBuyer": "eBay-in alıcıdan topladığı",
+      "ebayCollectedTax": "Satış vergisi",
+      "sellingCosts": "Satış xərcləri",
+      "itemSubtotal": "Məhsul(lar)ın ara cəmi",
+      "shippingHandling": "Çatdırılma və işləmə",
+      "totalBeforeTax": "Vergidən əvvəl cəmi",
+      "estimatedTax": "Təxmini vergi",
+      "grandTotal": "Yekun cəm",
+      "paymentMethod": "Ödəniş üsulu",
+      "subtotal": "Ara cəmi",
+      "shipping": "Çatdırılma",
+      "salesTax": "Satış vergisi",
+      "orderTotal": "Sifarişin cəmi",
+      "feesCollected": "Tutulan haqlar",
+      "transactionFees": "Əməliyyat haqları",
+      "adFee": "Ümumi reklam haqqı",
+      "orderEarnings": "Sifariş qazancı",
+      "viewMore": "Daha ətraflı bax",
+      "updateAmazon": "Amazon məlumatını daxil et",
+      "netProfitAnalysis": "XALİS MƏNFƏƏT TƏHLİLİ",
+      "analysisDesc": "Bu hesablama eBay-dən əldə etdiyiniz real qazancı bütün platforma haqları və vergilər çıxıldıqdan sonra nəzərə alır və ilkin Amazon alış xərcini çıxır.",
+      "calculation": "Hesablama",
+      "netProfitResult": "Xalis mənfəət",
+      "roi": "ROI",
+      "shipTo": "Çatdırılma ünvanı",
+      "contact": "Əlaqə",
+      "unknownProduct": "Naməlum məhsul",
+      "copyAddress": "Ünvanı kopyala",
+      "addressCopied": "Ünvan kopyalandı!",
+      "copyName": "Adı kopyala",
+      "copyStreet": "Küçəni kopyala",
+      "copyStreet2": "Ünvanın 2-ci sətrini kopyala",
+      "copyCity": "Şəhəri kopyala",
+      "copyState": "Ştatı/əyaləti kopyala",
+      "copyZip": "Poçt indeksini kopyala",
+      "copyCountry": "Ölkəni/regionu kopyala",
+      "copied": "Kopyalandı",
+      "amazonCosts": "Amazon sifariş xülasəsi",
+      "purchasePrice": "Alış qiyməti",
+      "amazonTax": "Amazon vergisi",
+      "amazonShipping": "Amazon çatdırılması",
+      "totalAmazonCost": "Ümumi Amazon xərci",
+      "amazonTracking": "Amazon izləməsi",
+      "convertedTracking": "Çevrilmiş izləmə",
+      "amazonOrder": "Amazon sifarişi",
+      "linkAmazon": "Amazon sifarişini əlaqələndir",
+      "calcEarnings": "Qazanc",
+      "calcPurchase": "Alış",
+      "calcTax": "Vergi",
+      "calcShipping": "Çatdırılma",
+      "asin": "ASIN",
+      "ebayItemId": "eBay ID",
+      "quantity": "Miqdar",
+      "unit": "ədəd",
+      "sku": "SKU",
+      "na": "Yoxdur"
+    },
+    "modal": {
+      "title": "Amazon sifariş məlumatını daxil edin",
+      "amazonUrl": "Amazon sifariş təfərrüatları URL-i",
+      "trackingUrl": "İzləmə URL-i (ixtiyari)",
+      "taxAmount": "Vergi məbləği ($)",
+      "shippingCost": "Çatdırılma xərci ($)",
+      "infoText": "Vergi və çatdırılma xərclərini daxil etmək bu sifariş üçün xalis mənfəətinizi avtomatik yenidən hesablayacaq.",
+      "save": "Təfərrüatları yadda saxla",
+      "cancel": "Ləğv et",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Təxmini",
+    "estimateNote": "Təxmini mənfəət — Amazon sifarişi veriləndə yekunlaşır. Amazon-un son məlum qiymətinə əsaslanır; Amazon çatdırılması daxil deyil.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Bütün hüquqlar qorunur."
+    },
+    "errors": {
+      "notFound": "Sifariş tapılmadı.",
+      "noTrackingYet": "Bu sifarişin hələ Amazon izləmə nömrəsi yoxdur — göndərilməyib.",
+      "conversionUnavailable": "İzləmə nömrəsi hazırda çevrilə bilmədi. Plan limitinizi və çevirmə parametrlərinizi yoxlayıb yenidən cəhd edin.",
+      "conversionDone": "İzləmə nömrəsi çevrildi.",
+      "orderNotTracked": "Bu sifariş elanlarınızdan birinə bağlı deyil, ona görə çevrilmiş izləmə nömrəsi heç vaxt eBay-ə göndərilə bilməz. Əvvəlcə sifarişi öz elanına əlaqələndirin.",
+      "trackingAlreadyPushed": "eBay-də bu sifariş üçün artıq orijinal izləmə nömrəsi var və onu əvəz etmək mümkün deyil, ona görə indi çevirmək alıcının gördüyünü dəyişməyəcək.",
+      "listingOverPlanLimit": "Sifariş gələndə bu sifarişin elanı planınızın elan limitindən kənarda idi. Limitdən kənardakı elanların sifarişləri göndəriş izləməsi və ya izləmə nömrəsinin çevrilməsi almır."
+    }
+  }
+}

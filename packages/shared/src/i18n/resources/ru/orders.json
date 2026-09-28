@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Заказы",
+      "subtitle": "Заказов: {{count}}"
+    },
+    "overview": {
+      "viewAll": "Показать все",
+      "emptyTitle": "Заказов пока нет",
+      "emptySubtitle": "Здесь появятся синхронизированные продажи eBay."
+    },
+    "carousel": {
+      "previous": "Назад",
+      "next": "Далее"
+    },
+    "all": {
+      "title": "Все заказы",
+      "subtitle": "Результатов: {{count}}",
+      "loadingTitle": "Загрузка заказов",
+      "loadingSubtitle": "Получаем ваши последние заказы eBay.",
+      "filtersTitle": "Нет заказов, соответствующих фильтрам",
+      "filtersSubtitle": "Попробуйте расширить диапазон дат, статус или магазин.",
+      "filtersAction": "Сбросить фильтры",
+      "emptyTitle": "Заказов пока нет",
+      "emptySubtitle": "Заказы появятся здесь автоматически после синхронизации с eBay."
+    },
+    "filters": {
+      "allStatuses": "Все статусы",
+      "allStores": "Все магазины",
+      "allTrackingStates": "Все состояния трекинга",
+      "clearAll": "Сбросить всё",
+      "resultCount": "Результатов: {{count}}"
+    },
+    "stats": {
+      "totalSales": "Всего продаж",
+      "netProfit": "Чистая прибыль",
+      "activeOrders": "Активные заказы",
+      "returnRate": "Доля возвратов",
+      "last24Hours": "Последние 24 часа",
+      "growth": "{{value}}% к прошлому месяцу",
+      "profitGrowth": "{{value}}% к прошлому месяцу",
+      "decrease": "{{value}}% к прошлому месяцу"
+    },
+    "actions": {
+      "search": "Поиск заказов, покупателей или товаров...",
+      "last30Days": "Последние 30 дней",
+      "export": "Экспорт",
+      "convertTracking": "Конвертировать трек-номер"
+    },
+    "table": {
+      "orderNumber": "Заказ №",
+      "product": "Товар",
+      "date": "Дата",
+      "buyer": "Покупатель",
+      "status": "Статус",
+      "salePrice": "Продажа",
+      "purchasePrice": "Затраты",
+      "netProfit": "Прибыль",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Завершён",
+      "shipped": "Отправлен",
+      "processing": "В обработке",
+      "cancelled": "Отменён",
+      "pending": "Ожидает",
+      "waiting_shipment": "Ожидает отправки"
+    },
+    "fulfillmentState": {
+      "column": "Исполнение на Amazon",
+      "purchased": "Куплено на Amazon",
+      "amazon_cancelled": "Отменён Amazon",
+      "action_required": "Требуется действие",
+      "in_progress": "Покупка на Amazon",
+      "not_automated": "Не автоматизировано",
+      "manual": "Куплено вручную",
+      "simulated": "Тестовый запуск — без покупки",
+      "filter": {
+        "all": "Все состояния исполнения"
+      },
+      "detail": {
+        "title": "Исполнение на Amazon",
+        "amazonOrderId": "Заказ Amazon",
+        "simulatedNotice": "Это тестовый запуск. Заказ на Amazon не оформлялся, деньги не списывались — затраты и прибыль ниже смоделированы.",
+        "actionRequiredNotice": "Автоматизация остановилась до покупки. Изучите причину и выполните этот заказ вручную.",
+        "cancelledNotice": "Покупка на Amazon отменена. Вы по-прежнему должны покупателю товар по продаже на eBay — выполните заказ другим способом.",
+        "notAutomatedNotice": "Автоматическое оформление заказов для этого заказа выключено.",
+        "attemptedAt": "Последняя попытка"
+      }
+    },
+    "tracking": {
+      "tracked": "Отслеживается SellerHill",
+      "untracked": "Не отслеживается",
+      "problem": {
+        "wrongPageType": "Провайдер трекинга не смог прочитать страницу заказа Amazon — возможно, изменился её формат. Попытка будет повторена автоматически.",
+        "amazonSessionExpired": "Сессия Amazon, использовавшаяся для чтения этого заказа, истекла, и требуется повторный вход.",
+        "trackingUrlMismatch": "Ссылка трекинга на странице заказа Amazon не совпала с ожидаемой. Попытка будет повторена автоматически.",
+        "needsTrackingUpload": "Ожидается загрузка данных об отправке, после чего трек-номер можно будет конвертировать.",
+        "updateNotApplied": "Провайдер трекинга ещё не применил обновление трекинга. Попытка будет повторена автоматически.",
+        "assignValidation": "Провайдер трекинга отклонил данные об отправке по этому заказу.",
+        "shipmentException": "Провайдер трекинга сообщил об исключении по этому отправлению.",
+        "trackingUpdateUnavailable": "Провайдер трекинга сейчас не может обновить это отправление.",
+        "generic": "Возникла проблема с конвертацией трек-номера этого заказа. Попытка будет повторена автоматически."
+      }
+    },
+    "autoFulfill": {
+      "column": "Автовыкуп",
+      "status": {
+        "pending": "В очереди",
+        "running": "Выполняется",
+        "placed": "Оформлен",
+        "blocked": "Заблокирован",
+        "failed": "Ошибка",
+        "dry_run": "Пробный запуск",
+        "skipped": "Пропущен"
+      },
+      "reason": {
+        "no_asin": "Товар не найден на Amazon",
+        "captcha": "Требуется капча",
+        "otp": "Запрос MFA/OTP",
+        "login": "Не удалось войти",
+        "out_of_stock": "Нет в наличии",
+        "address": "Проблема с адресом",
+        "payment": "Платёж отклонён",
+        "cap": "Превышен лимит стоимости",
+        "no_confirmation": "Нет подтверждения",
+        "proxy_required": "Прокси не настроен",
+        "quota_exhausted": "Достигнут месячный лимит",
+        "cart": "Несоответствие корзины",
+        "review_unreadable": "Не удалось прочитать итоговую сумму заказа",
+        "subscription_suspended": "Подписка приостановлена",
+        "listing_over_plan_limit": "Листинг вне лимита тарифа",
+        "order_already_fulfilled": "Уже отправлен — покупать нечего",
+        "order_not_paid": "Ожидается оплата покупателя"
+      },
+      "reasonLabel": "Причина: {{reason}}",
+      "amazonCancelledBadge": "Отменён Amazon",
+      "filter": {
+        "all": "Весь автовыкуп",
+        "needsAttention": "Требует внимания"
+      }
+    },
+    "pagination": {
+      "showing": "Показано {{from}}–{{to}} из {{total}} заказов"
+    },
+    "detail": {
+      "title": "Сведения о заказе",
+      "loadingSubtitle": "Загрузка сведений о заказе…",
+      "notFoundTitle": "Заказ не найден",
+      "notFoundSubtitle": "Возможно, заказ был удалён или у вас нет к нему доступа.",
+      "orderPlaced": "Заказ оформлен",
+      "viewInvoice": "Просмотреть счёт",
+      "printLabels": "Печать этикеток",
+      "customerInfo": "Данные покупателя",
+      "buyerPayment": "Оплата покупателя",
+      "ebaySummary": "Сводка продаж eBay",
+      "whatBuyerPaid": "Сколько заплатил покупатель",
+      "whatYouEarned": "Сколько вы заработали",
+      "earningsOrderTotal": "Итого по заказу",
+      "ebayCollectedFromBuyer": "eBay получил от покупателя",
+      "ebayCollectedTax": "Налог с продаж",
+      "sellingCosts": "Расходы на продажу",
+      "itemSubtotal": "Стоимость товаров",
+      "shippingHandling": "Доставка и обработка",
+      "totalBeforeTax": "Итого до налога",
+      "estimatedTax": "Ориентировочный налог",
+      "grandTotal": "Общий итог",
+      "paymentMethod": "Способ оплаты",
+      "subtotal": "Промежуточный итог",
+      "shipping": "Доставка",
+      "salesTax": "Налог с продаж",
+      "orderTotal": "Итого по заказу",
+      "feesCollected": "Удержанные комиссии",
+      "transactionFees": "Комиссии за транзакции",
+      "adFee": "Общая рекламная комиссия",
+      "orderEarnings": "Доход по заказу",
+      "viewMore": "Показать подробности",
+      "updateAmazon": "Ввести данные Amazon",
+      "netProfitAnalysis": "АНАЛИЗ ЧИСТОЙ ПРИБЫЛИ",
+      "analysisDesc": "В расчёте учитывается ваш реальный доход от eBay после всех комиссий платформы и налогов за вычетом исходной закупочной стоимости на Amazon.",
+      "calculation": "Расчёт",
+      "netProfitResult": "Чистая прибыль",
+      "roi": "ROI",
+      "shipTo": "Получатель",
+      "contact": "Контакт",
+      "unknownProduct": "Неизвестный товар",
+      "copyAddress": "Копировать адрес",
+      "addressCopied": "Адрес скопирован!",
+      "copyName": "Копировать имя",
+      "copyStreet": "Копировать улицу",
+      "copyStreet2": "Копировать вторую строку адреса",
+      "copyCity": "Копировать город",
+      "copyState": "Копировать штат/регион",
+      "copyZip": "Копировать почтовый индекс",
+      "copyCountry": "Копировать страну/регион",
+      "copied": "Скопировано",
+      "amazonCosts": "Сводка заказа Amazon",
+      "purchasePrice": "Закупочная цена",
+      "amazonTax": "Налог Amazon",
+      "amazonShipping": "Доставка Amazon",
+      "totalAmazonCost": "Общая стоимость Amazon",
+      "amazonTracking": "Трек-номер Amazon",
+      "convertedTracking": "Конвертированный трек-номер",
+      "amazonOrder": "Заказ Amazon",
+      "linkAmazon": "Привязать заказ Amazon",
+      "calcEarnings": "Доход",
+      "calcPurchase": "Закупка",
+      "calcTax": "Налог",
+      "calcShipping": "Доставка",
+      "asin": "ASIN",
+      "ebayItemId": "ID eBay",
+      "quantity": "Количество",
+      "unit": "шт.",
+      "sku": "SKU",
+      "na": "Н/Д"
+    },
+    "modal": {
+      "title": "Ввод данных заказа Amazon",
+      "amazonUrl": "URL страницы заказа Amazon",
+      "trackingUrl": "URL трекинга (необязательно)",
+      "taxAmount": "Сумма налога ($)",
+      "shippingCost": "Стоимость доставки ($)",
+      "infoText": "Указав налог и стоимость доставки, вы автоматически пересчитаете чистую прибыль по этому заказу.",
+      "save": "Сохранить данные",
+      "cancel": "Отмена",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Ориентировочно",
+    "estimateNote": "Ориентировочная прибыль — будет уточнена после оформления заказа на Amazon. Рассчитана по последней известной цене Amazon; доставка Amazon не включена.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Все права защищены."
+    },
+    "errors": {
+      "notFound": "Заказ не найден.",
+      "noTrackingYet": "У этого заказа пока нет трек-номера Amazon — он ещё не отправлен.",
+      "conversionUnavailable": "Сейчас не удаётся конвертировать трек-номер. Проверьте лимит тарифа и настройки конвертации, затем повторите попытку.",
+      "conversionDone": "Трек-номер конвертирован.",
+      "orderNotTracked": "Этот заказ не связан ни с одним из ваших листингов, поэтому конвертированный трек-номер невозможно отправить на eBay. Сначала привяжите заказ к его листингу.",
+      "trackingAlreadyPushed": "eBay уже получил исходный трек-номер этого заказа, и его нельзя заменить, поэтому конвертация сейчас не изменит то, что видит покупатель.",
+      "listingOverPlanLimit": "Листинг этого заказа находился вне лимита листингов вашего тарифа на момент поступления заказа. Для заказов из листингов вне лимита отслеживание отправлений и конвертация трек-номеров не выполняются."
+    }
+  }
+}

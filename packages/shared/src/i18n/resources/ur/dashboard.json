@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "subtitle": "سیلز، منافع اور لسٹنگ کی کارکردگی",
+    "greeting": "السلام علیکم، {{name}}",
+    "selectStore": "سٹور منتخب کریں",
+    "allStores": "تمام سٹورز",
+    "noData": "ابھی کوئی ڈیٹا نہیں",
+    "backToDashboard": "ڈیش بورڈ پر واپس جائیں",
+    "tabs": {
+      "cards": "کارڈز",
+      "chart": "چارٹ",
+      "pnl": "نفع و نقصان"
+    },
+    "today": "آج",
+    "thisWeek": "اس ہفتے",
+    "thisMonth": "اس مہینے",
+    "thisYear": "اس سال",
+    "metrics": {
+      "sales": "سیلز",
+      "units": "یونٹس",
+      "orders": "آرڈرز",
+      "ordersUnits": "آرڈرز / یونٹس",
+      "refunds": "ریفنڈز",
+      "refundRate": "ریفنڈ کی شرح",
+      "grossProfit": "مجموعی منافع",
+      "netProfit": "خالص منافع",
+      "estimatedPayout": "متوقع ادائیگی",
+      "margin": "مارجن",
+      "roi": "ROI",
+      "avgOrderValue": "اوسط آرڈر",
+      "costOfGoods": "پروڈکٹ کی لاگت",
+      "transactionFees": "ٹرانزیکشن فیس",
+      "adFees": "اشتہاری فیس",
+      "amazonShipping": "Amazon شپنگ",
+      "amazonTax": "Amazon ٹیکس",
+      "revenueUncosted": "لاگت کے بغیر آمدنی"
+    },
+    "card": {
+      "showMore": "مزید تفصیلات",
+      "showLess": "کم تفصیلات",
+      "activeHint": "نیچے دی گئی فہرستیں فلٹر ہو رہی ہیں"
+    },
+    "listingsSection": "لسٹنگز",
+    "ordersSection": "آرڈرز",
+    "listingsCount": "{{count}} سیلز کے ساتھ",
+    "ordersCount": "{{count}} آرڈرز",
+    "viewAllListings": "سب دیکھیں",
+    "viewAllOrders": "سب دیکھیں",
+    "listingsEmptyTitle": "سیلز والی کوئی لسٹنگ نہیں",
+    "listingsEmptySubtitle": "منتخب مدت میں جن لسٹنگز پر آرڈرز آئے وہ یہاں نظر آئیں گی۔",
+    "ordersEmptyTitle": "اس مدت میں کوئی آرڈر نہیں",
+    "ordersEmptySubtitle": "سیلز آتے ہی منتخب مدت کے آرڈرز یہاں نظر آئیں گے۔",
+    "chart": {
+      "title": "کارکردگی",
+      "subtitle": "سیلز کے حجم کے مقابلے میں خالص منافع",
+      "summary": "مدت کا خلاصہ",
+      "granularity": {
+        "day": "30 دن",
+        "week": "12 ہفتے",
+        "month": "12 مہینے"
+      },
+      "series": {
+        "netProfit": "خالص منافع",
+        "sales": "سیلز",
+        "units": "یونٹس",
+        "refunds": "ریفنڈز"
+      }
+    },
+    "pnl": {
+      "title": "نفع و نقصان",
+      "subtitle": "پچھلے 12 مہینوں کی ماہانہ تفصیل",
+      "parameter": "میٹرک / مدت",
+      "currentPeriod": "موجودہ مدت",
+      "heatmap": "ہیٹ میپ",
+      "export": "CSV ڈاؤن لوڈ کریں"
+    },
+    "groups": {
+      "revenue": "آمدنی",
+      "costs": "اخراجات",
+      "profit": "منافع",
+      "ratios": "تناسب"
+    },
+    "profit": {
+      "confirmedLabel": "تصدیق شدہ",
+      "confirmedTooltip": "ان آرڈرز کا منافع جن کی اصل Amazon لاگت حاصل کی جا چکی ہے۔ نامعلوم لاگت کو کبھی صفر شمار نہیں کیا جاتا۔",
+      "estimatedLabel": "تخمینی",
+      "estimatedTooltip": "Amazon سے خریداری کے منتظر آرڈرز کے لیے تخمینی لاگت استعمال ہوتی ہے (آپ کی مقرر کردہ {{rate}}% شرح پر Amazon ٹیکس)۔",
+      "uncostedLabel": "لاگت کے بغیر آمدنی",
+      "uncostedTooltip": "وہ سیلز جن کی Amazon لاگت ابھی معلوم نہیں ہو سکی — صرف آمدنی، منافع کا کوئی اندازہ نہیں۔"
+    }
+  }
+}

@@ -12,36 +12,7 @@
  * - But both use the same translation resources
  */
 
-import {
-  enActionCenter,
-  enAdmin,
-  enAmazon,
-  enAuth,
-  enBilling,
-  enDashboard,
-  enEbay,
-  enLegal,
-  enListings,
-  enListingSettingsGroup,
-  enOrders,
-  enProfile,
-  enStoreSettings,
-  enTranslation,
-  trActionCenter,
-  trAdmin,
-  trAmazon,
-  trAuth,
-  trBilling,
-  trTranslation as trCommon,
-  trDashboard,
-  trEbay,
-  trLegal,
-  trListings,
-  trListingSettingsGroup,
-  trOrders,
-  trProfile,
-  trStoreSettings,
-} from '@repo/shared';
+import { SUPPORTED_LOCALES, i18nResources } from '@repo/shared';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -51,45 +22,14 @@ import { detectBrowserLocale, getStoredLocalePreference } from './utils/locale';
 const initialLocale = getStoredLocalePreference() || detectBrowserLocale();
 
 void i18n.use(initReactI18next).init({
-  resources: {
-    en: {
-      translation: enTranslation,
-      actionCenter: enActionCenter,
-      admin: enAdmin,
-      amazon: enAmazon,
-      billing: enBilling,
-      auth: enAuth,
-      dashboard: enDashboard,
-      ebay: enEbay,
-      legal: enLegal,
-      storeSettings: enStoreSettings,
-      listingSettingsGroup: enListingSettingsGroup,
-      listings: enListings,
-      profile: enProfile,
-      orders: enOrders,
-    },
-    tr: {
-      translation: trCommon,
-      actionCenter: trActionCenter,
-      admin: trAdmin,
-      amazon: trAmazon,
-      billing: trBilling,
-      auth: trAuth,
-      dashboard: trDashboard,
-      ebay: trEbay,
-      legal: trLegal,
-      storeSettings: trStoreSettings,
-      listingSettingsGroup: trListingSettingsGroup,
-      listings: trListings,
-      profile: trProfile,
-      orders: trOrders,
-    },
-  },
+  resources: i18nResources,
   lng: initialLocale,
+  // A key (or a whole namespace — `admin`, `legal`) a locale does not carry
+  // resolves in English rather than rendering a raw key.
   fallbackLng: 'en',
-  // Keep language as bare codes (en / tr), never en-US / tr-TR
+  // Keep language as bare codes (en / tr / ru …), never en-US / tr-TR
   load: 'languageOnly',
-  supportedLngs: ['en', 'tr'],
+  supportedLngs: [...SUPPORTED_LOCALES],
   nonExplicitSupportedLngs: true,
   interpolation: { escapeValue: false },
   defaultNS: 'translation',

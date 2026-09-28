@@ -1,4 +1,4 @@
-import { PlatformSettingCategory, PlatformSettingType } from '@repo/shared';
+import { PlatformSettingKey, PlatformSettingCategory, PlatformSettingType } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -38,6 +38,7 @@ export const AdminSettingsPanelComponent = ({
   onResetConfirm,
   onResetCancel,
   onEmailTest,
+  scraperProxiesEditor,
 }: AdminSettingsPanelComponentProps): React.ReactElement => {
   const { t } = useTranslation(['admin', 'translation']);
   return (
@@ -115,8 +116,9 @@ export const AdminSettingsPanelComponent = ({
               <S.Rows>
                 {group.rows.map((row) => {
                   const { setting } = row;
+                  const isScraperProxies = setting.key === PlatformSettingKey.SCRAPER_PROXIES;
                   return (
-                    <S.Row key={setting.key} onSubmit={(event) => onSubmit(setting, event)} noValidate>
+                    <S.Row key={setting.key} onSubmit={(event) => onSubmit(setting, event)} noValidate $fullWidth={isScraperProxies}>
                       <S.RowText>
                         <Text variant="body" weight="semibold">
                           {row.title}
@@ -145,7 +147,9 @@ export const AdminSettingsPanelComponent = ({
                       </S.RowText>
 
                       <S.Control>
-                        {setting.type === PlatformSettingType.BOOLEAN ? (
+                        {isScraperProxies ? (
+                          scraperProxiesEditor
+                        ) : setting.type === PlatformSettingType.BOOLEAN ? (
                           <S.ToggleWrap>
                             <Toggle
                               checked={setting.value === 'true'}

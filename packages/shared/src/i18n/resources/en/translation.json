@@ -174,7 +174,12 @@
   },
   "languages": {
     "en": "English",
-    "tr": "Türkçe"
+    "tr": "Türkçe",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "ur": "اردو",
+    "ar": "العربية",
+    "az": "Azərbaycanca"
   },
   "notifications": {
     "comingSoonTitle": "Action Coming Soon",

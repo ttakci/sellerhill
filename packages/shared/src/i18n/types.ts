@@ -66,7 +66,7 @@ export type TranslationKeys = NestedKeyOf<TranslationResource>;
 /**
  * Supported languages
  */
-export type SupportedLanguage = 'en' | 'tr';
+export type SupportedLanguage = 'en' | 'tr' | 'ru' | 'hi' | 'ur' | 'ar' | 'az';
 
 /**
  * Language configuration
@@ -90,5 +90,30 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     code: 'tr',
     name: 'Turkish',
     nativeName: 'Türkçe',
+  },
+  ru: {
+    code: 'ru',
+    name: 'Russian',
+    nativeName: 'Русский',
+  },
+  hi: {
+    code: 'hi',
+    name: 'Hindi',
+    nativeName: 'हिन्दी',
+  },
+  ur: {
+    code: 'ur',
+    name: 'Urdu',
+    nativeName: 'اردو',
+  },
+  ar: {
+    code: 'ar',
+    name: 'Arabic',
+    nativeName: 'العربية',
+  },
+  az: {
+    code: 'az',
+    name: 'Azerbaijani',
+    nativeName: 'Azərbaycanca',
   },
 };

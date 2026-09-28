@@ -327,11 +327,13 @@ export function isStaleEvent(occurredAt: string | null, staleMinutes: number, no
 // ---------------------------------------------------------------------------
 
 /**
- * Stripe locale codes this app actively supports (the app only ships EN/TR
- * copy — see `i18n.config.ts`'s `supportedLngs`). Stripe accepts many more,
- * but sending one we never verified would be an unfounded promise.
+ * App languages Stripe Checkout / the Billing Portal can ALSO render in. This is
+ * a subset of `SUPPORTED_LOCALES`, not a copy of it: Stripe has no Hindi, Urdu
+ * or Arabic Checkout, so a seller using those still gets the English Stripe
+ * pages (`resolveStripeLocale` falls back to `'en'`, never `'auto'`). Extend it
+ * only with a code Stripe's `locale` parameter documents.
  */
-const SUPPORTED_STRIPE_LOCALES = ['en', 'tr'] as const;
+const SUPPORTED_STRIPE_LOCALES = ['en', 'tr', 'ru'] as const;
 export type SupportedStripeLocale = (typeof SUPPORTED_STRIPE_LOCALES)[number];
 
 /**

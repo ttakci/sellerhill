@@ -2,6 +2,7 @@ import hmac
 import logging
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 import bottle
 
@@ -9,6 +10,7 @@ from amazon import sites
 from sellerhill import egress
 from sellerhill.fetcher import fetch_one as default_fetch_one
 from sellerhill.pool import ProxyPool
+from sellerhill.verify import probe_proxy
 
 _log = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ _ASIN = re.compile(r"^[A-Z0-9]{10}$")
 _PROXY = re.compile(r"^(http|https|socks5|socks5h)://[^\s]+:(\d{1,5})$")
 _MODES = {"full", "commerce"}
 _LANES = {"interactive", "background"}
+_MAX_VERIFY_PROXIES = 50
 
 
 def _json(status, data):
@@ -92,6 +95,39 @@ def create_app(fetch_one=default_fetch_one, threads_per_proxy=None):
         if not _authorized():
             return _json(401, {"error": "unauthorized"})
         return _json(200, {**pool.stats(), "directAllowed": egress.allow_direct()})
+
+    @app.post("/v1/proxies/verify")
+    def verify_proxies():
+        if not os.environ.get("SCRAPER_SERVICE_SECRET"):
+            return _json(503, {"error": "SCRAPER_SERVICE_SECRET not set"})
+        if not _authorized():
+            return _json(401, {"error": "unauthorized"})
+        try:
+            body = bottle.request.json
+        except Exception:
+            body = None
+        if not isinstance(body, dict) or not isinstance(body.get("proxies"), list):
+            return _json(400, {"error": "proxies: list of http(s)/socks5(h) URLs with port"})
+        requested = body["proxies"]
+        if not 1 <= len(requested) <= _MAX_VERIFY_PROXIES:
+            return _json(400, {"error": f"proxies: 1..{_MAX_VERIFY_PROXIES}"})
+        # An invalid entry never reaches probe_proxy (no session, no request);
+        # it is reported the same shape as a probed one so the caller can
+        # render one uniform list.
+        results = [None] * len(requested)
+        to_probe = [(i, p) for i, p in enumerate(requested) if valid_proxy(p)]
+        for i, p in enumerate(requested):
+            if not valid_proxy(p):
+                # No credentials in the id here either: a malformed entry may
+                # still parse as scheme://user:pass@host:port with a bad port.
+                results[i] = {"id": egress.redact(p) if isinstance(p, str) else "?",
+                              "ok": False, "errorKind": "invalid", "latencyMs": None}
+        if to_probe:
+            with ThreadPoolExecutor(max_workers=len(to_probe)) as pool_exec:
+                probed = dict(zip((i for i, _ in to_probe), pool_exec.map(lambda ip: probe_proxy(ip[1]), to_probe)))
+            for i, result in probed.items():
+                results[i] = result
+        return _json(200, {"results": results})
 
     @app.post("/v1/products")
     def products():

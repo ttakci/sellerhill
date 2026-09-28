@@ -19,12 +19,14 @@ import {
   ProductDataProviderKind,
   UsageEventSource,
   UsageMetric,
+  partitionProxyList,
   type AdminBillingMetricsDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
   type AdminWarningDto,
   type AquilinePlanSnapshotDto,
   type ProviderCostSummaryDto,
+  type ProxyVerifyResult,
   type QueueEventType,
   type QueueHealthDto,
   type QueueObservationDto,
@@ -620,6 +622,26 @@ export class AdminService {
       uniqueRefreshedAsins,
       achievableSyncsPerDay: achievable === null ? null : Math.round(achievable * 10) / 10,
     };
+  }
+
+  /**
+   * Probes each proxy with a small, non-Amazon request so an operator can see
+   * "did this actually connect" before or after saving `scraper.proxies` —
+   * separate from `scraperStats.window1h.proxies`, which only reports real
+   * Amazon traffic once a create/refresh job has used a proxy.
+   *
+   * `draft` (comma/newline-separated, the same grammar the setting itself
+   * uses) tests entries the admin is about to save, without saving them.
+   * Omitted, it tests the CURRENTLY SAVED list — decrypted server-side by
+   * `ProductSourceService`, never returned here: only `ProxyVerifyResult.id`
+   * (host:port) and the outcome reach the caller.
+   */
+  async verifyScraperProxies(draft?: string): Promise<ProxyVerifyResult[]> {
+    const proxies = draft === undefined ? await this.productSource.proxies() : partitionProxyList(draft).valid;
+    if (proxies.length === 0) {
+      return [];
+    }
+    return this.scraperClient.verifyProxies(proxies);
   }
 
   // --- internals -------------------------------------------------------------
