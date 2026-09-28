@@ -70,10 +70,14 @@ export const Rows = styled.div`
   margin-top: ${tkn('spacing.sm')};
 `;
 
-/** One setting = one form. Text on the left, control on the right; stacks on phones. */
-export const Row = styled.form`
+/**
+ * One setting = one form. Text on the left, control on the right; stacks on
+ * phones. `$fullWidth` drops the two-column split entirely — for a control
+ * too rich for a 20rem lane (the scraper proxy list editor).
+ */
+export const Row = styled.form<{ $fullWidth?: boolean }>`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  grid-template-columns: ${({ $fullWidth }) => ($fullWidth ? '1fr' : 'minmax(0, 1fr) minmax(0, 20rem)')};
   align-items: start;
   gap: ${tkn('spacing.md')};
   padding-block: ${tkn('spacing.md')};

@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAdminSettings } from '../../hooks/useAdminSettings';
+import { ScraperProxiesEditorContainer } from '../ScraperProxiesEditor/ScraperProxiesEditor.container';
 
 import { AdminSettingsPanelComponent } from './AdminSettingsPanel.component';
 import {
@@ -150,6 +151,17 @@ export const AdminSettingsPanelContainer = ({ skip }: AdminSettingsPanelProps): 
     ? t(`admin.settings.keys.${settings.resetTarget.key}`, { defaultValue: settings.resetTarget.key })
     : null;
 
+  const scraperProxiesRow = groups
+    .flatMap((group) => group.rows)
+    .find((row) => row.setting.key === PlatformSettingKey.SCRAPER_PROXIES);
+  const scraperProxiesEditor = scraperProxiesRow ? (
+    <ScraperProxiesEditorContainer
+      value={scraperProxiesRow.value}
+      disabled={scraperProxiesRow.isPending}
+      onChange={(value) => settings.onSettingDraftChange(PlatformSettingKey.SCRAPER_PROXIES, value)}
+    />
+  ) : null;
+
   return (
     <AdminSettingsPanelComponent
       groups={groups}
@@ -172,6 +184,7 @@ export const AdminSettingsPanelContainer = ({ skip }: AdminSettingsPanelProps): 
       onResetConfirm={settings.onSettingResetConfirm}
       onResetCancel={settings.onSettingResetCancel}
       onEmailTest={settings.onEmailTest}
+      scraperProxiesEditor={scraperProxiesEditor}
     />
   );
 };

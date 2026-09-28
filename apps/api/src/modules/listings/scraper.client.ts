@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { partitionProxyList, type ScraperProductResult, type ScraperProductsRequest, type ScraperStats } from '@repo/shared';
+import {
+  partitionProxyList,
+  type ProxyVerifyResult,
+  type ScraperProductResult,
+  type ScraperProductsRequest,
+  type ScraperStats,
+} from '@repo/shared';
 import axios from 'axios';
 
 /** The scraper service could not be reached or answered with an error. Retryable. */
@@ -57,6 +63,30 @@ export class ScraperClient {
       return res.data;
     } catch {
       throw new ScraperUnavailableError('scraper stats unavailable');
+    }
+  }
+
+  /**
+   * One lightweight, non-Amazon connectivity check per proxy — never logs or
+   * returns the proxy value itself, only what the service already redacts to
+   * `host:port`. `proxies` is capped by the service at 50; this never sees a
+   * saved secret's plaintext caller-side, only whatever the admin action
+   * passed in (a draft, or the value `PlatformSettingsService` decrypted).
+   */
+  async verifyProxies(proxies: string[]): Promise<ProxyVerifyResult[]> {
+    const { url, secret } = this.base();
+    try {
+      const res = await axios.post<{ results: ProxyVerifyResult[] }>(
+        `${url}/v1/proxies/verify`,
+        { proxies },
+        { headers: { 'X-Scraper-Secret': secret }, timeout: 20_000 },
+      );
+      return res.data?.results ?? [];
+    } catch (error: unknown) {
+      // Never log the request body: it carries proxy credentials.
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      this.logger.error(`Scraper proxy verify failed (${proxies.length} entries, status ${status ?? 'network'})`);
+      throw new ScraperUnavailableError(`scraper proxy verify failed: ${status ?? 'network'}`);
     }
   }
 }
