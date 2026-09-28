@@ -219,6 +219,9 @@ services:
       SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-}
       SCRAPER_PORT: 8080
       SCRAPER_THREADS_PER_PROXY: ${SCRAPER_THREADS_PER_PROXY:-2}
+      # Parse worker PROCESSES (page HTML → signals/content is ~1.5 s of CPU;
+      # in one process it all queued under a single GIL). 0 = parse inline.
+      SCRAPER_PARSE_PROCESSES: ${SCRAPER_PARSE_PROCESSES:-3}
     deploy:
       resources:
         limits:
