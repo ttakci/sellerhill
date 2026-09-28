@@ -66,6 +66,14 @@ export class ProductDataUnavailableError extends Error {
   }
 }
 
+/** Amazon shows no Buy Box for this ASIN — nothing to price from or buy through. Terminal. */
+export class NoBuyBoxError extends Error {
+  override name = 'NoBuyBoxError';
+  constructor(asin: string) {
+    super(`no Buy Box for ${asin}`);
+  }
+}
+
 /** Buffer or stock drove a live create to quantity 0. Carries the numbers the seller message shows. */
 export class ZeroStockError extends Error {
   override name = 'ZeroStockError';
@@ -758,6 +766,9 @@ export class ListingProcessorService extends WorkerHost {
       if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
         const result =
           prefetched?.get(asin) ?? (await this.productSource.fetchForCreate([asin], marketplace)).get(asin);
+        if (result?.kind === 'no_buy_box') {
+          throw new NoBuyBoxError(asin);
+        }
         if (!result || result.kind === 'unavailable') {
           throw new ProductDataUnavailableError(asin, result?.outcome ?? SourceFetchOutcome.BLOCKED);
         }

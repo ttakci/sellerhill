@@ -56,6 +56,21 @@ describe('normalizeScraperCommerce', () => {
     expect(r).toMatchObject({ commerce: { stockStatus: SourceStockStatus.UNKNOWN, stock: null, price: 12.5 } });
   });
 
+  it('no Buy Box → OUT_OF_STOCK 0: nothing on the page can be bought', () => {
+    // Before: price and stock both absent read as a data failure, so a LISTED
+    // product that lost its Buy Box kept its eBay quantity (and got
+    // quarantined) while auto-fulfill had nothing it could purchase.
+    expect(
+      normalizeScraperCommerce(
+        found(signals({ isInStock: null, availabilityText: null, price: null, quantityMax: null, noFeaturedOffer: true })),
+        20
+      )
+    ).toEqual({
+      kind: 'observed',
+      commerce: { price: null, stockStatus: SourceStockStatus.OUT_OF_STOCK, stock: 0, maxOrderQuantity: null, removed: false },
+    });
+  });
+
   it('neither price nor availability → data failure', () => {
     expect(normalizeScraperCommerce(found(signals({ isInStock: null, availabilityText: null, price: null })), 20)).toEqual({ kind: 'data_failure' });
   });

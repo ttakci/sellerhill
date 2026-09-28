@@ -1140,15 +1140,20 @@ export class ListingsService {
       return false;
     });
 
-    // Filter out ASINs that are already actively listed
+    // Filter out ASINs that are already actively listed. Counted, not just
+    // logged: before this the seller submitted 20 ASINs, 5 were already
+    // theirs, and every screen — the success toast, the job's own totalAsins
+    // — only ever knew about the other 15, with nothing explaining the gap.
     const uniqueAsins = [...new Set(shapedAsins)];
     const toProcess: string[] = [];
+    let skippedDuplicateCount = 0;
 
     for (const asin of uniqueAsins) {
       const exists = await this.isAsinListed(userId, asin);
       if (!exists) {
         toProcess.push(asin);
       } else {
+        skippedDuplicateCount += 1;
         this.logger.warn(`ASIN ${asin} already exists in active listings for user ${userId}. Skipping.`);
       }
     }
@@ -1194,7 +1199,7 @@ export class ListingsService {
       items.push({ id: itemRows[0].id, asin });
     }
 
-    return { ...this.mapJobToDto(job), items };
+    return { ...this.mapJobToDto(job), items, skippedDuplicateCount };
   }
 
   /**

@@ -59,6 +59,22 @@ describe('extractRejectedAspect', () => {
 });
 
 describe('classifyListingFailure', () => {
+  it("reads eBay's Picture Policy refusal as an image problem, never a missing business policy", () => {
+    // The live message; "Policy" in "Picture Policy" used to route it to
+    // EBAY_POLICY_MISSING, telling the seller their business policies were
+    // broken when the same policies had just published 17 other listings.
+    const failure = classifyListingFailure(
+      ebayError([
+        {
+          errorId: 25002,
+          message:
+            "A user error has occurred. The resolution for provided picture(s) does not meet eBay's Picture Policy requirements. Please only use pictures that are at least 500 pixels on the longest side.",
+        },
+      ])
+    );
+    expect(failure.code).toBe(ListingFailureCode.IMAGE_INVALID);
+  });
+
   it('reports a missing product identifier generically — it is our payload gap, not the seller’s product', () => {
     // The real shape eBay sent in production (errorId 25002, parameters
     // positional: "2" is "1", "3" is "UPC"). Before: read as a missing aspect
@@ -267,6 +283,10 @@ describe('scraper provider failures', () => {
   it('ProductDataUnavailableError is retryable PRODUCT_DATA_UNAVAILABLE, never ASIN_NOT_FOUND', () => {
     const e = Object.assign(new Error('scraper: blocked for B000000001'), { name: 'ProductDataUnavailableError' });
     expect(classifyListingFailure(e)).toMatchObject({ code: ListingFailureCode.PRODUCT_DATA_UNAVAILABLE, details: { retryable: true } });
+  });
+  it('NoBuyBoxError is its own terminal reason — a retry cannot create a Buy Box', () => {
+    const e = Object.assign(new Error('no Buy Box for B000000001'), { name: 'NoBuyBoxError' });
+    expect(classifyListingFailure(e)).toMatchObject({ code: ListingFailureCode.NO_BUY_BOX, details: { retryable: false } });
   });
   it('ScraperUnavailableError is retryable PRODUCT_DATA_UNAVAILABLE', () => {
     const e = Object.assign(new Error('scraper request failed: network'), { name: 'ScraperUnavailableError' });

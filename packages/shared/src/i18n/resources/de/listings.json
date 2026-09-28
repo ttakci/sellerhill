@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN nicht gefunden – für diese Kennung existiert kein passendes Produkt.",
         "product_data_unavailable": "Die Amazon-Produktdaten für diese ASIN konnten nicht abgerufen werden.",
         "source_price_unavailable": "Der Amazon-Preis konnte nicht gelesen werden.",
+        "no_buy_box": "Amazon zeigt für dieses Produkt keine Buy Box an (nur „See All Buying Options“), daher kann es nicht automatisch eingestellt werden. Fügen Sie die ASIN erneut hinzu, sobald Amazon wieder eine Buy Box zeigt.",
         "category_unresolved": "eBay konnte dieses Produkt keiner Angebotskategorie zuordnen.",
         "category_aspects_unavailable": "Die artikelspezifischen Daten von eBay waren vorübergehend nicht verfügbar.",
         "aspect_missing": "eBay verlangt das Artikelmerkmal {{aspects}}, und es konnte kein Wert abgeleitet werden.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "{{count}} Angebote erfolgreich erstellt",
       "queued": "{{count}} Angebote zur Verarbeitung eingereiht",
-      "queuedDraft": "{{count}} Entwurfsangebote eingereiht – sie gehen erst live, wenn Sie sie veröffentlichen"
+      "queuedDraft": "{{count}} Entwurfsangebote eingereiht – sie gehen erst live, wenn Sie sie veröffentlichen",
+      "queuedWithSkipped": "{{count}} Angebote zur Verarbeitung eingereiht ({{skipped}} übersprungen — bereits in Ihren Angeboten vorhanden)",
+      "queuedDraftWithSkipped": "{{count}} Entwurfsangebote eingereiht ({{skipped}} übersprungen — bereits in Ihren Angeboten vorhanden) – sie gehen erst live, wenn Sie sie veröffentlichen",
+      "allSkippedDuplicates": "Alle {{skipped}} ASINs sind bereits in Ihren Angeboten vorhanden — es wurde nichts Neues eingereiht"
     },
     "errors": {
       "createFailed": "Die Angebote konnten nicht erstellt werden",

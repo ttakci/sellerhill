@@ -191,10 +191,20 @@ export function extractRejectedAspect(
   return match ? { name: match[1], value: match[2] } : null;
 }
 
-/** eBay's transient publish failure — the offer is orphaned and must be deleted before a retry. */
+/**
+ * eBay's own transient failure on one entry — the request was fine, their side
+ * broke, and a replay usually succeeds.
+ *
+ * 25001 is eBay's documented system-error id; 25002 is its GENERIC user-error
+ * id and counts only when the message says "system error". The previous check
+ * required 25002 AND a case-sensitive 'System error', so the real live shape —
+ * 25001, "A system error has occurred. Core Inventory Service internal error"
+ * — was never retried and the seller's listing failed on eBay's outage.
+ */
 export function isBulkSystemError(errors: readonly EbayBulkError[] | undefined): boolean {
   return (errors ?? []).some(
-    (error) => error.errorId === 25002 && (error.message?.includes('System error') ?? false)
+    (error) =>
+      error.errorId === 25001 || (error.errorId === 25002 && /system error/i.test(error.message ?? ''))
   );
 }
 

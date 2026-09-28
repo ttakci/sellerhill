@@ -46,6 +46,17 @@ export function normalizeScraperCommerce(result: ScraperProductResult, inStockFl
   if (!s) {
     return { kind: 'data_failure' };
   }
+  // No Buy Box: the page was read fine and nothing on it can be bought, so for
+  // automation it IS out of stock — quantity 0 on eBay, since auto-fulfill adds
+  // the Buy Box offer to the cart and there is none. Price is not read from
+  // such a page (the stored one is kept). The create path never reaches this:
+  // it refuses the ASIN as NO_BUY_BOX before normalising.
+  if (s.noFeaturedOffer === true) {
+    return {
+      kind: 'observed',
+      commerce: { price: null, stockStatus: SourceStockStatus.OUT_OF_STOCK, stock: 0, maxOrderQuantity: null, removed: false },
+    };
+  }
   const price = typeof s.price === 'number' && s.price > 0 ? s.price : null;
   const quantityMax = typeof s.quantityMax === 'number' && s.quantityMax > 0 ? s.quantityMax : null;
 

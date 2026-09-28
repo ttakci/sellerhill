@@ -110,6 +110,29 @@ describe('ProductSourceService', () => {
     expect(out.get('B000000002')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
   });
 
+  it('a page with no Buy Box is its own answer, never an unreadable page', async () => {
+    // Amazon offers only "See All Buying Options": price AND stock are absent,
+    // which the normalizer alone reads as a data failure ("product data
+    // unavailable", retried). It is a permanent condition of the listing, and
+    // nothing can be bought from the page, so it must say exactly that.
+    const { svc } = service(
+      { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },
+      [
+        {
+          asin: 'B000000001', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content,
+          signals: { ...signals, price: null, isInStock: null, availabilityText: null, quantityMax: null, noFeaturedOffer: true },
+        },
+        {
+          asin: 'B000000002', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content,
+          signals: { ...signals, price: null, noFeaturedOffer: false },
+        },
+      ],
+    );
+    const out = await svc.fetchForCreate(['B000000001', 'B000000002'], AmazonMarketplace.AMAZON_US);
+    expect(out.get('B000000001')).toEqual({ kind: 'no_buy_box' });
+    expect(out.get('B000000002')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
+  });
+
   it('an out-of-stock page with no price is still a product (price 0, stock 0) — a permanent condition, not a retry', async () => {
     const { svc } = service(
       { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },

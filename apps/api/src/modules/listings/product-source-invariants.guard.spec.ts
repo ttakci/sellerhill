@@ -65,6 +65,17 @@ describe('product source invariants', () => {
     expect(keepaCall).toBeGreaterThan(close);
   });
 
+  it('a page with no Buy Box throws its own terminal error, before the unavailable branch', () => {
+    // Without this it fell into ProductDataUnavailableError ("product data
+    // could not be read") — wrong for a page that was read fine and simply
+    // has nothing to buy.
+    const noBuyBox = body.indexOf("result?.kind === 'no_buy_box'");
+    const unavailable = body.indexOf("result.kind === 'unavailable'");
+    expect(noBuyBox).toBeGreaterThan(-1);
+    expect(unavailable).toBeGreaterThan(noBuyBox);
+    expect(body.slice(noBuyBox, unavailable)).toMatch(/throw new NoBuyBoxError\(asin\)/);
+  });
+
   it('a live create: zero stock, then the price refusal, then EPS and prepareListingData — a refused item spends nothing', () => {
     const batchStart = src.indexOf('private async processListingBatch(');
     expect(batchStart).toBeGreaterThan(-1);
