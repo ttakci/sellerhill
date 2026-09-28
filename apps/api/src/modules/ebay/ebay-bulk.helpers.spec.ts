@@ -1,4 +1,5 @@
 import {
+  bulkResponsesFromHttpError,
   chunkForBulk,
   correlateBulkResponses,
   describeBulkErrors,
@@ -8,6 +9,7 @@ import {
   extractRejectedAspect,
   isBulkEntrySuccess,
   isBulkSystemError,
+  toClassifiableError,
   type EbayBulkResponseEntry,
 } from './ebay-bulk.helpers';
 
@@ -104,6 +106,49 @@ describe('correlateBulkResponses with a custom entry key', () => {
     );
 
     expect(result.map((outcome) => outcome.entry?.listingId)).toEqual(['111', '222']);
+  });
+});
+
+describe('bulkResponsesFromHttpError', () => {
+  // eBay answers a bulk call in which EVERY entry failed with HTTP 400 and the
+  // normal `responses[]` envelope. A one-ASIN job is always that case, so
+  // treating it as a thrown error meant no per-entry recovery ever ran.
+  const failedEnvelope = {
+    isAxiosError: true,
+    response: {
+      status: 400,
+      data: {
+        responses: [
+          {
+            statusCode: 400,
+            errors: [
+              {
+                errorId: 25002,
+                message: 'A user error has occurred. Offer entity already exists.',
+                parameters: [{ name: 'offerId', value: '281563979011' }],
+              },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  it('returns the per-entry responses of an all-failed bulk call', () => {
+    const responses = bulkResponsesFromHttpError(failedEnvelope);
+    expect(responses).toHaveLength(1);
+    expect(extractExistingOfferId(responses?.[0]?.errors)).toBe('281563979011');
+  });
+
+  it('returns null for a rejection that is not a bulk envelope', () => {
+    expect(bulkResponsesFromHttpError({ response: { status: 400, data: { errors: [{ errorId: 1 }] } } })).toBeNull();
+    expect(bulkResponsesFromHttpError({ response: { status: 429, data: {} } })).toBeNull();
+    expect(bulkResponsesFromHttpError(new Error('socket hang up'))).toBeNull();
+    expect(bulkResponsesFromHttpError(undefined)).toBeNull();
+  });
+
+  it('does not treat an empty envelope as a result', () => {
+    expect(bulkResponsesFromHttpError({ response: { status: 400, data: { responses: [] } } })).toBeNull();
   });
 });
 
@@ -222,5 +267,19 @@ describe('describeBulkErrors', () => {
 
   it('falls back to the status code when eBay sends no error body', () => {
     expect(describeBulkErrors({ statusCode: 500 })).toContain('500');
+  });
+});
+
+describe('toClassifiableError', () => {
+  it('carries eBay error entries in the shape the failure classifier reads', () => {
+    const errors = [{ errorId: 25002, message: 'Offer entity already exists.' }];
+    const error = toClassifiableError('boom', errors) as Error & { response?: { data?: { errors?: unknown } } };
+    expect(error.message).toBe('boom');
+    expect(error.response?.data?.errors).toEqual(errors);
+  });
+
+  it('is a plain Error when there are no entries', () => {
+    expect((toClassifiableError('boom') as { response?: unknown }).response).toBeUndefined();
+    expect((toClassifiableError('boom', []) as { response?: unknown }).response).toBeUndefined();
   });
 });

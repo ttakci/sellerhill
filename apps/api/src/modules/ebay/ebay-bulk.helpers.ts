@@ -32,6 +32,37 @@ export interface EbayBulkEnvelope {
   responses?: EbayBulkResponseEntry[];
 }
 
+/**
+ * The per-entry `responses[]` of a bulk call that eBay rejected with an HTTP
+ * error status, or null when the failure is anything else.
+ *
+ * When EVERY entry of a bulk call fails, eBay answers 400 (not 207) and still
+ * sends the normal envelope. Rethrowing that hid the per-entry errors from the
+ * recovery logic — an existing-offer id, a missing item specific — so a
+ * single-ASIN job, where "all failed" is the only way to fail, could never
+ * recover from any of them.
+ */
+export function bulkResponsesFromHttpError(error: unknown): EbayBulkResponseEntry[] | null {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return null;
+  }
+  const data = (error as { response?: { data?: EbayBulkEnvelope } }).response?.data;
+  return Array.isArray(data?.responses) && data.responses.length > 0 ? data.responses : null;
+}
+
+/**
+ * An Error carrying eBay's own error entries in the shape `classifyListingFailure`
+ * reads off an axios rejection, so a per-entry failure is classified by eBay's
+ * error ids exactly like a thrown one instead of by prose alone.
+ */
+export function toClassifiableError(message: string, ebayErrors?: readonly EbayBulkError[]): Error {
+  const error = new Error(message);
+  if (ebayErrors && ebayErrors.length > 0) {
+    Object.assign(error, { response: { data: { errors: [...ebayErrors] } } });
+  }
+  return error;
+}
+
 /** eBay's max batch size for every bulk Inventory method. */
 export const EBAY_BULK_MAX_BATCH = 25;
 
