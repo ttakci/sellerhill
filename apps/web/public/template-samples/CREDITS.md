@@ -9,12 +9,13 @@ sign-up-free demo; it is not a photo.
 
 **Rules for this folder (2026-09-27):**
 
-- **CC0 / public domain, or Pexels / Pixabay** (operator decision 2026-09-27); CC0/PD the license is checked against the
-  Wikimedia Commons API (`imageinfo` → `extmetadata.LicenseShortName` must be
-  `CC0` or `Public domain`) — not read off a stock site's own label. No CC BY /
-  CC BY-SA: neither surface carries an attribution line. No stock-site licenses
-  (Unsplash, Pexels, …): they grant use of the photo, not of the product or
-  brand in it — including Unsplash/Pexels photos re-uploaded to Commons as CC0.
+- **CC0 / public domain, or the Pexels / Pixabay license** (operator decision
+  2026-09-27). A Commons photo's license is checked against the Commons API
+  (`imageinfo` → `extmetadata.LicenseShortName` must be `CC0` or `Public
+  domain`). No CC BY / CC BY-SA (neither surface carries an attribution line),
+  no Unsplash, no AI-generated images.
+- **The product must look brand-new**: clean shot, plain backdrop, not held in a
+  hand, no wear. Museum pieces and played-with toys fail this.
 - **No visible brand or logo.** A small maker's mark may be painted out (both
   licenses allow modification) and must be recorded under "Edits".
 - **The copy describes the photo.** Every sample is `Brand: Unbranded` with no
@@ -61,8 +62,8 @@ every template photo lives in one folder.
 
 - `kitchen-scale.jpg` — maker's wordmark painted out (done for the demo copy).
 - `wireless-earbuds.jpg` — maker's logo on both earbud caps painted out (done for the demo copy).
-- None of the six Commons photos needed a mark painted out. They were only
-  squared: `air-filter.jpg` / `led-flashlight.jpg` extend their own backdrop,
+- `air-filter.jpg` / `led-flashlight.jpg` needed no mark painted out; they were
+  only squared by extending their own backdrop.
 - The earlier Commons picks `knit-cardigan` (museum piece), `slow-feeder-bowl`,
   `heart-soap` and the old `wooden-blocks` were replaced by Pexels photos for
   looking used/vintage.
@@ -71,8 +72,7 @@ every template photo lives in one folder.
 
 - `File:Aftersun_lotion_bottle.webp` — "Public domain" because it is AI-generated
   (Craiyon), not a photograph of a real product.
-- `File:Cream_in_round_container.jpg`, `File:Sponge-for-washing-1212612.jpg` —
-  CC0 on Commons but sourced from Pixabay, a stock site.
+- `File:Cream_in_round_container.jpg` — Shiseido logo on the lid and jar.
 - `File:Bars_of_pure_Marseille_and_Aleppo_soap,_2024.jpg` — the Marseille bar
   is stamped with a real maker's name.
-- Every Commons "Unsplash …" / "Pexels-…" re-upload, for the same reason as Pixabay.
+- Every Commons "Unsplash …" re-upload (Unsplash is not an allowed source).
