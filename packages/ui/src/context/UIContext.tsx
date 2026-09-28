@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useMemo, useState } from 'react';
 
+import { looksLikeI18nKey } from './looksLikeI18nKey';
 import type {
     LoadingState,
     MessageState,
@@ -13,6 +14,9 @@ import type {
  * Manages: GeneralMessage, GeneralLoading
  * Platform-agnostic: Web & Mobile compatible
  */
+/** Same key `getErrorI18nKey` falls back to; present in every locale's `translation`. */
+const GENERIC_ERROR_KEY = 'translation:error.serverError';
+
 export const UIContext = createContext<UIContextValue | undefined>(undefined);
 
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -29,11 +33,20 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const showMessage = useCallback(
     (options: ShowMessageOptions, t: (key: string, params?: Record<string, string | number>) => string) => {
+      let description = t(options.descriptionKey, options.descriptionParams);
+      // An error dialog must never show a translation key. An untranslated one
+      // (missing namespace, backend code with no entry) comes back from i18next
+      // as the key itself, so fall back to the generic message instead.
+      if (options.type === 'error' && looksLikeI18nKey(description)) {
+        // eslint-disable-next-line no-console -- surfaces the missing translation to developers
+        console.warn(`[showMessage] untranslated error key "${options.descriptionKey}"`);
+        description = t(GENERIC_ERROR_KEY);
+      }
       setMessageState({
         isOpen: true,
         type: options.type,
         header: t(options.headerKey),
-        description: t(options.descriptionKey, options.descriptionParams),
+        description,
         primaryButton: options.primaryButton
           ? {
               label: t(options.primaryButton.labelKey),

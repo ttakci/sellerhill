@@ -134,6 +134,25 @@ describe('listing retry discipline', () => {
     expect(body).toMatch(/CASE WHEN status = \$6 THEN status ELSE \$4 END/);
   });
 
+  it('marks a job PROCESSING when its first batch starts, and only from PENDING', () => {
+    // Before this, the job showed "pending" until the FIRST item finished —
+    // prefetch of every uncached ASIN plus one item's whole preparation
+    // (~50s of a 70s job) with nothing on screen saying work had begun. The
+    // flip is guarded on PENDING so it can never resurrect a CANCELLED or
+    // terminal job, and the worker calls it right after the cancel check.
+    const service = read(LISTINGS_DIR, 'listings.service.ts');
+    const start = service.indexOf('async markJobProcessing(');
+    expect(start).toBeGreaterThan(-1);
+    const body = service.slice(start, service.indexOf('\n  }\n', start));
+    expect(body).toMatch(/WHERE id = \$1 AND status = \$3/);
+    expect(body).toMatch(/\[jobId, ListingJobStatus\.PROCESSING, ListingJobStatus\.PENDING\]/);
+
+    const worker = read(LISTINGS_DIR, 'listing-processor.service.ts');
+    const cancelCheck = worker.indexOf('isJobCancelled(jobId)');
+    const mark = worker.indexOf('markJobProcessing(jobId)');
+    expect(mark).toBeGreaterThan(cancelCheck);
+  });
+
   it('stops queued work by checking the flag, not by scanning the queue', () => {
     // BullMQ jobs are enqueued without stable ids, so finding them would mean
     // scanning the whole shared queue on every cancel. Both workers re-read the

@@ -48,6 +48,16 @@ def test_transport_failure_is_proxy_error_not_blocked(monkeypatch):
     assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "proxy_error"
 
 
+def test_soft_404_page_is_not_found(monkeypatch):
+    # HTTP 200 with Amazon's "couldn't find that page" body: the product is
+    # gone, exactly as a real 404 — not our parser failing.
+    html = ('<html><head><title>Page Not Found</title></head><body>'
+            '<img alt="Sorry! We couldn\'t find that page. Try searching or go to Amazon\'s home page.">'
+            '</body></html>')
+    monkeypatch.setattr(fetch, "page", lambda *a, **k: html)
+    assert fetcher.fetch_one("B003T6LHWM", "US", "commerce")["outcome"] == "not_found"
+
+
 def test_page_without_title_is_parse_failed(monkeypatch):
     monkeypatch.setattr(fetch, "page", lambda *a, **k: "<html><body>odd</body></html>")
     assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "parse_failed"

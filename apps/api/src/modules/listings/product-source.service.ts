@@ -40,6 +40,20 @@ export class ProductSourceService {
     return value === ProductDataProviderKind.KEEPA ? ProductDataProviderKind.KEEPA : ProductDataProviderKind.SCRAPER;
   }
 
+  /**
+   * How old a cached `products` row may be before a CREATE re-fetches it.
+   *
+   * The refresh interval, so a product on the refresh schedule (one with an
+   * ACTIVE listing) is always a cache hit, while a row nothing refreshes — a
+   * product whose listing attempts failed or whose listings ended — pays one
+   * page fetch before it can be listed again. That row is the one that can
+   * describe a product Amazon has since removed.
+   */
+  async createCacheMaxAgeMs(): Promise<number> {
+    const minutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
+    return minutes * 60_000;
+  }
+
   /** Valid proxies only — a malformed entry is never sent to the service. */
   async proxies(): Promise<string[]> {
     return (await this.proxyConfig()).proxies;

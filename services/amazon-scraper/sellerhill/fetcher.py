@@ -13,6 +13,20 @@ def _now():
     return datetime.now(timezone.utc).isoformat()
 
 
+_SOFT_NOT_FOUND_MARKERS = (
+    "couldn't find that page",
+    "couldn&#39;t find that page",
+    "couldn’t find that page",
+    "<title>page not found</title>",
+)
+
+
+def _is_soft_not_found(html):
+    """Amazon's HTTP-200 'we couldn't find that page' page for a removed ASIN."""
+    lowered = html.lower()
+    return any(marker in lowered for marker in _SOFT_NOT_FOUND_MARKERS)
+
+
 def fetch_one(asin, marketplace, mode):
     site = sites.site(marketplace)
     base = {"asin": asin, "fetchedAt": _now(), "signals": None, "content": None}
@@ -29,6 +43,12 @@ def fetch_one(asin, marketplace, mode):
         # as `proxy_error` in stats and as `blocked` (transient) on the wire.
         return {**base, "outcome": "proxy_error"}
     if 'id="productTitle"' not in html:
+        # Amazon answers a removed ASIN with HTTP 200 and its "Sorry, we
+        # couldn't find that page" page, not a 404. Reported as parse_failed
+        # it read as OUR parser failing (retried, counted in the parse-failure
+        # rate); it is the product being gone, the same answer as a real 404.
+        if _is_soft_not_found(html):
+            return {**base, "outcome": "not_found"}
         return {**base, "outcome": "parse_failed"}
     result = {**base, "outcome": "found", "signals": extract_commerce_signals(html, site)}
     if mode == "full":
