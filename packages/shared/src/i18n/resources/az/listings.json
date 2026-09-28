@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN tapılmadı — bu identifikator üçün uyğun məhsul mövcud deyil.",
         "product_data_unavailable": "Bu ASIN üçün Amazon məhsul məlumatı əldə edilə bilmədi.",
         "source_price_unavailable": "Amazon qiyməti oxuna bilmədi.",
+        "no_buy_box": "Amazon bu məhsul üçün Buy Box göstərmir (yalnız \"See All Buying Options\"), buna görə avtomatik elan edilə bilməz. Amazon yenidən Buy Box göstərəndə ASIN-i yenidən əlavə edin.",
         "category_unresolved": "eBay bu məhsulu elan kateqoriyasına uyğunlaşdıra bilmədi.",
         "category_aspects_unavailable": "eBay-in məhsul xüsusiyyətləri məlumatı müvəqqəti əlçatmaz idi.",
         "aspect_missing": "eBay {{aspects}} məhsul xüsusiyyətini tələb edir və dəyər müəyyən edilə bilmədi.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "{{count}} elan uğurla yaradıldı",
       "queued": "{{count}} elan emal üçün növbəyə əlavə edildi",
-      "queuedDraft": "{{count}} qaralama elan növbəyə əlavə edildi — siz dərc etməyincə aktiv olmayacaq"
+      "queuedDraft": "{{count}} qaralama elan növbəyə əlavə edildi — siz dərc etməyincə aktiv olmayacaq",
+      "queuedWithSkipped": "{{count}} elan emal üçün növbəyə əlavə edildi ({{skipped}} elan artıq siyahınızda olduğu üçün keçildi)",
+      "queuedDraftWithSkipped": "{{count}} qaralama elan növbəyə əlavə edildi ({{skipped}} elan artıq siyahınızda olduğu üçün keçildi) — siz dərc etməyincə aktiv olmayacaq",
+      "allSkippedDuplicates": "Daxil etdiyiniz {{skipped}} ASIN-in hamısı artıq siyahınızdadır — yeni proses başlanmadı"
     },
     "errors": {
       "createFailed": "Elanları yaratmaq alınmadı",

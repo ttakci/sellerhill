@@ -160,6 +160,13 @@ export interface ListingJobDto {
   kind: ListingJobKind;
   createdAt: string;
   updatedAt: string;
+  /**
+   * ASINs dropped from THIS submission because they were already ACTIVE or
+   * DRAFT for the user — never counted in `totalAsins`, no job item written.
+   * Only meaningful on `createJob`'s own response; a later read of the job
+   * (status polling, the jobs list) leaves it undefined.
+   */
+  skippedDuplicateCount?: number;
 }
 
 /**

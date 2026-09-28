@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN bulunamadı — bu tanımlayıcıyla eşleşen bir ürün yok.",
         "product_data_unavailable": "Bu ASIN için Amazon ürün verisi alınamadı.",
         "source_price_unavailable": "Amazon fiyatı okunamadı.",
+        "no_buy_box": "Amazon bu ürün için bir Buy Box göstermiyor (yalnızca \"Tüm Satın Alma Seçeneklerini Gör\"), bu yüzden otomatik listelenemez. Amazon yeniden Buy Box gösterdiğinde ASIN'i tekrar ekleyin.",
         "category_unresolved": "eBay bu ürün için bir listeleme kategorisi bulamadı.",
         "category_aspects_unavailable": "eBay ürün özellik bilgisi geçici olarak alınamadı.",
         "aspect_missing": "eBay {{aspects}} özelliğini zorunlu tutuyor ve bir değer türetilemedi.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "{{count}} liste başarıyla oluşturuldu",
       "queued": "{{count}} ürün işleme sırasına alındı. Durumu 'Liste İşleri' sekmesinden takip edebilirsiniz.",
-      "queuedDraft": "{{count}} taslak sıraya alındı — yayınlayana kadar eBay'de canlı olmayacak"
+      "queuedDraft": "{{count}} taslak sıraya alındı — yayınlayana kadar eBay'de canlı olmayacak",
+      "queuedWithSkipped": "{{count}} ürün işleme sırasına alındı ({{skipped}} tanesi zaten listenizde olduğu için atlandı). Durumu 'Liste İşleri' sekmesinden takip edebilirsiniz.",
+      "queuedDraftWithSkipped": "{{count}} taslak sıraya alındı ({{skipped}} tanesi zaten listenizde olduğu için atlandı) — yayınlayana kadar eBay'de canlı olmayacak",
+      "allSkippedDuplicates": "Girdiğiniz {{skipped}} ASIN'in tümü zaten listenizde — yeni bir işlem başlatılmadı"
     },
     "errors": {
       "createFailed": "Listeler oluşturulamadı",

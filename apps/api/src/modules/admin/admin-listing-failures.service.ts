@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   ListingStatus,
+  SELLER_CAUSED_LISTING_FAILURE_CODES,
   type AdminListingFailureBreakdownDto,
   type AdminListingFailureDto,
   type AdminListingFailuresDto,
@@ -49,11 +50,18 @@ export class AdminListingFailuresService {
     const offset = (page - 1) * limit;
 
     const conditions: string[] = [`i.status = $1`];
-    const params: Array<string | number> = [ListingStatus.ERROR];
+    const params: Array<string | number | string[]> = [ListingStatus.ERROR];
 
     if (query.failureCode) {
       params.push(query.failureCode);
       conditions.push(`i.failure_code = $${params.length}`);
+    } else {
+      // Seller-caused failures (their blacklist, their duplicate, …) carry no
+      // provider text and nothing for an operator to act on; listed by default
+      // they buried the provider failures this panel exists for. Uncoded rows
+      // stay in — an unclassified failure is exactly what an operator reads.
+      params.push([...SELLER_CAUSED_LISTING_FAILURE_CODES]);
+      conditions.push(`(i.failure_code IS NULL OR NOT (i.failure_code = ANY($${params.length})))`);
     }
     if (query.search?.trim()) {
       params.push(`${query.search.trim()}%`);
@@ -92,15 +100,19 @@ export class AdminListingFailuresService {
     };
   }
 
-  /** Failure counts by code over the last 30 days — which class to fix first. */
+  /**
+   * Failure counts by code over the last 30 days — which class to fix first.
+   * Seller-caused codes are not a class to fix, so they are left out here too.
+   */
   private async breakdown(): Promise<AdminListingFailureBreakdownDto[]> {
     const rows = await this.databaseService.query<{ failure_code: string | null; count: string }>(
       `SELECT i.failure_code, COUNT(*)::text AS count
        FROM listing_job_items i
        WHERE i.status = $1 AND i.updated_at >= NOW() - INTERVAL '30 days'
+         AND (i.failure_code IS NULL OR NOT (i.failure_code = ANY($2)))
        GROUP BY i.failure_code
        ORDER BY COUNT(*) DESC`,
-      [ListingStatus.ERROR]
+      [ListingStatus.ERROR, [...SELLER_CAUSED_LISTING_FAILURE_CODES]]
     );
 
     return rows.map((row) => ({

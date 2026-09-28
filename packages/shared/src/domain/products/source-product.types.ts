@@ -65,6 +65,8 @@ export interface ScraperSignals {
   buyboxSellerId: string | null;
   buyboxSellerName: string | null;
   soldByAmazon: boolean | null;
+  /** No Buy Box on the page (only "See All Buying Options"). Optional: an older service image omits it. */
+  noFeaturedOffer?: boolean;
 }
 
 /** Catalog content extracted from an Amazon product page (`mode: 'full'` only). */

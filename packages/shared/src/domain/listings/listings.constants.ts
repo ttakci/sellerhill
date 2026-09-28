@@ -13,6 +13,11 @@ export const EBAY_TITLE_MAX_LENGTH = 80;
 export const EBAY_DESCRIPTION_MAX_LENGTH = 500000;
 export const EBAY_INVENTORY_DESCRIPTION_MAX_LENGTH = 4000;
 export const EBAY_MAX_IMAGES = 24;
+/**
+ * eBay's Picture Policy minimum: every gallery picture must be at least this
+ * many pixels on its longest side, or the WHOLE listing is refused.
+ */
+export const EBAY_MIN_IMAGE_LONGEST_SIDE = 500;
 /** Max characters eBay accepts for a single item-specific (aspect) value. */
 export const EBAY_ASPECT_VALUE_MAX_LENGTH = 65;
 /** Max characters eBay accepts for an aspect name. */

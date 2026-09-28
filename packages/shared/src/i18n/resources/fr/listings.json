@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN introuvable — aucun produit ne correspond à cet identifiant.",
         "product_data_unavailable": "Les données du produit Amazon n'ont pas pu être récupérées pour cet ASIN.",
         "source_price_unavailable": "Le prix Amazon n'a pas pu être lu.",
+        "no_buy_box": "Amazon n'affiche aucune Buy Box pour ce produit (seulement « See All Buying Options »), il ne peut donc pas être mis en vente automatiquement. Ajoutez de nouveau l'ASIN quand Amazon affichera à nouveau une Buy Box.",
         "category_unresolved": "eBay n'a pas pu associer ce produit à une catégorie d'annonce.",
         "category_aspects_unavailable": "Les données de caractéristiques d'article d'eBay étaient temporairement indisponibles.",
         "aspect_missing": "eBay exige la caractéristique d'article {{aspects}} et aucune valeur n'a pu être déterminée.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "{{count}} annonces créées avec succès",
       "queued": "{{count}} annonces mises en file d'attente pour traitement",
-      "queuedDraft": "{{count}} annonces en brouillon mises en file d'attente — elles ne seront pas en ligne tant que vous ne les publierez pas"
+      "queuedDraft": "{{count}} annonces en brouillon mises en file d'attente — elles ne seront pas en ligne tant que vous ne les publierez pas",
+      "queuedWithSkipped": "{{count}} annonces mises en file d'attente pour traitement ({{skipped}} ignorées — déjà présentes dans vos annonces)",
+      "queuedDraftWithSkipped": "{{count}} annonces en brouillon mises en file d'attente ({{skipped}} ignorées — déjà présentes dans vos annonces) — elles ne seront pas en ligne tant que vous ne les publierez pas",
+      "allSkippedDuplicates": "Les {{skipped}} ASIN saisis sont déjà tous présents dans vos annonces — aucune nouvelle tâche n'a été lancée"
     },
     "errors": {
       "createFailed": "Échec de la création des annonces",

@@ -34,6 +34,14 @@ export enum ListingFailureCode {
    * ASIN once the page shows a price. A draft may still be saved.
    */
   SOURCE_PRICE_UNAVAILABLE = 'source_price_unavailable',
+  /**
+   * Amazon shows no Buy Box for the ASIN — only "See All Buying Options".
+   * There is no single offer to price from or to buy through (auto-fulfill
+   * adds the Buy Box offer to the cart), so the listing cannot be automated.
+   * Terminal: a retry cannot create a Buy Box; the seller re-adds the ASIN if
+   * Amazon shows one again.
+   */
+  NO_BUY_BOX = 'no_buy_box',
   /** eBay's taxonomy could not name a listable leaf category. */
   CATEGORY_UNRESOLVED = 'category_unresolved',
   /** Category aspect metadata is unavailable and nothing was cached. */
@@ -133,6 +141,21 @@ export const RETRYABLE_LISTING_FAILURE_CODES: ReadonlyArray<ListingFailureCode> 
   ListingFailureCode.ZERO_STOCK,
   ListingFailureCode.PROVIDER_BUDGET_EXHAUSTED,
   ListingFailureCode.UNKNOWN,
+];
+
+/**
+ * Failures the seller causes and already sees explained on their own screen:
+ * their blacklist, an ASIN they already listed, a quantity their own buffer
+ * drove to 0, their plan limit, their cancel. None carries provider text and an
+ * operator can do nothing about any of them, so the operator's Listing
+ * Failures panel leaves them out unless one is asked for explicitly.
+ */
+export const SELLER_CAUSED_LISTING_FAILURE_CODES: ReadonlyArray<ListingFailureCode> = [
+  ListingFailureCode.BLACKLISTED_KEYWORD,
+  ListingFailureCode.DUPLICATE_LISTING,
+  ListingFailureCode.ZERO_STOCK,
+  ListingFailureCode.QUOTA_EXHAUSTED,
+  ListingFailureCode.CANCELLED,
 ];
 
 export function isRetryableListingFailure(code: ListingFailureCode | undefined | null): boolean {

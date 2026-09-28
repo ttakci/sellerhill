@@ -1,12 +1,15 @@
 import {
   extractEpsImageId,
   isEpsImageUrl,
+  readEpsImageDimensions,
   readEpsImageUrl,
   resolveDescriptionUrl,
   resolveGalleryUrls,
 } from '@repo/shared';
 
 const EPS = 'https://i.ebayimg.com/00/s/MTM2OFgxMjMy/z/~sIAAeSwuiRqtYrb/$_1.JPG?set_id=8800005007';
+/** The real URL eBay returned for the 269x331 image that failed a live listing. */
+const EPS_SMALL = 'https://i.ebayimg.com/00/s/MjY5WDMzMQ==/z/9e0AAeSwAbc/$_1.JPG?set_id=8800005007';
 const AMZ1 = 'https://images-na.ssl-images-amazon.com/images/I/9106K0FD50L.jpg';
 const AMZ2 = 'https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg';
 
@@ -74,6 +77,40 @@ describe('resolveGalleryUrls', () => {
 
   it('returns an empty array for no source images', () => {
     expect(resolveGalleryUrls([], new Map())).toEqual([]);
+  });
+
+  it('drops an EPS image smaller than eBay accepts, keeping the rest', () => {
+    // eBay refuses the WHOLE listing when any gallery picture is under 500 px
+    // on its longest side ("does not meet eBay's Picture Policy"). One live
+    // listing failed on a single 269x331 image Amazon has no hi-res for.
+    const map = new Map([[AMZ1, EPS], [AMZ2, EPS_SMALL]]);
+    expect(resolveGalleryUrls([AMZ1, AMZ2], map)).toEqual([EPS]);
+  });
+
+  it('keeps small images when dropping them would leave no gallery at all', () => {
+    // An empty gallery publishes with eBay's placeholder picture — a live
+    // listing with no photo. eBay refusing the listing, with its reason shown,
+    // is the better outcome.
+    const map = new Map([[AMZ1, EPS_SMALL]]);
+    expect(resolveGalleryUrls([AMZ1], map)).toEqual([EPS_SMALL]);
+  });
+
+  it('never drops a source URL — its size is unknown', () => {
+    const map = new Map([[AMZ2, EPS_SMALL]]);
+    expect(resolveGalleryUrls([AMZ1, AMZ2], map)).toEqual([AMZ1]);
+  });
+});
+
+describe('readEpsImageDimensions', () => {
+  it('decodes the WxH eBay encodes in an EPS URL path', () => {
+    expect(readEpsImageDimensions(EPS_SMALL)).toEqual({ width: 269, height: 331 });
+    expect(readEpsImageDimensions(EPS)).toEqual({ width: 1368, height: 1232 });
+  });
+
+  it('returns null for anything it cannot read', () => {
+    expect(readEpsImageDimensions('https://i.ebayimg.com/images/g/abc/s-l1600.jpg')).toBeNull();
+    expect(readEpsImageDimensions('https://i.ebayimg.com/00/s/!!!notbase64/z/x.jpg')).toBeNull();
+    expect(readEpsImageDimensions(AMZ1)).toBeNull();
   });
 });
 

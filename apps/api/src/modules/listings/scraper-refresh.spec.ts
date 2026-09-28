@@ -17,6 +17,24 @@ describe('resolveScraperRefreshBatchSize', () => {
   });
 });
 
+describe('planScraperRefresh — a listed product that loses its Buy Box', () => {
+  it('drops stock to 0, keeps the stored price, and fans out so eBay goes to quantity 0', () => {
+    const plan = planScraperRefresh(
+      row,
+      found({ price: null, isInStock: null, availabilityText: null, quantityMax: null, noFeaturedOffer: true }),
+      20
+    );
+    expect(plan).toMatchObject({
+      kind: 'observed',
+      price: 10,
+      stock: 0,
+      stockStatus: SourceStockStatus.OUT_OF_STOCK,
+      removed: false,
+      commerceChanged: true,
+    });
+  });
+});
+
 describe('planScraperRefresh', () => {
   it('missing, blocked or no-proxy result → skip (lease expiry retries)', () => {
     expect(planScraperRefresh(row, undefined, 20)).toEqual({ kind: 'skip' });

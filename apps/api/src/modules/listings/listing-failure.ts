@@ -189,6 +189,11 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   // A live create or publish would have been priced from an unknown/0 Amazon
   // price. Terminal for the attempt: the same page returns the same unreadable
   // price block, and a retry would re-pay the fetch for the same refusal.
+  // The page was read fine: Amazon simply offers no Buy Box, so there is
+  // nothing to price from or buy through. A retry cannot change that.
+  if (name === 'NoBuyBoxError') {
+    return { code: ListingFailureCode.NO_BUY_BOX, message: raw, details: { retryable: false } };
+  }
   if (name === 'SourcePriceUnavailableError') {
     return { code: ListingFailureCode.SOURCE_PRICE_UNAVAILABLE, message: raw, details: { retryable: false } };
   }
@@ -294,15 +299,18 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
     return { code: ListingFailureCode.EBAY_DUPLICATE_ITEM, message, details: { ebayErrorIds, retryable: false } };
   }
 
+  // Before the policy bucket: eBay's picture refusal is worded "does not meet
+  // eBay's Picture Policy requirements", and matching "policy" first told a
+  // seller their business policies were broken over a 269x331 photo.
+  if (entries.some((entry) => /image|picture/i.test(entry.message ?? ''))) {
+    return { code: ListingFailureCode.IMAGE_INVALID, message, details: { ebayErrorIds, retryable: false } };
+  }
   if (entries.some((entry) => /policy/i.test(entry.message ?? ''))) {
     return {
       code: ListingFailureCode.EBAY_POLICY_MISSING,
       message,
       details: { ebayErrorIds, retryable: false },
     };
-  }
-  if (entries.some((entry) => /image|picture/i.test(entry.message ?? ''))) {
-    return { code: ListingFailureCode.IMAGE_INVALID, message, details: { ebayErrorIds, retryable: false } };
   }
   if (entries.some((entry) => /restricted|not allowed|prohibited/i.test(entry.message ?? ''))) {
     return { code: ListingFailureCode.EBAY_RESTRICTED_ITEM, message, details: { ebayErrorIds, retryable: false } };

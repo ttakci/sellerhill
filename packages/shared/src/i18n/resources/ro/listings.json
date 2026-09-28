@@ -99,6 +99,7 @@
         "asin_not_found": "ASIN negăsit — nu există niciun produs corespunzător acestui identificator.",
         "product_data_unavailable": "Datele produsului Amazon nu au putut fi preluate pentru acest ASIN.",
         "source_price_unavailable": "Prețul Amazon nu a putut fi citit.",
+        "no_buy_box": "Amazon nu afișează niciun Buy Box pentru acest produs (doar „See All Buying Options”), așa că nu poate fi listat automat. Adăugați din nou ASIN-ul când Amazon afișează din nou un Buy Box.",
         "category_unresolved": "eBay nu a putut asocia acest produs unei categorii de anunțuri.",
         "category_aspects_unavailable": "Datele eBay despre specificațiile articolului au fost temporar indisponibile.",
         "aspect_missing": "eBay cere specificația articolului {{aspects}}, iar nicio valoare nu a putut fi dedusă.",
@@ -345,7 +346,10 @@
     "success": {
       "created": "Anunțuri create cu succes: {{count}}",
       "queued": "Anunțuri puse în coadă pentru procesare: {{count}}",
-      "queuedDraft": "Anunțuri ciornă puse în coadă: {{count}} — nu vor deveni active până nu le publicați"
+      "queuedDraft": "Anunțuri ciornă puse în coadă: {{count}} — nu vor deveni active până nu le publicați",
+      "queuedWithSkipped": "Anunțuri puse în coadă pentru procesare: {{count}} ({{skipped}} omise — deja prezente în anunțurile dvs.)",
+      "queuedDraftWithSkipped": "Anunțuri ciornă puse în coadă: {{count}} ({{skipped}} omise — deja prezente în anunțurile dvs.) — nu vor deveni active până nu le publicați",
+      "allSkippedDuplicates": "Toate cele {{skipped}} coduri ASIN introduse sunt deja în anunțurile dvs. — nu a fost pornită nicio operație nouă"
     },
     "errors": {
       "createFailed": "Anunțurile nu au putut fi create",

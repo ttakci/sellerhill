@@ -249,6 +249,18 @@ describe('isBulkSystemError', () => {
     expect(isBulkSystemError([{ errorId: 25002, message: 'System error.' }])).toBe(true);
   });
 
+  it("detects eBay's real system-error shapes: 25001, and any case of 'system error'", () => {
+    // The live refusal that was never retried: errorId 25001, lowercase
+    // wording. The old check required 25002 AND a case-sensitive 'System error'.
+    expect(
+      isBulkSystemError([
+        { errorId: 25001, message: 'A system error has occurred. Internal Server Error' },
+        { errorId: 25001, message: 'A system error has occurred. Core Inventory Service internal error' },
+      ])
+    ).toBe(true);
+    expect(isBulkSystemError([{ errorId: 25002, message: 'A system error has occurred.' }])).toBe(true);
+  });
+
   it('does not confuse a missing aspect with a system error', () => {
     expect(isBulkSystemError([{ errorId: 25002, message: 'The item specific Color is missing.' }])).toBe(false);
   });
