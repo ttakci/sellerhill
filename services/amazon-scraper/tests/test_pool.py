@@ -171,6 +171,30 @@ def test_threads_follow_the_rate():
     assert threads_for_rate(1, 2) == 4
     assert threads_for_rate(3, 2) == 12
     assert threads_for_rate(100, 2) == 40
+
+
+def test_threads_follow_measured_latency_once_known():
+    # A 20 s round trip at 1 req/s needs 20 busy workers just to reach the
+    # budget; the fixed ~2 s assumption gave 4 and capped the proxy at 0.2/s.
+    from sellerhill.pool import threads_for_rate
+    assert threads_for_rate(1, 2, latency_s=20) == 30      # 1 * 20 * 1.5
+    assert threads_for_rate(1, 2, latency_s=10) == 15
+    assert threads_for_rate(1, 2, latency_s=1.5) == 4      # never below the fixed headroom
+    assert threads_for_rate(2, 2, latency_s=20) == 40      # still capped
+    assert threads_for_rate(1, 2, latency_s=None) == 4
+    assert threads_for_rate(1, 2, latency_s=0) == 4
+
+
+def test_pool_grows_threads_from_its_own_latency():
+    import time
+    from sellerhill.pool import ProxyPool
+    pool = ProxyPool(lambda *a: {"outcome": "found"}, threads_per_proxy=1)
+    now = time.monotonic()
+    for _ in range(5):
+        pool._events.append((now, "found", "p", 20_000))   # 20 s pages measured
+    pool.ensure(["http://p:1"], 1)
+    assert pool.stats()["proxies"][0]["threads"] == 30
+    pool.shutdown()
     pool = ProxyPool(ok_fetch, threads_per_proxy=2)
     pool.ensure(["http://h:1"], rate=1)
     proxy = pool._proxies["http://h:1"]

@@ -115,6 +115,8 @@
       "keepaBalance": "Keepa tokens left",
       "scraperLastHour": "Scraper, last hour (ok · blocked · unreadable · proxy error · timed out)",
       "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}} · {{proxyError}} · {{expired}}",
+      "scraperLatency": "Scraper, mean page round trip · workers per proxy",
+      "scraperLatencyValue": "{{ms}} ms · {{threads}}",
       "refreshLag": "Refresh lag",
       "refreshLagValue": "{{minutes}} min",
       "syncsPerDay": "Achievable syncs per day",

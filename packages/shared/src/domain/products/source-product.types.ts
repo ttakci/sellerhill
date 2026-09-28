@@ -150,7 +150,8 @@ export interface ScraperStats {
   window1h: ScraperOutcomeCounts;
   window24h: ScraperOutcomeCounts;
   meanLatencyMs: number | null;
-  proxies: Array<{ id: string; requests1h: number; blocked1h: number; coolingDown: boolean }>;
+  /** `threads` is the proxy's current worker count (grows with measured latency). Optional: an older service omits it. */
+  proxies: Array<{ id: string; requests1h: number; blocked1h: number; coolingDown: boolean; threads?: number }>;
   /** The service may fetch without a proxy (`SCRAPER_ALLOW_DIRECT=1`). Optional: an older service omits it. */
   directAllowed?: boolean;
 }
