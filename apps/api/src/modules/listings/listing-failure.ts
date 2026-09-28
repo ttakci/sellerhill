@@ -270,13 +270,27 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
     };
   }
 
+  // A required product identifier (UPC/EAN/ISBN) we did not send. That is a
+  // gap in OUR payload — the builder is meant to send the site's "Does not
+  // apply" substitute whenever the product has none — never a defect in the
+  // seller's product, so it reports as the generic reason. Not retryable: the
+  // same payload gets the same refusal. The raw text stays operator-visible.
+  if (entries.some((entry) => /\b(UPC|EAN|ISBN|GTIN) field is missing/i.test(entry.message ?? ''))) {
+    return { code: ListingFailureCode.UNKNOWN, message, details: { ebayErrorIds, retryable: false } };
+  }
+
   // Checked before the generic text-matched buckets below: eBay names the
   // specific conflicting item in `message`, so a seller sees a plan-actionable
   // reason instead of the generic UNKNOWN this fell into before.
-  // "Offer entity already exists" shares the 25002 id but is our own stale
-  // offer colliding with the SKU, not a live identical listing.
-  const isOfferCollision = entries.some((entry) => /offer entity already exists/i.test(entry.message ?? ''));
-  if (!isOfferCollision && ebayErrorIds.some((id) => EBAY_DUPLICATE_ITEM_ERROR_IDS.has(id))) {
+  // 25002 is eBay's GENERIC user-error id — it also carries "Offer entity
+  // already exists" (our own stale offer), "The UPC field is missing" and
+  // "System error" — so the id alone is not evidence of a duplicate. The
+  // message must say so, or a seller is told to end a listing that does not
+  // exist.
+  const isDuplicateItem = entries.some((entry) =>
+    /already have on eBay|identical|duplicate/i.test(entry.message ?? '')
+  );
+  if (isDuplicateItem && ebayErrorIds.some((id) => EBAY_DUPLICATE_ITEM_ERROR_IDS.has(id))) {
     return { code: ListingFailureCode.EBAY_DUPLICATE_ITEM, message, details: { ebayErrorIds, retryable: false } };
   }
 

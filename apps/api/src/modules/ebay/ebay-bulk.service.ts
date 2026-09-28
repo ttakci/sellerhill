@@ -340,7 +340,11 @@ export class EbayBulkService {
     // (`en_US`), unlike the header's hyphenated form (`en-US`).
     const locale = context.contentLanguage.replace('-', '_');
     const itemRequests = states.map((state) => {
-      const { payload, usedPlaceholderImage } = buildInventoryItemPayload(state.draft.data, state.draft.resolution);
+      const { payload, usedPlaceholderImage } = buildInventoryItemPayload(
+        state.draft.data,
+        state.draft.resolution,
+        context.marketplaceId
+      );
       if (usedPlaceholderImage) {
         this.logger.warn(`No valid images for SKU ${state.draft.sku}, using placeholder`);
       }
