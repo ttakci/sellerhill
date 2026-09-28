@@ -139,7 +139,8 @@ export const listingsApi = baseApi.injectEndpoints({
     }),
     importExistingListings: builder.mutation<ListingImportResult, FormData>({
       query: (body) => ({ url: '/listings/import', method: 'POST', body }),
-      invalidatesTags: ['Listings'],
+      // Import reserves + consumes listing quota synchronously (2026-09-17).
+      invalidatesTags: ['Listings', { type: 'Billing', id: 'SUMMARY' }],
     }),
 
     /**
@@ -180,10 +181,13 @@ export const listingsApi = baseApi.injectEndpoints({
      */
     cancelListingJob: builder.mutation<{ success: boolean; cancelledCount: number }, string>({
       query: (jobId) => ({ url: `/listings/jobs/${jobId}/cancel`, method: 'POST' }),
+      // Cancelling releases the unstarted items' billing reservations, which
+      // count toward the listing quota's "used" figure.
       invalidatesTags: (_result, _error, jobId) => [
         { type: 'Listings', id: `${jobId}-items` },
         { type: 'Listings', id: jobId },
         'Listings',
+        { type: 'Billing', id: 'SUMMARY' },
       ],
     }),
 
@@ -227,7 +231,10 @@ export const listingsApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { listingIds },
       }),
-      invalidatesTags: ['Listings'],
+      // The listing quota is a LEVEL (COUNT of ACTIVE listings), so ending a
+      // listing frees a slot the billing summary must re-read — without this
+      // the quota rings keep showing the cached pre-end figure.
+      invalidatesTags: ['Listings', { type: 'Billing', id: 'SUMMARY' }],
     }),
 
     /**
@@ -239,7 +246,7 @@ export const listingsApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { listingIds },
       }),
-      invalidatesTags: ['Listings'],
+      invalidatesTags: ['Listings', { type: 'Billing', id: 'SUMMARY' }],
     }),
 
     /**
@@ -253,6 +260,7 @@ export const listingsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [
         { type: 'Listings', id },
         { type: 'Listings', id: 'LIST' },
+        { type: 'Billing', id: 'SUMMARY' },
       ],
     }),
 
@@ -268,7 +276,7 @@ export const listingsApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { listingIds },
       }),
-      invalidatesTags: ['Listings'],
+      invalidatesTags: ['Listings', { type: 'Billing', id: 'SUMMARY' }],
     }),
   }),
 });
