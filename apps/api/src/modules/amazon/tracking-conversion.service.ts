@@ -49,10 +49,7 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
-import {
-  AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
-  buildAquilinePlanSnapshotParams,
-} from './aquiline-plan-snapshot.sql';
+import { AQUILINE_PLAN_SNAPSHOT_INSERT_SQL, buildAquilinePlanSnapshotParams } from './aquiline-plan-snapshot.sql';
 import { AquilineProfileService } from './aquiline-profile.service';
 import { AquilineClient, AquilineError, AquilineErrorKind, type AquilineConfig } from './aquiline.client';
 import {
@@ -159,7 +156,7 @@ export class TrackingConversionService {
     private readonly aquiline: AquilineClient,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly aquilineProfile: AquilineProfileService,
-    private readonly trackingQueue: AmazonTrackingQueueService,
+    private readonly trackingQueue: AmazonTrackingQueueService
   ) {}
 
   /**
@@ -202,9 +199,7 @@ export class TrackingConversionService {
     }
 
     if (order.converted_tracking_number) {
-      this.logger.debug(
-        `Order ${order.id}: reusing stored converted tracking ${order.converted_tracking_number}`,
-      );
+      this.logger.debug(`Order ${order.id}: reusing stored converted tracking ${order.converted_tracking_number}`);
       return {
         trackingNumber: order.converted_tracking_number,
         shippingCarrierCode: order.converted_tracking_carrier || AQUILINE_EBAY_CARRIER_CODE,
@@ -224,14 +219,30 @@ export class TrackingConversionService {
       settings.tracking_conversion_scope === TrackingConversionScope.ALL
         ? TrackingConversionScope.ALL
         : TrackingConversionScope.AMAZON_LOGISTICS_ONLY;
+    // An EMPTY number and carrier is an UNKNOWN carrier, not a non-Amazon one.
+    // Amazon marks an order shipped before the progress tracker prints the
+    // tracking id, and the order-details page rarely prints it at all. Reading
+    // that gap as "outside the seller's scope" passed the order through and
+    // marked it shipped on eBay with NO tracking — a fulfillment eBay cannot
+    // take back. Hold and let the next tick read the number instead.
+    if (
+      !request.forceManual &&
+      scope === TrackingConversionScope.AMAZON_LOGISTICS_ONLY &&
+      !request.rawNumber.trim() &&
+      !request.rawCarrier.trim()
+    ) {
+      this.logger.warn(
+        `Order ${order.id}: Amazon reports shipped but no tracking number/carrier was read yet — ` +
+          `holding until one is (scope ${scope})`
+      );
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_RETRYABLE);
+    }
     if (
       !request.forceManual &&
       scope === TrackingConversionScope.AMAZON_LOGISTICS_ONLY &&
       !isAmazonLogisticsTracking(request.rawNumber, request.rawCarrier)
     ) {
-      this.logger.debug(
-        `Order ${order.id}: carrier is not Amazon Logistics and scope is ${scope} — passing through`,
-      );
+      this.logger.debug(`Order ${order.id}: carrier is not Amazon Logistics and scope is ${scope} — passing through`);
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
@@ -246,17 +257,13 @@ export class TrackingConversionService {
     // flag, and there is no second definition of "manual" to drift.
     const manuallyLinked = order.auto_fulfill_status !== AutoFulfillStatus.PLACED;
     if (!request.forceManual && manuallyLinked && settings.tracking_convert_manual_orders === false) {
-      this.logger.debug(
-        `Order ${order.id}: manually linked and manual conversion is off — passing through`,
-      );
+      this.logger.debug(`Order ${order.id}: manually linked and manual conversion is off — passing through`);
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
     // Entitlement: a lapsed account does not get paid conversions.
     if (await this.quotaEnforcement.isSuspended(order.user_id)) {
-      this.logger.warn(
-        `Order ${order.id}: subscription suspended — falling back to pass-through`,
-      );
+      this.logger.warn(`Order ${order.id}: subscription suspended — falling back to pass-through`);
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
@@ -269,7 +276,7 @@ export class TrackingConversionService {
     if (!quota.allowed) {
       this.logger.error(
         `Order ${order.id}: monthly tracking-conversion quota exhausted ` +
-          `(${quota.used}/${quota.limitValue ?? '?'}) — falling back to pass-through`,
+          `(${quota.used}/${quota.limitValue ?? '?'}) — falling back to pass-through`
       );
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
@@ -277,7 +284,7 @@ export class TrackingConversionService {
     const config = await this.resolveConfig();
     if (!this.aquiline.isConfigured(config)) {
       this.logger.warn(
-        `Order ${order.id}: provider is ${provider} but no API key is configured — falling back to pass-through`,
+        `Order ${order.id}: provider is ${provider} but no API key is configured — falling back to pass-through`
       );
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
@@ -286,9 +293,7 @@ export class TrackingConversionService {
     if (!recipient) {
       // A conversion needs a deliverable recipient. Sending a half-address
       // would burn a paid conversion on a shipment the provider cannot track.
-      this.logger.warn(
-        `Order ${order.id}: buyer address incomplete — cannot convert, falling back to pass-through`,
-      );
+      this.logger.warn(`Order ${order.id}: buyer address incomplete — cannot convert, falling back to pass-through`);
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
@@ -304,7 +309,7 @@ export class TrackingConversionService {
     const trackingUrl = request.trackingUrl || order.amazon_tracking_url;
     if (!marketplaceOrderId || !trackingUrl) {
       this.logger.warn(
-        `Order ${order.id}: missing Amazon order id or tracking URL — cannot convert, falling back to pass-through`,
+        `Order ${order.id}: missing Amazon order id or tracking URL — cannot convert, falling back to pass-through`
       );
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
@@ -313,15 +318,9 @@ export class TrackingConversionService {
     // ceiling-guarded. `ensureProfile` never throws; `null` means the caller
     // must fall back, same as every other precondition here.
     const marketplace = (order.amazon_marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US;
-    const profileId = await this.aquilineProfile.ensureProfile(
-      order.user_id,
-      marketplace,
-      order.amazon_account_email,
-    );
+    const profileId = await this.aquilineProfile.ensureProfile(order.user_id, marketplace, order.amazon_account_email);
     if (!profileId) {
-      this.logger.warn(
-        `Order ${order.id}: no Aquiline profile available — falling back to pass-through`,
-      );
+      this.logger.warn(`Order ${order.id}: no Aquiline profile available — falling back to pass-through`);
       return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
@@ -329,9 +328,7 @@ export class TrackingConversionService {
       const marketplaceOrder: AquilineMarketplaceOrder = {
         marketplaceOrderId,
         ...(order.order_date ? { orderPlacedAt: order.order_date.toISOString() } : {}),
-        ...(order.shipping_address?.fullName?.trim()
-          ? { shipToName: order.shipping_address.fullName.trim() }
-          : {}),
+        ...(order.shipping_address?.fullName?.trim() ? { shipToName: order.shipping_address.fullName.trim() } : {}),
         shippingAddress: recipient,
         ...(order.listing_title ? { productTitle: order.listing_title } : {}),
         ...(order.listing_asin
@@ -353,7 +350,7 @@ export class TrackingConversionService {
           profileId,
           marketplaceOrderId,
           { trackingUrl, html: request.trackingHtml },
-          config,
+          config
         );
         await this.stampHtmlUploaded(order.id);
       }
@@ -364,7 +361,7 @@ export class TrackingConversionService {
       if (isPlanExhausted(snapshot, new Date())) {
         this.logger.error(
           `Order ${order.id}: Aquiline plan is exhausted (remaining ${snapshot?.planRemaining ?? '?'}) — ` +
-            `falling back to pass-through`,
+            `falling back to pass-through`
         );
         return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
       }
@@ -382,7 +379,7 @@ export class TrackingConversionService {
           marketplaceHost: AQUILINE_AMAZON_MARKETPLACE_HOST,
           sourceTracking: AQUILINE_SOURCE_TRACKING,
         },
-        config,
+        config
       );
 
       // Aquiline has ALREADY issued and billed this number — everything past
@@ -405,7 +402,7 @@ export class TrackingConversionService {
       this.logger.log(
         `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider}) ` +
           `reused=${assigned.reused} chargedCents=${assigned.chargedCents ?? 'unknown'} ` +
-          `planUsed=${assigned.planUsed ?? 'unknown'}/${assigned.planLimit ?? 'unknown'}`,
+          `planUsed=${assigned.planUsed ?? 'unknown'}/${assigned.planLimit ?? 'unknown'}`
       );
       return {
         trackingNumber: assigned.aquiline,
@@ -417,7 +414,7 @@ export class TrackingConversionService {
       const retryable = this.logConversionFailure(order.id, err);
       return this.passthroughResult(
         request,
-        retryable ? ConversionOutcome.PASSTHROUGH_RETRYABLE : ConversionOutcome.PASSTHROUGH_FAILED,
+        retryable ? ConversionOutcome.PASSTHROUGH_RETRYABLE : ConversionOutcome.PASSTHROUGH_FAILED
       );
     }
   }
@@ -449,11 +446,7 @@ export class TrackingConversionService {
    *     stale provider record is a degradation, and the caller is a tracking
    *     tick whose real job is detecting delivery.
    */
-  async refreshTrackingHtml(input: {
-    orderId: string;
-    trackingUrl: string;
-    trackingHtml: string;
-  }): Promise<boolean> {
+  async refreshTrackingHtml(input: { orderId: string; trackingUrl: string; trackingHtml: string }): Promise<boolean> {
     if (!input.trackingUrl || !input.trackingHtml) {
       return false;
     }
@@ -463,7 +456,7 @@ export class TrackingConversionService {
       order = await this.loadOrder(input.orderId);
     } catch (err) {
       this.logger.warn(
-        `Order ${input.orderId}: ship-track HTML refresh skipped, order read failed: ${describeError(err)}`,
+        `Order ${input.orderId}: ship-track HTML refresh skipped, order read failed: ${describeError(err)}`
       );
       return false;
     }
@@ -479,11 +472,7 @@ export class TrackingConversionService {
     // Cached: the order is already converted, so a profile row exists and this
     // returns its id without a provider call. It never throws.
     const marketplace = (order.amazon_marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US;
-    const profileId = await this.aquilineProfile.ensureProfile(
-      order.user_id,
-      marketplace,
-      order.amazon_account_email,
-    );
+    const profileId = await this.aquilineProfile.ensureProfile(order.user_id, marketplace, order.amazon_account_email);
     if (!profileId) {
       return false;
     }
@@ -493,14 +482,14 @@ export class TrackingConversionService {
         profileId,
         order.amazon_order_id,
         { trackingUrl: input.trackingUrl, html: input.trackingHtml },
-        config,
+        config
       );
       await this.stampHtmlUploaded(order.id);
       this.logger.debug(`Order ${order.id}: refreshed the ship-track HTML held by the provider`);
       return true;
     } catch (err) {
       this.logger.warn(
-        `Order ${order.id}: ship-track HTML refresh failed — the provider's copy stays stale. ${describeError(err)}`,
+        `Order ${order.id}: ship-track HTML refresh failed — the provider's copy stays stale. ${describeError(err)}`
       );
       return false;
     }
@@ -538,7 +527,7 @@ export class TrackingConversionService {
     }
     this.logger.warn(
       `Order ${orderId}: tracking conversion failed unexpectedly — falling back to pass-through. ` +
-        `${(err as Error).message}`,
+        `${(err as Error).message}`
     );
     return false;
   }
@@ -701,7 +690,7 @@ export class TrackingConversionService {
          FROM orders o
          JOIN listings l ON l.id = o.listing_id
         WHERE o.id = $1`,
-      [orderId],
+      [orderId]
     );
     return Boolean(rows[0]?.ebay_item_id);
   }
@@ -720,7 +709,7 @@ export class TrackingConversionService {
     try {
       const rows = await this.databaseService.query<{ amazon_account_id: string | null }>(
         `SELECT amazon_account_id FROM orders WHERE id = $1`,
-        [orderId],
+        [orderId]
       );
       const amazonAccountId = rows[0]?.amazon_account_id;
       if (!amazonAccountId) {
@@ -730,21 +719,16 @@ export class TrackingConversionService {
     } catch (err) {
       this.logger.warn(
         `Order ${orderId}: converted, but the immediate tracking nudge failed ` +
-          `(${(err as Error).message}) — the scheduled tick will push it`,
+          `(${(err as Error).message}) — the scheduled tick will push it`
       );
     }
   }
 
-  private async loadRawTracking(
-    orderId: string,
-  ): Promise<{ number: string | null; carrier: string | null }> {
+  private async loadRawTracking(orderId: string): Promise<{ number: string | null; carrier: string | null }> {
     const rows = await this.databaseService.query<{
       amazon_tracking_number: string | null;
       amazon_tracking_carrier: string | null;
-    }>(
-      `SELECT amazon_tracking_number, amazon_tracking_carrier FROM orders WHERE id = $1`,
-      [orderId],
-    );
+    }>(`SELECT amazon_tracking_number, amazon_tracking_carrier FROM orders WHERE id = $1`, [orderId]);
     return {
       number: rows[0]?.amazon_tracking_number ?? null,
       carrier: rows[0]?.amazon_tracking_carrier ?? null,
@@ -758,7 +742,7 @@ export class TrackingConversionService {
     orderId: string,
     provider: TrackingConversionProvider,
     trackingNumber: string,
-    shipmentId: string | null,
+    shipmentId: string | null
   ): Promise<void> {
     await this.databaseService.query(
       `UPDATE orders SET
@@ -769,7 +753,7 @@ export class TrackingConversionService {
          tracking_converted_at         = NOW(),
          updated_at                    = CURRENT_TIMESTAMP
        WHERE id = $5`,
-      [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, shipmentId, provider, orderId],
+      [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, shipmentId, provider, orderId]
     );
   }
 
@@ -808,7 +792,7 @@ export class TrackingConversionService {
   private async persistConverted(
     orderId: string,
     provider: TrackingConversionProvider,
-    trackingNumber: string,
+    trackingNumber: string
   ): Promise<void> {
     try {
       await this.persist(orderId, provider, trackingNumber, null);
@@ -816,19 +800,19 @@ export class TrackingConversionService {
     } catch (err) {
       this.logger.warn(
         `Order ${orderId}: full persist of converted tracking ${trackingNumber} failed ` +
-          `(${(err as Error).message}) — trying a minimal write`,
+          `(${(err as Error).message}) — trying a minimal write`
       );
     }
 
     try {
       await this.databaseService.query(
         `UPDATE orders SET converted_tracking_number = $1, converted_tracking_carrier = $2 WHERE id = $3`,
-        [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, orderId],
+        [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, orderId]
       );
     } catch (err) {
       this.logger.error(
         `Order ${orderId}: Aquiline issued AQUA number ${trackingNumber} but BOTH persist layers failed ` +
-          `(${(err as Error).message}) — nothing local records this conversion; recover it by hand.`,
+          `(${(err as Error).message}) — nothing local records this conversion; recover it by hand.`
       );
     }
   }
@@ -838,9 +822,7 @@ export class TrackingConversionService {
    *  succeeded. */
   private async stampOrderSynced(orderId: string): Promise<void> {
     try {
-      await this.databaseService.query(`UPDATE orders SET aquiline_order_synced_at = NOW() WHERE id = $1`, [
-        orderId,
-      ]);
+      await this.databaseService.query(`UPDATE orders SET aquiline_order_synced_at = NOW() WHERE id = $1`, [orderId]);
     } catch (err) {
       this.logger.warn(`Order ${orderId}: could not stamp aquiline_order_synced_at: ${(err as Error).message}`);
     }
@@ -850,9 +832,7 @@ export class TrackingConversionService {
    *  Same best-effort contract as `stampOrderSynced`. */
   private async stampHtmlUploaded(orderId: string): Promise<void> {
     try {
-      await this.databaseService.query(`UPDATE orders SET tracking_html_uploaded_at = NOW() WHERE id = $1`, [
-        orderId,
-      ]);
+      await this.databaseService.query(`UPDATE orders SET tracking_html_uploaded_at = NOW() WHERE id = $1`, [orderId]);
     } catch (err) {
       this.logger.warn(`Order ${orderId}: could not stamp tracking_html_uploaded_at: ${(err as Error).message}`);
     }
@@ -872,7 +852,7 @@ export class TrackingConversionService {
        LEFT JOIN amazon_accounts aa ON aa.id = o.amazon_account_id
        LEFT JOIN listings l ON l.id = o.listing_id
        WHERE o.id = $1`,
-      [orderId],
+      [orderId]
     );
     return rows[0] ?? null;
   }
@@ -886,19 +866,25 @@ export class TrackingConversionService {
   private async resolveSettings(order: ConversionOrderRow): Promise<ResolvedSettingsRow> {
     try {
       const rows = await this.databaseService.query<ResolvedSettingsRow>(
+        // `store_settings.store_id` IS the eBay account id (what every
+        // `getResolvedSettings(userId, ebayAccountId)` caller passes). This
+        // once filtered on a column carrying the eBay-account name, which does
+        // not exist on this table: the query threw on every call, the catch
+        // below swallowed it, and the seller's real provider/scope were
+        // replaced by the defaults. `tracking-conversion.spec.ts` locks it.
         `SELECT tracking_conversion_provider, tracking_provider_profile_id,
                 tracking_conversion_scope, tracking_convert_manual_orders
          FROM store_settings
-         WHERE user_id = $1 AND (ebay_account_id = $2 OR ebay_account_id IS NULL)
-         ORDER BY ebay_account_id NULLS LAST
+         WHERE user_id = $1 AND (store_id = $2 OR is_global = TRUE)
+         ORDER BY store_id NULLS LAST
          LIMIT 1`,
-        [order.user_id, order.ebay_account_id],
+        [order.user_id, order.ebay_account_id]
       );
       return rows[0] ?? EMPTY_SETTINGS;
     } catch (err) {
       // Settings resolution must never break the shipped push.
       this.logger.warn(
-        `Order ${order.id}: could not resolve tracking settings (${(err as Error).message}) — using defaults`,
+        `Order ${order.id}: could not resolve tracking settings (${(err as Error).message}) — using defaults`
       );
       return EMPTY_SETTINGS;
     }
@@ -957,7 +943,7 @@ export class TrackingConversionService {
           planLimit: result.planLimit,
           planUsed: result.planUsed,
           planRemaining: result.planRemaining,
-        }),
+        })
       );
     } catch (err) {
       this.logger.warn(`Could not record the Aquiline plan snapshot: ${(err as Error).message}`);
@@ -1032,10 +1018,7 @@ function toProblemCode(code: string | null | undefined): AquilineProblemCode | n
  * revoked token, a full profile ceiling and a rejected page all give the same
  * answer next time, so deferring only delays the seller's fulfilment.
  */
-export function isRetryableConversionFailure(
-  kind: AquilineErrorKind,
-  problem: AquilineProblemCode | null,
-): boolean {
+export function isRetryableConversionFailure(kind: AquilineErrorKind, problem: AquilineProblemCode | null): boolean {
   if (problem === AquilineProblemCode.NEEDS_TRACKING_UPLOAD) {
     return true;
   }
@@ -1060,7 +1043,7 @@ export function isRetryableConversionFailure(
  */
 export function isPlanExhausted(
   snapshot: { planRemaining: number | null; capturedAt: Date } | null,
-  now: Date,
+  now: Date
 ): boolean {
   if (!snapshot || snapshot.planRemaining === null) {
     return false;
