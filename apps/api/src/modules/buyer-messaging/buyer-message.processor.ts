@@ -19,7 +19,7 @@ interface OrderCtx {
   trackingNumber?: string;
   carrier?: string;
   storeName: string;
-  lineItemId?: string;
+  ebayItemId?: string;
 }
 
 /**
@@ -126,7 +126,7 @@ export class BuyerMessageProcessor extends WorkerHost {
       const result = await this.provider.sendMessage({
         ebayAccountId,
         orderId: ctx.orderId,
-        lineItemId: ctx.lineItemId,
+        ebayItemId: ctx.ebayItemId,
         buyerUsername: ctx.buyerUsername,
         body,
       });
@@ -159,12 +159,17 @@ export class BuyerMessageProcessor extends WorkerHost {
 
   /**
    * Load buyer/item/tracking context via orders -> listings -> products join.
-   * Schema (verified against migrations 012/022/024/010):
+   * Schema (verified against migrations 012/022/024/010/111):
    *   - orders.amazon_tracking_number, orders.amazon_tracking_carrier (migration 024)
    *   - ebay_accounts.store_name (migration 022, nullable), ebay_accounts.seller_id (migration 002)
    *   - listings.ebay_item_id (migration 010; nullable for drafts since 032) - the
-   *     persistent legacyItemId pointer; we use it directly instead of digging
+   *     persistent eBay item id pointer; we use it directly instead of digging
    *     through transient eBay line_items JSON, which is never persisted.
+   *   - orders.ebay_legacy_item_id (migration 111) - the eBay item id an order
+   *     was ingested against even when it matched no listing at the time. An
+   *     order adopted by a listing imported LATER has `l.ebay_item_id` too, so
+   *     the listing's own column is preferred and the order's is the fallback
+   *     for an order that is still untracked.
    *   - orders has NO line_items column.
    */
   private async loadOrderCtx(ebayOrderId: string, ebayAccountId: string): Promise<OrderCtx | null> {
@@ -185,7 +190,7 @@ export class BuyerMessageProcessor extends WorkerHost {
               -- Never seller_id: since migration 108 it is eBay's opaque immutable
               -- user id, and this value reaches buyers through {{store_name}}.
               COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name,
-              l.ebay_item_id AS legacy_item_id
+              COALESCE(l.ebay_item_id, o.ebay_legacy_item_id) AS legacy_item_id
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
          LEFT JOIN products p ON p.id = l.product_id
@@ -209,7 +214,7 @@ export class BuyerMessageProcessor extends WorkerHost {
       trackingNumber: r.tracking_number ?? undefined,
       carrier: r.carrier ?? undefined,
       storeName: r.store_name || 'our store',
-      lineItemId: r.legacy_item_id ?? undefined,
+      ebayItemId: r.legacy_item_id ?? undefined,
     };
   }
 
