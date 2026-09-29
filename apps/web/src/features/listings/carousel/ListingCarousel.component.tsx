@@ -18,6 +18,7 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
   onListingClick,
   emptyTitle,
   emptySubtitle,
+  locale,
   currentSlide,
   onNext,
   onPrev,
@@ -49,7 +50,7 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
       <S.CarouselViewport>
         {listings.map((listing, index) => {
           const slideClass = index === currentSlide ? 'active' : index < currentSlide ? 'prev' : '';
-          const card = toListingCardProps(listing, t);
+          const card = toListingCardProps(listing, t, locale);
           return (
             <S.CarouselSlide key={listing.id} className={slideClass} $isActive={index === currentSlide}>
               <ListingCard

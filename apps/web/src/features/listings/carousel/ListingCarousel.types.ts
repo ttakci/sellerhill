@@ -20,6 +20,8 @@ export interface ListingCarouselProps {
  * with carousel-slide state that the container owns and passes down.
  */
 export interface ListingCarouselComponentProps extends ListingCarouselProps {
+  /** Locale for card price-stat separators (currency comes from each listing's own `currency`). */
+  locale: string;
   currentSlide: number;
   onNext: () => void;
   onPrev: () => void;
