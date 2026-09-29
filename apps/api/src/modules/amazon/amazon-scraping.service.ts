@@ -7,7 +7,12 @@ import type { Locator, Page } from 'playwright';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { probeAmazonAuth } from './amazon-auth-state';
-import { AmazonOrderParserService } from './amazon-order-parser.service';
+import {
+  AmazonOrderParserService,
+  detectAmazonStatusLine,
+  extractTrackingNumberFromText,
+  resolveTrackingCarrier,
+} from './amazon-order-parser.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { BrowserStateManager } from './browser-state-manager.service';
 
@@ -26,6 +31,19 @@ export interface ScrapingProgress {
  * navigated to, because that navigation happens inside a session holding the
  * seller's real, logged-in Amazon cookies.
  */
+/**
+ * The page's visible text (what a person sees — never `<script>` bodies, which
+ * `textContent` includes). Empty when the page object cannot provide it, so a
+ * caller only ever loses the fallback, never the scrape.
+ */
+async function readVisibleText(page: Page): Promise<string> {
+  try {
+    return await page.locator('body').innerText();
+  } catch {
+    return '';
+  }
+}
+
 export function isTrustedAmazonTrackingUrl(href: string, originUrl: string): boolean {
   return resolveTrustedAmazonTrackingUrl(href, originUrl) !== null;
 }
@@ -446,6 +464,9 @@ export class AmazonScrapingService {
       // for and after eBay has already been handed the raw Amazon number.
       let trackingUrl: string | undefined;
       let trackingHtml: string | undefined;
+      let trackingNumber = parsed.trackingNumber;
+      let trackingCarrier = parsed.trackingCarrier;
+      let status = parsed.status;
       if (parsed.trackingUrl) {
         const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
         const resolvedTrackingUrl = resolveTrustedAmazonTrackingUrl(parsed.trackingUrl, origin);
@@ -459,6 +480,26 @@ export class AmazonScrapingService {
             await page.goto(resolvedTrackingUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await page.waitForTimeout(1500);
             trackingHtml = await page.content();
+
+            // The progress tracker is where Amazon actually prints "Tracking
+            // ID: …" and "Shipped with …"; order-details rarely carries the
+            // number at all. Read the VISIBLE text of this page too, so the
+            // shipped transition has a real number and carrier to decide the
+            // conversion scope on — an empty number there used to be read as
+            // "not Amazon Logistics" and pushed to eBay with no tracking.
+            const shipTrackText = await readVisibleText(page);
+            const shipTrackNumber = extractTrackingNumberFromText(shipTrackText);
+            if (shipTrackNumber) {
+              trackingNumber = shipTrackNumber;
+              trackingCarrier = resolveTrackingCarrier(shipTrackNumber, shipTrackText);
+            } else if (trackingNumber && !trackingCarrier) {
+              trackingCarrier = resolveTrackingCarrier(trackingNumber, shipTrackText);
+            }
+            // Only fills a gap — it never overrides a status order-details
+            // already read (the ETA heading there can lag the tracker).
+            if (status === 'pending') {
+              status = detectAmazonStatusLine(shipTrackText) ?? status;
+            }
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             this.logger.warn(`Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`);
@@ -466,7 +507,7 @@ export class AmazonScrapingService {
         }
       }
 
-      return { ...parsed, trackingUrl, trackingHtml };
+      return { ...parsed, status, trackingNumber, trackingCarrier, trackingUrl, trackingHtml };
     } finally {
       await page.close();
     }

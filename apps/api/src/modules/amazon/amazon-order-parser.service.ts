@@ -84,6 +84,51 @@ export function normalizeAmazonStatus(status: string): string {
 }
 
 /**
+ * Delivery status read from a page's VISIBLE text, line by line, or undefined.
+ *
+ * Amazon's delivery heading ("Arriving tomorrow", "Shipped", "Out for
+ * delivery", "Delivered September 30") is a short line of its own at the top
+ * of both the order-details and the progress-tracker page. The DOM selectors
+ * around it change often — on the first live order none of them matched — so
+ * this is the fallback that does not depend on class names.
+ *
+ * Every pattern is anchored to the START of a short line. That is what keeps
+ * the page's buttons out: "Cancel items" and "Return or replace items" are
+ * both on every order page, and a substring match would cancel or return the
+ * order in our books on every tick.
+ */
+export function detectAmazonStatusLine(text: string): string | undefined {
+  if (!text) {
+    return undefined;
+  }
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && line.length <= 48);
+  for (const line of lines) {
+    if (/^cancell?ed\b/i.test(line)) {
+      return 'cancelled';
+    }
+    if (/^(returned|return (started|received|complete)|refund (issued|complete))\b/i.test(line)) {
+      return 'returned';
+    }
+    if (/^delivered\b/i.test(line)) {
+      return 'delivered';
+    }
+    if (/^(shipped|out for delivery|on the way|in transit)\b/i.test(line)) {
+      return 'shipped';
+    }
+    if (/^(preparing for (shipment|dispatch))\b/i.test(line)) {
+      return 'processing';
+    }
+    if (/^(arriving|not yet shipped|not shipped yet|now expected)\b/i.test(line)) {
+      return 'pending';
+    }
+  }
+  return undefined;
+}
+
+/**
  * Carrier for a tracking number.
  *
  * The number is checked FIRST because it is unambiguous, and Amazon Logistics
@@ -197,7 +242,12 @@ export class AmazonOrderParserService {
       }
     }
 
-    return 'pending';
+    // No selector matched — read the delivery heading off the visible text.
+    const visible = await page
+      .locator('body')
+      .innerText()
+      .catch(() => '');
+    return detectAmazonStatusLine(visible) ?? 'pending';
   }
 
   private async extractOrderDate(page: Page): Promise<string | undefined> {

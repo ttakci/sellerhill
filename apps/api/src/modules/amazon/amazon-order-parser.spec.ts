@@ -3,6 +3,7 @@ import { AmazonMarketplace } from '@repo/shared';
 import type { AmazonAccountsService } from './amazon-accounts.service';
 import {
   AmazonOrderParserService,
+  detectAmazonStatusLine,
   extractTrackingNumberFromText,
   normalizeAmazonStatus,
   resolveTrackingCarrier,
@@ -361,5 +362,100 @@ describe('normalizeAmazonStatus', () => {
 describe('resolveTrackingCarrier tightened UPS shape', () => {
   it('does not call a digitless 1Z string UPS', () => {
     expect(resolveTrackingCarrier('1ZAUXFMSEBKUFEFJRA', '')).toBeUndefined();
+  });
+});
+
+describe('detectAmazonStatusLine — status from the visible page text', () => {
+  it('reads the delivery heading of the order-details page', () => {
+    expect(detectAmazonStatusLine('Order Details\nArriving tomorrow\nTrack package\nCancel items')).toBe('pending');
+    expect(detectAmazonStatusLine('Order Details\nShipped\nTrack package')).toBe('shipped');
+    expect(detectAmazonStatusLine('Out for delivery\nTrack package')).toBe('shipped');
+    expect(detectAmazonStatusLine('Delivered September 30\nHow was your delivery?')).toBe('delivered');
+    expect(detectAmazonStatusLine('Not yet shipped\nCancel items')).toBe('pending');
+    expect(detectAmazonStatusLine('Preparing for shipment')).toBe('processing');
+  });
+
+  it('never reads the "Cancel items" button or "Return or replace items" as a status', () => {
+    expect(detectAmazonStatusLine('Cancel items\nReturn or replace items\nWrite a product review')).toBeUndefined();
+  });
+
+  it('reads a real cancellation', () => {
+    expect(detectAmazonStatusLine('Cancelled\nYour order was cancelled')).toBe('cancelled');
+    expect(detectAmazonStatusLine('Canceled')).toBe('cancelled');
+  });
+
+  it('ignores long lines — a product title mentioning "shipped" is not a status', () => {
+    expect(
+      detectAmazonStatusLine('Shipped in original packaging, extra long product title that goes on and on and on')
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when nothing recognisable is on the page', () => {
+    expect(detectAmazonStatusLine('Secure checkout\nBack to top')).toBeUndefined();
+    expect(detectAmazonStatusLine('')).toBeUndefined();
+  });
+});
+
+describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — reads the ship-track page too', () => {
+  function buildService(opts: {
+    parsed: { status: string; trackingNumber?: string; trackingCarrier?: string; trackingUrl?: string };
+    shipTrackText: string;
+  }) {
+    const fakePage = {
+      goto: jest.fn().mockResolvedValue(undefined),
+      waitForTimeout: jest.fn().mockResolvedValue(undefined),
+      content: jest.fn().mockResolvedValue('<html>ship-track</html>'),
+      close: jest.fn().mockResolvedValue(undefined),
+      locator: jest.fn(() => ({ innerText: jest.fn().mockResolvedValue(opts.shipTrackText) })),
+    };
+    const accountsService = {
+      getDecrypted: jest.fn().mockResolvedValue({
+        marketplace: AmazonMarketplace.AMAZON_US,
+        email: 'buyer@example.com',
+        decryptedPassword: 'pw',
+        decryptedTwoFactorSecret: null,
+      }),
+    } as unknown as AmazonAccountsService;
+    const parserService = {
+      parseOrderStatus: jest.fn().mockResolvedValue(opts.parsed),
+    } as unknown as AmazonOrderParserService;
+    const browserStateManager = {
+      isSessionValid: jest.fn().mockResolvedValue(true),
+      getContext: jest.fn().mockResolvedValue({ newPage: jest.fn().mockResolvedValue(fakePage) }),
+      saveState: jest.fn().mockResolvedValue(undefined),
+    } as unknown as BrowserStateManager;
+    const rateLimiter = {
+      schedule: jest.fn((_accountId: string, fn: () => Promise<unknown>) => fn()),
+    } as unknown as AmazonRateLimiter;
+    return new AmazonScrapingService(accountsService, parserService, browserStateManager, rateLimiter);
+  }
+
+  it('takes the tracking number and carrier from the ship-track page when order-details has none', async () => {
+    // Amazon prints "Tracking ID" on the progress tracker, not on order-details.
+    const service = buildService({
+      parsed: { status: 'shipped', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: 'Shipped\nShipped with Amazon\nTracking ID: TBA303940404000\n',
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.trackingNumber).toBe('TBA303940404000');
+    expect(result.trackingCarrier).toBe('Amazon Logistics');
+  });
+
+  it('falls back to the ship-track page status when order-details yielded nothing usable', async () => {
+    const service = buildService({
+      parsed: { status: 'pending', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: 'Out for delivery\nTracking ID: TBA303940404000',
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.status).toBe('shipped');
+  });
+
+  it('never lets the ship-track page downgrade a status order-details already read', async () => {
+    const service = buildService({
+      parsed: { status: 'delivered', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: 'Arriving tomorrow',
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.status).toBe('delivered');
   });
 });
