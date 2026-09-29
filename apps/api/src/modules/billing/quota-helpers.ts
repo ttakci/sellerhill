@@ -170,6 +170,7 @@ const LOCK_DISCRIMINATOR: Record<BillingLimitKey, number> = {
   [BillingLimitKey.LISTINGS_PER_MONTH]: 1,
   [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: 2,
   [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: 3,
+  [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: 4,
 };
 
 /**
@@ -195,7 +196,7 @@ export function advisoryLockKey(
 }
 
 /**
- * key1 for {@link billingCustomerLockKey}. Deliberately outside the 1-3 range
+ * key1 for {@link billingCustomerLockKey}. Deliberately outside the 1-4 range
  * `LOCK_DISCRIMINATOR` uses: `pg_advisory_xact_lock` keys on the (key1, key2)
  * PAIR, so as long as key1 differs, this lock domain can never collide with a
  * quota-reservation lock no matter what key2 hashes to.

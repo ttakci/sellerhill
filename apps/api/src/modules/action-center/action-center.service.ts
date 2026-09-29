@@ -127,6 +127,9 @@ const QUOTA_ITEM_BY_LIMIT_KEY: Readonly<Record<string, ActionCenterItemKey>> = {
   [BillingLimitKey.LISTINGS_PER_MONTH]: ActionCenterItemKey.PLAN_LISTING_QUOTA,
   [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: ActionCenterItemKey.PLAN_AO_QUOTA,
   [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: ActionCenterItemKey.PLAN_CONVERSION_QUOTA,
+  // BEST_SELLERS_PRODUCTS_PER_MONTH is deliberately unmapped: exhausting it
+  // never stops anything, and the Best Sellers page itself shows the locked
+  // rows with the upgrade / top-up prompt — that page IS the prompt.
 };
 
 @Injectable()

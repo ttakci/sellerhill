@@ -240,9 +240,10 @@ export class BillingService {
    * same source the gate refuses on, so the warning and the refusal cannot
    * disagree:
    *
-   *   listings    — ACTIVE listing rows (a level; ending one frees a slot)
-   *   AO          — this month's reservations
-   *   conversions — this month's actually-performed conversions
+   *   listings     — ACTIVE listing rows (a level; ending one frees a slot)
+   *   AO           — this month's reservations
+   *   conversions  — this month's actually-performed conversions
+   *   best sellers — products actually shown on Best Sellers pages this window
    *
    * Fail-soft: a dimension that cannot be resolved is omitted rather than
    * reported as zero, because "0 of 100 used" is a claim, not an absence.
@@ -305,6 +306,13 @@ export class BillingService {
       {
         limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
         resolve: () => this.repository.countConversionsInWindow(userId, window),
+      },
+      {
+        // Same source the Best Sellers page locks rows on
+        // (`QuotaEnforcementService.resolveBestSellersAllowance`), so the ring
+        // here, the top-up offer below and the locked rows there all agree.
+        limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        resolve: () => this.repository.countBestSellersProductViews(userId, window),
       },
     ];
 

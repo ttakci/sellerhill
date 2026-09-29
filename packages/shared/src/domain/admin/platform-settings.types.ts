@@ -180,6 +180,8 @@ export enum PlatformSettingKey {
   RETENTION_BUYER_MESSAGE_LOG_DAYS = 'retention.buyerMessageLogDays',
   RETENTION_AUDIT_LOGS_DAYS = 'retention.auditLogsDays',
   RETENTION_LISTING_REVISIONS_DAYS = 'retention.listingRevisionsDays',
+  /** `best_sellers_views` — the per-day ledger the Best Sellers product allowance is counted from (migration 125). */
+  RETENTION_BEST_SELLERS_VIEWS_DAYS = 'retention.bestSellersViewsDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',

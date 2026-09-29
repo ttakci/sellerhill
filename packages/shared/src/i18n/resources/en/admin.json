@@ -223,6 +223,7 @@
         "retention.buyerMessageLogDays": "Buyer message log (days)",
         "retention.auditLogsDays": "Audit log (days)",
         "retention.listingRevisionsDays": "Listing revisions (days)",
+        "retention.bestSellersViewsDays": "Best Sellers view ledger (days)",
         "ebay.aspects.llmEnabled": "AI-assisted item specifics",
         "ebay.aspects.llmMaxPerListing": "AI item specifics per listing (max)",
         "keepa.refresh.batchAuto": "Derive batch size from the Keepa plan",
@@ -251,7 +252,7 @@
         "scraper.blockRateWarnPercent": "Block-rate warning (%)",
         "bestSellers.enabled": "Best Sellers browsing",
         "bestSellers.cacheTtlMinutes": "Best Sellers cache (minutes)",
-        "bestSellers.dailyFetchLimit": "Best Sellers daily fetches per seller"
+        "bestSellers.dailyFetchLimit": "Best Sellers anti-abuse fetch cap (per seller, per day)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Master switch for the background Keepa refresh scheduler. Turning it off stops all background token spend immediately, with no restart needed.",
@@ -294,6 +295,7 @@
         "retention.buyerMessageLogDays": "How many days buyer message log rows are kept. This table also prevents duplicate messages for the same order/event — deleting a row re-arms that event, so the floor is deliberately long.",
         "retention.auditLogsDays": "How many days audit log rows (role changes, setting changes) are kept. Kept long for compliance evidence.",
         "retention.listingRevisionsDays": "How many days of listing revision history are kept for the detail page's Revisions drawer.",
+        "retention.bestSellersViewsDays": "How many days of the Best Sellers view ledger are kept. The sum of this table over the current billing period IS the seller's used product allowance, so the floor stays well above one billing period; older rows are browsing history only.",
         "ebay.aspects.llmEnabled": "Allow the AI to choose a required eBay item specific when no cheaper deterministic layer could supply one. Off by default.",
         "ebay.aspects.llmMaxPerListing": "Maximum number of item specifics the AI is allowed to resolve per listing when the AI aspect layer is enabled.",
         "keepa.refresh.batchAuto": "When on, the batch size is calculated from the Keepa plan's own refill rate, so upgrading the plan raises throughput on its own. Turn off to use the fixed batch size value.",
@@ -322,7 +324,7 @@
         "scraper.blockRateWarnPercent": "Admin warning when this share of scraper requests was blocked in the last hour.",
         "bestSellers.enabled": "Lets sellers browse Amazon's Best Sellers lists in the app. Off hides the page and refuses the endpoint; the lists are fetched through the scraper proxies, never the server's own IP.",
         "bestSellers.cacheTtlMinutes": "How long a fetched list page is served to every seller before it is fetched again. Longer saves proxy capacity; Amazon updates the lists about hourly.",
-        "bestSellers.dailyFetchLimit": "How many live list fetches (cache misses) one seller may trigger per UTC day. Cache hits are free. 0 stops live fetches for everyone while cached pages keep serving."
+        "bestSellers.dailyFetchLimit": "Platform anti-abuse cap, hidden from sellers: how many LIVE list fetches (cache misses) one seller may trigger per UTC day before the page answers 429. Cache hits are free. This is NOT the seller allowance — that is the plan's Best Sellers products per billing period, which locks rows instead of refusing. Keep it far above real use; 0 stops live fetches for everyone while cached pages keep serving."
       },
       "newValueLabel": "New value",
       "search": "Search settings (name or environment variable)",

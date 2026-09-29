@@ -38,14 +38,21 @@ export class BestSellersController {
     summary: 'One page of an Amazon Best Sellers list',
     description:
       'Best Sellers / New Releases / Movers & Shakers / Most Wished For / Most Gifted, ' +
-      'by category alias and page (1–2). Pages are cached and shared across sellers; ' +
-      'only a cache miss counts against the per-seller daily allowance returned in `allowance`.',
+      'by category alias and page (1–2). Pages are cached and shared across sellers. ' +
+      'Every product shown counts against the plan\'s Best Sellers product allowance for the ' +
+      'billing period (`allowance`: used / limit / remaining, -1 = unmetered); the same page ' +
+      'reopened on the same UTC day is not counted twice. When the allowance runs out the page ' +
+      'is still returned with `list.items` truncated server-side and `lockedCount` rows to render locked.',
   })
   @ApiOkResponse({ description: 'List page (or a non-found outcome with `list: null`)' })
   @ApiBadRequestResponse({ description: 'Invalid query, or a marketplace that is not enabled' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   @ApiNotFoundResponse({ description: 'Feature disabled by the operator' })
-  @ApiTooManyRequestsResponse({ description: "Today's per-seller fetch allowance is spent" })
+  @ApiTooManyRequestsResponse({
+    description:
+      'Hidden anti-abuse cap: this seller triggered too many LIVE fetches (cache misses) today. ' +
+      'Not the product allowance — that never refuses, it locks rows.',
+  })
   @ApiServiceUnavailableResponse({ description: 'Scraper service unreachable' })
   async getPage(
     @Request() req: { user: { sub: string } },

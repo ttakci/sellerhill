@@ -56,7 +56,7 @@ export function isLocalDatabaseUrl(databaseUrl: string): boolean {
  * listings, orders, amazon_accounts, store_settings, listing_settings_groups,
  * listing_jobs (+ items), buyer_message_templates, buyer_message_log,
  * billing_quota_credits, user_oauth_accounts, password_reset_tokens,
- * auth_refresh_sessions, ebay_listing_discoveries.
+ * auth_refresh_sessions, ebay_listing_discoveries, best_sellers_views.
  *
  * The three non-optional entries after `users` are here precisely BECAUSE they
  * do not cascade — each one deliberately outlives the account that created it.

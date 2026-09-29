@@ -258,13 +258,19 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 1440,
   }),
   def({
-    // Per-seller cap on cache MISSES per UTC day (a hit costs nothing). 0 means
-    // nobody may trigger a live fetch; the cache still serves.
+    // HIDDEN anti-abuse brake on proxy capacity, NOT the seller allowance:
+    // a per-seller cap on cache MISSES (live fetches) per UTC day; a hit costs
+    // nothing. The seller-facing meter is the plan's
+    // `best_sellers_products_per_month` (migration 125), which locks rows
+    // instead of refusing. Set far above any real use — 1000 live fetches a
+    // day is ~4000 proxy requests, more than a person can click through — so
+    // only a script ever meets it. 0 means nobody may trigger a live fetch;
+    // the cache still serves.
     key: PlatformSettingKey.BEST_SELLERS_DAILY_FETCH_LIMIT,
     category: PlatformSettingCategory.SCRAPER,
     type: PlatformSettingType.NUMBER,
     envVar: 'BEST_SELLERS_DAILY_FETCH_LIMIT',
-    defaultValue: '100',
+    defaultValue: '1000',
     min: 0,
     max: 10000,
   }),
@@ -711,6 +717,20 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'RETENTION_LISTING_REVISIONS_DAYS',
     defaultValue: '180',
     min: 30,
+    max: 3650,
+  }),
+  def({
+    // The Best Sellers view ledger (migration 125). SUM(product_count) over the
+    // current billing window IS the seller's used allowance, so a row deleted
+    // inside that window is free allowance handed out. The floor (60) must
+    // comfortably exceed one billing period plus the webhook grace (~31 days);
+    // the default keeps a year of browsing history for support questions.
+    key: PlatformSettingKey.RETENTION_BEST_SELLERS_VIEWS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_BEST_SELLERS_VIEWS_DAYS',
+    defaultValue: '400',
+    min: 60,
     max: 3650,
   }),
 ];
