@@ -50,7 +50,27 @@ export const ChangeRow = styled.div`
 `;
 
 export const ChangeLabel = styled.span`
-  flex: 0 0 3.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+  flex: 0 0 4.25rem;
+`;
+
+/** Product identity + "go to listing" — shown only when the drawer is opened
+ * from a cross-listing surface (the Revision History table), where the
+ * drawer is otherwise the only place still showing which product is open. */
+export const Subject = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding-bottom: ${tkn('spacing.md')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+export const SubjectCell = styled.div`
+  min-width: 0;
+  flex: 1 1 auto;
 `;
 
 export const ChangeValues = styled.div`

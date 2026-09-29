@@ -260,7 +260,8 @@
       "title": "Änderungsverlauf",
       "subtitle": "Jede an eBay übermittelte Preis- und Bestandsänderung, über alle Ihre Angebote hinweg.",
       "empty": "Keine Änderungen gefunden.",
-      "emptyTitle": "Noch keine Änderungen"
+      "emptyTitle": "Noch keine Änderungen",
+      "viewListing": "Angebot ansehen"
     },
     "addSection": {
       "title": "Neues Angebot hinzufügen",
@@ -390,6 +391,7 @@
         "newQuantity": "Neuer Bestand",
         "priceChange": "Preis",
         "quantityChange": "Bestand",
+        "quantityTooltip": "Die an eBay gesendete Menge — nicht der reine Amazon-Bestand.",
         "unchanged": "Keine Änderung",
         "empty": "Noch keine Änderungen",
         "emptySubtitle": "Preis- und Bestandsänderungen erscheinen hier, sobald sie auftreten.",

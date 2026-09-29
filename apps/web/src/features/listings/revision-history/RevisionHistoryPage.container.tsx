@@ -4,12 +4,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { RevisionHistoryPageComponent } from './RevisionHistoryPage.component';
-import type { RevisionHistoryRow } from './RevisionHistoryPage.types';
+import type { RevisionHistoryDrawerState, RevisionHistoryRow } from './RevisionHistoryPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetAllListingRevisionsQuery } from '@/features/listings/api/listings.api';
 import { useLocale } from '@/utils/useLocale';
+
+const EMPTY_DRAWER: RevisionHistoryDrawerState = { isOpen: false, listingId: null, currency: 'USD', subject: null };
 
 /**
  * Price/quantity change history across every listing the caller owns — the
@@ -26,6 +28,7 @@ export const RevisionHistoryPageContainer: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [search, setSearch] = useState('');
   const [storeFilter, setStoreFilter] = useState('');
+  const [drawer, setDrawer] = useState<RevisionHistoryDrawerState>(EMPTY_DRAWER);
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const storeOptions = useMemo(
@@ -76,6 +79,7 @@ export const RevisionHistoryPageContainer: React.FC = () => {
           imageUrl: revision.imageUrl,
           asin: revision.asin,
           storeName: revision.storeName,
+          currency: revision.currency,
           recordedAt: formatRowDate(revision.recordedAt),
           previousPrice: formatCurrency(revision.previousPrice, locale, revision.currency),
           newPrice: formatCurrency(revision.newPrice, locale, revision.currency),
@@ -108,12 +112,26 @@ export const RevisionHistoryPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handleRowClick = useCallback(
-    (row: RevisionHistoryRow) => {
-      localeNavigate(`/listings/${row.listingId}`);
-    },
-    [localeNavigate]
-  );
+  const handleRowClick = useCallback((row: RevisionHistoryRow) => {
+    setDrawer({
+      isOpen: true,
+      listingId: row.listingId,
+      currency: row.currency,
+      subject: { title: row.title, imageUrl: row.imageUrl, asin: row.asin, storeName: row.storeName },
+    });
+  }, []);
+
+  const handleCloseDrawer = useCallback(() => {
+    // Keep the last subject/listingId while the Drawer plays its close
+    // transition — clearing them immediately would blank the header first.
+    setDrawer((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleViewListing = useCallback(() => {
+    if (drawer.listingId) {
+      localeNavigate(`/listings/${drawer.listingId}`);
+    }
+  }, [drawer.listingId, localeNavigate]);
 
   const handleBack = useCallback(() => {
     localeNavigate('/listings');
@@ -136,6 +154,9 @@ export const RevisionHistoryPageContainer: React.FC = () => {
         onClearFilters={handleClearFilters}
         onRowClick={handleRowClick}
         onBack={handleBack}
+        drawer={drawer}
+        onCloseDrawer={handleCloseDrawer}
+        onViewListing={handleViewListing}
         pagination={{
           count: totalCount,
           page,
