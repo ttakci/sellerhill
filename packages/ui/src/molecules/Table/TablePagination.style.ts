@@ -5,7 +5,7 @@ import { tkn } from '../../theme/tkn';
 
 import type { TablePaginationVariant } from './TablePagination.types';
 
-export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant }>`
+export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant; $compact: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -41,6 +41,16 @@ export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant
     align-items: center;
     justify-content: space-between;
   }
+
+  ${({ $compact }) =>
+    $compact
+      ? `
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+      `
+      : ''}
 `;
 
 export const RowsPerPage = styled.div`
@@ -72,9 +82,10 @@ export const SelectWrapper = styled.div`
   position: relative;
 `;
 
-export const PageInfo = styled.div`
+export const PageInfo = styled.div<{ $compact: boolean }>`
   display: flex;
   align-items: center;
+  ${({ $compact }) => ($compact ? 'order: 3; flex: 1 0 100%;' : '')}
 `;
 
 /*
@@ -84,17 +95,21 @@ export const PageInfo = styled.div`
  * its column and the page-nav controls bled visually into whatever sits
  * beside it.
  */
-export const NavigationWrapper = styled.div`
+export const NavigationWrapper = styled.div<{ $compact: boolean }>`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: ${tkn('spacing.md')};
+  /* Compact: dissolve the wrapper so the page nav and the info label become
+     direct flex items of the container and can sit on different rows. */
+  ${({ $compact }) => ($compact ? 'display: contents;' : '')}
 `;
 
-export const Navigation = styled.div`
+export const Navigation = styled.div<{ $compact: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.2xs')};
+  ${({ $compact }) => ($compact ? 'order: 2;' : '')}
 `;
 
 /** Page N of M — chevrons alone never said how much further the list goes. */

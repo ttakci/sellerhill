@@ -17,4 +17,9 @@ export interface TablePaginationProps {
   labelRowsPerPage?: string;
   labelInfo?: string;
   variant?: TablePaginationVariant;
+  /**
+   * For a narrow host (a ~28rem list column): rows-per-page and the page nav share
+   * the first row, the "Showing x-y of z" label drops to a second one.
+   */
+  compact?: boolean;
 }
