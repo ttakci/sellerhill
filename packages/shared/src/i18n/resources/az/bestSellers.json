@@ -1,0 +1,83 @@
+{
+  "bestSellers": {
+    "menu": "Ən Çox Satılanlar",
+    "title": "Amazon Ən Çox Satılanlar",
+    "subtitle": "Amazon-un ən yaxşı siyahılarına baxın, istədiyiniz məhsulları işarələyin və onları bir addımda Elan Əlavə Et bölməsinə göndərin.",
+    "listTypes": {
+      "best_sellers": "Ən Çox Satılanlar",
+      "new_releases": "Yeni Çıxanlar",
+      "movers_and_shakers": "Sürətlə Yüksələnlər",
+      "most_wished_for": "Ən Çox Arzulananlar",
+      "most_gifted": "Ən Çox Hədiyyə Edilənlər"
+    },
+    "listTypesAriaLabel": "Amazon siyahısı",
+    "allCategories": "Bütün şöbələr",
+    "categoryPlaceholder": "Kateqoriya seçin",
+    "categorySearchPlaceholder": "Kateqoriya axtar",
+    "categoryNoResults": "Uyğun kateqoriya yoxdur",
+    "backToAllCategories": "Bütün kateqoriyalara qayıt",
+    "selectAllOnPage": "Bu səhifədəkilərin hamısını seç",
+    "selected_one": "{{count}} məhsul seçildi",
+    "selected_other": "{{count}} məhsul seçildi",
+    "listSelected": "Seçilənləri elan et ({{count}})",
+    "clearSelection": "Təmizlə",
+    "rank": "#{{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Hələ reytinq yoxdur",
+    "allowance": "Bu dövrdə {{limit}} məhsuldan {{remaining}} qalıb",
+    "allowanceUnlimited": "Limitsiz məhsul görüntüləmə",
+    "allowanceHint": "Gördüyünüz hər məhsul dövr ərzində bir dəfə sayılır; eyni siyahını bu gün yenidən açmaq təkrar sayılmır.",
+    "locked": {
+      "title_one": "Bu səhifədə daha {{count}} məhsul planınızın aylıq limitindən kənardır",
+      "title_other": "Bu səhifədə daha {{count}} məhsul planınızın aylıq limitindən kənardır",
+      "description": "Onları görmək üçün planınızı yüksəldin və ya əlavə paket alın. Limitiniz hər faktura dövründə yenilənir.",
+      "cta": "Planlara və əlavə paketlərə bax",
+      "rowLabel": "Kilidli məhsul"
+    },
+    "table": {
+      "rank": "Sıra",
+      "product": "Məhsul",
+      "price": "Qiymət",
+      "rating": "Reytinq",
+      "reviews": "Rəylər"
+    },
+    "states": {
+      "loading": {
+        "title": "Siyahı yüklənir",
+        "description": "Amazon-dan ən son sıralama alınır."
+      },
+      "empty": {
+        "title": "Bu səhifədə məhsul yoxdur",
+        "description": "Bu siyahıda burada göstəriləcək heç nə yoxdur. Başqa kateqoriya və ya siyahı sınayın."
+      },
+      "notFound": {
+        "title": "Bu kateqoriya mövcud deyil",
+        "description": "Amazon bu siyahını seçilmiş kateqoriya üçün təqdim etmir. Bütün kateqoriyalara qayıdın və ya başqasını seçin."
+      },
+      "blocked": {
+        "title": "Amazon bu dəfə cavab vermədi",
+        "description": "Siyahı hazırda oxuna bilmədi. Bir az sonra yenidən cəhd edin."
+      },
+      "retry": "Yenidən cəhd et",
+      "unavailable": {
+        "title": "Ən Çox Satılanlar müvəqqəti əlçatan deyil",
+        "description": "Siyahı xidmətinə hazırda çatmaq mümkün deyil. Elanlarınız və sifarişləriniz təsirlənmir."
+      },
+      "disabled": {
+        "title": "Ən Çox Satılanlar bu hesabda aktiv deyil",
+        "description": "Amazon siyahılarına baxmaq hesabınız üçün bağlıdır. Görməyi gözləyirdinizsə, dəstəklə əlaqə saxlayın."
+      },
+      "limitReached": {
+        "title": "Bu gün həddən çox canlı siyahı yükləməsi edildi",
+        "description": "Bu gün artıq yüklənmiş siyahılar hələ də açıqdır — onlardan birinə keçin və ya sabah yenidən cəhd edin."
+      }
+    },
+    "errors": {
+      "disabled": "Ən Çox Satılanlar bu hesabda aktiv deyil.",
+      "dailyLimitReached": "Bu gün həddən çox canlı siyahı yükləməsi edildi. Sabah yenidən cəhd edin.",
+      "unavailable": "Ən Çox Satılanlar müvəqqəti əlçatan deyil.",
+      "unsupportedMarketplace": "Bu bazar dəstəklənmir."
+    }
+  }
+}

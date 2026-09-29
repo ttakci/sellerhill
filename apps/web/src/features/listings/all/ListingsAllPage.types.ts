@@ -5,6 +5,8 @@ import type { ListingsFilterState } from '../shared/listings-filter.types';
 
 export interface ListingsAllPageProps {
   listings: ListingDto[];
+  /** UI locale for card price-stat separators (currency comes from each listing's own `currency`). */
+  locale: string;
   onSelectionChange: (ids: string[]) => void;
   columns: TableColumn<ListingDto>[];
   selectedRows: ListingDto[];

@@ -2,6 +2,8 @@
  * eBay Domain Constants
  */
 
+import { EBAY_MESSAGING_SCOPES } from '../ebay-messages/ebay-messages.types';
+
 import { EbayAccountStatus, EbayMarketplaceId } from './ebay.types';
 
 /**
@@ -119,6 +121,7 @@ export const EBAY_OAUTH_CONSTANTS = {
     'https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
     'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly',
     'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
+    ...EBAY_MESSAGING_SCOPES,
   ],
   
   // Token expiration (in seconds)

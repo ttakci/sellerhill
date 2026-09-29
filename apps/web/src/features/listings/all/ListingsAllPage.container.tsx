@@ -410,6 +410,7 @@ export const ListingsAllPage: React.FC = () => {
     <EbayAccountGuard>
       <ListingsAllPageComponent
         listings={listings}
+        locale={localeCfg.locale}
         onSelectionChange={setSelectedListingIds}
         columns={filteredColumns}
         selectedRows={selectedRows}

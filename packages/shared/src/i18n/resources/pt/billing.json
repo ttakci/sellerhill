@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Pedidos automáticos",
         "unit": "pedidos",
-        "description": "Máximo de pedidos da Amazon feitos por você (automaticamente ou vinculados manualmente) por mês."
+        "description": "Pedidos da Amazon feitos por você (automaticamente ou vinculados manualmente). Ilimitados em todos os planos."
       },
       "unlimited": "Ilimitado",
       "disabled": "Não incluído",
       "of": "{{used}} de {{limit}}",
       "used": "{{used}} usado(s)",
+      "usedUnlimited": "{{used}} usado(s) · Ilimitado",
       "remaining": "{{remaining}} restante(s)",
       "exceeded": "Limite excedido",
       "tracking_conversions_per_month": {
         "label": "Conversões de rastreio",
         "unit": "conversões",
         "description": "Quantos envios por mês recebem um código de rastreio convertido, para que o comprador nunca veja o seu fornecedor."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Produtos de Mais vendidos",
+        "unit": "produtos",
+        "description": "Quantos produtos você pode ver na página Mais vendidos por período de cobrança, tanto de listas em cache quanto ao vivo."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Precisa de mais neste mês?",
-      "subtitle": "Você usou suas conversões de rastreio mensais. Faça uma recarga para continuar ocultando seu fornecedor até o mês virar.",
+      "subtitle": "Você atingiu um limite mensal. Faça uma recarga para continuar até o seu período de cobrança renovar.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Você usou suas conversões de rastreio mensais. Faça uma recarga para continuar ocultando seu fornecedor até o período renovar.",
+        "best_sellers_products_per_month": "Você usou sua franquia mensal de Mais vendidos. Faça uma recarga para continuar navegando pelas listas da Amazon até o período renovar."
+      },
       "buy": "Comprar",
       "note": "Uma recarga vale apenas para o mês civil atual, e é por isso que ela é oferecida quando você atinge o limite, e não antecipadamente. A franquia do seu plano é renovada no dia 1º."
     }

@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Otomatik siparişler",
         "unit": "sipariş",
-        "description": "Ayda sizin adınıza verilen (otomatik ya da elle bağlanan) Amazon siparişi üst sınırı."
+        "description": "Sizin adınıza verilen (otomatik ya da elle bağlanan) Amazon siparişleri. Her pakette sınırsız."
       },
       "unlimited": "Sınırsız",
       "disabled": "Dahil değil",
       "of": "{{used}} / {{limit}}",
       "used": "{{used}} kullanıldı",
+      "usedUnlimited": "{{used}} kullanıldı · Sınırsız",
       "remaining": "{{remaining}} kaldı",
       "exceeded": "Limit aşıldı",
       "tracking_conversions_per_month": {
         "label": "Kargo takip dönüşümü",
         "unit": "dönüşüm",
         "description": "Ayda kaç gönderinin takip numarasının dönüştürüleceği — alıcı tedarikçinizi görmesin diye."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Çok Satanlar ürünleri",
+        "unit": "ürün",
+        "description": "Çok Satanlar sayfasında fatura dönemi başına görüntüleyebileceğiniz ürün sayısı; önbellekten gelen ve canlı listeler aynı şekilde sayılır."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Bu ay daha fazlası mı gerekli?",
-      "subtitle": "Aylık kargo takip dönüşüm hakkınızı kullandınız. Ay yenilenene kadar tedarikçinizi gizlemeye devam etmek için ek paket alabilirsiniz.",
+      "subtitle": "Aylık bir limite ulaştınız. Fatura döneminiz yenilenene kadar devam etmek için ek paket alabilirsiniz.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Aylık kargo takip dönüşüm hakkınızı kullandınız. Dönem yenilenene kadar tedarikçinizi gizlemeye devam etmek için ek paket alabilirsiniz.",
+        "best_sellers_products_per_month": "Aylık Çok Satanlar hakkınızı kullandınız. Dönem yenilenene kadar Amazon listelerine göz atmaya devam etmek için ek paket alabilirsiniz."
+      },
       "buy": "Satın al",
       "note": "Ek paket yalnızca içinde bulunduğunuz takvim ayı için geçerlidir; bu yüzden önceden değil, limite ulaştığınızda sunulur. Paket hakkınız ayın 1’inde yenilenir."
     }

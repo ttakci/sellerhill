@@ -42,7 +42,12 @@
       "noAuthorizationCode": "Aucun code d'autorisation reçu d'eBay",
       "storeOwnedByAnotherAccount": "Cette boutique eBay est liée à un autre compte SellerHill. Contactez l'assistance pour la transférer.",
       "accountNotFound": "Cette boutique eBay est introuvable.",
-      "identityUnavailable": "Nous n'avons pas pu confirmer votre compte eBay auprès d'eBay. Rien n'a été connecté — veuillez réessayer dans un instant."
+      "identityUnavailable": "Nous n'avons pas pu confirmer votre compte eBay auprès d'eBay. Rien n'a été connecté — veuillez réessayer dans un instant.",
+      "messagingScopeMissing": "Reconnectez votre boutique eBay pour activer les messages — l'autorisation actuelle n'inclut pas la messagerie.",
+      "messagingReplyNotAllowed": "Il n'est pas possible de répondre ici aux messages d'eBay.",
+      "messagingUnavailable": "La messagerie eBay est temporairement indisponible. Veuillez réessayer.",
+      "messagingRejected": "eBay n'a pas accepté cette demande. Vérifiez le message et réessayez.",
+      "messageTooLong": "Un message ne peut pas dépasser 2000 caractères."
     },
     "onboarding": {
       "title": "Connectez votre boutique eBay",

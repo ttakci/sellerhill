@@ -15,6 +15,12 @@ export interface AddListingsDrawerPreferences {
 export interface AddListingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  /**
+   * ASINs to pre-fill the textarea with (one per line) — the Best Sellers page
+   * hands its ticked products over this way. Applied whenever the drawer
+   * opens, including when it mounts already open from a deep link.
+   */
+  initialAsins?: string;
   /** Called after successful queue; `asDraft` reflects the submitted mode. */
   onSuccess: (result?: { asDraft: boolean }) => void;
 }

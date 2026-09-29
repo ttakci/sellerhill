@@ -6,8 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import bottle
 
-from amazon import sites
+from amazon import rankings, refs, sites
 from sellerhill import egress
+from sellerhill.bestsellers import fetch_bestsellers
 from sellerhill.fetcher import fetch_one as default_fetch_one
 from sellerhill.pool import ProxyPool
 from sellerhill.verify import probe_proxy
@@ -18,7 +19,9 @@ _ASIN = re.compile(r"^[A-Z0-9]{10}$")
 # Same rule as `isValidProxyUrl` in packages/shared (utils/proxy-url.ts).
 _PROXY = re.compile(r"^(http|https|socks5|socks5h)://[^\s]+:(\d{1,5})$")
 _MODES = {"full", "commerce"}
-_LANES = {"interactive", "background"}
+_LANES = {"interactive", "browse", "background"}
+_BEST_SELLERS_MAX_PAGE = rankings.RANK_PAGES
+_BEST_SELLERS_CATEGORY_MAX_LENGTH = 120
 _MAX_VERIFY_PROXIES = 50
 
 
@@ -55,6 +58,41 @@ def _validate(body):
     except ValueError:
         return "marketplace: unknown"
     return None
+
+
+def _validate_best_sellers(body):
+    """Returns (error, resolved_category). Same 400 style as `_validate`;
+    `category` is normalised through upstream's own grammar so `""`, `all`
+    and `any` all mean the marketplace root."""
+    if not isinstance(body, dict):
+        return "body must be an object", None
+    marketplace = body.get("marketplace")
+    if not isinstance(marketplace, str):
+        return "marketplace: required", None
+    try:
+        sites.site(marketplace)
+    except ValueError:
+        return "marketplace: unknown", None
+    if body.get("listType") not in rankings.LIST_TYPES:
+        return "listType: one of " + ", ".join(rankings.LIST_TYPES), None
+    category = body.get("category")
+    if not isinstance(category, str) or len(category) > _BEST_SELLERS_CATEGORY_MAX_LENGTH:
+        return f"category: string of at most {_BEST_SELLERS_CATEGORY_MAX_LENGTH} chars", None
+    try:
+        resolved = refs.resolve_bestseller_category(category)
+    except ValueError:
+        return "category: a best sellers category alias (e.g. electronics or electronics/172541)", None
+    page = body.get("page")
+    if isinstance(page, bool) or not isinstance(page, int) or not 1 <= page <= _BEST_SELLERS_MAX_PAGE:
+        return f"page: 1..{_BEST_SELLERS_MAX_PAGE}", None
+    if body.get("lane") not in _LANES:
+        return "lane: invalid", None
+    if not isinstance(body.get("proxies"), list):
+        return "proxies: list of http(s)/socks5(h) URLs with port", None
+    rate = body.get("perIpRequestsPerSecond")
+    if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0.1 <= rate <= 100:
+        return "perIpRequestsPerSecond: 0.1..100", None
+    return None, resolved
 
 
 def valid_proxy(value):
@@ -159,5 +197,42 @@ def create_app(fetch_one=default_fetch_one, threads_per_proxy=None):
         futures = [pool.submit(a, body["marketplace"], body["mode"], body["lane"]) for a in asins]
         results = [pool.wait(f) for f in futures]  # each resolves by its own deadline
         return _json(200, {"results": results})
+
+    @app.post("/v1/best-sellers")
+    def best_sellers():
+        # One Amazon Best Sellers list page, through the SAME pool as product
+        # fetches: same proxies, same per-IP rate, same cooldown and deadline.
+        # Upstream's own /amazon/best-sellers route is deliberately not
+        # mounted — it would bypass the pool and its egress rule.
+        if not os.environ.get("SCRAPER_SERVICE_SECRET"):
+            return _json(503, {"error": "SCRAPER_SERVICE_SECRET not set"})
+        if not _authorized():
+            return _json(401, {"error": "unauthorized"})
+        try:
+            body = bottle.request.json
+        except Exception:
+            body = None
+        error, category = _validate_best_sellers(body)
+        if error:
+            return _json(400, {"error": error})
+        rate = float(body["perIpRequestsPerSecond"])
+        requested = body["proxies"]
+        proxies = usable_proxies(requested)
+        empty = {"outcome": "no_proxy", "fetchedAt": None, "list": None}
+        if not proxies:
+            # Same rule as /v1/products: direct egress only for a list that
+            # was EMPTY on a developer machine, never for malformed entries.
+            if requested or not egress.allow_direct():
+                pool.ensure([], rate)  # retire workers of proxies no longer configured
+                pool.record_no_proxy(1)
+                return _json(200, empty)
+            proxies = [None]  # developer machine only
+        pool.ensure(proxies, rate)
+        country, list_type, page = body["marketplace"], body["listType"], int(body["page"])
+        fut = pool.submit_call(lambda: fetch_bestsellers(country, list_type, category, page), body["lane"],
+                               expired_result={"outcome": "blocked", "fetchedAt": None, "list": None})
+        result = pool.wait(fut)
+        # Only the wire keys leave; anything internal a fetcher added stays here.
+        return _json(200, {key: result.get(key) for key in ("outcome", "fetchedAt", "list")})
 
     return app

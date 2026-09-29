@@ -50,7 +50,11 @@ export enum ScraperFetchMode {
 
 /** Priority lane a scrape request runs on — seller-triggered vs. background refresh. */
 export enum ScraperLane {
+  /** A seller is waiting on a create — highest priority. */
   INTERACTIVE = 'interactive',
+  /** A seller is browsing (Best Sellers) — behind creates, ahead of the background refresh. */
+  BROWSE = 'browse',
+  /** Scheduled price/stock refresh. */
   BACKGROUND = 'background',
 }
 

@@ -32,6 +32,11 @@ export interface AppLayoutProps {
   /** True when at least one pending action is critical, so the badge reads red. */
   hasCriticalActions: boolean;
   /**
+   * Unread eBay message count for the nav badge. `0` hides the badge — same
+   * rule as `pendingActionCount`.
+   */
+  unreadMessageCount: number;
+  /**
    * The three billing meters (listings, tracking conversions, automatic orders)
    * for the profile-dropdown shortcut, pre-formatted by the shared builder.
    * Empty when the account has no subscription/plan yet — the block is then

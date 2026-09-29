@@ -126,6 +126,12 @@ export enum ActionCenterItemKey {
 
   /** An eBay store's OAuth grant is revoked/errored — sync and publishing stop. */
   EBAY_ACCOUNT_DISCONNECTED = 'ebay_account_disconnected',
+  /**
+   * The store was connected before the eBay Messages scopes existed (or the
+   * seller declined them on reconnect), so the inbox and NEW_MESSAGE webhook
+   * cannot work for it. Fixed by reconnecting the store to re-grant scopes.
+   */
+  EBAY_ACCOUNT_MESSAGING_SCOPE_MISSING = 'ebay_account_messaging_scope_missing',
   /** An Amazon buyer account cannot sign in — auto-fulfillment cannot run on it. */
   AMAZON_ACCOUNT_NEEDS_ATTENTION = 'amazon_account_needs_attention',
 

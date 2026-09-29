@@ -1,6 +1,7 @@
 """Proxy pool: worker threads per proxy, each bound to its proxy for life (so
 upstream's thread-local curl sessions never change IP mid-session), a shared
-two-lane priority queue (interactive before background), a per-proxy
+three-lane priority queue (interactive, then browse, then background), a
+per-proxy
 token-bucket rate limit, cooldown after repeated blocks, and a deadline after
 which a task that has not resolved (queued OR in flight) resolves as blocked
 on the wire.
@@ -30,7 +31,10 @@ from sellerhill import egress
 
 _log = logging.getLogger(__name__)
 
-_LANE_PRIORITY = {"interactive": 0, "background": 1}
+# interactive: a seller waiting on a create. browse: a seller waiting on a
+# Best Sellers page — behind creates, ahead of the background refresh, which
+# nobody is watching. background: the scheduled price/stock refresh.
+_LANE_PRIORITY = {"interactive": 0, "browse": 1, "background": 2}
 _OUTCOMES = ("found", "not_found", "blocked", "parse_failed", "no_proxy", "expired", "proxy_error")
 _STAT_KEYS = {"found": "found", "not_found": "notFound", "blocked": "blocked",
               "parse_failed": "parseFailed", "no_proxy": "noProxy",
@@ -143,6 +147,28 @@ class ProxyPool:
         self._queue.put((_LANE_PRIORITY[lane], next(self._seq), (asin, marketplace, mode, fut.deadline, fut)))
         return fut
 
+    def submit_call(self, fn, lane, expired_result):
+        """Run an arbitrary `fn()` on a pool worker — same proxy binding, rate
+        limit, cooldown, deadline and stats as a product fetch. `fn` returns a
+        dict with an `outcome` key from the product vocabulary (`found`,
+        `not_found`, `blocked`, `parse_failed`, `no_proxy`, `proxy_error`) and
+        may carry `netMs`. `expired_result` is the caller's own wire shape for
+        a task that never resolved — the product path's ASIN-shaped dict would
+        be wrong for a Best Sellers page. It is returned with `outcome` forced
+        to the wire value for `expired`.
+
+        One call takes ONE `wait_turn` token however many HTTP requests `fn`
+        makes (a Best Sellers page is the page GET plus up to three ACP POSTs
+        plus a possible session warm-up). Acceptable: the token bucket exists
+        to space out page loads per proxy, and one list page is one page load
+        from Amazon's side of the fence."""
+        fut = Future()
+        fut.asin = None
+        fut.expired_result = expired_result
+        fut.deadline = time.monotonic() + self._timeout
+        self._queue.put((_LANE_PRIORITY[lane], next(self._seq), ("call", fn, fut.deadline, fut, expired_result)))
+        return fut
+
     def wait(self, fut):
         """Block until the task resolves or its deadline passes. A task still
         unresolved at its deadline — queued behind cooling proxies, or still in
@@ -153,7 +179,7 @@ class ProxyPool:
         try:
             return fut.result(timeout=remaining + 0.05)
         except FutureTimeout:
-            self._expire(fut.asin, fut)
+            self._expire_future(fut)
             return fut.result()
 
     def _resolve(self, fut, result):
@@ -167,6 +193,18 @@ class ProxyPool:
         if self._resolve(fut, {"asin": asin, "outcome": _WIRE_OUTCOME["expired"], "fetchedAt": None,
                                "signals": None, "content": None}):
             self._record("expired", None, None)
+
+    def _expire_call(self, fut, expired_result):
+        if self._resolve(fut, {**expired_result, "outcome": _WIRE_OUTCOME["expired"]}):
+            self._record("expired", None, None)
+
+    def _expire_future(self, fut):
+        """Expire either kind of task from the waiter side, in its own shape."""
+        expired_result = getattr(fut, "expired_result", None)
+        if expired_result is not None:
+            self._expire_call(fut, expired_result)
+        else:
+            self._expire(fut.asin, fut)
 
     def _worker(self, proxy):
         while not (self._stop.is_set() or proxy.retired.is_set()):
@@ -184,11 +222,24 @@ class ProxyPool:
                 # tasks is unaffected, and stop.
                 self._queue.put(item)
                 break
-            _, _, (asin, marketplace, mode, deadline, fut) = item
+            _, _, task = item
+            # Two task shapes share the queue: a product fetch
+            # (asin, marketplace, mode, deadline, fut) and a generic call
+            # ("call", fn, deadline, fut, expired_result) from submit_call.
+            is_call = task[0] == "call"
+            if is_call:
+                _, fn, deadline, fut, expired_result = task
+                asin, marketplace, mode = None, None, None
+            else:
+                asin, marketplace, mode, deadline, fut = task
+                fn, expired_result = None, None
             if fut.done():
                 continue
             if time.monotonic() > deadline:
-                self._expire(asin, fut)
+                if is_call:
+                    self._expire_call(fut, expired_result)
+                else:
+                    self._expire(asin, fut)
                 continue
             proxy.wait_turn()
             if proxy.retired.is_set() or self._stop.is_set():
@@ -203,10 +254,13 @@ class ProxyPool:
             no_streak_change = False
             with egress.bind(proxy.url):
                 try:
-                    result = self._fetch_one(asin, marketplace, mode)
+                    result = fn() if is_call else self._fetch_one(asin, marketplace, mode)
                 except egress.NoProxyError:
                     no_streak_change = True
-                    result = {"asin": asin, "outcome": "no_proxy", "fetchedAt": None, "signals": None, "content": None}
+                    if is_call:
+                        result = {**expired_result, "outcome": "no_proxy"}
+                    else:
+                        result = {"asin": asin, "outcome": "no_proxy", "fetchedAt": None, "signals": None, "content": None}
                 except Exception as exc:  # never let one page kill a worker
                     # A parser/logic bug (bad marketplace, a crash inside
                     # signals/content extraction) is OUR failure, not evidence
@@ -215,8 +269,12 @@ class ProxyPool:
                     # TYPE is logged: a curl/network error's str() can embed
                     # the proxy URL (credentials included).
                     no_streak_change = True
-                    _log.warning("fetch_one raised %s for asin=%s", type(exc).__name__, asin)
-                    result = {"asin": asin, "outcome": "parse_failed", "fetchedAt": None, "signals": None, "content": None}
+                    if is_call:
+                        _log.warning("pool call raised %s", type(exc).__name__)
+                        result = {**expired_result, "outcome": "parse_failed"}
+                    else:
+                        _log.warning("fetch_one raised %s for asin=%s", type(exc).__name__, asin)
+                        result = {"asin": asin, "outcome": "parse_failed", "fetchedAt": None, "signals": None, "content": None}
             latency = (time.monotonic() - started) * 1000
             # `netMs` is the fetcher's own network time. Stats and the
             # latency-adaptive worker sizing use it instead of wall time —

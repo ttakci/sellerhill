@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "Mesajlar",
+      "subtitle": "eBay mesajlarınızı buradan okuyup yanıtlayın"
+    },
+    "folders": {
+      "members": "Üyelerden",
+      "ebay": "eBay'den",
+      "all": "Tümü",
+      "unread": "Okunmamış",
+      "archive": "Arşiv"
+    },
+    "list": {
+      "empty": "Henüz konuşma yok.",
+      "emptyUnread": "Okunmamış konuşma yok.",
+      "emptyArchive": "Arşivlenmiş konuşma yok.",
+      "loading": "Konuşmalar yükleniyor…",
+      "listing": "{{title}} hakkında",
+      "select": "Seç",
+      "selectAll": "Tümünü seç",
+      "noStores": "Mesajlarınızı görmek için bir eBay mağazası bağlayın."
+    },
+    "thread": {
+      "empty": "Görüntülemek için bir konuşma seçin.",
+      "loading": "Konuşma yükleniyor…",
+      "reply": "Yanıtla",
+      "replyPlaceholder": "Yanıtınızı yazın…",
+      "send": "Gönder",
+      "sent": "Mesaj gönderildi",
+      "noReply": "Bu konuşmaya yanıt verilemez.",
+      "attachment": "Ek",
+      "you": "Siz",
+      "backToList": "Mesajlara dön",
+      "chars": "{{count}}/{{max}} karakter"
+    },
+    "actions": {
+      "markRead": "Okundu olarak işaretle",
+      "markUnread": "Okunmadı olarak işaretle",
+      "archive": "Arşivle",
+      "unarchive": "Arşivden çıkar",
+      "delete": "Sil",
+      "refresh": "Yenile",
+      "selected": "{{count}} seçildi",
+      "deleteConfirm": "Seçilen konuşmalar silinsin mi? Silinen konuşmalar hiçbir klasörde görünmez."
+    },
+    "reconnect": {
+      "title": "Bu mağazayı yeniden bağlayın",
+      "description": "Bu mağaza, mesajlaşma desteği eklenmeden önce bağlanmış. Mesajları okuyup yanıtlamak için eBay'e yeniden bağlanın.",
+      "action": "Yeniden bağlan"
+    },
+    "toast": {
+      "archived": "Konuşma arşivlendi",
+      "deleted": "Konuşma silindi",
+      "read": "Okundu olarak işaretlendi"
+    }
+  }
+}

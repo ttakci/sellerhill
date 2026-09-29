@@ -1,0 +1,79 @@
+ Application Growth Check | eBay Developers Program Developers Program 
+ Sign in 
+ Theme 
+ Join Overview 
+ About the Program 
+ Benefits 
+ Policies 
+ API License Agreement 
+ Develop Overview 
+ Get Started with APIs Overview 
+ Authorization 
+ Using eBay RESTful APIs 
+ API Call Limits 
+ API Deprecations 
+ API Status 
+ Selling Applications Listing Management 
+ Listing Metadata 
+ Account Management 
+ Order Management 
+ Offers and Leads 
+ Communication 
+ Marketing and Promotions 
+ Analytics and Reporting 
+ Other APIs 
+ App Settings & Insight 
+ Buying Applications Inventory Discovery & Refresh 
+ Marketing and Discounts 
+ Marketplace Metadata 
+ Checkout/Bid 
+ Communication 
+ Other APIs 
+ App Settings & Insight 
+ All guides 
+ SDKs & Widgets 
+ Tools Overview 
+ eBay Sandbox Overview 
+ Create Test Users 
+ Reset Password 
+ Sandbox Status 
+ Sandbox Site 
+ API Explorer 
+ GraphQL Explorer 
+ WSDL Pruner 
+ Grow Overview 
+ Application Growth Check 
+ Affiliate Program 
+ Loyalty Program 
+ Events 
+ Awards 
+ Updates Overview 
+ API Updates 
+ Newsletter 
+ Blog 
+ Survey 
+ Support Overview 
+ API Status 
+ FAQs 
+ Developer Community Forum 
+ Knowledge Base 
+ Developer Account Support 
+ Developer Technical Support 
+ Action Required: From early May, API users must include standardized condition details when creating or updating listings in certain coins category. Update your integration to stay compliant. Learn more here . 
+ Size Standardization Update: Apparel & Footwear listings with non-standard, missing, or incomplete size information may be blocked or hidden starting August 2026. Normalization begins in June. Learn more here . 
+ Home Develop Grow Application Growth Check 
+ Application Growth Check
+ The Application Growth Check is a free service that the eBay Developers Program provides to its members. During the Application Growth Check process, we critically review all new applications for compliance with the Application Growth Check requirements, at no cost to you.
+ Requesting an Application Growth Check is required if you want to:
+ Increase the API call limits for your application
+ Use restricted APIs in production
+ Apply for an Application Growth Check now or learn more about the application growth check in the Request an Application Growth Check section of the Get Started with eBay APIs Guide.
+ Related topics
+ Get started 
+ APIs 
+ Affiliate Program 
+ Loyalty Program 
+ Thank you for helping us to improve the eBay developer program.
+ While we are not able to respond directly to your comments, we will carefully review them to improve your experience with eBay developer program!
+ If you need help, contact Developer Technical Support .
+ 

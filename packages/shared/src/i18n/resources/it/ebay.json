@@ -42,7 +42,12 @@
       "noAuthorizationCode": "Nessun codice di autorizzazione ricevuto da eBay",
       "storeOwnedByAnotherAccount": "Questo negozio eBay è collegato a un altro account SellerHill. Contatta l'assistenza per trasferirlo.",
       "accountNotFound": "Impossibile trovare quel negozio eBay.",
-      "identityUnavailable": "Non siamo riusciti a confermare il tuo account eBay con eBay. Non è stato collegato nulla: riprova tra un momento."
+      "identityUnavailable": "Non siamo riusciti a confermare il tuo account eBay con eBay. Non è stato collegato nulla: riprova tra un momento.",
+      "messagingScopeMissing": "Ricollega il tuo negozio eBay per attivare i messaggi: l'autorizzazione attuale non include la messaggistica.",
+      "messagingReplyNotAllowed": "Non è possibile rispondere qui ai messaggi di eBay.",
+      "messagingUnavailable": "La messaggistica eBay non è temporaneamente disponibile. Riprova.",
+      "messagingRejected": "eBay non ha accettato questa richiesta. Controlla il messaggio e riprova.",
+      "messageTooLong": "Un messaggio può contenere al massimo 2000 caratteri."
     },
     "onboarding": {
       "title": "Collega il tuo negozio eBay",

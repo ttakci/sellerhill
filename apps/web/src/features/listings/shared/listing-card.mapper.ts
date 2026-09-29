@@ -1,4 +1,5 @@
 import { ListingStatus, type ListingDto } from '@repo/shared';
+import { formatCurrency } from '@repo/ui';
 import type { TFunction } from 'i18next';
 
 import type { ListingCardProps } from '@/domain-ui';
@@ -7,10 +8,16 @@ import type { ListingCardProps } from '@/domain-ui';
  * Single source of truth: ListingDto → ListingCard props (minus orientation / selection).
  * Used by overview carousel and listings-all grid so both pages render the same card.
  * Status pill only for non-active (e.g. draft list).
+ *
+ * `locale` controls only separators/ordering — currency always comes from the
+ * listing's own resolved `currency` (its eBay store's marketplace), never the
+ * UI language. See CLAUDE.md "Currency is resolved from the connected eBay
+ * store's marketplace".
  */
 export const toListingCardProps = (
   listing: ListingDto,
-  t: TFunction
+  t: TFunction,
+  locale: string
 ): Omit<ListingCardProps, 'orientation' | 'selectable' | 'selected' | 'onSelectedChange' | 'selectionAriaLabel'> => {
   const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
   const profit = listing.estimatedProfit ?? 0;
@@ -68,6 +75,10 @@ export const toListingCardProps = (
         }
       : undefined,
     stats: [
+      {
+        label: t('listings.table.price'),
+        value: formatCurrency(listing.price, locale, listing.currency || 'USD'),
+      },
       {
         label: t('listings.table.estimatedProfit'),
         value: `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`,

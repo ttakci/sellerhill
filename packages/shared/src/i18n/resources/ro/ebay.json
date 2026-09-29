@@ -42,7 +42,12 @@
       "noAuthorizationCode": "Nu s-a primit niciun cod de autorizare de la eBay",
       "storeOwnedByAnotherAccount": "Acest magazin eBay este asociat unui alt cont SellerHill. Contactați asistența pentru a-l transfera.",
       "accountNotFound": "Magazinul eBay respectiv nu a fost găsit.",
-      "identityUnavailable": "Nu am putut confirma contul dvs. eBay cu eBay. Nu s-a conectat nimic — încercați din nou peste puțin timp."
+      "identityUnavailable": "Nu am putut confirma contul dvs. eBay cu eBay. Nu s-a conectat nimic — încercați din nou peste puțin timp.",
+      "messagingScopeMissing": "Reconectați magazinul eBay pentru a activa mesajele — autorizarea actuală nu include mesageria.",
+      "messagingReplyNotAllowed": "La mesajele de la eBay nu se poate răspunde de aici.",
+      "messagingUnavailable": "Mesageria eBay este temporar indisponibilă. Încercați din nou.",
+      "messagingRejected": "eBay nu a acceptat această solicitare. Verificați mesajul și încercați din nou.",
+      "messageTooLong": "Un mesaj poate avea cel mult 2000 de caractere."
     },
     "onboarding": {
       "title": "Conectați-vă magazinul eBay",

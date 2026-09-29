@@ -9,6 +9,7 @@ import {
   EbayCallPriority,
   SUPPORTED_EBAY_MARKETPLACES,
   buildStoreStreetLine,
+  hasMessagingScopes,
   normalizeCountryCode,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
@@ -30,6 +31,7 @@ import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { CategoryAspectsUnavailableError, CategoryResolutionError } from './ebay.errors';
 import { interpretEndItemResponse } from './end-item-response';
+import { EbayNotificationService } from './notifications/ebay-notification.service';
 
 /**
  * Prefix marking an encrypted-at-rest token value in `ebay_accounts`.
@@ -133,6 +135,12 @@ interface EbayAccountEntity {
   refresh_token: string;
   access_token_expires_at: Date;
   status: EbayAccountStatus;
+  /** OAuth scopes the store granted at its last connect (migration 125). Empty for pre-125 rows. */
+  granted_scopes: string[] | null;
+  /** Unread buyer messages, maintained from NEW_MESSAGE notifications (migration 125). */
+  unread_message_count: number;
+  /** eBay Notification API subscription id for NEW_MESSAGE, when subscribed. */
+  message_subscription_id: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -161,7 +169,8 @@ export class EbayService implements OnModuleInit {
     private readonly taxonomyService: EbayTaxonomyService,
     private readonly aspectResolver: AspectResolverService,
     private readonly billingService: BillingService,
-    private readonly ebayCallBudget: EbayCallBudgetService
+    private readonly ebayCallBudget: EbayCallBudgetService,
+    private readonly notifications: EbayNotificationService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -267,9 +276,13 @@ export class EbayService implements OnModuleInit {
     );
 
     // Check if this seller account is already connected. `(seller_id,
-    // marketplace_id)` is UNIQUE, so at most one row can exist — and a
-    // previously DISCONNECTED row is the one case we reactivate instead of
-    // refusing (a plain INSERT would violate that constraint).
+    // marketplace_id)` is UNIQUE, so at most one row can exist. When it
+    // belongs to THIS user the callback is a RE-CONSENT, whatever the row's
+    // status — a disconnected store coming back, or an active store granting
+    // the scopes the app requests today (the Messages page's "Reconnect"
+    // button sends an already-connected seller through eBay consent). Both
+    // adopt the existing row below; a plain INSERT would violate the
+    // constraint.
     const existingAccounts = await this.databaseService.query<
       Pick<EbayAccountEntity, 'id' | 'user_id' | 'status'>
     >(
@@ -280,10 +293,11 @@ export class EbayService implements OnModuleInit {
     );
 
     const existing = existingAccounts[0];
-    if (existing && existing.status !== EBAY_ACCOUNT_STATUS.DISCONNECTED) {
-      throw new ConflictException('ebay.errors.accountAlreadyConnected');
-    }
     if (existing && existing.user_id !== userId) {
+      if (existing.status !== EBAY_ACCOUNT_STATUS.DISCONNECTED) {
+        // Live under a different SellerHill account.
+        throw new ConflictException('ebay.errors.accountAlreadyConnected');
+      }
       // The store is disconnected but its row — and therefore its order and
       // listing history — belongs to a different SellerHill account. Holding
       // the eBay credentials does not entitle this user to that history, so
@@ -317,10 +331,11 @@ export class EbayService implements OnModuleInit {
     // Calculate token expiry
     const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
 
-    // Reconnect: adopt the existing (disconnected) row rather than inserting a
-    // second one. This is what puts the store's own order and listing history
-    // back in service — they reference this row's id, so a new row would leave
-    // all of it stranded behind a store the seller can no longer see.
+    // Reconnect / re-consent: adopt this user's existing row (disconnected or
+    // still active) rather than inserting a second one. This is what puts the
+    // store's own order and listing history back in service — they reference
+    // this row's id, so a new row would leave all of it stranded behind a
+    // store the seller can no longer see.
     if (existing) {
       const reactivated = await this.databaseService.query<EbayAccountEntity>(
         `UPDATE ebay_accounts
@@ -331,6 +346,7 @@ export class EbayService implements OnModuleInit {
              status = $5,
              disconnected_at = NULL,
              ebay_username = $7,
+             granted_scopes = $8,
              updated_at = NOW()
          WHERE id = $6
          RETURNING *`,
@@ -344,9 +360,16 @@ export class EbayService implements OnModuleInit {
           // Refreshed on every reconnect: this is exactly the value that
           // changes when a seller renames their eBay account.
           username,
+          // A reconnect is a fresh consent, so it grants whatever the app
+          // requests TODAY — which is how a pre-messaging store gains it.
+          [...this.oauthService.getScopes()],
         ]
       );
       this.logger.log(`eBay account reconnected: ${existing.id} for user: ${userId}`);
+      // After the row is written: the subscription stamps its id onto it.
+      // Fire-and-forget — it never throws, and the seller's redirect back
+      // from eBay must not wait on up to three Notification API calls.
+      void this.subscribeToMessages(reactivated[0].id, tokenResponse.access_token);
       return { accountId: reactivated[0].id, userId };
     }
 
@@ -355,9 +378,9 @@ export class EbayService implements OnModuleInit {
       `INSERT INTO ebay_accounts (
         user_id, seller_id, store_name, marketplace_id,
         access_token, refresh_token, access_token_expires_at,
-        status, ebay_username
+        status, ebay_username, granted_scopes
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
       [
         userId,
@@ -369,6 +392,7 @@ export class EbayService implements OnModuleInit {
         expiresAt.toISOString(),
         EBAY_ACCOUNT_STATUS.ACTIVE,
         username,
+        [...this.oauthService.getScopes()],
       ]
     );
 
@@ -377,7 +401,53 @@ export class EbayService implements OnModuleInit {
       `eBay account created successfully: ${account.id} for user: ${userId}, marketplace: ${marketplaceId}`
     );
 
+    // After the row is written: the subscription stamps its id onto it.
+    // Fire-and-forget (see the reconnect branch above).
+    void this.subscribeToMessages(account.id, tokenResponse.access_token);
+
     return { accountId: account.id, userId };
+  }
+
+  /**
+   * Best-effort: a subscription failure must never fail a connect. The
+   * store's granted_scopes already say whether messaging can work, and
+   * `subscribeAccount` itself never throws — the catch is defence in depth.
+   */
+  private async subscribeToMessages(accountId: string, accessToken: string): Promise<void> {
+    try {
+      const result = await this.notifications.subscribeAccount(accountId, accessToken);
+      this.logger.log(`eBay NEW_MESSAGE subscription for ${accountId}: ${result}`);
+    } catch (error: unknown) {
+      this.logger.warn(`eBay NEW_MESSAGE subscription failed for ${accountId}: ${getErrorMessage(error)}`);
+    }
+  }
+
+  /**
+   * Best-effort: remove the store's NEW_MESSAGE subscription while we still
+   * hold a token to do it with. Runs BEFORE the disconnect nulls the tokens —
+   * afterwards there is no credential left to call eBay with, and the
+   * subscription would keep delivering a stranger's messages to our webhook.
+   * Ownership is checked first so another user's account id is never acted on;
+   * with no owned, still-connected row this is skipped and the disconnect's
+   * own UPDATE reports `accountNotFound` exactly as before.
+   */
+  private async unsubscribeFromMessages(userId: string, accountId: string): Promise<void> {
+    try {
+      const owned = await this.databaseService.query<EbayAccountEntity>(
+        `SELECT * FROM ebay_accounts
+         WHERE id = $1 AND user_id = $2 AND status <> $3
+         LIMIT 1`,
+        [accountId, userId, EBAY_ACCOUNT_STATUS.DISCONNECTED]
+      );
+      const account = owned[0];
+      if (!account || !account.access_token) {
+        return;
+      }
+      const token = await this.getAccessToken(account);
+      await this.notifications.unsubscribeAccount(accountId, token);
+    } catch (error: unknown) {
+      this.logger.warn(`eBay NEW_MESSAGE unsubscribe failed for ${accountId}: ${getErrorMessage(error)}`);
+    }
   }
 
   /**
@@ -401,6 +471,8 @@ export class EbayService implements OnModuleInit {
    * UI tells them.
    */
   async disconnectAccount(userId: string, accountId: string): Promise<void> {
+    await this.unsubscribeFromMessages(userId, accountId);
+
     const rows = await this.databaseService.query<Pick<EbayAccountEntity, 'id' | 'seller_id' | 'marketplace_id'>>(
       `UPDATE ebay_accounts
        SET status = $1,
@@ -1301,6 +1373,7 @@ export class EbayService implements OnModuleInit {
       storeName: entity.store_name,
       marketplaceId: entity.marketplace_id,
       status: entity.status,
+      messagingEnabled: hasMessagingScopes(entity.granted_scopes),
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };

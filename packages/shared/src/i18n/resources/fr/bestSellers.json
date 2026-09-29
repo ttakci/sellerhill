@@ -1,0 +1,85 @@
+{
+  "bestSellers": {
+    "menu": "Meilleures ventes",
+    "title": "Meilleures ventes Amazon",
+    "subtitle": "Parcourez les listes phares d’Amazon, cochez les produits qui vous intéressent et envoyez-les vers « Ajouter des annonces » en une étape.",
+    "listTypes": {
+      "best_sellers": "Meilleures ventes",
+      "new_releases": "Nouveautés",
+      "movers_and_shakers": "Fortes progressions",
+      "most_wished_for": "Les plus souhaités",
+      "most_gifted": "Les plus offerts"
+    },
+    "listTypesAriaLabel": "Liste Amazon",
+    "allCategories": "Toutes les catégories",
+    "categoryPlaceholder": "Choisir une catégorie",
+    "categorySearchPlaceholder": "Rechercher une catégorie",
+    "categoryNoResults": "Aucune catégorie correspondante",
+    "backToAllCategories": "Retour à toutes les catégories",
+    "selectAllOnPage": "Tout sélectionner sur cette page",
+    "selected_one": "{{count}} produit sélectionné",
+    "selected_many": "{{count}} produits sélectionnés",
+    "selected_other": "{{count}} produits sélectionnés",
+    "listSelected": "Mettre en vente la sélection ({{count}})",
+    "clearSelection": "Effacer",
+    "rank": "N° {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Pas encore de note",
+    "allowance": "Il vous reste {{remaining}} produits sur {{limit}} pour cette période",
+    "allowanceUnlimited": "Consultation illimitée des produits",
+    "allowanceHint": "Chaque produit affiché compte une fois par période ; rouvrir la même liste aujourd’hui n’est pas compté deux fois.",
+    "locked": {
+      "title_one": "{{count}} produit de plus sur cette page dépasse le quota mensuel de votre forfait",
+      "title_many": "{{count}} produits de plus sur cette page dépassent le quota mensuel de votre forfait",
+      "title_other": "{{count}} produits de plus sur cette page dépassent le quota mensuel de votre forfait",
+      "description": "Passez à un forfait supérieur ou achetez un pack complémentaire pour les voir. Votre quota se renouvelle à chaque période de facturation.",
+      "cta": "Voir les forfaits et les packs",
+      "rowLabel": "Produit verrouillé"
+    },
+    "table": {
+      "rank": "Rang",
+      "product": "Produit",
+      "price": "Prix",
+      "rating": "Note",
+      "reviews": "Avis"
+    },
+    "states": {
+      "loading": {
+        "title": "Chargement de la liste",
+        "description": "Récupération du classement le plus récent depuis Amazon."
+      },
+      "empty": {
+        "title": "Aucun produit sur cette page",
+        "description": "Cette liste n’a rien à afficher ici. Essayez une autre catégorie ou une autre liste."
+      },
+      "notFound": {
+        "title": "Cette catégorie n’est pas disponible",
+        "description": "Amazon ne propose pas cette liste pour la catégorie choisie. Revenez à toutes les catégories ou choisissez-en une autre."
+      },
+      "blocked": {
+        "title": "Amazon n’a pas répondu cette fois",
+        "description": "La liste n’a pas pu être lue pour le moment. Réessayez dans un instant."
+      },
+      "retry": "Réessayer",
+      "unavailable": {
+        "title": "Meilleures ventes est temporairement indisponible",
+        "description": "Le service des listes est inaccessible pour le moment. Vos annonces et commandes ne sont pas concernées."
+      },
+      "disabled": {
+        "title": "Meilleures ventes n’est pas activé sur ce compte",
+        "description": "La consultation des listes Amazon est désactivée pour votre compte. Contactez l’assistance si vous pensiez y avoir accès."
+      },
+      "limitReached": {
+        "title": "Trop de chargements de liste en direct aujourd’hui",
+        "description": "Les listes déjà chargées aujourd’hui restent disponibles : passez à l’une d’elles ou réessayez demain."
+      }
+    },
+    "errors": {
+      "disabled": "Meilleures ventes n’est pas activé sur ce compte.",
+      "dailyLimitReached": "Trop de chargements de liste en direct aujourd’hui. Réessayez demain.",
+      "unavailable": "Meilleures ventes est temporairement indisponible.",
+      "unsupportedMarketplace": "Cette place de marché n’est pas prise en charge."
+    }
+  }
+}

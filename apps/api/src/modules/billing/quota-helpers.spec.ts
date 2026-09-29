@@ -229,6 +229,8 @@ describe('advisoryLockKey', () => {
   it('key1 is 1 for listings, 2 for AO', () => {
     expect(advisoryLockKey('x', BillingLimitKey.LISTINGS_PER_MONTH).key1).toBe(1);
     expect(advisoryLockKey('x', BillingLimitKey.AMAZON_ORDERS_PER_MONTH).key1).toBe(2);
+    expect(advisoryLockKey('x', BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH).key1).toBe(3);
+    expect(advisoryLockKey('x', BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH).key1).toBe(4);
   });
 });
 

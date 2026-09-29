@@ -111,6 +111,13 @@
         "description_other": "{{count}} negozi non sono più autorizzati. Sincronizzazione degli ordini, riprezzamento e pubblicazione sono fermi per questi negozi finché non li ricolleghi.",
         "action": "Gestisci i negozi"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Ricollega un negozio per abilitare i messaggi eBay",
+        "description_one": "{{count}} negozio è stato collegato prima che la messaggistica fosse aggiunta. Ricollegalo per leggere e rispondere ai messaggi eBay qui.",
+        "description_many": "{{count}} negozi sono stati collegati prima che la messaggistica fosse aggiunta. Ricollegali per leggere e rispondere ai messaggi eBay qui.",
+        "description_other": "{{count}} negozi sono stati collegati prima che la messaggistica fosse aggiunta. Ricollegali per leggere e rispondere ai messaggi eBay qui.",
+        "action": "Gestisci i negozi"
+      },
       "amazon_account_needs_attention": {
         "title": "Un account acquirente Amazon non riesce ad accedere",
         "description_one": "{{count}} account acquirente non riesce ad accedere, quindi non è possibile acquistare nulla tramite di esso.",

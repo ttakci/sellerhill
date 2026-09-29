@@ -20,6 +20,9 @@ import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
 import { EbayService } from './ebay.service';
+import { EbayNotificationWebhookController } from './notifications/ebay-notification-webhook.controller';
+import { EbayNotificationClient } from './notifications/ebay-notification.client';
+import { EbayNotificationService } from './notifications/ebay-notification.service';
 
 
 @Module({
@@ -29,7 +32,7 @@ import { EbayService } from './ebay.service';
   // ledger before writing the account row. Billing does not import Ebay, so
   // this does not create a cycle (module-cycle.guard.spec.ts covers that).
   imports: [ConfigModule, AuthModule, DatabaseModule, LlmModule, BillingModule],
-  controllers: [EbayController, EbayAccountDeletionController],
+  controllers: [EbayController, EbayAccountDeletionController, EbayNotificationWebhookController],
   providers: [
     EbayService,
     EbayBulkService,
@@ -43,6 +46,8 @@ import { EbayService } from './ebay.service';
     EmailVerifiedGuard,
     EbayFulfillmentService,
     EbayAccountDeletionService,
+    EbayNotificationClient,
+    EbayNotificationService,
   ],
   exports: [
     EbayService,
@@ -53,6 +58,8 @@ import { EbayService } from './ebay.service';
     EbayFulfillmentService,
     EbayTaxonomyService,
     AspectResolverService,
+    EbayNotificationClient,
+    EbayNotificationService,
   ],
 })
 export class EbayModule {}

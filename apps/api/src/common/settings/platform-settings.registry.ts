@@ -237,6 +237,43 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 100,
   }),
+  // Best Sellers browsing rides the same scraper + proxy pool (browse lane).
+  def({
+    key: PlatformSettingKey.BEST_SELLERS_ENABLED,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'BEST_SELLERS_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    // A list page is shared by every seller; Amazon refreshes the lists about
+    // hourly, so a few hours of cache trades little freshness for a lot of
+    // proxy capacity.
+    key: PlatformSettingKey.BEST_SELLERS_CACHE_TTL_MINUTES,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_CACHE_TTL_MINUTES',
+    defaultValue: '360',
+    min: 5,
+    max: 1440,
+  }),
+  def({
+    // HIDDEN anti-abuse brake on proxy capacity, NOT the seller allowance:
+    // a per-seller cap on cache MISSES (live fetches) per UTC day; a hit costs
+    // nothing. The seller-facing meter is the plan's
+    // `best_sellers_products_per_month` (migration 125), which locks rows
+    // instead of refusing. Set far above any real use — 1000 live fetches a
+    // day is ~4000 proxy requests, more than a person can click through — so
+    // only a script ever meets it. 0 means nobody may trigger a live fetch;
+    // the cache still serves.
+    key: PlatformSettingKey.BEST_SELLERS_DAILY_FETCH_LIMIT,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_DAILY_FETCH_LIMIT',
+    defaultValue: '1000',
+    min: 0,
+    max: 10000,
+  }),
 
   // --- Amazon order sync + tracking ---
   def({
@@ -681,6 +718,42 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: '180',
     min: 30,
     max: 3650,
+  }),
+  def({
+    // The Best Sellers view ledger (migration 125). SUM(product_count) over the
+    // current billing window IS the seller's used allowance, so a row deleted
+    // inside that window is free allowance handed out. The floor (60) must
+    // comfortably exceed one billing period plus the webhook grace (~31 days);
+    // the default keeps a year of browsing history for support questions.
+    key: PlatformSettingKey.RETENTION_BEST_SELLERS_VIEWS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_BEST_SELLERS_VIEWS_DAYS',
+    defaultValue: '400',
+    min: 60,
+    max: 3650,
+  }),
+  def({
+    // eBay NEW_MESSAGE notification inbox. Only the notification_id UNIQUE is
+    // load-bearing (dedupe of retried deliveries, which eBay stops after 3
+    // attempts), so a week is the floor and 90 days is ample.
+    key: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS',
+    defaultValue: '90',
+    min: 7,
+    max: 730,
+  }),
+  def({
+    // Verbatim capture of every eBay notification POST — diagnostic only.
+    key: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS',
+    defaultValue: '30',
+    min: 7,
+    max: 365,
   }),
 ];
 

@@ -132,16 +132,20 @@ export enum BillingLimitKey {
    */
   LISTINGS_PER_MONTH = 'listings_per_month',
   /**
-   * Maximum AUTOMATIC Amazon orders per calendar month — auto-fulfill only.
-   * A generous anti-abuse ceiling rather than the priced dimension: the real
-   * per-unit cost sits on TRACKING_CONVERSIONS_PER_MONTH below.
+   * Automatic Amazon orders per billing period — auto-fulfill only.
    *
-   * Linking an Amazon order BY HAND deliberately consumes none of this
-   * (operator decision, 2026-09-18). It used to, justified by the browser time
-   * a linked order goes on to spend — but that pool is our own server
-   * capacity, not a third-party charge, and placing an order by hand is
-   * self-limiting in a way automation is not. Capacity is governed by
-   * AMAZON_GLOBAL_CONCURRENCY and monitoring, not by a seller-facing meter.
+   * UNLIMITED (`-1`) on every plan, the trial included, since 2026-09-29
+   * (operator decision, migration 125). An order costs us no third-party money
+   * — the priced unit is the tracking conversion below — and every automatic
+   * order is backed by a real eBay sale, so the count cannot be farmed. It was
+   * a 2x-conversions anti-abuse ceiling before; that ceiling would have capped
+   * exactly the largest, best-paying sellers first. The key is kept, and the
+   * gate still honours a finite value, so re-tightening is a data change.
+   * Capacity is governed by AMAZON_GLOBAL_CONCURRENCY and monitoring.
+   *
+   * Linking an Amazon order BY HAND consumes none of this (operator decision,
+   * 2026-09-18): the browser pool is our own server capacity, not a per-unit
+   * charge, and placing an order by hand is self-limiting.
    */
   AMAZON_ORDERS_PER_MONTH = 'amazon_orders_per_month',
   /**
@@ -155,6 +159,22 @@ export enum BillingLimitKey {
    * supplier concealment stops.
    */
   TRACKING_CONVERSIONS_PER_MONTH = 'tracking_conversions_per_month',
+  /**
+   * Amazon Best Sellers products a seller may VIEW per billing period — the
+   * meter behind `/best-sellers` (2026-09-29). Counted in products, not list
+   * loads, because that is the unit a seller understands ("3,000 products a
+   * month"), and counted whether the page came from the shared cache or a live
+   * fetch: it measures value delivered, not our cost, which is a fraction of a
+   * cent per page. The same list page opened again on the same UTC day is not
+   * counted twice.
+   *
+   * Exhausting it never blocks: the page still renders the products the
+   * allowance covers and BLURS the rest server-side (`BestSellersPageDto.
+   * lockedCount`), which is the upgrade / top-up prompt. Top-ups are
+   * `billing_quota_addons` rows on this key, credited per billing window like
+   * the conversion packs.
+   */
+  BEST_SELLERS_PRODUCTS_PER_MONTH = 'best_sellers_products_per_month',
 }
 
 /**

@@ -23,7 +23,13 @@ export interface LandingPricingPlan {
    * thing a buyer is choosing between tiers on, so the card shows this instead.
    */
   trackingConversionsDisplay: string;
-  /** Pre-formatted monthly automatic-order ceiling. */
+  /**
+   * Pre-formatted Best Sellers browsing allowance — products the seller may
+   * view on the Best Sellers page per billing period (e.g. "15,000 Best
+   * Sellers products / month").
+   */
+  bestSellersDisplay: string;
+  /** Pre-formatted monthly automatic-order line — "Unlimited …" on every plan since 2026-09-29. */
   amazonOrdersDisplay: string;
   /** True when this plan is the highlighted "popular" one. */
   isHighlighted: boolean;
@@ -45,7 +51,7 @@ export interface LandingPageProps {
   pricingPlans: LandingPricingPlan[];
   /**
    * Pre-formatted "plans from $X" amount for the hero price badge — the catalog's
-   * cheapest paid monthly tier, or the literal `$19.99` fallback when the catalog
+   * cheapest paid monthly tier, or the literal `$24.99` fallback when the catalog
    * call failed.
    */
   startingPriceDisplay: string;

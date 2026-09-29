@@ -1,0 +1,81 @@
+{
+  "bestSellers": {
+    "menu": "热销榜",
+    "title": "Amazon 热销榜",
+    "subtitle": "浏览 Amazon 的热门榜单，勾选想要的商品，一步发送到“添加刊登”。",
+    "listTypes": {
+      "best_sellers": "热销榜",
+      "new_releases": "新品榜",
+      "movers_and_shakers": "飙升榜",
+      "most_wished_for": "心愿榜",
+      "most_gifted": "礼品榜"
+    },
+    "listTypesAriaLabel": "Amazon 榜单",
+    "allCategories": "全部分类",
+    "categoryPlaceholder": "选择分类",
+    "categorySearchPlaceholder": "搜索分类",
+    "categoryNoResults": "没有匹配的分类",
+    "backToAllCategories": "返回全部分类",
+    "selectAllOnPage": "全选本页",
+    "selected_other": "已选 {{count}} 件商品",
+    "listSelected": "刊登所选 ({{count}})",
+    "clearSelection": "清除",
+    "rank": "#{{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "暂无评分",
+    "allowance": "本周期还剩 {{remaining}}/{{limit}} 件商品可查看",
+    "allowanceUnlimited": "不限商品查看数量",
+    "allowanceHint": "每件看到的商品每个周期只计一次；今天再次打开同一榜单不会重复计算。",
+    "locked": {
+      "title_other": "本页还有 {{count}} 件商品超出您套餐的每月额度",
+      "description": "升级套餐或购买加购包即可查看。额度随每个计费周期重置。",
+      "cta": "查看套餐与加购包",
+      "rowLabel": "已锁定的商品"
+    },
+    "table": {
+      "rank": "排名",
+      "product": "商品",
+      "price": "价格",
+      "rating": "评分",
+      "reviews": "评价"
+    },
+    "states": {
+      "loading": {
+        "title": "正在加载榜单",
+        "description": "正在从 Amazon 获取最新排名。"
+      },
+      "empty": {
+        "title": "本页没有商品",
+        "description": "这个榜单在这里没有内容。请试试其他分类或榜单。"
+      },
+      "notFound": {
+        "title": "该分类不可用",
+        "description": "Amazon 未为所选分类提供此榜单。请返回全部分类或选择其他分类。"
+      },
+      "blocked": {
+        "title": "Amazon 这次没有响应",
+        "description": "暂时无法读取榜单，请稍后再试。"
+      },
+      "retry": "重试",
+      "unavailable": {
+        "title": "热销榜暂时不可用",
+        "description": "榜单服务当前无法访问。您的刊登和订单不受影响。"
+      },
+      "disabled": {
+        "title": "此账户未启用热销榜",
+        "description": "您的账户已关闭 Amazon 榜单浏览。如果您认为应该可见，请联系客服。"
+      },
+      "limitReached": {
+        "title": "今天实时加载榜单的次数过多",
+        "description": "今天已加载过的榜单仍可查看——切换到其中一个，或明天再试。"
+      }
+    },
+    "errors": {
+      "disabled": "此账户未启用热销榜。",
+      "dailyLimitReached": "今天实时加载榜单的次数过多。请明天再试。",
+      "unavailable": "热销榜暂时不可用。",
+      "unsupportedMarketplace": "不支持该商城。"
+    }
+  }
+}

@@ -1,14 +1,15 @@
 // apps/api/src/modules/buyer-messaging/buyer-message.provider.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { EBAY_MESSAGE_MAX_LENGTH, EbayCallPriority } from '@repo/shared';
 
 import { EbayService } from '../ebay/ebay.service';
-
-import { redactForLog } from './buyer-message-helpers';
+import { EbayMessageClient } from '../ebay-messages/ebay-message.client';
 
 export interface BuyerMessageSendInput {
   ebayAccountId: string;
   orderId: string;
-  lineItemId?: string;
+  /** eBay item id (listing reference), when the order carries one. */
+  ebayItemId?: string;
   buyerUsername: string;
   body: string;
 }
@@ -22,64 +23,32 @@ export interface BuyerMessagingProvider {
 }
 
 /**
- * eBay Commerce Message API (REST) provider. Resolves the per-account user
- * token internally via EbayService.getAccountAccessToken. Honours Retry-After
- * on 429/5xx. Errors are thrown to the caller (the processor logs them redacted).
+ * Sends a buyer auto-message through the real, budget-governed
+ * `EbayMessageClient` (`commerce/message/v1/send_message`). Resolves the
+ * per-account seller token internally via `EbayService.getAccountAccessToken`.
+ * Runs at `EbayCallPriority.BACKGROUND` — this is automation-triggered, never
+ * an interactive seller action. Errors propagate to the caller; the processor
+ * logs them redacted and lets BullMQ retry.
  */
 @Injectable()
 export class EbayMessageApiProvider implements BuyerMessagingProvider {
-  private readonly logger = new Logger(EbayMessageApiProvider.name);
-  // TODO(confirm): exact path/scopes per live Message API docs - see task note.
-  private readonly endpoint = 'https://apix.ebay.com/ws/commerce/message/v1/message';
-
-  constructor(private readonly ebayService: EbayService) {}
+  constructor(
+    private readonly client: EbayMessageClient,
+    private readonly ebayService: EbayService,
+  ) {}
 
   async sendMessage(input: BuyerMessageSendInput): Promise<BuyerMessageSendResult> {
     const token = await this.ebayService.getAccountAccessToken(input.ebayAccountId);
-    const payload = {
-      // Field names per live docs; order context + recipient + body.
-      recipient: { username: input.buyerUsername },
-      body: input.body,
-      context: {
-        orderId: input.orderId,
-        ...(input.lineItemId ? { lineItemId: input.lineItemId } : {}),
+    const { messageId } = await this.client.sendMessage(
+      token,
+      {
+        otherPartyUsername: input.buyerUsername,
+        // By code point, so a cut never splits a surrogate pair (emoji).
+        text: Array.from(input.body).slice(0, EBAY_MESSAGE_MAX_LENGTH).join(''),
+        referenceItemId: input.ebayItemId,
       },
-    };
-    const res = await this.doWithRetry(() =>
-      fetch(this.endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          // some eBay Commerce APIs require a marketplace header; add if docs say so.
-        },
-        body: JSON.stringify(payload),
-      }),
+      EbayCallPriority.BACKGROUND,
     );
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(`eBay Message API ${res.status}: ${this.redact(text)}`);
-    }
-    const json = (await res.json().catch(() => ({}))) as { messageId?: string };
-    return { providerMessageId: json.messageId };
-  }
-
-  private async doWithRetry(run: () => Promise<Response>, maxAttempts = 3): Promise<Response> {
-    let last: Response | undefined;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const res = await run();
-      if (res.status !== 429 && res.status < 500) {
-        return res;
-      }
-      last = res;
-      const retryAfter = Number(res.headers.get('retry-after')) || 2 * (attempt + 1);
-      await new Promise((r) => setTimeout(r, retryAfter * 1000));
-    }
-    return last as Response;
-  }
-
-  /** Strip anything token-like before logging. */
-  private redact(text: string): string {
-    return redactForLog(text);
+    return { providerMessageId: messageId };
   }
 }

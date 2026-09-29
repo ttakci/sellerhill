@@ -113,10 +113,12 @@
     "listings": "Anunțuri",
     "ebayListings": "Anunțuri eBay",
     "listingJobs": "Sarcini de anunțuri",
+    "revisionHistory": "Istoric revizii",
     "drafts": "Ciorne",
     "products": "Produse",
     "inventory": "Inventar",
     "orders": "Comenzi",
+    "messages": "Mesaje",
     "stores": "Magazine",
     "billing": "Facturare",
     "settings": "Setări",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Automatizare accesibilă",
-        "description": "Setul complet de automatizare profesională la un abonament lunar mult mai mic. Fiecare funcție este în fiecare plan; planurile diferă doar prin volumul de anunțuri și comenzi.",
+        "description": "Setul complet de automatizare profesională la un abonament lunar mult mai mic. Fiecare funcție este în fiecare plan, comenzile automate sunt nelimitate; planurile diferă doar prin anunțuri, conversii de urmărire și răsfoirea Celor mai vândute.",
         "cta": "Vezi planurile"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Prețuri",
       "sectionTitle": "Automatizare accesibilă.",
-      "sectionSubtitle": "Fiecare plan include toate funcțiile. Planurile diferă doar prin numărul de anunțuri active și volumul lunar de comenzi, așa că funcțiile pe care alte instrumente le rezervă nivelurilor superioare sunt ale dvs. chiar și în cel mai mic plan.",
+      "sectionSubtitle": "Fiecare plan include toate funcțiile. Planurile diferă prin anunțurile active, conversiile de urmărire și alocarea de răsfoire a Celor mai vândute; comenzile automate sunt nelimitate în fiecare plan, așa că funcțiile pe care alte instrumente le rezervă nivelurilor superioare sunt ale dvs. chiar și în cel mai mic plan.",
       "billingNote": "Anulați oricând. Prețurile nu includ taxele locale, acolo unde se aplică.",
       "perMonth": "/lună",
       "mostPopular": "Cel mai popular",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Comenzi automate nelimitate",
       "upToConversions": "{{limit}} conversii de urmărire / lună",
       "unlimitedConversions": "Conversii de urmărire nelimitate",
+      "upToBestSellers": "{{limit}} de produse Cele mai vândute / lună",
+      "unlimitedBestSellers": "Răsfoire nelimitată a Celor mai vândute",
       "catalogError": "Prețurile live nu au putut fi încărcate acum. Mai jos este afișată o prezentare generală a planurilor.",
       "included": {
         "groups": "Grupuri de setări și 12 șabloane de anunțuri",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Până la 500 de anunțuri active",
-          "orders": "Până la 100 de comenzi automate / lună",
-          "conversions": "50 de conversii de urmărire / lună"
+          "orders": "Comenzi automate nelimitate",
+          "conversions": "50 de conversii de urmărire / lună",
+          "bestSellers": "2,500 de produse Cele mai vândute / lună"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Până la 2,000 de anunțuri active",
-          "orders": "Până la 300 de comenzi automate / lună",
-          "conversions": "150 de conversii de urmărire / lună"
+          "orders": "Comenzi automate nelimitate",
+          "conversions": "150 de conversii de urmărire / lună",
+          "bestSellers": "7,500 de produse Cele mai vândute / lună"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Până la 5,000 de anunțuri active",
-          "orders": "Până la 600 de comenzi automate / lună",
-          "conversions": "300 de conversii de urmărire / lună"
+          "orders": "Comenzi automate nelimitate",
+          "conversions": "300 de conversii de urmărire / lună",
+          "bestSellers": "15,000 de produse Cele mai vândute / lună"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Până la 10,000 de anunțuri active",
-          "orders": "Până la 1,000 de comenzi automate / lună",
-          "conversions": "500 de conversii de urmărire / lună"
+          "orders": "Comenzi automate nelimitate",
+          "conversions": "500 de conversii de urmărire / lună",
+          "bestSellers": "25,000 de produse Cele mai vândute / lună"
         }
       }
     },

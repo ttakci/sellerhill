@@ -99,6 +99,8 @@ export class QuotaEnforcementService {
     subscriptionId: string;
     usagePeriodId: string | null;
     limitValue: number | null;
+    /** Of `limitValue`, how much came from top-ups bought for this window. */
+    creditValue: number;
     /** True when the account owes money or its entitlement has lapsed. */
     suspended: boolean;
     /** The billing window this call's usage is metered against. */
@@ -137,6 +139,7 @@ export class QuotaEnforcementService {
       return {
         subscriptionId: subscription.id,
         usagePeriodId: null,
+        creditValue: 0,
         limitValue: 0,
         suspended: true,
         window,
@@ -146,7 +149,7 @@ export class QuotaEnforcementService {
     // The EFFECTIVE limit — plan allowance plus any top-up bought for this
     // window. Resolving the plan limit alone here would refuse a seller who had
     // just paid for extra headroom while the billing page showed it to them.
-    const { limitValue } = await this.repository.resolveEffectiveLimit(
+    const { limitValue, creditValue } = await this.repository.resolveEffectiveLimit(
       userId,
       subscription.id,
       kind,
@@ -172,6 +175,7 @@ export class QuotaEnforcementService {
       subscriptionId: subscription.id,
       usagePeriodId,
       limitValue,
+      creditValue,
       suspended: false,
       window,
     };
@@ -247,6 +251,56 @@ export class QuotaEnforcementService {
         `Conversion quota check failed for user ${userId}, allowing: ${(err as Error).message}`,
       );
       return { allowed: true, used: 0, limitValue: null };
+    }
+  }
+
+  /**
+   * The seller's Best Sellers product allowance for the current billing window
+   * (`best_sellers_products_per_month`, migration 125).
+   *
+   * Shaped like `canConvertTracking`, not like the listing/AO gates, because
+   * exhausting it BLOCKS nothing: the page still renders the products the
+   * allowance covers and locks the rest, so the caller needs the numbers, not a
+   * refusal. `limit` follows the shared sentinel: `-1` = unmetered (enforcement
+   * off, no subscription, or a plan that declares no limit — every other gate
+   * fails open the same way), `0` = suspended (every row locked), otherwise the
+   * EFFECTIVE ceiling (plan + top-ups bought for this window).
+   *
+   * Never throws. A billing outage must not break browsing — the codebase's
+   * standing rule for every read-side gate — so any error logs at warn and
+   * answers unmetered.
+   */
+  async resolveBestSellersAllowance(userId: string): Promise<{
+    limit: number;
+    used: number;
+    creditValue: number;
+    window: QuotaWindow | null;
+  }> {
+    const unmetered = { limit: -1, used: 0, creditValue: 0, window: null };
+    try {
+      if (!(await this.isEnabled())) {
+        return unmetered;
+      }
+      const ctx = await this.resolveSubscriptionContext(
+        userId,
+        BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+      );
+      if (!ctx) {
+        return unmetered;
+      }
+      if (ctx.suspended) {
+        return { limit: 0, used: 0, creditValue: 0, window: ctx.window };
+      }
+      if (ctx.limitValue === null || ctx.limitValue === -1) {
+        return { limit: -1, used: 0, creditValue: 0, window: ctx.window };
+      }
+      const used = await this.repository.countBestSellersProductViews(userId, ctx.window);
+      return { limit: ctx.limitValue, used, creditValue: ctx.creditValue, window: ctx.window };
+    } catch (err) {
+      this.logger.warn(
+        `Best Sellers allowance check failed for user ${userId}, not metering: ${(err as Error).message}`,
+      );
+      return unmetered;
     }
   }
 

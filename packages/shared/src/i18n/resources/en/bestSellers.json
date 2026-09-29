@@ -1,0 +1,83 @@
+{
+  "bestSellers": {
+    "menu": "Best Sellers",
+    "title": "Amazon Best Sellers",
+    "subtitle": "Browse Amazon's top lists, tick the products you want and send them to Add Listings in one step.",
+    "listTypes": {
+      "best_sellers": "Best Sellers",
+      "new_releases": "New Releases",
+      "movers_and_shakers": "Movers & Shakers",
+      "most_wished_for": "Most Wished For",
+      "most_gifted": "Most Gifted"
+    },
+    "listTypesAriaLabel": "Amazon list",
+    "allCategories": "All departments",
+    "categoryPlaceholder": "Choose a category",
+    "categorySearchPlaceholder": "Search categories",
+    "categoryNoResults": "No matching category",
+    "backToAllCategories": "Back to all categories",
+    "selectAllOnPage": "Select all on this page",
+    "selected_one": "{{count}} product selected",
+    "selected_other": "{{count}} products selected",
+    "listSelected": "List selected ({{count}})",
+    "clearSelection": "Clear",
+    "rank": "#{{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "No rating yet",
+    "allowance": "{{remaining}} of {{limit}} products left this period",
+    "allowanceUnlimited": "Unlimited product views",
+    "allowanceHint": "Every product you see counts once per period; the same list opened again today is not counted twice.",
+    "locked": {
+      "title_one": "{{count}} more product on this page is outside your plan's monthly allowance",
+      "title_other": "{{count}} more products on this page are outside your plan's monthly allowance",
+      "description": "Upgrade your plan or buy a top-up pack to see them. Your allowance renews with each billing period.",
+      "cta": "See plans and top-ups",
+      "rowLabel": "Locked product"
+    },
+    "table": {
+      "rank": "Rank",
+      "product": "Product",
+      "price": "Price",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
+    "states": {
+      "loading": {
+        "title": "Loading the list",
+        "description": "Fetching the latest ranking from Amazon."
+      },
+      "empty": {
+        "title": "No products on this page",
+        "description": "This list has nothing to show here. Try another category or list."
+      },
+      "notFound": {
+        "title": "This category is not available",
+        "description": "Amazon does not offer this list for the chosen category. Go back to all categories or pick another one."
+      },
+      "blocked": {
+        "title": "Amazon did not answer this time",
+        "description": "The list could not be read just now. Try again in a moment."
+      },
+      "retry": "Try again",
+      "unavailable": {
+        "title": "Best Sellers is temporarily unavailable",
+        "description": "The list service is not reachable right now. Your listings and orders are not affected."
+      },
+      "disabled": {
+        "title": "Best Sellers is not enabled on this account",
+        "description": "Browsing Amazon lists is switched off for your account. Contact support if you expected to see it."
+      },
+      "limitReached": {
+        "title": "Too many live list loads today",
+        "description": "Lists already loaded today are still available — switch to one of them, or try again tomorrow."
+      }
+    },
+    "errors": {
+      "disabled": "Best Sellers is not enabled on this account.",
+      "dailyLimitReached": "Too many live list loads today. Try again tomorrow.",
+      "unavailable": "Best Sellers is temporarily unavailable.",
+      "unsupportedMarketplace": "This marketplace is not supported."
+    }
+  }
+}

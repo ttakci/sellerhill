@@ -256,6 +256,12 @@
       "publish": "Auf eBay veröffentlichen",
       "publishSelected": "Ausgewählte veröffentlichen"
     },
+    "revisionHistory": {
+      "title": "Änderungsverlauf",
+      "subtitle": "Jede an eBay übermittelte Preis- und Bestandsänderung, über alle Ihre Angebote hinweg.",
+      "empty": "Keine Änderungen gefunden.",
+      "emptyTitle": "Noch keine Änderungen"
+    },
     "addSection": {
       "title": "Neues Angebot hinzufügen",
       "subtitle": "Importieren Sie Produkte mithilfe von ASINs von Amazon in Ihren eBay-Shop.",
@@ -375,6 +381,7 @@
       "updatedAt": "Aktualisiert",
       "revisions": {
         "action": "Änderungsverlauf",
+        "lastChecked": "Zuletzt geprüft am {{date}} — keine Änderung",
         "title": "Änderungsverlauf",
         "subtitle": "Preis- und Bestandsänderungen für dieses Angebot",
         "previousPrice": "Bisheriger Preis",

@@ -113,10 +113,12 @@
     "listings": "Anúncios",
     "ebayListings": "Anúncios do eBay",
     "listingJobs": "Tarefas de anúncios",
+    "revisionHistory": "Histórico de revisões",
     "drafts": "Rascunhos",
     "products": "Produtos",
     "inventory": "Estoque",
     "orders": "Pedidos",
+    "messages": "Mensagens",
     "stores": "Lojas",
     "billing": "Faturamento",
     "settings": "Configurações",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Automação acessível",
-        "description": "O conjunto completo de automação profissional por uma mensalidade bem menor. Todos os recursos estão em todos os planos; os planos só diferem no volume de anúncios e de pedidos.",
+        "description": "O conjunto completo de automação profissional por uma mensalidade bem menor. Todos os recursos estão em todos os planos, os pedidos automáticos são ilimitados; os planos só diferem em anúncios, conversões de rastreio e navegação em Mais vendidos.",
         "cta": "Ver planos"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Preços",
       "sectionTitle": "Automação acessível.",
-      "sectionSubtitle": "Todos os planos incluem todos os recursos. Os planos diferem apenas pelos anúncios ativos e pelo volume mensal de pedidos, então recursos que outras ferramentas reservam para os planos mais caros são seus até no menor plano.",
+      "sectionSubtitle": "Todos os planos incluem todos os recursos. Os planos diferem pelos anúncios ativos, pelas conversões de rastreio e pela franquia de navegação em Mais vendidos; os pedidos automáticos são ilimitados em todos os planos, então recursos que outras ferramentas reservam para os planos mais caros são seus até no menor plano.",
       "billingNote": "Cancele quando quiser. Os preços não incluem impostos locais, quando aplicáveis.",
       "perMonth": "/mês",
       "mostPopular": "Mais popular",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Pedidos automáticos ilimitados",
       "upToConversions": "{{limit}} conversões de rastreio / mês",
       "unlimitedConversions": "Conversões de rastreio ilimitadas",
+      "upToBestSellers": "{{limit}} produtos de Mais vendidos / mês",
+      "unlimitedBestSellers": "Navegação ilimitada em Mais vendidos",
       "catalogError": "Não foi possível carregar os preços ao vivo agora. Veja abaixo a visão geral dos planos.",
       "included": {
         "groups": "Grupos de configurações e 12 modelos de anúncios",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Até 500 anúncios ativos",
-          "orders": "Até 100 pedidos automáticos / mês",
-          "conversions": "50 conversões de rastreio / mês"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "50 conversões de rastreio / mês",
+          "bestSellers": "2,500 produtos de Mais vendidos / mês"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Até 2,000 anúncios ativos",
-          "orders": "Até 300 pedidos automáticos / mês",
-          "conversions": "150 conversões de rastreio / mês"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "150 conversões de rastreio / mês",
+          "bestSellers": "7,500 produtos de Mais vendidos / mês"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Até 5,000 anúncios ativos",
-          "orders": "Até 600 pedidos automáticos / mês",
-          "conversions": "300 conversões de rastreio / mês"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "300 conversões de rastreio / mês",
+          "bestSellers": "15,000 produtos de Mais vendidos / mês"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Até 10,000 anúncios ativos",
-          "orders": "Até 1,000 pedidos automáticos / mês",
-          "conversions": "500 conversões de rastreio / mês"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "500 conversões de rastreio / mês",
+          "bestSellers": "25,000 produtos de Mais vendidos / mês"
         }
       }
     },

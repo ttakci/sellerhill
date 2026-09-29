@@ -113,10 +113,12 @@
     "listings": "Publicaciones",
     "ebayListings": "Publicaciones de eBay",
     "listingJobs": "Tareas de publicación",
+    "revisionHistory": "Historial de revisiones",
     "drafts": "Borradores",
     "products": "Productos",
     "inventory": "Inventario",
     "orders": "Pedidos",
+    "messages": "Mensajes",
     "stores": "Tiendas",
     "billing": "Facturación",
     "settings": "Ajustes",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Automatización accesible",
-        "description": "El conjunto completo de automatización profesional por una cuota mensual mucho menor. Todas las funciones están en todos los planes; los planes solo se diferencian por el volumen de publicaciones y pedidos.",
+        "description": "El conjunto completo de automatización profesional por una cuota mensual mucho menor. Todas las funciones están en todos los planes, los pedidos automáticos son ilimitados; los planes solo se diferencian por publicaciones, conversiones de seguimiento y exploración de Más vendidos.",
         "cta": "Ver planes"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Precios",
       "sectionTitle": "Automatización accesible.",
-      "sectionSubtitle": "Todos los planes incluyen todas las funciones. Los planes solo se diferencian por las publicaciones activas y el volumen mensual de pedidos, así que las funciones que otras herramientas reservan para sus planes superiores son tuyas incluso en el plan más pequeño.",
+      "sectionSubtitle": "Todos los planes incluyen todas las funciones. Los planes se diferencian por las publicaciones activas, las conversiones de seguimiento y el límite de exploración de Más vendidos; los pedidos automáticos son ilimitados en todos los planes, así que las funciones que otras herramientas reservan para sus planes superiores son tuyas incluso en el plan más pequeño.",
       "billingNote": "Cancela cuando quieras. Los precios no incluyen impuestos locales cuando corresponda.",
       "perMonth": "/mes",
       "mostPopular": "Más popular",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Pedidos automáticos ilimitados",
       "upToConversions": "{{limit}} conversiones de seguimiento / mes",
       "unlimitedConversions": "Conversiones de seguimiento ilimitadas",
+      "upToBestSellers": "{{limit}} productos de Más vendidos / mes",
+      "unlimitedBestSellers": "Exploración ilimitada de Más vendidos",
       "catalogError": "No se pudieron cargar los precios en vivo en este momento. Se muestra a continuación un resumen de los planes.",
       "included": {
         "groups": "Grupos de ajustes y 12 plantillas de publicaciones",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Hasta 500 publicaciones activas",
-          "orders": "Hasta 100 pedidos automáticos / mes",
-          "conversions": "50 conversiones de seguimiento / mes"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "50 conversiones de seguimiento / mes",
+          "bestSellers": "2,500 productos de Más vendidos / mes"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Hasta 2,000 publicaciones activas",
-          "orders": "Hasta 300 pedidos automáticos / mes",
-          "conversions": "150 conversiones de seguimiento / mes"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "150 conversiones de seguimiento / mes",
+          "bestSellers": "7,500 productos de Más vendidos / mes"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Hasta 5,000 publicaciones activas",
-          "orders": "Hasta 600 pedidos automáticos / mes",
-          "conversions": "300 conversiones de seguimiento / mes"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "300 conversiones de seguimiento / mes",
+          "bestSellers": "15,000 productos de Más vendidos / mes"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Hasta 10,000 publicaciones activas",
-          "orders": "Hasta 1,000 pedidos automáticos / mes",
-          "conversions": "500 conversiones de seguimiento / mes"
+          "orders": "Pedidos automáticos ilimitados",
+          "conversions": "500 conversiones de seguimiento / mes",
+          "bestSellers": "25,000 productos de Más vendidos / mes"
         }
       }
     },

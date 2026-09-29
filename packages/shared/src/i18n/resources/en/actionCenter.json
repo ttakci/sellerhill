@@ -103,6 +103,12 @@
         "description_other": "{{count}} stores are no longer authorized. Order sync, repricing and publishing are stopped for them until you reconnect.",
         "action": "Manage stores"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Reconnect a store to enable eBay messages",
+        "description_one": "{{count}} store was connected before messaging was added. Reconnect it to read and answer eBay messages here.",
+        "description_other": "{{count}} stores were connected before messaging was added. Reconnect them to read and answer eBay messages here.",
+        "action": "Manage stores"
+      },
       "amazon_account_needs_attention": {
         "title": "An Amazon buyer account cannot sign in",
         "description_one": "{{count}} buyer account is failing sign-in, so nothing can be purchased through it.",

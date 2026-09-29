@@ -1,4 +1,5 @@
 import type {
+  AllListingRevisionsQueryDto,
   CreateListingsRequest,
   EbayBusinessPolicyDto,
   ListingDto,
@@ -11,6 +12,7 @@ import type {
   ListingImportResult,
   PaginatedListingJobsDto,
   PaginatedListingRevisionsDto,
+  PaginatedListingRevisionsWithListingDto,
   PaginatedListingsDto,
   PaginatedProductsDto,
   UpdateListingRequest,
@@ -124,6 +126,16 @@ export const listingsApi = baseApi.injectEndpoints({
     >({
       query: ({ listingId, query }) => ({ url: `/listings/${listingId}/revisions`, params: query ?? undefined }),
       providesTags: (result, error, { listingId }) => [{ type: 'Listings', id: `${listingId}-revisions` }],
+    }),
+
+    /**
+     * Price/quantity change history across every listing the caller owns —
+     * the "Revision history" nav page's sibling of the per-listing query
+     * above.
+     */
+    getAllListingRevisions: builder.query<PaginatedListingRevisionsWithListingDto, AllListingRevisionsQueryDto>({
+      query: (query) => ({ url: '/listings/revisions', params: query }),
+      providesTags: ['Listings'],
     }),
 
     syncEbayListings: builder.mutation<EbayListingSyncResult, string>({
@@ -290,6 +302,7 @@ export const {
   useGetListingJobsQuery,
   useGetUserProductsQuery,
   useGetListingRevisionsQuery,
+  useGetAllListingRevisionsQuery,
   useCreateListingsMutation,
   useSyncEbayListingsMutation,
   useDownloadListingImportTemplateMutation,

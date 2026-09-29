@@ -95,6 +95,18 @@ services:
       # challenge hash. Leave unset to derive `${FRONTEND_URL}/api/v1/ebay/marketplace-deletion-notification`.
       EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
 
+      # eBay Messages — NEW_MESSAGE Notification API webhook. Set both the token
+      # (same 32–80 char shape as EBAY_VERIFICATION_TOKEN, but a SEPARATE value;
+      # the API sends it to eBay itself via createDestination — nothing is
+      # pasted into the developer portal) and the alert e-mail to create the
+      # notification destination; without them the Message API inbox still
+      # works, on the 15-minute unread-badge polling fallback instead of a live
+      # webhook push. See CLAUDE.md "eBay Messages".
+      EBAY_NOTIFICATION_VERIFICATION_TOKEN: ${EBAY_NOTIFICATION_VERIFICATION_TOKEN:-}
+      EBAY_NOTIFICATION_ALERT_EMAIL: ${EBAY_NOTIFICATION_ALERT_EMAIL:-}
+      # Leave unset to derive `${FRONTEND_URL}/api/v1/ebay/notifications`.
+      EBAY_NOTIFICATION_ENDPOINT_URL: ${EBAY_NOTIFICATION_ENDPOINT_URL:-}
+
       # Amazon product data comes from the in-stack scraper service below by
       # default (`product.dataProvider` at /admin → Settings); Keepa is the
       # whole-provider rollback. Both values stay env-only: the URL must never
@@ -132,7 +144,8 @@ services:
       # constraint — but lower AMAZON_ORDER_SYNC_CRON (admin panel) FIRST,
       # since order-list scraping costs accounts × ticks/day regardless of
       # sales. Budget ~150–300 MB RSS per unit and raise API_MEMORY_LIMIT with it.
-      AMAZON_GLOBAL_CONCURRENCY: ${AMAZON_GLOBAL_CONCURRENCY:-5}
+      # 20 since 2026-09-29: automatic orders are unlimited on every plan, so this is the only bound on order throughput (~4× the ~20k–26k orders/month that 5 carried); the host has 128 GB.
+      AMAZON_GLOBAL_CONCURRENCY: ${AMAZON_GLOBAL_CONCURRENCY:-20}
 
       # Playwright browser-state + evidence locations (bind to the volumes below).
       BROWSER_STATE_DIR: /app/.browser-state
@@ -183,7 +196,8 @@ services:
           # Each resident Chromium context costs ~150–300 MB on top of the Node
           # heap. The idle-eviction sweep bounds how many stay alive; this cap
           # is the backstop. Raise it with the active-account count.
-          memory: ${API_MEMORY_LIMIT:-6G}
+          # 12G since 2026-09-29, sized for AMAZON_GLOBAL_CONCURRENCY=20 (~300 MB per unit) — raise the two together.
+          memory: ${API_MEMORY_LIMIT:-12G}
     networks:
       - coolify
       # Private network shared with the scraper only.

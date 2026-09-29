@@ -411,6 +411,13 @@ export const BillingPage: React.FC = () => {
           disabledLabel,
           locale: localeCfg.locale,
         }),
+        bestSellersLimitDisplay: formatBillingLimit({
+          limit: planLimitValue({ plan }, BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH),
+          unlimitedLabel,
+          disabledLabel,
+          locale: localeCfg.locale,
+        }),
+        // -1 on every plan since 2026-09-29; `formatBillingLimit` renders it as "Unlimited".
         amazonOrdersLimitDisplay: formatBillingLimit({
           limit: planLimitValue({ plan }, BillingLimitKey.AMAZON_ORDERS_PER_MONTH),
           unlimitedLabel,
@@ -473,6 +480,19 @@ export const BillingPage: React.FC = () => {
       isPurchasable: addon.isPurchasable,
     }));
   }, [summary, t, localeCfg.locale]);
+
+  /**
+   * One sentence per dimension the offered packs raise, in the order the
+   * packs arrive. The generic line is the fallback for a limit key that has
+   * no dedicated sentence yet, so a new pack type never renders a raw key.
+   */
+  const addonsSubtitle = useMemo<string>(() => {
+    const limitKeys = Array.from(new Set((summary?.quotaAddons ?? []).map((addon) => addon.limitKey)));
+    const sentences = limitKeys
+      .map((limitKey) => t(`billing:billing.addons.subtitleByLimit.${limitKey}`, { defaultValue: '' }))
+      .filter((sentence) => sentence.length > 0);
+    return sentences.length > 0 ? sentences.join(' ') : t('billing:billing.addons.subtitle');
+  }, [summary?.quotaAddons, t]);
 
   const handleBuyAddon = useCallback(
     (addonSlug: string) => {
@@ -684,6 +704,7 @@ export const BillingPage: React.FC = () => {
       onOpenPlans={handleOpenPlans}
       onClosePlans={handleClosePlans}
       addons={addons}
+      addonsSubtitle={addonsSubtitle}
       addonSlugInFlight={addonSlugInFlight}
       onBuyAddon={handleBuyAddon}
       onManage={handleManage}

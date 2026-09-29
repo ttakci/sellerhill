@@ -95,6 +95,7 @@ export const baseApi = createApi({
     'Ebay',
     'Dashboard',
     'ActionCenter',
+    'BestSellers',
     'StoreSettings',
     'ListingSettingsGroups',
     'PredefinedTemplates',
@@ -107,6 +108,7 @@ export const baseApi = createApi({
     'Billing',
     'BuyerMessagingConfig',
     'BuyerMessageTemplates',
+    'Messages',
   ],
   endpoints: () => ({}),
 });

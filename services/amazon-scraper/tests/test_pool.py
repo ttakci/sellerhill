@@ -231,3 +231,129 @@ def test_pool_grows_threads_from_its_own_latency():
     pool.ensure(["http://h:1"], rate=3)  # a raised rate grows the worker set
     assert proxy.threads == 12
     pool.shutdown()
+
+
+# ---- submit_call: the generic primitive behind /v1/best-sellers -----------------------------------------------
+
+_EXPIRED = {"outcome": "blocked", "fetchedAt": None, "list": None}
+
+
+def test_submit_call_runs_under_the_bound_proxy(monkeypatch):
+    monkeypatch.delenv("SCRAPER_ALLOW_DIRECT", raising=False)
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://u:p@10.0.0.7:1"], rate=50)
+    fut = pool.submit_call(lambda: {"outcome": "found", "proxy": egress.require_proxy(), "netMs": 321.0},
+                           "browse", _EXPIRED)
+    result = pool.wait(fut)
+    assert result["outcome"] == "found" and result["proxy"] == "http://u:p@10.0.0.7:1"
+    assert "netMs" not in result  # internal, stripped like the product path
+    stats = pool.stats()
+    assert stats["window1h"]["found"] == 1 and stats["meanLatencyMs"] == 321
+    pool.shutdown()
+
+
+def test_browse_lane_sits_between_interactive_and_background():
+    order = []
+    gate = threading.Event()
+
+    def slow(asin, marketplace, mode):
+        gate.wait(2)
+        order.append(asin)
+        return {"asin": asin, "outcome": "found"}
+
+    def call(name):
+        def fn():
+            gate.wait(2)
+            order.append(name)
+            return {"outcome": "found"}
+        return fn
+
+    pool = ProxyPool(slow, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://h:1"], rate=100)
+    first = pool.submit("BLOCKER000", "US", "commerce", "background")
+    time.sleep(0.1)  # the lone worker holds BLOCKER; everything below queues
+    bg = pool.submit("BACKGROUND", "US", "commerce", "background")
+    br = pool.submit_call(call("BROWSE"), "browse", _EXPIRED)
+    it = pool.submit("INTERACTIV", "US", "full", "interactive")
+    gate.set()
+    for f in (first, bg, br, it):
+        f.result(5)
+    assert order.index("INTERACTIV") < order.index("BROWSE") < order.index("BACKGROUND")
+    pool.shutdown()
+
+
+def test_submit_call_expiry_returns_the_callers_shape():
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1, task_timeout_seconds=0.1)
+    fut = pool.submit_call(lambda: {"outcome": "found"}, "browse", _EXPIRED)  # no proxies: nobody takes it
+    start = time.monotonic()
+    result = pool.wait(fut)
+    assert time.monotonic() - start < 1.0
+    assert result == {"outcome": "blocked", "fetchedAt": None, "list": None}
+    assert "asin" not in result  # never the product-shaped expiry dict
+    w = pool.stats()["window1h"]
+    assert w["expired"] == 1 and w["blocked"] == 0
+    pool.shutdown()
+
+
+def test_submit_call_in_flight_expiry_is_counted_once():
+    release = threading.Event()
+
+    def slow():
+        release.wait(2)
+        return {"outcome": "found"}
+
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1, task_timeout_seconds=0.1)
+    pool.ensure(["http://h:1"], rate=100)
+    fut = pool.submit_call(slow, "browse", _EXPIRED)
+    assert pool.wait(fut) == {**_EXPIRED, "outcome": "blocked"}
+    release.set()
+    time.sleep(0.3)
+    w = pool.stats()["window1h"]
+    assert (w["expired"], w["found"], w["blocked"]) == (1, 0, 0)
+    pool.shutdown()
+
+
+def test_submit_call_exception_is_parse_failed_in_the_callers_shape_and_does_not_cool(caplog):
+    def boom():
+        raise ValueError("http://leak_user:leak_pass@1.2.3.4:1")
+
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1, block_streak_for_cooldown=1, cooldown_seconds=60)
+    pool.ensure(["http://h:1"], rate=100)
+    with caplog.at_level("WARNING"):
+        result = pool.wait(pool.submit_call(boom, "browse", _EXPIRED))
+    assert result == {"outcome": "parse_failed", "fetchedAt": None, "list": None}
+    assert pool.stats()["proxies"][0]["coolingDown"] is False
+    assert "ValueError" in caplog.text and "leak_pass" not in caplog.text
+    pool.shutdown()
+
+
+def test_submit_call_no_proxy_error_is_no_proxy_in_the_callers_shape():
+    def boom():
+        raise egress.NoProxyError("no proxy bound")
+
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://h:1"], rate=100)
+    assert pool.wait(pool.submit_call(boom, "browse", _EXPIRED)) == {**_EXPIRED, "outcome": "no_proxy"}
+    pool.shutdown()
+
+
+def test_submit_call_proxy_error_cools_the_proxy_and_is_blocked_on_the_wire():
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1, block_streak_for_cooldown=3, cooldown_seconds=60)
+    pool.ensure(["http://h:1"], rate=100)
+    results = [pool.wait(pool.submit_call(lambda: {"outcome": "proxy_error"}, "browse", _EXPIRED)) for _ in range(3)]
+    assert all(r["outcome"] == "blocked" for r in results)
+    stats = pool.stats()
+    assert stats["window1h"]["proxyError"] == 3 and stats["window1h"]["blocked"] == 0
+    assert stats["proxies"][0]["coolingDown"] is True
+    pool.shutdown()
+
+
+def test_product_tasks_and_calls_share_one_queue_without_confusing_shapes():
+    pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://u:p@10.0.0.6:1"], rate=100)
+    product = pool.submit("A000000001", "US", "commerce", "background")
+    call = pool.submit_call(lambda: {"outcome": "found", "list": {"items": []}}, "browse", _EXPIRED)
+    p, c = pool.wait(product), pool.wait(call)
+    assert p["asin"] == "A000000001" and "list" not in p
+    assert c["list"] == {"items": []} and "asin" not in c
+    pool.shutdown()

@@ -2,37 +2,61 @@
 
 ## Product model
 
-SellerHill uses simple capacity-based packages. Customers do not see Keepa tokens, LLM tokens, API calls, or internal queue units. The visible limits are:
+SellerHill uses simple capacity-based packages. Customers do not see scraper requests, Keepa tokens, LLM tokens, API calls, or internal queue units. The visible limits are:
 
-- Active listings
-- Monthly automatic orders (AO)
+- Active listings (a level — how many can be live at once)
+- Monthly tracking conversions (the priced meter — the Aquiline unit cost)
+- Monthly Best Sellers products (an allowance on the Amazon Best Sellers browser — value delivered, not our cost)
 
-Initial catalog values are database seed values and are intentionally changeable before launch:
+**Automatic orders are unlimited on every plan, trial included (migration `125`, 2026-09-29).** An order costs no third-party money (the priced unit is the conversion), every automatic order is backed by a real eBay sale so the count cannot be farmed, the old 2×-conversions ceiling hit the best-paying sellers first, and the competitor shows "unlimited". Capacity protection lives entirely in `AMAZON_GLOBAL_CONCURRENCY` + monitoring (production default 20 since the same date). The `amazon_orders_per_month` limit key is kept at `-1`; a finite value still enforces if it ever has to be re-tightened.
 
-| Plan | Active listings | Automatic orders/month | Monthly price |
-|---|---:|---:|---:|
-| Lite | 200 | 25 | $19.99 |
-| Nano | 500 | 50 | $24.99 |
-| Micro | 1,000 | 100 | $29.99 |
-| Starter | 2,000 | 150 | $44.99 |
-| Basic | 3,000 | 200 | $59.99 |
-| Plus | 4,000 | 250 | $84.99 |
-| Growth | 5,000 | 300 | $104.99 |
-| Advanced | 7,500 | 350 | $159.99 |
-| Pro | 10,000 | 500 | $179.99 |
-| Elite | 15,000 | 600 | $319.99 |
-| Business | 20,000 | 700 | $429.99 |
-| Enterprise | 25,000 | 800 | $529.99 |
+Catalog values are database rows and are intentionally changeable; the current catalog (migration `125`, v3 prices):
 
-Monthly billing only — there is no annual interval. Set by migration `083_billing_plans_v2.sql`; the cost model behind these figures (Aquiline per-shipment conversion, Keepa refresh tokens, Stripe fees, listing churn) is summarised in CLAUDE.md.
+| Plan | Active listings | Tracking conversions/month | Best Sellers products/month | Automatic orders | Monthly price |
+|---|---:|---:|---:|---:|---:|
+| Trial (30 days) | 50 | 20 | 500 | unlimited | free |
+| Lite | 200 | 25 | 1,500 | unlimited | $24.99 |
+| Nano | 500 | 50 | 2,500 | unlimited | $29.99 |
+| Micro | 1,000 | 100 | 5,000 | unlimited | $34.99 |
+| Starter | 2,000 | 150 | 7,500 | unlimited | $44.99 |
+| Basic | 3,000 | 200 | 10,000 | unlimited | $54.99 |
+| Plus | 4,000 | 250 | 12,500 | unlimited | $64.99 |
+| Growth | 5,000 | 300 | 15,000 | unlimited | $89.99 |
+| Advanced | 7,500 | 350 | 20,000 | unlimited | $129.99 |
+| Pro | 10,000 | 500 | 25,000 | unlimited | $164.99 |
+| Elite | 15,000 | 600 | 35,000 | unlimited | $229.99 |
+| Business | 20,000 | 700 | 50,000 | unlimited | $284.99 |
+| Enterprise | 25,000 | 800 | 75,000 | unlimited | $339.99 |
+
+Monthly billing only — there is no annual interval. Migration `083` set the 12-tier ladder and its first prices ($19.99 … $529.99); `125` set the prices above — Lite, Nano and Micro each rose $5, Starter is unchanged, every other tier fell. Existing subscribers move to the new price from their next renewal automatically (`PriceMigrationProcessor`, hourly, `billing_price_change` e-mail); the hourly catalog sync mints the Stripe Prices. There is no operator step.
+
+**Pricing rule (operator decision, 2026-09-29).** The benchmark is AslDrop (19 tiers, 50 → 100,000 listings, tracking allowance ~2% of listings, 12-hourly sync, 3/10/unlimited store caps, unlimited automatic orders). Never price *below* the competitor at a shared listing tier — it invites a price war; equal or $1–2 above is fine, because at the same tier SellerHill gives 2.5–6× the tracking conversions, 4×/day sync, no store cap and a 30-day trial. The cost basis is the Aquiline tracking conversion at the Starter plan's $0.14/shipment (product data now comes from our own scraper, so the Keepa line in the 2026-08-21 model no longer applies). Worst-case margins — the seller spends their whole conversion quota, Stripe 2.9% + $0.30, ~$1 infrastructure + proxy share: Lite 78%, Nano 69%, Micro 53%, Starter 47%, Basic 43%, Plus 40%, Growth 48%, Advanced 57%, Pro 53%, Elite 59%, Business 61%, Enterprise 62%. The full reasoning and history are in CLAUDE.md ("Customer packages", "The priced meter").
 
 Prices, limits, ordering, active state, and Stripe price IDs are stored in billing catalog tables. Do not hardcode package values in application logic or UI.
+
+### Top-up packs (`billing_quota_addons`)
+
+Two dimensions are sold as one-time packs; both grant credits scoped to the current month that raise the effective limit (`resolveEffectiveLimit` = plan limit + credits) and are offered only to a seller who has actually reached the limit:
+
+| Pack slug | Grants | Price |
+|---|---:|---:|
+| `conversions-50` | 50 tracking conversions | $9.99 |
+| `conversions-100` | 100 tracking conversions | $19.99 |
+| `conversions-250` | 250 tracking conversions | $44.99 |
+| `conversions-500` | 500 tracking conversions | $79.99 |
+| `best-sellers-2500` | 2,500 Best Sellers products | $4.99 |
+| `best-sellers-10000` | 10,000 Best Sellers products | $14.99 |
+| `best-sellers-25000` | 25,000 Best Sellers products | $29.99 |
+
+Listings are not sold as a top-up (a level — more is a plan upgrade) and automatic orders are unlimited, so there is nothing to sell there.
 
 ## Database and migrations
 
 - `052_create_billing_foundation.sql` creates plans, prices, limits, customers, subscriptions, usage periods, listing reservations, AO reservations, and webhook inbox tables.
 - `053_billing_quota_enforcement.sql` adjusts reservation key types/nullability and adds idempotent quota reservation support.
-- `083_billing_plans_v2.sql` replaces the placeholder 3-plan catalog with the costed 11-tier ladder above, retires `scale` (deactivated, not deleted), and closes the annual prices. Superseded prices get `effective_to = CURRENT_DATE` rather than being edited, so historical subscriptions keep the price that applied when they were created.
+- `083_billing_plans_v2.sql` replaces the placeholder 3-plan catalog with the costed 12-tier ladder, retires `scale` (deactivated, not deleted), and closes the annual prices. Superseded prices get `effective_to = CURRENT_DATE` rather than being edited, so historical subscriptions keep the price that applied when they were created.
+- `085` moves the priced meter to `tracking_conversions_per_month`; `087`/`113` add the top-up packs and credits; `097` sets the 30-day trial.
+- `125_billing_prices_v3_unlimited_ao_best_sellers.sql` (2026-09-29) closes the `083` price rows and inserts the v3 prices above, sets `amazon_orders_per_month` to `-1` (unlimited) on every plan and the trial, adds the `best_sellers_products_per_month` limit per plan, seeds the three `best-sellers-*` packs, and creates the `best_sellers_views` table the Best Sellers allowance is counted from.
 - Plan limits are resolved from the current subscription and catalog. A user with **no subscription row at all** fails OPEN regardless of enforcement: `EntitlementState.NONE` is the pre-billing state, deliberately not the same as suspension, so turning enforcement on never locks out an account that has never been billed.
 
 Migrations run automatically through the existing API migration runner. Stripe identifiers (`billing_plans.provider_product_id`, `billing_plan_prices.provider_price_id`) remain nullable until the catalog is mirrored to Stripe — see the launch checklist below.
@@ -59,11 +83,23 @@ Active listings plus open listing reservations count toward the limit. Draft and
 
 ### Automatic orders
 
-AO quota is per user and per UTC calendar month. A reservation is idempotent by eBay order ID, so retries do not double-count. Reservation occurs before enqueue, consumption occurs only after Amazon confirms placement, and blocked/final-failed checkout releases the reservation. Existing placed orders and tracking continue even when the quota is exhausted. Exhaustion produces the shared `quota_exhausted` attention reason.
+Unlimited on every plan since `125`. The reservation machinery is kept (idempotent by eBay order ID, reserve before enqueue, consume after Amazon confirms placement, release on blocked/final failure) and simply never refuses while the limit is `-1`. A suspended account is still refused — suspension is status-driven, not a quota.
+
+### Tracking conversions
+
+Per billing period, counted from `orders.tracking_converted_at` — no reservation table, a failed conversion costs nothing. Exhaustion **degrades, never blocks**: conversion is skipped and the order is handled by the hold/pass-through rules in CLAUDE.md ("Tracking conversion").
+
+### Best Sellers products
+
+Per billing period, counted in products viewed (one list page = up to 50, cached or live alike) from the `best_sellers_views` table — one row per `(user_id, view_key, viewed_on)`, so the same page reopened on the same UTC day is not recounted. Exhaustion **truncates, never blocks**: the API cuts `list.items` server-side to what the allowance covers and returns `lockedCount`; the page renders that many blurred placeholder rows with an upgrade / top-up prompt. Client-side blurring of real data was rejected (devtools would show it). Enforcement off or no subscription → unmetered; suspended → everything locked. A separate hidden per-seller cap on daily cache MISSES (`bestSellers.dailyFetchLimit`, default 1000) protects proxy capacity and is not what sellers see.
+
+### Quota window
+
+All monthly meters follow the Stripe billing period (`resolveQuotaWindow`), not the calendar month — see "Billing backend" above.
 
 ## Customer UI
 
-The billing feature is under `apps/web/src/features/billing/`, rendered as its own routed page at `/:locale/billing` (sidebar entry near Settings) rather than a Settings drawer — `/:locale/settings/billing` and `/:locale/settings?drawer=billing` redirect there for old links. The page shows the current subscription/transition state, listing usage, monthly AO usage, and a simple monthly/yearly comparison. Upgrade/manage actions are unavailable until Stripe is configured. Landing pricing reads the public billing catalog rather than owning a second price/limit definition.
+The billing feature is under `apps/web/src/features/billing/`, rendered as its own routed page at `/:locale/billing` (sidebar entry near Settings) rather than a Settings drawer — `/:locale/settings/billing` and `/:locale/settings?drawer=billing` redirect there for old links. The page shows the current subscription/transition state and the three quota rings (listings, tracking conversions, Best Sellers products); automatic orders are unlimited and are not metered on the page. Upgrade/manage actions are unavailable until Stripe is configured. Landing pricing reads the public billing catalog rather than owning a second price/limit definition.
 
 All visible text is localized in English and Turkish. Do not add token-based pricing copy.
 

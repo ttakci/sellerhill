@@ -1067,6 +1067,10 @@ export const LandingPageComponent = ({
                         </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{plan.bestSellersDisplay}</span>
+                        </S.PlanFeature>
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.amazonOrdersDisplay}</span>
                         </S.PlanFeature>
                         {includedFeatures.map((feat) => (
@@ -1108,6 +1112,12 @@ export const LandingPageComponent = ({
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>
                             {t(`translation:landing.pricing.catalogFallback.${plan}.conversions`)}
+                          </span>
+                        </S.PlanFeature>
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.bestSellers`)}
                           </span>
                         </S.PlanFeature>
                         <S.PlanFeature>

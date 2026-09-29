@@ -1,0 +1,608 @@
+ Data Handling Compliance | eBay Developers Program 
+ Data Handling Compliance 
+ Developers Program 
+ Sign in 
+ Theme 
+ Join Overview 
+ About the Program 
+ Benefits 
+ Policies 
+ API License Agreement 
+ Develop Overview 
+ Get Started with APIs Overview 
+ Authorization 
+ Using eBay RESTful APIs 
+ API Call Limits 
+ API Deprecations 
+ API Status 
+ Selling Applications Listing Management 
+ Listing Metadata 
+ Account Management 
+ Order Management 
+ Offers and Leads 
+ Communication 
+ Marketing and Promotions 
+ Analytics and Reporting 
+ Other APIs 
+ App Settings & Insight 
+ Buying Applications Inventory Discovery & Refresh 
+ Marketing and Discounts 
+ Marketplace Metadata 
+ Checkout/Bid 
+ Communication 
+ Other APIs 
+ App Settings & Insight 
+ All guides 
+ SDKs & Widgets 
+ Tools Overview 
+ eBay Sandbox Overview 
+ Create Test Users 
+ Reset Password 
+ Sandbox Status 
+ Sandbox Site 
+ API Explorer 
+ GraphQL Explorer 
+ WSDL Pruner 
+ Grow Overview 
+ Application Growth Check 
+ Affiliate Program 
+ Loyalty Program 
+ Events 
+ Awards 
+ Updates Overview 
+ API Updates 
+ Newsletter 
+ Blog 
+ Survey 
+ Support Overview 
+ API Status 
+ FAQs 
+ Developer Community Forum 
+ Knowledge Base 
+ Developer Account Support 
+ Developer Technical Support 
+ Home Develop Data Handling Compliance 
+ Data Handling Compliance
+ We have updated our APIs to address requirements for third-party developers based in certain jurisdictions. Among those impacted are API users in China (and its territories), Russia, North Korea, Cuba, Iran, and Venezuela. 
+ Note: When retrieving username and financial information for U.S users, only a certain amount of unique user data can be retrieved over a given time period. Once this predetermined threshold is exceeded, an error will occur and the call will fail. For more information on this error, see API Response Status Errors (REST and GQL) and Error by Number (Trading API).
+ Username Replacement for U.S. Buyers and Sellers
+ Effective September 26, 2025, developers in affected marketplaces will no longer receive private username data for U.S users. Instead, username values for all U.S. buyers and sellers will be replaced with an immutable user ID when calling impacted APIs. 
+ This includes:
+ API responses : All API responses that give out username in one form or another, such as: payer, payee, login name, username, etc.
+ Notification payloads : All notification payloads that return username in one form or another, such as: payer, payee, login name, username, etc.
+ Note: In API and notification payloads where both username and userId are returned, users in affected regions will now see the userId value returned in both the fields.
+ In addition, impacted APIs will now support both username and userID values in the request body, parameters, fieldgroups, filters, etc. to support this change.
+ Please refer to the tables below for a list of all APIs and fields impacted by this update:
+ Traditional APIs: 
+ Request/Response 
+ API Name 
+ API Endpoint 
+ Field 
+ Request 
+ Trading API   
+ AddSecondChanceItem 
+ AddSecondChanceItemRequest.RecipientBidderUserID 
+ VerifyAddSecondChanceItem 
+ VerifyAddSecondChanceItemRequest.RecipientBidderUserID 
+ CompleteSale 
+ CompleteSaleRequest.FeedbackInfo.TargetUser 
+ GetBidderList
+ GetBidderListRequest.UserID 
+ GetFeedback
+ GetFeedbackRequest.UserID 
+ GetMessagePreferences
+ GetMessagePreferencesRequest.SellerID 
+ GetSellerList
+ GetSellerListRequest.MotorsDealerUsers.UserID 
+ GetStore
+ GetStoreRequest.UserID 
+ GetUser
+ GetUserRequest.UserID 
+ GetUserContactDetails 
+ GetUserContactDetailsRequest.ContactID 
+ GetUserContactDetailsRequest.RequesterID 
+ LeaveFeedback
+ LeaveFeedbackRequest.TargetUser 
+ RespondToFeedback 
+ RespondToFeedbackRequest.TargetUserID 
+ SetUserPreferences 
+ SetUserPreferencesRequest.UnpaidItemAssistancePreferences.ExcludedUser 
+ GetMemberMessages
+ GetMemberMessagesRequest.SenderID 
+ AddMemberMessageAAQToPartner
+ AddMemberMessageAAQToPartnerRequest.MemberMessage.RecipientID 
+ AddMemberMessageRTQ
+ AddMemberMessageRTQRequest.MemberMessage.RecipientID 
+ AddMemberMessagesAAQToBidder 
+ AddMemberMessagesAAQToBidderRequest.AddMemberMessagesAAQToBidderRequestContainer.MemberMessage.RecipientID 
+ Return Management API  
+ getUserReturns
+ getUserReturnsRequest.otherUserFilter.userId 
+ Response 
+ Trading API 
+ ConfirmIdentity 
+ ConfirmIdentityResponse.UserID 
+ GetAdFormatLeads
+ GetAdFormatLeadsResponse.AdFormatLead.UserID 
+ GetAllBidders 
+ GetAllBiddersResponse.HighBidder 
+ GetAllBiddersResponse.BidArray.Offer.User.UserID 
+ GetBestOffers 
+ GetBestOffersResponse.BestOfferArray.BestOffer.Buyer.UserID 
+ GetBestOffersResponse.ItemBestOffersArray.ItemBestOffers.BestOfferArray.BestOffer.Buyer.UserID 
+ GetBidderList 
+ GetBidderListResponse.Bidder.UserID 
+ GetBidderListResponse.BidItemArray.Item.Seller.UserID 
+ GetBidderListResponse.BidItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetItem 
+ GetItemResponse.Item.Seller.UserID 
+ GetItemResponse.Item.SellingStatus.HighBidder.UserID 
+ GetItemResponse.Item.Variations.Variation.SellingStatus.HighBidder.UserID 
+ GetItemsAwaitingFeedback 
+ GetItemsAwaitingFeedbackResponse.ItemsAwaitingFeedback.TransactionArray.Transaction.Buyer.UserID 
+  GetItemTransactions 
+ GetItemTransactionsResponse.TransactionArray.Transaction.MonetaryDetails.Payments.Payment.Payee 
+ GetItemTransactionsResponse.TransactionArray.Transaction.MonetaryDetails.Payments.Payment.Payer 
+ GetItemTransactionsResponse.Item.Seller.UserID 
+ GetItemTransactionsResponse.TransactionArray.Transaction.Buyer.UserID 
+ GetMyeBayBuying 
+ GetMyeBayBuyingResponse.FavoriteSearches.FavoriteSearch.SellerID 
+ GetMyeBayBuyingResponse.UserDefinedList.FavoriteSearches.FavoriteSearch.SellerID 
+ GetMyeBayBuyingResponse.FavoriteSearches.FavoriteSearch.SellerIDExclude 
+ GetMyeBayBuyingResponse.UserDefinedList.FavoriteSearches.FavoriteSearch.SellerIDExclude 
+ GetMyeBayBuyingResponse.BestOfferList.ItemArray.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.BidList.ItemArray.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.BidList.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetMyeBayBuyingResponse.DeletedFromLostList.ItemArray.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.DeletedFromLostList.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetMyeBayBuyingResponse.DeletedFromWonList.OrderTransactionArray.OrderTransaction.Order.TransactionArray.Transaction.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.DeletedFromWonList.OrderTransactionArray.OrderTransaction.Transaction.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.FavoriteSellers.FavoriteSeller.UserID 
+ GetMyeBayBuyingResponse.LostList.ItemArray.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.LostList.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetMyeBayBuyingResponse.UserDefinedList.FavoriteSellers.FavoriteSeller.UserID 
+ GetMyeBayBuyingResponse.WatchList.ItemArray.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.WatchList.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetMyeBayBuyingResponse.WonList.OrderTransactionArray.OrderTransaction.Order.TransactionArray.Transaction.Item.Seller.UserID 
+ GetMyeBayBuyingResponse.WonList.OrderTransactionArray.OrderTransaction.Transaction.Item.Seller.UserID 
+ GetMyeBaySelling 
+ GetMyeBaySellingResponse.ActiveList.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetMyeBaySellingResponse.ActiveList.ItemArray.Item.Variations.Variation.SellingStatus.HighBidder.UserID 
+ GetMyeBaySellingResponse.SoldList.OrderTransactionArray.OrderTransaction.Order.TransactionArray.Transaction.Buyer.UserID 
+ GetMyeBaySellingResponse.SoldList.OrderTransactionArray.OrderTransaction.Transaction.Buyer.UserID 
+ GetOrders 
+ GetOrdersResponse.OrderArray.Order.BuyerUserID 
+ GetOrdersResponse.OrderArray.Order.MonetaryDetails.Payments.Payment.Payee 
+ GetOrdersResponse.OrderArray.Order.MonetaryDetails.Payments.Payment.Payer 
+ GetOrdersResponse.OrderArray.Order.SellerUserID 
+ GetSellerEvents 
+ GetSellerEventsResponse.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetSellerEventsResponse.ItemArray.Item.Variations.Variation.SellingStatus.HighBidder.UserID 
+ GetSellerList 
+ GetSellerListResponse.ItemArray.Item.SellingStatus.HighBidder.UserID 
+ GetSellerListResponse.ItemArray.Item.Variations.Variation.SellingStatus.HighBidder.UserID 
+ GetSellerListResponse.Seller.UserID 
+ GetSellerTransactions 
+ GetSellerTransactionsResponse.TransactionArray.Transaction.MonetaryDetails.Payments.Payment.Payee 
+ GetSellerTransactionsResponse.TransactionArray.Transaction.MonetaryDetails.Payments.Payment.Payer 
+ GetSellerTransactionsResponse.Seller.UserID 
+ GetSellerTransactionsResponse.TransactionArray.Transaction.Buyer.UserID 
+ GetSellerTransactionsResponse.TransactionArray.Transaction.MonetaryDetails.Refunds.Refund.RefundTo 
+ GetUser 
+ GetUserResponse.User.UserID 
+ GetUserContactDetails 
+ GetUserContactDetailsResponse.UserID 
+ GetUserPreferences 
+ GetUserPreferencesResponse.UnpaidItemAssistancePreferences.ExcludedUser 
+ PlaceOffer 
+ PlaceOfferResponse.SellingStatus.HighBidder.UserID 
+ GetMyMessages 
+ GetMyMessagesResponse.Messages.Message.SendToName 
+ GetMyMessagesResponse.Messages.Message.Sender 
+ GetMyMessagesResponse.Messages.Message.RecipientUserID 
+ GetMemberMessages 
+ GetMemberMessagesResponse.MemberMessage.MemberMessageExchange.Question.SenderID 
+ GetMemberMessagesResponse.MemberMessage.MemberMessageExchange.Question.RecipientID 
+ Return Management API 
+ getReturnDetail 
+ getReturnDetaiResponse.ReturnDetail.returnHistory.author.userId 
+ getReturnDetailResponse.ReturnSummary.otherParty.userId 
+ getReturnDetailResponse.ReturnSummary.responseDue.party.userId 
+ getUserReturns 
+ getUserReturnsResponse.returns.otherParty.userId 
+ getUserReturnsResponse.returns.responseDue.party.userId 
+ Rest APIs:
+ API Family 
+ Request/Response 
+ API Name 
+ API Endpoint 
+ Fields 
+ Sell
+ Request
+ eDelivery International Shipping 
+ createPackage
+ buyerId 
+ Feedback API 
+ getFeedback
+ user_id 
+ respondToFeedback
+ recipientUserId 
+   Response
+ Feedback API 
+ getFeedback
+ userId 
+ Fulfillment 
+ getOrder
+ username 
+ sellerId 
+ getOrders
+ username 
+ sellerId 
+ getPaymentDispute
+ buyerUsername 
+ getPaymentDisputeSummaries
+ buyerUsername 
+ Finance 
+ getTransactions
+ username 
+ Identity 
+ getUser
+ username 
+ Negotiation 
+ sendOfferToInterestedBuyers
+ maskedUsername 
+ initiatedBy 
+ Post-Order Returns 
+ Get Return
+ buyerLoginName 
+ sellerLoginName 
+ Search Returns
+ buyerLoginName 
+ sellerLoginName 
+ Create Return Request
+ buyerLoginName 
+ sellerLoginName 
+ Post-Order Cancellation 
+ Get Cancellation
+ buyerLoginName 
+ sellerLoginName 
+ Find Cancellations
+ buyerLoginName 
+ sellerLoginName 
+ Post-Order Inquiry 
+ Search Inquiries
+ buyer 
+ seller 
+ Post-Order Case Management 
+ Search Cases
+ buyer 
+ seller 
+   Buy
+ Request
+ Feedback API 
+ getFeedback
+ user_id 
+ respondToFeedback
+ recipientUserId 
+ Response
+ Browse 
+ search
+ username 
+ searchByImage
+ username 
+ getItem
+ username 
+ getItemByLegacyId
+ username 
+ getItems
+ username 
+ getItemsByItemGroup
+ username 
+ eDelivery International Shipping 
+ getPackage
+ username 
+ Feedback API 
+ getFeedback
+ userId 
+ Identity 
+ getUser
+ username 
+ Notifications:
+ Notification Type 
+ Topic Name 
+ API Payload 
+ Fields 
+ Notifications via the new Notification Platform 
+ PLA_CAMPAIGN_BUDGET_STATUS 
+ N/A 
+ user.username
+ PRIORITY_LISTING_REVISION 
+ N/A 
+ seller.userName
+ MARKETPLACE_ACCOUNT_DELETION 
+ N/A 
+ username 
+ AUTHORIZATION_REVOCATION 
+ N/A 
+ username 
+ ITEM_AVAILABILITY 
+ N/A 
+ seller.username 
+ ITEM_PRICE_REVISION 
+ N/A 
+ seller.username
+ SELLER_STANDARDS_PROFILE_METRICS
+ N/A 
+ user.username
+ SELLER_CUSTOMER_SERVICE_METRIC_RATING 
+ N/A 
+ user.username 
+ LISTING_PREVIEW_CREATION_TASK_STATUS 
+ N/A 
+ user.username
+ BUYER_QUESTION 
+ N/A 
+ senderUserName 
+ N/A 
+ recipientUserName 
+ NEW_MESSAGE 
+ N/A 
+ senderUserName 
+ N/A 
+ recipientUserName 
+ Legacy Notifications 
+ Outbid 
+ GetItem 
+ N/A 
+ EndOfAuction 
+ GetItemTransactions 
+ N/A 
+ AuctionCheckoutComplete 
+ GetItemTransactions 
+ N/A 
+ CheckoutBuyerRequestsTotal 
+ GetItemTransactions 
+ N/A 
+ FeedbackForSeller 
+ GetFeedback 
+ N/A 
+ FixedPriceTransaction 
+ GetItemTransactions 
+ N/A 
+ AskSellerQuestion 
+ GetMemberMessages 
+ N/A 
+ ItemListed 
+ GetItem 
+ N/A 
+ BestOffer 
+ GetBestOffers 
+ N/A 
+ ItemRevised 
+ GetItem 
+ N/A 
+ MyMessageseBayMessageHeader 
+ GetMyMessages 
+ N/A 
+ MyMessagseeBayMessage 
+ GetMyMessages 
+ N/A 
+ MyMessagesM2MMessageHeader 
+ GetMyMessages 
+ N/A 
+ MyMessagesM2MMessage 
+ GetMyMessages 
+ N/A 
+ ItemSold 
+ GetItem 
+ N/A 
+ ItemClosed 
+ GetItem 
+ N/A 
+ ItemExtended 
+ GetItem 
+ N/A 
+ BidPlaced 
+ GetItem 
+ N/A 
+ BidReceived 
+ GetItem 
+ N/A 
+ ItemWon 
+ GetItem 
+ N/A 
+ ItemUnsold 
+ GetItem 
+ N/A 
+ FeedbackLeft 
+ GetFeedback 
+ N/A 
+ FeedbackStarChanged 
+ GetUser 
+ N/A 
+ BestOfferPlaced 
+ GetBestOffers 
+ N/A 
+ CounterOfferRecieved 
+ GetBestOffers 
+ N/A 
+ BestOfferDeclined 
+ GetBestOffers 
+ N/A 
+ FeedbackReceived 
+ GetFeedback 
+ N/A 
+ ItemMarkedShipped 
+ GetItemTransactions 
+ N/A 
+ MyMessagesHighPriorityMessage 
+ GetMyMessages 
+ N/A 
+ MyMessagesHighPriorityMessageHeader 
+ GetMyMessages 
+ N/A 
+ BidItemEndingSoon 
+ GetItem 
+ N/A 
+ Post Order Notifications 
+ EBPMyResponseDue
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPOtherPartyResponseDue 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPEscalatedCase 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPAppealedCase 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPPaymentDone 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPClosedCase
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ EBPOnHoldCase
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnCreated 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnSellerInfoOverdue 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnShipped 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnDelivered 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnRefundOverdue 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnEscalated 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ ReturnClosed 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ WebnextMobilePhotoSync 
+ N/A 
+ RecipientUserID 
+ BuyerCancelRequested 
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ OrderInquiryReminderForEscalation
+ N/A 
+ RecipientUserID 
+ N/A 
+ OtherPartyId 
+ Note: Feed files downloaded through the Sell Feed API will also be impacted by this change. 
+ Financial Data Handling for U.S. Buyers
+ Effective September 26, 2025, access to financial data related to U.S. buyers' payment methods and payment instruments will be limited to select developers only. For all other developers, any response field returning a U.S buyer’s payment details will have its values replaced with “CustomCode”.
+ Note: The data for non-US persons will continue to be returned without change. 
+ Please refer to the tables below for a list of all APIs and fields impacted by this update:
+ Traditional APIs:  
+ Request/Response 
+ API Name 
+ API Endpoint 
+ Field 
+ Response 
+ Trading API 
+ GetOrders 
+ OrderArray.Order.CheckoutStatus.PaymentInstrument 
+ OrderArray.Order.CheckoutStatus.PaymentMethod 
+ OrderArray.Order.PaymentMethods 
+ OrderArray.Order.TransactionArray.Transaction.Status.PaymentInstrument 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ GetSellerTransactions 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ REST APIs: 
+ API Family 
+ Request/Response 
+ API Name 
+ API Endpoint 
+ Fields 
+ Sell 
+ Response 
+ Fulfillment 
+ getOrder 
+ paymentMethod 
+ getOrders 
+ paymentMethod 
+ Feed 
+ Order task download 
+ PaymentInstrument 
+ PaymentMethod 
+ Notifications: 
+ Notification Type 
+ Topic Name 
+ API Payload 
+ Fields 
+ Legacy Notifications 
+ FixedPriceTransaction 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ AuctionCheckoutComplete 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ EndOfAuction 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ CheckoutBuyerRequestsTotal 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ ItemMarkedShipped 
+ GetItemTransactions 
+ TransactionArray.Transaction.Status.PaymentInstrument 
+ TransactionArray.Transaction.Status.PaymentMethodUsed 
+ Note: Feed files downloaded through the Sell Feed API will also be impacted by this change. 
+ Implementation Timeline
+ These changes will be effective from September 26, 2025, for applications from the countries listed above.
+ Related topics
+ Start Here 
+ API Documentation Feed API Browse API Marketing API Offer API Order API Marketplace Insights API Account API Inventory API Fulfillment API Finances API Marketing API Negotiation API Recommendation API Analytics API Metadata API Compliance API Logistics API Listing API Feed API Catalog API Identity API Taxonomy API Translation API Beta Translation API Expermental Analytics API 
+ Integration Guides Buying Integration Guide Selling Integration Guide 
+ Related Docs Sell API Buy API Commerce APIs Developer APIs 
+ Thank you for helping us to improve the eBay developer program.
+ While we are not able to respond directly to your comments, we will carefully review them to improve your experience with eBay developer program!
+ If you need help, contact Developer Technical Support .
+ 

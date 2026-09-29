@@ -24,6 +24,7 @@ export const DataTableComponent = <T,>({
   selectable,
   selectedRows,
   onSelectionChange,
+  isRowSelectable,
   bulkActions,
   bulkActionsPlaceholder,
   bulkValue,
@@ -117,6 +118,7 @@ export const DataTableComponent = <T,>({
             selectable={selectable}
             selectedRows={selectedRows}
             onSelectionChange={onSelectionChange}
+            isRowSelectable={isRowSelectable}
             emptyMessage={typeof resolvedEmpty === 'string' ? resolvedEmpty : undefined}
             emptyContent={typeof resolvedEmpty !== 'string' ? resolvedEmpty : undefined}
             sortColumn={sortColumn}

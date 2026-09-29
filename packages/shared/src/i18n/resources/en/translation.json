@@ -113,10 +113,12 @@
     "listings": "Listings",
     "ebayListings": "eBay Listings",
     "listingJobs": "Listing jobs",
+    "revisionHistory": "Revision history",
     "drafts": "Drafts",
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
+    "messages": "Messages",
     "stores": "Stores",
     "billing": "Billing",
     "settings": "Settings",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Affordable automation",
-        "description": "The complete professional automation set for a far lower monthly fee. Every feature is in every plan; plans only differ by listing and order volume.",
+        "description": "The complete professional automation set for a far lower monthly fee. Every feature is in every plan, automatic orders are unlimited, and plans differ only by listings, tracking conversions and Best Sellers browsing.",
         "cta": "See plans"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Pricing",
       "sectionTitle": "Affordable automation.",
-      "sectionSubtitle": "Every plan includes every feature. Plans differ only by active listings and monthly order volume, so features other tools keep for their top tiers are yours even on the smallest plan.",
+      "sectionSubtitle": "Every plan includes every feature. Plans differ by active listings, tracking conversions and your Best Sellers browsing allowance; automatic orders are unlimited on every plan, so features other tools keep for their top tiers are yours even on the smallest plan.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "mostPopular": "Most popular",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Unlimited automatic orders",
       "upToConversions": "{{limit}} tracking conversions / month",
       "unlimitedConversions": "Unlimited tracking conversions",
+      "upToBestSellers": "{{limit}} Best Sellers products / month",
+      "unlimitedBestSellers": "Unlimited Best Sellers browsing",
       "catalogError": "Live pricing couldn't be loaded right now. Plan overview shown below.",
       "included": {
         "groups": "Setting Groups & 12 listing templates",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Up to 500 active listings",
-          "orders": "Up to 100 automatic orders / month",
-          "conversions": "50 tracking conversions / month"
+          "orders": "Unlimited automatic orders",
+          "conversions": "50 tracking conversions / month",
+          "bestSellers": "2,500 Best Sellers products / month"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Up to 2,000 active listings",
-          "orders": "Up to 300 automatic orders / month",
-          "conversions": "150 tracking conversions / month"
+          "orders": "Unlimited automatic orders",
+          "conversions": "150 tracking conversions / month",
+          "bestSellers": "7,500 Best Sellers products / month"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Up to 5,000 active listings",
-          "orders": "Up to 600 automatic orders / month",
-          "conversions": "300 tracking conversions / month"
+          "orders": "Unlimited automatic orders",
+          "conversions": "300 tracking conversions / month",
+          "bestSellers": "15,000 Best Sellers products / month"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Up to 10,000 active listings",
-          "orders": "Up to 1,000 automatic orders / month",
-          "conversions": "500 tracking conversions / month"
+          "orders": "Unlimited automatic orders",
+          "conversions": "500 tracking conversions / month",
+          "bestSellers": "25,000 Best Sellers products / month"
         }
       }
     },

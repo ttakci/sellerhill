@@ -113,10 +113,12 @@
     "listings": "Angebote",
     "ebayListings": "eBay-Angebote",
     "listingJobs": "Angebotsaufträge",
+    "revisionHistory": "Änderungsverlauf",
     "drafts": "Entwürfe",
     "products": "Produkte",
     "inventory": "Inventar",
     "orders": "Bestellungen",
+    "messages": "Nachrichten",
     "stores": "Shops",
     "billing": "Abrechnung",
     "settings": "Einstellungen",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Automatisierung zu fairem Preis",
-        "description": "Das komplette professionelle Automatisierungspaket für eine deutlich niedrigere Monatsgebühr. Jede Funktion ist in jedem Tarif enthalten; die Tarife unterscheiden sich nur im Angebots- und Bestellvolumen.",
+        "description": "Das komplette professionelle Automatisierungspaket für eine deutlich niedrigere Monatsgebühr. Jede Funktion ist in jedem Tarif enthalten, automatische Bestellungen sind unbegrenzt; die Tarife unterscheiden sich nur in Angeboten, Sendungsnummern-Umwandlungen und Bestseller-Kontingent.",
         "cta": "Tarife ansehen"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Preise",
       "sectionTitle": "Automatisierung zu fairem Preis.",
-      "sectionSubtitle": "Jeder Tarif enthält jede Funktion. Die Tarife unterscheiden sich nur durch aktive Angebote und monatliches Bestellvolumen – Funktionen, die andere Tools für ihre höchsten Stufen reservieren, gehören also schon im kleinsten Tarif Ihnen.",
+      "sectionSubtitle": "Jeder Tarif enthält jede Funktion. Die Tarife unterscheiden sich durch aktive Angebote, Sendungsnummern-Umwandlungen und das Bestseller-Kontingent; automatische Bestellungen sind in jedem Tarif unbegrenzt – Funktionen, die andere Tools für ihre höchsten Stufen reservieren, gehören also schon im kleinsten Tarif Ihnen.",
       "billingNote": "Jederzeit kündbar. Preise verstehen sich ohne lokale Steuern, sofern zutreffend.",
       "perMonth": "/Monat",
       "mostPopular": "Am beliebtesten",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Unbegrenzte automatische Bestellungen",
       "upToConversions": "{{limit}} Sendungsnummern-Umwandlungen / Monat",
       "unlimitedConversions": "Unbegrenzte Sendungsnummern-Umwandlungen",
+      "upToBestSellers": "{{limit}} Bestseller-Produkte / Monat",
+      "unlimitedBestSellers": "Unbegrenztes Bestseller-Stöbern",
       "catalogError": "Die aktuellen Preise konnten gerade nicht geladen werden. Unten wird die Tarifübersicht angezeigt.",
       "included": {
         "groups": "Einstellungsgruppen und 12 Angebotsvorlagen",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Bis zu 500 aktive Angebote",
-          "orders": "Bis zu 100 automatische Bestellungen / Monat",
-          "conversions": "50 Sendungsnummern-Umwandlungen / Monat"
+          "orders": "Unbegrenzte automatische Bestellungen",
+          "conversions": "50 Sendungsnummern-Umwandlungen / Monat",
+          "bestSellers": "2,500 Bestseller-Produkte / Monat"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Bis zu 2,000 aktive Angebote",
-          "orders": "Bis zu 300 automatische Bestellungen / Monat",
-          "conversions": "150 Sendungsnummern-Umwandlungen / Monat"
+          "orders": "Unbegrenzte automatische Bestellungen",
+          "conversions": "150 Sendungsnummern-Umwandlungen / Monat",
+          "bestSellers": "7,500 Bestseller-Produkte / Monat"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Bis zu 5,000 aktive Angebote",
-          "orders": "Bis zu 600 automatische Bestellungen / Monat",
-          "conversions": "300 Sendungsnummern-Umwandlungen / Monat"
+          "orders": "Unbegrenzte automatische Bestellungen",
+          "conversions": "300 Sendungsnummern-Umwandlungen / Monat",
+          "bestSellers": "15,000 Bestseller-Produkte / Monat"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Bis zu 10,000 aktive Angebote",
-          "orders": "Bis zu 1,000 automatische Bestellungen / Monat",
-          "conversions": "500 Sendungsnummern-Umwandlungen / Monat"
+          "orders": "Unbegrenzte automatische Bestellungen",
+          "conversions": "500 Sendungsnummern-Umwandlungen / Monat",
+          "bestSellers": "25,000 Bestseller-Produkte / Monat"
         }
       }
     },

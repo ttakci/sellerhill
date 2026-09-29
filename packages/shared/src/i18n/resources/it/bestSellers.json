@@ -1,0 +1,85 @@
+{
+  "bestSellers": {
+    "menu": "Più venduti",
+    "title": "Più venduti su Amazon",
+    "subtitle": "Sfoglia le classifiche di Amazon, seleziona i prodotti che ti interessano e inviali ad Aggiungi inserzioni in un solo passaggio.",
+    "listTypes": {
+      "best_sellers": "Più venduti",
+      "new_releases": "Novità",
+      "movers_and_shakers": "In forte crescita",
+      "most_wished_for": "Più desiderati",
+      "most_gifted": "Più regalati"
+    },
+    "listTypesAriaLabel": "Classifica Amazon",
+    "allCategories": "Tutti i reparti",
+    "categoryPlaceholder": "Scegli una categoria",
+    "categorySearchPlaceholder": "Cerca categorie",
+    "categoryNoResults": "Nessuna categoria corrispondente",
+    "backToAllCategories": "Torna a tutte le categorie",
+    "selectAllOnPage": "Seleziona tutto in questa pagina",
+    "selected_one": "{{count}} prodotto selezionato",
+    "selected_many": "{{count}} prodotti selezionati",
+    "selected_other": "{{count}} prodotti selezionati",
+    "listSelected": "Metti in vendita la selezione ({{count}})",
+    "clearSelection": "Svuota",
+    "rank": "N. {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Nessuna valutazione",
+    "allowance": "Ti restano {{remaining}} prodotti su {{limit}} in questo periodo",
+    "allowanceUnlimited": "Visualizzazioni prodotto illimitate",
+    "allowanceHint": "Ogni prodotto che vedi conta una volta per periodo; riaprire oggi la stessa classifica non viene contato due volte.",
+    "locked": {
+      "title_one": "{{count}} altro prodotto in questa pagina è oltre il limite mensile del tuo piano",
+      "title_many": "Altri {{count}} prodotti in questa pagina sono oltre il limite mensile del tuo piano",
+      "title_other": "Altri {{count}} prodotti in questa pagina sono oltre il limite mensile del tuo piano",
+      "description": "Passa a un piano superiore o acquista un pacchetto aggiuntivo per vederli. Il limite si rinnova a ogni periodo di fatturazione.",
+      "cta": "Vedi piani e pacchetti",
+      "rowLabel": "Prodotto bloccato"
+    },
+    "table": {
+      "rank": "Posizione",
+      "product": "Prodotto",
+      "price": "Prezzo",
+      "rating": "Valutazione",
+      "reviews": "Recensioni"
+    },
+    "states": {
+      "loading": {
+        "title": "Caricamento della classifica",
+        "description": "Recupero della classifica più recente da Amazon."
+      },
+      "empty": {
+        "title": "Nessun prodotto in questa pagina",
+        "description": "Questa classifica non ha nulla da mostrare qui. Prova un’altra categoria o un’altra classifica."
+      },
+      "notFound": {
+        "title": "Questa categoria non è disponibile",
+        "description": "Amazon non offre questa classifica per la categoria scelta. Torna a tutte le categorie o scegline un’altra."
+      },
+      "blocked": {
+        "title": "Amazon non ha risposto questa volta",
+        "description": "La classifica non è stata letta in questo momento. Riprova tra poco."
+      },
+      "retry": "Riprova",
+      "unavailable": {
+        "title": "Più venduti è temporaneamente non disponibile",
+        "description": "Il servizio delle classifiche non è raggiungibile al momento. Le tue inserzioni e i tuoi ordini non ne risentono."
+      },
+      "disabled": {
+        "title": "Più venduti non è attivo su questo account",
+        "description": "La consultazione delle classifiche Amazon è disattivata per il tuo account. Contatta l’assistenza se ti aspettavi di vederla."
+      },
+      "limitReached": {
+        "title": "Troppi caricamenti di classifica in tempo reale oggi",
+        "description": "Le classifiche già caricate oggi restano disponibili: passa a una di esse o riprova domani."
+      }
+    },
+    "errors": {
+      "disabled": "Più venduti non è attivo su questo account.",
+      "dailyLimitReached": "Troppi caricamenti di classifica in tempo reale oggi. Riprova domani.",
+      "unavailable": "Più venduti è temporaneamente non disponibile.",
+      "unsupportedMarketplace": "Questo marketplace non è supportato."
+    }
+  }
+}
