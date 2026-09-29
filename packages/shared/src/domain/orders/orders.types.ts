@@ -30,6 +30,36 @@ export enum OrderFulfillmentState {
   MANUAL = 'manual',
 }
 
+/**
+ * ONE seller-facing status per order, derived from columns that already exist.
+ * Answers "what is happening to this order, and do I need to act?" — which
+ * neither the eBay status (`OrderStatus`) nor `OrderFulfillmentState` did on
+ * its own. Priority order = enum order: `deriveOrderStage` returns the FIRST
+ * matching member. See docs/superpowers/specs/2026-09-29-order-stages-design.md.
+ */
+export enum OrderStage {
+  AMAZON_CANCELLED = 'amazon_cancelled',
+  CANCELLED = 'cancelled',
+  DELIVERED = 'delivered',
+  TEST_RUN = 'test_run',
+  SHIPPED = 'shipped',
+  TRACKING_HELD = 'tracking_held',
+  BUYING = 'buying',
+  PURCHASED = 'purchased',
+  PURCHASE_BLOCKED = 'purchase_blocked',
+  AWAITING_PAYMENT = 'awaiting_payment',
+  TO_PURCHASE = 'to_purchase',
+}
+
+/** The list page's counted tabs — groupings over `OrderStage`. */
+export enum OrderStageTab {
+  ALL = 'all',
+  ACTION = 'action',
+  TO_PURCHASE = 'to_purchase',
+  IN_PROGRESS = 'in_progress',
+  DONE = 'done',
+}
+
 export enum OrderStatus {
   COMPLETED = 'completed',
   SHIPPED = 'shipped',
