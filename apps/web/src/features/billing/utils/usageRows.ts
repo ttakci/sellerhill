@@ -1,11 +1,11 @@
 // apps/web/src/features/billing/utils/usageRows.ts
 //
-// The one place the three-meter usage list is assembled from a billing summary.
+// The one place the four-meter usage list is assembled from a billing summary.
 // Shared by the Billing page (its "Usage this period" block) and the top-right
 // profile dropdown (a glanceable shortcut) so the two surfaces can never show
 // different figures for the same quota.
 
-import { BillingLimitKey, type BillingSummaryDto } from '@repo/shared';
+import { BILLING_UNLIMITED, BillingLimitKey, type BillingSummaryDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
 import { formatBillingLimit, planLimitValue, usageBarValue, usageBarVariant } from './usage';
@@ -15,14 +15,25 @@ export type { BillingUsageRow } from './usageRows.types';
 
 /**
  * Order matters: listings first (a level), then tracking conversions (the
- * metered, priced dimension), then automatic orders (a ceiling). Same order as
- * the plan cards on the Billing page.
+ * metered, priced dimension), then Best Sellers products (the browsing
+ * allowance, also per billing period), then automatic orders — unlimited on
+ * every plan since 2026-09-29, so it closes the list as the one meter that
+ * never fills. Same order as the plan cards on the Billing page.
  */
 const USAGE_LIMIT_KEYS: readonly BillingLimitKey[] = [
   BillingLimitKey.LISTINGS_PER_MONTH,
   BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+  BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
   BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
 ];
+
+/**
+ * Centre glyph of an unlimited meter's ring. A universal symbol, not copy (the
+ * same class of exception as the em dash used for an empty value): the ring
+ * is `sm` and "Unlimited" does not fit inside it — the word is rendered
+ * beside the ring, from i18n.
+ */
+const UNLIMITED_RING_GLYPH = '∞';
 
 /**
  * Build the per-meter display rows for a billing summary.
@@ -54,8 +65,18 @@ export function buildBillingUsageRows(
     const labelKey = `billing:billing.limits.${key}.label`;
     const limitDisplay = formatBillingLimit({ limit, unlimitedLabel, disabledLabel, locale });
     const usedDisplay = new Intl.NumberFormat(locale).format(used);
-    const ofDisplay = t('billing:billing.limits.of', { used: usedDisplay, limit: limitDisplay });
-    const ringLabel = limit > 0 ? `${Math.min(999, Math.round((used / limit) * 100))}%` : '—';
+    const isUnlimited = limit === BILLING_UNLIMITED;
+    // An unlimited meter has no fraction to show: no percentage in the ring,
+    // no bar fill (`usageBarValue` already returns 0 for -1), and "used ·
+    // Unlimited" instead of "used of -1".
+    const ofDisplay = isUnlimited
+      ? t('billing:billing.limits.usedUnlimited', { used: usedDisplay })
+      : t('billing:billing.limits.of', { used: usedDisplay, limit: limitDisplay });
+    const ringLabel = isUnlimited
+      ? UNLIMITED_RING_GLYPH
+      : limit > 0
+        ? `${Math.min(999, Math.round((used / limit) * 100))}%`
+        : '—';
     rows.push({
       ringLabel,
       labelKey,

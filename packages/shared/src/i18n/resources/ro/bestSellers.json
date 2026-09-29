@@ -26,8 +26,17 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Fără evaluare încă",
-    "allowance": "Astăzi mai aveți {{remaining}} din {{limit}} încărcări de listă",
-    "allowanceHint": "Listele încărcate deja astăzi de oricine sunt disponibile imediat și nu se contorizează.",
+    "allowance": "Mai aveți {{remaining}} din {{limit}} produse în această perioadă",
+    "allowanceUnlimited": "Vizualizări de produse nelimitate",
+    "allowanceHint": "Fiecare produs afișat se contorizează o dată pe perioadă; redeschiderea aceleiași liste astăzi nu se numără de două ori.",
+    "locked": {
+      "title_one": "Încă {{count}} produs de pe această pagină depășește alocarea lunară a planului dvs.",
+      "title_few": "Încă {{count}} produse de pe această pagină depășesc alocarea lunară a planului dvs.",
+      "title_other": "Încă {{count}} de produse de pe această pagină depășesc alocarea lunară a planului dvs.",
+      "description": "Treceți la un plan superior sau cumpărați un pachet suplimentar pentru a le vedea. Alocarea se reînnoiește cu fiecare perioadă de facturare.",
+      "cta": "Vezi planurile și pachetele",
+      "rowLabel": "Produs blocat"
+    },
     "table": {
       "rank": "Loc",
       "product": "Produs",
@@ -62,13 +71,13 @@
         "description": "Răsfoirea listelor Amazon este dezactivată pentru contul dvs. Contactați asistența dacă vă așteptați să o vedeți."
       },
       "limitReached": {
-        "title": "Ați folosit încărcările de listă de astăzi ({{used}}/{{limit}})",
-        "description": "Listele deja încărcate astăzi rămân disponibile — treceți la una dintre ele sau reveniți mâine."
+        "title": "Prea multe încărcări live de liste astăzi",
+        "description": "Listele deja încărcate astăzi rămân disponibile — treceți la una dintre ele sau încercați din nou mâine."
       }
     },
     "errors": {
       "disabled": "Cele mai vândute nu este activat pentru acest cont.",
-      "dailyLimitReached": "Încărcările de listă de astăzi s-au epuizat.",
+      "dailyLimitReached": "Prea multe încărcări live de liste astăzi. Încercați din nou mâine.",
       "unavailable": "Cele mai vândute este temporar indisponibil.",
       "unsupportedMarketplace": "Această piață nu este acceptată."
     }

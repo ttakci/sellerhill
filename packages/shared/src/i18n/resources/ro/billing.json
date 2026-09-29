@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Comenzi automate",
         "unit": "comenzi",
-        "description": "Numărul maxim de comenzi Amazon plasate pentru dvs. (automat sau asociate manual) pe lună."
+        "description": "Comenzi Amazon plasate pentru dvs. (automat sau asociate manual). Nelimitate în fiecare plan."
       },
       "unlimited": "Nelimitat",
       "disabled": "Nu este inclus",
       "of": "{{used}} din {{limit}}",
       "used": "{{used}} utilizate",
+      "usedUnlimited": "{{used}} utilizate · Nelimitat",
       "remaining": "{{remaining}} rămase",
       "exceeded": "Limită depășită",
       "tracking_conversions_per_month": {
         "label": "Conversii de urmărire",
         "unit": "conversii",
         "description": "Câte expedieri pe lună primesc un număr de urmărire convertit, astfel încât cumpărătorul să nu vadă niciodată furnizorul dvs."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Produse Cele mai vândute",
+        "unit": "produse",
+        "description": "Câte produse puteți vizualiza pe pagina Cele mai vândute pe perioadă de facturare, din liste din cache și din liste live deopotrivă."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Aveți nevoie de mai mult luna aceasta?",
-      "subtitle": "Ați folosit conversiile lunare de urmărire. Suplimentați-le pentru a vă ține furnizorul ascuns până la resetarea lunii.",
+      "subtitle": "Ați atins o limită lunară. Suplimentați pentru a continua până la reînnoirea perioadei de facturare.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Ați folosit conversiile lunare de urmărire. Suplimentați-le pentru a vă ține furnizorul ascuns până la reînnoirea perioadei.",
+        "best_sellers_products_per_month": "Ați folosit alocarea lunară Cele mai vândute. Suplimentați-o pentru a continua să răsfoiți listele Amazon până la reînnoirea perioadei."
+      },
       "buy": "Cumpără",
       "note": "O suplimentare se aplică doar lunii calendaristice curente, motiv pentru care este oferită la atingerea limitei, nu în avans. Alocarea planului dvs. se resetează pe 1."
     }

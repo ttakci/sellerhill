@@ -25,8 +25,16 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "No rating yet",
-    "allowance": "{{remaining}} of {{limit}} list loads left today",
-    "allowanceHint": "Lists anyone loaded today are already available and do not count.",
+    "allowance": "{{remaining}} of {{limit}} products left this period",
+    "allowanceUnlimited": "Unlimited product views",
+    "allowanceHint": "Every product you see counts once per period; the same list opened again today is not counted twice.",
+    "locked": {
+      "title_one": "{{count}} more product on this page is outside your plan's monthly allowance",
+      "title_other": "{{count}} more products on this page are outside your plan's monthly allowance",
+      "description": "Upgrade your plan or buy a top-up pack to see them. Your allowance renews with each billing period.",
+      "cta": "See plans and top-ups",
+      "rowLabel": "Locked product"
+    },
     "table": {
       "rank": "Rank",
       "product": "Product",
@@ -61,13 +69,13 @@
         "description": "Browsing Amazon lists is switched off for your account. Contact support if you expected to see it."
       },
       "limitReached": {
-        "title": "You have used today's list loads ({{used}}/{{limit}})",
-        "description": "Lists already loaded today are still available — switch to one of them, or come back tomorrow."
+        "title": "Too many live list loads today",
+        "description": "Lists already loaded today are still available — switch to one of them, or try again tomorrow."
       }
     },
     "errors": {
       "disabled": "Best Sellers is not enabled on this account.",
-      "dailyLimitReached": "Today's list loads are used up.",
+      "dailyLimitReached": "Too many live list loads today. Try again tomorrow.",
       "unavailable": "Best Sellers is temporarily unavailable.",
       "unsupportedMarketplace": "This marketplace is not supported."
     }

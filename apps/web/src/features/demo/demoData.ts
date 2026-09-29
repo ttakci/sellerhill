@@ -7,6 +7,7 @@ import {
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
   BestSellersListType,
+  BILLING_UNLIMITED,
   BillingInterval,
   BillingLimitKey,
   BillingProvider,
@@ -404,6 +405,10 @@ function demoRating(index: number): { average: number; count: number } {
   };
 }
 
+/** Best Sellers products viewed this period by the demo account, against Growth's allowance. */
+const DEMO_BEST_SELLERS_USED = 1240;
+const DEMO_BEST_SELLERS_LIMIT = 15_000;
+
 /**
  * The Best Sellers page in demo mode: the same eleven sample products, ranked,
  * under whichever list and category the visitor picks. The category tree is
@@ -459,7 +464,17 @@ export function buildDemoBestSellers(listType: BestSellersListType, category: st
     },
     cachedAt: isoHoursAgo(2),
     fetchedAt: isoHoursAgo(2),
-    allowance: { used: 0, limit: 100, remaining: 100 },
+    // The Growth demo account, mid-period: the same figures as the billing
+    // summary's Best Sellers quota, so the meter here and the ring on the
+    // billing page can never disagree. Nothing is locked — the demo never
+    // withholds a product.
+    allowance: {
+      used: DEMO_BEST_SELLERS_USED,
+      limit: DEMO_BEST_SELLERS_LIMIT,
+      remaining: DEMO_BEST_SELLERS_LIMIT - DEMO_BEST_SELLERS_USED,
+      creditValue: 0,
+    },
+    lockedCount: 0,
   };
 }
 
@@ -1506,10 +1521,10 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
 const MICROS = 1_000_000;
 
 /**
- * One demo catalog plan. The automatic-order ceiling is DERIVED as 2x the
- * conversion quota rather than passed in, for the same reason migration 085
- * derives it in SQL: two numbers that must stay in a fixed ratio should not be
- * two places to get it wrong.
+ * One demo catalog plan. Automatic orders are UNLIMITED on every plan (operator
+ * decision 2026-09-29), so that limit is written as `BILLING_UNLIMITED` rather
+ * than passed in; the Best Sellers browsing allowance (products viewable per
+ * billing period) is the fourth metered dimension.
  */
 function plan(
   slug: string,
@@ -1518,6 +1533,7 @@ function plan(
   monthly: number,
   listings: number,
   conversions: number,
+  bestSellers: number,
   order: number
 ): BillingPlanWithPricingDto {
   const id = `demo-plan-${slug}`;
@@ -1549,36 +1565,41 @@ function plan(
         id: `${id}-l3`, planId: id, limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
         limitValue: conversions, unit: 'conversions', createdAt: stamp, updatedAt: stamp,
       },
+      [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: {
+        id: `${id}-l4`, planId: id, limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        limitValue: bestSellers, unit: 'products', createdAt: stamp, updatedAt: stamp,
+      },
       [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: {
         id: `${id}-l2`, planId: id, limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
-        limitValue: conversions * 2, unit: 'orders', createdAt: stamp, updatedAt: stamp,
+        limitValue: BILLING_UNLIMITED, unit: 'orders', createdAt: stamp, updatedAt: stamp,
       },
     },
   };
 }
 
 /*
- * Mirrors the real catalog (migrations 083 + 085): twelve monthly tiers, no
- * annual interval, and the automatic-order ceiling derived as 2x the
- * conversion quota. The demo showed the retired three-plan catalog at its old
- * prices, so a visitor was quoted figures the product no longer sells.
+ * Mirrors the real catalog (2026-09-29 prices): twelve monthly tiers, no
+ * annual interval, unlimited automatic orders everywhere, and a Best Sellers
+ * browsing allowance per tier. The demo once showed the retired three-plan
+ * catalog at its old prices, so a visitor was quoted figures the product no
+ * longer sells — keep this list aligned with the live catalog.
  *
  * Names and descriptions come from the `billing` i18n namespace at render time,
  * exactly as the live catalog's do, so the strings here are only fallbacks.
  */
 export const DEMO_BILLING_PLANS: BillingPlanWithPricingDto[] = [
-  plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 19.99, 200, 25, 1),
-  plan('nano', 'Nano', 'For testing the waters with a focused product set.', 24.99, 500, 50, 2),
-  plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 29.99, 1000, 100, 3),
-  plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 4),
-  plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 59.99, 3000, 200, 5),
-  plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 84.99, 4000, 250, 6),
-  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 104.99, 5000, 300, 7),
-  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 159.99, 7500, 350, 8),
-  plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 179.99, 10000, 500, 9),
-  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 319.99, 15000, 600, 10),
-  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 429.99, 20000, 700, 11),
-  plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 529.99, 25000, 800, 12),
+  plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 24.99, 200, 25, 1_500, 1),
+  plan('nano', 'Nano', 'For testing the waters with a focused product set.', 29.99, 500, 50, 2_500, 2),
+  plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 34.99, 1000, 100, 5_000, 3),
+  plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 7_500, 4),
+  plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 54.99, 3000, 200, 10_000, 5),
+  plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 64.99, 4000, 250, 12_500, 6),
+  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 89.99, 5000, 300, 15_000, 7),
+  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 129.99, 7500, 350, 20_000, 8),
+  plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 164.99, 10000, 500, 25_000, 9),
+  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 229.99, 15000, 600, 35_000, 10),
+  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 284.99, 20000, 700, 50_000, 11),
+  plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 339.99, 25000, 800, 75_000, 12),
 ];
 
 export const DEMO_BILLING_CATALOG: BillingCatalogDto = {
@@ -1638,7 +1659,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
         periodStart,
         periodEnd,
         usedQty: 168,
-        limitValueSnapshot: 250,
+        limitValueSnapshot: BILLING_UNLIMITED,
         status: BillingUsagePeriodStatus.OPEN,
         closedAt: null,
         createdAt: periodStart,
@@ -1669,10 +1690,16 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
         limitValue: 300,
       },
       {
+        limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        used: DEMO_BEST_SELLERS_USED,
+        creditValue: 0,
+        limitValue: DEMO_BEST_SELLERS_LIMIT,
+      },
+      {
         limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
         used: 291,
         creditValue: 0,
-        limitValue: 600,
+        limitValue: BILLING_UNLIMITED,
       },
     ],
     enforcementEnabled: true,

@@ -55,6 +55,8 @@ export interface DataTableProps<T> {
   selectedRows?: T[];
   /** Callback when selection changes */
   onSelectionChange?: (selectedRows: T[]) => void;
+  /** See `TableProps.isRowSelectable` — a placeholder row gets no checkbox and is skipped by select-all. */
+  isRowSelectable?: (row: T) => boolean;
   /** Bulk action options for selected rows */
   bulkActions?: BulkAction<T>[];
   /** Placeholder text for bulk actions dropdown */
@@ -118,6 +120,7 @@ export interface DataTableComponentProps<T> {
   selectable?: boolean;
   selectedRows?: T[];
   onSelectionChange?: (selectedRows: T[]) => void;
+  isRowSelectable?: (row: T) => boolean;
   bulkActions?: BulkAction<T>[];
   bulkActionsPlaceholder?: string;
   bulkValue: string | number;

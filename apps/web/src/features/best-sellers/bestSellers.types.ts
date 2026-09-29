@@ -60,11 +60,15 @@ export enum BestSellersViewState {
   UNAVAILABLE = 'unavailable',
   /** The operator switched the feature off for this account (HTTP 404). */
   DISABLED = 'disabled',
-  /** Today's per-seller fetch allowance is spent (HTTP 429). */
+  /**
+   * The platform's hidden per-seller cap on LIVE list fetches for the day is
+   * spent (HTTP 429). An anti-abuse brake on proxy capacity, not the seller's
+   * product allowance — that one never refuses, it locks rows instead.
+   */
   LIMIT_REACHED = 'limit_reached',
 }
 
-/** Body of a refused request — `message` is an i18n key, `allowance` today's meter (429 only). */
+/** Body of a refused request — `message` is an i18n key, `allowance` the period's product meter (429 only). */
 export interface BestSellersRefusalBody {
   message?: string;
   allowance?: BestSellersBrowseAllowanceDto;

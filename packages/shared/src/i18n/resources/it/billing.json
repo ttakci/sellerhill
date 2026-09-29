@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Ordini automatici",
         "unit": "ordini",
-        "description": "Numero massimo di ordini Amazon effettuati per te (automaticamente o collegati a mano) al mese."
+        "description": "Ordini Amazon effettuati per te (automaticamente o collegati a mano). Illimitati in ogni piano."
       },
       "unlimited": "Illimitato",
       "disabled": "Non incluso",
       "of": "{{used}} di {{limit}}",
       "used": "{{used}} usati",
+      "usedUnlimited": "{{used}} usati · Illimitato",
       "remaining": "{{remaining}} rimanenti",
       "exceeded": "Limite superato",
       "tracking_conversions_per_month": {
         "label": "Conversioni del tracciamento",
         "unit": "conversioni",
         "description": "Quante spedizioni al mese ricevono un numero di tracciamento convertito, così l'acquirente non vede mai il tuo fornitore."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Prodotti Più venduti",
+        "unit": "prodotti",
+        "description": "Quanti prodotti puoi visualizzare nella pagina Più venduti per periodo di fatturazione, sia da classifiche in cache sia in tempo reale."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Ti serve di più questo mese?",
-      "subtitle": "Hai usato le conversioni del tracciamento mensili. Ricarica per continuare a nascondere il tuo fornitore fino al rinnovo del mese.",
+      "subtitle": "Hai raggiunto un limite mensile. Ricarica per continuare fino al rinnovo del periodo di fatturazione.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Hai usato le conversioni del tracciamento mensili. Ricarica per continuare a nascondere il tuo fornitore fino al rinnovo del periodo.",
+        "best_sellers_products_per_month": "Hai usato il limite mensile di Più venduti. Ricarica per continuare a sfogliare le classifiche Amazon fino al rinnovo del periodo."
+      },
       "buy": "Acquista",
       "note": "Una ricarica vale solo per il mese di calendario in corso, ed è per questo che viene proposta quando raggiungi il limite e non in anticipo. La quota del tuo piano si azzera il 1° del mese."
     }

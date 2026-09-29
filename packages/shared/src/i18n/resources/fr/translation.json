@@ -557,7 +557,7 @@
       },
       "price": {
         "title": "Une automatisation abordable",
-        "description": "L'ensemble complet de l'automatisation professionnelle pour un abonnement mensuel bien plus bas. Toutes les fonctionnalités sont dans tous les forfaits ; les forfaits ne diffèrent que par le volume d'annonces et de commandes.",
+        "description": "L'ensemble complet de l'automatisation professionnelle pour un abonnement mensuel bien plus bas. Toutes les fonctionnalités sont dans tous les forfaits, les commandes automatiques sont illimitées ; les forfaits ne diffèrent que par les annonces, les conversions de suivi et la consultation des Meilleures ventes.",
         "cta": "Voir les forfaits"
       }
     },
@@ -812,7 +812,7 @@
     "pricing": {
       "eyebrow": "Tarifs",
       "sectionTitle": "Une automatisation abordable.",
-      "sectionSubtitle": "Chaque forfait inclut toutes les fonctionnalités. Les forfaits ne diffèrent que par les annonces actives et le volume mensuel de commandes : les fonctionnalités que d'autres outils réservent à leurs forfaits supérieurs sont à vous, même avec le plus petit forfait.",
+      "sectionSubtitle": "Chaque forfait inclut toutes les fonctionnalités. Les forfaits diffèrent par les annonces actives, les conversions de suivi et le quota de consultation des Meilleures ventes ; les commandes automatiques sont illimitées dans tous les forfaits, si bien que les fonctionnalités que d'autres outils réservent à leurs forfaits supérieurs sont à vous, même avec le plus petit.",
       "billingNote": "Résiliable à tout moment. Les prix s'entendent hors taxes locales le cas échéant.",
       "perMonth": "/mois",
       "mostPopular": "Le plus populaire",
@@ -826,6 +826,8 @@
       "unlimitedOrders": "Commandes automatiques illimitées",
       "upToConversions": "{{limit}} conversions de suivi / mois",
       "unlimitedConversions": "Conversions de suivi illimitées",
+      "upToBestSellers": "{{limit}} produits Meilleures ventes / mois",
+      "unlimitedBestSellers": "Consultation illimitée des Meilleures ventes",
       "catalogError": "Les tarifs en direct n'ont pas pu être chargés pour le moment. Aperçu des forfaits ci-dessous.",
       "included": {
         "groups": "Groupes de paramètres et 12 modèles d'annonces",
@@ -839,28 +841,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Jusqu'à 500 annonces actives",
-          "orders": "Jusqu'à 100 commandes automatiques / mois",
-          "conversions": "50 conversions de suivi / mois"
+          "orders": "Commandes automatiques illimitées",
+          "conversions": "50 conversions de suivi / mois",
+          "bestSellers": "2,500 produits Meilleures ventes / mois"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Jusqu'à 2,000 annonces actives",
-          "orders": "Jusqu'à 300 commandes automatiques / mois",
-          "conversions": "150 conversions de suivi / mois"
+          "orders": "Commandes automatiques illimitées",
+          "conversions": "150 conversions de suivi / mois",
+          "bestSellers": "7,500 produits Meilleures ventes / mois"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Jusqu'à 5,000 annonces actives",
-          "orders": "Jusqu'à 600 commandes automatiques / mois",
-          "conversions": "300 conversions de suivi / mois"
+          "orders": "Commandes automatiques illimitées",
+          "conversions": "300 conversions de suivi / mois",
+          "bestSellers": "15,000 produits Meilleures ventes / mois"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Jusqu'à 10,000 annonces actives",
-          "orders": "Jusqu'à 1,000 commandes automatiques / mois",
-          "conversions": "500 conversions de suivi / mois"
+          "orders": "Commandes automatiques illimitées",
+          "conversions": "500 conversions de suivi / mois",
+          "bestSellers": "25,000 produits Meilleures ventes / mois"
         }
       }
     },

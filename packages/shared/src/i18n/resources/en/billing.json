@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Automatic orders",
         "unit": "orders",
-        "description": "Maximum Amazon orders placed for you (automatically or linked by hand) per month."
+        "description": "Amazon orders placed for you (automatically or linked by hand). Unlimited on every plan."
       },
       "unlimited": "Unlimited",
       "disabled": "Not included",
       "of": "{{used}} of {{limit}}",
       "used": "{{used}} used",
+      "usedUnlimited": "{{used}} used · Unlimited",
       "remaining": "{{remaining}} remaining",
       "exceeded": "Limit exceeded",
       "tracking_conversions_per_month": {
         "label": "Tracking conversions",
         "unit": "conversions",
         "description": "How many shipments per month get a converted tracking number, so the buyer never sees your supplier."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Best Sellers products",
+        "unit": "products",
+        "description": "How many products you can view on the Best Sellers page per billing period, from cached and live lists alike."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Need more this month?",
-      "subtitle": "You have used your monthly tracking conversions. Top up to keep hiding your supplier until the month resets.",
+      "subtitle": "You have reached a monthly limit. Top up to keep going until your billing period renews.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "You have used your monthly tracking conversions. Top up to keep hiding your supplier until the period renews.",
+        "best_sellers_products_per_month": "You have used your monthly Best Sellers allowance. Top up to keep browsing Amazon's lists until the period renews."
+      },
       "buy": "Buy",
       "note": "A top-up applies to the current calendar month only, which is why it is offered when you reach the limit rather than in advance. Your plan allowance resets on the 1st."
     }

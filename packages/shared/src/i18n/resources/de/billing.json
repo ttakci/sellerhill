@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Automatische Bestellungen",
         "unit": "Bestellungen",
-        "description": "Maximale Anzahl der pro Monat für Sie aufgegebenen Amazon-Bestellungen (automatisch oder manuell verknüpft)."
+        "description": "Für Sie aufgegebene Amazon-Bestellungen (automatisch oder manuell verknüpft). In jedem Tarif unbegrenzt."
       },
       "unlimited": "Unbegrenzt",
       "disabled": "Nicht enthalten",
       "of": "{{used}} von {{limit}}",
       "used": "{{used}} genutzt",
+      "usedUnlimited": "{{used}} genutzt · Unbegrenzt",
       "remaining": "{{remaining}} verbleibend",
       "exceeded": "Limit überschritten",
       "tracking_conversions_per_month": {
         "label": "Sendungsnummern-Umwandlungen",
         "unit": "Umwandlungen",
         "description": "Für wie viele Sendungen pro Monat eine umgewandelte Sendungsnummer vergeben wird, damit der Käufer Ihren Lieferanten nie sieht."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Bestseller-Produkte",
+        "unit": "Produkte",
+        "description": "Wie viele Produkte Sie pro Abrechnungszeitraum auf der Bestseller-Seite ansehen können – aus zwischengespeicherten und live geladenen Listen gleichermaßen."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Brauchen Sie diesen Monat mehr?",
-      "subtitle": "Sie haben Ihre monatlichen Sendungsnummern-Umwandlungen aufgebraucht. Laden Sie auf, um Ihren Lieferanten bis zum Monatswechsel weiter zu verbergen.",
+      "subtitle": "Sie haben ein monatliches Kontingent aufgebraucht. Laden Sie auf, um bis zur Erneuerung Ihres Abrechnungszeitraums weiterzumachen.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Sie haben Ihre monatlichen Sendungsnummern-Umwandlungen aufgebraucht. Laden Sie auf, um Ihren Lieferanten bis zur Erneuerung des Zeitraums weiter zu verbergen.",
+        "best_sellers_products_per_month": "Sie haben Ihr monatliches Bestseller-Kontingent aufgebraucht. Laden Sie auf, um bis zur Erneuerung des Zeitraums weiter in Amazons Listen zu stöbern."
+      },
       "buy": "Kaufen",
       "note": "Eine Aufladung gilt nur für den laufenden Kalendermonat, weshalb sie beim Erreichen des Limits angeboten wird und nicht im Voraus. Ihr Tarifkontingent wird am 1. zurückgesetzt."
     }

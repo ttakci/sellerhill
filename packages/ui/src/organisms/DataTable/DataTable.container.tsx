@@ -80,6 +80,7 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       selectable={props.selectable}
       selectedRows={selectedRows}
       onSelectionChange={props.onSelectionChange}
+      isRowSelectable={props.isRowSelectable}
       bulkActions={bulkActions}
       bulkActionsPlaceholder={bulkActionsPlaceholder}
       bulkValue={bulkValue}

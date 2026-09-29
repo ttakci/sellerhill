@@ -26,8 +26,17 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Pas encore de note",
-    "allowance": "Il vous reste {{remaining}} chargements de liste sur {{limit}} aujourd’hui",
-    "allowanceHint": "Les listes déjà chargées aujourd’hui par quelqu’un sont disponibles immédiatement et ne comptent pas.",
+    "allowance": "Il vous reste {{remaining}} produits sur {{limit}} pour cette période",
+    "allowanceUnlimited": "Consultation illimitée des produits",
+    "allowanceHint": "Chaque produit affiché compte une fois par période ; rouvrir la même liste aujourd’hui n’est pas compté deux fois.",
+    "locked": {
+      "title_one": "{{count}} produit de plus sur cette page dépasse le quota mensuel de votre forfait",
+      "title_many": "{{count}} produits de plus sur cette page dépassent le quota mensuel de votre forfait",
+      "title_other": "{{count}} produits de plus sur cette page dépassent le quota mensuel de votre forfait",
+      "description": "Passez à un forfait supérieur ou achetez un pack complémentaire pour les voir. Votre quota se renouvelle à chaque période de facturation.",
+      "cta": "Voir les forfaits et les packs",
+      "rowLabel": "Produit verrouillé"
+    },
     "table": {
       "rank": "Rang",
       "product": "Produit",
@@ -62,13 +71,13 @@
         "description": "La consultation des listes Amazon est désactivée pour votre compte. Contactez l’assistance si vous pensiez y avoir accès."
       },
       "limitReached": {
-        "title": "Vous avez utilisé vos chargements de liste du jour ({{used}}/{{limit}})",
-        "description": "Les listes déjà chargées aujourd’hui restent disponibles : passez à l’une d’elles ou revenez demain."
+        "title": "Trop de chargements de liste en direct aujourd’hui",
+        "description": "Les listes déjà chargées aujourd’hui restent disponibles : passez à l’une d’elles ou réessayez demain."
       }
     },
     "errors": {
       "disabled": "Meilleures ventes n’est pas activé sur ce compte.",
-      "dailyLimitReached": "Les chargements de liste du jour sont épuisés.",
+      "dailyLimitReached": "Trop de chargements de liste en direct aujourd’hui. Réessayez demain.",
       "unavailable": "Meilleures ventes est temporairement indisponible.",
       "unsupportedMarketplace": "Cette place de marché n’est pas prise en charge."
     }

@@ -557,7 +557,7 @@
       },
       "price": {
         "title": "Automazione accessibile",
-        "description": "L'insieme completo di strumenti di automazione professionale per un canone mensile molto più basso. Ogni funzionalità è inclusa in ogni piano; i piani differiscono solo per il volume di inserzioni e ordini.",
+        "description": "L'insieme completo di strumenti di automazione professionale per un canone mensile molto più basso. Ogni funzionalità è inclusa in ogni piano, gli ordini automatici sono illimitati; i piani differiscono solo per inserzioni, conversioni di tracciamento ed esplorazione dei Più venduti.",
         "cta": "Vedi i piani"
       }
     },
@@ -812,7 +812,7 @@
     "pricing": {
       "eyebrow": "Prezzi",
       "sectionTitle": "Automazione accessibile.",
-      "sectionSubtitle": "Ogni piano include tutte le funzionalità. I piani differiscono solo per inserzioni attive e volume mensile di ordini, quindi le funzionalità che altri strumenti riservano ai piani superiori sono tue anche con il piano più piccolo.",
+      "sectionSubtitle": "Ogni piano include tutte le funzionalità. I piani differiscono per inserzioni attive, conversioni di tracciamento e limite di esplorazione dei Più venduti; gli ordini automatici sono illimitati in ogni piano, quindi le funzionalità che altri strumenti riservano ai piani superiori sono tue anche con il piano più piccolo.",
       "billingNote": "Annulli quando vuoi. I prezzi non includono le imposte locali, ove applicabili.",
       "perMonth": "/mese",
       "mostPopular": "Il più scelto",
@@ -826,6 +826,8 @@
       "unlimitedOrders": "Ordini automatici illimitati",
       "upToConversions": "{{limit}} conversioni di tracciamento / mese",
       "unlimitedConversions": "Conversioni di tracciamento illimitate",
+      "upToBestSellers": "{{limit}} prodotti Più venduti / mese",
+      "unlimitedBestSellers": "Esplorazione illimitata dei Più venduti",
       "catalogError": "Al momento non è stato possibile caricare i prezzi aggiornati. Qui sotto trovi la panoramica dei piani.",
       "included": {
         "groups": "Gruppi di impostazioni e 12 modelli di inserzione",
@@ -839,28 +841,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "Fino a 500 inserzioni attive",
-          "orders": "Fino a 100 ordini automatici / mese",
-          "conversions": "50 conversioni di tracciamento / mese"
+          "orders": "Ordini automatici illimitati",
+          "conversions": "50 conversioni di tracciamento / mese",
+          "bestSellers": "2,500 prodotti Più venduti / mese"
         },
         "starter": {
           "price": "$44.99",
           "listings": "Fino a 2,000 inserzioni attive",
-          "orders": "Fino a 300 ordini automatici / mese",
-          "conversions": "150 conversioni di tracciamento / mese"
+          "orders": "Ordini automatici illimitati",
+          "conversions": "150 conversioni di tracciamento / mese",
+          "bestSellers": "7,500 prodotti Più venduti / mese"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "Fino a 5,000 inserzioni attive",
-          "orders": "Fino a 600 ordini automatici / mese",
-          "conversions": "300 conversioni di tracciamento / mese"
+          "orders": "Ordini automatici illimitati",
+          "conversions": "300 conversioni di tracciamento / mese",
+          "bestSellers": "15,000 prodotti Più venduti / mese"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "Fino a 10,000 inserzioni attive",
-          "orders": "Fino a 1,000 ordini automatici / mese",
-          "conversions": "500 conversioni di tracciamento / mese"
+          "orders": "Ordini automatici illimitati",
+          "conversions": "500 conversioni di tracciamento / mese",
+          "bestSellers": "25,000 prodotti Più venduti / mese"
         }
       }
     },

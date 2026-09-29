@@ -59,7 +59,23 @@ function formatConversionsLine(
   });
 }
 
-/** Format the monthly automatic-order ceiling line. */
+/** Format the monthly Best Sellers browsing allowance line (products the seller may view per period). */
+function formatBestSellersLine(
+  limit: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  if (limit === BILLING_UNLIMITED) {
+    return t('translation:landing.pricing.unlimitedBestSellers');
+  }
+  if (limit === BILLING_DISABLED || limit <= 0) {
+    return t('translation:landing.pricing.notIncluded');
+  }
+  return t('translation:landing.pricing.upToBestSellers', {
+    limit: new Intl.NumberFormat('en-US').format(limit),
+  });
+}
+
+/** Format the monthly automatic-order line — `-1` (every plan since 2026-09-29) renders as unlimited. */
 function formatAmazonOrdersLine(
   limit: number,
   t: (key: string, params?: Record<string, string | number>) => string,
@@ -151,6 +167,7 @@ export const LandingPageContainer = (): React.ReactElement => {
       const ordersLimit = plan.limits[BillingLimitKey.AMAZON_ORDERS_PER_MONTH]?.limitValue ?? 0;
       const conversionsLimit =
         plan.limits[BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]?.limitValue ?? 0;
+      const bestSellersLimit = plan.limits[BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]?.limitValue ?? 0;
       return {
         slug: plan.slug,
         priceDisplayMonthly: monthlyPrice
@@ -158,6 +175,7 @@ export const LandingPageContainer = (): React.ReactElement => {
           : freeLabel,
         listingsDisplay: formatListingsLine(listingsLimit, t),
         trackingConversionsDisplay: formatConversionsLine(conversionsLimit, t),
+        bestSellersDisplay: formatBestSellersLine(bestSellersLimit, t),
         amazonOrdersDisplay: formatAmazonOrdersLine(ordersLimit, t),
         isHighlighted: plan.slug === HIGHLIGHTED_PLAN_SLUG,
         isFeatured: cheapestPaidSlugs.has(plan.slug),
@@ -169,11 +187,11 @@ export const LandingPageContainer = (): React.ReactElement => {
    * The "plans from $X" figure on the hero price badge. Derived from the
    * catalog's cheapest paid monthly tier so it can never drift from the pricing
    * section further down the page; the literal fallback matches the real
-   * cheapest tier (Lite, $19.99) the same way `landing.pricing.catalogFallback`
-   * has to stay aligned with the catalog.
+   * cheapest tier (Lite, $24.99 since 2026-09-29) the same way
+   * `landing.pricing.catalogFallback` has to stay aligned with the catalog.
    */
   const startingPriceDisplay = useMemo(() => {
-    const FALLBACK = '$19.99';
+    const FALLBACK = '$24.99';
     if (!catalog || catalog.plans.length === 0) {
       return FALLBACK;
     }

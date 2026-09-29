@@ -26,8 +26,17 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Nessuna valutazione",
-    "allowance": "Oggi ti restano {{remaining}} caricamenti di classifica su {{limit}}",
-    "allowanceHint": "Le classifiche già caricate oggi da qualcuno sono subito disponibili e non vengono conteggiate.",
+    "allowance": "Ti restano {{remaining}} prodotti su {{limit}} in questo periodo",
+    "allowanceUnlimited": "Visualizzazioni prodotto illimitate",
+    "allowanceHint": "Ogni prodotto che vedi conta una volta per periodo; riaprire oggi la stessa classifica non viene contato due volte.",
+    "locked": {
+      "title_one": "{{count}} altro prodotto in questa pagina è oltre il limite mensile del tuo piano",
+      "title_many": "Altri {{count}} prodotti in questa pagina sono oltre il limite mensile del tuo piano",
+      "title_other": "Altri {{count}} prodotti in questa pagina sono oltre il limite mensile del tuo piano",
+      "description": "Passa a un piano superiore o acquista un pacchetto aggiuntivo per vederli. Il limite si rinnova a ogni periodo di fatturazione.",
+      "cta": "Vedi piani e pacchetti",
+      "rowLabel": "Prodotto bloccato"
+    },
     "table": {
       "rank": "Posizione",
       "product": "Prodotto",
@@ -62,13 +71,13 @@
         "description": "La consultazione delle classifiche Amazon è disattivata per il tuo account. Contatta l’assistenza se ti aspettavi di vederla."
       },
       "limitReached": {
-        "title": "Hai usato i caricamenti di classifica di oggi ({{used}}/{{limit}})",
-        "description": "Le classifiche già caricate oggi restano disponibili: passa a una di esse o torna domani."
+        "title": "Troppi caricamenti di classifica in tempo reale oggi",
+        "description": "Le classifiche già caricate oggi restano disponibili: passa a una di esse o riprova domani."
       }
     },
     "errors": {
       "disabled": "Più venduti non è attivo su questo account.",
-      "dailyLimitReached": "I caricamenti di classifica di oggi sono esauriti.",
+      "dailyLimitReached": "Troppi caricamenti di classifica in tempo reale oggi. Riprova domani.",
       "unavailable": "Più venduti è temporaneamente non disponibile.",
       "unsupportedMarketplace": "Questo marketplace non è supportato."
     }

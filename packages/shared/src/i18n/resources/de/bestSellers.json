@@ -25,8 +25,16 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Noch keine Bewertung",
-    "allowance": "Heute noch {{remaining}} von {{limit}} Listenabrufen übrig",
-    "allowanceHint": "Listen, die heute bereits jemand abgerufen hat, sind sofort verfügbar und zählen nicht.",
+    "allowance": "Noch {{remaining}} von {{limit}} Produkten in diesem Zeitraum",
+    "allowanceUnlimited": "Unbegrenzte Produktansichten",
+    "allowanceHint": "Jedes angezeigte Produkt zählt einmal pro Zeitraum; dieselbe Liste heute erneut zu öffnen, zählt nicht doppelt.",
+    "locked": {
+      "title_one": "{{count}} weiteres Produkt auf dieser Seite liegt außerhalb des monatlichen Kontingents Ihres Tarifs",
+      "title_other": "{{count}} weitere Produkte auf dieser Seite liegen außerhalb des monatlichen Kontingents Ihres Tarifs",
+      "description": "Wechseln Sie in einen höheren Tarif oder kaufen Sie ein Zusatzpaket, um sie zu sehen. Ihr Kontingent erneuert sich mit jedem Abrechnungszeitraum.",
+      "cta": "Tarife und Zusatzpakete ansehen",
+      "rowLabel": "Gesperrtes Produkt"
+    },
     "table": {
       "rank": "Rang",
       "product": "Produkt",
@@ -61,13 +69,13 @@
         "description": "Das Durchsuchen von Amazon-Listen ist für Ihr Konto ausgeschaltet. Wenden Sie sich an den Support, wenn Sie es erwartet haben."
       },
       "limitReached": {
-        "title": "Die heutigen Listenabrufe sind verbraucht ({{used}}/{{limit}})",
-        "description": "Heute bereits geladene Listen sind weiterhin verfügbar – wechseln Sie zu einer davon oder kommen Sie morgen wieder."
+        "title": "Heute zu viele Live-Listenabrufe",
+        "description": "Heute bereits geladene Listen sind weiterhin verfügbar – wechseln Sie zu einer davon oder versuchen Sie es morgen erneut."
       }
     },
     "errors": {
       "disabled": "Bestseller ist für dieses Konto nicht aktiviert.",
-      "dailyLimitReached": "Die heutigen Listenabrufe sind verbraucht.",
+      "dailyLimitReached": "Heute zu viele Live-Listenabrufe. Versuchen Sie es morgen erneut.",
       "unavailable": "Bestseller ist vorübergehend nicht verfügbar.",
       "unsupportedMarketplace": "Dieser Marktplatz wird nicht unterstützt."
     }

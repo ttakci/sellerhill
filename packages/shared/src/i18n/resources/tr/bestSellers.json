@@ -25,8 +25,16 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Henüz puan yok",
-    "allowance": "Bugün {{limit}} liste yüklemesinden {{remaining}} tanesi kaldı",
-    "allowanceHint": "Bugün herhangi bir kullanıcının yüklediği listeler hazırdır ve bu sayıdan düşmez.",
+    "allowance": "Bu dönem {{limit}} üründen {{remaining}} tanesi kaldı",
+    "allowanceUnlimited": "Sınırsız ürün görüntüleme",
+    "allowanceHint": "Gördüğünüz her ürün dönem başına bir kez sayılır; aynı listeyi bugün yeniden açmak tekrar sayılmaz.",
+    "locked": {
+      "title_one": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
+      "title_other": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
+      "description": "Onları görmek için paketinizi yükseltin ya da ek paket alın. Hakkınız her fatura döneminde yenilenir.",
+      "cta": "Paketleri ve ek paketleri gör",
+      "rowLabel": "Kilitli ürün"
+    },
     "table": {
       "rank": "Sıra",
       "product": "Ürün",
@@ -61,13 +69,13 @@
         "description": "Amazon listelerine göz atma hesabınız için kapalı. Görmeyi bekliyorsanız destekle iletişime geçin."
       },
       "limitReached": {
-        "title": "Bugünkü liste yüklemelerini kullandınız ({{used}}/{{limit}})",
-        "description": "Bugün zaten yüklenen listeler hâlâ açık — onlardan birine geçin ya da yarın tekrar gelin."
+        "title": "Bugün çok fazla canlı liste yüklemesi yapıldı",
+        "description": "Bugün zaten yüklenen listeler hâlâ açık — onlardan birine geçin ya da yarın yeniden deneyin."
       }
     },
     "errors": {
       "disabled": "Çok Satanlar bu hesapta etkin değil.",
-      "dailyLimitReached": "Bugünkü liste yüklemeleri bitti.",
+      "dailyLimitReached": "Bugün çok fazla canlı liste yüklemesi yapıldı. Yarın yeniden deneyin.",
       "unavailable": "Çok Satanlar geçici olarak kullanılamıyor.",
       "unsupportedMarketplace": "Bu pazar yeri desteklenmiyor."
     }

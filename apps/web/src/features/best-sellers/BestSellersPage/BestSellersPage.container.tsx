@@ -11,6 +11,7 @@ import {
   BEST_SELLERS_MAX_PAGE,
   BEST_SELLERS_PAGE_SIZE,
   BEST_SELLERS_ROOT_CATEGORY,
+  BILLING_UNLIMITED,
   BestSellersListType,
   SourceFetchOutcome, type BestSellersBrowseAllowanceDto, type BestSellersQueryDto,
 } from '@repo/shared';
@@ -42,6 +43,18 @@ const PRICE_FRACTION_DIGITS = 2;
 /** Where the ticked ASINs go: the Add Listings drawer, pre-filled. */
 const buildAddListingsPath = (asins: readonly string[]): string =>
   `/listings?drawer=add&asins=${encodeURIComponent(asins.join(','))}`;
+
+/** Where a locked row's upsell goes: plans and top-up packs live on one page. */
+const BILLING_PATH = '/billing';
+
+/**
+ * Synthetic key for a locked placeholder. It is not an ASIN and never reaches
+ * the selection or Add Listings — `isLocked` rows are filtered out of every
+ * selection callback — it only has to be unique among this page's rows.
+ */
+const lockedRowKey = (index: number): string => `locked-${index}`;
+
+const isUnlocked = (row: BestSellersItemView): boolean => !row.isLocked;
 
 export const BestSellersPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['bestSellers', 'translation']);
@@ -128,10 +141,38 @@ export const BestSellersPageContainer: React.FC = () => {
           ratingLabel,
           reviewsLabel,
           isSelected: selection.isSelected(item.asin),
+          isLocked: false,
         };
       }),
     [currentData?.list?.items, countFormat, ratingFormat, localeCfg, selection, t],
   );
+
+  /*
+   * Products the allowance did not cover were stripped server-side; the page
+   * draws that many locked placeholders AFTER the visible products so the
+   * seller sees the shape of what they are missing without any of its data.
+   * A page can be entirely locked (allowance spent before it was opened), so
+   * the placeholders count as content — never an empty state.
+   */
+  const lockedCount = currentData?.lockedCount ?? 0;
+  const rows = useMemo<BestSellersItemView[]>(() => {
+    if (lockedCount <= 0) {
+      return items;
+    }
+    const locked: BestSellersItemView[] = Array.from({ length: lockedCount }, (_, index) => ({
+      asin: lockedRowKey(index),
+      rank: null,
+      rankLabel: null,
+      title: '',
+      imageUrl: null,
+      priceLabel: null,
+      ratingLabel: null,
+      reviewsLabel: null,
+      isSelected: false,
+      isLocked: true,
+    }));
+    return [...items, ...locked];
+  }, [items, lockedCount]);
 
   const pageAsins = useMemo(() => items.map((item) => item.asin), [items]);
   const selectedRows = useMemo(() => items.filter((item) => item.isSelected), [items]);
@@ -168,14 +209,34 @@ export const BestSellersPageContainer: React.FC = () => {
         return BestSellersViewState.UNAVAILABLE;
       case SourceFetchOutcome.FOUND:
       default:
-        return items.length > 0 ? BestSellersViewState.READY : BestSellersViewState.EMPTY;
+        return items.length > 0 || lockedCount > 0 ? BestSellersViewState.READY : BestSellersViewState.EMPTY;
     }
-  }, [refusal, currentData, items.length]);
+  }, [refusal, currentData, items.length, lockedCount]);
 
   const allowance = useMemo<BestSellersBrowseAllowanceDto | null>(
     () => currentData?.allowance ?? refusal?.body.allowance ?? data?.allowance ?? null,
     [currentData?.allowance, refusal?.body.allowance, data?.allowance],
   );
+
+  /*
+   * Products per billing period, never "list loads": the same list reopened
+   * on the same day is not recounted, so the figure is what the seller has
+   * left to LOOK AT. An unmetered seller (`limit` = -1: enforcement off, no
+   * subscription, or a plan without the limit) gets the unlimited wording
+   * rather than "-1 of -1".
+   */
+  const allowanceLabel = useMemo<string | null>(() => {
+    if (!allowance) {
+      return null;
+    }
+    if (allowance.limit === BILLING_UNLIMITED) {
+      return t('bestSellers.allowanceUnlimited');
+    }
+    return t('bestSellers.allowance', {
+      remaining: countFormat.format(Math.max(0, allowance.remaining)),
+      limit: countFormat.format(allowance.limit),
+    });
+  }, [allowance, countFormat, t]);
 
   const listTypeOptions = useMemo<TabNavItem[]>(
     () => BEST_SELLERS_LIST_TYPE_ORDER.map((value) => ({ id: value, label: t(`bestSellers.listTypes.${value}`) })),
@@ -232,11 +293,13 @@ export const BestSellersPageContainer: React.FC = () => {
     [selection, pageAsins],
   );
 
+  // The table hands back whatever rows it holds; a locked placeholder can
+  // never be in the selection, whatever the caller's checkbox state says.
   const handleSelectionChange = useCallback(
-    (rows: BestSellersItemView[]) => {
+    (selected: BestSellersItemView[]) => {
       selection.setPageSelection(
         pageAsins,
-        rows.map((row) => row.asin),
+        selected.filter(isUnlocked).map((row) => row.asin),
       );
     },
     [selection, pageAsins],
@@ -252,6 +315,10 @@ export const BestSellersPageContainer: React.FC = () => {
     }
     localeNavigate(buildAddListingsPath([...selection.selectedAsins]));
   }, [selection.count, selection.selectedAsins, localeNavigate]);
+
+  const handleUpgrade = useCallback(() => {
+    localeNavigate(BILLING_PATH);
+  }, [localeNavigate]);
 
   const handleRetry = useCallback(() => {
     void refetch();
@@ -279,9 +346,13 @@ export const BestSellersPageContainer: React.FC = () => {
     <EbayAccountGuard>
       <BestSellersPageComponent
         viewState={viewState}
-        items={items}
+        items={rows}
         selectedRows={selectedRows}
         onSelectionChange={handleSelectionChange}
+        isRowSelectable={isUnlocked}
+        hasSelectableItems={items.length > 0}
+        lockedCount={lockedCount}
+        onUpgrade={handleUpgrade}
         listTypeOptions={listTypeOptions}
         listType={listType}
         onListTypeChange={handleListTypeChange}
@@ -298,7 +369,7 @@ export const BestSellersPageContainer: React.FC = () => {
         onListSelected={handleListSelected}
         onClearSelection={selection.clear}
         onRetry={handleRetry}
-        allowance={allowance}
+        allowanceLabel={allowanceLabel}
         pagination={pagination}
       />
     </EbayAccountGuard>

@@ -1,4 +1,3 @@
-import type { BestSellersBrowseAllowanceDto } from '@repo/shared';
 import type { SelectOption, TabNavItem } from '@repo/ui';
 import type React from 'react';
 
@@ -9,6 +8,12 @@ import type { BestSellersViewState } from '../bestSellers.types';
  * (money in the list's own currency, rating/review counts in the seller's
  * locale with Western digits), so the component prints strings and makes no
  * formatting decisions.
+ *
+ * A LOCKED row is a placeholder for a product the seller's monthly allowance
+ * did not cover. The server removes those products from the payload entirely
+ * (`BestSellersPageDto.lockedCount`), so a locked row carries no real data —
+ * `asin` is a synthetic key, every label is null — and only exists so the grid
+ * and the table can draw a blurred slot where the product would have been.
  */
 export interface BestSellersItemView {
   asin: string;
@@ -24,6 +29,8 @@ export interface BestSellersItemView {
   /** The review count alone, grouped for the locale — the table's Reviews column. */
   reviewsLabel: string | null;
   isSelected: boolean;
+  /** True for an allowance placeholder — never selectable, never sent to Add Listings. */
+  isLocked: boolean;
 }
 
 export interface BestSellersPagination {
@@ -38,10 +45,19 @@ export interface BestSellersPagination {
 
 export interface BestSellersPageComponentProps {
   viewState: BestSellersViewState;
+  /** Visible products first, then `lockedCount` locked placeholders — the DataTable's rows. */
   items: BestSellersItemView[];
   /** Rows of `items` that are ticked — what the table's selection column reflects. */
   selectedRows: BestSellersItemView[];
   onSelectionChange: (rows: BestSellersItemView[]) => void;
+  /** False for a locked placeholder, so it gets no checkbox and select-all skips it. */
+  isRowSelectable: (row: BestSellersItemView) => boolean;
+  /** True when at least one real (unlocked) product is on the page. */
+  hasSelectableItems: boolean;
+  /** Products on this page outside the allowance; drives the locked rows and the upsell card. */
+  lockedCount: number;
+  /** Sends the seller to the billing page (plans + top-ups). */
+  onUpgrade: () => void;
 
   listTypeOptions: TabNavItem[];
   listType: string;
@@ -69,7 +85,10 @@ export interface BestSellersPageComponentProps {
   onClearSelection: () => void;
   onRetry: () => void;
 
-  /** Today's fetch allowance, from the last answer or the 429 body; null before anything arrived. */
-  allowance: BestSellersBrowseAllowanceDto | null;
+  /**
+   * The allowance meter, already localized ("13,760 of 15,000 products left
+   * this period" / "Unlimited product views"); null before anything arrived.
+   */
+  allowanceLabel: string | null;
   pagination: BestSellersPagination | undefined;
 }

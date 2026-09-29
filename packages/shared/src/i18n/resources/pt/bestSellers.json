@@ -26,8 +26,17 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Ainda sem avaliação",
-    "allowance": "Restam {{remaining}} de {{limit}} carregamentos de lista hoje",
-    "allowanceHint": "Listas que alguém já carregou hoje ficam disponíveis na hora e não contam.",
+    "allowance": "Restam {{remaining}} de {{limit}} produtos neste período",
+    "allowanceUnlimited": "Visualizações de produtos ilimitadas",
+    "allowanceHint": "Cada produto que você vê conta uma vez por período; abrir a mesma lista de novo hoje não conta duas vezes.",
+    "locked": {
+      "title_one": "{{count}} produto a mais nesta página está fora da franquia mensal do seu plano",
+      "title_many": "{{count}} produtos a mais nesta página estão fora da franquia mensal do seu plano",
+      "title_other": "{{count}} produtos a mais nesta página estão fora da franquia mensal do seu plano",
+      "description": "Faça upgrade do plano ou compre um pacote adicional para vê-los. Sua franquia é renovada a cada período de cobrança.",
+      "cta": "Ver planos e pacotes",
+      "rowLabel": "Produto bloqueado"
+    },
     "table": {
       "rank": "Posição",
       "product": "Produto",
@@ -62,13 +71,13 @@
         "description": "A navegação pelas listas da Amazon está desligada para a sua conta. Fale com o suporte se esperava vê-la."
       },
       "limitReached": {
-        "title": "Você usou os carregamentos de lista de hoje ({{used}}/{{limit}})",
-        "description": "As listas já carregadas hoje continuam disponíveis — mude para uma delas ou volte amanhã."
+        "title": "Muitos carregamentos de lista ao vivo hoje",
+        "description": "As listas já carregadas hoje continuam disponíveis — mude para uma delas ou tente de novo amanhã."
       }
     },
     "errors": {
       "disabled": "Mais vendidos não está habilitado nesta conta.",
-      "dailyLimitReached": "Os carregamentos de lista de hoje acabaram.",
+      "dailyLimitReached": "Muitos carregamentos de lista ao vivo hoje. Tente de novo amanhã.",
       "unavailable": "Mais vendidos está temporariamente indisponível.",
       "unsupportedMarketplace": "Este marketplace não é compatível."
     }

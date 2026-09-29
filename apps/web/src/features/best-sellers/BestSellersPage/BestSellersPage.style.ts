@@ -3,6 +3,15 @@ import { Card, PageContainer, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
+/**
+ * How far a locked placeholder is blurred. The design system has no blur
+ * token (nothing else in the app blurs content), so this is a named constant
+ * rather than a `tkn()` path. It is strong enough that text could not be read
+ * through it even if any were rendered — none is: the server strips locked
+ * products before they reach the browser, and these slots hold skeleton bars.
+ */
+const LOCKED_BLUR = '0.3rem';
+
 /** Header actions — "List selected (N)" + Clear — wrap under the title on a phone. */
 export const HeaderActions = styled.div`
   display: flex;
@@ -146,6 +155,91 @@ export const CardFooter = styled.div`
   margin-top: auto;
   display: flex;
   align-items: center;
+`;
+
+/* --- Locked placeholders ---------------------------------------------------- */
+
+/**
+ * A product the allowance did not cover. Same footprint as `GridCard` so the
+ * grid keeps its rhythm, but it is not a tap surface: no hover lift, no
+ * pointer, no selection outline. The blurred body underneath is skeleton bars
+ * only; the lock badge sits on top, unblurred, so the state is legible.
+ */
+export const LockedCard = styled(Card)`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  cursor: default;
+  user-select: none;
+  overflow: hidden;
+`;
+
+export const LockedCardBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  filter: blur(${LOCKED_BLUR});
+  pointer-events: none;
+`;
+
+export const LockedOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+/** Round lock disc floating over the blurred card — the one unblurred element on it. */
+export const LockedBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  box-shadow: ${tkn('shadows.md')};
+`;
+
+/** Table product cell of a locked row: an unblurred lock glyph beside blurred title lines. */
+export const LockedProductCell = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+  user-select: none;
+`;
+
+export const LockedLines = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  flex: 1 1 auto;
+  min-width: 0;
+  filter: blur(${LOCKED_BLUR});
+  pointer-events: none;
+`;
+
+/** Any other table cell of a locked row — one blurred bar, aligned like its column. */
+export const LockedCell = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $align }) =>
+    $align === 'right' ? 'flex-end' : $align === 'center' ? 'center' : 'flex-start'};
+  filter: blur(${LOCKED_BLUR});
+  pointer-events: none;
+  user-select: none;
+`;
+
+/** One card under the locked rows: what they are and where to unlock them. */
+export const UpsellCard = styled(Card)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 /** Every non-grid state (disabled feature, first load, refusals) shares one surface. */

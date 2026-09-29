@@ -25,8 +25,16 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Hələ reytinq yoxdur",
-    "allowance": "Bu gün {{limit}} siyahı yükləməsindən {{remaining}} qalıb",
-    "allowanceHint": "Bu gün kiminsə yüklədiyi siyahılar artıq hazırdır və sayılmır.",
+    "allowance": "Bu dövrdə {{limit}} məhsuldan {{remaining}} qalıb",
+    "allowanceUnlimited": "Limitsiz məhsul görüntüləmə",
+    "allowanceHint": "Gördüyünüz hər məhsul dövr ərzində bir dəfə sayılır; eyni siyahını bu gün yenidən açmaq təkrar sayılmır.",
+    "locked": {
+      "title_one": "Bu səhifədə daha {{count}} məhsul planınızın aylıq limitindən kənardır",
+      "title_other": "Bu səhifədə daha {{count}} məhsul planınızın aylıq limitindən kənardır",
+      "description": "Onları görmək üçün planınızı yüksəldin və ya əlavə paket alın. Limitiniz hər faktura dövründə yenilənir.",
+      "cta": "Planlara və əlavə paketlərə bax",
+      "rowLabel": "Kilidli məhsul"
+    },
     "table": {
       "rank": "Sıra",
       "product": "Məhsul",
@@ -61,13 +69,13 @@
         "description": "Amazon siyahılarına baxmaq hesabınız üçün bağlıdır. Görməyi gözləyirdinizsə, dəstəklə əlaqə saxlayın."
       },
       "limitReached": {
-        "title": "Bu günkü siyahı yükləmələrini istifadə etdiniz ({{used}}/{{limit}})",
-        "description": "Bu gün artıq yüklənmiş siyahılar hələ də açıqdır — onlardan birinə keçin və ya sabah yenidən gəlin."
+        "title": "Bu gün həddən çox canlı siyahı yükləməsi edildi",
+        "description": "Bu gün artıq yüklənmiş siyahılar hələ də açıqdır — onlardan birinə keçin və ya sabah yenidən cəhd edin."
       }
     },
     "errors": {
       "disabled": "Ən Çox Satılanlar bu hesabda aktiv deyil.",
-      "dailyLimitReached": "Bu günkü siyahı yükləmələri bitdi.",
+      "dailyLimitReached": "Bu gün həddən çox canlı siyahı yükləməsi edildi. Sabah yenidən cəhd edin.",
       "unavailable": "Ən Çox Satılanlar müvəqqəti əlçatan deyil.",
       "unsupportedMarketplace": "Bu bazar dəstəklənmir."
     }
