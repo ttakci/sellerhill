@@ -199,7 +199,7 @@ export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')} ${tkn('spacing.sm')}; /* 12px */
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')} ${tkn('spacing.xs')};
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
   color: ${tkn('colors.sidebar.textMuted')};
   font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
@@ -211,7 +211,7 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 export const NavDivider = styled.div`
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
-  margin: ${tkn('spacing.sm-md')} ${tkn('spacing.sm')}; /* 12px */
+  margin: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
 `;
 
 export const NavItemWrapper = styled.div`

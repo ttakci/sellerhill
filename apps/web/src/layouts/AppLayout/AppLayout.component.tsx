@@ -18,7 +18,6 @@ import type { AppLayoutProps } from './AppLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
-import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
 import { NavTooltip } from '@/layouts/shell/NavTooltip';
 
 /**
@@ -347,7 +346,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </S.NavSection>
 
           <S.SidebarFooter>
-            <TawkToWidget sidebarCollapsed={sidebarCollapsed} onLaunch={onCloseMobileSidebar} />
             <NavTooltip label={t('translation:menu.logout')} collapsed={sidebarCollapsed}>
               <S.LogoutButton
                 $isCollapsed={sidebarCollapsed}
