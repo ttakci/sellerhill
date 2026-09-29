@@ -48,6 +48,10 @@ export enum EbayApiResource {
   FEED = 'sell.feed',
   /** Rate-limit introspection itself. */
   ANALYTICS = 'developer.analytics',
+  /** eBay Message API (seller inbox, replies, buyer auto-messages). 500,000/day measured 2026-09-29. */
+  MESSAGE = 'commerce.message',
+  /** eBay Notification API — destination/subscription/public-key management only; inbound deliveries are not metered. 10,000/day. */
+  NOTIFICATION = 'commerce.notification',
 }
 
 /**

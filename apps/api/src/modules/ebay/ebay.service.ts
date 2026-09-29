@@ -1301,6 +1301,8 @@ export class EbayService implements OnModuleInit {
       storeName: entity.store_name,
       marketplaceId: entity.marketplace_id,
       status: entity.status,
+      // TODO(task 7): derive from granted_scopes
+      messagingEnabled: false,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };

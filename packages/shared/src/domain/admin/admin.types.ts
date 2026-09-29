@@ -282,6 +282,12 @@ export enum AdminWarningKind {
   SCRAPER_DIRECT_EGRESS = 'scraper_direct_egress',
   /** The oldest overdue product refresh is further behind than the configured refresh interval. */
   REFRESH_LAG = 'refresh_lag',
+  /**
+   * The eBay Notification API subscription for NEW_MESSAGE is not active
+   * (never created, or eBay reports it disabled) — the seller inbox falls
+   * back to polling only, and a new buyer message may sit unseen until then.
+   */
+  EBAY_NOTIFICATIONS_DISABLED = 'ebay_notifications_disabled',
 }
 
 export enum AdminWarningLevel {

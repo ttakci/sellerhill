@@ -35,6 +35,8 @@ export class EbayAccountPublicDto {
   storeName?: string;
   marketplaceId!: EbayMarketplaceId;
   status!: EbayAccountStatus;
+  /** granted_scopes carries both messaging scopes (migration 125). False for stores connected before 2026-09-29 until they reconnect. */
+  messagingEnabled!: boolean;
   createdAt!: string;
   updatedAt!: string;
 }
