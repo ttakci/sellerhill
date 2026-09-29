@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 import * as S from './ConversationThread.style';
 import type { ConversationThreadProps } from './ConversationThread.types';
 
+import { SafeHtmlFrame } from '@/domain-ui';
+
 export const ConversationThread = ({
   hasConversation,
   isLoading,
@@ -97,7 +99,11 @@ export const ConversationThread = ({
               </S.BubbleMeta>
               {message.body && (
                 <S.BubbleBody dir="auto">
-                  <Text variant="body">{message.body}</Text>
+                  {message.bodyIsHtml ? (
+                    <SafeHtmlFrame html={message.body} title={t('messages.thread.systemMessage')} />
+                  ) : (
+                    <Text variant="body">{message.body}</Text>
+                  )}
                 </S.BubbleBody>
               )}
               {message.media.length > 0 && (

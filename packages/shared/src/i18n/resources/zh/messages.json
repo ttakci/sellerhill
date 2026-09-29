@@ -30,6 +30,7 @@
       "sent": "消息已发送",
       "noReply": "此对话无法回复。",
       "attachment": "附件",
+      "systemMessage": "系统消息",
       "you": "您",
       "backToList": "返回消息列表",
       "chars": "{{count}}/{{max}} 字符"

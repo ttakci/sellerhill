@@ -18,3 +18,6 @@ export type { ConnectEbayPromptProps } from './ConnectEbayPrompt';
 
 export { ProductTableCell } from './ProductTableCell';
 export type { ProductTableCellMetaRow, ProductTableCellProps } from './ProductTableCell';
+
+export { SafeHtmlFrame } from './SafeHtmlFrame';
+export type { SafeHtmlFrameProps } from './SafeHtmlFrame';

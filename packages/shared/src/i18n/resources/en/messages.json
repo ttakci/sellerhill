@@ -30,6 +30,7 @@
       "sent": "Message sent",
       "noReply": "This conversation can't be replied to.",
       "attachment": "Attachment",
+      "systemMessage": "System message",
       "you": "You",
       "backToList": "Back to messages",
       "chars": "{{count}}/{{max}} characters"
