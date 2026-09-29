@@ -75,6 +75,14 @@ services:
       EBAY_VERIFICATION_TOKEN: ${EBAY_VERIFICATION_TOKEN:-}
       EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
 
+      # eBay Messages — NEW_MESSAGE Notification API webhook. Both optional;
+      # until set the notification half is a no-op (Message API list/reply/read
+      # still works, on the 15-minute unread-badge polling fallback). See
+      # CLAUDE.md "eBay Messages".
+      EBAY_NOTIFICATION_VERIFICATION_TOKEN: ${EBAY_NOTIFICATION_VERIFICATION_TOKEN:-}
+      EBAY_NOTIFICATION_ALERT_EMAIL: ${EBAY_NOTIFICATION_ALERT_EMAIL:-}
+      EBAY_NOTIFICATION_ENDPOINT_URL: ${EBAY_NOTIFICATION_ENDPOINT_URL:-}
+
       # Amazon product data: the in-stack scraper below is the default provider
       # (`product.dataProvider` at /admin → Settings), Keepa the rollback. Both
       # values are env-only; proxies are entered at /admin → Settings → Scraper.
