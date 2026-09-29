@@ -138,11 +138,22 @@ export interface BestSellersQueryDto {
   marketplace?: AmazonMarketplace;
 }
 
-/** How much of today's per-seller fetch allowance is left. Cache hits cost nothing. */
+/**
+ * The seller's Best Sellers PRODUCT allowance for the current billing period
+ * (`BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH`): products viewed so far
+ * against the effective ceiling (plan allowance + top-ups bought this period).
+ *
+ * `limit` is `BILLING_UNLIMITED` (-1) when nothing meters the seller — quota
+ * enforcement off, no subscription, or a plan without the limit — and then
+ * `remaining` is also -1 and nothing is ever locked. Cached and live pages count
+ * the same; the same list page reopened on the same UTC day is not recounted.
+ */
 export interface BestSellersBrowseAllowanceDto {
   used: number;
   limit: number;
   remaining: number;
+  /** Extra allowance from top-up packs credited to this period; 0 when none. */
+  creditValue: number;
 }
 
 /** `GET /v1/best-sellers`. */
@@ -153,13 +164,27 @@ export interface BestSellersPageDto {
   cachedAt: string | null;
   fetchedAt: string | null;
   allowance: BestSellersBrowseAllowanceDto;
+  /**
+   * Products on this page the seller's allowance did NOT cover. They are
+   * removed from `list.items` SERVER-SIDE (never blurred client-side over real
+   * data — that would leak them to anyone opening devtools), and the page
+   * renders this many locked placeholder rows with an upgrade / top-up prompt.
+   * 0 whenever the whole page was covered or the seller is unmetered.
+   */
+  lockedCount: number;
 }
 
 /** i18n keys the API returns as the `message` of a refused request (mapped to HTTP statuses in the controller). */
 export enum BestSellersErrorKey {
   /** 404 — the operator switched the feature off. */
   DISABLED = 'bestSellers.errors.disabled',
-  /** 429 — today's per-seller fetch allowance is spent (cache hits still work). */
+  /**
+   * 429 — the per-seller daily cap on LIVE fetches (cache misses) is spent.
+   * This is the platform's anti-abuse brake on proxy capacity
+   * (`bestSellers.dailyFetchLimit`, hidden from sellers and set far above real
+   * use), NOT the seller-facing product allowance — that one never refuses,
+   * it locks rows instead (`BestSellersPageDto.lockedCount`).
+   */
   DAILY_LIMIT_REACHED = 'bestSellers.errors.dailyLimitReached',
   /** 503 — the scraper service could not be reached. */
   UNAVAILABLE = 'bestSellers.errors.unavailable',
