@@ -97,10 +97,7 @@ export class AmazonController {
   }
 
   @Delete('accounts/:id')
-  async deleteAccount(
-    @Req() req: AuthenticatedRequest,
-    @Param('id') id: string
-  ): Promise<{ success: boolean }> {
+  async deleteAccount(@Req() req: AuthenticatedRequest, @Param('id') id: string): Promise<{ success: boolean }> {
     await this.accountsService.delete(req.user.sub, id);
     return { success: true };
   }
@@ -127,7 +124,7 @@ export class AmazonController {
   @Post('orders/:orderId/convert-tracking')
   async convertTracking(
     @Req() req: AuthenticatedRequest,
-    @Param('orderId') orderId: string,
+    @Param('orderId') orderId: string
   ): Promise<{ converted: boolean; trackingNumber: string | null; reasonKey: string | null }> {
     const userId = req.user.sub;
 
@@ -135,7 +132,7 @@ export class AmazonController {
     // itself check who is asking.
     const owned = await this.databaseService.query<{ id: string }>(
       `SELECT id FROM orders WHERE id = $1 AND user_id = $2`,
-      [orderId, userId],
+      [orderId, userId]
     );
     if (owned.length === 0) {
       throw new NotFoundException('orders.errors.notFound');
@@ -200,11 +197,7 @@ export class AmazonController {
 
     try {
       // Scrape the Amazon order
-      const scrapedData = await this.scrapingService.scrapeOrder(
-        userId,
-        dto.amazonAccountId,
-        dto.amazonOrderId
-      );
+      const scrapedData = await this.scrapingService.scrapeOrder(userId, dto.amazonAccountId, dto.amazonOrderId);
 
       // Scrape reached the order page but the financial-summary DOM was missing
       // (or all values were 0/NaN). NEVER silently overwrite existing costs with
@@ -225,9 +218,7 @@ export class AmazonController {
       }
 
       // Use first item's price as purchase price (or grand total for single item)
-      const purchasePrice = scrapedData.items.length === 1
-        ? scrapedData.items[0].price
-        : scrapedData.subtotal;
+      const purchasePrice = scrapedData.items.length === 1 ? scrapedData.items[0].price : scrapedData.subtotal;
 
       // Update the order with scraped data
       await this.databaseService.query(
@@ -241,6 +232,11 @@ export class AmazonController {
           amazon_tracking_carrier = $7,
           amazon_tracking_url = $8,
           amazon_linked_at = CURRENT_TIMESTAMP,
+          -- Linking a new Amazon order by hand is the recovery the "Amazon
+          -- cancelled" stage asks for; the cancelled flag belonged to the OLD
+          -- Amazon order and must not keep this one red. Tracking of the new
+          -- order re-sets it if Amazon cancels again.
+          amazon_cancelled_at = NULL,
           updated_at = CURRENT_TIMESTAMP
          WHERE id = $9`,
         [

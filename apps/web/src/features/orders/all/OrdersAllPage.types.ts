@@ -21,7 +21,7 @@ export interface OrdersAllPageProps {
   tab: OrderStageTab;
   tabItems: TabNavItem[];
   onTabChange: (tabId: string) => void;
-  /** The Status select — one stage, narrowing within the tab. */
+  /** The Status select — one stage; choosing one returns the rail to "All". */
   stage: string;
   onStageChange: (value: string | number) => void;
   stageOptions: { value: string | number; label: string }[];

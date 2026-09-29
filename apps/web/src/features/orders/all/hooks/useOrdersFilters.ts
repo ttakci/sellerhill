@@ -27,9 +27,12 @@ export function useOrdersFilters() {
   const storeFromUrl = searchParams.get('store') ?? '';
   const stageFromUrl = searchParams.get('stage') ?? '';
   const tabFromUrl = searchParams.get('tab') ?? '';
-  /** True when the URL chose neither a tab nor a stage — the container may
-   *  then open on "Needs action" once the counts say there is something. */
-  const hasUrlSelection = Boolean(stageFromUrl || tabFromUrl);
+  /** True when the URL already expresses an intent — a tab, a stage, or any
+   *  deep-link filter (the dashboard's "view all" carries dates + tracking).
+   *  Only a bare `/orders` may be opened on "Needs action" by the container. */
+  const hasUrlSelection = Boolean(
+    stageFromUrl || tabFromUrl || dateFrom || dateTo || fromDashboard || storeFromUrl || searchParams.get('tracking')
+  );
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
@@ -133,8 +136,12 @@ export function useOrdersFilters() {
     (value: string | number) => {
       const v = String(value);
       setStage(isStage(v) ? v : '');
+      // One stage replaces the tab's group, so the rail goes back to "All" —
+      // otherwise "Done" would stay highlighted over a list of to-purchase rows.
+      setTab(OrderStageTab.ALL);
       setPage(1);
       const next = new URLSearchParams(searchParams);
+      next.delete('tab');
       if (isStage(v)) {
         next.set('stage', v);
       } else {

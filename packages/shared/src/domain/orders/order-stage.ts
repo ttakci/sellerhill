@@ -31,10 +31,19 @@ export function deriveOrderStage(input: OrderStageInput): OrderStage {
   if (settled) {
     return OrderStage.DELIVERED;
   }
-  if (isSimulatedAmazonOrderId(input.amazonOrderId) || input.autoFulfillStatus === AutoFulfillStatus.DRY_RUN) {
+  // A dry run is a test only while nothing real was bought: the manual link
+  // writes a real Amazon order id without touching auto_fulfill_status, and
+  // that order must then read as purchased / shipped / held like any other.
+  if (
+    isSimulatedAmazonOrderId(input.amazonOrderId) ||
+    (input.autoFulfillStatus === AutoFulfillStatus.DRY_RUN && !input.amazonOrderId)
+  ) {
     return OrderStage.TEST_RUN;
   }
-  if (input.status === OrderStatus.SHIPPED || input.ebayTrackingPushedAt) {
+  // eBay's IN_PROGRESS (PROCESSING) means at least one line item shipped, and
+  // the platform only reads lineItems[0] — so it is shipped, never "to buy"
+  // (the same reading `isOrderAlreadyFulfilled` gives auto-fulfill).
+  if (input.status === OrderStatus.SHIPPED || input.status === OrderStatus.PROCESSING || input.ebayTrackingPushedAt) {
     return OrderStage.SHIPPED;
   }
   if (input.shippedDetectedAt) {

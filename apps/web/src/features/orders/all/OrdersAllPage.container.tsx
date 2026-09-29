@@ -65,10 +65,13 @@ export const OrdersAllPageContainer: React.FC = () => {
   /* The tab counts describe the whole store (or the filtered store / link
      state), never the current tab or search — they are what makes the rail
      legible, not a second result count. */
-  const { data: stageCounts } = useGetOrderStageCountsQuery({
-    ebayAccountId: ebayAccountId || undefined,
-    isTracked: serverQuery.isTracked,
-  });
+  const { data: stageCounts } = useGetOrderStageCountsQuery(
+    {
+      ebayAccountId: ebayAccountId || undefined,
+      isTracked: serverQuery.isTracked,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const countFor = useCallback(
     (tabId: OrderStageTab): number =>

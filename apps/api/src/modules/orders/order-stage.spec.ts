@@ -104,6 +104,29 @@ describe('deriveOrderStage', () => {
     expect(deriveOrderStage({ ...paid, amazonOrderId: 'SIM-123', shippedDetectedAt: '2026-09-30T00:00:00Z' })).toBe(
       OrderStage.TEST_RUN
     );
+    expect(deriveOrderStage({ ...paid, autoFulfillStatus: AutoFulfillStatus.DRY_RUN })).toBe(OrderStage.TEST_RUN);
+  });
+
+  it('a dry run the seller then bought by hand is a real purchase, not a test', () => {
+    // The manual link writes a real Amazon order id but leaves auto_fulfill_status = dry_run.
+    expect(deriveOrderStage({ ...paid, autoFulfillStatus: AutoFulfillStatus.DRY_RUN, amazonOrderId: '112-1' })).toBe(
+      OrderStage.PURCHASED
+    );
+    expect(
+      deriveOrderStage({
+        ...paid,
+        autoFulfillStatus: AutoFulfillStatus.DRY_RUN,
+        amazonOrderId: '112-1',
+        shippedDetectedAt: '2026-09-30T00:00:00Z',
+      })
+    ).toBe(OrderStage.TRACKING_HELD);
+  });
+
+  it('reads eBay IN_PROGRESS (processing) as shipped, never as something to buy', () => {
+    expect(deriveOrderStage({ status: OrderStatus.PROCESSING })).toBe(OrderStage.SHIPPED);
+    expect(deriveOrderStage({ status: OrderStatus.PROCESSING, autoFulfillStatus: AutoFulfillStatus.BLOCKED })).toBe(
+      OrderStage.SHIPPED
+    );
   });
 });
 

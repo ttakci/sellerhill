@@ -259,7 +259,12 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   }
   if (params.ebayAccountId) {
     // Sample orders are spread across both demo stores by listing index.
-    rows = rows.filter((_, i) => (params.ebayAccountId === DEMO_EBAY_ACCOUNTS.items[1].id ? i % 4 === 0 : i % 4 !== 0));
+    rows = rows.filter((o) => {
+      // Keyed on the fixture index, not the position in the filtered list, so a
+      // store's orders are the same rows whatever other filters ran first.
+      const i = DEMO_ORDERS.indexOf(o);
+      return params.ebayAccountId === DEMO_EBAY_ACCOUNTS.items[1].id ? i % 4 === 0 : i % 4 !== 0;
+    });
   }
   if (params.dateFrom) {
     rows = rows.filter((o) => o.createdAt >= params.dateFrom);
