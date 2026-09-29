@@ -660,7 +660,7 @@ export class OrderSyncService {
            transaction_fee = $1,
            ad_fee = $2,
            net_profit = $3,
-           purchase_price = COALESCE(NULLIF($4, 0), purchase_price),
+           purchase_price = COALESCE(NULLIF($4::numeric, 0), purchase_price),
            cost_capture_status = $5,
            updated_at = CURRENT_TIMESTAMP
          WHERE id = $6`,

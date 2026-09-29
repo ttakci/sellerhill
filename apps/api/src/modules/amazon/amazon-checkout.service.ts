@@ -35,7 +35,10 @@ import { BrowserStateManager } from './browser-state-manager.service';
  * network, DB) is rethrown so BullMQ retries the whole job.
  */
 export class AutoFulfillBlockedError extends Error {
-  constructor(public readonly reason: AutoFulfillBlockedReason, message?: string) {
+  constructor(
+    public readonly reason: AutoFulfillBlockedReason,
+    message?: string
+  ) {
     super(message ?? reason);
     this.name = 'AutoFulfillBlockedError';
   }
@@ -61,8 +64,22 @@ interface Address {
   phone?: string;
 }
 
+/**
+ * How long the address step may take to render after "Proceed to checkout".
+ * Amazon paints the checkout shell (header + spinner) first and fills the
+ * address list in afterwards; the first live order was refused against that
+ * empty shell. Generous on purpose — a slow page is not a missing control.
+ */
+const ADDRESS_STEP_READY_TIMEOUT_MS = 20_000;
+
 // ---------------------------------------------------------------------------
 // FRAGILE: Amazon checkout-flow DOM selectors.
+//
+// `locator.isVisible({ timeout })` does NOT wait — Playwright ignores the
+// option and answers from the current DOM. Every presence check in this module
+// therefore goes through `waitFor({ state: 'visible', timeout })`, which is the
+// call that actually waits; `playwright-visibility.guard.spec.ts` refuses the
+// old form.
 //
 // Keep ALL selectors in this one block so a DOM change on Amazon's side is a
 // one-place patch. Amazon rotates obfuscated class names frequently; the
@@ -89,20 +106,12 @@ const CHECKOUT_SELECTORS = {
     'h1:has-text("we couldn\'t find that page")',
     'div:has-text("we couldn\'t find that page")',
   ],
-  addToCartButton: [
-    '#add-to-cart-button',
-    'input[name="submit.add-to-cart"]',
-    '[data-testid="add-to-cart-button"]',
-  ],
+  addToCartButton: ['#add-to-cart-button', 'input[name="submit.add-to-cart"]', '[data-testid="add-to-cart-button"]'],
   buyNowButton: '#buy-now-button',
   quantitySelect: '#quantity, #selectQuantity select, select[name="quantity"]',
 
   // "Added to Cart" / Cart page interstitials
-  goToCartLink: [
-    'a:has-text("Go to Cart")',
-    'a[href*="/gp/cart/view.html"]',
-    '#sw-gtc a',
-  ],
+  goToCartLink: ['a:has-text("Go to Cart")', 'a[href*="/gp/cart/view.html"]', '#sw-gtc a'],
 
   // --- Cart page (/gp/cart/view.html) ---
   // Active cart line items carry a `data-asin` attribute across Amazon's
@@ -110,11 +119,7 @@ const CHECKOUT_SELECTORS = {
   // #sc-active-cart and must NOT be counted.
   cartUrl: (marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US): string =>
     `${buildAmazonSiteUrl(marketplace)}/gp/cart/view.html`,
-  cartItemRow: [
-    '#sc-active-cart [data-asin]',
-    'div[data-itemtype="active"] [data-asin]',
-    '.sc-list-item[data-asin]',
-  ],
+  cartItemRow: ['#sc-active-cart [data-asin]', 'div[data-itemtype="active"] [data-asin]', '.sc-list-item[data-asin]'],
   cartDeleteButton: [
     '#sc-active-cart input[value="Delete"]',
     '#sc-active-cart [data-action="delete"] input',
@@ -122,11 +127,7 @@ const CHECKOUT_SELECTORS = {
     'input[name^="submit.delete"]',
   ],
   // Per-row quantity: legacy dropdown OR modern stepper value.
-  cartQuantityValue: [
-    'select[name^="quantity"]',
-    '[data-a-selector="value"]',
-    '.sc-quantity-stepper input',
-  ],
+  cartQuantityValue: ['select[name^="quantity"]', '[data-a-selector="value"]', '.sc-quantity-stepper input'],
 
   // --- Checkout flow entrance ---
   proceedToCheckoutButton: [
@@ -157,16 +158,9 @@ const CHECKOUT_SELECTORS = {
   // --- Ship-to address selection ---
   // Amazon's address list is a radio group on the "Choose your shipping
   // address" page. Each address is a `[data-address-id="…"]` block.
-  addressRadio: [
-    'input[name="shipmentAddressRadioGroup"]',
-    'input[type="radio"][name*="address"]',
-  ],
+  addressRadio: ['input[name="shipmentAddressRadioGroup"]', 'input[type="radio"][name*="address"]'],
   addressBlock: '[data-address-id], .address-block, div.address-row',
-  addNewAddressLink: [
-    'a:has-text("Add an address")',
-    'a[data-test-id="add-new-address"]',
-    'a[id*="add-new-address"]',
-  ],
+  addNewAddressLink: ['a:has-text("Add an address")', 'a[data-test-id="add-new-address"]', 'a[id*="add-new-address"]'],
   /**
    * Submit control of the "Add an address" dialog. Amazon's current copy is
    * "Use this address" and the button sits BELOW the fold inside the dialog, so
@@ -254,11 +248,7 @@ const CHECKOUT_SELECTORS = {
   ],
 
   // --- Confirmation page (after successful Place Order) ---
-  confirmationOrderId: [
-    '[data-testid="order-id"]',
-    '.confirmation-id',
-    'a[href*="orderID="]',
-  ],
+  confirmationOrderId: ['[data-testid="order-id"]', '.confirmation-id', 'a[href*="orderID="]'],
   confirmationSummary: '#order-summary, .order-summary, [data-testid="order-summary"]',
 
   // Generic Amazon signin-redirect URL fragments.
@@ -289,12 +279,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * Clamped to [1000, 60000] ms so a typo'd env value cannot stall the
    * concurrency-1 worker (R9 — the worker is single-threaded across orders).
    */
-  private readonly minTimeMs = clampInt(
-    process.env.AUTO_FULFILL_CHECKOUT_MIN_TIME_MS,
-    4500,
-    1000,
-    60_000,
-  );
+  private readonly minTimeMs = clampInt(process.env.AUTO_FULFILL_CHECKOUT_MIN_TIME_MS, 4500, 1000, 60_000);
   private readonly evidenceDir =
     process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
   /** How often the evidence-TTL sweep runs (ms). Default: hourly. */
@@ -309,7 +294,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly platformSettings: PlatformSettingsService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
 
   onModuleInit(): void {
@@ -339,7 +324,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // Idempotency: never double-order on BullMQ retry.
     const [order] = await this.db.query<{ auto_fulfill_status: AutoFulfillStatus; user_id: string }>(
       `SELECT auto_fulfill_status, user_id FROM orders WHERE ebay_order_id = $1`,
-      [ebayOrderId],
+      [ebayOrderId]
     );
     if (!order || shouldSkipFulfillStart(order.auto_fulfill_status)) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
@@ -355,7 +340,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       await this.block(
         ebayOrderId,
         AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED,
-        'subscription suspended at execution time',
+        'subscription suspended at execution time'
       );
       return;
     }
@@ -366,9 +351,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     await this.setStatus(ebayOrderId, AutoFulfillStatus.RUNNING);
 
     try {
-      await this.rateLimiter.schedule(amazonAccountId, () =>
-        this.checkout(ebayOrderId, amazonAccountId),
-      );
+      await this.rateLimiter.schedule(amazonAccountId, () => this.checkout(ebayOrderId, amazonAccountId));
     } catch (err) {
       if (err instanceof AutoFulfillBlockedError) {
         await this.block(ebayOrderId, err.reason, err.message);
@@ -393,9 +376,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     const authResolution = { attempted: false };
     const { userId, asin, quantity, ship, capTotal, dryRun, proxyEnabled, marketplace } = await this.loadInputs(
       ebayOrderId,
-      amazonAccountId,
+      amazonAccountId
     );
-    if (!asin) {throw new AutoFulfillBlockedError('no_asin');}
+    if (!asin) {
+      throw new AutoFulfillBlockedError('no_asin');
+    }
 
     // Step 1: session/login (reuse scraping's login incl. 2FA-TOTP). The page
     // returned is authenticated and lives in the proxy-aware persistent
@@ -411,7 +396,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     if (proxyEnabled && !this.browserState.isProxyActive(amazonAccountId)) {
       throw new AutoFulfillBlockedError(
         'proxy_required',
-        'this account has its own proxy enabled, but it did not apply to the browser context (resolution failed) — refusing to proceed over bare IP',
+        'this account has its own proxy enabled, but it did not apply to the browser context (resolution failed) — refusing to proceed over bare IP'
       );
     }
     try {
@@ -440,7 +425,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.snap(page, ebayOrderId, 'product-page-missing');
         throw new AutoFulfillBlockedError(
           'no_asin',
-          `Amazon has no product page for ASIN ${asin} (HTTP ${productResponse?.status() ?? 'unknown'}) — the listing points at a delisted or invalid ASIN`,
+          `Amazon has no product page for ASIN ${asin} (HTTP ${
+            productResponse?.status() ?? 'unknown'
+          }) — the listing points at a delisted or invalid ASIN`
         );
       }
 
@@ -466,14 +453,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const proceeded = await this.clickFirstAvailable(
         page,
         CHECKOUT_SELECTORS.proceedToCheckoutButton,
-        'proceed-to-checkout',
+        'proceed-to-checkout'
       );
       if (!proceeded) {
         await this.snap(page, ebayOrderId, 'proceed-to-checkout-missing');
-        throw new AutoFulfillBlockedError(
-          'cart',
-          'no visible "Proceed to checkout" control on the cart page',
-        );
+        throw new AutoFulfillBlockedError('cart', 'no visible "Proceed to checkout" control on the cart page');
       }
       // Resolves an OTP prompt automatically; throws 'captcha' | 'otp' only when
       // it cannot be handled without a human.
@@ -486,14 +470,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // from a valid browsing session. Detect that here instead of letting the
       // signed-out page no-op the address/payment steps and surface much later
       // as an unreadable review total.
-      await this.assertStillAuthenticated(
-        page,
-        ebayOrderId,
-        'post-proceed',
-        authResolution,
-        userId,
-        amazonAccountId,
-      );
+      await this.assertStillAuthenticated(page, ebayOrderId, 'post-proceed', authResolution, userId, amazonAccountId);
       await this.selectShipToAddress(page, ship, ebayOrderId); // throws 'address' on friction
 
       // Step 4: payment
@@ -505,14 +482,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // Last auth checkpoint before the cap read. A session lost between
       // payment and review would otherwise be reported as `review_unreadable`,
       // sending the operator to tune selectors against a sign-in page.
-      await this.assertStillAuthenticated(
-        page,
-        ebayOrderId,
-        'pre-review',
-        authResolution,
-        userId,
-        amazonAccountId,
-      );
+      await this.assertStillAuthenticated(page, ebayOrderId, 'pre-review', authResolution, userId, amazonAccountId);
       const grandTotal = await this.readReviewGrandTotal(page);
       if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
         await this.snap(page, ebayOrderId, 'review-total-missing');
@@ -522,20 +492,17 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         const title = await page.title().catch(() => 'unknown');
         throw new AutoFulfillBlockedError(
           'review_unreadable',
-          `unparseable review grandTotal (${grandTotal}) at ${new URL(page.url()).pathname} [${title}]; refusing to proceed without cap check`,
+          `unparseable review grandTotal (${grandTotal}) at ${
+            new URL(page.url()).pathname
+          } [${title}]; refusing to proceed without cap check`
         );
       }
       // Read at checkout time so an operator can flip the hard cap off (or
       // back on) from the admin panel without restarting the API mid-incident.
-      const hardStop = await this.platformSettings.getBoolean(
-        PlatformSettingKey.AUTO_FULFILL_REVIEW_CAP_HARD_STOP,
-      );
+      const hardStop = await this.platformSettings.getBoolean(PlatformSettingKey.AUTO_FULFILL_REVIEW_CAP_HARD_STOP);
       if (hardStop && capTotal !== Number.POSITIVE_INFINITY && grandTotal > capTotal) {
         await this.snap(page, ebayOrderId, 'cap');
-        throw new AutoFulfillBlockedError(
-          'cap',
-          `grandTotal ${grandTotal.toFixed(2)} > cap ${capTotal.toFixed(2)}`,
-        );
+        throw new AutoFulfillBlockedError('cap', `grandTotal ${grandTotal.toFixed(2)} > cap ${capTotal.toFixed(2)}`);
       }
 
       // The Place Order control must be ON SCREEN before we accept the total as
@@ -546,14 +513,16 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const placeOrderVisible = await page
         .locator(CHECKOUT_SELECTORS.placeYourOrderButton.join(', '))
         .first()
-        .isVisible({ timeout: 5_000 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
         .catch(() => false);
       if (!placeOrderVisible) {
         await this.snap(page, ebayOrderId, 'place-order-not-reached');
         const title = await page.title().catch(() => 'unknown');
         throw new AutoFulfillBlockedError(
           'review_unreadable',
-          `not on the final review step: no Place Order control at ${new URL(page.url()).pathname} [${title}]`,
+          `not on the final review step: no Place Order control at ${new URL(page.url()).pathname} [${title}]`
         );
       }
 
@@ -572,7 +541,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           asin,
         });
         this.logger.log(
-          `dry-run stop ${ebayOrderId}: grandTotal=${grandTotal.toFixed(2)} cap=${capTotal === Number.POSITIVE_INFINITY ? 'inf' : capTotal.toFixed(2)}`,
+          `dry-run stop ${ebayOrderId}: grandTotal=${grandTotal.toFixed(2)} cap=${
+            capTotal === Number.POSITIVE_INFINITY ? 'inf' : capTotal.toFixed(2)
+          }`
         );
         return;
       }
@@ -588,15 +559,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // (→ blocked, no retry). Any click-transport error becomes a fail-closed
       // block instead of a retriable propagation.
       try {
-        await this.clickFirstAvailable(
-          page,
-          CHECKOUT_SELECTORS.placeYourOrderButton,
-          'place-your-order',
-        );
+        await this.clickFirstAvailable(page, CHECKOUT_SELECTORS.placeYourOrderButton, 'place-your-order');
       } catch (err) {
-        this.logger.warn(
-          `place-order click threw; falling through to confirmation parse: ${(err as Error).message}`,
-        );
+        this.logger.warn(`place-order click threw; falling through to confirmation parse: ${(err as Error).message}`);
       }
       await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => undefined);
       const placed = await this.parseConfirmation(page); // throws 'no_confirmation'
@@ -613,7 +578,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           placed.purchasePrice +
           placed.tax +
           placed.shipping
-        ).toFixed(2)}`,
+        ).toFixed(2)}`
       );
     } finally {
       await page.close().catch(() => undefined);
@@ -635,7 +600,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     accountId: string,
     userId: string,
     ebayOrderId: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
   ): Promise<Page> {
     try {
       const page = await this.scraping.ensureAuthenticatedPage(userId, accountId);
@@ -661,15 +626,21 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.snap(page, ebayOrderId, 'login-not-proven');
         throw new AutoFulfillBlockedError(
           'login',
-          `session not proven authenticated (route=${authProbe.route}; authRoute=${authProbe.authRoute}; authControl=${authProbe.authControlVisible}; signedOutNav=${authProbe.signedOutNav}; signedInNav=${authProbe.signedInNav}; accountMarker=${authProbe.accountPageMarker})`,
+          `session not proven authenticated (route=${authProbe.route}; authRoute=${authProbe.authRoute}; authControl=${authProbe.authControlVisible}; signedOutNav=${authProbe.signedOutNav}; signedInNav=${authProbe.signedInNav}; accountMarker=${authProbe.accountPageMarker})`
         );
       }
       return page;
     } catch (err) {
-      if (err instanceof AutoFulfillBlockedError) {throw err;}
+      if (err instanceof AutoFulfillBlockedError) {
+        throw err;
+      }
       const msg = err instanceof Error ? err.message : String(err);
-      if (/2FA|otp|mfa/i.test(msg)) {throw new AutoFulfillBlockedError('otp', msg);}
-      if (/captcha/i.test(msg)) {throw new AutoFulfillBlockedError('captcha', msg);}
+      if (/2FA|otp|mfa/i.test(msg)) {
+        throw new AutoFulfillBlockedError('otp', msg);
+      }
+      if (/captcha/i.test(msg)) {
+        throw new AutoFulfillBlockedError('captcha', msg);
+      }
       // Keep the create-account refusal legible instead of flattening it into a
       // generic login failure: the fix is "use a registered Amazon email", not
       // "re-enter the password".
@@ -696,27 +667,20 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * Bounded loop: Amazon may chain more than one interstitial, but a page that
    * keeps re-presenting itself must not spin forever on the money path.
    */
-  private async passUpsellInterstitial(
-    page: Page,
-    asin: string,
-    quantity: number,
-    ebayOrderId: string,
-  ): Promise<void> {
+  private async passUpsellInterstitial(page: Page, asin: string, quantity: number, ebayOrderId: string): Promise<void> {
     for (let hop = 0; hop < 3; hop++) {
       const onInterstitial = await page
         .locator(CHECKOUT_SELECTORS.continueToCheckoutButton.join(', '))
         .first()
-        .isVisible({ timeout: 2000 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
         .catch(() => false);
       if (!onInterstitial) {
         return;
       }
       this.logger.debug(`${ebayOrderId}: passing checkout upsell interstitial (hop ${hop + 1})`);
-      await this.clickFirstAvailable(
-        page,
-        CHECKOUT_SELECTORS.continueToCheckoutButton,
-        'continue-to-checkout',
-      );
+      await this.clickFirstAvailable(page, CHECKOUT_SELECTORS.continueToCheckoutButton, 'continue-to-checkout');
       await this.humanDelay();
 
       // Fail closed if the interstitial changed the basket.
@@ -739,7 +703,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     stage: string,
     authResolution: { attempted: boolean },
     userId: string,
-    amazonAccountId: string,
+    amazonAccountId: string
   ): Promise<void> {
     const probe = await isOnAmazonAuthChallenge(page);
     if (probe.authenticated) {
@@ -760,9 +724,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const resolved = await this.scraping
         .resolveInContextChallenge(page, userId, amazonAccountId)
         .catch((err: unknown) => {
-          this.logger.warn(
-            `${ebayOrderId}: in-context challenge resolution failed: ${(err as Error).message}`,
-          );
+          this.logger.warn(`${ebayOrderId}: in-context challenge resolution failed: ${(err as Error).message}`);
           return false;
         });
       if (resolved) {
@@ -773,7 +735,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
 
     throw new AutoFulfillBlockedError(
       'login',
-      `Amazon identity challenge unresolved at ${stage} (route=${probe.route}; authRoute=${probe.authRoute}; authControl=${probe.authControlVisible})`,
+      `Amazon identity challenge unresolved at ${stage} (route=${probe.route}; authRoute=${probe.authRoute}; authControl=${probe.authControlVisible})`
     );
   }
 
@@ -790,7 +752,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       return true;
     }
     for (const sel of CHECKOUT_SELECTORS.pageNotFoundText) {
-      if (await page.locator(sel).first().isVisible({ timeout: 500 }).catch(() => false)) {
+      if (
+        await page
+          .locator(sel)
+          .first()
+          .first()
+          .waitFor({ state: 'visible', timeout: 500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         return true;
       }
     }
@@ -801,7 +771,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private async isUnavailable(page: Page): Promise<boolean> {
     for (const sel of CHECKOUT_SELECTORS.unavailableText) {
       const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 500 }).catch(() => false)) {
+      if (
+        await loc
+          .first()
+          .waitFor({ state: 'visible', timeout: 500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         return true;
       }
     }
@@ -809,12 +785,16 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     const addVisible = await page
       .locator(CHECKOUT_SELECTORS.addToCartButton.join(', '))
       .first()
-      .isVisible({ timeout: 1000 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 1000 })
+      .then(() => true)
       .catch(() => false);
     const buyVisible = await page
       .locator(CHECKOUT_SELECTORS.buyNowButton)
       .first()
-      .isVisible({ timeout: 500 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 500 })
+      .then(() => true)
       .catch(() => false);
     return !addVisible && !buyVisible;
   }
@@ -823,9 +803,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private async setQuantityAndAddToCart(page: Page, qty: number): Promise<void> {
     if (qty > 1) {
       const qtySelect = page.locator(CHECKOUT_SELECTORS.quantitySelect).first();
-      if (await qtySelect.isVisible({ timeout: 1500 }).catch(() => false)) {
+      if (
+        await qtySelect
+          .first()
+          .waitFor({ state: 'visible', timeout: 1500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         // Try exact value, fall back to highest available.
-        const opts = await qtySelect.locator('option').count().catch(() => 0);
+        const opts = await qtySelect
+          .locator('option')
+          .count()
+          .catch(() => 0);
         if (opts >= qty) {
           await qtySelect.selectOption(String(qty)).catch(() => undefined);
         } else if (opts > 0) {
@@ -837,7 +826,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       }
     }
     const addBtn = page.locator(CHECKOUT_SELECTORS.addToCartButton.join(', ')).first();
-    if (!(await addBtn.isVisible({ timeout: 2000 }).catch(() => false))) {
+    if (
+      !(await addBtn
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
+        .catch(() => false))
+    ) {
       throw new AutoFulfillBlockedError('out_of_stock', 'no visible Add to Cart button');
     }
     await addBtn.click();
@@ -852,7 +847,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private async clearCart(
     page: Page,
     ebayOrderId: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
   ): Promise<void> {
     try {
       await page.goto(CHECKOUT_SELECTORS.cartUrl(marketplace), {
@@ -861,7 +856,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       });
       for (let i = 0; i < 10; i++) {
         const del = page.locator(CHECKOUT_SELECTORS.cartDeleteButton.join(', ')).first();
-        if (!(await del.isVisible({ timeout: 1500 }).catch(() => false))) {
+        if (
+          !(await del
+            .first()
+            .waitFor({ state: 'visible', timeout: 1500 })
+            .then(() => true)
+            .catch(() => false))
+        ) {
           break;
         }
         await del.click().catch(() => undefined);
@@ -869,9 +870,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.humanDelay();
       }
     } catch (err) {
-      this.logger.warn(
-        `clearCart best-effort failed for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`clearCart best-effort failed for ${ebayOrderId}: ${(err as Error).message}`);
     }
   }
 
@@ -884,19 +883,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * co-purchased with real money. An unreadable row count also blocks
    * (selector drift is surfaced during dry-run tuning, before money moves).
    */
-  private async verifyCartContents(
-    page: Page,
-    asin: string,
-    qty: number,
-    ebayOrderId: string,
-  ): Promise<void> {
+  private async verifyCartContents(page: Page, asin: string, qty: number, ebayOrderId: string): Promise<void> {
     const rows = page.locator(CHECKOUT_SELECTORS.cartItemRow.join(', '));
     const rowCount = await rows.count().catch(() => -1);
     if (rowCount !== 1) {
       await this.snap(page, ebayOrderId, 'cart-mismatch');
       throw new AutoFulfillBlockedError(
         'cart',
-        `active cart has ${rowCount < 0 ? 'unreadable' : rowCount} line items (expected exactly 1)`,
+        `active cart has ${rowCount < 0 ? 'unreadable' : rowCount} line items (expected exactly 1)`
       );
     }
 
@@ -908,13 +902,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         (await row
           .locator(`a[href*="${asin}"]`)
           .first()
-          .isVisible({ timeout: 1000 })
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
           .catch(() => false)));
     if (!asinMatches) {
       await this.snap(page, ebayOrderId, 'cart-mismatch');
       throw new AutoFulfillBlockedError(
         'cart',
-        `cart line item ASIN mismatch (found "${rowAsin || 'unknown'}", expected ${asin})`,
+        `cart line item ASIN mismatch (found "${rowAsin || 'unknown'}", expected ${asin})`
       );
     }
 
@@ -924,7 +920,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // all orders on a cosmetic layout change).
     const qtyLoc = row.locator(CHECKOUT_SELECTORS.cartQuantityValue.join(', ')).first();
     let cartQty: number | null = null;
-    if (await qtyLoc.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (
+      await qtyLoc
+        .first()
+        .waitFor({ state: 'visible', timeout: 1000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const rawValue = await qtyLoc.inputValue().catch(() => null);
       const rawText = rawValue ?? (await qtyLoc.textContent().catch(() => null));
       const parsed = Number.parseInt((rawText ?? '').trim(), 10);
@@ -934,14 +936,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     }
     if (cartQty !== null && cartQty !== qty) {
       await this.snap(page, ebayOrderId, 'cart-mismatch');
-      throw new AutoFulfillBlockedError(
-        'cart',
-        `cart quantity ${cartQty} != order quantity ${qty}`,
-      );
+      throw new AutoFulfillBlockedError('cart', `cart quantity ${cartQty} != order quantity ${qty}`);
     }
     if (cartQty === null) {
       this.logger.warn(
-        `verifyCartContents: quantity unreadable for ${ebayOrderId} — proceeding on row/ASIN match only`,
+        `verifyCartContents: quantity unreadable for ${ebayOrderId} — proceeding on row/ASIN match only`
       );
     }
   }
@@ -959,30 +958,40 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     page: Page,
     userId: string,
     amazonAccountId: string,
-    ebayOrderId: string,
+    ebayOrderId: string
   ): Promise<void> {
     const otp = page.locator(CHECKOUT_SELECTORS.mfaOtpInput).first();
-    if (await otp.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (
+      await otp
+        .first()
+        .waitFor({ state: 'visible', timeout: 1000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       this.logger.warn(`${ebayOrderId}: resolving Amazon OTP prompt mid-checkout`);
       const resolved = await this.scraping
         .resolveInContextChallenge(page, userId, amazonAccountId)
         .catch((err: unknown) => {
-          this.logger.warn(
-            `${ebayOrderId}: OTP resolution failed: ${(err as Error).message}`,
-          );
+          this.logger.warn(`${ebayOrderId}: OTP resolution failed: ${(err as Error).message}`);
           return false;
         });
       if (!resolved) {
         await this.snap(page, ebayOrderId, 'otp-unresolved');
         throw new AutoFulfillBlockedError(
           'otp',
-          'Amazon prompted for an MFA OTP code mid-checkout and it could not be resolved automatically',
+          'Amazon prompted for an MFA OTP code mid-checkout and it could not be resolved automatically'
         );
       }
       await this.humanDelay();
     }
     const captcha = page.locator(CHECKOUT_SELECTORS.captchaInput).first();
-    if (await captcha.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (
+      await captcha
+        .first()
+        .waitFor({ state: 'visible', timeout: 1000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       await this.snap(page, ebayOrderId, 'captcha');
       throw new AutoFulfillBlockedError('captcha', 'Amazon captcha page presented');
     }
@@ -998,11 +1007,27 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * not be verified" interstitial is a hard stop because guessing leads to
    * mis-shipped orders.
    */
-  private async selectShipToAddress(
-    page: Page,
-    ship: Address,
-    ebayOrderId: string,
-  ): Promise<void> {
+  private async selectShipToAddress(page: Page, ship: Address, ebayOrderId: string): Promise<void> {
+    // Wait for the address step to actually RENDER before deciding anything.
+    // Amazon's checkout shell paints a spinner first and fills the address
+    // list in afterwards; the first live order (2026-09-29) was refused as
+    // "no saved addresses and no add-address control" because `count()`
+    // ran against that empty shell. Any one of these controls marks the
+    // step as ready; a timeout falls through to the existing fail-closed
+    // branches, which then snapshot the real page state.
+    await page
+      .locator(
+        [
+          ...CHECKOUT_SELECTORS.addressRadio,
+          ...CHECKOUT_SELECTORS.addNewAddressLink,
+          ...CHECKOUT_SELECTORS.useSelectedAddressButton,
+          CHECKOUT_SELECTORS.selectedShipToSummary,
+        ].join(', ')
+      )
+      .first()
+      .waitFor({ state: 'visible', timeout: ADDRESS_STEP_READY_TIMEOUT_MS })
+      .catch(() => undefined);
+
     const anyRadio = page.locator(CHECKOUT_SELECTORS.addressRadio.join(', '));
     const radioCount = await anyRadio.count().catch(() => 0);
 
@@ -1012,14 +1037,20 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const blockCount = await blocks.count().catch(() => 0);
       for (let i = 0; i < blockCount; i++) {
         const blk = blocks.nth(i);
-        const text = ((await blk.textContent().catch(() => '')) ?? '');
+        const text = (await blk.textContent().catch(() => '')) ?? '';
         // Street + zip (+ unit) must all line up — see `address-match.ts` for why
         // a zip-only match is unsafe.
         if (!addressBlockMatchesBuyer(text, ship)) {
           continue;
         }
         const radio = blk.locator('input[type="radio"]').first();
-        if (await radio.isVisible({ timeout: 500 }).catch(() => false)) {
+        if (
+          await radio
+            .first()
+            .waitFor({ state: 'visible', timeout: 500 })
+            .then(() => true)
+            .catch(() => false)
+        ) {
           await radio.check();
           matched = true;
           break;
@@ -1036,7 +1067,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           await this.snap(page, ebayOrderId, 'address-not-matched');
           throw new AutoFulfillBlockedError(
             'address',
-            `none of the saved Amazon addresses match the eBay buyer (${ship.zipCode ?? 'no zip'}) and the address could not be added`,
+            `none of the saved Amazon addresses match the eBay buyer (${
+              ship.zipCode ?? 'no zip'
+            }) and the address could not be added`
           );
         }
       }
@@ -1047,7 +1080,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.snap(page, ebayOrderId, 'address-add-unavailable');
         throw new AutoFulfillBlockedError(
           'address',
-          'no saved Amazon addresses and no add-address control was available',
+          'no saved Amazon addresses and no add-address control was available'
         );
       }
     }
@@ -1057,29 +1090,31 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // it had reached the review step while still sitting on address selection —
     // the cap was then checked against the sidebar total of the WRONG step, and
     // dry-run reported success without ever proving the pre-Place-Order page.
-    const useBtn = page
-      .locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', '))
-      .first();
-    const useBtnVisible = await useBtn.isVisible({ timeout: 2500 }).catch(() => false);
+    const useBtn = page.locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', ')).first();
+    const useBtnVisible = await useBtn
+      .first()
+      .waitFor({ state: 'visible', timeout: 2500 })
+      .then(() => true)
+      .catch(() => false);
     if (!useBtnVisible) {
       const addressStepPresent = await page
         .locator('h1:has-text("Select a delivery address"), h2:has-text("Select a delivery address")')
         .first()
-        .isVisible({ timeout: 1000 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 1000 })
+        .then(() => true)
         .catch(() => false);
       if (addressStepPresent) {
         await this.snap(page, ebayOrderId, 'address-confirm-missing');
         throw new AutoFulfillBlockedError(
           'address',
-          'address step is on screen but no delivery-address confirm control was found',
+          'address step is on screen but no delivery-address confirm control was found'
         );
       }
     }
     if (useBtnVisible) {
       await useBtn.click();
-      await page
-        .waitForLoadState('domcontentloaded', { timeout: 15_000 })
-        .catch(() => undefined);
+      await page.waitForLoadState('domcontentloaded', { timeout: 15_000 }).catch(() => undefined);
       // Post-submit we may bounce back to the same step on a validation issue.
       // Detect that from the DOM, not the URL: Amazon's single-page checkout
       // keeps the same URL across steps, so a URL check silently passed a
@@ -1088,12 +1123,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const stillOnAddressStep = await page
         .locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', '))
         .first()
-        .isVisible({ timeout: 1500 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
         .catch(() => false);
       if (stillOnAddressStep) {
         throw new AutoFulfillBlockedError(
           'address',
-          'address selection did not advance (Amazon re-presented the address step)',
+          'address selection did not advance (Amazon re-presented the address step)'
         );
       }
     }
@@ -1105,13 +1142,19 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // ship-to summary is actually rendered, so a layout without one cannot
     // dead-stop legitimate orders — the earlier gates still apply there.
     const shipToSummary = page.locator(CHECKOUT_SELECTORS.selectedShipToSummary).first();
-    if (await shipToSummary.isVisible({ timeout: 2500 }).catch(() => false)) {
-      const summaryText = ((await shipToSummary.textContent().catch(() => '')) ?? '');
+    if (
+      await shipToSummary
+        .first()
+        .waitFor({ state: 'visible', timeout: 2500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      const summaryText = (await shipToSummary.textContent().catch(() => '')) ?? '';
       if (summaryText.trim() && !addressBlockMatchesBuyer(summaryText, ship)) {
         await this.snap(page, ebayOrderId, 'wrong-ship-to-selected');
         throw new AutoFulfillBlockedError(
           'address',
-          `checkout ship-to does not match the eBay buyer (expected ${ship.street} ${ship.zipCode})`,
+          `checkout ship-to does not match the eBay buyer (expected ${ship.street} ${ship.zipCode})`
         );
       }
     }
@@ -1128,13 +1171,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * caller can fail closed. Throws `address` on form/validation friction:
    * guessing at a rejected address leads to a mis-shipped, paid-for order.
    */
-  private async addBuyerAddress(
-    page: Page,
-    ship: Address,
-    ebayOrderId: string,
-  ): Promise<boolean> {
+  private async addBuyerAddress(page: Page, ship: Address, ebayOrderId: string): Promise<boolean> {
     const addLink = page.locator(CHECKOUT_SELECTORS.addNewAddressLink.join(', ')).first();
-    if (!(await addLink.isVisible({ timeout: 2000 }).catch(() => false))) {
+    if (
+      !(await addLink
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
+        .catch(() => false))
+    ) {
       return false;
     }
     await addLink.click();
@@ -1151,11 +1196,17 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         .locator('#address-ui-widgets-enterAddressFullName')
         .first()
         .fill(ship.fullName ?? '');
-      await page.locator('#address-ui-widgets-enterAddressLine1').first().fill(ship.street ?? '');
+      await page
+        .locator('#address-ui-widgets-enterAddressLine1')
+        .first()
+        .fill(ship.street ?? '');
       if (ship.street2) {
         await page.locator('#address-ui-widgets-enterAddressLine2').first().fill(ship.street2);
       }
-      await page.locator('#address-ui-widgets-enterAddressCity').first().fill(ship.city ?? '');
+      await page
+        .locator('#address-ui-widgets-enterAddressCity')
+        .first()
+        .fill(ship.city ?? '');
 
       // State is a <select> in the current form (observed live 2026-07-30):
       // `fill()` silently leaves it on "Select", and Amazon then rejects the
@@ -1163,8 +1214,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       const stateField = page.locator(CHECKOUT_SELECTORS.addressStateField).first();
       const stateValue = (ship.state ?? '').trim();
       if (stateValue) {
-        const isSelect =
-          (await stateField.evaluate((el) => el.tagName.toLowerCase()).catch(() => '')) === 'select';
+        const isSelect = (await stateField.evaluate((el) => el.tagName.toLowerCase()).catch(() => '')) === 'select';
         if (isSelect) {
           const chosen = await stateField
             .selectOption(stateValue)
@@ -1191,7 +1241,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.snap(page, ebayOrderId, 'address-zip-mismatch');
         throw new AutoFulfillBlockedError(
           'address',
-          `ZIP field holds "${zipWritten}" after writing "${zipValue}" — refusing to ship to an unverified postcode`,
+          `ZIP field holds "${zipWritten}" after writing "${zipValue}" — refusing to ship to an unverified postcode`
         );
       }
 
@@ -1213,12 +1263,20 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       let submitBtn = page
         .getByRole('button', { name: /use this address|ship to this address|add address|save address/i })
         .first();
-      let submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+      let submitVisible = await submitBtn
+        .first()
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false);
 
       if (!submitVisible) {
         submitBtn = page.locator(CHECKOUT_SELECTORS.addressFormContinueButton.join(', ')).first();
         await submitBtn.scrollIntoViewIfNeeded({ timeout: 5_000 }).catch(() => undefined);
-        submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+        submitVisible = await submitBtn
+          .first()
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .then(() => true)
+          .catch(() => false);
       }
 
       if (!submitVisible) {
@@ -1272,15 +1330,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
             // document-wide search still cannot hit an unrelated control.
             const candidates = Array.from(
               document.querySelectorAll<HTMLElement>(
-                'input[type="submit"], input[type="button"], button, [role="button"], a[role="button"], span.a-button-inner',
-              ),
+                'input[type="submit"], input[type="button"], button, [role="button"], a[role="button"], span.a-button-inner'
+              )
             );
             const target = candidates.find((el) => {
-              const label = [
-                el.getAttribute('value'),
-                el.getAttribute('aria-label'),
-                el.textContent,
-              ]
+              const label = [el.getAttribute('value'), el.getAttribute('aria-label'), el.textContent]
                 .filter(Boolean)
                 .join(' ')
                 .replace(/\s+/g, ' ')
@@ -1298,7 +1352,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           .catch(() => false);
         if (submitVisible) {
           await this.humanDelay();
-          submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+          submitVisible = await submitBtn
+            .first()
+            .waitFor({ state: 'visible', timeout: 5_000 })
+            .then(() => true)
+            .catch(() => false);
         }
       }
 
@@ -1315,17 +1373,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
             // actually identifies it. Metadata only — never field values.
             const seen = Array.from(
               document.querySelectorAll<HTMLElement>(
-                'input[type="submit"], input[type="button"], button, [role="button"]',
-              ),
+                'input[type="submit"], input[type="button"], button, [role="button"]'
+              )
             )
               .map((el) => {
                 // Follow aria-labelledby: Amazon's submit inputs carry no value
                 // or text of their own, so without this the control that matters
                 // showed up as an unlabelled row and got filtered out.
                 const labelledBy = el.getAttribute('aria-labelledby');
-                const referenced = labelledBy
-                  ? (document.getElementById(labelledBy)?.textContent ?? '')
-                  : '';
+                const referenced = labelledBy ? document.getElementById(labelledBy)?.textContent ?? '' : '';
                 const label = [el.getAttribute('aria-label'), referenced, el.textContent]
                   .filter(Boolean)
                   .join(' ')
@@ -1354,7 +1410,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           .catch(() => null);
         throw new AutoFulfillBlockedError(
           'address',
-          `add-address dialog exposed no known submit control; probe=${JSON.stringify(controls)}`,
+          `add-address dialog exposed no known submit control; probe=${JSON.stringify(controls)}`
         );
       }
       await submitBtn.click();
@@ -1367,18 +1423,24 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         .catch(() => undefined);
       await this.humanDelay();
     } catch (err) {
-      if (err instanceof AutoFulfillBlockedError) {throw err;}
+      if (err instanceof AutoFulfillBlockedError) {
+        throw err;
+      }
       await this.snap(page, ebayOrderId, 'address-form-failed');
       const msg = err instanceof Error ? err.message : String(err);
       throw new AutoFulfillBlockedError('address', `add-address form failed: ${msg}`);
     }
 
     const validationErr = page
-      .locator(
-        'div.a-alert-content:has-text("could not be verified"), div.a-alert-content:has-text("not valid")',
-      )
+      .locator('div.a-alert-content:has-text("could not be verified"), div.a-alert-content:has-text("not valid")')
       .first();
-    if (await validationErr.isVisible({ timeout: 1500 }).catch(() => false)) {
+    if (
+      await validationErr
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       await this.snap(page, ebayOrderId, 'address-validation-failed');
       const txt = ((await validationErr.textContent()) ?? '').trim().slice(0, 200);
       throw new AutoFulfillBlockedError('address', `validation: ${txt}`);
@@ -1394,21 +1456,29 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // Amazon pre-selects the default instrument on the review page. Click the
     // "Use this payment method" button only if it is present; otherwise the
     // page is already past payment selection (modern single-page checkout).
-    const useBtn = page
-      .locator(CHECKOUT_SELECTORS.useSelectedPaymentButton.join(', '))
-      .first();
-    if (await useBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    const useBtn = page.locator(CHECKOUT_SELECTORS.useSelectedPaymentButton.join(', ')).first();
+    if (
+      await useBtn
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       await useBtn.click();
-      await page
-        .waitForLoadState('domcontentloaded', { timeout: 15_000 })
-        .catch(() => undefined);
+      await page.waitForLoadState('domcontentloaded', { timeout: 15_000 }).catch(() => undefined);
     }
 
     // Decline-signal detection — any visible "declined" / "invalid" text on a
     // payment-related alert is a hard stop (the robot cannot retry a card).
     for (const sel of CHECKOUT_SELECTORS.paymentDeclineText) {
       const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 1000 }).catch(() => false)) {
+      if (
+        await loc
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         const txt = ((await loc.textContent().catch(() => '')) ?? '').trim().slice(0, 200);
         throw new AutoFulfillBlockedError('payment', `decline signal: ${txt}`);
       }
@@ -1424,13 +1494,21 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private async readReviewGrandTotal(page: Page): Promise<number> {
     for (const sel of CHECKOUT_SELECTORS.reviewGrandTotal) {
       const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 2500 }).catch(() => false)) {
-        const txt = ((await loc.textContent().catch(() => '')) ?? '');
+      if (
+        await loc
+          .first()
+          .waitFor({ state: 'visible', timeout: 2500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
+        const txt = (await loc.textContent().catch(() => '')) ?? '';
         // First currency-looking token in the cell.
         const m = txt.match(/\$?\s*([\d,]+(?:\.\d{2})?)/);
         if (m) {
           const n = parseFloat(m[1].replace(/,/g, ''));
-          if (Number.isFinite(n) && n > 0) {return n;}
+          if (Number.isFinite(n) && n > 0) {
+            return n;
+          }
         }
       }
     }
@@ -1444,9 +1522,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     const labelled = await page
       .locator('body')
       .innerText()
-      .then((text) =>
-        text.match(/(?:order\s+total|grand\s+total)\s*:?\s*\$\s*([\d,]+\.\d{2})/i),
-      )
+      .then((text) => text.match(/(?:order\s+total|grand\s+total)\s*:?\s*\$\s*([\d,]+\.\d{2})/i))
       .catch(() => null);
     if (labelled?.[1]) {
       const n = parseFloat(labelled[1].replace(/,/g, ''));
@@ -1486,12 +1562,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     ebayOrderId: string,
     amazonAccountId: string,
     userId: string,
-    observed: { grandTotal: number; asin: string },
+    observed: { grandTotal: number; asin: string }
   ): Promise<void> {
     // Amazon's own id shape, behind the SIM- marker, so downstream formatting and
     // any length assumptions behave exactly as they will in production.
-    const digits = (len: number): string =>
-      Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join('');
+    const digits = (len: number): string => Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join('');
     const simulatedOrderId = `${SIMULATED_AMAZON_ORDER_PREFIX}${digits(3)}-${digits(7)}-${digits(7)}`;
 
     // Split the observed review total into the fields a confirmation carries.
@@ -1524,12 +1599,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           OrderCostCaptureStatus.LINKED,
           AutoFulfillStatus.DRY_RUN,
           ebayOrderId,
-        ],
+        ]
       );
     } catch (err) {
-      this.logger.error(
-        `dry-run simulation write failed for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.error(`dry-run simulation write failed for ${ebayOrderId}: ${(err as Error).message}`);
       // Still record the stop so the order does not look untouched.
       await this.setStatus(ebayOrderId, AutoFulfillStatus.DRY_RUN).catch(() => undefined);
       return;
@@ -1540,9 +1613,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.orderSync.recomputeProfit(ebayOrderId);
     } catch (err) {
-      this.logger.warn(
-        `dry-run recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`dry-run recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`);
     }
 
     // Record it in the same audit file operators already read for blocks. The tag
@@ -1554,11 +1625,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       `simulated placement: amazonOrderId=${simulatedOrderId} asin=${observed.asin} ` +
         `items=${purchasePrice.toFixed(2)} tax=${tax.toFixed(2)} shipping=${shipping.toFixed(2)} ` +
         `total=${observed.grandTotal.toFixed(2)} costCapture=linked account=${amazonAccountId} user=${userId} ` +
-        `tracking=NOT scheduled (placeholder id would fail a real scrape)`,
+        `tracking=NOT scheduled (placeholder id would fail a real scrape)`
     ).catch(() => undefined);
 
     this.logger.log(
-      `dry-run simulated placement ${ebayOrderId}: ${simulatedOrderId} total=${observed.grandTotal.toFixed(2)}`,
+      `dry-run simulated placement ${ebayOrderId}: ${simulatedOrderId} total=${observed.grandTotal.toFixed(2)}`
     );
   }
 
@@ -1574,7 +1645,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     let amazonOrderId = '';
     for (const sel of CHECKOUT_SELECTORS.confirmationOrderId) {
       const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (
+        await loc
+          .first()
+          .waitFor({ state: 'visible', timeout: 3000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         const href = await loc.getAttribute('href').catch(() => null);
         if (href) {
           const m = href.match(/orderID=([0-9A-Z-]+)/i);
@@ -1583,7 +1660,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
             break;
           }
         }
-        const txt = ((await loc.textContent().catch(() => '')) ?? '');
+        const txt = (await loc.textContent().catch(() => '')) ?? '';
         const m = txt.match(/(\d{3}-\d{7}-\d{7})/);
         if (m) {
           amazonOrderId = m[1];
@@ -1592,10 +1669,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       }
     }
     if (!amazonOrderId) {
-      throw new AutoFulfillBlockedError(
-        'no_confirmation',
-        'confirmation page did not expose an Amazon order id',
-      );
+      throw new AutoFulfillBlockedError('no_confirmation', 'confirmation page did not expose an Amazon order id');
     }
 
     // Best-effort cost parse from the confirmation summary block. Missing
@@ -1605,23 +1679,27 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     let tax = 0;
     let shipping = 0;
     const summary = page.locator(CHECKOUT_SELECTORS.confirmationSummary).first();
-    if (await summary.isVisible({ timeout: 1500 }).catch(() => false)) {
-      const txt = ((await summary.textContent().catch(() => '')) ?? '');
+    if (
+      await summary
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      const txt = (await summary.textContent().catch(() => '')) ?? '';
       const grab = (pattern: RegExp): number => {
         const m = txt.match(pattern);
-        if (!m?.[1]) {return 0;}
+        if (!m?.[1]) {
+          return 0;
+        }
         return parseFloat(m[1].replace(/,/g, '')) || 0;
       };
       purchasePrice =
         grab(/subtotal[:\s]*\$?([\d,]+\.?\d*)/i) ||
         grab(/items[:\s]*\$?([\d,]+\.?\d*)/i) ||
         grab(/merchandise[:\s]*\$?([\d,]+\.?\d*)/i);
-      tax =
-        grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
-        grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
-      shipping =
-        grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i) ||
-        grab(/postage[:\s]*\$?([\d,]+\.?\d*)/i);
+      tax = grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+      shipping = grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/postage[:\s]*\$?([\d,]+\.?\d*)/i);
     }
 
     return { amazonOrderId, purchasePrice, tax, shipping };
@@ -1637,18 +1715,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * block here would prevent legitimate orders. Downstream steps throw their
    * own typed reason if the flow genuinely cannot continue.
    */
-  private async clickFirstAvailable(
-    page: Page,
-    selectors: readonly string[],
-    label: string,
-  ): Promise<boolean> {
+  private async clickFirstAvailable(page: Page, selectors: readonly string[], label: string): Promise<boolean> {
     for (const sel of selectors) {
       const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (
+        await loc
+          .first()
+          .waitFor({ state: 'visible', timeout: 2000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         await loc.click();
-        await page
-          .waitForLoadState('domcontentloaded', { timeout: 15_000 })
-          .catch(() => undefined);
+        await page.waitForLoadState('domcontentloaded', { timeout: 15_000 }).catch(() => undefined);
         return true;
       }
     }
@@ -1674,9 +1752,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       });
     } catch (err) {
       // Evidence capture must NEVER fail the flow — log and continue.
-      this.logger.warn(
-        `evidence snap failed for ${ebayOrderId}/${stage}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`evidence snap failed for ${ebayOrderId}/${stage}: ${(err as Error).message}`);
     }
   }
 
@@ -1695,9 +1771,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // Dir doesn't exist yet (no blocked/dry-run orders) — nothing to sweep.
       return;
     }
-    const evidenceTtlDays = await this.platformSettings.getNumber(
-      PlatformSettingKey.FULFILLMENT_EVIDENCE_TTL_DAYS,
-    );
+    const evidenceTtlDays = await this.platformSettings.getNumber(PlatformSettingKey.FULFILLMENT_EVIDENCE_TTL_DAYS);
     const ttlMs = evidenceTtlDays * 24 * 60 * 60 * 1000;
     const now = Date.now();
     for (const entry of root) {
@@ -1714,9 +1788,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           this.logger.log(`swept evidence dir ${entry} (older than ${evidenceTtlDays}d)`);
         }
       } catch (err) {
-        this.logger.warn(
-          `evidence sweep skipped ${entry}: ${(err as Error).message}`,
-        );
+        this.logger.warn(`evidence sweep skipped ${entry}: ${(err as Error).message}`);
       }
     }
   }
@@ -1729,7 +1801,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    */
   private async loadInputs(
     ebayOrderId: string,
-    accountId: string,
+    accountId: string
   ): Promise<{
     userId: string;
     asin: string | null;
@@ -1757,9 +1829,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
          LEFT JOIN products p ON p.id = l.product_id
          JOIN amazon_accounts a ON a.id = $2 AND a.user_id = o.user_id
         WHERE o.ebay_order_id = $1`,
-      [ebayOrderId, accountId],
+      [ebayOrderId, accountId]
     );
-    if (!row) {throw new AutoFulfillBlockedError('no_asin');}
+    if (!row) {
+      throw new AutoFulfillBlockedError('no_asin');
+    }
 
     const rawCap = row.auto_fulfill_cap_total;
     // Fail-closed on unparseable cap: Number('xyz') is NaN, and NaN comparisons
@@ -1768,10 +1842,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // null is the legitimate "no cap configured" signal → Infinity backstop
     // (the producer already skips null-cap accounts; this is defence-in-depth).
     if (rawCap !== null && !Number.isFinite(Number(rawCap))) {
-      throw new AutoFulfillBlockedError(
-        'cap',
-        `unparseable auto_fulfill_cap_total: ${rawCap}`,
-      );
+      throw new AutoFulfillBlockedError('cap', `unparseable auto_fulfill_cap_total: ${rawCap}`);
     }
     const capTotal = rawCap === null ? Number.POSITIVE_INFINITY : Number(rawCap);
 
@@ -1782,15 +1853,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // eBay sale would still be unfulfilled. Require the parts needed to identify
     // and match a delivery address before anything is added to a cart.
     const ship = (row.shipping_address as Address | null) ?? null;
-    const missing = (['street', 'city', 'zipCode'] as const).filter(
-      (field) => !ship?.[field]?.trim(),
-    );
+    const missing = (['street', 'city', 'zipCode'] as const).filter((field) => !ship?.[field]?.trim());
     if (!ship || missing.length > 0) {
       throw new AutoFulfillBlockedError(
         'address',
         `eBay order has no usable buyer shipping address (missing: ${
           ship ? missing.join(', ') : 'entire address'
-        }); refusing to ship to the buyer account's default address`,
+        }); refusing to ship to the buyer account's default address`
       );
     }
 
@@ -1838,7 +1907,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     ebayOrderId: string,
     amazonAccountId: string,
     userId: string,
-    placed: PlacedResult,
+    placed: PlacedResult
   ): Promise<void> {
     let orderId: string | null = null;
 
@@ -1858,21 +1927,16 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
            updated_at                 = CURRENT_TIMESTAMP
          WHERE ebay_order_id = $6
          RETURNING id`,
-        [
-          amazonAccountId,
-          placed.amazonOrderId,
-          placed.purchasePrice,
-          placed.tax,
-          placed.shipping,
-          ebayOrderId,
-        ],
+        [amazonAccountId, placed.amazonOrderId, placed.purchasePrice, placed.tax, placed.shipping, ebayOrderId]
       );
       orderId = rows[0]?.id ?? null;
     } catch (err) {
       // Layer 2: minimal fallback — mark PLACED so a retry cannot re-click.
       this.logger.error(
-        `onPlaced primary UPDATE failed for ${ebayOrderId}; attempting minimal PLACED fallback: ${(err as Error).message}`,
-        (err as Error).stack,
+        `onPlaced primary UPDATE failed for ${ebayOrderId}; attempting minimal PLACED fallback: ${
+          (err as Error).message
+        }`,
+        (err as Error).stack
       );
       try {
         const rows = await this.db.query<{ id: string }>(
@@ -1883,15 +1947,17 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
              updated_at                = CURRENT_TIMESTAMP
            WHERE ebay_order_id = $2
            RETURNING id`,
-          [placed.amazonOrderId, ebayOrderId],
+          [placed.amazonOrderId, ebayOrderId]
         );
         orderId = rows[0]?.id ?? null;
       } catch (fallbackErr) {
         // Worst case: even the minimal fallback threw. DO NOT rethrow —
         // surface as critical log; operator sees the row stuck at RUNNING.
         this.logger.error(
-          `onPlaced minimal fallback ALSO failed for ${ebayOrderId} — row stuck at RUNNING, manual investigation required (costs/tracking will not auto-reconcile): ${(fallbackErr as Error).message}`,
-          (fallbackErr as Error).stack,
+          `onPlaced minimal fallback ALSO failed for ${ebayOrderId} — row stuck at RUNNING, manual investigation required (costs/tracking will not auto-reconcile): ${
+            (fallbackErr as Error).message
+          }`,
+          (fallbackErr as Error).stack
         );
       }
     }
@@ -1903,8 +1969,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       await this.orderSync.recomputeProfit(ebayOrderId);
     } catch (err) {
       this.logger.error(
-        `onPlaced recomputeProfit failed for ${ebayOrderId} (costs already written; recompute can be re-run): ${(err as Error).message}`,
-        (err as Error).stack,
+        `onPlaced recomputeProfit failed for ${ebayOrderId} (costs already written; recompute can be re-run): ${
+          (err as Error).message
+        }`,
+        (err as Error).stack
       );
     }
 
@@ -1917,13 +1985,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.trackingQueue.scheduleOrderTracking(id, amazonAccountId);
       } else {
         this.logger.warn(
-          `onPlaced could not resolve order id for ${ebayOrderId} — tracking scheduler skipped (reconcile manually)`,
+          `onPlaced could not resolve order id for ${ebayOrderId} — tracking scheduler skipped (reconcile manually)`
         );
       }
     } catch (err) {
       this.logger.error(
-        `onPlaced scheduleOrderTracking failed for ${ebayOrderId} (tracking can be reconciled later via reconcileSchedulers): ${(err as Error).message}`,
-        (err as Error).stack,
+        `onPlaced scheduleOrderTracking failed for ${ebayOrderId} (tracking can be reconciled later via reconcileSchedulers): ${
+          (err as Error).message
+        }`,
+        (err as Error).stack
       );
     }
 
@@ -1934,9 +2004,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     try {
       this.quotaEnforcement.consumeAmazonOrder(userId, ebayOrderId);
     } catch (err) {
-      this.logger.warn(
-        `onPlaced quota consume failed for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`onPlaced quota consume failed for ${ebayOrderId}: ${(err as Error).message}`);
     }
   }
 
@@ -1947,25 +2015,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * mid-onPlaced, but defensive — caller skips the tracking kickoff).
    */
   private async orderIdFor(ebayOrderId: string): Promise<string | null> {
-    const [row] = await this.db.query<{ id: string }>(
-      `SELECT id FROM orders WHERE ebay_order_id = $1`,
-      [ebayOrderId],
-    );
+    const [row] = await this.db.query<{ id: string }>(`SELECT id FROM orders WHERE ebay_order_id = $1`, [ebayOrderId]);
     return row?.id ?? null;
   }
 
   /** Update auto_fulfill status + attempted_at. Optional blocked_reason. */
-  private async setStatus(
-    ebayOrderId: string,
-    status: AutoFulfillStatus,
-    reason?: string,
-  ): Promise<void> {
+  private async setStatus(ebayOrderId: string, status: AutoFulfillStatus, reason?: string): Promise<void> {
     await this.db.query(
       `UPDATE orders SET auto_fulfill_status = $1,
           auto_fulfill_blocked_reason = COALESCE($2, auto_fulfill_blocked_reason),
           auto_fulfill_attempted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
         WHERE ebay_order_id = $3`,
-      [status, reason ?? null, ebayOrderId],
+      [status, reason ?? null, ebayOrderId]
     );
   }
 
@@ -1977,32 +2038,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    *
    * Best-effort: diagnostics must never affect the outcome of a run.
    */
-  private async appendEvidenceNote(
-    ebayOrderId: string,
-    tag: string,
-    msg: string,
-  ): Promise<void> {
+  private async appendEvidenceNote(ebayOrderId: string, tag: string, msg: string): Promise<void> {
     try {
       const dir = path.join(this.evidenceDir, ebayOrderId);
       await fs.mkdir(dir, { recursive: true });
-      await fs.appendFile(
-        path.join(dir, 'blocked.log'),
-        `${new Date().toISOString()} ${tag} ${msg}\n`,
-        'utf8',
-      );
+      await fs.appendFile(path.join(dir, 'blocked.log'), `${new Date().toISOString()} ${tag} ${msg}\n`, 'utf8');
     } catch (err) {
-      this.logger.warn(
-        `could not write evidence note for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`could not write evidence note for ${ebayOrderId}: ${(err as Error).message}`);
     }
   }
 
   /** Mark an order blocked. Deliberate stop — caller returns, no rethrow. */
-  private async block(
-    ebayOrderId: string,
-    reason: AutoFulfillBlockedReason,
-    msg?: string,
-  ): Promise<void> {
+  private async block(ebayOrderId: string, reason: AutoFulfillBlockedReason, msg?: string): Promise<void> {
     this.logger.warn(`fulfill blocked ${ebayOrderId}: ${reason} (${msg ?? ''})`);
     // Persist the detail next to the screenshots. The DB column stores only the
     // enum (the FE maps it to an i18n label), and the logger goes to the console,
@@ -2016,17 +2063,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // period's quota is not consumed by an order that never placed. Best-effort
     // + idempotent. userId resolved here (block call sites don't carry it).
     try {
-      const rows = await this.db.query<{ user_id: string }>(
-        `SELECT user_id FROM orders WHERE ebay_order_id = $1`,
-        [ebayOrderId],
-      );
+      const rows = await this.db.query<{ user_id: string }>(`SELECT user_id FROM orders WHERE ebay_order_id = $1`, [
+        ebayOrderId,
+      ]);
       if (rows[0]?.user_id) {
         await this.quotaEnforcement.releaseAmazonOrder(rows[0].user_id, ebayOrderId);
       }
     } catch (err) {
-      this.logger.warn(
-        `block quota release failed for ${ebayOrderId}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`block quota release failed for ${ebayOrderId}: ${(err as Error).message}`);
     }
     // Notification (in-app needs-attention list reads blocked status directly)
     // — no email in scope.
@@ -2039,12 +2083,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
  * (`evidenceTtlDays`). Invalid/empty → `fallback`; parsed value clamped to
  * `[min, max]`.
  */
-function clampInt(
-  raw: string | undefined,
-  fallback: number,
-  min: number,
-  max: number,
-): number {
+function clampInt(raw: string | undefined, fallback: number, min: number, max: number): number {
   if (raw === undefined || raw === '') {
     return fallback;
   }

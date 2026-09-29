@@ -2,12 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  AmazonAccountStatus,
-  AmazonMarketplace,
-  buildAmazonSiteUrl,
-  type AmazonScrapedOrderData,
-} from '@repo/shared';
+import { AmazonAccountStatus, AmazonMarketplace, buildAmazonSiteUrl, type AmazonScrapedOrderData } from '@repo/shared';
 import type { Locator, Page } from 'playwright';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
@@ -112,8 +107,7 @@ const AMAZON_LOGIN_SELECTORS = {
   // observed page exposes exactly one visible submit and no credential fields;
   // clicking it confirms the requested sign-in intent and advances to password.
   claimIntentContinue: 'input[type="submit"]:visible, button[type="submit"]:visible',
-  passwordInput:
-    '#ap_password_login, #ap_password, input[name="password"]:visible, input[type="password"]:visible',
+  passwordInput: '#ap_password_login, #ap_password, input[name="password"]:visible, input[type="password"]:visible',
   signInButton: '#signInSubmit, input[type="submit"]:visible, button[type="submit"]:visible',
   mfaInput: '#auth-mfa-otpcode, input[name="otpCode"]',
   mfaSubmit: '#auth-signin-button, input[type="submit"]:visible, button[type="submit"]:visible',
@@ -156,8 +150,7 @@ const ORDER_LIST_SELECTORS = {
     '[data-testid="order-card"]',
   ],
   // "View order details" / invoice link carries the orderId in the URL.
-  orderDetailsLink:
-    'a[href*="orderID="], a[href*="order-details"], a[href*="/gp/your-account/order-details"]',
+  orderDetailsLink: 'a[href*="orderID="], a[href*="order-details"], a[href*="/gp/your-account/order-details"]',
   // Order id literal fallback ("Order # 111-2222222-3333333").
   orderIdText: '[data-testid="order-id"], .order-id',
   // "Placed on January 15, 2025" — date the order was placed.
@@ -194,14 +187,9 @@ export class AmazonScrapingService {
    * up, and why). Written next to the checkout evidence so an operator finds
    * both in one place. Best-effort: never let diagnostics break the flow.
    */
-  private async snapLoginFailure(
-    page: Page,
-    amazonAccountId: string,
-    stage: string
-  ): Promise<void> {
+  private async snapLoginFailure(page: Page, amazonAccountId: string, stage: string): Promise<void> {
     try {
-      const root =
-        process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
+      const root = process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
       const dir = path.join(root, 'login', amazonAccountId);
       await fs.mkdir(dir, { recursive: true });
       await page.screenshot({ path: path.join(dir, `${stage}-${Date.now()}.png`), fullPage: true });
@@ -241,13 +229,21 @@ export class AmazonScrapingService {
         page = await context.newPage();
         this.logger.debug(`Reusing existing session for account ${amazonAccountId}`);
       } else {
-        page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+        page = await this.performLogin(
+          amazonAccountId,
+          account.email,
+          account.decryptedPassword,
+          account.decryptedTwoFactorSecret,
+          account.marketplace as AmazonMarketplace
+        );
       }
 
       try {
         onProgress?.({ stage: 'navigating', message: 'Navigating to order page...' });
 
-        const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+        const orderUrl = `${buildAmazonSiteUrl(
+          account.marketplace as AmazonMarketplace
+        )}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
         await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForTimeout(2000);
 
@@ -257,7 +253,13 @@ export class AmazonScrapingService {
           // Session expired mid-request, re-login
           await page.close();
           await this.browserStateManager.clearState(amazonAccountId);
-          page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+          page = await this.performLogin(
+            amazonAccountId,
+            account.email,
+            account.decryptedPassword,
+            account.decryptedTwoFactorSecret,
+            account.marketplace as AmazonMarketplace
+          );
           await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
           await page.waitForTimeout(2000);
         }
@@ -336,11 +338,19 @@ export class AmazonScrapingService {
       const context = await this.browserStateManager.getContext(amazonAccountId);
       page = await context.newPage();
     } else {
-      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+      page = await this.performLogin(
+        amazonAccountId,
+        account.email,
+        account.decryptedPassword,
+        account.decryptedTwoFactorSecret,
+        account.marketplace as AmazonMarketplace
+      );
     }
 
     try {
-      const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+      const orderUrl = `${buildAmazonSiteUrl(
+        account.marketplace as AmazonMarketplace
+      )}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
       await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
@@ -404,11 +414,19 @@ export class AmazonScrapingService {
       const context = await this.browserStateManager.getContext(amazonAccountId);
       page = await context.newPage();
     } else {
-      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+      page = await this.performLogin(
+        amazonAccountId,
+        account.email,
+        account.decryptedPassword,
+        account.decryptedTwoFactorSecret,
+        account.marketplace as AmazonMarketplace
+      );
     }
 
     try {
-      const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+      const orderUrl = `${buildAmazonSiteUrl(
+        account.marketplace as AmazonMarketplace
+      )}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
       await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
@@ -443,9 +461,7 @@ export class AmazonScrapingService {
             trackingHtml = await page.content();
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
-            this.logger.warn(
-              `Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`
-            );
+            this.logger.warn(`Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`);
           }
         }
       }
@@ -461,10 +477,7 @@ export class AmazonScrapingService {
    * Runs under the per-account rate limiter, reuses performLogin (the only
    * login code path), and never throws — callers get a result object.
    */
-  async testLogin(
-    userId: string,
-    amazonAccountId: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async testLogin(userId: string, amazonAccountId: string): Promise<{ success: boolean; error?: string }> {
     return this.rateLimiter.schedule(amazonAccountId, async () => {
       const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
       try {
@@ -499,10 +512,7 @@ export class AmazonScrapingService {
    * by calling this method again; that recovery path is intentionally NOT
    * duplicated here.
    */
-  async ensureAuthenticatedPage(
-    userId: string,
-    amazonAccountId: string,
-  ): Promise<Page> {
+  async ensureAuthenticatedPage(userId: string, amazonAccountId: string): Promise<Page> {
     const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
     const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
     if (hasValidSession) {
@@ -514,7 +524,7 @@ export class AmazonScrapingService {
       account.email,
       account.decryptedPassword,
       account.decryptedTwoFactorSecret,
-      account.marketplace as AmazonMarketplace,
+      account.marketplace as AmazonMarketplace
     );
   }
 
@@ -532,20 +542,14 @@ export class AmazonScrapingService {
    * skipped; transport failures bubble up so BullMQ retries the whole job.
    * Returns an empty array if no recent orders — never throws on DOM misses.
    */
-  async scrapeAccountOrders(
-    userId: string,
-    amazonAccountId: string,
-    since: Date,
-  ): Promise<ScrapedAccountOrders> {
-    return this.rateLimiter.schedule(amazonAccountId, () =>
-      this.doScrapeAccountOrders(userId, amazonAccountId, since),
-    );
+  async scrapeAccountOrders(userId: string, amazonAccountId: string, since: Date): Promise<ScrapedAccountOrders> {
+    return this.rateLimiter.schedule(amazonAccountId, () => this.doScrapeAccountOrders(userId, amazonAccountId, since));
   }
 
   private async doScrapeAccountOrders(
     userId: string,
     amazonAccountId: string,
-    since: Date,
+    since: Date
   ): Promise<ScrapedAccountOrders> {
     const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
 
@@ -561,7 +565,7 @@ export class AmazonScrapingService {
         account.email,
         account.decryptedPassword,
         account.decryptedTwoFactorSecret,
-        account.marketplace as AmazonMarketplace,
+        account.marketplace as AmazonMarketplace
       );
     }
 
@@ -571,7 +575,8 @@ export class AmazonScrapingService {
       // rows. The page itself only paginates so far back — if the user hasn't
       // synced in >1 year, we miss older orders (acceptable: cost-capture is
       // best-effort, controller-mediated for any gap).
-      const ordersUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/your-orders/orders?timeFilter=year-` +
+      const ordersUrl =
+        `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/your-orders/orders?timeFilter=year-` +
         new Date().getFullYear();
       await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
       await page.waitForTimeout(1500);
@@ -586,7 +591,7 @@ export class AmazonScrapingService {
           account.email,
           account.decryptedPassword,
           account.decryptedTwoFactorSecret,
-          account.marketplace as AmazonMarketplace,
+          account.marketplace as AmazonMarketplace
         );
         await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
         await page.waitForTimeout(1500);
@@ -616,12 +621,10 @@ export class AmazonScrapingService {
             suspect = true;
             this.logger.warn(
               `Account ${amazonAccountId}: no order cards on page 1 — ` +
-                `possible DOM/selector regression (suspect scrape).`,
+                `possible DOM/selector regression (suspect scrape).`
             );
           } else {
-            this.logger.debug(
-              `Account ${amazonAccountId}: no order cards on page ${pageNum} — stopping.`,
-            );
+            this.logger.debug(`Account ${amazonAccountId}: no order cards on page ${pageNum} — stopping.`);
           }
           break;
         }
@@ -629,7 +632,9 @@ export class AmazonScrapingService {
         for (let i = 0; i < cardCount; i++) {
           try {
             const row = await this.extractListOrderRow(page, i);
-            if (!row) {continue;}
+            if (!row) {
+              continue;
+            }
 
             if (row.orderDate.getTime() < sinceMs) {
               // Hit history older than the cutoff — no need to keep paging.
@@ -640,19 +645,25 @@ export class AmazonScrapingService {
           } catch (err) {
             // Per-card failure isolation — never fail the whole job for one row.
             const msg = err instanceof Error ? err.message : String(err);
-            this.logger.warn(
-              `Account ${amazonAccountId}: card ${i} on page ${pageNum} skipped: ${msg}`,
-            );
+            this.logger.warn(`Account ${amazonAccountId}: card ${i} on page ${pageNum} skipped: ${msg}`);
           }
         }
 
-        if (walkedPastSince) {break;}
+        if (walkedPastSince) {
+          break;
+        }
 
         // Try to advance to the next page. If there's no next button (or it's
         // disabled), we've reached the end of the visible history.
         const next = page.locator(ORDER_LIST_SELECTORS.nextPageButton).first();
-        const hasNext = await next.isVisible({ timeout: 1000 }).catch(() => false);
-        if (!hasNext) {break;}
+        const hasNext = await next
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!hasNext) {
+          break;
+        }
         try {
           await Promise.all([
             page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15_000 }).catch(() => {}),
@@ -675,7 +686,7 @@ export class AmazonScrapingService {
       const finalSuspect = results.length > 0 ? false : suspect;
       this.logger.log(
         `Account ${amazonAccountId}: scraped ${results.length} orders since ${since.toISOString()}` +
-          (finalSuspect ? ' (SUSPECT — watermark will not advance)' : ''),
+          (finalSuspect ? ' (SUSPECT — watermark will not advance)' : '')
       );
       return { rows: results, suspect: finalSuspect };
     } finally {
@@ -706,10 +717,7 @@ export class AmazonScrapingService {
    * simply not link that row (no harm done; controller-mediated re-link still
    * works via the order-detail scraper).
    */
-  private async extractListOrderRow(
-    page: Page,
-    cardIndex: number,
-  ): Promise<AmazonListOrderRow | null> {
+  private async extractListOrderRow(page: Page, cardIndex: number): Promise<AmazonListOrderRow | null> {
     // Re-resolve the card locator so the helper works regardless of which
     // alternate selector matched above.
     const cards = await this.locateOrderCards(page);
@@ -718,34 +726,62 @@ export class AmazonScrapingService {
     // Order ID — prefer URL-bearing link, fall back to literal text.
     let amazonOrderId: string | undefined;
     const detailsLink = card.locator(ORDER_LIST_SELECTORS.orderDetailsLink).first();
-    if (await detailsLink.isVisible({ timeout: 500 }).catch(() => false)) {
+    if (
+      await detailsLink
+        .first()
+        .waitFor({ state: 'visible', timeout: 500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const href = await detailsLink.getAttribute('href').catch(() => null);
       const m = href?.match(/orderID=([0-9A-Z-]+)/i);
       amazonOrderId = m?.[1];
     }
     if (!amazonOrderId) {
       const idEl = card.locator(ORDER_LIST_SELECTORS.orderIdText).first();
-      if (await idEl.isVisible({ timeout: 500 }).catch(() => false)) {
+      if (
+        await idEl
+          .first()
+          .waitFor({ state: 'visible', timeout: 500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         const txt = (await idEl.textContent()) ?? '';
         const m = txt.match(/(\d{3}-\d{7}-\d{7})/);
         amazonOrderId = m?.[1];
       }
     }
-    if (!amazonOrderId) {return null;}
+    if (!amazonOrderId) {
+      return null;
+    }
 
     // Order date — "Placed on January 15, 2025".
     let orderDate = new Date();
     const dateEl = card.locator(ORDER_LIST_SELECTORS.orderDate).first();
-    if (await dateEl.isVisible({ timeout: 500 }).catch(() => false)) {
+    if (
+      await dateEl
+        .first()
+        .waitFor({ state: 'visible', timeout: 500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const txt = (await dateEl.textContent()) ?? '';
       const parsed = new Date(txt.replace(/.*placed on/i, '').trim());
-      if (!Number.isNaN(parsed.getTime())) {orderDate = parsed;}
+      if (!Number.isNaN(parsed.getTime())) {
+        orderDate = parsed;
+      }
     }
 
     // ASIN from the first product link.
     let asin: string | undefined;
     const productLink = card.locator(ORDER_LIST_SELECTORS.productLink).first();
-    if (await productLink.isVisible({ timeout: 500 }).catch(() => false)) {
+    if (
+      await productLink
+        .first()
+        .waitFor({ state: 'visible', timeout: 500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const href = await productLink.getAttribute('href').catch(() => null);
       const m = href?.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
       asin = m?.[1];
@@ -755,10 +791,18 @@ export class AmazonScrapingService {
     // requires exact equality, so an unknown qty means no link — safe miss).
     let quantity = 1;
     const qtyEl = card.locator(ORDER_LIST_SELECTORS.quantity).first();
-    if (await qtyEl.isVisible({ timeout: 500 }).catch(() => false)) {
+    if (
+      await qtyEl
+        .first()
+        .waitFor({ state: 'visible', timeout: 500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const txt = (await qtyEl.textContent()) ?? '';
       const m = txt.match(/\d+/);
-      if (m) {quantity = parseInt(m[0], 10) || 1;}
+      if (m) {
+        quantity = parseInt(m[0], 10) || 1;
+      }
     }
 
     // Financials — try the card-local summary; fall back to the total line.
@@ -768,7 +812,13 @@ export class AmazonScrapingService {
     let purchasePrice = 0;
 
     const summary = card.locator(ORDER_LIST_SELECTORS.financialSummary).first();
-    if (await summary.isVisible({ timeout: 500 }).catch(() => false)) {
+    if (
+      await summary
+        .first()
+        .waitFor({ state: 'visible', timeout: 500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const txt = (await summary.textContent()) ?? '';
       const parsed = this.parseListFinancials(txt);
       grandTotal = parsed.grandTotal;
@@ -778,10 +828,18 @@ export class AmazonScrapingService {
     }
     if (grandTotal === 0) {
       const totalEl = card.locator(ORDER_LIST_SELECTORS.total).first();
-      if (await totalEl.isVisible({ timeout: 500 }).catch(() => false)) {
+      if (
+        await totalEl
+          .first()
+          .waitFor({ state: 'visible', timeout: 500 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         const txt = (await totalEl.textContent()) ?? '';
         const m = txt.match(/\$?([\d,]+(?:\.\d{2})?)/);
-        if (m) {grandTotal = parseFloat(m[1].replace(/,/g, '')) || 0;}
+        if (m) {
+          grandTotal = parseFloat(m[1].replace(/,/g, '')) || 0;
+        }
       }
     }
     if (purchasePrice === 0 && grandTotal > 0) {
@@ -814,16 +872,14 @@ export class AmazonScrapingService {
   } {
     const grab = (pattern: RegExp): number => {
       const m = text.match(pattern);
-      if (!m?.[1]) {return 0;}
+      if (!m?.[1]) {
+        return 0;
+      }
       return parseFloat(m[1].replace(/,/g, '')) || 0;
     };
-    const subtotal =
-      grab(/subtotal[:\s]*\$?([\d,]+\.?\d*)/i) ||
-      grab(/merchandise[:\s]*\$?([\d,]+\.?\d*)/i);
+    const subtotal = grab(/subtotal[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/merchandise[:\s]*\$?([\d,]+\.?\d*)/i);
     const shipping = grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i);
-    const tax =
-      grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
-      grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tax = grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
     const grandTotal =
       grab(/grand total[:\s]*\$?([\d,]+\.?\d*)/i) ||
       grab(/total[:\s]*\$?([\d,]+\.?\d*)/i) ||
@@ -848,7 +904,9 @@ export class AmazonScrapingService {
 
     const emailInput = page.locator(AMAZON_LOGIN_SELECTORS.emailInput).first();
     const emailVisible = await emailInput
-      .isVisible({ timeout: 10000 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
       .catch(() => false);
     if (!emailVisible) {
       // No email field can mean the OPPOSITE of a failure: Amazon skips the
@@ -858,9 +916,7 @@ export class AmazonScrapingService {
       // rendered "Hello, <name>" with the item already in the cart).
       const alreadyAuthed = await probeAmazonAuth(page);
       if (alreadyAuthed.authenticated) {
-        this.logger.debug(
-          `Amazon skipped the sign-in form for ${amazonAccountId}: session already authenticated`
-        );
+        this.logger.debug(`Amazon skipped the sign-in form for ${amazonAccountId}: session already authenticated`);
         await this.browserStateManager.saveState(amazonAccountId);
         return page;
       }
@@ -872,7 +928,9 @@ export class AmazonScrapingService {
       const passwordOnly = await page
         .locator(AMAZON_LOGIN_SELECTORS.passwordInput)
         .first()
-        .isVisible({ timeout: 2000 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
         .catch(() => false);
       if (!passwordOnly) {
         const status = response?.status() ?? 'unknown';
@@ -880,13 +938,9 @@ export class AmazonScrapingService {
         const url = page.url();
         await this.snapLoginFailure(page, amazonAccountId, 'no-email-field');
         await page.close();
-        throw new Error(
-          `Amazon login page did not expose an email field (HTTP ${status}, URL ${url}, title ${title})`
-        );
+        throw new Error(`Amazon login page did not expose an email field (HTTP ${status}, URL ${url}, title ${title})`);
       }
-      this.logger.debug(
-        `Amazon remembered the identity for ${amazonAccountId}: entering at the password step`
-      );
+      this.logger.debug(`Amazon remembered the identity for ${amazonAccountId}: entering at the password step`);
       await this.submitPasswordAndChallenges(page, password, twoFactorSecret, amazonAccountId);
     } else {
       await this.submitCredentialsOnPage(page, email, password, twoFactorSecret, amazonAccountId);
@@ -955,9 +1009,7 @@ export class AmazonScrapingService {
       const intentSubmitCount = await intentSubmit.count().catch(() => 0);
       if (intentSubmitCount !== 1) {
         await page.close();
-        throw new Error(
-          `Amazon claim-intent page exposed ${intentSubmitCount} submit controls; expected exactly one`
-        );
+        throw new Error(`Amazon claim-intent page exposed ${intentSubmitCount} submit controls; expected exactly one`);
       }
       await intentSubmit.first().click();
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => undefined);
@@ -967,7 +1019,9 @@ export class AmazonScrapingService {
 
     const passwordInput = page.locator(AMAZON_LOGIN_SELECTORS.passwordInput).first();
     const passwordVisible = await passwordInput
-      .isVisible({ timeout: 10000 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
       .catch(() => false);
     if (!passwordVisible) {
       const title = await page.title().catch(() => 'unknown');
@@ -979,35 +1033,50 @@ export class AmazonScrapingService {
       // Diagnose only coarse DOM signals and control metadata — never body text
       // or input values, because unified-auth can echo the customer's email.
       const [captcha, accountError, passkey, otp, controls] = await Promise.all([
-        page.locator('#captchacharacters, img[src*="captcha"]').first().isVisible().catch(() => false),
-        page.locator('#auth-error-message-box, .a-alert-error').first().isVisible().catch(() => false),
-        page.locator('[data-testid*="passkey"], button:has-text("passkey")').first().isVisible().catch(() => false),
-        page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first().isVisible().catch(() => false),
-        page.locator('input:visible, button:visible').evaluateAll((elements) =>
-          elements.slice(0, 12).map((element) => ({
-            tag: element.tagName.toLowerCase(),
-            id: element.id || null,
-            name: element.getAttribute('name'),
-            type: element.getAttribute('type'),
-            testId: element.getAttribute('data-testid'),
-          }))
-        ).catch(() => []),
+        page
+          .locator('#captchacharacters, img[src*="captcha"]')
+          .first()
+          .isVisible()
+          .catch(() => false),
+        page
+          .locator('#auth-error-message-box, .a-alert-error')
+          .first()
+          .isVisible()
+          .catch(() => false),
+        page
+          .locator('[data-testid*="passkey"], button:has-text("passkey")')
+          .first()
+          .isVisible()
+          .catch(() => false),
+        page
+          .locator(AMAZON_LOGIN_SELECTORS.mfaInput)
+          .first()
+          .isVisible()
+          .catch(() => false),
+        page
+          .locator('input:visible, button:visible')
+          .evaluateAll((elements) =>
+            elements.slice(0, 12).map((element) => ({
+              tag: element.tagName.toLowerCase(),
+              id: element.id || null,
+              name: element.getAttribute('name'),
+              type: element.getAttribute('type'),
+              testId: element.getAttribute('data-testid'),
+            }))
+          )
+          .catch(() => []),
       ]);
       await this.snapLoginFailure(page, amazonAccountId, 'password-step-unavailable');
       if (closePageOnAbort) {
         await page.close();
       }
       throw new Error(
-        `Amazon password step unavailable: route=${route}; title=${title}; captcha=${captcha}; accountError=${accountError}; passkey=${passkey}; otp=${otp}; controls=${JSON.stringify(controls)}`
+        `Amazon password step unavailable: route=${route}; title=${title}; captcha=${captcha}; accountError=${accountError}; passkey=${passkey}; otp=${otp}; controls=${JSON.stringify(
+          controls
+        )}`
       );
     }
-    await this.submitPasswordAndChallenges(
-      page,
-      password,
-      twoFactorSecret,
-      amazonAccountId,
-      closePageOnAbort
-    );
+    await this.submitPasswordAndChallenges(page, password, twoFactorSecret, amazonAccountId, closePageOnAbort);
   }
 
   /**
@@ -1036,7 +1105,13 @@ export class AmazonScrapingService {
     // challenges). Checking it materially extends session life. Best-effort: the
     // checkbox is absent on some layouts.
     const keepSignedIn = page.locator(AMAZON_LOGIN_SELECTORS.keepSignedInCheckbox).first();
-    if (await keepSignedIn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    if (
+      await keepSignedIn
+        .first()
+        .waitFor({ state: 'visible', timeout: 1500 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       await keepSignedIn.check().catch(() => undefined);
     }
 
@@ -1045,7 +1120,13 @@ export class AmazonScrapingService {
 
     for (let step = 0; step < 4; step++) {
       const authMfa = page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first();
-      if (await authMfa.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (
+        await authMfa
+          .first()
+          .waitFor({ state: 'visible', timeout: 2000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         if (!twoFactorSecret) {
           await page.close();
           throw new Error('Amazon requires 2FA but no secret key is configured for this account');
@@ -1058,7 +1139,13 @@ export class AmazonScrapingService {
         // again — each OTP round trip is another opportunity for the flow to be
         // interrupted mid-checkout. Best-effort.
         const rememberDevice = page.locator(AMAZON_LOGIN_SELECTORS.mfaRememberDevice).first();
-        if (await rememberDevice.isVisible({ timeout: 1000 }).catch(() => false)) {
+        if (
+          await rememberDevice
+            .first()
+            .waitFor({ state: 'visible', timeout: 1000 })
+            .then(() => true)
+            .catch(() => false)
+        ) {
           await rememberDevice.check().catch(() => undefined);
         }
         await page.locator(AMAZON_LOGIN_SELECTORS.mfaSubmit).first().click();
@@ -1080,8 +1167,16 @@ export class AmazonScrapingService {
         throw new Error('Amazon captcha challenge blocked automated login');
       }
 
-      const loginError = page.locator('#auth-error-message-box .a-alert-content, .a-alert-error .a-alert-content').first();
-      if (await loginError.isVisible({ timeout: 1000 }).catch(() => false)) {
+      const loginError = page
+        .locator('#auth-error-message-box .a-alert-content, .a-alert-error .a-alert-content')
+        .first();
+      if (
+        await loginError
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         // Do not persist Amazon's raw message: Unified Auth may echo account
         // identifiers. A stable typed message is enough for the account status.
         await this.snapLoginFailure(page, amazonAccountId, 'credentials-rejected');
@@ -1107,15 +1202,13 @@ export class AmazonScrapingService {
    *
    * Closes the page so no caller can keep interacting with the signup form.
    */
-  private async assertNotRegistrationForm(
-    page: Page,
-    amazonAccountId: string,
-    closePage = true
-  ): Promise<void> {
+  private async assertNotRegistrationForm(page: Page, amazonAccountId: string, closePage = true): Promise<void> {
     const onRegistration = await page
       .locator(AMAZON_LOGIN_SELECTORS.registrationForm)
       .first()
-      .isVisible({ timeout: 1500 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 1500 })
+      .then(() => true)
       .catch(() => false);
     if (!onRegistration) {
       return;
@@ -1142,11 +1235,7 @@ export class AmazonScrapingService {
    * Returns true when the challenge was resolved and no auth control remains.
    * Never throws for "no challenge present" — the caller checks first.
    */
-  async resolveInContextChallenge(
-    page: Page,
-    userId: string,
-    amazonAccountId: string
-  ): Promise<boolean> {
+  async resolveInContextChallenge(page: Page, userId: string, amazonAccountId: string): Promise<boolean> {
     const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
 
     // The in-context form sometimes starts at the password step (Amazon already
@@ -1154,7 +1243,9 @@ export class AmazonScrapingService {
     const emailVisible = await page
       .locator(AMAZON_LOGIN_SELECTORS.emailInput)
       .first()
-      .isVisible({ timeout: 2000 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
       .catch(() => false);
 
     // Same destructive-action guard as the fresh-login path, checked BEFORE any
@@ -1165,7 +1256,9 @@ export class AmazonScrapingService {
     const onRegistration = await page
       .locator(AMAZON_LOGIN_SELECTORS.registrationForm)
       .first()
-      .isVisible({ timeout: 1500 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 1500 })
+      .then(() => true)
       .catch(() => false);
     if (onRegistration) {
       this.logger.error(
@@ -1187,7 +1280,9 @@ export class AmazonScrapingService {
       await page
         .locator(AMAZON_LOGIN_SELECTORS.passwordInput)
         .first()
-        .isVisible({ timeout: 2000 })
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
         .catch(() => false)
     ) {
       await this.submitPasswordAndChallenges(
@@ -1202,7 +1297,13 @@ export class AmazonScrapingService {
       // factor (typical when it re-verifies identity at checkout). Answer it from
       // the stored secret — no customer interaction, per the product contract.
       const authMfa = page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first();
-      if (!(await authMfa.isVisible({ timeout: 2000 }).catch(() => false))) {
+      if (
+        !(await authMfa
+          .first()
+          .waitFor({ state: 'visible', timeout: 2000 })
+          .then(() => true)
+          .catch(() => false))
+      ) {
         return false;
       }
       if (!account.decryptedTwoFactorSecret) {
@@ -1211,7 +1312,13 @@ export class AmazonScrapingService {
       const { generateSync } = await import('otplib');
       await authMfa.fill(generateSync({ secret: account.decryptedTwoFactorSecret }));
       const rememberDevice = page.locator(AMAZON_LOGIN_SELECTORS.mfaRememberDevice).first();
-      if (await rememberDevice.isVisible({ timeout: 1000 }).catch(() => false)) {
+      if (
+        await rememberDevice
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         await rememberDevice.check().catch(() => undefined);
       }
       await page.locator(AMAZON_LOGIN_SELECTORS.mfaSubmit).first().click();
@@ -1228,7 +1335,9 @@ export class AmazonScrapingService {
       .or(page.locator(AMAZON_LOGIN_SELECTORS.passwordInput))
       .or(page.locator(AMAZON_LOGIN_SELECTORS.mfaInput))
       .first()
-      .isVisible({ timeout: 2000 })
+      .first()
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
       .catch(() => false);
     return !stillChallenged;
   }
