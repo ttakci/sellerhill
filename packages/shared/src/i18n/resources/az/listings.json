@@ -260,7 +260,8 @@
       "title": "Dəyişiklik tarixçəsi",
       "subtitle": "Bütün elanlarınızda eBay-ə göndərilən hər qiymət və stok dəyişikliyi.",
       "empty": "Dəyişiklik tapılmadı.",
-      "emptyTitle": "Hələ dəyişiklik yoxdur"
+      "emptyTitle": "Hələ dəyişiklik yoxdur",
+      "viewListing": "Elana bax"
     },
     "addSection": {
       "title": "Yeni elan əlavə et",
@@ -390,6 +391,7 @@
         "newQuantity": "Yeni stok",
         "priceChange": "Qiymət",
         "quantityChange": "Stok",
+        "quantityTooltip": "eBay-ə göndərilən miqdardır, Amazonun xam stoku deyil.",
         "unchanged": "Dəyişiklik yoxdur",
         "empty": "Hələ dəyişiklik yoxdur",
         "emptySubtitle": "Qiymət və stok dəyişiklikləri baş verdikcə burada görünəcək.",

@@ -260,7 +260,8 @@
       "title": "Historique des révisions",
       "subtitle": "Chaque changement de prix et de stock envoyé à eBay, sur toutes vos annonces.",
       "empty": "Aucune révision trouvée.",
-      "emptyTitle": "Aucune révision pour le moment"
+      "emptyTitle": "Aucune révision pour le moment",
+      "viewListing": "Voir l'annonce"
     },
     "addSection": {
       "title": "Ajouter une nouvelle annonce",
@@ -390,6 +391,7 @@
         "newQuantity": "Nouveau stock",
         "priceChange": "Prix",
         "quantityChange": "Stock",
+        "quantityTooltip": "La quantité envoyée à eBay, pas le stock brut Amazon.",
         "unchanged": "Aucun changement",
         "empty": "Aucune révision pour le moment",
         "emptySubtitle": "Les modifications de prix et de stock apparaîtront ici au fur et à mesure.",

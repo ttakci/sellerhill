@@ -20,6 +20,7 @@ import {
   buildDemoDashboard,
   buildDemoOrderStats,
   buildDemoUnread,
+  demoAllListingRevisions,
   demoJobItems,
   demoListingRevisions,
   demoStoreSettingsFor,
@@ -464,6 +465,17 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   const listingRevisions = /^\/listings\/(demo-listing-[\w-]+)\/revisions$/.exec(path);
   if (listingRevisions) {
     return ok(paginate(demoListingRevisions(listingRevisions[1]), params));
+  }
+
+  if (path === '/listings/revisions') {
+    return ok(
+      demoAllListingRevisions({
+        page: Number(params.page) || undefined,
+        limit: Number(params.limit) || undefined,
+        search: params.search,
+        ebayAccountId: params.ebayAccountId,
+      })
+    );
   }
 
   if (path === '/orders') {

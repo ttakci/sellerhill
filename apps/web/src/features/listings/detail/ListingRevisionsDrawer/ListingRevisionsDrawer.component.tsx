@@ -1,12 +1,15 @@
-import { Button, Drawer, EmptyState, Icon, InfoMessage, Text } from '@repo/ui';
+import { Button, Drawer, EmptyState, Icon, IconButton, InfoMessage, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingRevisionsDrawer.style';
 import type { ListingRevisionRow, ListingRevisionsDrawerComponentProps } from './ListingRevisionsDrawer.types';
 
+import { ProductTableCell } from '@/domain-ui';
+
 const ChangeLine = ({
   label,
+  labelTooltip,
   previous,
   next,
   changed,
@@ -14,6 +17,8 @@ const ChangeLine = ({
   delta,
 }: {
   label: string;
+  /** Shown as an info-icon tooltip next to the label — for a value that isn't self-explanatory. */
+  labelTooltip?: string;
   previous: string;
   next: string;
   changed: boolean;
@@ -27,6 +32,11 @@ const ChangeLine = ({
         <Text variant="caption" color="text.tertiary">
           {label}
         </Text>
+        {labelTooltip && (
+          <Tooltip content={labelTooltip} position="top" variant="dark">
+            <Icon name="info" size={12} color="text.tertiary" />
+          </Tooltip>
+        )}
       </S.ChangeLabel>
       <S.ChangeValues>
         {changed ? (
@@ -81,6 +91,7 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
         />
         <ChangeLine
           label={t('listings.detail.revisions.quantityChange')}
+          labelTooltip={t('listings.detail.revisions.quantityTooltip')}
           previous={row.previousQuantity}
           next={row.newQuantity}
           changed={row.quantityChanged}
@@ -97,6 +108,8 @@ export const ListingRevisionsDrawerComponent = ({
   onClose,
   isLoading,
   isError,
+  subject,
+  onViewListing,
   rows,
   shown,
   total,
@@ -116,6 +129,29 @@ export const ListingRevisionsDrawerComponent = ({
       size="md"
     >
       <S.BodyStack>
+        {subject && (
+          <S.Subject>
+            <S.SubjectCell>
+              <ProductTableCell
+                title={subject.title}
+                imageUrl={subject.imageUrl}
+                meta={[{ label: t('listings.table.asin'), id: subject.asin, storeType: 'amazon', icon: 'barcode' }]}
+                subtitle={subject.storeName}
+              />
+            </S.SubjectCell>
+            {onViewListing && (
+              <IconButton
+                type="button"
+                variant="outlined"
+                onClick={onViewListing}
+                aria-label={t('listings.revisionHistory.viewListing')}
+                title={t('listings.revisionHistory.viewListing')}
+              >
+                <Icon name="external-link" size={16} />
+              </IconButton>
+            )}
+          </S.Subject>
+        )}
         {!isLoading && !isError && lastCheckedLabel ? <InfoMessage>{lastCheckedLabel}</InfoMessage> : null}
         {isLoading || isError || rows.length === 0 ? (
           <S.EmptyWrap>

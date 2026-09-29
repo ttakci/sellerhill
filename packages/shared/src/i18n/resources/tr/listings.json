@@ -260,7 +260,8 @@
       "title": "Revizyon Geçmişi",
       "subtitle": "Tüm ilanlarınızda eBay'e gönderilen her fiyat ve stok değişikliği.",
       "empty": "Revizyon bulunamadı.",
-      "emptyTitle": "Henüz revizyon yok"
+      "emptyTitle": "Henüz revizyon yok",
+      "viewListing": "Listeyi görüntüle"
     },
     "addSection": {
       "title": "Yeni Liste Ekle",
@@ -390,6 +391,7 @@
         "newQuantity": "Yeni stok",
         "priceChange": "Fiyat",
         "quantityChange": "Stok",
+        "quantityTooltip": "eBay'e gönderilen miktar — ham Amazon stoğu değil.",
         "unchanged": "Değişmedi",
         "empty": "Henüz revizyon yok",
         "emptySubtitle": "Fiyat ve stok değişiklikleri gerçekleştikçe burada görünecek.",

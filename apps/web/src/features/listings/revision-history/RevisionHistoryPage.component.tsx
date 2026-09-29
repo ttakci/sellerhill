@@ -1,4 +1,4 @@
-import { DataTable, EmptyState, Icon, PageHeader, SearchField, Select, Text, type TableColumn } from '@repo/ui';
+import { DataTable, EmptyState, Icon, PageHeader, SearchField, Select, Text, Tooltip, type TableColumn } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +6,26 @@ import * as S from './RevisionHistoryPage.style';
 import type { RevisionHistoryPageComponentProps, RevisionHistoryRow } from './RevisionHistoryPage.types';
 
 import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
+import { ListingRevisionsDrawer } from '@/features/listings/detail/ListingRevisionsDrawer';
+
+/**
+ * "Stock" header + an info tooltip — this is the quantity SENT TO eBay, not
+ * the raw Amazon stock. Plain text (no `<Text>` wrapper) so it inherits the
+ * `Th` cell's own uppercase/letter-spaced styling exactly like every other
+ * column's bare-string header, instead of a `caption` variant that would
+ * render at a visibly different size/weight next to its siblings.
+ */
+const StockHeader = (): React.ReactElement => {
+  const { t } = useTranslation(['listings']);
+  return (
+    <S.StockHeader>
+      {t('listings.table.stock')}
+      <Tooltip content={t('listings.detail.revisions.quantityTooltip')} position="top" variant="dark">
+        <Icon name="info" size={12} color="text.tertiary" />
+      </Tooltip>
+    </S.StockHeader>
+  );
+};
 
 /** `previous → new` — muted when unchanged, tinted arrow when it moved. */
 const ChangeCell = ({
@@ -55,6 +75,9 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
   onClearFilters,
   onRowClick,
   onBack,
+  drawer,
+  onCloseDrawer,
+  onViewListing,
   pagination,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -88,7 +111,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
     },
     {
       key: 'quantity',
-      header: t('listings.table.stock'),
+      header: <StockHeader />,
       render: (_value, row) => (
         <ChangeCell
           previous={row.previousQuantity}
@@ -134,9 +157,14 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
           </S.ChangeRow>
           <S.ChangeRow>
             <S.ChangeLabel>
-              <Text variant="caption" color="text.tertiary">
-                {t('listings.table.stock')}
-              </Text>
+              <S.CardLabelRow>
+                <Text variant="caption" color="text.tertiary">
+                  {t('listings.table.stock')}
+                </Text>
+                <Tooltip content={t('listings.detail.revisions.quantityTooltip')} position="top" variant="dark">
+                  <Icon name="info" size={12} color="text.tertiary" />
+                </Tooltip>
+              </S.CardLabelRow>
             </S.ChangeLabel>
             <S.ChangeValues>
               <ChangeCell
@@ -245,6 +273,15 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
         emptyMessage={t('listings.revisionHistory.empty')}
         pagination={pagination}
         onRowClick={onRowClick}
+      />
+
+      <ListingRevisionsDrawer
+        isOpen={drawer.isOpen}
+        onClose={onCloseDrawer}
+        listingId={drawer.listingId}
+        currency={drawer.currency}
+        subject={drawer.subject}
+        onViewListing={onViewListing}
       />
     </S.Container>
   );

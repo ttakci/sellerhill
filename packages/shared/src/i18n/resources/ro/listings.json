@@ -260,7 +260,8 @@
       "title": "Istoric revizii",
       "subtitle": "Fiecare modificare de preț și stoc trimisă către eBay, pe toate anunțurile tale.",
       "empty": "Nu s-au găsit revizii.",
-      "emptyTitle": "Nicio revizie încă"
+      "emptyTitle": "Nicio revizie încă",
+      "viewListing": "Vezi anunțul"
     },
     "addSection": {
       "title": "Adaugă un anunț nou",
@@ -390,6 +391,7 @@
         "newQuantity": "Stoc nou",
         "priceChange": "Preț",
         "quantityChange": "Stoc",
+        "quantityTooltip": "Cantitatea trimisă către eBay, nu stocul brut Amazon.",
         "unchanged": "Nicio modificare",
         "empty": "Nicio revizie încă",
         "emptySubtitle": "Modificările de preț și stoc vor apărea aici pe măsură ce au loc.",

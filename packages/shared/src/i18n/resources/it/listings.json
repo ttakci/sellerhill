@@ -260,7 +260,8 @@
       "title": "Cronologia revisioni",
       "subtitle": "Ogni variazione di prezzo e stock inviata a eBay, su tutte le tue inserzioni.",
       "empty": "Nessuna revisione trovata.",
-      "emptyTitle": "Ancora nessuna revisione"
+      "emptyTitle": "Ancora nessuna revisione",
+      "viewListing": "Vedi inserzione"
     },
     "addSection": {
       "title": "Aggiungi una nuova inserzione",
@@ -390,6 +391,7 @@
         "newQuantity": "Nuovo stock",
         "priceChange": "Prezzo",
         "quantityChange": "Stock",
+        "quantityTooltip": "La quantità inviata a eBay, non lo stock grezzo di Amazon.",
         "unchanged": "Nessuna variazione",
         "empty": "Ancora nessuna revisione",
         "emptySubtitle": "Le variazioni di prezzo e stock compariranno qui man mano che avvengono.",

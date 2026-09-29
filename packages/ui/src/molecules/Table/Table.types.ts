@@ -35,7 +35,12 @@ export interface TableComponentProps<T = unknown> {
 
 export interface TableColumn<T = unknown> {
   key: string;
-  header: string;
+  /** Almost always a plain string, which inherits the header cell's own
+   * uppercase/letter-spaced styling. A `ReactNode` is for the rare column
+   * that needs something inline next to the label (e.g. an info tooltip) —
+   * such a node should stay unstyled text (no `<Text>` wrapper) so it still
+   * inherits that same cell styling instead of rendering at its own size. */
+  header: React.ReactNode;
   align?: 'left' | 'center' | 'right';
   render?: (value: unknown, row: T, index: number) => React.ReactNode;
   sortable?: boolean;
