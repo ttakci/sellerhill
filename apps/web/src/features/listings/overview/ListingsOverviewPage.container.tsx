@@ -1,4 +1,4 @@
-import { ListingStatus } from '@repo/shared';
+import { ListingStatus, parseAsins } from '@repo/shared';
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -20,6 +20,12 @@ const ADD_DRAWER_PARAM = 'add';
  * that link silently opened the plain overview page.
  */
 const IMPORT_DRAWER_PARAM = 'import';
+/**
+ * `?asins=B0…,B0…` alongside `drawer=add` pre-fills the create flow — the Best
+ * Sellers page hands its ticked products over this way. Read once, like the
+ * drawer flag: the URL is the hand-off, not live state.
+ */
+const ASINS_PARAM = 'asins';
 
 export const ListingsOverviewPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
@@ -30,6 +36,10 @@ export const ListingsOverviewPageContainer: React.FC = () => {
   const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(
     () => searchParams.get('drawer') === IMPORT_DRAWER_PARAM
   );
+  const [initialAsins, setInitialAsins] = useState(() => {
+    const raw = searchParams.get(ASINS_PARAM);
+    return raw ? parseAsins(raw).join('\n') : '';
+  });
 
   // Carousel + "view all" only show real (active) listings — never drafts
   const { data } = useGetListingsQuery(
@@ -65,12 +75,17 @@ export const ListingsOverviewPageContainer: React.FC = () => {
     if (searchParams.get('drawer') === value) {
       const next = new URLSearchParams(searchParams);
       next.delete('drawer');
+      // The hand-off travels with the drawer flag; a reopened drawer must start blank.
+      next.delete(ASINS_PARAM);
       setSearchParams(next, { replace: true });
     }
   };
 
   const handleAddDrawerClose = () => {
     setIsAddDrawerOpen(false);
+    // The hand-off is spent once the drawer closes: reopening from the page's
+    // own "Add listings" action must start blank, not with the Best Sellers pick.
+    setInitialAsins('');
     clearDrawerParam(ADD_DRAWER_PARAM);
   };
 
@@ -100,7 +115,12 @@ export const ListingsOverviewPageContainer: React.FC = () => {
         onViewDrafts={() => localeNavigate(`/listings/all?status=${ListingStatus.DRAFT}`)}
         onListingClick={(id) => localeNavigate(`/listings/${id}`)}
       />
-      <AddListingsDrawer isOpen={isAddDrawerOpen} onClose={handleAddDrawerClose} onSuccess={handleAddSuccess} />
+      <AddListingsDrawer
+        isOpen={isAddDrawerOpen}
+        onClose={handleAddDrawerClose}
+        onSuccess={handleAddSuccess}
+        initialAsins={initialAsins}
+      />
       <ExistingListingsImportDrawer
         isOpen={isImportDrawerOpen}
         onClose={handleImportDrawerClose}

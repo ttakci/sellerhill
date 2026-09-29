@@ -1,0 +1,76 @@
+{
+  "bestSellers": {
+    "menu": "Más vendidos",
+    "title": "Más vendidos en Amazon",
+    "subtitle": "Explora las listas destacadas de Amazon, marca los productos que quieras y envíalos a Agregar publicaciones en un solo paso.",
+    "listTypes": {
+      "best_sellers": "Más vendidos",
+      "new_releases": "Novedades",
+      "movers_and_shakers": "En ascenso",
+      "most_wished_for": "Más deseados",
+      "most_gifted": "Más regalados"
+    },
+    "listTypesAriaLabel": "Lista de Amazon",
+    "allCategories": "Todos los departamentos",
+    "categoryPlaceholder": "Elige una categoría",
+    "categorySearchPlaceholder": "Buscar categorías",
+    "categoryNoResults": "No hay categorías que coincidan",
+    "backToAllCategories": "Volver a todas las categorías",
+    "selectAllOnPage": "Seleccionar todo en esta página",
+    "selected_one": "{{count}} producto seleccionado",
+    "selected_many": "{{count}} productos seleccionados",
+    "selected_other": "{{count}} productos seleccionados",
+    "listSelected": "Publicar seleccionados ({{count}})",
+    "clearSelection": "Limpiar",
+    "rank": "N.º {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Aún sin calificación",
+    "allowance": "Te quedan {{remaining}} de {{limit}} cargas de lista hoy",
+    "allowanceHint": "Las listas que alguien ya cargó hoy están disponibles de inmediato y no cuentan.",
+    "table": {
+      "rank": "Puesto",
+      "product": "Producto",
+      "price": "Precio",
+      "rating": "Calificación",
+      "reviews": "Reseñas"
+    },
+    "states": {
+      "loading": {
+        "title": "Cargando la lista",
+        "description": "Obteniendo el ranking más reciente de Amazon."
+      },
+      "empty": {
+        "title": "No hay productos en esta página",
+        "description": "Esta lista no tiene nada que mostrar aquí. Prueba otra categoría u otra lista."
+      },
+      "notFound": {
+        "title": "Esta categoría no está disponible",
+        "description": "Amazon no ofrece esta lista para la categoría elegida. Vuelve a todas las categorías o elige otra."
+      },
+      "blocked": {
+        "title": "Amazon no respondió esta vez",
+        "description": "No se pudo leer la lista en este momento. Inténtalo de nuevo en un momento."
+      },
+      "retry": "Reintentar",
+      "unavailable": {
+        "title": "Más vendidos no está disponible temporalmente",
+        "description": "El servicio de listas no está accesible ahora. Tus publicaciones y pedidos no se ven afectados."
+      },
+      "disabled": {
+        "title": "Más vendidos no está habilitado en esta cuenta",
+        "description": "La navegación por las listas de Amazon está desactivada para tu cuenta. Contacta a soporte si esperabas verla."
+      },
+      "limitReached": {
+        "title": "Usaste las cargas de lista de hoy ({{used}}/{{limit}})",
+        "description": "Las listas ya cargadas hoy siguen disponibles: cambia a una de ellas o vuelve mañana."
+      }
+    },
+    "errors": {
+      "disabled": "Más vendidos no está habilitado en esta cuenta.",
+      "dailyLimitReached": "Las cargas de lista de hoy se agotaron.",
+      "unavailable": "Más vendidos no está disponible temporalmente.",
+      "unsupportedMarketplace": "Este mercado no es compatible."
+    }
+  }
+}

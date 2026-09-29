@@ -63,6 +63,9 @@ const ActionCenterPage = lazy(() =>
   import('./features/action-center').then((m) => ({ default: m.ActionCenterPageContainer }))
 );
 const AdminPage = lazy(() => import('./features/admin/AdminPage'));
+const BestSellersPage = lazy(() =>
+  import('./features/best-sellers').then((m) => ({ default: m.BestSellersPageContainer }))
+);
 const BillingPage = lazy(() => import('./features/billing').then((m) => ({ default: m.BillingPage })));
 const DashboardPage = lazy(() => import('./features/dashboard/DashboardPage'));
 const OnboardingEbayPage = lazy(() => import('./features/ebay/onboarding'));
@@ -189,6 +192,14 @@ export function App() {
               element={
                 <Lazy>
                   <ActionCenterPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="best-sellers"
+              element={
+                <Lazy>
+                  <BestSellersPage />
                 </Lazy>
               }
             />
@@ -355,6 +366,7 @@ export function App() {
         <Route path="/reset-password" element={<LocaleRedirect to="reset-password" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
+        <Route path="/best-sellers" element={<LocaleRedirect to="best-sellers" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" preserveQuery />} />
         {/*

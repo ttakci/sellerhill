@@ -6,6 +6,7 @@ import {
   AmazonMarketplace,
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
+  BestSellersListType,
   BillingInterval,
   BillingLimitKey,
   BillingProvider,
@@ -29,6 +30,7 @@ import {
   OrderStatus,
   PolicyType,
   ProfitBasis,
+  SourceFetchOutcome,
   SourceStockStatus,
   TemplateType,
   TrackingConversionProvider,
@@ -37,6 +39,7 @@ import {
   UserStatus,
   type ActionCenterSummaryDto,
   type AmazonAccountPublicDto,
+  type BestSellersPageDto,
   type BillingCatalogDto,
   type BillingDetailsDto,
   type BillingInvoiceListDto,
@@ -372,6 +375,93 @@ export const DEMO_LISTINGS: ListingDto[] = buildListings();
 export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
   new Set(PRODUCTS.map((p) => p.category))
 ).sort();
+
+/* ── Amazon Best Sellers ──────────────────────────────────────────────── */
+
+/** Amazon's own alias grammar (`electronics`, `home-garden`) for a demo category name. */
+function demoCategoryAlias(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const DEMO_BEST_SELLERS_TITLES: Record<BestSellersListType, string> = {
+  [BestSellersListType.BEST_SELLERS]: 'Amazon Best Sellers',
+  [BestSellersListType.NEW_RELEASES]: 'Amazon Hot New Releases',
+  [BestSellersListType.MOVERS_AND_SHAKERS]: 'Amazon Movers & Shakers',
+  [BestSellersListType.MOST_WISHED_FOR]: 'Amazon Most Wished For',
+  [BestSellersListType.MOST_GIFTED]: 'Amazon Most Gifted',
+};
+
+/** Demo ratings are deterministic per product, so a reload never reshuffles them. */
+function demoRating(index: number): { average: number; count: number } {
+  const rand = seeded(311 + index);
+  return {
+    average: round2(4.1 + rand() * 0.8),
+    count: Math.floor(rand() * 40_000) + 500,
+  };
+}
+
+/**
+ * The Best Sellers page in demo mode: the same eleven sample products, ranked,
+ * under whichever list and category the visitor picks. The category tree is
+ * derived from the products' own categories; a sub-category narrows the list
+ * to its products so the picker visibly does something. Every list type and
+ * every page answers — the demo must never show the "Amazon did not answer"
+ * screen, since nothing here ever asks Amazon.
+ */
+export function buildDemoBestSellers(listType: BestSellersListType, category: string, page: number): BestSellersPageDto {
+  const isRoot = category === '';
+  const matching = isRoot ? PRODUCTS : PRODUCTS.filter((p) => demoCategoryAlias(p.category) === category);
+  // Movers & Shakers reads best with a different order than the plain ranking.
+  const ordered = listType === BestSellersListType.MOVERS_AND_SHAKERS ? [...matching].reverse() : matching;
+  const selectedName = matching[0]?.category ?? null;
+
+  const items = ordered.map((p, i) => {
+    const rating = demoRating(PRODUCTS.indexOf(p));
+    return {
+      rank: i + 1,
+      asin: p.asin,
+      title: p.title,
+      link: `https://www.amazon.com/dp/${p.asin}`,
+      image: demoProductImage(p.slug),
+      rating,
+      price: { amount: p.cost, currency: DEMO_CURRENCY },
+      priceText: `$${p.cost.toFixed(2)}`,
+      rankChangePercent: listType === BestSellersListType.MOVERS_AND_SHAKERS ? (11 - i) * 35 : null,
+      previousRank: listType === BestSellersListType.MOVERS_AND_SHAKERS ? i + 12 : null,
+      salesRank: null,
+    };
+  });
+
+  return {
+    outcome: SourceFetchOutcome.FOUND,
+    list: {
+      title: DEMO_BEST_SELLERS_TITLES[listType],
+      category: isRoot ? null : selectedName,
+      listType,
+      link: 'https://www.amazon.com/gp/bestsellers',
+      items: page === 1 ? items : [],
+      categories: [
+        { name: 'Any Department', path: null, link: 'https://www.amazon.com/gp/bestsellers', isSelected: isRoot, isRoot: true },
+        ...DEMO_LISTING_CATEGORIES.map((name) => ({
+          name,
+          path: demoCategoryAlias(name),
+          link: `https://www.amazon.com/gp/bestsellers/${demoCategoryAlias(name)}`,
+          isSelected: demoCategoryAlias(name) === category,
+          isRoot: false,
+        })),
+      ],
+      relatedLists: [],
+      pagination: { page, itemsPerPage: 50, totalPages: 1, totalCount: items.length },
+    },
+    cachedAt: isoHoursAgo(2),
+    fetchedAt: isoHoursAgo(2),
+    allowance: { used: 0, limit: 100, remaining: 100 },
+  };
+}
 
 /** Hours between two price/stock checks (four a day). */
 const REFRESH_STEP_HOURS = 6;

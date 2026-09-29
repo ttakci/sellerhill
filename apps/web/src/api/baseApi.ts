@@ -95,6 +95,7 @@ export const baseApi = createApi({
     'Ebay',
     'Dashboard',
     'ActionCenter',
+    'BestSellers',
     'StoreSettings',
     'ListingSettingsGroups',
     'PredefinedTemplates',

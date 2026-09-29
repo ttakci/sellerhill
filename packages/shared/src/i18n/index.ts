@@ -1,6 +1,7 @@
 import arActionCenter from './resources/ar/actionCenter.json';
 import arAmazon from './resources/ar/amazon.json';
 import arAuth from './resources/ar/auth.json';
+import arBestSellers from './resources/ar/bestSellers.json';
 import arBilling from './resources/ar/billing.json';
 import arDashboard from './resources/ar/dashboard.json';
 import arEbay from './resources/ar/ebay.json';
@@ -13,6 +14,7 @@ import arTranslation from './resources/ar/translation.json';
 import azActionCenter from './resources/az/actionCenter.json';
 import azAmazon from './resources/az/amazon.json';
 import azAuth from './resources/az/auth.json';
+import azBestSellers from './resources/az/bestSellers.json';
 import azBilling from './resources/az/billing.json';
 import azDashboard from './resources/az/dashboard.json';
 import azEbay from './resources/az/ebay.json';
@@ -25,6 +27,7 @@ import azTranslation from './resources/az/translation.json';
 import deActionCenter from './resources/de/actionCenter.json';
 import deAmazon from './resources/de/amazon.json';
 import deAuth from './resources/de/auth.json';
+import deBestSellers from './resources/de/bestSellers.json';
 import deBilling from './resources/de/billing.json';
 import deDashboard from './resources/de/dashboard.json';
 import deEbay from './resources/de/ebay.json';
@@ -38,6 +41,7 @@ import enActionCenter from './resources/en/actionCenter.json';
 import enAdmin from './resources/en/admin.json';
 import enAmazon from './resources/en/amazon.json';
 import enAuth from './resources/en/auth.json';
+import enBestSellers from './resources/en/bestSellers.json';
 import enBilling from './resources/en/billing.json';
 import enDashboard from './resources/en/dashboard.json';
 import enEbay from './resources/en/ebay.json';
@@ -51,6 +55,7 @@ import enTranslation from './resources/en/translation.json';
 import esActionCenter from './resources/es/actionCenter.json';
 import esAmazon from './resources/es/amazon.json';
 import esAuth from './resources/es/auth.json';
+import esBestSellers from './resources/es/bestSellers.json';
 import esBilling from './resources/es/billing.json';
 import esDashboard from './resources/es/dashboard.json';
 import esEbay from './resources/es/ebay.json';
@@ -63,6 +68,7 @@ import esTranslation from './resources/es/translation.json';
 import frActionCenter from './resources/fr/actionCenter.json';
 import frAmazon from './resources/fr/amazon.json';
 import frAuth from './resources/fr/auth.json';
+import frBestSellers from './resources/fr/bestSellers.json';
 import frBilling from './resources/fr/billing.json';
 import frDashboard from './resources/fr/dashboard.json';
 import frEbay from './resources/fr/ebay.json';
@@ -75,6 +81,7 @@ import frTranslation from './resources/fr/translation.json';
 import hiActionCenter from './resources/hi/actionCenter.json';
 import hiAmazon from './resources/hi/amazon.json';
 import hiAuth from './resources/hi/auth.json';
+import hiBestSellers from './resources/hi/bestSellers.json';
 import hiBilling from './resources/hi/billing.json';
 import hiDashboard from './resources/hi/dashboard.json';
 import hiEbay from './resources/hi/ebay.json';
@@ -87,6 +94,7 @@ import hiTranslation from './resources/hi/translation.json';
 import itActionCenter from './resources/it/actionCenter.json';
 import itAmazon from './resources/it/amazon.json';
 import itAuth from './resources/it/auth.json';
+import itBestSellers from './resources/it/bestSellers.json';
 import itBilling from './resources/it/billing.json';
 import itDashboard from './resources/it/dashboard.json';
 import itEbay from './resources/it/ebay.json';
@@ -99,6 +107,7 @@ import itTranslation from './resources/it/translation.json';
 import ptActionCenter from './resources/pt/actionCenter.json';
 import ptAmazon from './resources/pt/amazon.json';
 import ptAuth from './resources/pt/auth.json';
+import ptBestSellers from './resources/pt/bestSellers.json';
 import ptBilling from './resources/pt/billing.json';
 import ptDashboard from './resources/pt/dashboard.json';
 import ptEbay from './resources/pt/ebay.json';
@@ -111,6 +120,7 @@ import ptTranslation from './resources/pt/translation.json';
 import roActionCenter from './resources/ro/actionCenter.json';
 import roAmazon from './resources/ro/amazon.json';
 import roAuth from './resources/ro/auth.json';
+import roBestSellers from './resources/ro/bestSellers.json';
 import roBilling from './resources/ro/billing.json';
 import roDashboard from './resources/ro/dashboard.json';
 import roEbay from './resources/ro/ebay.json';
@@ -123,6 +133,7 @@ import roTranslation from './resources/ro/translation.json';
 import ruActionCenter from './resources/ru/actionCenter.json';
 import ruAmazon from './resources/ru/amazon.json';
 import ruAuth from './resources/ru/auth.json';
+import ruBestSellers from './resources/ru/bestSellers.json';
 import ruBilling from './resources/ru/billing.json';
 import ruDashboard from './resources/ru/dashboard.json';
 import ruEbay from './resources/ru/ebay.json';
@@ -136,6 +147,7 @@ import trActionCenter from './resources/tr/actionCenter.json';
 import trAdmin from './resources/tr/admin.json';
 import trAmazon from './resources/tr/amazon.json';
 import trAuth from './resources/tr/auth.json';
+import trBestSellers from './resources/tr/bestSellers.json';
 import trBilling from './resources/tr/billing.json';
 import trDashboard from './resources/tr/dashboard.json';
 import trEbay from './resources/tr/ebay.json';
@@ -149,6 +161,7 @@ import trTranslation from './resources/tr/translation.json';
 import ukActionCenter from './resources/uk/actionCenter.json';
 import ukAmazon from './resources/uk/amazon.json';
 import ukAuth from './resources/uk/auth.json';
+import ukBestSellers from './resources/uk/bestSellers.json';
 import ukBilling from './resources/uk/billing.json';
 import ukDashboard from './resources/uk/dashboard.json';
 import ukEbay from './resources/uk/ebay.json';
@@ -161,6 +174,7 @@ import ukTranslation from './resources/uk/translation.json';
 import urActionCenter from './resources/ur/actionCenter.json';
 import urAmazon from './resources/ur/amazon.json';
 import urAuth from './resources/ur/auth.json';
+import urBestSellers from './resources/ur/bestSellers.json';
 import urBilling from './resources/ur/billing.json';
 import urDashboard from './resources/ur/dashboard.json';
 import urEbay from './resources/ur/ebay.json';
@@ -173,6 +187,7 @@ import urTranslation from './resources/ur/translation.json';
 import zhActionCenter from './resources/zh/actionCenter.json';
 import zhAmazon from './resources/zh/amazon.json';
 import zhAuth from './resources/zh/auth.json';
+import zhBestSellers from './resources/zh/bestSellers.json';
 import zhBilling from './resources/zh/billing.json';
 import zhDashboard from './resources/zh/dashboard.json';
 import zhEbay from './resources/zh/ebay.json';
@@ -188,6 +203,7 @@ export {
   enAdmin,
   enAmazon,
   enAuth,
+  enBestSellers,
   enBilling,
   enDashboard,
   enEbay,
@@ -202,6 +218,7 @@ export {
   trAdmin,
   trAmazon,
   trAuth,
+  trBestSellers,
   trBilling,
   trDashboard,
   trEbay,
@@ -215,6 +232,7 @@ export {
   ruActionCenter,
   ruAmazon,
   ruAuth,
+  ruBestSellers,
   ruBilling,
   ruDashboard,
   ruEbay,
@@ -227,6 +245,7 @@ export {
   hiActionCenter,
   hiAmazon,
   hiAuth,
+  hiBestSellers,
   hiBilling,
   hiDashboard,
   hiEbay,
@@ -239,6 +258,7 @@ export {
   urActionCenter,
   urAmazon,
   urAuth,
+  urBestSellers,
   urBilling,
   urDashboard,
   urEbay,
@@ -251,6 +271,7 @@ export {
   arActionCenter,
   arAmazon,
   arAuth,
+  arBestSellers,
   arBilling,
   arDashboard,
   arEbay,
@@ -263,6 +284,7 @@ export {
   azActionCenter,
   azAmazon,
   azAuth,
+  azBestSellers,
   azBilling,
   azDashboard,
   azEbay,
@@ -275,6 +297,7 @@ export {
   deActionCenter,
   deAmazon,
   deAuth,
+  deBestSellers,
   deBilling,
   deDashboard,
   deEbay,
@@ -287,6 +310,7 @@ export {
   frActionCenter,
   frAmazon,
   frAuth,
+  frBestSellers,
   frBilling,
   frDashboard,
   frEbay,
@@ -299,6 +323,7 @@ export {
   esActionCenter,
   esAmazon,
   esAuth,
+  esBestSellers,
   esBilling,
   esDashboard,
   esEbay,
@@ -311,6 +336,7 @@ export {
   itActionCenter,
   itAmazon,
   itAuth,
+  itBestSellers,
   itBilling,
   itDashboard,
   itEbay,
@@ -323,6 +349,7 @@ export {
   roActionCenter,
   roAmazon,
   roAuth,
+  roBestSellers,
   roBilling,
   roDashboard,
   roEbay,
@@ -335,6 +362,7 @@ export {
   ukActionCenter,
   ukAmazon,
   ukAuth,
+  ukBestSellers,
   ukBilling,
   ukDashboard,
   ukEbay,
@@ -347,6 +375,7 @@ export {
   zhActionCenter,
   zhAmazon,
   zhAuth,
+  zhBestSellers,
   zhBilling,
   zhDashboard,
   zhEbay,
@@ -359,6 +388,7 @@ export {
   ptActionCenter,
   ptAmazon,
   ptAuth,
+  ptBestSellers,
   ptBilling,
   ptDashboard,
   ptEbay,
@@ -385,6 +415,7 @@ export const i18nResources = {
     amazon: enAmazon,
     billing: enBilling,
     auth: enAuth,
+    bestSellers: enBestSellers,
     dashboard: enDashboard,
     ebay: enEbay,
     legal: enLegal,
@@ -401,6 +432,7 @@ export const i18nResources = {
     amazon: trAmazon,
     billing: trBilling,
     auth: trAuth,
+    bestSellers: trBestSellers,
     dashboard: trDashboard,
     ebay: trEbay,
     legal: trLegal,
@@ -416,6 +448,7 @@ export const i18nResources = {
     amazon: ruAmazon,
     billing: ruBilling,
     auth: ruAuth,
+    bestSellers: ruBestSellers,
     dashboard: ruDashboard,
     ebay: ruEbay,
     storeSettings: ruStoreSettings,
@@ -430,6 +463,7 @@ export const i18nResources = {
     amazon: hiAmazon,
     billing: hiBilling,
     auth: hiAuth,
+    bestSellers: hiBestSellers,
     dashboard: hiDashboard,
     ebay: hiEbay,
     storeSettings: hiStoreSettings,
@@ -444,6 +478,7 @@ export const i18nResources = {
     amazon: urAmazon,
     billing: urBilling,
     auth: urAuth,
+    bestSellers: urBestSellers,
     dashboard: urDashboard,
     ebay: urEbay,
     storeSettings: urStoreSettings,
@@ -458,6 +493,7 @@ export const i18nResources = {
     amazon: arAmazon,
     billing: arBilling,
     auth: arAuth,
+    bestSellers: arBestSellers,
     dashboard: arDashboard,
     ebay: arEbay,
     storeSettings: arStoreSettings,
@@ -472,6 +508,7 @@ export const i18nResources = {
     amazon: azAmazon,
     billing: azBilling,
     auth: azAuth,
+    bestSellers: azBestSellers,
     dashboard: azDashboard,
     ebay: azEbay,
     storeSettings: azStoreSettings,
@@ -484,6 +521,7 @@ export const i18nResources = {
     actionCenter: deActionCenter,
     amazon: deAmazon,
     auth: deAuth,
+    bestSellers: deBestSellers,
     billing: deBilling,
     dashboard: deDashboard,
     ebay: deEbay,
@@ -498,6 +536,7 @@ export const i18nResources = {
     actionCenter: frActionCenter,
     amazon: frAmazon,
     auth: frAuth,
+    bestSellers: frBestSellers,
     billing: frBilling,
     dashboard: frDashboard,
     ebay: frEbay,
@@ -512,6 +551,7 @@ export const i18nResources = {
     actionCenter: esActionCenter,
     amazon: esAmazon,
     auth: esAuth,
+    bestSellers: esBestSellers,
     billing: esBilling,
     dashboard: esDashboard,
     ebay: esEbay,
@@ -526,6 +566,7 @@ export const i18nResources = {
     actionCenter: itActionCenter,
     amazon: itAmazon,
     auth: itAuth,
+    bestSellers: itBestSellers,
     billing: itBilling,
     dashboard: itDashboard,
     ebay: itEbay,
@@ -540,6 +581,7 @@ export const i18nResources = {
     actionCenter: roActionCenter,
     amazon: roAmazon,
     auth: roAuth,
+    bestSellers: roBestSellers,
     billing: roBilling,
     dashboard: roDashboard,
     ebay: roEbay,
@@ -554,6 +596,7 @@ export const i18nResources = {
     actionCenter: ukActionCenter,
     amazon: ukAmazon,
     auth: ukAuth,
+    bestSellers: ukBestSellers,
     billing: ukBilling,
     dashboard: ukDashboard,
     ebay: ukEbay,
@@ -568,6 +611,7 @@ export const i18nResources = {
     actionCenter: zhActionCenter,
     amazon: zhAmazon,
     auth: zhAuth,
+    bestSellers: zhBestSellers,
     billing: zhBilling,
     dashboard: zhDashboard,
     ebay: zhEbay,
@@ -582,6 +626,7 @@ export const i18nResources = {
     actionCenter: ptActionCenter,
     amazon: ptAmazon,
     auth: ptAuth,
+    bestSellers: ptBestSellers,
     billing: ptBilling,
     dashboard: ptDashboard,
     ebay: ptEbay,

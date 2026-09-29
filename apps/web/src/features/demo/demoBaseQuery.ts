@@ -1,5 +1,7 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import {
+  BEST_SELLERS_LIST_TYPE_ORDER,
+  BestSellersListType,
   DashboardChartGranularity,
   ListingStatus,
   OrderFulfillmentState,
@@ -9,6 +11,7 @@ import {
 
 import {
   buildDemoActionCenter,
+  buildDemoBestSellers,
   buildDemoBillingDetails,
   buildDemoBillingInvoices,
   buildDemoBillingSummary,
@@ -318,6 +321,20 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/ebay/accounts') {
     return ok(DEMO_EBAY_ACCOUNTS);
+  }
+
+  /*
+   * Best Sellers is Amazon-side browsing; in the real app a miss costs the
+   * seller's daily allowance and a proxy fetch. The demo answers every list,
+   * category and page from the sample catalog so the page is always populated
+   * and nothing is ever fetched.
+   */
+  if (path.startsWith('/best-sellers')) {
+    const listType = BEST_SELLERS_LIST_TYPE_ORDER.includes(params.listType as BestSellersListType)
+      ? (params.listType as BestSellersListType)
+      : BestSellersListType.BEST_SELLERS;
+    const page = Math.max(1, Number(params.page) || 1);
+    return ok(buildDemoBestSellers(listType, params.category ?? '', page));
   }
 
   if (path === '/listings') {

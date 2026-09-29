@@ -50,7 +50,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   isProfileUsageOpen,
   onToggleProfileUsage,
 }) => {
-  const { t } = useTranslation(['translation', 'actionCenter', 'listings', 'orders', 'billing']);
+  const { t } = useTranslation(['translation', 'actionCenter', 'bestSellers', 'listings', 'orders', 'billing']);
 
   return (
     <ErrorBoundary>
@@ -200,6 +200,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="file-text" size={20} />
                   {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.drafts')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            {/*
+              Best Sellers is Amazon-side browsing (the seller picks products to
+              list), so it lives in the Inventory group under the listing items.
+              Its own top-level path keeps it out of the eBay Listings
+              `startsWith('/listings/')` active rule.
+            */}
+            <NavTooltip label={t('bestSellers:bestSellers.menu')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/best-sellers'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/best-sellers')}
+                aria-label={t('bestSellers:bestSellers.menu')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="trending-up" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('bestSellers:bestSellers.menu')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>

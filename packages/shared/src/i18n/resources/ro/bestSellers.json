@@ -1,0 +1,76 @@
+{
+  "bestSellers": {
+    "menu": "Cele mai vândute",
+    "title": "Cele mai vândute pe Amazon",
+    "subtitle": "Răsfoiți topurile Amazon, bifați produsele dorite și trimiteți-le către Adăugare anunțuri într-un singur pas.",
+    "listTypes": {
+      "best_sellers": "Cele mai vândute",
+      "new_releases": "Noutăți",
+      "movers_and_shakers": "În creștere rapidă",
+      "most_wished_for": "Cele mai dorite",
+      "most_gifted": "Cele mai oferite cadou"
+    },
+    "listTypesAriaLabel": "Listă Amazon",
+    "allCategories": "Toate departamentele",
+    "categoryPlaceholder": "Alegeți o categorie",
+    "categorySearchPlaceholder": "Căutați categorii",
+    "categoryNoResults": "Nicio categorie potrivită",
+    "backToAllCategories": "Înapoi la toate categoriile",
+    "selectAllOnPage": "Selectați tot de pe această pagină",
+    "selected_one": "{{count}} produs selectat",
+    "selected_few": "{{count}} produse selectate",
+    "selected_other": "{{count}} de produse selectate",
+    "listSelected": "Listați selecția ({{count}})",
+    "clearSelection": "Golire",
+    "rank": "Nr. {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Fără evaluare încă",
+    "allowance": "Astăzi mai aveți {{remaining}} din {{limit}} încărcări de listă",
+    "allowanceHint": "Listele încărcate deja astăzi de oricine sunt disponibile imediat și nu se contorizează.",
+    "table": {
+      "rank": "Loc",
+      "product": "Produs",
+      "price": "Preț",
+      "rating": "Evaluare",
+      "reviews": "Recenzii"
+    },
+    "states": {
+      "loading": {
+        "title": "Se încarcă lista",
+        "description": "Se preia cel mai recent clasament de la Amazon."
+      },
+      "empty": {
+        "title": "Niciun produs pe această pagină",
+        "description": "Această listă nu are nimic de afișat aici. Încercați altă categorie sau altă listă."
+      },
+      "notFound": {
+        "title": "Această categorie nu este disponibilă",
+        "description": "Amazon nu oferă această listă pentru categoria aleasă. Reveniți la toate categoriile sau alegeți alta."
+      },
+      "blocked": {
+        "title": "Amazon nu a răspuns de data aceasta",
+        "description": "Lista nu a putut fi citită acum. Încercați din nou peste câteva momente."
+      },
+      "retry": "Încercați din nou",
+      "unavailable": {
+        "title": "Cele mai vândute este temporar indisponibil",
+        "description": "Serviciul de liste nu este accesibil momentan. Anunțurile și comenzile dvs. nu sunt afectate."
+      },
+      "disabled": {
+        "title": "Cele mai vândute nu este activat pentru acest cont",
+        "description": "Răsfoirea listelor Amazon este dezactivată pentru contul dvs. Contactați asistența dacă vă așteptați să o vedeți."
+      },
+      "limitReached": {
+        "title": "Ați folosit încărcările de listă de astăzi ({{used}}/{{limit}})",
+        "description": "Listele deja încărcate astăzi rămân disponibile — treceți la una dintre ele sau reveniți mâine."
+      }
+    },
+    "errors": {
+      "disabled": "Cele mai vândute nu este activat pentru acest cont.",
+      "dailyLimitReached": "Încărcările de listă de astăzi s-au epuizat.",
+      "unavailable": "Cele mai vândute este temporar indisponibil.",
+      "unsupportedMarketplace": "Această piață nu este acceptată."
+    }
+  }
+}
