@@ -26,8 +26,18 @@ export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant
         border-top: 0.0625rem solid ${theme.colors.border.secondary};
       `}
 
+  /*
+   * The row layout assumes the bar spans close to the full viewport, but this
+   * breakpoint is a VIEWPORT media query while the bar's actual available
+   * width is whatever its container gives it — narrower on any page that
+   * shares the row with a sidebar or a card rail. The flex-wrap below is the
+   * fallback for that mismatch: side by side when there's room, the rows-per-
+   * page control above the page nav when there isn't, instead of the two
+   * groups forcing the bar (and its scrolling ancestor) wider than the page.
+   */
   @media (min-width: ${tkn('breakpoints.sm')}) {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
   }

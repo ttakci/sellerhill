@@ -109,6 +109,7 @@
     "subtitle": "Vizualizați detaliile produselor și datele Amazon pentru toate anunțurile dvs. active."
   },
   "menu": {
+    "overview": "Prezentare generală",
     "dashboard": "Panou de control",
     "listings": "Anunțuri",
     "ebayListings": "Anunțuri eBay",
@@ -117,6 +118,8 @@
     "drafts": "Ciorne",
     "products": "Produse",
     "inventory": "Inventar",
+    "discover": "Descoperă",
+    "sales": "Vânzări",
     "orders": "Comenzi",
     "messages": "Mesaje",
     "stores": "Magazine",

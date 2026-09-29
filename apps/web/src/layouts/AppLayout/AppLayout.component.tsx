@@ -87,7 +87,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {!sidebarCollapsed && (
               <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
                 <Text variant="overline" color="sidebar.textMuted">
-                  {t('translation:menu.inventory')}
+                  {t('translation:menu.overview')}
                 </Text>
               </S.NavLabelWrapper>
             )}
@@ -141,6 +141,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <S.NavDivider />
+
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.sales')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
+
             <NavTooltip label={t('translation:menu.orders')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $isCollapsed={sidebarCollapsed}
@@ -182,6 +192,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <S.NavDivider />
+
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.inventory')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
+
             <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={
@@ -219,20 +239,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/listings/revisions'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/listings/revisions')}
-                aria-label={t('translation:menu.revisionHistory')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="history" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
             <NavTooltip label={t('translation:menu.drafts')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={isDraftsActive}
@@ -247,10 +253,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/listings/revisions'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/listings/revisions')}
+                aria-label={t('translation:menu.revisionHistory')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="history" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <S.NavDivider />
+
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.discover')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
+
             {/*
               Best Sellers is Amazon-side browsing (the seller picks products to
-              list), so it lives in the Inventory group under the listing items.
-              Its own top-level path keeps it out of the eBay Listings
+              list) rather than managing the existing catalog, so it gets its
+              own "Discover" group instead of sitting under Inventory. Its own
+              top-level path keeps it out of the eBay Listings
               `startsWith('/listings/')` active rule.
             */}
             <NavTooltip label={t('bestSellers:bestSellers.menu')} collapsed={sidebarCollapsed}>

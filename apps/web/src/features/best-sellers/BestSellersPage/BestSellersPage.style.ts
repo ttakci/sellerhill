@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainer, Text, tkn } from '@repo/ui';
+import { Card, PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -20,6 +20,75 @@ export const HeaderActions = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
+/**
+ * Sidebar (category tree) + content column. The sidebar is a real column
+ * above `lg`, matching how the app's own shell collapses its sidebar at the
+ * same breakpoint; below it, `SidebarPanel` hides and `MobileCategoryTrigger`
+ * (a Drawer opener) takes over — see `MobileCategoryTrigger`.
+ */
+export const PageBody = styled.div`
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  align-items: start;
+  gap: ${tkn('spacing.lg')};
+
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const SidebarPanel = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  position: sticky;
+  top: ${tkn('spacing.lg')};
+  max-height: calc(100vh - 9rem);
+  overflow: hidden;
+  box-sizing: border-box;
+
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
+    display: none;
+  }
+`;
+
+export const SidebarHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  color: ${tkn('colors.text.secondary')};
+`;
+
+/** Opens the category Drawer below `lg`; the persistent sidebar takes over above it. */
+export const MobileCategoryTrigger = styled.div`
+  display: none;
+
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
+    display: flex;
+
+    & > button {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+`;
+
+export const MobileCategoryTriggerLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+`;
+
+export const ContentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+`;
+
 /* Same surface as the Listings / Orders / Products filter bars. */
 export const Toolbar = styled.div`
   background: ${tkn('colors.surface.primary')};
@@ -38,23 +107,13 @@ export const Toolbar = styled.div`
   }
 `;
 
-/** Category picker + back link on the left, select-all on the right; wraps on narrow widths. */
+/** Select-all on the right; wraps on narrow widths. */
 export const FilterRow = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   min-width: 0;
-`;
-
-export const CategorySelect = styled.div`
-  width: 22rem;
-  max-width: 100%;
-  min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    width: 100%;
-  }
 `;
 
 export const FilterSpacer = styled.div`
@@ -73,15 +132,15 @@ export const MetaRow = styled.div`
 
 /**
  * One ranked product. The card carries `aria-pressed` for its ticked state, and
- * the brand outline keys off that attribute — the design system has no Card
- * variant for "selected", and an attribute selector needs no theme access from
- * a prop function (the web app's Emotion `Theme` is not typed for `theme.colors`).
- * The whole card is the tap surface; the checkbox is the keyboard-reachable control.
+ * the brand outline + tint key off that attribute — the design system has no
+ * Card variant for "selected", and an attribute selector needs no theme access
+ * from a prop function (the web app's Emotion `Theme` is not typed for
+ * `theme.colors`). The whole card is the tap surface; the checkbox is the
+ * keyboard-reachable control.
  */
 export const GridCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
   position: relative;
   height: 100%;
   cursor: pointer;
@@ -89,15 +148,17 @@ export const GridCard = styled(Card)`
   transition:
     box-shadow ${tkn('transitions.fast')},
     border-color ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')},
     transform ${tkn('transitions.fast')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.md')};
+    box-shadow: ${tkn('shadows.lg')};
     transform: translateY(-0.125rem);
   }
 
   &[aria-pressed='true'] {
     border-color: ${tkn('colors.brand.primary')};
+    background: ${tkn('colors.brand.secondary')};
     box-shadow: inset 0 0 0 0.0625rem ${tkn('colors.brand.primary')};
   }
 `;
@@ -108,6 +169,7 @@ export const CardTopRow = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-height: 1.5rem;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm')} 0;
 `;
 
 /** Wraps the checkbox so its click never doubles up with the card's own toggle. */
@@ -119,12 +181,14 @@ export const CardControl = styled.div`
 /** Transparent image plate — no grey mat, matching every other product image in the app. */
 export const CardImageFrame = styled.div`
   width: 100%;
-  height: 10rem;
+  height: 11rem;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: transparent;
+  padding: ${tkn('spacing.sm')};
+  box-sizing: border-box;
 `;
 
 export const CardImage = styled.img`
@@ -133,13 +197,29 @@ export const CardImage = styled.img`
   object-fit: contain;
 `;
 
-/** Two-line clamp; the full title stays on the `title` tooltip. */
-export const CardTitle = styled(Text)`
+/** Everything below the image sits on its own inset, separated by a hairline. */
+export const CardBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  flex: 1;
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+/**
+ * Plain layout wrapper for the `-webkit-line-clamp` box — the clamp used to
+ * live on `styled(Text)` directly, but two Emotion-generated classes on one
+ * element race for the `color`/`display` declarations, and whichever loses
+ * that race can render the title uncoloured or unclamped. Wrapping an
+ * unmodified `<Text>` removes the race entirely.
+ */
+export const CardTitleClamp = styled.div`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.75rem;
+  min-height: 3rem;
 `;
 
 export const CardMetaRow = styled.div`
@@ -153,6 +233,7 @@ export const CardMetaRow = styled.div`
 /** ASIN badge pinned to the card foot; stops propagation so the Amazon link does not toggle the card. */
 export const CardFooter = styled.div`
   margin-top: auto;
+  padding-top: ${tkn('spacing.xs')};
   display: flex;
   align-items: center;
 `;

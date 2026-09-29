@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Поиск категорий",
     "categoryNoResults": "Подходящих категорий нет",
     "backToAllCategories": "Назад ко всем категориям",
+    "categories": {
+      "title": "Категории",
+      "mobileLabel": "Категория",
+      "drawerTitle": "Категории",
+      "expand": "Развернуть «{{name}}»",
+      "collapse": "Свернуть «{{name}}»"
+    },
     "selectAllOnPage": "Выбрать все на этой странице",
     "selected_one": "Выбран {{count}} товар",
     "selected_few": "Выбрано {{count}} товара",

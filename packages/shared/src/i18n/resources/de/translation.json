@@ -109,6 +109,7 @@
     "subtitle": "Sehen Sie sich Produktdetails und Amazon-Daten für alle Ihre aktiven Angebote an."
   },
   "menu": {
+    "overview": "Übersicht",
     "dashboard": "Dashboard",
     "listings": "Angebote",
     "ebayListings": "eBay-Angebote",
@@ -117,6 +118,8 @@
     "drafts": "Entwürfe",
     "products": "Produkte",
     "inventory": "Inventar",
+    "discover": "Entdecken",
+    "sales": "Umsatz",
     "orders": "Bestellungen",
     "messages": "Nachrichten",
     "stores": "Shops",

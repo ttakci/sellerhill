@@ -22,6 +22,19 @@ export const TabList = styled.div<{ $variant: 'underline' | 'pill' }>`
   &::-webkit-scrollbar {
     display: none;
   }
+
+  /*
+   * As a flex item of a COLUMN-direction parent (a toolbar stacking the rail
+   * over its filter row), the cross-axis 'automatic minimum size' rule that
+   * zeroes an overflowing item's floor only reliably kicks in along the flex
+   * container's main axis. Without an explicit min-width: 0 here, a rail
+   * wider than its column keeps its full content width instead of clipping
+   * to its own overflow-x: auto, and that width leaks into every ancestor up
+   * to the page's own scroll container — a real page-level horizontal
+   * scrollbar on narrow viewports, not just a rail that quietly grew past
+   * its card.
+   */
+  min-width: 0;
 `;
 
 export const TabButton = styled.button<{ $isActive: boolean; $variant: 'underline' | 'pill' }>`

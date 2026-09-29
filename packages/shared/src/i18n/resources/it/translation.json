@@ -109,6 +109,7 @@
     "subtitle": "Consulta i dettagli dei prodotti e i dati Amazon di tutte le tue inserzioni attive."
   },
   "menu": {
+    "overview": "Panoramica",
     "dashboard": "Pannello",
     "listings": "Inserzioni",
     "ebayListings": "Inserzioni eBay",
@@ -117,6 +118,8 @@
     "drafts": "Bozze",
     "products": "Prodotti",
     "inventory": "Inventario",
+    "discover": "Scopri",
+    "sales": "Vendite",
     "orders": "Ordini",
     "messages": "Messaggi",
     "stores": "Negozi",

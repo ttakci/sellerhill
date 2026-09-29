@@ -109,6 +109,7 @@
     "subtitle": "Сведения о товарах и данные Amazon по всем вашим активным листингам."
   },
   "menu": {
+    "overview": "Обзор",
     "dashboard": "Панель",
     "listings": "Листинги",
     "ebayListings": "Листинги eBay",
@@ -117,6 +118,8 @@
     "drafts": "Черновики",
     "products": "Товары",
     "inventory": "Инвентарь",
+    "discover": "Поиск",
+    "sales": "Продажи",
     "orders": "Заказы",
     "messages": "Сообщения",
     "stores": "Магазины",

@@ -109,6 +109,7 @@
     "subtitle": "Veja os detalhes dos produtos e os dados da Amazon de todos os seus anúncios ativos."
   },
   "menu": {
+    "overview": "Visão geral",
     "dashboard": "Painel",
     "listings": "Anúncios",
     "ebayListings": "Anúncios do eBay",
@@ -117,6 +118,8 @@
     "drafts": "Rascunhos",
     "products": "Produtos",
     "inventory": "Estoque",
+    "discover": "Descobrir",
+    "sales": "Vendas",
     "orders": "Pedidos",
     "messages": "Mensagens",
     "stores": "Lojas",

@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "زمرے تلاش کریں",
     "categoryNoResults": "کوئی مماثل زمرہ نہیں",
     "backToAllCategories": "تمام زمروں پر واپس جائیں",
+    "categories": {
+      "title": "زمرے",
+      "mobileLabel": "زمرہ",
+      "drawerTitle": "زمرے دیکھیں",
+      "expand": "{{name}} پھیلائیں",
+      "collapse": "{{name}} سمیٹیں"
+    },
     "selectAllOnPage": "اس صفحے کے سب منتخب کریں",
     "selected_one": "{{count}} مصنوعہ منتخب",
     "selected_other": "{{count}} مصنوعات منتخب",
