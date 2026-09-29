@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Vuelve a conectar tu tienda de eBay para activar los mensajes; la autorización actual no incluye la mensajería.",
       "messagingReplyNotAllowed": "Los mensajes de eBay no se pueden responder desde aquí.",
       "messagingUnavailable": "La mensajería de eBay no está disponible temporalmente. Inténtalo de nuevo.",
+      "messagingRejected": "eBay no aceptó esta solicitud. Revisa el mensaje e inténtalo de nuevo.",
       "messageTooLong": "Un mensaje puede tener como máximo 2000 caracteres."
     },
     "onboarding": {

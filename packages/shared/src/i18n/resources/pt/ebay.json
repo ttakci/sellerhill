@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Reconecte sua loja eBay para ativar as mensagens — a autorização atual não inclui mensagens.",
       "messagingReplyNotAllowed": "Não é possível responder aqui às mensagens do eBay.",
       "messagingUnavailable": "As mensagens do eBay estão temporariamente indisponíveis. Tente novamente.",
+      "messagingRejected": "O eBay não aceitou esta solicitação. Verifique a mensagem e tente novamente.",
       "messageTooLong": "Uma mensagem pode ter no máximo 2000 caracteres."
     },
     "onboarding": {

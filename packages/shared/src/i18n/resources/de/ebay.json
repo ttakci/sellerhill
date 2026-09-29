@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Verbinden Sie Ihren eBay-Shop erneut, um Nachrichten zu aktivieren – die aktuelle Autorisierung umfasst keine Nachrichten.",
       "messagingReplyNotAllowed": "Auf Nachrichten von eBay kann hier nicht geantwortet werden.",
       "messagingUnavailable": "eBay-Nachrichten sind vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
+      "messagingRejected": "eBay hat diese Anfrage nicht angenommen. Bitte prüfen Sie die Nachricht und versuchen Sie es erneut.",
       "messageTooLong": "Eine Nachricht darf höchstens 2000 Zeichen lang sein."
     },
     "onboarding": {

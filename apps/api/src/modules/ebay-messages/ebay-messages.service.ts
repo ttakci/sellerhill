@@ -30,6 +30,7 @@ export const MESSAGING_ERRORS = {
   SCOPE_MISSING: 'ebay.errors.messagingScopeMissing',
   REPLY_NOT_ALLOWED: 'ebay.errors.messagingReplyNotAllowed',
   UNAVAILABLE: 'ebay.errors.messagingUnavailable',
+  REJECTED: 'ebay.errors.messagingRejected',
   TOO_LONG: 'ebay.errors.messageTooLong',
 } as const;
 
@@ -38,6 +39,9 @@ export const MESSAGING_ERRORS = {
  * the badge read recounts a store from eBay once its counter is older than this.
  */
 const UNREAD_STALE_MS = 15 * 60 * 1000;
+
+/** How eBay words a 403 that is about the token's grant rather than the request. */
+const SCOPE_ERROR_TEXT = /scope|permission|authoriz/i;
 
 interface MessagingAccountRow {
   granted_scopes: string[] | null;
@@ -52,6 +56,7 @@ interface UnreadAccountRow {
   granted_scopes: string[] | null;
   unread_message_count: number;
   unread_message_synced_at: Date | null;
+  message_subscription_id: string | null;
 }
 
 export interface ThreadQuery {
@@ -84,7 +89,7 @@ export class EbayMessagesService {
   async listConversations(userId: string, q: EbayConversationsQuery): Promise<PaginatedConversationsDto> {
     const account = await this.loadAccount(userId, q.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(q.ebayAccountId);
-    const result = await this.call(() =>
+    const result = await this.call(account, () =>
       this.client.getConversations(
         token,
         {
@@ -105,9 +110,9 @@ export class EbayMessagesService {
   }
 
   async getThread(userId: string, conversationId: string, q: ThreadQuery): Promise<EbayConversationThreadDto> {
-    await this.loadAccount(userId, q.ebayAccountId);
+    const account = await this.loadAccount(userId, q.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(q.ebayAccountId);
-    const result = await this.call(() =>
+    const result = await this.call(account, () =>
       this.client.getConversation(
         token,
         conversationId,
@@ -133,15 +138,15 @@ export class EbayMessagesService {
     if (text.length > EBAY_MESSAGE_MAX_LENGTH) {
       throw new Error(MESSAGING_ERRORS.TOO_LONG);
     }
-    await this.loadAccount(userId, input.ebayAccountId);
+    const account = await this.loadAccount(userId, input.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(input.ebayAccountId);
-    return this.call(() => this.client.sendMessage(token, { conversationId, text }, EbayCallPriority.INTERACTIVE));
+    return this.call(account, () => this.client.sendMessage(token, { conversationId, text }, EbayCallPriority.INTERACTIVE));
   }
 
   async setRead(userId: string, conversationId: string, input: EbayConversationRead): Promise<void> {
-    await this.loadAccount(userId, input.ebayAccountId);
+    const account = await this.loadAccount(userId, input.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(input.ebayAccountId);
-    await this.call(() =>
+    await this.call(account, () =>
       this.client.updateRead(token, conversationId, input.type, input.read, EbayCallPriority.INTERACTIVE)
     );
     // A best guess until the next recount: one conversation moved across the line.
@@ -159,13 +164,13 @@ export class EbayMessagesService {
     userId: string,
     input: EbayBulkConversationStatus
   ): Promise<{ succeeded: string[]; failed: string[] }> {
-    await this.loadAccount(userId, input.ebayAccountId);
+    const account = await this.loadAccount(userId, input.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(input.ebayAccountId);
     const succeeded: string[] = [];
     const failed: string[] = [];
     for (let i = 0; i < input.conversationIds.length; i += EBAY_BULK_CONVERSATIONS_MAX) {
       const chunk = input.conversationIds.slice(i, i + EBAY_BULK_CONVERSATIONS_MAX);
-      const result = await this.call(() =>
+      const result = await this.call(account, () =>
         this.client.bulkUpdateStatus(token, input.type, chunk, input.status, EbayCallPriority.INTERACTIVE)
       );
       succeeded.push(...result.succeeded);
@@ -175,26 +180,28 @@ export class EbayMessagesService {
   }
 
   /**
-   * The sidebar badge. Read from the stored counters; only when the webhook is
-   * off (so nothing keeps them current) is a store whose counter is stale
-   * recounted from eBay first — best-effort, a failed recount keeps the stored
-   * value.
+   * The sidebar badge. Read from the stored counters; only when nothing keeps a
+   * store's counter current — the webhook is off, or that store has no
+   * NEW_MESSAGE subscription — is a stale counter recounted from eBay first.
+   * Best-effort and at BACKGROUND priority (the badge poll is not a seller
+   * action); a failed recount keeps the stored value.
    */
   async unreadCount(userId: string): Promise<EbayUnreadCountDto> {
     const rows = await this.db.query<UnreadAccountRow>(
-      `SELECT id, granted_scopes, unread_message_count, unread_message_synced_at
+      `SELECT id, granted_scopes, unread_message_count, unread_message_synced_at, message_subscription_id
          FROM ebay_accounts
         WHERE user_id = $1 AND status = $2
         ORDER BY created_at ASC`,
       [userId, EbayAccountStatus.ACTIVE]
     );
-    const recount = !this.notifications.isEnabled();
+    const webhookOff = !this.notifications.isEnabled();
     const byAccount: EbayUnreadCountDto['byAccount'] = [];
     for (const row of rows) {
       let unread = Number(row.unread_message_count) || 0;
-      if (recount && hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at)) {
+      const unsubscribed = webhookOff || !row.message_subscription_id;
+      if (unsubscribed && hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at)) {
         try {
-          unread = await this.refreshUnread(userId, row.id);
+          unread = await this.refreshUnread(userId, row.id, EbayCallPriority.BACKGROUND);
         } catch (error: unknown) {
           this.logger.warn(`Unread recount failed for eBay account ${row.id}: ${errorText(error)}`);
         }
@@ -204,17 +211,25 @@ export class EbayMessagesService {
     return { total: byAccount.reduce((sum, a) => sum + a.unread, 0), byAccount };
   }
 
-  /** Recounts one store's UNREAD conversations (both types) from eBay and stores the sum. */
-  async refreshUnread(userId: string, ebayAccountId: string): Promise<number> {
-    await this.loadAccount(userId, ebayAccountId);
+  /**
+   * Recounts one store's UNREAD conversations (both types) from eBay and stores
+   * the sum. INTERACTIVE when the seller opens the page; the badge's fallback
+   * recount passes BACKGROUND.
+   */
+  async refreshUnread(
+    userId: string,
+    ebayAccountId: string,
+    priority: EbayCallPriority = EbayCallPriority.INTERACTIVE
+  ): Promise<number> {
+    const account = await this.loadAccount(userId, ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(ebayAccountId);
     let unread = 0;
     for (const type of [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY]) {
-      const result = await this.call(() =>
+      const result = await this.call(account, () =>
         this.client.getConversations(
           token,
           { type, status: EbayConversationStatus.UNREAD, limit: 1, offset: 0 },
-          EbayCallPriority.INTERACTIVE
+          priority
         )
       );
       unread += result.total;
@@ -243,23 +258,30 @@ export class EbayMessagesService {
   }
 
   /**
-   * A 403 means the token lacks the scope (the row said otherwise — e.g. the
-   * grant was withdrawn on eBay's side); a 5xx or a failure with no HTTP answer
-   * is eBay being unavailable. Any other eBay 4xx is rethrown unchanged.
+   * Maps an eBay failure to a seller-facing key:
+   *  - 403 → `messagingScopeMissing` only when it really is the grant: the
+   *    store row lacks the scopes, or eBay's text says scope/permission/
+   *    authorization (e.g. the grant was withdrawn on eBay's side);
+   *  - any other 4xx (incl. other 403s) → `messagingRejected` — eBay refused
+   *    this request, not the connection;
+   *  - 429 (after the client's own retries), 5xx, a non-error status or no
+   *    HTTP answer at all → `messagingUnavailable`.
    */
-  private async call<T>(run: () => Promise<T>): Promise<T> {
+  private async call<T>(account: MessagingAccountRow, run: () => Promise<T>): Promise<T> {
     try {
       return await run();
     } catch (error: unknown) {
       if (error instanceof EbayMessageApiError) {
-        if (error.status === 403) {
+        const { status } = error;
+        if (status === 403 && (!hasMessagingScopes(account.granted_scopes) || SCOPE_ERROR_TEXT.test(error.message))) {
           throw new Error(MESSAGING_ERRORS.SCOPE_MISSING);
         }
-        if (error.status >= 500) {
-          this.logger.warn(`eBay Message API unavailable: ${error.message}`);
-          throw new Error(MESSAGING_ERRORS.UNAVAILABLE);
+        if (status >= 400 && status < 500 && status !== 429) {
+          this.logger.warn(`eBay Message API rejected a request (${status}): ${error.message}`);
+          throw new Error(MESSAGING_ERRORS.REJECTED);
         }
-        throw error;
+        this.logger.warn(`eBay Message API unavailable (${status}): ${error.message}`);
+        throw new Error(MESSAGING_ERRORS.UNAVAILABLE);
       }
       this.logger.warn(`eBay Message API call failed: ${errorText(error)}`);
       throw new Error(MESSAGING_ERRORS.UNAVAILABLE);

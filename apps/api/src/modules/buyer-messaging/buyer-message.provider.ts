@@ -43,7 +43,8 @@ export class EbayMessageApiProvider implements BuyerMessagingProvider {
       token,
       {
         otherPartyUsername: input.buyerUsername,
-        text: input.body.slice(0, EBAY_MESSAGE_MAX_LENGTH),
+        // By code point, so a cut never splits a surrogate pair (emoji).
+        text: Array.from(input.body).slice(0, EBAY_MESSAGE_MAX_LENGTH).join(''),
         referenceItemId: input.ebayItemId,
       },
       EbayCallPriority.BACKGROUND,

@@ -46,6 +46,7 @@
       "messagingScopeMissing": "أعد ربط متجر eBay لتفعيل الرسائل، فالتفويض الحالي لا يشمل المراسلة.",
       "messagingReplyNotAllowed": "لا يمكن الرد هنا على الرسائل الواردة من eBay.",
       "messagingUnavailable": "خدمة رسائل eBay غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+      "messagingRejected": "لم يقبل eBay هذا الطلب. يرجى التحقق من الرسالة والمحاولة مرة أخرى.",
       "messageTooLong": "يمكن أن تحتوي الرسالة على 2000 حرف كحد أقصى."
     },
     "onboarding": {

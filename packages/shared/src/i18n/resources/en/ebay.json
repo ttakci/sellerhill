@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Reconnect your eBay store to enable messages — the current authorization does not include messaging.",
       "messagingReplyNotAllowed": "Messages from eBay cannot be replied to here.",
       "messagingUnavailable": "eBay messaging is temporarily unavailable. Please try again.",
+      "messagingRejected": "eBay did not accept this request. Please check the message and try again.",
       "messageTooLong": "A message can be at most 2000 characters."
     },
     "onboarding": {

@@ -1,6 +1,7 @@
 // apps/api/src/modules/buyer-messaging/buyer-message.processor.ts
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { hasMessagingScopes } from '@repo/shared';
 import { DelayedError, Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -13,7 +14,10 @@ import { BuyerMessageService } from './buyer-message.service';
 import { BUYER_MESSAGE_QUEUE, BUYER_MESSAGING_DEFAULTS, BUYER_MESSAGE_TOKEN } from './buyer-messaging.constants';
 
 interface OrderCtx {
+  /** Display value for `{{buyer_username}}` only — falls back to "there". */
   buyerUsername: string;
+  /** The real eBay username the message is addressed to; null when the order has none. */
+  recipientUsername: string | null;
   itemTitle: string;
   orderId: string;
   trackingNumber?: string;
@@ -121,13 +125,64 @@ export class BuyerMessageProcessor extends WorkerHost {
       return;
     }
 
+    // 3b. Never address a placeholder. "there" is template text; sending to it
+    //     would message whichever eBay member happens to own that username.
+    const recipientUsername = ctx.recipientUsername;
+    if (!recipientUsername) {
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'skipped',
+        templateKind: tpl.kind,
+        templateRef: tpl.ref,
+        error: 'no_buyer_username',
+      });
+      return;
+    }
+
+    // 3c. A store connected before the messaging scopes existed cannot send.
+    //     eBay would refuse every attempt, so this is a permanent skip — no
+    //     provider call and no BullMQ retry.
+    let grantedScopes: string[] | null;
+    try {
+      grantedScopes = await this.loadGrantedScopes(ebayAccountId);
+    } catch (err) {
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'failed',
+        templateKind: tpl.kind,
+        templateRef: tpl.ref,
+        versionHash: tpl.versionHash,
+        error: redactForLog((err as Error).message),
+      });
+      throw err;
+    }
+    if (!hasMessagingScopes(grantedScopes)) {
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'skipped',
+        templateKind: tpl.kind,
+        templateRef: tpl.ref,
+        error: 'messaging_scope_missing',
+      });
+      return;
+    }
+
     try {
       const body = renderTemplate(tpl.body, ctx);
       const result = await this.provider.sendMessage({
         ebayAccountId,
         orderId: ctx.orderId,
         ebayItemId: ctx.ebayItemId,
-        buyerUsername: ctx.buyerUsername,
+        buyerUsername: recipientUsername,
         body,
       });
       await this.recordLog({
@@ -174,7 +229,7 @@ export class BuyerMessageProcessor extends WorkerHost {
    */
   private async loadOrderCtx(ebayOrderId: string, ebayAccountId: string): Promise<OrderCtx | null> {
     const rows = await this.db.query<{
-      buyer_username: string;
+      buyer_username: string | null;
       item_title: string;
       order_id: string;
       tracking_number: string | null;
@@ -207,8 +262,10 @@ export class BuyerMessageProcessor extends WorkerHost {
     // eBay-specific enum codes ('Amazon_Logistics', 'UPS', ...) which aren't
     // useful for a buyer-facing {{carrier}} placeholder. {{carrier}} is a
     // nice-to-have; not load-bearing.
+    const recipientUsername = r.buyer_username?.trim() || null;
     return {
-      buyerUsername: r.buyer_username || 'there',
+      buyerUsername: recipientUsername ?? 'there',
+      recipientUsername,
       itemTitle: r.item_title,
       orderId: r.order_id,
       trackingNumber: r.tracking_number ?? undefined,
@@ -216,6 +273,15 @@ export class BuyerMessageProcessor extends WorkerHost {
       storeName: r.store_name || 'our store',
       ebayItemId: r.legacy_item_id ?? undefined,
     };
+  }
+
+  /** The scopes the store was granted at its last consent (migration 125). */
+  private async loadGrantedScopes(ebayAccountId: string): Promise<string[] | null> {
+    const rows = await this.db.query<{ granted_scopes: string[] | null }>(
+      'SELECT granted_scopes FROM ebay_accounts WHERE id = $1',
+      [ebayAccountId],
+    );
+    return rows[0]?.granted_scopes ?? null;
   }
 
   /**

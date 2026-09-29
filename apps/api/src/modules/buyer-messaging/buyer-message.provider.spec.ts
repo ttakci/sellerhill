@@ -85,6 +85,23 @@ describe('EbayMessageApiProvider', () => {
     expect(sentBody.text).toHaveLength(2000);
   });
 
+  it('truncates by code point, never splitting a surrogate pair', async () => {
+    const client = makeClient();
+    client.sendMessage.mockResolvedValue({ messageId: 'm4' });
+    const ebay = makeEbay();
+    ebay.getAccountAccessToken.mockResolvedValue('tok');
+    const provider = new EbayMessageApiProvider(client as never, ebay as never);
+    // 1999 ASCII chars then emoji: a UTF-16 slice at 2000 would keep half of the first one.
+    const body = 'x'.repeat(1999) + '\u{1F600}\u{1F600}';
+
+    await provider.sendMessage({ ebayAccountId: 'a', orderId: 'o', buyerUsername: 'buyer', body });
+
+    const [, sentBody] = client.sendMessage.mock.calls[0];
+    expect(Array.from(sentBody.text)).toHaveLength(2000);
+    expect(sentBody.text).toBe('x'.repeat(1999) + '\u{1F600}');
+    expect(sentBody.text).not.toMatch(/[\uD800-\uDBFF]$/);
+  });
+
   it('propagates errors from the client so the processor can redact + retry', async () => {
     const client = makeClient();
     client.sendMessage.mockRejectedValue(new Error('eBay Message API 500'));

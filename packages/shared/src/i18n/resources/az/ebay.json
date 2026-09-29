@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Mesajları aktivləşdirmək üçün eBay mağazanızı yenidən qoşun — cari icazə mesajlaşmanı əhatə etmir.",
       "messagingReplyNotAllowed": "eBay-dən gələn mesajlara burada cavab vermək olmaz.",
       "messagingUnavailable": "eBay mesajlaşması müvəqqəti olaraq əlçatan deyil. Zəhmət olmasa yenidən cəhd edin.",
+      "messagingRejected": "eBay bu sorğunu qəbul etmədi. Mesajı yoxlayıb yenidən cəhd edin.",
       "messageTooLong": "Mesaj ən çoxu 2000 simvol ola bilər."
     },
     "onboarding": {

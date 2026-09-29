@@ -46,6 +46,7 @@
       "messagingScopeMissing": "请重新连接您的 eBay 店铺以启用消息——当前授权不包含消息功能。",
       "messagingReplyNotAllowed": "无法在此回复来自 eBay 的消息。",
       "messagingUnavailable": "eBay 消息服务暂时不可用，请重试。",
+      "messagingRejected": "eBay 未接受此请求，请检查消息后重试。",
       "messageTooLong": "一条消息最多 2000 个字符。"
     },
     "onboarding": {

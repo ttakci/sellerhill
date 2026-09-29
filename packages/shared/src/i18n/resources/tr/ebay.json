@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Mesajlar için eBay mağazanızı yeniden bağlayın — mevcut yetki mesajlaşmayı kapsamıyor.",
       "messagingReplyNotAllowed": "eBay'den gelen mesajlar buradan yanıtlanamaz.",
       "messagingUnavailable": "eBay mesajlaşma geçici olarak kullanılamıyor. Lütfen tekrar deneyin.",
+      "messagingRejected": "eBay bu isteği kabul etmedi. Mesajı kontrol edip tekrar deneyin.",
       "messageTooLong": "Bir mesaj en fazla 2000 karakter olabilir."
     },
     "onboarding": {

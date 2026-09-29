@@ -293,8 +293,8 @@ describe('EbayMessagesService', () => {
       const { service, db, client, notifications } = build();
       notifications.isEnabled.mockReturnValue(true);
       db.query.mockResolvedValue([
-        { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 2, unread_message_synced_at: null },
-        { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 5, unread_message_synced_at: null },
+        { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 2, unread_message_synced_at: null, message_subscription_id: 'sub-a' },
+        { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 5, unread_message_synced_at: null, message_subscription_id: 'sub-b' },
       ]);
 
       const result = await service.unreadCount(USER);
@@ -308,8 +308,44 @@ describe('EbayMessagesService', () => {
       });
       expect(client.getConversations).not.toHaveBeenCalled();
       const [sql, params] = db.query.mock.calls[0] as [string, unknown[]];
+      expect(sql).toContain('message_subscription_id');
       expect(sql).toContain('WHERE user_id = $1 AND status = $2');
       expect(params).toEqual([USER, EbayAccountStatus.ACTIVE]);
+    });
+
+    it('recounts a stale store with no NEW_MESSAGE subscription even while notifications are enabled, at BACKGROUND priority', async () => {
+      const { service, db, client, notifications } = build();
+      notifications.isEnabled.mockReturnValue(true);
+      const old = new Date(Date.now() - 60 * 60 * 1000);
+      db.query.mockImplementation((sql: string) => {
+        if (/WHERE user_id = \$1 AND status = \$2/.test(sql)) {
+          return Promise.resolve([
+            { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 9, unread_message_synced_at: old, message_subscription_id: null },
+            { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 4, unread_message_synced_at: old, message_subscription_id: 'sub-b' },
+          ]);
+        }
+        if (/WHERE id = \$1 AND user_id = \$2/.test(sql)) {
+          return Promise.resolve([accountRow()]);
+        }
+        return Promise.resolve([]);
+      });
+      client.getConversations
+        .mockResolvedValueOnce({ items: [], total: 2 })
+        .mockResolvedValueOnce({ items: [], total: 0 });
+
+      const result = await service.unreadCount(USER);
+
+      expect(client.getConversations).toHaveBeenCalledTimes(2);
+      for (const call of client.getConversations.mock.calls as unknown[][]) {
+        expect(call[2]).toBe(EbayCallPriority.BACKGROUND);
+      }
+      expect(result).toEqual({
+        total: 6,
+        byAccount: [
+          { ebayAccountId: ACCOUNT, unread: 2 },
+          { ebayAccountId: ACCOUNT_B, unread: 4 },
+        ],
+      });
     });
 
     it('recounts a never-synced store from eBay first when notifications are off', async () => {
@@ -412,21 +448,39 @@ describe('EbayMessagesService', () => {
       await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingUnavailable');
     });
 
-    it('maps an eBay 403 to messagingScopeMissing', async () => {
+    it.each(['insufficient scope', 'Insufficient permissions to fulfill the request', 'Not authorized'])(
+      'maps an eBay 403 about scopes/permissions (%s) to messagingScopeMissing',
+      async (text) => {
+        const { service, db, client } = build();
+        answerAccount(db, accountRow());
+        client.getConversations.mockRejectedValue(new EbayMessageApiError(403, [1100], text));
+
+        await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingScopeMissing');
+      }
+    );
+
+    it('maps any other 403 to messagingRejected', async () => {
       const { service, db, client } = build();
       answerAccount(db, accountRow());
-      client.getConversations.mockRejectedValue(new EbayMessageApiError(403, [1100], 'insufficient scope'));
+      client.getConversations.mockRejectedValue(new EbayMessageApiError(403, [355010], 'The conversation is closed'));
 
-      await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingScopeMissing');
+      await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingRejected');
     });
 
-    it('rethrows any other eBay 4xx unchanged', async () => {
+    it('maps an eBay 429 (rate limit, after the client retries) to messagingUnavailable, not a rejection', async () => {
       const { service, db, client } = build();
       answerAccount(db, accountRow());
-      const error = new EbayMessageApiError(400, [355001], 'bad input');
-      client.getConversations.mockRejectedValue(error);
+      client.getConversations.mockRejectedValue(new EbayMessageApiError(429, [], 'Too many requests'));
 
-      await expect(service.listConversations(USER, listQuery)).rejects.toBe(error);
+      await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingUnavailable');
+    });
+
+    it.each([400, 404, 409])('maps an eBay %i to messagingRejected', async (status) => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.getConversations.mockRejectedValue(new EbayMessageApiError(status, [355001], 'bad input'));
+
+      await expect(service.listConversations(USER, listQuery)).rejects.toThrow('ebay.errors.messagingRejected');
     });
   });
 });

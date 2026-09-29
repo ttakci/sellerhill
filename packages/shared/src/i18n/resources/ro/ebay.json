@@ -46,6 +46,7 @@
       "messagingScopeMissing": "Reconectați magazinul eBay pentru a activa mesajele — autorizarea actuală nu include mesageria.",
       "messagingReplyNotAllowed": "La mesajele de la eBay nu se poate răspunde de aici.",
       "messagingUnavailable": "Mesageria eBay este temporar indisponibilă. Încercați din nou.",
+      "messagingRejected": "eBay nu a acceptat această solicitare. Verificați mesajul și încercați din nou.",
       "messageTooLong": "Un mesaj poate avea cel mult 2000 de caractere."
     },
     "onboarding": {
