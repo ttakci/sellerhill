@@ -97,6 +97,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   roiLabel,
   totalAmazonCost,
   amazonTotalBeforeTax,
+  buyerPhoneDisplay,
   onBack,
   onCopyAddress,
   onOpenLinkAmazon,
@@ -401,16 +402,26 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                         copiedLabel={t('orders.detail.copied')}
                       />
                     </Text>
+                    {/* The buyer's phone belongs with the ship-to block, the
+                        way eBay's own order page prints it — it is part of the
+                        label, not of "contact". */}
+                    {buyerPhoneDisplay ? (
+                      <S.AddressPhoneRow>
+                        <Icon name="phone" size={14} />
+                        <Text variant="body-sm" color="text.secondary">
+                          <CopyableText
+                            value={buyerPhoneDisplay}
+                            label={t('orders.detail.copyPhone')}
+                            copiedLabel={t('orders.detail.copied')}
+                          />
+                        </Text>
+                      </S.AddressPhoneRow>
+                    ) : null}
                   </S.AddressBlock>
                 ) : null}
               </MetaBlock>
               <MetaBlock icon="mail" label={t('orders.detail.contact')}>
                 <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
-                {order.buyerPhone ? (
-                  <Text variant="body-sm" color="text.secondary">
-                    {order.buyerPhone}
-                  </Text>
-                ) : null}
               </MetaBlock>
               <Meta icon="box" label={t('orders.detail.quantity')}>
                 <Text variant="body" weight="semibold" numeric>
@@ -492,7 +503,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   −{formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}
                 </Text>
               </Meta>
-              {order.adFee > 0 ? (
+              {/* `adFee` is the settings group's configured FIXED fee — an
+                  estimate, not a charge eBay reported. eBay's own figure above
+                  already contains its per-order fixed portion, so listing this
+                  beside it double-counted and the rows stopped adding up to the
+                  earnings. Shown only while eBay has not reported the real fee. */}
+              {(order.ebayMarketplaceFee === null || order.ebayMarketplaceFee === undefined) && order.adFee > 0 ? (
                 <Meta icon="megaphone" label={t('orders.detail.adFee')}>
                   <Text variant="body" weight="semibold" numeric>
                     −{formatCurrency(order.adFee)}

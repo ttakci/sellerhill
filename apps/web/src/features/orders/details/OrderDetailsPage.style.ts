@@ -286,6 +286,14 @@ export const AddressBlock = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
+/** Phone line under the ship-to address: icon + copyable number, on one row. */
+export const AddressPhoneRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  margin-top: ${tkn('spacing.2xs')};
+`;
+
 export const MobileActionBar = styled.div`
   position: fixed;
   left: 0;

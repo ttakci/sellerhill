@@ -11,6 +11,8 @@ export interface OrderDetailsPageProps {
   totalAmazonCost: number;
   /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */
   amazonTotalBeforeTax: number;
+  /** The buyer's phone as eBay prints it (`+1 843-408-1812`), or null. */
+  buyerPhoneDisplay: string | null;
   onBack: () => void;
   onCopyAddress: () => void;
   onOpenLinkAmazon: () => void;

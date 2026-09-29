@@ -194,6 +194,8 @@
       "copyState": "复制州/省",
       "copyZip": "复制邮政编码",
       "copyCountry": "复制国家/地区",
+
+      "copyPhone": "复制电话号码",
       "copied": "已复制",
       "amazonCosts": "Amazon 订单汇总",
       "purchasePrice": "采购价",

@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import { formatCurrency, formatDate, formatPhoneNumber, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -82,6 +82,13 @@ export const OrderDetailsPageContainer: React.FC = () => {
       return 0;
     }
     return order.purchasePrice + (order.amazonShipping || 0);
+  }, [order]);
+
+  const buyerPhoneDisplay = useMemo(() => {
+    if (!order?.buyerPhone) {
+      return null;
+    }
+    return formatPhoneNumber(order.buyerPhone, order.shippingAddress?.country) || null;
   }, [order]);
 
   const roiLabel = useMemo(() => {
@@ -194,6 +201,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
         roiLabel={roiLabel}
         totalAmazonCost={totalAmazonCost}
         amazonTotalBeforeTax={amazonTotalBeforeTax}
+        buyerPhoneDisplay={buyerPhoneDisplay}
         onBack={handleBack}
         onCopyAddress={handleCopyAddress}
         onOpenLinkAmazon={() => setIsLinkModalOpen(true)}

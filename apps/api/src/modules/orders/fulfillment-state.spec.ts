@@ -17,7 +17,7 @@ describe('deriveFulfillmentState', () => {
         ...base,
         autoFulfillStatus: AutoFulfillStatus.PLACED,
         amazonOrderId: '123-4567890-1234567',
-      }),
+      })
     ).toBe(OrderFulfillmentState.PURCHASED);
   });
 
@@ -30,7 +30,7 @@ describe('deriveFulfillmentState', () => {
         autoFulfillStatus: AutoFulfillStatus.PLACED,
         amazonOrderId: '123-4567890-1234567',
         amazonCancelledAt: '2026-07-30T00:00:00Z',
-      }),
+      })
     ).toBe(OrderFulfillmentState.AMAZON_CANCELLED);
   });
 
@@ -41,26 +41,46 @@ describe('deriveFulfillmentState', () => {
         autoFulfillStatus: AutoFulfillStatus.PLACED,
         amazonOrderId: 'SIM-123-4567890-1234567',
         isSimulated: true,
-      }),
+      })
     ).toBe(OrderFulfillmentState.SIMULATED);
   });
 
   it('maps blocked and failed to action required', () => {
+    expect(deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.BLOCKED })).toBe(
+      OrderFulfillmentState.ACTION_REQUIRED
+    );
+    expect(deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.FAILED })).toBe(
+      OrderFulfillmentState.ACTION_REQUIRED
+    );
+  });
+
+  it('calls a blocked order manual once the seller linked an Amazon order by hand', () => {
+    // First live order, 2026-09-29: auto-fulfill blocked on `address`, the
+    // seller bought on Amazon and linked the order — and it stayed "Action
+    // required" in the list and in the Action Center with nothing left to do.
     expect(
-      deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.BLOCKED }),
-    ).toBe(OrderFulfillmentState.ACTION_REQUIRED);
+      deriveFulfillmentState({
+        ...base,
+        autoFulfillStatus: AutoFulfillStatus.BLOCKED,
+        amazonOrderId: '113-0158186-6357035',
+      })
+    ).toBe(OrderFulfillmentState.MANUAL);
     expect(
-      deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.FAILED }),
-    ).toBe(OrderFulfillmentState.ACTION_REQUIRED);
+      deriveFulfillmentState({
+        ...base,
+        autoFulfillStatus: AutoFulfillStatus.FAILED,
+        amazonOrderId: '113-0158186-6357035',
+      })
+    ).toBe(OrderFulfillmentState.MANUAL);
   });
 
   it('treats queued and running as in progress', () => {
-    expect(
-      deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.PENDING }),
-    ).toBe(OrderFulfillmentState.IN_PROGRESS);
-    expect(
-      deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.RUNNING }),
-    ).toBe(OrderFulfillmentState.IN_PROGRESS);
+    expect(deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.PENDING })).toBe(
+      OrderFulfillmentState.IN_PROGRESS
+    );
+    expect(deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.RUNNING })).toBe(
+      OrderFulfillmentState.IN_PROGRESS
+    );
   });
 
   it('calls a skipped order manual once the seller bought it themselves', () => {
@@ -69,17 +89,17 @@ describe('deriveFulfillmentState', () => {
         ...base,
         autoFulfillStatus: AutoFulfillStatus.SKIPPED,
         amazonOrderId: '123-4567890-1234567',
-      }),
+      })
     ).toBe(OrderFulfillmentState.MANUAL);
-    expect(
-      deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.SKIPPED }),
-    ).toBe(OrderFulfillmentState.NOT_AUTOMATED);
+    expect(deriveFulfillmentState({ ...base, autoFulfillStatus: AutoFulfillStatus.SKIPPED })).toBe(
+      OrderFulfillmentState.NOT_AUTOMATED
+    );
   });
 
   it('reports a manual Amazon link with no automation record', () => {
-    expect(
-      deriveFulfillmentState({ ...base, amazonOrderId: '123-4567890-1234567' }),
-    ).toBe(OrderFulfillmentState.MANUAL);
+    expect(deriveFulfillmentState({ ...base, amazonOrderId: '123-4567890-1234567' })).toBe(
+      OrderFulfillmentState.MANUAL
+    );
   });
 
   it('reports an untouched order as not automated', () => {
@@ -87,9 +107,7 @@ describe('deriveFulfillmentState', () => {
   });
 
   it('treats an already-shipped order as manually handled', () => {
-    expect(deriveFulfillmentState({ status: OrderStatus.SHIPPED })).toBe(
-      OrderFulfillmentState.MANUAL,
-    );
+    expect(deriveFulfillmentState({ status: OrderStatus.SHIPPED })).toBe(OrderFulfillmentState.MANUAL);
   });
 
   describe('a settled sale is never action-required', () => {
@@ -104,7 +122,7 @@ describe('deriveFulfillmentState', () => {
           status: OrderStatus.COMPLETED,
           amazonOrderId: '123-4567890-1234567',
           amazonCancelledAt: '2026-07-30T00:00:00Z',
-        }),
+        })
       ).toBe(OrderFulfillmentState.MANUAL);
     });
 
@@ -113,13 +131,13 @@ describe('deriveFulfillmentState', () => {
         deriveFulfillmentState({
           status: OrderStatus.COMPLETED,
           autoFulfillStatus: AutoFulfillStatus.BLOCKED,
-        }),
+        })
       ).toBe(OrderFulfillmentState.MANUAL);
       expect(
         deriveFulfillmentState({
           status: OrderStatus.COMPLETED,
           autoFulfillStatus: AutoFulfillStatus.FAILED,
-        }),
+        })
       ).toBe(OrderFulfillmentState.MANUAL);
     });
 
@@ -130,13 +148,13 @@ describe('deriveFulfillmentState', () => {
         deriveFulfillmentState({
           status: OrderStatus.SHIPPED,
           amazonCancelledAt: '2026-07-30T00:00:00Z',
-        }),
+        })
       ).toBe(OrderFulfillmentState.AMAZON_CANCELLED);
       expect(
         deriveFulfillmentState({
           status: OrderStatus.SHIPPED,
           autoFulfillStatus: AutoFulfillStatus.BLOCKED,
-        }),
+        })
       ).toBe(OrderFulfillmentState.ACTION_REQUIRED);
     });
 
@@ -145,7 +163,7 @@ describe('deriveFulfillmentState', () => {
         deriveFulfillmentState({
           ...base,
           amazonCancelledAt: '2026-07-30T00:00:00Z',
-        }),
+        })
       ).toBe(OrderFulfillmentState.AMAZON_CANCELLED);
     });
   });

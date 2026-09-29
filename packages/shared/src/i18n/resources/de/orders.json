@@ -194,6 +194,8 @@
       "copyState": "Bundesland/Region kopieren",
       "copyZip": "Postleitzahl kopieren",
       "copyCountry": "Land/Region kopieren",
+
+      "copyPhone": "Telefonnummer kopieren",
       "copied": "Kopiert",
       "amazonCosts": "Amazon-Bestellübersicht",
       "purchasePrice": "Einkaufspreis",

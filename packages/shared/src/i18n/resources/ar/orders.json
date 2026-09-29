@@ -194,6 +194,8 @@
       "copyState": "نسخ الجهة/المقاطعة",
       "copyZip": "نسخ الرمز البريدي",
       "copyCountry": "نسخ البلد/المنطقة",
+
+      "copyPhone": "نسخ رقم الهاتف",
       "copied": "تم النسخ",
       "amazonCosts": "ملخص طلب Amazon",
       "purchasePrice": "سعر الشراء",

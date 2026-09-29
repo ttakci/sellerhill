@@ -194,6 +194,8 @@
       "copyState": "Copy state/province",
       "copyZip": "Copy zip code",
       "copyCountry": "Copy country/region",
+
+      "copyPhone": "Copy phone",
       "copied": "Copied",
       "amazonCosts": "Amazon Order Summary",
       "purchasePrice": "Purchase Price",

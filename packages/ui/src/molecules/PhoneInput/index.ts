@@ -6,6 +6,7 @@ export {
   flagEmoji,
   regionName,
   describe as describePhoneNumber,
+  formatPhoneNumber,
   isValidPhone,
   toE164,
   DEFAULT_COUNTRY,
