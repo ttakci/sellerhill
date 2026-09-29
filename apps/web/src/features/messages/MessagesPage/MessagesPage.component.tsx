@@ -100,8 +100,8 @@ export const MessagesPageComponent = ({
         />
       </S.StateCard>
     ) : (
-      <S.Layout $threadOpen={threadOpen}>
-        <S.RailPane data-pane="rail" padding="sm">
+      <S.Shell $threadOpen={threadOpen}>
+        <S.RailPane data-pane="rail">
           {folderGroups.map((group) => (
             <S.RailGroup key={group.key} aria-label={group.label}>
               <S.RailGroupLabel>
@@ -128,12 +128,12 @@ export const MessagesPageComponent = ({
         </S.RailPane>
 
         <S.ListColumn data-pane="list">
-          <S.Pane>
+          <S.ListScroll>
             <ConversationList {...listProps} />
-          </S.Pane>
+          </S.ListScroll>
           {pagination && (
             <TablePagination
-              variant="detached"
+              variant="footer"
               count={pagination.count}
               page={pagination.page}
               rowsPerPage={pagination.rowsPerPage}
@@ -146,10 +146,10 @@ export const MessagesPageComponent = ({
           )}
         </S.ListColumn>
 
-        <S.Pane data-pane="thread">
+        <S.ThreadPane data-pane="thread">
           <ConversationThread {...threadProps} />
-        </S.Pane>
-      </S.Layout>
+        </S.ThreadPane>
+      </S.Shell>
     )}
   </S.Container>
 );

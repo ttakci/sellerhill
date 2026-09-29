@@ -18,6 +18,7 @@ export const ConversationThread = ({
   isLoading,
   title,
   otherParty,
+  avatarLabel,
   referenceId,
   messages,
   actions,
@@ -42,6 +43,11 @@ export const ConversationThread = ({
   return (
     <S.Wrapper>
       <S.Header>
+        <S.HeaderAvatar aria-hidden>
+          <Text variant="body-sm" weight="semibold" color="brand.primary">
+            {avatarLabel}
+          </Text>
+        </S.HeaderAvatar>
         <S.HeaderText>
           <Text variant="h4" weight="semibold" truncate>
             {title}
