@@ -5,7 +5,8 @@
  * and the tracking webhook. eBay calls this with no SellerHill session; the
  * ECDSA `X-EBAY-SIGNATURE` is the authentication, verified against the RAW
  * request bytes before anything in the body is trusted. The GET challenge is
- * `@SkipThrottle` (eBay validates once); the POST carries its own generous
+ * skipped on every named tracker (eBay validates once — a bare `@SkipThrottle()`
+ * only skips the `default` tracker, which this app does not define); the POST carries its own generous
  * `@Throttle` — well above eBay's retry burst, but still a ceiling, since the
  * route is public and every request costs a raw-capture row.
  *
@@ -83,7 +84,7 @@ export class EbayNotificationWebhookController {
   ) {}
 
   @Get()
-  @SkipThrottle()
+  @SkipThrottle({ short: true, medium: true, long: true })
   @ApiOperation({ summary: 'eBay platform notifications — destination challenge validation' })
   handleChallenge(@Query('challenge_code') challengeCode?: string): { challengeResponse: string } {
     if (!challengeCode || typeof challengeCode !== 'string') {

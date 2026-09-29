@@ -13,9 +13,15 @@ import {
   parseNewMessageData,
 } from './ebay-notification.helpers';
 
-/** How a delivered notification was booked. `test` is reserved; eBay's test payload is an ordinary envelope. */
+/**
+ * How a delivered notification was booked. `test` is reserved; eBay's test
+ * payload is an ordinary envelope. A `counted` row is later rewritten to
+ * `counted_read` by `EbayMessagesService.setRead(read: true)`, which closes that
+ * conversation's counting window so its next unread message counts again.
+ */
 export type NotificationDeliveryOutcomeKind =
   | 'counted'
+  | 'counted_read'
   | 'counted_same_conversation'
   | 'duplicate'
   | 'no_account'

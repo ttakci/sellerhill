@@ -236,6 +236,34 @@ describe('EbayMessagesService', () => {
       expect(update[1]).toEqual([ACCOUNT]);
     });
 
+    it('on read, retires the conversation\'s counted webhook events so its next buyer reply counts again', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.updateRead.mockResolvedValue(undefined);
+
+      await service.setRead(USER, 'c1', { ebayAccountId: ACCOUNT, type: EbayConversationType.FROM_MEMBERS, read: true });
+
+      const retire = db.query.mock.calls.find(([sql]) => /UPDATE ebay_notification_events/.test(sql as string)) as [string, unknown[]];
+      expect(retire[0]).toContain(
+        "UPDATE ebay_notification_events SET outcome = 'counted_read' WHERE ebay_account_id = $1 AND conversation_id = $2 AND outcome = 'counted'"
+      );
+      expect(retire[1]).toEqual([ACCOUNT, 'c1']);
+    });
+
+    it('does not retire counted events when marking unread, or when eBay refuses the read', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.updateRead.mockResolvedValue(undefined);
+
+      await service.setRead(USER, 'c1', { ebayAccountId: ACCOUNT, type: EbayConversationType.FROM_MEMBERS, read: false });
+      client.updateRead.mockRejectedValue(new EbayMessageApiError(503, [], 'down'));
+      await expect(
+        service.setRead(USER, 'c1', { ebayAccountId: ACCOUNT, type: EbayConversationType.FROM_MEMBERS, read: true })
+      ).rejects.toThrow('ebay.errors.messagingUnavailable');
+
+      expect(db.query.mock.calls.some(([sql]) => /ebay_notification_events/.test(sql as string))).toBe(false);
+    });
+
     it('marks unread and increments the counter', async () => {
       const { service, db, client } = build();
       answerAccount(db, accountRow());

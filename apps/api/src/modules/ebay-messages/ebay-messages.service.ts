@@ -154,6 +154,15 @@ export class EbayMessagesService {
       ? 'unread_message_count = GREATEST(0, unread_message_count - 1)'
       : 'unread_message_count = unread_message_count + 1';
     await this.db.query(`UPDATE ebay_accounts SET ${adjust} WHERE id = $1`, [input.ebayAccountId]);
+    if (input.read) {
+      // Close this conversation's counting window: the webhook adds +1 only
+      // while no 'counted' event exists for it, so without this the buyer's
+      // next reply after an in-app read would never reach the badge.
+      await this.db.query(
+        "UPDATE ebay_notification_events SET outcome = 'counted_read' WHERE ebay_account_id = $1 AND conversation_id = $2 AND outcome = 'counted'",
+        [input.ebayAccountId, conversationId]
+      );
+    }
   }
 
   /**
