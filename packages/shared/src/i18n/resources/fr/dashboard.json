@@ -87,7 +87,11 @@
       "estimatedLabel": "Estimé",
       "estimatedTooltip": "Les commandes en attente d'exécution Amazon utilisent un coût estimé (taxe Amazon au taux configuré de {{rate}} %).",
       "uncostedLabel": "Chiffre d'affaires sans coût",
-      "uncostedTooltip": "Ventes dont le coût Amazon n'a pas encore pu être déterminé — chiffre d'affaires uniquement, aucun profit sous-entendu."
+      "uncostedTooltip": "Ventes dont le coût Amazon n'a pas encore pu être déterminé — chiffre d'affaires uniquement, aucun profit sous-entendu.",
+      "untrackedExcludedLabel_one": "{{count}} commande non suivie exclue",
+      "untrackedExcludedLabel_many": "{{count}} commandes non suivies exclues",
+      "untrackedExcludedLabel_other": "{{count}} commandes non suivies exclues",
+      "untrackedExcludedTooltip": "Les commandes sans annonce SellerHill correspondante sont exclues de tous les chiffres de ce tableau de bord. Elles restent visibles sur la page Commandes sous « Non suivie » ; importez l’annonce pour les inclure."
     }
   }
 }

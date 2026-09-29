@@ -858,6 +858,12 @@ function aggregate(orders: OrderDto[], trend: number | null, profitTrend: number
   const m: PeriodMetricsDto = { ...EMPTY_METRICS, trend, profitTrend };
 
   for (const o of orders) {
+    // Mirrors the API: an untracked order (no SellerHill listing) is excluded
+    // from every figure and only counted, so the card can say it was left out.
+    if (o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED) {
+      m.ordersUntracked += 1;
+      continue;
+    }
     m.sales = round2(m.sales + o.saleTotal);
     m.orders += 1;
     m.units += o.product?.quantity ?? 1;
@@ -875,10 +881,6 @@ function aggregate(orders: OrderDto[], trend: number | null, profitTrend: number
         break;
       case OrderCostCaptureStatus.PROVISIONAL:
         m.profitProvisional = round2(m.profitProvisional + o.netProfit);
-        break;
-      case OrderCostCaptureStatus.UNTRACKED:
-        m.revenueUncosted = round2(m.revenueUncosted + o.saleTotal);
-        m.ordersUntracked += 1;
         break;
       default:
         m.revenueUncosted = round2(m.revenueUncosted + o.saleTotal);

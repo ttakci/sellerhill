@@ -79,6 +79,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
     ebayAccountId: storeFilter,
   });
 
+  // Tracked only — the dashboard describes the business SellerHill manages,
+  // and the period cards are scoped the same way, so the carousel cannot show
+  // an order the card above it did not count.
   const { data: ordersPage } = useGetOrdersQuery({
     page: 1,
     limit: CAROUSEL_LIMIT,
@@ -87,6 +90,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
     sortBy: 'order_date',
     sortOrder: 'desc',
     ebayAccountId: storeFilter,
+    isTracked: true,
   });
 
   const listings = listingsPage?.items ?? [];
@@ -126,8 +130,10 @@ export const DashboardPageContainer = (): React.ReactElement => {
     [localeNavigate, buildRangeParams],
   );
 
+  // `tracking=tracked` mirrors the carousel's `isTracked: true`, so "view all"
+  // opens the same set of orders the dashboard counted.
   const handleOrdersViewAll = useCallback(
-    () => localeNavigate(`/orders?${buildRangeParams('dateFrom', 'dateTo')}`),
+    () => localeNavigate(`/orders?${buildRangeParams('dateFrom', 'dateTo')}&tracking=tracked`),
     [localeNavigate, buildRangeParams],
   );
 
@@ -165,6 +171,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
       estimatedTooltip: t('dashboard.profit.estimatedTooltip', { rate: amazonTaxRate }),
       uncostedLabel: t('dashboard.profit.uncostedLabel'),
       uncostedTooltip: t('dashboard.profit.uncostedTooltip'),
+      untrackedExcludedLabel: (count: number) =>
+        t('dashboard.profit.untrackedExcludedLabel', { count }),
+      untrackedExcludedTooltip: t('dashboard.profit.untrackedExcludedTooltip'),
     }),
     [t, amazonTaxRate],
   );

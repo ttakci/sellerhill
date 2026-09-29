@@ -29,6 +29,7 @@ export const PeriodCardComponent = ({
   profitPositive,
   hasEstimated,
   hasUncosted,
+  hasUntrackedExcluded,
 }: PeriodCardComponentProps): React.ReactElement => (
   <S.Root
     variant="bordered"
@@ -106,7 +107,7 @@ export const PeriodCardComponent = ({
         </S.ValueRow>
       </S.Block>
 
-      {(hasEstimated || hasUncosted) && (
+      {(hasEstimated || hasUncosted || hasUntrackedExcluded) && (
         <S.NoteRow>
           {hasEstimated && (
             <Tooltip content={labels.estimatedTooltip} position="top" variant="dark">
@@ -128,6 +129,15 @@ export const PeriodCardComponent = ({
                 </Text>
                 <Text variant="caption" weight="semibold" color="text.secondary">
                   {formatters.currency(metrics.revenueUncosted)}
+                </Text>
+              </S.NoteChip>
+            </Tooltip>
+          )}
+          {hasUntrackedExcluded && (
+            <Tooltip content={labels.untrackedExcludedTooltip} position="top" variant="dark">
+              <S.NoteChip $tone="neutral">
+                <Text variant="caption" color="text.secondary">
+                  {labels.untrackedExcludedLabel(metrics.ordersUntracked)}
                 </Text>
               </S.NoteChip>
             </Tooltip>

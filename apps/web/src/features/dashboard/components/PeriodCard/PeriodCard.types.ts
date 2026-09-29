@@ -29,6 +29,9 @@ export interface PeriodCardLabels {
   estimatedTooltip: string;
   uncostedLabel: string;
   uncostedTooltip: string;
+  /** "{{count}} untracked excluded" — receives `metrics.ordersUntracked`. */
+  untrackedExcludedLabel: (count: number) => string;
+  untrackedExcludedTooltip: string;
 }
 
 export interface PeriodCardContainerProps {
@@ -54,4 +57,5 @@ export interface PeriodCardComponentProps extends PeriodCardContainerProps {
   profitPositive: boolean;
   hasEstimated: boolean;
   hasUncosted: boolean;
+  hasUntrackedExcluded: boolean;
 }

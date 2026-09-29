@@ -249,6 +249,9 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
       (o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED || o.amazonCancelledAt
     );
   }
+  if (params.tracked === 'true' || params.tracked === 'false') {
+    rows = rows.filter((o) => o.isTracked === (params.tracked === 'true'));
+  }
   if (params.ebayAccountId) {
     // Sample orders are spread across both demo stores by listing index.
     rows = rows.filter((_, i) =>
