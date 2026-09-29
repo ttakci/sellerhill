@@ -276,9 +276,13 @@ export class EbayService implements OnModuleInit {
     );
 
     // Check if this seller account is already connected. `(seller_id,
-    // marketplace_id)` is UNIQUE, so at most one row can exist — and a
-    // previously DISCONNECTED row is the one case we reactivate instead of
-    // refusing (a plain INSERT would violate that constraint).
+    // marketplace_id)` is UNIQUE, so at most one row can exist. When it
+    // belongs to THIS user the callback is a RE-CONSENT, whatever the row's
+    // status — a disconnected store coming back, or an active store granting
+    // the scopes the app requests today (the Messages page's "Reconnect"
+    // button sends an already-connected seller through eBay consent). Both
+    // adopt the existing row below; a plain INSERT would violate the
+    // constraint.
     const existingAccounts = await this.databaseService.query<
       Pick<EbayAccountEntity, 'id' | 'user_id' | 'status'>
     >(
@@ -289,10 +293,11 @@ export class EbayService implements OnModuleInit {
     );
 
     const existing = existingAccounts[0];
-    if (existing && existing.status !== EBAY_ACCOUNT_STATUS.DISCONNECTED) {
-      throw new ConflictException('ebay.errors.accountAlreadyConnected');
-    }
     if (existing && existing.user_id !== userId) {
+      if (existing.status !== EBAY_ACCOUNT_STATUS.DISCONNECTED) {
+        // Live under a different SellerHill account.
+        throw new ConflictException('ebay.errors.accountAlreadyConnected');
+      }
       // The store is disconnected but its row — and therefore its order and
       // listing history — belongs to a different SellerHill account. Holding
       // the eBay credentials does not entitle this user to that history, so
@@ -326,10 +331,11 @@ export class EbayService implements OnModuleInit {
     // Calculate token expiry
     const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
 
-    // Reconnect: adopt the existing (disconnected) row rather than inserting a
-    // second one. This is what puts the store's own order and listing history
-    // back in service — they reference this row's id, so a new row would leave
-    // all of it stranded behind a store the seller can no longer see.
+    // Reconnect / re-consent: adopt this user's existing row (disconnected or
+    // still active) rather than inserting a second one. This is what puts the
+    // store's own order and listing history back in service — they reference
+    // this row's id, so a new row would leave all of it stranded behind a
+    // store the seller can no longer see.
     if (existing) {
       const reactivated = await this.databaseService.query<EbayAccountEntity>(
         `UPDATE ebay_accounts
@@ -361,7 +367,9 @@ export class EbayService implements OnModuleInit {
       );
       this.logger.log(`eBay account reconnected: ${existing.id} for user: ${userId}`);
       // After the row is written: the subscription stamps its id onto it.
-      await this.subscribeToMessages(reactivated[0].id, tokenResponse.access_token);
+      // Fire-and-forget — it never throws, and the seller's redirect back
+      // from eBay must not wait on up to three Notification API calls.
+      void this.subscribeToMessages(reactivated[0].id, tokenResponse.access_token);
       return { accountId: reactivated[0].id, userId };
     }
 
@@ -394,7 +402,8 @@ export class EbayService implements OnModuleInit {
     );
 
     // After the row is written: the subscription stamps its id onto it.
-    await this.subscribeToMessages(account.id, tokenResponse.access_token);
+    // Fire-and-forget (see the reconnect branch above).
+    void this.subscribeToMessages(account.id, tokenResponse.access_token);
 
     return { accountId: account.id, userId };
   }

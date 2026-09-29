@@ -23,10 +23,33 @@ describe('eBay messaging lifecycle invariants', () => {
     expect(src.match(/subscribeAccount\(/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
     const updateIdx = src.indexOf('granted_scopes = $8');
     const insertIdx = src.indexOf('INSERT INTO ebay_accounts');
-    const calls = [...src.matchAll(/await this\.subscribeToMessages\(/g)].map((m) => m.index ?? -1);
+    const calls = [...src.matchAll(/(?:await|void) this\.subscribeToMessages\(/g)].map((m) => m.index ?? -1);
     expect(calls.length).toBeGreaterThanOrEqual(2);
     expect(calls.some((i) => i > updateIdx && i < insertIdx)).toBe(true);
     expect(calls.some((i) => i > insertIdx)).toBe(true);
+  });
+
+  it('never makes the OAuth callback wait on the subscription', () => {
+    expect(src).not.toMatch(/await this\.subscribeToMessages\(/);
+    expect(src.match(/void this\.subscribeToMessages\(/g)?.length ?? 0).toBe(2);
+  });
+
+  it('treats a same-owner callback as a re-consent, never accountAlreadyConnected', () => {
+    const start = src.indexOf('async handleCallback(');
+    const end = src.indexOf('INSERT INTO ebay_accounts', start);
+    const body = src.slice(start, end);
+    // The only accountAlreadyConnected throw sits inside the different-owner branch.
+    const ownerBranch = body.indexOf('existing.user_id !== userId');
+    const conflict = body.indexOf("'ebay.errors.accountAlreadyConnected'");
+    const storeOwned = body.indexOf("'ebay.errors.storeOwnedByAnotherAccount'");
+    expect(ownerBranch).toBeGreaterThan(-1);
+    expect(conflict).toBeGreaterThan(ownerBranch);
+    expect(storeOwned).toBeGreaterThan(conflict);
+    expect(body.match(/accountAlreadyConnected/g)?.length).toBe(1);
+    // No status-only refusal that would also catch the owner's own active row.
+    expect(body).not.toMatch(/if \(existing && existing\.status !== EBAY_ACCOUNT_STATUS\.DISCONNECTED\)/);
+    // The reactivate UPDATE runs for any existing row that survived the owner check.
+    expect(body).toMatch(/if \(existing\) \{\s*const reactivated/);
   });
 
   it('unsubscribes BEFORE the tokens are nulled on disconnect', () => {
