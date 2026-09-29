@@ -13,21 +13,34 @@ import type { Page } from 'playwright';
  * default conversion scope is amazon_logistics_only, so the shipment most in
  * need of hiding the supplier was the one skipped.
  */
-export function resolveTrackingCarrier(
-  trackingNumber: string | undefined,
-  pageText: string
-): string | undefined {
+export function resolveTrackingCarrier(trackingNumber: string | undefined, pageText: string): string | undefined {
   const num = (trackingNumber || '').trim().toUpperCase();
-  if (/^TB[A-Z]/.test(num)) { return 'Amazon Logistics'; }
-  if (/^1Z[0-9A-Z]{16}$/.test(num)) { return 'UPS'; }
-  if (/^9[2-5]\d{18,24}$/.test(num)) { return 'USPS'; }
+  if (/^TB[A-Z]/.test(num)) {
+    return 'Amazon Logistics';
+  }
+  if (/^1Z[0-9A-Z]{16}$/.test(num)) {
+    return 'UPS';
+  }
+  if (/^9[2-5]\d{18,24}$/.test(num)) {
+    return 'USPS';
+  }
 
   // Word-bounded so a carrier name inside another word cannot match.
-  if (/amazon\s*logistics/i.test(pageText)) { return 'Amazon Logistics'; }
-  if (/\bUSPS\b|\bUnited States Postal\b/i.test(pageText)) { return 'USPS'; }
-  if (/\bUPS\b/.test(pageText)) { return 'UPS'; }
-  if (/\bFedEx\b/i.test(pageText)) { return 'FedEx'; }
-  if (/\bDHL\b/i.test(pageText)) { return 'DHL'; }
+  if (/amazon\s*logistics/i.test(pageText)) {
+    return 'Amazon Logistics';
+  }
+  if (/\bUSPS\b|\bUnited States Postal\b/i.test(pageText)) {
+    return 'USPS';
+  }
+  if (/\bUPS\b/.test(pageText)) {
+    return 'UPS';
+  }
+  if (/\bFedEx\b/i.test(pageText)) {
+    return 'FedEx';
+  }
+  if (/\bDHL\b/i.test(pageText)) {
+    return 'DHL';
+  }
   return undefined;
 }
 
@@ -85,7 +98,13 @@ export class AmazonOrderParserService {
 
     for (const selector of statusSelectors) {
       const el = page.locator(selector).first();
-      if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (
+        await el
+          .first()
+          .waitFor({ state: 'visible', timeout: 2000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
         const text = await el.textContent();
         if (text) {
           return this.normalizeStatus(text.trim());
@@ -98,7 +117,13 @@ export class AmazonOrderParserService {
 
   private async extractOrderDate(page: Page): Promise<string | undefined> {
     const dateEl = page.locator('[data-component="orderDate"], .order-date-invoice-item').first();
-    if (await dateEl.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (
+      await dateEl
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
       const text = await dateEl.textContent();
       return text?.trim() || undefined;
     }
@@ -118,13 +143,23 @@ export class AmazonOrderParserService {
 
       try {
         const titleEl = itemEl.locator('a.a-link-normal').first();
-        const title = await titleEl.isVisible({ timeout: 1000 }).catch(() => false)
+        const title = (await titleEl
+          .first()
+          .waitFor({ state: 'visible', timeout: 1000 })
+          .then(() => true)
+          .catch(() => false))
           ? (await titleEl.textContent())?.trim()
           : undefined;
 
-        if (!title) {continue;}
+        if (!title) {
+          continue;
+        }
 
-        const priceText = await itemEl.locator('.a-color-price').first().textContent().catch(() => '');
+        const priceText = await itemEl
+          .locator('.a-color-price')
+          .first()
+          .textContent()
+          .catch(() => '');
         const price = priceText ? parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0 : 0;
 
         // Try to extract ASIN from the link
@@ -132,7 +167,11 @@ export class AmazonOrderParserService {
         const asinMatch = href?.match(/\/dp\/([A-Z0-9]{10})/i);
         const asin = asinMatch?.[1];
 
-        const qtyText = await itemEl.locator('.item-view-qty, .quantity').first().textContent().catch(() => '1');
+        const qtyText = await itemEl
+          .locator('.item-view-qty, .quantity')
+          .first()
+          .textContent()
+          .catch(() => '1');
         const quantity = parseInt(qtyText?.replace(/[^0-9]/g, '') || '1', 10);
 
         items.push({ title, price, quantity, asin });
@@ -155,7 +194,13 @@ export class AmazonOrderParserService {
     // Financial summary is in an order-summary or payment-breakdown section
     const summarySection = page.locator('#orderSummary, .payment-breakdown, [data-component="orderSummary"]').first();
 
-    if (!(await summarySection.isVisible({ timeout: 3000 }).catch(() => false))) {
+    if (
+      !(await summarySection
+        .first()
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false))
+    ) {
       this.logger.warn('Could not find order summary section');
       return { ok: false };
     }
@@ -202,10 +247,18 @@ export class AmazonOrderParserService {
     const result: { trackingNumber?: string; trackingCarrier?: string; trackingUrl?: string } = {};
 
     // Look for tracking link/button
-    const trackBtn = page.locator('a:has-text("Track package"), a:has-text("Track Package"), a:has-text("Track shipment")').first();
+    const trackBtn = page
+      .locator('a:has-text("Track package"), a:has-text("Track Package"), a:has-text("Track shipment")')
+      .first();
 
-    if (await trackBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      result.trackingUrl = await trackBtn.getAttribute('href') || undefined;
+    if (
+      await trackBtn
+        .first()
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      result.trackingUrl = (await trackBtn.getAttribute('href')) || undefined;
 
       // Try to extract tracking number from the page
       const pageText = await page.textContent('body').catch(() => '');
@@ -238,18 +291,32 @@ export class AmazonOrderParserService {
 
   private extractAmount(text: string, pattern: RegExp): number {
     const match = text.match(pattern);
-    if (!match?.[1]) {return 0;}
+    if (!match?.[1]) {
+      return 0;
+    }
     return parseFloat(match[1].replace(/,/g, '')) || 0;
   }
 
   private normalizeStatus(status: string): string {
     const lower = status.toLowerCase();
-    if (lower.includes('deliver') && lower.includes('not yet')) {return 'pending';}
-    if (lower.includes('shipped') || lower.includes('on the way')) {return 'shipped';}
-    if (lower.includes('delivered') || lower.includes('arrived')) {return 'delivered';}
-    if (lower.includes('cancel')) {return 'cancelled';}
-    if (lower.includes('return')) {return 'returned';}
-    if (lower.includes('processing') || lower.includes('preparing')) {return 'processing';}
+    if (lower.includes('deliver') && lower.includes('not yet')) {
+      return 'pending';
+    }
+    if (lower.includes('shipped') || lower.includes('on the way')) {
+      return 'shipped';
+    }
+    if (lower.includes('delivered') || lower.includes('arrived')) {
+      return 'delivered';
+    }
+    if (lower.includes('cancel')) {
+      return 'cancelled';
+    }
+    if (lower.includes('return')) {
+      return 'returned';
+    }
+    if (lower.includes('processing') || lower.includes('preparing')) {
+      return 'processing';
+    }
     return lower;
   }
 }

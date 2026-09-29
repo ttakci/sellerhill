@@ -77,8 +77,16 @@ export const PageInfo = styled.div`
   align-items: center;
 `;
 
+/*
+ * `flex-wrap` is load-bearing on a narrow container (e.g. the Messages page's
+ * ~16-22rem list column): the info label plus the nav buttons are each
+ * `white-space: nowrap`, so without a wrap here the row simply overflowed
+ * its column and the page-nav controls bled visually into whatever sits
+ * beside it.
+ */
 export const NavigationWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: ${tkn('spacing.md')};
 `;

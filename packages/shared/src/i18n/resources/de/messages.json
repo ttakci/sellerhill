@@ -30,6 +30,7 @@
       "sent": "Nachricht gesendet",
       "noReply": "Auf diese Unterhaltung kann nicht geantwortet werden.",
       "attachment": "Anhang",
+      "systemMessage": "Systemnachricht",
       "you": "Sie",
       "backToList": "Zurück zu den Nachrichten",
       "chars": "{{count}}/{{max}} Zeichen"

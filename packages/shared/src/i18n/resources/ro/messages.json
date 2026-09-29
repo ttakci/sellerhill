@@ -30,6 +30,7 @@
       "sent": "Mesaj trimis",
       "noReply": "Nu se poate răspunde la această conversație.",
       "attachment": "Atașament",
+      "systemMessage": "Mesaj de sistem",
       "you": "Tu",
       "backToList": "Înapoi la mesaje",
       "chars": "{{count}}/{{max}} caractere"

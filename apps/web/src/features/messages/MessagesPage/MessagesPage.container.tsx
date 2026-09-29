@@ -8,7 +8,7 @@
  */
 
 import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder, type EbayAccountPublicDto } from '@repo/shared';
-import { formatDate, getLocaleConfig, useIsMobile, useLoading, type DropdownItem, type IconName } from '@repo/ui';
+import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type DropdownItem, type IconName } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -58,8 +58,21 @@ const EMPTY_KEY: Record<MessagesFolder, string> = {
 const isSafeMediaUrl = (url: string | null | undefined): boolean =>
   typeof url === 'string' && url.startsWith('https://');
 
-/** List snippets are one line: collapse the message's own line breaks. */
-const toSnippet = (body: string | undefined): string => (body ?? '').replace(/\s+/g, ' ').trim();
+/**
+ * eBay's own system notices ("We sent your payout") carry a full inline-
+ * styled e-mail template as `messageBody`; buyer/seller messages are plain
+ * text. eBay's Message API gives no content-type field, so this is a sniff:
+ * a leading tag is enough — a plain-text message from a real buyer never
+ * opens with one.
+ */
+const looksLikeHtml = (body: string): boolean => /^\s*<[a-z!]/i.test(body);
+
+/** List snippets are one line of plain text — an HTML body is stripped to its tags-out text first. */
+const toSnippet = (body: string | undefined): string => {
+  const raw = body ?? '';
+  const text = looksLikeHtml(raw) ? raw.replace(/<[^>]*>/g, ' ') : raw;
+  return text.replace(/\s+/g, ' ').trim();
+};
 
 /** First letter for the avatar disc; eBay usernames are ASCII so `charAt` is safe. */
 const avatarInitial = (name: string | null | undefined): string => {
@@ -74,6 +87,11 @@ const storeLabel = (account: EbayAccountPublicDto): string =>
 export const MessagesPageContainer = (): React.ReactElement => {
   const { t, i18n } = useTranslation(['messages', 'translation']);
   const isMobile = useIsMobile();
+  const { theme } = useTheme();
+  /** The folder rail (RailPane) replaces the toolbar's compact type/folder
+   * switch starting at this width — below it, the toolbar is what carries
+   * that control. */
+  const isRailVisible = useMediaQuery(`(min-width: ${theme.breakpoints.xl})`);
 
   const { state, setStore, setType, setFolder, setTypeAndFolder, openConversation, setPage } =
     useMessagesUrlState();
@@ -207,6 +225,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         return {
           id: message.messageId,
           body: message.body,
+          bodyIsHtml: looksLikeHtml(message.body),
           senderLabel: mine ? t('messages.thread.you') : message.senderUsername,
           isMine: mine,
           date: formatMessageDate(message.createdAt),
@@ -324,6 +343,15 @@ export const MessagesPageContainer = (): React.ReactElement => {
   const threadOpenOnPhone = isMobile && !!conversationId;
   const handleBack = useCallback(() => openConversation(null), [openConversation]);
 
+  /**
+   * The toolbar exists to carry the compact type/folder switch (below `xl`,
+   * where the rail is hidden) and the store switcher (2+ stores). With a
+   * single store at `xl`+ neither renders, and an unconditional `showToolbar`
+   * left a bordered, shadowed bar with nothing inside it.
+   */
+  const needsCompactFilters = inbox.messagingEnabled && !isRailVisible;
+  const showToolbar = !threadOpenOnPhone && (needsCompactFilters || !!storeSelector);
+
   return (
     <EbayAccountGuard>
       <MessagesPageComponent
@@ -331,7 +359,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         subtitle={threadOpenOnPhone ? '' : t('messages.page.subtitle')}
         onBack={threadOpenOnPhone ? handleBack : undefined}
         backLabel={t('messages.thread.backToList')}
-        showToolbar={!threadOpenOnPhone}
+        showToolbar={showToolbar}
         storeSelector={storeSelector}
         messagingEnabled={inbox.messagingEnabled}
         onReconnect={actions.handleReconnect}

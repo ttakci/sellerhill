@@ -30,6 +30,7 @@
       "sent": "Messaggio inviato",
       "noReply": "Non è possibile rispondere a questa conversazione.",
       "attachment": "Allegato",
+      "systemMessage": "Messaggio di sistema",
       "you": "Tu",
       "backToList": "Torna ai messaggi",
       "chars": "{{count}}/{{max}} caratteri"

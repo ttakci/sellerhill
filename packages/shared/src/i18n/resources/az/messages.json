@@ -30,6 +30,7 @@
       "sent": "Mesaj göndərildi",
       "noReply": "Bu yazışmaya cavab vermək mümkün deyil.",
       "attachment": "Əlavə",
+      "systemMessage": "Sistem mesajı",
       "you": "Siz",
       "backToList": "Mesajlara qayıt",
       "chars": "{{count}}/{{max}} simvol"

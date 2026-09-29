@@ -30,6 +30,7 @@
       "sent": "Mesaj gönderildi",
       "noReply": "Bu konuşmaya yanıt verilemez.",
       "attachment": "Ek",
+      "systemMessage": "Sistem mesajı",
       "you": "Siz",
       "backToList": "Mesajlara dön",
       "chars": "{{count}}/{{max}} karakter"
