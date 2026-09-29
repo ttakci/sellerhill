@@ -1,4 +1,10 @@
-import { type OrderDto, type OrderStatsDto, type OrderFiltersDto, type OrderSyncResponseDto } from '@repo/shared';
+import {
+  type OrderDto,
+  type OrderStatsDto,
+  type OrderFiltersDto,
+  type OrderStageCountsDto,
+  type OrderSyncResponseDto,
+} from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -55,6 +61,21 @@ export const ordersApi = baseApi.injectEndpoints({
       },
       providesTags: ['Orders'],
     }),
+    getOrderStageCounts: builder.query<OrderStageCountsDto, { ebayAccountId?: string; isTracked?: boolean } | void>({
+      query: (args) => {
+        const params: Record<string, string> = {};
+        if (args?.ebayAccountId) {
+          params.ebayAccountId = args.ebayAccountId;
+        }
+        if (args?.isTracked !== undefined) {
+          params.tracked = String(args.isTracked);
+        }
+        return { url: '/orders/stage-counts', params };
+      },
+      // Same tag as the list, so a mutation that invalidates the list also
+      // refreshes the tab counts.
+      providesTags: ['Orders'],
+    }),
     getOrderStats: builder.query<OrderStatsDto, void>({
       query: () => '/orders/stats',
       providesTags: ['Orders'],
@@ -89,6 +110,7 @@ export const ordersApi = baseApi.injectEndpoints({
 
 export const {
   useGetOrdersQuery,
+  useGetOrderStageCountsQuery,
   useGetOrderStatsQuery,
   useGetOrderByIdQuery,
   useUpdateOrderAmazonDetailsMutation,
