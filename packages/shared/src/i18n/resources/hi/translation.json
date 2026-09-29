@@ -109,6 +109,7 @@
     "subtitle": "अपनी सभी सक्रिय लिस्टिंग के प्रोडक्ट का विवरण और Amazon डेटा देखें।"
   },
   "menu": {
+    "overview": "ओवरव्यू",
     "dashboard": "डैशबोर्ड",
     "listings": "लिस्टिंग",
     "ebayListings": "eBay लिस्टिंग",
@@ -117,6 +118,8 @@
     "drafts": "ड्राफ्ट",
     "products": "प्रोडक्ट",
     "inventory": "इन्वेंटरी",
+    "discover": "खोजें",
+    "sales": "बिक्री",
     "orders": "ऑर्डर",
     "messages": "संदेश",
     "stores": "स्टोर",

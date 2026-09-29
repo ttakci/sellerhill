@@ -109,6 +109,7 @@
     "subtitle": "Consulta los detalles de los productos y los datos de Amazon de todas tus publicaciones activas."
   },
   "menu": {
+    "overview": "Resumen",
     "dashboard": "Panel",
     "listings": "Publicaciones",
     "ebayListings": "Publicaciones de eBay",
@@ -117,6 +118,8 @@
     "drafts": "Borradores",
     "products": "Productos",
     "inventory": "Inventario",
+    "discover": "Descubrir",
+    "sales": "Ventas",
     "orders": "Pedidos",
     "messages": "Mensajes",
     "stores": "Tiendas",

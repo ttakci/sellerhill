@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "ابحث في الفئات",
     "categoryNoResults": "لا توجد فئة مطابقة",
     "backToAllCategories": "العودة إلى جميع الفئات",
+    "categories": {
+      "title": "الفئات",
+      "mobileLabel": "الفئة",
+      "drawerTitle": "تصفّح الفئات",
+      "expand": "توسيع {{name}}",
+      "collapse": "طي {{name}}"
+    },
     "selectAllOnPage": "تحديد كل ما في هذه الصفحة",
     "selected_zero": "لم يتم تحديد منتجات",
     "selected_one": "تم تحديد منتج واحد",

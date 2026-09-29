@@ -15,17 +15,19 @@ import {
   BestSellersListType,
   SourceFetchOutcome, type BestSellersBrowseAllowanceDto, type BestSellersQueryDto,
 } from '@repo/shared';
-import { formatCurrency, getLocaleConfig, type SelectOption, type TabNavItem } from '@repo/ui';
+import { formatCurrency, getLocaleConfig, type TabNavItem } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetBestSellersQuery } from '../api/bestSellersApi';
-import { BestSellersViewState, type BestSellersKnownCategories, type BestSellersRefusalBody } from '../bestSellers.types';
+import { BestSellersViewState, type BestSellersRefusalBody } from '../bestSellers.types';
+import { useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
 import { useBestSellersSelection } from '../hooks/useBestSellersSelection';
 import { useBestSellersUrlState } from '../hooks/useBestSellersUrlState';
 
 import { BestSellersPage as BestSellersPageComponent } from './BestSellersPage.component';
 import type { BestSellersItemView, BestSellersPagination } from './BestSellersPage.types';
+import type { BestSellersCategoryTreeRow } from './CategoryTree';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { isFetchBaseQueryError } from '@/utils/errorHandler';
@@ -93,19 +95,11 @@ export const BestSellersPageContainer: React.FC = () => {
 
   /*
    * A sub-category that Amazon does not offer answers `not_found` with no
-   * category tree at all. Remembering the last tree we saw for this list keeps
-   * the picker usable on that screen, so the seller can pick another category
-   * rather than being stranded on "Back to all categories" alone. Adjusted
-   * during render (the same pattern `AddListingsDrawer` uses for its open
-   * transition) rather than in an effect, so there is no extra render pass.
+   * category tree at all — the hook keeps whatever it already cached, so the
+   * tree stays browsable on that screen instead of collapsing to nothing.
    */
-  const [known, setKnown] = useState<BestSellersKnownCategories>({ listType, categories: [] });
-  const freshCategories = currentData?.list?.categories;
-  if (known.listType !== listType) {
-    setKnown({ listType, categories: freshCategories && freshCategories.length > 0 ? freshCategories : [] });
-  } else if (freshCategories && freshCategories.length > 0 && freshCategories !== known.categories) {
-    setKnown({ listType, categories: freshCategories });
-  }
+  const categoryTree = useBestSellersCategoryTree(listType, category, currentData?.list?.categories);
+
   const refusal = useMemo<{ status: number | string; body: BestSellersRefusalBody } | null>(() => {
     if (!error) {
       return null;
@@ -243,24 +237,84 @@ export const BestSellersPageContainer: React.FC = () => {
     [t],
   );
 
-  const categoryOptions = useMemo<SelectOption[]>(() => {
-    const knownCategories = known.listType === listType ? known.categories : [];
-    const options: SelectOption[] = [
-      { label: t('bestSellers.allCategories'), value: BEST_SELLERS_ROOT_CATEGORY },
+  const [categorySearch, setCategorySearch] = useState('');
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+
+  /*
+   * A department-context answer's own `categories` occasionally still carries
+   * the full top-level department list alongside that department's real
+   * children (Amazon renders the whole sidebar accordion, not just the open
+   * branch) — `isRoot` entries and the branch's own breadcrumb echo of itself
+   * are dropped so a department's "children" never duplicate the department
+   * list underneath it.
+   */
+  const categoryTreeRows = useMemo<BestSellersCategoryTreeRow[]>(() => {
+    const query = categorySearch.trim().toLowerCase();
+    const rows: BestSellersCategoryTreeRow[] = [
+      {
+        key: 'root',
+        path: BEST_SELLERS_ROOT_CATEGORY,
+        name: t('bestSellers.allCategories'),
+        depth: 0,
+        isActive: category === BEST_SELLERS_ROOT_CATEGORY,
+        hasChildren: false,
+        isExpanded: false,
+      },
     ];
-    knownCategories.forEach((entry) => {
-      if (!entry.isRoot && entry.path) {
-        options.push({ label: entry.name, value: entry.path });
+
+    const departments = query
+      ? categoryTree.departments.filter((entry) => entry.name.toLowerCase().includes(query))
+      : categoryTree.departments;
+
+    departments.forEach((department) => {
+      if (!department.path) {
+        return;
       }
+      const isExpanded = categoryTree.isExpanded(department.path);
+      rows.push({
+        key: department.path,
+        path: department.path,
+        name: department.name,
+        depth: 0,
+        isActive: category === department.path,
+        hasChildren: true,
+        isExpanded,
+      });
+      if (!isExpanded) {
+        return;
+      }
+      const children = categoryTree.childrenOf(department.path) ?? [];
+      children.forEach((child) => {
+        if (!child.path || child.isRoot || child.path === department.path) {
+          return;
+        }
+        rows.push({
+          key: `${department.path}::${child.path}`,
+          path: child.path,
+          name: child.name,
+          depth: 1,
+          isActive: category === child.path,
+          hasChildren: false,
+          isExpanded: false,
+        });
+      });
     });
-    // The open sub-category may not be in the tree Amazon rendered (deep
-    // paths); keep it selectable so the picker never shows a blank value.
-    if (category !== BEST_SELLERS_ROOT_CATEGORY && !options.some((option) => option.value === category)) {
-      const selected = knownCategories.find((entry) => entry.isSelected);
-      options.push({ label: selected?.name ?? category, value: category });
-    }
-    return options;
-  }, [known, listType, category, t]);
+
+    return rows;
+  }, [categoryTree, categorySearch, category, t]);
+
+  /*
+   * The Amazon-rendered breadcrumb marks the currently browsed node with
+   * `isSelected` — the truest source for its display name, ahead of anything
+   * this page infers on its own. `data` (not just `currentData`) so the mobile
+   * trigger keeps its label while a new page is loading.
+   */
+  const activeCategoryEntry = useMemo(
+    () => (currentData?.list?.categories ?? data?.list?.categories)?.find((entry) => entry.isSelected) ?? null,
+    [currentData?.list?.categories, data?.list?.categories],
+  );
+  const activeCategoryLabel =
+    category === BEST_SELLERS_ROOT_CATEGORY ? t('bestSellers.allCategories') : (activeCategoryEntry?.name ?? category);
 
   const handleListTypeChange = useCallback(
     (value: string) => {
@@ -271,12 +325,27 @@ export const BestSellersPageContainer: React.FC = () => {
     [setListType],
   );
 
-  const handleCategoryChange = useCallback(
-    (value: string | number) => {
-      setCategory(String(value));
+  const handleCategorySelect = useCallback(
+    (path: string) => {
+      setCategory(path);
+      setIsCategoryDrawerOpen(false);
     },
     [setCategory],
   );
+
+  const handleToggleCategoryExpand = useCallback(
+    (path: string) => {
+      categoryTree.toggleExpanded(path);
+    },
+    [categoryTree],
+  );
+
+  const handleCategorySearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setCategorySearch(event.target.value);
+  }, []);
+
+  const handleOpenCategoryDrawer = useCallback(() => setIsCategoryDrawerOpen(true), []);
+  const handleCloseCategoryDrawer = useCallback(() => setIsCategoryDrawerOpen(false), []);
 
   const handleBackToAllCategories = useCallback(() => {
     setCategory(BEST_SELLERS_ROOT_CATEGORY);
@@ -356,9 +425,16 @@ export const BestSellersPageContainer: React.FC = () => {
         listTypeOptions={listTypeOptions}
         listType={listType}
         onListTypeChange={handleListTypeChange}
-        categoryOptions={categoryOptions}
-        category={category}
-        onCategoryChange={handleCategoryChange}
+        categoryTreeRows={categoryTreeRows}
+        categorySearchValue={categorySearch}
+        onCategorySearchChange={handleCategorySearchChange}
+        onCategorySelect={handleCategorySelect}
+        onToggleCategoryExpand={handleToggleCategoryExpand}
+        hasDepartments={categoryTree.departments.length > 0}
+        activeCategoryLabel={activeCategoryLabel}
+        isCategoryDrawerOpen={isCategoryDrawerOpen}
+        onOpenCategoryDrawer={handleOpenCategoryDrawer}
+        onCloseCategoryDrawer={handleCloseCategoryDrawer}
         isSubCategory={category !== BEST_SELLERS_ROOT_CATEGORY}
         onBackToAllCategories={handleBackToAllCategories}
         selectedCount={selection.count}

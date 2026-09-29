@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Kategorien durchsuchen",
     "categoryNoResults": "Keine passende Kategorie",
     "backToAllCategories": "Zurück zu allen Kategorien",
+    "categories": {
+      "title": "Kategorien",
+      "mobileLabel": "Kategorie",
+      "drawerTitle": "Kategorien durchsuchen",
+      "expand": "{{name}} aufklappen",
+      "collapse": "{{name}} zuklappen"
+    },
     "selectAllOnPage": "Alle auf dieser Seite auswählen",
     "selected_one": "{{count}} Produkt ausgewählt",
     "selected_other": "{{count}} Produkte ausgewählt",

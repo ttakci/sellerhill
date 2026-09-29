@@ -11,11 +11,11 @@ import {
   Button,
   Checkbox,
   DataTable,
+  Drawer,
   EmptyState,
   Icon,
   IdBadge,
   PageHeader,
-  Select,
   Skeleton,
   TabNav,
   Text, type TableColumn,
@@ -27,6 +27,7 @@ import { BestSellersViewState } from '../bestSellers.types';
 
 import * as S from './BestSellersPage.style';
 import type { BestSellersItemView, BestSellersPageComponentProps } from './BestSellersPage.types';
+import { CategoryTree } from './CategoryTree';
 
 import { ProductTableCell } from '@/domain-ui';
 
@@ -48,9 +49,16 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   listTypeOptions,
   listType,
   onListTypeChange,
-  categoryOptions,
-  category,
-  onCategoryChange,
+  categoryTreeRows,
+  categorySearchValue,
+  onCategorySearchChange,
+  onCategorySelect,
+  onToggleCategoryExpand,
+  hasDepartments,
+  activeCategoryLabel,
+  isCategoryDrawerOpen,
+  onOpenCategoryDrawer,
+  onCloseCategoryDrawer,
   isSubCategory,
   onBackToAllCategories,
   selectedCount,
@@ -158,7 +166,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     <S.LockedCard
       key={item.asin}
       variant="bordered"
-      padding="md"
+      padding="none"
       role="img"
       aria-label={t('bestSellers.locked.rowLabel')}
     >
@@ -170,13 +178,15 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
         <S.CardImageFrame>
           <Skeleton width="60%" height="80%" radius="md" />
         </S.CardImageFrame>
-        <Skeleton width="90%" height="0.875rem" />
-        <Skeleton width="60%" height="0.875rem" />
-        <S.CardMetaRow>
-          <Skeleton width="30%" height="1rem" />
-          <Skeleton width="35%" height="0.75rem" />
-        </S.CardMetaRow>
-        <Skeleton width="45%" height="1.25rem" radius="sm" />
+        <S.CardBody>
+          <Skeleton width="90%" height="0.875rem" />
+          <Skeleton width="60%" height="0.875rem" />
+          <S.CardMetaRow>
+            <Skeleton width="30%" height="1rem" />
+            <Skeleton width="35%" height="0.75rem" />
+          </S.CardMetaRow>
+          <Skeleton width="45%" height="1.25rem" radius="sm" />
+        </S.CardBody>
       </S.LockedCardBody>
       <S.LockedOverlay>
         <S.LockedBadge>
@@ -193,7 +203,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
       <S.GridCard
         key={item.asin}
         variant="interactive"
-        padding="md"
+        padding="none"
         aria-pressed={item.isSelected}
         onClick={() => onToggleItem(item.asin)}
       >
@@ -218,22 +228,26 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
           )}
         </S.CardImageFrame>
 
-        <S.CardTitle variant="body-sm" weight="semibold" color="text.primary">
-          {item.title}
-        </S.CardTitle>
+        <S.CardBody>
+          <S.CardTitleClamp title={item.title}>
+            <Text variant="body" weight="semibold" color="text.primary">
+              {item.title}
+            </Text>
+          </S.CardTitleClamp>
 
-        <S.CardMetaRow>
-          <Text variant="body" weight="semibold" color="text.primary" numeric>
-            {item.priceLabel ?? EMPTY_VALUE}
-          </Text>
-          <Text variant="body-sm" color="text.secondary" numeric>
-            {item.ratingLabel ?? t('bestSellers.noRating')}
-          </Text>
-        </S.CardMetaRow>
+          <S.CardMetaRow>
+            <Text variant="body" weight="bold" color="text.primary" numeric>
+              {item.priceLabel ?? EMPTY_VALUE}
+            </Text>
+            <Text variant="body-sm" color="text.secondary" numeric>
+              {item.ratingLabel ?? t('bestSellers.noRating')}
+            </Text>
+          </S.CardMetaRow>
 
-        <S.CardFooter onClick={onControlClick}>
-          <IdBadge id={item.asin} storeType="amazon" size="sm" />
-        </S.CardFooter>
+          <S.CardFooter onClick={onControlClick}>
+            <IdBadge id={item.asin} storeType="amazon" size="sm" />
+          </S.CardFooter>
+        </S.CardBody>
       </S.GridCard>
     );
 
@@ -353,93 +367,121 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
       {isDisabled ? (
         <S.StateCard padding="lg">{renderState()}</S.StateCard>
       ) : (
-        <>
-          <S.Toolbar>
-            <TabNav
-              items={listTypeOptions}
-              value={listType}
-              onChange={onListTypeChange}
-              ariaLabel={t('bestSellers.listTypesAriaLabel')}
+        <S.PageBody>
+          <S.SidebarPanel variant="bordered" padding="lg">
+            <S.SidebarHeader>
+              <Icon name="grid-view" size={16} />
+              <Text variant="h5">{t('bestSellers.categories.title')}</Text>
+            </S.SidebarHeader>
+            <CategoryTree
+              rows={categoryTreeRows}
+              searchValue={categorySearchValue}
+              onSearchChange={onCategorySearchChange}
+              onSelect={onCategorySelect}
+              onToggleExpand={onToggleCategoryExpand}
+              hasDepartments={hasDepartments}
+            />
+          </S.SidebarPanel>
+
+          <S.ContentColumn>
+            <S.MobileCategoryTrigger>
+              <Button variant="secondary" size="medium" onClick={onOpenCategoryDrawer}>
+                <Icon name="grid-view" size={16} />
+                <S.MobileCategoryTriggerLabel>
+                  <Text variant="body-sm" weight="semibold" truncate>
+                    {activeCategoryLabel}
+                  </Text>
+                </S.MobileCategoryTriggerLabel>
+                <Icon name="chevron-down" size={14} />
+              </Button>
+            </S.MobileCategoryTrigger>
+
+            <S.Toolbar>
+              <TabNav
+                items={listTypeOptions}
+                value={listType}
+                onChange={onListTypeChange}
+                ariaLabel={t('bestSellers.listTypesAriaLabel')}
+              />
+
+              <S.FilterRow>
+                {isSubCategory && (
+                  <Button variant="text" size="small" onClick={onBackToAllCategories}>
+                    <Icon name="arrow-left" size={14} />
+                    <Text variant="body-sm" weight="semibold">
+                      {t('bestSellers.backToAllCategories')}
+                    </Text>
+                  </Button>
+                )}
+
+                <S.FilterSpacer />
+
+                <Checkbox
+                  checked={isAllOnPageSelected}
+                  onChange={onToggleSelectAllOnPage}
+                  disabled={!hasSelectableItems}
+                  label={t('bestSellers.selectAllOnPage')}
+                />
+              </S.FilterRow>
+
+              <S.MetaRow>
+                {selectedCount > 0 && (
+                  <Text variant="caption" weight="semibold" color="brand.primary" numeric>
+                    {t('bestSellers.selected', { count: selectedCount })}
+                  </Text>
+                )}
+                {allowanceLabel && (
+                  <Text variant="caption" color="text.secondary" numeric>
+                    {allowanceLabel}
+                  </Text>
+                )}
+                <Text variant="caption" color="text.tertiary">
+                  {t('bestSellers.allowanceHint')}
+                </Text>
+              </S.MetaRow>
+            </S.Toolbar>
+
+            <DataTable<BestSellersItemView>
+              columns={columns}
+              data={items}
+              renderGridCard={renderGridCard}
+              gridMinItemWidth={GRID_MIN_ITEM_WIDTH}
+              gridMaxColumns={GRID_MAX_COLUMNS}
+              defaultViewMode="grid"
+              selectable
+              selectedRows={selectedRows}
+              onSelectionChange={onSelectionChange}
+              isRowSelectable={isRowSelectable}
+              emptyContent={renderState()}
+              pagination={isReady ? pagination : undefined}
             />
 
-            <S.FilterRow>
-              <S.CategorySelect>
-                <Select
-                  options={categoryOptions}
-                  value={category}
-                  onChange={onCategoryChange}
-                  placeholder={t('bestSellers.categoryPlaceholder')}
-                  isSearchable
-                  searchPlaceholder={t('bestSellers.categorySearchPlaceholder')}
-                  noResultsMessage={t('bestSellers.categoryNoResults')}
-                  size="medium"
-                  fullWidth
+            {isReady && lockedCount > 0 && (
+              <S.UpsellCard variant="bordered" padding="lg">
+                <EmptyState
+                  icon="lock"
+                  title={t('bestSellers.locked.title', { count: lockedCount })}
+                  description={t('bestSellers.locked.description')}
+                  action={t('bestSellers.locked.cta')}
+                  onAction={onUpgrade}
                 />
-              </S.CategorySelect>
+              </S.UpsellCard>
+            )}
+          </S.ContentColumn>
+        </S.PageBody>
+      )}
 
-              {isSubCategory && (
-                <Button variant="text" size="small" onClick={onBackToAllCategories}>
-                  <Icon name="arrow-left" size={14} />
-                  <Text variant="body-sm" weight="semibold">
-                    {t('bestSellers.backToAllCategories')}
-                  </Text>
-                </Button>
-              )}
-
-              <S.FilterSpacer />
-
-              <Checkbox
-                checked={isAllOnPageSelected}
-                onChange={onToggleSelectAllOnPage}
-                disabled={!hasSelectableItems}
-                label={t('bestSellers.selectAllOnPage')}
-              />
-            </S.FilterRow>
-
-            <S.MetaRow>
-              {selectedCount > 0 && (
-                <Text variant="caption" weight="semibold" color="brand.primary" numeric>
-                  {t('bestSellers.selected', { count: selectedCount })}
-                </Text>
-              )}
-              {allowanceLabel && (
-                <Text variant="caption" color="text.secondary" numeric>
-                  {allowanceLabel}
-                </Text>
-              )}
-              <Text variant="caption" color="text.tertiary">
-                {t('bestSellers.allowanceHint')}
-              </Text>
-            </S.MetaRow>
-          </S.Toolbar>
-
-          <DataTable<BestSellersItemView>
-            columns={columns}
-            data={items}
-            renderGridCard={renderGridCard}
-            gridMinItemWidth={GRID_MIN_ITEM_WIDTH}
-            gridMaxColumns={GRID_MAX_COLUMNS}
-            defaultViewMode="grid"
-            selectable
-            selectedRows={selectedRows}
-            onSelectionChange={onSelectionChange}
-            isRowSelectable={isRowSelectable}
-            emptyContent={renderState()}
-            pagination={isReady ? pagination : undefined}
+      {!isDisabled && (
+        <Drawer isOpen={isCategoryDrawerOpen} onClose={onCloseCategoryDrawer} title={t('bestSellers.categories.drawerTitle')}>
+          <CategoryTree
+            rows={categoryTreeRows}
+            searchValue={categorySearchValue}
+            onSearchChange={onCategorySearchChange}
+            onSelect={onCategorySelect}
+            onToggleExpand={onToggleCategoryExpand}
+            hasDepartments={hasDepartments}
           />
-
-          {isReady && lockedCount > 0 && (
-            <S.UpsellCard variant="bordered" padding="lg">
-              <EmptyState
-                icon="lock"
-                title={t('bestSellers.locked.title', { count: lockedCount })}
-                description={t('bestSellers.locked.description')}
-                action={t('bestSellers.locked.cta')}
-                onAction={onUpgrade}
-              />
-            </S.UpsellCard>
-          )}
-        </>
+        </Drawer>
       )}
     </S.Container>
   );

@@ -1,7 +1,9 @@
-import type { SelectOption, TabNavItem } from '@repo/ui';
+import type { TabNavItem } from '@repo/ui';
 import type React from 'react';
 
 import type { BestSellersViewState } from '../bestSellers.types';
+
+import type { BestSellersCategoryTreeRow } from './CategoryTree';
 
 /**
  * One ranked product with every figure already formatted by the container
@@ -63,10 +65,19 @@ export interface BestSellersPageComponentProps {
   listType: string;
   onListTypeChange: (value: string) => void;
 
-  categoryOptions: SelectOption[];
-  /** Current category alias; `''` is the root option. */
-  category: string;
-  onCategoryChange: (value: string | number) => void;
+  /** Pre-flattened two-level category tree — see `useBestSellersCategoryTree`. */
+  categoryTreeRows: BestSellersCategoryTreeRow[];
+  categorySearchValue: string;
+  onCategorySearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onCategorySelect: (path: string) => void;
+  onToggleCategoryExpand: (path: string) => void;
+  /** True once the root departments have been fetched at least once. */
+  hasDepartments: boolean;
+  /** The currently browsed category's display name, for the mobile trigger. */
+  activeCategoryLabel: string;
+  isCategoryDrawerOpen: boolean;
+  onOpenCategoryDrawer: () => void;
+  onCloseCategoryDrawer: () => void;
   /** True when a sub-category is open, so "Back to all categories" applies. */
   isSubCategory: boolean;
   onBackToAllCategories: () => void;
