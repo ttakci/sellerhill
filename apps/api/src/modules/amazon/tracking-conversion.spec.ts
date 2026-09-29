@@ -1,4 +1,7 @@
 // apps/api/src/modules/amazon/tracking-conversion.spec.ts
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { AQUILINE_EBAY_CARRIER_CODE, AquilineProblemCode, ConversionOutcome } from '@repo/shared';
 
 import type { DatabaseService } from '../../common/database/database.service';
@@ -23,18 +26,12 @@ describe('isRetryableConversionFailure', () => {
   it('retries "the HTML has not been parsed yet"', () => {
     // The whole reason the deferral exists: assign may refuse until the upload
     // is applied, and that would be a systematic first-attempt failure.
-    expect(
-      isRetryableConversionFailure(
-        AquilineErrorKind.BAD_REQUEST,
-        AquilineProblemCode.NEEDS_TRACKING_UPLOAD,
-      ),
-    ).toBe(true);
-    expect(
-      isRetryableConversionFailure(
-        AquilineErrorKind.BAD_REQUEST,
-        AquilineProblemCode.UPDATE_NOT_APPLIED,
-      ),
-    ).toBe(true);
+    expect(isRetryableConversionFailure(AquilineErrorKind.BAD_REQUEST, AquilineProblemCode.NEEDS_TRACKING_UPLOAD)).toBe(
+      true
+    );
+    expect(isRetryableConversionFailure(AquilineErrorKind.BAD_REQUEST, AquilineProblemCode.UPDATE_NOT_APPLIED)).toBe(
+      true
+    );
   });
 
   it('does NOT retry a plan wall or a revoked token', () => {
@@ -44,12 +41,9 @@ describe('isRetryableConversionFailure', () => {
   });
 
   it('does NOT retry a rejected page — the same page gets the same answer', () => {
-    expect(
-      isRetryableConversionFailure(
-        AquilineErrorKind.BAD_REQUEST,
-        AquilineProblemCode.WRONG_PAGE_TYPE,
-      ),
-    ).toBe(false);
+    expect(isRetryableConversionFailure(AquilineErrorKind.BAD_REQUEST, AquilineProblemCode.WRONG_PAGE_TYPE)).toBe(
+      false
+    );
   });
 });
 
@@ -65,9 +59,7 @@ describe('isPlanExhausted', () => {
     // snapshot after 24h means at worst one wasted call per day re-learns the
     // real state, and a reset is never missed.
     const old = new Date('2026-08-01T00:00:00Z');
-    expect(isPlanExhausted({ planRemaining: 0, capturedAt: old }, new Date('2026-08-03T00:00:00Z'))).toBe(
-      false,
-    );
+    expect(isPlanExhausted({ planRemaining: 0, capturedAt: old }, new Date('2026-08-03T00:00:00Z'))).toBe(false);
   });
 
   it('does not short-circuit on an unknown remaining count', () => {
@@ -87,7 +79,7 @@ describe('shouldRefuseOnDemandConversion', () => {
       shouldRefuseOnDemandConversion({
         convertedTrackingNumber: null,
         ebayTrackingPushedNumber: 'TBA303940404000',
-      }),
+      })
     ).toBe(true);
   });
 
@@ -96,7 +88,7 @@ describe('shouldRefuseOnDemandConversion', () => {
       shouldRefuseOnDemandConversion({
         convertedTrackingNumber: null,
         ebayTrackingPushedNumber: null,
-      }),
+      })
     ).toBe(false);
   });
 
@@ -105,7 +97,7 @@ describe('shouldRefuseOnDemandConversion', () => {
       shouldRefuseOnDemandConversion({
         convertedTrackingNumber: 'AQUAA1234567YQ',
         ebayTrackingPushedNumber: 'TBA303940404000',
-      }),
+      })
     ).toBe(false);
   });
 });
@@ -209,7 +201,7 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
-      trackingQueue,
+      trackingQueue
     );
 
     const result = await service.resolveForOrder({
@@ -229,12 +221,11 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
 
     // Layer 2's minimal write was attempted after Layer 1 failed.
     const layer2Call = queryMock.mock.calls.find(
-      ([sql]) => typeof sql === 'string' && sql.includes('converted_tracking_carrier = $2 WHERE id = $3'),
+      ([sql]) => typeof sql === 'string' && sql.includes('converted_tracking_carrier = $2 WHERE id = $3')
     );
     expect(layer2Call).toBeDefined();
   });
 });
-
 
 describe('TrackingConversionService.refreshTrackingHtml', () => {
   function build(orderRow: Record<string, unknown> | null) {
@@ -275,7 +266,7 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
-      trackingQueue,
+      trackingQueue
     );
     return { service, uploadTrackingHtml, queries, isSuspended, canConvertTracking };
   }
@@ -302,7 +293,7 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
       'sh-user-1-AMAZON_US',
       '111-2222222-3333333',
       { trackingUrl: input.trackingUrl, html: input.trackingHtml },
-      expect.anything(),
+      expect.anything()
     );
     expect(queries.some((sql) => sql.includes('tracking_html_uploaded_at'))).toBe(true);
   });
@@ -351,5 +342,148 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
     uploadTrackingHtml.mockRejectedValue(new Error('502'));
 
     await expect(service.refreshTrackingHtml(input)).resolves.toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Pre-flight for the first live conversion (2026-09-29). Two things that would
+// have silently broken it on the shipped transition.
+// ---------------------------------------------------------------------------
+describe('TrackingConversionService.resolveSettings reads the real store_settings column', () => {
+  // `store_settings` has `store_id` (the eBay account id — what every other
+  // getResolvedSettings caller passes), never `ebay_account_id`. The query
+  // threw on every call, was swallowed, and the seller's real scope/provider
+  // was replaced by the defaults.
+  const src = fs.readFileSync(path.join(__dirname, 'tracking-conversion.service.ts'), 'utf8').replace(/\r\n/g, '\n');
+  const fn = src.slice(src.indexOf('private async resolveSettings('));
+  const body = fn.slice(0, fn.indexOf('\n  }\n'));
+
+  it('filters on store_id, not a column that does not exist', () => {
+    expect(body).toMatch(/store_id = \$2/);
+    // The ORDER row legitimately supplies `order.ebay_account_id` as the
+    // parameter; what must not appear is that name as a store_settings column.
+    expect(body).not.toMatch(/\(ebay_account_id = \$2|ebay_account_id IS NULL|BY ebay_account_id/);
+  });
+
+  it('prefers the per-store row over the global one', () => {
+    expect(body).toMatch(/ORDER BY[^\n]*store_id[^\n]*NULLS LAST/);
+  });
+});
+
+describe('TrackingConversionService.resolveForOrder — unknown carrier under a scoped setting', () => {
+  function build(settingsRow: Record<string, unknown>) {
+    const orderRow = {
+      id: 'order-1',
+      user_id: 'user-1',
+      ebay_account_id: 'ebay-1',
+      auto_fulfill_status: null,
+      shipping_address: {
+        fullName: 'Jane Buyer',
+        street: '1 Main St',
+        city: 'Springfield',
+        state: 'IL',
+        zipCode: '62704',
+        country: 'US',
+      },
+      converted_tracking_number: null,
+      converted_tracking_carrier: null,
+      tracking_provider_shipment_id: null,
+      ebay_tracking_pushed_number: null,
+      listing_over_plan_limit: false,
+      amazon_account_id: 'amz-1',
+      amazon_order_id: 'AMZ-ORDER-1',
+      amazon_order_url: null,
+      amazon_tracking_url: 'https://www.amazon.com/progress-tracker/package?orderId=AMZ-ORDER-1',
+      order_date: new Date('2026-09-29T00:00:00Z'),
+      amazon_marketplace: 'AMAZON_US',
+      amazon_account_email: 'buyer@example.com',
+      listing_asin: 'B07VKDPXSB',
+      listing_title: 'Dress',
+    };
+    const dbService = {
+      query: jest.fn((sql: string): unknown[] => {
+        if (sql.includes('FROM orders o')) {
+          return [orderRow];
+        }
+        if (sql.includes('FROM store_settings')) {
+          return [settingsRow];
+        }
+        return [];
+      }),
+    } as unknown as DatabaseService;
+    const upsertOrders = jest.fn().mockResolvedValue({ success: true });
+    const assign = jest.fn().mockResolvedValue({
+      aquiline: 'AQUAA1234567890YQ',
+      chargedCents: 14,
+      planLimit: 300,
+      planUsed: 1,
+      planRemaining: 299,
+      reused: false,
+    });
+    const aquilineClient = {
+      isConfigured: () => true,
+      upsertOrders,
+      uploadTrackingHtml: jest.fn().mockResolvedValue({ success: true }),
+      assign,
+    } as unknown as AquilineClient;
+    const service = new TrackingConversionService(
+      dbService,
+      {
+        getString: jest.fn().mockResolvedValue(null),
+        getNumber: jest.fn().mockResolvedValue(null),
+      } as unknown as PlatformSettingsService,
+      aquilineClient,
+      {
+        isSuspended: jest.fn().mockResolvedValue(false),
+        canConvertTracking: jest.fn().mockResolvedValue({ allowed: true, used: 0, limitValue: 700 }),
+      } as unknown as QuotaEnforcementService,
+      { ensureProfile: jest.fn().mockResolvedValue('sh-user-1-AMAZON_US') } as unknown as AquilineProfileService,
+      { triggerImmediateTracking: jest.fn() } as unknown as AmazonTrackingQueueService
+    );
+    return { service, upsertOrders, assign };
+  }
+
+  const scopedSettings = {
+    tracking_conversion_provider: 'aquiline',
+    tracking_provider_profile_id: null,
+    tracking_conversion_scope: 'amazon_logistics_only',
+    tracking_convert_manual_orders: true,
+  };
+
+  it('HOLDS (retryable) when Amazon shipped but no tracking number/carrier could be read yet', async () => {
+    // With scope = Amazon Logistics only, an EMPTY raw number is not "a
+    // non-Amazon carrier the seller chose not to convert" — it is an unknown
+    // carrier. Passing through here marked the order shipped on eBay with NO
+    // tracking at all, and eBay's fulfillment call cannot be corrected later.
+    const { service, upsertOrders, assign } = build(scopedSettings);
+    const result = await service.resolveForOrder({ orderId: 'order-1', rawNumber: '', rawCarrier: '' });
+    expect(result.outcome).toBe(ConversionOutcome.PASSTHROUGH_RETRYABLE);
+    expect(upsertOrders).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('still passes a genuinely non-Amazon carrier through under the scoped setting', async () => {
+    const { service, assign } = build(scopedSettings);
+    const result = await service.resolveForOrder({
+      orderId: 'order-1',
+      rawNumber: '1Z999AA10123456784',
+      rawCarrier: 'UPS',
+    });
+    expect(result.outcome).toBe(ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('converts under scope=all even when the raw number is unknown — Aquiline reads the carrier from the HTML', async () => {
+    const { service, assign } = build({ ...scopedSettings, tracking_conversion_scope: 'all' });
+    const result = await service.resolveForOrder({
+      orderId: 'order-1',
+      rawNumber: '',
+      rawCarrier: '',
+      trackingUrl: 'https://www.amazon.com/progress-tracker/package?orderId=AMZ-ORDER-1',
+      trackingHtml: '<html>ship-track</html>',
+    });
+    expect(result.outcome).toBe(ConversionOutcome.CONVERTED);
+    expect(result.trackingNumber).toBe('AQUAA1234567890YQ');
+    expect(assign).toHaveBeenCalledTimes(1);
   });
 });
