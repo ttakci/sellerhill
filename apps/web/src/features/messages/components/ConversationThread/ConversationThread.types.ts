@@ -34,6 +34,8 @@ export interface ConversationThreadProps {
   isLoading: boolean;
   title: string;
   otherParty: string | null;
+  /** Single uppercase letter for the header avatar, resolved by the container. */
+  avatarLabel: string;
   referenceId: string | null;
   messages: ThreadMessageView[];
   actions: ThreadActionView[];

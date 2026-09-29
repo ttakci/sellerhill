@@ -14,7 +14,8 @@ export const Wrapper = styled.div`
   min-height: 0;
 `;
 
-/** Select-all row; becomes the bulk bar while rows are selected. */
+/** Select-all row; becomes the bulk bar while rows are selected. A faint
+ * tint sets it apart from the rows below as the list's own toolbar. */
 export const ListHeader = styled.div`
   display: flex;
   align-items: center;
@@ -22,6 +23,7 @@ export const ListHeader = styled.div`
   gap: ${tkn('spacing.sm')};
   min-height: 3rem;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.secondary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
@@ -44,8 +46,8 @@ export const Rows = styled.div`
 export const Row = styled.div<{ $active: boolean }>`
   display: flex;
   align-items: flex-start;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  gap: ${tkn('spacing.sm-md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   background: ${({ $active, theme }) => ($active ? theme.colors.table.rowSelected : 'transparent')};
   box-shadow: ${({ $active, theme }) =>
@@ -63,6 +65,24 @@ export const RowCheck = styled.div`
   align-items: center;
   flex: 0 0 auto;
   padding-top: ${tkn('spacing.2xs')};
+`;
+
+/**
+ * Initials avatar. Unread rows get the SOLID brand fill (the same
+ * treatment `table.rowSelectedAccent`-style emphasis uses elsewhere) so an
+ * unread conversation reads at a glance without relying on bold text alone;
+ * read rows get the quiet tint every brand-tinted disc in this app uses
+ * (`EmptyState`'s icon circle, `CardStat`'s icon tile).
+ */
+export const Avatar = styled.div<{ $unread: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${({ $unread, theme }) => ($unread ? theme.colors.brand.primary : theme.colors.brand.secondary)};
 `;
 
 export const RowMain = styled.div`

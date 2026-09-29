@@ -1,6 +1,14 @@
 /**
  * MessagesPage styles.
  *
+ * The inbox is ONE bordered/elevated shell (`Shell`) — rail, list and thread
+ * are divider-separated panes inside it, never three separate floating
+ * cards. That's what makes it read as a single mail surface instead of
+ * three boxes glued together with gaps. The filter row above it uses the
+ * same bordered/shadowed bar every other list page's toolbar does (see
+ * `OrdersAllPage.style.ts` `FilterBar`), so the page matches the rest of
+ * the app instead of inventing its own chrome.
+ *
  *   ≥ xl      folder rail | conversation list | thread
  *   md – xl   type + folder switch above  list | thread
  *   < md      one column: the list, or (with `?c=`) the thread
@@ -17,12 +25,18 @@ import { Card, PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
-/** Store filter row (and, below `lg`, the type/folder switches). */
+/** Store filter row (and, below `xl`, the type/folder switches) — the same
+ * bordered, shadowed bar every other list page's filter row uses. */
 export const Toolbar = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.lg')};
+  box-shadow: ${tkn('shadows.sm')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
 `;
 
 /** The rail's stand-in below `xl`; hidden once the rail itself is shown. */
@@ -53,7 +67,7 @@ export const StoreTrigger = styled.button`
   max-width: 14rem;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm-md')};
   border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.surface.primary')};
+  background: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   cursor: pointer;
   color: ${tkn('colors.text.primary')};
@@ -74,13 +88,19 @@ export const StoreLabel = styled.span`
   overflow: hidden;
 `;
 
-export const Layout = styled.div<{ $threadOpen: boolean }>`
+/**
+ * The whole inbox — one Card. `grid-template-rows: minmax(0, 1fr)` (not the
+ * implicit default) is load-bearing: it's what lets a grid item declare its
+ * own `min-height: 0` and scroll internally instead of stretching the whole
+ * shell to its content height.
+ */
+export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: ${tkn('spacing.md')};
-  align-items: stretch;
+  grid-template-rows: minmax(0, 1fr);
+  height: 74vh;
+  min-height: 32rem;
 
-  /* Below md: one pane at a time. */
   & > [data-pane='list'] {
     display: ${({ $threadOpen }) => ($threadOpen ? 'none' : 'flex')};
   }
@@ -103,7 +123,7 @@ export const Layout = styled.div<{ $threadOpen: boolean }>`
   }
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
-    grid-template-columns: 12rem minmax(16rem, 20rem) minmax(0, 1fr);
+    grid-template-columns: 13rem minmax(16rem, 20rem) minmax(0, 1fr);
 
     & > [data-pane='rail'] {
       display: flex;
@@ -111,10 +131,18 @@ export const Layout = styled.div<{ $threadOpen: boolean }>`
   }
 `;
 
-export const RailPane = styled(Card)`
+/** Tinted so the rail reads as a sidebar-within-the-card, not a fourth
+ * white box — the same `background.secondary` the thread's message canvas
+ * already uses for the same reason. */
+export const RailPane = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  align-self: start;
+  min-width: 0;
+  min-height: 0;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  overflow-y: auto;
+  background: ${tkn('colors.background.secondary')};
+  border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
 export const RailGroup = styled.nav`
@@ -153,22 +181,27 @@ export const RailItem = styled.button<{ $active: boolean }>`
   }
 `;
 
-/** The list card plus its detached pagination bar. */
+/** The scrolling conversation list plus its own footer pagination — both
+ * live inside the shell's own border, never a detached card underneath. */
 export const ListColumn = styled.div`
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
   min-width: 0;
+  min-height: 0;
+  border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
-/** List and thread panes: a card that scrolls its own content. */
-export const Pane = styled(Card)`
+export const ListScroll = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+  min-height: 0;
+`;
+
+/** Rightmost pane — no divider of its own. */
+export const ThreadPane = styled.div`
+  flex-direction: column;
   min-width: 0;
-  height: 70vh;
-  min-height: 28rem;
-  overflow: hidden;
+  min-height: 0;
 `;
 
 export const StateCard = styled(Card)`
