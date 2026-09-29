@@ -43,7 +43,8 @@
       "unarchive": "Aus Archiv holen",
       "delete": "Löschen",
       "refresh": "Aktualisieren",
-      "selected": "{{count}} ausgewählt"
+      "selected": "{{count}} ausgewählt",
+      "deleteConfirm": "Ausgewählte Unterhaltung(en) löschen? Sie erscheinen danach in keinem Ordner mehr."
     },
     "reconnect": {
       "title": "Diesen Shop erneut verbinden",

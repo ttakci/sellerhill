@@ -43,7 +43,8 @@
       "unarchive": "Desarquivar",
       "delete": "Excluir",
       "refresh": "Atualizar",
-      "selected": "{{count}} selecionada(s)"
+      "selected": "{{count}} selecionada(s)",
+      "deleteConfirm": "Excluir a(s) conversa(s) selecionada(s)? Elas não aparecerão mais em nenhuma pasta."
     },
     "reconnect": {
       "title": "Reconecte esta loja",

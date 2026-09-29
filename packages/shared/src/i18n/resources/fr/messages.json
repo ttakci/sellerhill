@@ -43,7 +43,8 @@
       "unarchive": "Désarchiver",
       "delete": "Supprimer",
       "refresh": "Actualiser",
-      "selected": "{{count}} sélectionné(s)"
+      "selected": "{{count}} sélectionné(s)",
+      "deleteConfirm": "Supprimer la ou les conversations sélectionnées ? Elles n'apparaîtront plus dans aucun dossier."
     },
     "reconnect": {
       "title": "Reconnecter cette boutique",

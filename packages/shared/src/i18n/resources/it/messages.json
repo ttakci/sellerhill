@@ -43,7 +43,8 @@
       "unarchive": "Rimuovi dall'archivio",
       "delete": "Elimina",
       "refresh": "Aggiorna",
-      "selected": "{{count}} selezionati"
+      "selected": "{{count}} selezionati",
+      "deleteConfirm": "Eliminare le conversazioni selezionate? Non compariranno più in nessuna cartella."
     },
     "reconnect": {
       "title": "Ricollega questo negozio",

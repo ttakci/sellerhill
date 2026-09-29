@@ -43,7 +43,8 @@
       "unarchive": "Arxivdən çıxar",
       "delete": "Sil",
       "refresh": "Yenilə",
-      "selected": "{{count}} seçildi"
+      "selected": "{{count}} seçildi",
+      "deleteConfirm": "Seçilmiş yazışmalar silinsin? Onlar artıq heç bir qovluqda görünməyəcək."
     },
     "reconnect": {
       "title": "Bu mağazanı yenidən qoşun",

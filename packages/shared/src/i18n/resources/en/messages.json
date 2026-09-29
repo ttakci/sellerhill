@@ -43,7 +43,8 @@
       "unarchive": "Unarchive",
       "delete": "Delete",
       "refresh": "Refresh",
-      "selected": "{{count}} selected"
+      "selected": "{{count}} selected",
+      "deleteConfirm": "Delete the selected conversation(s)? They will no longer appear in any folder."
     },
     "reconnect": {
       "title": "Reconnect this store",

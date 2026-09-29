@@ -43,7 +43,8 @@
       "unarchive": "Scoate din arhivă",
       "delete": "Șterge",
       "refresh": "Reîmprospătează",
-      "selected": "{{count}} selectate"
+      "selected": "{{count}} selectate",
+      "deleteConfirm": "Ștergi conversațiile selectate? Nu vor mai apărea în niciun dosar."
     },
     "reconnect": {
       "title": "Reconectează acest magazin",
