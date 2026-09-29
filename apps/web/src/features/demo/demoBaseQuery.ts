@@ -1,6 +1,8 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import {
   DashboardChartGranularity,
+  EbayConversationDto,
+  EbayConversationStatus,
   ListingStatus,
   OrderFulfillmentState,
   type ListingDto,
@@ -14,13 +16,16 @@ import {
   buildDemoBillingSummary,
   buildDemoDashboard,
   buildDemoOrderStats,
+  buildDemoUnread,
   demoJobItems,
   demoListingRevisions,
   demoStoreSettingsFor,
+  demoThread,
   DEMO_AMAZON_ACCOUNTS,
   DEMO_BILLING_CATALOG,
   DEMO_BUSINESS_POLICIES,
   DEMO_BUYER_MESSAGE_TEMPLATES,
+  DEMO_CONVERSATIONS,
   DEMO_EBAY_ACCOUNTS,
   DEMO_LISTING_CATEGORIES,
   DEMO_LISTING_GROUPS,
@@ -119,11 +124,19 @@ function demoWrite(path: string, body: unknown): { data: unknown } {
     return ok('sku,title,price,quantity\n');
   }
 
+  // The bulk-status caller reads `failed.length` off every chunk's result —
+  // the generic echo below has no such field, so this one write is mapped
+  // explicitly rather than letting a demo click throw.
+  if (path === '/ebay/messages/conversations/bulk-status') {
+    const conversationIds = (body as { conversationIds?: string[] } | null)?.conversationIds ?? [];
+    return ok({ succeeded: conversationIds, failed: [] });
+  }
+
   // Echo the request body so a container reading the "updated entity" back
   // still has the shape it expects; the refetch that follows restores the
   // fixture values.
   const echoed = body && typeof body === 'object' && !Array.isArray(body) ? body : {};
-  return ok({ id: 'demo-generated', success: true, count: 0, ...echoed });
+  return ok({ id: 'demo-generated', messageId: 'demo-generated', success: true, count: 0, ...echoed });
 }
 
 function paginate<T>(rows: T[], params: Record<string, string>) {
@@ -248,6 +261,30 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   return rows;
 }
 
+/* ── eBay Messages ────────────────────────────────────────────────────── */
+
+/**
+ * Mirrors the real endpoint's own contract: `type` is required, and `status`
+ * carries the folder rail's meaning — `UNREAD` filters by unread count rather
+ * than eBay's own `UNREAD` status, `ARCHIVE` matches the archived status, and
+ * no `status` at all (the "All" folder) means the live `ACTIVE` set.
+ */
+function filterConversations(params: Record<string, string>): EbayConversationDto[] {
+  let rows = DEMO_CONVERSATIONS.filter((conversation) => String(conversation.type) === params.type);
+
+  if (params.status === String(EbayConversationStatus.UNREAD)) {
+    rows = rows.filter((conversation) => conversation.unreadCount > 0);
+  } else if (params.status === String(EbayConversationStatus.ARCHIVE)) {
+    rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ARCHIVE);
+  } else {
+    rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ACTIVE);
+  }
+
+  return rows.sort((a, b) =>
+    (b.latestMessage?.createdAt ?? b.createdAt).localeCompare(a.latestMessage?.createdAt ?? a.createdAt)
+  );
+}
+
 /* ── Template catalog ─────────────────────────────────────────────────── */
 
 /** The real catalog, written by `scripts/build-template-previews.mjs`. */
@@ -318,6 +355,20 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/ebay/accounts') {
     return ok(DEMO_EBAY_ACCOUNTS);
+  }
+
+  if (path === '/ebay/messages/unread-count') {
+    return ok(buildDemoUnread());
+  }
+
+  if (path === '/ebay/messages/conversations') {
+    return ok(paginate(filterConversations(params), params));
+  }
+
+  const conversationThread = /^\/ebay\/messages\/conversations\/([\w-]+)$/.exec(path);
+  if (conversationThread) {
+    const thread = demoThread(conversationThread[1]);
+    return thread ? ok(thread) : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
   if (path === '/listings') {
