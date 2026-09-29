@@ -1,0 +1,59 @@
+{
+  "messages": {
+    "page": {
+      "title": "Mensajes",
+      "subtitle": "Lee y responde tus mensajes de eBay desde aquí"
+    },
+    "folders": {
+      "members": "De miembros",
+      "ebay": "De eBay",
+      "all": "Todos",
+      "unread": "No leídos",
+      "archive": "Archivo"
+    },
+    "list": {
+      "empty": "Todavía no hay conversaciones.",
+      "emptyUnread": "No hay conversaciones sin leer.",
+      "emptyArchive": "No hay conversaciones archivadas.",
+      "loading": "Cargando conversaciones…",
+      "unreadOne": "{{count}} mensaje sin leer",
+      "unreadOther": "{{count}} mensajes sin leer",
+      "listing": "Sobre {{title}}",
+      "select": "Seleccionar",
+      "selectAll": "Seleccionar todo",
+      "noStores": "Conecta una tienda de eBay para ver tus mensajes."
+    },
+    "thread": {
+      "empty": "Selecciona una conversación para verla.",
+      "loading": "Cargando conversación…",
+      "reply": "Responder",
+      "replyPlaceholder": "Escribe tu respuesta…",
+      "send": "Enviar",
+      "sent": "Mensaje enviado",
+      "noReply": "No se puede responder a esta conversación.",
+      "attachment": "Archivo adjunto",
+      "you": "Tú",
+      "backToList": "Volver a mensajes",
+      "chars": "{{count}}/{{max}} caracteres"
+    },
+    "actions": {
+      "markRead": "Marcar como leído",
+      "markUnread": "Marcar como no leído",
+      "archive": "Archivar",
+      "unarchive": "Desarchivar",
+      "delete": "Eliminar",
+      "refresh": "Actualizar",
+      "selected": "{{count}} seleccionado(s)"
+    },
+    "reconnect": {
+      "title": "Reconecta esta tienda",
+      "description": "Esta tienda se conectó antes de que existiera la mensajería. Reconéctala a eBay para leer y responder mensajes.",
+      "action": "Reconectar"
+    },
+    "toast": {
+      "archived": "Conversación archivada",
+      "deleted": "Conversación eliminada",
+      "read": "Marcado como leído"
+    }
+  }
+}

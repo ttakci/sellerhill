@@ -44,6 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onLocaleNavigate,
   pendingActionCount,
   hasCriticalActions,
+  unreadMessageCount,
   i18nLanguage,
   billingUsageRows,
   billingPlanName,
@@ -151,6 +152,33 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   <Icon name="shopping-bag" size={20} />
                   {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.orders')}</S.NavItemLabel>}
                 </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <NavTooltip
+              label={
+                unreadMessageCount > 0
+                  ? `${t('translation:menu.messages')} (${unreadMessageCount})`
+                  : t('translation:menu.messages')
+              }
+              collapsed={sidebarCollapsed}
+            >
+              <S.NavItem
+                $active={pathWithoutLocale === '/messages'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/messages')}
+                aria-label={t('translation:menu.messages')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="mail" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.messages')}</S.NavItemLabel>}
+                </S.NavItemContent>
+                {unreadMessageCount > 0 &&
+                  (sidebarCollapsed ? (
+                    <S.NavBadgeDot $urgent={false} />
+                  ) : (
+                    <S.NavBadge $urgent={false}>{unreadMessageCount}</S.NavBadge>
+                  ))}
               </S.NavItem>
             </NavTooltip>
 

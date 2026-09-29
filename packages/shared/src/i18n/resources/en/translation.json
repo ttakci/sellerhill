@@ -118,6 +118,7 @@
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
+    "messages": "Messages",
     "stores": "Stores",
     "billing": "Billing",
     "settings": "Settings",

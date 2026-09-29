@@ -1,0 +1,59 @@
+{
+  "messages": {
+    "page": {
+      "title": "Mesaje",
+      "subtitle": "Citește și răspunde la mesajele tale eBay de aici"
+    },
+    "folders": {
+      "members": "De la membri",
+      "ebay": "De la eBay",
+      "all": "Toate",
+      "unread": "Necitite",
+      "archive": "Arhivă"
+    },
+    "list": {
+      "empty": "Nu există încă nicio conversație.",
+      "emptyUnread": "Nu există conversații necitite.",
+      "emptyArchive": "Nu există conversații arhivate.",
+      "loading": "Se încarcă conversațiile…",
+      "unreadOne": "{{count}} mesaj necitit",
+      "unreadOther": "{{count}} mesaje necitite",
+      "listing": "Referitor la {{title}}",
+      "select": "Selectează",
+      "selectAll": "Selectează tot",
+      "noStores": "Conectează un magazin eBay pentru a-ți vedea mesajele."
+    },
+    "thread": {
+      "empty": "Selectează o conversație pentru a o vizualiza.",
+      "loading": "Se încarcă conversația…",
+      "reply": "Răspunde",
+      "replyPlaceholder": "Scrie răspunsul tău…",
+      "send": "Trimite",
+      "sent": "Mesaj trimis",
+      "noReply": "Nu se poate răspunde la această conversație.",
+      "attachment": "Atașament",
+      "you": "Tu",
+      "backToList": "Înapoi la mesaje",
+      "chars": "{{count}}/{{max}} caractere"
+    },
+    "actions": {
+      "markRead": "Marchează ca citit",
+      "markUnread": "Marchează ca necitit",
+      "archive": "Arhivează",
+      "unarchive": "Scoate din arhivă",
+      "delete": "Șterge",
+      "refresh": "Reîmprospătează",
+      "selected": "{{count}} selectate"
+    },
+    "reconnect": {
+      "title": "Reconectează acest magazin",
+      "description": "Acest magazin a fost conectat înainte să existe suportul pentru mesagerie. Reconectează-l la eBay pentru a citi și a răspunde la mesaje.",
+      "action": "Reconectează"
+    },
+    "toast": {
+      "archived": "Conversație arhivată",
+      "deleted": "Conversație ștearsă",
+      "read": "Marcat ca citit"
+    }
+  }
+}

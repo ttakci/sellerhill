@@ -107,6 +107,7 @@ export const baseApi = createApi({
     'Billing',
     'BuyerMessagingConfig',
     'BuyerMessageTemplates',
+    'Messages',
   ],
   endpoints: () => ({}),
 });

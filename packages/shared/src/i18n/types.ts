@@ -22,6 +22,7 @@ import type dashboard from './resources/en/dashboard.json';
 import type ebay from './resources/en/ebay.json';
 import type listings from './resources/en/listings.json';
 import type listingSettingsGroup from './resources/en/listingSettingsGroup.json';
+import type messages from './resources/en/messages.json';
 import type orders from './resources/en/orders.json';
 import type profile from './resources/en/profile.json';
 import type storeSettings from './resources/en/storeSettings.json';
@@ -39,6 +40,7 @@ export type TranslationResource = typeof en &
   typeof dashboard &
   typeof listings &
   typeof listingSettingsGroup &
+  typeof messages &
   typeof orders &
   typeof profile &
   typeof storeSettings;

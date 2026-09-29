@@ -73,6 +73,9 @@ const ListingJobDetailsPage = lazy(() =>
 const ListingJobsPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingJobsPage }))
 );
+const MessagesPage = lazy(() =>
+  import('./features/messages').then((m) => ({ default: m.MessagesPageContainer }))
+);
 const ListingsAllPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingsAllPage }))
 );
@@ -322,6 +325,14 @@ export function App() {
                 </Lazy>
               }
             />
+            <Route
+              path="messages"
+              element={
+                <Lazy>
+                  <MessagesPage />
+                </Lazy>
+              }
+            />
             <Route path="profile" element={<Navigate to="../settings" replace />} />
             <Route index element={<Navigate to="register" replace />} />
           </Route>
@@ -366,6 +377,7 @@ export function App() {
         <Route path="/reset-password" element={<LocaleRedirect to="reset-password" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
+        <Route path="/messages" element={<LocaleRedirect to="messages" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" preserveQuery />} />
         {/*
