@@ -87,6 +87,14 @@ export enum PlatformSettingKey {
   /** Admin warning threshold: share of scraper requests blocked in the last hour. */
   SCRAPER_BLOCK_RATE_WARN_PERCENT = 'scraper.blockRateWarnPercent',
 
+  // --- Amazon Best Sellers browsing (2026-09-29) ---
+  /** Master switch for the seller-facing Best Sellers page. Off = the endpoint answers 404 and the menu item hides. */
+  BEST_SELLERS_ENABLED = 'bestSellers.enabled',
+  /** How long one fetched list page (list type × category × page) is served from the shared cache before it is fetched again. */
+  BEST_SELLERS_CACHE_TTL_MINUTES = 'bestSellers.cacheTtlMinutes',
+  /** Per-seller ceiling on live (cache-miss) list fetches per UTC day. Cache hits are free. */
+  BEST_SELLERS_DAILY_FETCH_LIMIT = 'bestSellers.dailyFetchLimit',
+
   // --- eBay API call budget (quotas are per APPLICATION, shared by all users) ---
   // Per-resource ceilings are no longer typed in here — the governor takes
   // them from eBay's own `getRateLimits` response (EbayRateLimitStore).

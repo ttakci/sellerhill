@@ -93,6 +93,9 @@ export * from './domain/dashboard/index';
 // Domain - Action Center
 export * from './domain/action-center/index';
 
+// Domain - Best Sellers (Amazon ranking lists browsing)
+export * from './domain/best-sellers/index';
+
 // Domain - Amazon
 export * from './domain/amazon/index';
 
