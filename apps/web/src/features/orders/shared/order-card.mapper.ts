@@ -1,4 +1,4 @@
-import { ProfitBasis, type OrderDto } from '@repo/shared';
+import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
 import type { OrderCardProps } from './OrderCard';
@@ -72,6 +72,14 @@ export const toOrderCardProps = (
   }
   if (order.profitBasis === ProfitBasis.ESTIMATED) {
     statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
+  }
+  // The blocked reason is what makes "Purchase blocked" actionable — the
+  // table column shows it inline, so the card must too.
+  if (order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason) {
+    statsBadges.push({
+      label: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
+      variant: 'error',
+    });
   }
 
   return {
