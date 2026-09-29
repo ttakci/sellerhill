@@ -1,7 +1,12 @@
 import { AmazonMarketplace } from '@repo/shared';
 
 import type { AmazonAccountsService } from './amazon-accounts.service';
-import { AmazonOrderParserService, resolveTrackingCarrier } from './amazon-order-parser.service';
+import {
+  AmazonOrderParserService,
+  extractTrackingNumberFromText,
+  normalizeAmazonStatus,
+  resolveTrackingCarrier,
+} from './amazon-order-parser.service';
 import type { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import {
   AmazonScrapingService,
@@ -62,9 +67,7 @@ describe('resolveTrackingCarrier', () => {
     // "amazon logistics" LAST, so any page containing a word like "groups"
     // labelled an Amazon Logistics shipment as UPS — which then silently failed
     // the default amazon_logistics_only conversion scope.
-    expect(resolveTrackingCarrier('TBA303940404000', 'Join our groups for updates')).toBe(
-      'Amazon Logistics',
-    );
+    expect(resolveTrackingCarrier('TBA303940404000', 'Join our groups for updates')).toBe('Amazon Logistics');
   });
 
   it('still recognises a real UPS number', () => {
@@ -84,9 +87,7 @@ describe('isTrustedAmazonTrackingUrl', () => {
   const origin = 'https://www.amazon.com';
 
   it('accepts a same-host relative href resolved against the marketplace origin', () => {
-    expect(isTrustedAmazonTrackingUrl('/progress-tracker/package/?orderId=1&packageIndex=0', origin)).toBe(
-      true,
-    );
+    expect(isTrustedAmazonTrackingUrl('/progress-tracker/package/?orderId=1&packageIndex=0', origin)).toBe(true);
   });
 
   it('accepts a same-host absolute https href', () => {
@@ -148,12 +149,7 @@ describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — untrusted 
       schedule: jest.fn((_accountId: string, fn: () => Promise<unknown>) => fn()),
     } as unknown as AmazonRateLimiter;
 
-    const service = new AmazonScrapingService(
-      accountsService,
-      parserService,
-      browserStateManager,
-      rateLimiter,
-    );
+    const service = new AmazonScrapingService(accountsService, parserService, browserStateManager, rateLimiter);
 
     const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
 
@@ -214,18 +210,11 @@ describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — untrusted 
       schedule: jest.fn((_accountId: string, fn: () => Promise<unknown>) => fn()),
     } as unknown as AmazonRateLimiter;
 
-    const service = new AmazonScrapingService(
-      accountsService,
-      parserService,
-      browserStateManager,
-      rateLimiter,
-    );
+    const service = new AmazonScrapingService(accountsService, parserService, browserStateManager, rateLimiter);
 
     const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
 
-    expect(result.trackingUrl).toBe(
-      'https://www.amazon.com/progress-tracker/package/?orderId=111-222&packageIndex=0',
-    );
+    expect(result.trackingUrl).toBe('https://www.amazon.com/progress-tracker/package/?orderId=111-222&packageIndex=0');
     // Absolute, on the marketplace host, and parseable as a URL on its own —
     // which a relative href is not.
     expect(new URL(result.trackingUrl as string).hostname).toBe('www.amazon.com');
@@ -241,14 +230,14 @@ describe('resolveTrustedAmazonTrackingUrl', () => {
 
   it('absolutizes a relative href against the marketplace origin', () => {
     expect(resolveTrustedAmazonTrackingUrl('/progress-tracker/package/?orderId=1', origin)).toBe(
-      'https://www.amazon.com/progress-tracker/package/?orderId=1',
+      'https://www.amazon.com/progress-tracker/package/?orderId=1'
     );
   });
 
   it('preserves the package index, which is what makes the page unambiguous', () => {
-    expect(
-      resolveTrustedAmazonTrackingUrl('/gp/your-account/ship-track?orderId=1&packageIndex=2', origin),
-    ).toBe('https://www.amazon.com/gp/your-account/ship-track?orderId=1&packageIndex=2');
+    expect(resolveTrustedAmazonTrackingUrl('/gp/your-account/ship-track?orderId=1&packageIndex=2', origin)).toBe(
+      'https://www.amazon.com/gp/your-account/ship-track?orderId=1&packageIndex=2'
+    );
   });
 
   it('returns null — never a relative string — for an untrusted host', () => {
@@ -269,9 +258,108 @@ describe('resolveTrustedAmazonTrackingUrl', () => {
       'http://[::1',
     ];
     for (const href of cases) {
-      expect(resolveTrustedAmazonTrackingUrl(href, origin) !== null).toBe(
-        isTrustedAmazonTrackingUrl(href, origin),
-      );
+      expect(resolveTrustedAmazonTrackingUrl(href, origin) !== null).toBe(isTrustedAmazonTrackingUrl(href, origin));
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// First live order (113-0158186-6357035, 2026-09-29). The order-details summary
+// reads, as one textContent string:
+//   Item(s) Subtotal:$13.91 Shipping & Handling:$0.00 Total before tax:$13.91
+//   Estimated tax to be collected:$0.97 Grand Total:$14.88
+// The old /tax[:\s]*\$?(\d…)/ matched "Total before tax:$13.91" first, so the
+// order was linked with amazon_tax = 13.91 and net_profit = −11.91.
+// ---------------------------------------------------------------------------
+describe('parseFinancialsFromText against the real Amazon order-summary layout', () => {
+  const service = new AmazonOrderParserService();
+  const REAL_SUMMARY =
+    'Order Summary Item(s) Subtotal:$13.91Shipping & Handling:$0.00Total before tax:$13.91Estimated tax to be collected:$0.97Grand Total:$14.88';
+
+  it('reads the tax from "Estimated tax to be collected", never from "Total before tax"', () => {
+    const result = service.parseFinancialsFromText(REAL_SUMMARY);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.subtotal).toBeCloseTo(13.91, 2);
+      expect(result.shipping).toBe(0);
+      expect(result.tax).toBeCloseTo(0.97, 2);
+      expect(result.grandTotal).toBeCloseTo(14.88, 2);
+    }
+  });
+
+  it('reads "Shipping & Handling" as the shipping line', () => {
+    const result = service.parseFinancialsFromText(
+      'Item(s) Subtotal:$10.00Shipping & Handling:$4.99Total before tax:$14.99Estimated tax to be collected:$1.20Grand Total:$16.19'
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.shipping).toBeCloseTo(4.99, 2);
+      expect(result.tax).toBeCloseTo(1.2, 2);
+      expect(result.grandTotal).toBeCloseTo(16.19, 2);
+    }
+  });
+
+  it('never lets "Subtotal" feed the grand total when "Grand Total" is absent', () => {
+    const result = service.parseFinancialsFromText('Item(s) Subtotal:$13.91 Order Total:$14.88');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.grandTotal).toBeCloseTo(14.88, 2);
+    }
+  });
+});
+
+describe('extractTrackingNumberFromText', () => {
+  it('returns the number after a "Tracking ID" label', () => {
+    expect(extractTrackingNumberFromText('Tracking ID: TBA303940404000 Shipped with Amazon')).toBe('TBA303940404000');
+  });
+
+  it('recognises a real UPS number', () => {
+    expect(extractTrackingNumberFromText('Carrier: UPS 1Z999AA10123456784')).toBe('1Z999AA10123456784');
+  });
+
+  it('refuses the script-blob string the first live order was stamped with', () => {
+    // Uppercase letters after "1Z" with no digits — a real UPS number carries
+    // ten digits. This came out of <script> text via page.textContent('body').
+    expect(extractTrackingNumberFromText('window.x="1ZAUXFMSEBKUFEFJRA";')).toBeUndefined();
+  });
+
+  it('never reads an Amazon order id or a phone number as a tracking number', () => {
+    expect(
+      extractTrackingNumberFromText('Order # 113-0158186-6357035 Phone 8434081812 Arriving tomorrow')
+    ).toBeUndefined();
+  });
+
+  it('never returns a lowercase or mixed-case word after "tracking"', () => {
+    expect(extractTrackingNumberFromText('tracking information will appear here')).toBeUndefined();
+  });
+});
+
+describe('normalizeAmazonStatus', () => {
+  it('maps the unrecognised "Grand Total:" label to pending, never to itself', () => {
+    expect(normalizeAmazonStatus('Grand Total:')).toBe('pending');
+  });
+
+  it('treats an ETA ("Arriving tomorrow") as not yet shipped', () => {
+    expect(normalizeAmazonStatus('Arriving tomorrow')).toBe('pending');
+    expect(normalizeAmazonStatus('Arriving Monday')).toBe('pending');
+  });
+
+  it('recognises shipped, out for delivery, delivered and cancelled', () => {
+    expect(normalizeAmazonStatus('Shipped')).toBe('shipped');
+    expect(normalizeAmazonStatus('Out for delivery')).toBe('shipped');
+    expect(normalizeAmazonStatus('On the way')).toBe('shipped');
+    expect(normalizeAmazonStatus('Delivered September 30')).toBe('delivered');
+    expect(normalizeAmazonStatus('Cancelled')).toBe('cancelled');
+  });
+
+  it('keeps "not yet shipped" pre-ship', () => {
+    expect(normalizeAmazonStatus('Not yet shipped')).toBe('pending');
+    expect(normalizeAmazonStatus('Preparing for shipment')).toBe('processing');
+  });
+});
+
+describe('resolveTrackingCarrier tightened UPS shape', () => {
+  it('does not call a digitless 1Z string UPS', () => {
+    expect(resolveTrackingCarrier('1ZAUXFMSEBKUFEFJRA', '')).toBeUndefined();
   });
 });

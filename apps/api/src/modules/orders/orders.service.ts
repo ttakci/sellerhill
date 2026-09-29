@@ -304,16 +304,12 @@ export class OrdersService {
   /**
    * Update Amazon order details and recalculate profit
    */
-  async updateAmazonDetails(
-    userId: string,
-    id: string,
-    updateDto: UpdateOrderAmazonDetailsDto
-  ): Promise<OrderDto> {
+  async updateAmazonDetails(userId: string, id: string, updateDto: UpdateOrderAmazonDetailsDto): Promise<OrderDto> {
     // Verify ownership
-    const existing = await this.databaseService.query<OrderRow>(
-      `SELECT * FROM orders WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const existing = await this.databaseService.query<OrderRow>(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [
+      id,
+      userId,
+    ]);
 
     if (existing.length === 0) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -379,10 +375,10 @@ export class OrdersService {
     await this.orderSyncService.recomputeProfit(order.ebay_order_id);
 
     // Fetch updated order
-    const updated = await this.databaseService.query<OrderRow>(
-      `SELECT * FROM orders WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const updated = await this.databaseService.query<OrderRow>(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [
+      id,
+      userId,
+    ]);
 
     return this.mapRowToDto(updated[0]);
   }
@@ -390,7 +386,9 @@ export class OrdersService {
   /**
    * Trigger manual order sync for a user via queue and return fresh data
    */
-  async triggerSync(userId: string): Promise<{ orders: OrderDto[]; total: number; stats: OrderStatsDto; message: string }> {
+  async triggerSync(
+    userId: string
+  ): Promise<{ orders: OrderDto[]; total: number; stats: OrderStatsDto; message: string }> {
     const accounts = await this.databaseService.query<{ id: string }>(
       `SELECT id FROM ebay_accounts WHERE user_id = $1 AND status = $2`,
       [userId, EbayAccountStatus.ACTIVE]
@@ -416,15 +414,19 @@ export class OrdersService {
   }
 
   private resolveImageUrl(raw: string[] | string | undefined): string | undefined {
-    if (!raw) {return undefined;}
-    const urls = Array.isArray(raw) ? raw : (() => {
-      try {
-        const parsed: unknown = JSON.parse(String(raw));
-        return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
-      } catch {
-        return [];
-      }
-    })();
+    if (!raw) {
+      return undefined;
+    }
+    const urls = Array.isArray(raw)
+      ? raw
+      : (() => {
+          try {
+            const parsed: unknown = JSON.parse(String(raw));
+            return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+          } catch {
+            return [];
+          }
+        })();
     return urls[0] || undefined;
   }
 
@@ -448,32 +450,25 @@ export class OrdersService {
       isTracked: !!row.listing_id,
       buyerName: row.buyer_name || undefined,
       buyerEmail: row.buyer_email || undefined,
-      buyerPhone: row.buyer_phone || undefined,
+      // eBay puts the buyer's phone on the ship-to address (`primaryPhone`),
+      // not on the registration address `buyer_phone` is filled from — so the
+      // number was in `shipping_address.phone` and never shown.
+      buyerPhone: row.buyer_phone || shippingAddress?.phone || undefined,
       buyerUsername: row.buyer_username || undefined,
       status: row.status as OrderStatus,
-      costCaptureStatus: row.cost_capture_status
-        ? (row.cost_capture_status as OrderCostCaptureStatus)
-        : undefined,
-      profitBasis: deriveProfitBasis(
-        row.cost_capture_status as OrderCostCaptureStatus,
-      ),
-      autoFulfillStatus: row.auto_fulfill_status
-        ? (row.auto_fulfill_status as AutoFulfillStatus)
-        : undefined,
+      costCaptureStatus: row.cost_capture_status ? (row.cost_capture_status as OrderCostCaptureStatus) : undefined,
+      profitBasis: deriveProfitBasis(row.cost_capture_status as OrderCostCaptureStatus),
+      autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : undefined,
       autoFulfillBlockedReason: row.auto_fulfill_blocked_reason
         ? (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReason)
         : null,
-      amazonCancelledAt: row.amazon_cancelled_at
-        ? row.amazon_cancelled_at.toISOString()
-        : null,
+      amazonCancelledAt: row.amazon_cancelled_at ? row.amazon_cancelled_at.toISOString() : null,
       // Derive the seller-facing state once, here, so the list, the detail page
       // and the filter cannot drift apart on the precedence rules.
       isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
       fulfillmentState: deriveFulfillmentState({
         status: row.status as OrderStatus,
-        autoFulfillStatus: row.auto_fulfill_status
-          ? (row.auto_fulfill_status as AutoFulfillStatus)
-          : null,
+        autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : null,
         amazonOrderId: row.amazon_order_id,
         amazonCancelledAt: row.amazon_cancelled_at,
         isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
