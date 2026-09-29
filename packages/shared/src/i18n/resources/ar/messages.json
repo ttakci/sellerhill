@@ -16,8 +16,6 @@
       "emptyUnread": "لا توجد محادثات غير مقروءة.",
       "emptyArchive": "لا توجد محادثات مؤرشفة.",
       "loading": "جارٍ تحميل المحادثات…",
-      "unreadOne": "رسالة واحدة غير مقروءة",
-      "unreadOther": "{{count}} رسالة غير مقروءة",
       "listing": "بخصوص {{title}}",
       "select": "تحديد",
       "selectAll": "تحديد الكل",

@@ -16,8 +16,6 @@
       "emptyUnread": "Keine ungelesenen Unterhaltungen.",
       "emptyArchive": "Keine archivierten Unterhaltungen.",
       "loading": "Unterhaltungen werden geladen…",
-      "unreadOne": "{{count}} ungelesene Nachricht",
-      "unreadOther": "{{count}} ungelesene Nachrichten",
       "listing": "Betrifft {{title}}",
       "select": "Auswählen",
       "selectAll": "Alle auswählen",

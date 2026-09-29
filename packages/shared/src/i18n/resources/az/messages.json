@@ -16,8 +16,6 @@
       "emptyUnread": "Oxunmamış yazışma yoxdur.",
       "emptyArchive": "Arxivlənmiş yazışma yoxdur.",
       "loading": "Yazışmalar yüklənir…",
-      "unreadOne": "{{count}} oxunmamış mesaj",
-      "unreadOther": "{{count}} oxunmamış mesaj",
       "listing": "{{title}} ilə bağlı",
       "select": "Seç",
       "selectAll": "Hamısını seç",

@@ -16,8 +16,6 @@
       "emptyUnread": "कोई अपठित बातचीत नहीं है।",
       "emptyArchive": "कोई संग्रहीत बातचीत नहीं है।",
       "loading": "बातचीत लोड हो रही है…",
-      "unreadOne": "{{count}} अपठित संदेश",
-      "unreadOther": "{{count}} अपठित संदेश",
       "listing": "{{title}} के संबंध में",
       "select": "चुनें",
       "selectAll": "सभी चुनें",

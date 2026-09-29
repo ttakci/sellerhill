@@ -16,8 +16,6 @@
       "emptyUnread": "没有未读对话。",
       "emptyArchive": "没有已归档的对话。",
       "loading": "正在加载对话…",
-      "unreadOne": "{{count}} 条未读消息",
-      "unreadOther": "{{count}} 条未读消息",
       "listing": "关于 {{title}}",
       "select": "选择",
       "selectAll": "全选",

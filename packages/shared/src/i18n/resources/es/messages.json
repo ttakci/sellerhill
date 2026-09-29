@@ -16,8 +16,6 @@
       "emptyUnread": "No hay conversaciones sin leer.",
       "emptyArchive": "No hay conversaciones archivadas.",
       "loading": "Cargando conversaciones…",
-      "unreadOne": "{{count}} mensaje sin leer",
-      "unreadOther": "{{count}} mensajes sin leer",
       "listing": "Sobre {{title}}",
       "select": "Seleccionar",
       "selectAll": "Seleccionar todo",

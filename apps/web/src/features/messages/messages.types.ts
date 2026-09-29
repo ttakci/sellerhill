@@ -16,6 +16,8 @@ export interface MessagesActionsInput {
   /** Changes whenever the list scope changes (store/type/folder/page): selection resets. */
   scopeKey: string;
   openConversation: (id: string | null) => void;
+  /** Called with the ids just marked UNREAD, so the inbox's once-per-id mark-read guard forgets them. */
+  onMarkedUnread: (ids: string[]) => void;
 }
 
 /** The Messages page's URL-backed state (`?store=&type=&folder=&c=&page=`). */

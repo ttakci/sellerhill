@@ -16,8 +16,6 @@
       "emptyUnread": "Aucune conversation non lue.",
       "emptyArchive": "Aucune conversation archivée.",
       "loading": "Chargement des conversations…",
-      "unreadOne": "{{count}} message non lu",
-      "unreadOther": "{{count}} messages non lus",
       "listing": "Concernant {{title}}",
       "select": "Sélectionner",
       "selectAll": "Tout sélectionner",

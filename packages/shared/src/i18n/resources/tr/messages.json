@@ -16,8 +16,6 @@
       "emptyUnread": "Okunmamış konuşma yok.",
       "emptyArchive": "Arşivlenmiş konuşma yok.",
       "loading": "Konuşmalar yükleniyor…",
-      "unreadOne": "{{count}} okunmamış mesaj",
-      "unreadOther": "{{count}} okunmamış mesaj",
       "listing": "{{title}} hakkında",
       "select": "Seç",
       "selectAll": "Tümünü seç",

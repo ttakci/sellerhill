@@ -16,8 +16,6 @@
       "emptyUnread": "کوئی غیر پڑھی گفتگو نہیں ہے۔",
       "emptyArchive": "کوئی آرکائیو شدہ گفتگو نہیں ہے۔",
       "loading": "گفتگو لوڈ ہو رہی ہے…",
-      "unreadOne": "{{count}} غیر پڑھا پیغام",
-      "unreadOther": "{{count}} غیر پڑھے پیغامات",
       "listing": "{{title}} کے بارے میں",
       "select": "منتخب کریں",
       "selectAll": "تمام منتخب کریں",

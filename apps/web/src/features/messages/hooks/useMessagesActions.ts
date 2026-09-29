@@ -38,6 +38,7 @@ export function useMessagesActions({
   pageIds,
   scopeKey,
   openConversation,
+  onMarkedUnread,
 }: MessagesActionsInput) {
   const { i18n } = useTranslation(['messages', 'translation']);
   const { showMessage, closeMessage } = useUI();
@@ -146,6 +147,10 @@ export function useMessagesActions({
           ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type, read }).unwrap()),
         );
         setSelected(new Set());
+        if (!read) {
+          // Reopening one of these must mark it read again.
+          onMarkedUnread(ids);
+        }
         // Marking the open thread unread returns to the list — staying on it
         // would leave a thread on screen that the inbox now calls unread.
         if (!read && conversationId && ids.includes(conversationId)) {
@@ -155,7 +160,7 @@ export function useMessagesActions({
         showError(error as MessagesApiError);
       }
     },
-    [ebayAccountId, type, conversationId, setConversationRead, openConversation, showError],
+    [ebayAccountId, type, conversationId, setConversationRead, openConversation, onMarkedUnread, showError],
   );
 
   /** Deleting has no undo here, so it asks first. */

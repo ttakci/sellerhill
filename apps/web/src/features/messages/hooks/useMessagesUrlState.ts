@@ -20,15 +20,19 @@ export const MESSAGES_THREAD_LIMIT = 50;
 const parseEnum = <T extends string>(raw: string | null, allowed: T[], fallback: T): T =>
   allowed.includes(raw as T) ? (raw as T) : fallback;
 
-/** The folder rail is a client grouping; this is the `status` it sends to the API. */
-export function folderToStatus(folder: MessagesFolder): EbayConversationStatus | undefined {
+/**
+ * The folder rail is a client grouping; this is the `conversation_status` it
+ * sends to eBay. "All" sends ACTIVE so archived and deleted conversations never
+ * appear there; UNREAD and ARCHIVE are filtered by eBay itself.
+ */
+export function folderToStatus(folder: MessagesFolder): EbayConversationStatus {
   if (folder === MessagesFolder.UNREAD) {
     return EbayConversationStatus.UNREAD;
   }
   if (folder === MessagesFolder.ARCHIVE) {
     return EbayConversationStatus.ARCHIVE;
   }
-  return undefined;
+  return EbayConversationStatus.ACTIVE;
 }
 
 export function useMessagesUrlState(): UseMessagesUrlStateResult {

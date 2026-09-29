@@ -16,8 +16,6 @@
       "emptyUnread": "Nessuna conversazione non letta.",
       "emptyArchive": "Nessuna conversazione archiviata.",
       "loading": "Caricamento conversazioni…",
-      "unreadOne": "{{count}} messaggio non letto",
-      "unreadOther": "{{count}} messaggi non letti",
       "listing": "Riguardo a {{title}}",
       "select": "Seleziona",
       "selectAll": "Seleziona tutto",

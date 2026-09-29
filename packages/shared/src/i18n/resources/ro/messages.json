@@ -16,8 +16,6 @@
       "emptyUnread": "Nu există conversații necitite.",
       "emptyArchive": "Nu există conversații arhivate.",
       "loading": "Se încarcă conversațiile…",
-      "unreadOne": "{{count}} mesaj necitit",
-      "unreadOther": "{{count}} mesaje necitite",
       "listing": "Referitor la {{title}}",
       "select": "Selectează",
       "selectAll": "Selectează tot",

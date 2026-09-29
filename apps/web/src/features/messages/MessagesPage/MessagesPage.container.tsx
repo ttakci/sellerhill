@@ -54,6 +54,10 @@ const EMPTY_KEY: Record<MessagesFolder, string> = {
   [MessagesFolder.ARCHIVE]: 'messages.list.emptyArchive',
 };
 
+/** Attachments render only over https. */
+const isSafeMediaUrl = (url: string | null | undefined): boolean =>
+  typeof url === 'string' && url.startsWith('https://');
+
 /** List snippets are one line: collapse the message's own line breaks. */
 const toSnippet = (body: string | undefined): string => (body ?? '').replace(/\s+/g, ' ').trim();
 
@@ -85,6 +89,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
     pageIds,
     scopeKey: `${inbox.ebayAccountId}|${type}|${folder}|${page}`,
     openConversation,
+    onMarkedUnread: inbox.forgetMarkedRead,
   });
   const { selectedIds, applyRead, applyStatus, confirmDelete } = actions;
 
@@ -195,12 +200,17 @@ export const MessagesPageContainer = (): React.ReactElement => {
           senderLabel: mine ? t('messages.thread.you') : message.senderUsername,
           isMine: mine,
           date: formatMessageDate(message.createdAt),
-          media: message.media.map((media, index) => ({
-            key: `${message.messageId}-${index}`,
-            name: media.mediaName,
-            url: media.mediaUrl,
-            isImage: String(media.mediaType) === String(EbayMessageMediaType.IMAGE),
-          })),
+          // Only https links become an <a href>/<img src>: a media URL is
+          // eBay-supplied text, and anything else (javascript:, data:, http:)
+          // is dropped rather than rendered.
+          media: message.media
+            .filter((media) => isSafeMediaUrl(media.mediaUrl))
+            .map((media, index) => ({
+              key: `${message.messageId}-${index}`,
+              name: media.mediaName,
+              url: media.mediaUrl,
+              isImage: String(media.mediaType) === String(EbayMessageMediaType.IMAGE),
+            })),
         };
       }),
     [threadMessages, isMine, t, formatMessageDate],

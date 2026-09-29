@@ -8,7 +8,7 @@
  */
 
 import type { EbayAccountPublicDto, EbayConversationDto, EbayMessageDto } from '@repo/shared';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   useGetConversationThreadQuery,
@@ -125,6 +125,13 @@ export function useMessagesInbox(state: MessagesUrlState) {
       });
   }, [conversationId, ebayAccountId, messagingEnabled, hasUnread, type, setConversationRead]);
 
+  /** Marked unread by the seller: the next open of these must mark them read again. */
+  const forgetMarkedRead = useCallback((ids: string[]) => {
+    for (const id of ids) {
+      markedRead.current.delete(id);
+    }
+  }, []);
+
   /* ─── keep the thread pinned to its newest message ─── */
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -149,5 +156,6 @@ export function useMessagesInbox(state: MessagesUrlState) {
     activeConversation,
     isMine,
     scrollRef,
+    forgetMarkedRead,
   };
 }
