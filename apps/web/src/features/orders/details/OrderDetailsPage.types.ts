@@ -9,6 +9,8 @@ export interface OrderDetailsPageProps {
   statusLabel: string;
   roiLabel: string;
   totalAmazonCost: number;
+  /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */
+  amazonTotalBeforeTax: number;
   onBack: () => void;
   onCopyAddress: () => void;
   onOpenLinkAmazon: () => void;

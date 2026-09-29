@@ -96,6 +96,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   statusLabel,
   roiLabel,
   totalAmazonCost,
+  amazonTotalBeforeTax,
   onBack,
   onCopyAddress,
   onOpenLinkAmazon,
@@ -512,23 +513,32 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         {/* Amazon costs */}
         <SettingsCard variant="section" header={{ title: t('orders.detail.amazonCosts') }}>
           <S.SectionContent>
+            {/* Same lines, same order, same names as Amazon's own Order Summary
+                (Item(s) Subtotal / Shipping & Handling / Total before tax /
+                Estimated tax to be collected / Grand Total) so the seller can
+                check this card against the Amazon page line by line. */}
             <S.MetaList>
-              <Meta icon="shopping-bag" label={t('orders.detail.purchasePrice')}>
+              <Meta icon="shopping-bag" label={t('orders.detail.itemSubtotal')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.purchasePrice)}
                 </Text>
               </Meta>
-              <Meta icon="percent" label={t('orders.detail.amazonTax')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.amazonTax || 0)}
-                </Text>
-              </Meta>
-              <Meta icon="truck" label={t('orders.detail.amazonShipping')}>
+              <Meta icon="truck" label={t('orders.detail.shippingHandling')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.amazonShipping || 0)}
                 </Text>
               </Meta>
-              <Meta icon="circle-dollar-sign" label={t('orders.detail.totalAmazonCost')}>
+              <Meta icon="receipt" label={t('orders.detail.totalBeforeTax')}>
+                <Text variant="body" weight="semibold" numeric>
+                  {formatCurrency(amazonTotalBeforeTax)}
+                </Text>
+              </Meta>
+              <Meta icon="percent" label={t('orders.detail.estimatedTax')}>
+                <Text variant="body" weight="semibold" numeric>
+                  {formatCurrency(order.amazonTax || 0)}
+                </Text>
+              </Meta>
+              <Meta icon="circle-dollar-sign" label={t('orders.detail.grandTotal')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(totalAmazonCost)}
                 </Text>

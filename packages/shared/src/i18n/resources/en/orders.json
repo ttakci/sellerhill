@@ -164,7 +164,7 @@
       "itemSubtotal": "Item(s) Subtotal",
       "shippingHandling": "Shipping & Handling",
       "totalBeforeTax": "Total before tax",
-      "estimatedTax": "Estimated tax",
+      "estimatedTax": "Estimated tax to be collected",
       "grandTotal": "Grand Total",
       "paymentMethod": "Payment method",
       "subtotal": "Subtotal",

@@ -21,7 +21,11 @@ export const OrderDetailsPageContainer: React.FC = () => {
   const { showMessage, closeMessage } = useUI();
   const [isLinkModalOpen, setIsLinkModalOpen] = React.useState(false);
 
-  const { data: order, isLoading, refetch } = useGetOrderByIdQuery(id || '', {
+  const {
+    data: order,
+    isLoading,
+    refetch,
+  } = useGetOrderByIdQuery(id || '', {
     skip: !id,
   });
 
@@ -71,6 +75,13 @@ export const OrderDetailsPageContainer: React.FC = () => {
       return 0;
     }
     return order.purchasePrice + (order.amazonTax || 0) + (order.amazonShipping || 0);
+  }, [order]);
+
+  const amazonTotalBeforeTax = useMemo(() => {
+    if (!order) {
+      return 0;
+    }
+    return order.purchasePrice + (order.amazonShipping || 0);
   }, [order]);
 
   const roiLabel = useMemo(() => {
@@ -124,10 +135,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
    * would decline out of the seller's way.
    */
   const canConvertTracking = Boolean(
-    order?.isTracked &&
-      order.amazonTrackingNumber &&
-      !order.convertedTrackingNumber &&
-      !order.ebayTrackingPushedNumber
+    order?.isTracked && order.amazonTrackingNumber && !order.convertedTrackingNumber && !order.ebayTrackingPushedNumber
   );
 
   const handleConvertTracking = useCallback(() => {
@@ -143,9 +151,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
         showMessage(
           {
             type: result.converted ? 'success' : 'info',
-            headerKey: result.converted
-              ? 'translation:message.success.header'
-              : 'translation:message.info.header',
+            headerKey: result.converted ? 'translation:message.success.header' : 'translation:message.info.header',
             descriptionKey: result.converted
               ? 'orders:orders.errors.conversionDone'
               : `orders:${result.reasonKey ?? 'orders.errors.conversionUnavailable'}`,
@@ -187,13 +193,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
         statusLabel={statusLabel}
         roiLabel={roiLabel}
         totalAmazonCost={totalAmazonCost}
+        amazonTotalBeforeTax={amazonTotalBeforeTax}
         onBack={handleBack}
         onCopyAddress={handleCopyAddress}
         onOpenLinkAmazon={() => setIsLinkModalOpen(true)}
         onOpenAmazonOrderUrl={
-          order?.amazonOrderUrl
-            ? () => window.open(order.amazonOrderUrl, '_blank', 'noopener,noreferrer')
-            : undefined
+          order?.amazonOrderUrl ? () => window.open(order.amazonOrderUrl, '_blank', 'noopener,noreferrer') : undefined
         }
         canCopyAddress={canCopyAddress}
         canConvertTracking={canConvertTracking}
