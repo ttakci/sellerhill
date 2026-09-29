@@ -604,30 +604,32 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Meta>
               )}
             </S.MetaList>
-            {order.trackingProblemCode && (
-              <InfoMessage>{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
-            )}
-            <Button variant="primary" size="small" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
-              <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
-            </Button>
-            {canConvertTracking && onConvertTracking ? (
-              <Button
-                variant="secondary"
-                size="small"
-                fullWidth
-                onClick={onConvertTracking}
-                isLoading={isConvertingTracking}
-              >
-                <Icon name="repeat" size={16} />
-                <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
+            <S.SectionActions>
+              {order.trackingProblemCode && (
+                <InfoMessage>{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
+              )}
+              <Button variant="primary" size="small" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
+                <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
               </Button>
-            ) : null}
-            {order.amazonOrderUrl && onOpenAmazonOrderUrl ? (
-              <Button variant="text" size="small" onClick={onOpenAmazonOrderUrl}>
-                <Icon name="external-link" size={16} />
-                <Text variant="body-sm">{t('orders.detail.amazonOrder')}</Text>
-              </Button>
-            ) : null}
+              {canConvertTracking && onConvertTracking ? (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  fullWidth
+                  onClick={onConvertTracking}
+                  isLoading={isConvertingTracking}
+                >
+                  <Icon name="repeat" size={16} />
+                  <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
+                </Button>
+              ) : null}
+              {order.amazonOrderUrl && onOpenAmazonOrderUrl ? (
+                <Button variant="text" size="small" onClick={onOpenAmazonOrderUrl}>
+                  <Icon name="external-link" size={16} />
+                  <Text variant="body-sm">{t('orders.detail.amazonOrder')}</Text>
+                </Button>
+              ) : null}
+            </S.SectionActions>
           </S.SectionContent>
         </SettingsCard>
       </S.SectionGrid>
