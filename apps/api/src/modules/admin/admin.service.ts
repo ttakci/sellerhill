@@ -11,6 +11,7 @@
 // aggregate — well below Number.MAX_SAFE_INTEGER).
 
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   AdminWarningKind,
   AdminWarningLevel,
@@ -40,6 +41,10 @@ import type { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+// A PURE helper, not a module import — AdminModule must never import EbayModule
+// (module-cycle.guard.spec.ts). The predicate is the one EbayNotificationService
+// itself uses to decide whether notifications are enabled.
+import { isValidNotificationVerificationToken } from '../ebay/notifications/ebay-notification.helpers';
 import { ProductSourceService } from '../listings/product-source.service';
 import { buildRefreshEntitlementSql } from '../listings/refresh-entitlement-sql';
 import { ScraperClient } from '../listings/scraper.client';
@@ -123,7 +128,8 @@ export class AdminService {
     private readonly databaseService: DatabaseService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly productSource: ProductSourceService,
-    private readonly scraperClient: ScraperClient
+    private readonly scraperClient: ScraperClient,
+    private readonly config: ConfigService
   ) {}
 
   /**
@@ -546,6 +552,17 @@ export class AdminService {
       } catch {
         warnings.push({ kind: AdminWarningKind.SCRAPER_UNREACHABLE, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 0 });
       }
+    }
+
+    // eBay NEW_MESSAGE notifications: without both env values the destination is
+    // never registered and the Messages badge falls back to the slow poll. Read
+    // straight from env with the same predicate as `EbayNotificationService.isEnabled`.
+    const notificationToken = this.config.get<string>('EBAY_NOTIFICATION_VERIFICATION_TOKEN')?.trim();
+    const notificationAlertEmail = this.config.get<string>('EBAY_NOTIFICATION_ALERT_EMAIL')?.trim();
+    // Same shape check as EbayNotificationService.alertEmail (SIMPLE_EMAIL there).
+    const alertEmailOk = !!notificationAlertEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notificationAlertEmail);
+    if (!isValidNotificationVerificationToken(notificationToken) || !alertEmailOk) {
+      warnings.push({ kind: AdminWarningKind.EBAY_NOTIFICATIONS_DISABLED, level: AdminWarningLevel.WARNING, value: 0, threshold: 1 });
     }
 
     const llmThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LLM_FAILURE_RATE_THRESHOLD);

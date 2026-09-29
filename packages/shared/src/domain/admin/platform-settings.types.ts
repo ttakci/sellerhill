@@ -172,6 +172,8 @@ export enum PlatformSettingKey {
   RETENTION_BUYER_MESSAGE_LOG_DAYS = 'retention.buyerMessageLogDays',
   RETENTION_AUDIT_LOGS_DAYS = 'retention.auditLogsDays',
   RETENTION_LISTING_REVISIONS_DAYS = 'retention.listingRevisionsDays',
+  RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS = 'retention.ebayNotificationEventsDays',
+  RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS = 'retention.ebayNotificationRawCapturesDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',

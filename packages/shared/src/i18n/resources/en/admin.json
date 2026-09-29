@@ -64,7 +64,8 @@
       "scraper_proxy_invalid": "Scraper proxy entries are malformed and are being skipped (count)",
       "scraper_transport_failure_high": "Scraper cannot reach Amazon through its proxies (%) — check the proxy list and credentials",
       "scraper_parse_failure_high": "Scraper parse failures are elevated (%) — Amazon may have changed its page layout",
-      "scraper_direct_egress": "Scraper is allowed to fetch WITHOUT a proxy — disable SCRAPER_ALLOW_DIRECT on this server"
+      "scraper_direct_egress": "Scraper is allowed to fetch WITHOUT a proxy — disable SCRAPER_ALLOW_DIRECT on this server",
+      "ebay_notifications_disabled": "eBay notifications are not configured — message badges rely on a 15-minute fallback"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokens",
@@ -223,6 +224,8 @@
         "retention.buyerMessageLogDays": "Buyer message log (days)",
         "retention.auditLogsDays": "Audit log (days)",
         "retention.listingRevisionsDays": "Listing revisions (days)",
+        "retention.ebayNotificationEventsDays": "eBay notification inbox (days)",
+        "retention.ebayNotificationRawCapturesDays": "eBay notification raw captures (days)",
         "ebay.aspects.llmEnabled": "AI-assisted item specifics",
         "ebay.aspects.llmMaxPerListing": "AI item specifics per listing (max)",
         "keepa.refresh.batchAuto": "Derive batch size from the Keepa plan",
@@ -291,6 +294,8 @@
         "retention.buyerMessageLogDays": "How many days buyer message log rows are kept. This table also prevents duplicate messages for the same order/event — deleting a row re-arms that event, so the floor is deliberately long.",
         "retention.auditLogsDays": "How many days audit log rows (role changes, setting changes) are kept. Kept long for compliance evidence.",
         "retention.listingRevisionsDays": "How many days of listing revision history are kept for the detail page's Revisions drawer.",
+        "retention.ebayNotificationEventsDays": "How many days of received eBay NEW_MESSAGE notifications are kept. Only used to ignore eBay's retried deliveries, which stop after 3 attempts.",
+        "retention.ebayNotificationRawCapturesDays": "How many days of verbatim eBay notification requests are kept for diagnosing signature or payload problems.",
         "ebay.aspects.llmEnabled": "Allow the AI to choose a required eBay item specific when no cheaper deterministic layer could supply one. Off by default.",
         "ebay.aspects.llmMaxPerListing": "Maximum number of item specifics the AI is allowed to resolve per listing when the AI aspect layer is enabled.",
         "keepa.refresh.batchAuto": "When on, the batch size is calculated from the Keepa plan's own refill rate, so upgrading the plan raises throughput on its own. Turn off to use the fixed batch size value.",

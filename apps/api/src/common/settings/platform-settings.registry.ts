@@ -682,6 +682,28 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 30,
     max: 3650,
   }),
+  def({
+    // eBay NEW_MESSAGE notification inbox. Only the notification_id UNIQUE is
+    // load-bearing (dedupe of retried deliveries, which eBay stops after 3
+    // attempts), so a week is the floor and 90 days is ample.
+    key: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS',
+    defaultValue: '90',
+    min: 7,
+    max: 730,
+  }),
+  def({
+    // Verbatim capture of every eBay notification POST — diagnostic only.
+    key: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS',
+    defaultValue: '30',
+    min: 7,
+    max: 365,
+  }),
 ];
 
 /** Registry lookup by key. Unknown keys are rejected at the API boundary. */

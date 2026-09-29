@@ -39,6 +39,8 @@ export enum DataRetentionTable {
   BUYER_MESSAGE_LOG = 'buyer_message_log',
   AUDIT_LOGS = 'audit_logs',
   LISTING_REVISIONS = 'listing_revisions',
+  EBAY_NOTIFICATION_EVENTS = 'ebay_notification_events',
+  EBAY_NOTIFICATION_RAW_CAPTURES = 'ebay_notification_raw_captures',
 }
 
 export interface DataRetentionRule {
@@ -113,6 +115,22 @@ export const DATA_RETENTION_RULES: readonly DataRetentionRule[] = [
     minDays: 30,
     rationale:
       'Price/quantity change history behind the listing detail page\'s Revisions drawer. Purely historical — nothing re-derives state from an old row the way buyer_message_log does, so the floor is short.',
+  },
+  {
+    table: DataRetentionTable.EBAY_NOTIFICATION_EVENTS,
+    timestampColumn: 'received_at',
+    settingKey: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS,
+    minDays: 7,
+    rationale:
+      'eBay NEW_MESSAGE inbox; only the notification_id UNIQUE is load-bearing (dedupe of retried deliveries, which eBay stops after 3 attempts), so a week is ample.',
+  },
+  {
+    table: DataRetentionTable.EBAY_NOTIFICATION_RAW_CAPTURES,
+    timestampColumn: 'received_at',
+    settingKey: PlatformSettingKey.RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS,
+    minDays: 7,
+    rationale:
+      'Verbatim capture of every eBay notification POST (signature_ok / parsed_ok). Diagnostic only — nothing reads it back.',
   },
 ] as const;
 
