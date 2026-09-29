@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Toate stările",
       "allStores": "Toate magazinele",
-      "allTrackingStates": "Toate stările de urmărire",
+      "allTrackingStates": "Asociate și neasociate",
       "clearAll": "Șterge tot",
-      "resultCount": "Rezultate: {{count}}"
+      "resultCount": "Rezultate: {{count}}",
+      "allStages": "Toate stările"
     },
     "stats": {
       "totalSales": "Vânzări totale",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Urmărită de SellerHill",
-      "untracked": "Neurmărită",
+      "tracked": "Asociată unui anunț",
+      "untracked": "Neasociată unui anunț",
       "problem": {
         "wrongPageType": "Furnizorul de urmărire nu a putut citi pagina comenzii Amazon — este posibil să-și fi schimbat formatul. Se va reîncerca automat.",
         "amazonSessionExpired": "Sesiunea Amazon folosită pentru a citi această comandă a expirat și trebuie autentificată din nou.",
@@ -194,7 +195,6 @@
       "copyState": "Copiază regiunea/provincia",
       "copyZip": "Copiază codul poștal",
       "copyCountry": "Copiază țara/regiunea",
-
       "copyPhone": "Copiază telefonul",
       "copied": "Copiat",
       "amazonCosts": "Rezumatul comenzii Amazon",
@@ -215,7 +215,8 @@
       "quantity": "Cantitate",
       "unit": "unitate",
       "sku": "SKU",
-      "na": "N/A"
+      "na": "N/A",
+      "ebayStatus": "Stare eBay"
     },
     "modal": {
       "title": "Introduceți informațiile comenzii Amazon",
@@ -242,6 +243,70 @@
       "orderNotTracked": "Această comandă nu este asociată unuia dintre anunțurile dvs., deci un număr de urmărire convertit nu ar putea fi trimis niciodată către eBay. Asociați mai întâi comanda cu anunțul ei.",
       "trackingAlreadyPushed": "eBay are deja numărul de urmărire original pentru această comandă și acesta nu poate fi înlocuit, deci conversia acum nu ar schimba ce vede cumpărătorul.",
       "listingOverPlanLimit": "Anunțul acestei comenzi se afla în afara limitei de anunțuri a planului dvs. când a sosit comanda. Comenzile din anunțurile aflate în afara limitei nu primesc urmărirea expedierii și nici conversia numărului de urmărire."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Anulat de Amazon",
+        "meaning": "Amazon a anulat achiziția. Cumpărătorul eBay așteaptă în continuare articolul.",
+        "action": "Onorați comanda altfel, apoi asociați noua comandă Amazon."
+      },
+      "cancelled": {
+        "label": "Anulată",
+        "meaning": "Comanda eBay a fost anulată."
+      },
+      "delivered": {
+        "label": "Livrată",
+        "meaning": "Amazon raportează coletul ca livrat. Nu mai este nimic de făcut."
+      },
+      "test_run": {
+        "label": "Test",
+        "meaning": "O rulare de probă a comenzii automate. Nicio comandă Amazon plasată, niciun ban mutat."
+      },
+      "shipped": {
+        "label": "Expediată",
+        "meaning": "Urmărirea a fost trimisă la eBay. Se așteaptă livrarea."
+      },
+      "tracking_held": {
+        "label": "Urmărire reținută",
+        "meaning": "Amazon a expediat, dar urmărirea nu a ajuns încă la eBay — de obicei conversia urmăririi este încă în așteptare.",
+        "action": "Convertiți urmărirea sau remediați cauza afișată în comandă."
+      },
+      "buying": {
+        "label": "Se cumpără pe Amazon",
+        "meaning": "Comanda automată plasează chiar acum această comandă pe Amazon."
+      },
+      "purchased": {
+        "label": "Cumpărată · așteaptă expedierea",
+        "meaning": "O comandă Amazon este asociată. Se așteaptă ca Amazon să o expedieze."
+      },
+      "purchase_blocked": {
+        "label": "Cumpărare blocată",
+        "meaning": "Comanda automată s-a oprit la o verificare de siguranță înainte de cumpărare. Niciun ban mutat.",
+        "action": "Remediați cauza afișată sau cumpărați manual pe Amazon și asociați comanda."
+      },
+      "awaiting_payment": {
+        "label": "Așteaptă plata",
+        "meaning": "Cumpărătorul nu a plătit încă. Nu cumpărați înainte de plată."
+      },
+      "to_purchase": {
+        "label": "De cumpărat",
+        "meaning": "Plătită, nicio comandă Amazon asociată încă.",
+        "action": "Cumpărați pe Amazon și asociați comanda."
+      }
+    },
+    "stageTabs": {
+      "all": "Toate",
+      "action": "Necesită acțiune",
+      "to_purchase": "De cumpărat",
+      "in_progress": "În curs",
+      "done": "Finalizate"
+    },
+    "stageLegend": {
+      "title": "Ce înseamnă stările",
+      "open": "Explică stările",
+      "columnStage": "Stare",
+      "columnMeaning": "Ce înseamnă",
+      "columnAction": "Ce faceți"
     }
   }
 }

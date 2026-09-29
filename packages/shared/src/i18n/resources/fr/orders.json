@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Tous les statuts",
       "allStores": "Toutes les boutiques",
-      "allTrackingStates": "Tous les états de suivi",
+      "allTrackingStates": "Liées et non liées",
       "clearAll": "Tout effacer",
-      "resultCount": "{{count}} résultats"
+      "resultCount": "{{count}} résultats",
+      "allStages": "Tous les statuts"
     },
     "stats": {
       "totalSales": "Ventes totales",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Suivie par SellerHill",
-      "untracked": "Non suivie",
+      "tracked": "Liée à une annonce",
+      "untracked": "Non liée à une annonce",
       "problem": {
         "wrongPageType": "Le prestataire de suivi n'a pas pu lire la page de commande d'Amazon — son format a peut-être changé. Une nouvelle tentative aura lieu automatiquement.",
         "amazonSessionExpired": "La session Amazon utilisée pour lire cette commande a expiré et doit être reconnectée.",
@@ -194,7 +195,6 @@
       "copyState": "Copier la région/province",
       "copyZip": "Copier le code postal",
       "copyCountry": "Copier le pays/région",
-
       "copyPhone": "Copier le téléphone",
       "copied": "Copié",
       "amazonCosts": "Récapitulatif de la commande Amazon",
@@ -215,7 +215,8 @@
       "quantity": "Quantité",
       "unit": "unité",
       "sku": "SKU",
-      "na": "N/D"
+      "na": "N/D",
+      "ebayStatus": "Statut eBay"
     },
     "modal": {
       "title": "Saisir les infos de la commande Amazon",
@@ -242,6 +243,70 @@
       "orderNotTracked": "Cette commande n'est liée à aucune de vos annonces, un numéro de suivi converti ne pourrait donc jamais être envoyé à eBay. Liez d'abord la commande à son annonce.",
       "trackingAlreadyPushed": "eBay possède déjà le numéro de suivi d'origine de cette commande et il ne peut pas être remplacé ; convertir maintenant ne changerait donc pas ce que voit l'acheteur.",
       "listingOverPlanLimit": "L'annonce de cette commande était hors de la limite d'annonces de votre forfait lorsque la commande est arrivée. Les commandes issues d'annonces hors limite n'ont ni suivi d'expédition ni conversion du suivi."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Annulé par Amazon",
+        "meaning": "Amazon a annulé l'achat. L'acheteur eBay attend toujours l'article.",
+        "action": "Expédiez la commande autrement, puis liez la nouvelle commande Amazon."
+      },
+      "cancelled": {
+        "label": "Annulée",
+        "meaning": "La commande eBay a été annulée."
+      },
+      "delivered": {
+        "label": "Livrée",
+        "meaning": "Amazon indique le colis comme livré. Plus rien à faire."
+      },
+      "test_run": {
+        "label": "Essai",
+        "meaning": "Un essai à blanc de la commande automatique. Aucune commande Amazon passée, aucun mouvement d'argent."
+      },
+      "shipped": {
+        "label": "Expédiée",
+        "meaning": "Le suivi a été envoyé à eBay. En attente de livraison."
+      },
+      "tracking_held": {
+        "label": "Suivi en attente",
+        "meaning": "Amazon a expédié, mais le suivi n'est pas encore arrivé sur eBay — la conversion du suivi est généralement en cours.",
+        "action": "Convertissez le suivi ou corrigez la cause affichée sur la commande."
+      },
+      "buying": {
+        "label": "Achat sur Amazon en cours",
+        "meaning": "La commande automatique passe cette commande sur Amazon en ce moment."
+      },
+      "purchased": {
+        "label": "Achetée · en attente d'expédition",
+        "meaning": "Une commande Amazon est liée. En attente de l'expédition par Amazon."
+      },
+      "purchase_blocked": {
+        "label": "Achat bloqué",
+        "meaning": "La commande automatique s'est arrêtée à un contrôle de sécurité avant l'achat. Aucun mouvement d'argent.",
+        "action": "Corrigez la cause affichée, ou achetez manuellement sur Amazon et liez la commande."
+      },
+      "awaiting_payment": {
+        "label": "En attente de paiement",
+        "meaning": "L'acheteur n'a pas encore payé. N'achetez pas avant le paiement."
+      },
+      "to_purchase": {
+        "label": "À acheter",
+        "meaning": "Payée, aucune commande Amazon liée pour le moment.",
+        "action": "Achetez sur Amazon et liez la commande."
+      }
+    },
+    "stageTabs": {
+      "all": "Toutes",
+      "action": "Action requise",
+      "to_purchase": "À acheter",
+      "in_progress": "En cours",
+      "done": "Terminées"
+    },
+    "stageLegend": {
+      "title": "Signification des statuts",
+      "open": "Expliquer les statuts",
+      "columnStage": "Statut",
+      "columnMeaning": "Signification",
+      "columnAction": "Ce que vous faites"
     }
   }
 }

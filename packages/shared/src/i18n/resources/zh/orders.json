@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "所有状态",
       "allStores": "所有店铺",
-      "allTrackingStates": "所有追踪状态",
+      "allTrackingStates": "已关联和未关联",
       "clearAll": "全部清除",
-      "resultCount": "{{count}} 条结果"
+      "resultCount": "{{count}} 条结果",
+      "allStages": "全部状态"
     },
     "stats": {
       "totalSales": "总销售额",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "由 SellerHill 追踪",
-      "untracked": "未追踪",
+      "tracked": "已关联刊登",
+      "untracked": "未关联刊登",
       "problem": {
         "wrongPageType": "物流服务商无法读取 Amazon 的订单页面，可能是页面格式已更改。系统将自动重试。",
         "amazonSessionExpired": "用于读取此订单的 Amazon 会话已过期，需要重新登录。",
@@ -194,7 +195,6 @@
       "copyState": "复制州/省",
       "copyZip": "复制邮政编码",
       "copyCountry": "复制国家/地区",
-
       "copyPhone": "复制电话号码",
       "copied": "已复制",
       "amazonCosts": "Amazon 订单汇总",
@@ -215,7 +215,8 @@
       "quantity": "数量",
       "unit": "件",
       "sku": "SKU",
-      "na": "不适用"
+      "na": "不适用",
+      "ebayStatus": "eBay 状态"
     },
     "modal": {
       "title": "填写 Amazon 订单信息",
@@ -242,6 +243,70 @@
       "orderNotTracked": "此订单未关联到您的任何商品刊登，因此转换后的物流单号永远无法发送到 eBay。请先把订单关联到对应的商品刊登。",
       "trackingAlreadyPushed": "eBay 已有此订单的原始物流单号且无法替换，因此现在转换不会改变买家看到的内容。",
       "listingOverPlanLimit": "此订单到达时，其商品刊登已超出您套餐的商品刊登上限。来自上限之外商品刊登的订单不会进行货件追踪，也不会转换物流单号。"
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Amazon 已取消",
+        "meaning": "Amazon 取消了这笔采购。eBay 买家仍在等待商品。",
+        "action": "请以其他方式履行订单，然后关联新的 Amazon 订单。"
+      },
+      "cancelled": {
+        "label": "已取消",
+        "meaning": "eBay 订单已取消。"
+      },
+      "delivered": {
+        "label": "已送达",
+        "meaning": "Amazon 报告包裹已送达。无需再做任何操作。"
+      },
+      "test_run": {
+        "label": "测试运行",
+        "meaning": "自动下单的试运行。未在 Amazon 下单，也没有资金流动。"
+      },
+      "shipped": {
+        "label": "已发货",
+        "meaning": "物流信息已发送到 eBay。等待送达。"
+      },
+      "tracking_held": {
+        "label": "物流信息暂缓",
+        "meaning": "Amazon 已发货，但物流信息尚未到达 eBay——通常是物流转换仍在等待中。",
+        "action": "请转换物流信息，或处理订单中显示的原因。"
+      },
+      "buying": {
+        "label": "正在 Amazon 下单",
+        "meaning": "自动下单正在 Amazon 上提交此订单。"
+      },
+      "purchased": {
+        "label": "已购买 · 等待发货",
+        "meaning": "已关联一个 Amazon 订单。等待 Amazon 发货。"
+      },
+      "purchase_blocked": {
+        "label": "下单被阻止",
+        "meaning": "自动下单在购买前的安全检查处停止。没有资金流动。",
+        "action": "请处理显示的原因，或在 Amazon 手动购买并关联订单。"
+      },
+      "awaiting_payment": {
+        "label": "等待付款",
+        "meaning": "买家尚未付款。付款前请勿购买。"
+      },
+      "to_purchase": {
+        "label": "待购买",
+        "meaning": "已付款，尚未关联 Amazon 订单。",
+        "action": "在 Amazon 购买并关联订单。"
+      }
+    },
+    "stageTabs": {
+      "all": "全部",
+      "action": "需要处理",
+      "to_purchase": "待购买",
+      "in_progress": "进行中",
+      "done": "已完成"
+    },
+    "stageLegend": {
+      "title": "状态说明",
+      "open": "解释状态",
+      "columnStage": "状态",
+      "columnMeaning": "含义",
+      "columnAction": "您需要做什么"
     }
   }
 }

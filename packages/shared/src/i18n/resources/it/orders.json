@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Tutti gli stati",
       "allStores": "Tutti i negozi",
-      "allTrackingStates": "Tutti gli stati di tracciamento",
+      "allTrackingStates": "Collegati e non collegati",
       "clearAll": "Cancella tutto",
-      "resultCount": "{{count}} risultati"
+      "resultCount": "{{count}} risultati",
+      "allStages": "Tutti gli stati"
     },
     "stats": {
       "totalSales": "Vendite totali",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Monitorato da SellerHill",
-      "untracked": "Non monitorato",
+      "tracked": "Collegato a un'inserzione",
+      "untracked": "Non collegato a un'inserzione",
       "problem": {
         "wrongPageType": "Il fornitore del tracciamento non è riuscito a leggere la pagina dell'ordine Amazon: potrebbe averne cambiato il formato. Verrà ritentato automaticamente.",
         "amazonSessionExpired": "La sessione Amazon usata per leggere questo ordine è scaduta e richiede un nuovo accesso.",
@@ -194,7 +195,6 @@
       "copyState": "Copia la regione/provincia",
       "copyZip": "Copia il CAP",
       "copyCountry": "Copia il paese/la regione",
-
       "copyPhone": "Copia telefono",
       "copied": "Copiato",
       "amazonCosts": "Riepilogo ordine Amazon",
@@ -215,7 +215,8 @@
       "quantity": "Quantità",
       "unit": "unità",
       "sku": "SKU",
-      "na": "N/D"
+      "na": "N/D",
+      "ebayStatus": "Stato eBay"
     },
     "modal": {
       "title": "Inserisci i dati dell'ordine Amazon",
@@ -242,6 +243,70 @@
       "orderNotTracked": "Questo ordine non è collegato a nessuna delle tue inserzioni, quindi un numero di tracciamento convertito non potrebbe mai essere inviato a eBay. Collega prima l'ordine alla sua inserzione.",
       "trackingAlreadyPushed": "eBay ha già il numero di tracciamento originale di questo ordine e non può essere sostituito, quindi convertirlo ora non cambierebbe ciò che vede l'acquirente.",
       "listingOverPlanLimit": "L'inserzione di questo ordine era oltre il limite di inserzioni del tuo piano quando l'ordine è arrivato. Gli ordini delle inserzioni oltre il limite non ricevono il tracciamento della spedizione né la conversione del tracciamento."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Annullato da Amazon",
+        "meaning": "Amazon ha annullato l'acquisto. L'acquirente eBay attende ancora l'articolo.",
+        "action": "Evadi l'ordine in altro modo, poi collega il nuovo ordine Amazon."
+      },
+      "cancelled": {
+        "label": "Annullato",
+        "meaning": "L'ordine eBay è stato annullato."
+      },
+      "delivered": {
+        "label": "Consegnato",
+        "meaning": "Amazon segnala il pacco come consegnato. Non resta nulla da fare."
+      },
+      "test_run": {
+        "label": "Prova",
+        "meaning": "Una prova dell'ordine automatico. Nessun ordine Amazon effettuato, nessun movimento di denaro."
+      },
+      "shipped": {
+        "label": "Spedito",
+        "meaning": "Il tracking è stato inviato a eBay. In attesa della consegna."
+      },
+      "tracking_held": {
+        "label": "Tracking in attesa",
+        "meaning": "Amazon ha spedito, ma il tracking non è ancora arrivato su eBay — di solito la conversione del tracking è ancora in corso.",
+        "action": "Converti il tracking o risolvi la causa mostrata nell'ordine."
+      },
+      "buying": {
+        "label": "Acquisto su Amazon in corso",
+        "meaning": "L'ordine automatico sta effettuando questo ordine su Amazon proprio ora."
+      },
+      "purchased": {
+        "label": "Acquistato · in attesa di spedizione",
+        "meaning": "Un ordine Amazon è collegato. In attesa che Amazon lo spedisca."
+      },
+      "purchase_blocked": {
+        "label": "Acquisto bloccato",
+        "meaning": "L'ordine automatico si è fermato a un controllo di sicurezza prima dell'acquisto. Nessun movimento di denaro.",
+        "action": "Risolvi la causa mostrata, oppure acquista manualmente su Amazon e collega l'ordine."
+      },
+      "awaiting_payment": {
+        "label": "In attesa di pagamento",
+        "meaning": "L'acquirente non ha ancora pagato. Non acquistare prima del pagamento."
+      },
+      "to_purchase": {
+        "label": "Da acquistare",
+        "meaning": "Pagato, nessun ordine Amazon ancora collegato.",
+        "action": "Acquista su Amazon e collega l'ordine."
+      }
+    },
+    "stageTabs": {
+      "all": "Tutti",
+      "action": "Richiedono azione",
+      "to_purchase": "Da acquistare",
+      "in_progress": "In corso",
+      "done": "Completati"
+    },
+    "stageLegend": {
+      "title": "Cosa significano gli stati",
+      "open": "Spiega gli stati",
+      "columnStage": "Stato",
+      "columnMeaning": "Cosa significa",
+      "columnAction": "Cosa fai tu"
     }
   }
 }

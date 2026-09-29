@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Todos os status",
       "allStores": "Todas as lojas",
-      "allTrackingStates": "Todos os estados de rastreio",
+      "allTrackingStates": "Vinculados e não vinculados",
       "clearAll": "Limpar tudo",
-      "resultCount": "{{count}} resultados"
+      "resultCount": "{{count}} resultados",
+      "allStages": "Todos os status"
     },
     "stats": {
       "totalSales": "Total de vendas",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Rastreado pelo SellerHill",
-      "untracked": "Não rastreado",
+      "tracked": "Vinculado a um anúncio",
+      "untracked": "Não vinculado a um anúncio",
       "problem": {
         "wrongPageType": "O provedor de rastreamento não conseguiu ler a página do pedido da Amazon — o formato pode ter mudado. Uma nova tentativa será feita automaticamente.",
         "amazonSessionExpired": "A sessão da Amazon usada para ler este pedido expirou e precisa entrar novamente.",
@@ -194,7 +195,6 @@
       "copyState": "Copiar estado/província",
       "copyZip": "Copiar CEP",
       "copyCountry": "Copiar país/região",
-
       "copyPhone": "Copiar telefone",
       "copied": "Copiado",
       "amazonCosts": "Resumo do pedido na Amazon",
@@ -215,7 +215,8 @@
       "quantity": "Quantidade",
       "unit": "unidade",
       "sku": "SKU",
-      "na": "N/D"
+      "na": "N/D",
+      "ebayStatus": "Status no eBay"
     },
     "modal": {
       "title": "Informar dados do pedido da Amazon",
@@ -242,6 +243,70 @@
       "orderNotTracked": "Este pedido não está vinculado a nenhum dos seus anúncios, então um código de rastreio convertido nunca poderia ser enviado ao eBay. Vincule primeiro o pedido ao seu anúncio.",
       "trackingAlreadyPushed": "O eBay já tem o código de rastreio original deste pedido e ele não pode ser substituído, então converter agora não mudaria o que o comprador vê.",
       "listingOverPlanLimit": "O anúncio deste pedido estava fora do limite de anúncios do seu plano quando o pedido chegou. Pedidos de anúncios fora do limite não têm rastreamento de envio nem conversão de rastreio."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Cancelado pela Amazon",
+        "meaning": "A Amazon cancelou a compra. O comprador do eBay ainda espera o item.",
+        "action": "Atenda o pedido de outra forma e depois vincule o novo pedido da Amazon."
+      },
+      "cancelled": {
+        "label": "Cancelado",
+        "meaning": "O pedido do eBay foi cancelado."
+      },
+      "delivered": {
+        "label": "Entregue",
+        "meaning": "A Amazon informa o pacote como entregue. Nada mais a fazer."
+      },
+      "test_run": {
+        "label": "Teste",
+        "meaning": "Um teste do pedido automático. Nenhum pedido feito na Amazon, nenhum dinheiro movimentado."
+      },
+      "shipped": {
+        "label": "Enviado",
+        "meaning": "O rastreio foi enviado ao eBay. Aguardando a entrega."
+      },
+      "tracking_held": {
+        "label": "Rastreio retido",
+        "meaning": "A Amazon enviou, mas o rastreio ainda não chegou ao eBay — normalmente a conversão do rastreio ainda está pendente.",
+        "action": "Converta o rastreio ou corrija a causa mostrada no pedido."
+      },
+      "buying": {
+        "label": "Comprando na Amazon",
+        "meaning": "O pedido automático está fazendo este pedido na Amazon agora."
+      },
+      "purchased": {
+        "label": "Comprado · aguardando envio",
+        "meaning": "Um pedido da Amazon está vinculado. Aguardando a Amazon enviar."
+      },
+      "purchase_blocked": {
+        "label": "Compra bloqueada",
+        "meaning": "O pedido automático parou em uma verificação de segurança antes de comprar. Nenhum dinheiro movimentado.",
+        "action": "Corrija a causa mostrada ou compre manualmente na Amazon e vincule o pedido."
+      },
+      "awaiting_payment": {
+        "label": "Aguardando pagamento",
+        "meaning": "O comprador ainda não pagou. Não compre antes do pagamento."
+      },
+      "to_purchase": {
+        "label": "A comprar",
+        "meaning": "Pago, ainda sem pedido da Amazon vinculado.",
+        "action": "Compre na Amazon e vincule o pedido."
+      }
+    },
+    "stageTabs": {
+      "all": "Todos",
+      "action": "Precisam de ação",
+      "to_purchase": "A comprar",
+      "in_progress": "Em andamento",
+      "done": "Concluídos"
+    },
+    "stageLegend": {
+      "title": "O que os status significam",
+      "open": "Explicar os status",
+      "columnStage": "Status",
+      "columnMeaning": "O que significa",
+      "columnAction": "O que você faz"
     }
   }
 }

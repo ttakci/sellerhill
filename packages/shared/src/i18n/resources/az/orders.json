@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Bütün statuslar",
       "allStores": "Bütün mağazalar",
-      "allTrackingStates": "Bütün izləmə vəziyyətləri",
+      "allTrackingStates": "Bağlı və bağlı olmayan",
       "clearAll": "Hamısını təmizlə",
-      "resultCount": "{{count}} nəticə"
+      "resultCount": "{{count}} nəticə",
+      "allStages": "Bütün statuslar"
     },
     "stats": {
       "totalSales": "Ümumi satışlar",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "SellerHill tərəfindən izlənir",
-      "untracked": "İzlənmir",
+      "tracked": "Bir elana bağlıdır",
+      "untracked": "Elana bağlı deyil",
       "problem": {
         "wrongPageType": "İzləmə provayderi Amazon-un sifariş səhifəsini oxuya bilmədi — format dəyişmiş ola bilər. Bu, avtomatik təkrar cəhd ediləcək.",
         "amazonSessionExpired": "Bu sifarişi oxumaq üçün istifadə olunan Amazon sessiyasının müddəti bitib və yenidən daxil olmaq lazımdır.",
@@ -194,7 +195,6 @@
       "copyState": "Ştatı/əyaləti kopyala",
       "copyZip": "Poçt indeksini kopyala",
       "copyCountry": "Ölkəni/regionu kopyala",
-
       "copyPhone": "Telefonu kopyala",
       "copied": "Kopyalandı",
       "amazonCosts": "Amazon sifariş xülasəsi",
@@ -215,7 +215,8 @@
       "quantity": "Miqdar",
       "unit": "ədəd",
       "sku": "SKU",
-      "na": "Yoxdur"
+      "na": "Yoxdur",
+      "ebayStatus": "eBay statusu"
     },
     "modal": {
       "title": "Amazon sifariş məlumatını daxil edin",
@@ -242,6 +243,70 @@
       "orderNotTracked": "Bu sifariş elanlarınızdan birinə bağlı deyil, ona görə çevrilmiş izləmə nömrəsi heç vaxt eBay-ə göndərilə bilməz. Əvvəlcə sifarişi öz elanına əlaqələndirin.",
       "trackingAlreadyPushed": "eBay-də bu sifariş üçün artıq orijinal izləmə nömrəsi var və onu əvəz etmək mümkün deyil, ona görə indi çevirmək alıcının gördüyünü dəyişməyəcək.",
       "listingOverPlanLimit": "Sifariş gələndə bu sifarişin elanı planınızın elan limitindən kənarda idi. Limitdən kənardakı elanların sifarişləri göndəriş izləməsi və ya izləmə nömrəsinin çevrilməsi almır."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Amazon ləğv etdi",
+        "meaning": "Amazon alışı ləğv etdi. eBay alıcısı məhsulu hələ də gözləyir.",
+        "action": "Sifarişi başqa yolla yerinə yetirin, sonra yeni Amazon sifarişini bağlayın."
+      },
+      "cancelled": {
+        "label": "Ləğv edildi",
+        "meaning": "eBay sifarişi ləğv edildi."
+      },
+      "delivered": {
+        "label": "Çatdırıldı",
+        "meaning": "Amazon bağlamanın çatdırıldığını bildirir. Görüləcək iş qalmadı."
+      },
+      "test_run": {
+        "label": "Sınaq",
+        "meaning": "Avtomatik sifarişin sınaq işləməsi. Amazon-da sifariş verilməyib, pul çıxmayıb."
+      },
+      "shipped": {
+        "label": "Göndərildi",
+        "meaning": "İzləmə nömrəsi eBay-ə göndərildi. Çatdırılma gözlənilir."
+      },
+      "tracking_held": {
+        "label": "İzləmə saxlanılıb",
+        "meaning": "Amazon göndərdi, amma izləmə hələ eBay-ə çatmayıb — adətən izləmə çevrilməsi gözlənilir.",
+        "action": "İzləməni çevirin və ya sifarişdə göstərilən səbəbi aradan qaldırın."
+      },
+      "buying": {
+        "label": "Amazon-da alınır",
+        "meaning": "Avtomatik sifariş hazırda bu sifarişi Amazon-da verir."
+      },
+      "purchased": {
+        "label": "Alındı · göndəriş gözlənilir",
+        "meaning": "Bir Amazon sifarişi bağlıdır. Amazon-un göndərməsi gözlənilir."
+      },
+      "purchase_blocked": {
+        "label": "Alış bloklandı",
+        "meaning": "Avtomatik sifariş alışdan əvvəl təhlükəsizlik yoxlamasında dayandı. Pul çıxmayıb.",
+        "action": "Göstərilən səbəbi aradan qaldırın və ya Amazon-dan əl ilə alıb sifarişi bağlayın."
+      },
+      "awaiting_payment": {
+        "label": "Ödəniş gözlənilir",
+        "meaning": "Alıcı hələ ödəməyib. Ödənişdən əvvəl almayın."
+      },
+      "to_purchase": {
+        "label": "Alınacaq",
+        "meaning": "Ödənilib, hələ bağlı Amazon sifarişi yoxdur.",
+        "action": "Amazon-dan alın və sifarişi bağlayın."
+      }
+    },
+    "stageTabs": {
+      "all": "Hamısı",
+      "action": "Tədbir tələb edir",
+      "to_purchase": "Alınacaq",
+      "in_progress": "Davam edən",
+      "done": "Tamamlanan"
+    },
+    "stageLegend": {
+      "title": "Statuslar nə deməkdir",
+      "open": "Statusları izah et",
+      "columnStage": "Status",
+      "columnMeaning": "Mənası",
+      "columnAction": "Siz nə edirsiniz"
     }
   }
 }
