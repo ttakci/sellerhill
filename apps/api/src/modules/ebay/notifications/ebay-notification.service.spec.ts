@@ -106,6 +106,28 @@ describe('EbayNotificationService', () => {
     expect(await svc.publicKey('other')).toBeNull();
   });
 
+  it('negative-caches a failed kid for 10 minutes — one eBay call for repeated lookups', async () => {
+    jest.useFakeTimers();
+    try {
+      client.getPublicKey.mockRejectedValue(new EbayNotificationApiError(404, [195001], 'no'));
+      expect(await svc.publicKey('bad-kid-1')).toBeNull();
+      expect(await svc.publicKey('bad-kid-1')).toBeNull();
+      expect(client.getPublicKey).toHaveBeenCalledTimes(1);
+      // An empty key is a failure too.
+      client.getPublicKey.mockResolvedValueOnce({ key: '' });
+      expect(await svc.publicKey('empty-kid')).toBeNull();
+      expect(await svc.publicKey('empty-kid')).toBeNull();
+      expect(client.getPublicKey).toHaveBeenCalledTimes(2);
+      // After the window the kid is looked up again.
+      jest.advanceTimersByTime(10 * 60 * 1000 + 1);
+      client.getPublicKey.mockResolvedValueOnce({ key: 'PEM2' });
+      expect(await svc.publicKey('bad-kid-1')).toBe('PEM2');
+      expect(client.getPublicKey).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   describe('onApplicationBootstrap', () => {
     afterEach(() => {
       jest.useRealTimers();
@@ -128,13 +150,27 @@ describe('EbayNotificationService', () => {
     const parsed = (over: Partial<Record<string, unknown>> = {}) => ({ notificationId: 'n1', topic: 'NEW_MESSAGE', eventDate: null, publishAttemptCount: 1, data: { messageId: 'm', conversationId: 'c', conversationType: 'FROM_MEMBERS', recipientUserName: 'seller-id', senderUserName: 'b', readStatus: false, ...over } });
     it('counts an unread message for the active store and inserts the event once', async () => {
       db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);       // account lookup
+      db.query.mockResolvedValueOnce([{ counted: false }]);                       // same-conversation check
       db.query.mockResolvedValueOnce([{ id: 1 }]);                                // INSERT … RETURNING id
       await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: true, outcome: 'counted' });
       expect(db.query).toHaveBeenCalledWith(expect.stringMatching(/seller_id = \$1 OR ebay_username = \$1/), ['seller-id']);
       expect(db.query).toHaveBeenCalledWith(expect.stringContaining('unread_message_count = unread_message_count + 1'), ['acc']);
     });
+    it('counts a conversation once per sync window — a second message in it is stored, not counted', async () => {
+      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);
+      db.query.mockResolvedValueOnce([{ counted: true }]);
+      db.query.mockResolvedValueOnce([{ id: 7 }]);
+      await expect(svc.recordDelivery(parsed({ messageId: 'm2' }))).resolves.toEqual({ stored: true, outcome: 'counted_same_conversation' });
+      const check = (db.query.mock.calls as unknown[][])[1];
+      expect(check[0]).toMatch(/outcome = 'counted'/);
+      expect(check[0]).toMatch(/received_at > COALESCE\(a\.unread_message_synced_at, '-infinity'\)/);
+      expect(check[1]).toEqual(['acc', 'c']);
+      expect((db.query.mock.calls as unknown[][])[2][1]).toEqual(expect.arrayContaining(['counted_same_conversation']));
+      expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());
+    });
     it('a redelivered notification does not double-count', async () => {
       db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);
+      db.query.mockResolvedValueOnce([{ counted: false }]);
       db.query.mockResolvedValueOnce([]);                                         // ON CONFLICT DO NOTHING → no row
       await expect(svc.recordDelivery(parsed({ publishAttemptCount: 2 }))).resolves.toEqual({ stored: false, outcome: 'duplicate' });
       expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());

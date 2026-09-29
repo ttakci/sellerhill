@@ -31,9 +31,9 @@ const sign = (payload: string): string => {
   return signer.sign(privateKey, 'base64');
 };
 
-const sig = (payload: string): string =>
+const sig = (payload: string, kid = 'k1-signing-key'): string =>
   Buffer.from(
-    JSON.stringify({ alg: 'ecdsa', kid: 'k1', signature: sign(payload), digest: 'SHA1' }),
+    JSON.stringify({ alg: 'ecdsa', kid, signature: sign(payload), digest: 'SHA1' }),
   ).toString('base64');
 
 const req = (raw: string, signature?: string): never =>
@@ -111,6 +111,44 @@ describe('EbayNotificationWebhookController', () => {
       status: 412,
     });
     expect(service.recordDelivery).not.toHaveBeenCalled();
+  });
+
+  it('503s a POST while notifications are disabled, before reading or recording anything', async () => {
+    service.isEnabled.mockReturnValue(false);
+    await expect(ctl.handleNotification(req(body, sig(body)))).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(service.publicKey).not.toHaveBeenCalled();
+    expect(service.recordDelivery).not.toHaveBeenCalled();
+    expect(db.query).not.toHaveBeenCalled();
+  });
+
+  it('412s a malformed kid without a key lookup and captures only the first 1 KB', async () => {
+    const big = JSON.stringify({ padding: 'x'.repeat(5_000) });
+    await expect(ctl.handleNotification(req(big, sig(big, 'k1')))).rejects.toMatchObject({
+      status: 412,
+    });
+    await expect(
+      ctl.handleNotification(req(big, sig(big, 'bad kid/../with spaces'))),
+    ).rejects.toMatchObject({ status: 412 });
+    expect(service.publicKey).not.toHaveBeenCalled();
+    expect(service.recordDelivery).not.toHaveBeenCalled();
+    expect(db.query).toHaveBeenCalledTimes(2);
+    for (const call of db.query.mock.calls as unknown[][]) {
+      const params = call[1] as [string, string, boolean, boolean];
+      expect(params[1]).toBe(big.slice(0, 1_024));
+      expect(params[2]).toBe(false);
+    }
+  });
+
+  it('captures an unsigned request truncated to 1 KB, a signed one up to 20 KB', async () => {
+    const big = JSON.stringify({ padding: 'x'.repeat(30_000) });
+    await expect(ctl.handleNotification(req(big))).rejects.toMatchObject({ status: 412 });
+    service.publicKey.mockResolvedValue(null);
+    await expect(ctl.handleNotification(req(big, sig(big)))).rejects.toMatchObject({ status: 412 });
+    const captured = (db.query.mock.calls as unknown[][]).map((c) => (c[1] as [string, string])[1]);
+    expect(captured[0]).toHaveLength(1_024);
+    expect(captured[1]).toHaveLength(20_000);
   });
 
   it('400s a verified body that is not a notification', async () => {

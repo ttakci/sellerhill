@@ -16,6 +16,7 @@ import {
 /** How a delivered notification was booked. `test` is reserved; eBay's test payload is an ordinary envelope. */
 export type NotificationDeliveryOutcomeKind =
   | 'counted'
+  | 'counted_same_conversation'
   | 'duplicate'
   | 'no_account'
   | 'inactive_account'
@@ -40,6 +41,8 @@ const ERROR_SCOPE_MISSING = 195011;
 const DESTINATION_NAME = 'SellerHill';
 const BOOTSTRAP_DELAY_MS = 20_000;
 const PUBLIC_KEY_TTL_MS = 3_600_000;
+/** A kid eBay could not resolve is not asked about again inside this window. */
+const PUBLIC_KEY_FAILURE_TTL_MS = 600_000;
 const NOTIFICATION_PATH = '/api/v1/ebay/notifications';
 const SIMPLE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -67,6 +70,7 @@ export class EbayNotificationService implements OnApplicationBootstrap {
   private destinationId: string | null = null;
   private destinationInFlight: Promise<string | null> | null = null;
   private readonly publicKeys = new Map<string, { pem: string; expiresAt: number }>();
+  private readonly failedPublicKeys = new Map<string, number>();
 
   constructor(
     private readonly client: EbayNotificationClient,
@@ -188,23 +192,48 @@ export class EbayNotificationService implements OnApplicationBootstrap {
     }
   }
 
-  /** PEM for a signature key id, cached for an hour. `null` on 404/any failure (failures are not cached). */
+  /**
+   * PEM for a signature key id, cached for an hour. `null` on 404/any failure,
+   * and a failure is negative-cached for 10 minutes: the receiver is public, so
+   * a caller replaying made-up kids must not turn each request into an eBay call.
+   */
   async publicKey(kid: string): Promise<string | null> {
+    const now = Date.now();
     const cached = this.publicKeys.get(kid);
-    if (cached && cached.expiresAt > Date.now()) {
+    if (cached && cached.expiresAt > now) {
       return cached.pem;
+    }
+    const failedUntil = this.failedPublicKeys.get(kid);
+    if (failedUntil !== undefined) {
+      if (failedUntil > now) {
+        return null;
+      }
+      this.failedPublicKeys.delete(kid);
     }
     try {
       const { key } = await this.client.getPublicKey(kid);
       if (!key) {
+        this.rememberFailedKid(kid);
         return null;
       }
       this.publicKeys.set(kid, { pem: key, expiresAt: Date.now() + PUBLIC_KEY_TTL_MS });
       return key;
     } catch (error: unknown) {
       this.logger.warn(`eBay notification public key ${kid} unavailable: ${errorText(error)}`);
+      this.rememberFailedKid(kid);
       return null;
     }
+  }
+
+  private rememberFailedKid(kid: string): void {
+    // Drop expired entries on the way in so the map cannot grow without bound.
+    const now = Date.now();
+    for (const [key, until] of this.failedPublicKeys) {
+      if (until <= now) {
+        this.failedPublicKeys.delete(key);
+      }
+    }
+    this.failedPublicKeys.set(kid, now + PUBLIC_KEY_FAILURE_TTL_MS);
   }
 
   /**
@@ -212,6 +241,10 @@ export class EbayNotificationService implements OnApplicationBootstrap {
    * NOTHING` on eBay's notification id, and the unread counter is bumped only
    * when that insert actually wrote a row — so a redelivery (same id, higher
    * publishAttemptCount) can never double-count.
+   *
+   * The badge counts CONVERSATIONS (as the eBay recount does), so a second
+   * unread message in a conversation already counted since the store's last
+   * recount is stored as `counted_same_conversation` and not incremented.
    */
   async recordDelivery(parsed: ParsedEbayNotification): Promise<NotificationDeliveryOutcome> {
     const message = parsed.topic === NEW_MESSAGE_TOPIC ? parseNewMessageData(parsed.data) : null;
@@ -236,6 +269,8 @@ export class EbayNotificationService implements OnApplicationBootstrap {
       outcome = 'inactive_account';
     } else if (message.readStatus) {
       outcome = 'already_read';
+    } else if (await this.conversationAlreadyCounted(account.id, message.conversationId)) {
+      outcome = 'counted_same_conversation';
     } else {
       outcome = 'counted';
     }
@@ -257,6 +292,23 @@ export class EbayNotificationService implements OnApplicationBootstrap {
       );
     }
     return { stored: true, outcome };
+  }
+
+  /** True when this conversation already added +1 to the store's counter since its last recount. */
+  private async conversationAlreadyCounted(ebayAccountId: string, conversationId: string): Promise<boolean> {
+    const rows = await this.db.query<{ counted: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1
+           FROM ebay_notification_events e
+           JOIN ebay_accounts a ON a.id = e.ebay_account_id
+          WHERE e.ebay_account_id = $1
+            AND e.conversation_id = $2
+            AND e.outcome = 'counted'
+            AND e.received_at > COALESCE(a.unread_message_synced_at, '-infinity')
+       ) AS counted`,
+      [ebayAccountId, conversationId]
+    );
+    return rows[0]?.counted === true;
   }
 
   private alertEmail(): string | null {
