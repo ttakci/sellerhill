@@ -111,6 +111,13 @@
         "description_other": "{{count}} lojas não estão mais autorizadas. A sincronização de pedidos, o reajuste de preços e a publicação estão parados para elas até você reconectar.",
         "action": "Gerenciar lojas"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Reconecte uma loja para ativar as mensagens do eBay",
+        "description_one": "{{count}} loja foi conectada antes de a mensageria ser adicionada. Reconecte-a para ler e responder às mensagens do eBay aqui.",
+        "description_many": "{{count}} lojas foram conectadas antes de a mensageria ser adicionada. Reconecte-as para ler e responder às mensagens do eBay aqui.",
+        "description_other": "{{count}} lojas foram conectadas antes de a mensageria ser adicionada. Reconecte-as para ler e responder às mensagens do eBay aqui.",
+        "action": "Gerenciar lojas"
+      },
       "amazon_account_needs_attention": {
         "title": "Uma conta de comprador da Amazon não consegue entrar",
         "description_one": "{{count}} conta de comprador está falhando no login, então nada pode ser comprado por ela.",

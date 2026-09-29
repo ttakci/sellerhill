@@ -48,6 +48,7 @@ import {
   BillingSubscriptionStatus,
   EntitlementState,
   EbayAccountStatus,
+  EBAY_MESSAGING_SCOPES,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingStatus,
   OrderFulfillmentState,
@@ -397,6 +398,23 @@ export class ActionCenterService {
     );
 
     /*
+     * A store connected before the eBay Messages scopes existed (or reconnected
+     * without them) never granted `commerce.message`/`commerce.notification.subscription`,
+     * so the inbox and NEW_MESSAGE webhook cannot work for it — only reconnecting
+     * re-grants the missing scopes. `@>` (array contains) against the whole
+     * required set means a store missing EITHER scope is still flagged, not
+     * just one missing both.
+     */
+    const messagingScope = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM ebay_accounts
+        WHERE user_id = $1
+          AND status = $2
+          AND NOT (granted_scopes @> $3::text[])`,
+      [userId, EbayAccountStatus.ACTIVE, [...EBAY_MESSAGING_SCOPES]],
+    );
+
+    /*
      * Amazon sign-in is broken. Broken down by status because the remedies
      * differ: `needs_reauth`/`invalid` want fresh credentials, `locked` wants
      * the seller to clear a hold with Amazon directly — re-saving the password
@@ -431,6 +449,13 @@ export class ActionCenterService {
         group: ActionCenterGroup.CONNECTIONS,
         severity: ActionCenterSeverity.CRITICAL,
         count: toCount(ebay[0]?.count),
+        actionPath: '/stores',
+      },
+      {
+        key: ActionCenterItemKey.EBAY_ACCOUNT_MESSAGING_SCOPE_MISSING,
+        group: ActionCenterGroup.CONNECTIONS,
+        severity: ActionCenterSeverity.INFO,
+        count: toCount(messagingScope[0]?.count),
         actionPath: '/stores',
       },
       {

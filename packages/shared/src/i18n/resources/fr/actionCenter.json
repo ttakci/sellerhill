@@ -111,6 +111,13 @@
         "description_other": "{{count}} boutiques ne sont plus autorisées. La synchronisation des commandes, le repricing et la publication sont arrêtés pour elles jusqu'à la reconnexion.",
         "action": "Gérer les boutiques"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Reconnectez une boutique pour activer les messages eBay",
+        "description_one": "{{count}} boutique a été connectée avant l'ajout de la messagerie. Reconnectez-la pour lire et répondre aux messages eBay ici.",
+        "description_many": "{{count}} boutiques ont été connectées avant l'ajout de la messagerie. Reconnectez-les pour lire et répondre aux messages eBay ici.",
+        "description_other": "{{count}} boutiques ont été connectées avant l'ajout de la messagerie. Reconnectez-les pour lire et répondre aux messages eBay ici.",
+        "action": "Gérer les boutiques"
+      },
       "amazon_account_needs_attention": {
         "title": "Un compte acheteur Amazon ne peut pas se connecter",
         "description_one": "{{count}} compte acheteur échoue à la connexion, aucun achat ne peut donc être effectué avec lui.",

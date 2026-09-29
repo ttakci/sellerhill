@@ -103,6 +103,12 @@
         "description_other": "{{count}} mağazanın yetkisi düştü. Yeniden bağlayana kadar o mağazalarda sipariş senkronu, fiyatlama ve yayınlama durdu.",
         "action": "Mağazaları yönet"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Mesajlar için bir mağazayı yeniden bağlayın",
+        "description_one": "{{count}} mağaza mesajlaşma eklenmeden önce bağlanmış. eBay mesajlarını burada okuyup yanıtlamak için yeniden bağlayın.",
+        "description_other": "{{count}} mağaza mesajlaşma eklenmeden önce bağlanmış. eBay mesajlarını burada okuyup yanıtlamak için onları yeniden bağlayın.",
+        "action": "Mağazaları yönet"
+      },
       "amazon_account_needs_attention": {
         "title": "Bir Amazon alıcı hesabı giriş yapamıyor",
         "description_one": "{{count}} alıcı hesabı giriş yapamıyor, bu hesap üzerinden hiçbir şey satın alınamaz.",

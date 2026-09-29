@@ -111,6 +111,13 @@
         "description_other": "{{count}} de magazine nu mai sunt autorizate. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru ele până la reconectare.",
         "action": "Gestionează magazinele"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Reconectează un magazin pentru a activa mesajele eBay",
+        "description_one": "{{count}} magazin a fost conectat înainte de adăugarea mesageriei. Reconectează-l pentru a citi și răspunde la mesajele eBay aici.",
+        "description_few": "{{count}} magazine au fost conectate înainte de adăugarea mesageriei. Reconectează-le pentru a citi și răspunde la mesajele eBay aici.",
+        "description_other": "{{count}} de magazine au fost conectate înainte de adăugarea mesageriei. Reconectează-le pentru a citi și răspunde la mesajele eBay aici.",
+        "action": "Gestionează magazinele"
+      },
       "amazon_account_needs_attention": {
         "title": "Un cont de cumpărător Amazon nu se poate autentifica",
         "description_one": "{{count}} cont de cumpărător nu reușește să se autentifice, deci nu se poate cumpăra nimic prin el.",

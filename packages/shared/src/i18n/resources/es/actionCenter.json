@@ -111,6 +111,13 @@
         "description_other": "{{count}} tiendas ya no están autorizadas. La sincronización de pedidos, el repricing y la publicación están detenidos para ellas hasta que vuelvas a conectarlas.",
         "action": "Administrar tiendas"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Vuelve a conectar una tienda para activar los mensajes de eBay",
+        "description_one": "{{count}} tienda se conectó antes de añadirse la mensajería. Vuelve a conectarla para leer y responder mensajes de eBay aquí.",
+        "description_many": "{{count}} tiendas se conectaron antes de añadirse la mensajería. Vuelve a conectarlas para leer y responder mensajes de eBay aquí.",
+        "description_other": "{{count}} tiendas se conectaron antes de añadirse la mensajería. Vuelve a conectarlas para leer y responder mensajes de eBay aquí.",
+        "action": "Administrar tiendas"
+      },
       "amazon_account_needs_attention": {
         "title": "Una cuenta de comprador de Amazon no puede iniciar sesión",
         "description_one": "{{count}} cuenta de comprador falla al iniciar sesión, por lo que no se puede comprar nada a través de ella.",

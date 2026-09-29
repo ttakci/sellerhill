@@ -95,6 +95,11 @@
         "description_other": "有 {{count}} 个店铺已不再获得授权。在您重新连接之前，这些店铺的订单同步、调价和发布都已停止。",
         "action": "管理店铺"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "重新连接店铺以启用 eBay 消息",
+        "description_other": "有 {{count}} 个店铺是在消息功能上线之前连接的。请重新连接以在此处读取和回复 eBay 消息。",
+        "action": "管理店铺"
+      },
       "amazon_account_needs_attention": {
         "title": "有 Amazon 买家账号无法登录",
         "description_other": "有 {{count}} 个买家账号登录失败，因此无法通过它们采购任何商品。",
