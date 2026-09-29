@@ -3,6 +3,87 @@ import { type AmazonFinancials, type AmazonScrapedOrderData } from '@repo/shared
 import type { Page } from 'playwright';
 
 /**
+ * A real UPS number is `1Z` + 6-char shipper id + 2-digit service code +
+ * 8 digits. The old `1Z[A-Z0-9]{16}` accepted `1ZAUXFMSEBKUFEFJRA` — a string
+ * with no digits after the prefix, lifted out of <script> text on the first
+ * live order — and labelled it UPS, which would have pushed it to eBay raw.
+ */
+const UPS_TRACKING_RE = /^1Z[0-9A-Z]{6}\d{2}\d{8}$/;
+
+/**
+ * Tracking number found in the VISIBLE text of an Amazon page, or undefined.
+ *
+ * Every pattern is anchored to a word boundary and every candidate must be a
+ * carrier-shaped code (uppercase, several digits): a bare `\d{12,14}` or
+ * `[A-Z0-9]{10,30}` scan over a whole page also matches order ids, phone
+ * numbers and script blobs. Returning nothing is always safer than a guess —
+ * the tracking processor re-reads on every tick, and a wrong number would go
+ * to the buyer through eBay's write-once fulfillment call.
+ */
+export function extractTrackingNumberFromText(text: string): string | undefined {
+  if (!text) {
+    return undefined;
+  }
+  const labelled = text.match(/tracking\s*(?:id|number|#)?\s*[:#]\s*([A-Z0-9]{10,34})\b/i)?.[1];
+  const candidates = [
+    labelled,
+    text.match(/\bTBA\d{12,}\b/)?.[0],
+    text.match(/\b1Z[0-9A-Z]{6}\d{10}\b/)?.[0],
+    text.match(/\b9[2-5]\d{18,24}\b/)?.[0],
+  ];
+  for (const candidate of candidates) {
+    if (candidate && isPlausibleTrackingNumber(candidate)) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
+function isPlausibleTrackingNumber(value: string): boolean {
+  if (value !== value.toUpperCase()) {
+    return false;
+  }
+  const digits = (value.match(/\d/g) ?? []).length;
+  return digits >= 4 && /^[A-Z0-9]+$/.test(value);
+}
+
+/**
+ * Amazon's delivery-status wording → our coarse status vocabulary.
+ *
+ * Unrecognised text is `pending`, never echoed back: the first live order was
+ * stamped with the status "grand total:" because a fallback selector matched
+ * the order-summary label. An ETA line ("Arriving tomorrow") is shown before
+ * the parcel ships, so it is pre-ship too.
+ */
+export function normalizeAmazonStatus(status: string): string {
+  const lower = status.toLowerCase();
+  if (lower.includes('cancel')) {
+    return 'cancelled';
+  }
+  if (lower.includes('return') || lower.includes('refund')) {
+    return 'returned';
+  }
+  if (lower.includes('delivered') || lower.includes('arrived')) {
+    return 'delivered';
+  }
+  if (lower.includes('not yet shipped') || lower.includes('not shipped yet')) {
+    return 'pending';
+  }
+  if (
+    lower.includes('shipped') ||
+    lower.includes('on the way') ||
+    lower.includes('out for delivery') ||
+    lower.includes('in transit')
+  ) {
+    return 'shipped';
+  }
+  if (lower.includes('processing') || lower.includes('preparing')) {
+    return 'processing';
+  }
+  return 'pending';
+}
+
+/**
  * Carrier for a tracking number.
  *
  * The number is checked FIRST because it is unambiguous, and Amazon Logistics
@@ -18,7 +99,7 @@ export function resolveTrackingCarrier(trackingNumber: string | undefined, pageT
   if (/^TB[A-Z]/.test(num)) {
     return 'Amazon Logistics';
   }
-  if (/^1Z[0-9A-Z]{16}$/.test(num)) {
+  if (UPS_TRACKING_RE.test(num)) {
     return 'UPS';
   }
   if (/^9[2-5]\d{18,24}$/.test(num)) {
@@ -89,11 +170,15 @@ export class AmazonOrderParserService {
   }
 
   private async extractStatus(page: Page): Promise<string> {
-    // Amazon order status is typically in a delivery status bar
+    // Amazon order status is typically in a delivery status bar. The old
+    // `#orderDetails .a-row .a-text-bold` fallback is gone: it matched the
+    // "Grand Total:" label of the order summary.
     const statusSelectors = [
       '[data-component="deliveryStatus"] .a-text-bold',
       '.delivery-status-card-title',
-      '#orderDetails .a-row .a-text-bold',
+      '.delivery-box__primary-text',
+      '[data-component="orderDeliveryStatus"]',
+      '.od-status-message',
     ];
 
     for (const selector of statusSelectors) {
@@ -106,8 +191,8 @@ export class AmazonOrderParserService {
           .catch(() => false)
       ) {
         const text = await el.textContent();
-        if (text) {
-          return this.normalizeStatus(text.trim());
+        if (text?.trim()) {
+          return normalizeAmazonStatus(text.trim());
         }
       }
     }
@@ -221,14 +306,22 @@ export class AmazonOrderParserService {
       return { ok: false };
     }
 
+    // Amazon's order-summary lines, as textContent renders them:
+    //   Item(s) Subtotal:$13.91  Shipping & Handling:$0.00  Total before tax:$13.91
+    //   Estimated tax to be collected:$0.97  Grand Total:$14.88
+    // "Total before tax" is removed BEFORE the tax lookup — a bare /tax/ once
+    // matched it first and linked the first live order with tax = subtotal.
+    const withoutBeforeTax = text.replace(/total before tax[:\s]*\$?[\d,]+\.?\d*/gi, '');
+
     const subtotal = this.extractAmount(text, /subtotal[:\s]*\$?([\d,]+\.?\d*)/i);
-    const shipping = this.extractAmount(text, /shipping[:\s]*\$?([\d,]+\.?\d*)/i);
+    const shipping = this.extractAmount(text, /shipping(?:\s*(?:&|and)\s*handling)?[:\s]*\$?([\d,]+\.?\d*)/i);
     const tax =
-      this.extractAmount(text, /tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
-      this.extractAmount(text, /estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+      this.extractAmount(withoutBeforeTax, /estimated tax(?:\s+to\s+be\s+collected)?[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      this.extractAmount(withoutBeforeTax, /\btax[:\s]*\$?([\d,]+\.?\d*)/i);
+    // `\btotal` so "Subtotal:$13.91" cannot feed the grand total.
     const grandTotal =
       this.extractAmount(text, /grand total[:\s]*\$?([\d,]+\.?\d*)/i) ||
-      this.extractAmount(text, /total[:\s]*\$?([\d,]+\.?\d*)/i);
+      this.extractAmount(withoutBeforeTax, /\btotal[:\s]*\$?([\d,]+\.?\d*)/i);
 
     const allZero = !subtotal && !shipping && !tax && !grandTotal;
     if (allZero) {
@@ -260,30 +353,17 @@ export class AmazonOrderParserService {
     ) {
       result.trackingUrl = (await trackBtn.getAttribute('href')) || undefined;
 
-      // Try to extract tracking number from the page
-      const pageText = await page.textContent('body').catch(() => '');
-      if (pageText) {
-        // Common tracking number patterns
-        const trackingPatterns = [
-          /tracking[^:]*[:\s]+([A-Z0-9]{10,30})/i,
-          /TBA\d{13,}/, // Amazon Logistics
-          /1Z[A-Z0-9]{16}/, // UPS
-          /9[4-7]\d{20,}/, // USPS
-          /\d{12,14}/, // FedEx
-        ];
-
-        for (const pattern of trackingPatterns) {
-          const match = pageText.match(pattern);
-          if (match) {
-            result.trackingNumber = match[0].trim() || match[1]?.trim();
-            break;
-          }
-        }
-      }
+      // VISIBLE text only. `textContent('body')` includes every <script>
+      // body, and a base64-ish blob in one of them is where the first live
+      // order's "1ZAUXFMSEBKUFEFJRA" came from.
+      const pageText = await page
+        .locator('body')
+        .innerText()
+        .catch(() => '');
+      result.trackingNumber = extractTrackingNumberFromText(pageText);
 
       // Determine carrier from the tracking number first, page text second.
-      const text = await page.textContent('body').catch(() => '');
-      result.trackingCarrier = resolveTrackingCarrier(result.trackingNumber, text || '');
+      result.trackingCarrier = resolveTrackingCarrier(result.trackingNumber, pageText);
     }
 
     return result;
@@ -295,28 +375,5 @@ export class AmazonOrderParserService {
       return 0;
     }
     return parseFloat(match[1].replace(/,/g, '')) || 0;
-  }
-
-  private normalizeStatus(status: string): string {
-    const lower = status.toLowerCase();
-    if (lower.includes('deliver') && lower.includes('not yet')) {
-      return 'pending';
-    }
-    if (lower.includes('shipped') || lower.includes('on the way')) {
-      return 'shipped';
-    }
-    if (lower.includes('delivered') || lower.includes('arrived')) {
-      return 'delivered';
-    }
-    if (lower.includes('cancel')) {
-      return 'cancelled';
-    }
-    if (lower.includes('return')) {
-      return 'returned';
-    }
-    if (lower.includes('processing') || lower.includes('preparing')) {
-      return 'processing';
-    }
-    return lower;
   }
 }
