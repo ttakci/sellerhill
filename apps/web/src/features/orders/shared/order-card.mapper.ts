@@ -62,8 +62,7 @@ export const toOrderCardProps = (
     });
   }
 
-  const profitTone =
-    order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
+  const profitTone = order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
 
   // A card can carry both at once: an untracked order (no matched listing)
   // can never reach `linked`, so its profit is also always an estimate/unknown.
@@ -79,12 +78,8 @@ export const toOrderCardProps = (
     productTitle,
     imageUrl: order.product?.imageUrl,
     ebayOrderId: order.ebayOrderId,
-    status: order.status,
-    statusLabel: (() => {
-      const key = `orders.status.${order.status}`;
-      const translated = t(key);
-      return translated === key ? order.status : translated;
-    })(),
+    stage: order.stage,
+    shippedDetectedAt: order.shippedDetectedAt,
     statsBadges: statsBadges.length > 0 ? statsBadges : undefined,
     meta,
     stats: [
