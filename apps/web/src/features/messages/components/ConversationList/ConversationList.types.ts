@@ -4,6 +4,8 @@ import type { IconName } from '@repo/ui';
 export interface ConversationRowView {
   id: string;
   otherParty: string;
+  /** Single uppercase letter for the row avatar, resolved by the container. */
+  avatarLabel: string;
   title: string | null;
   snippet: string;
   date: string;

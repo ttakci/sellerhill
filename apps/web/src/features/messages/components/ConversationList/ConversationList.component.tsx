@@ -69,6 +69,11 @@ export const ConversationList = ({
                 aria-label={t('messages.list.select')}
               />
             </S.RowCheck>
+            <S.Avatar $unread={row.unreadCount > 0} aria-hidden>
+              <Text variant="body-sm" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
+                {row.avatarLabel}
+              </Text>
+            </S.Avatar>
             <S.RowMain>
               <S.RowButton type="button" onClick={() => onOpen(row.id)} aria-current={row.isActive || undefined}>
                 <S.RowLine>

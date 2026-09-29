@@ -61,6 +61,12 @@ const isSafeMediaUrl = (url: string | null | undefined): boolean =>
 /** List snippets are one line: collapse the message's own line breaks. */
 const toSnippet = (body: string | undefined): string => (body ?? '').replace(/\s+/g, ' ').trim();
 
+/** First letter for the avatar disc; eBay usernames are ASCII so `charAt` is safe. */
+const avatarInitial = (name: string | null | undefined): string => {
+  const trimmed = (name ?? '').trim();
+  return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+};
+
 /** Same store label the dashboard filter shows. */
 const storeLabel = (account: EbayAccountPublicDto): string =>
   account.storeName || account.ebayUsername || account.sellerId;
@@ -127,17 +133,21 @@ export const MessagesPageContainer = (): React.ReactElement => {
 
   const rows = useMemo<ConversationRowView[]>(
     () =>
-      conversations.map((conversation) => ({
-        id: conversation.conversationId,
-        otherParty: conversation.otherPartyUsername ?? conversation.latestMessage?.senderUsername ?? '—',
-        title: conversation.title,
-        snippet: toSnippet(conversation.latestMessage?.body),
-        date: formatListDate(conversation.latestMessage?.createdAt ?? conversation.createdAt),
-        unreadCount: conversation.unreadCount,
-        referenceId: conversation.referenceId,
-        isSelected: selectedSet.has(conversation.conversationId),
-        isActive: conversation.conversationId === conversationId,
-      })),
+      conversations.map((conversation) => {
+        const otherParty = conversation.otherPartyUsername ?? conversation.latestMessage?.senderUsername ?? '—';
+        return {
+          id: conversation.conversationId,
+          otherParty,
+          avatarLabel: avatarInitial(otherParty),
+          title: conversation.title,
+          snippet: toSnippet(conversation.latestMessage?.body),
+          date: formatListDate(conversation.latestMessage?.createdAt ?? conversation.createdAt),
+          unreadCount: conversation.unreadCount,
+          referenceId: conversation.referenceId,
+          isSelected: selectedSet.has(conversation.conversationId),
+          isActive: conversation.conversationId === conversationId,
+        };
+      }),
     [conversations, conversationId, selectedSet, formatListDate],
   );
 
@@ -222,6 +232,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
     null;
   const threadTitle =
     inbox.thread?.title ?? activeConversation?.title ?? otherParty ?? t('messages.page.title');
+  const threadAvatarLabel = avatarInitial(otherParty ?? threadTitle);
 
   const threadActions = useMemo<ThreadActionView[]>(() => {
     if (!conversationId) {
@@ -348,6 +359,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
           isLoading: inbox.isThreadLoading,
           title: threadTitle,
           otherParty,
+          avatarLabel: threadAvatarLabel,
           referenceId: activeConversation?.referenceId ?? null,
           messages,
           actions: threadActions,

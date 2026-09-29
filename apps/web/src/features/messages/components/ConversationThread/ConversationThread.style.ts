@@ -18,11 +18,24 @@ export const Wrapper = styled.div`
 
 export const Header = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.secondary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+/** Same disc language as the list row avatar, one size up for the header. */
+export const HeaderAvatar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.secondary')};
 `;
 
 export const HeaderText = styled.div`
