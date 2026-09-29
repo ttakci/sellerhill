@@ -42,7 +42,11 @@
       "noAuthorizationCode": "Nenhum código de autorização recebido do eBay",
       "storeOwnedByAnotherAccount": "Esta loja eBay está vinculada a uma conta diferente do SellerHill. Entre em contato com o suporte para transferi-la.",
       "accountNotFound": "Essa loja eBay não foi encontrada.",
-      "identityUnavailable": "Não foi possível confirmar sua conta eBay junto ao eBay. Nada foi conectado — tente novamente em instantes."
+      "identityUnavailable": "Não foi possível confirmar sua conta eBay junto ao eBay. Nada foi conectado — tente novamente em instantes.",
+      "messagingScopeMissing": "Reconecte sua loja eBay para ativar as mensagens — a autorização atual não inclui mensagens.",
+      "messagingReplyNotAllowed": "Não é possível responder aqui às mensagens do eBay.",
+      "messagingUnavailable": "As mensagens do eBay estão temporariamente indisponíveis. Tente novamente.",
+      "messageTooLong": "Uma mensagem pode ter no máximo 2000 caracteres."
     },
     "onboarding": {
       "title": "Conecte sua loja eBay",

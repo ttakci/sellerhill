@@ -42,7 +42,11 @@
       "noAuthorizationCode": "Von eBay wurde kein Autorisierungscode empfangen",
       "storeOwnedByAnotherAccount": "Dieser eBay-Shop ist mit einem anderen SellerHill-Konto verknüpft. Wenden Sie sich an den Support, um ihn zu übertragen.",
       "accountNotFound": "Dieser eBay-Shop wurde nicht gefunden.",
-      "identityUnavailable": "Wir konnten Ihr eBay-Konto bei eBay nicht bestätigen. Es wurde nichts verbunden – bitte versuchen Sie es in Kürze erneut."
+      "identityUnavailable": "Wir konnten Ihr eBay-Konto bei eBay nicht bestätigen. Es wurde nichts verbunden – bitte versuchen Sie es in Kürze erneut.",
+      "messagingScopeMissing": "Verbinden Sie Ihren eBay-Shop erneut, um Nachrichten zu aktivieren – die aktuelle Autorisierung umfasst keine Nachrichten.",
+      "messagingReplyNotAllowed": "Auf Nachrichten von eBay kann hier nicht geantwortet werden.",
+      "messagingUnavailable": "eBay-Nachrichten sind vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
+      "messageTooLong": "Eine Nachricht darf höchstens 2000 Zeichen lang sein."
     },
     "onboarding": {
       "title": "Verbinden Sie Ihren eBay-Shop",

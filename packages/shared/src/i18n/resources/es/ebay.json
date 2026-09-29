@@ -42,7 +42,11 @@
       "noAuthorizationCode": "No se recibió ningún código de autorización de eBay",
       "storeOwnedByAnotherAccount": "Esta tienda de eBay está vinculada a otra cuenta de SellerHill. Contacta con soporte para transferirla.",
       "accountNotFound": "No se encontró esa tienda de eBay.",
-      "identityUnavailable": "No pudimos confirmar tu cuenta de eBay con eBay. No se conectó nada; inténtalo de nuevo en un momento."
+      "identityUnavailable": "No pudimos confirmar tu cuenta de eBay con eBay. No se conectó nada; inténtalo de nuevo en un momento.",
+      "messagingScopeMissing": "Vuelve a conectar tu tienda de eBay para activar los mensajes; la autorización actual no incluye la mensajería.",
+      "messagingReplyNotAllowed": "Los mensajes de eBay no se pueden responder desde aquí.",
+      "messagingUnavailable": "La mensajería de eBay no está disponible temporalmente. Inténtalo de nuevo.",
+      "messageTooLong": "Un mensaje puede tener como máximo 2000 caracteres."
     },
     "onboarding": {
       "title": "Conecta tu tienda de eBay",
