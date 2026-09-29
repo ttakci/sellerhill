@@ -20,6 +20,8 @@ import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
 import { EbayService } from './ebay.service';
+import { EbayNotificationClient } from './notifications/ebay-notification.client';
+import { EbayNotificationService } from './notifications/ebay-notification.service';
 
 
 @Module({
@@ -43,6 +45,8 @@ import { EbayService } from './ebay.service';
     EmailVerifiedGuard,
     EbayFulfillmentService,
     EbayAccountDeletionService,
+    EbayNotificationClient,
+    EbayNotificationService,
   ],
   exports: [
     EbayService,
@@ -53,6 +57,8 @@ import { EbayService } from './ebay.service';
     EbayFulfillmentService,
     EbayTaxonomyService,
     AspectResolverService,
+    EbayNotificationClient,
+    EbayNotificationService,
   ],
 })
 export class EbayModule {}
