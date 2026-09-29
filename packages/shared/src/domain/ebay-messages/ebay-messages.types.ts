@@ -78,10 +78,11 @@ export function hasMessagingScopes(granted: readonly string[] | null | undefined
 }
 
 /**
- * The web Messages page's folder rail. Not an eBay concept — a client-side
- * grouping over {@link EbayConversationStatus} (`ALL`/`ARCHIVE` map to
- * `status` directly, `UNREAD` filters client-visible rows by `unreadCount > 0`
- * within the ACTIVE status).
+ * The web Messages page's folder rail. Not an eBay concept — a grouping over
+ * {@link EbayConversationStatus}, each folder sending one `conversation_status`
+ * to eBay: `ALL` → ACTIVE (archived/deleted never appear), `UNREAD` → UNREAD,
+ * `ARCHIVE` → ARCHIVE. eBay does the filtering; only the demo fixtures filter
+ * client-side.
  */
 export enum MessagesFolder {
   ALL = 'all',

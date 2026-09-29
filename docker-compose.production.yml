@@ -96,11 +96,12 @@ services:
       EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
 
       # eBay Messages — NEW_MESSAGE Notification API webhook. Set both the token
-      # (same 32–80 char shape as EBAY_VERIFICATION_TOKEN, but a SEPARATE value
-      # pasted into the eBay portal's Notification API config) and the alert
-      # e-mail to create the notification destination; without them the Message
-      # API inbox still works, on the 15-minute unread-badge polling fallback
-      # instead of a live webhook push. See CLAUDE.md "eBay Messages".
+      # (same 32–80 char shape as EBAY_VERIFICATION_TOKEN, but a SEPARATE value;
+      # the API sends it to eBay itself via createDestination — nothing is
+      # pasted into the developer portal) and the alert e-mail to create the
+      # notification destination; without them the Message API inbox still
+      # works, on the 15-minute unread-badge polling fallback instead of a live
+      # webhook push. See CLAUDE.md "eBay Messages".
       EBAY_NOTIFICATION_VERIFICATION_TOKEN: ${EBAY_NOTIFICATION_VERIFICATION_TOKEN:-}
       EBAY_NOTIFICATION_ALERT_EMAIL: ${EBAY_NOTIFICATION_ALERT_EMAIL:-}
       # Leave unset to derive `${FRONTEND_URL}/api/v1/ebay/notifications`.

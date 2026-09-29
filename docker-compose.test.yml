@@ -77,8 +77,9 @@ services:
 
       # eBay Messages — NEW_MESSAGE Notification API webhook. Both optional;
       # until set the notification half is a no-op (Message API list/reply/read
-      # still works, on the 15-minute unread-badge polling fallback). See
-      # CLAUDE.md "eBay Messages".
+      # still works, on the 15-minute unread-badge polling fallback). The token
+      # is sent to eBay by the API itself (createDestination) — nothing is
+      # pasted into the developer portal. See CLAUDE.md "eBay Messages".
       EBAY_NOTIFICATION_VERIFICATION_TOKEN: ${EBAY_NOTIFICATION_VERIFICATION_TOKEN:-}
       EBAY_NOTIFICATION_ALERT_EMAIL: ${EBAY_NOTIFICATION_ALERT_EMAIL:-}
       EBAY_NOTIFICATION_ENDPOINT_URL: ${EBAY_NOTIFICATION_ENDPOINT_URL:-}

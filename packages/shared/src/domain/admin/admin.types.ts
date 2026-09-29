@@ -283,9 +283,12 @@ export enum AdminWarningKind {
   /** The oldest overdue product refresh is further behind than the configured refresh interval. */
   REFRESH_LAG = 'refresh_lag',
   /**
-   * The eBay Notification API subscription for NEW_MESSAGE is not active
-   * (never created, or eBay reports it disabled) — the seller inbox falls
-   * back to polling only, and a new buyer message may sit unseen until then.
+   * The NEW_MESSAGE notification half is switched off by ENVIRONMENT: the
+   * `EBAY_NOTIFICATION_VERIFICATION_TOKEN` or `EBAY_NOTIFICATION_ALERT_EMAIL`
+   * value is missing or malformed, so no destination/subscription is ever
+   * created. Derived from env only — it does NOT reflect per-store
+   * subscription state on eBay's side. The seller inbox falls back to the
+   * 15-minute unread recount, so a new buyer message may sit unseen until then.
    */
   EBAY_NOTIFICATIONS_DISABLED = 'ebay_notifications_disabled',
 }
