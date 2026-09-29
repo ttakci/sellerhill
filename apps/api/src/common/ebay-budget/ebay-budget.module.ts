@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 
 import { EbayAnalyticsService } from './ebay-analytics.service';
+import { EbayApplicationTokenService } from './ebay-application-token.service';
 import { EbayBudgetOverviewService } from './ebay-budget-overview.service';
 import { EbayCallBudgetService } from './ebay-call-budget.service';
 import { EbayRateLimitRefreshProcessor, EBAY_RATE_LIMIT_REFRESH_QUEUE } from './ebay-rate-limit-refresh.processor';
@@ -40,10 +41,17 @@ import { EbayRateLimitStore } from './ebay-rate-limit.store';
   providers: [
     EbayCallBudgetService,
     EbayRateLimitStore,
+    EbayApplicationTokenService,
     EbayAnalyticsService,
     EbayRateLimitRefreshProcessor,
     EbayBudgetOverviewService,
   ],
-  exports: [EbayCallBudgetService, EbayRateLimitStore, EbayAnalyticsService, EbayBudgetOverviewService],
+  exports: [
+    EbayCallBudgetService,
+    EbayRateLimitStore,
+    EbayApplicationTokenService,
+    EbayAnalyticsService,
+    EbayBudgetOverviewService,
+  ],
 })
 export class EbayBudgetModule {}

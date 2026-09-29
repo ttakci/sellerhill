@@ -2,6 +2,7 @@ import type { ConfigService } from '@nestjs/config';
 import { EbayApiResource, EbayCallPriority } from '@repo/shared';
 
 import { EbayAnalyticsService, EBAY_ANALYTICS_TIMEOUT_MS, PANEL_CACHE_MS } from './ebay-analytics.service';
+import { EbayApplicationTokenService } from './ebay-application-token.service';
 import { EbayBudgetExhaustedError } from './ebay-budget.errors';
 import type { EbayCallBudgetService } from './ebay-call-budget.service';
 import type { EbayRateLimitStore } from './ebay-rate-limit.store';
@@ -32,10 +33,12 @@ function setup(config: Record<string, string> = CONFIG) {
   const cfg = { get: (k: string) => config[k] } as unknown as ConfigService;
   const fetchMock = jest.fn<Promise<Response>, [string, RequestInit?]>();
   global.fetch = fetchMock as unknown as typeof fetch;
+  const appToken = new EbayApplicationTokenService(cfg);
   const service = new EbayAnalyticsService(
     cfg,
     store as unknown as EbayRateLimitStore,
     budget as unknown as EbayCallBudgetService,
+    appToken,
   );
   return { service, store, budget, fetchMock };
 }
