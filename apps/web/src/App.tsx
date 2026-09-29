@@ -76,6 +76,9 @@ const ListingJobsPage = lazy(() =>
 const ListingsAllPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingsAllPage }))
 );
+const RevisionHistoryPage = lazy(() =>
+  import('./features/listings').then((m) => ({ default: m.RevisionHistoryPage }))
+);
 const ProductsPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ProductsPage }))
 );
@@ -263,6 +266,14 @@ export function App() {
               element={
                 <Lazy>
                   <ListingJobDetailsPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="listings/revisions"
+              element={
+                <Lazy>
+                  <RevisionHistoryPage />
                 </Lazy>
               }
             />

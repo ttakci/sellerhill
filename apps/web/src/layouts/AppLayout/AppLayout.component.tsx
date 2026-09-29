@@ -163,6 +163,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     (pathWithoutLocale.startsWith('/listings/') &&
                       !pathWithoutLocale.startsWith('/listings/jobs') &&
                       pathWithoutLocale !== '/listings/products' &&
+                      pathWithoutLocale !== '/listings/revisions' &&
                       pathWithoutLocale !== '/listings/add'))
                 }
                 $isCollapsed={sidebarCollapsed}
@@ -186,6 +187,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="clipboard-list" size={20} />
                   {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.listingJobs')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/listings/revisions'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/listings/revisions')}
+                aria-label={t('translation:menu.revisionHistory')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="history" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>

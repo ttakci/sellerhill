@@ -256,6 +256,12 @@
       "publish": "Publică pe eBay",
       "publishSelected": "Publică selecția"
     },
+    "revisionHistory": {
+      "title": "Istoric revizii",
+      "subtitle": "Fiecare modificare de preț și stoc trimisă către eBay, pe toate anunțurile tale.",
+      "empty": "Nu s-au găsit revizii.",
+      "emptyTitle": "Nicio revizie încă"
+    },
     "addSection": {
       "title": "Adaugă un anunț nou",
       "subtitle": "Importați produse de pe Amazon în magazinul eBay folosind ASIN-uri.",
@@ -375,6 +381,7 @@
       "updatedAt": "Actualizat",
       "revisions": {
         "action": "Revizii",
+        "lastChecked": "Ultima verificare {{date}} — fără modificări",
         "title": "Revizii",
         "subtitle": "Modificările de preț și stoc pentru acest anunț",
         "previousPrice": "Preț anterior",

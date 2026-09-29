@@ -256,6 +256,12 @@
       "publish": "النشر على eBay",
       "publishSelected": "نشر المحدد"
     },
+    "revisionHistory": {
+      "title": "سجل المراجعات",
+      "subtitle": "كل تغيير في السعر أو المخزون تم إرساله إلى eBay، عبر جميع إعلاناتك.",
+      "empty": "لم يتم العثور على مراجعات.",
+      "emptyTitle": "لا توجد مراجعات بعد"
+    },
     "addSection": {
       "title": "إضافة إدراج جديد",
       "subtitle": "استورد المنتجات من Amazon إلى متجرك على eBay باستخدام أرقام ASIN.",
@@ -375,6 +381,7 @@
       "updatedAt": "تاريخ التحديث",
       "revisions": {
         "action": "المراجعات",
+        "lastChecked": "آخر فحص {{date}} — لا تغيير",
         "title": "المراجعات",
         "subtitle": "تغييرات السعر والمخزون لهذا الإدراج",
         "previousPrice": "السعر السابق",
