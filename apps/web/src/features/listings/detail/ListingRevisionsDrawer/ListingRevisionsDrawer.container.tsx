@@ -47,6 +47,8 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
   onClose,
   listingId,
   currency,
+  subject,
+  onViewListing,
 }) => {
   const { t, i18n } = useTranslation(['listings']);
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
@@ -156,6 +158,8 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
       onClose={onClose}
       isLoading={isFetching && shown === 0}
       isError={isError && shown === 0}
+      subject={subject}
+      onViewListing={onViewListing}
       rows={rows}
       shown={shown}
       total={total}

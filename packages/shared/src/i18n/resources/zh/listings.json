@@ -260,7 +260,8 @@
       "title": "修订记录",
       "subtitle": "推送到 eBay 的所有价格和库存变更，涵盖您的全部刊登。",
       "empty": "未找到修订记录。",
-      "emptyTitle": "暂无修订记录"
+      "emptyTitle": "暂无修订记录",
+      "viewListing": "查看商品"
     },
     "addSection": {
       "title": "添加新商品刊登",
@@ -390,6 +391,7 @@
         "newQuantity": "新库存",
         "priceChange": "价格",
         "quantityChange": "库存",
+        "quantityTooltip": "发送到 eBay 的数量，并非亚马逊的原始库存。",
         "unchanged": "无变化",
         "empty": "暂无修订记录",
         "emptySubtitle": "价格和库存发生变更时，会显示在这里。",

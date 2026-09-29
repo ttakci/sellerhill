@@ -1,8 +1,24 @@
+/**
+ * Identifies which product the drawer is showing. Omitted from the listing
+ * detail page (the page itself already makes that obvious); set by the
+ * cross-listing Revision History table, where the drawer is the only place
+ * that still shows which product is open.
+ */
+export interface ListingRevisionsDrawerSubject {
+  title: string;
+  imageUrl?: string;
+  asin: string;
+  storeName?: string;
+}
+
 export interface ListingRevisionsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   listingId: string | null;
   currency: string;
+  subject?: ListingRevisionsDrawerSubject | null;
+  /** Renders a "go to listing" link in the subject header — only meaningful together with `subject`. */
+  onViewListing?: () => void;
 }
 
 /**
@@ -36,6 +52,8 @@ export interface ListingRevisionsDrawerComponentProps {
   onClose: () => void;
   isLoading: boolean;
   isError: boolean;
+  subject?: ListingRevisionsDrawerSubject | null;
+  onViewListing?: () => void;
   rows: ListingRevisionRow[];
   /** How many rows are currently in `rows` (accumulated across "load more"). */
   shown: number;

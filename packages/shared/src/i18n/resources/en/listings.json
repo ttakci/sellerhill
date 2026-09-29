@@ -260,7 +260,8 @@
       "title": "Revision history",
       "subtitle": "Every price and stock change pushed to eBay, across all your listings.",
       "empty": "No revisions found.",
-      "emptyTitle": "No revisions yet"
+      "emptyTitle": "No revisions yet",
+      "viewListing": "View listing"
     },
     "addSection": {
       "title": "Add New Listing",
@@ -390,6 +391,7 @@
         "newQuantity": "New stock",
         "priceChange": "Price",
         "quantityChange": "Stock",
+        "quantityTooltip": "The quantity sent to eBay — not the raw Amazon stock.",
         "unchanged": "No change",
         "empty": "No revisions yet",
         "emptySubtitle": "Price and stock changes will appear here as they happen.",

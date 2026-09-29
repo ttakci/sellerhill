@@ -143,3 +143,18 @@ export const TableChange = styled.div`
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
+
+/** Layout only — no font/color of its own, so the label text inherits the
+ * table header cell's own uppercase/letter-spaced styling. */
+export const StockHeader = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+`;
+
+/** Same idea for the grid card's own "Stok" label, next to its `Text` sibling. */
+export const CardLabelRow = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+`;

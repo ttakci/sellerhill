@@ -67,7 +67,7 @@ import {
   type PeriodMetricsDto,
   type ProfileDto,
   type StoreSettingsResponse,
-  type UserDto,
+  type UserDto, type ListingRevisionWithListingDto,
 } from '@repo/shared';
 
 /* =========================================================================
@@ -457,16 +457,31 @@ export function buildDemoBestSellers(listType: BestSellersListType, category: st
       listType,
       link: 'https://www.amazon.com/gp/bestsellers',
       items: page === 1 ? items : [],
-      categories: [
-        { name: 'Any Department', path: null, link: 'https://www.amazon.com/gp/bestsellers', isSelected: isRoot, isRoot: true },
-        ...DEMO_LISTING_CATEGORIES.map((name) => ({
-          name,
-          path: demoCategoryAlias(name),
-          link: `https://www.amazon.com/gp/bestsellers/${demoCategoryAlias(name)}`,
-          isSelected: demoCategoryAlias(name) === category,
-          isRoot: false,
-        })),
-      ],
+      // Root answers the full department list (the tree's level-1 rows); a
+      // department page answers only its own breadcrumb echo — this demo's
+      // eleven products carry one category each, so there is no real
+      // sub-category data to invent under a department, same as a genuinely
+      // leaf-level department on Amazon itself.
+      categories: isRoot
+        ? [
+            { name: 'Any Department', path: null, link: 'https://www.amazon.com/gp/bestsellers', isSelected: true, isRoot: true },
+            ...DEMO_LISTING_CATEGORIES.map((name) => ({
+              name,
+              path: demoCategoryAlias(name),
+              link: `https://www.amazon.com/gp/bestsellers/${demoCategoryAlias(name)}`,
+              isSelected: false,
+              isRoot: false,
+            })),
+          ]
+        : [
+            {
+              name: selectedName ?? category,
+              path: category,
+              link: `https://www.amazon.com/gp/bestsellers/${category}`,
+              isSelected: true,
+              isRoot: false,
+            },
+          ],
       relatedLists: [],
       pagination: { page, itemsPerPage: 50, totalPages: 1, totalCount: items.length },
     },
@@ -581,6 +596,56 @@ export function demoListingRevisions(listingId: string): {
   }
 
   return rows; // newest-first
+}
+
+/**
+ * The cross-listing feed behind "Revizyon Geçmişi" (`GET /listings/revisions`)
+ * — every {@link demoListingRevisions} row, across every non-draft listing,
+ * merged and sorted newest-first, with the product/store context the
+ * per-listing endpoint leaves to its caller (that one already has a listing
+ * page around it). Search matches the ASIN only, same as the real query.
+ */
+export function demoAllListingRevisions(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  ebayAccountId?: string;
+}): { items: ListingRevisionWithListingDto[]; total: number; page: number; limit: number } {
+  const storeByAccountId = new Map(DEMO_EBAY_ACCOUNTS.items.map((acc) => [acc.id, acc]));
+
+  let merged: ListingRevisionWithListingDto[] = [];
+  for (const listing of DEMO_LISTINGS) {
+    if (listing.status === ListingStatus.DRAFT) {
+      continue;
+    }
+    const store = listing.ebayAccountId ? storeByAccountId.get(listing.ebayAccountId) : undefined;
+    for (const revision of demoListingRevisions(listing.id)) {
+      merged.push({
+        ...revision,
+        listingId: listing.id,
+        asin: listing.asin,
+        title: listing.title,
+        imageUrl: listing.imageUrls[0],
+        ebayAccountId: listing.ebayAccountId,
+        storeName: store?.storeName,
+        currency: DEMO_CURRENCY,
+      });
+    }
+  }
+
+  const search = params.search?.trim().toLowerCase();
+  if (search) {
+    merged = merged.filter((r) => r.asin.toLowerCase().includes(search));
+  }
+  if (params.ebayAccountId) {
+    merged = merged.filter((r) => r.ebayAccountId === params.ebayAccountId);
+  }
+  merged.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+
+  const page = Math.max(1, params.page ?? 1);
+  const limit = Math.max(1, params.limit ?? 20);
+  const start = (page - 1) * limit;
+  return { items: merged.slice(start, start + limit), total: merged.length, page, limit };
 }
 
 /* ── Orders ───────────────────────────────────────────────────────────── */

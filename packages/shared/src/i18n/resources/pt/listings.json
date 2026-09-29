@@ -260,7 +260,8 @@
       "title": "Histórico de revisões",
       "subtitle": "Cada alteração de preço e estoque enviada ao eBay, em todos os seus anúncios.",
       "empty": "Nenhuma revisão encontrada.",
-      "emptyTitle": "Ainda não há revisões"
+      "emptyTitle": "Ainda não há revisões",
+      "viewListing": "Ver anúncio"
     },
     "addSection": {
       "title": "Adicionar novo anúncio",
@@ -390,6 +391,7 @@
         "newQuantity": "Novo estoque",
         "priceChange": "Preço",
         "quantityChange": "Estoque",
+        "quantityTooltip": "A quantidade enviada ao eBay, não o estoque bruto da Amazon.",
         "unchanged": "Sem alteração",
         "empty": "Ainda não há revisões",
         "emptySubtitle": "As alterações de preço e estoque aparecerão aqui conforme acontecem.",
