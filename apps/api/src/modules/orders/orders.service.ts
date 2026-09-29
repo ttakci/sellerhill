@@ -9,12 +9,17 @@ import {
   AutoFulfillStatus,
   EbayAccountStatus,
   OrderCostCaptureStatus,
+  OrderStage,
   OrderStatus,
+  ACTIONABLE_ORDER_STAGES,
   buildFulfillmentStateSql,
+  buildOrderStageSql,
   deriveFulfillmentState,
+  deriveOrderStage,
   isSimulatedAmazonOrderId,
   type OrderDto,
   type OrderFiltersDto,
+  type OrderStageCountsDto,
   type OrderStatsDto,
   type UpdateOrderAmazonDetailsDto,
 } from '@repo/shared';
@@ -64,6 +69,8 @@ interface OrderRow {
   auto_fulfill_status: string | null;
   auto_fulfill_blocked_reason: string | null;
   amazon_cancelled_at: Date | null;
+  shipped_detected_at: Date | null;
+  ebay_tracking_pushed_at: Date | null;
   shipping_address: {
     fullName?: string;
     street?: string;
@@ -117,7 +124,7 @@ export class OrdersService {
 
     // Build WHERE clause
     const conditions: string[] = ['o.user_id = $1'];
-    const params: (string | number | boolean | null)[] = [userId];
+    const params: (string | number | boolean | null | string[])[] = [userId];
     let paramIndex = 2;
 
     if (filters?.status) {
@@ -187,6 +194,14 @@ export class OrdersService {
       paramIndex++;
     }
 
+    if (filters?.stages && filters.stages.length > 0) {
+      // Same CASE the DTO's `stage` is derived from, so a row can never be
+      // listed under a tab whose badge it does not carry.
+      conditions.push(`${buildOrderStageSql('o')} = ANY($${paramIndex}::text[])`);
+      params.push(filters.stages);
+      paramIndex++;
+    }
+
     if (filters?.isTracked !== undefined) {
       // Whether the order matched a SellerHill listing at all — independent of
       // `fulfillmentState`, which only describes automation on an order this
@@ -214,6 +229,21 @@ export class OrdersService {
     );
     const total = parseInt(countResult[0]?.count || '0', 10);
 
+    // "What needs me" floats to the top of the default view; an explicit
+    // sortBy from the caller is honoured as-is. The actionable list is bound
+    // as a parameter that the page query alone carries (it sits after the
+    // WHERE parameters, before LIMIT/OFFSET).
+    const pageParams: (string | number | boolean | null | string[])[] = [...params];
+    let orderBy = `o.${safeSortBy} ${safeSortOrder}`;
+    let limitIndex = paramIndex;
+    if (!filters?.sortBy) {
+      pageParams.push([...ACTIONABLE_ORDER_STAGES]);
+      orderBy = `CASE WHEN ${buildOrderStageSql(
+        'o'
+      )} = ANY($${limitIndex}::text[]) THEN 0 ELSE 1 END, o.order_date DESC`;
+      limitIndex++;
+    }
+
     // Data query — enrich with listing + product (title, ASIN, eBay item, image)
     const results = await this.databaseService.query<OrderRow>(
       `SELECT o.*,
@@ -223,15 +253,50 @@ export class OrdersService {
               p.image_urls as product_image_urls
        ${fromJoin}
        WHERE ${whereClause}
-       ORDER BY o.${safeSortBy} ${safeSortOrder}
-       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, limit, offset]
+       ORDER BY ${orderBy}
+       LIMIT $${limitIndex} OFFSET $${limitIndex + 1}`,
+      [...pageParams, limit, offset]
     );
 
     return {
       orders: results.map((row) => this.mapRowToDto(row)),
       total,
     };
+  }
+
+  /**
+   * One row per stage for the list page's tabs. Store and listing-link
+   * filters apply (they narrow the whole page); stage/search/date do not
+   * (the counts describe the tabs, not the current tab).
+   */
+  async getStageCounts(
+    userId: string,
+    filters: Pick<OrderFiltersDto, 'ebayAccountId' | 'isTracked'>
+  ): Promise<OrderStageCountsDto> {
+    const conditions = ['o.user_id = $1'];
+    const params: string[] = [userId];
+    if (filters.ebayAccountId) {
+      params.push(filters.ebayAccountId);
+      conditions.push(`o.ebay_account_id = $${params.length}`);
+    }
+    if (filters.isTracked !== undefined) {
+      conditions.push(`o.listing_id IS ${filters.isTracked ? 'NOT NULL' : 'NULL'}`);
+    }
+    const rows = await this.databaseService.query<{ stage: string; count: string }>(
+      `SELECT ${buildOrderStageSql('o')} AS stage, COUNT(*) AS count
+         FROM orders o
+        WHERE ${conditions.join(' AND ')}
+        GROUP BY 1`,
+      params
+    );
+    const stages = Object.values(OrderStage);
+    const counts = Object.fromEntries(stages.map((s) => [s, 0])) as OrderStageCountsDto;
+    for (const row of rows) {
+      if ((stages as string[]).includes(row.stage)) {
+        counts[row.stage as OrderStage] = Number(row.count);
+      }
+    }
+    return counts;
   }
 
   /**
@@ -473,6 +538,16 @@ export class OrdersService {
         amazonCancelledAt: row.amazon_cancelled_at,
         isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
       }),
+      stage: deriveOrderStage({
+        status: row.status as OrderStatus,
+        autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : null,
+        amazonOrderId: row.amazon_order_id,
+        amazonCancelledAt: row.amazon_cancelled_at,
+        shippedDetectedAt: row.shipped_detected_at,
+        ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+      }),
+      shippedDetectedAt: row.shipped_detected_at ? row.shipped_detected_at.toISOString() : null,
+      ebayTrackingPushedAt: row.ebay_tracking_pushed_at ? row.ebay_tracking_pushed_at.toISOString() : null,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
       product: hasListing

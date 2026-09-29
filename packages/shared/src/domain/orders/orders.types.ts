@@ -228,6 +228,13 @@ export interface OrderDto {
    * outranking a placed order, a simulated order never counting as purchased).
    */
   fulfillmentState?: OrderFulfillmentState;
+  /** The one seller-facing status — see `OrderStage` / `deriveOrderStage`. */
+  stage: OrderStage;
+  /** `orders.shipped_detected_at` (089): Amazon first observed shipped. Drives
+   *  the "tracking held" badge's amber → red switch on the web. */
+  shippedDetectedAt?: string | null;
+  /** `orders.ebay_tracking_pushed_at` (089): eBay received the fulfillment. */
+  ebayTrackingPushedAt?: string | null;
   /** True when `amazonOrderId` is a dry-run placeholder, not a real purchase. */
   isSimulated?: boolean;
 
@@ -360,6 +367,10 @@ export interface OrderStatsDto {
   returnRate?: number;
 }
 
+/** `GET /orders/stage-counts` — every stage is present, 0 when empty, so the
+ *  tabs never render an undefined count. */
+export type OrderStageCountsDto = Record<OrderStage, number>;
+
 export interface OrderFiltersDto {
   search?: string;
   dateFrom?: string;
@@ -367,6 +378,10 @@ export interface OrderFiltersDto {
   status?: OrderStatus;
   /** Filter by connected eBay store (ebay_accounts.id). */
   ebayAccountId?: string;
+  /** Filter to one or more stages (`?stage=a,b`). The list page's tabs send
+   *  a group, the Status select sends one. Unknown values are dropped by the
+   *  controller. */
+  stages?: OrderStage[];
   /**
    * When true, restrict to orders whose automated Amazon fulfillment hit a
    * fail-closed obstacle (`auto_fulfill_status IN ('blocked','failed')`) so
