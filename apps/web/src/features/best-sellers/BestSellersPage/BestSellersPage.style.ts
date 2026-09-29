@@ -107,13 +107,58 @@ export const Toolbar = styled.div`
   }
 `;
 
-/** Select-all on the right; wraps on narrow widths. */
+/**
+ * Filters on the left, select-all pushed right; wraps on narrow widths. Widths
+ * follow the Listings filter bar (Select 12rem) so the two toolbars line up.
+ */
 export const FilterRow = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+export const FilterSelect = styled.div`
+  width: 11rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    width: 100%;
+  }
+`;
+
+export const FilterNumber = styled.div`
+  width: 11rem;
+  flex-shrink: 0;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    width: 100%;
+  }
+`;
+
+export const FilterPriceRange = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  width: 18rem;
+  flex-shrink: 0;
+  min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    width: 100%;
+  }
+`;
+
+export const RangeSeparator = styled.span`
+  flex-shrink: 0;
 `;
 
 export const FilterSpacer = styled.div`
@@ -128,121 +173,11 @@ export const MetaRow = styled.div`
   gap: ${tkn('spacing.2xs')} ${tkn('spacing.md')};
 `;
 
-/* --- Grid card ------------------------------------------------------------ */
-
-/**
- * One ranked product. The card carries `aria-pressed` for its ticked state, and
- * the brand outline + tint key off that attribute — the design system has no
- * Card variant for "selected", and an attribute selector needs no theme access
- * from a prop function (the web app's Emotion `Theme` is not typed for
- * `theme.colors`). The whole card is the tap surface; the checkbox is the
- * keyboard-reachable control.
- */
-export const GridCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  height: 100%;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition:
-    box-shadow ${tkn('transitions.fast')},
-    border-color ${tkn('transitions.fast')},
-    background ${tkn('transitions.fast')},
-    transform ${tkn('transitions.fast')};
-
-  &:hover {
-    box-shadow: ${tkn('shadows.lg')};
-    transform: translateY(-0.125rem);
-  }
-
-  &[aria-pressed='true'] {
-    border-color: ${tkn('colors.brand.primary')};
-    background: ${tkn('colors.brand.secondary')};
-    box-shadow: inset 0 0 0 0.0625rem ${tkn('colors.brand.primary')};
-  }
-`;
-
-export const CardTopRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  min-height: 1.5rem;
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm')} 0;
-`;
-
-/** Wraps the checkbox so its click never doubles up with the card's own toggle. */
-export const CardControl = styled.div`
-  display: inline-flex;
-  align-items: center;
-`;
-
-/** Transparent image plate — no grey mat, matching every other product image in the app. */
-export const CardImageFrame = styled.div`
-  width: 100%;
-  height: 11rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: transparent;
-  padding: ${tkn('spacing.sm')};
-  box-sizing: border-box;
-`;
-
-export const CardImage = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-`;
-
-/** Everything below the image sits on its own inset, separated by a hairline. */
-export const CardBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  flex: 1;
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
-`;
-
-/**
- * Plain layout wrapper for the `-webkit-line-clamp` box — the clamp used to
- * live on `styled(Text)` directly, but two Emotion-generated classes on one
- * element race for the `color`/`display` declarations, and whichever loses
- * that race can render the title uncoloured or unclamped. Wrapping an
- * unmodified `<Text>` removes the race entirely.
- */
-export const CardTitleClamp = styled.div`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 3rem;
-`;
-
-export const CardMetaRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-`;
-
-/** ASIN badge pinned to the card foot; stops propagation so the Amazon link does not toggle the card. */
-export const CardFooter = styled.div`
-  margin-top: auto;
-  padding-top: ${tkn('spacing.xs')};
-  display: flex;
-  align-items: center;
-`;
-
 /* --- Locked placeholders ---------------------------------------------------- */
 
 /**
- * A product the allowance did not cover. Same footprint as `GridCard` so the
- * grid keeps its rhythm, but it is not a tap surface: no hover lift, no
+ * A product the allowance did not cover. Same footprint as the listings card so
+ * the grid keeps its rhythm, but it is not a tap surface: no hover lift, no
  * pointer, no selection outline. The blurred body underneath is skeleton bars
  * only; the lock badge sits on top, unblurred, so the state is legible.
  */
@@ -257,12 +192,31 @@ export const LockedCard = styled(Card)`
   overflow: hidden;
 `;
 
+/** Same geometry as the horizontal ListingCard: 10.5rem image slot beside the content. */
 export const LockedCardBody = styled.div`
+  display: flex;
+  gap: ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.lg')};
+  filter: blur(${LOCKED_BLUR});
+  pointer-events: none;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    flex-direction: column;
+  }
+`;
+
+export const LockedImageSlot = styled.div`
+  width: 10.5rem;
+  height: 10.5rem;
+  flex-shrink: 0;
+`;
+
+export const LockedCardLines = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
-  filter: blur(${LOCKED_BLUR});
-  pointer-events: none;
+  flex: 1;
+  min-width: 0;
 `;
 
 export const LockedOverlay = styled.div`

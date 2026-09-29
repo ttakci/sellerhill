@@ -1,7 +1,7 @@
-import type { TabNavItem } from '@repo/ui';
+import type { SelectOption, TabNavItem } from '@repo/ui';
 import type React from 'react';
 
-import type { BestSellersViewState } from '../bestSellers.types';
+import type { BestSellersFilterValues, BestSellersViewState } from '../bestSellers.types';
 
 import type { BestSellersCategoryTreeRow } from './CategoryTree';
 
@@ -28,8 +28,12 @@ export interface BestSellersItemView {
   priceLabel: string | null;
   /** `★ 4.6 (12,345)` / `★ 4.6`, or null when the product has no rating yet. */
   ratingLabel: string | null;
+  /** The star average alone (`4.6`), for the card's star stat; null when unrated. */
+  ratingValueLabel: string | null;
   /** The review count alone, grouped for the locale — the table's Reviews column. */
   reviewsLabel: string | null;
+  /** Movers & Shakers only — `+250%`; null on every other list. */
+  rankChangeLabel: string | null;
   isSelected: boolean;
   /** True for an allowance placeholder — never selectable, never sent to Add Listings. */
   isLocked: boolean;
@@ -78,20 +82,26 @@ export interface BestSellersPageComponentProps {
   isCategoryDrawerOpen: boolean;
   onOpenCategoryDrawer: () => void;
   onCloseCategoryDrawer: () => void;
-  /** True when a sub-category is open, so "Back to all categories" applies. */
+  /** True when a category other than the root is open (the not-found screen offers a way back). */
   isSubCategory: boolean;
   onBackToAllCategories: () => void;
+
+  /** Rating / reviews / price filters over the page being viewed. */
+  ratingOptions: SelectOption[];
+  filterValues: BestSellersFilterValues;
+  onMinRatingChange: (value: string | number) => void;
+  onMinReviewsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onPriceMinChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onPriceMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+  /** "12 of 50 products on this page" while a filter narrows the page; null otherwise. */
+  filterResultLabel: string | null;
 
   selectedCount: number;
   isAllOnPageSelected: boolean;
   onToggleSelectAllOnPage: (checked: boolean) => void;
   onToggleItem: (asin: string) => void;
-  /**
-   * Stops a click inside a card's own controls (checkbox, Amazon link) from
-   * also toggling the card — the container owns it so the component holds no
-   * handler logic of its own.
-   */
-  onControlClick: (event: React.SyntheticEvent) => void;
   onListSelected: () => void;
   onClearSelection: () => void;
   onRetry: () => void;

@@ -33,6 +33,7 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Fără evaluare încă",
+    "rankChange": "{{sign}}{{value}}%",
     "allowance": "Mai aveți {{remaining}} din {{limit}} produse în această perioadă",
     "allowanceUnlimited": "Vizualizări de produse nelimitate",
     "allowanceHint": "Fiecare produs afișat se contorizează o dată pe perioadă; redeschiderea aceleiași liste astăzi nu se numără de două ori.",
@@ -49,7 +50,17 @@
       "product": "Produs",
       "price": "Preț",
       "rating": "Evaluare",
-      "reviews": "Recenzii"
+      "reviews": "Recenzii",
+      "rankChange": "Schimbare poziție (24 h)"
+    },
+    "filters": {
+      "anyRating": "Orice evaluare",
+      "ratingAtLeast": "{{value}}+ stele",
+      "minReviews": "Recenzii min.",
+      "priceMin": "Preț min.",
+      "priceMax": "Preț max.",
+      "clear": "Șterge filtrele",
+      "resultCount": "{{shown}} din {{total}} produse pe această pagină"
     },
     "states": {
       "loading": {
@@ -59,6 +70,10 @@
       "empty": {
         "title": "Niciun produs pe această pagină",
         "description": "Această listă nu are nimic de afișat aici. Încercați altă categorie sau altă listă."
+      },
+      "noMatches": {
+        "title": "Niciun produs nu corespunde filtrelor",
+        "description": "Relaxează un filtru pentru a vedea mai mult din această listă. Filtrele se aplică produselor de pe această pagină."
       },
       "notFound": {
         "title": "Această categorie nu este disponibilă",

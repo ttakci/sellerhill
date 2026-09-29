@@ -15,6 +15,8 @@ export interface BestSellersCategoryTreeRow {
   depth: 0 | 1;
   /** True when this exact path is the category currently being browsed. */
   isActive: boolean;
+  /** Department rows only — a sub-category of it is the one being browsed. */
+  isActiveBranch: boolean;
   /** Department rows only — whether it has a chevron at all. */
   hasChildren: boolean;
   isExpanded: boolean;

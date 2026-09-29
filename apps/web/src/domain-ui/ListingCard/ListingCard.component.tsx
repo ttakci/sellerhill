@@ -1,4 +1,4 @@
-import { Badge, Checkbox, Icon, IdBadge, Text } from '@repo/ui';
+import { Badge, Checkbox, Icon, IdBadge, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -43,6 +43,7 @@ export const ListingCard = ({
   selected,
   onSelectedChange,
   selectionAriaLabel,
+  showDetailAction = true,
   ...rest
 }: ListingCardProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
@@ -81,9 +82,14 @@ export const ListingCard = ({
 
       <S.Content $orientation={orientation}>
         <S.HeaderBlock>
-          <S.Title variant="body" weight="semibold" color="text.primary">
-            {title}
-          </S.Title>
+          {/* The title is clamped to two lines, so the full text lives on the tooltip. */}
+          <S.TitleSlot>
+            <Tooltip content={title} position="top" variant="dark">
+              <S.Title variant="body" weight="semibold" color="text.primary">
+                {title}
+              </S.Title>
+            </Tooltip>
+          </S.TitleSlot>
 
           {meta.length > 0 && (
             <S.MetaList>
@@ -118,9 +124,14 @@ export const ListingCard = ({
               <S.StatLabel variant="caption" color="text.tertiary">
                 {stat.label}
               </S.StatLabel>
-              <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
-                {stat.value}
-              </S.StatValue>
+              <S.StatValueRow>
+                {stat.icon ? (
+                  <Icon name={stat.icon} size={14} color={stat.iconColor} filled />
+                ) : null}
+                <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
+                  {stat.value}
+                </S.StatValue>
+              </S.StatValueRow>
             </S.StatCell>
           ))}
         </S.StatsGrid>
@@ -133,12 +144,14 @@ export const ListingCard = ({
           ) : (
             <span />
           )}
-          <S.DetailAction>
-            <Text variant="body-sm" weight="semibold" color="brand.primary">
-              {t('translation:common.details')}
-            </Text>
-            <Icon name="arrow-right" size={14} color="brand.primary" />
-          </S.DetailAction>
+          {showDetailAction && (
+            <S.DetailAction>
+              <Text variant="body-sm" weight="semibold" color="brand.primary">
+                {t('translation:common.details')}
+              </Text>
+              <Icon name="arrow-right" size={14} color="brand.primary" />
+            </S.DetailAction>
+          )}
         </S.Footer>
       </S.Content>
     </S.Wrapper>

@@ -62,6 +62,8 @@ export enum BestSellersViewState {
   LOADING = 'loading',
   READY = 'ready',
   EMPTY = 'empty',
+  /** The page has products, but none passes the seller's filters. */
+  NO_MATCHES = 'no_matches',
   /** Amazon does not offer this list for the chosen category. */
   NOT_FOUND = 'not_found',
   /** Amazon did not answer (blocked / unreadable page) — retryable. */
@@ -82,4 +84,39 @@ export enum BestSellersViewState {
 export interface BestSellersRefusalBody {
   message?: string;
   allowance?: BestSellersBrowseAllowanceDto;
+}
+
+/**
+ * Seller-side filters over the products of the page being viewed, kept as the
+ * raw text the seller typed (a half-typed "4." must not snap back to "4").
+ * Each is optional; an empty string means "no constraint". Only fields Amazon
+ * actually prints on a Best Sellers card exist here — rating, review count and
+ * price. Prime and "bought in past month" are not on those pages, so there is
+ * nothing honest to filter them on.
+ */
+export interface BestSellersFilterValues {
+  /** Minimum star average, one of `BEST_SELLERS_RATING_OPTIONS`; `''` = any. */
+  minRating: string;
+  minReviews: string;
+  priceMin: string;
+  priceMax: string;
+}
+
+/** The same filters parsed into numbers; `null` = no constraint. */
+export interface BestSellersFilterCriteria {
+  minRating: number | null;
+  minReviews: number | null;
+  priceMin: number | null;
+  priceMax: number | null;
+}
+
+export interface BestSellersFilters {
+  values: BestSellersFilterValues;
+  criteria: BestSellersFilterCriteria;
+  isActive: boolean;
+  setMinRating: (value: string) => void;
+  setMinReviews: (value: string) => void;
+  setPriceMin: (value: string) => void;
+  setPriceMax: (value: string) => void;
+  clear: () => void;
 }

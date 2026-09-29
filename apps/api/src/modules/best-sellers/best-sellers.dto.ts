@@ -4,6 +4,7 @@ import {
   BEST_SELLERS_CATEGORY_REGEX,
   BEST_SELLERS_MAX_PAGE,
   BestSellersListType,
+  type BestSellersCategoriesQueryDto as SharedBestSellersCategoriesQueryDto,
   type BestSellersQueryDto as SharedBestSellersQueryDto,
 } from '@repo/shared';
 import { Transform } from 'class-transformer';
@@ -35,6 +36,17 @@ export class BestSellersQueryDto implements SharedBestSellersQueryDto {
   @Min(1)
   @Max(BEST_SELLERS_MAX_PAGE)
   page?: number;
+
+  @IsOptional()
+  @IsEnum(AmazonMarketplace)
+  marketplace?: AmazonMarketplace;
+}
+
+/** `GET /v1/best-sellers/categories` query: the root department list of one list type. */
+export class BestSellersCategoriesQueryDto implements SharedBestSellersCategoriesQueryDto {
+  @IsOptional()
+  @IsEnum(BestSellersListType)
+  listType?: BestSellersListType;
 
   @IsOptional()
   @IsEnum(AmazonMarketplace)

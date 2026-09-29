@@ -11,6 +11,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
     field,
     error,
     label,
+    placeholder,
     iconLeft,
     iconRight,
     isDisabled,
@@ -70,6 +71,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
           maxLength={maxLength}
           autoComplete={autoComplete}
           aria-label={ariaLabel}
+          placeholder={label ? undefined : placeholder}
           aria-invalid={!!error}
           aria-describedby={errorId}
           onFocus={onFocus}

@@ -96,12 +96,18 @@ export const HeaderBlock = styled.div`
   min-width: 0;
 `;
 
+/** Block-level host for the tooltip, so the clamped title keeps the full content width. */
+export const TitleSlot = styled.div`
+  display: flex;
+  min-width: 0;
+  margin-bottom: ${tkn('spacing.md')};
+`;
+
 export const Title = styled(Text)`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: ${tkn('spacing.md')};
 `;
 
 export const MetaList = styled.div`
@@ -191,6 +197,14 @@ export const StatLabel = styled(Text)`
   text-transform: uppercase;
   letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+export const StatValueRow = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
 `;
 
 export const StatValue = styled(Text)<{ $tone: StatTone }>`
