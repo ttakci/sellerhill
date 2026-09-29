@@ -13,6 +13,13 @@ export interface ThreadMediaView {
 export interface ThreadMessageView {
   id: string;
   body: string;
+  /**
+   * True when `body` is an HTML document rather than plain text — eBay's own
+   * system notices (e.g. "We sent your payout") carry a full inline-styled
+   * e-mail template. Resolved once by the container so the presentation
+   * layer never re-sniffs the string.
+   */
+  bodyIsHtml: boolean;
   /** "You" for the store's own messages, else the sender's eBay username. */
   senderLabel: string;
   isMine: boolean;
