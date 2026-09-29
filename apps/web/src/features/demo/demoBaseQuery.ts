@@ -6,7 +6,9 @@ import {
   EbayConversationDto,
   EbayConversationStatus,
   ListingStatus,
+  ACTIONABLE_ORDER_STAGES,
   OrderFulfillmentState,
+  OrderStage,
   type ListingDto,
   type OrderDto,
 } from '@repo/shared';
@@ -244,19 +246,20 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   if (params.fulfillmentState && params.fulfillmentState !== 'all') {
     rows = rows.filter((o) => String(o.fulfillmentState) === params.fulfillmentState);
   }
+  // `?stage=a,b` — a tab group, or the one stage the Status select chose.
+  if (params.stage) {
+    const wanted = new Set(params.stage.split(',').filter(Boolean));
+    rows = rows.filter((o) => wanted.has(o.stage));
+  }
   if (params.autoFulfillNeedsAttention === 'true') {
-    rows = rows.filter(
-      (o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED || o.amazonCancelledAt
-    );
+    rows = rows.filter((o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED || o.amazonCancelledAt);
   }
   if (params.tracked === 'true' || params.tracked === 'false') {
     rows = rows.filter((o) => o.isTracked === (params.tracked === 'true'));
   }
   if (params.ebayAccountId) {
     // Sample orders are spread across both demo stores by listing index.
-    rows = rows.filter((_, i) =>
-      params.ebayAccountId === DEMO_EBAY_ACCOUNTS.items[1].id ? i % 4 === 0 : i % 4 !== 0
-    );
+    rows = rows.filter((_, i) => (params.ebayAccountId === DEMO_EBAY_ACCOUNTS.items[1].id ? i % 4 === 0 : i % 4 !== 0));
   }
   if (params.dateFrom) {
     rows = rows.filter((o) => o.createdAt >= params.dateFrom);
@@ -265,7 +268,23 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
     rows = rows.filter((o) => o.createdAt <= `${params.dateTo}T23:59:59.999Z`);
   }
 
+  // Same default order as the API: what needs the seller first, then newest.
+  if (!params.sortBy) {
+    const rank = (o: OrderDto) => (ACTIONABLE_ORDER_STAGES.includes(o.stage) ? 0 : 1);
+    rows.sort((a, b) => rank(a) - rank(b) || b.createdAt.localeCompare(a.createdAt));
+  }
+
   return rows;
+}
+
+/** Whole-store stage counts for the list page tabs (store / link filters only). */
+function countOrderStages(params: Record<string, string>): Record<OrderStage, number> {
+  const scoped = filterOrders({ ebayAccountId: params.ebayAccountId ?? '', tracked: params.tracked ?? '' });
+  const counts = Object.fromEntries(Object.values(OrderStage).map((s) => [s, 0])) as Record<OrderStage, number>;
+  for (const order of scoped) {
+    counts[order.stage] += 1;
+  }
+  return counts;
 }
 
 /* ── eBay Messages ────────────────────────────────────────────────────── */
@@ -326,9 +345,7 @@ function loadDemoPredefinedTemplates(): Promise<typeof DEMO_PREDEFINED_TEMPLATES
 
 /* ── Router ───────────────────────────────────────────────────────────── */
 
-export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
-  args
-) => {
+export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args) => {
   const { path, method, params, body } = parseRequest(args);
 
   // A tiny delay keeps loading states visible, so the demo behaves like the
@@ -365,8 +382,7 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   }
 
   if (path === '/dashboard') {
-    const granularity =
-      (params.chartGranularity as DashboardChartGranularity) || DashboardChartGranularity.DAY;
+    const granularity = (params.chartGranularity as DashboardChartGranularity) || DashboardChartGranularity.DAY;
     return ok(buildDemoDashboard(granularity));
   }
 
@@ -419,10 +435,7 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   if (path === '/listings/products') {
     const search = params.search?.trim().toLowerCase();
     const rows = DEMO_LISTINGS.filter(
-      (l) =>
-        !search ||
-        l.title.toLowerCase().includes(search) ||
-        l.asin.toLowerCase().includes(search)
+      (l) => !search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search)
     ).map((l) => ({
       id: l.productId,
       asin: l.asin,
@@ -490,6 +503,10 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     const rows = filterOrders(params);
     const { items, total } = paginate(rows, params);
     return ok({ orders: items, total });
+  }
+
+  if (path === '/orders/stage-counts') {
+    return ok(countOrderStages(params));
   }
 
   if (path === '/orders/stats') {

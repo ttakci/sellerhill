@@ -34,7 +34,9 @@ import {
   ListingTrackingState,
   OrderCostCaptureStatus,
   OrderFulfillmentState,
+  OrderStage,
   OrderStatus,
+  deriveOrderStage,
   PolicyType,
   ProfitBasis,
   SourceFetchOutcome,
@@ -705,6 +707,11 @@ function buildOrders(): OrderDto[] {
     let autoFulfillBlockedReason: AutoFulfillBlockedReason | null = null;
     let amazonCancelledAt: string | null = null;
     let status: OrderStatus;
+    // Amazon observed "shipped" but nothing reached eBay yet — the tracking
+    // conversion is HELD (raw numbers are never pushed). One inside the 12 h
+    // grace (amber), one past it (red) so the demo shows both alarm colours.
+    let shippedDetectedAt: string | null = null;
+    let isSimulated = false;
 
     if (i === 3) {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
@@ -733,6 +740,29 @@ function buildOrders(): OrderDto[] {
       costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
       fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
       status = OrderStatus.SHIPPED;
+    } else if (i === 13 || i === 17) {
+      costCaptureStatus = OrderCostCaptureStatus.LINKED;
+      fulfillmentState = OrderFulfillmentState.PURCHASED;
+      autoFulfillStatus = AutoFulfillStatus.PLACED;
+      status = OrderStatus.WAITING_SHIPMENT;
+      shippedDetectedAt = isoHoursAgo(i === 13 ? 2 : 20);
+    } else if (i === 21) {
+      // Sold but not yet paid on eBay — nothing to buy until the payment lands.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = OrderStatus.PENDING;
+    } else if (i === 24) {
+      // Automation off for this store: the seller buys this one by hand.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = OrderStatus.WAITING_SHIPMENT;
+    } else if (i === 26) {
+      // A dry run: the checkout walked to Place Order and stopped — nothing bought.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.SIMULATED;
+      autoFulfillStatus = AutoFulfillStatus.DRY_RUN;
+      status = OrderStatus.WAITING_SHIPMENT;
+      isSimulated = true;
     } else {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
       fulfillmentState = OrderFulfillmentState.PURCHASED;
@@ -765,20 +795,26 @@ function buildOrders(): OrderDto[] {
      * recent SHIPPED order) is left source-only so the "Convert tracking"
      * action still has something to act on in the demo.
      */
-    const isShippedOrder =
-      status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED;
-    const hasTracking =
-      isShippedOrder && autoFulfillStatus === AutoFulfillStatus.PLACED && isLinked;
-    const amazonTrackingNumber = hasTracking
-      ? `TBA${915_000_000_000 + i * 3607}`
-      : null;
+    const isShippedOrder = status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED;
+    const hasTracking = isShippedOrder && autoFulfillStatus === AutoFulfillStatus.PLACED && isLinked;
+    const amazonTrackingNumber = hasTracking ? `TBA${915_000_000_000 + i * 3607}` : null;
     const trackRng = seeded(5100 + i);
     const aquaBody = Array.from(
       { length: 9 },
       () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(trackRng() * 31)]
     ).join('');
-    const convertedTrackingNumber =
-      hasTracking && i !== 1 ? `AQUA${aquaBody}YQ` : null;
+    const convertedTrackingNumber = hasTracking && i !== 1 ? `AQUA${aquaBody}YQ` : null;
+    // A placed purchase always has its Amazon order id (onPlaced writes both), whatever
+    // the cost-capture status says; a dry run gets the SIM- id the real code writes.
+    const amazonOrderId = isSimulated
+      ? `SIM-112-${3000000 + i * 91}-${1000000 + i * 17}`
+      : isLinked || autoFulfillStatus === AutoFulfillStatus.PLACED
+        ? `112-${3000000 + i * 91}-${1000000 + i * 17}`
+        : null;
+    // A shipped/completed fixture was observed shipped by Amazon before its
+    // tracking reached eBay — the same two stamps the API derives the stage from.
+    const shippedDetectedAtResolved = isShippedOrder ? isoDaysAgo(daysAgo, i + 3) : shippedDetectedAt;
+    const ebayTrackingPushedAt = isShippedOrder ? isoDaysAgo(daysAgo, i + 4) : null;
 
     orders.push({
       id: `demo-order-${i + 1}`,
@@ -786,19 +822,28 @@ function buildOrders(): OrderDto[] {
       createdAt: recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i),
       isTracked: costCaptureStatus !== OrderCostCaptureStatus.UNTRACKED,
       buyerName,
-      buyerUsername: buyerName.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 12),
+      buyerUsername: buyerName
+        .toLowerCase()
+        .replace(/[^a-z]/g, '_')
+        .slice(0, 12),
       status,
       costCaptureStatus,
-      profitBasis: isLinked
-        ? ProfitBasis.CONFIRMED
-        : isProvisional
-          ? ProfitBasis.ESTIMATED
-          : null,
+      profitBasis: isLinked ? ProfitBasis.CONFIRMED : isProvisional ? ProfitBasis.ESTIMATED : null,
       autoFulfillStatus,
       autoFulfillBlockedReason,
       amazonCancelledAt,
       fulfillmentState,
-      isSimulated: false,
+      isSimulated,
+      stage: deriveOrderStage({
+        status,
+        autoFulfillStatus,
+        amazonOrderId,
+        amazonCancelledAt,
+        shippedDetectedAt: shippedDetectedAtResolved,
+        ebayTrackingPushedAt,
+      }),
+      shippedDetectedAt: shippedDetectedAtResolved,
+      ebayTrackingPushedAt,
       product: {
         title: p.title,
         asin: p.asin,
@@ -813,7 +858,7 @@ function buildOrders(): OrderDto[] {
       saleTotal,
       ebayEarnings,
       purchasePrice: costCaptureStatus === OrderCostCaptureStatus.UNTRACKED ? 0 : purchasePrice,
-      amazonOrderId: isLinked ? `112-${3000000 + i * 91}-${1000000 + i * 17}` : null,
+      amazonOrderId,
       amazonTrackingNumber,
       convertedTrackingNumber,
       ebayTrackingPushedNumber: convertedTrackingNumber,
@@ -1058,12 +1103,11 @@ export function buildDemoOrderStats(): OrderStatsDto {
  * badge, this page and the linked filtered lists all agree.
  */
 export function buildDemoActionCenter(): ActionCenterSummaryDto {
-  const cancelled = DEMO_ORDERS.filter((o) => o.fulfillmentState === OrderFulfillmentState.AMAZON_CANCELLED).length;
-  const blocked = DEMO_ORDERS.filter((o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED);
+  const cancelled = DEMO_ORDERS.filter((o) => o.stage === OrderStage.AMAZON_CANCELLED).length;
+  const blocked = DEMO_ORDERS.filter((o) => o.stage === OrderStage.PURCHASE_BLOCKED);
+  const held = DEMO_ORDERS.filter((o) => o.stage === OrderStage.TRACKING_HELD).length;
   const untracked = DEMO_ORDERS.filter((o) => o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED).length;
-  const outOfStock = DEMO_LISTINGS.filter(
-    (l) => l.status === ListingStatus.ACTIVE && l.quantity === 0
-  ).length;
+  const outOfStock = DEMO_LISTINGS.filter((l) => l.status === ListingStatus.ACTIVE && l.quantity === 0).length;
   const drafts = DEMO_LISTINGS.filter((l) => l.status === ListingStatus.DRAFT).length;
 
   const orderItems = [
@@ -1072,7 +1116,7 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: cancelled,
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.AMAZON_CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}`,
     },
     blocked.length > 0 && {
       key: ActionCenterItemKey.ORDER_FULFILLMENT_BLOCKED,
@@ -1083,7 +1127,14 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
         { code: AutoFulfillBlockedReason.CAP, count: 1 },
         { code: AutoFulfillBlockedReason.OUT_OF_STOCK, count: 1 },
       ],
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.ACTION_REQUIRED}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}`,
+    },
+    held > 0 && {
+      key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.CRITICAL,
+      count: held,
+      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
     },
     untracked > 0 && {
       key: ActionCenterItemKey.ORDER_UNTRACKED,
