@@ -237,6 +237,37 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 100,
   }),
+  // Best Sellers browsing rides the same scraper + proxy pool (browse lane).
+  def({
+    key: PlatformSettingKey.BEST_SELLERS_ENABLED,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'BEST_SELLERS_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    // A list page is shared by every seller; Amazon refreshes the lists about
+    // hourly, so a few hours of cache trades little freshness for a lot of
+    // proxy capacity.
+    key: PlatformSettingKey.BEST_SELLERS_CACHE_TTL_MINUTES,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_CACHE_TTL_MINUTES',
+    defaultValue: '360',
+    min: 5,
+    max: 1440,
+  }),
+  def({
+    // Per-seller cap on cache MISSES per UTC day (a hit costs nothing). 0 means
+    // nobody may trigger a live fetch; the cache still serves.
+    key: PlatformSettingKey.BEST_SELLERS_DAILY_FETCH_LIMIT,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_DAILY_FETCH_LIMIT',
+    defaultValue: '100',
+    min: 0,
+    max: 10000,
+  }),
 
   // --- Amazon order sync + tracking ---
   def({

@@ -248,7 +248,10 @@
         "scraper.proxies": "Scraper proxies",
         "scraper.perIpRequestsPerSecond": "Requests per second per proxy",
         "scraper.inStockFloor": "\"In Stock\" stock floor",
-        "scraper.blockRateWarnPercent": "Block-rate warning (%)"
+        "scraper.blockRateWarnPercent": "Block-rate warning (%)",
+        "bestSellers.enabled": "Best Sellers browsing",
+        "bestSellers.cacheTtlMinutes": "Best Sellers cache (minutes)",
+        "bestSellers.dailyFetchLimit": "Best Sellers daily fetches per seller"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Master switch for the background Keepa refresh scheduler. Turning it off stops all background token spend immediately, with no restart needed.",
@@ -316,7 +319,10 @@
         "scraper.proxies": "Add each proxy on its own row (http, https, socks5 or socks5h). Test a row before saving. Without any proxy, no Amazon data is fetched — the server's own IP is never used.",
         "scraper.perIpRequestsPerSecond": "How fast each proxy may fetch pages. Each proxy runs enough workers for this rate; total throughput ≈ rate × proxies while Amazon answers within ~2 s.",
         "scraper.inStockFloor": "Stock recorded when Amazon shows \"In Stock\" without a count. Displayed as N+.",
-        "scraper.blockRateWarnPercent": "Admin warning when this share of scraper requests was blocked in the last hour."
+        "scraper.blockRateWarnPercent": "Admin warning when this share of scraper requests was blocked in the last hour.",
+        "bestSellers.enabled": "Lets sellers browse Amazon's Best Sellers lists in the app. Off hides the page and refuses the endpoint; the lists are fetched through the scraper proxies, never the server's own IP.",
+        "bestSellers.cacheTtlMinutes": "How long a fetched list page is served to every seller before it is fetched again. Longer saves proxy capacity; Amazon updates the lists about hourly.",
+        "bestSellers.dailyFetchLimit": "How many live list fetches (cache misses) one seller may trigger per UTC day. Cache hits are free. 0 stops live fetches for everyone while cached pages keep serving."
       },
       "newValueLabel": "New value",
       "search": "Search settings (name or environment variable)",

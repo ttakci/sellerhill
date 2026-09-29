@@ -163,4 +163,6 @@ export enum BestSellersErrorKey {
   DAILY_LIMIT_REACHED = 'bestSellers.errors.dailyLimitReached',
   /** 503 — the scraper service could not be reached. */
   UNAVAILABLE = 'bestSellers.errors.unavailable',
+  /** 400 — a marketplace outside `SUPPORTED_AMAZON_MARKETPLACES`. */
+  UNSUPPORTED_MARKETPLACE = 'bestSellers.errors.unsupportedMarketplace',
 }

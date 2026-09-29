@@ -248,7 +248,10 @@
         "scraper.proxies": "Scraper proxy'leri",
         "scraper.perIpRequestsPerSecond": "Proxy başına saniyelik istek",
         "scraper.inStockFloor": "\"In Stock\" stok tabanı",
-        "scraper.blockRateWarnPercent": "Blok oranı uyarısı (%)"
+        "scraper.blockRateWarnPercent": "Blok oranı uyarısı (%)",
+        "bestSellers.enabled": "Çok Satanlar gezintisi",
+        "bestSellers.cacheTtlMinutes": "Çok Satanlar önbelleği (dakika)",
+        "bestSellers.dailyFetchLimit": "Satıcı başına günlük Çok Satanlar çekimi"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka planda Keepa yenileme zamanlayıcısının ana anahtarı. Kapatıldığında arka plan token harcaması, yeniden başlatma gerekmeden anında durur.",
@@ -316,7 +319,10 @@
         "scraper.proxies": "Her proxy'yi ayrı bir satıra ekleyin (http, https, socks5 veya socks5h). Kaydetmeden önce satırı test edin. Hiç proxy yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
         "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Her proxy bu hıza yetecek kadar işçi çalıştırır; Amazon ~2 sn içinde yanıt verdiği sürece toplam verim ≈ hız × proxy sayısı.",
         "scraper.inStockFloor": "Amazon sayı vermeden \"In Stock\" gösterdiğinde kaydedilen stok. N+ olarak gösterilir.",
-        "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar."
+        "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar.",
+        "bestSellers.enabled": "Satıcıların Amazon Çok Satanlar listelerine uygulama içinden göz atmasına izin verir. Kapalıyken sayfa gizlenir ve uç nokta isteği reddeder; listeler scraper proxy'leri üzerinden çekilir, sunucunun kendi IP'si asla kullanılmaz.",
+        "bestSellers.cacheTtlMinutes": "Çekilen bir liste sayfasının yeniden çekilmeden önce tüm satıcılara ne kadar süre sunulacağı. Uzun süre proxy kapasitesinden tasarruf sağlar; Amazon listeleri yaklaşık saatte bir günceller.",
+        "bestSellers.dailyFetchLimit": "Bir satıcının UTC gününde tetikleyebileceği canlı liste çekimi (önbellek kaçırma) sayısı. Önbellekten gelen yanıtlar sayılmaz. 0 herkes için canlı çekimi durdurur; önbellekteki sayfalar sunulmaya devam eder."
       },
       "newValueLabel": "Yeni değer",
       "search": "Ayar ara (ad veya ortam değişkeni)",
