@@ -51,10 +51,10 @@ import {
   EBAY_MESSAGING_SCOPES,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingStatus,
-  OrderFulfillmentState,
+  OrderStage,
   OrderStatus,
   SourceUnavailableReason,
-  buildFulfillmentStateSql,
+  buildOrderStageSql,
   type ActionCenterItemDto,
   type ActionCenterSummaryDto,
 } from '@repo/shared';
@@ -139,7 +139,7 @@ export class ActionCenterService {
 
   constructor(
     private readonly db: DatabaseService,
-    private readonly billing: BillingService,
+    private readonly billing: BillingService
   ) {}
 
   async getSummary(userId: string): Promise<ActionCenterSummaryDto> {
@@ -161,17 +161,14 @@ export class ActionCenterService {
    * here" — the safe direction. Reporting a fabricated action would be worse
    * than reporting none.
    */
-  private async probe(
-    name: string,
-    run: () => Promise<ActionCenterItemDto[]>,
-  ): Promise<ActionCenterItemDto[]> {
+  private async probe(name: string, run: () => Promise<ActionCenterItemDto[]>): Promise<ActionCenterItemDto[]> {
     try {
       return await run();
     } catch (error) {
       this.logger.warn(
         `Action Center probe "${name}" failed; its actions are omitted from this snapshot: ${
           error instanceof Error ? error.message : String(error)
-        }`,
+        }`
       );
       return [];
     }
@@ -183,17 +180,19 @@ export class ActionCenterService {
     const items: ActionCenterItemDto[] = [];
 
     /*
-     * Both order-state probes count through `buildFulfillmentStateSql` — the
-     * same expression the orders list filters on. That is what makes "3 orders
-     * need you" and the list behind the link agree: they are one definition,
-     * not two that have to be kept in step by comment. Re-deriving the state
-     * here with hand-written predicates is how the two silently diverge.
+     * Every order-state probe counts through `buildOrderStageSql` — the same
+     * expression the orders list filters on and the DTO's `stage` is derived
+     * from. That is what makes "3 orders need you" and the list behind the
+     * link agree: they are one definition, not two that have to be kept in
+     * step by comment. Re-deriving the state here with hand-written
+     * predicates is how the two silently diverge.
      *
      * It also means the badge clears on its own: a settled (completed) eBay
-     * sale derives as MANUAL, so an order the seller fixed by hand drops out of
-     * both the count and the list without needing an acknowledge flag.
+     * sale derives as DELIVERED, and a blocked purchase the seller linked by
+     * hand as PURCHASED, so an order the seller fixed drops out of both the
+     * count and the list without needing an acknowledge flag.
      */
-    const fulfillmentState = buildFulfillmentStateSql('o');
+    const stage = buildOrderStageSql('o');
 
     // Amazon cancelled after we paid, and the eBay sale is still owed to the
     // buyer — the most urgent thing the platform can tell a seller.
@@ -201,15 +200,15 @@ export class ActionCenterService {
       `SELECT COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
-          AND ${fulfillmentState} = $2`,
-      [userId, OrderFulfillmentState.AMAZON_CANCELLED],
+          AND ${stage} = $2`,
+      [userId, OrderStage.AMAZON_CANCELLED]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_AMAZON_CANCELLED,
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: toCount(cancelled[0]?.count),
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.AMAZON_CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}`,
     });
 
     /*
@@ -221,9 +220,9 @@ export class ActionCenterService {
       `SELECT COALESCE(o.auto_fulfill_blocked_reason, '') AS code, COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
-          AND ${fulfillmentState} = $2
+          AND ${stage} = $2
         GROUP BY 1`,
-      [userId, OrderFulfillmentState.ACTION_REQUIRED],
+      [userId, OrderStage.PURCHASE_BLOCKED]
     );
     const blockedTally: Record<string, number> = {};
     let blockedTotal = 0;
@@ -243,7 +242,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.CRITICAL,
       count: blockedTotal,
       breakdown: buildBreakdown(blockedTally),
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.ACTION_REQUIRED}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}`,
     });
 
     /*
@@ -260,13 +259,9 @@ export class ActionCenterService {
       `SELECT COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
-          AND ${fulfillmentState} = $2
+          AND ${stage} = $2
           AND o.order_date < NOW() - ($3 || ' hours')::INTERVAL`,
-      [
-        userId,
-        OrderFulfillmentState.NOT_AUTOMATED,
-        String(AWAITING_PURCHASE_GRACE_HOURS),
-      ],
+      [userId, OrderStage.TO_PURCHASE, String(AWAITING_PURCHASE_GRACE_HOURS)]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_AWAITING_PURCHASE,
@@ -274,7 +269,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.WARNING,
       count: toCount(awaiting[0]?.count),
       context: { hours: AWAITING_PURCHASE_GRACE_HOURS },
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.NOT_AUTOMATED}`,
+      actionPath: `/orders?stage=${OrderStage.TO_PURCHASE}`,
     });
 
     /*
@@ -291,7 +286,7 @@ export class ActionCenterService {
           AND o.listing_id IS NULL
           AND o.status <> $2
           AND o.order_date >= NOW() - ($3 || ' days')::INTERVAL`,
-      [userId, OrderStatus.CANCELLED, String(RECENT_WINDOW_DAYS)],
+      [userId, OrderStatus.CANCELLED, String(RECENT_WINDOW_DAYS)]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_UNTRACKED,
@@ -327,7 +322,7 @@ export class ActionCenterService {
           AND o.tracking_problem_code IS NOT NULL
           AND o.status <> $2
         GROUP BY o.tracking_problem_code`,
-      [userId, OrderStatus.CANCELLED],
+      [userId, OrderStatus.CANCELLED]
     );
     const problemTally: Record<string, number> = {};
     let problemTotal = 0;
@@ -375,7 +370,7 @@ export class ActionCenterService {
           AND o.ebay_tracking_pushed_at IS NULL
           AND o.status <> $2
           AND o.shipped_detected_at <= NOW() - ($3 || ' hours')::INTERVAL`,
-      [userId, OrderStatus.CANCELLED, String(HELD_GRACE_HOURS)],
+      [userId, OrderStatus.CANCELLED, String(HELD_GRACE_HOURS)]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
@@ -383,7 +378,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.CRITICAL,
       count: toCount(held[0]?.count),
       context: { hours: HELD_GRACE_HOURS },
-      actionPath: '/orders',
+      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
     });
 
     return items;
@@ -397,7 +392,7 @@ export class ActionCenterService {
          FROM ebay_accounts
         WHERE user_id = $1
           AND status IN ($2, $3)`,
-      [userId, EbayAccountStatus.REVOKED, EbayAccountStatus.ERROR],
+      [userId, EbayAccountStatus.REVOKED, EbayAccountStatus.ERROR]
     );
 
     /*
@@ -414,7 +409,7 @@ export class ActionCenterService {
         WHERE user_id = $1
           AND status = $2
           AND NOT (granted_scopes @> $3::text[])`,
-      [userId, EbayAccountStatus.ACTIVE, [...EBAY_MESSAGING_SCOPES]],
+      [userId, EbayAccountStatus.ACTIVE, [...EBAY_MESSAGING_SCOPES]]
     );
 
     /*
@@ -429,12 +424,7 @@ export class ActionCenterService {
         WHERE user_id = $1
           AND status IN ($2, $3, $4)
         GROUP BY 1`,
-      [
-        userId,
-        AmazonAccountStatus.NEEDS_REAUTH,
-        AmazonAccountStatus.INVALID,
-        AmazonAccountStatus.LOCKED,
-      ],
+      [userId, AmazonAccountStatus.NEEDS_REAUTH, AmazonAccountStatus.INVALID, AmazonAccountStatus.LOCKED]
     );
     const amazonTally: Record<string, number> = {};
     let amazonTotal = 0;
@@ -489,7 +479,7 @@ export class ActionCenterService {
           AND LOWER(i.status) = 'error'
           AND i.updated_at >= NOW() - ($2 || ' days')::INTERVAL
         GROUP BY 1`,
-      [userId, String(JOB_FAILURE_WINDOW_DAYS)],
+      [userId, String(JOB_FAILURE_WINDOW_DAYS)]
     );
     const failureTally: Record<string, number> = {};
     let failureTotal = 0;
@@ -503,7 +493,7 @@ export class ActionCenterService {
 
     const drafts = await this.db.query<CountRow>(
       `SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status = $2`,
-      [userId, ListingStatus.DRAFT],
+      [userId, ListingStatus.DRAFT]
     );
 
     /*
@@ -527,7 +517,7 @@ export class ActionCenterService {
         WHERE l.user_id = $1
           AND l.status = $2
           AND (p.consecutive_failures >= $3 OR p.source_removed_at IS NOT NULL)`,
-      [userId, ListingStatus.ACTIVE, SOURCE_UNAVAILABLE_FAILURE_THRESHOLD],
+      [userId, ListingStatus.ACTIVE, SOURCE_UNAVAILABLE_FAILURE_THRESHOLD]
     );
 
     /*
@@ -541,7 +531,7 @@ export class ActionCenterService {
         WHERE user_id = $1
           AND status = $2
           AND quantity <= 0`,
-      [userId, ListingStatus.ACTIVE],
+      [userId, ListingStatus.ACTIVE]
     );
 
     return [
@@ -723,7 +713,7 @@ export class ActionCenterService {
              AND auto_fulfill_cap_total > 0) AS automated_count,
          (SELECT COUNT(*) FROM store_settings WHERE user_id = $1 AND is_global = TRUE) AS store_settings_count,
          (SELECT COUNT(*) FROM listing_settings_groups WHERE user_id = $1) AS listing_group_count`,
-      [userId, AmazonAccountStatus.ACTIVE],
+      [userId, AmazonAccountStatus.ACTIVE]
     );
 
     return buildSetupItems({
