@@ -10,14 +10,12 @@ import {
   InfoMessage,
   PageHeader,
   SettingsCard,
-  StatusBadge,
   Text,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { fulfillmentStateNoticeKey, fulfillmentStateToBadgeVariant } from '../shared/fulfillment-state';
-import { orderStatusToBadgeStatus } from '../shared/order-status';
+import { OrderStageBadge } from '../shared/OrderStageBadge';
 import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 
 import * as S from './OrderDetailsPage.style';
@@ -70,13 +68,16 @@ const Kpi = ({
 const MetaBlock = ({
   icon,
   label,
+  rows,
   children,
 }: {
   icon: IconName;
   label: string;
+  /** How many shared row units the block spans, so the rows under it keep lining up with the neighbouring cards. */
+  rows?: number;
   children: React.ReactNode;
 }): React.ReactElement => (
-  <S.MetaBlockRow>
+  <S.MetaBlockRow $rows={rows}>
     <S.MetaLabel>
       <Icon name={icon} size={16} color="brand.primary" />
       <Text variant="body-sm" color="text.secondary">
@@ -94,6 +95,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   formatCurrency,
   formatDate,
   statusLabel,
+  stageMeaning,
+  stageAction,
   roiLabel,
   totalAmazonCost,
   amazonTotalBeforeTax,
@@ -150,8 +153,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
       })
     : undefined;
-  const noticeKey = fulfillmentStateNoticeKey(order.fulfillmentState);
-  const fulfillmentNotice = noticeKey ? t(noticeKey) : undefined;
 
   /*
    * `saleTax`/`saleTotal` are captured once at order-sync ingest from eBay's
@@ -191,26 +192,30 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         </S.ProductImage>
 
         <S.HeroInfo>
+          {/* ONE badge: the seller-facing stage. The eBay status is a fact
+              about the sale, not a status of the work, and sits in the eBay
+              card below. */}
           <S.StatusBadgeSlot>
-            <StatusBadge status={orderStatusToBadgeStatus(order.status)} size="lg">
-              {statusLabel}
-            </StatusBadge>
-            {order.fulfillmentState && (
-              <Badge variant={fulfillmentStateToBadgeVariant(order.fulfillmentState)} size="md" isPill>
-                {t(`orders.fulfillmentState.${order.fulfillmentState}`)}
-              </Badge>
-            )}
+            <OrderStageBadge
+              stage={order.stage}
+              shippedDetectedAt={order.shippedDetectedAt}
+              size="md"
+              withTooltip={false}
+            />
           </S.StatusBadgeSlot>
 
           {/*
-            State-specific guidance instead of a bare reason code. "blocked ·
-            address" told the seller nothing about what to DO; each state now
-            explains the consequence and the next step.
+            The stage's meaning and — when the stage needs the seller — its next
+            step, instead of a bare reason code. "blocked · address" told the
+            seller nothing about what to DO.
           */}
           <S.HeroLede>
-            {fulfillmentNotice && (
-              <Text variant="caption" color="text.secondary">
-                {fulfillmentNotice}
+            <Text variant="body-sm" color="text.secondary">
+              {stageMeaning}
+            </Text>
+            {stageAction && (
+              <Text variant="body-sm" weight="semibold">
+                {stageAction}
               </Text>
             )}
             {autoFulfillReasonLabel && (
@@ -347,7 +352,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         <SettingsCard variant="section" header={{ title: t('orders.detail.customerInfo') }}>
           <S.SectionContent>
             <S.MetaList>
-              <MetaBlock icon="map-pin" label={t('orders.detail.shipTo')}>
+              {/* Spans 4 shared row units: name + up to 6 address lines + phone. */}
+              <MetaBlock icon="map-pin" label={t('orders.detail.shipTo')} rows={4}>
                 <Text variant="body" weight="semibold">
                   {order.shippingAddress?.fullName || order.buyerName ? (
                     <CopyableText
@@ -420,9 +426,9 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   </S.AddressBlock>
                 ) : null}
               </MetaBlock>
-              <MetaBlock icon="mail" label={t('orders.detail.contact')}>
+              <Meta icon="mail" label={t('orders.detail.contact')}>
                 <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
-              </MetaBlock>
+              </Meta>
               <Meta icon="box" label={t('orders.detail.quantity')}>
                 <Text variant="body" weight="semibold" numeric>
                   {order.product?.quantity || 1} {t('orders.detail.unit')}
@@ -435,10 +441,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Meta>
             </S.MetaList>
             {canCopyAddress && (
-              <Button variant="secondary" size="small" onClick={onCopyAddress} fullWidth>
-                <Icon name="copy" size={16} />
-                <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
-              </Button>
+              <S.SectionActions>
+                <Button variant="secondary" size="small" onClick={onCopyAddress} fullWidth>
+                  <Icon name="copy" size={16} />
+                  <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
+                </Button>
+              </S.SectionActions>
             )}
           </S.SectionContent>
         </SettingsCard>
@@ -446,10 +454,19 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         {/* eBay summary */}
         <SettingsCard variant="section" header={{ title: t('orders.detail.ebaySummary') }}>
           <S.SectionContent>
-            <Text variant="body-sm" weight="semibold">
-              {t('orders.detail.whatBuyerPaid')}
-            </Text>
+            {/* Group labels are one shared row unit tall (S.GroupLabel) so the
+                rows under them stay level with the neighbouring cards. */}
+            <S.GroupLabel>
+              <Text variant="body-sm" weight="semibold">
+                {t('orders.detail.whatBuyerPaid')}
+              </Text>
+            </S.GroupLabel>
             <S.MetaList>
+              <Meta icon="info" label={t('orders.detail.ebayStatus')}>
+                <Text variant="body" weight="semibold">
+                  {statusLabel}
+                </Text>
+              </Meta>
               <Meta icon="circle-dollar-sign" label={t('orders.detail.subtotal')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.salePrice)}
@@ -471,9 +488,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Text>
               </Meta>
             </S.MetaList>
-            <Text variant="body-sm" weight="semibold">
-              {t('orders.detail.whatYouEarned')}
-            </Text>
+            <S.GroupLabel>
+              <Text variant="body-sm" weight="semibold">
+                {t('orders.detail.whatYouEarned')}
+              </Text>
+            </S.GroupLabel>
             <S.MetaList>
               <Meta icon="receipt" label={t('orders.detail.earningsOrderTotal')}>
                 <Text variant="body" weight="semibold" numeric>
@@ -481,9 +500,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Text>
               </Meta>
             </S.MetaList>
-            <Text variant="caption" color="text.tertiary">
-              {t('orders.detail.ebayCollectedFromBuyer')}
-            </Text>
+            <S.GroupLabel>
+              <Text variant="caption" color="text.tertiary">
+                {t('orders.detail.ebayCollectedFromBuyer')}
+              </Text>
+            </S.GroupLabel>
             <S.MetaList>
               <Meta icon="percent" label={t('orders.detail.ebayCollectedTax')}>
                 <Text variant="body" weight="semibold" numeric>
@@ -491,9 +512,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Text>
               </Meta>
             </S.MetaList>
-            <Text variant="caption" color="text.tertiary">
-              {t('orders.detail.sellingCosts')}
-            </Text>
+            <S.GroupLabel>
+              <Text variant="caption" color="text.tertiary">
+                {t('orders.detail.sellingCosts')}
+              </Text>
+            </S.GroupLabel>
             <S.MetaList>
               {/* `ebayMarketplaceFee` is eBay's own reported figure (migration
                   098); `transactionFee` is only the seller's configured-percent
@@ -532,7 +555,14 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             {/* Same lines, same order, same names as Amazon's own Order Summary
                 (Item(s) Subtotal / Shipping & Handling / Total before tax /
                 Estimated tax to be collected / Grand Total) so the seller can
-                check this card against the Amazon page line by line. */}
+                check this card against the Amazon page line by line. The
+                label mirrors the eBay card's "What your buyer paid" so both
+                cards' rows start on the same shared row unit. */}
+            <S.GroupLabel>
+              <Text variant="body-sm" weight="semibold">
+                {t('orders.detail.whatYouPaidAmazon')}
+              </Text>
+            </S.GroupLabel>
             <S.MetaList>
               <Meta icon="shopping-bag" label={t('orders.detail.itemSubtotal')}>
                 <Text variant="body" weight="semibold" numeric>

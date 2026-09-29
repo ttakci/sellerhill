@@ -6,7 +6,12 @@ export interface OrderDetailsPageProps {
   isUpdating: boolean;
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
+  /** eBay's own order status, localized — shown as a fact in the eBay card. */
   statusLabel: string;
+  /** `orders.stage.<stage>.meaning` — one sentence under the hero badge. */
+  stageMeaning: string;
+  /** `orders.stage.<stage>.action` for a stage that needs the seller, else null. */
+  stageAction: string | null;
   roiLabel: string;
   totalAmazonCost: number;
   /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */

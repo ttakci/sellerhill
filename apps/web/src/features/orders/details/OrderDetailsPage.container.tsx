@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
+import { orderStageHasAction } from '../shared/order-stage';
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
@@ -69,6 +70,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
     const translated = t(key);
     return translated === key ? order.status : translated;
   }, [order, t]);
+
+  const stageMeaning = useMemo(() => (order ? t(`orders.stage.${order.stage}.meaning`) : ''), [order, t]);
+  const stageAction = useMemo(
+    () => (order && orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null),
+    [order, t]
+  );
 
   const totalAmazonCost = useMemo(() => {
     if (!order) {
@@ -198,6 +205,8 @@ export const OrderDetailsPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         statusLabel={statusLabel}
+        stageMeaning={stageMeaning}
+        stageAction={stageAction}
         roiLabel={roiLabel}
         totalAmazonCost={totalAmazonCost}
         amazonTotalBeforeTax={amazonTotalBeforeTax}
