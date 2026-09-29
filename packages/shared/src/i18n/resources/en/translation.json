@@ -109,6 +109,7 @@
     "subtitle": "View product details and Amazon data for all your active listings."
   },
   "menu": {
+    "overview": "Overview",
     "dashboard": "Dashboard",
     "listings": "Listings",
     "ebayListings": "eBay Listings",
@@ -117,6 +118,8 @@
     "drafts": "Drafts",
     "products": "Products",
     "inventory": "Inventory",
+    "discover": "Discover",
+    "sales": "Sales",
     "orders": "Orders",
     "messages": "Messages",
     "stores": "Stores",

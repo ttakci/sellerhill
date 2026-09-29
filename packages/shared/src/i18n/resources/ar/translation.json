@@ -109,6 +109,7 @@
     "subtitle": "اعرض تفاصيل المنتجات وبيانات Amazon لجميع إدراجاتك النشطة."
   },
   "menu": {
+    "overview": "نظرة عامة",
     "dashboard": "لوحة التحكم",
     "listings": "الإدراجات",
     "ebayListings": "إدراجات eBay",
@@ -117,6 +118,8 @@
     "drafts": "المسودات",
     "products": "المنتجات",
     "inventory": "المخزون",
+    "discover": "استكشاف",
+    "sales": "المبيعات",
     "orders": "الطلبات",
     "messages": "الرسائل",
     "stores": "المتاجر",

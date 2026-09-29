@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Căutați categorii",
     "categoryNoResults": "Nicio categorie potrivită",
     "backToAllCategories": "Înapoi la toate categoriile",
+    "categories": {
+      "title": "Categorii",
+      "mobileLabel": "Categorie",
+      "drawerTitle": "Răsfoiți categoriile",
+      "expand": "Extindeți {{name}}",
+      "collapse": "Restrângeți {{name}}"
+    },
     "selectAllOnPage": "Selectați tot de pe această pagină",
     "selected_one": "{{count}} produs selectat",
     "selected_few": "{{count}} produse selectate",

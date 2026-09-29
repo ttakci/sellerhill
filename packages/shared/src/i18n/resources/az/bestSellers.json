@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Kateqoriya axtar",
     "categoryNoResults": "Uyğun kateqoriya yoxdur",
     "backToAllCategories": "Bütün kateqoriyalara qayıt",
+    "categories": {
+      "title": "Kateqoriyalar",
+      "mobileLabel": "Kateqoriya",
+      "drawerTitle": "Kateqoriyalara baxın",
+      "expand": "{{name}} genişləndir",
+      "collapse": "{{name}} yığ"
+    },
     "selectAllOnPage": "Bu səhifədəkilərin hamısını seç",
     "selected_one": "{{count}} məhsul seçildi",
     "selected_other": "{{count}} məhsul seçildi",

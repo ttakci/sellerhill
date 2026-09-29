@@ -38,13 +38,23 @@ export interface BestSellersSelection {
 }
 
 /**
- * The last category tree Amazon rendered for a list, kept so the picker stays
- * usable on a `not_found` answer (which carries no tree). Tagged with the list
- * it came from — one list's categories must never show under another's tab.
+ * The client-side category tree cache (`useBestSellersCategoryTree`). Amazon's
+ * alias grammar caps a category at two segments — a department, or one
+ * sub-category under it — so this is a two-level tree: departments at the
+ * root, each one's own sub-categories revealed once the seller has visited it.
  */
-export interface BestSellersKnownCategories {
-  listType: BestSellersListType;
-  categories: BestSellersCategoryDto[];
+export interface BestSellersCategoryTreeListTypeBucket {
+  departments: BestSellersCategoryDto[];
+  childrenByDepartment: Record<string, BestSellersCategoryDto[]>;
+}
+
+export interface BestSellersCategoryTreeState {
+  /** Root-level departments for the active list type, once seen (empty until then). */
+  departments: BestSellersCategoryDto[];
+  /** A department's own sub-categories, once visited; `undefined` if never fetched. */
+  childrenOf: (departmentPath: string) => BestSellersCategoryDto[] | undefined;
+  isExpanded: (departmentPath: string) => boolean;
+  toggleExpanded: (departmentPath: string) => void;
 }
 
 /** What the page shows instead of (or around) the product grid. */

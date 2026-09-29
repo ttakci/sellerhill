@@ -109,6 +109,7 @@
     "subtitle": "اپنی تمام فعال لسٹنگز کی پروڈکٹ تفصیلات اور Amazon ڈیٹا دیکھیں۔"
   },
   "menu": {
+    "overview": "جائزہ",
     "dashboard": "ڈیش بورڈ",
     "listings": "لسٹنگز",
     "ebayListings": "eBay لسٹنگز",
@@ -117,6 +118,8 @@
     "drafts": "ڈرافٹس",
     "products": "پروڈکٹس",
     "inventory": "انوینٹری",
+    "discover": "دریافت",
+    "sales": "سیلز",
     "orders": "آرڈرز",
     "messages": "پیغامات",
     "stores": "سٹورز",

@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Пошук категорій",
     "categoryNoResults": "Немає відповідних категорій",
     "backToAllCategories": "Назад до всіх категорій",
+    "categories": {
+      "title": "Категорії",
+      "mobileLabel": "Категорія",
+      "drawerTitle": "Категорії",
+      "expand": "Розгорнути «{{name}}»",
+      "collapse": "Згорнути «{{name}}»"
+    },
     "selectAllOnPage": "Вибрати все на цій сторінці",
     "selected_one": "Вибрано {{count}} товар",
     "selected_few": "Вибрано {{count}} товари",

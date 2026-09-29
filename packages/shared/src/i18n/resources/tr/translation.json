@@ -109,6 +109,7 @@
     "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
   },
   "menu": {
+    "overview": "Genel Bakış",
     "dashboard": "Panel",
     "listings": "Listeler",
     "ebayListings": "eBay Listeleri",
@@ -117,6 +118,8 @@
     "drafts": "Taslaklar",
     "products": "Ürünler",
     "inventory": "Envanter",
+    "discover": "Keşfet",
+    "sales": "Satışlar",
     "orders": "Siparişler",
     "messages": "Mesajlar",
     "stores": "Mağazalar",

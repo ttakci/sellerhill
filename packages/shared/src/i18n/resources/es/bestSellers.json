@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "Buscar categorías",
     "categoryNoResults": "No hay categorías que coincidan",
     "backToAllCategories": "Volver a todas las categorías",
+    "categories": {
+      "title": "Categorías",
+      "mobileLabel": "Categoría",
+      "drawerTitle": "Explorar categorías",
+      "expand": "Expandir {{name}}",
+      "collapse": "Contraer {{name}}"
+    },
     "selectAllOnPage": "Seleccionar todo en esta página",
     "selected_one": "{{count}} producto seleccionado",
     "selected_many": "{{count}} productos seleccionados",

@@ -1,27 +1,9 @@
 import type { BreadcrumbItem } from '@repo/ui';
 import type { TFunction } from 'i18next';
 
-export type NavSection = 'inventory' | 'configuration';
+import type { AppRouteMeta } from './routeMeta.types';
 
-export interface AppRouteMeta {
-  /** Path without locale prefix, e.g. `/listings/all` */
-  path: string;
-  /** Exact match unless endsWithMatch is set */
-  match?: 'exact' | 'prefix';
-  /**
-   * Which static sidebar group ("Envanter" / "Yapılandırma") the route
-   * belongs to. Documentary only — the sidebar's item order is hand-authored
-   * in `AppLayout.component.tsx`, not derived from this list.
-   */
-  section?: NavSection;
-  /** Breadcrumb segments after home (label keys resolved via t) */
-  breadcrumbs: Array<{
-    labelKey: string;
-    /** When set, segment is a link (path without locale) */
-    path?: string;
-    ns?: string;
-  }>;
-}
+export type { NavSection, AppRouteMeta } from './routeMeta.types';
 
 /**
  * Single source of truth for app shell navigation metadata.
@@ -31,19 +13,19 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   {
     path: '/dashboard',
     match: 'exact',
-    section: 'inventory',
+    section: 'overview',
     breadcrumbs: [],
   },
   {
     path: '/actions',
     match: 'exact',
-    section: 'inventory',
+    section: 'overview',
     breadcrumbs: [{ labelKey: 'actionCenter:actionCenter.menu', path: '/actions' }],
   },
   {
     path: '/best-sellers',
     match: 'exact',
-    section: 'inventory',
+    section: 'discover',
     breadcrumbs: [{ labelKey: 'bestSellers:bestSellers.menu', path: '/best-sellers' }],
   },
   {
@@ -103,19 +85,19 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   {
     path: '/orders',
     match: 'exact',
-    section: 'inventory',
+    section: 'sales',
     breadcrumbs: [{ labelKey: 'translation:menu.orders', path: '/orders' }],
   },
   {
     path: '/messages',
     match: 'exact',
-    section: 'inventory',
+    section: 'sales',
     breadcrumbs: [{ labelKey: 'translation:menu.messages', path: '/messages' }],
   },
   {
     path: '/orders/',
     match: 'prefix',
-    section: 'inventory',
+    section: 'sales',
     breadcrumbs: [
       { labelKey: 'translation:menu.orders', path: '/orders' },
       { labelKey: 'orders:orders.detail.title' },

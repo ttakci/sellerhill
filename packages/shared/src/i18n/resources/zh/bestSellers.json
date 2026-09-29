@@ -16,6 +16,13 @@
     "categorySearchPlaceholder": "搜索分类",
     "categoryNoResults": "没有匹配的分类",
     "backToAllCategories": "返回全部分类",
+    "categories": {
+      "title": "分类",
+      "mobileLabel": "分类",
+      "drawerTitle": "浏览分类",
+      "expand": "展开 {{name}}",
+      "collapse": "收起 {{name}}"
+    },
     "selectAllOnPage": "全选本页",
     "selected_other": "已选 {{count}} 件商品",
     "listSelected": "刊登所选 ({{count}})",

@@ -109,6 +109,7 @@
     "subtitle": "查看所有在售商品刊登的商品详情和 Amazon 数据。"
   },
   "menu": {
+    "overview": "概览",
     "dashboard": "仪表盘",
     "listings": "商品刊登",
     "ebayListings": "eBay 商品刊登",
@@ -117,6 +118,8 @@
     "drafts": "草稿",
     "products": "商品",
     "inventory": "库存",
+    "discover": "发现",
+    "sales": "销售",
     "orders": "订单",
     "messages": "消息",
     "stores": "店铺",

@@ -109,6 +109,7 @@
     "subtitle": "Bütün aktiv elanlarınız üçün məhsul təfərrüatlarına və Amazon məlumatlarına baxın."
   },
   "menu": {
+    "overview": "İcmal",
     "dashboard": "İdarə paneli",
     "listings": "Elanlar",
     "ebayListings": "eBay elanları",
@@ -117,6 +118,8 @@
     "drafts": "Qaralamalar",
     "products": "Məhsullar",
     "inventory": "Anbar",
+    "discover": "Kəşf",
+    "sales": "Satışlar",
     "orders": "Sifarişlər",
     "messages": "Mesajlar",
     "stores": "Mağazalar",
