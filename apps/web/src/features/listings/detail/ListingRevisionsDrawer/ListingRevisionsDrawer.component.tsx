@@ -1,4 +1,4 @@
-import { Button, Drawer, EmptyState, Icon, Text } from '@repo/ui';
+import { Button, Drawer, EmptyState, Icon, InfoMessage, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -103,6 +103,7 @@ export const ListingRevisionsDrawerComponent = ({
   hasMore,
   isLoadingMore,
   onLoadMore,
+  lastCheckedLabel,
 }: ListingRevisionsDrawerComponentProps): React.ReactElement => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -115,6 +116,7 @@ export const ListingRevisionsDrawerComponent = ({
       size="md"
     >
       <S.BodyStack>
+        {!isLoading && !isError && lastCheckedLabel ? <InfoMessage>{lastCheckedLabel}</InfoMessage> : null}
         {isLoading || isError || rows.length === 0 ? (
           <S.EmptyWrap>
             <EmptyState

@@ -30,6 +30,8 @@ const body = {
     },
     { apiContext: 'sell', apiName: 'Feed', apiVersion: 'v1', resources: [{ name: 'sell.feed', rates: [rate(100_000, 86_400)] }] },
     { apiContext: 'developer', apiName: 'Analytics', apiVersion: 'v1_beta', resources: [{ name: 'developer.analytics.app_rate_limit', rates: [rate(5_000, 86_400)] }] },
+    { apiContext: 'commerce', apiName: 'Message', apiVersion: 'v1', resources: [{ name: 'commerce.message', rates: [rate(500_000, 86_400)] }] },
+    { apiContext: 'commerce', apiName: 'Notification', apiVersion: 'v1', resources: [{ name: 'commerce.notification', rates: [rate(10_000, 86_400)] }] },
     {
       apiContext: 'TradingAPI', apiName: 'TradingAPI', apiVersion: 'v1',
       resources: [
@@ -138,6 +140,8 @@ describe('mapRateLimits', () => {
     [EbayApiResource.FULFILLMENT, 100_000, 90_000],
     [EbayApiResource.FEED, 100_000, 100_000],
     [EbayApiResource.ANALYTICS, 5_000, 5_000],
+    [EbayApiResource.MESSAGE, 500_000, 500_000],
+    [EbayApiResource.NOTIFICATION, 10_000, 10_000],
     [EbayApiResource.TRADING_GET_MY_EBAY_SELLING, 5_000, 4_000],
     [EbayApiResource.TRADING_END_ITEM, 5_000, 4_900],
   ])('maps %s by its exact eBay resource name', (resource, limit, remaining) => {

@@ -256,6 +256,12 @@
       "publish": "eBay-də dərc et",
       "publishSelected": "Seçilmişləri dərc et"
     },
+    "revisionHistory": {
+      "title": "Dəyişiklik tarixçəsi",
+      "subtitle": "Bütün elanlarınızda eBay-ə göndərilən hər qiymət və stok dəyişikliyi.",
+      "empty": "Dəyişiklik tapılmadı.",
+      "emptyTitle": "Hələ dəyişiklik yoxdur"
+    },
     "addSection": {
       "title": "Yeni elan əlavə et",
       "subtitle": "ASIN-lərdən istifadə edərək Amazon-dan eBay mağazanıza məhsul idxal edin.",
@@ -375,6 +381,7 @@
       "updatedAt": "Yenilənib",
       "revisions": {
         "action": "Dəyişikliklər",
+        "lastChecked": "Son yoxlama {{date}} — dəyişiklik yoxdur",
         "title": "Dəyişikliklər",
         "subtitle": "Bu elan üzrə qiymət və stok dəyişiklikləri",
         "previousPrice": "Əvvəlki qiymət",

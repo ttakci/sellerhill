@@ -22,6 +22,10 @@ import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { useGetBillingSummaryQuery } from '@/features/billing/api/billing.api';
 import { buildBillingUsageRows } from '@/features/billing/utils/usageRows';
+import {
+  MESSAGES_UNREAD_POLL_INTERVAL_MS,
+  useGetUnreadMessageCountQuery,
+} from '@/features/messages';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
 
@@ -131,6 +135,16 @@ export const AppLayout: React.FC = () => {
   });
 
   /*
+   * Same reasoning as the Action Center badge above: polling lives here so
+   * the unread count keeps updating while the seller is anywhere in the app,
+   * not only on the Messages page itself.
+   */
+  const { data: unreadMessages } = useGetUnreadMessageCountQuery(undefined, {
+    skip: !isAuthenticated || isOperatorRole(user?.role),
+    pollingInterval: MESSAGES_UNREAD_POLL_INTERVAL_MS,
+  });
+
+  /*
    * Entitlement gate for the whole seller shell.
    *
    * A suspended account (payment failed, cancelled, or an expired trial) can
@@ -214,6 +228,7 @@ export const AppLayout: React.FC = () => {
       onLocaleNavigate={localeNavigate}
       pendingActionCount={actionCenter?.totalCount ?? 0}
       hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
+      unreadMessageCount={unreadMessages?.total ?? 0}
       billingUsageRows={billingUsageRows}
       billingPlanName={billingPlanName}
       isProfileUsageOpen={isProfileUsageOpen}

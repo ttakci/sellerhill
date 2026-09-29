@@ -44,4 +44,10 @@ export interface ListingRevisionsDrawerComponentProps {
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  /**
+   * "Last checked {{date}} — no change", pre-formatted — set only when the
+   * product was verified more recently than the newest revision (or nothing
+   * has ever changed but a check has happened). `null` renders nothing.
+   */
+  lastCheckedLabel: string | null;
 }

@@ -103,6 +103,12 @@
         "description_other": "{{count}} Shops sind nicht mehr autorisiert. Bestellabgleich, Preisanpassung und Veröffentlichung sind dafür gestoppt, bis Sie die Verbindung wiederherstellen.",
         "action": "Shops verwalten"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "Verbindung eines Shops erneuern, um eBay-Nachrichten zu aktivieren",
+        "description_one": "{{count}} Shop wurde verbunden, bevor Nachrichten eingeführt wurden. Verbinden Sie ihn erneut, um eBay-Nachrichten hier zu lesen und zu beantworten.",
+        "description_other": "{{count}} Shops wurden verbunden, bevor Nachrichten eingeführt wurden. Verbinden Sie sie erneut, um eBay-Nachrichten hier zu lesen und zu beantworten.",
+        "action": "Shops verwalten"
+      },
       "amazon_account_needs_attention": {
         "title": "Ein Amazon-Käuferkonto kann sich nicht anmelden",
         "description_one": "Bei {{count}} Käuferkonto schlägt die Anmeldung fehl, daher kann darüber nichts gekauft werden.",

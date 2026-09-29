@@ -19,7 +19,13 @@ import {
   DashboardChartGranularity,
   DashboardPeriodKey,
   EbayAccountStatus,
+  EbayConversationDto,
+  EbayConversationStatus,
+  EbayConversationThreadDto,
+  EbayConversationType,
   EbayMarketplaceId,
+  EbayMessageDto,
+  EbayUnreadCountDto,
   EntitlementState,
   ListingFailureCode,
   ListingJobKind,
@@ -176,6 +182,7 @@ export const DEMO_EBAY_ACCOUNTS = {
       storeName: 'Northvale Supply',
       marketplaceId: EbayMarketplaceId.EBAY_US,
       status: EbayAccountStatus.ACTIVE,
+      messagingEnabled: true,
       createdAt: isoDaysAgo(238),
       updatedAt: isoDaysAgo(1),
     },
@@ -186,6 +193,7 @@ export const DEMO_EBAY_ACCOUNTS = {
       storeName: 'Deskly Direct',
       marketplaceId: EbayMarketplaceId.EBAY_US,
       status: EbayAccountStatus.ACTIVE,
+      messagingEnabled: true,
       createdAt: isoDaysAgo(120),
       updatedAt: isoDaysAgo(2),
     },
@@ -1074,6 +1082,334 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
     infoCount: all.filter((i) => i.severity === ActionCenterSeverity.INFO).length,
     groups,
     generatedAt: new Date().toISOString(),
+  };
+}
+
+/* ── eBay Messages ────────────────────────────────────────────────────── */
+
+/**
+ * One demo seller identity for every outbound message — matches
+ * `DEMO_EBAY_ACCOUNTS.items[0].sellerId`, which is what `useMessagesInbox`'s
+ * `isMine` check compares a sender against when no `ebayUsername` is set.
+ */
+const STORE_SELLER_USERNAME = DEMO_EBAY_ACCOUNTS.items[0].sellerId;
+
+function demoMessage(
+  id: string,
+  senderUsername: string,
+  body: string,
+  daysAgo: number,
+  hourOffset: number,
+  read: boolean
+): EbayMessageDto {
+  return {
+    messageId: id,
+    subject: null,
+    body,
+    senderUsername,
+    recipientUsername: senderUsername === STORE_SELLER_USERNAME ? 'buyer' : STORE_SELLER_USERNAME,
+    read,
+    createdAt: isoDaysAgo(daysAgo, hourOffset),
+    media: [],
+  };
+}
+
+/** Turns an invented buyer name into an eBay-style handle — no real accounts, no real brands. */
+function buyerHandle(name: string, suffix: number): string {
+  return `${name.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 12)}${suffix}`;
+}
+
+/** The two listings a pre-sale question links back to, via their real eBay item id. */
+const EARBUDS_ITEM_ID = DEMO_LISTINGS[3].ebayListingId ?? null; // Wireless Earbuds
+const PILLOW_ITEM_ID = DEMO_LISTINGS[2].ebayListingId ?? null; // Memory Foam Pillow
+
+/**
+ * Eight conversations: six buyer↔seller (`FROM_MEMBERS` — two unread, one
+ * archived, two carrying a `referenceId` back to a real demo listing) and two
+ * eBay-to-seller system notices (`FROM_EBAY`, always read — eBay does not
+ * report an unread system notice as something to action).
+ */
+const CONVERSATION_SEEDS: Array<{
+  conversationId: string;
+  type: EbayConversationType;
+  status: EbayConversationStatus;
+  title: string | null;
+  referenceId: string | null;
+  otherPartyUsername: string | null;
+  messages: EbayMessageDto[];
+}> = [
+  {
+    conversationId: 'demo-conv-1',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Question about my order',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Aaron Pike', 47),
+    messages: [
+      demoMessage(
+        'demo-msg-1-1',
+        buyerHandle('Aaron Pike', 47),
+        'Hi, just checking — has my order shipped yet?',
+        4,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-1-2',
+        STORE_SELLER_USERNAME,
+        'Thanks for reaching out! It ships within one business day and you will get tracking automatically.',
+        4,
+        3,
+        true
+      ),
+      demoMessage(
+        'demo-msg-1-3',
+        buyerHandle('Aaron Pike', 47),
+        'Great, appreciate the quick reply!',
+        0,
+        1,
+        false
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-2',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Shipping to a different address',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Chloe Bennett', 12),
+    messages: [
+      demoMessage(
+        'demo-msg-2-1',
+        buyerHandle('Chloe Bennett', 12),
+        'I moved recently — can you ship this to a new address instead of the one on file?',
+        1,
+        4,
+        false
+      ),
+      demoMessage(
+        'demo-msg-2-2',
+        buyerHandle('Chloe Bennett', 12),
+        'Let me know if you need the new zip code too.',
+        0,
+        5,
+        false
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-3',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ARCHIVE,
+    title: 'Thanks for the fast shipping',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Grace Okafor', 8),
+    messages: [
+      demoMessage(
+        'demo-msg-3-1',
+        buyerHandle('Grace Okafor', 8),
+        'Item arrived a day early, thank you!',
+        18,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-3-2',
+        STORE_SELLER_USERNAME,
+        'So glad it arrived safely — thanks for shopping with us!',
+        18,
+        3,
+        true
+      ),
+      demoMessage(
+        'demo-msg-3-3',
+        buyerHandle('Grace Okafor', 8),
+        'Will definitely buy from you again.',
+        17,
+        6,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-4',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Battery life question',
+    referenceId: EARBUDS_ITEM_ID,
+    otherPartyUsername: buyerHandle('Marcus Lin', 3),
+    messages: [
+      demoMessage(
+        'demo-msg-4-1',
+        buyerHandle('Marcus Lin', 3),
+        'Does the battery life hold up with noise cancelling on the whole time?',
+        6,
+        1,
+        true
+      ),
+      demoMessage(
+        'demo-msg-4-2',
+        STORE_SELLER_USERNAME,
+        'Yes — the 40-hour figure already includes the case, with ANC on throughout.',
+        6,
+        2,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-5',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Is the cover machine washable?',
+    referenceId: PILLOW_ITEM_ID,
+    otherPartyUsername: buyerHandle('Sofia Bianchi', 21),
+    messages: [
+      demoMessage(
+        'demo-msg-5-1',
+        buyerHandle('Sofia Bianchi', 21),
+        'Is the cover removable and machine washable?',
+        9,
+        1,
+        true
+      ),
+      demoMessage(
+        'demo-msg-5-2',
+        STORE_SELLER_USERNAME,
+        'Yes, the cover zips off and is machine washable on a cold, gentle cycle.',
+        9,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-5-3',
+        buyerHandle('Sofia Bianchi', 21),
+        'Perfect, ordering one now.',
+        9,
+        3,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-6',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Left you five stars',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Devon Marsh', 5),
+    messages: [
+      demoMessage(
+        'demo-msg-6-1',
+        buyerHandle('Devon Marsh', 5),
+        'Exactly as described, fast delivery. Left five-star feedback.',
+        13,
+        4,
+        true
+      ),
+      demoMessage(
+        'demo-msg-6-2',
+        STORE_SELLER_USERNAME,
+        'Thank you so much for the kind words and the feedback!',
+        13,
+        5,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-7',
+    type: EbayConversationType.FROM_EBAY,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Reminder: keep your business policies current',
+    referenceId: null,
+    otherPartyUsername: 'eBay',
+    messages: [
+      demoMessage(
+        'demo-msg-7-1',
+        'eBay',
+        'We recommend reviewing your payment, shipping and return policies before the next peak season.',
+        22,
+        0,
+        true
+      ),
+      demoMessage(
+        'demo-msg-7-2',
+        'eBay',
+        'No action is required if your policies already reflect your current handling times.',
+        22,
+        1,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-8',
+    type: EbayConversationType.FROM_EBAY,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Your listing template meets our picture policy',
+    referenceId: null,
+    otherPartyUsername: 'eBay',
+    messages: [
+      demoMessage(
+        'demo-msg-8-1',
+        'eBay',
+        'A recent scan of your active listings found no picture policy issues.',
+        29,
+        0,
+        true
+      ),
+    ],
+  },
+];
+
+export const DEMO_CONVERSATIONS: EbayConversationDto[] = CONVERSATION_SEEDS.map((seed) => {
+  const latestMessage = seed.messages[seed.messages.length - 1] ?? null;
+  const unreadCount = seed.messages.filter(
+    (message) => !message.read && message.senderUsername !== STORE_SELLER_USERNAME
+  ).length;
+  return {
+    conversationId: seed.conversationId,
+    type: seed.type,
+    status: seed.status,
+    title: seed.title,
+    unreadCount,
+    referenceType: seed.referenceId ? 'ITEM' : null,
+    referenceId: seed.referenceId,
+    createdAt: seed.messages[0]?.createdAt ?? isoDaysAgo(1),
+    latestMessage,
+    otherPartyUsername: seed.otherPartyUsername,
+  } satisfies EbayConversationDto;
+});
+
+/** `GET .../conversations/:id` — the full thread, or `null` for an unknown id. */
+export function demoThread(conversationId: string): EbayConversationThreadDto | null {
+  const seed = CONVERSATION_SEEDS.find((s) => s.conversationId === conversationId);
+  if (!seed) {
+    return null;
+  }
+  return {
+    conversationId: seed.conversationId,
+    type: seed.type,
+    status: seed.status,
+    title: seed.title,
+    messages: seed.messages,
+    total: seed.messages.length,
+    page: 1,
+    limit: seed.messages.length,
+  };
+}
+
+/** `GET /ebay/messages/unread-count` — the sidebar badge, summed from the fixtures above. */
+export function buildDemoUnread(): EbayUnreadCountDto {
+  const total = DEMO_CONVERSATIONS.reduce((sum, c) => sum + c.unreadCount, 0);
+  return {
+    total,
+    byAccount: [
+      { ebayAccountId: DEMO_EBAY_ACCOUNT_ID, unread: total },
+      { ebayAccountId: DEMO_EBAY_ACCOUNT_ID_2, unread: 0 },
+    ],
   };
 }
 

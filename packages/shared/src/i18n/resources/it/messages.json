@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "Messaggi",
+      "subtitle": "Leggi e rispondi ai tuoi messaggi eBay da qui"
+    },
+    "folders": {
+      "members": "Dai membri",
+      "ebay": "Da eBay",
+      "all": "Tutti",
+      "unread": "Non letti",
+      "archive": "Archivio"
+    },
+    "list": {
+      "empty": "Ancora nessuna conversazione.",
+      "emptyUnread": "Nessuna conversazione non letta.",
+      "emptyArchive": "Nessuna conversazione archiviata.",
+      "loading": "Caricamento conversazioni…",
+      "listing": "Riguardo a {{title}}",
+      "select": "Seleziona",
+      "selectAll": "Seleziona tutto",
+      "noStores": "Collega un negozio eBay per vedere i tuoi messaggi."
+    },
+    "thread": {
+      "empty": "Seleziona una conversazione per visualizzarla.",
+      "loading": "Caricamento conversazione…",
+      "reply": "Rispondi",
+      "replyPlaceholder": "Scrivi la tua risposta…",
+      "send": "Invia",
+      "sent": "Messaggio inviato",
+      "noReply": "Non è possibile rispondere a questa conversazione.",
+      "attachment": "Allegato",
+      "you": "Tu",
+      "backToList": "Torna ai messaggi",
+      "chars": "{{count}}/{{max}} caratteri"
+    },
+    "actions": {
+      "markRead": "Segna come letto",
+      "markUnread": "Segna come non letto",
+      "archive": "Archivia",
+      "unarchive": "Rimuovi dall'archivio",
+      "delete": "Elimina",
+      "refresh": "Aggiorna",
+      "selected": "{{count}} selezionati",
+      "deleteConfirm": "Eliminare le conversazioni selezionate? Non compariranno più in nessuna cartella."
+    },
+    "reconnect": {
+      "title": "Ricollega questo negozio",
+      "description": "Questo negozio è stato collegato prima che fosse disponibile il supporto per i messaggi. Ricollegalo a eBay per leggere e rispondere ai messaggi.",
+      "action": "Ricollega"
+    },
+    "toast": {
+      "archived": "Conversazione archiviata",
+      "deleted": "Conversazione eliminata",
+      "read": "Segnato come letto"
+    }
+  }
+}

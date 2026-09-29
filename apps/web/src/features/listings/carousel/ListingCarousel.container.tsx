@@ -1,4 +1,6 @@
+import { getLocaleConfig } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ListingCarouselComponent } from './ListingCarousel.component';
 import type { ListingCarouselProps } from './ListingCarousel.types';
@@ -12,6 +14,11 @@ export const ListingCarousel: React.FC<ListingCarouselProps> = ({
   emptyTitle,
   emptySubtitle,
 }) => {
+  const { i18n } = useTranslation();
+  /* Card price stat needs a locale for separators — currency itself comes
+     from each listing's own `currency`, never the UI language. */
+  const locale = useMemo(() => getLocaleConfig(i18n.language).locale, [i18n.language]);
+
   // Last 3 added listings sorted by createdAt descending.
   const recentListings = useMemo(
     () => [...listings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3),
@@ -37,6 +44,7 @@ export const ListingCarousel: React.FC<ListingCarouselProps> = ({
       onListingClick={onListingClick}
       emptyTitle={emptyTitle}
       emptySubtitle={emptySubtitle}
+      locale={locale}
       currentSlide={currentSlide}
       onNext={nextSlide}
       onPrev={prevSlide}

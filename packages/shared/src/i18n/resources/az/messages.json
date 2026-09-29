@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "Mesajlar",
+      "subtitle": "eBay mesajlarınızı buradan oxuyun və cavablayın"
+    },
+    "folders": {
+      "members": "Üzvlərdən",
+      "ebay": "eBay-dən",
+      "all": "Hamısı",
+      "unread": "Oxunmamış",
+      "archive": "Arxiv"
+    },
+    "list": {
+      "empty": "Hələ heç bir yazışma yoxdur.",
+      "emptyUnread": "Oxunmamış yazışma yoxdur.",
+      "emptyArchive": "Arxivlənmiş yazışma yoxdur.",
+      "loading": "Yazışmalar yüklənir…",
+      "listing": "{{title}} ilə bağlı",
+      "select": "Seç",
+      "selectAll": "Hamısını seç",
+      "noStores": "Mesajlarınızı görmək üçün eBay mağazası qoşun."
+    },
+    "thread": {
+      "empty": "Baxmaq üçün bir yazışma seçin.",
+      "loading": "Yazışma yüklənir…",
+      "reply": "Cavabla",
+      "replyPlaceholder": "Cavabınızı yazın…",
+      "send": "Göndər",
+      "sent": "Mesaj göndərildi",
+      "noReply": "Bu yazışmaya cavab vermək mümkün deyil.",
+      "attachment": "Əlavə",
+      "you": "Siz",
+      "backToList": "Mesajlara qayıt",
+      "chars": "{{count}}/{{max}} simvol"
+    },
+    "actions": {
+      "markRead": "Oxunmuş kimi işarələ",
+      "markUnread": "Oxunmamış kimi işarələ",
+      "archive": "Arxivləşdir",
+      "unarchive": "Arxivdən çıxar",
+      "delete": "Sil",
+      "refresh": "Yenilə",
+      "selected": "{{count}} seçildi",
+      "deleteConfirm": "Seçilmiş yazışmalar silinsin? Onlar artıq heç bir qovluqda görünməyəcək."
+    },
+    "reconnect": {
+      "title": "Bu mağazanı yenidən qoşun",
+      "description": "Bu mağaza mesajlaşma dəstəyi mövcud olmazdan əvvəl qoşulub. Mesajları oxumaq və cavablamaq üçün onu eBay-ə yenidən qoşun.",
+      "action": "Yenidən qoş"
+    },
+    "toast": {
+      "archived": "Yazışma arxivləndi",
+      "deleted": "Yazışma silindi",
+      "read": "Oxunmuş kimi işarələndi"
+    }
+  }
+}

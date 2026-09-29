@@ -74,6 +74,15 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     ],
   },
   {
+    path: '/listings/revisions',
+    match: 'exact',
+    section: 'inventory',
+    breadcrumbs: [
+      { labelKey: 'translation:menu.listings', path: '/listings' },
+      { labelKey: 'translation:menu.revisionHistory' },
+    ],
+  },
+  {
     path: '/listings/products',
     match: 'exact',
     section: 'inventory',
@@ -96,6 +105,12 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     match: 'exact',
     section: 'inventory',
     breadcrumbs: [{ labelKey: 'translation:menu.orders', path: '/orders' }],
+  },
+  {
+    path: '/messages',
+    match: 'exact',
+    section: 'inventory',
+    breadcrumbs: [{ labelKey: 'translation:menu.messages', path: '/messages' }],
   },
   {
     path: '/orders/',

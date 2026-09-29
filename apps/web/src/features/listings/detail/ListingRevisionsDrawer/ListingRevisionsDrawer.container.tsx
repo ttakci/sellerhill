@@ -48,19 +48,23 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
   listingId,
   currency,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['listings']);
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
   const [openListingId, setOpenListingId] = useState(listingId);
   const [pagesLoaded, setPagesLoaded] = useState(1);
   const [buckets, setBuckets] = useState<Record<number, ListingRevisionDto[]>>({});
   const [knownTotal, setKnownTotal] = useState(0);
+  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null);
+  const [hasUncommittedCheck, setHasUncommittedCheck] = useState(false);
 
   if (listingId !== openListingId) {
     setOpenListingId(listingId);
     setPagesLoaded(1);
     setBuckets({});
     setKnownTotal(0);
+    setLastCheckedAt(null);
+    setHasUncommittedCheck(false);
   }
 
   const { data, isFetching, isError } = useGetListingRevisionsQuery(
@@ -74,6 +78,13 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
     }
     if (data.total !== knownTotal) {
       setKnownTotal(data.total);
+    }
+    // Reflects the true latest state regardless of which page is open — the
+    // API computes it against the newest revision across ALL pages, not just
+    // the one currently loaded (see `getListingRevisions`'s correlated MAX()).
+    if (data.lastCheckedAt !== lastCheckedAt || Boolean(data.hasUncommittedCheck) !== hasUncommittedCheck) {
+      setLastCheckedAt(data.lastCheckedAt ?? null);
+      setHasUncommittedCheck(Boolean(data.hasUncommittedCheck));
     }
   }
 
@@ -124,6 +135,21 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
   const shown = accumulated.length;
   const total = Math.max(knownTotal, shown);
 
+  const lastCheckedLabel = useMemo(() => {
+    if (!hasUncommittedCheck || !lastCheckedAt) {
+      return null;
+    }
+    return t('listings.detail.revisions.lastChecked', {
+      date: formatDate(lastCheckedAt, localeCfg.locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    });
+  }, [hasUncommittedCheck, lastCheckedAt, localeCfg.locale, t]);
+
   return (
     <ListingRevisionsDrawerComponent
       isOpen={isOpen}
@@ -136,6 +162,7 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
       hasMore={shown < total}
       isLoadingMore={isFetching && shown > 0}
       onLoadMore={() => setPagesLoaded((p) => p + 1)}
+      lastCheckedLabel={lastCheckedLabel}
     />
   );
 };

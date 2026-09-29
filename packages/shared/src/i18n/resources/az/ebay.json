@@ -42,7 +42,12 @@
       "noAuthorizationCode": "eBay-dən avtorizasiya kodu alınmadı",
       "storeOwnedByAnotherAccount": "Bu eBay mağazası başqa SellerHill hesabı ilə əlaqələndirilib. Onu köçürmək üçün dəstək xidməti ilə əlaqə saxlayın.",
       "accountNotFound": "Həmin eBay mağazası tapılmadı.",
-      "identityUnavailable": "eBay hesabınızı eBay ilə təsdiqləyə bilmədik. Heç nə qoşulmadı — zəhmət olmasa bir azdan yenidən cəhd edin."
+      "identityUnavailable": "eBay hesabınızı eBay ilə təsdiqləyə bilmədik. Heç nə qoşulmadı — zəhmət olmasa bir azdan yenidən cəhd edin.",
+      "messagingScopeMissing": "Mesajları aktivləşdirmək üçün eBay mağazanızı yenidən qoşun — cari icazə mesajlaşmanı əhatə etmir.",
+      "messagingReplyNotAllowed": "eBay-dən gələn mesajlara burada cavab vermək olmaz.",
+      "messagingUnavailable": "eBay mesajlaşması müvəqqəti olaraq əlçatan deyil. Zəhmət olmasa yenidən cəhd edin.",
+      "messagingRejected": "eBay bu sorğunu qəbul etmədi. Mesajı yoxlayıb yenidən cəhd edin.",
+      "messageTooLong": "Mesaj ən çoxu 2000 simvol ola bilər."
     },
     "onboarding": {
       "title": "eBay mağazanızı qoşun",

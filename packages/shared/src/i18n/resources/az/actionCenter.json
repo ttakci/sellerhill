@@ -103,6 +103,12 @@
         "description_other": "{{count}} mağazanın avtorizasiyası artıq yoxdur. Yenidən qoşana qədər onlar üçün sifariş sinxronizasiyası, qiymət yenilənməsi və dərc dayandırılıb.",
         "action": "Mağazaları idarə et"
       },
+      "ebay_account_messaging_scope_missing": {
+        "title": "eBay mesajlarını aktivləşdirmək üçün mağazanı yenidən qoşun",
+        "description_one": "{{count}} mağaza mesajlaşma əlavə olunmazdan əvvəl qoşulub. eBay mesajlarını burada oxumaq və cavablamaq üçün onu yenidən qoşun.",
+        "description_other": "{{count}} mağaza mesajlaşma əlavə olunmazdan əvvəl qoşulub. eBay mesajlarını burada oxumaq və cavablamaq üçün onları yenidən qoşun.",
+        "action": "Mağazaları idarə et"
+      },
       "amazon_account_needs_attention": {
         "title": "Amazon alıcı hesabı daxil ola bilmir",
         "description_one": "{{count}} alıcı hesabında giriş uğursuz olur, ona görə onun vasitəsilə heç nə almaq mümkün deyil.",

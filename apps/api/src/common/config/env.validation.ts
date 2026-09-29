@@ -200,6 +200,18 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  EBAY_NOTIFICATION_VERIFICATION_TOKEN?: string;
+
+  @IsString()
+  @IsOptional()
+  EBAY_NOTIFICATION_ALERT_EMAIL?: string;
+
+  @IsString()
+  @IsOptional()
+  EBAY_NOTIFICATION_ENDPOINT_URL?: string;
+
+  @IsString()
+  @IsOptional()
   AMAZON_ENCRYPTION_KEY?: string;
 
   @IsString()

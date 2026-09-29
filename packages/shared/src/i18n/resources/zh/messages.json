@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "消息",
+      "subtitle": "在这里查看并回复您的 eBay 消息"
+    },
+    "folders": {
+      "members": "来自会员",
+      "ebay": "来自 eBay",
+      "all": "全部",
+      "unread": "未读",
+      "archive": "归档"
+    },
+    "list": {
+      "empty": "暂无对话。",
+      "emptyUnread": "没有未读对话。",
+      "emptyArchive": "没有已归档的对话。",
+      "loading": "正在加载对话…",
+      "listing": "关于 {{title}}",
+      "select": "选择",
+      "selectAll": "全选",
+      "noStores": "请连接一个 eBay 店铺以查看您的消息。"
+    },
+    "thread": {
+      "empty": "选择一个对话以查看。",
+      "loading": "正在加载对话…",
+      "reply": "回复",
+      "replyPlaceholder": "输入您的回复…",
+      "send": "发送",
+      "sent": "消息已发送",
+      "noReply": "此对话无法回复。",
+      "attachment": "附件",
+      "you": "您",
+      "backToList": "返回消息列表",
+      "chars": "{{count}}/{{max}} 字符"
+    },
+    "actions": {
+      "markRead": "标记为已读",
+      "markUnread": "标记为未读",
+      "archive": "归档",
+      "unarchive": "取消归档",
+      "delete": "删除",
+      "refresh": "刷新",
+      "selected": "已选择 {{count}} 项",
+      "deleteConfirm": "删除所选对话？删除后它们将不再出现在任何文件夹中。"
+    },
+    "reconnect": {
+      "title": "重新连接此店铺",
+      "description": "此店铺是在消息功能上线之前连接的。请重新连接到 eBay 以查看和回复消息。",
+      "action": "重新连接"
+    },
+    "toast": {
+      "archived": "对话已归档",
+      "deleted": "对话已删除",
+      "read": "已标记为已读"
+    }
+  }
+}

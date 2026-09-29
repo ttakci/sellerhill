@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "Messages",
+      "subtitle": "Read and reply to your eBay messages"
+    },
+    "folders": {
+      "members": "From members",
+      "ebay": "From eBay",
+      "all": "All",
+      "unread": "Unread",
+      "archive": "Archive"
+    },
+    "list": {
+      "empty": "No conversations here yet.",
+      "emptyUnread": "No unread conversations.",
+      "emptyArchive": "No archived conversations.",
+      "loading": "Loading conversations…",
+      "listing": "Regarding {{title}}",
+      "select": "Select",
+      "selectAll": "Select all",
+      "noStores": "Connect an eBay store to see your messages."
+    },
+    "thread": {
+      "empty": "Select a conversation to view it.",
+      "loading": "Loading conversation…",
+      "reply": "Reply",
+      "replyPlaceholder": "Type your reply…",
+      "send": "Send",
+      "sent": "Message sent",
+      "noReply": "This conversation can't be replied to.",
+      "attachment": "Attachment",
+      "you": "You",
+      "backToList": "Back to messages",
+      "chars": "{{count}}/{{max}} characters"
+    },
+    "actions": {
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete",
+      "refresh": "Refresh",
+      "selected": "{{count}} selected",
+      "deleteConfirm": "Delete the selected conversation(s)? They will no longer appear in any folder."
+    },
+    "reconnect": {
+      "title": "Reconnect this store",
+      "description": "This store was connected before messaging support existed. Reconnect it to eBay to read and reply to messages.",
+      "action": "Reconnect"
+    },
+    "toast": {
+      "archived": "Conversation archived",
+      "deleted": "Conversation deleted",
+      "read": "Marked as read"
+    }
+  }
+}

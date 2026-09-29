@@ -102,6 +102,8 @@ export const RESOURCE_SOURCE: Record<EbayApiResource, ResourceSource> = {
   [EbayApiResource.FULFILLMENT]: { trading: false, name: 'sell.fulfillment' },
   [EbayApiResource.FEED]: { trading: false, name: 'sell.feed' },
   [EbayApiResource.ANALYTICS]: { trading: false, name: 'developer.analytics.app_rate_limit' },
+  [EbayApiResource.MESSAGE]: { trading: false, name: 'commerce.message' },
+  [EbayApiResource.NOTIFICATION]: { trading: false, name: 'commerce.notification' },
   [EbayApiResource.TRADING_GET_MY_EBAY_SELLING]: { trading: true, name: 'GetMyeBaySelling' },
   [EbayApiResource.TRADING_END_ITEM]: { trading: true, name: 'EndItem' },
 };

@@ -76,8 +76,14 @@ const ListingJobDetailsPage = lazy(() =>
 const ListingJobsPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingJobsPage }))
 );
+const MessagesPage = lazy(() =>
+  import('./features/messages').then((m) => ({ default: m.MessagesPageContainer }))
+);
 const ListingsAllPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingsAllPage }))
+);
+const RevisionHistoryPage = lazy(() =>
+  import('./features/listings').then((m) => ({ default: m.RevisionHistoryPage }))
 );
 const ProductsPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ProductsPage }))
@@ -278,6 +284,14 @@ export function App() {
               }
             />
             <Route
+              path="listings/revisions"
+              element={
+                <Lazy>
+                  <RevisionHistoryPage />
+                </Lazy>
+              }
+            />
+            <Route
               path="listings/products"
               element={
                 <Lazy>
@@ -319,6 +333,14 @@ export function App() {
               element={
                 <Lazy>
                   <OrderDetailsPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="messages"
+              element={
+                <Lazy>
+                  <MessagesPage />
                 </Lazy>
               }
             />
@@ -367,6 +389,7 @@ export function App() {
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
         <Route path="/best-sellers" element={<LocaleRedirect to="best-sellers" preserveQuery />} />
+        <Route path="/messages" element={<LocaleRedirect to="messages" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" preserveQuery />} />
         {/*

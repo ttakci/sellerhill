@@ -16,6 +16,7 @@ import {
   OrderStatus,
   PlatformSettingKey,
   SourceStockStatus,
+  type AllListingRevisionsQueryDto,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
@@ -24,9 +25,11 @@ import {
   type ListingJobsQueryDto,
   type ListingRevisionDto,
   type ListingRevisionsQueryDto,
+  type ListingRevisionWithListingDto,
   type ListingsQueryDto,
   type PaginatedListingJobsDto,
   type PaginatedListingRevisionsDto,
+  type PaginatedListingRevisionsWithListingDto,
   type PaginatedListingsDto,
   type PaginatedProductsDto,
   type ProductData,
@@ -47,6 +50,7 @@ import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { classifyListingFailure } from './listing-failure';
+import { hasUncommittedRefreshCheck } from './listing-revision-check';
 import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
@@ -911,6 +915,136 @@ export class ListingsService {
       newQuantity: row.new_quantity,
       recordedAt: row.recorded_at.toISOString(),
     }));
+
+    // The product's own last-checked time, plus the newest revision across
+    // ALL pages (not just this one) — a correlated MAX() rather than a second
+    // round trip, cheap under the existing (listing_id, recorded_at) index.
+    // `hasUncommittedRefreshCheck` is what turns the two into "show the
+    // checked-but-unchanged line" — see its own doc comment for why a real
+    // change can leave this false immediately after it lands.
+    const checkRows = await this.databaseService.query<{
+      last_successful_refresh_at: Date | null;
+      most_recent_revision_at: Date | null;
+    }>(
+      `SELECT p.last_successful_refresh_at,
+              (SELECT MAX(r.recorded_at) FROM listing_revisions r WHERE r.listing_id = l.id) AS most_recent_revision_at
+       FROM listings l
+       JOIN products p ON p.id = l.product_id
+       WHERE l.id = $1 AND l.user_id = $2`,
+      [listingId, userId]
+    );
+    const lastCheckedAt = checkRows[0]?.last_successful_refresh_at ?? null;
+    const mostRecentRevisionAt = checkRows[0]?.most_recent_revision_at ?? null;
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      lastCheckedAt: lastCheckedAt?.toISOString() ?? null,
+      hasUncommittedCheck: hasUncommittedRefreshCheck(lastCheckedAt, mostRecentRevisionAt),
+    };
+  }
+
+  /**
+   * Price/quantity change history across EVERY listing the caller owns (the
+   * "Revizyonlar" nav page) — the per-listing method above scopes to one
+   * listing via the URL; this is its cross-listing sibling, same table,
+   * server-paginated the same way (CLAUDE.md "Every list endpoint is
+   * server-paginated"). No "checked, unchanged" synthetic rows here: that
+   * banner is a per-listing "is this stale?" question, and mixing it into a
+   * global feed would mean one row per listing per refresh tick with no new
+   * information — the DB-write cost `076`'s design note explicitly avoided.
+   */
+  async getAllListingRevisions(
+    userId: string,
+    query: AllListingRevisionsQueryDto = {}
+  ): Promise<PaginatedListingRevisionsWithListingDto> {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const offset = (page - 1) * limit;
+
+    const conditions = [`l.user_id = $1`];
+    const params: Array<string | number> = [userId];
+
+    if (query.search?.trim()) {
+      params.push(`%${query.search.trim()}%`);
+      conditions.push(`p.asin ILIKE $${params.length}`);
+    }
+    if (query.ebayAccountId?.trim()) {
+      params.push(query.ebayAccountId.trim());
+      // Cast the column side, not the parameter: this filter is read straight
+      // off the query string with no UUID-shape validation (same as the
+      // sibling `getListings`/`getUntrackedListings` filters), and a bare
+      // `l.ebay_account_id = $N` throws `invalid input syntax for type uuid`
+      // — a 500 — for anything malformed. A ::text compare just finds no
+      // match instead, which is the correct answer for an id that isn't real.
+      conditions.push(`l.ebay_account_id::text = $${params.length}`);
+    }
+    const where = conditions.join(' AND ');
+
+    const countResult = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count
+       FROM listing_revisions r
+       JOIN listings l ON l.id = r.listing_id
+       JOIN products p ON p.id = l.product_id
+       WHERE ${where}`,
+      params
+    );
+    const total = parseInt(countResult[0]?.count || '0', 10);
+
+    const results = await this.databaseService.query<{
+      id: string;
+      previous_price: string;
+      new_price: string;
+      previous_quantity: number;
+      new_quantity: number;
+      recorded_at: Date;
+      listing_id: string;
+      asin: string;
+      title: string;
+      image_urls: string[] | string | null;
+      ebay_account_id: string | null;
+      ebay_marketplace_id: EbayMarketplaceId | null;
+      store_name: string | null;
+    }>(
+      `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
+              l.id AS listing_id, l.ebay_account_id,
+              p.asin, p.title, p.image_urls,
+              ea.marketplace_id AS ebay_marketplace_id,
+              COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name
+       FROM listing_revisions r
+       JOIN listings l ON l.id = r.listing_id
+       JOIN products p ON p.id = l.product_id
+       LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
+       WHERE ${where}
+       ORDER BY r.recorded_at DESC, r.id DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+
+    const items: ListingRevisionWithListingDto[] = results.map((row) => {
+      const imageUrls = Array.isArray(row.image_urls)
+        ? row.image_urls
+        : (JSON.parse(String(row.image_urls ?? '[]')) as string[]);
+      return {
+        id: row.id,
+        previousPrice: Number(row.previous_price),
+        newPrice: Number(row.new_price),
+        previousQuantity: row.previous_quantity,
+        newQuantity: row.new_quantity,
+        recordedAt: row.recorded_at.toISOString(),
+        listingId: row.listing_id,
+        asin: row.asin,
+        title: row.title,
+        imageUrl: imageUrls[0],
+        ebayAccountId: row.ebay_account_id ?? undefined,
+        storeName: row.store_name ?? undefined,
+        currency:
+          (row.ebay_marketplace_id && EBAY_MARKETPLACE_CONFIG[row.ebay_marketplace_id]?.currency) ||
+          EBAY_MARKETPLACE_CONFIG[EbayMarketplaceId.EBAY_US].currency,
+      };
+    });
 
     return { items, total, page, limit };
   }

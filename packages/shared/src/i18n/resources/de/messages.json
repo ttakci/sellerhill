@@ -1,0 +1,58 @@
+{
+  "messages": {
+    "page": {
+      "title": "Nachrichten",
+      "subtitle": "Lesen und beantworten Sie hier Ihre eBay-Nachrichten"
+    },
+    "folders": {
+      "members": "Von Mitgliedern",
+      "ebay": "Von eBay",
+      "all": "Alle",
+      "unread": "Ungelesen",
+      "archive": "Archiv"
+    },
+    "list": {
+      "empty": "Noch keine Unterhaltungen vorhanden.",
+      "emptyUnread": "Keine ungelesenen Unterhaltungen.",
+      "emptyArchive": "Keine archivierten Unterhaltungen.",
+      "loading": "Unterhaltungen werden geladen…",
+      "listing": "Betrifft {{title}}",
+      "select": "Auswählen",
+      "selectAll": "Alle auswählen",
+      "noStores": "Verbinden Sie einen eBay-Shop, um Ihre Nachrichten zu sehen."
+    },
+    "thread": {
+      "empty": "Wählen Sie eine Unterhaltung aus, um sie anzuzeigen.",
+      "loading": "Unterhaltung wird geladen…",
+      "reply": "Antworten",
+      "replyPlaceholder": "Ihre Antwort eingeben…",
+      "send": "Senden",
+      "sent": "Nachricht gesendet",
+      "noReply": "Auf diese Unterhaltung kann nicht geantwortet werden.",
+      "attachment": "Anhang",
+      "you": "Sie",
+      "backToList": "Zurück zu den Nachrichten",
+      "chars": "{{count}}/{{max}} Zeichen"
+    },
+    "actions": {
+      "markRead": "Als gelesen markieren",
+      "markUnread": "Als ungelesen markieren",
+      "archive": "Archivieren",
+      "unarchive": "Aus Archiv holen",
+      "delete": "Löschen",
+      "refresh": "Aktualisieren",
+      "selected": "{{count}} ausgewählt",
+      "deleteConfirm": "Ausgewählte Unterhaltung(en) löschen? Sie erscheinen danach in keinem Ordner mehr."
+    },
+    "reconnect": {
+      "title": "Diesen Shop erneut verbinden",
+      "description": "Dieser Shop wurde verbunden, bevor die Nachrichtenfunktion verfügbar war. Verbinden Sie ihn erneut mit eBay, um Nachrichten zu lesen und zu beantworten.",
+      "action": "Erneut verbinden"
+    },
+    "toast": {
+      "archived": "Unterhaltung archiviert",
+      "deleted": "Unterhaltung gelöscht",
+      "read": "Als gelesen markiert"
+    }
+  }
+}

@@ -7,6 +7,7 @@ import arDashboard from './resources/ar/dashboard.json';
 import arEbay from './resources/ar/ebay.json';
 import arListings from './resources/ar/listings.json';
 import arListingSettingsGroup from './resources/ar/listingSettingsGroup.json';
+import arMessages from './resources/ar/messages.json';
 import arOrders from './resources/ar/orders.json';
 import arProfile from './resources/ar/profile.json';
 import arStoreSettings from './resources/ar/storeSettings.json';
@@ -20,6 +21,7 @@ import azDashboard from './resources/az/dashboard.json';
 import azEbay from './resources/az/ebay.json';
 import azListings from './resources/az/listings.json';
 import azListingSettingsGroup from './resources/az/listingSettingsGroup.json';
+import azMessages from './resources/az/messages.json';
 import azOrders from './resources/az/orders.json';
 import azProfile from './resources/az/profile.json';
 import azStoreSettings from './resources/az/storeSettings.json';
@@ -33,6 +35,7 @@ import deDashboard from './resources/de/dashboard.json';
 import deEbay from './resources/de/ebay.json';
 import deListings from './resources/de/listings.json';
 import deListingSettingsGroup from './resources/de/listingSettingsGroup.json';
+import deMessages from './resources/de/messages.json';
 import deOrders from './resources/de/orders.json';
 import deProfile from './resources/de/profile.json';
 import deStoreSettings from './resources/de/storeSettings.json';
@@ -48,6 +51,7 @@ import enEbay from './resources/en/ebay.json';
 import enLegal from './resources/en/legal.json';
 import enListings from './resources/en/listings.json';
 import enListingSettingsGroup from './resources/en/listingSettingsGroup.json';
+import enMessages from './resources/en/messages.json';
 import enOrders from './resources/en/orders.json';
 import enProfile from './resources/en/profile.json';
 import enStoreSettings from './resources/en/storeSettings.json';
@@ -61,6 +65,7 @@ import esDashboard from './resources/es/dashboard.json';
 import esEbay from './resources/es/ebay.json';
 import esListings from './resources/es/listings.json';
 import esListingSettingsGroup from './resources/es/listingSettingsGroup.json';
+import esMessages from './resources/es/messages.json';
 import esOrders from './resources/es/orders.json';
 import esProfile from './resources/es/profile.json';
 import esStoreSettings from './resources/es/storeSettings.json';
@@ -74,6 +79,7 @@ import frDashboard from './resources/fr/dashboard.json';
 import frEbay from './resources/fr/ebay.json';
 import frListings from './resources/fr/listings.json';
 import frListingSettingsGroup from './resources/fr/listingSettingsGroup.json';
+import frMessages from './resources/fr/messages.json';
 import frOrders from './resources/fr/orders.json';
 import frProfile from './resources/fr/profile.json';
 import frStoreSettings from './resources/fr/storeSettings.json';
@@ -87,6 +93,7 @@ import hiDashboard from './resources/hi/dashboard.json';
 import hiEbay from './resources/hi/ebay.json';
 import hiListings from './resources/hi/listings.json';
 import hiListingSettingsGroup from './resources/hi/listingSettingsGroup.json';
+import hiMessages from './resources/hi/messages.json';
 import hiOrders from './resources/hi/orders.json';
 import hiProfile from './resources/hi/profile.json';
 import hiStoreSettings from './resources/hi/storeSettings.json';
@@ -100,6 +107,7 @@ import itDashboard from './resources/it/dashboard.json';
 import itEbay from './resources/it/ebay.json';
 import itListings from './resources/it/listings.json';
 import itListingSettingsGroup from './resources/it/listingSettingsGroup.json';
+import itMessages from './resources/it/messages.json';
 import itOrders from './resources/it/orders.json';
 import itProfile from './resources/it/profile.json';
 import itStoreSettings from './resources/it/storeSettings.json';
@@ -113,6 +121,7 @@ import ptDashboard from './resources/pt/dashboard.json';
 import ptEbay from './resources/pt/ebay.json';
 import ptListings from './resources/pt/listings.json';
 import ptListingSettingsGroup from './resources/pt/listingSettingsGroup.json';
+import ptMessages from './resources/pt/messages.json';
 import ptOrders from './resources/pt/orders.json';
 import ptProfile from './resources/pt/profile.json';
 import ptStoreSettings from './resources/pt/storeSettings.json';
@@ -126,6 +135,7 @@ import roDashboard from './resources/ro/dashboard.json';
 import roEbay from './resources/ro/ebay.json';
 import roListings from './resources/ro/listings.json';
 import roListingSettingsGroup from './resources/ro/listingSettingsGroup.json';
+import roMessages from './resources/ro/messages.json';
 import roOrders from './resources/ro/orders.json';
 import roProfile from './resources/ro/profile.json';
 import roStoreSettings from './resources/ro/storeSettings.json';
@@ -139,6 +149,7 @@ import ruDashboard from './resources/ru/dashboard.json';
 import ruEbay from './resources/ru/ebay.json';
 import ruListings from './resources/ru/listings.json';
 import ruListingSettingsGroup from './resources/ru/listingSettingsGroup.json';
+import ruMessages from './resources/ru/messages.json';
 import ruOrders from './resources/ru/orders.json';
 import ruProfile from './resources/ru/profile.json';
 import ruStoreSettings from './resources/ru/storeSettings.json';
@@ -154,6 +165,7 @@ import trEbay from './resources/tr/ebay.json';
 import trLegal from './resources/tr/legal.json';
 import trListings from './resources/tr/listings.json';
 import trListingSettingsGroup from './resources/tr/listingSettingsGroup.json';
+import trMessages from './resources/tr/messages.json';
 import trOrders from './resources/tr/orders.json';
 import trProfile from './resources/tr/profile.json';
 import trStoreSettings from './resources/tr/storeSettings.json';
@@ -167,6 +179,7 @@ import ukDashboard from './resources/uk/dashboard.json';
 import ukEbay from './resources/uk/ebay.json';
 import ukListings from './resources/uk/listings.json';
 import ukListingSettingsGroup from './resources/uk/listingSettingsGroup.json';
+import ukMessages from './resources/uk/messages.json';
 import ukOrders from './resources/uk/orders.json';
 import ukProfile from './resources/uk/profile.json';
 import ukStoreSettings from './resources/uk/storeSettings.json';
@@ -180,6 +193,7 @@ import urDashboard from './resources/ur/dashboard.json';
 import urEbay from './resources/ur/ebay.json';
 import urListings from './resources/ur/listings.json';
 import urListingSettingsGroup from './resources/ur/listingSettingsGroup.json';
+import urMessages from './resources/ur/messages.json';
 import urOrders from './resources/ur/orders.json';
 import urProfile from './resources/ur/profile.json';
 import urStoreSettings from './resources/ur/storeSettings.json';
@@ -193,6 +207,7 @@ import zhDashboard from './resources/zh/dashboard.json';
 import zhEbay from './resources/zh/ebay.json';
 import zhListings from './resources/zh/listings.json';
 import zhListingSettingsGroup from './resources/zh/listingSettingsGroup.json';
+import zhMessages from './resources/zh/messages.json';
 import zhOrders from './resources/zh/orders.json';
 import zhProfile from './resources/zh/profile.json';
 import zhStoreSettings from './resources/zh/storeSettings.json';
@@ -210,6 +225,7 @@ export {
   enLegal,
   enListings,
   enListingSettingsGroup,
+  enMessages,
   enOrders,
   enProfile,
   enStoreSettings,
@@ -225,6 +241,7 @@ export {
   trLegal,
   trListings,
   trListingSettingsGroup,
+  trMessages,
   trOrders,
   trProfile,
   trStoreSettings,
@@ -238,6 +255,7 @@ export {
   ruEbay,
   ruListings,
   ruListingSettingsGroup,
+  ruMessages,
   ruOrders,
   ruProfile,
   ruStoreSettings,
@@ -251,6 +269,7 @@ export {
   hiEbay,
   hiListings,
   hiListingSettingsGroup,
+  hiMessages,
   hiOrders,
   hiProfile,
   hiStoreSettings,
@@ -264,6 +283,7 @@ export {
   urEbay,
   urListings,
   urListingSettingsGroup,
+  urMessages,
   urOrders,
   urProfile,
   urStoreSettings,
@@ -277,6 +297,7 @@ export {
   arEbay,
   arListings,
   arListingSettingsGroup,
+  arMessages,
   arOrders,
   arProfile,
   arStoreSettings,
@@ -290,6 +311,7 @@ export {
   azEbay,
   azListings,
   azListingSettingsGroup,
+  azMessages,
   azOrders,
   azProfile,
   azStoreSettings,
@@ -303,6 +325,7 @@ export {
   deEbay,
   deListings,
   deListingSettingsGroup,
+  deMessages,
   deOrders,
   deProfile,
   deStoreSettings,
@@ -316,6 +339,7 @@ export {
   frEbay,
   frListings,
   frListingSettingsGroup,
+  frMessages,
   frOrders,
   frProfile,
   frStoreSettings,
@@ -329,6 +353,7 @@ export {
   esEbay,
   esListings,
   esListingSettingsGroup,
+  esMessages,
   esOrders,
   esProfile,
   esStoreSettings,
@@ -342,6 +367,7 @@ export {
   itEbay,
   itListings,
   itListingSettingsGroup,
+  itMessages,
   itOrders,
   itProfile,
   itStoreSettings,
@@ -355,6 +381,7 @@ export {
   roEbay,
   roListings,
   roListingSettingsGroup,
+  roMessages,
   roOrders,
   roProfile,
   roStoreSettings,
@@ -368,6 +395,7 @@ export {
   ukEbay,
   ukListings,
   ukListingSettingsGroup,
+  ukMessages,
   ukOrders,
   ukProfile,
   ukStoreSettings,
@@ -381,6 +409,7 @@ export {
   zhEbay,
   zhListings,
   zhListingSettingsGroup,
+  zhMessages,
   zhOrders,
   zhProfile,
   zhStoreSettings,
@@ -394,6 +423,7 @@ export {
   ptEbay,
   ptListings,
   ptListingSettingsGroup,
+  ptMessages,
   ptOrders,
   ptProfile,
   ptStoreSettings,
@@ -421,6 +451,7 @@ export const i18nResources = {
     legal: enLegal,
     storeSettings: enStoreSettings,
     listingSettingsGroup: enListingSettingsGroup,
+    messages: enMessages,
     listings: enListings,
     profile: enProfile,
     orders: enOrders,
@@ -438,6 +469,7 @@ export const i18nResources = {
     legal: trLegal,
     storeSettings: trStoreSettings,
     listingSettingsGroup: trListingSettingsGroup,
+    messages: trMessages,
     listings: trListings,
     profile: trProfile,
     orders: trOrders,
@@ -453,6 +485,7 @@ export const i18nResources = {
     ebay: ruEbay,
     storeSettings: ruStoreSettings,
     listingSettingsGroup: ruListingSettingsGroup,
+    messages: ruMessages,
     listings: ruListings,
     profile: ruProfile,
     orders: ruOrders,
@@ -468,6 +501,7 @@ export const i18nResources = {
     ebay: hiEbay,
     storeSettings: hiStoreSettings,
     listingSettingsGroup: hiListingSettingsGroup,
+    messages: hiMessages,
     listings: hiListings,
     profile: hiProfile,
     orders: hiOrders,
@@ -483,6 +517,7 @@ export const i18nResources = {
     ebay: urEbay,
     storeSettings: urStoreSettings,
     listingSettingsGroup: urListingSettingsGroup,
+    messages: urMessages,
     listings: urListings,
     profile: urProfile,
     orders: urOrders,
@@ -498,6 +533,7 @@ export const i18nResources = {
     ebay: arEbay,
     storeSettings: arStoreSettings,
     listingSettingsGroup: arListingSettingsGroup,
+    messages: arMessages,
     listings: arListings,
     profile: arProfile,
     orders: arOrders,
@@ -513,6 +549,7 @@ export const i18nResources = {
     ebay: azEbay,
     storeSettings: azStoreSettings,
     listingSettingsGroup: azListingSettingsGroup,
+    messages: azMessages,
     listings: azListings,
     profile: azProfile,
     orders: azOrders,
@@ -527,6 +564,7 @@ export const i18nResources = {
     ebay: deEbay,
     listings: deListings,
     listingSettingsGroup: deListingSettingsGroup,
+    messages: deMessages,
     orders: deOrders,
     profile: deProfile,
     storeSettings: deStoreSettings,
@@ -542,6 +580,7 @@ export const i18nResources = {
     ebay: frEbay,
     listings: frListings,
     listingSettingsGroup: frListingSettingsGroup,
+    messages: frMessages,
     orders: frOrders,
     profile: frProfile,
     storeSettings: frStoreSettings,
@@ -557,6 +596,7 @@ export const i18nResources = {
     ebay: esEbay,
     listings: esListings,
     listingSettingsGroup: esListingSettingsGroup,
+    messages: esMessages,
     orders: esOrders,
     profile: esProfile,
     storeSettings: esStoreSettings,
@@ -572,6 +612,7 @@ export const i18nResources = {
     ebay: itEbay,
     listings: itListings,
     listingSettingsGroup: itListingSettingsGroup,
+    messages: itMessages,
     orders: itOrders,
     profile: itProfile,
     storeSettings: itStoreSettings,
@@ -587,6 +628,7 @@ export const i18nResources = {
     ebay: roEbay,
     listings: roListings,
     listingSettingsGroup: roListingSettingsGroup,
+    messages: roMessages,
     orders: roOrders,
     profile: roProfile,
     storeSettings: roStoreSettings,
@@ -602,6 +644,7 @@ export const i18nResources = {
     ebay: ukEbay,
     listings: ukListings,
     listingSettingsGroup: ukListingSettingsGroup,
+    messages: ukMessages,
     orders: ukOrders,
     profile: ukProfile,
     storeSettings: ukStoreSettings,
@@ -617,6 +660,7 @@ export const i18nResources = {
     ebay: zhEbay,
     listings: zhListings,
     listingSettingsGroup: zhListingSettingsGroup,
+    messages: zhMessages,
     orders: zhOrders,
     profile: zhProfile,
     storeSettings: zhStoreSettings,
@@ -632,6 +676,7 @@ export const i18nResources = {
     ebay: ptEbay,
     listings: ptListings,
     listingSettingsGroup: ptListingSettingsGroup,
+    messages: ptMessages,
     orders: ptOrders,
     profile: ptProfile,
     storeSettings: ptStoreSettings,

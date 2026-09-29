@@ -182,6 +182,8 @@ export enum PlatformSettingKey {
   RETENTION_LISTING_REVISIONS_DAYS = 'retention.listingRevisionsDays',
   /** `best_sellers_views` — the per-day ledger the Best Sellers product allowance is counted from (migration 125). */
   RETENTION_BEST_SELLERS_VIEWS_DAYS = 'retention.bestSellersViewsDays',
+  RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS = 'retention.ebayNotificationEventsDays',
+  RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS = 'retention.ebayNotificationRawCapturesDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',

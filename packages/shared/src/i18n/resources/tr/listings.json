@@ -256,6 +256,12 @@
       "publish": "eBay'de Yayınla",
       "publishSelected": "Seçilenleri yayınla"
     },
+    "revisionHistory": {
+      "title": "Revizyon Geçmişi",
+      "subtitle": "Tüm ilanlarınızda eBay'e gönderilen her fiyat ve stok değişikliği.",
+      "empty": "Revizyon bulunamadı.",
+      "emptyTitle": "Henüz revizyon yok"
+    },
     "addSection": {
       "title": "Yeni Liste Ekle",
       "subtitle": "ASIN ile Amazon ürünlerini eBay mağazanıza aktarın.",
@@ -375,6 +381,7 @@
       "updatedAt": "Güncellenme",
       "revisions": {
         "action": "Revizyonlar",
+        "lastChecked": "Son kontrol {{date}} — değişiklik yok",
         "title": "Revizyonlar",
         "subtitle": "Bu listenin fiyat ve stok değişiklikleri",
         "previousPrice": "Önceki fiyat",

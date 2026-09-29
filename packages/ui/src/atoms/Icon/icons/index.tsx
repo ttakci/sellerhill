@@ -95,6 +95,7 @@ import {
   LockKeyhole,
   LogOut,
   Mail,
+  MailOpen,
   MapPin,
   Megaphone,
   Menu,
@@ -111,6 +112,7 @@ import {
   PanelLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  Paperclip,
   Pencil,
   Percent,
   Phone,
@@ -124,6 +126,7 @@ import {
   ReceiptText,
   RefreshCw,
   Repeat,
+  Reply,
   Rocket,
   RotateCcw,
   Save,
@@ -359,12 +362,18 @@ export const iconMap = {
 
   // ── Support & messaging ──────────────────────────────
   mail: lucide(Mail),
+  /** Read message / opened conversation — distinct from the unread `mail` glyph */
+  'mail-open': lucide(MailOpen),
   'message-circle': lucide(MessageCircle),
   /** Support agent */
   headset: lucide(Headset),
   'life-buoy': lucide(LifeBuoy),
   /** Buyer broadcast / announcements */
   megaphone: lucide(Megaphone),
+  /** Reply to a message thread */
+  reply: lucide(Reply),
+  /** Message attachment */
+  paperclip: lucide(Paperclip),
   phone: lucide(Phone),
   globe: lucide(Globe),
   'map-pin': lucide(MapPin),

@@ -64,7 +64,8 @@
       "scraper_proxy_invalid": "Hatalı biçimli scraper proxy girdileri atlanıyor (adet)",
       "scraper_transport_failure_high": "Scraper proxy'ler üzerinden Amazon'a ulaşamıyor (%) — proxy listesini ve şifreleri kontrol edin",
       "scraper_parse_failure_high": "Scraper ayrıştırma hataları yüksek (%) — Amazon sayfa düzenini değiştirmiş olabilir",
-      "scraper_direct_egress": "Scraper proxy'siz çekim yapabiliyor — bu sunucuda SCRAPER_ALLOW_DIRECT'i kapatın"
+      "scraper_direct_egress": "Scraper proxy'siz çekim yapabiliyor — bu sunucuda SCRAPER_ALLOW_DIRECT'i kapatın",
+      "ebay_notifications_disabled": "eBay bildirimleri yapılandırılmamış — mesaj rozeti 15 dakikalık yedek yenilemeye düşüyor"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -224,6 +225,8 @@
         "retention.auditLogsDays": "Denetim kaydı (gün)",
         "retention.listingRevisionsDays": "Liste revizyonları (gün)",
         "retention.bestSellersViewsDays": "Çok Satanlar görüntüleme defteri (gün)",
+        "retention.ebayNotificationEventsDays": "eBay bildirim gelen kutusu (gün)",
+        "retention.ebayNotificationRawCapturesDays": "eBay bildirim ham kayıtları (gün)",
         "ebay.aspects.llmEnabled": "Yapay zekâ destekli ürün özellikleri",
         "ebay.aspects.llmMaxPerListing": "Liste başına yapay zekâ ürün özelliği (maks)",
         "keepa.refresh.batchAuto": "Parti boyutunu Keepa planından belirle",
@@ -296,6 +299,8 @@
         "retention.auditLogsDays": "Denetim kaydı satırlarının (rol değişiklikleri, ayar değişiklikleri) kaç gün saklanacağı. Uyumluluk kanıtı için uzun tutulur.",
         "retention.listingRevisionsDays": "Liste detay sayfasındaki Revizyonlar çekmecesi için liste revizyon geçmişinin kaç gün saklanacağı.",
         "retention.bestSellersViewsDays": "Çok Satanlar görüntüleme defterinin kaç gün saklanacağı. Bu tablonun mevcut fatura dönemindeki toplamı satıcının kullanılmış ürün hakkının kendisidir; bu yüzden alt sınır bir fatura döneminin çok üzerinde kalır. Daha eski satırlar yalnızca gezinti geçmişidir.",
+        "retention.ebayNotificationEventsDays": "Alınan eBay NEW_MESSAGE bildirimlerinin kaç gün saklanacağı. Yalnızca eBay'in 3 denemeden sonra biten tekrar gönderimlerini ayıklamak için kullanılır.",
+        "retention.ebayNotificationRawCapturesDays": "İmza veya içerik sorunlarını teşhis etmek için eBay bildirim isteklerinin olduğu gibi kaç gün saklanacağı.",
         "ebay.aspects.llmEnabled": "Daha ucuz bir deterministik katman değer sağlayamadığında, yapay zekânın zorunlu bir eBay ürün özelliğini seçmesine izin ver. Varsayılan olarak kapalıdır.",
         "ebay.aspects.llmMaxPerListing": "Yapay zekâ özellik katmanı açıkken, yapay zekânın liste başına çözebileceği maksimum ürün özelliği sayısı.",
         "keepa.refresh.batchAuto": "Açıkken parti boyutu Keepa planının kendi yenilenme hızından hesaplanır; planı yükseltince yenileme hızı kendiliğinden artar. Kapatırsanız sabit parti boyutu değeri kullanılır.",

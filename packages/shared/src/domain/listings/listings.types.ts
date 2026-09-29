@@ -395,6 +395,54 @@ export interface PaginatedListingRevisionsDto {
   total: number;
   page: number;
   limit: number;
+  /**
+   * The product's own `last_successful_refresh_at`, regardless of whether it
+   * produced a revision. Lets the drawer say "checked, no change" instead of
+   * looking stale between real price/quantity moves.
+   */
+  lastCheckedAt?: string | null;
+  /**
+   * True when `lastCheckedAt` is newer than the most recent revision (or
+   * nothing has ever changed but a check has happened) — see
+   * `hasUncommittedRefreshCheck` in `apps/api`.
+   */
+  hasUncommittedCheck?: boolean;
+}
+
+/**
+ * One price/quantity change with the listing/product context a cross-listing
+ * view needs (the per-listing `ListingRevisionDto` above already has an
+ * implicit listing from the URL, so it carries none of this).
+ */
+export interface ListingRevisionWithListingDto extends ListingRevisionDto {
+  listingId: string;
+  asin: string;
+  title: string;
+  imageUrl?: string;
+  ebayAccountId?: string;
+  /** Store label, when the listing belongs to a connected eBay account. */
+  storeName?: string;
+  /** Resolved from the listing's eBay store marketplace, same as `ListingDto.currency`. */
+  currency: string;
+}
+
+/** Query for `GET /listings/revisions` (all listings, one seller). */
+export interface AllListingRevisionsQueryDto {
+  page?: number;
+  /** Page size (default 20, clamped to 100). */
+  limit?: number;
+  /** Case-insensitive substring match against the product's ASIN. */
+  search?: string;
+  /** Scope to one connected eBay store. */
+  ebayAccountId?: string;
+}
+
+/** Paginated response for `GET /listings/revisions`. */
+export interface PaginatedListingRevisionsWithListingDto {
+  items: ListingRevisionWithListingDto[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 /**

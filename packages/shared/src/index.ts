@@ -65,6 +65,9 @@ export * from './domain/auth/index';
 // Domain - eBay
 export * from './domain/ebay/index';
 
+// Domain - eBay Messages (seller inbox + NEW_MESSAGE webhook)
+export * from './domain/ebay-messages/index';
+
 // Domain - Store Settings
 export * from './domain/store-settings/index';
 
@@ -162,3 +165,6 @@ export * from './schemas/billing/index';
 
 // Buyer Messaging Schemas
 export * from './schemas/buyer-messaging/buyer-messaging.schema';
+
+// eBay Messages Schemas
+export * from './schemas/ebay-messages/index';
