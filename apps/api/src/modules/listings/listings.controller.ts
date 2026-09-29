@@ -26,6 +26,7 @@ import {
   type ListingsQueryDto,
   type PaginatedListingJobsDto,
   type PaginatedListingRevisionsDto,
+  type PaginatedListingRevisionsWithListingDto,
   type PaginatedListingsDto,
   type PaginatedProductsDto,
   ProductData,
@@ -410,6 +411,23 @@ export class ListingsController {
       throw new Error('Product not found');
     }
     return product.data;
+  }
+
+  @ApiOperation({ summary: 'Get price/quantity change history across every listing (paginated)' })
+  @Get('revisions')
+  async getAllListingRevisions(
+    @Request() req: { user: { sub: string } },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('ebayAccountId') ebayAccountId?: string
+  ): Promise<PaginatedListingRevisionsWithListingDto> {
+    return this.listingsService.getAllListingRevisions(req.user.sub, {
+      page: toPositiveInt(page),
+      limit: toPositiveInt(limit),
+      search,
+      ebayAccountId,
+    });
   }
 
   @ApiOperation({ summary: 'Get a single listing by ID' })

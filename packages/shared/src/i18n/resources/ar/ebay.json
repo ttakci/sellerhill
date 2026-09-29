@@ -42,7 +42,12 @@
       "noAuthorizationCode": "لم يتم استلام رمز التفويض من eBay",
       "storeOwnedByAnotherAccount": "متجر eBay هذا مرتبط بحساب SellerHill مختلف. تواصل مع الدعم لنقله.",
       "accountNotFound": "لم يتم العثور على متجر eBay هذا.",
-      "identityUnavailable": "تعذّر تأكيد حساب eBay الخاص بك لدى eBay. لم يتم ربط أي شيء، يرجى المحاولة مرة أخرى بعد قليل."
+      "identityUnavailable": "تعذّر تأكيد حساب eBay الخاص بك لدى eBay. لم يتم ربط أي شيء، يرجى المحاولة مرة أخرى بعد قليل.",
+      "messagingScopeMissing": "أعد ربط متجر eBay لتفعيل الرسائل، فالتفويض الحالي لا يشمل المراسلة.",
+      "messagingReplyNotAllowed": "لا يمكن الرد هنا على الرسائل الواردة من eBay.",
+      "messagingUnavailable": "خدمة رسائل eBay غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+      "messagingRejected": "لم يقبل eBay هذا الطلب. يرجى التحقق من الرسالة والمحاولة مرة أخرى.",
+      "messageTooLong": "يمكن أن تحتوي الرسالة على 2000 حرف كحد أقصى."
     },
     "onboarding": {
       "title": "اربط متجرك على eBay",

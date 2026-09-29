@@ -24,6 +24,7 @@ export interface TableComponentProps<T = unknown> {
   onSort: (columnKey: string) => void;
   onSelectAll: (checked: boolean) => void;
   onSelectRow: (row: T, checked: boolean) => void;
+  isRowSelectable?: (row: T) => boolean;
   onBulkChange: (value: string | number) => void;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -63,6 +64,13 @@ export interface TableProps<T = unknown> {
   selectable?: boolean;
   selectedRows?: T[];
   onSelectionChange?: (selectedRows: T[]) => void;
+  /**
+   * Rows for which this returns false render no checkbox and are skipped by
+   * "select all" — for placeholder rows (e.g. a locked product whose data the
+   * server withheld) that sit in `data` for layout but can never be acted on.
+   * Omit to keep every row selectable.
+   */
+  isRowSelectable?: (row: T) => boolean;
   bulkActions?: BulkAction<T>[];
   bulkActionsPlaceholder?: string;
   onFilter?: () => void;

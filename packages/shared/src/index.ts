@@ -65,6 +65,9 @@ export * from './domain/auth/index';
 // Domain - eBay
 export * from './domain/ebay/index';
 
+// Domain - eBay Messages (seller inbox + NEW_MESSAGE webhook)
+export * from './domain/ebay-messages/index';
+
 // Domain - Store Settings
 export * from './domain/store-settings/index';
 
@@ -92,6 +95,9 @@ export * from './domain/dashboard/index';
 
 // Domain - Action Center
 export * from './domain/action-center/index';
+
+// Domain - Best Sellers (Amazon ranking lists browsing)
+export * from './domain/best-sellers/index';
 
 // Domain - Amazon
 export * from './domain/amazon/index';
@@ -159,3 +165,6 @@ export * from './schemas/billing/index';
 
 // Buyer Messaging Schemas
 export * from './schemas/buyer-messaging/buyer-messaging.schema';
+
+// eBay Messages Schemas
+export * from './schemas/ebay-messages/index';

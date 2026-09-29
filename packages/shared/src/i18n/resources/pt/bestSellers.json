@@ -1,0 +1,85 @@
+{
+  "bestSellers": {
+    "menu": "Mais vendidos",
+    "title": "Mais vendidos na Amazon",
+    "subtitle": "Navegue pelas listas em destaque da Amazon, marque os produtos que quiser e envie-os para Adicionar anúncios em um só passo.",
+    "listTypes": {
+      "best_sellers": "Mais vendidos",
+      "new_releases": "Lançamentos",
+      "movers_and_shakers": "Em alta",
+      "most_wished_for": "Mais desejados",
+      "most_gifted": "Mais presenteados"
+    },
+    "listTypesAriaLabel": "Lista da Amazon",
+    "allCategories": "Todos os departamentos",
+    "categoryPlaceholder": "Escolha uma categoria",
+    "categorySearchPlaceholder": "Buscar categorias",
+    "categoryNoResults": "Nenhuma categoria correspondente",
+    "backToAllCategories": "Voltar para todas as categorias",
+    "selectAllOnPage": "Selecionar tudo nesta página",
+    "selected_one": "{{count}} produto selecionado",
+    "selected_many": "{{count}} produtos selecionados",
+    "selected_other": "{{count}} produtos selecionados",
+    "listSelected": "Anunciar selecionados ({{count}})",
+    "clearSelection": "Limpar",
+    "rank": "Nº {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Ainda sem avaliação",
+    "allowance": "Restam {{remaining}} de {{limit}} produtos neste período",
+    "allowanceUnlimited": "Visualizações de produtos ilimitadas",
+    "allowanceHint": "Cada produto que você vê conta uma vez por período; abrir a mesma lista de novo hoje não conta duas vezes.",
+    "locked": {
+      "title_one": "{{count}} produto a mais nesta página está fora da franquia mensal do seu plano",
+      "title_many": "{{count}} produtos a mais nesta página estão fora da franquia mensal do seu plano",
+      "title_other": "{{count}} produtos a mais nesta página estão fora da franquia mensal do seu plano",
+      "description": "Faça upgrade do plano ou compre um pacote adicional para vê-los. Sua franquia é renovada a cada período de cobrança.",
+      "cta": "Ver planos e pacotes",
+      "rowLabel": "Produto bloqueado"
+    },
+    "table": {
+      "rank": "Posição",
+      "product": "Produto",
+      "price": "Preço",
+      "rating": "Avaliação",
+      "reviews": "Avaliações"
+    },
+    "states": {
+      "loading": {
+        "title": "Carregando a lista",
+        "description": "Buscando o ranking mais recente na Amazon."
+      },
+      "empty": {
+        "title": "Nenhum produto nesta página",
+        "description": "Esta lista não tem nada para mostrar aqui. Tente outra categoria ou outra lista."
+      },
+      "notFound": {
+        "title": "Esta categoria não está disponível",
+        "description": "A Amazon não oferece esta lista para a categoria escolhida. Volte para todas as categorias ou escolha outra."
+      },
+      "blocked": {
+        "title": "A Amazon não respondeu desta vez",
+        "description": "Não foi possível ler a lista agora. Tente de novo em instantes."
+      },
+      "retry": "Tentar de novo",
+      "unavailable": {
+        "title": "Mais vendidos está temporariamente indisponível",
+        "description": "O serviço de listas não está acessível no momento. Seus anúncios e pedidos não são afetados."
+      },
+      "disabled": {
+        "title": "Mais vendidos não está habilitado nesta conta",
+        "description": "A navegação pelas listas da Amazon está desligada para a sua conta. Fale com o suporte se esperava vê-la."
+      },
+      "limitReached": {
+        "title": "Muitos carregamentos de lista ao vivo hoje",
+        "description": "As listas já carregadas hoje continuam disponíveis — mude para uma delas ou tente de novo amanhã."
+      }
+    },
+    "errors": {
+      "disabled": "Mais vendidos não está habilitado nesta conta.",
+      "dailyLimitReached": "Muitos carregamentos de lista ao vivo hoje. Tente de novo amanhã.",
+      "unavailable": "Mais vendidos está temporariamente indisponível.",
+      "unsupportedMarketplace": "Este marketplace não é compatível."
+    }
+  }
+}

@@ -1,6 +1,10 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import {
+  BEST_SELLERS_LIST_TYPE_ORDER,
+  BestSellersListType,
   DashboardChartGranularity,
+  EbayConversationDto,
+  EbayConversationStatus,
   ListingStatus,
   OrderFulfillmentState,
   type ListingDto,
@@ -9,18 +13,22 @@ import {
 
 import {
   buildDemoActionCenter,
+  buildDemoBestSellers,
   buildDemoBillingDetails,
   buildDemoBillingInvoices,
   buildDemoBillingSummary,
   buildDemoDashboard,
   buildDemoOrderStats,
+  buildDemoUnread,
   demoJobItems,
   demoListingRevisions,
   demoStoreSettingsFor,
+  demoThread,
   DEMO_AMAZON_ACCOUNTS,
   DEMO_BILLING_CATALOG,
   DEMO_BUSINESS_POLICIES,
   DEMO_BUYER_MESSAGE_TEMPLATES,
+  DEMO_CONVERSATIONS,
   DEMO_EBAY_ACCOUNTS,
   DEMO_LISTING_CATEGORIES,
   DEMO_LISTING_GROUPS,
@@ -119,11 +127,19 @@ function demoWrite(path: string, body: unknown): { data: unknown } {
     return ok('sku,title,price,quantity\n');
   }
 
+  // The bulk-status caller reads `failed.length` off every chunk's result —
+  // the generic echo below has no such field, so this one write is mapped
+  // explicitly rather than letting a demo click throw.
+  if (path === '/ebay/messages/conversations/bulk-status') {
+    const conversationIds = (body as { conversationIds?: string[] } | null)?.conversationIds ?? [];
+    return ok({ succeeded: conversationIds, failed: [] });
+  }
+
   // Echo the request body so a container reading the "updated entity" back
   // still has the shape it expects; the refetch that follows restores the
   // fixture values.
   const echoed = body && typeof body === 'object' && !Array.isArray(body) ? body : {};
-  return ok({ id: 'demo-generated', success: true, count: 0, ...echoed });
+  return ok({ id: 'demo-generated', messageId: 'demo-generated', success: true, count: 0, ...echoed });
 }
 
 function paginate<T>(rows: T[], params: Record<string, string>) {
@@ -248,6 +264,30 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   return rows;
 }
 
+/* ── eBay Messages ────────────────────────────────────────────────────── */
+
+/**
+ * Mirrors the real endpoint's own contract: `type` is required, and `status`
+ * carries the folder rail's meaning — `UNREAD` filters by unread count rather
+ * than eBay's own `UNREAD` status, `ARCHIVE` matches the archived status, and
+ * no `status` at all (the "All" folder) means the live `ACTIVE` set.
+ */
+function filterConversations(params: Record<string, string>): EbayConversationDto[] {
+  let rows = DEMO_CONVERSATIONS.filter((conversation) => String(conversation.type) === params.type);
+
+  if (params.status === String(EbayConversationStatus.UNREAD)) {
+    rows = rows.filter((conversation) => conversation.unreadCount > 0);
+  } else if (params.status === String(EbayConversationStatus.ARCHIVE)) {
+    rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ARCHIVE);
+  } else {
+    rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ACTIVE);
+  }
+
+  return rows.sort((a, b) =>
+    (b.latestMessage?.createdAt ?? b.createdAt).localeCompare(a.latestMessage?.createdAt ?? a.createdAt)
+  );
+}
+
 /* ── Template catalog ─────────────────────────────────────────────────── */
 
 /** The real catalog, written by `scripts/build-template-previews.mjs`. */
@@ -302,6 +342,20 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     return ok({ success: true });
   }
 
+  /*
+   * Bookkeeping writes the Messages page fires ON ITS OWN — the unread recount
+   * on page open and the mark-read when a thread is opened. The visitor did
+   * not ask to change anything, so they answer silently: routing them through
+   * `demoWrite` would raise the "this is a demo" notice the moment the page
+   * loads. They still persist nothing.
+   */
+  if (method !== 'GET' && path === '/ebay/messages/refresh-unread') {
+    return ok({ unread: buildDemoUnread().total });
+  }
+  if (method !== 'GET' && /^\/ebay\/messages\/conversations\/[^/]+\/read$/.test(path)) {
+    return ok({});
+  }
+
   if (method !== 'GET') {
     return demoWrite(path, body);
   }
@@ -318,6 +372,34 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/ebay/accounts') {
     return ok(DEMO_EBAY_ACCOUNTS);
+  }
+
+  /*
+   * Best Sellers is Amazon-side browsing; in the real app a miss costs the
+   * seller's daily allowance and a proxy fetch. The demo answers every list,
+   * category and page from the sample catalog so the page is always populated
+   * and nothing is ever fetched.
+   */
+  if (path.startsWith('/best-sellers')) {
+    const listType = BEST_SELLERS_LIST_TYPE_ORDER.includes(params.listType as BestSellersListType)
+      ? (params.listType as BestSellersListType)
+      : BestSellersListType.BEST_SELLERS;
+    const page = Math.max(1, Number(params.page) || 1);
+    return ok(buildDemoBestSellers(listType, params.category ?? '', page));
+  }
+
+  if (path === '/ebay/messages/unread-count') {
+    return ok(buildDemoUnread());
+  }
+
+  if (path === '/ebay/messages/conversations') {
+    return ok(paginate(filterConversations(params), params));
+  }
+
+  const conversationThread = /^\/ebay\/messages\/conversations\/([\w-]+)$/.exec(path);
+  if (conversationThread) {
+    const thread = demoThread(conversationThread[1]);
+    return thread ? ok(thread) : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
   if (path === '/listings') {

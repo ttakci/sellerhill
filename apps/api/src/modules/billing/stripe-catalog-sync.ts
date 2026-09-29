@@ -14,6 +14,7 @@
 // Price is immutable); it is VERIFIED instead, and any amount/currency that no
 // longer matches is reported rather than silently accepted.
 
+import { BillingLimitKey } from '@repo/shared';
 import type Stripe from 'stripe';
 
 /** Products are created with the SaaS tax code rather than Stripe's too-broad default. */
@@ -61,6 +62,53 @@ export interface CatalogSyncResult {
 /** amount_micros is 1/1,000,000 of the major unit; Stripe wants minor units. */
 function toUnitAmount(amountMicros: string): number {
   return Math.round(Number(amountMicros) / 10_000);
+}
+
+/**
+ * The Stripe Product copy for a top-up pack, by the meter it raises.
+ *
+ * This text is what the seller reads on the Stripe Checkout page and on the
+ * invoice, so it must name the thing they are buying. It used to be a literal
+ * "N extra tracking conversions" for every pack — correct while conversions
+ * were the only meter sold (087), and wrong the moment migration 125 added the
+ * Best Sellers packs: a seller would have paid for "2500 extra tracking
+ * conversions" and received Best Sellers products. Exhaustive over
+ * `BillingLimitKey` so a future sellable meter cannot fall through to a stale
+ * wording; the `default` covers only a key the enum does not know, which the
+ * catalog cannot produce.
+ */
+export function describeAddonProduct(
+  limitKey: string,
+  quantity: string | number,
+): { name: string; description: string } {
+  const qty = String(quantity);
+  switch (limitKey as BillingLimitKey) {
+    case BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH:
+      return {
+        name: `${qty} extra tracking conversions`,
+        description: `One-time top-up: ${qty} additional tracking conversions for the current billing period.`,
+      };
+    case BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH:
+      return {
+        name: `${qty} extra Best Sellers products`,
+        description: `One-time top-up: ${qty} additional Amazon Best Sellers products to browse in the current billing period.`,
+      };
+    case BillingLimitKey.LISTINGS_PER_MONTH:
+      return {
+        name: `${qty} extra listings`,
+        description: `One-time top-up: ${qty} additional active listings for the current billing period.`,
+      };
+    case BillingLimitKey.AMAZON_ORDERS_PER_MONTH:
+      return {
+        name: `${qty} extra automatic orders`,
+        description: `One-time top-up: ${qty} additional automatic orders for the current billing period.`,
+      };
+    default:
+      return {
+        name: `${qty} extra ${limitKey}`,
+        description: `One-time top-up: ${qty} additional ${limitKey} for the current billing period.`,
+      };
+  }
 }
 
 async function verifyPrice(
@@ -180,9 +228,10 @@ export async function syncStripeCatalog(
       }
       continue;
     }
+    const copy = describeAddonProduct(addon.limit_key, addon.quantity);
     const product = await stripe.products.create({
-      name: `${addon.quantity} extra tracking conversions`,
-      description: `One-time top-up: ${addon.quantity} additional tracking conversions for the current month.`,
+      name: copy.name,
+      description: copy.description,
       tax_code: SAAS_TAX_CODE,
       metadata: { addon_id: addon.id, addon_slug: addon.slug, limit_key: addon.limit_key },
     });

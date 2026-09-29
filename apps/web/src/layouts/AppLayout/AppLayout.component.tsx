@@ -44,13 +44,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onLocaleNavigate,
   pendingActionCount,
   hasCriticalActions,
+  unreadMessageCount,
   i18nLanguage,
   billingUsageRows,
   billingPlanName,
   isProfileUsageOpen,
   onToggleProfileUsage,
 }) => {
-  const { t } = useTranslation(['translation', 'actionCenter', 'listings', 'orders', 'billing']);
+  const { t } = useTranslation(['translation', 'actionCenter', 'bestSellers', 'listings', 'orders', 'billing']);
 
   return (
     <ErrorBoundary>
@@ -154,6 +155,33 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <NavTooltip
+              label={
+                unreadMessageCount > 0
+                  ? `${t('translation:menu.messages')} (${unreadMessageCount})`
+                  : t('translation:menu.messages')
+              }
+              collapsed={sidebarCollapsed}
+            >
+              <S.NavItem
+                $active={pathWithoutLocale === '/messages'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/messages')}
+                aria-label={t('translation:menu.messages')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="mail" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.messages')}</S.NavItemLabel>}
+                </S.NavItemContent>
+                {unreadMessageCount > 0 &&
+                  (sidebarCollapsed ? (
+                    <S.NavBadgeDot $urgent={false} />
+                  ) : (
+                    <S.NavBadge $urgent={false}>{unreadMessageCount}</S.NavBadge>
+                  ))}
+              </S.NavItem>
+            </NavTooltip>
+
             <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={
@@ -163,6 +191,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     (pathWithoutLocale.startsWith('/listings/') &&
                       !pathWithoutLocale.startsWith('/listings/jobs') &&
                       pathWithoutLocale !== '/listings/products' &&
+                      pathWithoutLocale !== '/listings/revisions' &&
                       pathWithoutLocale !== '/listings/add'))
                 }
                 $isCollapsed={sidebarCollapsed}
@@ -190,6 +219,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/listings/revisions'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/listings/revisions')}
+                aria-label={t('translation:menu.revisionHistory')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="history" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
             <NavTooltip label={t('translation:menu.drafts')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={isDraftsActive}
@@ -200,6 +243,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="file-text" size={20} />
                   {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.drafts')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            {/*
+              Best Sellers is Amazon-side browsing (the seller picks products to
+              list), so it lives in the Inventory group under the listing items.
+              Its own top-level path keeps it out of the eBay Listings
+              `startsWith('/listings/')` active rule.
+            */}
+            <NavTooltip label={t('bestSellers:bestSellers.menu')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/best-sellers'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/best-sellers')}
+                aria-label={t('bestSellers:bestSellers.menu')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="trending-up" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('bestSellers:bestSellers.menu')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>

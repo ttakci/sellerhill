@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   partitionProxyList,
   type ProxyVerifyResult,
+  type ScraperBestSellersRequest,
+  type ScraperBestSellersResponse,
   type ScraperProductResult,
   type ScraperProductsRequest,
   type ScraperStats,
@@ -24,6 +26,7 @@ export function parseProxyList(value: string | null): string[] {
 }
 
 const REQUEST_TIMEOUT_MS = 200_000; // service resolves each ASIN by its own 150 s deadline
+const BEST_SELLERS_TIMEOUT_MS = 180_000; // one list page, behind the service's own 150 s deadline
 
 @Injectable()
 export class ScraperClient {
@@ -53,6 +56,29 @@ export class ScraperClient {
       const status = axios.isAxiosError(error) ? error.response?.status : undefined;
       this.logger.error(`Scraper request failed (${req.asins.length} ASINs, status ${status ?? 'network'})`);
       throw new ScraperUnavailableError(`scraper request failed: ${status ?? 'network'}`);
+    }
+  }
+
+  /**
+   * One Amazon Best Sellers list page (`POST /v1/best-sellers`). The request
+   * carries the proxy list like `fetchProducts`, so the same discipline holds:
+   * the body is never logged, only the list coordinates and the status.
+   */
+  async fetchBestSellers(req: ScraperBestSellersRequest): Promise<ScraperBestSellersResponse> {
+    const { url, secret } = this.base();
+    try {
+      const res = await axios.post<ScraperBestSellersResponse>(`${url}/v1/best-sellers`, req, {
+        headers: { 'X-Scraper-Secret': secret },
+        timeout: BEST_SELLERS_TIMEOUT_MS,
+      });
+      return res.data;
+    } catch (error: unknown) {
+      // Never log the request body: it carries proxy credentials.
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      this.logger.error(
+        `Scraper best-sellers request failed (${req.listType} ${req.category || 'root'} p${req.page}, status ${status ?? 'network'})`,
+      );
+      throw new ScraperUnavailableError(`scraper best-sellers request failed: ${status ?? 'network'}`);
     }
   }
 

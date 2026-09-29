@@ -32,6 +32,7 @@ export const TableComponent = <T,>({
   onSort,
   onSelectAll,
   onSelectRow,
+  isRowSelectable,
   onBulkChange,
   onMouseDown,
   onMouseMove,
@@ -124,6 +125,7 @@ export const TableComponent = <T,>({
             <S.Tbody>
               {data.map((row, rowIndex) => {
                 const isSelected = selectedRows.includes(row);
+                const canSelect = isRowSelectable ? isRowSelectable(row) : true;
                 return (
                   <S.Tr
                     key={rowIndex}
@@ -141,7 +143,9 @@ export const TableComponent = <T,>({
                         $left={0}
                       >
                         <S.CheckboxCell>
-                          <Checkbox checked={isSelected} onChange={(checked) => onSelectRow(row, checked)} />
+                          {canSelect ? (
+                            <Checkbox checked={isSelected} onChange={(checked) => onSelectRow(row, checked)} />
+                          ) : null}
                         </S.CheckboxCell>
                       </S.Td>
                     )}

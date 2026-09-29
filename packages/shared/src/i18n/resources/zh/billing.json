@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "自动订单",
         "unit": "笔订单",
-        "description": "每月为您下达（自动或手动关联）的 Amazon 订单数量上限。"
+        "description": "为您下达（自动或手动关联）的 Amazon 订单。所有套餐均不限数量。"
       },
       "unlimited": "不限",
       "disabled": "不包含",
       "of": "已用 {{used}} / {{limit}}",
       "used": "已用 {{used}}",
+      "usedUnlimited": "已用 {{used}} · 不限",
       "remaining": "剩余 {{remaining}}",
       "exceeded": "已超出上限",
       "tracking_conversions_per_month": {
         "label": "物流单号转换",
         "unit": "次转换",
         "description": "每月有多少票货件会获得转换后的物流单号，让买家永远看不到您的供应商。"
+      },
+      "best_sellers_products_per_month": {
+        "label": "热销榜商品",
+        "unit": "件商品",
+        "description": "每个计费周期内您可在热销榜页面查看的商品数量，缓存榜单与实时榜单同样计入。"
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "本月还需要更多额度？",
-      "subtitle": "您已用完本月的物流单号转换次数。加购后，在本月重置之前可继续隐藏您的供应商。",
+      "subtitle": "您已达到某项月度额度。加购后可在计费周期重置前继续使用。",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "您已用完本月的物流单号转换次数。加购后，在周期重置之前可继续隐藏您的供应商。",
+        "best_sellers_products_per_month": "您已用完本月的热销榜额度。加购后，在周期重置之前可继续浏览 Amazon 榜单。"
+      },
       "buy": "购买",
       "note": "加购仅适用于当前自然月，因此会在您达到上限时提供，而不是提前提供。您的套餐额度会在每月 1 日重置。"
     }

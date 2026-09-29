@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Commandes automatiques",
         "unit": "commandes",
-        "description": "Nombre maximal de commandes Amazon passées pour vous (automatiquement ou liées à la main) par mois."
+        "description": "Commandes Amazon passées pour vous (automatiquement ou liées à la main). Illimitées dans tous les forfaits."
       },
       "unlimited": "Illimité",
       "disabled": "Non inclus",
       "of": "{{used}} sur {{limit}}",
       "used": "{{used}} utilisé(s)",
+      "usedUnlimited": "{{used}} utilisé(s) · Illimité",
       "remaining": "{{remaining}} restant(s)",
       "exceeded": "Limite dépassée",
       "tracking_conversions_per_month": {
         "label": "Conversions de suivi",
         "unit": "conversions",
         "description": "Nombre d'expéditions par mois qui reçoivent un numéro de suivi converti, afin que l'acheteur ne voie jamais votre fournisseur."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Produits Meilleures ventes",
+        "unit": "produits",
+        "description": "Nombre de produits que vous pouvez consulter sur la page Meilleures ventes par période de facturation, listes en cache et listes en direct comprises."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Besoin de plus ce mois-ci ?",
-      "subtitle": "Vous avez utilisé vos conversions de suivi mensuelles. Rechargez pour continuer à masquer votre fournisseur jusqu'à la réinitialisation du mois.",
+      "subtitle": "Vous avez atteint un quota mensuel. Rechargez pour continuer jusqu’au renouvellement de votre période de facturation.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Vous avez utilisé vos conversions de suivi mensuelles. Rechargez pour continuer à masquer votre fournisseur jusqu’au renouvellement de la période.",
+        "best_sellers_products_per_month": "Vous avez utilisé votre quota mensuel Meilleures ventes. Rechargez pour continuer à parcourir les listes Amazon jusqu’au renouvellement de la période."
+      },
       "buy": "Acheter",
       "note": "Une recharge ne s'applique qu'au mois civil en cours, c'est pourquoi elle est proposée lorsque vous atteignez la limite plutôt qu'à l'avance. L'allocation de votre forfait est réinitialisée le 1er."
     }

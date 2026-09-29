@@ -1,0 +1,367 @@
+/**
+ * MessagesPage Container
+ *
+ * URL state (`?store=&type=&folder=&c=&page=`) → data (useMessagesInbox) →
+ * writes (useMessagesActions) → view models for the presentational panes.
+ * A store connected before the messaging scopes existed gets the reconnect
+ * prompt and costs no Message API call at all (every query is skipped).
+ */
+
+import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder, type EbayAccountPublicDto } from '@repo/shared';
+import { formatDate, getLocaleConfig, useIsMobile, useLoading, type DropdownItem, type IconName } from '@repo/ui';
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import type { ConversationBulkActionView, ConversationRowView } from '../components/ConversationList';
+import type { ThreadActionView, ThreadMessageView } from '../components/ConversationThread';
+import { useMessagesActions } from '../hooks/useMessagesActions';
+import { useMessagesInbox } from '../hooks/useMessagesInbox';
+import { MESSAGES_PAGE_SIZE, useMessagesUrlState } from '../hooks/useMessagesUrlState';
+
+import { MessagesPageComponent } from './MessagesPage.component';
+import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPagination, MessagesStoreSelector } from './MessagesPage.types';
+
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+
+const FOLDERS: MessagesFolder[] = [MessagesFolder.ALL, MessagesFolder.UNREAD, MessagesFolder.ARCHIVE];
+const TYPES: EbayConversationType[] = [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY];
+
+const FOLDER_ICON: Record<MessagesFolder, IconName> = {
+  [MessagesFolder.ALL]: 'inbox',
+  [MessagesFolder.UNREAD]: 'mail',
+  [MessagesFolder.ARCHIVE]: 'archive',
+};
+
+const TYPE_ICON: Record<EbayConversationType, IconName> = {
+  [EbayConversationType.FROM_MEMBERS]: 'users',
+  [EbayConversationType.FROM_EBAY]: 'bell',
+};
+
+const TYPE_LABEL_KEY: Record<EbayConversationType, string> = {
+  [EbayConversationType.FROM_MEMBERS]: 'messages.folders.members',
+  [EbayConversationType.FROM_EBAY]: 'messages.folders.ebay',
+};
+
+const FOLDER_LABEL_KEY: Record<MessagesFolder, string> = {
+  [MessagesFolder.ALL]: 'messages.folders.all',
+  [MessagesFolder.UNREAD]: 'messages.folders.unread',
+  [MessagesFolder.ARCHIVE]: 'messages.folders.archive',
+};
+
+const EMPTY_KEY: Record<MessagesFolder, string> = {
+  [MessagesFolder.ALL]: 'messages.list.empty',
+  [MessagesFolder.UNREAD]: 'messages.list.emptyUnread',
+  [MessagesFolder.ARCHIVE]: 'messages.list.emptyArchive',
+};
+
+/** Attachments render only over https. */
+const isSafeMediaUrl = (url: string | null | undefined): boolean =>
+  typeof url === 'string' && url.startsWith('https://');
+
+/** List snippets are one line: collapse the message's own line breaks. */
+const toSnippet = (body: string | undefined): string => (body ?? '').replace(/\s+/g, ' ').trim();
+
+/** Same store label the dashboard filter shows. */
+const storeLabel = (account: EbayAccountPublicDto): string =>
+  account.storeName || account.ebayUsername || account.sellerId;
+
+export const MessagesPageContainer = (): React.ReactElement => {
+  const { t, i18n } = useTranslation(['messages', 'translation']);
+  const isMobile = useIsMobile();
+
+  const { state, setStore, setType, setFolder, setTypeAndFolder, openConversation, setPage } =
+    useMessagesUrlState();
+  const { type, folder, conversationId, page } = state;
+
+  const inbox = useMessagesInbox(state);
+  const { accounts, conversations, activeAccount, activeConversation, threadMessages, isMine } = inbox;
+
+  const pageIds = useMemo(
+    () => conversations.map((conversation) => conversation.conversationId),
+    [conversations],
+  );
+
+  const actions = useMessagesActions({
+    ebayAccountId: inbox.ebayAccountId,
+    marketplaceId: activeAccount?.marketplaceId,
+    type,
+    conversationId,
+    pageIds,
+    scopeKey: `${inbox.ebayAccountId}|${type}|${folder}|${page}`,
+    openConversation,
+    onMarkedUnread: inbox.forgetMarkedRead,
+  });
+  const { selectedIds, applyRead, applyStatus, confirmDelete } = actions;
+
+  /* Blocking mutations only — the initial list/thread fetch shows its own state. */
+  useLoading(actions.isReplying || actions.isBulkUpdating);
+
+  /* ─── formatting ─── */
+
+  const languageCode = (i18n.language || 'en').split('-')[0];
+  const { locale } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
+
+  const formatListDate = useCallback(
+    (iso: string): string => {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) {
+        return '';
+      }
+      const isToday = date.toDateString() === new Date().toDateString();
+      return isToday
+        ? formatDate(iso, locale, { day: undefined, month: undefined, hour: '2-digit', minute: '2-digit' })
+        : formatDate(iso, locale);
+    },
+    [locale],
+  );
+
+  const formatMessageDate = useCallback(
+    (iso: string): string =>
+      Number.isNaN(Date.parse(iso)) ? '' : formatDate(iso, locale, { hour: '2-digit', minute: '2-digit' }),
+    [locale],
+  );
+
+  /* ─── list ─── */
+
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  const rows = useMemo<ConversationRowView[]>(
+    () =>
+      conversations.map((conversation) => ({
+        id: conversation.conversationId,
+        otherParty: conversation.otherPartyUsername ?? conversation.latestMessage?.senderUsername ?? '—',
+        title: conversation.title,
+        snippet: toSnippet(conversation.latestMessage?.body),
+        date: formatListDate(conversation.latestMessage?.createdAt ?? conversation.createdAt),
+        unreadCount: conversation.unreadCount,
+        referenceId: conversation.referenceId,
+        isSelected: selectedSet.has(conversation.conversationId),
+        isActive: conversation.conversationId === conversationId,
+      })),
+    [conversations, conversationId, selectedSet, formatListDate],
+  );
+
+  /* In the archive folder the counterpart of "archive" is "move back to the inbox". */
+  const inArchive = folder === MessagesFolder.ARCHIVE;
+  const archiveTarget = inArchive ? EbayConversationStatus.ACTIVE : EbayConversationStatus.ARCHIVE;
+  const archiveLabel = inArchive ? t('messages.actions.unarchive') : t('messages.actions.archive');
+  const archiveIcon: IconName = inArchive ? 'inbox' : 'archive';
+
+  const bulkActions = useMemo<ConversationBulkActionView[]>(
+    () => [
+      {
+        id: 'read',
+        label: t('messages.actions.markRead'),
+        icon: 'mail-open',
+        onClick: () => void applyRead(selectedIds, true),
+      },
+      {
+        id: 'archive',
+        label: archiveLabel,
+        icon: archiveIcon,
+        onClick: () => void applyStatus(selectedIds, archiveTarget),
+      },
+      {
+        id: 'delete',
+        label: t('messages.actions.delete'),
+        icon: 'trash',
+        onClick: () => confirmDelete(selectedIds),
+      },
+    ],
+    [t, selectedIds, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget],
+  );
+
+  const pagination = useMemo<MessagesPagination | null>(
+    () =>
+      inbox.conversationsTotal > 0
+        ? {
+            count: inbox.conversationsTotal,
+            page,
+            rowsPerPage: MESSAGES_PAGE_SIZE,
+            rowsPerPageOptions: [MESSAGES_PAGE_SIZE],
+            onPageChange: setPage,
+            onRowsPerPageChange: () => setPage(1),
+            labelRowsPerPage: t('translation:common.rowsPerPage'),
+            labelInfo: t('translation:common.showing_info'),
+          }
+        : null,
+    [inbox.conversationsTotal, page, setPage, t],
+  );
+
+  /* ─── thread ─── */
+
+  const messages = useMemo<ThreadMessageView[]>(
+    () =>
+      threadMessages.map((message) => {
+        const mine = isMine(message.senderUsername);
+        return {
+          id: message.messageId,
+          body: message.body,
+          senderLabel: mine ? t('messages.thread.you') : message.senderUsername,
+          isMine: mine,
+          date: formatMessageDate(message.createdAt),
+          // Only https links become an <a href>/<img src>: a media URL is
+          // eBay-supplied text, and anything else (javascript:, data:, http:)
+          // is dropped rather than rendered.
+          media: message.media
+            .filter((media) => isSafeMediaUrl(media.mediaUrl))
+            .map((media, index) => ({
+              key: `${message.messageId}-${index}`,
+              name: media.mediaName,
+              url: media.mediaUrl,
+              isImage: String(media.mediaType) === String(EbayMessageMediaType.IMAGE),
+            })),
+        };
+      }),
+    [threadMessages, isMine, t, formatMessageDate],
+  );
+
+  const otherParty =
+    activeConversation?.otherPartyUsername ??
+    threadMessages.find((message) => !isMine(message.senderUsername))?.senderUsername ??
+    null;
+  const threadTitle =
+    inbox.thread?.title ?? activeConversation?.title ?? otherParty ?? t('messages.page.title');
+
+  const threadActions = useMemo<ThreadActionView[]>(() => {
+    if (!conversationId) {
+      return [];
+    }
+    const ids = [conversationId];
+    return [
+      {
+        id: 'unread',
+        label: t('messages.actions.markUnread'),
+        icon: 'mail',
+        onClick: () => void applyRead(ids, false),
+      },
+      {
+        id: 'archive',
+        label: archiveLabel,
+        icon: archiveIcon,
+        onClick: () => void applyStatus(ids, archiveTarget),
+      },
+      {
+        id: 'delete',
+        label: t('messages.actions.delete'),
+        icon: 'trash',
+        onClick: () => confirmDelete(ids),
+      },
+    ];
+  }, [conversationId, t, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]);
+
+  /* ─── folders: the rail (≥ lg) and its compact stand-in (< lg) ─── */
+
+  const folderGroups = useMemo<MessagesFolderGroupView[]>(
+    () =>
+      TYPES.map((groupType) => ({
+        key: groupType,
+        label: t(TYPE_LABEL_KEY[groupType]),
+        items: FOLDERS.map((groupFolder) => ({
+          key: `${groupType}-${groupFolder}`,
+          label: t(FOLDER_LABEL_KEY[groupFolder]),
+          icon: FOLDER_ICON[groupFolder],
+          isActive: type === groupType && folder === groupFolder,
+          onSelect: () => setTypeAndFolder(groupType, groupFolder),
+        })),
+      })),
+    [t, type, folder, setTypeAndFolder],
+  );
+
+  const compactFilters = useMemo<MessagesCompactFilters>(
+    () => ({
+      typeItems: TYPES.map((entry) => ({
+        id: entry,
+        label: t(TYPE_LABEL_KEY[entry]),
+        icon: TYPE_ICON[entry],
+      })),
+      typeValue: type,
+      onTypeChange: (value: string) => {
+        const next = TYPES.find((entry) => String(entry) === value);
+        if (next) {
+          setType(next);
+        }
+      },
+      folderOptions: FOLDERS.map((entry) => ({ value: entry, label: t(FOLDER_LABEL_KEY[entry]) })),
+      folderValue: folder,
+      onFolderChange: (value: string) => {
+        const next = FOLDERS.find((entry) => String(entry) === value);
+        if (next) {
+          setFolder(next);
+        }
+      },
+    }),
+    [t, type, folder, setType, setFolder],
+  );
+
+  /* ─── store filter — only worth showing with more than one store ─── */
+
+  const storeSelector = useMemo<MessagesStoreSelector | null>(() => {
+    if (accounts.length < 2 || !activeAccount) {
+      return null;
+    }
+    const items: DropdownItem[] = accounts.map((account) => ({
+      label: storeLabel(account),
+      icon: account.id === activeAccount.id ? ('check' as const) : undefined,
+      onClick: () => setStore(account.id),
+    }));
+    return { label: storeLabel(activeAccount), items };
+  }, [accounts, activeAccount, setStore]);
+
+  /* ─── mobile: list OR thread; the header's back arrow clears `?c=` ─── */
+
+  const threadOpenOnPhone = isMobile && !!conversationId;
+  const handleBack = useCallback(() => openConversation(null), [openConversation]);
+
+  return (
+    <EbayAccountGuard>
+      <MessagesPageComponent
+        title={t('messages.page.title')}
+        subtitle={threadOpenOnPhone ? '' : t('messages.page.subtitle')}
+        onBack={threadOpenOnPhone ? handleBack : undefined}
+        backLabel={t('messages.thread.backToList')}
+        showToolbar={!threadOpenOnPhone}
+        storeSelector={storeSelector}
+        messagingEnabled={inbox.messagingEnabled}
+        onReconnect={actions.handleReconnect}
+        isReconnecting={actions.isReconnecting}
+        reconnectTitle={t('messages.reconnect.title')}
+        reconnectDescription={t('messages.reconnect.description')}
+        reconnectAction={t('messages.reconnect.action')}
+        folderGroups={folderGroups}
+        compactFilters={compactFilters}
+        threadOpen={!!conversationId}
+        listProps={{
+          rows,
+          isLoading: inbox.isListLoading,
+          emptyTitle: t(EMPTY_KEY[folder]),
+          onOpen: openConversation,
+          onToggle: actions.toggleOne,
+          allSelected: actions.allSelected,
+          onToggleAll: actions.toggleAll,
+          selectedCount: selectedIds.length,
+          bulkActions,
+        }}
+        pagination={pagination}
+        threadProps={{
+          hasConversation: !!conversationId,
+          isLoading: inbox.isThreadLoading,
+          title: threadTitle,
+          otherParty,
+          referenceId: activeConversation?.referenceId ?? null,
+          messages,
+          actions: threadActions,
+          canReply: type !== EbayConversationType.FROM_EBAY,
+          draft: actions.draft,
+          onDraftChange: actions.setDraft,
+          onSend: actions.handleSend,
+          isSending: actions.isReplying,
+          maxLength: EBAY_MESSAGE_MAX_LENGTH,
+          scrollRef: inbox.scrollRef,
+        }}
+      />
+    </EbayAccountGuard>
+  );
+};
+
+export default MessagesPageContainer;

@@ -113,10 +113,12 @@
     "listings": "Elanlar",
     "ebayListings": "eBay elanları",
     "listingJobs": "Elan işləri",
+    "revisionHistory": "Dəyişiklik tarixçəsi",
     "drafts": "Qaralamalar",
     "products": "Məhsullar",
     "inventory": "Anbar",
     "orders": "Sifarişlər",
+    "messages": "Mesajlar",
     "stores": "Mağazalar",
     "billing": "Ödənişlər",
     "settings": "Parametrlər",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Əlverişli avtomatlaşdırma",
-        "description": "Tam peşəkar avtomatlaşdırma dəsti xeyli aşağı aylıq haqla. Hər funksiya hər planda var; planlar yalnız elan və sifariş həcminə görə fərqlənir.",
+        "description": "Tam peşəkar avtomatlaşdırma dəsti xeyli aşağı aylıq haqla. Hər funksiya hər planda var, avtomatik sifarişlər limitsizdir; planlar yalnız elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxışına görə fərqlənir.",
         "cta": "Planlara bax"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Qiymətlər",
       "sectionTitle": "Əlverişli avtomatlaşdırma.",
-      "sectionSubtitle": "Hər plan bütün funksiyaları əhatə edir. Planlar yalnız aktiv elanlara və aylıq sifariş həcminə görə fərqlənir, beləliklə digər alətlərin yalnız yüksək səviyyələr üçün saxladığı funksiyalar ən kiçik planda da sizindir.",
+      "sectionSubtitle": "Hər plan bütün funksiyaları əhatə edir. Planlar aktiv elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxış limitinə görə fərqlənir; avtomatik sifarişlər hər planda limitsizdir, beləliklə digər alətlərin yalnız yüksək səviyyələr üçün saxladığı funksiyalar ən kiçik planda da sizindir.",
       "billingNote": "İstənilən vaxt ləğv edin. Qiymətlərə tətbiq olunan yerlərdə yerli vergilər daxil deyil.",
       "perMonth": "/ay",
       "mostPopular": "Ən populyar",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Limitsiz avtomatik sifariş",
       "upToConversions": "Ayda {{limit}} izləmə çevirməsi",
       "unlimitedConversions": "Limitsiz izləmə çevirməsi",
+      "upToBestSellers": "Ayda {{limit}} Ən Çox Satılanlar məhsulu",
+      "unlimitedBestSellers": "Limitsiz Ən Çox Satılanlar baxışı",
       "catalogError": "Canlı qiymətlər hazırda yüklənə bilmədi. Aşağıda plan icmalı göstərilir.",
       "included": {
         "groups": "Parametr qrupları və 12 elan şablonu",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "500 aktiv elana qədər",
-          "orders": "Ayda 100 avtomatik sifarişə qədər",
-          "conversions": "Ayda 50 izləmə çevirməsi"
+          "orders": "Limitsiz avtomatik sifariş",
+          "conversions": "Ayda 50 izləmə çevirməsi",
+          "bestSellers": "Ayda 2,500 Ən Çox Satılanlar məhsulu"
         },
         "starter": {
           "price": "$44.99",
           "listings": "2,000 aktiv elana qədər",
-          "orders": "Ayda 300 avtomatik sifarişə qədər",
-          "conversions": "Ayda 150 izləmə çevirməsi"
+          "orders": "Limitsiz avtomatik sifariş",
+          "conversions": "Ayda 150 izləmə çevirməsi",
+          "bestSellers": "Ayda 7,500 Ən Çox Satılanlar məhsulu"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "5,000 aktiv elana qədər",
-          "orders": "Ayda 600 avtomatik sifarişə qədər",
-          "conversions": "Ayda 300 izləmə çevirməsi"
+          "orders": "Limitsiz avtomatik sifariş",
+          "conversions": "Ayda 300 izləmə çevirməsi",
+          "bestSellers": "Ayda 15,000 Ən Çox Satılanlar məhsulu"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "10,000 aktiv elana qədər",
-          "orders": "Ayda 1,000 avtomatik sifarişə qədər",
-          "conversions": "Ayda 500 izləmə çevirməsi"
+          "orders": "Limitsiz avtomatik sifariş",
+          "conversions": "Ayda 500 izləmə çevirməsi",
+          "bestSellers": "Ayda 25,000 Ən Çox Satılanlar məhsulu"
         }
       }
     },

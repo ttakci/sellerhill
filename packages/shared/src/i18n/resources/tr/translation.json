@@ -113,10 +113,12 @@
     "listings": "Listeler",
     "ebayListings": "eBay Listeleri",
     "listingJobs": "Liste İşleri",
+    "revisionHistory": "Revizyon Geçmişi",
     "drafts": "Taslaklar",
     "products": "Ürünler",
     "inventory": "Envanter",
     "orders": "Siparişler",
+    "messages": "Mesajlar",
     "stores": "Mağazalar",
     "billing": "Faturalandırma",
     "settings": "Ayarlar",
@@ -557,7 +559,7 @@
       },
       "price": {
         "title": "Uygun fiyatlı otomasyon",
-        "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette; paketler yalnızca ilan ve sipariş hacmine göre ayrılır.",
+        "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette, otomatik sipariş sınırsız; paketler yalnızca ilan, takip numarası dönüştürme ve Çok Satanlar gezinti hakkına göre ayrılır.",
         "cta": "Paketleri gör"
       }
     },
@@ -812,7 +814,7 @@
     "pricing": {
       "eyebrow": "Fiyatlandırma",
       "sectionTitle": "Uygun fiyatlı otomasyon.",
-      "sectionSubtitle": "Her pakette bütün özellikler var. Paketler yalnızca aktif ilan sayınıza ve aylık sipariş hacminize göre ayrılır; başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
+      "sectionSubtitle": "Her pakette bütün özellikler var. Paketler aktif ilan sayısına, takip numarası dönüştürme hakkına ve Çok Satanlar gezinti hakkına göre ayrılır; otomatik sipariş her pakette sınırsızdır. Başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
@@ -826,6 +828,8 @@
       "unlimitedOrders": "Sınırsız otomatik sipariş",
       "upToConversions": "Ayda {{limit}} takip numarası dönüştürme",
       "unlimitedConversions": "Sınırsız takip numarası dönüştürme",
+      "upToBestSellers": "Ayda {{limit}} Çok Satanlar ürünü",
+      "unlimitedBestSellers": "Sınırsız Çok Satanlar gezintisi",
       "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
       "included": {
         "groups": "Ayar Grupları ve 12 ilan şablonu",
@@ -839,28 +843,32 @@
       },
       "catalogFallback": {
         "nano": {
-          "price": "$24.99",
+          "price": "$29.99",
           "listings": "500 aktif ilana kadar",
-          "orders": "Ayda 100 otomatik siparişe kadar",
-          "conversions": "Ayda 50 takip numarası dönüştürme"
+          "orders": "Sınırsız otomatik sipariş",
+          "conversions": "Ayda 50 takip numarası dönüştürme",
+          "bestSellers": "Ayda 2,500 Çok Satanlar ürünü"
         },
         "starter": {
           "price": "$44.99",
           "listings": "2,000 aktif ilana kadar",
-          "orders": "Ayda 300 otomatik siparişe kadar",
-          "conversions": "Ayda 150 takip numarası dönüştürme"
+          "orders": "Sınırsız otomatik sipariş",
+          "conversions": "Ayda 150 takip numarası dönüştürme",
+          "bestSellers": "Ayda 7,500 Çok Satanlar ürünü"
         },
         "growth": {
-          "price": "$104.99",
+          "price": "$89.99",
           "listings": "5,000 aktif ilana kadar",
-          "orders": "Ayda 600 otomatik siparişe kadar",
-          "conversions": "Ayda 300 takip numarası dönüştürme"
+          "orders": "Sınırsız otomatik sipariş",
+          "conversions": "Ayda 300 takip numarası dönüştürme",
+          "bestSellers": "Ayda 15,000 Çok Satanlar ürünü"
         },
         "pro": {
-          "price": "$179.99",
+          "price": "$164.99",
           "listings": "10,000 aktif ilana kadar",
-          "orders": "Ayda 1,000 otomatik siparişe kadar",
-          "conversions": "Ayda 500 takip numarası dönüştürme"
+          "orders": "Sınırsız otomatik sipariş",
+          "conversions": "Ayda 500 takip numarası dönüştürme",
+          "bestSellers": "Ayda 25,000 Çok Satanlar ürünü"
         }
       }
     },

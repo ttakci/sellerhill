@@ -68,6 +68,27 @@ const writePreferences = (preferences: AddListingsDrawerPreferences) => {
 };
 
 /**
+ * The schema refuses a batch above 1000 ASINs (`createListingsSchema`), so a
+ * pre-filled list is trimmed to what can actually be submitted rather than
+ * arriving already invalid. Same cap as the schema — keep the two in step.
+ */
+const MAX_PREFILLED_ASINS = 1000;
+
+const normalizePrefilledAsins = (raw: string | undefined): string =>
+  raw ? parseAsins(raw).slice(0, MAX_PREFILLED_ASINS).join('\n') : '';
+
+/**
+ * Fresh form values for an open: the stored store/group/policy preferences plus
+ * whatever ASINs were handed in. Used both for `defaultValues` (a drawer that
+ * MOUNTS open, e.g. `/listings?drawer=add`) and for the reset on a later open
+ * — the two used to differ, see the note at the open transition below.
+ */
+const buildOpenValues = (initialAsins: string | undefined): CreateListingsFormData => ({
+  asins: normalizePrefilledAsins(initialAsins),
+  ...readPreferences(),
+});
+
+/**
  * i18n key for the post-submit success toast. The draft/live split only
  * matters when something was actually queued — an all-duplicates submission
  * reads the same either way, since nothing happened.
@@ -86,7 +107,7 @@ const resolveQueuedMessageKey = (summary: ListingJobQueuedSummary, asDraft: bool
   }
 };
 
-export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess }) => {
+export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess, initialAsins }) => {
   const { t } = useTranslation(['listings', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
@@ -120,32 +141,36 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     resolver: zodResolver(createListingsSchema(t)) as never,
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
-    defaultValues: {
-      asins: '',
-      ebayAccountId: '',
-      listingSettingsGroupId: '',
-      paymentPolicyId: '',
-      shippingPolicyId: '',
-      returnPolicyId: '',
-      asDraft: false,
-    },
+    /*
+     * A drawer that mounts already open (deep link) never goes through the
+     * open transition below, so its defaults have to be the real opening
+     * values. They used to be blanks: the stored preferences were never
+     * loaded, and the preferences effect then wrote those blanks BACK over
+     * the saved selections — a seller who followed `/listings?drawer=add`
+     * lost their remembered store/group/policies.
+     */
+    defaultValues: isOpen ? buildOpenValues(initialAsins) : { ...EMPTY_PREFERENCES, asins: '' },
   });
 
   const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
 
-  // Reset step + form when drawer opens
+  // Reset step + form when the drawer opens (the initial mount is covered by
+  // `defaultValues` above, which is built from the same values).
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  const [prevInitialAsins, setPrevInitialAsins] = useState(initialAsins);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
+    setPrevInitialAsins(initialAsins);
     if (isOpen) {
       setCurrentStep(0);
       clearErrors();
-      const preferences = readPreferences();
-      reset({
-        asins: '',
-        ...preferences,
-      });
+      reset(buildOpenValues(initialAsins));
     }
+  } else if (isOpen && initialAsins !== prevInitialAsins) {
+    // A new hand-off while already open (another Best Sellers pick): only the
+    // ASINs change; the seller's step and store/group/policy choices stay.
+    setPrevInitialAsins(initialAsins);
+    form.setValue('asins', normalizePrefilledAsins(initialAsins), { shouldValidate: false, shouldDirty: true });
   }
 
   React.useEffect(() => {

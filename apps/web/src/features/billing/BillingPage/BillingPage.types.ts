@@ -34,6 +34,9 @@ export interface BillingPlanCard {
   priceDisplay: string;
   listingsLimitDisplay: string;
   trackingConversionsLimitDisplay: string;
+  /** Best Sellers products the plan lets the seller view per billing period. */
+  bestSellersLimitDisplay: string;
+  /** "Unlimited" on every plan since 2026-09-29 — still rendered so the card says so. */
   amazonOrdersLimitDisplay: string;
   isCurrent: boolean;
 }
@@ -98,6 +101,12 @@ export interface BillingPageComponentProps {
   onOpenPlans: () => void;
   onClosePlans: () => void;
   addons: BillingAddonCard[];
+  /**
+   * The top-up card's one-line explanation, assembled in the container from
+   * the dimension(s) the offered packs raise — a conversions pack and a Best
+   * Sellers pack need different sentences, and a seller may be offered both.
+   */
+  addonsSubtitle: string;
   addonSlugInFlight: string | null;
   onBuyAddon: (addonSlug: string) => void;
   onManage: () => void;

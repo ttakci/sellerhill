@@ -164,7 +164,7 @@ export const MetaValueText = styled(Text)`
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
   gap: 0;
   background: ${tkn('colors.background.tertiary')};
   border: 0.0625rem solid ${tkn('colors.border.secondary')};

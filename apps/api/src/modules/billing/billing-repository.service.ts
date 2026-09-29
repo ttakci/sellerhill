@@ -664,6 +664,90 @@ export class BillingRepositoryService {
   }
 
   // -------------------------------------------------------------------------
+  // Best Sellers product allowance (migration 125)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Products the seller has been shown on Best Sellers pages inside `window` —
+   * the used figure of `best_sellers_products_per_month`.
+   *
+   * Read from the view ledger itself, never from a counter: like the
+   * conversion meter, the durable record IS the count, so the number the gate
+   * locks rows on and the number the billing page shows cannot drift.
+   */
+  async countBestSellersProductViews(
+    userId: string,
+    window: QuotaWindow,
+    client?: PoolClient,
+  ): Promise<number> {
+    const rows = await this.run<{ total: string | null }>(
+      `SELECT COALESCE(SUM(product_count), 0)::text AS total
+         FROM best_sellers_views
+        WHERE user_id = $1
+          AND viewed_at >= $2
+          AND viewed_at < $3`,
+      [userId, window.periodStart.toISOString(), window.periodEnd.toISOString()],
+      client,
+    );
+    return Number(rows[0]?.total ?? 0);
+  }
+
+  /**
+   * Record that the seller opened one Best Sellers list page today and return
+   * how many of its products they may SEE.
+   *
+   * ONE statement, so two tabs opening the same page at once cannot both take
+   * a charge: the `(user_id, view_key, viewed_on)` UNIQUE key makes the second
+   * arrival an UPDATE of the first's row.
+   *
+   *   - `remaining < 0` means unmetered: the whole page is visible and the row
+   *     is still written (harmless, and it gives support a browsing history).
+   *   - First open today: `LEAST(items, remaining)` — the page is charged up to
+   *     what is left, never more than it holds.
+   *   - Reopened today with nothing new: `GREATEST(existing, existing +
+   *     remaining)` cannot go below the existing count, so a page already paid
+   *     for costs nothing again, and one first opened at 0 remaining stays at 0.
+   *   - Reopened after a top-up: `remaining` is now positive, so the row grows
+   *     by exactly the delta the new allowance covers, capped at the page size.
+   *
+   * `viewedOn` is the UTC calendar day (`YYYY-MM-DD`), matching the Redis
+   * fetch counter's bucket. The caller computes `remaining` from
+   * `countBestSellersProductViews` a moment earlier; two DIFFERENT pages opened
+   * in the same instant can therefore each read the same remaining and
+   * together overshoot by at most one page — accepted, for a meter whose unit
+   * costs a fraction of a cent, in preference to an advisory lock around every
+   * page view.
+   */
+  async recordBestSellersView(
+    userId: string,
+    viewKey: string,
+    viewedOn: string,
+    itemCount: number,
+    remaining: number,
+    client?: PoolClient,
+  ): Promise<number> {
+    const rows = await this.run<{ product_count: number | string }>(
+      `INSERT INTO best_sellers_views (user_id, view_key, viewed_on, product_count)
+       VALUES ($1, $2, $3::date,
+               LEAST($4::int, CASE WHEN $5::int < 0 THEN $4::int ELSE $5::int END))
+       ON CONFLICT (user_id, view_key, viewed_on) DO UPDATE
+         SET product_count = LEAST(
+               $4::int,
+               GREATEST(
+                 best_sellers_views.product_count,
+                 best_sellers_views.product_count
+                   + CASE WHEN $5::int < 0 THEN $4::int ELSE $5::int END
+               )
+             ),
+             updated_at = NOW()
+       RETURNING product_count`,
+      [userId, viewKey, viewedOn, Math.max(0, Math.floor(itemCount)), Math.floor(remaining)],
+      client,
+    );
+    return Number(rows[0]?.product_count ?? 0);
+  }
+
+  // -------------------------------------------------------------------------
   // Quota top-ups (migration 087)
   // -------------------------------------------------------------------------
 

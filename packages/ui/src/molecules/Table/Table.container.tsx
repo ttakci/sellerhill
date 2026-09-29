@@ -18,6 +18,7 @@ export const Table = <T,>(props: TableProps<T>) => {
     selectable,
     selectedRows = [],
     onSelectionChange,
+    isRowSelectable,
     bulkActions,
     bulkActionsPlaceholder,
     onFilter,
@@ -45,14 +46,20 @@ export const Table = <T,>(props: TableProps<T>) => {
     }
   };
 
-  const isAllSelected = data.length > 0 && selectedRows.length === data.length;
+  // "All" means every row that CAN be selected; a non-selectable placeholder
+  // row must neither be handed to the caller nor stop the header box ticking.
+  const selectableData = useMemo(
+    () => (isRowSelectable ? data.filter((row) => isRowSelectable(row)) : data),
+    [data, isRowSelectable]
+  );
+  const isAllSelected = selectableData.length > 0 && selectedRows.length === selectableData.length;
 
   const handleSelectAll = (checked: boolean) => {
     if (!onSelectionChange) {
       return;
     }
     if (checked) {
-      onSelectionChange(data);
+      onSelectionChange(selectableData);
     } else {
       onSelectionChange([]);
     }
@@ -147,6 +154,7 @@ export const Table = <T,>(props: TableProps<T>) => {
       onSort={handleSort}
       onSelectAll={handleSelectAll}
       onSelectRow={handleSelectRow}
+      isRowSelectable={isRowSelectable}
       onBulkChange={handleBulkChange}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

@@ -256,6 +256,12 @@
       "publish": "eBay पर पब्लिश करें",
       "publishSelected": "चुने हुए पब्लिश करें"
     },
+    "revisionHistory": {
+      "title": "संशोधन इतिहास",
+      "subtitle": "आपकी सभी लिस्टिंग में eBay पर भेजे गए हर कीमत और स्टॉक बदलाव।",
+      "empty": "कोई संशोधन नहीं मिला।",
+      "emptyTitle": "अभी कोई संशोधन नहीं"
+    },
     "addSection": {
       "title": "नई लिस्टिंग जोड़ें",
       "subtitle": "ASIN से Amazon के प्रोडक्ट अपने eBay स्टोर में इंपोर्ट करें।",
@@ -375,6 +381,7 @@
       "updatedAt": "अपडेट किया गया",
       "revisions": {
         "action": "संशोधन",
+        "lastChecked": "आखिरी जांच {{date}} — कोई बदलाव नहीं",
         "title": "संशोधन",
         "subtitle": "इस लिस्टिंग की कीमत और स्टॉक में बदलाव",
         "previousPrice": "पिछली कीमत",

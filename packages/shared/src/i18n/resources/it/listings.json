@@ -256,6 +256,12 @@
       "publish": "Pubblica su eBay",
       "publishSelected": "Pubblica le selezionate"
     },
+    "revisionHistory": {
+      "title": "Cronologia revisioni",
+      "subtitle": "Ogni variazione di prezzo e stock inviata a eBay, su tutte le tue inserzioni.",
+      "empty": "Nessuna revisione trovata.",
+      "emptyTitle": "Ancora nessuna revisione"
+    },
     "addSection": {
       "title": "Aggiungi una nuova inserzione",
       "subtitle": "Importa i prodotti da Amazon nel tuo negozio eBay usando gli ASIN.",
@@ -375,6 +381,7 @@
       "updatedAt": "Aggiornata",
       "revisions": {
         "action": "Revisioni",
+        "lastChecked": "Ultimo controllo {{date}} — nessuna variazione",
         "title": "Revisioni",
         "subtitle": "Variazioni di prezzo e stock di questa inserzione",
         "previousPrice": "Prezzo precedente",

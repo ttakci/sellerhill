@@ -42,7 +42,12 @@
       "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı",
       "storeOwnedByAnotherAccount": "Bu eBay mağazası başka bir SellerHill hesabına bağlı. Devretmek için destek ile iletişime geçin.",
       "accountNotFound": "Bu eBay mağazası bulunamadı.",
-      "identityUnavailable": "eBay hesabınızı eBay üzerinden doğrulayamadık. Hiçbir şey bağlanmadı; lütfen biraz sonra tekrar deneyin."
+      "identityUnavailable": "eBay hesabınızı eBay üzerinden doğrulayamadık. Hiçbir şey bağlanmadı; lütfen biraz sonra tekrar deneyin.",
+      "messagingScopeMissing": "Mesajlar için eBay mağazanızı yeniden bağlayın — mevcut yetki mesajlaşmayı kapsamıyor.",
+      "messagingReplyNotAllowed": "eBay'den gelen mesajlar buradan yanıtlanamaz.",
+      "messagingUnavailable": "eBay mesajlaşma geçici olarak kullanılamıyor. Lütfen tekrar deneyin.",
+      "messagingRejected": "eBay bu isteği kabul etmedi. Mesajı kontrol edip tekrar deneyin.",
+      "messageTooLong": "Bir mesaj en fazla 2000 karakter olabilir."
     },
     "onboarding": {
       "title": "eBay Mağazanızı Bağlayın",

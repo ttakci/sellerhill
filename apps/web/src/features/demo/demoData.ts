@@ -6,6 +6,8 @@ import {
   AmazonMarketplace,
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
+  BestSellersListType,
+  BILLING_UNLIMITED,
   BillingInterval,
   BillingLimitKey,
   BillingProvider,
@@ -17,7 +19,13 @@ import {
   DashboardChartGranularity,
   DashboardPeriodKey,
   EbayAccountStatus,
+  EbayConversationDto,
+  EbayConversationStatus,
+  EbayConversationThreadDto,
+  EbayConversationType,
   EbayMarketplaceId,
+  EbayMessageDto,
+  EbayUnreadCountDto,
   EntitlementState,
   ListingFailureCode,
   ListingJobKind,
@@ -29,6 +37,7 @@ import {
   OrderStatus,
   PolicyType,
   ProfitBasis,
+  SourceFetchOutcome,
   SourceStockStatus,
   TemplateType,
   TrackingConversionProvider,
@@ -37,6 +46,7 @@ import {
   UserStatus,
   type ActionCenterSummaryDto,
   type AmazonAccountPublicDto,
+  type BestSellersPageDto,
   type BillingCatalogDto,
   type BillingDetailsDto,
   type BillingInvoiceListDto,
@@ -172,6 +182,7 @@ export const DEMO_EBAY_ACCOUNTS = {
       storeName: 'Northvale Supply',
       marketplaceId: EbayMarketplaceId.EBAY_US,
       status: EbayAccountStatus.ACTIVE,
+      messagingEnabled: true,
       createdAt: isoDaysAgo(238),
       updatedAt: isoDaysAgo(1),
     },
@@ -182,6 +193,7 @@ export const DEMO_EBAY_ACCOUNTS = {
       storeName: 'Deskly Direct',
       marketplaceId: EbayMarketplaceId.EBAY_US,
       status: EbayAccountStatus.ACTIVE,
+      messagingEnabled: true,
       createdAt: isoDaysAgo(120),
       updatedAt: isoDaysAgo(2),
     },
@@ -372,6 +384,107 @@ export const DEMO_LISTINGS: ListingDto[] = buildListings();
 export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
   new Set(PRODUCTS.map((p) => p.category))
 ).sort();
+
+/* ── Amazon Best Sellers ──────────────────────────────────────────────── */
+
+/** Amazon's own alias grammar (`electronics`, `home-garden`) for a demo category name. */
+function demoCategoryAlias(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const DEMO_BEST_SELLERS_TITLES: Record<BestSellersListType, string> = {
+  [BestSellersListType.BEST_SELLERS]: 'Amazon Best Sellers',
+  [BestSellersListType.NEW_RELEASES]: 'Amazon Hot New Releases',
+  [BestSellersListType.MOVERS_AND_SHAKERS]: 'Amazon Movers & Shakers',
+  [BestSellersListType.MOST_WISHED_FOR]: 'Amazon Most Wished For',
+  [BestSellersListType.MOST_GIFTED]: 'Amazon Most Gifted',
+};
+
+/** Demo ratings are deterministic per product, so a reload never reshuffles them. */
+function demoRating(index: number): { average: number; count: number } {
+  const rand = seeded(311 + index);
+  return {
+    average: round2(4.1 + rand() * 0.8),
+    count: Math.floor(rand() * 40_000) + 500,
+  };
+}
+
+/** Best Sellers products viewed this period by the demo account, against Growth's allowance. */
+const DEMO_BEST_SELLERS_USED = 1240;
+const DEMO_BEST_SELLERS_LIMIT = 15_000;
+
+/**
+ * The Best Sellers page in demo mode: the same eleven sample products, ranked,
+ * under whichever list and category the visitor picks. The category tree is
+ * derived from the products' own categories; a sub-category narrows the list
+ * to its products so the picker visibly does something. Every list type and
+ * every page answers — the demo must never show the "Amazon did not answer"
+ * screen, since nothing here ever asks Amazon.
+ */
+export function buildDemoBestSellers(listType: BestSellersListType, category: string, page: number): BestSellersPageDto {
+  const isRoot = category === '';
+  const matching = isRoot ? PRODUCTS : PRODUCTS.filter((p) => demoCategoryAlias(p.category) === category);
+  // Movers & Shakers reads best with a different order than the plain ranking.
+  const ordered = listType === BestSellersListType.MOVERS_AND_SHAKERS ? [...matching].reverse() : matching;
+  const selectedName = matching[0]?.category ?? null;
+
+  const items = ordered.map((p, i) => {
+    const rating = demoRating(PRODUCTS.indexOf(p));
+    return {
+      rank: i + 1,
+      asin: p.asin,
+      title: p.title,
+      link: `https://www.amazon.com/dp/${p.asin}`,
+      image: demoProductImage(p.slug),
+      rating,
+      price: { amount: p.cost, currency: DEMO_CURRENCY },
+      priceText: `$${p.cost.toFixed(2)}`,
+      rankChangePercent: listType === BestSellersListType.MOVERS_AND_SHAKERS ? (11 - i) * 35 : null,
+      previousRank: listType === BestSellersListType.MOVERS_AND_SHAKERS ? i + 12 : null,
+      salesRank: null,
+    };
+  });
+
+  return {
+    outcome: SourceFetchOutcome.FOUND,
+    list: {
+      title: DEMO_BEST_SELLERS_TITLES[listType],
+      category: isRoot ? null : selectedName,
+      listType,
+      link: 'https://www.amazon.com/gp/bestsellers',
+      items: page === 1 ? items : [],
+      categories: [
+        { name: 'Any Department', path: null, link: 'https://www.amazon.com/gp/bestsellers', isSelected: isRoot, isRoot: true },
+        ...DEMO_LISTING_CATEGORIES.map((name) => ({
+          name,
+          path: demoCategoryAlias(name),
+          link: `https://www.amazon.com/gp/bestsellers/${demoCategoryAlias(name)}`,
+          isSelected: demoCategoryAlias(name) === category,
+          isRoot: false,
+        })),
+      ],
+      relatedLists: [],
+      pagination: { page, itemsPerPage: 50, totalPages: 1, totalCount: items.length },
+    },
+    cachedAt: isoHoursAgo(2),
+    fetchedAt: isoHoursAgo(2),
+    // The Growth demo account, mid-period: the same figures as the billing
+    // summary's Best Sellers quota, so the meter here and the ring on the
+    // billing page can never disagree. Nothing is locked — the demo never
+    // withholds a product.
+    allowance: {
+      used: DEMO_BEST_SELLERS_USED,
+      limit: DEMO_BEST_SELLERS_LIMIT,
+      remaining: DEMO_BEST_SELLERS_LIMIT - DEMO_BEST_SELLERS_USED,
+      creditValue: 0,
+    },
+    lockedCount: 0,
+  };
+}
 
 /** Hours between two price/stock checks (four a day). */
 const REFRESH_STEP_HOURS = 6;
@@ -972,6 +1085,334 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
   };
 }
 
+/* ── eBay Messages ────────────────────────────────────────────────────── */
+
+/**
+ * One demo seller identity for every outbound message — matches
+ * `DEMO_EBAY_ACCOUNTS.items[0].sellerId`, which is what `useMessagesInbox`'s
+ * `isMine` check compares a sender against when no `ebayUsername` is set.
+ */
+const STORE_SELLER_USERNAME = DEMO_EBAY_ACCOUNTS.items[0].sellerId;
+
+function demoMessage(
+  id: string,
+  senderUsername: string,
+  body: string,
+  daysAgo: number,
+  hourOffset: number,
+  read: boolean
+): EbayMessageDto {
+  return {
+    messageId: id,
+    subject: null,
+    body,
+    senderUsername,
+    recipientUsername: senderUsername === STORE_SELLER_USERNAME ? 'buyer' : STORE_SELLER_USERNAME,
+    read,
+    createdAt: isoDaysAgo(daysAgo, hourOffset),
+    media: [],
+  };
+}
+
+/** Turns an invented buyer name into an eBay-style handle — no real accounts, no real brands. */
+function buyerHandle(name: string, suffix: number): string {
+  return `${name.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 12)}${suffix}`;
+}
+
+/** The two listings a pre-sale question links back to, via their real eBay item id. */
+const EARBUDS_ITEM_ID = DEMO_LISTINGS[3].ebayListingId ?? null; // Wireless Earbuds
+const PILLOW_ITEM_ID = DEMO_LISTINGS[2].ebayListingId ?? null; // Memory Foam Pillow
+
+/**
+ * Eight conversations: six buyer↔seller (`FROM_MEMBERS` — two unread, one
+ * archived, two carrying a `referenceId` back to a real demo listing) and two
+ * eBay-to-seller system notices (`FROM_EBAY`, always read — eBay does not
+ * report an unread system notice as something to action).
+ */
+const CONVERSATION_SEEDS: Array<{
+  conversationId: string;
+  type: EbayConversationType;
+  status: EbayConversationStatus;
+  title: string | null;
+  referenceId: string | null;
+  otherPartyUsername: string | null;
+  messages: EbayMessageDto[];
+}> = [
+  {
+    conversationId: 'demo-conv-1',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Question about my order',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Aaron Pike', 47),
+    messages: [
+      demoMessage(
+        'demo-msg-1-1',
+        buyerHandle('Aaron Pike', 47),
+        'Hi, just checking — has my order shipped yet?',
+        4,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-1-2',
+        STORE_SELLER_USERNAME,
+        'Thanks for reaching out! It ships within one business day and you will get tracking automatically.',
+        4,
+        3,
+        true
+      ),
+      demoMessage(
+        'demo-msg-1-3',
+        buyerHandle('Aaron Pike', 47),
+        'Great, appreciate the quick reply!',
+        0,
+        1,
+        false
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-2',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Shipping to a different address',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Chloe Bennett', 12),
+    messages: [
+      demoMessage(
+        'demo-msg-2-1',
+        buyerHandle('Chloe Bennett', 12),
+        'I moved recently — can you ship this to a new address instead of the one on file?',
+        1,
+        4,
+        false
+      ),
+      demoMessage(
+        'demo-msg-2-2',
+        buyerHandle('Chloe Bennett', 12),
+        'Let me know if you need the new zip code too.',
+        0,
+        5,
+        false
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-3',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ARCHIVE,
+    title: 'Thanks for the fast shipping',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Grace Okafor', 8),
+    messages: [
+      demoMessage(
+        'demo-msg-3-1',
+        buyerHandle('Grace Okafor', 8),
+        'Item arrived a day early, thank you!',
+        18,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-3-2',
+        STORE_SELLER_USERNAME,
+        'So glad it arrived safely — thanks for shopping with us!',
+        18,
+        3,
+        true
+      ),
+      demoMessage(
+        'demo-msg-3-3',
+        buyerHandle('Grace Okafor', 8),
+        'Will definitely buy from you again.',
+        17,
+        6,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-4',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Battery life question',
+    referenceId: EARBUDS_ITEM_ID,
+    otherPartyUsername: buyerHandle('Marcus Lin', 3),
+    messages: [
+      demoMessage(
+        'demo-msg-4-1',
+        buyerHandle('Marcus Lin', 3),
+        'Does the battery life hold up with noise cancelling on the whole time?',
+        6,
+        1,
+        true
+      ),
+      demoMessage(
+        'demo-msg-4-2',
+        STORE_SELLER_USERNAME,
+        'Yes — the 40-hour figure already includes the case, with ANC on throughout.',
+        6,
+        2,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-5',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Is the cover machine washable?',
+    referenceId: PILLOW_ITEM_ID,
+    otherPartyUsername: buyerHandle('Sofia Bianchi', 21),
+    messages: [
+      demoMessage(
+        'demo-msg-5-1',
+        buyerHandle('Sofia Bianchi', 21),
+        'Is the cover removable and machine washable?',
+        9,
+        1,
+        true
+      ),
+      demoMessage(
+        'demo-msg-5-2',
+        STORE_SELLER_USERNAME,
+        'Yes, the cover zips off and is machine washable on a cold, gentle cycle.',
+        9,
+        2,
+        true
+      ),
+      demoMessage(
+        'demo-msg-5-3',
+        buyerHandle('Sofia Bianchi', 21),
+        'Perfect, ordering one now.',
+        9,
+        3,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-6',
+    type: EbayConversationType.FROM_MEMBERS,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Left you five stars',
+    referenceId: null,
+    otherPartyUsername: buyerHandle('Devon Marsh', 5),
+    messages: [
+      demoMessage(
+        'demo-msg-6-1',
+        buyerHandle('Devon Marsh', 5),
+        'Exactly as described, fast delivery. Left five-star feedback.',
+        13,
+        4,
+        true
+      ),
+      demoMessage(
+        'demo-msg-6-2',
+        STORE_SELLER_USERNAME,
+        'Thank you so much for the kind words and the feedback!',
+        13,
+        5,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-7',
+    type: EbayConversationType.FROM_EBAY,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Reminder: keep your business policies current',
+    referenceId: null,
+    otherPartyUsername: 'eBay',
+    messages: [
+      demoMessage(
+        'demo-msg-7-1',
+        'eBay',
+        'We recommend reviewing your payment, shipping and return policies before the next peak season.',
+        22,
+        0,
+        true
+      ),
+      demoMessage(
+        'demo-msg-7-2',
+        'eBay',
+        'No action is required if your policies already reflect your current handling times.',
+        22,
+        1,
+        true
+      ),
+    ],
+  },
+  {
+    conversationId: 'demo-conv-8',
+    type: EbayConversationType.FROM_EBAY,
+    status: EbayConversationStatus.ACTIVE,
+    title: 'Your listing template meets our picture policy',
+    referenceId: null,
+    otherPartyUsername: 'eBay',
+    messages: [
+      demoMessage(
+        'demo-msg-8-1',
+        'eBay',
+        'A recent scan of your active listings found no picture policy issues.',
+        29,
+        0,
+        true
+      ),
+    ],
+  },
+];
+
+export const DEMO_CONVERSATIONS: EbayConversationDto[] = CONVERSATION_SEEDS.map((seed) => {
+  const latestMessage = seed.messages[seed.messages.length - 1] ?? null;
+  const unreadCount = seed.messages.filter(
+    (message) => !message.read && message.senderUsername !== STORE_SELLER_USERNAME
+  ).length;
+  return {
+    conversationId: seed.conversationId,
+    type: seed.type,
+    status: seed.status,
+    title: seed.title,
+    unreadCount,
+    referenceType: seed.referenceId ? 'ITEM' : null,
+    referenceId: seed.referenceId,
+    createdAt: seed.messages[0]?.createdAt ?? isoDaysAgo(1),
+    latestMessage,
+    otherPartyUsername: seed.otherPartyUsername,
+  } satisfies EbayConversationDto;
+});
+
+/** `GET .../conversations/:id` — the full thread, or `null` for an unknown id. */
+export function demoThread(conversationId: string): EbayConversationThreadDto | null {
+  const seed = CONVERSATION_SEEDS.find((s) => s.conversationId === conversationId);
+  if (!seed) {
+    return null;
+  }
+  return {
+    conversationId: seed.conversationId,
+    type: seed.type,
+    status: seed.status,
+    title: seed.title,
+    messages: seed.messages,
+    total: seed.messages.length,
+    page: 1,
+    limit: seed.messages.length,
+  };
+}
+
+/** `GET /ebay/messages/unread-count` — the sidebar badge, summed from the fixtures above. */
+export function buildDemoUnread(): EbayUnreadCountDto {
+  const total = DEMO_CONVERSATIONS.reduce((sum, c) => sum + c.unreadCount, 0);
+  return {
+    total,
+    byAccount: [
+      { ebayAccountId: DEMO_EBAY_ACCOUNT_ID, unread: total },
+      { ebayAccountId: DEMO_EBAY_ACCOUNT_ID_2, unread: 0 },
+    ],
+  };
+}
+
 /* =========================================================================
  * Account-level sample data — the settings, billing and configuration a
  * seller three months into using SellerHill would already have filled in.
@@ -1416,10 +1857,10 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
 const MICROS = 1_000_000;
 
 /**
- * One demo catalog plan. The automatic-order ceiling is DERIVED as 2x the
- * conversion quota rather than passed in, for the same reason migration 085
- * derives it in SQL: two numbers that must stay in a fixed ratio should not be
- * two places to get it wrong.
+ * One demo catalog plan. Automatic orders are UNLIMITED on every plan (operator
+ * decision 2026-09-29), so that limit is written as `BILLING_UNLIMITED` rather
+ * than passed in; the Best Sellers browsing allowance (products viewable per
+ * billing period) is the fourth metered dimension.
  */
 function plan(
   slug: string,
@@ -1428,6 +1869,7 @@ function plan(
   monthly: number,
   listings: number,
   conversions: number,
+  bestSellers: number,
   order: number
 ): BillingPlanWithPricingDto {
   const id = `demo-plan-${slug}`;
@@ -1459,36 +1901,41 @@ function plan(
         id: `${id}-l3`, planId: id, limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
         limitValue: conversions, unit: 'conversions', createdAt: stamp, updatedAt: stamp,
       },
+      [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: {
+        id: `${id}-l4`, planId: id, limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        limitValue: bestSellers, unit: 'products', createdAt: stamp, updatedAt: stamp,
+      },
       [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: {
         id: `${id}-l2`, planId: id, limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
-        limitValue: conversions * 2, unit: 'orders', createdAt: stamp, updatedAt: stamp,
+        limitValue: BILLING_UNLIMITED, unit: 'orders', createdAt: stamp, updatedAt: stamp,
       },
     },
   };
 }
 
 /*
- * Mirrors the real catalog (migrations 083 + 085): twelve monthly tiers, no
- * annual interval, and the automatic-order ceiling derived as 2x the
- * conversion quota. The demo showed the retired three-plan catalog at its old
- * prices, so a visitor was quoted figures the product no longer sells.
+ * Mirrors the real catalog (2026-09-29 prices): twelve monthly tiers, no
+ * annual interval, unlimited automatic orders everywhere, and a Best Sellers
+ * browsing allowance per tier. The demo once showed the retired three-plan
+ * catalog at its old prices, so a visitor was quoted figures the product no
+ * longer sells — keep this list aligned with the live catalog.
  *
  * Names and descriptions come from the `billing` i18n namespace at render time,
  * exactly as the live catalog's do, so the strings here are only fallbacks.
  */
 export const DEMO_BILLING_PLANS: BillingPlanWithPricingDto[] = [
-  plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 19.99, 200, 25, 1),
-  plan('nano', 'Nano', 'For testing the waters with a focused product set.', 24.99, 500, 50, 2),
-  plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 29.99, 1000, 100, 3),
-  plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 4),
-  plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 59.99, 3000, 200, 5),
-  plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 84.99, 4000, 250, 6),
-  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 104.99, 5000, 300, 7),
-  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 159.99, 7500, 350, 8),
-  plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 179.99, 10000, 500, 9),
-  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 319.99, 15000, 600, 10),
-  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 429.99, 20000, 700, 11),
-  plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 529.99, 25000, 800, 12),
+  plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 24.99, 200, 25, 1_500, 1),
+  plan('nano', 'Nano', 'For testing the waters with a focused product set.', 29.99, 500, 50, 2_500, 2),
+  plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 34.99, 1000, 100, 5_000, 3),
+  plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 7_500, 4),
+  plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 54.99, 3000, 200, 10_000, 5),
+  plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 64.99, 4000, 250, 12_500, 6),
+  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 89.99, 5000, 300, 15_000, 7),
+  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 129.99, 7500, 350, 20_000, 8),
+  plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 164.99, 10000, 500, 25_000, 9),
+  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 229.99, 15000, 600, 35_000, 10),
+  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 284.99, 20000, 700, 50_000, 11),
+  plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 339.99, 25000, 800, 75_000, 12),
 ];
 
 export const DEMO_BILLING_CATALOG: BillingCatalogDto = {
@@ -1548,7 +1995,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
         periodStart,
         periodEnd,
         usedQty: 168,
-        limitValueSnapshot: 250,
+        limitValueSnapshot: BILLING_UNLIMITED,
         status: BillingUsagePeriodStatus.OPEN,
         closedAt: null,
         createdAt: periodStart,
@@ -1579,10 +2026,16 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
         limitValue: 300,
       },
       {
+        limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        used: DEMO_BEST_SELLERS_USED,
+        creditValue: 0,
+        limitValue: DEMO_BEST_SELLERS_LIMIT,
+      },
+      {
         limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
         used: 291,
         creditValue: 0,
-        limitValue: 600,
+        limitValue: BILLING_UNLIMITED,
       },
     ],
     enforcementEnabled: true,

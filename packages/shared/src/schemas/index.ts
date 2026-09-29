@@ -17,5 +17,6 @@ export * from './amazon';
 export * from './auth';
 export * from './buyer-messaging/buyer-messaging.schema';
 export * from './common/form.utils';
+export * from './ebay-messages/ebay-messages.schema';
 export * from './orders';
 export * from './store-settings';

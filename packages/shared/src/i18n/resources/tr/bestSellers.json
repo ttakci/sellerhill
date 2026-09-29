@@ -1,0 +1,83 @@
+{
+  "bestSellers": {
+    "menu": "Çok Satanlar",
+    "title": "Amazon Çok Satanlar",
+    "subtitle": "Amazon'un öne çıkan listelerine göz atın, istediğiniz ürünleri işaretleyin ve tek adımda Liste Ekle'ye gönderin.",
+    "listTypes": {
+      "best_sellers": "Çok Satanlar",
+      "new_releases": "Yeni Çıkanlar",
+      "movers_and_shakers": "Yükselenler",
+      "most_wished_for": "En Çok İstenenler",
+      "most_gifted": "En Çok Hediye Edilenler"
+    },
+    "listTypesAriaLabel": "Amazon listesi",
+    "allCategories": "Tüm departmanlar",
+    "categoryPlaceholder": "Kategori seçin",
+    "categorySearchPlaceholder": "Kategori ara",
+    "categoryNoResults": "Eşleşen kategori yok",
+    "backToAllCategories": "Tüm kategorilere dön",
+    "selectAllOnPage": "Bu sayfadakilerin tümünü seç",
+    "selected_one": "{{count}} ürün seçildi",
+    "selected_other": "{{count}} ürün seçildi",
+    "listSelected": "Seçilenleri listele ({{count}})",
+    "clearSelection": "Temizle",
+    "rank": "#{{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Henüz puan yok",
+    "allowance": "Bu dönem {{limit}} üründen {{remaining}} tanesi kaldı",
+    "allowanceUnlimited": "Sınırsız ürün görüntüleme",
+    "allowanceHint": "Gördüğünüz her ürün dönem başına bir kez sayılır; aynı listeyi bugün yeniden açmak tekrar sayılmaz.",
+    "locked": {
+      "title_one": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
+      "title_other": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
+      "description": "Onları görmek için paketinizi yükseltin ya da ek paket alın. Hakkınız her fatura döneminde yenilenir.",
+      "cta": "Paketleri ve ek paketleri gör",
+      "rowLabel": "Kilitli ürün"
+    },
+    "table": {
+      "rank": "Sıra",
+      "product": "Ürün",
+      "price": "Fiyat",
+      "rating": "Puan",
+      "reviews": "Değerlendirme"
+    },
+    "states": {
+      "loading": {
+        "title": "Liste yükleniyor",
+        "description": "Amazon'dan güncel sıralama alınıyor."
+      },
+      "empty": {
+        "title": "Bu sayfada ürün yok",
+        "description": "Bu listede gösterilecek bir şey yok. Başka bir kategori veya liste deneyin."
+      },
+      "notFound": {
+        "title": "Bu kategori kullanılamıyor",
+        "description": "Amazon bu listeyi seçilen kategori için sunmuyor. Tüm kategorilere dönün veya başka bir kategori seçin."
+      },
+      "blocked": {
+        "title": "Amazon bu kez yanıt vermedi",
+        "description": "Liste şu anda okunamadı. Biraz sonra yeniden deneyin."
+      },
+      "retry": "Yeniden dene",
+      "unavailable": {
+        "title": "Çok Satanlar geçici olarak kullanılamıyor",
+        "description": "Liste servisine şu anda ulaşılamıyor. İlanlarınız ve siparişleriniz etkilenmez."
+      },
+      "disabled": {
+        "title": "Çok Satanlar bu hesapta etkin değil",
+        "description": "Amazon listelerine göz atma hesabınız için kapalı. Görmeyi bekliyorsanız destekle iletişime geçin."
+      },
+      "limitReached": {
+        "title": "Bugün çok fazla canlı liste yüklemesi yapıldı",
+        "description": "Bugün zaten yüklenen listeler hâlâ açık — onlardan birine geçin ya da yarın yeniden deneyin."
+      }
+    },
+    "errors": {
+      "disabled": "Çok Satanlar bu hesapta etkin değil.",
+      "dailyLimitReached": "Bugün çok fazla canlı liste yüklemesi yapıldı. Yarın yeniden deneyin.",
+      "unavailable": "Çok Satanlar geçici olarak kullanılamıyor.",
+      "unsupportedMarketplace": "Bu pazar yeri desteklenmiyor."
+    }
+  }
+}

@@ -156,6 +156,13 @@ function PlanCardView({
         </S.PlanFeatureItem>
         <S.PlanFeatureItem>
           <Text variant="body-sm">
+            {t('billing:billing.limits.best_sellers_products_per_month.label')}: {plan.bestSellersLimitDisplay}
+          </Text>
+        </S.PlanFeatureItem>
+        {/* Unlimited on every plan — kept on the card because "unlimited" is
+            part of what the tier promises, not something to leave unsaid. */}
+        <S.PlanFeatureItem>
+          <Text variant="body-sm">
             {t('billing:billing.limits.amazon_orders_per_month.label')}: {plan.amazonOrdersLimitDisplay}
           </Text>
         </S.PlanFeatureItem>
@@ -199,6 +206,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   onOpenPlans,
   onClosePlans,
   addons,
+  addonsSubtitle,
   addonSlugInFlight,
   onBuyAddon,
   nextChargeLine,
@@ -427,7 +435,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           variant="section"
           header={{
             title: t('billing:billing.addons.title'),
-            subtitle: t('billing:billing.addons.subtitle'),
+            subtitle: addonsSubtitle,
           }}
         >
           <S.AddonGrid>

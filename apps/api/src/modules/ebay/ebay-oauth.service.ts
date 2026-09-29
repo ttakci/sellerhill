@@ -60,6 +60,16 @@ export class EbayOAuthService {
   }
 
   /**
+   * The scopes this app requests on the consent screen — and therefore the
+   * scopes a store connected through it has granted. Recorded on the store row
+   * (`ebay_accounts.granted_scopes`) so a store connected before a new scope
+   * was added can be told apart from one that has it.
+   */
+  getScopes(): readonly string[] {
+    return this.scopes;
+  }
+
+  /**
    * Generate OAuth consent URL
    */
   generateConsentUrl(

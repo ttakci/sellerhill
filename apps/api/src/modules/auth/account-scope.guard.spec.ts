@@ -47,6 +47,7 @@ const CUSTOMER_SURFACES = [
   'store-settings/store-settings.controller.ts',
   'buyer-messaging/buyer-message.controller.ts',
   'listing-settings-groups/listing-settings-group.controller.ts',
+  'best-sellers/best-sellers.controller.ts',
 ];
 
 function contextFor(role: UserRole): Parameters<InstanceType<typeof JwtAuthGuard>['canActivate']>[0] {

@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Pedidos automáticos",
         "unit": "pedidos",
-        "description": "Máximo de pedidos de Amazon realizados por ti (automáticamente o vinculados a mano) por mes."
+        "description": "Pedidos de Amazon realizados por ti (automáticamente o vinculados a mano). Ilimitados en todos los planes."
       },
       "unlimited": "Ilimitado",
       "disabled": "No incluido",
       "of": "{{used}} de {{limit}}",
       "used": "{{used}} usados",
+      "usedUnlimited": "{{used}} usados · Ilimitado",
       "remaining": "{{remaining}} restantes",
       "exceeded": "Límite superado",
       "tracking_conversions_per_month": {
         "label": "Conversiones de seguimiento",
         "unit": "conversiones",
         "description": "Cuántos envíos por mes reciben un número de seguimiento convertido, para que el comprador nunca vea a tu proveedor."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Productos de Más vendidos",
+        "unit": "productos",
+        "description": "Cuántos productos puedes ver en la página Más vendidos por período de facturación, tanto de listas en caché como en vivo."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "¿Necesitas más este mes?",
-      "subtitle": "Usaste tus conversiones de seguimiento mensuales. Recarga para seguir ocultando a tu proveedor hasta que el mes se reinicie.",
+      "subtitle": "Alcanzaste un límite mensual. Recarga para seguir hasta que tu período de facturación se renueve.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Usaste tus conversiones de seguimiento mensuales. Recarga para seguir ocultando a tu proveedor hasta que el período se renueve.",
+        "best_sellers_products_per_month": "Usaste tu límite mensual de Más vendidos. Recarga para seguir explorando las listas de Amazon hasta que el período se renueve."
+      },
       "buy": "Comprar",
       "note": "Una recarga se aplica solo al mes calendario en curso, por eso se ofrece cuando alcanzas el límite y no por adelantado. La asignación de tu plan se restablece el día 1."
     }

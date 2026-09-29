@@ -1,0 +1,83 @@
+{
+  "bestSellers": {
+    "menu": "Bestseller",
+    "title": "Amazon Bestseller",
+    "subtitle": "Stöbern Sie in den Top-Listen von Amazon, markieren Sie die gewünschten Produkte und übergeben Sie sie in einem Schritt an „Angebote hinzufügen“.",
+    "listTypes": {
+      "best_sellers": "Bestseller",
+      "new_releases": "Neuerscheinungen",
+      "movers_and_shakers": "Aufsteiger",
+      "most_wished_for": "Meistgewünscht",
+      "most_gifted": "Meistverschenkt"
+    },
+    "listTypesAriaLabel": "Amazon-Liste",
+    "allCategories": "Alle Kategorien",
+    "categoryPlaceholder": "Kategorie wählen",
+    "categorySearchPlaceholder": "Kategorien durchsuchen",
+    "categoryNoResults": "Keine passende Kategorie",
+    "backToAllCategories": "Zurück zu allen Kategorien",
+    "selectAllOnPage": "Alle auf dieser Seite auswählen",
+    "selected_one": "{{count}} Produkt ausgewählt",
+    "selected_other": "{{count}} Produkte ausgewählt",
+    "listSelected": "Auswahl einstellen ({{count}})",
+    "clearSelection": "Leeren",
+    "rank": "Nr. {{rank}}",
+    "rating": "★ {{average}}",
+    "ratingWithReviews": "★ {{average}} ({{reviews}})",
+    "noRating": "Noch keine Bewertung",
+    "allowance": "Noch {{remaining}} von {{limit}} Produkten in diesem Zeitraum",
+    "allowanceUnlimited": "Unbegrenzte Produktansichten",
+    "allowanceHint": "Jedes angezeigte Produkt zählt einmal pro Zeitraum; dieselbe Liste heute erneut zu öffnen, zählt nicht doppelt.",
+    "locked": {
+      "title_one": "{{count}} weiteres Produkt auf dieser Seite liegt außerhalb des monatlichen Kontingents Ihres Tarifs",
+      "title_other": "{{count}} weitere Produkte auf dieser Seite liegen außerhalb des monatlichen Kontingents Ihres Tarifs",
+      "description": "Wechseln Sie in einen höheren Tarif oder kaufen Sie ein Zusatzpaket, um sie zu sehen. Ihr Kontingent erneuert sich mit jedem Abrechnungszeitraum.",
+      "cta": "Tarife und Zusatzpakete ansehen",
+      "rowLabel": "Gesperrtes Produkt"
+    },
+    "table": {
+      "rank": "Rang",
+      "product": "Produkt",
+      "price": "Preis",
+      "rating": "Bewertung",
+      "reviews": "Rezensionen"
+    },
+    "states": {
+      "loading": {
+        "title": "Liste wird geladen",
+        "description": "Die aktuelle Rangliste wird von Amazon abgerufen."
+      },
+      "empty": {
+        "title": "Keine Produkte auf dieser Seite",
+        "description": "Diese Liste hat hier nichts anzuzeigen. Probieren Sie eine andere Kategorie oder Liste."
+      },
+      "notFound": {
+        "title": "Diese Kategorie ist nicht verfügbar",
+        "description": "Amazon bietet diese Liste für die gewählte Kategorie nicht an. Gehen Sie zurück zu allen Kategorien oder wählen Sie eine andere."
+      },
+      "blocked": {
+        "title": "Amazon hat diesmal nicht geantwortet",
+        "description": "Die Liste konnte gerade nicht gelesen werden. Versuchen Sie es gleich noch einmal."
+      },
+      "retry": "Erneut versuchen",
+      "unavailable": {
+        "title": "Bestseller ist vorübergehend nicht verfügbar",
+        "description": "Der Listendienst ist derzeit nicht erreichbar. Ihre Angebote und Bestellungen sind nicht betroffen."
+      },
+      "disabled": {
+        "title": "Bestseller ist für dieses Konto nicht aktiviert",
+        "description": "Das Durchsuchen von Amazon-Listen ist für Ihr Konto ausgeschaltet. Wenden Sie sich an den Support, wenn Sie es erwartet haben."
+      },
+      "limitReached": {
+        "title": "Heute zu viele Live-Listenabrufe",
+        "description": "Heute bereits geladene Listen sind weiterhin verfügbar – wechseln Sie zu einer davon oder versuchen Sie es morgen erneut."
+      }
+    },
+    "errors": {
+      "disabled": "Bestseller ist für dieses Konto nicht aktiviert.",
+      "dailyLimitReached": "Heute zu viele Live-Listenabrufe. Versuchen Sie es morgen erneut.",
+      "unavailable": "Bestseller ist vorübergehend nicht verfügbar.",
+      "unsupportedMarketplace": "Dieser Marktplatz wird nicht unterstützt."
+    }
+  }
+}

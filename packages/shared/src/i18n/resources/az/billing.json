@@ -100,18 +100,24 @@
       "amazon_orders_per_month": {
         "label": "Avtomatik sifarişlər",
         "unit": "sifariş",
-        "description": "Aylıq sizin üçün verilən (avtomatik və ya əl ilə əlaqələndirilən) maksimum Amazon sifarişi sayı."
+        "description": "Sizin üçün verilən (avtomatik və ya əl ilə əlaqələndirilən) Amazon sifarişləri. Hər planda limitsiz."
       },
       "unlimited": "Limitsiz",
       "disabled": "Daxil deyil",
       "of": "{{limit}} içində {{used}}",
       "used": "{{used}} istifadə olunub",
+      "usedUnlimited": "{{used}} istifadə olunub · Limitsiz",
       "remaining": "{{remaining}} qalıb",
       "exceeded": "Limit aşılıb",
       "tracking_conversions_per_month": {
         "label": "İzləmə çevirmələri",
         "unit": "çevirmə",
         "description": "Aylıq neçə göndərişə çevrilmiş izləmə nömrəsi verilir ki, alıcı heç vaxt təchizatçınızı görməsin."
+      },
+      "best_sellers_products_per_month": {
+        "label": "Ən Çox Satılanlar məhsulları",
+        "unit": "məhsul",
+        "description": "Ən Çox Satılanlar səhifəsində faktura dövrü ərzində görə biləcəyiniz məhsul sayı; keşlənmiş və canlı siyahılar eyni cür sayılır."
       }
     },
     "subscription": {
@@ -323,7 +329,11 @@
     },
     "addons": {
       "title": "Bu ay daha çox lazımdır?",
-      "subtitle": "Aylıq izləmə çevirmələrinizi istifadə etmisiniz. Ay sıfırlanana qədər təchizatçınızı gizlətməyə davam etmək üçün əlavə paket alın.",
+      "subtitle": "Aylıq limitə çatmısınız. Faktura dövrü yenilənənə qədər davam etmək üçün əlavə paket alın.",
+      "subtitleByLimit": {
+        "tracking_conversions_per_month": "Aylıq izləmə çevirmələrinizi istifadə etmisiniz. Dövr yenilənənə qədər təchizatçınızı gizlətməyə davam etmək üçün əlavə paket alın.",
+        "best_sellers_products_per_month": "Aylıq Ən Çox Satılanlar limitinizi istifadə etmisiniz. Dövr yenilənənə qədər Amazon siyahılarına baxmağa davam etmək üçün əlavə paket alın."
+      },
       "buy": "Al",
       "note": "Əlavə paket yalnız cari təqvim ayına tətbiq olunur, buna görə əvvəlcədən yox, limitə çatdıqda təklif olunur. Plan limitiniz hər ayın 1-də sıfırlanır."
     }
