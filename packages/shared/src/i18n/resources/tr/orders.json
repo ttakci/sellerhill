@@ -130,6 +130,7 @@
         "quota_exhausted": "Aylık kota doldu",
         "cart": "Sepet uyuşmazlığı",
         "review_unreadable": "Sipariş toplamı okunamadı",
+        "interrupted": "Satın alma yarıda kesildi — Amazon'u kontrol edin",
         "subscription_suspended": "Abonelik askıya alındı",
         "listing_over_plan_limit": "İlan, paket limitinin dışında",
         "order_already_fulfilled": "Zaten kargolanmış — alınacak bir şey yok",

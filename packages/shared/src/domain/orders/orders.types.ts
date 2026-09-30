@@ -142,6 +142,14 @@ export enum AutoFulfillBlockedReason {
    */
   REVIEW_UNREADABLE = 'review_unreadable',
   /**
+   * A fulfillment job started and found the row still RUNNING: the previous
+   * attempt died without cleaning up (SIGKILL on deploy, OOM, host restart).
+   * The Place Order click may already have gone out, so the checkout is NOT
+   * re-entered — the seller checks Amazon and links the order by hand, or buys
+   * it. Fail-closed: the alternative is a second Amazon order.
+   */
+  INTERRUPTED = 'interrupted',
+  /**
    * The order's listing was outside the plan's listing limit when the order
    * arrived (only the oldest listings up to the limit are automated). Written
    * with status SKIPPED, not BLOCKED: it is the plan working as designed, not

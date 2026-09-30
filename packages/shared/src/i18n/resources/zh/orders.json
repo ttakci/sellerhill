@@ -130,6 +130,7 @@
         "quota_exhausted": "已达月度额度",
         "cart": "购物车不匹配",
         "review_unreadable": "无法读取订单总额",
+        "interrupted": "购买被中断 — 请检查 Amazon",
         "subscription_suspended": "订阅已暂停",
         "listing_over_plan_limit": "商品刊登超出套餐上限",
         "order_already_fulfilled": "已发货，无需采购",

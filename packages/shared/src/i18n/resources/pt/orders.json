@@ -130,6 +130,7 @@
         "quota_exhausted": "Cota mensal atingida",
         "cart": "Carrinho divergente",
         "review_unreadable": "Total do pedido ilegível",
+        "interrupted": "Compra interrompida — verifique a Amazon",
         "subscription_suspended": "Assinatura suspensa",
         "listing_over_plan_limit": "Anúncio fora do limite do plano",
         "order_already_fulfilled": "Já enviado — nada a comprar",

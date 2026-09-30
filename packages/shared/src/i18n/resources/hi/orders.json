@@ -130,6 +130,7 @@
         "quota_exhausted": "मासिक कोटा पूरा हो गया",
         "cart": "कार्ट में गड़बड़ी",
         "review_unreadable": "ऑर्डर का कुल नहीं पढ़ा जा सका",
+        "interrupted": "खरीद बीच में रुक गई — Amazon जांचें",
         "subscription_suspended": "सब्सक्रिप्शन निलंबित",
         "listing_over_plan_limit": "लिस्टिंग प्लान की सीमा से बाहर",
         "order_already_fulfilled": "पहले ही शिप हो चुका — खरीदने को कुछ नहीं",

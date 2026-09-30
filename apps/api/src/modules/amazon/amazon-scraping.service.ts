@@ -496,9 +496,14 @@ export class AmazonScrapingService {
               trackingCarrier = resolveTrackingCarrier(trackingNumber, shipTrackText);
             }
             // Only fills a gap — it never overrides a status order-details
-            // already read (the ETA heading there can lag the tracker).
+            // already read (the ETA heading there can lag the tracker). The
+            // tracker's own status card heading is read first; the visible
+            // text is the fallback for when Amazon renames that class.
             if (status === 'pending') {
-              status = detectAmazonStatusLine(shipTrackText) ?? status;
+              status =
+                (await this.parserService.parseTrackerStatus(page)) ??
+                detectAmazonStatusLine(shipTrackText) ??
+                status;
             }
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
