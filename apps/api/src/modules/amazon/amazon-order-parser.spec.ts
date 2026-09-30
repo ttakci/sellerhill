@@ -396,10 +396,97 @@ describe('detectAmazonStatusLine — status from the visible page text', () => {
   });
 });
 
+// Visible text of two REAL progress-tracker pages ("Track package"), saved
+// 2026-09-30, buyer name and address removed. The page order is fixed by
+// Amazon's layout: the promise card's ETA heading ("Arriving …") comes FIRST,
+// the status card's own heading ("Shipped" / "Ordered") second, and then the
+// four milestone labels, which are printed on EVERY tracker page whether
+// reached or not. Order 03-15243-67997 sat at "pending" for three ticks
+// because the ETA line was read as the status and "Shipped" never was.
+const SHIPPED_TRACKER_TEXT = [
+  'See all orders',
+  'Arriving tomorrow',
+  'Shipped',
+  'Package left the shipper facility',
+  'Ordered',
+  'Shipped',
+  'Out for delivery',
+  'Delivered',
+  'Update delivery instructions',
+  'Return or replace items',
+  'Buy again',
+  'Shipped with Amazon',
+  'Tracking ID: TBA335065888809',
+  'See all updates',
+].join('\n');
+
+const UNSHIPPED_TRACKER_TEXT = [
+  'See all orders',
+  'Arriving Friday',
+  'Ordered',
+  'Ordered',
+  'Shipped',
+  'Out for delivery',
+  'Delivered',
+  'Order Info',
+  'View or Change this order',
+].join('\n');
+
+describe('detectAmazonStatusLine — the real progress-tracker layout', () => {
+  it('reads "Shipped" from the status card even though the ETA heading comes first', () => {
+    expect(detectAmazonStatusLine(SHIPPED_TRACKER_TEXT)).toBe('shipped');
+  });
+
+  it('reads an unshipped tracker as pending — the milestone labels are never a status', () => {
+    expect(detectAmazonStatusLine(UNSHIPPED_TRACKER_TEXT)).toBe('pending');
+  });
+
+  it('stops at the milestone list when the status card is missing', () => {
+    expect(detectAmazonStatusLine('Arriving Friday\nOrdered\nShipped\nOut for delivery\nDelivered')).toBe(
+      'pending'
+    );
+  });
+
+  it('still reports pending for an ETA with no status heading after it (order-details page)', () => {
+    expect(detectAmazonStatusLine('Arriving tomorrow\nTrack package\nCancel items')).toBe('pending');
+  });
+});
+
+describe('AmazonOrderParserService.parseTrackerStatus — the status card heading', () => {
+  function fakeTrackerPage(headingText: string | null) {
+    const heading = {
+      waitFor: jest.fn(() => (headingText === null ? Promise.reject(new Error('timeout')) : Promise.resolve())),
+      textContent: jest.fn().mockResolvedValue(headingText),
+    };
+    const first = jest.fn(() => heading);
+    return {
+      locator: jest.fn(() => ({ first })),
+    };
+  }
+
+  it('reads "Shipped" from .pt-status-main-status', async () => {
+    const service = new AmazonOrderParserService();
+    const page = fakeTrackerPage('Shipped');
+    await expect(service.parseTrackerStatus(page as never)).resolves.toBe('shipped');
+    expect(page.locator).toHaveBeenCalledWith('.pt-status-main-status');
+  });
+
+  it('reads "Ordered" as pending', async () => {
+    const service = new AmazonOrderParserService();
+    await expect(service.parseTrackerStatus(fakeTrackerPage('Ordered') as never)).resolves.toBe('pending');
+  });
+
+  it('answers undefined when the heading is not on the page, so the text fallback runs', async () => {
+    const service = new AmazonOrderParserService();
+    await expect(service.parseTrackerStatus(fakeTrackerPage(null) as never)).resolves.toBeUndefined();
+  });
+});
+
 describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — reads the ship-track page too', () => {
   function buildService(opts: {
     parsed: { status: string; trackingNumber?: string; trackingCarrier?: string; trackingUrl?: string };
     shipTrackText: string;
+    trackerStatus?: string;
   }) {
     const fakePage = {
       goto: jest.fn().mockResolvedValue(undefined),
@@ -418,6 +505,7 @@ describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — reads the 
     } as unknown as AmazonAccountsService;
     const parserService = {
       parseOrderStatus: jest.fn().mockResolvedValue(opts.parsed),
+      parseTrackerStatus: jest.fn().mockResolvedValue(opts.trackerStatus),
     } as unknown as AmazonOrderParserService;
     const browserStateManager = {
       isSessionValid: jest.fn().mockResolvedValue(true),
@@ -457,5 +545,40 @@ describe('AmazonScrapingService.scrapeOrderStatusWithTrackingHtml — reads the 
     });
     const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
     expect(result.status).toBe('delivered');
+  });
+
+  it('takes the tracker status card heading over the visible text when order-details read only an ETA', async () => {
+    // Order 03-15243-67997: order-details showed "Arriving tomorrow" (pending);
+    // the tracker's status card said "Shipped" but its visible text starts
+    // with the same ETA line.
+    const service = buildService({
+      parsed: { status: 'pending', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: SHIPPED_TRACKER_TEXT,
+      trackerStatus: 'shipped',
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.status).toBe('shipped');
+    expect(result.trackingNumber).toBe('TBA335065888809');
+    expect(result.trackingCarrier).toBe('Amazon Logistics');
+  });
+
+  it('falls back to the tracker visible text when the status card heading is missing', async () => {
+    const service = buildService({
+      parsed: { status: 'pending', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: SHIPPED_TRACKER_TEXT,
+      trackerStatus: undefined,
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.status).toBe('shipped');
+  });
+
+  it('keeps an unshipped order pending from the tracker', async () => {
+    const service = buildService({
+      parsed: { status: 'pending', trackingUrl: '/progress-tracker/package/?orderId=1&packageIndex=0' },
+      shipTrackText: UNSHIPPED_TRACKER_TEXT,
+      trackerStatus: 'pending',
+    });
+    const result = await service.scrapeOrderStatusWithTrackingHtml('user-1', 'account-1', 'order-1');
+    expect(result.status).toBe('pending');
   });
 });
