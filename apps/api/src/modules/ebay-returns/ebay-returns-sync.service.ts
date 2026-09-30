@@ -12,6 +12,7 @@ import { EbayService } from '../ebay/ebay.service';
 import { RETURN_SEARCH_WINDOW_DAYS } from './ebay-returns.constants';
 import { PostOrderClient } from './post-order.client';
 import { EbayReturnRow, mapReturnSummary } from './return-mapper';
+import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -47,8 +48,9 @@ function describeFailure(err: unknown): string {
  * Same shape as the listing reconciliation sweep (`EbayFeedSyncService`): a
  * tick claims the most-overdue stores and reads them one after another. One
  * call per store per sweep, against `post-order.return`'s 5,000 calls a day
- * for the whole application — `ebay.returnSync.intervalHours` is the knob that
- * spends that quota.
+ * for the whole application. How often a store is due is therefore derived
+ * from the store count and that limit (`ReturnSweepScheduleService`), not
+ * typed in: a fixed interval is right for exactly one number of stores.
  */
 @Injectable()
 export class EbayReturnsSyncService {
@@ -59,7 +61,8 @@ export class EbayReturnsSyncService {
     private readonly platformSettings: PlatformSettingsService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly ebay: EbayService,
-    private readonly postOrder: PostOrderClient
+    private readonly postOrder: PostOrderClient,
+    private readonly schedule: ReturnSweepScheduleService
   ) {}
 
   /** One tick: claim the stores that are due and read them in sequence. */
@@ -108,7 +111,7 @@ export class EbayReturnsSyncService {
    * store, and a crashed run costs one interval rather than looping.
    */
   private async claimDueAccounts(): Promise<ClaimedAccount[]> {
-    const intervalHours = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS);
+    const { intervalHours } = await this.schedule.resolve();
     const maxAccounts = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN);
 
     return this.database.query<ClaimedAccount>(

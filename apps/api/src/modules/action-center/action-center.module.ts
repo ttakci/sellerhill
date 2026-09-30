@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../common/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { BillingModule } from '../billing/billing.module';
+import { EbayReturnsModule } from '../ebay-returns/ebay-returns.module';
 
 import { ActionCenterController } from './action-center.controller';
 import { ActionCenterService } from './action-center.service';
@@ -14,7 +15,7 @@ import { ActionCenterService } from './action-center.service';
  * module back, so no cycle is introduced.
  */
 @Module({
-  imports: [AuthModule, DatabaseModule, BillingModule],
+  imports: [AuthModule, DatabaseModule, BillingModule, EbayReturnsModule],
   controllers: [ActionCenterController],
   providers: [ActionCenterService],
   exports: [ActionCenterService],

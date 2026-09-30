@@ -7,7 +7,6 @@ import {
   deriveReturnBucket,
   EbayReturnDto,
   PaginatedReturnsDto,
-  PlatformSettingKey,
   resolveReturnFreshnessHours,
   RETURN_TABS,
   ReturnBucket,
@@ -17,9 +16,9 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService, QueryParam } from '../../common/database/database.service';
-import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { RETURNS_DEFAULT_PAGE_SIZE, RETURNS_MAX_PAGE_SIZE } from './ebay-returns.constants';
+import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 interface ReturnListRow {
   id: string;
@@ -137,19 +136,18 @@ const RETURN_BUCKETS = new Set<string>(Object.values(ReturnBucket));
 export class EbayReturnsService {
   constructor(
     private readonly database: DatabaseService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly schedule: ReturnSweepScheduleService
   ) {}
 
   /**
    * The bucket CASE over the `r` alias — the one expression the list filters,
    * sorts and counts by — with the freshness horizon of the moment. The
-   * horizon follows the sweep interval (`resolveReturnFreshnessHours`), so it
-   * is resolved per request rather than frozen at module load.
+   * horizon follows the interval the sweep is ACTUALLY running at
+   * (`ReturnSweepScheduleService` — derived from the store count and the
+   * quota), so it is resolved per request rather than frozen at module load.
    */
   private async bucketContext(): Promise<{ bucketSql: string; freshnessHours: number }> {
-    const freshnessHours = resolveReturnFreshnessHours(
-      await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS)
-    );
+    const freshnessHours = resolveReturnFreshnessHours((await this.schedule.resolve()).intervalHours);
     return { bucketSql: buildReturnBucketSql('r', freshnessHours), freshnessHours };
   }
 

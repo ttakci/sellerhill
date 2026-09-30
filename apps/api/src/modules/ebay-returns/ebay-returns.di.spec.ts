@@ -21,6 +21,7 @@ import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import { EbayReturnsController } from './ebay-returns.controller';
 import { EbayReturnsService } from './ebay-returns.service';
 import { PostOrderClient } from './post-order.client';
+import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const paramTypes = (target: object): unknown[] =>
   (Reflect.getMetadata('design:paramtypes', target) as unknown[] | undefined) ?? [];
@@ -37,11 +38,20 @@ describe('ebay-returns dependency injection metadata', () => {
       QuotaEnforcementService,
       EbayService,
       PostOrderClient,
+      ReturnSweepScheduleService,
+    ]);
+  });
+
+  it('ReturnSweepScheduleService resolves the database, the settings and the call budget', () => {
+    expect(paramTypes(ReturnSweepScheduleService)).toEqual([
+      DatabaseService,
+      PlatformSettingsService,
+      EbayCallBudgetService,
     ]);
   });
 
   it('EbayReturnsService resolves the database and the settings', () => {
-    expect(paramTypes(EbayReturnsService)).toEqual([DatabaseService, PlatformSettingsService]);
+    expect(paramTypes(EbayReturnsService)).toEqual([DatabaseService, ReturnSweepScheduleService]);
   });
 
   it('EbayReturnsController resolves the read service', () => {

@@ -53,7 +53,6 @@ import {
   ListingStatus,
   OrderStage,
   OrderStatus,
-  PlatformSettingKey,
   ReturnBucket,
   ReturnTab,
   SIMULATED_AMAZON_ORDER_PREFIX,
@@ -66,8 +65,8 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
-import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { BillingService } from '../billing/billing.service';
+import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 
 import {
   TRIAL_ENDING_NOTICE_DAYS,
@@ -158,7 +157,7 @@ export class ActionCenterService {
   constructor(
     private readonly db: DatabaseService,
     private readonly billing: BillingService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly returnSchedule: ReturnSweepScheduleService
   ) {}
 
   async getSummary(userId: string): Promise<ActionCenterSummaryDto> {
@@ -456,14 +455,12 @@ export class ActionCenterService {
    * the freshness horizon derives as UNCONFIRMED, never as an action, so a
    * return that dropped out of the search (too old, beyond the first page, a
    * store whose token broke, the sweep switched off) cannot hold this item
-   * open. Same horizon the Returns page uses, resolved from the same setting.
+   * open. Same horizon the Returns page uses, from the same schedule service.
    */
   private async returnItems(userId: string): Promise<ActionCenterItemDto[]> {
     const bucket = buildReturnBucketSql(
       'r',
-      resolveReturnFreshnessHours(
-        await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS)
-      )
+      resolveReturnFreshnessHours((await this.returnSchedule.resolve()).intervalHours)
     );
     const rows = await this.db.query<BreakdownRow>(
       `SELECT ${bucket} AS code, COUNT(*) AS count

@@ -383,7 +383,12 @@ export class BillingRepositoryService {
          JOIN billing_plans p ON p.id = s.plan_id
          JOIN billing_plan_prices pp
            ON pp.plan_id = s.plan_id
-          AND pp.interval = s.interval
+          -- Cast BOTH sides: the two columns are different enum types
+          -- (billing_price_interval vs billing_subscription_interval) with the
+          -- same labels, and Postgres has no operator between them. A bare
+          -- comparison failed this whole statement on every hourly run, so no
+          -- subscriber was ever moved to a new price.
+          AND pp.interval::text = s.interval::text
           AND pp.effective_to IS NULL
           AND pp.provider_price_id IS NOT NULL
          JOIN billing_customers c ON c.id = s.customer_id
