@@ -1,0 +1,1114 @@
+{
+  "slug": "order_return_activity",
+  "deliveryChannel": "HTTPS webhook (POST)",
+  "eventLabel": "ORDER_RETURN_ACTIVITY",
+  "name": "ORDER_RETURN_ACTIVITY",
+  "mdGenerationStatus": "success",
+  "sample": [],
+  "summary": "<p><strong>OAuth Scope</strong><br /><span>In addition to the standard OAuth scope (<a href=\"https://api.ebay.com/oauth/api_scope\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope</a>), this topic requires an access token created using the Authorization Code Grant flow with the following scope:<br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.return.read\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\">https://api.ebay.com/oauth/api_scope/sell.return.read</a><br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.return\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\">https://api.ebay.com/oauth/api_scope/sell.return</a><br /></span><span></span></p>\r\n<p><span>See <a href=\"https://developer.ebay.com/develop/guides-v2/authorization#working-with-oauth-scopes\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">Working with OAuth scopes</a> for more information.</span></p>",
+  "specVersion": "1.0.0",
+  "shortSummary": "This notification is sent to a seller when a return lifecycle activity occurs.",
+  "mdGenerationError": "",
+  "latestSpecHref": "/develop/api/spec/events/ORDER_RETURN_ACTIVITY.yaml",
+  "specSaveAsFileName": "ORDER_RETURN_ACTIVITY.yaml",
+  "documentation": {
+    "info": {
+      "title": "eBay Order Return Activity Notifications",
+      "version": "1.0.0",
+      "description": "This contract defines the payload for eBay order return activity notifications. The service dispatches notifications to users when a return lifecycle activity occurs or when a seller response reminder is generated for a return."
+    },
+    "schemas": {
+      "Metadata": {
+        "type": "object",
+        "description": "This type specifies the metadata included with the notification.",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "This is the unique identifier of the Notification topic."
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "This specifies the version number of the topic schema."
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+            "default": "false"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "description": "This type includes information about the notification.",
+        "properties": {
+          "notificationId": {
+            "type": "string",
+            "description": "This is the unique identifier of the specific notification."
+          },
+          "eventDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+          },
+          "publishDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+          },
+          "publishAttemptCount": {
+            "type": "integer",
+            "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+          },
+          "data": {
+            "description": "This container consists of specific information related to the order return activity notifications.",
+            "$ref": "#/components/schemas/OrderReturnActivityData"
+          }
+        }
+      },
+      "OrderReturnActivityData": {
+        "type": "object",
+        "description": "This type defines the payload for the ORDER_RETURN_ACTIVITY notification.",
+        "properties": {
+          "activityType": {
+            "description": "The enumeration value returned in this field indicates the specific order return activity that occurred.",
+            "$ref": "#/components/schemas/OrderReturnActivityType"
+          },
+          "activityDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the return activity occurred. This date is returned as a UTC-formatted timestamp."
+          },
+          "orderReturn": {
+            "description": "This object contains detailed information about the return request where activity occurred.",
+            "$ref": "#/components/schemas/OrderReturn"
+          }
+        }
+      },
+      "OrderReturnActivityType": {
+        "type": "string",
+        "description": "This enumeration type contains the list of order return activity events.",
+        "enum": [
+          {
+            "value": "RETURN_REQUESTED",
+            "description": "This value indicates a return request was filed against an order line item."
+          },
+          {
+            "value": "RETURN_FULFILLMENT_INITIATED",
+            "description": "This value indicates that the buyer has initiated the return fulfillment process."
+          },
+          {
+            "value": "RETURN_FULFILLMENT_COMPLETED",
+            "description": "This value indicates the return fulfillment process was completed."
+          },
+          {
+            "value": "RETURN_CLOSED",
+            "description": "This value indicates the return was closed."
+          },
+          {
+            "value": "RETURN_REFERRAL_CREATED",
+            "description": "This value indicates that the return has been referred to eBay Customer Support."
+          },
+          {
+            "value": "SELLER_RESPONSE_DUE_REMINDER",
+            "description": "This value indicates that the seller must take an action against the return request. The <strong>sellerAvailableActions</strong> container in the payload may be referenced to see what action(s) are required and by what date."
+          },
+          {
+            "value": "RETURN_REFERRAL_DECIDED",
+            "description": "This value indicates that a referral decision has been reached by eBay Customer Support."
+          },
+          {
+            "value": "RETURN_REFERRAL_ON_HOLD",
+            "description": "This value indicates the referral is on hold so further details can be gathered before a decision outcome can be reached."
+          }
+        ]
+      },
+      "OrderReturn": {
+        "type": "object",
+        "description": "This type contains detailed information about the return request where activity occurred.",
+        "properties": {
+          "returnId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the return."
+          },
+          "returnStatus": {
+            "description": "This value indicates the current status of the return request.",
+            "$ref": "#/components/schemas/ReturnStatus"
+          },
+          "requester": {
+            "description": "This value indicates the party who initiated the return request, such as the BUYER.",
+            "$ref": "#/components/schemas/ReturnRequester"
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the return was requested. This date is returned as a UTC-formatted timestamp."
+          },
+          "closedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the return was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed return requests."
+          },
+          "seller": {
+            "description": "This object identifies the seller involved in the return request.",
+            "$ref": "#/components/schemas/User"
+          },
+          "sellerAvailableActions": {
+            "description": "This object describes the actions currently available to the seller in response to the return request.",
+            "$ref": "#/components/schemas/SellerAvailableActions"
+          },
+          "returnFulfillment": {
+            "description": "This object is used to indicate the current status of the item being returned by the buyer to the seller.",
+            "$ref": "#/components/schemas/ReturnFulfillment"
+          },
+          "returnRefund": {
+            "description": "This object is used to indicate the current status of a refund that is due to the buyer for the returned item.",
+            "$ref": "#/components/schemas/ReturnRefund"
+          },
+          "returnCase": {
+            "description": "This object is only returned if the return request has been referred to eBay customer support and indicates the current status of the referral.",
+            "$ref": "#/components/schemas/ReturnCase"
+          },
+          "returnLineItems": {
+            "type": "array",
+            "description": "This object identifies the line item being returned and the order to which it belongs.",
+            "items": {
+              "$ref": "#/components/schemas/ReturnLineItem"
+            }
+          }
+        }
+      },
+      "ReturnRequester": {
+        "type": "string",
+        "description": "This enumeration type is used to indicate which party initiated a return request.",
+        "enum": [
+          {
+            "value": "BUYER",
+            "description": "This value indicates the return was initiated by the buyer."
+          },
+          {
+            "value": "SELLER",
+            "description": "This value indicates the return was initiated by the seller."
+          },
+          {
+            "value": "EBAY",
+            "description": "This value indicates the return was initiated by eBay."
+          }
+        ]
+      },
+      "User": {
+        "type": "object",
+        "description": "This type is used to identify the seller involved in the return request.",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "This string is the public user identifier of the user."
+          },
+          "username": {
+            "type": "string",
+            "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>"
+          }
+        }
+      },
+      "ReturnLineItem": {
+        "type": "object",
+        "description": "This type represents the information on the order line item attached to the return.",
+        "properties": {
+          "returnLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the return line item."
+          },
+          "orderLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order line item."
+          },
+          "orderId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order."
+          }
+        }
+      },
+      "SellerAvailableActions": {
+        "type": "object",
+        "description": "This type represents the actions currently available to the seller.",
+        "properties": {
+          "respondByAction": {
+            "description": "This object identifies the main required action for the seller at the current point in the return flow.",
+            "$ref": "#/components/schemas/RespondByAction"
+          },
+          "secondaryActions": {
+            "type": "array",
+            "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action.",
+            "items": {
+              "$ref": "#/components/schemas/ReturnAction"
+            }
+          }
+        }
+      },
+      "RespondByAction": {
+        "type": "object",
+        "description": "This type is used to indicate the primary action required from the seller and its due date.",
+        "properties": {
+          "respondAction": {
+            "description": "This value indicates the primary/required action that the seller must take against a return request, such as APPROVE_RETURN.",
+            "$ref": "#/components/schemas/ReturnAction"
+          },
+          "responseDueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the due date for completing the required seller action."
+          }
+        }
+      },
+      "ReturnAction": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible actions that a seller may take against a return request.",
+        "enum": [
+          {
+            "value": "SEND_MESSAGE",
+            "description": "This value indicates that one action that the seller can take is to send a message to the buyer concerning the return request."
+          },
+          {
+            "value": "APPROVE_RETURN",
+            "description": "This value indicates that the seller may approve the return request."
+          },
+          {
+            "value": "DECLINE_RETURN",
+            "description": "This value indicates that the seller may decline the return request."
+          },
+          {
+            "value": "PROCESS_RETURN_REFUND",
+            "description": "This value indicates that the seller has the option to issue a partial or full refund to the buyer to resolve the return request."
+          },
+          {
+            "value": "PROVIDE_RMA_NUMBER",
+            "description": "This value indicates that the seller has the option to provide the Return Merchandise Authorization (RMA) number to the buyer. Some sellers use RMAs and others do not."
+          },
+          {
+            "value": "PROVIDE_SHIPMENT_INFO",
+            "description": "This value indicates that the seller has the option to provide return shipment information and/or a return shipping label to the buyer returning the item."
+          },
+          {
+            "value": "RECORD_RETURN_RECEIVED",
+            "description": "This value indicates that the seller can mark the return item as received if they have indeed received the item back from the seller. This action may be necessary if eBay does not have access to return shipment tracking information."
+          },
+          {
+            "value": "NEGOTIATE_ON_RETURN",
+            "description": "This value indicates that the seller has the option to negotiate the terms of the return request. An example of this would be for the seller to offer that the buyer keeps the item after the seller offers a partial refund."
+          },
+          {
+            "value": "REFER_RETURN_TO_EBAY",
+            "description": "This value indicates that the seller has the option to refer the return request to eBay customer support to help resolve issues with the buyer."
+          }
+        ]
+      },
+      "ReturnStatus": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible statuses for a return request.",
+        "enum": [
+          {
+            "value": "REQUESTED",
+            "description": "This value indicates a return request was initiated against an order line item."
+          },
+          {
+            "value": "OPEN",
+            "description": "This value indicates the return is active and still in progress."
+          },
+          {
+            "value": "CLOSED",
+            "description": "This value indicates that the return is complete."
+          },
+          {
+            "value": "DECLINED",
+            "description": "This value indicates that the return request was declined by the seller."
+          },
+          {
+            "value": "CANCELLED",
+            "description": "This value indicates the return was cancelled, such as by the buyer or eBay."
+          }
+        ]
+      },
+      "ReturnFulfillment": {
+        "type": "object",
+        "description": "This type is used to indicate the current status of the item being returned by the buyer to the seller.",
+        "properties": {
+          "status": {
+            "description": "The value returned in this field indicates the current status of the return fulfillment.",
+            "$ref": "#/components/schemas/ReturnFulfillmentStatus"
+          }
+        }
+      },
+      "ReturnFulfillmentStatus": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible statuses that a return shipment can be in during the return fulfillment lifecycle.",
+        "enum": [
+          {
+            "value": "AWAITING_RETURN_FULFILLMENT_DETAILS",
+            "description": "This value indicates that the buyer is waiting for the seller or eBay to provide return fulfillment details such as a label or an RMA number."
+          },
+          {
+            "value": "AWAITING_RETURN_FULFILLMENT_INITIATION",
+            "description": "This value indicates that the buyer has all the details to initiate the return fulfillment but has yet to ship the item or mark the item as shipped."
+          },
+          {
+            "value": "RETURN_FULFILLMENT_IN_PROGRESS",
+            "description": "This value indicates that the return item has been shipped by the buyer and is on its way back to the seller."
+          },
+          {
+            "value": "RETURN_FULFILLMENT_COMPLETE",
+            "description": "This value indicates that the return fulfillment process has completed, which generally means that the seller has received the return item."
+          },
+          {
+            "value": "RETURN_FULFILLMENT_EXCEPTION",
+            "description": "This value indicates that the return fulfillment process has encountered an issue or exception. For an item that went through the Authentication process, this would mean that eBay’s authentication partner tested and failed the item, or this status can also indicate delivery problems to the seller’s return address."
+          }
+        ]
+      },
+      "ReturnRefund": {
+        "type": "object",
+        "description": "This type is used to indicate the current status of a refund that is due to the buyer for the returned item.",
+        "properties": {
+          "status": {
+            "description": "The value returned in this field indicates the current status of any refund due to the buyer for the returned item.",
+            "$ref": "#/components/schemas/ReturnRefundStatus"
+          }
+        }
+      },
+      "ReturnRefundStatus": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible values used to indicate the status of a buyer’s refund for a returned item.",
+        "enum": [
+          {
+            "value": "PENDING",
+            "description": "This value indicates that the buyer’s refund is pending and has not completed processing yet."
+          },
+          {
+            "value": "COMPLETED",
+            "description": "This value indicates the refund has been successfully completed."
+          },
+          {
+            "value": "FAILED",
+            "description": "This value indicates the refund attempt did not complete successfully."
+          }
+        ]
+      },
+      "ReturnCase": {
+        "type": "object",
+        "description": "This type is used to indicate the current status of a return request that has been referred to eBay customer support.",
+        "properties": {
+          "status": {
+            "description": "The value returned in this field indicates the current status of a return case filed against a return request.",
+            "$ref": "#/components/schemas/ReturnCaseStatus"
+          }
+        }
+      },
+      "ReturnCaseStatus": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible values used to indicate the status of a return case.",
+        "enum": [
+          {
+            "value": "OPEN",
+            "description": "This value indicates that a return case filed against the return request is currently open."
+          },
+          {
+            "value": "ON_HOLD",
+            "description": "This value indicates that a return case filed against the return request is on hold. This state may occur if either the buyer or seller appeals a previous case decision, or it could just indicate that eBay customer support needs more time to research the case."
+          },
+          {
+            "value": "CLOSED",
+            "description": "This value indicates that a return case filed against the return request has been closed."
+          }
+        ]
+      }
+    },
+    "channels": {
+      "ORDER_RETURN_ACTIVITY": {
+        "subscribe": {
+          "message": {
+            "$ref": "#/components/messages/message"
+          },
+          "bindings": {
+            "http": {
+              "type": "request",
+              "method": "POST",
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "Content-Type": {
+                    "type": "string",
+                    "enum": [
+                      "application/json"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "methods": {
+      "subscribe_ORDER_RETURN_ACTIVITY": {
+        "operationId": "subscribe_ORDER_RETURN_ACTIVITY",
+        "action": "subscribe",
+        "channel": "ORDER_RETURN_ACTIVITY",
+        "message": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "X-EBAY-SIGNATURE": {
+                "description": "The ECC message signature. This signature is used to process and validate the message payload.",
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/MetaData",
+                "description": "This component contains the metadata for the notification."
+              },
+              "notification": {
+                "$ref": "#/components/schemas/Notification",
+                "description": "This component contains the notification details."
+              }
+            }
+          }
+        },
+        "request": null,
+        "response": {
+          "rawSchema": {
+            "typeDetails": {
+              "type": "object",
+              "displayNameForType": "object"
+            },
+            "fields": [
+              {
+                "name": "metadata",
+                "description": "This component contains the metadata for the notification.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "MetaData",
+                  "displayNameForType": "MetaData"
+                }
+              },
+              {
+                "name": "notification",
+                "description": "This component contains the notification details.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "Notification",
+                  "displayNameForType": "Notification"
+                },
+                "fields": [
+                  {
+                    "name": "notificationId",
+                    "description": "This is the unique identifier of the specific notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "eventDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishAttemptCount",
+                    "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "integer",
+                      "displayNameForType": "integer"
+                    }
+                  },
+                  {
+                    "name": "data",
+                    "description": "This container consists of specific information related to the order return activity notifications.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "OrderReturnActivityData",
+                      "displayNameForType": "OrderReturnActivityData"
+                    },
+                    "fields": [
+                      {
+                        "name": "activityType",
+                        "description": "The enumeration value returned in this field indicates the specific order return activity that occurred.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "OrderReturnActivityType",
+                          "displayNameForType": "OrderReturnActivityType"
+                        }
+                      },
+                      {
+                        "name": "activityDate",
+                        "description": "This string is the date when the return activity occurred. This date is returned as a UTC-formatted timestamp.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "orderReturn",
+                        "description": "This object contains detailed information about the return request where activity occurred.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "OrderReturn",
+                          "displayNameForType": "OrderReturn"
+                        },
+                        "fields": [
+                          {
+                            "name": "returnId",
+                            "description": "This string is the unique identifier of the return.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "returnStatus",
+                            "description": "This value indicates the current status of the return request.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ReturnStatus",
+                              "displayNameForType": "ReturnStatus"
+                            }
+                          },
+                          {
+                            "name": "requester",
+                            "description": "This value indicates the party who initiated the return request, such as the BUYER.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ReturnRequester",
+                              "displayNameForType": "ReturnRequester"
+                            }
+                          },
+                          {
+                            "name": "requestedDate",
+                            "description": "This string is the date when the return was requested. This date is returned as a UTC-formatted timestamp.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "closedDate",
+                            "description": "This string is the date when the return was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed return requests.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "seller",
+                            "description": "This object identifies the seller involved in the return request.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "User",
+                              "displayNameForType": "User"
+                            },
+                            "fields": [
+                              {
+                                "name": "userId",
+                                "description": "This string is the public user identifier of the user.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "username",
+                                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "sellerAvailableActions",
+                            "description": "This object describes the actions currently available to the seller in response to the return request.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "SellerAvailableActions",
+                              "displayNameForType": "SellerAvailableActions"
+                            },
+                            "fields": [
+                              {
+                                "name": "respondByAction",
+                                "description": "This object identifies the main required action for the seller at the current point in the return flow.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "RespondByAction",
+                                  "displayNameForType": "RespondByAction"
+                                },
+                                "fields": [
+                                  {
+                                    "name": "respondAction",
+                                    "description": "This value indicates the primary/required action that the seller must take against a return request, such as APPROVE_RETURN.",
+                                    "occurrence": "Optional",
+                                    "typeDetails": {
+                                      "type": "ReturnAction",
+                                      "displayNameForType": "ReturnAction"
+                                    }
+                                  },
+                                  {
+                                    "name": "responseDueDate",
+                                    "description": "This string is the due date for completing the required seller action.",
+                                    "occurrence": "Optional",
+                                    "typeDetails": {
+                                      "type": "string",
+                                      "displayNameForType": "string"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "secondaryActions",
+                                "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "array",
+                                  "displayNameForType": "ReturnAction",
+                                  "of": "ReturnAction",
+                                  "displayNameForOf": "ReturnAction"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "returnFulfillment",
+                            "description": "This object is used to indicate the current status of the item being returned by the buyer to the seller.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ReturnFulfillment",
+                              "displayNameForType": "ReturnFulfillment"
+                            },
+                            "fields": [
+                              {
+                                "name": "status",
+                                "description": "The value returned in this field indicates the current status of the return fulfillment.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "ReturnFulfillmentStatus",
+                                  "displayNameForType": "ReturnFulfillmentStatus"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "returnRefund",
+                            "description": "This object is used to indicate the current status of a refund that is due to the buyer for the returned item.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ReturnRefund",
+                              "displayNameForType": "ReturnRefund"
+                            },
+                            "fields": [
+                              {
+                                "name": "status",
+                                "description": "The value returned in this field indicates the current status of any refund due to the buyer for the returned item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "ReturnRefundStatus",
+                                  "displayNameForType": "ReturnRefundStatus"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "returnCase",
+                            "description": "This object is only returned if the return request has been referred to eBay customer support and indicates the current status of the referral.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ReturnCase",
+                              "displayNameForType": "ReturnCase"
+                            },
+                            "fields": [
+                              {
+                                "name": "status",
+                                "description": "The value returned in this field indicates the current status of a return case filed against a return request.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "ReturnCaseStatus",
+                                  "displayNameForType": "ReturnCaseStatus"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "returnLineItems",
+                            "description": "This object identifies the line item being returned and the order to which it belongs.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "array",
+                              "displayNameForType": "array",
+                              "of": "ReturnLineItem",
+                              "displayNameForOf": "ReturnLineItem"
+                            },
+                            "fields": [
+                              {
+                                "name": "returnLineItemId",
+                                "description": "This string is the unique identifier of the return line item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderLineItemId",
+                                "description": "This string is the unique identifier of the order line item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderId",
+                                "description": "This string is the unique identifier of the order.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "operations": [
+      null
+    ],
+    "servers": [],
+    "document": {
+      "asyncapi": "2.0.0",
+      "info": {
+        "title": "eBay Order Return Activity Notifications",
+        "version": "1.0.0",
+        "description": "This contract defines the payload for eBay order return activity notifications. The service dispatches notifications to users when a return lifecycle activity occurs or when a seller response reminder is generated for a return."
+      },
+      "components": {
+        "messages": {},
+        "schemas": {
+          "Metadata": {
+            "type": "object",
+            "description": "This type specifies the metadata included with the notification.",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "This is the unique identifier of the Notification topic."
+              },
+              "schemaVersion": {
+                "type": "string",
+                "description": "This specifies the version number of the topic schema."
+              },
+              "deprecated": {
+                "type": "boolean",
+                "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+                "default": "false"
+              }
+            }
+          },
+          "Notification": {
+            "type": "object",
+            "description": "This type includes information about the notification.",
+            "properties": {
+              "notificationId": {
+                "type": "string",
+                "description": "This is the unique identifier of the specific notification."
+              },
+              "eventDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+              },
+              "publishDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+              },
+              "publishAttemptCount": {
+                "type": "integer",
+                "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+              },
+              "data": {
+                "description": "This container consists of specific information related to the order return activity notifications.",
+                "$ref": "#/components/schemas/OrderReturnActivityData"
+              }
+            }
+          },
+          "OrderReturnActivityData": {
+            "type": "object",
+            "description": "This type defines the payload for the ORDER_RETURN_ACTIVITY notification.",
+            "properties": {
+              "activityType": {
+                "description": "The enumeration value returned in this field indicates the specific order return activity that occurred.",
+                "$ref": "#/components/schemas/OrderReturnActivityType"
+              },
+              "activityDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the return activity occurred. This date is returned as a UTC-formatted timestamp."
+              },
+              "orderReturn": {
+                "description": "This object contains detailed information about the return request where activity occurred.",
+                "$ref": "#/components/schemas/OrderReturn"
+              }
+            }
+          },
+          "OrderReturnActivityType": {
+            "type": "string",
+            "description": "This enumeration type contains the list of order return activity events. | - **RETURN_REQUESTED**: This value indicates a return request was filed against an order line item. - **RETURN_FULFILLMENT_INITIATED**: This value indicates that the buyer has initiated the return fulfillment process. - **RETURN_FULFILLMENT_COMPLETED**: This value indicates the return fulfillment process was completed. - **RETURN_CLOSED**: This value indicates the return was closed. - **RETURN_REFERRAL_CREATED**: This value indicates that the return has been referred to eBay Customer Support. - **SELLER_RESPONSE_DUE_REMINDER**: This value indicates that the seller must take an action against the return request. The <strong>sellerAvailableActions</strong> container in the payload may be referenced to see what action(s) are required and by what date. - **RETURN_REFERRAL_DECIDED**: This value indicates that a referral decision has been reached by eBay Customer Support. - **RETURN_REFERRAL_ON_HOLD**: This value indicates the referral is on hold so further details can be gathered before a decision outcome can be reached.",
+            "enum": [
+              "RETURN_REQUESTED",
+              "RETURN_FULFILLMENT_INITIATED",
+              "RETURN_FULFILLMENT_COMPLETED",
+              "RETURN_CLOSED",
+              "RETURN_REFERRAL_CREATED",
+              "SELLER_RESPONSE_DUE_REMINDER",
+              "RETURN_REFERRAL_DECIDED",
+              "RETURN_REFERRAL_ON_HOLD"
+            ]
+          },
+          "OrderReturn": {
+            "type": "object",
+            "description": "This type contains detailed information about the return request where activity occurred.",
+            "properties": {
+              "returnId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the return."
+              },
+              "returnStatus": {
+                "description": "This value indicates the current status of the return request.",
+                "$ref": "#/components/schemas/ReturnStatus"
+              },
+              "requester": {
+                "description": "This value indicates the party who initiated the return request, such as the BUYER.",
+                "$ref": "#/components/schemas/ReturnRequester"
+              },
+              "requestedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the return was requested. This date is returned as a UTC-formatted timestamp."
+              },
+              "closedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the return was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed return requests."
+              },
+              "seller": {
+                "description": "This object identifies the seller involved in the return request.",
+                "$ref": "#/components/schemas/User"
+              },
+              "sellerAvailableActions": {
+                "description": "This object describes the actions currently available to the seller in response to the return request.",
+                "$ref": "#/components/schemas/SellerAvailableActions"
+              },
+              "returnFulfillment": {
+                "description": "This object is used to indicate the current status of the item being returned by the buyer to the seller.",
+                "$ref": "#/components/schemas/ReturnFulfillment"
+              },
+              "returnRefund": {
+                "description": "This object is used to indicate the current status of a refund that is due to the buyer for the returned item.",
+                "$ref": "#/components/schemas/ReturnRefund"
+              },
+              "returnCase": {
+                "description": "This object is only returned if the return request has been referred to eBay customer support and indicates the current status of the referral.",
+                "$ref": "#/components/schemas/ReturnCase"
+              },
+              "returnLineItems": {
+                "type": "array",
+                "description": "This object identifies the line item being returned and the order to which it belongs."
+              }
+            }
+          },
+          "ReturnRequester": {
+            "type": "string",
+            "description": "This enumeration type is used to indicate which party initiated a return request. | - **BUYER**: This value indicates the return was initiated by the buyer. - **SELLER**: This value indicates the return was initiated by the seller. - **EBAY**: This value indicates the return was initiated by eBay.",
+            "enum": [
+              "BUYER",
+              "SELLER",
+              "EBAY"
+            ]
+          },
+          "User": {
+            "type": "object",
+            "description": "This type is used to identify the seller involved in the return request.",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "description": "This string is the public user identifier of the user."
+              },
+              "username": {
+                "type": "string",
+                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>"
+              }
+            }
+          },
+          "ReturnLineItem": {
+            "type": "object",
+            "description": "This type represents the information on the order line item attached to the return.",
+            "properties": {
+              "returnLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the return line item."
+              },
+              "orderLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order line item."
+              },
+              "orderId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order."
+              }
+            }
+          },
+          "SellerAvailableActions": {
+            "type": "object",
+            "description": "This type represents the actions currently available to the seller.",
+            "properties": {
+              "respondByAction": {
+                "description": "This object identifies the main required action for the seller at the current point in the return flow.",
+                "$ref": "#/components/schemas/RespondByAction"
+              },
+              "secondaryActions": {
+                "type": "array",
+                "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action."
+              }
+            }
+          },
+          "RespondByAction": {
+            "type": "object",
+            "description": "This type is used to indicate the primary action required from the seller and its due date.",
+            "properties": {
+              "respondAction": {
+                "description": "This value indicates the primary/required action that the seller must take against a return request, such as APPROVE_RETURN.",
+                "$ref": "#/components/schemas/ReturnAction"
+              },
+              "responseDueDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the due date for completing the required seller action."
+              }
+            }
+          },
+          "ReturnAction": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible actions that a seller may take against a return request. | - **SEND_MESSAGE**: This value indicates that one action that the seller can take is to send a message to the buyer concerning the return request. - **APPROVE_RETURN**: This value indicates that the seller may approve the return request. - **DECLINE_RETURN**: This value indicates that the seller may decline the return request. - **PROCESS_RETURN_REFUND**: This value indicates that the seller has the option to issue a partial or full refund to the buyer to resolve the return request. - **PROVIDE_RMA_NUMBER**: This value indicates that the seller has the option to provide the Return Merchandise Authorization (RMA) number to the buyer. Some sellers use RMAs and others do not. - **PROVIDE_SHIPMENT_INFO**: This value indicates that the seller has the option to provide return shipment information and/or a return shipping label to the buyer returning the item. - **RECORD_RETURN_RECEIVED**: This value indicates that the seller can mark the return item as received if they have indeed received the item back from the seller. This action may be necessary if eBay does not have access to return shipment tracking information. - **NEGOTIATE_ON_RETURN**: This value indicates that the seller has the option to negotiate the terms of the return request. An example of this would be for the seller to offer that the buyer keeps the item after the seller offers a partial refund. - **REFER_RETURN_TO_EBAY**: This value indicates that the seller has the option to refer the return request to eBay customer support to help resolve issues with the buyer.",
+            "enum": [
+              "SEND_MESSAGE",
+              "APPROVE_RETURN",
+              "DECLINE_RETURN",
+              "PROCESS_RETURN_REFUND",
+              "PROVIDE_RMA_NUMBER",
+              "PROVIDE_SHIPMENT_INFO",
+              "RECORD_RETURN_RECEIVED",
+              "NEGOTIATE_ON_RETURN",
+              "REFER_RETURN_TO_EBAY"
+            ]
+          },
+          "ReturnStatus": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible statuses for a return request. | - **REQUESTED**: This value indicates a return request was initiated against an order line item. - **OPEN**: This value indicates the return is active and still in progress. - **CLOSED**: This value indicates that the return is complete. - **DECLINED**: This value indicates that the return request was declined by the seller. - **CANCELLED**: This value indicates the return was cancelled, such as by the buyer or eBay.",
+            "enum": [
+              "REQUESTED",
+              "OPEN",
+              "CLOSED",
+              "DECLINED",
+              "CANCELLED"
+            ]
+          },
+          "ReturnFulfillment": {
+            "type": "object",
+            "description": "This type is used to indicate the current status of the item being returned by the buyer to the seller.",
+            "properties": {
+              "status": {
+                "description": "The value returned in this field indicates the current status of the return fulfillment.",
+                "$ref": "#/components/schemas/ReturnFulfillmentStatus"
+              }
+            }
+          },
+          "ReturnFulfillmentStatus": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible statuses that a return shipment can be in during the return fulfillment lifecycle. | - **AWAITING_RETURN_FULFILLMENT_DETAILS**: This value indicates that the buyer is waiting for the seller or eBay to provide return fulfillment details such as a label or an RMA number. - **AWAITING_RETURN_FULFILLMENT_INITIATION**: This value indicates that the buyer has all the details to initiate the return fulfillment but has yet to ship the item or mark the item as shipped. - **RETURN_FULFILLMENT_IN_PROGRESS**: This value indicates that the return item has been shipped by the buyer and is on its way back to the seller. - **RETURN_FULFILLMENT_COMPLETE**: This value indicates that the return fulfillment process has completed, which generally means that the seller has received the return item. - **RETURN_FULFILLMENT_EXCEPTION**: This value indicates that the return fulfillment process has encountered an issue or exception. For an item that went through the Authentication process, this would mean that eBay’s authentication partner tested and failed the item, or this status can also indicate delivery problems to the seller’s return address.",
+            "enum": [
+              "AWAITING_RETURN_FULFILLMENT_DETAILS",
+              "AWAITING_RETURN_FULFILLMENT_INITIATION",
+              "RETURN_FULFILLMENT_IN_PROGRESS",
+              "RETURN_FULFILLMENT_COMPLETE",
+              "RETURN_FULFILLMENT_EXCEPTION"
+            ]
+          },
+          "ReturnRefund": {
+            "type": "object",
+            "description": "This type is used to indicate the current status of a refund that is due to the buyer for the returned item.",
+            "properties": {
+              "status": {
+                "description": "The value returned in this field indicates the current status of any refund due to the buyer for the returned item.",
+                "$ref": "#/components/schemas/ReturnRefundStatus"
+              }
+            }
+          },
+          "ReturnRefundStatus": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible values used to indicate the status of a buyer’s refund for a returned item. | - **PENDING**: This value indicates that the buyer’s refund is pending and has not completed processing yet. - **COMPLETED**: This value indicates the refund has been successfully completed. - **FAILED**: This value indicates the refund attempt did not complete successfully.",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "ReturnCase": {
+            "type": "object",
+            "description": "This type is used to indicate the current status of a return request that has been referred to eBay customer support.",
+            "properties": {
+              "status": {
+                "description": "The value returned in this field indicates the current status of a return case filed against a return request.",
+                "$ref": "#/components/schemas/ReturnCaseStatus"
+              }
+            }
+          },
+          "ReturnCaseStatus": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible values used to indicate the status of a return case. | - **OPEN**: This value indicates that a return case filed against the return request is currently open. - **ON_HOLD**: This value indicates that a return case filed against the return request is on hold. This state may occur if either the buyer or seller appeals a previous case decision, or it could just indicate that eBay customer support needs more time to research the case. - **CLOSED**: This value indicates that a return case filed against the return request has been closed.",
+            "enum": [
+              "OPEN",
+              "ON_HOLD",
+              "CLOSED"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

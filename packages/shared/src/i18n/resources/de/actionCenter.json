@@ -97,6 +97,18 @@
         "description_other": "{{count}} Bestellungen wurden vor über {{hours}} Stunden bei Amazon versendet, sind aber auf eBay noch nicht als versendet markiert, weil ihre Sendungsnummern nicht umgewandelt werden konnten. Wir senden die ursprünglichen Amazon-Sendungsnummern nie an Ihre Käufer. Beheben Sie die Ursache, dann werden sie automatisch versendet – bis dahin drohen Mängel wegen verspäteten Versands.",
         "action": "Bestellungen ansehen"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay hat einen Verkauf storniert, den Sie bereits bei Amazon gekauft haben",
+        "description_one": "{{count}} Bestellung wurde in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebene Amazon-Bestellung ist noch offen. Auf diesen Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellung oder senden Sie den Artikel zurück, falls er schon versandt wurde.",
+        "description_other": "{{count}} Bestellungen wurden in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebenen Amazon-Bestellungen sind noch offen. Auf diese Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellungen oder senden Sie die Artikel zurück, falls sie schon versandt wurden.",
+        "action": "Bestellungen prüfen"
+      },
+      "return_seller_action_due": {
+        "title": "Rückgaben warten auf Ihre Antwort",
+        "description_one": "Bei {{count}} Rückgabe erwartet eBay einen nächsten Schritt von Ihnen. Antworten Sie bei eBay vor der Frist, die auf der Seite „Rückgaben“ angezeigt wird.",
+        "description_other": "Bei {{count}} Rückgaben erwartet eBay einen nächsten Schritt von Ihnen. Antworten Sie bei eBay vor den Fristen, die auf der Seite „Rückgaben“ angezeigt werden.",
+        "action": "Rückgaben ansehen"
+      },
       "ebay_account_disconnected": {
         "title": "Ein eBay-Shop hat seine Verbindung verloren",
         "description_one": "{{count}} Shop ist nicht mehr autorisiert. Bestellabgleich, Preisanpassung und Veröffentlichung sind dafür gestoppt, bis Sie die Verbindung wiederherstellen.",

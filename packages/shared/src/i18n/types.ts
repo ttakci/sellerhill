@@ -25,6 +25,7 @@ import type listingSettingsGroup from './resources/en/listingSettingsGroup.json'
 import type messages from './resources/en/messages.json';
 import type orders from './resources/en/orders.json';
 import type profile from './resources/en/profile.json';
+import type returns from './resources/en/returns.json';
 import type storeSettings from './resources/en/storeSettings.json';
 import type en from './resources/en/translation.json';
 
@@ -43,6 +44,7 @@ export type TranslationResource = typeof en &
   typeof messages &
   typeof orders &
   typeof profile &
+  typeof returns &
   typeof storeSettings;
 
 

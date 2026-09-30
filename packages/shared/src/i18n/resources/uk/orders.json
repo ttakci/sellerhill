@@ -133,7 +133,8 @@
         "subscription_suspended": "Підписку призупинено",
         "listing_over_plan_limit": "Лістинг поза лімітом тарифу",
         "order_already_fulfilled": "Уже відправлено — купувати нічого",
-        "order_not_paid": "Очікується оплата покупцем"
+        "order_not_paid": "Очікується оплата покупцем",
+        "order_cancelled": "Скасовано на eBay — купувати нічого"
       },
       "reasonLabel": "Причина: {{reason}}",
       "amazonCancelledBadge": "Amazon скасував",
@@ -217,7 +218,13 @@
       "unit": "шт.",
       "sku": "SKU",
       "na": "Н/д",
-      "ebayStatus": "Статус eBay"
+      "ebayStatus": "Статус eBay",
+      "ebayCancelledOn": "Скасовано на eBay",
+      "refundGroup": "Повернено покупцеві",
+      "refundedAmount": "Сума повернення",
+      "refundedOn": "Дата повернення",
+      "refundNote": "Сума повернення за даними eBay. До неї не входить податок з продажу, який стягнув eBay, тож покупець міг отримати більше.",
+      "cancelledAmazonOpenAction": "Для цього продажу вже оформлено замовлення на Amazon. Скасуйте його на Amazon або поверніть товар, якщо його вже відправлено."
     },
     "modal": {
       "title": "Ввести дані замовлення Amazon",

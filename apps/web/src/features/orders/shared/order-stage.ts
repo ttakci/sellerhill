@@ -32,14 +32,11 @@ export function orderStagePresentation(
 }
 
 /**
- * Stages a seller can meet today. `cancelled` is reserved: `mapOrderStatus` never
- * writes OrderStatus.CANCELLED, so offering it in the Status select or the legend
- * would promise a state that cannot appear. It stays in the enum, the SQL twin and
- * the i18n (a future eBay-cancel sync needs no migration) and is one line to re-list.
+ * Stages offered in the Status select and the legend. Every stage is reachable
+ * since order sync reads eBay cancellations (2026-09-30), so this is the whole
+ * list; the constant stays as the one place to hide a stage again.
  */
-export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER.filter(
-  (stage) => stage !== OrderStage.CANCELLED
-);
+export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER;
 
 const STAGES_WITH_ACTION: readonly OrderStage[] = [...ACTIONABLE_ORDER_STAGES, OrderStage.TO_PURCHASE];
 

@@ -133,7 +133,8 @@
         "subscription_suspended": "Подписка приостановлена",
         "listing_over_plan_limit": "Листинг вне лимита тарифа",
         "order_already_fulfilled": "Уже отправлен — покупать нечего",
-        "order_not_paid": "Ожидается оплата покупателя"
+        "order_not_paid": "Ожидается оплата покупателя",
+        "order_cancelled": "Отменён на eBay — покупать нечего"
       },
       "reasonLabel": "Причина: {{reason}}",
       "amazonCancelledBadge": "Отменён Amazon",
@@ -217,7 +218,13 @@
       "unit": "шт.",
       "sku": "SKU",
       "na": "Н/Д",
-      "ebayStatus": "Статус eBay"
+      "ebayStatus": "Статус eBay",
+      "ebayCancelledOn": "Отменён на eBay",
+      "refundGroup": "Возвращено покупателю",
+      "refundedAmount": "Сумма возврата",
+      "refundedOn": "Дата возврата",
+      "refundNote": "Сумма возврата по данным eBay. В неё не входит налог с продаж, собранный eBay, поэтому покупатель мог получить больше.",
+      "cancelledAmazonOpenAction": "Для этой продажи уже оформлен заказ на Amazon. Отмените его на Amazon или верните товар, если он уже отправлен."
     },
     "modal": {
       "title": "Ввод данных заказа Amazon",

@@ -80,6 +80,22 @@ describe('deriveOrderStage', () => {
     expect(deriveOrderStage({ status: OrderStatus.CANCELLED })).toBe(OrderStage.CANCELLED);
   });
 
+  it('a cancelled eBay sale outranks everything — there is no buyer left to serve', () => {
+    expect(
+      deriveOrderStage({
+        status: OrderStatus.CANCELLED,
+        amazonOrderId: '111-1',
+        amazonCancelledAt: '2026-09-30T00:00:00Z',
+      })
+    ).toBe(OrderStage.CANCELLED);
+    expect(
+      deriveOrderStage({ status: OrderStatus.CANCELLED, autoFulfillStatus: AutoFulfillStatus.BLOCKED })
+    ).toBe(OrderStage.CANCELLED);
+    expect(
+      deriveOrderStage({ status: OrderStatus.CANCELLED, shippedDetectedAt: '2026-09-30T00:00:00Z' })
+    ).toBe(OrderStage.CANCELLED);
+  });
+
   it('lets an Amazon cancellation outrank a shipped or purchased order, but not a settled one', () => {
     expect(
       deriveOrderStage({

@@ -118,6 +118,7 @@ export const ADMIN_QUEUE_NAMES = [
   'billing-price-migration',
   'data-retention',
   'ebay-rate-limit-refresh',
+  'ebay-returns-sync',
 ] as const;
 
 @Injectable()

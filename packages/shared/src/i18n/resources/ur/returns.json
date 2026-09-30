@@ -1,0 +1,94 @@
+{
+  "returns": {
+    "title": "ریٹرنز",
+    "subtitle_one": "{{count}} ریٹرن",
+    "subtitle_other": "{{count}} ریٹرنز",
+    "loading": "ریٹرنز لوڈ ہو رہے ہیں…",
+    "notice": "ریٹرنز کا جواب eBay پر دیں۔ یہ صفحہ دکھاتا ہے کہ آپ سے کیا درکار ہے اور کب تک۔",
+    "tabs": {
+      "all": "سب",
+      "action": "کارروائی درکار",
+      "in_progress": "جاری",
+      "closed": "بند",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "ریٹرن کی حالت"
+    },
+    "filters": {
+      "search": "ریٹرن آئی ڈی، آرڈر آئی ڈی یا پروڈکٹ تلاش کریں…",
+      "allStores": "تمام سٹورز",
+      "clear": "صاف کریں",
+      "resultCount_one": "{{count}} نتیجہ",
+      "resultCount_other": "{{count}} نتائج"
+    },
+    "columns": {
+      "product": "پروڈکٹ",
+      "return": "ریٹرن",
+      "status": "حالت",
+      "due": "آپ سے درکار",
+      "reason": "وجہ",
+      "refund": "ریفنڈ",
+      "opened": "کھولا گیا"
+    },
+    "bucket": {
+      "unconfirmed": "تصدیق نہیں ہوئی",
+      "action_overdue": "مہلت گزر گئی",
+      "action_due": "کارروائی باقی",
+      "escalated": "eBay کو بھیج دیا گیا",
+      "in_progress": "جاری",
+      "closed": "بند"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay نے حال ہی میں اس ریٹرن کی تصدیق نہیں کی، اس لیے اس کی آخری معلوم حالت پرانی ہو سکتی ہے۔ اسے eBay پر چیک کریں۔",
+      "action_overdue": "جس تاریخ تک eBay کو آپ کے جواب کی توقع تھی وہ گزر چکی ہے۔",
+      "action_due": "eBay اس ریٹرن پر آپ کی کارروائی کا منتظر ہے۔",
+      "escalated": "یہ ریٹرن eBay کیس میں تبدیل کر دیا گیا ہے۔",
+      "in_progress": "ریٹرن کھلا ہے؛ فی الحال آپ سے کچھ درکار نہیں۔",
+      "closed": "eBay نے یہ ریٹرن بند کر دیا ہے۔"
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "ریٹرن کی درخواست منظور کریں",
+      "SELLER_DECLINE_REQUEST": "ریٹرن کی درخواست مسترد کریں",
+      "SELLER_ISSUE_REFUND": "ریفنڈ جاری کریں",
+      "SELLER_MARK_AS_RECEIVED": "واپس آنے والے آئٹم کو موصول شدہ نشان زد کریں",
+      "SELLER_MARK_REFUND_SENT": "ریفنڈ کو بھیجا ہوا نشان زد کریں",
+      "SELLER_OFFER_PARTIAL_REFUND": "جزوی ریفنڈ کی پیشکش کریں",
+      "SELLER_PRINT_SHIPPING_LABEL": "شپنگ لیبل پرنٹ کریں",
+      "SELLER_PROVIDE_LABEL": "شپنگ لیبل فراہم کریں",
+      "SELLER_PROVIDE_RMA": "خریدار کو RMA نمبر دیں",
+      "SELLER_RETRY_REFUND": "ریفنڈ دوبارہ آزمائیں",
+      "REMINDER_FOR_REFUND": "خریدار کو ریفنڈ کریں",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "خریدار کو ریفنڈ کریں (آئٹم کی واپسی متوقع نہیں)",
+      "REMINDER_FOR_RMA": "RMA یاد دہانی: eBay پر جواب دیں",
+      "REMINDER_SELLER_TO_RESPOND": "ریٹرن کی درخواست کا جواب دیں",
+      "other": "eBay پر جواب دیں"
+    },
+    "dueBy": "{{date}} تک",
+    "reasonType": {
+      "CANCEL": "ترسیل کے بعد منسوخی",
+      "INSTORE": "سٹور میں واپسی",
+      "REMORSE": "خریدار نے ارادہ بدل لیا",
+      "SNAD": "تفصیل کے مطابق نہیں",
+      "UNKNOWN": "وجہ نہیں بتائی گئی"
+    },
+    "refund": {
+      "refunded": "ریفنڈ ہو گیا",
+      "estimated": "تخمینہ"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "آرڈر",
+    "viewOrder": "آرڈر دیکھیں",
+    "unknownProduct": "نامعلوم پروڈکٹ",
+    "empty": {
+      "title": "ابھی کوئی ریٹرن نہیں",
+      "description": "خریدار eBay پر جو ریٹرنز کھولیں گے وہ یہاں نظر آئیں گے۔"
+    },
+    "emptyFiltered": {
+      "title": "کوئی ریٹرن آپ کے فلٹرز سے مطابقت نہیں رکھتا",
+      "description": "کوئی دوسرا ٹیب، سٹور یا تلاش آزمائیں۔",
+      "action": "فلٹرز صاف کریں"
+    }
+  }
+}

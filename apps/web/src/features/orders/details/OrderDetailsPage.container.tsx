@@ -1,3 +1,4 @@
+import { OrderStage } from '@repo/shared';
 import { formatCurrency, formatDate, formatPhoneNumber, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -72,10 +73,23 @@ export const OrderDetailsPageContainer: React.FC = () => {
   }, [order, t]);
 
   const stageMeaning = useMemo(() => (order ? t(`orders.stage.${order.stage}.meaning`) : ''), [order, t]);
-  const stageAction = useMemo(
-    () => (order && orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null),
-    [order, t]
-  );
+  const stageAction = useMemo(() => {
+    if (!order) {
+      return null;
+    }
+    // "Cancelled" is a finished stage with nothing to do — except when a real
+    // Amazon order was already placed for the sale and Amazon has not reported
+    // it cancelled. The platform never cancels an Amazon order, so say so.
+    if (
+      order.stage === OrderStage.CANCELLED &&
+      order.amazonOrderId &&
+      !order.isSimulated &&
+      !order.amazonCancelledAt
+    ) {
+      return t('orders.detail.cancelledAmazonOpenAction');
+    }
+    return orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null;
+  }, [order, t]);
 
   const totalAmazonCost = useMemo(() => {
     if (!order) {

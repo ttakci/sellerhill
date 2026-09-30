@@ -1,0 +1,323 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ReturnStatusEnum.html
+Fetched: 2026-09-30 (text-extracted)
+
+ReturnStatusEnum - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ReturnStatusEnum
+
+This enumeration type lists the possible statuses for a return request.
+
+Type that uses ReturnStatusEnum:
+
+ReturnSummaryType
+
+Calls that use one or more values of ReturnStatusEnum:
+
+/post-order/v2/return POST,
+/post-order/v2/return/search GET,
+/post-order/v2/return/{returnId} GET
+
+## Enumeration Values
+
+Value |
+Description |
+
+CLOSED |
+This enumeration value indicates that the return request has been closed |
+
+ESCALATED |
+This enumeration value indicates that the return request has been escalated to a return case. |
+
+ITEM_DELIVERED |
+This enumeration value indicates that the return request item has been delivered to the seller. |
+
+ITEM_SHIPPED |
+This enumeration value indicates that the return request item has been shipped by the buyer. |
+
+LESS_THAN_A_FULL_REFUND_ISSUED |
+This enumeration value indicates that a partial buyer refund was issued by the seller. |
+
+PARTIAL_REFUND_DECLINED |
+This enumeration value indicates that the buyer has declined the partial refund amount that the seller has proposed. |
+
+PARTIAL_REFUND_FAILED |
+This enumeration value indicates that the partial refund operation has failed. |
+
+PARTIAL_REFUND_INITIATED |
+This enumeration value indicates that a partial refund to the buyer has been initiated by the seller. |
+
+PARTIAL_REFUND_REQUESTED |
+This enumeration value indicates that a partial refund has been requested by the buyer. |
+
+READY_FOR_SHIPPING |
+This enumeration value indicates that the return request item is ready to be shipped back by the buyer to the seller. |
+
+REPLACED |
+This enumeration value indicates that the buyer has acknowledged the receipt of the replacement item. Note: This value is not currently supported.
+|
+
+REPLACEMENT_CLOSED |
+This enumeration value indicates that the replacement item has been received and the return request has been closed. Note: This value is not currently supported.
+|
+
+REPLACEMENT_DELIVERED |
+This enumeration value indicates that the replacement item has been delivered to the buyer. Note: This value is not currently supported.
+|
+
+REPLACEMENT_LABEL_REQUESTED |
+This enumeration value indicates that the seller has requested a shipping label for the replacement item. Note: This value is not currently supported.
+|
+
+REPLACEMENT_REQUESTED |
+This enumeration value indicates that the buyer has requested a replacement item. Note: This value is not currently supported.
+|
+
+REPLACEMENT_SHIPPED |
+This enumeration value indicates that the replacement item has been shipped to the buyer. Note: This value is not currently supported.
+|
+
+REPLACEMENT_STARTED |
+This enumeration value indicates that the process for the seller to send a replacement item to the buyer has started. |
+
+REPLACEMENT_WAITING_FOR_RMA |
+This enumeration value indicates that the seller still needs to provide a Return Merchandise Authorization (RMA) number for the replacement item. Note: This value is not currently supported.
+|
+
+RETURN_LABEL_REQUESTED |
+This enumeration value indicates that the buyer has requested a return shipping label. |
+
+RETURN_REJECTED |
+This enumeration value indicates that the buyer's return request has been rejected by the seller. |
+
+RETURN_REQUESTED |
+This enumeration value indicates that a return request has been initiated by the buyer. |
+
+RETURN_REQUESTED_TIMEOUT |
+This enumeration value indicates that a return request has been initiated by the buyer, but the system has timed out. |
+
+UNKNOWN |
+This enumeration value indicates that the current status of the return request is unknown. |
+
+WAITING_FOR_RETURN_LABEL |
+This enumeration value indicates that the return request is currently waiting for an eBay return shipping label to be available. |
+
+WAITING_FOR_RMA |
+This enumeration value indicates that the return request is currently waiting for the seller to provide a Return Merchandise Authorization (RMA) number to the buyer. |
+
+* See the Enumeration Index to see exact use of each enumeration value in the API.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

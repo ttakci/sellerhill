@@ -1,0 +1,96 @@
+{
+  "returns": {
+    "title": "Devoluciones",
+    "subtitle_one": "{{count}} devolución",
+    "subtitle_many": "{{count}} devoluciones",
+    "subtitle_other": "{{count}} devoluciones",
+    "loading": "Cargando devoluciones…",
+    "notice": "Responde las devoluciones en eBay. Esta página muestra qué está pendiente y para cuándo.",
+    "tabs": {
+      "all": "Todas",
+      "action": "Requieren acción",
+      "in_progress": "En curso",
+      "closed": "Cerradas",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Estado de la devolución"
+    },
+    "filters": {
+      "search": "Buscar n.º de devolución, de pedido o producto…",
+      "allStores": "Todas las tiendas",
+      "clear": "Borrar",
+      "resultCount_one": "{{count}} resultado",
+      "resultCount_many": "{{count}} resultados",
+      "resultCount_other": "{{count}} resultados"
+    },
+    "columns": {
+      "product": "Producto",
+      "return": "Devolución",
+      "status": "Estado",
+      "due": "Acción pendiente",
+      "reason": "Motivo",
+      "refund": "Reembolso",
+      "opened": "Abierta"
+    },
+    "bucket": {
+      "unconfirmed": "Sin confirmar",
+      "action_overdue": "Vencida",
+      "action_due": "Acción pendiente",
+      "escalated": "Escalada a eBay",
+      "in_progress": "En curso",
+      "closed": "Cerrada"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay no ha confirmado esta devolución recientemente, por lo que su último estado conocido puede estar desactualizado. Revísala en eBay.",
+      "action_overdue": "La fecha en la que eBay esperaba tu respuesta ya pasó.",
+      "action_due": "eBay espera una acción tuya en esta devolución.",
+      "escalated": "Esta devolución se escaló a un caso de eBay.",
+      "in_progress": "La devolución está abierta; por ahora no hay nada pendiente de tu parte.",
+      "closed": "eBay cerró esta devolución."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Aprueba la solicitud de devolución",
+      "SELLER_DECLINE_REQUEST": "Rechaza la solicitud de devolución",
+      "SELLER_ISSUE_REFUND": "Emite el reembolso",
+      "SELLER_MARK_AS_RECEIVED": "Marca el artículo devuelto como recibido",
+      "SELLER_MARK_REFUND_SENT": "Marca el reembolso como enviado",
+      "SELLER_OFFER_PARTIAL_REFUND": "Ofrece un reembolso parcial",
+      "SELLER_PRINT_SHIPPING_LABEL": "Imprime la etiqueta de envío",
+      "SELLER_PROVIDE_LABEL": "Proporciona una etiqueta de envío",
+      "SELLER_PROVIDE_RMA": "Da un número de RMA al comprador",
+      "SELLER_RETRY_REFUND": "Reintenta el reembolso",
+      "REMINDER_FOR_REFUND": "Reembolsa al comprador",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Reembolsa al comprador (no se espera que devuelva el artículo)",
+      "REMINDER_FOR_RMA": "Recordatorio de RMA: responde en eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Responde a la solicitud de devolución",
+      "other": "Responde en eBay"
+    },
+    "dueBy": "antes del {{date}}",
+    "reasonType": {
+      "CANCEL": "Cancelación después del envío",
+      "INSTORE": "Devolución en tienda",
+      "REMORSE": "El comprador cambió de opinión",
+      "SNAD": "No coincide con la descripción",
+      "UNKNOWN": "Motivo no especificado"
+    },
+    "refund": {
+      "refunded": "Reembolsado",
+      "estimated": "Estimado"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Pedido",
+    "viewOrder": "Ver pedido",
+    "unknownProduct": "Producto desconocido",
+    "empty": {
+      "title": "Aún no hay devoluciones",
+      "description": "Las devoluciones que tus compradores abran en eBay aparecerán aquí."
+    },
+    "emptyFiltered": {
+      "title": "Ninguna devolución coincide con los filtros",
+      "description": "Prueba con otra pestaña, tienda o búsqueda.",
+      "action": "Borrar filtros"
+    }
+  }
+}

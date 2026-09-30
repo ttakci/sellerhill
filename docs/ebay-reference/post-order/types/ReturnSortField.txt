@@ -1,0 +1,248 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ReturnSortField.html
+Fetched: 2026-09-30 (text-extracted)
+
+ReturnSortField - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ReturnSortField
+
+Although the sort query parameter in the GET /post-order/v2/return/search method actually references this type, none of the elements defined in this type are literally used through the sort query parameter.
+
+Call that uses ReturnSortField:
+
+/post-order/v2/return/search GET
+
+## Fields
+
+ascending ( boolean ) [0..?]
+
+This boolean field is not literally used. To initiate the retrieval of return requests in ascending order, a plus sign (+) prepends the sort value. To initiate the retrieval of return requests in descending order, a minus sign (-) prepends the sort value.
+
+See the Field Index to learn which calls use ascending.
+
+enumValue ( string ) [0..?]
+
+This field is not literally used, but the sort query parameter value is set to one of the values defined in ReturnSortEnum type, prepended by either a plus sign (+) or minus sign (-) to set ascending or descending order, respectively. See the ReturnSortEnum type definition for a complete list of supported sort values.
+
+See the Field Index to learn which calls use enumValue.
+
+field ( string ) [0..?]
+
+This field is not used.
+
+See the Field Index to learn which calls use field.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

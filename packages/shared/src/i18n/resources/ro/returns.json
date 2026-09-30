@@ -1,0 +1,96 @@
+{
+  "returns": {
+    "title": "Retururi",
+    "subtitle_one": "{{count}} retur",
+    "subtitle_few": "{{count}} retururi",
+    "subtitle_other": "{{count}} de retururi",
+    "loading": "Se încarcă retururile…",
+    "notice": "Răspunde la retururi pe eBay. Această pagină arată ce ai de făcut și până când.",
+    "tabs": {
+      "all": "Toate",
+      "action": "Necesită acțiune",
+      "in_progress": "În curs",
+      "closed": "Închise",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Starea returului"
+    },
+    "filters": {
+      "search": "Caută nr. retur, nr. comandă sau produs…",
+      "allStores": "Toate magazinele",
+      "clear": "Șterge",
+      "resultCount_one": "{{count}} rezultat",
+      "resultCount_few": "{{count}} rezultate",
+      "resultCount_other": "{{count}} de rezultate"
+    },
+    "columns": {
+      "product": "Produs",
+      "return": "Retur",
+      "status": "Stare",
+      "due": "Acțiune necesară",
+      "reason": "Motiv",
+      "refund": "Rambursare",
+      "opened": "Deschis la"
+    },
+    "bucket": {
+      "unconfirmed": "Neconfirmat",
+      "action_overdue": "Termen depășit",
+      "action_due": "Acțiune necesară",
+      "escalated": "Escaladat la eBay",
+      "in_progress": "În curs",
+      "closed": "Închis"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay nu a confirmat recent acest retur, așa că ultima stare cunoscută poate fi depășită. Verificați-l pe eBay.",
+      "action_overdue": "Data până la care eBay aștepta răspunsul tău a trecut.",
+      "action_due": "eBay așteaptă o acțiune din partea ta pentru acest retur.",
+      "escalated": "Acest retur a fost escaladat într-un caz eBay.",
+      "in_progress": "Returul este deschis; momentan nu ai nimic de făcut.",
+      "closed": "eBay a închis acest retur."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Aprobă cererea de retur",
+      "SELLER_DECLINE_REQUEST": "Respinge cererea de retur",
+      "SELLER_ISSUE_REFUND": "Emite rambursarea",
+      "SELLER_MARK_AS_RECEIVED": "Marchează produsul returnat ca primit",
+      "SELLER_MARK_REFUND_SENT": "Marchează rambursarea ca trimisă",
+      "SELLER_OFFER_PARTIAL_REFUND": "Oferă o rambursare parțială",
+      "SELLER_PRINT_SHIPPING_LABEL": "Tipărește eticheta de expediere",
+      "SELLER_PROVIDE_LABEL": "Furnizează o etichetă de expediere",
+      "SELLER_PROVIDE_RMA": "Comunică-i cumpărătorului un număr RMA",
+      "SELLER_RETRY_REFUND": "Reîncearcă rambursarea",
+      "REMINDER_FOR_REFUND": "Rambursează cumpărătorul",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Rambursează cumpărătorul (nu se așteaptă returnarea produsului)",
+      "REMINDER_FOR_RMA": "Memento RMA: răspunde pe eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Răspunde la cererea de retur",
+      "other": "Răspunde pe eBay"
+    },
+    "dueBy": "până la {{date}}",
+    "reasonType": {
+      "CANCEL": "Anulare după expediere",
+      "INSTORE": "Retur în magazin",
+      "REMORSE": "Cumpărătorul s-a răzgândit",
+      "SNAD": "Nu corespunde descrierii",
+      "UNKNOWN": "Motiv nespecificat"
+    },
+    "refund": {
+      "refunded": "Rambursat",
+      "estimated": "Estimat"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Comandă",
+    "viewOrder": "Vezi comanda",
+    "unknownProduct": "Produs necunoscut",
+    "empty": {
+      "title": "Niciun retur încă",
+      "description": "Retururile deschise de cumpărători pe eBay vor apărea aici."
+    },
+    "emptyFiltered": {
+      "title": "Niciun retur nu corespunde filtrelor",
+      "description": "Încearcă altă filă, alt magazin sau altă căutare.",
+      "action": "Șterge filtrele"
+    }
+  }
+}

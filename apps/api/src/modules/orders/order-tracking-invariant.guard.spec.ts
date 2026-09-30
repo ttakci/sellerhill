@@ -26,16 +26,23 @@ describe('order ingest tracking invariant', () => {
     // one of our ACTIVE listings. Re-running any of them on a re-sync would
     // double-deplete shared product stock, inflate sold_count, or — worst —
     // purchase the same order on Amazon twice.
-    const GATE = 'if (inserted && listingId && entity.quantity > 0) {';
+    //
+    // Since order sync re-reads by modification date (2026-09-30) the two
+    // effects that ACT on the sale are gated one step tighter, on a FRESH sale
+    // (`decideIngest`): inserted, created after the store was connected, and
+    // recent. The sold counter only records, so it stays on the insert.
+    const INSERT_GATE = 'if (inserted && listingId && entity.quantity > 0) {';
+    const FRESH_GATE = 'if (freshSale && listingId && entity.quantity > 0) {';
+    expect(source).toContain('const freshSale = ingest.isFreshSale(inserted);');
     // Matched as call sites, not bare names: each of these is also mentioned in
     // a nearby comment, and a comment must not be able to satisfy this guard.
-    const sideEffects = [
-      'this.productsService.decrementStock(', // sale-driven stock sync
-      'SET sold_count = sold_count +', // real-time sold count
-      'this.maybeEnqueueAutoFulfill(', // A2 auto purchase
+    const sideEffects: Array<[string, string]> = [
+      ['this.productsService.decrementStock(', FRESH_GATE], // sale-driven stock sync
+      ['SET sold_count = sold_count +', INSERT_GATE], // real-time sold count
+      ['this.maybeEnqueueAutoFulfill(', FRESH_GATE], // A2 auto purchase
     ];
 
-    for (const effect of sideEffects) {
+    for (const [effect, GATE] of sideEffects) {
       const at = source.indexOf(effect);
       expect(at).toBeGreaterThan(-1);
 
@@ -44,6 +51,11 @@ describe('order ingest tracking invariant', () => {
       // makes this independent of indentation and of how the body is worded.
       const gateAt = source.lastIndexOf(GATE, at);
       expect(gateAt).toBeGreaterThan(-1);
+      // …and it is the NEAREST gate of either kind, so an effect cannot sit
+      // behind the looser one while the tighter one exists further up.
+      expect(gateAt).toBeGreaterThanOrEqual(
+        Math.max(source.lastIndexOf(INSERT_GATE, at), source.lastIndexOf(FRESH_GATE, at))
+      );
 
       let depth = 0;
       let end = -1;
@@ -62,7 +74,7 @@ describe('order ingest tracking invariant', () => {
     }
 
     // …and no side effect was moved out from behind the gate entirely.
-    expect(source.match(/if \(inserted && listingId && entity\.quantity > 0\)/g)?.length).toBe(
+    expect(source.match(/if \((inserted|freshSale) && listingId && entity\.quantity > 0\)/g)?.length).toBe(
       sideEffects.length
     );
   });
@@ -96,13 +108,16 @@ describe('auto-fulfill order-state gate', () => {
   it('does not greet an already-shipped order with a thank-you message', () => {
     // Same returning-seller backlog, different damage: a real buyer receives a
     // "we're preparing your order" weeks after their parcel arrived.
-    expect(source).toContain('if (inserted && !isOrderAlreadyFulfilled(entity.status)) {');
+    // …nor a cancelled one, nor an order first seen long after it was placed.
+    expect(source).toContain(
+      'if (freshSale && !isOrderAlreadyFulfilled(entity.status) && entity.status !== OrderStatus.CANCELLED) {'
+    );
   });
 
   it('can undo an unpaid skip, and bounds what that costs', () => {
-    // The skip is only safe because it is reversible: order sync filters on
-    // creationdate with non-overlapping windows, so nothing else ever observes
-    // a later payment. Without this sweep the refusal is permanent.
+    // The skip is only safe because it is reversible. Order sync does re-read
+    // a modified order, but it starts automation only on a first insert, so
+    // without this sweep the refusal is permanent.
     expect(source).toContain('private async releaseOrdersAwaitingPayment(');
     expect(source).toContain('this.releaseOrdersAwaitingPayment(');
 

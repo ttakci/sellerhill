@@ -191,6 +191,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <NavTooltip label={t('translation:menu.returns')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $isCollapsed={sidebarCollapsed}
+                $active={pathWithoutLocale === '/returns'}
+                onClick={() => onLocaleNavigate('/returns')}
+                aria-label={t('translation:menu.returns')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="undo-2" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.returns')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
             <S.NavDivider />
 
             {!sidebarCollapsed && (

@@ -1,0 +1,96 @@
+{
+  "returns": {
+    "title": "Retours",
+    "subtitle_one": "{{count}} retour",
+    "subtitle_many": "{{count}} retours",
+    "subtitle_other": "{{count}} retours",
+    "loading": "Chargement des retours…",
+    "notice": "Répondez aux retours sur eBay. Cette page indique ce qui est attendu et pour quand.",
+    "tabs": {
+      "all": "Tous",
+      "action": "Action requise",
+      "in_progress": "En cours",
+      "closed": "Clôturés",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Statut du retour"
+    },
+    "filters": {
+      "search": "Rechercher un n° de retour, de commande ou un produit…",
+      "allStores": "Toutes les boutiques",
+      "clear": "Effacer",
+      "resultCount_one": "{{count}} résultat",
+      "resultCount_many": "{{count}} résultats",
+      "resultCount_other": "{{count}} résultats"
+    },
+    "columns": {
+      "product": "Produit",
+      "return": "Retour",
+      "status": "Statut",
+      "due": "Action attendue",
+      "reason": "Motif",
+      "refund": "Remboursement",
+      "opened": "Ouvert le"
+    },
+    "bucket": {
+      "unconfirmed": "Non confirmé",
+      "action_overdue": "En retard",
+      "action_due": "Action attendue",
+      "escalated": "Transmis à eBay",
+      "in_progress": "En cours",
+      "closed": "Clôturé"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay n'a pas confirmé ce retour récemment ; son dernier état connu peut être obsolète. Vérifiez-le sur eBay.",
+      "action_overdue": "La date à laquelle eBay attendait votre réponse est dépassée.",
+      "action_due": "eBay attend une action de votre part sur ce retour.",
+      "escalated": "Ce retour a été transformé en litige eBay.",
+      "in_progress": "Le retour est ouvert ; rien n'est attendu de vous pour le moment.",
+      "closed": "eBay a clôturé ce retour."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Accepter la demande de retour",
+      "SELLER_DECLINE_REQUEST": "Refuser la demande de retour",
+      "SELLER_ISSUE_REFUND": "Effectuer le remboursement",
+      "SELLER_MARK_AS_RECEIVED": "Marquer l'article retourné comme reçu",
+      "SELLER_MARK_REFUND_SENT": "Marquer le remboursement comme envoyé",
+      "SELLER_OFFER_PARTIAL_REFUND": "Proposer un remboursement partiel",
+      "SELLER_PRINT_SHIPPING_LABEL": "Imprimer l'étiquette d'expédition",
+      "SELLER_PROVIDE_LABEL": "Fournir une étiquette d'expédition",
+      "SELLER_PROVIDE_RMA": "Communiquer un numéro RMA à l'acheteur",
+      "SELLER_RETRY_REFUND": "Relancer le remboursement",
+      "REMINDER_FOR_REFUND": "Rembourser l'acheteur",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Rembourser l'acheteur (le renvoi de l'article n'est pas attendu)",
+      "REMINDER_FOR_RMA": "Rappel RMA : répondre sur eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Répondre à la demande de retour",
+      "other": "Répondre sur eBay"
+    },
+    "dueBy": "avant le {{date}}",
+    "reasonType": {
+      "CANCEL": "Annulation après expédition",
+      "INSTORE": "Retour en magasin",
+      "REMORSE": "Changement d'avis",
+      "SNAD": "Non conforme à la description",
+      "UNKNOWN": "Motif non précisé"
+    },
+    "refund": {
+      "refunded": "Remboursé",
+      "estimated": "Estimé"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Commande",
+    "viewOrder": "Voir la commande",
+    "unknownProduct": "Produit inconnu",
+    "empty": {
+      "title": "Aucun retour pour le moment",
+      "description": "Les retours ouverts par vos acheteurs sur eBay s'afficheront ici."
+    },
+    "emptyFiltered": {
+      "title": "Aucun retour ne correspond à vos filtres",
+      "description": "Essayez un autre onglet, une autre boutique ou une autre recherche.",
+      "action": "Effacer les filtres"
+    }
+  }
+}

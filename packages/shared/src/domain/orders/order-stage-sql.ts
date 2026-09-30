@@ -20,8 +20,8 @@ export function buildOrderStageSql(alias: string): string {
   const pushed = `${alias}.ebay_tracking_pushed_at IS NOT NULL`;
 
   return `CASE
-    WHEN ${cancelled} AND ${status} <> '${OrderStatus.COMPLETED}' THEN '${OrderStage.AMAZON_CANCELLED}'
     WHEN ${status} = '${OrderStatus.CANCELLED}' THEN '${OrderStage.CANCELLED}'
+    WHEN ${cancelled} AND ${status} <> '${OrderStatus.COMPLETED}' THEN '${OrderStage.AMAZON_CANCELLED}'
     WHEN ${status} = '${OrderStatus.COMPLETED}' THEN '${OrderStage.DELIVERED}'
     WHEN ${simulated} THEN '${OrderStage.TEST_RUN}'
     WHEN ${auto} = '${AutoFulfillStatus.DRY_RUN}' AND ${alias}.amazon_order_id IS NULL THEN '${OrderStage.TEST_RUN}'

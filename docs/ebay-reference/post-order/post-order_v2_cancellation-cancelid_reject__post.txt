@@ -1,0 +1,404 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_cancellation-cancelid_reject__post.html
+Fetched: 2026-09-30 (text-extracted)
+
+Reject Cancellation - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Reject Cancellation
+
+##
+POST /post-order/v2/cancellation/{cancelId}/reject
+
+This method is used on behalf of a seller to reject a buyer's order cancellation request.
+
+A seller often rejects cancellation requests if one or more line items in the order have already been shipped to the buyer (which makes the order ineligible to be cancelled).
+
+If the seller has shipped all or part of the order, it is good practice to pass shipmentDate and trackingNumber in the request payload.
+Important! The shipmentDate and trackingNumber fields are optional in the request payload. If you do not include either of these fields, you must submit a payload consisting of just the opening and closing braces ({ }).
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+POST https://api.ebay.com/post-order/v2/cancellation/{cancelId}/reject
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+cancelId
+|
+string |
+Required |
+
+The unique eBay-assigned identifier of the cancellation request to be rejected. The cancellation ID value is passed in as part of the call URI.
+|
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+The following lists all fields that could be included in the request.
+
+{ /* RejectCancelRequest */
+"shipmentDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"trackingNumber": string
+}
+
+#### Request field descriptions
+
+Input Container/Field |
+Type |
+Occurrence |
+Meaning |
+
+shipmentDate
+|
+DateTime |
+Optional |
+
+The date and time that a package in the order was shipped by the seller.
+
+Although not a required container, the shipment date should be provided if the seller has indeed shipped the order.
+|
+
+shipmentDate.formattedValue
+|
+string |
+Optional |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+shipmentDate.value
+|
+datetime |
+Conditional |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+trackingNumber
+|
+string |
+Optional |
+
+The shipment tracking number for the package that is en route to the buyer. Although not a required field, the tracking number should be provided if the seller has indeed shipped the order and the tracking number is readily available.
+|
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+This call has no response payload.
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Sample: Reject a cancellation request
+
+The seller rejects the buyers request for an order cancellation.
+
+Description
+
+The seller can reject a cancellation request for a number of reasons, but the most likely reason is because at least one line item in the order has already been shipped. If this is the reason, the seller provides shipment tracking information to the buyer.
+
+Input
+
+Supply the cancellation ID as a path parameter in the call. In the request payload, the seller passes in the shipment date and a shipment tracking number. This indirectly lets the buyer know that the cancellation request was rejected because the order is already en route to the buyer.
+
+URL format. See also the non-wrapped version of this URL.
+
+POST https://api.ebay.com/post-order/v2/cancellation/5********8/reject
+{
+"shipmentDate":
+{
+"value": "2015-08-22T23:29:11.000Z"
+},
+"trackingNumber": "4********************************0"
+}
+
+Output
+
+A successful call returns an HTTP code of 200; there is no payload for the response.
+
+JSON format.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

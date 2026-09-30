@@ -133,7 +133,8 @@
         "subscription_suspended": "الاشتراك معلّق",
         "listing_over_plan_limit": "الإدراج خارج حد الخطة",
         "order_already_fulfilled": "تم شحنه بالفعل، لا شيء لشرائه",
-        "order_not_paid": "بانتظار دفع المشتري"
+        "order_not_paid": "بانتظار دفع المشتري",
+        "order_cancelled": "أُلغي على eBay — لا شيء للشراء"
       },
       "reasonLabel": "السبب: {{reason}}",
       "amazonCancelledBadge": "ألغته Amazon",
@@ -217,7 +218,13 @@
       "unit": "وحدة",
       "sku": "SKU",
       "na": "غير متوفر",
-      "ebayStatus": "حالة eBay"
+      "ebayStatus": "حالة eBay",
+      "ebayCancelledOn": "تاريخ الإلغاء على eBay",
+      "refundGroup": "المبلغ المسترد للمشتري",
+      "refundedAmount": "مبلغ الاسترداد",
+      "refundedOn": "تاريخ الاسترداد",
+      "refundNote": "هذا مبلغ الاسترداد كما يبلّغ به eBay. لا يشمل ضريبة المبيعات التي حصّلها eBay، لذا قد يكون المشتري استلم مبلغاً أكبر.",
+      "cancelledAmazonOpenAction": "سبق تقديم طلب على Amazon لهذه الصفقة. ألغِه على Amazon، أو أرجِع المنتج إن كان قد شُحن."
     },
     "modal": {
       "title": "إدخال معلومات طلب Amazon",

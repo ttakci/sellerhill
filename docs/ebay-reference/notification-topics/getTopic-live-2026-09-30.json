@@ -1,0 +1,151 @@
+{
+  "ORDER_CONFIRMATION": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "ORDER_CONFIRMATION",
+      "description": "An ORDER_CONFIRM notification is sent when a buyer completes the checkout process for an auction or fixed-price item. Usually, an ORDER CONFIRM notification occurs only once per listing. However, if the payment for checkout fails, the checkout status will change from \"complete\" to \"incomplete.\" If the buyer then successfully pays for the item via checkout, the checkout status will change back to \"complete\" again. When the checkout status changes back to \"complete,\" another ORDER CONFIRM notification will be sent. An ORDER CONFIRM notification is generated for each line item in the order. The seller looks up the order ID from the notification and then makes a GetOrders call (using the order ID as an input filter) to retrieve complete order information.",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
+        "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly"
+      ],
+      "status": "ENABLED",
+      "context": "COMMERCE",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        },
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.1",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  },
+  "ORDER_CANCELLATION_ACTIVITY": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "ORDER_CANCELLATION_ACTIVITY",
+      "description": "A consolidated notification topic for all cancellation lifecycle events. This topic replaces 1 legacy cancellation notification methods (BuyerCancelRequested) with a ORDER_CANCELLATION_ACTIVITY for order cancellation notification. Events notify subscribers of cancellation lifecycle changes including creation, closure.",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/sell.cancellation.read",
+        "https://api.ebay.com/oauth/api_scope/sell.cancellation"
+      ],
+      "status": "ENABLED",
+      "context": "COMMERCE",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  },
+  "ORDER_RETURN_ACTIVITY": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "ORDER_RETURN_ACTIVITY",
+      "description": "A consolidated notification topic for all return lifecycle events. This topic replaces 8 legacy return notification methods (ReturnClosed, ReturnCreated, ReturnDelivered,ReturnEscalated, ReturnRefundOverdue, ReturnSellerInfoOverdue, ReturnShipped, ReturnWaitingForSellerInfo) with a unified ORDER_RETURN_ACTIVITY notification. Events notify subscribers of return lifecycle changes including return creation, fulfillment status updates, seller action reminders, referrals, and return closure.",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/sell.return.read",
+        "https://api.ebay.com/oauth/api_scope/sell.return"
+      ],
+      "status": "ENABLED",
+      "context": "COMMERCE",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  },
+  "ORDER_INQUIRY_ACTIVITY": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "ORDER_INQUIRY_ACTIVITY",
+      "description": "A consolidated notification topic for all inquiry lifecycle events. This topic replaces 10 legacy inquiry notification methods (`EBPMyResponseDue`, `EBPEscalatedCase`, `EBPAppealedCase`, `EBPOnHoldCase`, `EBPClosedCase`, `EBPClosedAppeal`, `EBPOtherPartyResponseDue`, `EBPMyPaymentDue`, `EBPPaymentDone`) with a unified ORDER_INQUIRY_ACTIVITY notification. Events notify subscribers of inquiry lifecycle changes including inquiry creation, seller action reminders, referrals, and inquiry closure.",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/sell.inquiry.read",
+        "https://api.ebay.com/oauth/api_scope/sell.inquiry"
+      ],
+      "status": "ENABLED",
+      "context": "COMMERCE",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  },
+  "ITEM_MARKED_SHIPPED": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "ITEM_MARKED_SHIPPED",
+      "description": "Notify user that their item was marked shipped",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/commerce.shipping"
+      ],
+      "status": "ENABLED",
+      "context": "COMMERCE",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  },
+  "NEW_MESSAGE": {
+    "httpStatus": 200,
+    "body": {
+      "topicId": "NEW_MESSAGE",
+      "description": "Topic used for processing messages sent by members or eBay",
+      "authorizationScopes": [
+        "https://api.ebay.com/oauth/api_scope/commerce.message"
+      ],
+      "status": "ENABLED",
+      "context": "DEVELOPER",
+      "scope": "USER",
+      "supportedPayloads": [
+        {
+          "format": [
+            "JSON"
+          ],
+          "schemaVersion": "1.0",
+          "deliveryProtocol": "HTTPS"
+        }
+      ],
+      "filterable": false
+    }
+  }
+}

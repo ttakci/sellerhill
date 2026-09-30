@@ -133,7 +133,8 @@
         "subscription_suspended": "Abunəlik dayandırılıb",
         "listing_over_plan_limit": "Elan plan limitindən kənardadır",
         "order_already_fulfilled": "Artıq göndərilib — alınacaq heç nə yoxdur",
-        "order_not_paid": "Alıcının ödənişi gözlənilir"
+        "order_not_paid": "Alıcının ödənişi gözlənilir",
+        "order_cancelled": "eBay-də ləğv edildi — alınacaq bir şey yoxdur"
       },
       "reasonLabel": "Səbəb: {{reason}}",
       "amazonCancelledBadge": "Amazon ləğv etdi",
@@ -217,7 +218,13 @@
       "unit": "ədəd",
       "sku": "SKU",
       "na": "Yoxdur",
-      "ebayStatus": "eBay statusu"
+      "ebayStatus": "eBay statusu",
+      "ebayCancelledOn": "eBay-də ləğv tarixi",
+      "refundGroup": "Alıcıya qaytarılan",
+      "refundedAmount": "Geri qaytarılan məbləğ",
+      "refundedOn": "Geri qaytarma tarixi",
+      "refundNote": "eBay-in bildirdiyi geri qaytarma məbləğidir. eBay-in yığdığı satış vergisi buraya daxil deyil, ona görə alıcıya daha çox qaytarılmış ola bilər.",
+      "cancelledAmazonOpenAction": "Bu satış üçün Amazon sifarişi artıq verilmişdi. Onu Amazon-da ləğv edin; göndərilibsə, məhsulu geri qaytarın."
     },
     "modal": {
       "title": "Amazon sifariş məlumatını daxil edin",

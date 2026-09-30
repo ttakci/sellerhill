@@ -1,0 +1,805 @@
+{
+  "slug": "order_cancellation_activity",
+  "deliveryChannel": "HTTPS webhook (POST)",
+  "eventLabel": "ORDER_CANCELLATION_ACTIVITY",
+  "name": "ORDER_CANCELLATION_ACTIVITY",
+  "mdGenerationStatus": "success",
+  "sample": [],
+  "summary": "<p><strong>OAuth Scope</strong><br /><span>In addition to the standard OAuth scope (<a href=\"https://api.ebay.com/oauth/api_scope\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope</a>), this topic requires an access token created using the Authorization Code Grant flow with the following scope:<br /></span><a href=\"https://api.ebay.com/oauth/api_scope/sell.cancellation.read\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope/sell.cancellation.read</a><br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.cancellation\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope/sell.cancellation</a></p>\r\n<p><span>See <a href=\"https://developer.ebay.com/develop/guides-v2/authorization#working-with-oauth-scopes\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">Working with OAuth scopes</a> for more information.</span></p>",
+  "specVersion": "1.0.0",
+  "shortSummary": "This notification is sent to a seller when an order cancellation is initiated.",
+  "mdGenerationError": "",
+  "latestSpecHref": "/develop/api/spec/events/ORDER_CANCELLATION_ACTIVITY.yaml",
+  "specSaveAsFileName": "ORDER_CANCELLATION_ACTIVITY.yaml",
+  "documentation": {
+    "info": {
+      "title": "eBay Order Cancellation Activity Notifications",
+      "version": "1.0.0",
+      "description": "This contract defines the payload for eBay order cancellation activity notifications. The service dispatches notifications to users when an order cancellation lifecycle activity occurs or when a seller response reminder is generated for an order cancellation."
+    },
+    "schemas": {
+      "MetaData": {
+        "type": "object",
+        "description": "This type specifies the metadata included with the notification.",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "This is the unique identifier of the Notification topic."
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "This specifies the version number of the topic schema."
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+            "default": "false"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "description": "This type includes information about the notification.",
+        "properties": {
+          "notificationId": {
+            "type": "string",
+            "description": "This is the unique identifier of the specific notification."
+          },
+          "eventDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+          },
+          "publishDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+          },
+          "publishAttemptCount": {
+            "type": "integer",
+            "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OrderCancellationActivityData",
+            "description": "This object defines the base payload for the ORDER_CANCELLATION_ACTIVITY  notification."
+          }
+        }
+      },
+      "OrderCancellationActivityData": {
+        "type": "object",
+        "description": "This type defines the base payload for the ORDER_CANCELLATION_ACTIVITY  notification.",
+        "properties": {
+          "activityType": {
+            "$ref": "#/components/schemas/OrderCancellationActivityType",
+            "description": "The value returned in this field indicates the type of activity that occurred with the order cancellation."
+          },
+          "activityDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the cancellation activity occurred. This date is returned as a UTC-formatted timestamp."
+          },
+          "orderCancellation": {
+            "$ref": "#/components/schemas/OrderCancellation",
+            "description": "This object contains detailed information on the order cancellation associated with the activity."
+          }
+        }
+      },
+      "OrderCancellationActivityType": {
+        "type": "string",
+        "description": "This enumeration type is used to indicate the specific order cancellation activity classification.",
+        "enum": [
+          {
+            "value": "CANCELLATION_REQUESTED",
+            "description": "This value indicates that the notification event corresponds to an order cancellation request that was initiated."
+          },
+          {
+            "value": "CANCELLATION_DECLINED",
+            "description": "This value indicates that the notification event corresponds to an order cancellation request that was declined."
+          },
+          {
+            "value": "CANCELLATION_COMPLETED",
+            "description": "This value indicates that the notification event corresponds to an order cancellation request that completed and is now closed."
+          },
+          {
+            "value": "SELLER_RESPONSE_REMINDER",
+            "description": "This value indicates that the notification event is a reminder to the seller that an action is required on their part for the cancellation request."
+          }
+        ]
+      },
+      "OrderCancellation": {
+        "type": "object",
+        "description": "This type contains detailed information on the order cancellation associated with the activity.",
+        "properties": {
+          "cancellationId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the cancellation."
+          },
+          "cancellationStatus": {
+            "$ref": "#/components/schemas/ContractCancellationStatus",
+            "description": "The value in this field represents the status of the contract cancellation."
+          },
+          "requester": {
+            "$ref": "#/components/schemas/Requester",
+            "description": "This value indicates the party who initiated the cancellation request, such as the BUYER."
+          },
+          "requestedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the cancellation was requested. This date is returned as a UTC-formatted timestamp."
+          },
+          "closedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the cancellation was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed cancellation requests"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/User",
+            "description": "This object identifies the seller involved in the cancellation request."
+          },
+          "sellerAvailableActions": {
+            "$ref": "#/components/schemas/ContractCancellationActions",
+            "description": "This object describes the actions currently available to the seller in response to the cancellation request."
+          },
+          "cancellationLineItems": {
+            "type": "array",
+            "description": "This object identifies the line item being cancelled and the order that it belongs to.",
+            "items": {
+              "$ref": "#/components/schemas/OrderCancellationLineItem"
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "This type is used to identify the seller involved in the cancellation request.",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "This string is the public user identifier of the user."
+          },
+          "username": {
+            "type": "string",
+            "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>."
+          }
+        }
+      },
+      "OrderCancellationLineItem": {
+        "type": "object",
+        "description": "This type contains the information on the order line item attached to the cancellation.",
+        "properties": {
+          "cancellationLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the cancellation line item."
+          },
+          "orderId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order."
+          },
+          "orderLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order line item."
+          }
+        }
+      },
+      "ContractCancellationActions": {
+        "type": "object",
+        "description": "This type contains the actions currently available to the seller.",
+        "properties": {
+          "primaryActions": {
+            "type": "array",
+            "description": "This array contains the primary actions currently available to the seller.",
+            "items": {
+              "$ref": "#/components/schemas/ContractCancellationAction"
+            }
+          },
+          "responseDueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the due date for completing one of the required seller actions."
+          }
+        }
+      },
+      "ContractCancellationAction": {
+        "type": "string",
+        "description": "This enumeration type is used to indicate a cancellation action available to the seller.",
+        "enum": [
+          {
+            "value": "APPROVE",
+            "description": "This value indicates the buyer's cancellation request has been approved. If the order is eligible and the seller agrees, the order is canceled and the buyer is notified."
+          },
+          {
+            "value": "DECLINE",
+            "description": "This value indicates the cancellation request has been declined."
+          },
+          {
+            "value": "RETRY_REFUND",
+            "description": "This value indicates that the seller can retry the refund for the cancellation after a previous refund attempt failed or encountered an issue."
+          }
+        ]
+      },
+      "Requester": {
+        "type": "string",
+        "description": "This enumeration type is used to indicate the party who initiated the cancellation.",
+        "enum": [
+          {
+            "value": "BUYER",
+            "description": "This value indicates the cancellation was initiated by the buyer."
+          },
+          {
+            "value": "SELLER",
+            "description": "This value indicates the cancellation was initiated by the seller."
+          },
+          {
+            "value": "EBAY",
+            "description": "This value indicates the cancellation was initiated by eBay."
+          }
+        ]
+      },
+      "ContractCancellationStatus": {
+        "type": "string",
+        "description": "This enumeration type is used to indicate the status of the contract cancellation.",
+        "enum": [
+          {
+            "value": "REQUESTED",
+            "description": "This value indicates the cancellation has been submitted or opened and is awaiting further processing."
+          },
+          {
+            "value": "PENDING",
+            "description": "This value indicates the cancellation is still in progress and has not reached a final outcome yet."
+          },
+          {
+            "value": "DECLINED",
+            "description": "This value indicates the cancellation request was declined."
+          },
+          {
+            "value": "COMPLETED",
+            "description": "This value indicates the cancellation flow finished and the cancellation was completed."
+          }
+        ]
+      }
+    },
+    "channels": {
+      "ORDER_CANCELLATION_ACTIVITY": {
+        "subscribe": {
+          "message": {
+            "$ref": "#/components/messages/message"
+          },
+          "bindings": {
+            "http": {
+              "type": "request",
+              "method": "POST",
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "Content-Type": {
+                    "type": "string",
+                    "enum": [
+                      "application/json"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "methods": {
+      "subscribe_ORDER_CANCELLATION_ACTIVITY": {
+        "operationId": "subscribe_ORDER_CANCELLATION_ACTIVITY",
+        "action": "subscribe",
+        "channel": "ORDER_CANCELLATION_ACTIVITY",
+        "message": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "X-EBAY-SIGNATURE": {
+                "description": "The ECC message signature. This signature is used to process and validate the message payload.",
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/MetaData",
+                "description": "This component represents the metadata for the notification."
+              },
+              "notification": {
+                "$ref": "#/components/schemas/Notification",
+                "description": "This component represents the notification details."
+              }
+            }
+          }
+        },
+        "request": null,
+        "response": {
+          "rawSchema": {
+            "typeDetails": {
+              "type": "object",
+              "displayNameForType": "object"
+            },
+            "fields": [
+              {
+                "name": "metadata",
+                "description": "This component represents the metadata for the notification.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "MetaData",
+                  "displayNameForType": "MetaData"
+                },
+                "fields": [
+                  {
+                    "name": "topic",
+                    "description": "This is the unique identifier of the Notification topic.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "schemaVersion",
+                    "description": "This specifies the version number of the topic schema.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "deprecated",
+                    "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "boolean",
+                      "displayNameForType": "boolean"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "notification",
+                "description": "This component represents the notification details.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "Notification",
+                  "displayNameForType": "Notification"
+                },
+                "fields": [
+                  {
+                    "name": "notificationId",
+                    "description": "This is the unique identifier of the specific notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "eventDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishAttemptCount",
+                    "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "integer",
+                      "displayNameForType": "integer"
+                    }
+                  },
+                  {
+                    "name": "data",
+                    "description": "This object defines the base payload for the ORDER_CANCELLATION_ACTIVITY  notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "OrderCancellationActivityData",
+                      "displayNameForType": "OrderCancellationActivityData"
+                    },
+                    "fields": [
+                      {
+                        "name": "activityType",
+                        "description": "The value returned in this field indicates the type of activity that occurred with the order cancellation.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "OrderCancellationActivityType",
+                          "displayNameForType": "OrderCancellationActivityType"
+                        }
+                      },
+                      {
+                        "name": "activityDate",
+                        "description": "This string is the date when the cancellation activity occurred. This date is returned as a UTC-formatted timestamp.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "orderCancellation",
+                        "description": "This object contains detailed information on the order cancellation associated with the activity.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "OrderCancellation",
+                          "displayNameForType": "OrderCancellation"
+                        },
+                        "fields": [
+                          {
+                            "name": "cancellationId",
+                            "description": "This string is the unique identifier of the cancellation.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "cancellationStatus",
+                            "description": "The value in this field represents the status of the contract cancellation.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ContractCancellationStatus",
+                              "displayNameForType": "ContractCancellationStatus"
+                            }
+                          },
+                          {
+                            "name": "requester",
+                            "description": "This value indicates the party who initiated the cancellation request, such as the BUYER.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "Requester",
+                              "displayNameForType": "Requester"
+                            }
+                          },
+                          {
+                            "name": "requestedDate",
+                            "description": "This string is the date when the cancellation was requested. This date is returned as a UTC-formatted timestamp.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "closedDate",
+                            "description": "This string is the date when the cancellation was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed cancellation requests",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "seller",
+                            "description": "This object identifies the seller involved in the cancellation request.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "User",
+                              "displayNameForType": "User"
+                            },
+                            "fields": [
+                              {
+                                "name": "userId",
+                                "description": "This string is the public user identifier of the user.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "username",
+                                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "sellerAvailableActions",
+                            "description": "This object describes the actions currently available to the seller in response to the cancellation request.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "ContractCancellationActions",
+                              "displayNameForType": "ContractCancellationActions"
+                            },
+                            "fields": [
+                              {
+                                "name": "primaryActions",
+                                "description": "This array contains the primary actions currently available to the seller.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "array",
+                                  "displayNameForType": "ContractCancellationAction",
+                                  "of": "ContractCancellationAction",
+                                  "displayNameForOf": "ContractCancellationAction"
+                                }
+                              },
+                              {
+                                "name": "responseDueDate",
+                                "description": "This string is the due date for completing one of the required seller actions.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "cancellationLineItems",
+                            "description": "This object identifies the line item being cancelled and the order that it belongs to.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "array",
+                              "displayNameForType": "array",
+                              "of": "OrderCancellationLineItem",
+                              "displayNameForOf": "OrderCancellationLineItem"
+                            },
+                            "fields": [
+                              {
+                                "name": "cancellationLineItemId",
+                                "description": "This string is the unique identifier of the cancellation line item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderId",
+                                "description": "This string is the unique identifier of the order.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderLineItemId",
+                                "description": "This string is the unique identifier of the order line item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "operations": [
+      null
+    ],
+    "servers": [],
+    "document": {
+      "asyncapi": "2.0.0",
+      "info": {
+        "title": "eBay Order Cancellation Activity Notifications",
+        "version": "1.0.0",
+        "description": "This contract defines the payload for eBay order cancellation activity notifications. The service dispatches notifications to users when an order cancellation lifecycle activity occurs or when a seller response reminder is generated for an order cancellation."
+      },
+      "components": {
+        "messages": {},
+        "schemas": {
+          "MetaData": {
+            "type": "object",
+            "description": "This type specifies the metadata included with the notification.",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "This is the unique identifier of the Notification topic."
+              },
+              "schemaVersion": {
+                "type": "string",
+                "description": "This specifies the version number of the topic schema."
+              },
+              "deprecated": {
+                "type": "boolean",
+                "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+                "default": "false"
+              }
+            }
+          },
+          "Notification": {
+            "type": "object",
+            "description": "This type includes information about the notification.",
+            "properties": {
+              "notificationId": {
+                "type": "string",
+                "description": "This is the unique identifier of the specific notification."
+              },
+              "eventDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+              },
+              "publishDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+              },
+              "publishAttemptCount": {
+                "type": "integer",
+                "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+              },
+              "data": {
+                "$ref": "#/components/schemas/OrderCancellationActivityData",
+                "description": "This object defines the base payload for the ORDER_CANCELLATION_ACTIVITY  notification."
+              }
+            }
+          },
+          "OrderCancellationActivityData": {
+            "type": "object",
+            "description": "This type defines the base payload for the ORDER_CANCELLATION_ACTIVITY  notification.",
+            "properties": {
+              "activityType": {
+                "$ref": "#/components/schemas/OrderCancellationActivityType",
+                "description": "The value returned in this field indicates the type of activity that occurred with the order cancellation."
+              },
+              "activityDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the cancellation activity occurred. This date is returned as a UTC-formatted timestamp."
+              },
+              "orderCancellation": {
+                "$ref": "#/components/schemas/OrderCancellation",
+                "description": "This object contains detailed information on the order cancellation associated with the activity."
+              }
+            }
+          },
+          "OrderCancellationActivityType": {
+            "type": "string",
+            "description": "This enumeration type is used to indicate the specific order cancellation activity classification. | - **CANCELLATION_REQUESTED**: This value indicates that the notification event corresponds to an order cancellation request that was initiated. - **CANCELLATION_DECLINED**: This value indicates that the notification event corresponds to an order cancellation request that was declined. - **CANCELLATION_COMPLETED**: This value indicates that the notification event corresponds to an order cancellation request that completed and is now closed. - **SELLER_RESPONSE_REMINDER**: This value indicates that the notification event is a reminder to the seller that an action is required on their part for the cancellation request.",
+            "enum": [
+              "CANCELLATION_REQUESTED",
+              "CANCELLATION_DECLINED",
+              "CANCELLATION_COMPLETED",
+              "SELLER_RESPONSE_REMINDER"
+            ]
+          },
+          "OrderCancellation": {
+            "type": "object",
+            "description": "This type contains detailed information on the order cancellation associated with the activity.",
+            "properties": {
+              "cancellationId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the cancellation."
+              },
+              "cancellationStatus": {
+                "$ref": "#/components/schemas/ContractCancellationStatus",
+                "description": "The value in this field represents the status of the contract cancellation."
+              },
+              "requester": {
+                "$ref": "#/components/schemas/Requester",
+                "description": "This value indicates the party who initiated the cancellation request, such as the BUYER."
+              },
+              "requestedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the cancellation was requested. This date is returned as a UTC-formatted timestamp."
+              },
+              "closedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the cancellation was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed cancellation requests"
+              },
+              "seller": {
+                "$ref": "#/components/schemas/User",
+                "description": "This object identifies the seller involved in the cancellation request."
+              },
+              "sellerAvailableActions": {
+                "$ref": "#/components/schemas/ContractCancellationActions",
+                "description": "This object describes the actions currently available to the seller in response to the cancellation request."
+              },
+              "cancellationLineItems": {
+                "type": "array",
+                "description": "This object identifies the line item being cancelled and the order that it belongs to."
+              }
+            }
+          },
+          "User": {
+            "type": "object",
+            "description": "This type is used to identify the seller involved in the cancellation request.",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "description": "This string is the public user identifier of the user."
+              },
+              "username": {
+                "type": "string",
+                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>."
+              }
+            }
+          },
+          "OrderCancellationLineItem": {
+            "type": "object",
+            "description": "This type contains the information on the order line item attached to the cancellation.",
+            "properties": {
+              "cancellationLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the cancellation line item."
+              },
+              "orderId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order."
+              },
+              "orderLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order line item."
+              }
+            }
+          },
+          "ContractCancellationActions": {
+            "type": "object",
+            "description": "This type contains the actions currently available to the seller.",
+            "properties": {
+              "primaryActions": {
+                "type": "array",
+                "description": "This array contains the primary actions currently available to the seller."
+              },
+              "responseDueDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the due date for completing one of the required seller actions."
+              }
+            }
+          },
+          "ContractCancellationAction": {
+            "type": "string",
+            "description": "This enumeration type is used to indicate a cancellation action available to the seller. | - **APPROVE**: This value indicates the buyer's cancellation request has been approved. If the order is eligible and the seller agrees, the order is canceled and the buyer is notified. - **DECLINE**: This value indicates the cancellation request has been declined. - **RETRY_REFUND**: This value indicates that the seller can retry the refund for the cancellation after a previous refund attempt failed or encountered an issue.",
+            "enum": [
+              "APPROVE",
+              "DECLINE",
+              "RETRY_REFUND"
+            ]
+          },
+          "Requester": {
+            "type": "string",
+            "description": "This enumeration type is used to indicate the party who initiated the cancellation. | - **BUYER**: This value indicates the cancellation was initiated by the buyer. - **SELLER**: This value indicates the cancellation was initiated by the seller. - **EBAY**: This value indicates the cancellation was initiated by eBay.",
+            "enum": [
+              "BUYER",
+              "SELLER",
+              "EBAY"
+            ]
+          },
+          "ContractCancellationStatus": {
+            "type": "string",
+            "description": "This enumeration type is used to indicate the status of the contract cancellation. | - **REQUESTED**: This value indicates the cancellation has been submitted or opened and is awaiting further processing. - **PENDING**: This value indicates the cancellation is still in progress and has not reached a final outcome yet. - **DECLINED**: This value indicates the cancellation request was declined. - **COMPLETED**: This value indicates the cancellation flow finished and the cancellation was completed.",
+            "enum": [
+              "REQUESTED",
+              "PENDING",
+              "DECLINED",
+              "COMPLETED"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

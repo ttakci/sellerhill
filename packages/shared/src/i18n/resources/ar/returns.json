@@ -1,0 +1,102 @@
+{
+  "returns": {
+    "title": "المرتجعات",
+    "subtitle_zero": "لا توجد مرتجعات",
+    "subtitle_one": "مرتجع واحد",
+    "subtitle_two": "مرتجعان",
+    "subtitle_few": "{{count}} مرتجعات",
+    "subtitle_many": "{{count}} مرتجعًا",
+    "subtitle_other": "{{count}} مرتجع",
+    "loading": "جارٍ تحميل المرتجعات…",
+    "notice": "استجب لطلبات الإرجاع على eBay. تعرض هذه الصفحة المطلوب منك وموعده النهائي.",
+    "tabs": {
+      "all": "الكل",
+      "action": "تحتاج إجراء",
+      "in_progress": "قيد التنفيذ",
+      "closed": "مغلقة",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "حالة المرتجع"
+    },
+    "filters": {
+      "search": "ابحث برقم المرتجع أو رقم الطلب أو المنتج…",
+      "allStores": "جميع المتاجر",
+      "clear": "مسح",
+      "resultCount_zero": "لا توجد نتائج",
+      "resultCount_one": "نتيجة واحدة",
+      "resultCount_two": "نتيجتان",
+      "resultCount_few": "{{count}} نتائج",
+      "resultCount_many": "{{count}} نتيجة",
+      "resultCount_other": "{{count}} نتيجة"
+    },
+    "columns": {
+      "product": "المنتج",
+      "return": "المرتجع",
+      "status": "الحالة",
+      "due": "المطلوب منك",
+      "reason": "السبب",
+      "refund": "الاسترداد",
+      "opened": "تاريخ الفتح"
+    },
+    "bucket": {
+      "unconfirmed": "غير مؤكَّد",
+      "action_overdue": "تجاوز الموعد",
+      "action_due": "بانتظار إجراء",
+      "escalated": "مُصعَّد إلى eBay",
+      "in_progress": "قيد التنفيذ",
+      "closed": "مغلق"
+    },
+    "bucketHint": {
+      "unconfirmed": "لم يؤكّد eBay هذا المرتجع مؤخراً، لذا قد تكون حالته الأخيرة المعروفة قديمة. تحقّق منه على eBay.",
+      "action_overdue": "انقضى الموعد الذي كانت eBay تنتظر ردّك فيه.",
+      "action_due": "تنتظر eBay إجراءً منك بخصوص هذا المرتجع.",
+      "escalated": "تم تصعيد هذا المرتجع إلى قضية لدى eBay.",
+      "in_progress": "المرتجع مفتوح، ولا يوجد ما هو مطلوب منك حاليًا.",
+      "closed": "أغلقت eBay هذا المرتجع."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "وافق على طلب الإرجاع",
+      "SELLER_DECLINE_REQUEST": "ارفض طلب الإرجاع",
+      "SELLER_ISSUE_REFUND": "أصدر المبلغ المسترد",
+      "SELLER_MARK_AS_RECEIVED": "ضع علامة على استلام المنتج المُرجَع",
+      "SELLER_MARK_REFUND_SENT": "ضع علامة على إرسال المبلغ المسترد",
+      "SELLER_OFFER_PARTIAL_REFUND": "اعرض استردادًا جزئيًا",
+      "SELLER_PRINT_SHIPPING_LABEL": "اطبع ملصق الشحن",
+      "SELLER_PROVIDE_LABEL": "قدّم ملصق الشحن",
+      "SELLER_PROVIDE_RMA": "زوّد المشتري برقم RMA",
+      "SELLER_RETRY_REFUND": "أعد محاولة الاسترداد",
+      "REMINDER_FOR_REFUND": "أعد المبلغ إلى المشتري",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "أعد المبلغ إلى المشتري (لا يُنتظر إرجاع المنتج)",
+      "REMINDER_FOR_RMA": "تذكير RMA: استجب على eBay",
+      "REMINDER_SELLER_TO_RESPOND": "استجب لطلب الإرجاع",
+      "other": "استجب على eBay"
+    },
+    "dueBy": "قبل {{date}}",
+    "reasonType": {
+      "CANCEL": "إلغاء بعد الشحن",
+      "INSTORE": "إرجاع في المتجر",
+      "REMORSE": "غيّر المشتري رأيه",
+      "SNAD": "لا يطابق الوصف",
+      "UNKNOWN": "السبب غير محدد"
+    },
+    "refund": {
+      "refunded": "تم الاسترداد",
+      "estimated": "تقديري"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "الطلب",
+    "viewOrder": "عرض الطلب",
+    "unknownProduct": "منتج غير معروف",
+    "empty": {
+      "title": "لا توجد مرتجعات بعد",
+      "description": "ستظهر هنا المرتجعات التي يفتحها المشترون على eBay."
+    },
+    "emptyFiltered": {
+      "title": "لا توجد مرتجعات تطابق عوامل التصفية",
+      "description": "جرّب تبويبًا أو متجرًا أو بحثًا آخر.",
+      "action": "مسح عوامل التصفية"
+    }
+  }
+}

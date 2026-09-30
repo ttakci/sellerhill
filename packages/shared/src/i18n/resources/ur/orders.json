@@ -133,7 +133,8 @@
         "subscription_suspended": "سبسکرپشن معطل",
         "listing_over_plan_limit": "لسٹنگ پلان کی حد سے باہر",
         "order_already_fulfilled": "پہلے ہی شپ ہو چکا — خریدنے کو کچھ نہیں",
-        "order_not_paid": "خریدار کی ادائیگی کا انتظار"
+        "order_not_paid": "خریدار کی ادائیگی کا انتظار",
+        "order_cancelled": "eBay پر منسوخ — خریدنے کو کچھ نہیں"
       },
       "reasonLabel": "وجہ: {{reason}}",
       "amazonCancelledBadge": "Amazon نے منسوخ کیا",
@@ -217,7 +218,13 @@
       "unit": "یونٹ",
       "sku": "SKU",
       "na": "N/A",
-      "ebayStatus": "eBay اسٹیٹس"
+      "ebayStatus": "eBay اسٹیٹس",
+      "ebayCancelledOn": "eBay پر منسوخی کی تاریخ",
+      "refundGroup": "خریدار کو ریفنڈ",
+      "refundedAmount": "ریفنڈ کی رقم",
+      "refundedOn": "ریفنڈ کی تاریخ",
+      "refundNote": "یہ eBay کی بتائی ہوئی ریفنڈ رقم ہے۔ اس میں eBay کا وصول کردہ سیلز ٹیکس شامل نہیں، اس لیے خریدار کو اس سے زیادہ ملا ہو سکتا ہے۔",
+      "cancelledAmazonOpenAction": "اس فروخت کے لیے Amazon آرڈر پہلے ہی دیا جا چکا تھا۔ اسے Amazon پر منسوخ کریں، یا اگر بھیجا جا چکا ہے تو آئٹم واپس کریں۔"
     },
     "modal": {
       "title": "Amazon آرڈر کی معلومات درج کریں",

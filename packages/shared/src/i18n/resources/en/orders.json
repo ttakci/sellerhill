@@ -133,7 +133,8 @@
         "subscription_suspended": "Subscription suspended",
         "listing_over_plan_limit": "Listing outside plan limit",
         "order_already_fulfilled": "Already shipped — nothing to buy",
-        "order_not_paid": "Waiting for buyer payment"
+        "order_not_paid": "Waiting for buyer payment",
+        "order_cancelled": "Cancelled on eBay — nothing to buy"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",
@@ -217,7 +218,13 @@
       "unit": "unit",
       "sku": "SKU",
       "na": "N/A",
-      "ebayStatus": "eBay status"
+      "ebayStatus": "eBay status",
+      "ebayCancelledOn": "Cancelled on eBay",
+      "refundGroup": "Refunded to the buyer",
+      "refundedAmount": "Refunded amount",
+      "refundedOn": "Refund date",
+      "refundNote": "The amount eBay reports for the refund. It leaves out any sales tax eBay collected, so the buyer may have received more.",
+      "cancelledAmazonOpenAction": "An Amazon order was already placed for this sale. Cancel it on Amazon, or return the item if it has shipped."
     },
     "modal": {
       "title": "Enter Amazon Order Info",

@@ -74,6 +74,11 @@ export type AutoFulfillEligibility =
  * shown to the seller; the two cannot disagree about why nothing was bought.
  */
 export function resolveAutoFulfillEligibility(status: OrderStatus): AutoFulfillEligibility {
+  // A cancelled sale first: it is neither unpaid (the recheck sweep would keep
+  // asking eBay about it) nor fulfilled.
+  if (status === OrderStatus.CANCELLED) {
+    return { eligible: false, reason: AutoFulfillBlockedReasonEnum.ORDER_CANCELLED };
+  }
   if (isOrderAlreadyFulfilled(status)) {
     return { eligible: false, reason: AutoFulfillBlockedReasonEnum.ORDER_ALREADY_FULFILLED };
   }
@@ -136,7 +141,8 @@ export function selectResumableOrders(rows: ResumableOrderRow[]): ResumableOrder
         AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED &&
       row.amazon_order_id === null &&
       (row.status as OrderStatus) !== OrderStatus.SHIPPED &&
-      (row.status as OrderStatus) !== OrderStatus.COMPLETED,
+      (row.status as OrderStatus) !== OrderStatus.COMPLETED &&
+      (row.status as OrderStatus) !== OrderStatus.CANCELLED,
   );
 }
 

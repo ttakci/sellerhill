@@ -1,0 +1,505 @@
+{
+  "slug": "order_confirmation",
+  "deliveryChannel": "HTTPS webhook (POST)",
+  "eventLabel": "ORDER_CONFIRMATION",
+  "name": "ORDER_CONFIRMATION",
+  "sample": [],
+  "summary": "<p>This notification is sent to a seller when the buyer completes the checkout process and payment clears for a fixed price or auction listing.</p>\r\n<p><strong>OAuth Scope</strong><br /><span>In addition to the standard OAuth scope (<a href=\"https://api.ebay.com/oauth/api_scope\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope</a>), this topic requires an access token created using the Authorization Code Grant flow with the following scopes:<br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.fulfillment\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope/sell.fulfillment</a>, </span><br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly</a></p>\r\n<p><span>See <a href=\"https://developer.ebay.com/develop/guides-v2/authorization#working-with-oauth-scopes\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">Working with OAuth scopes</a> for more information.</span></p>",
+  "shortSummary": "Notification sent to seller when buyer completes checkout.",
+  "specVersion": "1.0.0",
+  "latestSpecHref": "/develop/api/spec/events/ORDER_CONFIRMATION.yaml",
+  "specSaveAsFileName": "ORDER_CONFIRMATION.yaml",
+  "documentation": {
+    "info": {
+      "title": "eBay Order Confirmation Notifications",
+      "version": "1.0.0",
+      "description": "An ORDER_CONFIRMATION notification is sent when a buyer completes the checkout process for an auction or fixed-price item. Usually, an ORDER CONFIRMATION notification occurs only once per listing. However, if the payment for checkout fails, the checkout status will change from \"complete\" to \"incomplete.\" If the buyer then successfully pays for the item via checkout, the checkout status will change back to \"complete\" again. When the checkout status changes back to \"complete,\" another ORDER CONFIRMATION notification will be sent. An ORDER CONFIRMATION notification is generated for each line item in the order. The seller looks up the order ID from the notification and then makes a GetOrders call (using the order ID as an input filter) to retrieve complete order information.\""
+    },
+    "schemas": {
+      "MetaData": {
+        "type": "object",
+        "description": "This type specifies the metadata included with the notification.",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "This is the unique identifier of the Notification topic."
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "This specifies the version number of the topic schema."
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+            "default": false
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "description": "This type includes information about the notification.",
+        "properties": {
+          "notificationId": {
+            "type": "string",
+            "description": "This is the unique identifier of the specific notification."
+          },
+          "eventDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient."
+          },
+          "publishDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+          },
+          "publishAttemptCount": {
+            "type": "integer",
+            "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+          },
+          "data": {
+            "description": "This container consists of specific information related to the order confirmation data.",
+            "$ref": "#/components/schemas/OrderConfirmationData"
+          }
+        }
+      },
+      "OrderConfirmationData": {
+        "type": "object",
+        "description": "This type defines the payload for the Order Confirmation notification.",
+        "properties": {
+          "user": {
+            "type": "object",
+            "description": "The seller details for the notification subscriber.",
+            "$ref": "#/components/schemas/User"
+          },
+          "order": {
+            "type": "object",
+            "description": "This object contains the order details for the notification subscriber.",
+            "$ref": "#/components/schemas/Order"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "The user details for the notification subscriber.",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "The public user identifier"
+          },
+          "username": {
+            "type": "string",
+            "description": "The public username"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "description": "This type contains the order details for the notification subscriber.",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "This string is the unique identifier for the order."
+          },
+          "orderLineItems": {
+            "type": "array",
+            "description": "This array contains the order line item information for the order.",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        }
+      },
+      "OrderLineItem": {
+        "type": "object",
+        "description": "This type contains the order line item information.",
+        "properties": {
+          "orderLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier for the line item."
+          },
+          "listingId": {
+            "type": "string",
+            "description": "This string is the unique identifier for the listing."
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "This integer value is the quantity of the item."
+          }
+        }
+      }
+    },
+    "channels": {
+      "ORDER_CONFIRMATION": {
+        "subscribe": {
+          "message": {
+            "$ref": "#/components/messages/message"
+          },
+          "bindings": {
+            "http": {
+              "type": "request",
+              "method": "POST",
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "Content-Type": {
+                    "type": "string",
+                    "enum": [
+                      "application/json"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "methods": {
+      "subscribe_ORDER_CONFIRMATION": {
+        "operationId": "subscribe_ORDER_CONFIRMATION",
+        "action": "subscribe",
+        "channel": "ORDER_CONFIRMATION",
+        "message": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "X-EBAY-SIGNATURE": {
+                "description": "The ECC message signature. This signature is used to process and validate the message payload.",
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/MetaData"
+              },
+              "notification": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "request": null,
+        "response": {
+          "rawSchema": {
+            "typeDetails": {
+              "type": "object",
+              "displayNameForType": "object"
+            },
+            "fields": [
+              {
+                "name": "metadata",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "MetaData",
+                  "displayNameForType": "MetaData"
+                },
+                "fields": [
+                  {
+                    "name": "topic",
+                    "description": "This is the unique identifier of the Notification topic.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "schemaVersion",
+                    "description": "This specifies the version number of the topic schema.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "deprecated",
+                    "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "boolean",
+                      "displayNameForType": "boolean"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "notification",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "Notification",
+                  "displayNameForType": "Notification"
+                },
+                "fields": [
+                  {
+                    "name": "notificationId",
+                    "description": "This is the unique identifier of the specific notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "eventDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishAttemptCount",
+                    "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "integer",
+                      "displayNameForType": "integer"
+                    }
+                  },
+                  {
+                    "name": "data",
+                    "description": "This container consists of specific information related to the order confirmation data.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "OrderConfirmationData",
+                      "displayNameForType": "OrderConfirmationData"
+                    },
+                    "fields": [
+                      {
+                        "name": "user",
+                        "description": "The seller details for the notification subscriber.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "User",
+                          "displayNameForType": "User"
+                        },
+                        "fields": [
+                          {
+                            "name": "userId",
+                            "description": "The public user identifier",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "username",
+                            "description": "The public username",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "name": "order",
+                        "description": "This object contains the order details for the notification subscriber.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "Order",
+                          "displayNameForType": "Order"
+                        },
+                        "fields": [
+                          {
+                            "name": "orderId",
+                            "description": "This string is the unique identifier for the order.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "orderLineItems",
+                            "description": "This array contains the order line item information for the order.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "array",
+                              "displayNameForType": "array",
+                              "of": "OrderLineItem",
+                              "displayNameForOf": "OrderLineItem"
+                            },
+                            "fields": [
+                              {
+                                "name": "orderLineItemId",
+                                "description": "This string is the unique identifier for the line item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "listingId",
+                                "description": "This string is the unique identifier for the listing.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "quantity",
+                                "description": "This integer value is the quantity of the item.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "integer",
+                                  "displayNameForType": "integer"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "operations": [
+      null
+    ],
+    "servers": [],
+    "document": {
+      "asyncapi": "2.0.0",
+      "info": {
+        "title": "eBay Order Confirmation Notifications",
+        "version": "1.0.0",
+        "description": "An ORDER_CONFIRMATION notification is sent when a buyer completes the checkout process for an auction or fixed-price item. Usually, an ORDER CONFIRMATION notification occurs only once per listing. However, if the payment for checkout fails, the checkout status will change from \"complete\" to \"incomplete.\" If the buyer then successfully pays for the item via checkout, the checkout status will change back to \"complete\" again. When the checkout status changes back to \"complete,\" another ORDER CONFIRMATION notification will be sent. An ORDER CONFIRMATION notification is generated for each line item in the order. The seller looks up the order ID from the notification and then makes a GetOrders call (using the order ID as an input filter) to retrieve complete order information.\""
+      },
+      "components": {
+        "messages": {},
+        "schemas": {
+          "MetaData": {
+            "type": "object",
+            "description": "This type specifies the metadata included with the notification.",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "This is the unique identifier of the Notification topic."
+              },
+              "schemaVersion": {
+                "type": "string",
+                "description": "This specifies the version number of the topic schema."
+              },
+              "deprecated": {
+                "type": "boolean",
+                "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+                "default": false
+              }
+            }
+          },
+          "Notification": {
+            "type": "object",
+            "description": "This type includes information about the notification.",
+            "properties": {
+              "notificationId": {
+                "type": "string",
+                "description": "This is the unique identifier of the specific notification."
+              },
+              "eventDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient."
+              },
+              "publishDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+              },
+              "publishAttemptCount": {
+                "type": "integer",
+                "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+              },
+              "data": {
+                "description": "This container consists of specific information related to the order confirmation data.",
+                "$ref": "#/components/schemas/OrderConfirmationData"
+              }
+            }
+          },
+          "OrderConfirmationData": {
+            "type": "object",
+            "description": "This type defines the payload for the Order Confirmation notification.",
+            "properties": {
+              "user": {
+                "type": "object",
+                "description": "The seller details for the notification subscriber.",
+                "$ref": "#/components/schemas/User"
+              },
+              "order": {
+                "type": "object",
+                "description": "This object contains the order details for the notification subscriber.",
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          },
+          "User": {
+            "type": "object",
+            "description": "The user details for the notification subscriber.",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "description": "The public user identifier"
+              },
+              "username": {
+                "type": "string",
+                "description": "The public username"
+              }
+            }
+          },
+          "Order": {
+            "type": "object",
+            "description": "This type contains the order details for the notification subscriber.",
+            "properties": {
+              "orderId": {
+                "type": "string",
+                "description": "This string is the unique identifier for the order."
+              },
+              "orderLineItems": {
+                "type": "array",
+                "description": "This array contains the order line item information for the order."
+              }
+            }
+          },
+          "OrderLineItem": {
+            "type": "object",
+            "description": "This type contains the order line item information.",
+            "properties": {
+              "orderLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier for the line item."
+              },
+              "listingId": {
+                "type": "string",
+                "description": "This string is the unique identifier for the listing."
+              },
+              "quantity": {
+                "type": "integer",
+                "description": "This integer value is the quantity of the item."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

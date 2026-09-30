@@ -133,7 +133,8 @@
         "subscription_suspended": "Suscripción suspendida",
         "listing_over_plan_limit": "Publicación fuera del límite del plan",
         "order_already_fulfilled": "Ya enviado: nada que comprar",
-        "order_not_paid": "Esperando el pago del comprador"
+        "order_not_paid": "Esperando el pago del comprador",
+        "order_cancelled": "Cancelado en eBay: nada que comprar"
       },
       "reasonLabel": "Motivo: {{reason}}",
       "amazonCancelledBadge": "Cancelado por Amazon",
@@ -217,7 +218,13 @@
       "unit": "unidad",
       "sku": "SKU",
       "na": "N/D",
-      "ebayStatus": "Estado en eBay"
+      "ebayStatus": "Estado en eBay",
+      "ebayCancelledOn": "Cancelado en eBay el",
+      "refundGroup": "Reembolsado al comprador",
+      "refundedAmount": "Importe reembolsado",
+      "refundedOn": "Fecha del reembolso",
+      "refundNote": "Es el importe del reembolso que informa eBay. No incluye el impuesto sobre las ventas que eBay recaudó, por lo que el comprador pudo haber recibido más.",
+      "cancelledAmazonOpenAction": "Ya se había hecho un pedido en Amazon para esta venta. Cancélalo en Amazon o devuelve el artículo si ya se envió."
     },
     "modal": {
       "title": "Ingresar datos del pedido de Amazon",
