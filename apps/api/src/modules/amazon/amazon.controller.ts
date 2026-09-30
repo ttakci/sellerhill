@@ -130,37 +130,15 @@ export class AmazonController {
 
     // Ownership first — the conversion service takes an order id and does not
     // itself check who is asking.
-    const owned = await this.databaseService.query<{ id: string; amazon_account_id: string | null }>(
-      `SELECT id, amazon_account_id FROM orders WHERE id = $1 AND user_id = $2`,
+    const owned = await this.databaseService.query<{ id: string }>(
+      `SELECT id FROM orders WHERE id = $1 AND user_id = $2`,
       [orderId, userId]
     );
     if (owned.length === 0) {
       throw new NotFoundException('orders.errors.notFound');
     }
 
-    const result = await this.trackingConversion.convertOnDemand(orderId);
-
-    // The conversion only STORES the AQUA number; eBay is told at the shipped
-    // transition by the tracking processor, and nowhere else. Without this
-    // the seller waited up to a whole tracking interval after clicking. The
-    // immediate tick re-reads Amazon, and only if it reads "shipped" does
-    // `handleShipped` run — where the stored conversion wins (never paid
-    // twice) and `mayPushToEbay` is the one gate, so a raw Amazon number
-    // still cannot reach eBay through this path. Best-effort: a queue error
-    // must not turn a paid, stored conversion into a seller-visible failure.
-    const amazonAccountId = owned[0].amazon_account_id;
-    if (result.converted && amazonAccountId) {
-      try {
-        await this.trackingQueueService.triggerImmediateTracking(orderId, amazonAccountId);
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        this.logger.warn(
-          `Order ${orderId}: converted on demand but the immediate tracking tick could not be queued (${message}); the next scheduled tick pushes it`
-        );
-      }
-    }
-
-    return result;
+    return this.trackingConversion.convertOnDemand(orderId);
   }
 
   @Post('orders/:orderId/link-amazon')
