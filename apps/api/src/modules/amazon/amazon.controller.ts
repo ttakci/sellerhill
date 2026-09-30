@@ -17,6 +17,7 @@ import {
   type AmazonAccountPublicDto,
   CreateAmazonAccountDto,
   LinkAmazonOrderDto,
+  type StartAutoFulfillResultDto,
   UpdateAmazonAccountDto,
 } from '@repo/shared';
 
@@ -139,6 +140,29 @@ export class AmazonController {
     }
 
     return this.trackingConversion.convertOnDemand(orderId);
+  }
+
+  /**
+   * Start the automatic Amazon purchase for one order by hand — the retry for
+   * a purchase that stopped before anything was bought (card declined at the
+   * payment step, address, stock, captcha…). The rules live in
+   * `canStartAutoFulfillManually` (the same one `OrderDto.canStartAutoFulfill`
+   * reports) and `OrderSyncService.startAutoFulfillManually`; ownership is
+   * checked there. Every refusal is a 409 carrying an i18n key.
+   */
+  @Post('orders/:orderId/start-auto-fulfill')
+  async startAutoFulfill(
+    @Req() req: AuthenticatedRequest,
+    @Param('orderId') orderId: string
+  ): Promise<StartAutoFulfillResultDto> {
+    const result = await this.orderSyncService.startAutoFulfillManually(req.user.sub, orderId);
+    if (!result.ok) {
+      if (result.notFound) {
+        throw new NotFoundException(result.errorKey);
+      }
+      throw new ConflictException(result.errorKey);
+    }
+    return { queued: true, dryRun: result.dryRun };
   }
 
   @Post('orders/:orderId/link-amazon')

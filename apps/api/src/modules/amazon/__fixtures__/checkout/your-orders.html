@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+  Amazon "Your Orders" (www.amazon.com/your-orders/orders), trimmed from a live
+  capture on 2026-10-01. The order-card markup is kept as served; every name,
+  address, order id, ASIN and product title is FICTITIOUS.
+
+  Two things the fixture exists to pin:
+  - the card header carries date and total as bare label/value rows (no
+    data-testid, no .order-date / .order-total);
+  - the FIRST live card embeds Amazon's ~100 KB client-side decryption library
+    in a <script>. It is replaced here by a short script holding a decoy id and
+    ASIN, so a reader that looks inside scripts fails the test.
+-->
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>Your Orders</title>
+<style>.a-popover-preload{display:none!important}.a-text-caps{text-transform:uppercase}</style>
+</head>
+<body>
+<section class="your-orders-content-container aok-relative js-yo-container">
+<div class="your-orders-content-container__content js-yo-main-content">
+<h1>Your Orders</h1>
+<label for="time-filter" class="a-form-label time-filter__label aok-inline-block a-text-normal"><b>3 orders</b> placed in</label>
+
+<div class="order-card js-order-card" data-csa-c-type="widget" data-csa-c-content-id="amzn1.yourorders.order-card" data-csa-c-slot-id="amzn1.yourorders.order-card.111-2222222-3333333">
+  <div class="a-box-group a-spacing-base">
+<script type="text/javascript">
+  /* stand-in for the live ~100 KB decryption library; decoys: /dp/B0OTHER001 999-9999999-9999999 */
+  window.__siegeStub = 1;
+</script>
+    <div class="a-box a-color-offset-background order-header"><div class="a-box-inner">
+      <div class="a-fixed-right-grid"><div class="a-fixed-right-grid-inner" style="padding-right:290px">
+        <h5 class="a-text-normal">
+          <ul class="order-header__header-list" role="presentation">
+            <div class="a-fixed-right-grid-col a-col-left" style="padding-right:0%;float:left;">
+              <div class="a-row">
+                <div class="a-column a-span3">
+                  <li class="order-header__header-list-item" role="presentation">
+                    <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Order placed</span></div>
+                    <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">September 30, 2026</span></div>
+                  </li>
+                </div>
+                <div class="a-column a-span2">
+                  <li class="order-header__header-list-item" role="presentation">
+                    <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Total</span></div>
+                    <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">$9.47</span></div>
+                  </li>
+                </div>
+                <div class="a-column a-span7 a-span-last">
+                  <li class="order-header__header-list-item" role="presentation">
+                    <div class="yohtmlc-recipient">
+                      <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Ship to</span></div>
+                      <div class="a-row a-size-base">
+                        <div id="shipToInsertionNode-shippingAddress-1">
+                          <span class="a-declarative"><a href="javascript:void(0)" class="a-popover-trigger a-declarative insert-encrypted-trigger-text aok-break-word">Sam Buyer<i class="a-icon a-icon-popover"></i></a></span>
+                          <div class="a-popover-preload" id="a-popover-shippingAddress-1">
+                            <span class="a-color-base">
+                              <div class="a-row"><h5>Sam Buyer</h5></div>
+                              <div class="a-row">4820 JUNIPER CT<br>FAIRVIEW, OR 97024-1111</div>
+                              <div class="a-row">United States</div>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </div>
+              </div>
+            </div>
+            <div class="a-text-right a-fixed-right-grid-col a-col-right" style="width:290px;margin-right:-290px;float:left;">
+              <div class="a-row a-size-mini">
+                <li class="order-header__header-list-item" role="presentation">
+                  <div class="yohtmlc-order-id"><span class="a-color-secondary a-text-caps">Order #</span> <span class="a-color-secondary" dir="ltr">111-2222222-3333333</span></div>
+                </li>
+              </div>
+              <div class="a-row">
+                <li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
+                  <a class="a-link-normal" href="https://www.amazon.com/your-orders/order-details?orderID=111-2222222-3333333&amp;ref=ppx_yo2ov_dt_b_fed_order_details">View order details</a>
+                  <i class="a-icon a-icon-text-separator" role="img"></i>
+                  <a class="a-link-normal" href="https://www.amazon.com/gp/css/summary/print.html?orderID=111-2222222-3333333&amp;ref=ppx_yo2ov_dt_b_fed_invoice_pos">View invoice</a>
+                </li>
+              </div>
+            </div>
+          </ul>
+        </h5>
+      </div></div>
+    </div></div>
+    <div class="a-box delivery-box"><div class="a-box-inner">
+      <div class="yohtmlc-shipment-status-primaryText"><h3><span class="a-size-medium delivery-box__primary-text a-text-bold">Arriving tomorrow</span></h3></div>
+      <ul class="a-unordered-list a-nostyle a-vertical" role="list">
+        <li><span class="a-list-item">
+          <div class="product-image"><a class="a-link-normal" tabindex="-1" href="https://www.amazon.com/dp/B0SHTEST01?ref=ppx_yo2ov_dt_b_fed_asin_title"><img alt="Test product" src="data:,"></a></div>
+          <div class="yohtmlc-product-title"><a class="a-link-normal" href="https://www.amazon.com/dp/B0SHTEST01?ref=ppx_yo2ov_dt_b_fed_asin_title">Test product</a></div>
+          <span class="a-button a-button-normal a-spacing-mini a-button-base"><span class="a-button-inner"><a href="https://www.amazon.com/gp/buyagain?ats=eyJleHBsaWNpdENhbmRpZGF0ZXMiOiJCMFNIVEVTVDAxIn0%3D&amp;ref=ppx_yo2ov_dt_b_bia_item_f" class="a-button-text" role="button"><div class="reorder-modal-trigger-text">Buy it again</div></a></span></span>
+        </span></li>
+      </ul>
+      <ul class="yohtmlc-shipment-level-connections a-nostyle yo-collapsible-actions__list" role="list">
+        <li><span class="a-button a-button-normal a-spacing-mini a-button-primary"><span class="a-button-inner"><a href="https://www.amazon.com/progress-tracker/package?itemId=testitem&amp;ref=ppx_yo2ov_dt_b_fed_track_package&amp;orderId=111-2222222-3333333&amp;_encoding=UTF8" class="a-button-text" role="button">Track package</a></span></span></li>
+      </ul>
+    </div></div>
+<script id="shipToData-shippingAddress-1" type="text/template">
+  <span class="a-declarative"><a href="javascript:void(0)" class="a-popover-trigger">Sam Buyer</a></span>
+</script>
+  </div>
+</div>
+
+<div class="order-card js-order-card" data-csa-c-type="widget" data-csa-c-content-id="amzn1.yourorders.order-card" data-csa-c-slot-id="amzn1.yourorders.order-card.111-4444444-5555555">
+  <div class="a-box-group a-spacing-base">
+    <div class="a-box a-color-offset-background order-header"><div class="a-box-inner">
+      <h5 class="a-text-normal">
+        <ul class="order-header__header-list" role="presentation">
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Order placed</span></div>
+            <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">September 29, 2026</span></div>
+          </li>
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Total</span></div>
+            <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">$14.88</span></div>
+          </li>
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="yohtmlc-order-id"><span class="a-color-secondary a-text-caps">Order #</span> <span class="a-color-secondary" dir="ltr">111-4444444-5555555</span></div>
+          </li>
+          <li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
+            <a class="a-link-normal" href="https://www.amazon.com/your-orders/order-details?orderID=111-4444444-5555555&amp;ref=ppx_yo2ov_dt_b_fed_order_details">View order details</a>
+          </li>
+        </ul>
+      </h5>
+    </div></div>
+    <div class="a-box delivery-box"><div class="a-box-inner">
+      <div class="yohtmlc-shipment-status-primaryText"><h3><span class="a-size-medium delivery-box__primary-text a-text-bold">Arriving tomorrow</span></h3></div>
+      <div class="product-image"><a class="a-link-normal" tabindex="-1" href="https://www.amazon.com/dp/B0OTHER001?ref=ppx_yo2ov_dt_b_fed_asin_title"><img alt="Other product" src="data:,"></a></div>
+      <div class="yohtmlc-product-title"><a class="a-link-normal" href="https://www.amazon.com/dp/B0OTHER001?ref=ppx_yo2ov_dt_b_fed_asin_title">Other product</a></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="order-card js-order-card" data-csa-c-type="widget" data-csa-c-content-id="amzn1.yourorders.order-card" data-csa-c-slot-id="amzn1.yourorders.order-card.111-6666666-7777777">
+  <div class="a-box-group a-spacing-base">
+    <div class="a-box a-color-offset-background order-header"><div class="a-box-inner">
+      <h5 class="a-text-normal">
+        <ul class="order-header__header-list" role="presentation">
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Order placed</span></div>
+            <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">July 27, 2026</span></div>
+          </li>
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="a-row a-size-mini"><span class="a-color-secondary a-text-caps">Total</span></div>
+            <div class="a-row"><span class="a-size-base a-color-secondary aok-break-word">$1.14</span></div>
+          </li>
+          <li class="order-header__header-list-item" role="presentation">
+            <div class="yohtmlc-order-id"><span class="a-color-secondary a-text-caps">Order #</span> <span class="a-color-secondary" dir="ltr">111-6666666-7777777</span></div>
+          </li>
+          <li class="order-header__header-list-item yohtmlc-order-level-connections" role="presentation">
+            <a class="a-link-normal" href="https://www.amazon.com/your-orders/order-details?orderID=111-6666666-7777777&amp;ref=ppx_yo2ov_dt_b_fed_order_details">View order details</a>
+          </li>
+        </ul>
+      </h5>
+    </div></div>
+    <div class="a-box delivery-box"><div class="a-box-inner">
+      <div class="yohtmlc-shipment-status-primaryText"><h3><span class="a-size-medium delivery-box__primary-text a-text-bold">Delivered August 3</span></h3></div>
+      <div class="product-image"><a class="a-link-normal" tabindex="-1" href="https://www.amazon.com/dp/B0OTHER002?ref=ppx_yo2ov_dt_b_fed_asin_title"><img alt="Older product" src="data:,"></a></div>
+    </div></div>
+  </div>
+</div>
+
+</div>
+</section>
+</body>
+</html>

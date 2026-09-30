@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+  Amazon's thank-you page after "Place your order"
+  (www.amazon.com/gp/buy/thankyou/handlers/display.html?purchaseId=<3-7-7>),
+  trimmed from a live capture on 2026-10-01. The confirmation widgets are kept
+  verbatim; the recipient, address, product and every id are FICTITIOUS.
+
+  What this page does NOT carry is the point of the fixture: no Amazon order id
+  (no orderID= link, no order-id element) and no cost summary. The only 3-7-7
+  number is `purchaseId` in the URL, which is not proven to be the order id.
+-->
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>Place Your Order - Amazon Checkout</title>
+<style>.aok-hidden,.a-popover-preload,.js-hide{display:none!important}</style>
+</head>
+<body>
+<div id="a-page">
+<div id="widget-purchaseConfirmationDetails" class="a-section a-spacing-none">
+  <div cel_widget_id="typ-purchaseConfirmationDetails" class="celwidget" data-cel-widget="typ-purchaseConfirmationDetails">
+    <div class="a-section a-spacing-micro">
+      <div id="widget-purchaseConfirmationStatus" class="a-section">
+        <div cel_widget_id="typ-purchaseConfirmationStatus" class="celwidget" data-cel-widget="typ-purchaseConfirmationStatus">
+          <h4 aria-level="1" class="a-color-success">
+            <div class="a-box a-alert-inline a-alert-inline-success" aria-live="polite" aria-atomic="true"><div class="a-box-inner a-alert-container"><h4 class="a-alert-heading">Order placed, thanks!</h4><i class="a-icon a-icon-alert" aria-hidden="true"></i><div class="a-alert-content"></div></div></div>
+          </h4>
+        </div>
+      </div>
+    </div>
+    <div id="widget-purchaseConfirmationReview" class="a-section a-spacing-base">
+      <p id="subHeadingOnly"><span class="break-word">Confirmation will be sent to your email.</span></p>
+    </div>
+    <div class="a-section a-spacing-large a-spacing-top-medium">
+      <div id="widget-purchaseSummary" class="a-section">
+        <div id="widget-orderSummary" class="a-section a-spacing-medium-plus">
+          <div id="shipment-text-orderGroupID0" class="a-section a-spacing-base">
+            <div cel_widget_id="typ-shippingToDestination" class="celwidget" data-cel-widget="typ-shippingToDestination">
+              <span class="a-text-bold">Shipping to</span>
+              <span class="a-size-base a-text-bold">Sam Buyer, </span>
+              <span class="a-size-base">4820 JUNIPER CT, FAIRVIEW, OR, 97024-1111, United States</span>
+            </div>
+          </div>
+          <div id="widget-deliveryPromise-orderGroupID0#itemGroupID0" class="a-row">
+            <span class="a-text-bold"><span class="break-word">Tomorrow, Oct. 1 </span></span>
+            <p class="rich-content-paragraph"><span class="break-word">Estimated delivery</span></p>
+          </div>
+          <div cel_widget_id="typ-singleItemImage" class="celwidget" data-cel-widget="typ-singleItemImage">
+            <a id="image-link-1" class="a-link-normal" target="_blank" rel="noopener" href="https://www.amazon.com/dp/B0SHTEST01?psc=1&amp;ref_=chk_typ_imgToDp"><img alt="Test product" src="data:," id="product-image-1"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="widget-accountLevelActions" class="a-section">
+      <span cel_widget_id="typ-reviewYourAllOrders" class="celwidget" data-cel-widget="typ-reviewYourAllOrders">
+        <a class="a-link-emphasis" href="https://www.amazon.com/gp/your-account/order-history?ref_=typ_rev_edit_mult"><span class="break-word">Review or edit your recent orders</span></a>
+      </span>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

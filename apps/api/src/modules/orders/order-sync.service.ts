@@ -14,7 +14,9 @@ import {
   ListingStatus,
   OrderCostCaptureStatus,
   OrderStatus,
+  canStartAutoFulfillManually,
   isOrderAlreadyFulfilled,
+  isSimulatedAmazonOrderId,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
@@ -58,6 +60,14 @@ const AWAITING_PAYMENT_RECHECK_LIMIT = 20;
  * cancels them after four days and the window closes after seven.
  */
 const AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS = 1;
+
+/**
+ * Outcome of `startAutoFulfillManually`. A refusal carries an i18n key the
+ * controller returns as the error message; `notFound` maps to a 404.
+ */
+export type ManualAutoFulfillStart =
+  | { ok: true; dryRun: boolean }
+  | { ok: false; errorKey: string; notFound?: boolean };
 
 /**
  * Runaway guard for one store in one tick: 50 pages of 200 is 10,000 modified
@@ -891,6 +901,152 @@ export class OrderSyncService {
       pick.id,
     ]);
     await this.autoFulfillQueue.enqueue(input.ebayOrderId, pick.id);
+  }
+
+  /**
+   * The seller's "Start automatic order" button (`POST /amazon/orders/:id/start-auto-fulfill`).
+   *
+   * Nothing re-arms a blocked purchase on its own (only a suspension block is
+   * resumed automatically), so without this a seller who topped up the card,
+   * fixed the address or waited for stock could only buy the item by hand.
+   *
+   * Differs from `resolveAndEnqueueAutoFulfill` on purpose:
+   *  - The store toggle (`store_settings.auto_fulfill_enabled`) is NOT read —
+   *    it means "buy new sales on their own"; a click is an explicit request
+   *    for this one order (operator decision, 2026-10-01). The buyer-account
+   *    gate stays: only an account with auto-fulfill on AND a cap is used.
+   *  - Every refusal is reported (an i18n key) instead of written as SKIPPED,
+   *    so the order keeps the state it had and the seller reads why.
+   *  - The account the order was last tried on is preferred when still usable.
+   *
+   * Money safety: the order is claimed with a compare-and-set against exactly
+   * the state `canStartAutoFulfillManually` approved, so a double click, a
+   * second tab or a job that moved the row in between gets `alreadyStarted`
+   * rather than a second job. The job itself runs the normal checkout with its
+   * review-step hard cap and final recipient check.
+   */
+  async startAutoFulfillManually(userId: string, orderId: string): Promise<ManualAutoFulfillStart> {
+    const [row] = await this.databaseService.query<{
+      ebay_order_id: string;
+      sale_total: string | number | null;
+      status: OrderStatus;
+      listing_id: string | null;
+      listing_over_plan_limit: boolean | null;
+      auto_fulfill_status: AutoFulfillStatus | null;
+      auto_fulfill_blocked_reason: AutoFulfillBlockedReason | null;
+      amazon_order_id: string | null;
+      amazon_account_id: string | null;
+    }>(
+      `SELECT ebay_order_id, sale_total, status, listing_id, listing_over_plan_limit,
+              auto_fulfill_status, auto_fulfill_blocked_reason, amazon_order_id, amazon_account_id
+         FROM orders
+        WHERE id = $1 AND user_id = $2`,
+      [orderId, userId]
+    );
+    if (!row) {
+      return { ok: false, notFound: true, errorKey: 'orders.errors.notFound' };
+    }
+    const allowed = canStartAutoFulfillManually({
+      status: row.status,
+      isTracked: !!row.listing_id,
+      listingOverPlanLimit: row.listing_over_plan_limit === true,
+      autoFulfillStatus: row.auto_fulfill_status,
+      autoFulfillBlockedReason: row.auto_fulfill_blocked_reason,
+      amazonOrderId: row.amazon_order_id,
+    });
+    if (!allowed) {
+      return { ok: false, errorKey: 'orders.errors.autoFulfillNotRestartable' };
+    }
+    if (await this.quotaEnforcement.isSuspended(userId)) {
+      return { ok: false, errorKey: 'billing.errors.subscriptionSuspendedOrders' };
+    }
+
+    const pool = await this.databaseService.query<{
+      id: string;
+      last_used_at: Date | null;
+      auto_fulfill_cap_total: string | number;
+      auto_fulfill_dry_run: boolean;
+    }>(
+      `SELECT id, last_used_at, auto_fulfill_cap_total, auto_fulfill_dry_run FROM amazon_accounts
+        WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
+      [userId]
+    );
+    const pick =
+      pool.find((a) => a.id === row.amazon_account_id) ??
+      pickRoundRobinAccount(pool.map((a) => ({ ...a, lastUsedAt: a.last_used_at })));
+    if (!pick) {
+      return { ok: false, errorKey: 'orders.errors.autoFulfillNoAccount' };
+    }
+    if (!meetsCoarseCapGate(Number(row.sale_total) || 0, Number(pick.auto_fulfill_cap_total))) {
+      return { ok: false, errorKey: 'orders.errors.autoFulfillOverCap' };
+    }
+
+    // Claim. A dry run's placeholder purchase is cleared in the same statement,
+    // so the retry starts from "nothing bought" and recomputeProfit below puts
+    // the order back on its provisional estimate.
+    const simulated = isSimulatedAmazonOrderId(row.amazon_order_id);
+    const clearSimulation = simulated
+      ? `, amazon_order_id = NULL, amazon_linked_at = NULL, purchase_price = 0,
+           amazon_tax = NULL, amazon_shipping = NULL`
+      : '';
+    const claimed = await this.databaseService.query<{ ebay_order_id: string }>(
+      `UPDATE orders
+          SET auto_fulfill_status = $1,
+              auto_fulfill_blocked_reason = NULL,
+              updated_at = CURRENT_TIMESTAMP${clearSimulation}
+        WHERE id = $2 AND user_id = $3
+          AND status = $4
+          AND auto_fulfill_status = $5
+          AND auto_fulfill_blocked_reason IS NOT DISTINCT FROM $6
+          AND amazon_order_id IS NOT DISTINCT FROM $7
+        RETURNING ebay_order_id`,
+      [
+        AutoFulfillStatus.PENDING,
+        orderId,
+        userId,
+        row.status,
+        row.auto_fulfill_status,
+        row.auto_fulfill_blocked_reason,
+        row.amazon_order_id,
+      ]
+    );
+    if (claimed.length === 0) {
+      return { ok: false, errorKey: 'orders.errors.autoFulfillAlreadyStarted' };
+    }
+    if (simulated) {
+      await this.recomputeProfit(row.ebay_order_id);
+    }
+
+    const quota = await this.quotaEnforcement.reserveAmazonOrder(userId, row.ebay_order_id);
+    if (!quota.allowed) {
+      const reason = quota.blockedReason ?? AutoFulfillBlockedReason.QUOTA_EXHAUSTED;
+      await this.setAutoFulfillBlocked(row.ebay_order_id, reason);
+      return {
+        ok: false,
+        errorKey:
+          reason === AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED
+            ? 'billing.errors.subscriptionSuspendedOrders'
+            : 'orders.errors.autoFulfillQuotaExhausted',
+      };
+    }
+
+    try {
+      await this.databaseService.query(`UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`, [
+        pick.id,
+      ]);
+      await this.autoFulfillQueue.enqueueManual(row.ebay_order_id, pick.id);
+    } catch (err) {
+      // FAILED, not the previous state: it means "nothing was bought", which is
+      // true, and it keeps the button available for another try.
+      this.logger.error(`Manual auto-fulfill enqueue failed for ${row.ebay_order_id}: ${(err as Error).message}`);
+      await this.setAutoFulfillStatus(row.ebay_order_id, AutoFulfillStatus.FAILED).catch(() => undefined);
+      await this.quotaEnforcement.releaseAmazonOrder(userId, row.ebay_order_id).catch(() => undefined);
+      throw err;
+    }
+    this.logger.log(
+      `Manual auto-fulfill queued for ${row.ebay_order_id} on account ${pick.id}${pick.auto_fulfill_dry_run ? ' (dry run)' : ''}`
+    );
+    return { ok: true, dryRun: pick.auto_fulfill_dry_run === true };
   }
 
   /**

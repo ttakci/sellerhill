@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+  Amazon checkout "Payment method" step (www.amazon.com/checkout/p/<purchase>/pay),
+  trimmed from a live capture on 2026-09-30. The two "Use this payment method"
+  inputs are kept verbatim: no value, no text, labelled by aria-labelledby, and
+  sharing their element ids with the address step's buttons — only the
+  data-csa-c-slot-id (…-payselect) tells them apart. Card and address details
+  are FICTITIOUS.
+
+  Inline script: either button navigates to the collapsed single-page checkout.
+-->
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>Place Your Order - Amazon Checkout</title>
+<style>.aok-hidden,.a-popover-preload,.js-hide{display:none!important}</style>
+</head>
+<body>
+<div id="a-page">
+<div class="a-container checkout-experience-page-content">
+  <div id="checkout-experience-container" class="a-row a-ws-row">
+    <div id="checkout-experience-right-column" class="a-column a-span12 a-ws-span4 a-ws-span-last">
+      <div id="subtotals" class="a-cardui celwidget rcx-checkout-custom-card no-trailing-space">
+        <span class="a-declarative" data-action="buy-button-as-primary-action">
+          <span id="checkout-secondary-continue-button-id" class="a-button a-spacing-medium-plus a-button-span12 a-button-primary continue-button secondary-action-button celwidget"><span class="a-button-inner"><input data-csa-c-slot-id="checkout-secondary-continue-payselect" data-csa-c-type="widget" data-testid="secondary-continue-button" class="a-button-input" type="submit" aria-labelledby="checkout-secondary-continue-button-id-announce"><span id="checkout-secondary-continue-button-id-announce" class="a-button-text" aria-hidden="true">
+            Use this payment method
+          </span></span></span>
+        </span>
+      </div>
+    </div>
+    <div id="checkout-experience-left-column" class="a-column a-span12 a-ws-span8">
+      <div id="checkout-delivery-address-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel collapsed">
+        <div id="checkout-deliveryAddressPanel" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <h2 id="deliver-to-customer-text" class="a-size-medium a-color-base a-text-bold">Delivering to Casey Saved</h2>
+          <p class="a-spacing-none"><span id="deliver-to-address-text" class="a-color-base">77 MAPLE LN APT 3B, SPRINGFIELD, IL, 62704-1234, United States</span></p>
+          <a data-csa-c-slot-id="checkout-change-shipaddressselect" aria-label="Change delivery address" class="a-link-normal expand-panel-button celwidget" href="address">Change</a>
+        </div>
+      </div>
+      <div id="checkout-payment-option-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel expanded">
+        <div class="a-cardui rcx-checkout-custom-card js-hide shrink-placeholder no-trailing-space">
+          <h2 class="a-size-medium a-spacing-none a-text-bold">Payment method</h2>
+          <span class="aok-inline-block a-spacing-top-micro loading-text">Setting your payment method...</span>
+        </div>
+        <div id="checkout-paymentOptionPanel" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <h2 class="a-size-medium a-spacing-none a-text-bold">Payment method</h2>
+          <form method="post" action="pay/continue" class="pmts-select-payment-instrument-form">
+            <div class="a-radio"><label><input type="radio" name="ppw-instrumentRowSelection" value="instrumentId=FAKE&amp;paymentMethod=CC"><span class="a-label a-radio-label">Mastercard ending in 0000</span></label></div>
+          </form>
+          <span class="a-declarative" data-action="checkout-continue-button-click-action">
+            <span id="checkout-primary-continue-button-id" class="a-button a-button-primary continue-button primary-action-button celwidget"><span class="a-button-inner"><input data-csa-c-slot-id="checkout-primary-continue-payselect" data-csa-c-type="button" data-testid="bottom-continue-button" class="a-button-input" type="submit" aria-labelledby="checkout-primary-continue-button-id-announce"><span id="checkout-primary-continue-button-id-announce" class="a-button-text" aria-hidden="true">
+              Use this payment method
+            </span></span></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+document.querySelectorAll('[data-csa-c-slot-id$="continue-payselect"]').forEach(function (btn) {
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    location.href = 'spc?addr=' + encodeURIComponent('Casey Saved|77 MAPLE LN APT 3B, SPRINGFIELD, IL, 62704-1234, United States') + '&from=pay';
+  });
+});
+</script>
+</body>
+</html>

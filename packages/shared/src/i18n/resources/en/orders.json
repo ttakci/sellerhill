@@ -142,6 +142,14 @@
       "filter": {
         "all": "All auto-fulfill",
         "needsAttention": "Needs attention"
+      },
+      "start": {
+        "button": "Start automatic order",
+        "confirmTitle": "Buy this order on Amazon now?",
+        "confirmDescription": "SellerHill will place a real Amazon order for this sale with your automatic-order Amazon account, shipped to the eBay buyer. Your spending cap still applies, and the purchase stops if the total is over it. Only continue if you have not already bought the item yourself.",
+        "confirm": "Start purchase",
+        "queued": "The purchase has started. The order's status updates in a few minutes.",
+        "queuedDryRun": "A test run has started. This Amazon account is in test mode, so nothing will be bought."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Tracking converted.",
       "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
       "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees.",
-      "listingOverPlanLimit": "This order's listing was outside your plan's listing limit when the order arrived. Orders from listings outside the limit get no shipment tracking or tracking conversion."
+      "listingOverPlanLimit": "This order's listing was outside your plan's listing limit when the order arrived. Orders from listings outside the limit get no shipment tracking or tracking conversion.",
+      "autoFulfillNotRestartable": "The automatic purchase for this order can't be started again. It may already be bought or in progress, or a second purchase could be placed. Check your Amazon orders and link the order by hand.",
+      "autoFulfillNoAccount": "No Amazon account is ready for automatic orders. In Settings, turn on automatic orders for an Amazon account and set a spending cap.",
+      "autoFulfillOverCap": "This sale is over your Amazon account's spending cap. Raise the cap in the Amazon account's settings, or buy the item by hand.",
+      "autoFulfillAlreadyStarted": "This order's status changed a moment ago, so the purchase may already have started. Refresh the page.",
+      "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up."
     },
     "stage": {
       "amazon_cancelled": {

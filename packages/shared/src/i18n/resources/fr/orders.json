@@ -142,6 +142,14 @@
       "filter": {
         "all": "Toute l'exécution auto",
         "needsAttention": "Requiert votre attention"
+      },
+      "start": {
+        "button": "Lancer la commande automatique",
+        "confirmTitle": "Acheter cette commande sur Amazon maintenant ?",
+        "confirmDescription": "SellerHill va passer une vraie commande Amazon pour cette vente avec votre compte Amazon de commandes automatiques, livrée à l'acheteur eBay. Votre plafond de dépenses s'applique toujours : l'achat s'arrête si le total le dépasse. Ne continuez que si vous n'avez pas déjà acheté l'article vous-même.",
+        "confirm": "Lancer l'achat",
+        "queued": "L'achat a démarré. Le statut de la commande se met à jour dans quelques minutes.",
+        "queuedDryRun": "Un test a démarré. Ce compte Amazon est en mode test : rien ne sera acheté."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Suivi converti.",
       "orderNotTracked": "Cette commande n'est liée à aucune de vos annonces, un numéro de suivi converti ne pourrait donc jamais être envoyé à eBay. Liez d'abord la commande à son annonce.",
       "trackingAlreadyPushed": "eBay possède déjà le numéro de suivi d'origine de cette commande et il ne peut pas être remplacé ; convertir maintenant ne changerait donc pas ce que voit l'acheteur.",
-      "listingOverPlanLimit": "L'annonce de cette commande était hors de la limite d'annonces de votre forfait lorsque la commande est arrivée. Les commandes issues d'annonces hors limite n'ont ni suivi d'expédition ni conversion du suivi."
+      "listingOverPlanLimit": "L'annonce de cette commande était hors de la limite d'annonces de votre forfait lorsque la commande est arrivée. Les commandes issues d'annonces hors limite n'ont ni suivi d'expédition ni conversion du suivi.",
+      "autoFulfillNotRestartable": "L'achat automatique de cette commande ne peut pas être relancé. Elle est peut-être déjà achetée ou en cours, ou un second achat pourrait être passé. Vérifiez vos commandes Amazon et associez la commande manuellement.",
+      "autoFulfillNoAccount": "Aucun compte Amazon n'est prêt pour les commandes automatiques. Dans les paramètres, activez les commandes automatiques sur un compte Amazon et définissez un plafond de dépenses.",
+      "autoFulfillOverCap": "Cette vente dépasse le plafond de dépenses de votre compte Amazon. Augmentez le plafond dans les paramètres du compte Amazon ou achetez l'article manuellement.",
+      "autoFulfillAlreadyStarted": "Le statut de cette commande vient de changer : l'achat a peut-être déjà démarré. Actualisez la page.",
+      "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période."
     },
     "stage": {
       "amazon_cancelled": {

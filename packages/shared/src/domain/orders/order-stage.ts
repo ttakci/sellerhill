@@ -56,7 +56,10 @@ export function deriveOrderStage(input: OrderStageInput): OrderStage {
   if (input.autoFulfillStatus === AutoFulfillStatus.PENDING || input.autoFulfillStatus === AutoFulfillStatus.RUNNING) {
     return OrderStage.BUYING;
   }
-  if (input.amazonOrderId) {
+  // PLACED without an id: the purchase is proven (Amazon's "Order placed"
+  // page) but its order number has not been read yet — cost-capture links it
+  // later. It must never read as "to purchase", or the seller buys it twice.
+  if (input.amazonOrderId || input.autoFulfillStatus === AutoFulfillStatus.PLACED) {
     return OrderStage.PURCHASED;
   }
   if (input.autoFulfillStatus === AutoFulfillStatus.BLOCKED || input.autoFulfillStatus === AutoFulfillStatus.FAILED) {

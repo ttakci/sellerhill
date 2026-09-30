@@ -13,7 +13,7 @@ import {
   PlatformSettingKey,
   SIMULATED_AMAZON_ORDER_PREFIX,
 } from '@repo/shared';
-import type { Page } from 'playwright';
+import type { Locator, Page } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
@@ -27,6 +27,13 @@ import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AutoFulfillBlockedReason, decideFulfillStart, FulfillStartDecision } from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
+import {
+  isOrderPlacedPage,
+  parseReviewCostLines,
+  pickOrderIdFromHistoryCards,
+  type ReviewCostLines,
+} from './order-confirmation';
+import { stripScriptBlocks } from './your-orders-card';
 
 /**
  * Fail-closed obstacle. Thrown by every step helper in this service to signal
@@ -47,7 +54,13 @@ export class AutoFulfillBlockedError extends Error {
 
 /** Result of a successful Place Order click — parsed from the confirmation DOM. */
 export interface PlacedResult {
-  amazonOrderId: string;
+  /**
+   * NULL when the placement is proven (Amazon's "Order placed" page) but the
+   * order number could not be read — the 2026-09 thank-you page carries none.
+   * `onPlaced` then marks the order PLACED without linking it; the auto
+   * cost-capture sync links the real Amazon order later.
+   */
+  amazonOrderId: string | null;
   purchasePrice: number;
   tax: number;
   shipping: number;
@@ -157,18 +170,51 @@ const CHECKOUT_SELECTORS = {
   captchaImage: 'img[src*="captcha"]',
 
   // --- Ship-to address selection ---
-  // Amazon's address list is a radio group on the "Choose your shipping
-  // address" page. Each address is a `[data-address-id="…"]` block.
-  addressRadio: ['input[name="shipmentAddressRadioGroup"]', 'input[type="radio"][name*="address"]'],
-  addressBlock: '[data-address-id], .address-block, div.address-row',
-  addNewAddressLink: ['a:has-text("Add an address")', 'a[data-test-id="add-new-address"]', 'a[id*="add-new-address"]'],
+  // Amazon's address list is a radio group on the "Select a delivery address"
+  // step. The current (2026-09-30) checkout names the radios
+  // `destinationSubmissionUrl` and wraps each address in a
+  // `select-destination-on-sasp-desktop-panel-id-<addressId>` span; the older
+  // pipeline used `shipmentAddressRadioGroup` + `[data-address-id]` blocks.
+  addressRadio: [
+    'input[type="radio"][name="destinationSubmissionUrl"]',
+    'input[name="shipmentAddressRadioGroup"]',
+    'input[type="radio"][name*="address"]',
+  ],
+  addressBlock: '[id^="select-destination-on-sasp-desktop-panel-id-"], [data-address-id], .address-block, div.address-row',
+  addNewAddressLink: [
+    '#add-new-address-desktop-sasp-tango-link',
+    'a:has-text("Add a new delivery address")',
+    'a:has-text("Add an address")',
+    'a[data-test-id="add-new-address"]',
+    'a[id*="add-new-address"]',
+  ],
   /**
-   * Submit control of the "Add an address" dialog. Amazon's current copy is
-   * "Use this address" and the button sits BELOW the fold inside the dialog, so
-   * the caller must scroll it into view before clicking (observed live
-   * 2026-07-30 — the form filled correctly but the click target was never found).
+   * Single-page checkout with the address step COLLAPSED (observed 2026-09-30,
+   * order 17-15222-04697). Amazon skips the address list entirely when the
+   * account has a last-used address and shows only "Delivering to <name>" plus
+   * this line. That address is the buyer-account's choice, not the eBay
+   * buyer's, so it is read and, when it is not the buyer's, the step is opened
+   * with the "Change" control below.
+   */
+  collapsedShipTo: '#deliver-to-address-text',
+  changeShipToLink: [
+    'a[data-csa-c-slot-id="checkout-change-shipaddressselect"]',
+    'a[aria-label="Change delivery address"]',
+    '#change-delivery-link',
+  ],
+  /**
+   * Submit control of the "Add an address" dialog. Amazon's copy is "Use this
+   * address". Since 2026-09 the control is an `<input type="submit">` whose
+   * label comes from `aria-labelledby` — and it reuses the id
+   * `checkout-primary-continue-button-id` of the page's own "Deliver to this
+   * address" button, so neither the id nor the accessible name (which resolves
+   * to the FIRST element with the referenced id, i.e. the page's label) can tell
+   * the two apart. The `data-csa-c-slot-id` can, and it is scoped to the dialog.
+   * Clicking the page button instead would ship to the pre-selected address.
    */
   addressFormContinueButton: [
+    '.a-popover-modal input[data-csa-c-slot-id="address-ui-widgets-continue-address-btn-bottom"]',
+    'input[data-csa-c-slot-id="address-ui-widgets-continue-address-btn-bottom"]',
     '#address-ui-widgets-form-submit-button',
     'input[name="shipToThisAddress"]',
     'input[aria-labelledby*="AddressSubmit"]',
@@ -199,10 +245,16 @@ const CHECKOUT_SELECTORS = {
    * would be delivered to the buyer-account holder instead of the customer.
    */
   selectedShipToSummary:
-    '#addressListSelectedAddress, .displayAddressDiv, [data-testid="shipping-address-summary"], #shipToInsertionNode',
+    '#deliver-to-address-text, #addressListSelectedAddress, .displayAddressDiv, [data-testid="shipping-address-summary"], #shipToInsertionNode',
   // Amazon's current wording is "Deliver to this address" (observed live
   // 2026-07-30); the older "Use this address" copy is kept for other layouts.
+  // Since 2026-09 the button is an `<input>` labelled via aria-labelledby with
+  // no value or text of its own; its `data-csa-c-slot-id` names the step
+  // (`…-shipaddressselect`), which also keeps it apart from the payment step's
+  // and the add-address dialog's buttons that share its element id.
   useSelectedAddressButton: [
+    'input[data-csa-c-slot-id="checkout-primary-continue-shipaddressselect"]',
+    'input[data-csa-c-slot-id="checkout-secondary-continue-shipaddressselect"]',
     'input[name="shipToThisAddress"]',
     'input[value="Deliver to this address"]',
     'button:has-text("Deliver to this address")',
@@ -215,6 +267,10 @@ const CHECKOUT_SELECTORS = {
   // --- Payment selection ---
   // Default payment radio (already-added credit card).
   useSelectedPaymentButton: [
+    // 2026-09 layout: "Use this payment method" is an aria-labelled <input>,
+    // told apart from its same-id siblings by the step in its slot id.
+    'input[data-csa-c-slot-id="checkout-primary-continue-payselect"]',
+    'input[data-csa-c-slot-id="checkout-secondary-continue-payselect"]',
     'input[name="ppw-widgetEvent:ExecutePaymentMethodSelection"]',
     'a:has-text("Use this payment method")',
     '[data-testid="use-this-payment-method"]',
@@ -232,6 +288,10 @@ const CHECKOUT_SELECTORS = {
   // the most specific containers come first so a broad text match cannot pick up
   // a subtotal or an "Items:" row instead of the real total.
   reviewGrandTotal: [
+    // 2026-09 layout: the summary is a <ul> of term/definition grid rows, not a
+    // table. Anchored to the "Order total" row so the Items row ($ before tax)
+    // can never be read as the figure the cap is checked against.
+    '#subtotals-marketplace-table li:has(.order-summary-line-term:has-text("Order total")) .order-summary-line-definition',
     '#subtotals-marketplace-table td.grand-total',
     '#rev-summary td:has-text("Grand Total") + td',
     '#order-summary td[data-testid="grand-total"]',
@@ -251,6 +311,22 @@ const CHECKOUT_SELECTORS = {
   // --- Confirmation page (after successful Place Order) ---
   confirmationOrderId: ['[data-testid="order-id"]', '.confirmation-id', 'a[href*="orderID="]'],
   confirmationSummary: '#order-summary, .order-summary, [data-testid="order-summary"]',
+  // 2026-09 thank-you page (`/gp/buy/thankyou/…`, captured 2026-10-01): an
+  // inline success alert "Order placed, thanks!" — and no order id anywhere.
+  confirmationPlacedHeading:
+    '#widget-purchaseConfirmationStatus .a-alert-heading, .a-alert-inline-success .a-alert-heading',
+  // The review page's cost summary, read BEFORE the click (the thank-you page has none).
+  reviewSummary: '#subtotals-marketplace-table',
+  // "Your Orders" cards. `.order-card.js-order-card` is the live 2026-10 markup
+  // (`__fixtures__/checkout/your-orders.html`) and goes first: each miss below
+  // it costs a 4 s wait. The rest are older layouts kept as fallbacks.
+  historyOrderCards: [
+    '.js-order-card',
+    '.order-card',
+    '[data-component="order-card"]',
+    '.yo1JGqUWoy0k__order-card',
+    '[data-testid="order-card"]',
+  ],
 
   // Generic Amazon signin-redirect URL fragments.
   signinUrlFragments: ['/signin', '/ap/signin'],
@@ -544,10 +620,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // from an earlier step's sidebar (address selection also shows an order
       // total) and dry-run would report success without ever proving the final
       // pre-purchase page — exactly the verification dry-run exists to provide.
-      const placeOrderVisible = await page
-        .locator(CHECKOUT_SELECTORS.placeYourOrderButton.join(', '))
-        .first()
-        .first()
+      const placeOrderVisible = await this.placeOrderControl(page)
         .waitFor({ state: 'visible', timeout: 5_000 })
         .then(() => true)
         .catch(() => false);
@@ -582,6 +655,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
+      // Costs come from the review summary, read now: Amazon's thank-you page
+      // shows none. Items/shipping/tax reconcile to the total the cap checked.
+      const reviewSummaryText = await page
+        .locator(CHECKOUT_SELECTORS.reviewSummary)
+        .first()
+        .innerText({ timeout: 2_000 })
+        .catch(() => '');
+      const reviewCosts = parseReviewCostLines(reviewSummaryText, grandTotal);
+      // The final page as it stood before the click, and the page Amazon answers
+      // with — the two a selector fix for this step is written against, and the
+      // only record of a card declined AFTER the click (`no_confirmation`).
+      await this.snap(page, ebayOrderId, 'place-order-review');
       await this.humanDelay();
       // I-2 (money-safety): if clickFirstAvailable / waitForLoadState throw
       // AFTER the browser already received the click event (navigation-
@@ -593,12 +678,24 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // (→ blocked, no retry). Any click-transport error becomes a fail-closed
       // block instead of a retriable propagation.
       try {
-        await this.clickFirstAvailable(page, CHECKOUT_SELECTORS.placeYourOrderButton, 'place-your-order');
+        // The same control the visibility check above proved is on screen.
+        await this.placeOrderControl(page).click({ timeout: 15_000 });
       } catch (err) {
         this.logger.warn(`place-order click threw; falling through to confirmation parse: ${(err as Error).message}`);
       }
       await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => undefined);
-      const placed = await this.parseConfirmation(page); // throws 'no_confirmation'
+      let placed: PlacedResult;
+      try {
+        placed = await this.parseConfirmation(page, reviewCosts); // throws 'no_confirmation'
+      } finally {
+        // After the parse's own waits, so the thank-you page has rendered.
+        // `snap` never throws, so a proven order still reaches `onPlaced`.
+        await this.snap(page, ebayOrderId, 'after-place-order');
+      }
+      if (!placed.amazonOrderId) {
+        // Never throws: an unread id leaves the order PLACED for cost-capture.
+        placed.amazonOrderId = await this.resolveOrderIdFromHistory(page, asin, marketplace, ebayOrderId);
+      }
       // onPlaced sets `auto_fulfill_status='placed'` atomically in its Layer 1
       // UPDATE (or the Layer 2 minimal fallback). Do NOT setStatus(PLACED) again
       // here: in the catastrophic case where BOTH layers throw, onPlaced swallows
@@ -1049,21 +1146,54 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // ran against that empty shell. Any one of these controls marks the
     // step as ready; a timeout falls through to the existing fail-closed
     // branches, which then snapshot the real page state.
+    const addressStepControls = [
+      ...CHECKOUT_SELECTORS.addressRadio,
+      ...CHECKOUT_SELECTORS.addNewAddressLink,
+      ...CHECKOUT_SELECTORS.useSelectedAddressButton,
+    ];
     await page
-      .locator(
-        [
-          ...CHECKOUT_SELECTORS.addressRadio,
-          ...CHECKOUT_SELECTORS.addNewAddressLink,
-          ...CHECKOUT_SELECTORS.useSelectedAddressButton,
-          CHECKOUT_SELECTORS.selectedShipToSummary,
-        ].join(', ')
-      )
+      .locator([...addressStepControls, CHECKOUT_SELECTORS.selectedShipToSummary].join(', '))
       .first()
       .waitFor({ state: 'visible', timeout: ADDRESS_STEP_READY_TIMEOUT_MS })
       .catch(() => undefined);
 
     const anyRadio = page.locator(CHECKOUT_SELECTORS.addressRadio.join(', '));
-    const radioCount = await anyRadio.count().catch(() => 0);
+    let radioCount = await anyRadio.count().catch(() => 0);
+
+    // Collapsed single-page checkout: no address list, only "Delivering to …".
+    // Amazon picked the account's last-used address (often the PREVIOUS eBay
+    // buyer, added by hand for an earlier order). Accept it only when it is this
+    // buyer's; otherwise open the step with "Change" and select properly below.
+    // Before this branch existed, the collapsed page read as "no saved addresses"
+    // and every such order was blocked (17-15222-04697, 2026-09-30).
+    const collapsed = page.locator(CHECKOUT_SELECTORS.collapsedShipTo).first();
+    if (
+      radioCount === 0 &&
+      (await collapsed
+        .waitFor({ state: 'visible', timeout: 1000 })
+        .then(() => true)
+        .catch(() => false))
+    ) {
+      const preselected = ((await collapsed.textContent().catch(() => '')) ?? '').trim();
+      if (addressBlockMatchesBuyer(preselected, ship)) {
+        this.logger.log(`${ebayOrderId}: checkout already delivers to the eBay buyer; address step not opened`);
+        return;
+      }
+      const opened = await this.clickFirstAvailable(page, CHECKOUT_SELECTORS.changeShipToLink, 'change-ship-to');
+      if (!opened) {
+        await this.snap(page, ebayOrderId, 'address-change-missing');
+        throw new AutoFulfillBlockedError(
+          'address',
+          "checkout pre-selected an address that is not the eBay buyer's and shows no Change control"
+        );
+      }
+      await page
+        .locator(addressStepControls.join(', '))
+        .first()
+        .waitFor({ state: 'visible', timeout: ADDRESS_STEP_READY_TIMEOUT_MS })
+        .catch(() => undefined);
+      radioCount = await anyRadio.count().catch(() => 0);
+    }
 
     if (radioCount > 0) {
       let matched = false;
@@ -1078,14 +1208,17 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           continue;
         }
         const radio = blk.locator('input[type="radio"]').first();
-        if (
-          await radio
-            .first()
-            .waitFor({ state: 'visible', timeout: 500 })
-            .then(() => true)
-            .catch(() => false)
-        ) {
-          await radio.check();
+        if ((await radio.count().catch(() => 0)) === 0) {
+          continue;
+        }
+        // Amazon's "fancy" radios keep the real <input> visually hidden behind an
+        // icon, so an actionability-checked `check()` never fires. Force it, then
+        // fall back to a DOM click, and trust only the resulting checked state.
+        await radio.check({ force: true, timeout: 5_000 }).catch(() => undefined);
+        if (!(await radio.isChecked().catch(() => false))) {
+          await radio.evaluate((el) => (el as HTMLInputElement).click()).catch(() => undefined);
+        }
+        if (await radio.isChecked().catch(() => false)) {
           matched = true;
           break;
         }
@@ -1339,11 +1472,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           .catch(() => false);
         if (submitted) {
           this.logger.debug(`${ebayOrderId}: address dialog submitted via form.requestSubmit()`);
-          await page
-            .locator('#address-ui-widgets-enterAddressFullName')
-            .first()
-            .waitFor({ state: 'hidden', timeout: 20_000 })
-            .catch(() => undefined);
+          await this.assertAddressDialogClosed(page, ebayOrderId);
           await this.humanDelay();
           return true;
         }
@@ -1448,13 +1577,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         );
       }
       await submitBtn.click();
-      // The dialog closes in-page rather than navigating, so wait for the form
-      // to disappear instead of a load event.
-      await page
-        .locator('#address-ui-widgets-enterAddressFullName')
-        .first()
-        .waitFor({ state: 'hidden', timeout: 20_000 })
-        .catch(() => undefined);
+      await this.assertAddressDialogClosed(page, ebayOrderId);
       await this.humanDelay();
     } catch (err) {
       if (err instanceof AutoFulfillBlockedError) {
@@ -1483,6 +1606,53 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * The final "Place your order" control. The CSS list covers the layouts seen
+   * so far; the accessible-name fallback covers Amazon's aria-labelled
+   * `<input>` buttons (2026-09), which carry no value or text of their own.
+   * The name is anchored end to end so nothing but that exact control matches.
+   */
+  private placeOrderControl(page: Page): Locator {
+    return page
+      .locator(CHECKOUT_SELECTORS.placeYourOrderButton.join(', '))
+      .or(page.getByRole('button', { name: /^\s*place your order\s*$/i }))
+      .first();
+  }
+
+  /**
+   * The add-address dialog closes in-page on success. When Amazon rejects a
+   * field (name with digits/symbols, missing phone, unknown ZIP) it stays open
+   * with an inline error instead — and the page behind it still carries the
+   * "Deliver to this address" button for the PRE-SELECTED address. Continuing
+   * would at best time out on an inert page and at worst reach that button, so
+   * a dialog that is still open is a hard `address` stop naming Amazon's error.
+   */
+  private async assertAddressDialogClosed(page: Page, ebayOrderId: string): Promise<void> {
+    const closed = await page
+      .locator('#address-ui-widgets-enterAddressFullName')
+      .first()
+      .waitFor({ state: 'hidden', timeout: 20_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (closed) {
+      return;
+    }
+    const inlineErrors = await page
+      .locator('.a-alert-inline-error:not(.aok-hidden) .a-alert-content')
+      .allInnerTexts()
+      .catch(() => [] as string[]);
+    const reason = inlineErrors
+      .map((text) => text.replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join(' | ')
+      .slice(0, 300);
+    await this.snap(page, ebayOrderId, 'address-form-rejected');
+    throw new AutoFulfillBlockedError(
+      'address',
+      `Amazon kept the add-address form open${reason ? `: ${reason}` : ' (no inline error shown)'}`
+    );
+  }
+
+  /**
    * Step 4: select the account's default payment method and confirm. Throws
    * `'payment'` on any decline-signal text Amazon surfaces post-selection.
    */
@@ -1494,7 +1664,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     if (
       await useBtn
         .first()
-        .waitFor({ state: 'visible', timeout: 1500 })
+        // The payment panel renders a "Loading your payment information…"
+        // placeholder first; 1.5 s read that placeholder as "no button".
+        .waitFor({ state: 'visible', timeout: 5_000 })
         .then(() => true)
         .catch(() => false)
     ) {
@@ -1668,15 +1840,22 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Step 6 (post-click): parse the confirmation page. Throws
-   * `'no_confirmation'` if no Amazon order id can be extracted — this is the
-   * worst-case signal: we may have placed an order but cannot prove it. The
-   * operator must inspect the evidence screenshots and the account's order
-   * history manually.
+   * Step 6 (post-click): prove the placement and collect what the page offers.
+   *
+   * Proof is EITHER an order id on the page (the legacy confirmation layouts)
+   * OR Amazon's thank-you page itself (`isOrderPlacedPage`: the
+   * `/gp/buy/thankyou/` route or its "Order placed" heading). The 2026-09
+   * thank-you page carries no order id and no cost summary, so the id may come
+   * back NULL (resolved from "Your Orders" next, else linked by cost-capture)
+   * and the costs fall back to `reviewCosts`, read just before the click.
+   *
+   * Throws `'no_confirmation'` only when there is no proof at all — the
+   * worst-case signal: an order may have been placed but cannot be shown. The
+   * operator inspects the `after-place-order` evidence and the account's orders.
    */
-  private async parseConfirmation(page: Page): Promise<PlacedResult> {
+  private async parseConfirmation(page: Page, reviewCosts: ReviewCostLines): Promise<PlacedResult> {
     await this.humanDelay();
-    let amazonOrderId = '';
+    let amazonOrderId: string | null = null;
     for (const sel of CHECKOUT_SELECTORS.confirmationOrderId) {
       const loc = page.locator(sel).first();
       if (
@@ -1703,15 +1882,25 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       }
     }
     if (!amazonOrderId) {
-      throw new AutoFulfillBlockedError('no_confirmation', 'confirmation page did not expose an Amazon order id');
+      const heading = page.locator(CHECKOUT_SELECTORS.confirmationPlacedHeading).first();
+      const headingText = await heading
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => heading.textContent())
+        .catch(() => null);
+      if (!isOrderPlacedPage(page.url(), headingText)) {
+        throw new AutoFulfillBlockedError(
+          'no_confirmation',
+          'no order id and no "Order placed" page after the Place Order click'
+        );
+      }
+      this.logger.log('placement proven by the thank-you page; its order number is read from Your Orders next');
     }
 
-    // Best-effort cost parse from the confirmation summary block. Missing
-    // values default to 0 — the trusted value is the amazonOrderId; Task 7's
-    // post-purchase link re-scrapes the order detail page for canonical costs.
-    let purchasePrice = 0;
-    let tax = 0;
-    let shipping = 0;
+    // Costs: a confirmation summary when the layout has one, else the review
+    // page's own lines (the figures Amazon showed for the order just placed).
+    let purchasePrice = reviewCosts.items;
+    let tax = reviewCosts.tax;
+    let shipping = reviewCosts.shipping;
     const summary = page.locator(CHECKOUT_SELECTORS.confirmationSummary).first();
     if (
       await summary
@@ -1728,15 +1917,80 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         }
         return parseFloat(m[1].replace(/,/g, '')) || 0;
       };
-      purchasePrice =
+      const summaryItems =
         grab(/subtotal[:\s]*\$?([\d,]+\.?\d*)/i) ||
         grab(/items[:\s]*\$?([\d,]+\.?\d*)/i) ||
         grab(/merchandise[:\s]*\$?([\d,]+\.?\d*)/i);
-      tax = grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
-      shipping = grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/postage[:\s]*\$?([\d,]+\.?\d*)/i);
+      if (summaryItems > 0) {
+        purchasePrice = summaryItems;
+        tax = grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+        shipping = grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i) || grab(/postage[:\s]*\$?([\d,]+\.?\d*)/i);
+      }
     }
 
     return { amazonOrderId, purchasePrice, tax, shipping };
+  }
+
+  /**
+   * Read the id of the order just placed from "Your Orders", on the same page
+   * and inside the same rate-limiter slot (calling AmazonScrapingService here
+   * would queue behind this very job on the per-account limiter and deadlock).
+   *
+   * NEVER throws and never guesses: only the newest cards, only one linking our
+   * ASIN, only an id no other order already holds (`pickOrderIdFromHistoryCards`).
+   * `purchaseId` in the thank-you URL shares the 3-7-7 shape but is NOT proven
+   * to be the order number, so it is not used. Null → the order stays PLACED
+   * without an id and the auto cost-capture sync links it.
+   */
+  private async resolveOrderIdFromHistory(
+    page: Page,
+    asin: string,
+    marketplace: AmazonMarketplace,
+    ebayOrderId: string
+  ): Promise<string | null> {
+    try {
+      await this.humanDelay();
+      await page.goto(`${buildAmazonSiteUrl(marketplace)}/your-orders/orders`, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30_000,
+      });
+      let cardsHtml: string[] = [];
+      for (const sel of CHECKOUT_SELECTORS.historyOrderCards) {
+        const cards = page.locator(sel);
+        const found = await cards
+          .first()
+          .waitFor({ state: 'visible', timeout: 4_000 })
+          .then(() => true)
+          .catch(() => false);
+        if (found) {
+          cardsHtml = await cards.evaluateAll((els) => els.slice(0, 5).map((el) => el.outerHTML));
+          break;
+        }
+      }
+      await this.snap(page, ebayOrderId, 'order-history');
+      const candidates = cardsHtml.flatMap((html) => stripScriptBlocks(html).match(/\d{3}-\d{7}-\d{7}/g) ?? []);
+      const taken = new Set<string>();
+      if (candidates.length > 0) {
+        const rows = await this.db.query<{ amazon_order_id: string }>(
+          `SELECT amazon_order_id FROM orders WHERE amazon_order_id = ANY($1::text[])`,
+          [candidates]
+        );
+        rows.forEach((r) => taken.add(r.amazon_order_id));
+      }
+      const id = pickOrderIdFromHistoryCards(cardsHtml, asin, taken);
+      if (id) {
+        this.logger.log(`order number for ${ebayOrderId} read from Your Orders: ${id}`);
+      } else {
+        this.logger.warn(
+          `order number for ${ebayOrderId} not found among ${cardsHtml.length} Your Orders card(s); ` +
+            'left PLACED without an id for cost-capture to link'
+        );
+      }
+      return id;
+    } catch (err) {
+      this.logger.warn(`Your Orders lookup failed for ${ebayOrderId}: ${(err as Error).message}`);
+      return null;
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -1775,18 +2029,28 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     await new Promise((r) => setTimeout(r, base + jitter));
   }
 
-  /** Capture a full-page screenshot as audit evidence under fulfillment-evidence/<ebayOrderId>/. */
+  /**
+   * Capture audit evidence under fulfillment-evidence/<ebayOrderId>/: a
+   * full-page screenshot AND the page's HTML under the same stem. The HTML is
+   * what a selector fix is written against — a screenshot shows that a step
+   * failed, not which element Amazon renamed. Both carry the buyer's name and
+   * address, so they share the screenshots' 7-day sweep and filesystem
+   * protection and must never be committed verbatim (see `__fixtures__/checkout`).
+   */
   private async snap(page: Page, ebayOrderId: string, stage: string): Promise<void> {
+    const dir = path.join(this.evidenceDir, ebayOrderId);
+    const stem = path.join(dir, `${stage}-${Date.now()}`);
     try {
-      const dir = path.join(this.evidenceDir, ebayOrderId);
       await fs.mkdir(dir, { recursive: true });
-      await page.screenshot({
-        path: path.join(dir, `${stage}-${Date.now()}.png`),
-        fullPage: true,
-      });
+      await page.screenshot({ path: `${stem}.png`, fullPage: true });
     } catch (err) {
       // Evidence capture must NEVER fail the flow — log and continue.
       this.logger.warn(`evidence snap failed for ${ebayOrderId}/${stage}: ${(err as Error).message}`);
+    }
+    try {
+      await fs.writeFile(`${stem}.html`, await page.content(), 'utf8');
+    } catch (err) {
+      this.logger.warn(`evidence html failed for ${ebayOrderId}/${stage}: ${(err as Error).message}`);
     }
   }
 
@@ -1946,23 +2210,42 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     let orderId: string | null = null;
 
     // Layer 1: atomic UPDATE — real costs + amazon_order_id + linked + placed.
+    // Without an order id (thank-you page proved the purchase, "Your Orders"
+    // did not yield the number) the order is PLACED with the review costs but
+    // NOT linked: `amazon_linked_at` stays NULL so it remains a pending /
+    // provisional cost-capture candidate, which is how the 3-hourly Amazon
+    // order sync finds it, links the real id and starts tracking.
     try {
-      const rows = await this.db.query<{ id: string }>(
-        `UPDATE orders SET
-           amazon_account_id          = $1,
-           amazon_order_id            = $2,
-           purchase_price             = $3,
-           amazon_tax                 = $4,
-           amazon_shipping            = $5,
-           amazon_linked_at           = CURRENT_TIMESTAMP,
-           cost_capture_status        = 'linked',
-           auto_fulfill_status        = 'placed',
-           auto_fulfill_attempted_at  = CURRENT_TIMESTAMP,
-           updated_at                 = CURRENT_TIMESTAMP
-         WHERE ebay_order_id = $6
-         RETURNING id`,
-        [amazonAccountId, placed.amazonOrderId, placed.purchasePrice, placed.tax, placed.shipping, ebayOrderId]
-      );
+      const rows = placed.amazonOrderId
+        ? await this.db.query<{ id: string }>(
+            `UPDATE orders SET
+               amazon_account_id          = $1,
+               amazon_order_id            = $2,
+               purchase_price             = $3,
+               amazon_tax                 = $4,
+               amazon_shipping            = $5,
+               amazon_linked_at           = CURRENT_TIMESTAMP,
+               cost_capture_status        = 'linked',
+               auto_fulfill_status        = 'placed',
+               auto_fulfill_attempted_at  = CURRENT_TIMESTAMP,
+               updated_at                 = CURRENT_TIMESTAMP
+             WHERE ebay_order_id = $6
+             RETURNING id`,
+            [amazonAccountId, placed.amazonOrderId, placed.purchasePrice, placed.tax, placed.shipping, ebayOrderId]
+          )
+        : await this.db.query<{ id: string }>(
+            `UPDATE orders SET
+               amazon_account_id          = $1,
+               purchase_price             = $2,
+               amazon_tax                 = $3,
+               amazon_shipping            = $4,
+               auto_fulfill_status        = 'placed',
+               auto_fulfill_attempted_at  = CURRENT_TIMESTAMP,
+               updated_at                 = CURRENT_TIMESTAMP
+             WHERE ebay_order_id = $5
+             RETURNING id`,
+            [amazonAccountId, placed.purchasePrice, placed.tax, placed.shipping, ebayOrderId]
+          );
       orderId = rows[0]?.id ?? null;
     } catch (err) {
       // Layer 2: minimal fallback — mark PLACED so a retry cannot re-click.
@@ -2015,7 +2298,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // Keys off order.id (UUID), not ebay_order_id. Owns its own try/catch.
     try {
       const id = orderId ?? (await this.orderIdFor(ebayOrderId));
-      if (id) {
+      if (!placed.amazonOrderId) {
+        // The tracker reads Amazon's order page BY its id; with none it would
+        // only fail. The cost-capture link schedules tracking once the id is known.
+        this.logger.warn(
+          `onPlaced ${ebayOrderId}: placed without an Amazon order id — tracking starts once cost-capture links it`
+        );
+      } else if (id) {
         await this.trackingQueue.scheduleOrderTracking(id, amazonAccountId);
       } else {
         this.logger.warn(

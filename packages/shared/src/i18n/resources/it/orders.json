@@ -142,6 +142,14 @@
       "filter": {
         "all": "Tutta l'evasione automatica",
         "needsAttention": "Richiede attenzione"
+      },
+      "start": {
+        "button": "Avvia ordine automatico",
+        "confirmTitle": "Acquistare ora questo ordine su Amazon?",
+        "confirmDescription": "SellerHill effettuerà un vero ordine Amazon per questa vendita con il tuo account Amazon per gli ordini automatici, con spedizione all'acquirente eBay. Il tuo limite di spesa resta valido e l'acquisto si ferma se il totale lo supera. Continua solo se non hai già acquistato l'articolo tu stesso.",
+        "confirm": "Avvia acquisto",
+        "queued": "L'acquisto è partito. Lo stato dell'ordine si aggiorna tra pochi minuti.",
+        "queuedDryRun": "È partita una prova. Questo account Amazon è in modalità test, quindi non verrà acquistato nulla."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Tracciamento convertito.",
       "orderNotTracked": "Questo ordine non è collegato a nessuna delle tue inserzioni, quindi un numero di tracciamento convertito non potrebbe mai essere inviato a eBay. Collega prima l'ordine alla sua inserzione.",
       "trackingAlreadyPushed": "eBay ha già il numero di tracciamento originale di questo ordine e non può essere sostituito, quindi convertirlo ora non cambierebbe ciò che vede l'acquirente.",
-      "listingOverPlanLimit": "L'inserzione di questo ordine era oltre il limite di inserzioni del tuo piano quando l'ordine è arrivato. Gli ordini delle inserzioni oltre il limite non ricevono il tracciamento della spedizione né la conversione del tracciamento."
+      "listingOverPlanLimit": "L'inserzione di questo ordine era oltre il limite di inserzioni del tuo piano quando l'ordine è arrivato. Gli ordini delle inserzioni oltre il limite non ricevono il tracciamento della spedizione né la conversione del tracciamento.",
+      "autoFulfillNotRestartable": "L'acquisto automatico di questo ordine non può essere riavviato. Potrebbe essere già acquistato o in corso, oppure potrebbe partire un secondo acquisto. Controlla i tuoi ordini Amazon e collega l'ordine manualmente.",
+      "autoFulfillNoAccount": "Nessun account Amazon è pronto per gli ordini automatici. Nelle impostazioni attiva gli ordini automatici su un account Amazon e imposta un limite di spesa.",
+      "autoFulfillOverCap": "Questa vendita supera il limite di spesa del tuo account Amazon. Aumenta il limite nelle impostazioni dell'account Amazon o acquista l'articolo manualmente.",
+      "autoFulfillAlreadyStarted": "Lo stato di questo ordine è appena cambiato, quindi l'acquisto potrebbe essere già partito. Aggiorna la pagina.",
+      "autoFulfillQuotaExhausted": "Il limite di ordini automatici del tuo piano per questo periodo è esaurito."
     },
     "stage": {
       "amazon_cancelled": {
