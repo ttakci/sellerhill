@@ -1,0 +1,2834 @@
+Source: https://developer.ebay.com/devzone/xml/docs/reference/ebay/GetSellerEvents.html
+Fetched: 2026-09-30 (text-extracted)
+
+GetSellerEvents - API Reference - Trading API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Trading APIVersion 1477
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Tutorials
+
+- Release Notes
+
+# GetSellerEvents
+
+Use this call to retrieve a list of the items on which a seller event has occurred. A seller event includes actions such as a revision to the item (e.g., a description change), a price change (through a bid), or the ending of an item's listing.
+
+Short-duration call rate limit: To protect eBay's infrastructure and servers from being overloaded and/or destabilized, the GetSellerEvents call has a short-duration call rate limit to restrict bursts of very high traffic.
+
+Per (seller) user ID, no more than 1000 GetSellerEvents calls can be executed within any 15-second interval. If this call rate limit is exceeded at any time, the application making the called is blocked. Each time an application is blocked, the user/application must wait until the block is reset after 15 seconds. This short-duration call rate limit applies to all seller accounts, and sellers/developers cannot appeal or request for a higher limit.
+
+GetSellerEvents returns individual item data in an ItemArray object. Item data is retrieved for only the authenticated user of the call. GetSellerEvents returns zero or more items, depending on the items that have seller events within the specified time range. You can add filters so the data returned includes only items that start, end, or are modified within a certain time span.
+
+## Usage Details
+
+Each of the date-range filters is individually optional, but a given call to GetSellerEvents must use at least one date-range filter. Multiple date-range filters may not be used in the same call.
+
+- Use the EndTimeFrom and EndTimeTo input properties to limit the items returned to just those where the listing ends between the two dates.
+
+- Use the StartTimeFrom and StartTimeTo input properties to limit the items returned to just those where the listing started between the two dates.
+
+- Use the ModTimeFrom and ModTimeTo input properties to limit the items returned to just those where the listing was modified between the two dates.
+
+### Working With the Response
+
+GetSellerEvents returns a list of the sellers event items into an ItemArray container. The Quantity element is only returned if it was set by the seller or by eBay.
+
+An application might process the response in the following sequence:
+
+- Traverse the collection to visit each Item object contained in the ItemArray container.
+
+- Inspect the properties of each Item object to get the desired values for the listing.
+
+- As applicable for the application, store the appropriate item data. If data for the same listing is already stored, update it with the new data. Comparing the new incoming data for a listing with the previously stored data allows the application to indicate to the seller what information has changed.
+
+### Best Practices
+
+- Applications should use the EndTimeFrom and EndTimeTo input fields, or ModTimeFrom and ModTimeTo input fields, to ensure that each unique item is retrieved only once.
+
+- Use the ModTime filter more frequently than the EndTime filter because ModTime events are indexed.
+
+See the following FAQ for extra details: Best Practices for GetSellerEvents and GetSellerTransactions
+
+## Testing GetSellerEvents
+
+Test GetSellerEvents in the Sandbox as follows:
+
+- Register a Sandbox user (seller) and add at two or three new items for the test seller using AddItem.
+
+- Some data values are returned only if the call requestor is the item seller. To test the call from the perspective of another user, execute the call using a Sandbox test user other than the one used to list the item.
+
+- Use a second and third Sandbox test user to perform actions that translate into seller events, such as bidding on a auction. (The seller of an item cannot bid on his or her own item, a rule that is also enforced in the Sandbox.)
+
+- For applications that create and use competitive-bid item listings (auctions), bid on the items using the Sandbox user interface before retrieving the item using GetSellerEvents. This will populate the high bidder data for items in the result set.
+
+### Related Information
+
+See Track listing changes.
+
+Input
+Output
+Detail Controls
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+The box below lists all fields that could be included in the call request. To learn more about an individual field or its type, click its name in the box (or scroll down to find it in the table below the box).
+
+See also the Deprecated Objects link above. Fields presented
+in this color are deprecated, and fields presented in this color are (or soon will be) non-operational.
+
+The XML prototype does not include requester credentials. This is a documentation limitation only (see Standard Requester Credentials for Making Calls).
+
+<?xml version="1.0" encoding="utf-8"?>
+<GetSellerEventsRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+<!-- Call-specific Input Fields -->
+<EndTimeFrom> dateTime </EndTimeFrom>
+<EndTimeTo> dateTime </EndTimeTo>
+<HideVariations> boolean </HideVariations>
+<IncludeVariationSpecifics> boolean </IncludeVariationSpecifics>
+<IncludeWatchCount> boolean </IncludeWatchCount>
+<ModTimeFrom> dateTime </ModTimeFrom>
+<ModTimeTo> dateTime </ModTimeTo>
+<NewItemFilter> boolean </NewItemFilter>
+<StartTimeFrom> dateTime </StartTimeFrom>
+<StartTimeTo> dateTime </StartTimeTo>
+<!-- Standard Input Fields -->
+<DetailLevel> DetailLevelCodeType </DetailLevel>
+<!-- ... more DetailLevel values allowed here ... -->
+<ErrorLanguage> string </ErrorLanguage>
+<MessageID> string </MessageID>
+<OutputSelector> string </OutputSelector>
+<!-- ... more OutputSelector values allowed here ... -->
+<Version> string </Version>
+<WarningLevel> WarningLevelCodeType </WarningLevel>
+</GetSellerEventsRequest>
+
+Argument |
+Type |
+Occurrence |
+Meaning |
+
+Call-specific Input Fields
+[Jump to standard fields]
+|
+
+EndTimeFrom
+|
+dateTime |
+Conditional |
+
+Describes the earliest (oldest) date to use in a time range filter based on item end time. Must be specified if EndTimeTo is specified.
+
+Either the StartTimeFrom, EndTimeFrom, or ModTimeFrom filter must be specified. If you do not specify the corresponding To filter, it is set to the time you make the call.
+
+For better results, the time range you use should be less than 48 hours. If 3000 or more items are found, use a smaller time range.
+
+Include a 2-minute, overlapping buffer between requests. For example, if EndTimeTo was 6:58 in a prior request, the current request should use 6:56 in EndTimeFrom (e.g., use ranges like 5:56-6:58, 6:56-7:58, 7:56-8:58).
+See KB article: Best Practices for GetSellerEvents and GetSellerTransactions.
+
+|
+
+EndTimeTo
+|
+dateTime |
+Optional |
+
+Describes the latest (most recent) date to use in a time range filter based on item end time.
+
+If you specify the corresponding From filter, but you do not include EndTimeTo, then EndTimeTo is set to the time you make the call.
+|
+
+HideVariations
+|
+boolean |
+Optional |
+
+Specifies whether to force the response to hide variation details for multiple-variation listings.
+
+If false (or not specified), eBay returns variation details (if any). In this case, the amount of detail can be controlled by using IncludeVariationSpecifics.
+
+If true, variation details are not returned (and IncludeVariationSpecifics has no effect). This may be useful for applications that use other calls, notifications, alerts, or reports to track price and quantity details.
+
+Default: false.
+|
+
+IncludeVariationSpecifics
+|
+boolean |
+Optional |
+
+Specifies whether to force the response to include variation specifics for multiple-variation listings.
+
+If false (or not specified), eBay keeps the response as small as possible by not returning Variation.VariationSpecifics. It only returns Variation.SKU as an identifier (along with the variation price and other selling details). If the variation has no SKU, then Variation.VariationSpecifics is returned as the variation's unique identifier.
+
+If true, Variation.VariationSpecifics is returned. (Variation.SKU is also returned, if the variation has a SKU.) This may be useful for applications that don't track variations by SKU.
+
+Ignored when HideVariations is set to true.
+
+Note: If the seller includes a large number of variations in many listings, using this flag may degrade the call's performance. Therefore, when you use this flag, you may need to reduce the total number of items you're requesting at once. For example, you may need to use shorter time ranges in the StartTimeFrom, EndTimeFrom, or ModTimeFrom filters.
+
+Default: false.
+|
+
+IncludeWatchCount
+|
+boolean |
+Optional |
+
+The seller can include this field and set its value to true if that seller wants to see how many prospective bidders/buyers currently have an item added to their Watch Lists. The Watch count is returned in the WatchCount field for each item in the response.
+|
+
+ModTimeFrom
+|
+dateTime |
+Conditional |
+
+Describes the earliest (oldest) date to use in a time range filter based on item modification time. Must be specified if ModTimeTo is specified. Either the StartTimeFrom, EndTimeFrom, or ModTimeFrom filter must be specified. If you do not specify the corresponding To filter, it is set to the time you make the call.
+
+Include a 2-minute, overlapping buffer between requests. For example, if ModTimeTo was 6:58 in a prior request, the current request should use 6:56 in ModTimeFrom (e.g., use ranges like 5:56-6:58, 6:56-7:58, 7:56-8:58).
+
+For better results, the time range you use should be less than 48 hours. If 3000 or more items are found, use a smaller time range.
+
+If an unexpected item is returned (including an old item or an unchanged active item), please ignore the item. Although a maintenance process may have triggered a change in the modification time, item characteristics are unchanged.
+See KB article: Best Practices for GetSellerEvents and GetSellerTransactions.
+
+|
+
+ModTimeTo
+|
+dateTime |
+Optional |
+
+Describes the latest (most recent) date and time to use in a time range filter based on the time an item's record was modified. If you specify the corresponding From filter, but you do not include ModTimeTo , then ModTimeTo is set to the time you make the call. Include a 2-minute buffer between the current time and the ModTimeTo filter.
+|
+
+NewItemFilter
+|
+boolean |
+Optional |
+
+If true, response includes only items that have been modified within the ModTime range. If false, response includes all items.
+|
+
+StartTimeFrom
+|
+dateTime |
+Conditional |
+
+Describes the earliest (oldest) time to use in a time range filter based on item start time. Must be specified if StartTimeTo is specified.
+
+Either the StartTimeFrom, EndTimeFrom, or ModTimeFrom filter must be specified.
+
+If you do not specify the corresponding To filter, it is set to the time you make the call.
+
+For better results, the time period you use should be less than 48 hours. If 3000 or more items are found, use a smaller time range.
+
+Include a 2-minute, overlapping buffer between requests. For example, if StartTimeTo was 6:58 in a prior request, the current request should use 6:56 in StartTimeFrom (e.g., use ranges like 5:56-6:58, 6:56-7:58, 7:56-8:58).
+See KB article: Best Practices for GetSellerEvents and GetSellerTransactions.
+
+|
+
+StartTimeTo
+|
+dateTime |
+Optional |
+
+Describes the latest (most recent) date to use in a time range filter based on item start time. If you specify the corresponding From filter, but you do not include StartTimeTo, the StartTimeTo is set to the time you make the call.
+|
+
+Standard Input Fields
+|
+
+DetailLevel
+|
+DetailLevelCodeType |
+Optional,
+
+repeatable: [0..*] |
+
+Detail levels are instructions that define standard subsets of data to return for particular data components (e.g., each Item, Transaction, or User) within the response payload. For example, a particular detail level might cause the response to include buyer-related data in every result (e.g., for every Item), but no seller-related data.
+
+Specifying a detail level is like using a predefined attribute list in the SELECT clause of an SQL query. Use the DetailLevel element to specify the required detail level that the client application needs pertaining to the data components that are applicable to the request.
+
+The DetailLevelCodeType defines the global list of available detail levels for all request types. Most request types support certain detail levels or none at all. If you pass a detail level that exists in the schema but that isn't valid for a particular request, eBay ignores it and processes the request without it.
+
+For each request type, see the detail level tables in the Input/Output Reference to determine which detail levels are applicable and which elements are returned for each applicable detail level.
+
+Note that DetailLevel is required input for GetMyMessages.
+
+With GetSellerList and other calls that retrieve large data sets, please avoid using ReturnAll when possible. For example, if you use GetSellerList, use GranularityLevel instead, or use GetSellerEvents. If you do use 'ReturnAll' with GetSellerList, use a small Pagination.EntriesPerPage value and a narrow EndTimeFrom/EndTimeTo date range for better performance.
+
+Applicable values:
+
+ReturnAll
+
+(in) Returns all available data. With GetSellerList and other calls that retrieve large data sets, please avoid using ReturnAll when possible. For example, if you use GetSellerList, use a GranularityLevel or use the GetSellerEvents call instead. If you use ReturnAll with GetSellerList, use a small EntriesPerPage value and a short EndTimeFrom/EndTimeTo range for better performance.
+
+(Not all values in DetailLevelCodeType apply to this field.)
+
+|
+
+ErrorLanguage
+|
+string |
+Optional |
+
+Use ErrorLanguage to return error strings for the call in a different language from the language commonly associated with the site that the requesting user is registered with. Below are some examples from different countries.
+
+ID | Country |
+en_AU | Australia |
+de_AT | Austria |
+nl_BE | Belgium (Dutch) |
+fr_BE | Belgium (French) |
+en_CA | Canada |
+fr_CA | Canada (French) |
+zh_CN | China |
+fr_FR | France |
+de_DE | Germany |
+zh_HK | Hong Kong |
+en_IN | India |
+en_IE | Ireland |
+it_IT | Italy |
+nl_NL | Netherlands |
+en_SG | Singapore |
+es_ES | Spain |
+de_CH | Switzerland |
+en_GB | United Kingdom |
+en_US | United States |
+
+|
+
+MessageID
+|
+string |
+Optional |
+
+Most Trading API calls support a MessageID element in the request and a CorrelationID element in the response. If you pass in a MessageID in a request, the same value will be returned in the CorrelationID field in the response. Pairing these values can help you track and confirm that a response is returned for every request and to match specific responses to specific requests. If you do not pass a MessageID value in the request, CorrelationID is not returned.
+|
+
+OutputSelector
+|
+string |
+Optional,
+
+repeatable: [0..*] |
+
+You can use the OutputSelector field to restrict the data returned by a call. This field can make the call response easier to manage, especially when a large payload is returned. If you use the OutputSelector field, the output data will only include the field(s) you specified in the request, as well as all of its child fields (if a field is a container) and its parent fields (if any). Note that it is possible that a field included through an OutputSelector field may still not be returned if it is not applicable, or if it is not found based on other criteria set up in the request payload.
+
+For example, if you are using GetItem and you only want to retrieve the URL of the View Item page (emitted in ViewItemURL field) and the item's Buy It Now price (emitted in BuyItNowPrice field), you would include two separate OutputSelector fields and set the value for each one as ViewItemURL and BuyItNowPrice as in the following example:
+
+If the following output selectors are used:
+
+...
+<OutputSelector>ViewItemURL</OutputSelector>
+<OutputSelector>BuyItNowPrice</OutputSelector>
+...
+
+...the response might look like the following
+
+<Item>
+<BuyItNowPrice currencyID="USD">0.0</BuyItNowPrice>
+<ListingDetails>
+<ViewItemURL>http://www.ebay.com/itm/Tag-Heuer-Mens-Watch/182879833261</ViewItemURL>
+</ListingDetails>
+</Item>
+
+See OutputSelector.
+
+|
+
+Version
+|
+string |
+Conditional |
+
+The version number of the API code that you are programming against (e.g., 1149). The version you specify for a call has these basic effects: - It indicates the version of the code lists and other data that eBay should use to process your request.
+- It indicates the schema version you are using.
+You need to use a version that is greater than or equal to the lowest supported version.
+For the SOAP API: If you are using the SOAP API, this field is required. Specify the version of the WSDL your application is using.
+
+For the XML API: If you are using the XML API, this field has no effect. Instead, specify the version in the X-EBAY-API-COMPATIBILITY-LEVEL HTTP header. (If you specify Version in the body of an XML API request and it is different from the value in the HTTP header, eBay returns an informational warning that the value in the HTTP header was used instead.)
+See:
+
+HTTP headers
+
+eBay Schema Versioning Strategy
+
+Lowest Supported Version
+
+|
+
+WarningLevel
+|
+WarningLevelCodeType |
+Optional |
+
+Controls whether or not to return warnings when the application passes unrecognized or deprecated elements in a request.
+
+An unrecognized element is one that is not defined in any supported version of the schema. Schema element names are case-sensitive, so using WarningLevel can also help you remove any potential hidden bugs within your application due to incorrect case or spelling in field names before you put your application into the Production environment.
+
+WarningLevel only validates elements; it doesn't validate XML attributes. It also doesn't control warnings related to user-entered strings or numbers, or warnings for logical errors.
+
+We recommend that you only use this during development and debugging. Do not use this in requests performed in the Production environment.
+
+Applicable values:
+
+High
+
+(in) The WarningLevel value is set to High if the user wishes to receive warnings when the application passes unrecognized or deprecated elements in an API call request. Setting the WarningLevel value to High is not recommended in a production environment. Instead, it should only be used during the development/debugging stage.
+
+Low
+
+(in) The WarningLevel value is set to Low if the user does not wish to receive warnings when the application passes unrecognized or deprecated elements in an API call request. This is the default value if WarningLevel is not specified in the call request.
+
+See Warning Level.
+
+|
+
+Input
+Output
+Detail Controls
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+The box below lists all fields that might be returned in the response. To learn more about an individual field or its type, click its name in the box (or scroll down to find it in the table below the box).
+
+See also the Deprecated Objects link above. Fields presented in this color are deprecated, and fields presented in this color are not returned (or soon will not be returned) or are not operational (or soon will be non-operational).
+
+<?xml version="1.0" encoding="utf-8"?>
+<GetSellerEventsResponse xmlns="urn:ebay:apis:eBLBaseComponents">
+<!-- Call-specific Output Fields -->
+<ItemArray> ItemArrayType
+<Item> ItemType
+<BestOfferDetails> BestOfferDetailsType
+<BestOfferCount> int </BestOfferCount>
+<BestOfferEnabled> boolean </BestOfferEnabled>
+</BestOfferDetails>
+<BuyItNowPrice currencyID="CurrencyCodeType"> AmountType (double) </BuyItNowPrice>
+<Currency> CurrencyCodeType </Currency>
+<HitCount> long </HitCount>
+<IsSecureDescription> boolean </IsSecureDescription>
+<ItemID> ItemIDType (string) </ItemID>
+<ListingDetails> ListingDetailsType
+<EndTime> dateTime </EndTime>
+<StartTime> dateTime </StartTime>
+</ListingDetails>
+<ListingType> ListingTypeCodeType </ListingType>
+<Quantity> int </Quantity>
+<SellerProfiles> SellerProfilesType
+<SellerPaymentProfile> SellerPaymentProfileType
+<PaymentProfileID> long </PaymentProfileID>
+<PaymentProfileName> string </PaymentProfileName>
+</SellerPaymentProfile>
+<SellerReturnProfile> SellerReturnProfileType
+<ReturnProfileID> long </ReturnProfileID>
+<ReturnProfileName> string </ReturnProfileName>
+</SellerReturnProfile>
+<SellerShippingProfile> SellerShippingProfileType
+<ShippingProfileID> long </ShippingProfileID>
+<ShippingProfileName> string </ShippingProfileName>
+</SellerShippingProfile>
+</SellerProfiles>
+<SellerVacationNote> string </SellerVacationNote>
+<SellingStatus> SellingStatusType
+<BidCount> int </BidCount>
+<CurrentPrice currencyID="CurrencyCodeType"> AmountType (double) </CurrentPrice>
+<HighBidder> UserType
+<Email> string </Email>
+<FeedbackScore> int </FeedbackScore>
+<UserAnonymized> boolean </UserAnonymized>
+<UserID> UserIDType (string) </UserID>
+</HighBidder>
+<ListingStatus> ListingStatusCodeType </ListingStatus>
+<QuantitySold> int </QuantitySold>
+</SellingStatus>
+<Site> SiteCodeType </Site>
+<Title> string </Title>
+<Variations> VariationsType
+<Variation> VariationType
+<Quantity> int </Quantity>
+<SellingStatus> SellingStatusType
+<BidCount> int </BidCount>
+<CurrentPrice currencyID="CurrencyCodeType"> AmountType (double) </CurrentPrice>
+<HighBidder> UserType
+<Email> string </Email>
+<FeedbackScore> int </FeedbackScore>
+<UserAnonymized> boolean </UserAnonymized>
+<UserID> UserIDType (string) </UserID>
+</HighBidder>
+<ListingStatus> ListingStatusCodeType </ListingStatus>
+<QuantitySold> int </QuantitySold>
+</SellingStatus>
+<SKU> SKUType (string) </SKU>
+<StartPrice currencyID="CurrencyCodeType"> AmountType (double) </StartPrice>
+<VariationProductListingDetails> VariationProductListingDetailsType
+<EAN> string </EAN>
+<ISBN> string </ISBN>
+<UPC> string </UPC>
+</VariationProductListingDetails>
+<VariationSpecifics> NameValueListArrayType
+<NameValueList> NameValueListType
+<Name> string </Name>
+<Value> string </Value>
+<!-- ... more Value values allowed here ... -->
+</NameValueList>
+<!-- ... more NameValueList nodes allowed here ... -->
+</VariationSpecifics>
+<!-- ... more VariationSpecifics nodes allowed here ... -->
+</Variation>
+<!-- ... more Variation nodes allowed here ... -->
+</Variations>
+<WatchCount> long </WatchCount>
+</Item>
+<!-- ... more Item nodes allowed here ... -->
+</ItemArray>
+<TimeTo> dateTime </TimeTo>
+<!-- Standard Output Fields -->
+<Ack> AckCodeType </Ack>
+<Build> string </Build>
+<CorrelationID> string </CorrelationID>
+<Errors> ErrorType
+<ErrorClassification> ErrorClassificationCodeType </ErrorClassification>
+<ErrorCode> token </ErrorCode>
+<ErrorParameters ParamID="string"> ErrorParameterType
+<Value> string </Value>
+</ErrorParameters>
+<!-- ... more ErrorParameters nodes allowed here ... -->
+<LongMessage> string </LongMessage>
+<SeverityCode> SeverityCodeType </SeverityCode>
+<ShortMessage> string </ShortMessage>
+</Errors>
+<!-- ... more Errors nodes allowed here ... -->
+<HardExpirationWarning> string </HardExpirationWarning>
+<Timestamp> dateTime </Timestamp>
+<Version> string </Version>
+</GetSellerEventsResponse>
+
+Return Value |
+Type |
+Occurrence |
+Meaning |
+
+Call-specific Output Fields
+[Jump to standard fields]
+|
+
+ItemArray
+|
+ItemArrayType |
+Always |
+
+Collection of items whose last modified time matches the filters specified in the request. Returns empty if no items were modified within the time range of the request.
+
+If 1 to 2999 items are returned, then the results are complete. If 3000 or more items are returned, it usually means additional items exist within the time range you requested, but they were not all returned.
+
+To retrieve complete results, use a smaller time range in the request so that fewer than 3000 are returned per response.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See KB article: Best Practices for GetSellerEvents and GetSellerTransactions.
+
+|
+
+ItemArray.Item
+|
+ItemType |
+Conditionally,
+
+repeatable: [0..3000] |
+
+Contains the data properties that define one item listing. GetSellerEvents and GetSellerList only return items if any are available for the seller within the time window specified in the request.
+
+Some optional fields are only returned if the seller defined them for the item. Some fields are only returned under particular conditions specified in the individual field descriptions. For example, a buyer's contact information might only be returned if the member who is making the request (as identified in the eBayAuthToken) has an order relationship with that buyer.
+
+For calls that support detail levels, the set of fields returned is also controlled by the value of DetailLevel in the request. For some calls, other parameters in the request can also control the data returned for each item. For example, GranularityLevel controls the fields to return for each item in the GetSellerList response.
+Note: When making a GetSellerList call, items that are on-hold due to an eBay policy violation will not be returned in the response.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item
+.BestOfferDetails
+|
+BestOfferDetailsType |
+Conditionally |
+
+For Add/Revise/Relist/Verify calls: This container is used to enable the Best Offer feature on a listing. Note that the Best Offer feature can be set for auction listings on the US, Canada, UK, Germany, Australia, France, Italy, and Spain marketplaces, but a seller can only use Best Offer or Buy It Now, but not both. Once an auction listing receives a qualifying bid, the Best Offer feature will be turned off and any pending Best Offers or Counteroffers will no longer be valid.
+
+For GetItem and other calls that retrieve item data, this container will include the status (GetMyeBayBuying only) and dollar amount of the latest Best Offer on a fixed-price listing, and the number of Best Offers received for the fixed-price listing.
+
+Note: Best Offer is not available for multi-variation listings.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item
+.BestOfferDetails
+.BestOfferCount
+|
+int |
+Conditionally |
+
+The number of Best Offers made for this item, if any. In other words, if there are no Best Offers made, this field will not appear in the response. This field is not applicable to the Add/Revise/Relist calls.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item
+.BestOfferDetails
+.BestOfferEnabled
+|
+boolean |
+Conditionally |
+
+This field indicates whether or not the Best Offer feature is enabled for the listing. A seller can enable the Best Offer feature for a listing as long as the category supports the Best Offer feature. To see if an eBay category supports the Best Offer feature, call the Metadata API getNegotiatedPricePolicies method. If the applicable leaf category is returned in the negotiatedPricePolicies container, that category supports Best Offer. Note that Metadata API methods return metadata for leaf categories only.
+
+A listing enabled with the Best Offer feature allows a buyer to bargain with the seller and make a lower-priced offer than the fixed price or the starting bid price for an auction listing. The seller can then decide whether to accept the buyer's Best Offer price or propose a counter offer higher than the Best Offer price, but lower than the fixed price or starting bid price.
+
+Note: The Best Offer feature is now available for auction listings on the following sites: US, Canada, UK, Germany, Australia, France, Italy, and Spain. However, sellers must choose between offering Best Offer or Buy It Now on an auction listing, as both features cannot be enabled on the same auction listing. If an auction listing is enabled with Best Offer, this feature will no longer be applicable once the listing receives its first qualifying bid. Note: Best Offer is not available for multi-variation listings.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.BuyItNowPrice
+|
+AmountType (double) |
+Conditionally |
+
+This field is only applicable for auction listings. By specifying a 'Buy It Now' price, a seller is allowing prospective buyers the opportunity to purchase the item in the auction listing at this price immediately. When a buyer uses the 'Buy It Now' option to purchase the item, the auction listing will end immediately.
+
+By including this field and specifying a 'Buy It Now' price, the seller is enabling the 'Buy It Now' feature on the auction listing. If the seller includes this field for any other listing type other than an auction, this field and its price will just be ignored.
+
+The price in this field must be at least 30 percent higher than the starting bid price (which is specified in an Add call through the Item.StartPrice field). Once a bid is made on an auction listing, and the bid meets or exceeds the Item.ReservePrice value (if set), the 'Buy It Now' option becomes unavailable, and this field will no longer be applicable. If there is no Reserve Price, the first bid will nullify the 'Buy It Now' option.
+
+Keep in mind that GetItem (and other 'Get' calls that retrieve the Item details) may still return the BuyItNowPrice field for an auction item even if the 'Buy It Now' option is no longer available. Instead, a user should look for the ListingDetails.BuyItNowAvailable boolean field in the GetItem response to determine if the 'Buy It Now' option is still available for the auction item.
+
+Note: For the US site, new eBay sellers are subject to Seller Limits, which limit the quantity of items that may be listed and/or the total cumulative value of these listings. While subject to these selling limits, an eBay seller can use the GetMyeBaySelling call to retrieve both the remaining number of listings they can create and the remaining cumulative value of these listings. These values are shown in the Summary.QuantityLimitRemaining and Summary.AmountLimitRemaining fields in the GetMyeBaySelling response. If a call to add an item or revise an item would result in the exceeding of these limits, the add item or revise item call will fail. These fields will only be returned if the seller is subject to seller limits.
+
+DetailLevel: ReturnAll.
+|
+
+ItemArray.Item.BuyItNowPrice
+[ attribute currencyID ] |
+CurrencyCodeType |
+Always |
+
+This field is only applicable for auction listings. By specifying a 'Buy It Now' price, a seller is allowing prospective buyers the opportunity to purchase the item in the auction listing at this price immediately. When a buyer uses the 'Buy It Now' option to purchase the item, the auction listing will end immediately.
+
+By including this field and specifying a 'Buy It Now' price, the seller is enabling the 'Buy It Now' feature on the auction listing. If the seller includes this field for any other listing type other than an auction, this field and its price will just be ignored.
+
+The price in this field must be at least 30 percent higher than the starting bid price (which is specified in an Add call through the Item.StartPrice field). Once a bid is made on an auction listing, and the bid meets or exceeds the Item.ReservePrice value (if set), the 'Buy It Now' option becomes unavailable, and this field will no longer be applicable. If there is no Reserve Price, the first bid will nullify the 'Buy It Now' option.
+
+Keep in mind that GetItem (and other 'Get' calls that retrieve the Item details) may still return the BuyItNowPrice field for an auction item even if the 'Buy It Now' option is no longer available. Instead, a user should look for the ListingDetails.BuyItNowAvailable boolean field in the GetItem response to determine if the 'Buy It Now' option is still available for the auction item.
+
+Note: For the US site, new eBay sellers are subject to Seller Limits, which limit the quantity of items that may be listed and/or the total cumulative value of these listings. While subject to these selling limits, an eBay seller can use the GetMyeBaySelling call to retrieve both the remaining number of listings they can create and the remaining cumulative value of these listings. These values are shown in the Summary.QuantityLimitRemaining and Summary.AmountLimitRemaining fields in the GetMyeBaySelling response. If a call to add an item or revise an item would result in the exceeding of these limits, the add item or revise item call will fail. These fields will only be returned if the seller is subject to seller limits.
+
+For a list of possible enumeration values, see CurrencyCodeType.
+|
+
+ItemArray.Item.Currency
+|
+CurrencyCodeType |
+Conditionally |
+
+In an Add/Revise/Relist/Verify call, this required three-digit enumeration value defines the currency associated with the listing site. The item price and all costs passed in the call request will be using this currency. Similarly, the listing fees and other cost-related data will be using this currency. Since the Trading API can only be used for a select number of eBay sites, only a subset of values are supporting when adding/revising/relisting an item. These supported values are discussed in the top section of CurrencyCodeType.
+
+In 'Get' calls, it is possible that any of the values in CurrencyCodeType may appear, as some cost-related fields will show the buyer's currency type.
+
+Applicable values: See Currency.
+
+Code so that your app gracefully handles any future changes to this list.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.HitCount
+|
+long |
+Conditionally |
+
+This value indicates the number of page views that a listing has received in the last 30 days.
+
+We recommend that you use the getTrafficReport method of the Analytics API to return user traffic details received by a seller's listings. This RESTful method returns metrics such as click-through rate, listing impressions, listing views, sales conversion rate, and the number of completed transactions.
+
+Note: This field is only returned to authorized applications.
+
+DetailLevel: ReturnAll.
+|
+
+ItemArray.Item
+.IsSecureDescription
+|
+boolean |
+Conditionally |
+
+This boolean field indicates whether or not the listing description is HTTPS secure/compliant. To be HTTPS secure/compliant, the Item.Description field may not contain any links to site pages that use the HTTP (and not HTTPS) protocol. This field will be returned with each listing that is found unless one or more OutputSelector fields are used and Item.IsSecureDescription is not one of the values passed in to one of these fields.
+
+If this field is returned as true, the listing is HTTPs secure/compliant, and the whole listing description will appear on the View Item page for the listing. If this field is returned as false, the listing is not HTTPs secure/compliant, and only a partial/brief listing description will appear on the View Item page for the listing, with a link to the full listing description that will load in another tab.
+
+If the listing description is not HTTPS compliant, the fix is to call ReviseItem or ReviseFixedPriceItem and update the Item.Description field, removing all links to HTTP pages.
+
+For more information about why eBay made this change, please see the Policy Updates page of the Fall 2017 Seller Updates page.
+|
+
+ItemArray.Item.ItemID
+|
+ItemIDType (string) |
+Conditionally |
+
+The unique identifier of the eBay listing. This identifier is generated by eBay and returned in the response of an Add call if an item is successfully listed. Once an item is successfully created, the ItemID cannot be modified.
+
+Note: Although we represent item IDs as strings in the schema, we recommend you store them as 64-bit signed integers. If you choose to store item IDs as strings, allocate at least 19 characters (assuming decimal digits are used) to hold them. Your code should be prepared to handle IDs of up to 19 digits.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.ListingDetails
+|
+ListingDetailsType |
+Conditionally |
+
+Various details about a listing, some of which are calculated or derived after the item is listed. These include the start and end time, converted (localized) prices, and certain flags that indicate whether the seller specified fields whose values are not visible to the requesting user. For GetMyeBayBuying, returned as a self-closed element if no listings meet the request criteria.
+
+In an Add/Revise/Relist call, this container is used to set the Best Offer Auto-Accept and Best Offer Auto-Decline threshold values.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.ListingDetails
+.EndTime
+|
+dateTime |
+Conditionally |
+
+Time stamp (in GMT) when the listing is scheduled to end (calculated based on the values of StartTime and ListingDuration ) or the actual end time if the item has ended.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.ListingDetails
+.StartTime
+|
+dateTime |
+Conditionally |
+
+The StartTime value returned by non-search calls such as GetItem is the time stamp (in GMT) for when the item was listed.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.ListingType
+|
+ListingTypeCodeType |
+Conditionally |
+
+The selling format of the eBay listing, such as auction (indicated with Chinese value), fixed-price (indicated with FixedPriceItem value), or classified ad (indicated with AdType value).
+
+If this field is not included in an AddItem, AddItems, or VerifyAddItem call, the listing type defaults to auction
+
+For AddFixedPriceItem, RelistFixedPriceItem, or VerifyAddFixedPriceItem call, this field must be included and set to FixedPriceItem, since these calls only work with fixed-price listings.
+
+This field is not applicable to Revise calls because the selling format of active listings cannot be changed.
+
+Applicable values: See ListingType.
+
+Code so that your app gracefully handles any future changes to this list.
+
+DetailLevel: ReturnAll.
+See Listing types.
+
+|
+
+ItemArray.Item.Quantity
+|
+int |
+Conditionally |
+
+For AddItem family of calls: The Quantity value for auction listings must always be 1. For a fixed-price listing, the Quantity value indicates the number of identical items the seller has available for sale in the listing. If this field is not included when creating a new fixed-price listing, quantity defaults to '1'. If variations are specified in AddFixedPriceItem or VerifyAddFixedPriceItem, the Item.Quantity is not required since the quantity of variations is specified in Variation.Quantity instead. See the Creating a listing with variations eBay Help page for more information on variations.
+
+For ReviseItem and ReviseFixedPriceItem: This value can only be changed for a fixed-price listing with no variations. The quantity of variations is controlled in the Variation.Quantity field and the Item.Quantity value for an auction listing should always be 1.
+
+For RelistItem and RelistFixedPriceItem: Like most fields, when you use RelistItem or RelistFixedPriceItem, Quantity retains its original value unless you specifically change it. This means that the item is relisted with the value that was already in Quantity, not with the remaining quantity available. For example, if the original Quantity value was 10, and three items have been sold, eBay sets the relisted item's Quantity to 10 by default, and not 7. So, we strongly recommend that you always set Quantity to the correct value (your actual quantity available) in your relist requests.
+
+When eBay auto-renews a GTC listing (ListingDuration = GTC) on your behalf, eBay relists with correct quantity available.
+
+For GetSellerEvents: Quantity is only returned for listings where item quantity is greater than 1.
+
+For GetItem and related calls: This is the total of the number of items available for sale plus the quantity already sold. To determine the number of items available, subtract SellingStatus.QuantitySold from this value.
+
+For order line item calls with variations: In GetItemTransactions, Item.Quantity is the same as GetItem (the total quantity across all variations). In GetSellerTransactions, Transaction.Item.Quantity is the total quantity of the applicable variation (quantity available plus quantity sold).
+
+Note: For the US site, new eBay sellers are subject to Seller Limits, which limit the quantity of items that may be listed and/or the total cumulative value of these listings. While subject to these selling limits, an eBay seller can use the GetMyeBaySelling call to retrieve both the remaining number of listings they can create and the remaining cumulative value of these listings. These values are shown in the Summary.QuantityLimitRemaining and Summary.AmountLimitRemaining fields in the GetMyeBaySelling response. If a call to add an item or revise an item would result in the exceeding of these limits, the add item or revise item call will fail. These fields will only be returned if the seller is subject to seller limits.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.SellerProfiles
+|
+SellerProfilesType |
+Conditionally |
+
+This container is used if the seller would like to use/reference business policies to create, revise, relist, or verify their listing. The seller's account must be opted in to business policies to use this container. If this container is used, exactly one Payment Business Policy, one Shipping Business Policy, and one Return Business Policy must be specified and applied to the listing. If the seller's account is not opted in to business policies, that seller may not use this container. Sellers must opt-in to business policies through My eBay or by using the optInToProgram call of the eBay Account API.
+
+If business policies are applied to a listing, all payment, shipping, and return policy settings in these policies will override any other payment, shipping, or return policy legacy fields that are included in the call request.
+Note: To make sure that the shipping cost override and policies are set correctly on an item (that is using business policies and has one or more shipping service cost overrides set up), the Item.SellerProfiles.SellerShippingProfile container and the Item.ShippingServiceCostOverrideList.ShippingServiceCostOverride container(s) must be included, even if no changes are being made. This container is only returned in 'Get' calls if business policies are set for the listing, and the person making the API call is the seller of the listing.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerPaymentProfile
+|
+SellerPaymentProfileType |
+Conditionally |
+
+The SellerPaymentProfile container is used in an Add/Revise/Relist/Verify API call to reference and use the settings/values of a payment business policy. Payment business policies contain a setting to control whether immediate payment is required, settings to specify due dates for the deposit and full payment of a motor vehicle listing (Motors policy only), and settings to specify which offline payment methods are avaiable to buyers for sales transactions that happen off of eBay's platform. Multiple payment business policies can be created and saved at the account level by sellers.
+
+This container is only returned in 'Get' calls if Business Policies are set for the listing, and the person making the API call is the seller of the listing.
+
+Note: Sellers will never have to specify electronic payment methods, but offline payment methods are required for listings where offline payment is required or supported.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerPaymentProfile
+.PaymentProfileID
+|
+long |
+Conditionally |
+
+The unique identifier of a payment business policy. A PaymentProfileID and/or a PaymentProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the payment settings/values of a payment business policy. If both fields are provided and their values don't match, the PaymentProfileID takes precedence.
+
+Payment profile IDs can be retrieved with the getPaymentPolicies call of the Account API or with the getSellerProfiles call of the Business Policies Management API. Business policy IDs can also be retrieved through the Business policies section of My eBay.
+
+In the 'Get' calls, the PaymentProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The PaymentProfileName value will be returned if a name is assigned to the payment business policy.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerPaymentProfile
+.PaymentProfileName
+|
+string |
+Conditionally |
+
+The name of a payment business policy. A PaymentProfileID and/or a PaymentProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the payment settings/values of a payment business policy. If both fields are provided and their values don't match, the PaymentProfileID takes precedence.
+
+In the 'Get' calls, the PaymentProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The PaymentProfileName value will be returned if a name is assigned to the payment business policy.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerReturnProfile
+|
+SellerReturnProfileType |
+Conditionally |
+
+The SellerReturnProfile container is used in an Add/Revise/Relist/Verify Trading API call to reference and use the settings/values of a return business policy. Return business policies contain detailed information on the seller's return policy for domestic and international buyers (if the seller ships internationally), including whether or not the seller accepts returns from domestic and international buyers, how many days the buyer has to return the item for a refund, and who pays the return shipping costs. Multiple return policy business policies can be created and saved at the account level by sellers.
+Note: As a part of Digital Services Act (DSA) requirements, as of April 3, 2023, buyers in the EU must be allowed to return an item within 14 days or more, unless the item is exempt. Where applicable, sellers should update their return policies to reflect this requirement of accepting returns from EU buyers. This update can be made through the ReturnPolicy container or through a return business policy that is referenced through the SellerProfiles.SellerReturnProfile container.
+
+This container is only returned in 'Get' calls if Business Policies are set for the listing and the person making the API call is the seller of the listing.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerReturnProfile
+.ReturnProfileID
+|
+long |
+Conditionally |
+
+The unique identifier of a return policy business policy. A ReturnProfileID and/or a ReturnProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the return policy settings/values of a return policy business policy. If both fields are provided and their values don't match, the ReturnProfileID takes precedence.
+
+Return policy profile IDs can be retrieved with the getReturnPolicies call of the Account API or with the getSellerProfiles call of the Business Policies Management API. Business policy IDs can also be retrieved through the Business policies section of My eBay.
+
+In the 'Get' calls, the ReturnProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The ReturnProfileName value will be returned if a name is assigned to the return policy business policy.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerReturnProfile
+.ReturnProfileName
+|
+string |
+Conditionally |
+
+The name of a return policy business policy. A ReturnProfileID and/or a ReturnProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the return policy settings/values of a return policy business policy. If both fields are provided and their values don't match, the ReturnProfileID takes precedence.
+
+In the 'Get' calls, the ReturnProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The ReturnProfileName value will be returned if a name is assigned to the return policy business policy.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerShippingProfile
+|
+SellerShippingProfileType |
+Conditionally |
+
+The SellerShippingProfile container is used in an Add/Revise/Relist/Verify Trading API call to reference and use the settings/values of a specific shipping business policy. Shipping business policies contain detailed information on domestic and international shipping, including shipping service options and costs, handling time, shipping discount information, and excluded ship-to locations. Multiple shipping business policies can be created and saved at the account level by sellers.
+Note: Any shipping inclusions specified through this container can be overridden by the eBay International Shipping exclusions toggle located under Shipping Preferences in My eBay. For more information on eBay International Shipping, see eBay International Shipping program. This container is only returned in 'Get' calls if Business Policies are set for the listing, and the person making the API call is the seller of the listing.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerShippingProfile
+.ShippingProfileID
+|
+long |
+Conditionally |
+
+The unique identifier of a shipping business policy. A ShippingProfileID and/or a ShipppingProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the shippping-related settings/values of a shipping business policy. If both fields are provided and their values don't match, the ShipppingProfileID takes precedence.
+
+Shipping profile IDs can be retrieved with the getFulfillmentPolicies call of the Account API or with the getSellerProfiles call of the Business Policies Management API. Business policy IDs can also be retrieved through the Business policies section of My eBay.
+
+In the 'Get' calls, the ShipppingProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The ShipppingProfileName value will be returned if a name is assigned to the shipping business policy.
+|
+
+ItemArray.Item.SellerProfiles
+.SellerShippingProfile
+.ShippingProfileName
+|
+string |
+Conditionally |
+
+The name of a shipping business policy. A ShippingProfileID and/or a ShippingProfileName value is used in the Add/Revise/Relist/Verify call to reference and use the shipping-related settings/values of a shipping business policy. If both fields are provided and their values don't match, the ShippingProfileID takes precedence.
+
+In the 'Get' calls, the ShippingProfileID value will always be returned if business policies are set for the listing, and the person making the API call is the seller of the listing. The ShippingProfileName value will be returned if a name is assigned to the shipping business policy.
+|
+
+ItemArray.Item
+.SellerVacationNote
+|
+string |
+Conditionally |
+
+This field is returned if the seller of the item is currently on vacation and has configured a custom message to display to potentioal buyers through Time Away settings.
+
+Note: There are two Time Away modes - Pause Sales and Allow Sales. If seller is in the Pause Sales mode, all fixed-price listings for that seller will be hidden from search results during the span of the seller's vacation.
+
+DetailLevel: ReturnAll.
+|
+
+ItemArray.Item.SellingStatus
+|
+SellingStatusType |
+Always |
+
+Various details about the current status of the listing, such as the current number of bids, the current high bidder, quantity sold, current price, and listing status.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.SellingStatus
+.BidCount
+|
+int |
+Conditionally |
+
+Number of bids placed so far against the auction item.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.SellingStatus
+.CurrentPrice
+|
+AmountType (double) |
+Conditionally |
+
+The current price of the item in the original listing currency.
+
+For auction listings, this price is the starting minimum price (if the listing has no bids) or the current highest bid (if bids have been placed) for the item. This does not reflect the BuyItNow price.
+
+For fixed-price and ad format listings, this is the current listing price.
+
+In multi-variation, fixed-price listings, this value matches the lowest-priced variation that is still available for sale.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.SellingStatus
+.CurrentPrice
+[ attribute currencyID ] |
+CurrencyCodeType |
+Always |
+
+The current price of the item in the original listing currency.
+
+For auction listings, this price is the starting minimum price (if the listing has no bids) or the current highest bid (if bids have been placed) for the item. This does not reflect the BuyItNow price.
+
+For fixed-price and ad format listings, this is the current listing price.
+
+In multi-variation, fixed-price listings, this value matches the lowest-priced variation that is still available for sale.
+
+For a list of possible enumeration values, see CurrencyCodeType.
+|
+
+ItemArray.Item.SellingStatus
+.HighBidder
+|
+UserType |
+Conditionally |
+
+For ended auction listings that have a winning bidder, this field is a container for the high bidder's user ID. For ended, single-item, fixed-price listings, this field is a container for the user ID of the purchaser. This field isn't returned for auctions with no bids, or for active fixed-price listings.
+
+In the case of PlaceOffer, for auction listings, this field is a container for the high bidder's user ID. In the PlaceOffer response, the following applies: For multiple-quantity, fixed-price listings, the high bidder is only returned if there is just one order line item (or only for the first order line item that is created).
+
+DetailLevel: ReturnAll.
+|
+
+ItemArray.Item.SellingStatus
+.HighBidder.Email
+|
+string |
+Conditionally |
+
+Email address for the user. Please see the links below to the topics related to anonymous user information and static email addresses. You cannot retrieve an email address for any user with whom you do not have an order relationship, regardless of site.
+
+An email address of another user is only returned if you and the other user are in an order relationship, within a certain time of order line item creation (although this limitation isn't applicable to the GetAllBidders call in the case of motor vehicles categories.) Based on Trust and Safety policies, the time is unspecified and can vary by site.
+
+Since a bidder's user info is anonymous, this tag will be returned only to that bidder, and to the seller of an item that the user is bidding on.
+
+For the GetOrders call, the buyer's email address will be returned (to the seller only) for orders less than two weeks old, but for orders that occurred more than two weeks in the past, the buyer's email address will no longer be returned. This Email field will still be returned, but 'dummy data', such as Invalid Request will replace the actual email address.
+
+Note: For the GetItemTransactions call, this field is only returned to the seller of the order; this field is not returned for the buyer or third party.
+
+Max length:
+64 for US. May differ for other countries. Note: The eBay database
+allocates up to 128 characters for this field
+.
+
+DetailLevel: ReturnAll.
+See:
+
+Anonymous user information
+
+Member communications
+
+|
+
+ItemArray.Item.SellingStatus
+.HighBidder.FeedbackScore
+|
+int |
+Conditionally |
+
+The aggregate feedback score for a user. A user's feedback score is the net positive feedback minus the net negative feedback left for the user. Feedback scores are a quantitative expression of the desirability of dealing with a user as a buyer or a seller in either side of an order.
+
+Each order line item can result in one feedback entry for a given user (the buyer can leave feedback for the seller, and the seller can leave feedback for the buyer.). That one feedback can be positive, negative, or neutral. The aggregated feedback counts for a particular user represent that user's overall feedback score (referred to as a "feedback rating" on the eBay site).
+
+If the user has chosen to make their feedback private and that user is not the user identified in the request's authentication token, FeedbackScore is not returned and FeedbackPrivate is returned with a value of true.
+
+In GetMyeBayBuying and GetMyeBaySelling, feedback information (FeedbackScore and FeedbackRatingStar) is returned in BidList.ItemArray.Item.Seller. For GetMyeBayBuying, the feedback score of each seller with an item having received a bid from the buyer is returned. For GetMyeBaySelling, the feedback score of the seller is returned.
+
+GetMyeBayBuying and GetMyeBaySelling also return feedback information (FeedbackScore and FeedbackRatingStar) in BidList.ItemArray.Item.SellingStatus.HighBidder. GetMyeBayBuying returns feedback information on the high bidder of each item the buyer is bidding on. GetMyeBaySelling returns feedback information on the high bidder of each item the seller is selling.
+
+Since a bidder's user info is anonymous, the real feedback score will be returned only to that bidder, and to the seller of an item that the user is bidding on. For all other users, the value -99 is returned.
+
+For GetOrders and GetItemTransactions only: If using Trading WSDL Version 1019 or above, this field will only be returned to the buyer or seller, and no longer returned at all to third parties. If using a Trading WSDL older than Version 1019, the accurate Feedback Score for the user is returned to the buyer or seller, but a dummy value of 0 will be returned to all third parties.
+
+DetailLevel: ReturnAll.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.SellingStatus
+.HighBidder.UserAnonymized
+|
+boolean |
+Always |
+
+Indicates whether or not the User container has been made anonymous. If true, some elements in the User container have either been removed, or had their values changed to remove identifying characteristics. If false, all expected elements are returned, and no values are changed.
+
+Since a bidder's user info is anonymous, this tag is returned as false only to the bidder, and to the seller of an item that the user is bidding on. For all other users, this tag is returned as true.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.SellingStatus
+.HighBidder.UserID
+|
+UserIDType (string) |
+Conditionally |
+
+Unique eBay user ID for the user.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+Since a bidder's user info is anonymous, this tag contains the actual value of an ID only for that bidder, and for the seller of an item that the user is bidding on. For other users, the actual value is replaced by an anonymous value, according to these rules:
+
+When bidding on items, UserID is replaced with the value "a****b" where a and b are random characters from the UserID. For example, if the UserID = IBidALot, it might be displayed as, "I****A".
+
+Important: In this format, the anonymous bidder ID can change for each auction. For GetMyeBayBuying only, when bidding on items: UserID is replaced with the value "a****b" where a and b are random characters from the UserID.
+
+When bidding on items listed on the Philippines site: UserID is replaced with the value "Bidder X" where X is a number indicating the order of that user's first bid. For example, if the user was the third bidder, UserID = Bidder 3. Note that in this Philippines site format, the anonymous bidder ID stays the same for a given auction, but is different for different auctions. For example, a bidder who is the third and then the seventh bidder in an auction will be listed for both bids as "Bidder 3". However, if that same bidder is the first bidder on a different auction, the bidder will be listed for that auction as "Bidder 1", not "Bidder 3".
+
+For GetMyeBayBuying only, when bidding on items listed on the UK and AU sites: UserID is replaced with the string "High Bidder".
+
+For PlaceOffer, see also SellingStatus.HighBidder.
+
+DetailLevel: ReturnAll.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.SellingStatus
+.ListingStatus
+|
+ListingStatusCodeType |
+Conditionally |
+
+Specifies an active or ended listing's status in eBay's processing workflow. - If a listing ends with a sale (or sales), eBay needs to update the sale details (e.g., total price and buyer/high bidder) and the transaction fees. This processing can take several minutes.
+- If you retrieve a sold item and no details about the buyer/high bidder are returned or no transaction fees are available, use this listing status information to determine whether eBay has finished processing the listing.
+
+Applicable values:
+
+Active
+
+(out) The listing is still active or the listing has ended with a sale but eBay has not completed processing the sale details. If the listing has ended with a sale but this Active status is returned, please allow several minutes for eBay to finish processing the listing.
+
+Completed
+
+(out) The listing has closed and eBay has completed processing the sale. All sale information returned from eBay should be considered accurate and complete. In this state, all transaction fees should be calculated.
+
+Custom
+
+(out) Reserved for internal or future use.
+
+CustomCode
+
+(out) Reserved for internal or future use.
+
+Ended
+
+(out) The listing has ended. If the listing ended with a sale, eBay has completed processing of the sale. All sale information returned from eBay should be considered accurate and complete. However, the transaction fees are not yet available.
+
+Code so that your app gracefully handles any future changes to this list.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.SellingStatus
+.QuantitySold
+|
+int |
+Conditionally |
+
+The total number of items purchased so far (in the listing's lifetime). Subtract this from Quantity to determine the quantity available.
+
+If the listing has Item Variations, then in GetItem (and related calls) and GetItemTransactions, Item.SellingStatus.QuantitySold contains the sum of all quantities sold across all variations in the listing, and Variation.SellingStatus.QuantitySold contains the number of items sold for that variation.
+
+In GetSellerTransactions, Transaction.Item.SellingStatus.QuantitySold contains the number of items sold in that order line item.
+
+For order line item calls, also see Transaction.QuantityPurchased for the number of items purchased in the order line item.
+In multi-variation listings, this value matches total quantity sold across all variations.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Site
+|
+SiteCodeType |
+Conditionally |
+
+The name of the eBay listing site. The listing site affects the business logic and validation rules that are applied to the request, which in turn affect the values that are returned in the response, as well as values that appear on the eBay site. For example, the listing site can affect the validation of Category in listing requests, international business seller requirements, the values of converted (localized) prices in responses, the item-related time stamps that are displayed on the eBay site, the visibility of the item in some types of searches (e.g., GetCategoryListings), and other information. In some cases, the rules are determined by a combination of the site, the user's registration address, and other information. You cannot change the site when you revise a listing.
+
+When you specify Item.Site in AddItem or AddFixedPriceItem, it must be consistent with the numeric site ID that you specify in the request URL (for the SOAP API) or the X-EBAY-API-SITEID header (for the XML API).
+
+Applicable values: See Site.
+
+Code so that your app gracefully handles any future changes to this list.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Title
+|
+string |
+Conditionally |
+
+This field is used to specify the title of the listing. This field is conditionally required in an Add call unless the seller successfully uses the ProductListingDetails container to find an eBay catalog product match. When the seller successfully uses an eBay catalog product to create a listing, the listing title, listing description, Item Specifics, and stock photo defined in the catalog product are used to create the listing.
+
+You cannot use HTML or JavaScript in the Title. (HTML characters will be interpreted literally as plain text.)
+
+The listing title can only be changed if the active listing has yet to have any bids or sales, and the listing does not end within 12 hours.
+Note: When making a GetSellerEvents call, this field will be returned masked as ***************** for on-hold listings. Note: When making a GetSellerTransactions or GetMyeBaySelling call, the item ID value of the listing will be returned in this field to indicate that the listing is on hold. Note: When a line item comes from a multiple-variation listing, the variation aspect name-value pair will be appended to this title.
+
+Max length: 80 for Add/Revise/Relist/Verify Item family of calls; 120 for GetOrders/GetItemTransactions/GetSellerTransactions calls.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+|
+VariationsType |
+Conditionally |
+
+Variations are similar (but not identical) items in a multiple-variation, fixed-price listing. For example, a T-shirt listing could contain multiple items of the same brand that vary by color and size (like "Blue, Large" and "Black, Medium"). Each variation specifies a combination of one of these colors and sizes. Each variation can have a different quantity and price. You can buy multiple items from one variation at the same time. (That is, one order line item can contain multiple items from a single variation.)
+
+If you list in two categories, both categories must support listing with variations. Use the Metadata API getListingStructurePolicies method and inspect the variationsSupported field to determine whether a specific leaf category supports variations.
+
+For ReviseFixedPriceItem and RelistFixedPriceItem: Once a listing has been submitted with variations, you can't delete all the variations when you revise or relist the listing (because it would be considered a different listing). You also can't add or change variation specifics (because they are unique identifiers). However, you can delete or replace individual variations as needed to match your current inventory. If a variation has no purchases, use the Variation.Delete field to delete the variation. If it has inventory, set the Quantity to 0.
+
+As a best practice, if you want to revise multiple variations in the same listing at the same time (i.e., within a very short period), use a single ReviseFixedPriceItem request and include all the variation revisions in the same request. If your application design requires you to revise each variation individually, then avoid using multiple parallel threads. Instead, use a serial, synchronous process. That is, wait until each revision has been processed by eBay before submitting the next revision request for another variation in the same listing.
+
+For GetItem and related calls Only returned when a listing has variations.
+
+For GetSellerList: Only returned when a listing has variations, IncludeVariations was set to true in the request, the DetailLevel was set to ReturnAll, and an applicable pagination value and time range were specified.
+
+For GetItemTransactions Only returned in Item when a listing has variations and IncludeVariations was set to true in the request. (Also see Variation returned in Transaction for information about which variation was actually purchased.)
+
+For GetSellerEvents, GetMyeBayBuying, and GetMyeBaySelling: Only returned when a listing has variations and HideVariations was set to false or not specified in the request.
+Note: This container will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See Multiple-variation listings.
+
+|
+
+ItemArray.Item.Variations
+.Variation
+|
+VariationType |
+Conditionally,
+
+repeatable: [0..*] |
+
+Contains data that distinguishes one item variation from another. For example, if an item varies by color and size, each Variation node specifies a combination of one of those colors and sizes.
+
+When listing or relisting an item, you are allowed to create a listing with only one item variation, and you might have a plan to add more item variations to the listing in the future. However, if you don't plan to add other item variations in the future, we recommend that you avoid listing with only one variation, so that you avoid confusing buyers.
+
+If you specify multiple Variation containers in an add/revise/relist/verify add call to define multiple item variations, the Variation containers must be contiguous or an error will occur. This means that you would not want to input a Pictures or a VariationSpecificsSet container in between Variation containers in an API call.
+
+When you modify an item variation with a ReviseFixedPriceItem call, the best practice is to include all applicable fields under the Variation container, even if some of the values/settings are not being modified. The StartPrice and VariationSpecifics must be included when modifying an existing item variation, even if these values are not being changed. If a SKU value is defined for the item variation, it is strongly recommended that you include the SKU field, regardless of whether the SKU value is changing or not. If the SKU field is not included, any existing SKU value will be removed from the item variation. It is also strongly recommended that you include the Quantity field and input an accurate value, because if the Quantity field is omitted in the API call, the quantity for the item variation is set to 0.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See Multiple-variation listings.
+
+|
+
+ItemArray.Item.Variations
+.Variation.Quantity
+|
+int |
+Conditionally |
+
+This value indicates the quantity of the specific variation that are available for purchase. If you set Variation.Quantity to 0 when you create, revise, or relist an item listing, the variation is dropped from the listing. To prevent this, you can set SetUserPreferences.OutOfStockControlPreference to true.
+
+For GetItem (and other related calls that retrieve the Item object), the Variation.Quantity value indicates the total quantity associated with the variation, including the quantity available and the quantity sold. To calculate the quantity available for sale, subtract SellingStatus.QuantitySold from this value.
+
+For RelistFixedPriceItem: - For an item variation that had an available quantity greater than 0 when the listing ended, the Quantity value of the item variation for the newly relisted item is set to the actual quantity available. For item variations, there is actually no QuantityAvailable field, but this value may be derived if you look at the corresponding item variation in a GetMyeBaySelling) response and subtract the Variation.QuantitySold value from the Variation.Quantity value, which represents the original Variation.Quantity value at creation time of the previous listing.
+- For item variations with an available quantity of 0 when the listing ended, the relisted item will retain the Variaton.Quantity value that was passed in at creation time of the previous listing.
+So, if you are relisting an item that had one or more item variations with an available quantity of 0 when the listing ended, we strongly recommend that you pass in the correct available quantity through the corresponding Variation.Quantity field of a relist call. Alternatively, you can update the correct quantity available by using a ReviseInventoryStatus call and passing in a Quantity value, while also making sure to pass in the correct SKU value(s) to identify the correct item variation. A ReviseInventoryStatus call can be used to revise the quantity of up to four single item listings and/or item variations (from the same or different listings).
+
+For ReviseFixedPriceItem: You can revise a variation's quantity at any time, even if it has purchases. However, unless you set the OutOfStockControlPreference boolean field of the SetUserPreferences call to true, at least one variation must remain with a non-zero quantity in order for the listing to remain active. If you set the OutOfStockControlPreference field to true, a multiple-variation listing will remain active but hidden from search even if the quantity of all variations in the listing is set to 0. When you modify a variation during revise or relist, you need to include both its StartPrice and Quantity. If you revise the Quantity value for a variation after items have already sold, specify the quantity available for sale. (eBay will automatically add the quantity sold to the value you specify.) If you set the quantity to 0 and the variation has no purchases, the variation may be dropped from the listing.
+
+For GetSellerTransactions: See Item.Quantity instead.
+
+See the Trading API User Guide for more details about setting and modifying a variation's quantity.
+
+Note: The number in the Variation.Quantity field represents the current quantity of the item variation that is available using the "Ship to home" fulfillment method. This number does not take into account any quantity of the item variation that is available through "local" fulfillment methods such as In-Store Pickup or Click and Collect. This is due to the fact that there is no current implementation (or API field) where the seller informs eBay about the quantity of item variations available through each local fulfillment method. In the case where a listing is only offering the item variations through a local fulfillment method, this value should default to 0, and the Item.IgnoreQuantity will also be returned as True.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See:
+
+Set and adjust a variation's quantity
+
+Out-of-Stock control
+
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+|
+SellingStatusType |
+Conditionally |
+
+Contains the variation's quantity sold. Always returned when variations are present.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.BidCount
+|
+int |
+Conditionally |
+
+Number of bids placed so far against the auction item.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.CurrentPrice
+|
+AmountType (double) |
+Conditionally |
+
+The current price of the item in the original listing currency.
+
+For auction listings, this price is the starting minimum price (if the listing has no bids) or the current highest bid (if bids have been placed) for the item. This does not reflect the BuyItNow price.
+
+For fixed-price and ad format listings, this is the current listing price.
+
+In multi-variation, fixed-price listings, this value matches the lowest-priced variation that is still available for sale.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.CurrentPrice
+[ attribute currencyID ] |
+CurrencyCodeType |
+Always |
+
+The current price of the item in the original listing currency.
+
+For auction listings, this price is the starting minimum price (if the listing has no bids) or the current highest bid (if bids have been placed) for the item. This does not reflect the BuyItNow price.
+
+For fixed-price and ad format listings, this is the current listing price.
+
+In multi-variation, fixed-price listings, this value matches the lowest-priced variation that is still available for sale.
+
+For a list of possible enumeration values, see CurrencyCodeType.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.HighBidder
+|
+UserType |
+Conditionally |
+
+For ended auction listings that have a winning bidder, this field is a container for the high bidder's user ID. For ended, single-item, fixed-price listings, this field is a container for the user ID of the purchaser. This field isn't returned for auctions with no bids, or for active fixed-price listings.
+
+In the case of PlaceOffer, for auction listings, this field is a container for the high bidder's user ID. In the PlaceOffer response, the following applies: For multiple-quantity, fixed-price listings, the high bidder is only returned if there is just one order line item (or only for the first order line item that is created).
+
+DetailLevel: ReturnAll.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.HighBidder.Email
+|
+string |
+Conditionally |
+
+Email address for the user. Please see the links below to the topics related to anonymous user information and static email addresses. You cannot retrieve an email address for any user with whom you do not have an order relationship, regardless of site.
+
+An email address of another user is only returned if you and the other user are in an order relationship, within a certain time of order line item creation (although this limitation isn't applicable to the GetAllBidders call in the case of motor vehicles categories.) Based on Trust and Safety policies, the time is unspecified and can vary by site.
+
+Since a bidder's user info is anonymous, this tag will be returned only to that bidder, and to the seller of an item that the user is bidding on.
+
+For the GetOrders call, the buyer's email address will be returned (to the seller only) for orders less than two weeks old, but for orders that occurred more than two weeks in the past, the buyer's email address will no longer be returned. This Email field will still be returned, but 'dummy data', such as Invalid Request will replace the actual email address.
+
+Note: For the GetItemTransactions call, this field is only returned to the seller of the order; this field is not returned for the buyer or third party.
+
+Max length:
+64 for US. May differ for other countries. Note: The eBay database
+allocates up to 128 characters for this field
+.
+
+DetailLevel: ReturnAll.
+See:
+
+Anonymous user information
+
+Member communications
+
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.HighBidder.FeedbackScore
+|
+int |
+Conditionally |
+
+The aggregate feedback score for a user. A user's feedback score is the net positive feedback minus the net negative feedback left for the user. Feedback scores are a quantitative expression of the desirability of dealing with a user as a buyer or a seller in either side of an order.
+
+Each order line item can result in one feedback entry for a given user (the buyer can leave feedback for the seller, and the seller can leave feedback for the buyer.). That one feedback can be positive, negative, or neutral. The aggregated feedback counts for a particular user represent that user's overall feedback score (referred to as a "feedback rating" on the eBay site).
+
+If the user has chosen to make their feedback private and that user is not the user identified in the request's authentication token, FeedbackScore is not returned and FeedbackPrivate is returned with a value of true.
+
+In GetMyeBayBuying and GetMyeBaySelling, feedback information (FeedbackScore and FeedbackRatingStar) is returned in BidList.ItemArray.Item.Seller. For GetMyeBayBuying, the feedback score of each seller with an item having received a bid from the buyer is returned. For GetMyeBaySelling, the feedback score of the seller is returned.
+
+GetMyeBayBuying and GetMyeBaySelling also return feedback information (FeedbackScore and FeedbackRatingStar) in BidList.ItemArray.Item.SellingStatus.HighBidder. GetMyeBayBuying returns feedback information on the high bidder of each item the buyer is bidding on. GetMyeBaySelling returns feedback information on the high bidder of each item the seller is selling.
+
+Since a bidder's user info is anonymous, the real feedback score will be returned only to that bidder, and to the seller of an item that the user is bidding on. For all other users, the value -99 is returned.
+
+For GetOrders and GetItemTransactions only: If using Trading WSDL Version 1019 or above, this field will only be returned to the buyer or seller, and no longer returned at all to third parties. If using a Trading WSDL older than Version 1019, the accurate Feedback Score for the user is returned to the buyer or seller, but a dummy value of 0 will be returned to all third parties.
+
+DetailLevel: ReturnAll.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.HighBidder.UserAnonymized
+|
+boolean |
+Always |
+
+Indicates whether or not the User container has been made anonymous. If true, some elements in the User container have either been removed, or had their values changed to remove identifying characteristics. If false, all expected elements are returned, and no values are changed.
+
+Since a bidder's user info is anonymous, this tag is returned as false only to the bidder, and to the seller of an item that the user is bidding on. For all other users, this tag is returned as true.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.HighBidder.UserID
+|
+UserIDType (string) |
+Conditionally |
+
+Unique eBay user ID for the user.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+Since a bidder's user info is anonymous, this tag contains the actual value of an ID only for that bidder, and for the seller of an item that the user is bidding on. For other users, the actual value is replaced by an anonymous value, according to these rules:
+
+When bidding on items, UserID is replaced with the value "a****b" where a and b are random characters from the UserID. For example, if the UserID = IBidALot, it might be displayed as, "I****A".
+
+Important: In this format, the anonymous bidder ID can change for each auction. For GetMyeBayBuying only, when bidding on items: UserID is replaced with the value "a****b" where a and b are random characters from the UserID.
+
+When bidding on items listed on the Philippines site: UserID is replaced with the value "Bidder X" where X is a number indicating the order of that user's first bid. For example, if the user was the third bidder, UserID = Bidder 3. Note that in this Philippines site format, the anonymous bidder ID stays the same for a given auction, but is different for different auctions. For example, a bidder who is the third and then the seventh bidder in an auction will be listed for both bids as "Bidder 3". However, if that same bidder is the first bidder on a different auction, the bidder will be listed for that auction as "Bidder 1", not "Bidder 3".
+
+For GetMyeBayBuying only, when bidding on items listed on the UK and AU sites: UserID is replaced with the string "High Bidder".
+
+For PlaceOffer, see also SellingStatus.HighBidder.
+
+DetailLevel: ReturnAll.
+See Anonymous user information.
+
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.ListingStatus
+|
+ListingStatusCodeType |
+Conditionally |
+
+Specifies an active or ended listing's status in eBay's processing workflow. - If a listing ends with a sale (or sales), eBay needs to update the sale details (e.g., total price and buyer/high bidder) and the transaction fees. This processing can take several minutes.
+- If you retrieve a sold item and no details about the buyer/high bidder are returned or no transaction fees are available, use this listing status information to determine whether eBay has finished processing the listing.
+
+Applicable values:
+
+Active
+
+(out) The listing is still active or the listing has ended with a sale but eBay has not completed processing the sale details. If the listing has ended with a sale but this Active status is returned, please allow several minutes for eBay to finish processing the listing.
+
+Completed
+
+(out) The listing has closed and eBay has completed processing the sale. All sale information returned from eBay should be considered accurate and complete. In this state, all transaction fees should be calculated.
+
+Custom
+
+(out) Reserved for internal or future use.
+
+CustomCode
+
+(out) Reserved for internal or future use.
+
+Ended
+
+(out) The listing has ended. If the listing ended with a sale, eBay has completed processing of the sale. All sale information returned from eBay should be considered accurate and complete. However, the transaction fees are not yet available.
+
+Code so that your app gracefully handles any future changes to this list.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.SellingStatus
+.QuantitySold
+|
+int |
+Conditionally |
+
+The total number of items purchased so far (in the listing's lifetime). Subtract this from Quantity to determine the quantity available.
+
+If the listing has Item Variations, then in GetItem (and related calls) and GetItemTransactions, Item.SellingStatus.QuantitySold contains the sum of all quantities sold across all variations in the listing, and Variation.SellingStatus.QuantitySold contains the number of items sold for that variation.
+
+In GetSellerTransactions, Transaction.Item.SellingStatus.QuantitySold contains the number of items sold in that order line item.
+
+For order line item calls, also see Transaction.QuantityPurchased for the number of items purchased in the order line item.
+In multi-variation listings, this value matches total quantity sold across all variations.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.SKU
+|
+SKUType (string) |
+Conditionally |
+
+A SKU (stock keeping unit) is a seller-defined identifier. It is only intended for the seller's use (not for buyers). A SKU value is not required, but many large sellers like to add SKU value to their listings. If defined on a listing, a SKU value can be used by sellers to reconcile their eBay inventory with your own inventory system, instead of using the VariationSpecifics identifying values.
+
+If specified, all SKU values must be unique within the Variations node. That is, no two variations within the same listing can have the same SKU.
+
+If you include the Item.InventoryTrackingMethod field in an 'FixedPriceItem' call and set its value to SKU, the Variation.SKU values become required for each variation..
+
+For GetItem, GetOrders and other 'Get' calls: Only returned if the seller specified a SKU for the variation.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+Max length: 80.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See SKU identifiers.
+
+|
+
+ItemArray.Item.Variations
+.Variation.StartPrice
+|
+AmountType (double) |
+Conditionally |
+
+The fixed price for this item variation. For example, a "Blue, Large" variation price could be USD 10.00, and a "Black, Medium" variation price could be USD 5.00.
+
+Each variation requires this field, and the prices can be the same for all variations, or be different for each variation. This enables sellers to provide discounts on certain variations without affecting the price of others. Required (and always returned) for listings with variations.
+
+You can revise a variation's price at any time (even if it has purchases). When you modify a variation during revise or relist, you need to include both its StartPrice and Quantity.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See Pricing.
+
+|
+
+ItemArray.Item.Variations
+.Variation.StartPrice
+[ attribute currencyID ] |
+CurrencyCodeType |
+Always |
+
+The fixed price for this item variation. For example, a "Blue, Large" variation price could be USD 10.00, and a "Black, Medium" variation price could be USD 5.00.
+
+Each variation requires this field, and the prices can be the same for all variations, or be different for each variation. This enables sellers to provide discounts on certain variations without affecting the price of others. Required (and always returned) for listings with variations.
+
+You can revise a variation's price at any time (even if it has purchases). When you modify a variation during revise or relist, you need to include both its StartPrice and Quantity.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+For a list of possible enumeration values, see CurrencyCodeType.
+|
+
+ItemArray.Item.Variations
+.Variation
+.VariationProductListingDetails
+|
+VariationProductListingDetailsType |
+Conditionally |
+
+This container is used to provide one or more product identifiers for a product variation within a multiple-variation, fixed-price listing. The same product identifier type(s) must be used for all product variations within the listing. For instance, if one product variation uses ISBNs, all product variations must use ISBN values.
+
+When you include the VariationProductListingDetails container in a call, you must specify at least one GTIN or ePID. If an ePID is provided, a matching eBay catalog product must exist for the value that is passed in.
+
+For ReviseItem and RelistItem only: When you revise a listing, if it ends within 12 hours, you cannot change the product identifier and you cannot remove existing product variation listing details data.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation
+.VariationProductListingDetails
+.EAN
+|
+string |
+Conditionally |
+
+This field is used if the seller wants to, or is required to identify each product variation within a multiple-variation listing by an EAN (European Article Number) value. An EAN is a unique 8 or 13-digit identifier that many industries (such as book publishers) use to identify products. To determine whether a specific leaf category supports or requires an EAN value for a variation listing, use the Taxonomy API getItemAspectsForCategory method. Inspect the localizedAspectName field to find the EAN aspect for the category, and then use the aspectRequired and aspectUsage fields to determine whether the EAN value is required, recommended, or optional.
+
+Note: If the listing is being posted to a category that expects an EAN value, but one doesn't exist for the product, the seller must provide a string indicating that the product identifier is unavailable. This text varies by marketplace. Refer to Product Identifier Text for the specific text based on the listing marketplace.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation
+.VariationProductListingDetails
+.ISBN
+|
+string |
+Conditionally |
+
+This field is used if the seller wants to, or is required to identify each product variation within a multiplge-variation listing by an ISBN (International Standard Book Number) value. An ISBN is a unique identifer for books. Both 10 and 13-character ISBNs are supported. When specifying a 13-character ISBN, the value must begin with either '978' or '979'. To determine whether a specific leaf category supports or requires an ISBN value for a variation listing, use the Taxonomy API getItemAspectsForCategory method. Inspect the localizedAspectName field to find the ISBN aspect for the category, and then use the aspectRequired and aspectUsage fields to determine whether the ISBN value is required, recommended, or optional.
+
+Note: If the listing is being posted to a category that expects an ISBN value, but one doesn't exist for the product, the seller must provide a string indicating that the product identifier is unavailable. This text varies by marketplace. Refer to Product Identifier Text for the specific text based on the listing marketplace.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation
+.VariationProductListingDetails
+.UPC
+|
+string |
+Conditionally |
+
+This field is used if the seller wants to, or is required to identify each product variation within a multiple-variation listing by a UPC (Universal Product Code) value. A UPC is a commonly-used identifier for many different products. To determine whether a specific leaf category supports or requires a UPC value for a variation listing, use the Taxonomy API getItemAspectsForCategory method. Inspect the localizedAspectName field to find the UPC aspect for the category, and then use the aspectRequired and aspectUsage fields to determine whether the UPC value is required, recommended, or optional.
+
+Note: If the listing is being posted to a category that expects a UPC value, but one doesn't exist for the product, the seller must provide a string indicating that the product identifier is unavailable. This text varies by marketplace. Refer to Product Identifier Text for the specific text based on the listing marketplace.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.VariationSpecifics
+|
+NameValueListArrayType |
+Conditionally,
+
+repeatable: [2..5] |
+
+A list of name/value pairs that uniquely identify the variation within the listing. All variations must specify the same set of Item Specific names, but each variation must provide a unique combination of values for those Item Specific names. For example, if the items vary by color and size, then every variation must specify 'Color' and 'Size' as Item Specific names, but no two variations can specify the same combination of 'Color' and 'Size' values.
+
+When you revise a listing that includes variations, you can change names of Variationpecifics by using the Variations.ModifyNameList container. You can also add, delete, or replace individual variations as needed to match your current inventory. Use the Variation.Delete field to delete a variation that has no sales (order line items). If the variation has sales, then set the Quantity to 0.
+
+For GetSellerEvents To keep the GetSellerEvents response smaller, Variationpecifics are not returned if the variation has a SKU. If the variation has no SKU, then Variationpecifics are returned instead. Optionally, you can pass IncludeVariationSpecifics as true in the request to force Variationpecifics to be returned, even when the SKU is returned.
+Note: The Item.Variations container and its child fields will stop being returned in GetItemTransactions on January 31, 2024.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+See:
+
+Configure variation-selection widgets for buyers (View Item)
+
+Revise and relist with variations
+
+|
+
+ItemArray.Item.Variations
+.Variation.VariationSpecifics
+.NameValueList
+|
+NameValueListType |
+Conditionally,
+
+repeatable: [0..*] |
+
+For the AddItem family of calls: Contains the name and value(s) for an Item Specific. Only required when the ItemSpecifics container is specified.
+For the AddFixedPriceItem family of calls: The same NameValueList schema is used for the ItemSpecifics node, the VariationSpecifics node, and the VariationSpecifcsSet node.
+
+If the listing has variations, any name that you use in the VariationSpecifics and VariationSpecificsSet nodes can't be used in the ItemSpecifics node.
+When you list with Item Variations:
+- Specify shared Item Specifics (e.g., Brand) in the ItemSpecifics node.
+- Specify up to five VariationSpecifics in each Variation node.
+- Specify all applicable names with all their supported values in the VariationSpecificSet node.
+See the Variation sample in the AddFixedPriceItem call reference for examples.
+
+For PlaceOffer: Required if the item being purchased includes Item Variations.
+
+For AddToWatchList and RemoveFromWatchList: The ItemID value of the multiple-variation listing and the name-value pair to identify each variation in the listing are required.
+
+Note: As of August 30, 2018, California will require sellers to display a Proposition 65 warning on online retail sites if products contain chemicals and/or substances that may impact the health of California buyers. This requirement is applicable to most eBay US categories, including eBay Motors, Motors Parts & Accessories, and catalog-enabled categories. The warning message can be customized by the seller, but should contain the following basic information: - The name of at least one listed chemical that prompted the warning
+- Text stating that the product 'can expose you to' the chemical(s) in the product
+- The URL for OEHHA's new Proposition 65 warnings website, which is www.P65Warnings.ca.gov
+Unlike standard item specifics that allow a maximum of 65 characters in the Value field, the matching value for the 'California Prop 65 Warning' item specific allows up to 800 characters of text. When a seller passes in this item specific, eBay will automatically insert a warning symbol icon for the listing.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.VariationSpecifics
+.NameValueList.Name
+|
+string |
+Conditionally |
+
+Depending on the call and context, this value is either a name of an Item/Variation Specific, or a Parts Compatibility name.
+
+For the AddItem and AddFixedPriceItem families of calls: In the Item.ItemSpecifics context, the value in this field will either be the name of a required/recommended/optional item specific name for the category, or it may be a seller's customized item specific name.
+
+For the AddFixedPriceItem family of calls: In the Compatibility.NameValueList context, this value is a motor vehicle aspect such as Year, Make, and Model. A Compatibility.NameValueList container is applicable for motor vehicle parts and accessories listings.
+
+For PlaceOffer: Required if the line item being purchased is an item variation within a multiple-variation listing.
+
+Note: For required and recommended item specifics that are returned in the getItemAspectsForCategory method of the Taxonomy API, the seller should pass in the name of these item specifics just as they are shown in the getItemAspectsForCategory response. Similarly, for catalog-enabled categories, the seller should pass in the name of instance aspects just as they are shown in the getItemAspectsForCategory response. Instance aspects are additional details unique to a specific item or listing that a seller can include along with the product aspects that are already defined in the eBay catalog product associated with the listing. Instance aspects common to many catalog-enabled categories include 'Bundle Description' and 'Modification Description'. eBay US sellers who ship to California are required to pass in a 'California Prop 65 Warning' item specific if the item in the listing contains one or more chemicals known to be harmful to human health. This item specific is passed at the listing level for both single-variation and multiple-variation listings. The 'California Prop 65 Warning' is considered an instance specific because it will be retained on the listing even when the seller lists using an eBay catalog product. The 'California Prop 65 Warning' may be applicable in most eBay US categories, including eBay Motors, Motors Parts & Accessories, and catalog-enabled categories. Note: If Brand and MPN (Manufacturer Part Number) are being used to identify product variations in a multiple-variation listing, the Brand must be specified at the item level (ItemSpecifics container) and the MPN for each product variation must be specified at the variation level (VariationSpecifics container). The Brand name must be the same for all variations within a single listing.
+
+Max length: 65.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.Variations
+.Variation.VariationSpecifics
+.NameValueList.Value
+|
+string |
+Conditionally,
+
+repeatable: [0..*] |
+
+Depending on the call and context, this value is either the value of an Item/Variation Specific, a Parts Compatibility value, or a product identifier.
+
+For the AddItem family of calls: Multiple values can only be specified for an Item Specific if the itemToAspectCardinality field of the getItemAspectsForCategory method shows a value of MULTI. If an item specific only supports a single value, only the first item specific value specified in the request will be used.
+
+For the Compatibility.NameValueList context, this is the corresponding value of a motor vehicle aspect such as Year, Make, and Model. A Compatibility.NameValueList container is applicable for motor vehicle parts and accessories listings.
+
+For PlaceOffer: Required if the line item being purchased is an item variation within a multiple-variation listing.
+
+Note: The standard maximum length for the value of an item specific is 65, but the maximum allowed length increases for instance aspects such as 'Bundle Description' and 'Modification Description'. For item specifics with max lengths greater than 65, the actual max length will be returned in a corresponding aspectMaxLength field. The maximum allowed length for the new 'California Prop 65 Warning' item specific is 800 characters. For more information about the 'California Prop 65 Warning' item specific, see the ItemSpecifics.NameValueList field description.
+
+Max length: 65 (but longer for some instance aspects, including 800 for 'California Prop 65 Warning').
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+ItemArray.Item.WatchCount
+|
+long |
+Conditionally |
+
+The number of watches placed on this item from buyers' My eBay accounts. Specify IncludeWatchCount as true in the request. Returned by GetMyeBaySelling only if greater than 0.
+
+DetailLevel: ReturnAll.
+|
+
+TimeTo
+|
+dateTime |
+Always |
+
+Indicates the latest (most recent) date for any date-based filtering specified as input. Specifically, this field contains the value you specified in the StartTimeFrom, EndTimeFrom, or ModTimeFrom filter, if you used a time filter in the request. If no time filter was specified, TimeTo returns the current time.
+
+DetailLevel: ReturnAll. Also returned if DetailLevel is not provided on input.
+|
+
+Standard Output Fields
+|
+
+Ack
+|
+AckCodeType |
+Always |
+
+A token representing the application-level acknowledgement code that indicates the response status (e.g., success). The AckCodeType list specifies the possible values for the Ack field.
+
+Applicable values:
+
+CustomCode
+
+(out) Reserved for internal or future use.
+
+Failure
+
+(out) This value indicates that the call request processing failed.
+
+Success
+
+(out) This value indicates that the call request was processed successfully without any issues.
+
+Warning
+
+(out) This value indicates that the call request was successful, but processing was not without any issues. These issues can be checked in the Errors container, that will also be returned when one or more known issues occur with the call request.
+
+(Not all values in AckCodeType apply to this field.)
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+Build
+|
+string |
+Always |
+
+This refers to the specific software build that eBay used when processing the request and generating the response. This includes the version number plus additional information. eBay Developer Support may request the build information when helping you resolve technical issues.
+|
+
+CorrelationID
+|
+string |
+Conditionally |
+
+Most Trading API calls support a MessageID element in the request and a CorrelationID element in the response. If you pass in a MessageID in a request, the same value will be returned in the CorrelationID field in the response. Pairing these values can help you track and confirm that a response is returned for every request and to match specific responses to specific requests. If you do not pass a MessageID value in the request, CorrelationID is not returned.
+|
+
+Errors
+|
+ErrorType |
+Conditionally,
+
+repeatable: [0..*] |
+
+A list of application-level errors (if any) that occurred when eBay processed the request.
+|
+
+Errors.ErrorClassification
+|
+ErrorClassificationCodeType |
+Conditionally |
+
+API errors are divided between two classes: system errors and request errors.
+
+Applicable values:
+
+CustomCode
+
+(out) Reserved for internal or future use.
+
+RequestError
+
+(out) An error has occurred either as a result of a problem in the sending application or because the application's end-user has attempted to submit invalid data (or missing data). In these cases, do not retry the request. The problem must be corrected before the request can be made again. If the problem is due to something in the application (such as a missing required field), the application must be changed. If the problem is a result of end-user data, the application must alert the end-user to the problem and provide the means for the end-user to correct the data. Once the problem in the application or data is resolved, resend the request to eBay with the corrected data.
+
+SystemError
+
+(out) Indicates that an error has occurred on the eBay system side, such as a database or server down. An application can retry the request as-is a reasonable number of times (eBay recommends twice). If the error persists, contact Developer Technical Support. Once the problem has been resolved, the request may be resent in its original form.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+Errors.ErrorCode
+|
+token |
+Conditionally |
+
+A unique code that identifies the particular error condition that occurred. Your application can use error codes as identifiers in your customized error-handling algorithms.
+See Errors By Number.
+
+|
+
+Errors.ErrorParameters
+|
+ErrorParameterType |
+Conditionally,
+
+repeatable: [0..*] |
+
+This optional element carries a list of context-specific error variables that indicate details about the error condition. These are useful when multiple instances of ErrorType are returned.
+|
+
+Errors.ErrorParameters
+[ attribute ParamID ] |
+string |
+Conditionally |
+
+This optional element carries a list of context-specific error variables that indicate details about the error condition. These are useful when multiple instances of ErrorType are returned.
+|
+
+Errors.ErrorParameters.Value
+|
+string |
+Conditionally |
+
+This is the value of the request parameter noted in the ParamID attribute. So, if the ParamID value was ItemID, the value in this field would be the actual value of that ItemID.
+|
+
+Errors.LongMessage
+|
+string |
+Conditionally |
+
+A more detailed description of the condition that raised the error.
+|
+
+Errors.SeverityCode
+|
+SeverityCodeType |
+Conditionally |
+
+Indicates whether the error is a severe error (causing the request to fail) or an informational error (a warning) that should be communicated to the user.
+
+Applicable values:
+
+CustomCode
+
+(out) Reserved for internal or future use.
+
+Error
+
+(out) The request that triggered the error was not processed successfully. When a serious application-level error occurs, the error is returned instead of the business data.
+
+If the source of the problem is within the application (such as a missing required element), change the application before you retry the request. - If the problem is due to end-user input data, please alert the end-user to the problem and provide the means for them to correct the data. Once the problem in the application or data is resolved, you can attempt to re-send the request to eBay.
+- If the source of the problem is on eBay's side, An application can retry the request as-is a reasonable number of times (eBay recommends twice). If the error persists, contact Developer Technical Support. Once the problem has been resolved, the request may be resent in its original form.
+
+See the Error handling section of the Making a Trading API call guide for more information.
+
+Warning
+
+(out) The request was processed successfully, but something occurred that may affect your application or the user. For example, eBay may have changed a value the user sent in. In this case, eBay returns a normal, successful response and also returns the warning.
+
+When a warning occurs, the error is returned in addition to the business data. In this case, you do not need to retry the request (as the original request was successful). However, depending on the cause or nature of the warning, you might need to contact either the end user or eBay to effect a long term solution to the problem to prevent it from reoccurring in the future.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+Errors.ShortMessage
+|
+string |
+Conditionally |
+
+A brief description of the condition that raised the error.
+|
+
+HardExpirationWarning
+|
+string |
+Conditionally |
+
+Expiration date of the user's authentication token. Only returned within the 7-day period prior to a token's expiration. To ensure that user authentication tokens are secure and to help avoid a user's token being compromised, tokens have a limited life span. A token is only valid for a period of time (set by eBay). After this amount of time has passed, the token expires and must be replaced with a new token.
+|
+
+Timestamp
+|
+dateTime |
+Always |
+
+This value represents the date and time when eBay processed the request. The time zone of this value is GMT and the format is the ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS.SSSZ). See the Time Values section in the eBay Features Guide for information about this time format and converting to and from the GMT time zone.
+
+Note: Trading API calls are designed to retrieve very large sets of metadata that change once a day or less often. To improve performance, these calls return cached responses when you request all available data (with no filters). When this occurs, this time value reflects the time the cached response was created. Thus, this value is not necessarily when the request was processed. However, if you specify an input filter to reduce the amount of data returned, the calls retrieve the latest data (not cached). When this occurs, this time value does reflect when the request was processed.
+|
+
+Version
+|
+string |
+Always |
+
+The version of the response payload schema. Indicates the version of the schema that eBay used to process the request. See the Standard Data for All Calls section in the eBay Features Guide for information on using the response version when troubleshooting CustomCode values that appear in the response.
+|
+
+Input
+Output
+Detail Controls
+Samples
+Change History
+
+|
+
+## Detail Controls
+
+### DetailLevel
+
+The DetailLevel input field influences which call-specific fields may be returned. (All standard output fields are returned regardless of DetailLevel.)
+The none column indicates the fields that are returned when you do not specify a DetailLevel.
+
+Y | The field is always returned. |
+
+(Y) | The field is conditionally returned. See the field documentation for clarification of conditions. |
+
+- | The field is not returned. |
+
+Output Field |
+none |
+ReturnAll |
+
+ItemArray | Y | Y |
+
+ItemArray.Item | (Y) | (Y) |
+
+ItemArray.Item.BestOfferDetails | (Y) | (Y) |
+
+ItemArray.Item.BestOfferDetails.BestOfferCount | (Y) | (Y) |
+
+ItemArray.Item.BestOfferDetails.BestOfferEnabled | (Y) | (Y) |
+
+ItemArray.Item.BuyItNowPrice | - | (Y) |
+
+ItemArray.Item.Currency | (Y) | (Y) |
+
+ItemArray.Item.HitCount | - | (Y) |
+
+ItemArray.Item.ItemID | (Y) | (Y) |
+
+ItemArray.Item.ListingDetails | (Y) | (Y) |
+
+ItemArray.Item.ListingDetails.EndTime | (Y) | (Y) |
+
+ItemArray.Item.ListingDetails.StartTime | (Y) | (Y) |
+
+ItemArray.Item.ListingType | - | (Y) |
+
+ItemArray.Item.Quantity | (Y) | (Y) |
+
+ItemArray.Item.SellerVacationNote | - | (Y) |
+
+ItemArray.Item.SellingStatus | Y | Y |
+
+ItemArray.Item.SellingStatus.BidCount | (Y) | (Y) |
+
+ItemArray.Item.SellingStatus.CurrentPrice | (Y) | (Y) |
+
+ItemArray.Item.SellingStatus.HighBidder | - | (Y) |
+
+ItemArray.Item.SellingStatus.HighBidder.Email | - | (Y) |
+
+ItemArray.Item.SellingStatus.HighBidder.FeedbackScore | - | (Y) |
+
+ItemArray.Item.SellingStatus.HighBidder.UserID | - | (Y) |
+
+ItemArray.Item.SellingStatus.ListingStatus | (Y) | (Y) |
+
+ItemArray.Item.SellingStatus.QuantitySold | (Y) | (Y) |
+
+ItemArray.Item.Site | (Y) | (Y) |
+
+ItemArray.Item.Title | (Y) | (Y) |
+
+ItemArray.Item.Variations | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.Quantity | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.BidCount | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.CurrentPrice | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.HighBidder | - | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.HighBidder
+.Email | - | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.HighBidder
+.FeedbackScore | - | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.HighBidder
+.UserID | - | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.ListingStatus | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SellingStatus.QuantitySold | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.SKU | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.StartPrice | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation
+.VariationProductListingDetails | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation
+.VariationProductListingDetails.EAN | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation
+.VariationProductListingDetails.ISBN | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation
+.VariationProductListingDetails.UPC | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.VariationSpecifics | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.VariationSpecifics
+.NameValueList | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.VariationSpecifics
+.NameValueList.Name | (Y) | (Y) |
+
+ItemArray.Item.Variations.Variation.VariationSpecifics
+.NameValueList.Value | (Y) | (Y) |
+
+ItemArray.Item.WatchCount | - | (Y) |
+
+TimeTo | Y | Y |
+
+Input
+Output
+Detail Controls
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Sample: Basic Call
+
+The following sample returns listings that had any type of action occur (listing creation, listing revision, sale, ended listing) within the specified time period. In this example, a ModTimeFrom filter is used, but no ModTimeTo filter, so this time defaults to the present time. Note that fixed-price (GTC) listings that are automatically renewed by eBay each month count as a 'listing revision' or action/event.
+
+The response includes only items listed by the authorized user of the call. With DetailLevel set to ReturnAll, all applicable fields are included in the response.
+
+Input
+
+XML format.
+
+<?xml version="1.0" encoding="utf-8"?>
+<GetSellerEventsRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+<RequesterCredentials>
+<eBayAuthToken>A*******3</eBayAuthToken>
+</RequesterCredentials>
+<ErrorLanguage>en_US</ErrorLanguage>
+<WarningLevel>High</WarningLevel>
+<ModTimeFrom>2019-06-01T00:00:01.000Z</ModTimeFrom>
+<DetailLevel>ReturnAll</DetailLevel>
+</GetSellerEventsRequest>
+
+Output
+
+XML format.
+<?xml version="1.0" encoding="UTF-8"?>
+<GetSellerEventsResponse
+xmlns="urn:ebay:apis:eBLBaseComponents">
+<Timestamp>2019-11-05T18:10:12.440Z</Timestamp>
+<Ack>Success</Ack>
+<Version>1131</Version>
+<Build>E1131_CORE_APISELLING_19099826_R1</Build>
+<TimeTo>2019-11-05T18:10:11.830Z</TimeTo>
+<ItemArray>
+<Item>
+<ItemID>1**********3</ItemID>
+<ListingDetails>
+<StartTime>2018-09-08T19:44:06.000Z</StartTime>
+<EndTime>2019-11-08T19:44:06.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">25.0</CurrentPrice>
+<QuantitySold>0</QuantitySold>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Brinn's First Lady Gown Series Emily Tennessee Donelson</Title>
+<Quantity>1</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>0</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C*********************************************0</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>3*********0</PaymentProfileID>
+<PaymentProfileName>P******************y</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********5</ItemID>
+<ListingDetails>
+<StartTime>2018-09-21T17:57:57.000Z</StartTime>
+<EndTime>2019-11-21T17:57:57.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">22.0</CurrentPrice>
+<QuantitySold>0</QuantitySold>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Brinn's Musical Calendar Miss Doll May 1986 - "Rose Garden"</Title>
+<Quantity>1</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>0</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C***************************************2</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>3*********0</PaymentProfileID>
+<PaymentProfileName>P******************y</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********8</ItemID>
+<ListingDetails>
+<StartTime>2018-09-28T16:47:22.000Z</StartTime>
+<EndTime>2019-11-28T16:47:22.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">19.95</CurrentPrice>
+<QuantitySold>2</QuantitySold>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>M.I. Hummel "Sisters" Collector Plates - The Danbury Mint</Title>
+<Quantity>2</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>1</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C***************************************2</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R********************************************0</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>1**********0</PaymentProfileID>
+<PaymentProfileName>e*************************s</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********8</ItemID>
+<ListingDetails>
+<StartTime>2019-06-10T19:29:18.000Z</StartTime>
+<EndTime>2019-11-04T17:33:35.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">28.0</CurrentPrice>
+<QuantitySold>1</QuantitySold>
+<HighBidder>
+<UserID>p********d</UserID>
+<UserAnonymized>false</UserAnonymized>
+<Email>j********@*****.com</Email>
+<FeedbackScore>22</FeedbackScore>
+</HighBidder>
+<ListingStatus>Completed</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Electronic, Animated Sleeping, Snoring, Whistling Mrs. Claus in Box</Title>
+<Quantity>1</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>1</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C***************************************1</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>1**********0</PaymentProfileID>
+<PaymentProfileName>e***************************************s</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********3</ItemID>
+<ListingDetails>
+<StartTime>2019-06-10T18:49:25.000Z</StartTime>
+<EndTime>2019-10-09T23:10:25.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">27.0</CurrentPrice>
+<QuantitySold>1</QuantitySold>
+<HighBidder>
+<UserID>n********8</UserID>
+<UserAnonymized>false</UserAnonymized>
+<Email>n********@*****.com</Email>
+<FeedbackScore>58</FeedbackScore>
+</HighBidder>
+<ListingStatus>Completed</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Electronic, Animated Sleeping, Snoring, Whistling Santa Claus in Box</Title>
+<Quantity>1</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>1</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>3*********0</ShippingProfileID>
+<ShippingProfileName>C*************************************y</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>1**********0</PaymentProfileID>
+<PaymentProfileName>e***************************************s</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********1</ItemID>
+<ListingDetails>
+<StartTime>2018-09-08T19:03:45.000Z</StartTime>
+<EndTime>2019-11-08T19:03:45.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">16.0</CurrentPrice>
+<QuantitySold>1</QuantitySold>
+<HighBidder>
+<UserID>o********a</UserID>
+<UserAnonymized>false</UserAnonymized>
+<Email>r********@*****.com</Email>
+<FeedbackScore>1933</FeedbackScore>
+</HighBidder>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Brinn's First Lady Gown Series Martha Jefferson Randolf</Title>
+<Quantity>2</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>0</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C*********************************************0</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>3*********0</PaymentProfileID>
+<PaymentProfileName>P******************y</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********6</ItemID>
+<ListingDetails>
+<StartTime>2018-09-21T17:48:38.000Z</StartTime>
+<EndTime>2019-11-21T17:48:38.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">15.0</CurrentPrice>
+<QuantitySold>1</QuantitySold>
+<HighBidder>
+<UserID>s*****</UserID>
+<UserAnonymized>false</UserAnonymized>
+<Email>s********@*****.com</Email>
+<FeedbackScore>5</FeedbackScore>
+</HighBidder>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Brinn's Musical Calendar Miss Doll September 1986 - "September Song"</Title>
+<Quantity>1</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>1</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C***************************************2</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>3*********0</PaymentProfileID>
+<PaymentProfileName>P******************y</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+<Item>
+<ItemID>1**********0</ItemID>
+<ListingDetails>
+<StartTime>2018-09-08T18:33:47.000Z</StartTime>
+<EndTime>2019-11-08T18:33:47.000Z</EndTime>
+</ListingDetails>
+<SellingStatus>
+<BidCount>0</BidCount>
+<CurrentPrice currencyID="USD">23.0</CurrentPrice>
+<QuantitySold>1</QuantitySold>
+<HighBidder>
+<UserID>c*****</UserID>
+<UserAnonymized>false</UserAnonymized>
+<Email>m********@*****.com</Email>
+<FeedbackScore>180</FeedbackScore>
+</HighBidder>
+<ListingStatus>Active</ListingStatus>
+</SellingStatus>
+<Site>US</Site>
+<Title>Brinn's American Tradition First Lady Gown Series Dolley Payne Madison</Title>
+<Quantity>2</Quantity>
+<Currency>USD</Currency>
+<ListingType>StoresFixedPrice</ListingType>
+<BestOfferDetails>
+<BestOfferCount>0</BestOfferCount>
+<BestOfferEnabled>true</BestOfferEnabled>
+</BestOfferDetails>
+<HitCounter>NoHitCounter</HitCounter>
+<SellerProfiles>
+<SellerShippingProfile>
+<ShippingProfileID>1**********0</ShippingProfileID>
+<ShippingProfileName>C***************************************2</ShippingProfileName>
+</SellerShippingProfile>
+<SellerReturnProfile>
+<ReturnProfileID>1**********0</ReturnProfileID>
+<ReturnProfileName>R******************************************r</ReturnProfileName>
+</SellerReturnProfile>
+<SellerPaymentProfile>
+<PaymentProfileID>3*********0</PaymentProfileID>
+<PaymentProfileName>P******************y</PaymentProfileName>
+</SellerPaymentProfile>
+</SellerProfiles>
+<eBayPlus>false</eBayPlus>
+<eBayPlusEligible>false</eBayPlusEligible>
+</Item>
+</ItemArray>
+</GetSellerEventsResponse>
+
+Input
+Output
+Detail Controls
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+1323
+2023-08-25 |
+
+- SiteCodeType (modified): Czechia and Cyprus have been added to SiteCodeType as enumeration values. These sites cannot be set in the X-EBAY-API-SITEID header, nor in the Site field of a request payload.
+
+|
+
+1257
+2022-05-06 |
+
+- Item.HitCount (modified): The logic of HitCount has been modified to show page views for the latest 30-day period, instead of tracking page views for the lifetime of the listing.
+
+|
+
+1247
+2022-02-25 |
+
+- Item.HitCounter (deprecated): Hit counters are no longer shown in View Item pages, so this field is no longer applicable.
+
+|
+
+1091
+2019-01-18 |
+
+- BestOfferDetails.BestOfferEnabled (modified): Best Offers in Auction listings are now supported on the following eBay marketplaces: US, Canada, UK, Germany, Australia, France, Italy, and Spain.
+
+|
+
+1039
+2017-10-17 |
+
+- Item.IsSecureDescription (added): This boolean field indicates whether or not the listing description is HTTPS secure/compliant. To be HTTPS secure/compliant, the listing description field may not contain any links to site pages that use the HTTP (and not HTTPS) protocol.
+
+|
+
+1027
+2017-08-04 |
+
+- ListingTypeCodeType (modified): The Half enumeration value is being deprecated, as API support for Half.com listings is being deprecated.
+
+|
+
+0933
+2015-07-24 |
+
+- eBayPlusEligible (added): This new field returns a boolean value that indicates whether an item is is eligible to be listed under the eBay Plus program. eBay Plus is a premium account option for buyers, which provides benefits such as fast free domestic shipping and free returns on selected items. Currently available only in Germany.
+
+- eBayPlus (added): This new field returns a boolean value that indicates whether the eBay Plus program is being offered on an item listing. eBay Plus is a premium account option for buyers, which provides benefits such as fast free domestic shipping and free returns on selected items. Currently available only in Germany.
+
+|
+
+0925
+2015-05-29 |
+
+- NameValueList.Name (modified): In a multiple-variation listing, the Brand should be returned at the item level (ItemSpecifics container) and the MPN for the product variation should be returned at the variation level (VariationSpecifics container).
+
+- Item.ProductListingDetails (modified): In a multiple-variation listing, the product identifier (EAN, ISBN or UPC) for a product variation should be returned in the Variation.VariationProductListingDetails container instead.
+
+- BrandMPN.Brand (modified): Decreased maximum length of string value to 65 characters. If Brand and MPN (Manufacturer Part Number) are being used to identify product variations in a multiple-variation listing, the Brand should be returned at the item level (this field and the ItemSpecifics container) and the MPN for each product variation should be returned at the variation level (VariationSpecifics container).
+
+- BrandMPN.MPN (modified): Decreased maximum length of string value to 65 characters. If Brand and MPN (Manufacturer Part Number) are being used to identify product variations in a multiple-variation listing, the Brand should be returned at the item level (this field and the ItemSpecifics container) and the MPN for each product variation should be returned at the variation level (VariationSpecifics container).
+
+- ProductListingDetails.EAN (modified): In a multiple-variation listing, the EAN of a product variation should be returned in the VariationProductListingDetails container instead. If the listing is in a category that expects an EAN value, but one doesn't exist for the product, this field may contain text similar or identical to 'Does not apply'.
+
+- ProductListingDetails.ISBN (modified): In a multiple-variation listing, the ISBN of a product variation should be returned in the VariationProductListingDetails container instead. If the listing is in a category that expects an ISBN value, but one doesn't exist for the product, this field may contain text similar or identical to 'Does not apply'.
+
+- ProductListingDetails.UPC (modified): In a multiple-variation listing, the UPC of a product variation should be returned in the VariationProductListingDetails container instead. If the listing is in a category that expects a UPC value, but one doesn't exist for the product, this field may contain text similar or identical to 'Does not apply'.
+
+- VariationProductListingDetails (added): This container is returned if a product variation within a multiple-variation listing was identified with an EAN, an ISBN, or a UPC value.
+
+|
+
+0897
+2014-10-21 |
+
+- SiteCodeType (modified): 'Russia' added as enumeration value to support selling on the new Russia site.
+
+|
+
+0763
+2012-02-29 |
+
+- Item.SellerProfiles.SellerPaymentProfile (added): This container is returned if a Business Policies payment profile was applied
+to the listing. This feature is currently only available for testing in a Sandbox
+environment and will not be available in Production until May 2012.
+
+- Item.SellerProfiles.SellerReturnProfile (added): This container is returned if a Business Policies return policy profile was applied
+to the listing. This feature is currently only available for testing in a Sandbox
+environment and will not be available in Production until May 2012.
+
+- Item.SellerProfiles.SellerShippingProfile (added): This container is returned if a Business Policies shipping profile was applied
+to the listing. This feature is currently only available for testing in a Sandbox
+environment and will not be available in Production until May 2012.
+
+- Item.ShippingPackageDetails (added): If the seller is using calculated shipping, this container is used to specify
+the weight and dimensions of an item's shipping package. This feature is currently
+only available for testing in a Sandbox environment and will not be available in
+Production until May 2012.
+
+|
+
+0675
+2010-06-23 |
+
+- Item (modified): Limit increased to 3000. If 3000 or more items are returned, it means items may be missing and you should
+use a shorter time range filter.
+
+|
+
+0669
+2010-05-12 |
+
+- HideVariations (added): Boolean input field that, when set to true, suppresses variation details in the
+response. Use HideVariations to reduce the response size if you use other calls,
+alerts, notifications, or reports to track changes to variation details.
+
+|
+
+0629
+2009-08-05 |
+
+- Item.Variations, IncludeVariationSpecifics (added): Variation details are now returned, including StartPrice, Quantity, QuantitySold, plus SKU and/or VariationSpecifics. Use IncludeVariationSpecifics to control the
+size of the variations response.
+
+|
+
+0561
+2008-04-16 |
+
+- Item.ListingType.Express (deprecated): Due to the shutdown of UK and Germany eBay Express sites Item.ListingType.Express has been deprecated.
+
+|
+
+0555
+2008-03-05 |
+
+- GetSellerEventsRequestType.UserIDType (modified): Note that since user information is anonymous to everyone except the bidder and the seller (during an active auction), only sellers looking for information about their own listings and bidders who know the user IDs of their sellers
+will be able to make this API call successfully. See Working with Anonymous User Informationin the eBay Web Services Guide for more information.
+
+|
+
+0491
+2006-12-13 |
+
+- UserType (modified): Starting Jan 2007, selected tags in the User container will be made anonymous for listings that have a current price of $200.00 USD or higher. See Working with Anonymous User Information for a list of effected fields.
+
+|
+
+0453
+2006-03-22 |
+
+- ItemType.BestOfferEnabled (added): Indicates, when true, that an item is available through the Best Offer feature.
+
+|
+
+0447
+2006-02-08 |
+
+- TotalAvailable (modified): Previously announced as obsolete for this call.
+
+|
+
+0431
+2005-10-19 |
+
+- GetSellerEvents.TotalAvailable (modified): This field is obsolete (not returned) as of API version 427.
+
+|
+
+0427
+2005-09-21 |
+
+- Item.SellingStatus.ListingStatus (added): Specifies an active or ended listing's status in eBay's processing workflow. For items that have sold, this to determine whether eBay has finished processing total price, winning bidder/buyer, and Final Value Fee details.
+
+|
+
+0425
+2005-09-07 |
+
+- IncludeWatchCount (added): New input argument.
+
+|
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.
