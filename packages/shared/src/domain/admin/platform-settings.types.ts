@@ -130,9 +130,19 @@ export enum PlatformSettingKey {
   EBAY_RETURN_SYNC_ENABLED = 'ebay.returnSync.enabled',
   EBAY_RETURN_SYNC_CRON = 'ebay.returnSync.cron',
   /**
-   * Hours before a store's returns are read again. One call per store per
-   * sweep against a 5,000/day application-wide ceiling, so this is the knob
-   * that spends that quota.
+   * Derive the sweep interval from the store count and eBay's daily limit
+   * (default on). Off = use `intervalHours` as typed.
+   */
+  EBAY_RETURN_SYNC_INTERVAL_AUTO = 'ebay.returnSync.intervalAuto',
+  /**
+   * How much of the daily return quota the sweep may spend (percent). With
+   * auto on, this — not the interval — is the knob.
+   */
+  EBAY_RETURN_SYNC_QUOTA_PERCENT = 'ebay.returnSync.quotaPercent',
+  /**
+   * Hours before a store's returns are read again — the MANUAL value, used
+   * when auto is off or eBay has not reported a limit yet. One call per store
+   * per sweep against a 5,000/day application-wide ceiling.
    */
   EBAY_RETURN_SYNC_INTERVAL_HOURS = 'ebay.returnSync.intervalHours',
   /** Stores per tick. */

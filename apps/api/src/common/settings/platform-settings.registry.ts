@@ -121,10 +121,29 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     requiresRestart: true,
   }),
   def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_AUTO,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_RETURN_SYNC_INTERVAL_AUTO',
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_QUOTA_PERCENT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_RETURN_SYNC_QUOTA_PERCENT',
+    // Half the quota: retries are charged too, and the rest stays free for
+    // any other return call. At 500 stores this resolves to a 6-hour interval.
+    defaultValue: '50',
+    min: 5,
+    max: 90,
+  }),
+  def({
     key: PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS,
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,
     envVar: 'EBAY_RETURN_SYNC_INTERVAL_HOURS',
+    // Manual fallback only (auto off, or no eBay limit captured yet).
     // 500 stores x 4 sweeps/day = 2,000 calls, 40% of the 5,000/day ceiling.
     defaultValue: '6',
     min: 1,
@@ -135,7 +154,10 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,
     envVar: 'EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN',
-    defaultValue: '25',
+    // A burst guard, not the pace. 144 ticks a day x 35 = 5,040 sweeps, above
+    // the whole 5,000/day quota, so this can never be what slows the sweep
+    // down — the interval (derived from the quota) is.
+    defaultValue: '35',
     min: 1,
     max: 200,
   }),

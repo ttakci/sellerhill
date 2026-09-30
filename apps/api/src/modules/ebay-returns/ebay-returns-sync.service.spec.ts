@@ -12,6 +12,7 @@ import type { EbayService } from '../ebay/ebay.service';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import type { PostOrderClient } from './post-order.client';
 import type { PostOrderReturnSearchResponse } from './post-order.types';
+import type { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const USER_A = '00000000-0000-4000-8000-00000000000a';
 const USER_B = '00000000-0000-4000-8000-00000000000b';
@@ -72,6 +73,7 @@ function build(options: {
   tokens?: Record<string, string>;
   failUpsertFor?: string[];
   sandbox?: boolean;
+  intervalHours?: number;
 }): Harness {
   const accounts = options.accounts ?? [];
   const tokens = options.tokens ?? { [ACCOUNT_A]: TOKEN_A, [ACCOUNT_B]: TOKEN_B };
@@ -104,7 +106,11 @@ function build(options: {
     { getBoolean, getNumber } as unknown as PlatformSettingsService,
     { isSuspended } as unknown as QuotaEnforcementService,
     { getAccountAccessToken } as unknown as EbayService,
-    { searchReturns, isReturnSearchSupported: () => options.sandbox !== true } as unknown as PostOrderClient
+    { searchReturns, isReturnSearchSupported: () => options.sandbox !== true } as unknown as PostOrderClient,
+    {
+      resolve: () =>
+        Promise.resolve({ intervalHours: options.intervalHours ?? 6, source: 'auto', estimatedDailyCalls: 0 }),
+    } as unknown as ReturnSweepScheduleService
   );
 
   const matching = (needle: string) => (): Array<[string, unknown[]?]> =>
@@ -178,9 +184,10 @@ describe('EbayReturnsSyncService', () => {
     expect(sql).toContain('SET last_return_sync_at = NOW()');
     expect(sql).toContain('last_return_sync_at IS NULL');
     expect(sql).toContain('RETURNING a.id, a.user_id, a.marketplace_id');
-    // intervalHours, maxAccountsPerRun — both from the settings, never literals.
+    // The interval comes from the schedule (derived from stores and quota),
+    // the burst limit from the settings — neither is a literal.
     expect(params).toEqual(['6', 25]);
-    expect(h.getNumber).toHaveBeenCalledWith(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS);
+    expect(h.getNumber).not.toHaveBeenCalledWith(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS);
     expect(h.getNumber).toHaveBeenCalledWith(PlatformSettingKey.EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN);
     expect(h.searchReturns).not.toHaveBeenCalled();
   });
