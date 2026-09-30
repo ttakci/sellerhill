@@ -354,8 +354,11 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     key: PlatformSettingKey.AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT,
     category: PlatformSettingCategory.AMAZON,
     type: PlatformSettingType.NUMBER,
+    // A tie-break only: an Amazon total within this % of the order's expected
+    // cost ranks that candidate higher. It never blocks a match (the Amazon
+    // total includes tax, hence the wider default).
     envVar: 'AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT',
-    defaultValue: '5',
+    defaultValue: '15',
     min: 0,
     max: 50,
   }),

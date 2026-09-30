@@ -872,11 +872,11 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
   - **Suspect 0-row scrape** (page redirected off "Your Orders", or zero order-cards on page 1 — likely a layout/selector break): treated as a data failure, NOT a legit empty. Watermark is held (no advance) and the run returns without throwing — the 30-min scheduler naturally retries on the next tick, avoiding a BullMQ retry storm on a persistent Amazon layout change.
   - **Legit empty / no candidates**: watermark advances normally.
   - **Per-Amazon-order failure** in the match/write loop: logged and skipped, never fails the run (watermark still advances for the rest).
-- **Matching strictness** (`order-matcher.ts`): `scoreAmazonOrderMatch` requires identical ASIN (`+40`), identical quantity (`+20`), amount within `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT` percent (`+up to 40`, scaled by closeness), date within `AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS` (`+up to 20`, scaled by closeness). Score is informational; `match: true` requires ALL four gates to pass. Wrong cost attribution is treated as worse than no attribution — there is no "best effort" force-link path.
+- **Matching strictness** (`order-matcher.ts`): `scoreAmazonOrderMatch` requires identical ASIN (`+40`), identical quantity (`+20`), the Amazon "Ship to" recipient being the eBay buyer (`+20`, `recipientMatchesBuyer`: equal 5-digit postcode + name words) and date within `AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS` (`+up to 20`, scaled by closeness). The amount is a tie-break only (`+10` when Amazon's total is within `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT` of the order's provisional `purchase_price`) — it used to compare Amazon's total with the eBay sale total (cost vs revenue) and so never matched a real order. `pickBestMatch` refuses a tie between two different eBay orders. Wrong cost attribution is treated as worse than no attribution — there is no "best effort" force-link path.
 - **Config (all optional, defaults shown):**
   - `AMAZON_ORDER_SYNC_CRON='0 */3 * * *'` — scheduler tick (every 3 hours; see the capacity note above before lowering it).
   - `AMAZON_ORDER_SYNC_CONCURRENCY=2` — parallel jobs (one per Amazon account).
-  - `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT=5` — max percent diff between Amazon `grandTotal` and eBay `sale_total`.
+  - `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT=15` — tie-break only: Amazon `grandTotal` within this percent of the order's expected cost ranks that candidate higher; never blocks a match.
   - `AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS=7` — max day-delta between Amazon and eBay order dates (candidate pool itself is 60-day to cover slow ship paths).
 
 ### Amazon Order Tracking (Amazon → eBay Status Sync)

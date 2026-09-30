@@ -1,4 +1,4 @@
-import { parseOrderCardHeader, stripScriptBlocks } from './your-orders-card';
+import { parseOrderCardHeader, parseOrderCardRecipient, stripScriptBlocks } from './your-orders-card';
 
 describe('parseOrderCardHeader', () => {
   // textContent of a live card's `.order-header` (2026-10-01), names changed.
@@ -26,6 +26,31 @@ describe('parseOrderCardHeader', () => {
       orderDate: null,
       grandTotal: null,
     });
+  });
+});
+
+describe('parseOrderCardRecipient', () => {
+  const block =
+    '\n  Ship to\n  Sam Buyer\n  Sam Buyer\n  4820 JUNIPER CT\n  FAIRVIEW, OR 97024-1111\n  United States\n';
+
+  it('reads the name and the 5-digit postcode of the ship-to', () => {
+    expect(parseOrderCardRecipient('  Sam Buyer\n', block)).toEqual({ name: 'Sam Buyer', zip: '97024' });
+  });
+
+  it('never takes a five-digit house number for the postcode', () => {
+    const text = 'Ship to Sam Buyer 12345 MAIN ST SPRINGDALE, AR 72764 United States';
+    expect(parseOrderCardRecipient('Sam Buyer', text).zip).toBe('72764');
+  });
+
+  it('reads a postcode that textContent ran into the next row', () => {
+    expect(parseOrderCardRecipient('Lee Other', 'Ship toLee Other12345 OAK STSPRINGDALE, AR 72764United States').zip).toBe(
+      '72764',
+    );
+  });
+
+  it('returns null for what it cannot read (digital orders have no ship-to)', () => {
+    expect(parseOrderCardRecipient('', '')).toEqual({ name: null, zip: null });
+    expect(parseOrderCardRecipient('Sam Buyer', 'Ship to Sam Buyer 12345 MAIN ST').zip).toBeNull();
   });
 });
 
