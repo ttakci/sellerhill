@@ -14,6 +14,7 @@ import { EBAY_RETURNS_SYNC_QUEUE } from './ebay-returns.constants';
 import { EbayReturnsController } from './ebay-returns.controller';
 import { EbayReturnsService } from './ebay-returns.service';
 import { PostOrderClient } from './post-order.client';
+import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 /**
  * eBay returns (read only): the Post-Order client, the periodic sweep that
@@ -34,7 +35,15 @@ import { PostOrderClient } from './post-order.client';
     BullModule.registerQueue({ name: EBAY_RETURNS_SYNC_QUEUE }),
   ],
   controllers: [EbayReturnsController],
-  providers: [PostOrderClient, EbayReturnsSyncService, EbayReturnsSyncProcessor, EbayReturnsService],
-  exports: [EbayReturnsService],
+  providers: [
+    PostOrderClient,
+    ReturnSweepScheduleService,
+    EbayReturnsSyncService,
+    EbayReturnsSyncProcessor,
+    EbayReturnsService,
+  ],
+  // The schedule is exported for the Action Center, which must call a return
+  // stale on the very interval the sweep refreshes it at.
+  exports: [EbayReturnsService, ReturnSweepScheduleService],
 })
 export class EbayReturnsModule {}

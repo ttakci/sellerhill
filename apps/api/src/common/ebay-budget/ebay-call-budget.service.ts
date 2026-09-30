@@ -144,6 +144,21 @@ export class EbayCallBudgetService implements OnModuleInit {
     return Object.fromEntries(entries) as Record<EbayApiResource, number>;
   }
 
+  /**
+   * What BACKGROUND work may spend on a resource per day: eBay's reported daily
+   * limit after the interactive reserve — the same ceiling `acquire` enforces.
+   * Null when eBay has reported no daily limit for it. For schedulers that size
+   * their own pace from the quota instead of discovering it by being refused.
+   */
+  async backgroundDailyCeiling(resource: EbayApiResource): Promise<number | null> {
+    const daily = (await this.resolveMapped(resource))?.daily?.limit;
+    if (typeof daily !== 'number' || !Number.isFinite(daily) || daily <= 0) {
+      return null;
+    }
+    const reserve = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_BUDGET_RESERVE_PERCENT);
+    return effectiveLimit(daily, reserve, EbayCallPriority.BACKGROUND);
+  }
+
   /** eBay's own figures for this resource, or null when eBay has never reported any — never a number we made up. */
   private async resolveMapped(resource: EbayApiResource): Promise<MappedLimit | null> {
     const snapshot = await this.rateLimits.current();

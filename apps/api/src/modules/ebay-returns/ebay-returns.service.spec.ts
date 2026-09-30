@@ -3,9 +3,9 @@
 import { ACTIONABLE_RETURN_BUCKETS, buildReturnBucketSql, ReturnBucket, ReturnTab } from '@repo/shared';
 
 import type { DatabaseService } from '../../common/database/database.service';
-import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { EbayReturnsService } from './ebay-returns.service';
+import type { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
 const ACCOUNT = '11111111-1111-4111-8111-11111111111a';
@@ -58,11 +58,13 @@ function build(
     }
     return Promise.resolve(options.rows ?? []);
   });
-  const getNumber = jest.fn<Promise<number>, [string]>(() => Promise.resolve(options.intervalHours ?? 6));
+  const resolve = jest.fn(() =>
+    Promise.resolve({ intervalHours: options.intervalHours ?? 6, source: 'auto' as const, estimatedDailyCalls: 0 })
+  );
   return {
     service: new EbayReturnsService(
       { query } as unknown as DatabaseService,
-      { getNumber } as unknown as PlatformSettingsService
+      { resolve } as unknown as ReturnSweepScheduleService
     ),
     query,
   };
