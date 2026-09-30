@@ -142,6 +142,14 @@
       "filter": {
         "all": "Alle Auto-Abwicklungen",
         "needsAttention": "Braucht Aufmerksamkeit"
+      },
+      "start": {
+        "button": "Automatische Bestellung starten",
+        "confirmTitle": "Diese Bestellung jetzt bei Amazon kaufen?",
+        "confirmDescription": "SellerHill gibt mit deinem Amazon-Konto für automatische Bestellungen eine echte Amazon-Bestellung für diesen Verkauf auf, Lieferung an den eBay-Käufer. Dein Ausgabelimit gilt weiterhin; liegt die Summe darüber, wird der Kauf gestoppt. Fahre nur fort, wenn du den Artikel nicht schon selbst gekauft hast.",
+        "confirm": "Kauf starten",
+        "queued": "Der Kauf wurde gestartet. Der Status der Bestellung aktualisiert sich in wenigen Minuten.",
+        "queuedDryRun": "Ein Testlauf wurde gestartet. Dieses Amazon-Konto ist im Testmodus, es wird nichts gekauft."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Sendungsnummer umgewandelt.",
       "orderNotTracked": "Diese Bestellung ist mit keinem Ihrer Angebote verknüpft, daher könnte eine umgewandelte Sendungsnummer nie an eBay gesendet werden. Verknüpfen Sie die Bestellung zuerst mit ihrem Angebot.",
       "trackingAlreadyPushed": "eBay hat die ursprüngliche Sendungsnummer für diese Bestellung bereits erhalten, und sie kann nicht ersetzt werden. Eine Umwandlung würde daher nichts an dem ändern, was der Käufer sieht.",
-      "listingOverPlanLimit": "Das Angebot dieser Bestellung lag beim Eingang der Bestellung außerhalb des Angebotslimits Ihres Tarifs. Für Bestellungen aus Angeboten außerhalb des Limits gibt es weder Sendungsverfolgung noch Umwandlung von Sendungsnummern."
+      "listingOverPlanLimit": "Das Angebot dieser Bestellung lag beim Eingang der Bestellung außerhalb des Angebotslimits Ihres Tarifs. Für Bestellungen aus Angeboten außerhalb des Limits gibt es weder Sendungsverfolgung noch Umwandlung von Sendungsnummern.",
+      "autoFulfillNotRestartable": "Der automatische Kauf für diese Bestellung kann nicht erneut gestartet werden. Sie ist vielleicht schon gekauft oder in Bearbeitung, oder es könnte ein zweiter Kauf entstehen. Prüfe deine Amazon-Bestellungen und verknüpfe die Bestellung manuell.",
+      "autoFulfillNoAccount": "Kein Amazon-Konto ist für automatische Bestellungen bereit. Aktiviere in den Einstellungen automatische Bestellungen für ein Amazon-Konto und lege ein Ausgabelimit fest.",
+      "autoFulfillOverCap": "Dieser Verkauf liegt über dem Ausgabelimit deines Amazon-Kontos. Erhöhe das Limit in den Einstellungen des Amazon-Kontos oder kaufe den Artikel manuell.",
+      "autoFulfillAlreadyStarted": "Der Status dieser Bestellung hat sich gerade geändert, der Kauf wurde vielleicht schon gestartet. Lade die Seite neu.",
+      "autoFulfillQuotaExhausted": "Das Limit deines Tarifs für automatische Bestellungen ist für diesen Zeitraum aufgebraucht."
     },
     "stage": {
       "amazon_cancelled": {

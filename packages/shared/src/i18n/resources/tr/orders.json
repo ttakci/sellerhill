@@ -142,6 +142,14 @@
       "filter": {
         "all": "Tümü",
         "needsAttention": "İlgilenilecek"
+      },
+      "start": {
+        "button": "Otomatik siparişi başlat",
+        "confirmTitle": "Bu sipariş şimdi Amazon'dan alınsın mı?",
+        "confirmDescription": "SellerHill, otomatik sipariş için ayarlı Amazon hesabınızla bu satış için gerçek bir Amazon siparişi verecek ve ürün eBay alıcısına gönderilecek. Harcama limitiniz yine geçerli; toplam limiti aşarsa satın alma durur. Ürünü kendiniz almadıysanız devam edin.",
+        "confirm": "Satın almayı başlat",
+        "queued": "Satın alma başladı. Siparişin durumu birkaç dakika içinde güncellenir.",
+        "queuedDryRun": "Test çalıştırması başladı. Bu Amazon hesabı test modunda olduğu için hiçbir şey satın alınmayacak."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Kargo takibi dönüştürüldü.",
       "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
       "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir.",
-      "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz."
+      "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz.",
+      "autoFulfillNotRestartable": "Bu siparişin otomatik satın alması yeniden başlatılamaz. Sipariş zaten alınmış ya da işlemde olabilir veya ikinci bir satın alma oluşabilir. Amazon siparişlerinizi kontrol edip siparişi elle bağlayın.",
+      "autoFulfillNoAccount": "Otomatik sipariş için hazır bir Amazon hesabı yok. Ayarlar'da bir Amazon hesabı için otomatik siparişi açın ve harcama limiti girin.",
+      "autoFulfillOverCap": "Bu satış Amazon hesabınızın harcama limitini aşıyor. Limiti Amazon hesabının ayarlarından yükseltin veya ürünü elle alın.",
+      "autoFulfillAlreadyStarted": "Siparişin durumu az önce değişti, satın alma zaten başlamış olabilir. Sayfayı yenileyin.",
+      "autoFulfillQuotaExhausted": "Planınızın bu dönemki otomatik sipariş limiti doldu."
     },
     "stage": {
       "amazon_cancelled": {

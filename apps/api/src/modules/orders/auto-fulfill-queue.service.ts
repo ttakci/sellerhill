@@ -49,4 +49,29 @@ export class AutoFulfillQueueService {
       `enqueued auto-fulfill for ${ebayOrderId} on account ${amazonAccountId}`,
     );
   }
+
+  /**
+   * The seller's "Start automatic order" click. Needs its OWN jobId: the
+   * per-order id above is kept on completed/failed jobs (removeOnComplete /
+   * removeOnFail), and BullMQ silently ignores an add whose id already exists —
+   * the click would enqueue nothing. Duplicate protection does not rest on the
+   * id here: `OrderSyncService.startAutoFulfillManually` claims the row with a
+   * compare-and-set first, so only one click per blocked state reaches this.
+   */
+  async enqueueManual(ebayOrderId: string, amazonAccountId: string): Promise<void> {
+    await this.queue.add(
+      'fulfill-order',
+      stampCurrentCorrelation({ ebayOrderId, amazonAccountId }),
+      {
+        jobId: `${AUTO_FULFILL_JOB_ID_PREFIX}${ebayOrderId}-manual-${Date.now()}`,
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 60_000 },
+        removeOnComplete: 100,
+        removeOnFail: { age: 86_400 },
+      },
+    );
+    this.logger.log(
+      `enqueued manual auto-fulfill for ${ebayOrderId} on account ${amazonAccountId}`,
+    );
+  }
 }

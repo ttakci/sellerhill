@@ -142,6 +142,14 @@
       "filter": {
         "all": "Todo el cumplimiento automático",
         "needsAttention": "Requiere atención"
+      },
+      "start": {
+        "button": "Iniciar pedido automático",
+        "confirmTitle": "¿Comprar este pedido en Amazon ahora?",
+        "confirmDescription": "SellerHill hará un pedido real en Amazon para esta venta con tu cuenta de Amazon para pedidos automáticos, con envío al comprador de eBay. Tu límite de gasto sigue aplicando y la compra se detiene si el total lo supera. Continúa solo si no compraste el artículo tú mismo.",
+        "confirm": "Iniciar compra",
+        "queued": "La compra comenzó. El estado del pedido se actualiza en unos minutos.",
+        "queuedDryRun": "Comenzó una prueba. Esta cuenta de Amazon está en modo de prueba, así que no se comprará nada."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Seguimiento convertido.",
       "orderNotTracked": "Este pedido no está vinculado a ninguna de tus publicaciones, por lo que un número de seguimiento convertido nunca se podría enviar a eBay. Primero vincula el pedido a su publicación.",
       "trackingAlreadyPushed": "eBay ya tiene el número de seguimiento original de este pedido y no se puede reemplazar, por lo que convertirlo ahora no cambiaría lo que ve el comprador.",
-      "listingOverPlanLimit": "La publicación de este pedido estaba fuera del límite de publicaciones de tu plan cuando llegó el pedido. Los pedidos de publicaciones fuera del límite no reciben seguimiento de envío ni conversión de seguimiento."
+      "listingOverPlanLimit": "La publicación de este pedido estaba fuera del límite de publicaciones de tu plan cuando llegó el pedido. Los pedidos de publicaciones fuera del límite no reciben seguimiento de envío ni conversión de seguimiento.",
+      "autoFulfillNotRestartable": "La compra automática de este pedido no se puede volver a iniciar. Puede que ya esté comprado o en curso, o que se haga una segunda compra. Revisa tus pedidos de Amazon y vincula el pedido manualmente.",
+      "autoFulfillNoAccount": "No hay ninguna cuenta de Amazon lista para pedidos automáticos. En Configuración, activa los pedidos automáticos en una cuenta de Amazon y define un límite de gasto.",
+      "autoFulfillOverCap": "Esta venta supera el límite de gasto de tu cuenta de Amazon. Sube el límite en la configuración de la cuenta de Amazon o compra el artículo manualmente.",
+      "autoFulfillAlreadyStarted": "El estado de este pedido acaba de cambiar, así que puede que la compra ya haya comenzado. Actualiza la página.",
+      "autoFulfillQuotaExhausted": "Se agotó el límite de pedidos automáticos de tu plan para este periodo."
     },
     "stage": {
       "amazon_cancelled": {

@@ -1,4 +1,9 @@
-import { type AmazonAccountPublicDto, type CreateAmazonAccountFormData, type UpdateAmazonAccountFormData } from '@repo/shared';
+import {
+  type AmazonAccountPublicDto,
+  type CreateAmazonAccountFormData,
+  type StartAutoFulfillResultDto,
+  type UpdateAmazonAccountFormData,
+} from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -78,6 +83,18 @@ export const amazonApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Orders'],
     }),
+    /**
+     * Start the automatic Amazon purchase for one order by hand. Offered only
+     * while `OrderDto.canStartAutoFulfill` is true; every refusal comes back
+     * as a 409 whose message is an i18n key.
+     */
+    startAutoFulfill: builder.mutation<StartAutoFulfillResultDto, { orderId: string }>({
+      query: ({ orderId }) => ({
+        url: `/amazon/orders/${orderId}/start-auto-fulfill`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
@@ -89,4 +106,5 @@ export const {
   useVerifyAmazonAccountMutation,
   useLinkAmazonOrderMutation,
   useConvertOrderTrackingMutation,
+  useStartAutoFulfillMutation,
 } = amazonApi;

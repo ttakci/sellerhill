@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!--
+  Amazon checkout "Select a delivery address" step, trimmed from a live capture
+  (2026-09-30, www.amazon.com/checkout/p/<purchase>/address). Element ids,
+  classes, data-csa-c-slot-id values, the shared element id of the three
+  continue buttons and the aria-labelledby labelling are kept verbatim; every
+  name, street, phone and id value is FICTITIOUS.
+
+  The inline script is the test's stand-in for Amazon's own JS:
+   - "Deliver to this address" navigates to the collapsed single-page checkout
+     showing the checked address (`spc?addr=`);
+   - "Add a new delivery address" opens the add-address dialog (template below),
+     making the page behind it inert exactly like the live page does;
+   - the dialog's "Use this address" navigates to spc with the entered address,
+     unless a required field is empty or `?reject=1` is set, in which case it
+     keeps the dialog open with Amazon's inline name error.
+-->
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>Place Your Order - Amazon Checkout</title>
+<style>.aok-hidden,.a-popover-preload,.js-hide{display:none!important}.a-popover-modal{border:1px solid #999;padding:8px}</style>
+</head>
+<body>
+<div id="a-page">
+<div class="a-container checkout-experience-page-content">
+  <div id="checkout-experience-container" class="a-row a-ws-row">
+    <div id="checkout-experience-right-column" class="a-column a-span12 a-ws-span4 a-ws-span-last">
+      <div id="checkout-subtotals-section" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel">
+        <div id="subtotals" class="a-cardui celwidget rcx-checkout-custom-card no-trailing-space">
+          <span class="a-declarative" data-action="buy-button-as-primary-action">
+            <span id="checkout-secondary-continue-button-id" class="a-button a-button-primary continue-button secondary-action-button celwidget"><span class="a-button-inner"><input data-csa-c-slot-id="checkout-secondary-continue-shipaddressselect" data-csa-c-type="widget" data-testid="secondary-continue-button" class="a-button-input" type="submit" aria-labelledby="checkout-secondary-continue-button-id-announce"><span id="checkout-secondary-continue-button-id-announce" class="a-button-text" aria-hidden="true">
+              Deliver to this address
+            </span></span></span>
+          </span>
+          <ul id="subtotals-marketplace-table" class="a-unordered-list a-nostyle a-vertical a-spacing-none a-size-small a-color-base" role="list">
+            <li class="a-spacing-mini"><span class="a-list-item"><div class="order-summary-grid"><div class="order-summary-line-term"><span><span class="break-word">Items:</span></span></div><div class="order-summary-line-definition"><span class="aok-nowrap a-nowrap"><span data-shimmer-target="ordertotals-amount">$8.79</span></span></div></div></span></li>
+            <li class="a-spacing-mini"><span class="a-list-item a-size-medium a-color-base a-text-bold"><div class="order-summary-grid"><div class="order-summary-line-term"><span class="break-word">Order total:</span></div><div class="order-summary-line-definition"><span data-shimmer-target="ordertotals-amount">$9.41</span></div></div></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="checkout-experience-left-column" class="a-column a-span12 a-ws-span8">
+      <div id="checkout-delivery-address-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel expanded">
+        <div class="a-cardui rcx-checkout-custom-card js-hide shrink-placeholder no-trailing-space">
+          <h2 class="a-size-medium a-spacing-none a-text-bold">Select a delivery address</h2>
+          <span class="aok-inline-block a-spacing-top-micro loading-text">Setting your shipping address...</span>
+        </div>
+        <div id="shipping-address-selection-panel-card-id" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <div class="a-row a-spacing-base"><h2 class="a-size-medium a-spacing-none a-text-bold">Select a delivery address</h2></div>
+          <div class="a-row">
+            <form id="main-continue-form" name="addressSelectForm" method="post" action="shiptodestination" class="checkout-page-form a-spacing-none">
+              <div id="shipping-address-selection-panel" class="a-section a-spacing-top-micro">
+                <fieldset>
+                  <h4 class="a-spacing-small address-default-text-color"><span id="delivery-addresses-section-header-id">Delivery addresses (3)</span></h4>
+                  <div aria-labelledby="delivery-addresses-section-header-id" class="a-row" role="radiogroup">
+                    <div class="a-row a-spacing-medium">
+                      <span class="a-declarative" data-action="select-destination-on-sasp-desktop-panel" id="select-destination-on-sasp-desktop-panel-id-ADDRHOLDER1">
+                        <div data-a-input-name="destinationSubmissionUrl" class="a-radio a-radio-fancy"><label><input type="radio" name="destinationSubmissionUrl" value="shiptodestination?addressID=ADDRHOLDER1" checked=""><i class="a-icon a-icon-radio"></i><span class="a-label a-radio-label">
+                          <div class="a-row destination-data-alignment celwidget">
+                            <span class="a-text-bold">ACCOUNT HOLDER<br></span>
+                            <span>30 N GOULD ST  24233, SHERIDAN, WY, 82801-6317, United States<br></span>
+                            <span>Phone number: 5550000000 <br></span>
+                            <span><span class="aok-inline-block"><a id="edit-address-desktop-tango-sasp-0" class="a-link-normal" href="#">Edit address</a></span> | <span class="aok-inline-block"><a class="a-link-normal" href="#">Add delivery instructions</a></span></span>
+                          </div>
+                        </span></label></div>
+                      </span>
+                    </div>
+                    <div class="a-row a-spacing-medium">
+                      <span class="a-declarative" data-action="select-destination-on-sasp-desktop-panel" id="select-destination-on-sasp-desktop-panel-id-ADDRPRIOR2">
+                        <div data-a-input-name="destinationSubmissionUrl" class="a-radio a-radio-fancy"><label><input type="radio" name="destinationSubmissionUrl" value="shiptodestination?addressID=ADDRPRIOR2"><i class="a-icon a-icon-radio"></i><span class="a-label a-radio-label">
+                          <div class="a-row destination-data-alignment celwidget">
+                            <span class="a-text-bold">Pat Prior<br></span>
+                            <span>115 ELM ST, ASHEVILLE, NC, 28801-2007, United States<br></span>
+                            <span>Phone number: +1 555-010-0001 <br></span>
+                            <span><span class="aok-inline-block"><a id="edit-address-desktop-tango-sasp-1" class="a-link-normal" href="#">Edit address</a></span></span>
+                          </div>
+                        </span></label></div>
+                      </span>
+                    </div>
+                    <div class="a-row a-spacing-medium">
+                      <span class="a-declarative" data-action="select-destination-on-sasp-desktop-panel" id="select-destination-on-sasp-desktop-panel-id-ADDRSAVED3">
+                        <div data-a-input-name="destinationSubmissionUrl" class="a-radio a-radio-fancy"><label><input type="radio" name="destinationSubmissionUrl" value="shiptodestination?addressID=ADDRSAVED3"><i class="a-icon a-icon-radio"></i><span class="a-label a-radio-label">
+                          <div class="a-row destination-data-alignment celwidget">
+                            <span class="a-text-bold">Casey Saved<br></span>
+                            <span>77 MAPLE LN APT 3B, SPRINGFIELD, IL, 62704-1234, United States<br></span>
+                            <span>Phone number: 5550000003 <br></span>
+                          </div>
+                        </span></label></div>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="a-row a-spacing-medium">
+                    <span class="a-declarative" data-action="checkout-view-modal">
+                      <a id="add-new-address-desktop-sasp-tango-link" data-csa-c-slot-id="add-new-address-non-mobile-tango-sasp" class="a-link-normal celwidget" href="#">Add a new delivery address</a>
+                    </span>
+                  </div>
+                  <h4 id="pickup-locations-section-header-id" class="a-spacing-small">Pickup locations (0)</h4>
+                </fieldset>
+              </div>
+            </form>
+          </div>
+          <div class="a-row a-spacing-base">
+            <span class="a-declarative" data-action="checkout-continue-button-click-action">
+              <span id="checkout-primary-continue-button-id" class="a-button a-button-primary continue-button primary-action-button celwidget"><span class="a-button-inner"><input data-csa-c-slot-id="checkout-primary-continue-shipaddressselect" data-csa-c-type="button" data-testid="bottom-continue-button" class="a-button-input" type="submit" aria-labelledby="checkout-primary-continue-button-id-announce"><span id="checkout-primary-continue-button-id-announce" class="a-button-text" aria-hidden="true">
+                Deliver to this address
+              </span></span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div id="checkout-payment-option-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel collapsed">
+        <div id="checkout-paymentOptionPanel" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <h2 id="payment-option-text-default" class="a-size-medium a-color-base a-text-bold"><span class="break-word">Paying with Mastercard 0000</span></h2>
+          <a data-csa-c-slot-id="checkout-change-payselect" aria-label="Change payment method" class="a-link-normal expand-panel-button" href="pay">Change</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<template id="add-address-dialog">
+<div class="a-modal-scroller"><div class="a-popover a-popover-modal a-declarative" aria-modal="true" role="dialog" id="a-popover-3">
+  <div class="a-popover-wrapper">
+    <div class="a-popover-header"><h4 class="a-popover-header-content" id="a-popover-header-3">Add an address</h4><button data-action="a-popover-close" class="a-button-close a-declarative" aria-label="Close"><i class="a-icon a-icon-close"></i></button></div>
+    <div class="a-popover-inner" id="a-popover-content-3">
+      <div id="pagelet-layout-section" class="a-section a-padding-base">
+        <div id="checkout-pagelet-container">
+          <form name="checkout-auiws-pagelet-form" id="main-continue-form" method="post" action="add-address/continue" class="checkout-page-form" autocomplete="off">
+            <div id="address-ui-widgets-enterAddressFormContainer" class="a-section celwidget">
+              <h2 class="a-spacing-none">Enter a new shipping address</h2>
+              <span class="a-dropdown-container"><select name="address-ui-widgets-countryCode" id="address-ui-widgets-countryCode-dropdown-nativeId" class="a-native-dropdown"><option value="CA">Canada</option><option value="US" selected="">United States</option></select></span>
+              <label for="address-ui-widgets-enterAddressFullName" class="a-form-label"><span class="a-size-base">Full name (First and Last name)</span></label>
+              <input type="text" maxlength="50" value="ACCOUNT HOLDER" id="address-ui-widgets-enterAddressFullName" name="address-ui-widgets-enterAddressFullName" class="a-input-text" aria-required="true">
+              <div id="address-ui-widgets-full-name-special-characters-error" class="a-box a-alert-inline a-alert-inline-error aok-hidden" role="alert"><div class="a-box-inner a-alert-container"><div class="a-alert-content"><div class="a-section">Full first and last name are required. No numbers or special characters (@, #, !).</div></div></div></div>
+              <label for="address-ui-widgets-enterAddressPhoneNumber" class="a-form-label"><span class="a-size-base">Phone number</span></label>
+              <input type="text" maxlength="20" id="address-ui-widgets-enterAddressPhoneNumber" name="address-ui-widgets-enterAddressPhoneNumber" class="a-input-text" aria-required="true">
+              <div id="address-ui-widgets-phone-number-invalid-error" class="a-box a-alert-inline a-alert-inline-error aok-hidden" role="alert"><div class="a-box-inner a-alert-container"><div class="a-alert-content"><div class="a-section">Please enter a valid mobile number</div></div></div></div>
+              <label for="address-ui-widgets-enterAddressLine1" class="a-form-label"><span class="a-size-base">Street address</span></label>
+              <input type="text" maxlength="60" id="address-ui-widgets-enterAddressLine1" placeholder="Street address or P.O. Box" name="address-ui-widgets-enterAddressLine1" class="a-input-text" aria-required="true" role="combobox">
+              <label for="address-ui-widgets-enterAddressLine2" class="a-form-label"><span class="a-size-base">Unit or suite number</span></label>
+              <input type="text" maxlength="60" id="address-ui-widgets-enterAddressLine2" name="address-ui-widgets-enterAddressLine2" class="a-input-text">
+              <label for="address-ui-widgets-enterAddressCity" class="a-form-label"><span class="a-size-base">City</span></label>
+              <input type="text" maxlength="50" id="address-ui-widgets-enterAddressCity" name="address-ui-widgets-enterAddressCity" class="a-input-text" aria-required="true">
+              <label for="address-ui-widgets-enterAddressStateOrRegion-dropdown-nativeId" class="a-form-label"><span class="a-size-base">State</span></label>
+              <span class="a-dropdown-container"><select name="address-ui-widgets-enterAddressStateOrRegion" id="address-ui-widgets-enterAddressStateOrRegion-dropdown-nativeId" class="a-native-dropdown" aria-required="true"><option class="a-prompt" value="">Select</option><option value="CA">California</option><option value="IL">Illinois</option><option value="NC">North Carolina</option><option value="OR">Oregon</option><option value="WY">Wyoming</option></select><span tabindex="-1" id="address-ui-widgets-enterAddressStateOrRegion" class="a-button a-button-dropdown" aria-hidden="true"><span class="a-button-inner"><span class="a-button-text"><span class="a-dropdown-prompt">Select</span></span></span></span></span>
+              <label for="address-ui-widgets-enterAddressPostalCode" class="a-form-label"><span class="a-size-base">ZIP Code</span></label>
+              <input type="text" maxlength="10" id="address-ui-widgets-enterAddressPostalCode" name="address-ui-widgets-enterAddressPostalCode" class="a-input-text" aria-required="true">
+              <div id="address-ui-widgets-postalcode-error" class="a-box a-alert-inline a-alert-inline-error aok-hidden" role="alert"><div class="a-box-inner a-alert-container"><div class="a-alert-content"><div class="a-section">Please enter a valid ZIP or postal code.</div></div></div></div>
+            </div>
+          </form>
+        </div>
+        <span class="a-declarative" data-action="checkout-continue-button-click-action">
+          <span id="checkout-primary-continue-button-id" class="a-button a-button-primary continue-button primary-action-button celwidget"><span class="a-button-inner"><input data-csa-c-slot-id="address-ui-widgets-continue-address-btn-bottom" data-csa-c-type="button" data-testid="bottom-continue-button" class="a-button-input" type="submit" aria-labelledby="checkout-primary-continue-button-id-announce"><span id="checkout-primary-continue-button-id-announce" class="a-button-text" aria-hidden="true">
+            Use this address
+          </span></span></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div></div>
+</template>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var reject = params.get('reject') === '1';
+  function goToSpc(addr) {
+    location.href = 'spc?addr=' + encodeURIComponent(addr) + (reject ? '&reject=1' : '');
+  }
+  document.querySelectorAll('[data-csa-c-slot-id$="continue-shipaddressselect"]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var checked = document.querySelector('input[name="destinationSubmissionUrl"]:checked');
+      var block = checked && checked.closest('[id^="select-destination-on-sasp-desktop-panel-id-"]');
+      var lines = block ? block.querySelectorAll('.destination-data-alignment > span') : [];
+      goToSpc(lines.length ? lines[0].textContent.trim() + '|' + lines[1].textContent.trim() : 'NONE|');
+    });
+  });
+  document.getElementById('add-new-address-desktop-sasp-tango-link').addEventListener('click', function (e) {
+    e.preventDefault();
+    var tpl = document.getElementById('add-address-dialog');
+    document.body.appendChild(tpl.content.cloneNode(true));
+    var pageEl = document.getElementById('a-page');
+    pageEl.setAttribute('inert', '');
+    pageEl.setAttribute('aria-hidden', 'true');
+    var dialog = document.getElementById('a-popover-3');
+    dialog.querySelector('[data-csa-c-slot-id="address-ui-widgets-continue-address-btn-bottom"]').addEventListener('click', function (ev) {
+      ev.preventDefault();
+      function val(id) { return (dialog.querySelector('#' + id).value || '').trim(); }
+      var name = val('address-ui-widgets-enterAddressFullName');
+      var required = [name, val('address-ui-widgets-enterAddressPhoneNumber'), val('address-ui-widgets-enterAddressLine1'),
+        val('address-ui-widgets-enterAddressCity'), val('address-ui-widgets-enterAddressStateOrRegion-dropdown-nativeId'),
+        val('address-ui-widgets-enterAddressPostalCode')];
+      if (reject || required.some(function (v) { return !v; })) {
+        dialog.querySelector('#address-ui-widgets-full-name-special-characters-error').classList.remove('aok-hidden');
+        return;
+      }
+      window.__submittedAddress = {
+        name: name,
+        phone: val('address-ui-widgets-enterAddressPhoneNumber'),
+        line1: val('address-ui-widgets-enterAddressLine1'),
+        line2: val('address-ui-widgets-enterAddressLine2'),
+        city: val('address-ui-widgets-enterAddressCity'),
+        state: val('address-ui-widgets-enterAddressStateOrRegion-dropdown-nativeId'),
+        zip: val('address-ui-widgets-enterAddressPostalCode')
+      };
+      var s = window.__submittedAddress;
+      goToSpc(s.name + '|' + [s.line1 + (s.line2 ? ' ' + s.line2 : ''), s.city, s.state, s.zip, 'United States'].join(', '));
+    });
+  });
+})();
+</script>
+</body>
+</html>

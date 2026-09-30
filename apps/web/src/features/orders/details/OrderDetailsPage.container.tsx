@@ -9,7 +9,7 @@ import { orderStageHasAction } from '../shared/order-stage';
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
-import { useConvertOrderTrackingMutation } from '@/features/amazon/api/amazon.api';
+import { useConvertOrderTrackingMutation, useStartAutoFulfillMutation } from '@/features/amazon/api/amazon.api';
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
@@ -35,6 +35,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
 
   const [, { isLoading: isUpdating }] = useUpdateOrderAmazonDetailsMutation();
   const [convertTracking, { isLoading: isConvertingTracking }] = useConvertOrderTrackingMutation();
+  const [startAutoFulfill, { isLoading: isStartingAutoFulfill }] = useStartAutoFulfillMutation();
 
   useLoading(isUpdating);
 
@@ -202,6 +203,63 @@ export const OrderDetailsPageContainer: React.FC = () => {
       });
   }, [id, convertTracking, showMessage, closeMessage, t, refetch]);
 
+  /*
+   * "Start automatic order": re-arms a purchase that stopped before anything
+   * was bought (card declined at the payment step, address, stock, captcha…).
+   * Offered only while the server says so (`canStartAutoFulfill`, computed by
+   * the same rule the endpoint enforces). It spends real money, so it asks
+   * first; the answer says whether the chosen account is in test mode.
+   */
+  const canStartAutoFulfill = Boolean(order?.canStartAutoFulfill);
+
+  const runStartAutoFulfill = useCallback(() => {
+    if (!id) {
+      return;
+    }
+    closeMessage();
+    startAutoFulfill({ orderId: id })
+      .unwrap()
+      .then((result) => {
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: result.dryRun
+              ? 'orders:orders.autoFulfill.start.queuedDryRun'
+              : 'orders:orders.autoFulfill.start.queued',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t
+        );
+        void refetch();
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t
+        );
+        void refetch();
+      });
+  }, [id, startAutoFulfill, showMessage, closeMessage, t, refetch]);
+
+  const handleStartAutoFulfill = useCallback(() => {
+    showMessage(
+      {
+        type: 'warning',
+        headerKey: 'orders:orders.autoFulfill.start.confirmTitle',
+        descriptionKey: 'orders:orders.autoFulfill.start.confirmDescription',
+        primaryButton: { labelKey: 'orders:orders.autoFulfill.start.confirm', onClick: runStartAutoFulfill },
+        secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
+      },
+      t
+    );
+  }, [showMessage, closeMessage, runStartAutoFulfill, t]);
+
   const handleBack = () => {
     localeNavigate('/orders');
   };
@@ -235,6 +293,9 @@ export const OrderDetailsPageContainer: React.FC = () => {
         canConvertTracking={canConvertTracking}
         isConvertingTracking={isConvertingTracking}
         onConvertTracking={handleConvertTracking}
+        canStartAutoFulfill={canStartAutoFulfill}
+        isStartingAutoFulfill={isStartingAutoFulfill}
+        onStartAutoFulfill={handleStartAutoFulfill}
       />
       {id && (
         <LinkAmazonModal

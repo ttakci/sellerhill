@@ -142,6 +142,14 @@
       "filter": {
         "all": "Todo o atendimento automático",
         "needsAttention": "Requer atenção"
+      },
+      "start": {
+        "button": "Iniciar pedido automático",
+        "confirmTitle": "Comprar este pedido na Amazon agora?",
+        "confirmDescription": "A SellerHill fará um pedido real na Amazon para esta venda com sua conta Amazon de pedidos automáticos, com entrega ao comprador do eBay. Seu limite de gastos continua valendo e a compra para se o total passar dele. Só continue se você ainda não comprou o item por conta própria.",
+        "confirm": "Iniciar compra",
+        "queued": "A compra começou. O status do pedido é atualizado em alguns minutos.",
+        "queuedDryRun": "Um teste começou. Esta conta Amazon está em modo de teste, então nada será comprado."
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "Rastreio convertido.",
       "orderNotTracked": "Este pedido não está vinculado a nenhum dos seus anúncios, então um código de rastreio convertido nunca poderia ser enviado ao eBay. Vincule primeiro o pedido ao seu anúncio.",
       "trackingAlreadyPushed": "O eBay já tem o código de rastreio original deste pedido e ele não pode ser substituído, então converter agora não mudaria o que o comprador vê.",
-      "listingOverPlanLimit": "O anúncio deste pedido estava fora do limite de anúncios do seu plano quando o pedido chegou. Pedidos de anúncios fora do limite não têm rastreamento de envio nem conversão de rastreio."
+      "listingOverPlanLimit": "O anúncio deste pedido estava fora do limite de anúncios do seu plano quando o pedido chegou. Pedidos de anúncios fora do limite não têm rastreamento de envio nem conversão de rastreio.",
+      "autoFulfillNotRestartable": "A compra automática deste pedido não pode ser iniciada de novo. Ele pode já ter sido comprado ou estar em andamento, ou uma segunda compra poderia ser feita. Confira seus pedidos na Amazon e vincule o pedido manualmente.",
+      "autoFulfillNoAccount": "Nenhuma conta Amazon está pronta para pedidos automáticos. Em Configurações, ative os pedidos automáticos em uma conta Amazon e defina um limite de gastos.",
+      "autoFulfillOverCap": "Esta venda passa do limite de gastos da sua conta Amazon. Aumente o limite nas configurações da conta Amazon ou compre o item manualmente.",
+      "autoFulfillAlreadyStarted": "O status deste pedido acabou de mudar, então a compra pode já ter começado. Atualize a página.",
+      "autoFulfillQuotaExhausted": "O limite de pedidos automáticos do seu plano neste período foi atingido."
     },
     "stage": {
       "amazon_cancelled": {
