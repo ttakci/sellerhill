@@ -104,6 +104,20 @@
         "description_other": "{{count}} de comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu au fost marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. Remediați cauza și comenzile se expediază automat — până atunci există riscul unor defecte de expediere întârziată.",
         "action": "Vezi comenzile"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay a anulat o vânzare pe care ați cumpărat-o deja de pe Amazon",
+        "description_one": "{{count}} comandă a fost anulată pe eBay în ultimele {{days}} zile, dar comanda Amazon plasată pentru ea este încă deschisă. Nimeni nu mai așteaptă acest produs — anulați comanda Amazon sau returnați produsul dacă a fost expediat.",
+        "description_few": "{{count}} comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse — anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
+        "description_other": "{{count}} de comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse — anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
+        "action": "Verifică comenzile"
+      },
+      "return_seller_action_due": {
+        "title": "Retururi care așteaptă răspunsul dvs.",
+        "description_one": "{{count}} retur are un pas pe care eBay îl așteaptă de la dvs. Răspundeți pe eBay înainte de termenul afișat pe pagina Retururi.",
+        "description_few": "{{count}} retururi au un pas pe care eBay îl așteaptă de la dvs. Răspundeți pe eBay înainte de termenele afișate pe pagina Retururi.",
+        "description_other": "{{count}} de retururi au un pas pe care eBay îl așteaptă de la dvs. Răspundeți pe eBay înainte de termenele afișate pe pagina Retururi.",
+        "action": "Vezi retururile"
+      },
       "ebay_account_disconnected": {
         "title": "Un magazin eBay și-a pierdut conexiunea",
         "description_one": "{{count}} magazin nu mai este autorizat. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru el până la reconectare.",

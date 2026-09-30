@@ -21,12 +21,16 @@ export interface OrderStageInput {
 
 /** Priority order — the first rule that matches wins. */
 export function deriveOrderStage(input: OrderStageInput): OrderStage {
+  // A cancelled eBay sale first: there is no buyer left to serve, so neither
+  // an Amazon cancellation ("buy it again") nor a blocked purchase is an
+  // action any more. An Amazon order still open for it is the Action Center's
+  // ORDER_CANCELLED_AMAZON_OPEN.
+  if (input.status === OrderStatus.CANCELLED) {
+    return OrderStage.CANCELLED;
+  }
   const settled = input.status === OrderStatus.COMPLETED;
   if (input.amazonCancelledAt && !settled) {
     return OrderStage.AMAZON_CANCELLED;
-  }
-  if (input.status === OrderStatus.CANCELLED) {
-    return OrderStage.CANCELLED;
   }
   if (settled) {
     return OrderStage.DELIVERED;

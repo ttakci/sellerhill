@@ -133,7 +133,8 @@
         "subscription_suspended": "Abonnement ausgesetzt",
         "listing_over_plan_limit": "Angebot außerhalb des Tariflimits",
         "order_already_fulfilled": "Bereits versendet – nichts zu kaufen",
-        "order_not_paid": "Wartet auf Zahlung des Käufers"
+        "order_not_paid": "Wartet auf Zahlung des Käufers",
+        "order_cancelled": "Bei eBay storniert — nichts zu kaufen"
       },
       "reasonLabel": "Grund: {{reason}}",
       "amazonCancelledBadge": "Von Amazon storniert",
@@ -217,7 +218,13 @@
       "unit": "Stück",
       "sku": "SKU",
       "na": "k. A.",
-      "ebayStatus": "eBay-Status"
+      "ebayStatus": "eBay-Status",
+      "ebayCancelledOn": "Bei eBay storniert am",
+      "refundGroup": "An den Käufer erstattet",
+      "refundedAmount": "Erstattungsbetrag",
+      "refundedOn": "Erstattungsdatum",
+      "refundNote": "Der von eBay gemeldete Erstattungsbetrag. Von eBay eingezogene Umsatzsteuer ist nicht enthalten, der Käufer kann also mehr erhalten haben.",
+      "cancelledAmazonOpenAction": "Für diesen Verkauf wurde bereits eine Amazon-Bestellung aufgegeben. Stornieren Sie sie bei Amazon oder senden Sie den Artikel zurück, falls er schon versandt wurde."
     },
     "modal": {
       "title": "Amazon-Bestelldaten eingeben",

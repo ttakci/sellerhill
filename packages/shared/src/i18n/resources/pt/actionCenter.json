@@ -104,6 +104,20 @@
         "description_other": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não foram marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Resolva a causa e eles são enviados automaticamente — até lá, há risco de defeitos por envio atrasado.",
         "action": "Ver pedidos"
       },
+      "order_cancelled_amazon_open": {
+        "title": "O eBay cancelou uma venda que você já comprou na Amazon",
+        "description_one": "{{count}} pedido foi cancelado no eBay nos últimos {{days}} dias, mas o pedido da Amazon feito para ele continua aberto. Ninguém mais espera esse item — cancele o pedido da Amazon ou devolva o item se já tiver sido enviado.",
+        "description_many": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens — cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
+        "description_other": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens — cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
+        "action": "Revisar pedidos"
+      },
+      "return_seller_action_due": {
+        "title": "Devoluções aguardando sua resposta",
+        "description_one": "{{count}} devolução tem uma etapa que o eBay espera de você. Responda no eBay antes do prazo mostrado na página Devoluções.",
+        "description_many": "{{count}} devoluções têm uma etapa que o eBay espera de você. Responda no eBay antes dos prazos mostrados na página Devoluções.",
+        "description_other": "{{count}} devoluções têm uma etapa que o eBay espera de você. Responda no eBay antes dos prazos mostrados na página Devoluções.",
+        "action": "Ver devoluções"
+      },
       "ebay_account_disconnected": {
         "title": "Uma loja eBay perdeu a conexão",
         "description_one": "{{count}} loja não está mais autorizada. A sincronização de pedidos, o reajuste de preços e a publicação estão parados para ela até você reconectar.",

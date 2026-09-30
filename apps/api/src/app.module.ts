@@ -22,6 +22,7 @@ import { BuyerMessagingModule } from './modules/buyer-messaging/buyer-messaging.
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
 import { EbayMessagesModule } from './modules/ebay-messages/ebay-messages.module';
+import { EbayReturnsModule } from './modules/ebay-returns/ebay-returns.module';
 import { ListingSettingsGroupModule } from './modules/listing-settings-groups/listing-settings-group.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { LlmModule } from './modules/llm/llm.module';
@@ -75,6 +76,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     AuthModule,
     EbayModule,
     EbayMessagesModule,
+    EbayReturnsModule,
     DashboardModule,
     ActionCenterModule,
     BestSellersModule,

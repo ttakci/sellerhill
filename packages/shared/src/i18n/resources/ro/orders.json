@@ -133,7 +133,8 @@
         "subscription_suspended": "Abonament suspendat",
         "listing_over_plan_limit": "Anunț în afara limitei planului",
         "order_already_fulfilled": "Deja expediată — nu este nimic de cumpărat",
-        "order_not_paid": "Se așteaptă plata cumpărătorului"
+        "order_not_paid": "Se așteaptă plata cumpărătorului",
+        "order_cancelled": "Anulată pe eBay — nimic de cumpărat"
       },
       "reasonLabel": "Motiv: {{reason}}",
       "amazonCancelledBadge": "Anulată de Amazon",
@@ -217,7 +218,13 @@
       "unit": "unitate",
       "sku": "SKU",
       "na": "N/A",
-      "ebayStatus": "Stare eBay"
+      "ebayStatus": "Stare eBay",
+      "ebayCancelledOn": "Anulată pe eBay la",
+      "refundGroup": "Rambursat cumpărătorului",
+      "refundedAmount": "Suma rambursată",
+      "refundedOn": "Data rambursării",
+      "refundNote": "Este suma rambursării raportată de eBay. Nu include taxa pe vânzări colectată de eBay, deci cumpărătorul poate să fi primit mai mult.",
+      "cancelledAmazonOpenAction": "Pentru această vânzare fusese deja plasată o comandă pe Amazon. Anulați-o pe Amazon sau returnați produsul dacă a fost deja expediat."
     },
     "modal": {
       "title": "Introduceți informațiile comenzii Amazon",

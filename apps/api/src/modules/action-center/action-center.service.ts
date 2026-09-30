@@ -53,14 +53,19 @@ import {
   ListingStatus,
   OrderStage,
   OrderStatus,
+  ReturnBucket,
+  ReturnTab,
+  SIMULATED_AMAZON_ORDER_PREFIX,
   SourceUnavailableReason,
   buildOrderStageSql,
+  buildReturnBucketSql,
   type ActionCenterItemDto,
   type ActionCenterSummaryDto,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { BillingService } from '../billing/billing.service';
+import { RETURN_SEARCH_WINDOW_DAYS } from '../ebay-returns/ebay-returns.constants';
 
 import {
   TRIAL_ENDING_NOTICE_DAYS,
@@ -100,6 +105,17 @@ const JOB_FAILURE_WINDOW_DAYS = 7;
  * listings qualify.
  */
 const SOURCE_UNAVAILABLE_FAILURE_THRESHOLD = LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD;
+
+/**
+ * How long a cancelled eBay sale with an Amazon order still open stays listed.
+ *
+ * The platform stops polling Amazon once the eBay sale is cancelled, so it can
+ * not observe the seller cancelling (or returning) the Amazon order — nothing
+ * would ever clear this item. A window measured from the cancellation makes it
+ * self-clearing, the same way ORDER_AWAITING_PURCHASE's grace is: a week is
+ * longer than Amazon takes to ship, after which there is nothing left to cancel.
+ */
+const CANCELLED_AMAZON_OPEN_WINDOW_DAYS = 7;
 
 /** node-pg returns COUNT() as a string; every probe funnels through this. */
 function toCount(value: unknown): number {
@@ -145,6 +161,7 @@ export class ActionCenterService {
   async getSummary(userId: string): Promise<ActionCenterSummaryDto> {
     const probes = await Promise.all([
       this.probe('orders', () => this.orderItems(userId)),
+      this.probe('returns', () => this.returnItems(userId)),
       this.probe('connections', () => this.connectionItems(userId)),
       this.probe('listings', () => this.listingItems(userId)),
       this.probe('plan', () => this.planItems(userId)),
@@ -381,7 +398,100 @@ export class ActionCenterService {
       actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
     });
 
+    /*
+     * eBay cancelled the sale, and an Amazon order placed for it is still open.
+     * The buyer has been refunded; the supplier is about to ship (or has
+     * shipped) an item nobody is paying for. Order sync learns of the
+     * cancellation on its own — this is what tells the seller to cancel the
+     * Amazon side by hand, which the platform never does.
+     *
+     * Counted inside the CANCELLED stage so the rows are in the linked list;
+     * the narrowing to "real Amazon order, not reported cancelled, recent" is
+     * deliberate (see the window constant) and self-clearing.
+     */
+    const cancelledOpen = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM orders o
+        WHERE o.user_id = $1
+          AND ${stage} = $2
+          AND o.amazon_order_id IS NOT NULL
+          AND o.amazon_order_id NOT LIKE $3
+          AND o.amazon_cancelled_at IS NULL
+          AND COALESCE(o.ebay_cancelled_at, o.updated_at) >= NOW() - ($4 || ' days')::INTERVAL`,
+      [
+        userId,
+        OrderStage.CANCELLED,
+        `${SIMULATED_AMAZON_ORDER_PREFIX}%`,
+        String(CANCELLED_AMAZON_OPEN_WINDOW_DAYS),
+      ]
+    );
+    items.push({
+      key: ActionCenterItemKey.ORDER_CANCELLED_AMAZON_OPEN,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.WARNING,
+      count: toCount(cancelledOpen[0]?.count),
+      context: { days: CANCELLED_AMAZON_OPEN_WINDOW_DAYS },
+      actionPath: `/orders?stage=${OrderStage.CANCELLED}`,
+    });
+
     return items;
+  }
+
+  // --------------------------------------------------------------- returns
+
+  /**
+   * Returns where eBay reports a next action the seller is responsible for
+   * (`sellerResponseDue`). Its own probe: the rows come from the return sweep,
+   * and a problem there must not cost the order items.
+   *
+   * Counted through `buildReturnBucketSql` — the expression the Returns page
+   * filters its "Needs action" tab on — so the count and the list agree.
+   * CRITICAL once any deadline has passed: eBay documents the respond-by date
+   * as the seller's due date, and past it the case is out of the seller's hands.
+   *
+   * One deliberate narrowing: only returns created inside the window the sweep
+   * can still ask eBay about (`RETURN_SEARCH_WINDOW_DAYS`). An older return is
+   * no longer in any search response, so its row keeps whatever it last said —
+   * counting it would raise an item that can never clear.
+   */
+  private async returnItems(userId: string): Promise<ActionCenterItemDto[]> {
+    const bucket = buildReturnBucketSql('r');
+    const rows = await this.db.query<BreakdownRow>(
+      `SELECT ${bucket} AS code, COUNT(*) AS count
+         FROM ebay_returns r
+         JOIN ebay_accounts a ON a.id = r.ebay_account_id
+        WHERE r.user_id = $1
+          AND a.status = $2
+          AND ${bucket} IN ($3, $4)
+          AND COALESCE(r.created_on_ebay_at, r.first_seen_at) >= NOW() - ($5 || ' days')::INTERVAL
+        GROUP BY 1`,
+      [
+        userId,
+        EbayAccountStatus.ACTIVE,
+        ReturnBucket.ACTION_OVERDUE,
+        ReturnBucket.ACTION_DUE,
+        String(RETURN_SEARCH_WINDOW_DAYS),
+      ]
+    );
+    let total = 0;
+    let overdue = 0;
+    for (const row of rows) {
+      const count = toCount(row.count);
+      total += count;
+      if (row.code === (ReturnBucket.ACTION_OVERDUE as string)) {
+        overdue += count;
+      }
+    }
+    return [
+      {
+        key: ActionCenterItemKey.RETURN_SELLER_ACTION_DUE,
+        group: ActionCenterGroup.ORDERS,
+        severity: overdue > 0 ? ActionCenterSeverity.CRITICAL : ActionCenterSeverity.WARNING,
+        count: total,
+        context: { overdue },
+        actionPath: `/returns?tab=${ReturnTab.ACTION}`,
+      },
+    ];
   }
 
   // ----------------------------------------------------------- connections

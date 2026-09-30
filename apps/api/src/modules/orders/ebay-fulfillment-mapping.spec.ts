@@ -1,4 +1,5 @@
 import type { ConfigService } from '@nestjs/config';
+import { OrderStatus } from '@repo/shared';
 
 import type { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
@@ -84,5 +85,54 @@ describe('EbayFulfillmentService.mapEbayOrderToEntity', () => {
 
   it('never touches ebayEarnings, which already excludes the tax', () => {
     expect(map(collectAndRemitOrder).ebayEarnings).toBe(9.63);
+  });
+
+  // Shapes observed on real production orders (2026-09-30).
+  it('maps a cancelled order to CANCELLED whatever its fulfilment status says', () => {
+    const entity = map({
+      ...collectAndRemitOrder,
+      orderFulfillmentStatus: 'NOT_STARTED',
+      orderPaymentStatus: 'FULLY_REFUNDED',
+      cancelStatus: { cancelState: 'CANCELED', cancelledDate: '2026-09-20T10:00:00.000Z', cancelRequests: [] },
+      paymentSummary: {
+        totalDueSeller: money('0.00'),
+        refunds: [{ amount: money('9.63'), refundDate: '2026-09-20T10:00:05.000Z', refundStatus: 'REFUNDED' }],
+      },
+    });
+    expect(entity.status).toBe(OrderStatus.CANCELLED);
+    expect(entity.ebayCancelState).toBe('CANCELED');
+    expect(entity.ebayCancelledAt?.toISOString()).toBe('2026-09-20T10:00:00.000Z');
+    expect(entity.ebayRefundedAmount).toBe(9.63);
+    expect(entity.ebayRefundedAt?.toISOString()).toBe('2026-09-20T10:00:05.000Z');
+  });
+
+  it('keeps an ordinary paid order out of CANCELLED and reports no refund', () => {
+    const entity = map({
+      ...collectAndRemitOrder,
+      orderFulfillmentStatus: 'NOT_STARTED',
+      orderPaymentStatus: 'PAID',
+      cancelStatus: { cancelState: 'NONE_REQUESTED', cancelRequests: [] },
+      paymentSummary: { totalDueSeller: money('9.63'), refunds: [] },
+    });
+    expect(entity.status).toBe(OrderStatus.WAITING_SHIPMENT);
+    expect(entity.ebayCancelState).toBe('NONE_REQUESTED');
+    expect(entity.ebayCancelledAt).toBeNull();
+    expect(entity.ebayRefundedAmount).toBeNull();
+    expect(entity.ebayRefundedAt).toBeNull();
+  });
+
+  it('a refund without a cancellation does not cancel the order', () => {
+    const entity = map({
+      ...collectAndRemitOrder,
+      orderFulfillmentStatus: 'FULFILLED',
+      orderPaymentStatus: 'FULLY_REFUNDED',
+      cancelStatus: { cancelState: 'NONE_REQUESTED', cancelRequests: [] },
+      paymentSummary: {
+        totalDueSeller: money('0.00'),
+        refunds: [{ amount: money('9.63'), refundDate: '2026-09-25T08:00:00.000Z', refundStatus: 'REFUNDED' }],
+      },
+    });
+    expect(entity.status).not.toBe(OrderStatus.CANCELLED);
+    expect(entity.ebayRefundedAmount).toBe(9.63);
   });
 });

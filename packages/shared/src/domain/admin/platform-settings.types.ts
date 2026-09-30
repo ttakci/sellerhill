@@ -125,6 +125,19 @@ export enum PlatformSettingKey {
   /** Stores per tick — the pacing that keeps the unpublished task limits safe. */
   EBAY_FEED_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.feedSync.maxAccountsPerRun',
 
+  // --- Periodic return sweep (eBay Post-Order API) ---
+  /** Master switch for reading each store's returns from eBay. */
+  EBAY_RETURN_SYNC_ENABLED = 'ebay.returnSync.enabled',
+  EBAY_RETURN_SYNC_CRON = 'ebay.returnSync.cron',
+  /**
+   * Hours before a store's returns are read again. One call per store per
+   * sweep against a 5,000/day application-wide ceiling, so this is the knob
+   * that spends that quota.
+   */
+  EBAY_RETURN_SYNC_INTERVAL_HOURS = 'ebay.returnSync.intervalHours',
+  /** Stores per tick. */
+  EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.returnSync.maxAccountsPerRun',
+
   // --- Amazon order sync / tracking ---
   /**
    * How often each Amazon buyer account's order list is scraped for cost

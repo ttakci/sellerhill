@@ -135,6 +135,7 @@ export class AdminController {
     @InjectQueue('billing-subscription-reconcile') private readonly billingReconcileQueue: Queue,
     @InjectQueue('billing-price-migration') private readonly billingPriceMigrationQueue: Queue,
     @InjectQueue('ebay-rate-limit-refresh') private readonly ebayRateLimitRefreshQueue: Queue,
+    @InjectQueue('ebay-returns-sync') private readonly ebayReturnsSyncQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -154,6 +155,7 @@ export class AdminController {
       { name: 'billing-subscription-reconcile', queue: this.billingReconcileQueue },
       { name: 'billing-price-migration', queue: this.billingPriceMigrationQueue },
       { name: 'ebay-rate-limit-refresh', queue: this.ebayRateLimitRefreshQueue },
+      { name: 'ebay-returns-sync', queue: this.ebayReturnsSyncQueue },
     ];
   }
 

@@ -168,6 +168,13 @@ export enum AutoFulfillBlockedReason {
    * releases them once payment settles, so the skip is not permanent.
    */
   ORDER_NOT_PAID = 'order_not_paid',
+  /**
+   * eBay cancelled the sale (`cancelStatus.cancelledDate`) before anything was
+   * bought. Written with status SKIPPED: there is no buyer left to serve, so
+   * nothing is purchased and nothing needs the seller. Checked at enqueue AND at
+   * execution, because a cancellation can land while the job waits in the queue.
+   */
+  ORDER_CANCELLED = 'order_cancelled',
 }
 
 /**
@@ -314,6 +321,19 @@ export interface OrderDto {
    * note), not that no tax was charged.
    */
   ebayCollectRemitTax?: number | null;
+  /**
+   * When eBay cancelled the order (`cancelStatus.cancelledDate`), or null. Set by
+   * the order re-sync; a cancelled order also carries `status = cancelled`.
+   */
+  ebayCancelledAt?: string | null;
+  /**
+   * Sum of `paymentSummary.refunds[].amount` — what eBay reports was refunded to
+   * the buyer, as "the seller's net amount" (eBay-collected tax is not in it).
+   * NULL = eBay reported no refund.
+   */
+  ebayRefundedAmount?: number | null;
+  /** The latest `refunds[].refundDate`, or null. */
+  ebayRefundedAt?: string | null;
 
   // Shipping
   // Buyer ship-to address. `fullName`/`street2`/`phone` are optional because

@@ -104,6 +104,20 @@
         "description_other": "{{count}} commandes ont été expédiées sur Amazon il y a plus de {{hours}} heures mais n'ont pas été marquées comme expédiées sur eBay, car leurs numéros de suivi n'ont pas pu être convertis. Nous n'envoyons jamais les numéros de suivi Amazon d'origine à vos acheteurs. Résolvez la cause et elles seront expédiées automatiquement — d'ici là, elles risquent des défauts d'expédition tardive.",
         "action": "Voir les commandes"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay a annulé une vente déjà achetée sur Amazon",
+        "description_one": "{{count}} commande a été annulée sur eBay au cours des {{days}} derniers jours, mais la commande Amazon passée pour elle est toujours ouverte. Plus personne n'attend cet article — annulez la commande Amazon, ou retournez l'article s'il a été expédié.",
+        "description_many": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles — annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
+        "description_other": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles — annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
+        "action": "Examiner les commandes"
+      },
+      "return_seller_action_due": {
+        "title": "Retours en attente de votre réponse",
+        "description_one": "{{count}} retour comporte une étape qu'eBay attend de vous. Répondez sur eBay avant la date limite indiquée sur la page Retours.",
+        "description_many": "{{count}} retours comportent une étape qu'eBay attend de vous. Répondez sur eBay avant les dates limites indiquées sur la page Retours.",
+        "description_other": "{{count}} retours comportent une étape qu'eBay attend de vous. Répondez sur eBay avant les dates limites indiquées sur la page Retours.",
+        "action": "Voir les retours"
+      },
       "ebay_account_disconnected": {
         "title": "Une boutique eBay a perdu sa connexion",
         "description_one": "{{count}} boutique n'est plus autorisée. La synchronisation des commandes, le repricing et la publication sont arrêtés pour elle jusqu'à la reconnexion.",

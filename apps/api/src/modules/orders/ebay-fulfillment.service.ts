@@ -17,6 +17,7 @@ import axios from 'axios';
 
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
+import { readCancellation, readRefunds, type EbayCancelStatus, type EbayOrderRefund } from './ebay-order-changes';
 import { parseEbayAmount, sumCollectAndRemitTax } from './ebay-order-financials';
 
 /**
@@ -72,7 +73,11 @@ interface EbayFulfillmentOrder {
       paymentMethod?: string;
       amount?: { value: string; currency: string };
     }>;
+    /** "always returned, but … an empty array unless the seller has submitted a partial or full refund". */
+    refunds?: EbayOrderRefund[];
   };
+  /** "always returned"; `cancelState` is NONE_REQUESTED when nobody asked to cancel. */
+  cancelStatus?: EbayCancelStatus;
   /**
    * Where eBay's Fulfillment API really puts the ship-to address:
    * `fulfillmentStartInstructions[].shippingStep.shipTo`. There is no
@@ -102,10 +107,12 @@ interface EbayShipTo {
   };
 }
 
+/** eBay's documented page ceiling for getOrders ("If a requested limit is more than 200, the call fails"). */
+export const EBAY_GET_ORDERS_MAX_LIMIT = 200;
+
 interface FetchOrdersResult {
   orders: EbayFulfillmentOrder[];
-  nextCursor?: string;
-  total?: number;
+  total: number;
 }
 
 @Injectable()
@@ -131,10 +138,11 @@ export class EbayFulfillmentService {
     accessToken: string,
     marketplaceId: EbayMarketplaceId,
     options: {
-      fromDateString?: string;
-      toDateString?: string;
+      /** Orders MODIFIED at or after this instant (ISO 8601 UTC). */
+      modifiedFrom?: string;
       limit?: number;
-      cursor?: string;
+      /** Zero-based number of orders to skip — eBay's documented paging. */
+      offset?: number;
     } = {}
   ): Promise<FetchOrdersResult> {
     await this.ebayCallBudget.acquire(EbayApiResource.FULFILLMENT, EbayCallPriority.BACKGROUND);
@@ -143,18 +151,17 @@ export class EbayFulfillmentService {
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
 
     const params: Record<string, string> = {
-      limit: String(options.limit || 50),
+      limit: String(Math.min(options.limit || 50, EBAY_GET_ORDERS_MAX_LIMIT)),
+      offset: String(Math.max(options.offset ?? 0, 0)),
     };
 
-    if (options.fromDateString) {
-      params.filter = `creationdate:[${options.fromDateString}..]`;
-      if (options.toDateString) {
-        params.filter = `creationdate:[${options.fromDateString}..${options.toDateString}]`;
-      }
-    }
-
-    if (options.cursor) {
-      params.continuation_token = options.cursor;
+    // `lastmodifieddate`, and ONLY it: eBay documents that "if creationdate and
+    // lastmodifieddate are both included, only creationdate is used", and a
+    // creation-date window is what made an order invisible after its first
+    // fetch — a later cancellation, refund or shipment was never seen. An order
+    // is modified at creation too, so new orders are still in this window.
+    if (options.modifiedFrom) {
+      params.filter = `lastmodifieddate:[${options.modifiedFrom}..]`;
     }
 
     const url = `${baseUrl}/sell/fulfillment/v1/order`;
@@ -179,10 +186,9 @@ export class EbayFulfillmentService {
 
       const data = response.data;
       const orders = data?.orders || [];
-      const nextCursor = data?.next ?? undefined;
       const total = data?.total ?? orders.length;
 
-      return { orders, nextCursor, total };
+      return { orders, total };
     } catch (error: unknown) {
       const axiosErr = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { errors?: Array<{ message?: string }> } }; message?: string })
@@ -254,6 +260,8 @@ export class EbayFulfillmentService {
       ebayOrder.shippingDetail?.shipToAddress;
     const address = shipTo?.contactAddress;
     const totalDueSeller = ebayOrder.paymentSummary?.totalDueSeller;
+    const cancellation = readCancellation(ebayOrder.cancelStatus);
+    const refunds = readRefunds(ebayOrder.paymentSummary?.refunds);
 
     // CONFIRMED live 2026-09-20 (verified against real orders + eBay's own
     // Seller Hub screen): `pricingSummary.tax` reads 0 for every Collect &
@@ -280,7 +288,15 @@ export class EbayFulfillmentService {
       buyerName: buyer?.buyerRegistrationAddress?.fullName || shipTo?.fullName,
       buyerEmail: buyer?.buyerRegistrationAddress?.email,
       buyerPhone: buyer?.buyerRegistrationAddress?.phone,
-      status: this.mapOrderStatus(ebayOrder.orderFulfillmentStatus, ebayOrder.orderPaymentStatus),
+      // A cancelled sale is cancelled whatever its fulfilment status says: eBay
+      // keeps reporting NOT_STARTED / FULFILLED on a cancelled order.
+      status: cancellation.isCancelled
+        ? OrderStatus.CANCELLED
+        : this.mapOrderStatus(ebayOrder.orderFulfillmentStatus, ebayOrder.orderPaymentStatus),
+      ebayCancelState: cancellation.cancelState,
+      ebayCancelledAt: cancellation.cancelledAt,
+      ebayRefundedAmount: refunds.refundedAmount,
+      ebayRefundedAt: refunds.refundedAt,
       orderFulfillmentStatus: ebayOrder.orderFulfillmentStatus,
       paymentStatus: ebayOrder.orderPaymentStatus,
       listingId: listingId || null,

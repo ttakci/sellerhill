@@ -97,6 +97,18 @@
         "description_other": "{{count}} orders shipped on Amazon over {{hours}} hours ago but have not been marked shipped on eBay, because their tracking numbers could not be converted. We never send original Amazon tracking numbers to your buyers. Resolve the cause and they ship automatically — until then they risk late shipment defects.",
         "action": "View orders"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay cancelled a sale you already bought on Amazon",
+        "description_one": "{{count}} order was cancelled on eBay in the last {{days}} days, but the Amazon order placed for it is still open. Nobody is waiting for that item any more — cancel the Amazon order, or return the item if it has shipped.",
+        "description_other": "{{count}} orders were cancelled on eBay in the last {{days}} days, but the Amazon orders placed for them are still open. Nobody is waiting for those items any more — cancel the Amazon orders, or return the items if they have shipped.",
+        "action": "Review orders"
+      },
+      "return_seller_action_due": {
+        "title": "Returns waiting for your response",
+        "description_one": "{{count}} return has a next step that eBay expects from you. Respond on eBay before the deadline shown on the Returns page.",
+        "description_other": "{{count}} returns have a next step that eBay expects from you. Respond on eBay before the deadlines shown on the Returns page.",
+        "action": "View returns"
+      },
       "ebay_account_disconnected": {
         "title": "An eBay store lost its connection",
         "description_one": "{{count}} store is no longer authorized. Order sync, repricing and publishing are stopped for it until you reconnect.",

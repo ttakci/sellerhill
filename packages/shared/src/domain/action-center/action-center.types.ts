@@ -123,6 +123,18 @@ export enum ActionCenterItemKey {
    * session) rather than learn about it from a case.
    */
   ORDER_TRACKING_CONVERSION_HELD = 'order_tracking_conversion_held',
+  /**
+   * eBay cancelled the sale, but an Amazon order was already placed for it and
+   * Amazon has not reported it cancelled. The buyer was refunded, the supplier
+   * is still shipping: the seller has to cancel (or return) the Amazon order.
+   * Bounded to recent cancellations so the item can reach zero.
+   */
+  ORDER_CANCELLED_AMAZON_OPEN = 'order_cancelled_amazon_open',
+  /**
+   * eBay reports a next action the seller is responsible for on a return
+   * (`sellerResponseDue`), with the deadline in the breakdown.
+   */
+  RETURN_SELLER_ACTION_DUE = 'return_seller_action_due',
 
   /** An eBay store's OAuth grant is revoked/errored — sync and publishing stop. */
   EBAY_ACCOUNT_DISCONNECTED = 'ebay_account_disconnected',

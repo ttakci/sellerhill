@@ -52,6 +52,12 @@ export enum EbayApiResource {
   MESSAGE = 'commerce.message',
   /** eBay Notification API — destination/subscription/public-key management only; inbound deliveries are not metered. 10,000/day. */
   NOTIFICATION = 'commerce.notification',
+  /**
+   * Post-Order API return calls (`/post-order/v2/return/...`). 5,000/day for the
+   * whole application (production `getRateLimits`, 2026-09-30) — the scarce one:
+   * a return sweep costs one call per store, so its cadence is what spends it.
+   */
+  POST_ORDER_RETURN = 'post-order.return',
 }
 
 /**
