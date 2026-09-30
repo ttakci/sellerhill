@@ -953,8 +953,8 @@ export class ListingsService {
    * server-paginated the same way (CLAUDE.md "Every list endpoint is
    * server-paginated"). No "checked, unchanged" synthetic rows here: that
    * banner is a per-listing "is this stale?" question, and mixing it into a
-   * global feed would mean one row per listing per refresh tick with no new
-   * information — the DB-write cost `076`'s design note explicitly avoided.
+   * global feed would bury the changes. The per-listing drawer shows those
+   * rows; this feed filters them out.
    */
   async getAllListingRevisions(
     userId: string,
@@ -964,7 +964,13 @@ export class ListingsService {
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const offset = (page - 1) * limit;
 
-    const conditions = [`l.user_id = $1`];
+    // Only REAL changes: the per-listing drawer also carries "checked, nothing
+    // moved" rows (previous = new, see `ProductSyncService.recordUnchangedChecks`),
+    // which would bury the changes in a cross-listing feed.
+    const conditions = [
+      `l.user_id = $1`,
+      `(r.previous_price <> r.new_price OR r.previous_quantity <> r.new_quantity)`,
+    ];
     const params: Array<string | number> = [userId];
 
     if (query.search?.trim()) {

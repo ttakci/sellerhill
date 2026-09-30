@@ -511,6 +511,40 @@ export class ProductSyncService {
   }
 
   /**
+   * "Checked, nothing moved" rows — one per active listing of a product whose
+   * refresh just succeeded, so the Revisions drawer shows that the check RAN
+   * instead of leaving a silent gap between two real changes (a 6-hourly
+   * refresh with no change used to look skipped).
+   *
+   * The row is an ordinary `listing_revisions` row with previous = new, taken
+   * from the listing's own stored price/quantity (what eBay last confirmed).
+   * `excludeListingIds` are the listings this cycle already pushed (or tried
+   * to): a confirmed push has its real from→to row, and a FAILED push must not
+   * read as "unchanged" when Amazon and eBay actually disagree. Listings past
+   * the plan limit are not refreshed, so they get no row either.
+   */
+  async recordUnchangedChecks(productIds: string[], excludeListingIds: string[]): Promise<void> {
+    if (productIds.length === 0) {
+      return;
+    }
+
+    await this.databaseService.query(
+      `INSERT INTO listing_revisions (
+         listing_id, previous_price, new_price, previous_quantity, new_quantity
+       )
+       SELECT l.id, l.price, l.price, l.quantity, l.quantity
+       FROM listings l
+       WHERE l.product_id = ANY($1::uuid[])
+         AND l.status = $2
+         AND l.over_plan_limit = FALSE
+         AND l.price IS NOT NULL
+         AND l.quantity IS NOT NULL
+         AND NOT (l.id = ANY($3::uuid[]))`,
+      [productIds, ListingStatus.ACTIVE, excludeListingIds]
+    );
+  }
+
+  /**
    * One row per listing whose price or quantity eBay just confirmed — the
    * history behind the detail page's "Revisions" drawer. Same one-round-trip
    * shape as `persistApplied`; `updates` is already filtered to listings eBay

@@ -671,7 +671,7 @@ Read APIs and data model:
 | `usage_events` | `recorded_at` | 400d | 30d | The FinOps projection the Costs tab reads |
 | `buyer_message_log` | `created_at` | 400d | **180d** | **Correctness — see below** |
 | `audit_logs` | `created_at` | 730d | **365d** | Compliance evidence |
-| `listing_revisions` | `recorded_at` | 180d | 30d | Revisions drawer history only |
+| `listing_revisions` | `recorded_at` | 30d | 30d | Revisions drawer history only. Since 2026-09-30 every successful refresh also writes a previous = new "checked, unchanged" row per active listing it did not push (`ProductSyncService.recordUnchangedChecks`, called from `RefreshProcessorService` after `flushUpdates`) — ~4 rows/listing/day, which is why the default window is the 30-day floor (operator decision, 2026-09-30); the cross-listing Revision History page filters those rows out |
 | `best_sellers_views` | `viewed_at` | 400d | **60d** | The Best Sellers allowance ledger (2026-09-29, `retention.bestSellersViewsDays`): `SUM(product_count)` over the quota window IS the seller's used figure, so a row must outlive one billing period plus the webhook grace (~31 days) before it may be purged |
 | `ebay_notification_events` | `received_at` | 90d | 7d | Dedupe of retried NEW_MESSAGE deliveries only; eBay stops retrying after a few attempts |
 | `ebay_notification_raw_captures` | `received_at` | 30d | 7d | Diagnostic verbatim capture — see "eBay Messages" |

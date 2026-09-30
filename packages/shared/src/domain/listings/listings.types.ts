@@ -370,8 +370,9 @@ export interface PaginatedListingJobsDto {
 }
 
 /**
- * One price/quantity change, written only when the value actually moved (see
- * `ProductSyncService.recordRevisions`) — never a per-refresh-tick no-op row.
+ * One price/quantity revision. Either a real change (`ProductSyncService.recordRevisions`)
+ * or a "checked, nothing moved" row with previous = new
+ * (`ProductSyncService.recordUnchangedChecks`) that shows the refresh ran.
  */
 export interface ListingRevisionDto {
   id: string;
