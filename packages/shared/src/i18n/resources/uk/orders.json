@@ -300,7 +300,8 @@
       "action": "Потребують дій",
       "to_purchase": "Потрібно купити",
       "in_progress": "У роботі",
-      "done": "Завершені"
+      "done": "Завершені",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Що означають статуси",

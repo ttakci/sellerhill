@@ -300,7 +300,8 @@
       "action": "تحتاج إجراء",
       "to_purchase": "للشراء",
       "in_progress": "قيد التنفيذ",
-      "done": "منتهية"
+      "done": "منتهية",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "ماذا تعني الحالات",

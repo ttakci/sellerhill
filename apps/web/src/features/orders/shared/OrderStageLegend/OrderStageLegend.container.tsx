@@ -1,8 +1,7 @@
-import { ORDER_STAGE_ORDER } from '@repo/shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { orderStageHasAction } from '../order-stage';
+import { orderStageHasAction, SELLER_VISIBLE_ORDER_STAGES } from '../order-stage';
 
 import { OrderStageLegendComponent } from './OrderStageLegend.component';
 import type { OrderStageLegendRow } from './OrderStageLegend.types';
@@ -14,7 +13,7 @@ export const OrderStageLegend: React.FC = () => {
   const handleClose = useCallback(() => setIsOpen(false), []);
   const rows = useMemo<OrderStageLegendRow[]>(
     () =>
-      ORDER_STAGE_ORDER.map((stage) => ({
+      SELLER_VISIBLE_ORDER_STAGES.map((stage) => ({
         stage,
         meaning: t(`orders.stage.${stage}.meaning`),
         action: orderStageHasAction(stage) ? t(`orders.stage.${stage}.action`) : null,

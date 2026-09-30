@@ -233,6 +233,12 @@ export class OrdersService {
     // sortBy from the caller is honoured as-is. The actionable list is bound
     // as a parameter that the page query alone carries (it sits after the
     // WHERE parameters, before LIMIT/OFFSET).
+    // Cost, measured against the schema rather than assumed: the leading key is a
+    // computed CASE, so this page sorts the seller's matching rows instead of
+    // walking idx_orders_order_date. That index is GLOBAL (all sellers) and was
+    // never the access path anyway — the WHERE starts at user_id — so the sort is
+    // bounded by ONE seller's orders. Revisit with a stored stage column only if
+    // a single seller reaches six figures of orders.
     const pageParams: (string | number | boolean | null | string[])[] = [...params];
     let orderBy = `o.${safeSortBy} ${safeSortOrder}`;
     let limitIndex = paramIndex;

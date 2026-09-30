@@ -1,4 +1,4 @@
-import { ACTIONABLE_ORDER_STAGES, isTrackingHeldOverdue, OrderStage } from '@repo/shared';
+import { ACTIONABLE_ORDER_STAGES, isTrackingHeldOverdue, ORDER_STAGE_ORDER, OrderStage } from '@repo/shared';
 
 import type { OrderStagePresentation } from './order-stage.types';
 
@@ -30,6 +30,16 @@ export function orderStagePresentation(
   }
   return base;
 }
+
+/**
+ * Stages a seller can meet today. `cancelled` is reserved: `mapOrderStatus` never
+ * writes OrderStatus.CANCELLED, so offering it in the Status select or the legend
+ * would promise a state that cannot appear. It stays in the enum, the SQL twin and
+ * the i18n (a future eBay-cancel sync needs no migration) and is one line to re-list.
+ */
+export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER.filter(
+  (stage) => stage !== OrderStage.CANCELLED
+);
 
 const STAGES_WITH_ACTION: readonly OrderStage[] = [...ACTIONABLE_ORDER_STAGES, OrderStage.TO_PURCHASE];
 

@@ -300,7 +300,8 @@
       "action": "Precisam de ação",
       "to_purchase": "A comprar",
       "in_progress": "Em andamento",
-      "done": "Concluídos"
+      "done": "Concluídos",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "O que os status significam",

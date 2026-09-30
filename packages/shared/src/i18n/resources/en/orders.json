@@ -300,7 +300,8 @@
       "action": "Needs action",
       "to_purchase": "To purchase",
       "in_progress": "In progress",
-      "done": "Done"
+      "done": "Done",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "What the statuses mean",

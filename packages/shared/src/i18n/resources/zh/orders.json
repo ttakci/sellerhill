@@ -300,7 +300,8 @@
       "action": "需要处理",
       "to_purchase": "待购买",
       "in_progress": "进行中",
-      "done": "已完成"
+      "done": "已完成",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "状态说明",

@@ -300,7 +300,8 @@
       "action": "Aksiyon gerekli",
       "to_purchase": "Satın alınacak",
       "in_progress": "Devam eden",
-      "done": "Tamamlanan"
+      "done": "Tamamlanan",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Durumlar ne anlama geliyor",

@@ -300,7 +300,8 @@
       "action": "कार्रवाई चाहिए",
       "to_purchase": "ख़रीदना है",
       "in_progress": "प्रगति में",
-      "done": "पूर्ण"
+      "done": "पूर्ण",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "स्टेटस का मतलब",

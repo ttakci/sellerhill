@@ -300,7 +300,8 @@
       "action": "Necesită acțiune",
       "to_purchase": "De cumpărat",
       "in_progress": "În curs",
-      "done": "Finalizate"
+      "done": "Finalizate",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Ce înseamnă stările",

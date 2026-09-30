@@ -300,7 +300,8 @@
       "action": "کارروائی درکار",
       "to_purchase": "خریدنا ہے",
       "in_progress": "جاری",
-      "done": "مکمل"
+      "done": "مکمل",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "اسٹیٹس کا مطلب",

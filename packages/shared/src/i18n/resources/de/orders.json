@@ -300,7 +300,8 @@
       "action": "Handlungsbedarf",
       "to_purchase": "Zu kaufen",
       "in_progress": "In Bearbeitung",
-      "done": "Erledigt"
+      "done": "Erledigt",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Was die Status bedeuten",

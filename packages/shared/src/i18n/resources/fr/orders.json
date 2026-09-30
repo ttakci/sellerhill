@@ -300,7 +300,8 @@
       "action": "Action requise",
       "to_purchase": "À acheter",
       "in_progress": "En cours",
-      "done": "Terminées"
+      "done": "Terminées",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Signification des statuts",

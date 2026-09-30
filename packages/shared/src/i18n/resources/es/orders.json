@@ -300,7 +300,8 @@
       "action": "Requieren acción",
       "to_purchase": "Por comprar",
       "in_progress": "En curso",
-      "done": "Terminados"
+      "done": "Terminados",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Qué significan los estados",

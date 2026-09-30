@@ -300,7 +300,8 @@
       "action": "Tədbir tələb edir",
       "to_purchase": "Alınacaq",
       "in_progress": "Davam edən",
-      "done": "Tamamlanan"
+      "done": "Tamamlanan",
+      "withCount": "{{label}} ({{count}})"
     },
     "stageLegend": {
       "title": "Statuslar nə deməkdir",

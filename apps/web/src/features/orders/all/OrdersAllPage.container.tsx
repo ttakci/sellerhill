@@ -86,7 +86,7 @@ export const OrdersAllPageContainer: React.FC = () => {
         label:
           tabId === OrderStageTab.ALL
             ? t(`orders.stageTabs.${tabId}`)
-            : `${t(`orders.stageTabs.${tabId}`)} (${countFor(tabId)})`,
+            : t('orders.stageTabs.withCount', { label: t(`orders.stageTabs.${tabId}`), count: countFor(tabId) }),
       })),
     [countFor, t]
   );

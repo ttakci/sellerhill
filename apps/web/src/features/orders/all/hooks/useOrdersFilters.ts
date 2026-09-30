@@ -1,7 +1,9 @@
-import { ORDER_STAGE_ORDER, ORDER_STAGE_TABS, OrderStage, OrderStageTab, type OrderFiltersDto } from '@repo/shared';
+import { ORDER_STAGE_TABS, OrderStage, OrderStageTab, type OrderFiltersDto } from '@repo/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
+
+import { SELLER_VISIBLE_ORDER_STAGES } from '../../shared/order-stage';
 
 const isTab = (value: string): value is OrderStageTab => (Object.values(OrderStageTab) as string[]).includes(value);
 
@@ -71,7 +73,7 @@ export function useOrdersFilters() {
   const stageOptions = useMemo(
     () => [
       { value: '', label: t('orders.filters.allStages') },
-      ...ORDER_STAGE_ORDER.map((s) => ({ value: s, label: t(`orders.stage.${s}.label`) })),
+      ...SELLER_VISIBLE_ORDER_STAGES.map((s) => ({ value: s, label: t(`orders.stage.${s}.label`) })),
     ],
     [t]
   );

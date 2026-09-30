@@ -1,4 +1,4 @@
-import { ProfitBasis } from '@repo/shared';
+import { OrderStage, ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -148,11 +148,14 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
   const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
-  const autoFulfillReasonLabel = order.autoFulfillBlockedReason
-    ? t('orders.autoFulfill.reasonLabel', {
-        reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
-      })
-    : undefined;
+  // The reason explains a BLOCK; once the seller linked the order by hand the
+  // stage moves on and a stale "Reason: address" must not linger under it.
+  const autoFulfillReasonLabel =
+    order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason
+      ? t('orders.autoFulfill.reasonLabel', {
+          reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
+        })
+      : undefined;
 
   /*
    * `saleTax`/`saleTotal` are captured once at order-sync ingest from eBay's
