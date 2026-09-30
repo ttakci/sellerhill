@@ -25,8 +25,11 @@ export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): Ret
   const { translate, locale, currencyFor } = ctx;
   const currency = item.currency ?? currencyFor(item.ebayAccountId);
 
-  // A closed return has nothing due, whatever the last `sellerResponseDue` said.
-  const activityKey = item.bucket === ReturnBucket.CLOSED ? null : resolveSellerActivityKey(item.sellerActivityDue);
+  // A closed return has nothing due, whatever the last `sellerResponseDue` said;
+  // and on a return eBay has not confirmed recently, the last action and its
+  // deadline are old news — showing them would state them as current.
+  const showsDue = item.bucket !== ReturnBucket.CLOSED && item.bucket !== ReturnBucket.UNCONFIRMED;
+  const activityKey = showsDue ? resolveSellerActivityKey(item.sellerActivityDue) : null;
   const dueLabel = activityKey ? translate(`returns.activity.${activityKey}`) : null;
   const dueBy =
     dueLabel && item.sellerRespondBy

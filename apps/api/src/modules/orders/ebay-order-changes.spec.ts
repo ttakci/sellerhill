@@ -269,6 +269,18 @@ describe('order change tracking — source guards', () => {
     }
   });
 
+  it('never restores the address of a buyer whose data was erased', () => {
+    expect(sync).not.toMatch(/shipping_address = EXCLUDED\.shipping_address,/);
+    expect(sync).toMatch(
+      /shipping_address = CASE\s+WHEN orders\.buyer_data_erased_at IS NOT NULL THEN orders\.shipping_address\s+ELSE EXCLUDED\.shipping_address\s+END,/
+    );
+    // No other buyer column is written on the conflict path at all.
+    const conflict = sync.slice(sync.indexOf('ON CONFLICT (ebay_order_id) DO UPDATE SET'), sync.indexOf('RETURNING id, (xmax = 0)'));
+    for (const column of ['buyer_name', 'buyer_email', 'buyer_phone', 'buyer_username']) {
+      expect(conflict).not.toContain(`${column} =`);
+    }
+  });
+
   it('stock, purchase and buyer message fire only for a fresh sale', () => {
     expect(sync).toMatch(/const freshSale = ingest\.isFreshSale\(inserted\);/);
     // Exactly one insert-only gate is left: the sold counter.

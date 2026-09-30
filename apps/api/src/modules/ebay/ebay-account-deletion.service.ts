@@ -14,9 +14,18 @@
  * integration by revoking the token. If that ever needs to change it belongs
  * here, behind the same match.
  *
+ * The same buyer can also appear on `ebay_returns` (login name + the comment
+ * they wrote when opening a return); both are nulled there.
+ *
+ * **An erasure is remembered, not just performed** (`buyer_data_erased_at`,
+ * migration 130). Order sync re-reads an order whenever eBay modifies it and
+ * the return sweep rewrites every return it sees, so without a marker the next
+ * read would put the erased data straight back. The order upsert and the
+ * return upsert both refuse to restore buyer data on a marked row.
+ *
  * Idempotent: eBay redelivers a notification up to a handful of times, and the
- * UPDATE only touches rows that still carry PII, so a second delivery is a
- * zero-row no-op.
+ * UPDATEs only touch rows that still carry PII or are not yet marked, so a
+ * second delivery is a zero-row no-op.
  */
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -27,6 +36,7 @@ import type { AccountDeletionTarget } from './ebay-account-deletion.helpers';
 
 export interface AccountDeletionResult {
   ordersAnonymized: number;
+  returnsAnonymized: number;
 }
 
 @Injectable()
@@ -41,6 +51,7 @@ export class EbayAccountDeletionService {
     // notification carrying only a userId matches nothing (correctly a no-op:
     // we hold no data keyed by it).
     let ordersAnonymized = 0;
+    let returnsAnonymized = 0;
     if (target.username) {
       const rows = await this.databaseService.query<{ id: string }>(
         `UPDATE orders
@@ -48,26 +59,43 @@ export class EbayAccountDeletionService {
                 buyer_email = NULL,
                 buyer_phone = NULL,
                 shipping_address = NULL,
+                buyer_data_erased_at = COALESCE(buyer_data_erased_at, CURRENT_TIMESTAMP),
                 updated_at = CURRENT_TIMESTAMP
           WHERE buyer_username = $1
             AND (buyer_name IS NOT NULL
                  OR buyer_email IS NOT NULL
                  OR buyer_phone IS NOT NULL
-                 OR shipping_address IS NOT NULL)
+                 OR shipping_address IS NOT NULL
+                 OR buyer_data_erased_at IS NULL)
           RETURNING id`,
         [target.username],
       );
       ordersAnonymized = rows.length;
+
+      // The return rows of the same buyer. Matching on the login name is what
+      // makes a redelivery a no-op: once nulled, nothing matches again.
+      const returnRows = await this.databaseService.query<{ id: string }>(
+        `UPDATE ebay_returns
+            SET buyer_login_name = NULL,
+                buyer_comment = NULL,
+                buyer_data_erased_at = COALESCE(buyer_data_erased_at, CURRENT_TIMESTAMP),
+                updated_at = CURRENT_TIMESTAMP
+          WHERE buyer_login_name = $1
+          RETURNING id`,
+        [target.username],
+      );
+      returnsAnonymized = returnRows.length;
     }
 
-    await this.writeAuditLog(target, ordersAnonymized);
+    await this.writeAuditLog(target, ordersAnonymized, returnsAnonymized);
 
     this.logger.log(
       `eBay account deletion processed: username=${target.username ?? '-'} ` +
-        `userId=${target.userId ?? '-'} ordersAnonymized=${ordersAnonymized}`,
+        `userId=${target.userId ?? '-'} ordersAnonymized=${ordersAnonymized} ` +
+        `returnsAnonymized=${returnsAnonymized}`,
     );
 
-    return { ordersAnonymized };
+    return { ordersAnonymized, returnsAnonymized };
   }
 
   /**
@@ -81,6 +109,7 @@ export class EbayAccountDeletionService {
   private async writeAuditLog(
     target: AccountDeletionTarget,
     ordersAnonymized: number,
+    returnsAnonymized: number,
   ): Promise<void> {
     try {
       await this.databaseService.query(
@@ -93,6 +122,7 @@ export class EbayAccountDeletionService {
             userId: target.userId,
             eiasToken: target.eiasToken,
             ordersAnonymized,
+            returnsAnonymized,
             processedAt: new Date().toISOString(),
           }),
         ],

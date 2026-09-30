@@ -29,6 +29,13 @@ describe('returnBucketPresentation', () => {
     expect(returnBucketPresentation(ReturnBucket.CLOSED).variant).toBe('neutral');
   });
 
+  it('renders an unconfirmed return grey, and apart from a closed one by icon', () => {
+    expect(returnBucketPresentation(ReturnBucket.UNCONFIRMED).variant).toBe('neutral');
+    expect(returnBucketPresentation(ReturnBucket.UNCONFIRMED).icon).not.toBe(
+      returnBucketPresentation(ReturnBucket.CLOSED).icon
+    );
+  });
+
   it('tells the two red buckets apart by icon', () => {
     expect(returnBucketPresentation(ReturnBucket.ACTION_OVERDUE).icon).not.toBe(
       returnBucketPresentation(ReturnBucket.ESCALATED).icon

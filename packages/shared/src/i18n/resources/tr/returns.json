@@ -30,6 +30,7 @@
       "opened": "Açılış"
     },
     "bucket": {
+      "unconfirmed": "Doğrulanmadı",
       "action_overdue": "Süresi geçti",
       "action_due": "İşlem bekliyor",
       "escalated": "eBay'e taşındı",
@@ -37,6 +38,7 @@
       "closed": "Kapandı"
     },
     "bucketHint": {
+      "unconfirmed": "eBay bu iadeyi yakın zamanda doğrulamadı; son bilinen durumu güncel olmayabilir. eBay üzerinden kontrol edin.",
       "action_overdue": "eBay'in sizden yanıt beklediği tarih geçti.",
       "action_due": "eBay bu iade için sizden bir işlem bekliyor.",
       "escalated": "Bu iade eBay'de vakaya dönüştürüldü.",

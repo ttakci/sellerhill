@@ -3,12 +3,14 @@
 import { ACTIONABLE_RETURN_BUCKETS, buildReturnBucketSql, ReturnBucket, ReturnTab } from '@repo/shared';
 
 import type { DatabaseService } from '../../common/database/database.service';
+import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { EbayReturnsService } from './ebay-returns.service';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
 const ACCOUNT = '11111111-1111-4111-8111-11111111111a';
-const BUCKET_SQL = buildReturnBucketSql('r');
+// Sweep interval 6 h (the fake below) → the 24 h minimum freshness horizon.
+const BUCKET_SQL = buildReturnBucketSql('r', 24);
 
 const dbRow = (over: Record<string, unknown> = {}): Record<string, unknown> => ({
   id: '22222222-2222-4222-8222-222222222222',
@@ -30,7 +32,10 @@ const dbRow = (over: Record<string, unknown> = {}): Record<string, unknown> => (
   actual_refund_amount: null,
   currency: 'USD',
   created_on_ebay_at: new Date('2026-09-28T10:00:00.000Z'),
-  last_synced_at: new Date('2026-09-30T08:00:00.000Z'),
+  // Relative to the real clock: the DTO's bucket depends on how long ago eBay
+  // last reported the row, so a fixed date would turn every row stale a day
+  // after it was written.
+  last_synced_at: new Date(Date.now() - 60 * 60 * 1000),
   listing_id: '44444444-4444-4444-8444-444444444444',
   listing_title: 'Steel water bottle',
   listing_asin: 'B0SH000001',
@@ -38,7 +43,9 @@ const dbRow = (over: Record<string, unknown> = {}): Record<string, unknown> => (
   ...over,
 });
 
-function build(options: { total?: number; rows?: Array<Record<string, unknown>>; counts?: unknown[] } = {}): {
+function build(
+  options: { total?: number; rows?: Array<Record<string, unknown>>; counts?: unknown[]; intervalHours?: number } = {}
+): {
   service: EbayReturnsService;
   query: jest.Mock<Promise<unknown[]>, [string, unknown[]?]>;
 } {
@@ -51,7 +58,14 @@ function build(options: { total?: number; rows?: Array<Record<string, unknown>>;
     }
     return Promise.resolve(options.rows ?? []);
   });
-  return { service: new EbayReturnsService({ query } as unknown as DatabaseService), query };
+  const getNumber = jest.fn<Promise<number>, [string]>(() => Promise.resolve(options.intervalHours ?? 6));
+  return {
+    service: new EbayReturnsService(
+      { query } as unknown as DatabaseService,
+      { getNumber } as unknown as PlatformSettingsService
+    ),
+    query,
+  };
 }
 
 describe('EbayReturnsService.list', () => {
@@ -104,7 +118,7 @@ describe('EbayReturnsService.list', () => {
 
   it.each([
     [ReturnTab.ACTION, [ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE]],
-    [ReturnTab.IN_PROGRESS, [ReturnBucket.IN_PROGRESS, ReturnBucket.ESCALATED]],
+    [ReturnTab.IN_PROGRESS, [ReturnBucket.IN_PROGRESS, ReturnBucket.ESCALATED, ReturnBucket.UNCONFIRMED]],
     [ReturnTab.CLOSED, [ReturnBucket.CLOSED]],
   ])('filters the %s tab through the bucket CASE', async (tab, buckets) => {
     const { service, query } = build();
@@ -192,7 +206,7 @@ describe('EbayReturnsService.list', () => {
         actualRefundAmount: null,
         currency: 'USD',
         createdOnEbayAt: '2026-09-28T10:00:00.000Z',
-        lastSyncedAt: '2026-09-30T08:00:00.000Z',
+        lastSyncedAt: expect.any(String) as unknown as string,
         product: {
           title: 'Steel water bottle',
           imageUrl: 'https://example.test/1.jpg',
@@ -264,6 +278,7 @@ describe('EbayReturnsService.counts', () => {
     const { service, query } = build({ counts: [] });
 
     await expect(service.counts(USER)).resolves.toEqual({
+      [ReturnBucket.UNCONFIRMED]: 0,
       [ReturnBucket.ACTION_OVERDUE]: 0,
       [ReturnBucket.ACTION_DUE]: 0,
       [ReturnBucket.ESCALATED]: 0,
@@ -288,6 +303,7 @@ describe('EbayReturnsService.counts', () => {
     const counts = await service.counts(USER);
 
     expect(counts).toEqual({
+      [ReturnBucket.UNCONFIRMED]: 0,
       [ReturnBucket.ACTION_OVERDUE]: 0,
       [ReturnBucket.ACTION_DUE]: 3,
       [ReturnBucket.ESCALATED]: 0,
@@ -305,5 +321,42 @@ describe('EbayReturnsService.counts', () => {
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('WHERE r.user_id = $1 AND r.ebay_account_id = $2::uuid');
     expect(params).toEqual([USER, ACCOUNT]);
+  });
+});
+
+describe('EbayReturnsService freshness', () => {
+  it('reports a row eBay has not confirmed within the horizon as UNCONFIRMED', async () => {
+    const { service } = build({
+      total: 1,
+      rows: [dbRow({ last_synced_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) })],
+    });
+
+    const page = await service.list(USER);
+
+    expect(page.items[0].bucket).toBe(ReturnBucket.UNCONFIRMED);
+  });
+
+  it('keeps the same row actionable when the sweep interval makes the horizon longer', async () => {
+    // Interval 48 h → horizon 96 h; three days old is still inside it.
+    const { service, query } = build({
+      total: 1,
+      intervalHours: 48,
+      rows: [dbRow({ last_synced_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) })],
+    });
+
+    const page = await service.list(USER, { tab: ReturnTab.ACTION });
+
+    expect(page.items[0].bucket).toBe(ReturnBucket.ACTION_DUE);
+    // …and the SQL filtered with the very same horizon the DTO was derived with.
+    expect(query.mock.calls[0][0]).toContain("INTERVAL '96 hours'");
+    expect(query.mock.calls[1][0]).toContain("INTERVAL '96 hours'");
+  });
+
+  it('counts with the horizon of the current sweep interval', async () => {
+    const { service, query } = build({ intervalHours: 24 });
+
+    await service.counts(USER);
+
+    expect(query.mock.calls[0][0]).toContain("INTERVAL '48 hours'");
   });
 });

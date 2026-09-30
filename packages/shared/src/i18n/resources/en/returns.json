@@ -30,6 +30,7 @@
       "opened": "Opened"
     },
     "bucket": {
+      "unconfirmed": "Not confirmed",
       "action_overdue": "Overdue",
       "action_due": "Action due",
       "escalated": "Escalated to eBay",
@@ -37,6 +38,7 @@
       "closed": "Closed"
     },
     "bucketHint": {
+      "unconfirmed": "eBay has not confirmed this return recently, so its last known state may be out of date. Check it on eBay.",
       "action_overdue": "The date eBay expected your response by has passed.",
       "action_due": "eBay is waiting for an action from you on this return.",
       "escalated": "This return was escalated to an eBay case.",

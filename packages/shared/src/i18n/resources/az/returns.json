@@ -30,6 +30,7 @@
       "opened": "Açılıb"
     },
     "bucket": {
+      "unconfirmed": "Təsdiqlənməyib",
       "action_overdue": "Vaxtı keçib",
       "action_due": "Tədbir gözləyir",
       "escalated": "eBay-ə ötürülüb",
@@ -37,6 +38,7 @@
       "closed": "Bağlanıb"
     },
     "bucketHint": {
+      "unconfirmed": "eBay bu qaytarmanı son vaxtlar təsdiqləməyib, ona görə son məlum vəziyyəti köhnəlmiş ola bilər. Onu eBay-də yoxlayın.",
       "action_overdue": "eBay-in sizdən cavab gözlədiyi tarix artıq keçib.",
       "action_due": "eBay bu qaytarma üzrə sizdən bir addım gözləyir.",
       "escalated": "Bu qaytarma eBay-də işə çevrilib.",

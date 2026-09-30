@@ -4,8 +4,11 @@ import type { ReturnBucketPresentation } from './return-presentation.types';
 
 // Colours group by MEANING, same convention as the order stages: red = a
 // deadline was missed or eBay stepped in, amber = your move, blue = nothing due
-// from you, grey = over. The icon tells the two reds apart.
+// from you, grey = over — or not known: a return eBay has not confirmed
+// recently is grey with a question mark, never a colour that claims a state.
+// The icon tells the two reds (and the two greys) apart.
 const PRESENTATION: Record<ReturnBucket, ReturnBucketPresentation> = {
+  [ReturnBucket.UNCONFIRMED]: { variant: 'neutral', icon: 'help' },
   [ReturnBucket.ACTION_OVERDUE]: { variant: 'error', icon: 'alert-triangle' },
   [ReturnBucket.ACTION_DUE]: { variant: 'warning', icon: 'alert-circle' },
   [ReturnBucket.ESCALATED]: { variant: 'error', icon: 'shield-alert' },

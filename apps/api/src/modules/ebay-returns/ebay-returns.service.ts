@@ -7,6 +7,8 @@ import {
   deriveReturnBucket,
   EbayReturnDto,
   PaginatedReturnsDto,
+  PlatformSettingKey,
+  resolveReturnFreshnessHours,
   RETURN_TABS,
   ReturnBucket,
   ReturnBucketCountsDto,
@@ -15,6 +17,7 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService, QueryParam } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { RETURNS_DEFAULT_PAGE_SIZE, RETURNS_MAX_PAGE_SIZE } from './ebay-returns.constants';
 
@@ -49,9 +52,6 @@ interface BucketCountRow {
   bucket: string;
   count: number | string;
 }
-
-/** The bucket CASE over the `r` alias — the same expression the list filters, sorts and counts by. */
-const BUCKET_SQL = buildReturnBucketSql('r');
 
 /** Same joins the orders list uses to reach a row's product (title / ASIN on the listing, image on the product). */
 const PRODUCT_JOINS = `LEFT JOIN orders o ON o.id = r.order_id
@@ -113,6 +113,7 @@ function firstImageUrl(raw: string[] | string | null): string | null {
 
 function emptyCounts(): ReturnBucketCountsDto {
   return {
+    [ReturnBucket.UNCONFIRMED]: 0,
     [ReturnBucket.ACTION_OVERDUE]: 0,
     [ReturnBucket.ACTION_DUE]: 0,
     [ReturnBucket.ESCALATED]: 0,
@@ -134,11 +135,28 @@ const RETURN_BUCKETS = new Set<string>(Object.values(ReturnBucket));
  */
 @Injectable()
 export class EbayReturnsService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly platformSettings: PlatformSettingsService
+  ) {}
+
+  /**
+   * The bucket CASE over the `r` alias — the one expression the list filters,
+   * sorts and counts by — with the freshness horizon of the moment. The
+   * horizon follows the sweep interval (`resolveReturnFreshnessHours`), so it
+   * is resolved per request rather than frozen at module load.
+   */
+  private async bucketContext(): Promise<{ bucketSql: string; freshnessHours: number }> {
+    const freshnessHours = resolveReturnFreshnessHours(
+      await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS)
+    );
+    return { bucketSql: buildReturnBucketSql('r', freshnessHours), freshnessHours };
+  }
 
   async list(userId: string, query: ReturnsQueryDto = {}): Promise<PaginatedReturnsDto> {
     const page = clampPage(query.page);
     const limit = clampLimit(query.limit);
+    const { bucketSql, freshnessHours } = await this.bucketContext();
 
     const params: QueryParam[] = [userId];
     let filters = '';
@@ -146,7 +164,7 @@ export class EbayReturnsService {
     const buckets = query.tab ? RETURN_TABS[query.tab] : undefined;
     if (buckets && query.tab !== ReturnTab.ALL) {
       params.push([...buckets]);
-      filters += ` AND ${BUCKET_SQL} = ANY($${params.length}::text[])`;
+      filters += ` AND ${bucketSql} = ANY($${params.length}::text[])`;
     }
     if (query.ebayAccountId) {
       params.push(query.ebayAccountId);
@@ -189,7 +207,7 @@ export class EbayReturnsService {
          FROM ebay_returns r
        ${PRODUCT_JOINS}
         WHERE r.user_id = $1${filters}
-        ORDER BY CASE WHEN ${BUCKET_SQL} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
+        ORDER BY CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
                  r.seller_respond_by ASC NULLS LAST,
                  r.created_on_ebay_at DESC NULLS LAST,
                  r.id ASC
@@ -198,7 +216,7 @@ export class EbayReturnsService {
     );
 
     const now = new Date();
-    return { items: rows.map((row) => this.toDto(row, now)), total, page, limit };
+    return { items: rows.map((row) => this.toDto(row, now, freshnessHours)), total, page, limit };
   }
 
   /** How many returns sit in each bucket — every bucket present, zero-filled. */
@@ -210,8 +228,9 @@ export class EbayReturnsService {
       filters += ` AND r.ebay_account_id = $${params.length}::uuid`;
     }
 
+    const { bucketSql } = await this.bucketContext();
     const rows = await this.database.query<BucketCountRow>(
-      `SELECT ${BUCKET_SQL} AS bucket, COUNT(*)::int AS count
+      `SELECT ${bucketSql} AS bucket, COUNT(*)::int AS count
          FROM ebay_returns r
         WHERE r.user_id = $1${filters}
         GROUP BY 1`,
@@ -227,7 +246,7 @@ export class EbayReturnsService {
     return counts;
   }
 
-  private toDto(row: ReturnListRow, now: Date): EbayReturnDto {
+  private toDto(row: ReturnListRow, now: Date, freshnessHours: number): EbayReturnDto {
     return {
       id: row.id,
       returnId: row.return_id,
@@ -242,8 +261,10 @@ export class EbayReturnsService {
           status: row.status,
           sellerActivityDue: row.seller_activity_due,
           sellerRespondBy: row.seller_respond_by,
+          lastSyncedAt: row.last_synced_at,
         },
-        now
+        now,
+        freshnessHours
       ),
       state: row.state,
       status: row.status,

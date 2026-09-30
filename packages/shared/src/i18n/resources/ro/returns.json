@@ -32,6 +32,7 @@
       "opened": "Deschis la"
     },
     "bucket": {
+      "unconfirmed": "Neconfirmat",
       "action_overdue": "Termen depășit",
       "action_due": "Acțiune necesară",
       "escalated": "Escaladat la eBay",
@@ -39,6 +40,7 @@
       "closed": "Închis"
     },
     "bucketHint": {
+      "unconfirmed": "eBay nu a confirmat recent acest retur, așa că ultima stare cunoscută poate fi depășită. Verificați-l pe eBay.",
       "action_overdue": "Data până la care eBay aștepta răspunsul tău a trecut.",
       "action_due": "eBay așteaptă o acțiune din partea ta pentru acest retur.",
       "escalated": "Acest retur a fost escaladat într-un caz eBay.",

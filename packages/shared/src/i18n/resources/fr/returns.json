@@ -32,6 +32,7 @@
       "opened": "Ouvert le"
     },
     "bucket": {
+      "unconfirmed": "Non confirmé",
       "action_overdue": "En retard",
       "action_due": "Action attendue",
       "escalated": "Transmis à eBay",
@@ -39,6 +40,7 @@
       "closed": "Clôturé"
     },
     "bucketHint": {
+      "unconfirmed": "eBay n'a pas confirmé ce retour récemment ; son dernier état connu peut être obsolète. Vérifiez-le sur eBay.",
       "action_overdue": "La date à laquelle eBay attendait votre réponse est dépassée.",
       "action_due": "eBay attend une action de votre part sur ce retour.",
       "escalated": "Ce retour a été transformé en litige eBay.",

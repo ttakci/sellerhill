@@ -536,7 +536,13 @@ export class OrderSyncService {
         ebay_earnings = EXCLUDED.ebay_earnings,
         currency = EXCLUDED.currency,
         quantity = EXCLUDED.quantity,
-        shipping_address = EXCLUDED.shipping_address,
+        -- An erased buyer stays erased: after an eBay account-deletion
+        -- notification nulled this row's buyer data (migration 130), a re-read
+        -- must not write the address back.
+        shipping_address = CASE
+          WHEN orders.buyer_data_erased_at IS NOT NULL THEN orders.shipping_address
+          ELSE EXCLUDED.shipping_address
+        END,
         last_ebay_event_at = EXCLUDED.last_ebay_event_at,
         -- COALESCE, never a bare EXCLUDED: eBay assesses the marketplace fee
         -- when the buyer's payment settles, which can be after we first pulled

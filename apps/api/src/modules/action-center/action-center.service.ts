@@ -53,19 +53,21 @@ import {
   ListingStatus,
   OrderStage,
   OrderStatus,
+  PlatformSettingKey,
   ReturnBucket,
   ReturnTab,
   SIMULATED_AMAZON_ORDER_PREFIX,
   SourceUnavailableReason,
   buildOrderStageSql,
   buildReturnBucketSql,
+  resolveReturnFreshnessHours,
   type ActionCenterItemDto,
   type ActionCenterSummaryDto,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { BillingService } from '../billing/billing.service';
-import { RETURN_SEARCH_WINDOW_DAYS } from '../ebay-returns/ebay-returns.constants';
 
 import {
   TRIAL_ENDING_NOTICE_DAYS,
@@ -155,7 +157,8 @@ export class ActionCenterService {
 
   constructor(
     private readonly db: DatabaseService,
-    private readonly billing: BillingService
+    private readonly billing: BillingService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
 
   async getSummary(userId: string): Promise<ActionCenterSummaryDto> {
@@ -449,13 +452,19 @@ export class ActionCenterService {
    * CRITICAL once any deadline has passed: eBay documents the respond-by date
    * as the seller's due date, and past it the case is out of the seller's hands.
    *
-   * One deliberate narrowing: only returns created inside the window the sweep
-   * can still ask eBay about (`RETURN_SEARCH_WINDOW_DAYS`). An older return is
-   * no longer in any search response, so its row keeps whatever it last said —
-   * counting it would raise an item that can never clear.
+   * Staleness is inside the bucket itself: a row eBay has not confirmed within
+   * the freshness horizon derives as UNCONFIRMED, never as an action, so a
+   * return that dropped out of the search (too old, beyond the first page, a
+   * store whose token broke, the sweep switched off) cannot hold this item
+   * open. Same horizon the Returns page uses, resolved from the same setting.
    */
   private async returnItems(userId: string): Promise<ActionCenterItemDto[]> {
-    const bucket = buildReturnBucketSql('r');
+    const bucket = buildReturnBucketSql(
+      'r',
+      resolveReturnFreshnessHours(
+        await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS)
+      )
+    );
     const rows = await this.db.query<BreakdownRow>(
       `SELECT ${bucket} AS code, COUNT(*) AS count
          FROM ebay_returns r
@@ -463,15 +472,8 @@ export class ActionCenterService {
         WHERE r.user_id = $1
           AND a.status = $2
           AND ${bucket} IN ($3, $4)
-          AND COALESCE(r.created_on_ebay_at, r.first_seen_at) >= NOW() - ($5 || ' days')::INTERVAL
         GROUP BY 1`,
-      [
-        userId,
-        EbayAccountStatus.ACTIVE,
-        ReturnBucket.ACTION_OVERDUE,
-        ReturnBucket.ACTION_DUE,
-        String(RETURN_SEARCH_WINDOW_DAYS),
-      ]
+      [userId, EbayAccountStatus.ACTIVE, ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE]
     );
     let total = 0;
     let overdue = 0;

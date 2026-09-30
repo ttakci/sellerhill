@@ -28,6 +28,7 @@
       "opened": "发起时间"
     },
     "bucket": {
+      "unconfirmed": "未确认",
       "action_overdue": "已逾期",
       "action_due": "待处理",
       "escalated": "已升级至 eBay",
@@ -35,6 +36,7 @@
       "closed": "已关闭"
     },
     "bucketHint": {
+      "unconfirmed": "eBay 最近未确认此退货，其最后已知状态可能已过时。请到 eBay 查看。",
       "action_overdue": "eBay 要求您回复的期限已过。",
       "action_due": "eBay 正在等待您对此退货采取操作。",
       "escalated": "此退货已升级为 eBay 纠纷个案。",

@@ -11,6 +11,12 @@
  * Derived by `deriveReturnBucket`, never stored.
  */
 export enum ReturnBucket {
+  /**
+   * Open as of the last time eBay reported it, but eBay has not confirmed it
+   * since (see `resolveReturnFreshnessHours`). Whatever the row last said
+   * about an action or a deadline is not shown as current.
+   */
+  UNCONFIRMED = 'unconfirmed',
   /** A seller action is due and its deadline has passed. */
   ACTION_OVERDUE = 'action_overdue',
   /** eBay reports a next action the seller is responsible for. */

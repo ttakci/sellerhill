@@ -32,6 +32,7 @@
       "opened": "Abierta"
     },
     "bucket": {
+      "unconfirmed": "Sin confirmar",
       "action_overdue": "Vencida",
       "action_due": "Acción pendiente",
       "escalated": "Escalada a eBay",
@@ -39,6 +40,7 @@
       "closed": "Cerrada"
     },
     "bucketHint": {
+      "unconfirmed": "eBay no ha confirmado esta devolución recientemente, por lo que su último estado conocido puede estar desactualizado. Revísala en eBay.",
       "action_overdue": "La fecha en la que eBay esperaba tu respuesta ya pasó.",
       "action_due": "eBay espera una acción tuya en esta devolución.",
       "escalated": "Esta devolución se escaló a un caso de eBay.",

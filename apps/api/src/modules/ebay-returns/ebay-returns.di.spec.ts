@@ -40,8 +40,8 @@ describe('ebay-returns dependency injection metadata', () => {
     ]);
   });
 
-  it('EbayReturnsService resolves the database', () => {
-    expect(paramTypes(EbayReturnsService)).toEqual([DatabaseService]);
+  it('EbayReturnsService resolves the database and the settings', () => {
+    expect(paramTypes(EbayReturnsService)).toEqual([DatabaseService, PlatformSettingsService]);
   });
 
   it('EbayReturnsController resolves the read service', () => {

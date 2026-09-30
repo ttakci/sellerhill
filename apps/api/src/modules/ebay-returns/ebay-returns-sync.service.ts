@@ -211,6 +211,10 @@ export class EbayReturnsSyncService {
    * currently no action due from the seller", and keeping the previous value
    * would show an action as due for ever. `first_seen_at` is never touched.
    *
+   * The one exception is the buyer's own data: on a row marked by an eBay
+   * account-deletion erasure (`buyer_data_erased_at`, migration 130) the login
+   * name and the comment stay NULL, whatever eBay still returns.
+   *
    * `order_id` links the return to the SellerHill order with that eBay order
    * id, for the same seller only. It is NULL when we hold no such order, and
    * an existing link is never dropped by a later sweep (COALESCE).
@@ -246,8 +250,14 @@ export class EbayReturnsSyncService {
          current_type = EXCLUDED.current_type,
          reason = EXCLUDED.reason,
          reason_type = EXCLUDED.reason_type,
-         buyer_comment = EXCLUDED.buyer_comment,
-         buyer_login_name = EXCLUDED.buyer_login_name,
+         buyer_comment = CASE
+           WHEN ebay_returns.buyer_data_erased_at IS NOT NULL THEN NULL
+           ELSE EXCLUDED.buyer_comment
+         END,
+         buyer_login_name = CASE
+           WHEN ebay_returns.buyer_data_erased_at IS NOT NULL THEN NULL
+           ELSE EXCLUDED.buyer_login_name
+         END,
          seller_activity_due = EXCLUDED.seller_activity_due,
          seller_respond_by = EXCLUDED.seller_respond_by,
          estimated_refund_amount = EXCLUDED.estimated_refund_amount,

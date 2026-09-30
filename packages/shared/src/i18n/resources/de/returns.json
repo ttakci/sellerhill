@@ -30,6 +30,7 @@
       "opened": "Eröffnet"
     },
     "bucket": {
+      "unconfirmed": "Nicht bestätigt",
       "action_overdue": "Überfällig",
       "action_due": "Aktion fällig",
       "escalated": "An eBay eskaliert",
@@ -37,6 +38,7 @@
       "closed": "Geschlossen"
     },
     "bucketHint": {
+      "unconfirmed": "eBay hat diese Rückgabe zuletzt nicht bestätigt; der letzte bekannte Stand kann veraltet sein. Prüfen Sie sie bei eBay.",
       "action_overdue": "Die Frist, bis zu der eBay Ihre Antwort erwartet hat, ist abgelaufen.",
       "action_due": "eBay wartet bei dieser Rückgabe auf eine Aktion von Ihnen.",
       "escalated": "Diese Rückgabe wurde zu einem eBay-Fall eskaliert.",

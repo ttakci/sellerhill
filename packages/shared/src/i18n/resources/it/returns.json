@@ -32,6 +32,7 @@
       "opened": "Aperto il"
     },
     "bucket": {
+      "unconfirmed": "Non confermato",
       "action_overdue": "Scaduto",
       "action_due": "Azione richiesta",
       "escalated": "Passato a eBay",
@@ -39,6 +40,7 @@
       "closed": "Chiuso"
     },
     "bucketHint": {
+      "unconfirmed": "eBay non ha confermato questo reso di recente, quindi l'ultimo stato noto potrebbe non essere aggiornato. Controllalo su eBay.",
       "action_overdue": "La data entro cui eBay attendeva la tua risposta è già passata.",
       "action_due": "eBay attende una tua azione su questo reso.",
       "escalated": "Questo reso è stato trasformato in una controversia eBay.",

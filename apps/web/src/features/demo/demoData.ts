@@ -1189,7 +1189,14 @@ function buildReturns(): EbayReturnDto[] {
       ebayItemId: seed.knownOrder ? order.product?.ebayItemId ?? null : `1${255900000000 + k * 211}`,
       returnQuantity: order.product?.quantity ?? 1,
       bucket: deriveReturnBucket(
-        { state: seed.state, status: seed.status, sellerActivityDue: seed.activity, sellerRespondBy: respondBy },
+        {
+          state: seed.state,
+          status: seed.status,
+          sellerActivityDue: seed.activity,
+          sellerRespondBy: respondBy,
+          // The demo is always "just synced", so nothing derives as unconfirmed.
+          lastSyncedAt: now,
+        },
         now
       ),
       state: seed.state,
