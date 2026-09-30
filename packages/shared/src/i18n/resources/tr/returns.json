@@ -1,0 +1,92 @@
+{
+  "returns": {
+    "title": "İadeler",
+    "subtitle_one": "{{count}} iade",
+    "subtitle_other": "{{count}} iade",
+    "loading": "İadeler yükleniyor…",
+    "notice": "İadeleri eBay üzerinden yanıtlayın. Bu sayfa sizden ne beklendiğini ve son tarihini gösterir.",
+    "tabs": {
+      "all": "Tümü",
+      "action": "Aksiyon gerekli",
+      "in_progress": "Devam eden",
+      "closed": "Kapanan",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "İade durumu"
+    },
+    "filters": {
+      "search": "İade no, sipariş no veya ürün ara…",
+      "allStores": "Tüm mağazalar",
+      "clear": "Temizle",
+      "resultCount_one": "{{count}} sonuç",
+      "resultCount_other": "{{count}} sonuç"
+    },
+    "columns": {
+      "product": "Ürün",
+      "return": "İade",
+      "status": "Durum",
+      "due": "Sizden beklenen",
+      "reason": "Neden",
+      "refund": "Geri ödeme",
+      "opened": "Açılış"
+    },
+    "bucket": {
+      "action_overdue": "Süresi geçti",
+      "action_due": "İşlem bekliyor",
+      "escalated": "eBay'e taşındı",
+      "in_progress": "Devam ediyor",
+      "closed": "Kapandı"
+    },
+    "bucketHint": {
+      "action_overdue": "eBay'in sizden yanıt beklediği tarih geçti.",
+      "action_due": "eBay bu iade için sizden bir işlem bekliyor.",
+      "escalated": "Bu iade eBay'de vakaya dönüştürüldü.",
+      "in_progress": "İade açık; şu anda sizden beklenen bir işlem yok.",
+      "closed": "eBay bu iadeyi kapattı."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "İade talebini onaylayın",
+      "SELLER_DECLINE_REQUEST": "İade talebini reddedin",
+      "SELLER_ISSUE_REFUND": "Geri ödemeyi yapın",
+      "SELLER_MARK_AS_RECEIVED": "İade edilen ürünü teslim alındı olarak işaretleyin",
+      "SELLER_MARK_REFUND_SENT": "Geri ödemeyi gönderildi olarak işaretleyin",
+      "SELLER_OFFER_PARTIAL_REFUND": "Kısmi geri ödeme teklif edin",
+      "SELLER_PRINT_SHIPPING_LABEL": "Kargo etiketini yazdırın",
+      "SELLER_PROVIDE_LABEL": "Kargo etiketi sağlayın",
+      "SELLER_PROVIDE_RMA": "Alıcıya RMA numarası verin",
+      "SELLER_RETRY_REFUND": "Geri ödemeyi yeniden deneyin",
+      "REMINDER_FOR_REFUND": "Alıcıya geri ödeme yapın",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya geri ödeme yapın (ürünün geri gönderilmesi beklenmiyor)",
+      "REMINDER_FOR_RMA": "RMA hatırlatması: eBay'de yanıtlayın",
+      "REMINDER_SELLER_TO_RESPOND": "İade talebini yanıtlayın",
+      "other": "eBay'de yanıtlayın"
+    },
+    "dueBy": "Son tarih: {{date}}",
+    "reasonType": {
+      "CANCEL": "Kargodan sonra iptal",
+      "INSTORE": "Mağazaya iade",
+      "REMORSE": "Alıcı vazgeçti",
+      "SNAD": "Açıklamaya uygun değil",
+      "UNKNOWN": "Neden belirtilmemiş"
+    },
+    "refund": {
+      "refunded": "Geri ödendi",
+      "estimated": "Tahmini"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Sipariş",
+    "viewOrder": "Siparişi görüntüle",
+    "unknownProduct": "Bilinmeyen ürün",
+    "empty": {
+      "title": "Henüz iade yok",
+      "description": "Alıcıların eBay'de açtığı iadeler burada görünür."
+    },
+    "emptyFiltered": {
+      "title": "Filtrelere uyan iade yok",
+      "description": "Başka bir sekme, mağaza veya arama deneyin.",
+      "action": "Filtreleri temizle"
+    }
+  }
+}

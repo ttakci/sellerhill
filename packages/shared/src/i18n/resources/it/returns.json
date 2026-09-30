@@ -1,0 +1,94 @@
+{
+  "returns": {
+    "title": "Resi",
+    "subtitle_one": "{{count}} reso",
+    "subtitle_many": "{{count}} resi",
+    "subtitle_other": "{{count}} resi",
+    "loading": "Caricamento dei resi…",
+    "notice": "Rispondi ai resi su eBay. Questa pagina mostra cosa è richiesto ed entro quando.",
+    "tabs": {
+      "all": "Tutti",
+      "action": "Richiedono azione",
+      "in_progress": "In corso",
+      "closed": "Chiusi",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Stato del reso"
+    },
+    "filters": {
+      "search": "Cerca n. reso, n. ordine o prodotto…",
+      "allStores": "Tutti i negozi",
+      "clear": "Cancella",
+      "resultCount_one": "{{count}} risultato",
+      "resultCount_many": "{{count}} risultati",
+      "resultCount_other": "{{count}} risultati"
+    },
+    "columns": {
+      "product": "Prodotto",
+      "return": "Reso",
+      "status": "Stato",
+      "due": "Azione richiesta",
+      "reason": "Motivo",
+      "refund": "Rimborso",
+      "opened": "Aperto il"
+    },
+    "bucket": {
+      "action_overdue": "Scaduto",
+      "action_due": "Azione richiesta",
+      "escalated": "Passato a eBay",
+      "in_progress": "In corso",
+      "closed": "Chiuso"
+    },
+    "bucketHint": {
+      "action_overdue": "La data entro cui eBay attendeva la tua risposta è già passata.",
+      "action_due": "eBay attende una tua azione su questo reso.",
+      "escalated": "Questo reso è stato trasformato in una controversia eBay.",
+      "in_progress": "Il reso è aperto; al momento non è richiesto nulla da parte tua.",
+      "closed": "eBay ha chiuso questo reso."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Approva la richiesta di reso",
+      "SELLER_DECLINE_REQUEST": "Rifiuta la richiesta di reso",
+      "SELLER_ISSUE_REFUND": "Emetti il rimborso",
+      "SELLER_MARK_AS_RECEIVED": "Segna l'oggetto restituito come ricevuto",
+      "SELLER_MARK_REFUND_SENT": "Segna il rimborso come inviato",
+      "SELLER_OFFER_PARTIAL_REFUND": "Offri un rimborso parziale",
+      "SELLER_PRINT_SHIPPING_LABEL": "Stampa l'etichetta di spedizione",
+      "SELLER_PROVIDE_LABEL": "Fornisci un'etichetta di spedizione",
+      "SELLER_PROVIDE_RMA": "Comunica un numero RMA all'acquirente",
+      "SELLER_RETRY_REFUND": "Riprova il rimborso",
+      "REMINDER_FOR_REFUND": "Rimborsa l'acquirente",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Rimborsa l'acquirente (non è prevista la restituzione dell'oggetto)",
+      "REMINDER_FOR_RMA": "Promemoria RMA: rispondi su eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Rispondi alla richiesta di reso",
+      "other": "Rispondi su eBay"
+    },
+    "dueBy": "entro il {{date}}",
+    "reasonType": {
+      "CANCEL": "Annullamento dopo la spedizione",
+      "INSTORE": "Reso in negozio",
+      "REMORSE": "L'acquirente ha cambiato idea",
+      "SNAD": "Non conforme alla descrizione",
+      "UNKNOWN": "Motivo non specificato"
+    },
+    "refund": {
+      "refunded": "Rimborsato",
+      "estimated": "Stimato"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Ordine",
+    "viewOrder": "Vedi ordine",
+    "unknownProduct": "Prodotto sconosciuto",
+    "empty": {
+      "title": "Ancora nessun reso",
+      "description": "I resi aperti dagli acquirenti su eBay compariranno qui."
+    },
+    "emptyFiltered": {
+      "title": "Nessun reso corrisponde ai filtri",
+      "description": "Prova un'altra scheda, un altro negozio o un'altra ricerca.",
+      "action": "Cancella filtri"
+    }
+  }
+}

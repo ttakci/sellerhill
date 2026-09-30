@@ -9,7 +9,11 @@ import {
   ACTIONABLE_ORDER_STAGES,
   OrderFulfillmentState,
   OrderStage,
+  RETURN_TABS,
+  ReturnBucket,
+  ReturnTab,
   type ListingDto,
+  type EbayReturnDto,
   type OrderDto,
 } from '@repo/shared';
 
@@ -40,6 +44,7 @@ import {
   DEMO_ORDERS,
   DEMO_PREDEFINED_TEMPLATES,
   DEMO_PROFILE,
+  DEMO_RETURNS,
   DEMO_STORE_SETTINGS_ALL,
   DEMO_USER,
 } from './demoData';
@@ -316,6 +321,49 @@ function filterConversations(params: Record<string, string>): EbayConversationDt
   );
 }
 
+/* ── eBay returns ─────────────────────────────────────────────────────── */
+
+/** `GET /returns` — tab (a bucket group), store and search, like the real endpoint. */
+function filterReturns(params: Record<string, string>): EbayReturnDto[] {
+  let rows = [...DEMO_RETURNS];
+
+  const tab = Object.values(ReturnTab).find((value) => String(value) === params.tab);
+  if (tab && tab !== ReturnTab.ALL) {
+    const wanted = RETURN_TABS[tab];
+    rows = rows.filter((r) => wanted.includes(r.bucket));
+  }
+  if (params.ebayAccountId) {
+    rows = rows.filter((r) => r.ebayAccountId === params.ebayAccountId);
+  }
+  // Matches the eBay return id, the eBay order id or the product title.
+  const search = params.search?.trim().toLowerCase();
+  if (search) {
+    rows = rows.filter(
+      (r) =>
+        r.returnId.toLowerCase().includes(search) ||
+        (r.ebayOrderId ?? '').toLowerCase().includes(search) ||
+        (r.product?.title ?? '').toLowerCase().includes(search)
+    );
+  }
+
+  // What needs the seller first, a closed return last; newest first inside a bucket.
+  const BUCKET_ORDER = Object.values(ReturnBucket);
+  return rows.sort(
+    (a, b) =>
+      BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) ||
+      (b.createdOnEbayAt ?? '').localeCompare(a.createdOnEbayAt ?? '')
+  );
+}
+
+/** Whole-store bucket counts for the tab rail (store filter only — never tab or search). */
+function countReturnBuckets(params: Record<string, string>): Record<ReturnBucket, number> {
+  const counts = Object.fromEntries(Object.values(ReturnBucket).map((b) => [b, 0])) as Record<ReturnBucket, number>;
+  for (const row of filterReturns({ ebayAccountId: params.ebayAccountId ?? '' })) {
+    counts[row.bucket] += 1;
+  }
+  return counts;
+}
+
 /* ── Template catalog ─────────────────────────────────────────────────── */
 
 /** The real catalog, written by `scripts/build-template-previews.mjs`. */
@@ -516,6 +564,14 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/orders/stats') {
     return ok(buildDemoOrderStats());
+  }
+
+  if (path === '/returns') {
+    return ok(paginate(filterReturns(params), params));
+  }
+
+  if (path === '/returns/counts') {
+    return ok(countReturnBuckets(params));
   }
 
   const orderDetail = /^\/orders\/(demo-order-[\w-]+)$/.exec(path);

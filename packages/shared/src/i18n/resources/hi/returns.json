@@ -1,0 +1,92 @@
+{
+  "returns": {
+    "title": "रिटर्न",
+    "subtitle_one": "{{count}} रिटर्न",
+    "subtitle_other": "{{count}} रिटर्न",
+    "loading": "रिटर्न लोड हो रहे हैं…",
+    "notice": "रिटर्न का जवाब eBay पर दें। यह पेज दिखाता है कि आपसे क्या अपेक्षित है और कब तक।",
+    "tabs": {
+      "all": "सभी",
+      "action": "कार्रवाई चाहिए",
+      "in_progress": "प्रगति में",
+      "closed": "बंद",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "रिटर्न की स्थिति"
+    },
+    "filters": {
+      "search": "रिटर्न आईडी, ऑर्डर आईडी या प्रोडक्ट खोजें…",
+      "allStores": "सभी स्टोर",
+      "clear": "हटाएँ",
+      "resultCount_one": "{{count}} परिणाम",
+      "resultCount_other": "{{count}} परिणाम"
+    },
+    "columns": {
+      "product": "प्रोडक्ट",
+      "return": "रिटर्न",
+      "status": "स्टेटस",
+      "due": "आपसे अपेक्षित",
+      "reason": "कारण",
+      "refund": "रिफ़ंड",
+      "opened": "खोला गया"
+    },
+    "bucket": {
+      "action_overdue": "समय-सीमा निकल गई",
+      "action_due": "कार्रवाई बाकी",
+      "escalated": "eBay को भेजा गया",
+      "in_progress": "प्रगति में",
+      "closed": "बंद"
+    },
+    "bucketHint": {
+      "action_overdue": "जिस तारीख़ तक eBay को आपके जवाब की अपेक्षा थी, वह निकल चुकी है।",
+      "action_due": "eBay इस रिटर्न पर आपकी कार्रवाई का इंतज़ार कर रहा है।",
+      "escalated": "यह रिटर्न eBay केस में बदल दिया गया है।",
+      "in_progress": "रिटर्न खुला है; अभी आपसे कुछ अपेक्षित नहीं है।",
+      "closed": "eBay ने यह रिटर्न बंद कर दिया है।"
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "रिटर्न अनुरोध स्वीकार करें",
+      "SELLER_DECLINE_REQUEST": "रिटर्न अनुरोध अस्वीकार करें",
+      "SELLER_ISSUE_REFUND": "रिफ़ंड जारी करें",
+      "SELLER_MARK_AS_RECEIVED": "लौटाए गए आइटम को प्राप्त के रूप में चिह्नित करें",
+      "SELLER_MARK_REFUND_SENT": "रिफ़ंड को भेजा गया के रूप में चिह्नित करें",
+      "SELLER_OFFER_PARTIAL_REFUND": "आंशिक रिफ़ंड की पेशकश करें",
+      "SELLER_PRINT_SHIPPING_LABEL": "शिपिंग लेबल प्रिंट करें",
+      "SELLER_PROVIDE_LABEL": "शिपिंग लेबल उपलब्ध कराएँ",
+      "SELLER_PROVIDE_RMA": "खरीदार को RMA नंबर दें",
+      "SELLER_RETRY_REFUND": "रिफ़ंड दोबारा आज़माएँ",
+      "REMINDER_FOR_REFUND": "खरीदार को रिफ़ंड करें",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "खरीदार को रिफ़ंड करें (आइटम वापस आना अपेक्षित नहीं है)",
+      "REMINDER_FOR_RMA": "RMA रिमाइंडर: eBay पर जवाब दें",
+      "REMINDER_SELLER_TO_RESPOND": "रिटर्न अनुरोध का जवाब दें",
+      "other": "eBay पर जवाब दें"
+    },
+    "dueBy": "{{date}} तक",
+    "reasonType": {
+      "CANCEL": "शिपमेंट के बाद रद्द",
+      "INSTORE": "स्टोर में रिटर्न",
+      "REMORSE": "खरीदार का मन बदल गया",
+      "SNAD": "विवरण के अनुरूप नहीं",
+      "UNKNOWN": "कारण नहीं बताया गया"
+    },
+    "refund": {
+      "refunded": "रिफ़ंड किया गया",
+      "estimated": "अनुमानित"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "ऑर्डर",
+    "viewOrder": "ऑर्डर देखें",
+    "unknownProduct": "अज्ञात प्रोडक्ट",
+    "empty": {
+      "title": "अभी कोई रिटर्न नहीं",
+      "description": "खरीदार eBay पर जो रिटर्न खोलेंगे, वे यहाँ दिखेंगे।"
+    },
+    "emptyFiltered": {
+      "title": "कोई रिटर्न आपके फ़िल्टर से मेल नहीं खाता",
+      "description": "कोई दूसरा टैब, स्टोर या खोज आज़माएँ।",
+      "action": "फ़िल्टर हटाएँ"
+    }
+  }
+}

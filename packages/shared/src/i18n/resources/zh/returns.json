@@ -1,0 +1,90 @@
+{
+  "returns": {
+    "title": "退货",
+    "subtitle_other": "{{count}} 笔退货",
+    "loading": "正在加载退货…",
+    "notice": "请在 eBay 上处理退货。此页面显示需要您做什么以及截止时间。",
+    "tabs": {
+      "all": "全部",
+      "action": "需要处理",
+      "in_progress": "进行中",
+      "closed": "已关闭",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "退货状态"
+    },
+    "filters": {
+      "search": "搜索退货编号、订单号或商品…",
+      "allStores": "所有店铺",
+      "clear": "清除",
+      "resultCount_other": "{{count}} 条结果"
+    },
+    "columns": {
+      "product": "商品",
+      "return": "退货",
+      "status": "状态",
+      "due": "待办事项",
+      "reason": "原因",
+      "refund": "退款",
+      "opened": "发起时间"
+    },
+    "bucket": {
+      "action_overdue": "已逾期",
+      "action_due": "待处理",
+      "escalated": "已升级至 eBay",
+      "in_progress": "进行中",
+      "closed": "已关闭"
+    },
+    "bucketHint": {
+      "action_overdue": "eBay 要求您回复的期限已过。",
+      "action_due": "eBay 正在等待您对此退货采取操作。",
+      "escalated": "此退货已升级为 eBay 纠纷个案。",
+      "in_progress": "退货处理中，目前无需您操作。",
+      "closed": "eBay 已关闭此退货。"
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "批准退货请求",
+      "SELLER_DECLINE_REQUEST": "拒绝退货请求",
+      "SELLER_ISSUE_REFUND": "发放退款",
+      "SELLER_MARK_AS_RECEIVED": "将退回的商品标记为已收到",
+      "SELLER_MARK_REFUND_SENT": "将退款标记为已发出",
+      "SELLER_OFFER_PARTIAL_REFUND": "提供部分退款",
+      "SELLER_PRINT_SHIPPING_LABEL": "打印运单标签",
+      "SELLER_PROVIDE_LABEL": "提供运单标签",
+      "SELLER_PROVIDE_RMA": "向买家提供 RMA 编号",
+      "SELLER_RETRY_REFUND": "重试退款",
+      "REMINDER_FOR_REFUND": "向买家退款",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "向买家退款（买家无需寄回商品）",
+      "REMINDER_FOR_RMA": "RMA 提醒：请在 eBay 上回复",
+      "REMINDER_SELLER_TO_RESPOND": "回复退货请求",
+      "other": "请在 eBay 上回复"
+    },
+    "dueBy": "截止 {{date}}",
+    "reasonType": {
+      "CANCEL": "发货后取消",
+      "INSTORE": "到店退货",
+      "REMORSE": "买家改变主意",
+      "SNAD": "与描述不符",
+      "UNKNOWN": "未说明原因"
+    },
+    "refund": {
+      "refunded": "已退款",
+      "estimated": "预计"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "订单",
+    "viewOrder": "查看订单",
+    "unknownProduct": "未知商品",
+    "empty": {
+      "title": "暂无退货",
+      "description": "买家在 eBay 上发起的退货会显示在这里。"
+    },
+    "emptyFiltered": {
+      "title": "没有符合筛选条件的退货",
+      "description": "请尝试其他标签页、店铺或搜索词。",
+      "action": "清除筛选"
+    }
+  }
+}

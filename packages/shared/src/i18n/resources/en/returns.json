@@ -1,0 +1,92 @@
+{
+  "returns": {
+    "title": "Returns",
+    "subtitle_one": "{{count}} return",
+    "subtitle_other": "{{count}} returns",
+    "loading": "Loading returns…",
+    "notice": "Respond to returns on eBay. This page shows what is due and by when.",
+    "tabs": {
+      "all": "All",
+      "action": "Needs action",
+      "in_progress": "In progress",
+      "closed": "Closed",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Return status"
+    },
+    "filters": {
+      "search": "Search return ID, order ID or product…",
+      "allStores": "All stores",
+      "clear": "Clear",
+      "resultCount_one": "{{count}} result",
+      "resultCount_other": "{{count}} results"
+    },
+    "columns": {
+      "product": "Product",
+      "return": "Return",
+      "status": "Status",
+      "due": "What is due",
+      "reason": "Reason",
+      "refund": "Refund",
+      "opened": "Opened"
+    },
+    "bucket": {
+      "action_overdue": "Overdue",
+      "action_due": "Action due",
+      "escalated": "Escalated to eBay",
+      "in_progress": "In progress",
+      "closed": "Closed"
+    },
+    "bucketHint": {
+      "action_overdue": "The date eBay expected your response by has passed.",
+      "action_due": "eBay is waiting for an action from you on this return.",
+      "escalated": "This return was escalated to an eBay case.",
+      "in_progress": "The return is open and nothing is due from you right now.",
+      "closed": "eBay has closed this return."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Approve the return request",
+      "SELLER_DECLINE_REQUEST": "Decline the return request",
+      "SELLER_ISSUE_REFUND": "Issue the refund",
+      "SELLER_MARK_AS_RECEIVED": "Mark the returned item as received",
+      "SELLER_MARK_REFUND_SENT": "Mark the refund as sent",
+      "SELLER_OFFER_PARTIAL_REFUND": "Offer a partial refund",
+      "SELLER_PRINT_SHIPPING_LABEL": "Print the shipping label",
+      "SELLER_PROVIDE_LABEL": "Provide a shipping label",
+      "SELLER_PROVIDE_RMA": "Give the buyer an RMA number",
+      "SELLER_RETRY_REFUND": "Retry the refund",
+      "REMINDER_FOR_REFUND": "Refund the buyer",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Refund the buyer (the item is not expected back)",
+      "REMINDER_FOR_RMA": "RMA reminder: respond on eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Respond to the return request",
+      "other": "Respond on eBay"
+    },
+    "dueBy": "by {{date}}",
+    "reasonType": {
+      "CANCEL": "Cancellation after shipping",
+      "INSTORE": "In-store return",
+      "REMORSE": "Buyer changed their mind",
+      "SNAD": "Not as described",
+      "UNKNOWN": "Reason not specified"
+    },
+    "refund": {
+      "refunded": "Refunded",
+      "estimated": "Estimated"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Order",
+    "viewOrder": "View order",
+    "unknownProduct": "Unknown product",
+    "empty": {
+      "title": "No returns yet",
+      "description": "Returns your buyers open on eBay will appear here."
+    },
+    "emptyFiltered": {
+      "title": "No returns match your filters",
+      "description": "Try another tab, store or search term.",
+      "action": "Clear filters"
+    }
+  }
+}

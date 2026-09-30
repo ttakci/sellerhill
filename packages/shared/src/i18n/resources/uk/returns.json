@@ -1,0 +1,96 @@
+{
+  "returns": {
+    "title": "Повернення",
+    "subtitle_one": "{{count}} повернення",
+    "subtitle_few": "{{count}} повернення",
+    "subtitle_many": "{{count}} повернень",
+    "subtitle_other": "{{count}} повернення",
+    "loading": "Завантажуємо повернення…",
+    "notice": "Відповідайте на повернення на eBay. Тут видно, що від вас потрібно і до якого терміну.",
+    "tabs": {
+      "all": "Усі",
+      "action": "Потребують дій",
+      "in_progress": "У роботі",
+      "closed": "Закриті",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Статус повернення"
+    },
+    "filters": {
+      "search": "Пошук за номером повернення, замовлення або товаром…",
+      "allStores": "Усі магазини",
+      "clear": "Скинути",
+      "resultCount_one": "{{count}} результат",
+      "resultCount_few": "{{count}} результати",
+      "resultCount_many": "{{count}} результатів",
+      "resultCount_other": "{{count}} результату"
+    },
+    "columns": {
+      "product": "Товар",
+      "return": "Повернення",
+      "status": "Статус",
+      "due": "Що потрібно",
+      "reason": "Причина",
+      "refund": "Повернення коштів",
+      "opened": "Відкрито"
+    },
+    "bucket": {
+      "action_overdue": "Термін минув",
+      "action_due": "Потрібна дія",
+      "escalated": "Передано в eBay",
+      "in_progress": "У роботі",
+      "closed": "Закрито"
+    },
+    "bucketHint": {
+      "action_overdue": "Термін, до якого eBay чекав вашої відповіді, уже минув.",
+      "action_due": "eBay чекає від вас дії щодо цього повернення.",
+      "escalated": "Це повернення переведено у спір на eBay.",
+      "in_progress": "Повернення відкрите, зараз від вас нічого не потрібно.",
+      "closed": "eBay закрив це повернення."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Схваліть запит на повернення",
+      "SELLER_DECLINE_REQUEST": "Відхиліть запит на повернення",
+      "SELLER_ISSUE_REFUND": "Оформіть повернення коштів",
+      "SELLER_MARK_AS_RECEIVED": "Позначте повернений товар як отриманий",
+      "SELLER_MARK_REFUND_SENT": "Позначте повернення коштів як надіслане",
+      "SELLER_OFFER_PARTIAL_REFUND": "Запропонуйте часткове повернення коштів",
+      "SELLER_PRINT_SHIPPING_LABEL": "Роздрукуйте транспортну етикетку",
+      "SELLER_PROVIDE_LABEL": "Надайте транспортну етикетку",
+      "SELLER_PROVIDE_RMA": "Повідомте покупцеві номер RMA",
+      "SELLER_RETRY_REFUND": "Повторіть повернення коштів",
+      "REMINDER_FOR_REFUND": "Поверніть гроші покупцеві",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Поверніть гроші покупцеві (товар назад не очікується)",
+      "REMINDER_FOR_RMA": "Нагадування про RMA: дайте відповідь на eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Дайте відповідь на запит про повернення",
+      "other": "Дайте відповідь на eBay"
+    },
+    "dueBy": "до {{date}}",
+    "reasonType": {
+      "CANCEL": "Скасування після відправлення",
+      "INSTORE": "Повернення в магазин",
+      "REMORSE": "Покупець передумав",
+      "SNAD": "Не відповідає опису",
+      "UNKNOWN": "Причину не вказано"
+    },
+    "refund": {
+      "refunded": "Повернено",
+      "estimated": "Орієнтовно"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Замовлення",
+    "viewOrder": "Відкрити замовлення",
+    "unknownProduct": "Невідомий товар",
+    "empty": {
+      "title": "Повернень поки немає",
+      "description": "Повернення, які покупці відкривають на eBay, з'являться тут."
+    },
+    "emptyFiltered": {
+      "title": "Немає повернень, що відповідають фільтрам",
+      "description": "Спробуйте іншу вкладку, магазин або запит.",
+      "action": "Скинути фільтри"
+    }
+  }
+}
