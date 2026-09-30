@@ -130,6 +130,7 @@
         "quota_exhausted": "تم بلوغ الحصة الشهرية",
         "cart": "عدم تطابق السلة",
         "review_unreadable": "تعذّرت قراءة إجمالي الطلب",
+        "interrupted": "توقّف الشراء في منتصفه — تحقّق من Amazon",
         "subscription_suspended": "الاشتراك معلّق",
         "listing_over_plan_limit": "الإدراج خارج حد الخطة",
         "order_already_fulfilled": "تم شحنه بالفعل، لا شيء لشرائه",

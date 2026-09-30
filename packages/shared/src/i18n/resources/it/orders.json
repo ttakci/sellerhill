@@ -130,6 +130,7 @@
         "quota_exhausted": "Limite mensile raggiunto",
         "cart": "Carrello non corrispondente",
         "review_unreadable": "Totale dell'ordine illeggibile",
+        "interrupted": "Acquisto interrotto — controlla Amazon",
         "subscription_suspended": "Abbonamento sospeso",
         "listing_over_plan_limit": "Inserzione oltre il limite del piano",
         "order_already_fulfilled": "Già spedito — nulla da acquistare",

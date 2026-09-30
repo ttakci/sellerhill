@@ -102,6 +102,37 @@ export function shouldSkipFulfillStart(status: AutoFulfillStatus): boolean {
   );
 }
 
+export enum FulfillStartDecision {
+  /** Terminal state already reached — no-op. */
+  SKIP = 'skip',
+  /** Nothing bought yet — run the checkout. */
+  PROCEED = 'proceed',
+  /**
+   * The row is still RUNNING while a job STARTS: the previous attempt died
+   * without cleaning up (SIGKILL on deploy, OOM, host restart). The Place
+   * Order click may already have gone out, so re-entering the checkout could
+   * buy the item twice. Fail closed: block with INTERRUPTED and let the seller
+   * check Amazon. An in-process retry never lands here — the processor resets
+   * the row to PENDING before rethrowing a transport error.
+   */
+  INTERRUPTED = 'interrupted',
+}
+
+/**
+ * The one decision a starting fulfillment job makes from the stored status.
+ * `shouldSkipFulfillStart` is kept for the SKIP half; this adds the third
+ * answer, INTERRUPTED, which the checkout turns into a blocked order.
+ */
+export function decideFulfillStart(status: AutoFulfillStatus): FulfillStartDecision {
+  if (shouldSkipFulfillStart(status)) {
+    return FulfillStartDecision.SKIP;
+  }
+  if (status === AutoFulfillStatus.RUNNING) {
+    return FulfillStartDecision.INTERRUPTED;
+  }
+  return FulfillStartDecision.PROCEED;
+}
+
 export interface ResumableOrderRow {
   ebay_order_id: string;
   auto_fulfill_status: string;

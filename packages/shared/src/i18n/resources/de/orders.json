@@ -130,6 +130,7 @@
         "quota_exhausted": "Monatskontingent erreicht",
         "cart": "Warenkorb weicht ab",
         "review_unreadable": "Bestellsumme nicht lesbar",
+        "interrupted": "Kauf unterbrochen — Amazon prüfen",
         "subscription_suspended": "Abonnement ausgesetzt",
         "listing_over_plan_limit": "Angebot außerhalb des Tariflimits",
         "order_already_fulfilled": "Bereits versendet – nichts zu kaufen",

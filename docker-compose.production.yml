@@ -34,6 +34,11 @@ services:
       context: .
       dockerfile: Dockerfile.api
     restart: unless-stopped
+    # On SIGTERM main.ts runs app.close(), and the BullMQ workers wait for
+    # their active job — an Amazon checkout that may be seconds from "Place
+    # Order". Docker's default 10 s would SIGKILL that wait; give a deploy
+    # long enough for the job to finish (a checkout takes minutes).
+    stop_grace_period: 5m
     environment:
       NODE_ENV: production
       PORT: 3000
