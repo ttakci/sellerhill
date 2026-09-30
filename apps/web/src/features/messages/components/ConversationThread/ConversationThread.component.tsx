@@ -88,7 +88,7 @@ export const ConversationThread = ({
           </S.StateSlot>
         ) : (
           messages.map((message) => (
-            <S.Bubble key={message.id} $mine={message.isMine}>
+            <S.Bubble key={message.id} $mine={message.isMine} $wide={message.bodyIsHtml}>
               <S.BubbleMeta>
                 <Text variant="caption" weight="semibold" color={message.isMine ? 'brand.primary' : 'text.primary'}>
                   {message.senderLabel}

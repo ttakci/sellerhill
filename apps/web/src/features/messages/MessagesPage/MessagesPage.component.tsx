@@ -134,6 +134,7 @@ export const MessagesPageComponent = ({
           {pagination && (
             <TablePagination
               variant="footer"
+              compact
               count={pagination.count}
               page={pagination.page}
               rowsPerPage={pagination.rowsPerPage}

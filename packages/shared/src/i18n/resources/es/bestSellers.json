@@ -33,6 +33,7 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Aún sin calificación",
+    "rankChange": "{{sign}}{{value}}%",
     "allowance": "Te quedan {{remaining}} de {{limit}} productos en este período",
     "allowanceUnlimited": "Vistas de productos ilimitadas",
     "allowanceHint": "Cada producto que ves cuenta una vez por período; volver a abrir la misma lista hoy no se cuenta dos veces.",
@@ -49,7 +50,17 @@
       "product": "Producto",
       "price": "Precio",
       "rating": "Calificación",
-      "reviews": "Reseñas"
+      "reviews": "Reseñas",
+      "rankChange": "Cambio de posición (24 h)"
+    },
+    "filters": {
+      "anyRating": "Cualquier calificación",
+      "ratingAtLeast": "{{value}}+ estrellas",
+      "minReviews": "Reseñas mín.",
+      "priceMin": "Precio mín.",
+      "priceMax": "Precio máx.",
+      "clear": "Borrar filtros",
+      "resultCount": "{{shown}} de {{total}} productos en esta página"
     },
     "states": {
       "loading": {
@@ -59,6 +70,10 @@
       "empty": {
         "title": "No hay productos en esta página",
         "description": "Esta lista no tiene nada que mostrar aquí. Prueba otra categoría u otra lista."
+      },
+      "noMatches": {
+        "title": "Ningún producto coincide con tus filtros",
+        "description": "Afloja un filtro para ver más de esta lista. Los filtros se aplican a los productos de esta página."
       },
       "notFound": {
         "title": "Esta categoría no está disponible",

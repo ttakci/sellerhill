@@ -36,11 +36,16 @@ const { renderListingTemplate } = require(
 );
 
 const CATALOG_MIGRATION = path.resolve(__dirname, '../apps/api/migrations/073_dropshipping_templates_catalog.sql');
+const CATALOG_SEASONAL = path.resolve(__dirname, '../apps/api/migrations/126_dropshipping_templates_catalog_seasonal.sql');
+const CATALOG_MORE = path.resolve(__dirname, '../apps/api/migrations/127_dropshipping_templates_catalog_more.sql');
 const OUT_DIR = process.env.OUT_DIR ?? path.resolve(__dirname, '../apps/web/public/landing-screens/templates');
 const SAMPLES_MIGRATION = path.resolve(__dirname, '../apps/api/migrations/122_template_sample_products.sql');
 const DEMO_CATALOG = path.resolve(__dirname, '../apps/web/public/template-samples/catalog.json');
 
-const sql = fs.readFileSync(CATALOG_MIGRATION, 'utf8');
+let sql = fs.readFileSync(CATALOG_MIGRATION, 'utf8') + fs.readFileSync(CATALOG_SEASONAL, 'utf8');
+if (fs.existsSync(CATALOG_MORE)) {
+  sql += fs.readFileSync(CATALOG_MORE, 'utf8');
+}
 /** `replace(html_content, 'from', 'to') … WHERE slug = 'x'` patches from later migrations. */
 const HTML_FIX_MIGRATIONS = ['123_tech_gadgets_image_fit.sql'];
 const HTML_FIXES = HTML_FIX_MIGRATIONS.flatMap((file) => {
@@ -69,12 +74,36 @@ function templateHtml(slug) {
  * same product. Output file = slug without the `ds-` prefix.
  */
 function templateSamples() {
-  const src = fs.readFileSync(SAMPLES_MIGRATION, 'utf8');
+  const src1 = fs.readFileSync(SAMPLES_MIGRATION, 'utf8');
+  const src2 = fs.readFileSync(CATALOG_SEASONAL, 'utf8');
   const tag = '$template_samples$';
-  const start = src.indexOf(tag);
-  const end = src.indexOf(tag, start + tag.length);
-  if (start < 0 || end < 0) throw new Error(`Sample data not found in ${SAMPLES_MIGRATION}`);
-  return JSON.parse(src.slice(start + tag.length, end));
+  
+  const start1 = src1.indexOf(tag);
+  const end1 = src1.indexOf(tag, start1 + tag.length);
+  const samples1 = JSON.parse(src1.slice(start1 + tag.length, end1));
+  
+  let samples2 = {};
+  const start2 = src2.indexOf(tag);
+  if (start2 >= 0) {
+    const end2 = src2.indexOf(tag, start2 + tag.length);
+    if (end2 >= 0) {
+      samples2 = JSON.parse(src2.slice(start2 + tag.length, end2));
+    }
+  }
+  
+  let samples3 = {};
+  if (fs.existsSync(CATALOG_MORE)) {
+    const src3 = fs.readFileSync(CATALOG_MORE, 'utf8');
+    const start3 = src3.indexOf(tag);
+    if (start3 >= 0) {
+      const end3 = src3.indexOf(tag, start3 + tag.length);
+      if (end3 >= 0) {
+        samples3 = JSON.parse(src3.slice(start3 + tag.length, end3));
+      }
+    }
+  }
+  
+  return { ...samples1, ...samples2, ...samples3 };
 }
 const samples = templateSamples();
 

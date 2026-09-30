@@ -1,8 +1,9 @@
-import { formatCurrency, formatDate, getLocaleConfig, type ViewMode } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { ORDER_STAGE_TABS, OrderStageTab } from '@repo/shared';
+import { formatCurrency, formatDate, getLocaleConfig, type TabNavItem, type ViewMode } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useGetOrdersQuery } from '../api/orders.api';
+import { useGetOrderStageCountsQuery, useGetOrdersQuery } from '../api/orders.api';
 
 import { useOrdersColumns } from './hooks/useOrdersColumns';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
@@ -25,14 +26,14 @@ export const OrdersAllPageContainer: React.FC = () => {
     handleRowsPerPageChange,
     searchInput,
     handleSearchChange,
-    status,
-    handleStatusChange,
-    statusOptions,
     ebayAccountId,
     handleEbayAccountChange,
-    fulfillmentState,
-    fulfillmentStateOptions,
-    handleFulfillmentStateChange,
+    tab,
+    handleTabChange,
+    hasUrlSelection,
+    stage,
+    stageOptions,
+    handleStageChange,
     trackingState,
     trackingOptions,
     handleTrackingStateChange,
@@ -60,6 +61,49 @@ export const OrdersAllPageContainer: React.FC = () => {
   });
   const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const totalCount = data?.total ?? 0;
+
+  /* The tab counts describe the whole store (or the filtered store / link
+     state), never the current tab or search — they are what makes the rail
+     legible, not a second result count. */
+  const { data: stageCounts } = useGetOrderStageCountsQuery(
+    {
+      ebayAccountId: ebayAccountId || undefined,
+      isTracked: serverQuery.isTracked,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  const countFor = useCallback(
+    (tabId: OrderStageTab): number =>
+      stageCounts ? ORDER_STAGE_TABS[tabId].reduce((sum, s) => sum + (stageCounts[s] ?? 0), 0) : 0,
+    [stageCounts]
+  );
+
+  const tabItems = useMemo<TabNavItem[]>(
+    () =>
+      Object.values(OrderStageTab).map((tabId) => ({
+        id: tabId,
+        label:
+          tabId === OrderStageTab.ALL
+            ? t(`orders.stageTabs.${tabId}`)
+            : t('orders.stageTabs.withCount', { label: t(`orders.stageTabs.${tabId}`), count: countFor(tabId) }),
+      })),
+    [countFor, t]
+  );
+
+  /* Open on "Needs action" when something is waiting and the URL chose
+     nothing — once per mount, so a seller who then clicks "All" is not
+     bounced back on the next refetch. */
+  const defaultedTab = useRef(false);
+  useEffect(() => {
+    if (defaultedTab.current || !stageCounts || hasUrlSelection) {
+      return;
+    }
+    defaultedTab.current = true;
+    if (tab === OrderStageTab.ALL && countFor(OrderStageTab.ACTION) > 0) {
+      handleTabChange(OrderStageTab.ACTION);
+    }
+  }, [stageCounts, hasUrlSelection, tab, countFor, handleTabChange]);
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
@@ -94,7 +138,7 @@ export const OrdersAllPageContainer: React.FC = () => {
       t('orders.table.orderNumber'),
       t('orders.table.date'),
       t('orders.table.buyer'),
-      t('orders.table.status'),
+      t('orders.stageLegend.columnStage'),
       t('orders.table.salePrice'),
       t('orders.table.purchasePrice'),
       t('orders.table.netProfit'),
@@ -105,7 +149,7 @@ export const OrdersAllPageContainer: React.FC = () => {
         o.ebayOrderId,
         new Date(o.createdAt).toLocaleDateString(localeCfg.locale),
         o.buyerName ?? '',
-        o.status,
+        t(`orders.stage.${o.stage}.label`),
         o.salePrice,
         o.purchasePrice,
         o.netProfit,
@@ -144,15 +188,15 @@ export const OrdersAllPageContainer: React.FC = () => {
         }}
         search={searchInput}
         onSearchChange={handleSearchChange}
-        status={status}
-        onStatusChange={handleStatusChange}
-        statusOptions={statusOptions}
+        tab={tab}
+        tabItems={tabItems}
+        onTabChange={handleTabChange}
+        stage={stage}
+        onStageChange={handleStageChange}
+        stageOptions={stageOptions}
         ebayAccountId={ebayAccountId}
         onEbayAccountChange={handleEbayAccountChange}
         storeOptions={storeOptions}
-        fulfillmentState={fulfillmentState}
-        onFulfillmentStateChange={handleFulfillmentStateChange}
-        fulfillmentStateOptions={fulfillmentStateOptions}
         trackingState={trackingState}
         onTrackingStateChange={handleTrackingStateChange}
         trackingStateOptions={trackingOptions}

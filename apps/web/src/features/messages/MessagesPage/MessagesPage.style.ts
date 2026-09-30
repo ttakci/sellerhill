@@ -114,7 +114,7 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   }
 
   @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+    grid-template-columns: minmax(18rem, 28rem) minmax(0, 1fr);
 
     & > [data-pane='list'],
     & > [data-pane='thread'] {
@@ -123,7 +123,7 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   }
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
-    grid-template-columns: 13rem minmax(16rem, 20rem) minmax(0, 1fr);
+    grid-template-columns: 11rem minmax(24rem, 28rem) minmax(0, 1fr);
 
     & > [data-pane='rail'] {
       display: flex;

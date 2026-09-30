@@ -1,18 +1,11 @@
 import type { OrderDto } from '@repo/shared';
-import {
-  Button,
-  DataTable,
-  EmptyState,
-  PageHeader,
-  SearchField,
-  Select,
-  Text,
-} from '@repo/ui';
+import { Button, DataTable, EmptyState, PageHeader, SearchField, Select, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { toOrderCardProps } from '../shared/order-card.mapper';
 import { OrderCard } from '../shared/OrderCard';
+import { OrderStageLegend } from '../shared/OrderStageLegend';
 
 import * as S from './OrdersAllPage.style';
 import type { OrdersAllPageProps } from './OrdersAllPage.types';
@@ -25,15 +18,15 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   pagination,
   search,
   onSearchChange,
-  status,
-  onStatusChange,
-  statusOptions,
+  tab,
+  tabItems,
+  onTabChange,
+  stage,
+  onStageChange,
+  stageOptions,
   ebayAccountId,
   onEbayAccountChange,
   storeOptions,
-  fulfillmentState,
-  onFulfillmentStateChange,
-  fulfillmentStateOptions,
   trackingState,
   onTrackingStateChange,
   trackingStateOptions,
@@ -51,14 +44,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
 
   const renderGridCard = (order: OrderDto) => {
     const card = toOrderCardProps(order, t, formatCurrency, formatDate);
-    return (
-      <OrderCard
-        key={order.id}
-        {...card}
-        onClick={() => onOrderClick(order.id)}
-        hoverEffect={false}
-      />
-    );
+    return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} hoverEffect={false} />;
   };
 
   return (
@@ -76,6 +62,19 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         backAriaLabel={t('translation:common.back')}
       />
 
+      {/* One rail answers "what needs me / what is in flight / what is done";
+          the legend beside it explains every badge the table can show. */}
+      <S.TabsRow>
+        <TabNav
+          items={tabItems}
+          value={tab}
+          onChange={onTabChange}
+          variant="underline"
+          ariaLabel={t('orders.stageLegend.columnStage')}
+        />
+        <OrderStageLegend />
+      </S.TabsRow>
+
       <S.FilterBar>
         <S.FilterBarRow>
           <S.SearchWrapper>
@@ -89,10 +88,10 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
           </S.SearchWrapper>
           <S.SelectWrapper>
             <Select
-              value={status}
-              onChange={onStatusChange}
-              options={statusOptions}
-              placeholder={t('orders.filters.allStatuses')}
+              value={stage}
+              onChange={onStageChange}
+              options={stageOptions}
+              placeholder={t('orders.filters.allStages')}
               size="medium"
               fullWidth
             />
@@ -103,16 +102,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onEbayAccountChange}
               options={storeOptions}
               placeholder={t('orders.filters.allStores')}
-              size="medium"
-              fullWidth
-            />
-          </S.SelectWrapper>
-          <S.SelectWrapper>
-            <Select
-              value={fulfillmentState}
-              onChange={onFulfillmentStateChange}
-              options={fulfillmentStateOptions}
-              placeholder={t('orders.fulfillmentState.filter.all')}
               size="medium"
               fullWidth
             />

@@ -283,3 +283,59 @@ describe('BestSellersService — product allowance', () => {
     expect(ledger.repository.recordBestSellersView).not.toHaveBeenCalled();
   });
 });
+
+describe('BestSellersService — department list without products', () => {
+  const DEPARTMENTS = [
+    { name: 'Any Department', path: null, link: null, isSelected: true, isRoot: true },
+    { name: 'Electronics', path: 'electronics', link: null, isSelected: false, isRoot: false },
+  ];
+
+  function rootWithDepartments(): ScraperBestSellersResponse {
+    return {
+      outcome: SourceFetchOutcome.FOUND,
+      fetchedAt: '2026-09-29T10:00:00.000Z',
+      list: { ...listOf(50), categories: DEPARTMENTS },
+    };
+  }
+
+  it('returns the root page\'s categories and charges nothing against the allowance', async () => {
+    const { service, ledger, client } = build({ limit: 100, scraper: rootWithDepartments() });
+
+    const result = await service.getCategories(USER, { listType: BestSellersListType.NEW_RELEASES });
+
+    expect(result).toEqual({ outcome: SourceFetchOutcome.FOUND, categories: DEPARTMENTS });
+    expect(client.fetchBestSellers).toHaveBeenCalledWith(
+      expect.objectContaining({ listType: BestSellersListType.NEW_RELEASES, category: '', page: 1 }),
+    );
+    expect(ledger.repository.recordBestSellersView).not.toHaveBeenCalled();
+    expect(ledger.sum()).toBe(0);
+  });
+
+  it('shares the root page cache with getPage, which still charges the products it shows', async () => {
+    const { service, ledger, client } = build({ limit: 100, scraper: rootWithDepartments() });
+
+    await service.getCategories(USER, {});
+    const page = await service.getPage(USER, {});
+
+    expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
+    expect(page.cachedAt).toBe('2026-09-29T10:00:00.000Z');
+    expect(ledger.sum()).toBe(50);
+  });
+
+  it('a suspended seller (limit 0) still gets the tree, which shows no product', async () => {
+    const { service } = build({ limit: 0, scraper: rootWithDepartments() });
+
+    const result = await service.getCategories(USER, {});
+
+    expect(result.categories).toEqual(DEPARTMENTS);
+  });
+
+  it('makes no scraper call without a proxy and answers an empty tree', async () => {
+    const { service, client } = build({ limit: 100, proxies: [] });
+
+    const result = await service.getCategories(USER, {});
+
+    expect(result).toEqual({ outcome: SourceFetchOutcome.NO_PROXY, categories: [] });
+    expect(client.fetchBestSellers).not.toHaveBeenCalled();
+  });
+});

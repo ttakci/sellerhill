@@ -14,10 +14,17 @@
  * department list, and every department-scoped answer becomes that
  * department's children, both keyed per list type (Movers & Shakers does not
  * carry the same departments as Best Sellers).
+ *
+ * A page opened straight into a department (deep link, reload, back button)
+ * never saw the root answer, so the department level would be empty. Then,
+ * and only then, the hook asks `GET /best-sellers/categories` for the root
+ * department list alone: no products, so nothing is taken from the seller's
+ * allowance for a list they did not open.
  */
 import { BEST_SELLERS_ROOT_CATEGORY, type BestSellersCategoryDto, type BestSellersListType } from '@repo/shared';
 import { useState } from 'react';
 
+import { useGetBestSellersCategoriesQuery } from '../api/bestSellersApi';
 import type { BestSellersCategoryTreeListTypeBucket, BestSellersCategoryTreeState } from '../bestSellers.types';
 
 /** A category alias's department is its first path segment. */
@@ -60,6 +67,22 @@ export function useBestSellersCategoryTree(
         }));
       }
     }
+  }
+
+  // Department level still unknown on a non-root page: fetch it on its own.
+  // Skipped the moment departments are cached, so it runs at most once per
+  // list type and session, and never on the root page (which carries them).
+  const hasDepartments = (byListType[listType]?.departments.length ?? 0) > 0;
+  const { currentData: rootAnswer } = useGetBestSellersCategoriesQuery(
+    { listType },
+    { skip: category === BEST_SELLERS_ROOT_CATEGORY || hasDepartments },
+  );
+  const rootDepartments = rootAnswer?.categories;
+  if (!hasDepartments && rootDepartments && rootDepartments.length > 0) {
+    setByListType((prev) => ({
+      ...prev,
+      [listType]: { departments: rootDepartments, childrenByDepartment: prev[listType]?.childrenByDepartment ?? {} },
+    }));
   }
 
   // Which department is open. Default is "whichever contains the active

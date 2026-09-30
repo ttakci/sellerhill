@@ -223,7 +223,9 @@ describe('buildFulfillmentStateSql', () => {
     const matches = Object.values(OrderFulfillmentState).filter(
       (state) => evaluateCase(sql, row, ALIAS) === state,
     );
-    expect(matches).toEqual([OrderFulfillmentState.ACTION_REQUIRED]);
+    // Exactly ONE state — and since 2026-09-29 a blocked purchase the seller
+    // then linked by hand is MANUAL (resolved), not action-required.
+    expect(matches).toEqual([OrderFulfillmentState.MANUAL]);
   });
 
   it('honours the caller alias so it can be embedded in any query', () => {

@@ -43,11 +43,7 @@ function isSettled(status: OrderStatus): boolean {
  * unfulfilled is the expensive direction to be wrong in.
  */
 export function isOrderAlreadyFulfilled(status: OrderStatus): boolean {
-  return (
-    status === OrderStatus.SHIPPED ||
-    status === OrderStatus.COMPLETED ||
-    status === OrderStatus.PROCESSING
-  );
+  return status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED || status === OrderStatus.PROCESSING;
 }
 
 /**
@@ -74,9 +70,7 @@ export function isOrderAlreadyFulfilled(status: OrderStatus): boolean {
  * here MUST be made there too — `fulfillment-state-sql.guard.spec.ts` fails the
  * build if the two fall out of step.
  */
-export function deriveFulfillmentState(
-  input: FulfillmentStateInput,
-): OrderFulfillmentState {
+export function deriveFulfillmentState(input: FulfillmentStateInput): OrderFulfillmentState {
   const settled = isSettled(input.status);
 
   if (input.amazonCancelledAt) {
@@ -91,6 +85,14 @@ export function deriveFulfillmentState(
       return OrderFulfillmentState.PURCHASED;
     case AutoFulfillStatus.BLOCKED:
     case AutoFulfillStatus.FAILED:
+      // A blocked purchase the seller then linked by hand IS resolved — the
+      // Amazon order exists. Reporting it as still action-required kept the
+      // first live order (blocked on `address`, then linked manually,
+      // 2026-09-29) in the Action Center under "Action required" with nothing
+      // left to do.
+      if (input.amazonOrderId) {
+        return OrderFulfillmentState.MANUAL;
+      }
       // Same rule as (0): automation failed, but the sale closed anyway, so the
       // seller handled it and there is nothing left to act on.
       return settled ? OrderFulfillmentState.MANUAL : OrderFulfillmentState.ACTION_REQUIRED;
@@ -102,9 +104,7 @@ export function deriveFulfillmentState(
     case AutoFulfillStatus.SKIPPED:
       // Automation declined this order (gate off / no eligible account). If the
       // seller bought it by hand anyway, that is the more useful label.
-      return input.amazonOrderId
-        ? OrderFulfillmentState.MANUAL
-        : OrderFulfillmentState.NOT_AUTOMATED;
+      return input.amazonOrderId ? OrderFulfillmentState.MANUAL : OrderFulfillmentState.NOT_AUTOMATED;
     default:
       break;
   }

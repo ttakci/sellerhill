@@ -212,21 +212,48 @@ export const StateCard = styled(Card)`
   width: 100%;
 `;
 
-/** Vertical rhythm for a SettingsCard body with multiple top-level children
- *  (a sub-heading + its row list, a row list + its action button). */
+/**
+ * ONE row unit for the three section cards (customer / eBay / Amazon).
+ * Every row, group label and the address block below is a whole multiple of it
+ * and the cards' bodies all start at the same y, so a row (and its divider) in
+ * one card lines up with the same-numbered row in its neighbours when the
+ * cards sit side by side. Rows are `height`, not `padding`, for that reason —
+ * padding-driven rows drift with font metrics. Anything taller than its slot
+ * (a long address) only pushes the rows BELOW it down; nothing overflows.
+ */
+const ROW = tkn('controls.height.mediumLabeled');
+
+/** Vertical stack for a SettingsCard body. No gap between rows: the gap
+ *  would break the shared row rhythm (see ROW). */
 export const SectionContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  gap: 0;
+`;
+
+/** Space above a card's action buttons, kept out of the row rhythm so it
+ *  cannot shift the rows above it. */
+export const SectionActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.md')};
 `;
 
 /** Row list — matches the listing detail page's Meta rows exactly (same
- *  border, padding, icon+label pairing) so the two detail pages read as one
+ *  border, icon+label pairing) so the two detail pages read as one
  *  design language. */
 export const MetaList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
+
+  /* Every row keeps its divider — including the last row of a list that a
+     group label follows — so dividers line up across the three cards. Only
+     the card's very last row drops it (nothing sits under it). */
+  &:last-child > *:last-child {
+    border-bottom: none;
+  }
 `;
 
 export const MetaRow = styled.div`
@@ -234,12 +261,19 @@ export const MetaRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.md')} 0;
+  height: ${ROW};
+  box-sizing: border-box;
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+`;
 
-  &:last-child {
-    border-bottom: none;
-  }
+/** A group label ("What your buyer paid", "Selling costs") — one full row
+ *  unit tall so the rows after it stay on the shared grid. */
+export const GroupLabel = styled.div`
+  display: flex;
+  align-items: flex-end;
+  height: ${ROW};
+  padding-bottom: ${tkn('spacing.sm')};
+  box-sizing: border-box;
 `;
 
 /** Icon + label, left side of a Meta row. */
@@ -262,16 +296,16 @@ export const MetaValue = styled.div`
  * of beside it — for content that reads better left-aligned across several
  * lines (a shipping address, an email + phone pair) than squeezed right.
  */
-export const MetaBlockRow = styled.div`
+export const MetaBlockRow = styled.div<{ $rows?: number }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
+  /* min-height, not height: an address longer than its slot grows the row
+     instead of overflowing it. */
+  min-height: calc(${ROW} * ${({ $rows = 1 }) => $rows});
   padding: ${tkn('spacing.md')} 0;
+  box-sizing: border-box;
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
-
-  &:last-child {
-    border-bottom: none;
-  }
 `;
 
 export const MetaBlockValue = styled.div`
@@ -284,6 +318,14 @@ export const AddressBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
+`;
+
+/** Phone line under the ship-to address: icon + copyable number, on one row. */
+export const AddressPhoneRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  margin-top: ${tkn('spacing.2xs')};
 `;
 
 export const MobileActionBar = styled.div`

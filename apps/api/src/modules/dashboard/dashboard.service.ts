@@ -255,10 +255,25 @@ export class DashboardService {
 
   /**
    * Shared SELECT fragment for period aggregates.
+   *
+   * THE DASHBOARD DESCRIBES THE BUSINESS SELLERHILL MANAGES, NOT THE WHOLE
+   * eBAY STORE. Every figure is scoped to TRACKED orders — rows whose eBay item
+   * matched a SellerHill listing at ingest (`listing_id IS NOT NULL`, the same
+   * predicate `OrdersService` uses for its `tracked` filter and `recomputeProfit`
+   * inverts to set `cost_capture_status = 'untracked'`). An untracked order has
+   * no product cost and never can (eBay's payload carries no ASIN), so letting
+   * it into the totals inflated Sales/Payout while contributing nothing to
+   * profit, and — worse — counted its whole payout as gross profit and ROI
+   * because its `purchase_price` is 0. Those orders stay visible on the Orders
+   * page ("Not tracked") and in the Action Center's untracked-sales item; the
+   * one figure they contribute here is `orders_untracked`, the count the card
+   * shows as "excluded", so a seller comparing the two screens is never left
+   * wondering where their orders went.
+   *
    * Splits profit/revenue into confidence tiers by `cost_capture_status`:
    *   - confirmed   = linked (trusted Amazon costs scraped)
    *   - provisional = product-only costs (purchase price known, tax/shipping pending)
-   *   - uncosted    = pending/failed/untracked (revenue only, no reliable cost basis)
+   *   - uncosted    = pending/failed (revenue only, no reliable cost basis yet)
    */
   private periodSelect(): string {
     const c = OrderStatus.CANCELLED;
@@ -266,22 +281,22 @@ export class DashboardService {
     const provisional = OrderCostCaptureStatus.PROVISIONAL;
     const pending = OrderCostCaptureStatus.PENDING;
     const failed = OrderCostCaptureStatus.FAILED;
-    const untracked = OrderCostCaptureStatus.UNTRACKED;
-    const live = `WHERE status <> '${c}'`;
+    const tracked = 'listing_id IS NOT NULL';
+    const live = `WHERE status <> '${c}' AND ${tracked}`;
     return `
       COALESCE(SUM(sale_total) FILTER (${live}), 0) AS sales,
       COUNT(*) FILTER (${live}) AS orders,
       COALESCE(SUM(quantity) FILTER (${live}), 0) AS units,
-      COUNT(*) FILTER (WHERE status = '${c}') AS refunds,
+      COUNT(*) FILTER (WHERE status = '${c}' AND ${tracked}) AS refunds,
       COALESCE(SUM(COALESCE(ebay_earnings, 0) - COALESCE(purchase_price, 0))
         FILTER (${live}), 0) AS gross_profit,
       COALESCE(SUM(COALESCE(ebay_earnings, 0)) FILTER (${live}), 0) AS payout,
       COALESCE(SUM(net_profit) FILTER (${live} AND cost_capture_status = '${linked}'), 0) AS profit_confirmed,
       COALESCE(SUM(net_profit) FILTER (${live} AND cost_capture_status = '${provisional}'), 0) AS profit_provisional,
-      COALESCE(SUM(sale_total) FILTER (${live} AND cost_capture_status IN ('${pending}','${failed}','${untracked}')), 0) AS revenue_uncosted,
+      COALESCE(SUM(sale_total) FILTER (${live} AND cost_capture_status IN ('${pending}','${failed}')), 0) AS revenue_uncosted,
       COUNT(*) FILTER (${live} AND cost_capture_status = '${pending}') AS orders_pending_capture,
       COUNT(*) FILTER (${live} AND cost_capture_status = '${failed}') AS orders_capture_failed,
-      COUNT(*) FILTER (${live} AND cost_capture_status = '${untracked}') AS orders_untracked,
+      COUNT(*) FILTER (WHERE status <> '${c}' AND listing_id IS NULL) AS orders_untracked,
       COALESCE(SUM(COALESCE(purchase_price, 0)) FILTER (${live}), 0) AS cost_of_goods,
       COALESCE(SUM(COALESCE(transaction_fee, 0)) FILTER (${live}), 0) AS transaction_fees,
       COALESCE(SUM(COALESCE(ad_fee, 0)) FILTER (${live}), 0) AS ad_fees,

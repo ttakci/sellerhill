@@ -1,14 +1,23 @@
-import {
-  OrderFulfillmentState,
-  OrderStatus,
-  type OrderFiltersDto,
-} from '@repo/shared';
+import { ORDER_STAGE_TABS, OrderStage, OrderStageTab, type OrderFiltersDto } from '@repo/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
+import { SELLER_VISIBLE_ORDER_STAGES } from '../../shared/order-stage';
+
+const isTab = (value: string): value is OrderStageTab => (Object.values(OrderStageTab) as string[]).includes(value);
+
+const isStage = (value: string): value is OrderStage => (Object.values(OrderStage) as string[]).includes(value);
+
 /**
- * Orders list UI filters + server query DTO (search debounce, status, store, page, date range).
+ * Orders list UI filters + server query DTO (search debounce, stage tab +
+ * stage select, store, listing-link, page, date range).
+ *
+ * The eBay status and the Amazon-fulfillment selects are gone: both were
+ * folded into ONE seller-facing stage (`OrderStage`), which the counted tabs
+ * group and the Status select narrows. Tabs and select both write `?stage=` /
+ * `?tab=` so a link from the Action Center (`/orders?stage=purchase_blocked`)
+ * lands filtered instead of on all 400 orders.
  */
 export function useOrdersFilters() {
   const { t } = useTranslation(['orders', 'translation']);
@@ -18,21 +27,22 @@ export function useOrdersFilters() {
   const dateTo = searchParams.get('dateTo') ?? '';
   const fromDashboard = searchParams.get('from') === 'dashboard';
   const storeFromUrl = searchParams.get('store') ?? '';
-  /**
-   * Deep-link target for the Action Center: every one of its order rows links
-   * here with the state it counted (`?fulfillmentState=action_required`). This
-   * was local-only state, so those links landed on an unfiltered list showing
-   * every order — the seller was told "3 need you" and handed all 400.
-   */
-  const fulfillmentStateFromUrl = searchParams.get('fulfillmentState') ?? '';
+  const stageFromUrl = searchParams.get('stage') ?? '';
+  const tabFromUrl = searchParams.get('tab') ?? '';
+  /** True when the URL already expresses an intent — a tab, a stage, or any
+   *  deep-link filter (the dashboard's "view all" carries dates + tracking).
+   *  Only a bare `/orders` may be opened on "Needs action" by the container. */
+  const hasUrlSelection = Boolean(
+    stageFromUrl || tabFromUrl || dateFrom || dateTo || fromDashboard || storeFromUrl || searchParams.get('tracking')
+  );
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
-  const [fulfillmentState, setFulfillmentState] = useState(fulfillmentStateFromUrl);
+  const [stage, setStage] = useState(isStage(stageFromUrl) ? stageFromUrl : '');
+  const [tab, setTab] = useState<OrderStageTab>(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
   const [trackingState, setTrackingState] = useState(() => searchParams.get('tracking') ?? '');
 
   // Sync store from URL (e.g. deep-link from dashboard)
@@ -40,12 +50,17 @@ export function useOrdersFilters() {
     setEbayAccountId(storeFromUrl);
   }, [storeFromUrl]);
 
-  // Same for the fulfillment state, so navigating between two Action Center
-  // rows re-filters instead of keeping the first one's selection.
+  // Same for the stage, so navigating between two Action Center rows
+  // re-filters instead of keeping the first one's selection.
   useEffect(() => {
-    setFulfillmentState(fulfillmentStateFromUrl);
+    setStage(isStage(stageFromUrl) ? stageFromUrl : '');
     setPage(1);
-  }, [fulfillmentStateFromUrl]);
+  }, [stageFromUrl]);
+
+  useEffect(() => {
+    setTab(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
+    setPage(1);
+  }, [tabFromUrl]);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -55,55 +70,19 @@ export function useOrdersFilters() {
     return () => window.clearTimeout(handle);
   }, [searchInput]);
 
-  /**
-   * eBay-side statuses the sync can actually produce. `mapOrderStatus` only ever
-   * writes these four, and `completed` is set later by the Amazon tracker;
-   * `cancelled` is never written at all. Offering the full enum meant two of the
-   * six options could only ever return an empty list, which read as a broken
-   * filter.
-   */
-  const statusOptions = useMemo(
+  const stageOptions = useMemo(
     () => [
-      { value: '', label: t('orders.filters.allStatuses') },
-      ...[
-        OrderStatus.PENDING,
-        OrderStatus.WAITING_SHIPMENT,
-        OrderStatus.PROCESSING,
-        OrderStatus.SHIPPED,
-        OrderStatus.COMPLETED,
-      ].map((s) => ({ value: s, label: t(`orders.status.${s}`) })),
-    ],
-    [t]
-  );
-
-  /**
-   * Amazon-fulfillment filter. Replaces the old two-value dropdown ("All" /
-   * "Needs attention"), which could not answer the question sellers actually
-   * have — which orders were bought on Amazon, which are still queued, which are
-   * stuck — and whose "Needs attention" option looked broken whenever nothing
-   * was blocked.
-   */
-  const fulfillmentStateOptions = useMemo(
-    () => [
-      { value: '', label: t('orders.fulfillmentState.filter.all') },
-      ...[
-        OrderFulfillmentState.ACTION_REQUIRED,
-        OrderFulfillmentState.AMAZON_CANCELLED,
-        OrderFulfillmentState.PURCHASED,
-        OrderFulfillmentState.IN_PROGRESS,
-        OrderFulfillmentState.NOT_AUTOMATED,
-        OrderFulfillmentState.MANUAL,
-        OrderFulfillmentState.SIMULATED,
-      ].map((s) => ({ value: s, label: t(`orders.fulfillmentState.${s}`) })),
+      { value: '', label: t('orders.filters.allStages') },
+      ...SELLER_VISIBLE_ORDER_STAGES.map((s) => ({ value: s, label: t(`orders.stage.${s}.label`) })),
     ],
     [t]
   );
 
   /**
    * Whether the order matched a SellerHill listing at all — independent of
-   * `fulfillmentState`. A matched order can still report `not_automated`
-   * (auto-fulfill simply off/pending), so that dropdown alone cannot answer
-   * "is this even one of ours" for a seller migrating in existing eBay sales.
+   * the stage. A matched order can still be "to purchase" (automation simply
+   * off), so the stage alone cannot answer "is this even one of ours" for a
+   * seller migrating in existing eBay sales.
    */
   const trackingOptions = useMemo(
     () => [
@@ -115,7 +94,7 @@ export function useOrdersFilters() {
   );
 
   const hasActiveFilters = Boolean(
-    search || status || ebayAccountId || dateFrom || dateTo || fulfillmentState || trackingState,
+    search || ebayAccountId || dateFrom || dateTo || stage || tab !== OrderStageTab.ALL || trackingState
   );
 
   const serverQuery: OrderFiltersDto = useMemo(
@@ -123,25 +102,20 @@ export function useOrdersFilters() {
       page,
       limit: rowsPerPage,
       search: search || undefined,
-      status: (status as OrderStatus) || undefined,
       ebayAccountId: ebayAccountId || undefined,
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
-      fulfillmentState: (fulfillmentState as OrderFulfillmentState) || undefined,
+      // The select narrows to one stage; otherwise the tab's group applies.
+      stages: stage ? [stage as OrderStage] : tab === OrderStageTab.ALL ? undefined : [...ORDER_STAGE_TABS[tab]],
       isTracked: trackingState === 'tracked' ? true : trackingState === 'untracked' ? false : undefined,
-      sortBy: 'order_date',
-      sortOrder: 'desc',
+      // No sortBy on purpose: the API then floats the stages that need the
+      // seller to the top, then newest first.
     }),
-    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, fulfillmentState, trackingState]
+    [page, rowsPerPage, search, ebayAccountId, dateFrom, dateTo, stage, tab, trackingState]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
-  }, []);
-
-  const handleStatusChange = useCallback((value: string | number) => {
-    setStatus(String(value));
-    setPage(1);
   }, []);
 
   const handleEbayAccountChange = useCallback(
@@ -160,10 +134,43 @@ export function useOrdersFilters() {
     [searchParams, setSearchParams]
   );
 
-  const handleFulfillmentStateChange = useCallback((value: string | number) => {
-    setFulfillmentState(String(value));
-    setPage(1);
-  }, []);
+  const handleStageChange = useCallback(
+    (value: string | number) => {
+      const v = String(value);
+      setStage(isStage(v) ? v : '');
+      // One stage replaces the tab's group, so the rail goes back to "All" —
+      // otherwise "Done" would stay highlighted over a list of to-purchase rows.
+      setTab(OrderStageTab.ALL);
+      setPage(1);
+      const next = new URLSearchParams(searchParams);
+      next.delete('tab');
+      if (isStage(v)) {
+        next.set('stage', v);
+      } else {
+        next.delete('stage');
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleTabChange = useCallback(
+    (tabId: string) => {
+      const nextTab = isTab(tabId) ? tabId : OrderStageTab.ALL;
+      setTab(nextTab);
+      setStage('');
+      setPage(1);
+      const next = new URLSearchParams(searchParams);
+      next.delete('stage');
+      if (nextTab === OrderStageTab.ALL) {
+        next.delete('tab');
+      } else {
+        next.set('tab', nextTab);
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const handleTrackingStateChange = useCallback(
     (value: string | number) => {
@@ -188,9 +195,9 @@ export function useOrdersFilters() {
   const handleClearFilters = useCallback(() => {
     setSearchInput('');
     setSearch('');
-    setStatus('');
     setEbayAccountId('');
-    setFulfillmentState('');
+    setStage('');
+    setTab(OrderStageTab.ALL);
     setTrackingState('');
     setPage(1);
     const next = new URLSearchParams();
@@ -212,14 +219,14 @@ export function useOrdersFilters() {
     handleRowsPerPageChange,
     searchInput,
     handleSearchChange,
-    status,
-    handleStatusChange,
-    statusOptions,
     ebayAccountId,
     handleEbayAccountChange,
-    fulfillmentState,
-    fulfillmentStateOptions,
-    handleFulfillmentStateChange,
+    tab,
+    handleTabChange,
+    hasUrlSelection,
+    stage,
+    stageOptions,
+    handleStageChange,
     trackingState,
     trackingOptions,
     handleTrackingStateChange,

@@ -34,7 +34,9 @@ import {
   ListingTrackingState,
   OrderCostCaptureStatus,
   OrderFulfillmentState,
+  OrderStage,
   OrderStatus,
+  deriveOrderStage,
   PolicyType,
   ProfitBasis,
   SourceFetchOutcome,
@@ -67,7 +69,8 @@ import {
   type PeriodMetricsDto,
   type ProfileDto,
   type StoreSettingsResponse,
-  type UserDto, type ListingRevisionWithListingDto,
+  type UserDto,
+  type ListingRevisionWithListingDto,
 } from '@repo/shared';
 
 /* =========================================================================
@@ -143,17 +146,138 @@ interface DemoProduct {
 }
 
 const PRODUCTS: DemoProduct[] = [
-  { asin: 'B0SH2L4N8C', title: 'Insulated Lunch Bag, Leakproof Cooler Tote for Work & Picnic', category: 'Home & Garden', brand: 'Unbranded', cost: 9.8, price: 24.99, slug: 'lunch-bag', description: 'Keeps food cold for hours with thick foam insulation and a leakproof, wipe-clean liner. Sized for a full day out, with sturdy carry handles.', features: ['Thermal foam insulation', 'Leakproof, wipe-clean liner', 'Sturdy carry handles'] },
-  { asin: 'B0SH7P3K1D', title: 'Portable Shower Speaker, Waterproof, Suction Cup Mount', category: 'Consumer Electronics', brand: 'Unbranded', cost: 8.4, price: 21.99, slug: 'bluetooth-speaker', description: 'Take your music into the shower. A strong suction cup, splash-proof shell and simple button controls make this compact speaker easy to use anywhere.', features: ['Waterproof shell', 'Suction cup mount', 'Built-in microphone'] },
-  { asin: 'B0SH5M9R2E', title: 'Memory Foam Pillow, Cooling Gel, Contour Neck Support', category: 'Health & Beauty', brand: 'Unbranded', cost: 18.5, price: 44.99, slug: 'memory-foam-pillow', description: 'Contoured memory foam cradles your head and neck, while a cooling gel layer keeps the surface fresh through the night.', features: ['Ergonomic contour', 'Cooling gel layer', 'Washable cover'] },
-  { asin: 'B0SH4Q6T7F', title: 'Wireless Earbuds, Active Noise Cancelling, 40H Battery', category: 'Consumer Electronics', brand: 'Unbranded', cost: 22.0, price: 59.99, slug: 'wireless-earbuds', description: 'Hybrid active noise cancelling, a 40-hour charging case and a low-latency game mode, in earbuds that weigh under 5 grams each.', features: ['Active noise cancelling', '40 hours with the case', 'IPX5 water resistant'] },
-  { asin: 'B0SH8V2W5G', title: 'Clip-On LED Ring Light, 3 Color Modes, USB Powered', category: 'Health & Beauty', brand: 'Unbranded', cost: 7.9, price: 19.99, slug: 'desk-lamp', description: 'A flexible clip-on ring light for makeup, reading and video calls. Three color temperatures and ten brightness levels, powered from any USB port.', features: ['3 color modes', 'Flexible gooseneck', 'USB powered'] },
-  { asin: 'B0SH3X7Y9H', title: '65W USB-C Wall Charger with 2 Cables and Adapter', category: 'Computers/Tablets', brand: 'Unbranded', cost: 14.2, price: 34.99, slug: 'usb-c-charger', description: 'Fast-charge a laptop, tablet or phone from one compact wall charger. Includes two USB-C cables and a USB-A adapter.', features: ['65W fast charging', 'Foldable plug', 'Cables included'] },
-  { asin: 'B0SH6Z1A4J', title: 'Non-Slip Yoga Mat, 6mm Thick, Lightweight', category: 'Sporting Goods', brand: 'Unbranded', cost: 11.5, price: 29.99, slug: 'yoga-mat', description: 'A cushioned 6mm mat with a textured, non-slip surface for yoga, pilates and floor workouts. Light enough to carry to class.', features: ['6mm cushioning', 'Non-slip texture', 'Lightweight'] },
-  { asin: 'B0SH9B5C3K', title: 'Handheld Milk Frother, Battery Powered, Stainless Whisk', category: 'Home & Garden', brand: 'Unbranded', cost: 4.6, price: 14.99, slug: 'milk-frother', description: 'Whip up creamy foam for lattes, matcha and hot chocolate in seconds. A stainless steel whisk and a comfortable grip make it quick to use and easy to rinse.', features: ['Stainless steel whisk', 'Battery powered', 'Easy to clean'] },
-  { asin: 'B0SH1D8E6L', title: 'Digital Kitchen Scale, 0.1 oz Precision, Stainless Steel', category: 'Home & Garden', brand: 'Unbranded', cost: 9.2, price: 24.99, slug: 'kitchen-scale', description: 'Weigh ingredients to the gram for baking, meal prep and coffee. A bright backlit display and one-touch tare keep measuring fast.', features: ['0.1 oz / 1 g precision', 'Tare function', 'Backlit display'] },
-  { asin: 'B0SH4F2G7M', title: 'HD Webcam with Microphone, Clip-On, Plug and Play', category: 'Computers/Tablets', brand: 'Unbranded', cost: 12.8, price: 32.99, slug: 'webcam', description: 'Clear video for calls and streaming with a built-in microphone and a universal clip that fits laptops and monitors. No drivers needed.', features: ['HD video', 'Built-in microphone', 'Universal clip'] },
-  { asin: 'B0SH7H6J2N', title: 'Neoprene Dumbbell Pair with Jump Rope, Home Workout Set', category: 'Sporting Goods', brand: 'Unbranded', cost: 13.4, price: 34.99, slug: 'dumbbell', description: 'A pair of soft-coated dumbbells with a matching jump rope for quick home workouts. The neoprene coating is gentle on floors and easy to grip.', features: ['Neoprene coating', 'Non-slip grip', 'Jump rope included'] },
+  {
+    asin: 'B0SH2L4N8C',
+    title: 'Insulated Lunch Bag, Leakproof Cooler Tote for Work & Picnic',
+    category: 'Home & Garden',
+    brand: 'Unbranded',
+    cost: 9.8,
+    price: 24.99,
+    slug: 'lunch-bag',
+    description:
+      'Keeps food cold for hours with thick foam insulation and a leakproof, wipe-clean liner. Sized for a full day out, with sturdy carry handles.',
+    features: ['Thermal foam insulation', 'Leakproof, wipe-clean liner', 'Sturdy carry handles'],
+  },
+  {
+    asin: 'B0SH7P3K1D',
+    title: 'Portable Shower Speaker, Waterproof, Suction Cup Mount',
+    category: 'Consumer Electronics',
+    brand: 'Unbranded',
+    cost: 8.4,
+    price: 21.99,
+    slug: 'bluetooth-speaker',
+    description:
+      'Take your music into the shower. A strong suction cup, splash-proof shell and simple button controls make this compact speaker easy to use anywhere.',
+    features: ['Waterproof shell', 'Suction cup mount', 'Built-in microphone'],
+  },
+  {
+    asin: 'B0SH5M9R2E',
+    title: 'Memory Foam Pillow, Cooling Gel, Contour Neck Support',
+    category: 'Health & Beauty',
+    brand: 'Unbranded',
+    cost: 18.5,
+    price: 44.99,
+    slug: 'memory-foam-pillow',
+    description:
+      'Contoured memory foam cradles your head and neck, while a cooling gel layer keeps the surface fresh through the night.',
+    features: ['Ergonomic contour', 'Cooling gel layer', 'Washable cover'],
+  },
+  {
+    asin: 'B0SH4Q6T7F',
+    title: 'Wireless Earbuds, Active Noise Cancelling, 40H Battery',
+    category: 'Consumer Electronics',
+    brand: 'Unbranded',
+    cost: 22.0,
+    price: 59.99,
+    slug: 'wireless-earbuds',
+    description:
+      'Hybrid active noise cancelling, a 40-hour charging case and a low-latency game mode, in earbuds that weigh under 5 grams each.',
+    features: ['Active noise cancelling', '40 hours with the case', 'IPX5 water resistant'],
+  },
+  {
+    asin: 'B0SH8V2W5G',
+    title: 'Clip-On LED Ring Light, 3 Color Modes, USB Powered',
+    category: 'Health & Beauty',
+    brand: 'Unbranded',
+    cost: 7.9,
+    price: 19.99,
+    slug: 'desk-lamp',
+    description:
+      'A flexible clip-on ring light for makeup, reading and video calls. Three color temperatures and ten brightness levels, powered from any USB port.',
+    features: ['3 color modes', 'Flexible gooseneck', 'USB powered'],
+  },
+  {
+    asin: 'B0SH3X7Y9H',
+    title: '65W USB-C Wall Charger with 2 Cables and Adapter',
+    category: 'Computers/Tablets',
+    brand: 'Unbranded',
+    cost: 14.2,
+    price: 34.99,
+    slug: 'usb-c-charger',
+    description:
+      'Fast-charge a laptop, tablet or phone from one compact wall charger. Includes two USB-C cables and a USB-A adapter.',
+    features: ['65W fast charging', 'Foldable plug', 'Cables included'],
+  },
+  {
+    asin: 'B0SH6Z1A4J',
+    title: 'Non-Slip Yoga Mat, 6mm Thick, Lightweight',
+    category: 'Sporting Goods',
+    brand: 'Unbranded',
+    cost: 11.5,
+    price: 29.99,
+    slug: 'yoga-mat',
+    description:
+      'A cushioned 6mm mat with a textured, non-slip surface for yoga, pilates and floor workouts. Light enough to carry to class.',
+    features: ['6mm cushioning', 'Non-slip texture', 'Lightweight'],
+  },
+  {
+    asin: 'B0SH9B5C3K',
+    title: 'Handheld Milk Frother, Battery Powered, Stainless Whisk',
+    category: 'Home & Garden',
+    brand: 'Unbranded',
+    cost: 4.6,
+    price: 14.99,
+    slug: 'milk-frother',
+    description:
+      'Whip up creamy foam for lattes, matcha and hot chocolate in seconds. A stainless steel whisk and a comfortable grip make it quick to use and easy to rinse.',
+    features: ['Stainless steel whisk', 'Battery powered', 'Easy to clean'],
+  },
+  {
+    asin: 'B0SH1D8E6L',
+    title: 'Digital Kitchen Scale, 0.1 oz Precision, Stainless Steel',
+    category: 'Home & Garden',
+    brand: 'Unbranded',
+    cost: 9.2,
+    price: 24.99,
+    slug: 'kitchen-scale',
+    description:
+      'Weigh ingredients to the gram for baking, meal prep and coffee. A bright backlit display and one-touch tare keep measuring fast.',
+    features: ['0.1 oz / 1 g precision', 'Tare function', 'Backlit display'],
+  },
+  {
+    asin: 'B0SH4F2G7M',
+    title: 'HD Webcam with Microphone, Clip-On, Plug and Play',
+    category: 'Computers/Tablets',
+    brand: 'Unbranded',
+    cost: 12.8,
+    price: 32.99,
+    slug: 'webcam',
+    description:
+      'Clear video for calls and streaming with a built-in microphone and a universal clip that fits laptops and monitors. No drivers needed.',
+    features: ['HD video', 'Built-in microphone', 'Universal clip'],
+  },
+  {
+    asin: 'B0SH7H6J2N',
+    title: 'Neoprene Dumbbell Pair with Jump Rope, Home Workout Set',
+    category: 'Sporting Goods',
+    brand: 'Unbranded',
+    cost: 13.4,
+    price: 34.99,
+    slug: 'dumbbell',
+    description:
+      'A pair of soft-coated dumbbells with a matching jump rope for quick home workouts. The neoprene coating is gentle on floors and easy to grip.',
+    features: ['Neoprene coating', 'Non-slip grip', 'Jump rope included'],
+  },
 ];
 
 /* ── Identity ─────────────────────────────────────────────────────────── */
@@ -359,11 +483,19 @@ function buildListings(): ListingDto[] {
       sourceStock:
         i === SOURCE_REMOVED_DEMO_INDEX
           ? 0
-          : i === 1 ? 4 : i % 3 === 0 ? 20 : quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
+          : i === 1
+            ? 4
+            : i % 3 === 0
+              ? 20
+              : quantity === 0
+                ? 0
+                : quantity + Math.floor(rand() * 8),
       sourceStockStatus:
         i === SOURCE_REMOVED_DEMO_INDEX
           ? SourceStockStatus.OUT_OF_STOCK
-          : i === 1 || i % 3 === 0 ? SourceStockStatus.AT_LEAST : SourceStockStatus.EXACT,
+          : i === 1 || i % 3 === 0
+            ? SourceStockStatus.AT_LEAST
+            : SourceStockStatus.EXACT,
       sourceRemoved: i === SOURCE_REMOVED_DEMO_INDEX,
       ebayAccountId: i % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
       lastSaleAt:
@@ -372,18 +504,14 @@ function buildListings(): ListingDto[] {
           : isoDaysAgo(pinnedRank === -1 ? daysSinceSale : Math.min(daysSinceSale, pinnedRank + 1), i),
       createdAt,
       updatedAt:
-        pinnedRank === -1
-          ? isoDaysAgo(daysSinceSale, i)
-          : isoDaysAgo(Math.min(daysSinceSale, pinnedRank + 1), i),
+        pinnedRank === -1 ? isoDaysAgo(daysSinceSale, i) : isoDaysAgo(Math.min(daysSinceSale, pinnedRank + 1), i),
     } satisfies ListingDto;
   });
 }
 
 export const DEMO_LISTINGS: ListingDto[] = buildListings();
 
-export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
-  new Set(PRODUCTS.map((p) => p.category))
-).sort();
+export const DEMO_LISTING_CATEGORIES: string[] = Array.from(new Set(PRODUCTS.map((p) => p.category))).sort();
 
 /* ── Amazon Best Sellers ──────────────────────────────────────────────── */
 
@@ -425,7 +553,11 @@ const DEMO_BEST_SELLERS_LIMIT = 15_000;
  * every page answers — the demo must never show the "Amazon did not answer"
  * screen, since nothing here ever asks Amazon.
  */
-export function buildDemoBestSellers(listType: BestSellersListType, category: string, page: number): BestSellersPageDto {
+export function buildDemoBestSellers(
+  listType: BestSellersListType,
+  category: string,
+  page: number
+): BestSellersPageDto {
   const isRoot = category === '';
   const matching = isRoot ? PRODUCTS : PRODUCTS.filter((p) => demoCategoryAlias(p.category) === category);
   // Movers & Shakers reads best with a different order than the plain ranking.
@@ -464,7 +596,13 @@ export function buildDemoBestSellers(listType: BestSellersListType, category: st
       // leaf-level department on Amazon itself.
       categories: isRoot
         ? [
-            { name: 'Any Department', path: null, link: 'https://www.amazon.com/gp/bestsellers', isSelected: true, isRoot: true },
+            {
+              name: 'Any Department',
+              path: null,
+              link: 'https://www.amazon.com/gp/bestsellers',
+              isSelected: true,
+              isRoot: true,
+            },
             ...DEMO_LISTING_CATEGORIES.map((name) => ({
               name,
               path: demoCategoryAlias(name),
@@ -536,10 +674,7 @@ export function demoListingRevisions(listingId: string): {
   // Roughly one recorded change every ~2 days the listing has existed — so an
   // old listing has hundreds of rows and exercises the "load more" paging,
   // while a freshly added one has only a handful.
-  const daysListed = Math.max(
-    3,
-    Math.round((Date.now() - new Date(listing.createdAt).getTime()) / 86_400_000)
-  );
+  const daysListed = Math.max(3, Math.round((Date.now() - new Date(listing.createdAt).getTime()) / 86_400_000));
   // Floor of 24 so even a week-old listing spills past one page and shows the
   // "load more" control; an old listing climbs toward hundreds of rows.
   const rowCount = Math.min(240, Math.max(24, Math.round(daysListed * 0.9)));
@@ -651,9 +786,21 @@ export function demoAllListingRevisions(params: {
 /* ── Orders ───────────────────────────────────────────────────────────── */
 
 const BUYER_NAMES = [
-  'James Whitfield', 'Maria Delgado', 'Aaron Pike', 'Chloe Bennett', 'Devon Marsh',
-  'Priya Raman', 'Tom Ashby', 'Elena Kovac', 'Marcus Lin', 'Sofia Bianchi',
-  'Nathan Cole', 'Hannah Brooks', 'Omar Haddad', 'Grace Okafor', 'Liam Sutter',
+  'James Whitfield',
+  'Maria Delgado',
+  'Aaron Pike',
+  'Chloe Bennett',
+  'Devon Marsh',
+  'Priya Raman',
+  'Tom Ashby',
+  'Elena Kovac',
+  'Marcus Lin',
+  'Sofia Bianchi',
+  'Nathan Cole',
+  'Hannah Brooks',
+  'Omar Haddad',
+  'Grace Okafor',
+  'Liam Sutter',
 ];
 
 const CITIES: [string, string, string][] = [
@@ -705,6 +852,11 @@ function buildOrders(): OrderDto[] {
     let autoFulfillBlockedReason: AutoFulfillBlockedReason | null = null;
     let amazonCancelledAt: string | null = null;
     let status: OrderStatus;
+    // Amazon observed "shipped" but nothing reached eBay yet — the tracking
+    // conversion is HELD (raw numbers are never pushed). One inside the 12 h
+    // grace (amber), one past it (red) so the demo shows both alarm colours.
+    let shippedDetectedAt: string | null = null;
+    let isSimulated = false;
 
     if (i === 3) {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
@@ -716,8 +868,7 @@ function buildOrders(): OrderDto[] {
       costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
       fulfillmentState = OrderFulfillmentState.ACTION_REQUIRED;
       autoFulfillStatus = AutoFulfillStatus.BLOCKED;
-      autoFulfillBlockedReason =
-        i === 7 ? AutoFulfillBlockedReason.CAP : AutoFulfillBlockedReason.OUT_OF_STOCK;
+      autoFulfillBlockedReason = i === 7 ? AutoFulfillBlockedReason.CAP : AutoFulfillBlockedReason.OUT_OF_STOCK;
       status = OrderStatus.PENDING;
     } else if (i % 9 === 5) {
       costCaptureStatus = OrderCostCaptureStatus.PENDING;
@@ -733,6 +884,29 @@ function buildOrders(): OrderDto[] {
       costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
       fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
       status = OrderStatus.SHIPPED;
+    } else if (i === 13 || i === 17) {
+      costCaptureStatus = OrderCostCaptureStatus.LINKED;
+      fulfillmentState = OrderFulfillmentState.PURCHASED;
+      autoFulfillStatus = AutoFulfillStatus.PLACED;
+      status = OrderStatus.WAITING_SHIPMENT;
+      shippedDetectedAt = isoHoursAgo(i === 13 ? 2 : 20);
+    } else if (i === 21) {
+      // Sold but not yet paid on eBay — nothing to buy until the payment lands.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = OrderStatus.PENDING;
+    } else if (i === 24) {
+      // Automation off for this store: the seller buys this one by hand.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = OrderStatus.WAITING_SHIPMENT;
+    } else if (i === 26) {
+      // A dry run: the checkout walked to Place Order and stopped — nothing bought.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.SIMULATED;
+      autoFulfillStatus = AutoFulfillStatus.DRY_RUN;
+      status = OrderStatus.WAITING_SHIPMENT;
+      isSimulated = true;
     } else {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
       fulfillmentState = OrderFulfillmentState.PURCHASED;
@@ -765,20 +939,26 @@ function buildOrders(): OrderDto[] {
      * recent SHIPPED order) is left source-only so the "Convert tracking"
      * action still has something to act on in the demo.
      */
-    const isShippedOrder =
-      status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED;
-    const hasTracking =
-      isShippedOrder && autoFulfillStatus === AutoFulfillStatus.PLACED && isLinked;
-    const amazonTrackingNumber = hasTracking
-      ? `TBA${915_000_000_000 + i * 3607}`
-      : null;
+    const isShippedOrder = status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED;
+    const hasTracking = isShippedOrder && autoFulfillStatus === AutoFulfillStatus.PLACED && isLinked;
+    const amazonTrackingNumber = hasTracking ? `TBA${915_000_000_000 + i * 3607}` : null;
     const trackRng = seeded(5100 + i);
     const aquaBody = Array.from(
       { length: 9 },
       () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(trackRng() * 31)]
     ).join('');
-    const convertedTrackingNumber =
-      hasTracking && i !== 1 ? `AQUA${aquaBody}YQ` : null;
+    const convertedTrackingNumber = hasTracking && i !== 1 ? `AQUA${aquaBody}YQ` : null;
+    // A placed purchase always has its Amazon order id (onPlaced writes both), whatever
+    // the cost-capture status says; a dry run gets the SIM- id the real code writes.
+    const amazonOrderId = isSimulated
+      ? `SIM-112-${3000000 + i * 91}-${1000000 + i * 17}`
+      : isLinked || autoFulfillStatus === AutoFulfillStatus.PLACED
+        ? `112-${3000000 + i * 91}-${1000000 + i * 17}`
+        : null;
+    // A shipped/completed fixture was observed shipped by Amazon before its
+    // tracking reached eBay — the same two stamps the API derives the stage from.
+    const shippedDetectedAtResolved = isShippedOrder ? isoDaysAgo(daysAgo, i + 3) : shippedDetectedAt;
+    const ebayTrackingPushedAt = isShippedOrder ? isoDaysAgo(daysAgo, i + 4) : null;
 
     orders.push({
       id: `demo-order-${i + 1}`,
@@ -786,19 +966,28 @@ function buildOrders(): OrderDto[] {
       createdAt: recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i),
       isTracked: costCaptureStatus !== OrderCostCaptureStatus.UNTRACKED,
       buyerName,
-      buyerUsername: buyerName.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 12),
+      buyerUsername: buyerName
+        .toLowerCase()
+        .replace(/[^a-z]/g, '_')
+        .slice(0, 12),
       status,
       costCaptureStatus,
-      profitBasis: isLinked
-        ? ProfitBasis.CONFIRMED
-        : isProvisional
-          ? ProfitBasis.ESTIMATED
-          : null,
+      profitBasis: isLinked ? ProfitBasis.CONFIRMED : isProvisional ? ProfitBasis.ESTIMATED : null,
       autoFulfillStatus,
       autoFulfillBlockedReason,
       amazonCancelledAt,
       fulfillmentState,
-      isSimulated: false,
+      isSimulated,
+      stage: deriveOrderStage({
+        status,
+        autoFulfillStatus,
+        amazonOrderId,
+        amazonCancelledAt,
+        shippedDetectedAt: shippedDetectedAtResolved,
+        ebayTrackingPushedAt,
+      }),
+      shippedDetectedAt: shippedDetectedAtResolved,
+      ebayTrackingPushedAt,
       product: {
         title: p.title,
         asin: p.asin,
@@ -813,7 +1002,7 @@ function buildOrders(): OrderDto[] {
       saleTotal,
       ebayEarnings,
       purchasePrice: costCaptureStatus === OrderCostCaptureStatus.UNTRACKED ? 0 : purchasePrice,
-      amazonOrderId: isLinked ? `112-${3000000 + i * 91}-${1000000 + i * 17}` : null,
+      amazonOrderId,
       amazonTrackingNumber,
       convertedTrackingNumber,
       ebayTrackingPushedNumber: convertedTrackingNumber,
@@ -845,12 +1034,30 @@ export const DEMO_ORDERS: OrderDto[] = buildOrders();
 /* ── Dashboard ────────────────────────────────────────────────────────── */
 
 const EMPTY_METRICS: PeriodMetricsDto = {
-  sales: 0, orders: 0, units: 0, refunds: 0, grossProfit: 0, netProfit: 0,
-  estimatedPayout: 0, margin: 0, avgOrderValue: 0, trend: null, profitTrend: null,
-  profitConfirmed: 0, profitProvisional: 0, revenueUncosted: 0,
-  ordersPendingCapture: 0, ordersCaptureFailed: 0, ordersUntracked: 0,
-  costOfGoods: 0, transactionFees: 0, adFees: 0, amazonShipping: 0, amazonTax: 0,
-  roi: 0, refundRate: 0,
+  sales: 0,
+  orders: 0,
+  units: 0,
+  refunds: 0,
+  grossProfit: 0,
+  netProfit: 0,
+  estimatedPayout: 0,
+  margin: 0,
+  avgOrderValue: 0,
+  trend: null,
+  profitTrend: null,
+  profitConfirmed: 0,
+  profitProvisional: 0,
+  revenueUncosted: 0,
+  ordersPendingCapture: 0,
+  ordersCaptureFailed: 0,
+  ordersUntracked: 0,
+  costOfGoods: 0,
+  transactionFees: 0,
+  adFees: 0,
+  amazonShipping: 0,
+  amazonTax: 0,
+  roi: 0,
+  refundRate: 0,
 };
 
 /** Aggregates real order rows so the cards can never disagree with the list. */
@@ -858,6 +1065,12 @@ function aggregate(orders: OrderDto[], trend: number | null, profitTrend: number
   const m: PeriodMetricsDto = { ...EMPTY_METRICS, trend, profitTrend };
 
   for (const o of orders) {
+    // Mirrors the API: an untracked order (no SellerHill listing) is excluded
+    // from every figure and only counted, so the card can say it was left out.
+    if (o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED) {
+      m.ordersUntracked += 1;
+      continue;
+    }
     m.sales = round2(m.sales + o.saleTotal);
     m.orders += 1;
     m.units += o.product?.quantity ?? 1;
@@ -875,10 +1088,6 @@ function aggregate(orders: OrderDto[], trend: number | null, profitTrend: number
         break;
       case OrderCostCaptureStatus.PROVISIONAL:
         m.profitProvisional = round2(m.profitProvisional + o.netProfit);
-        break;
-      case OrderCostCaptureStatus.UNTRACKED:
-        m.revenueUncosted = round2(m.revenueUncosted + o.saleTotal);
-        m.ordersUntracked += 1;
         break;
       default:
         m.revenueUncosted = round2(m.revenueUncosted + o.saleTotal);
@@ -924,8 +1133,7 @@ function scaleMetrics(base: PeriodMetricsDto, factor: number): PeriodMetricsDto 
   };
   scaled.margin = scaled.sales > 0 ? round2((scaled.netProfit / scaled.sales) * 100) : 0;
   scaled.avgOrderValue = scaled.orders > 0 ? round2(scaled.sales / scaled.orders) : 0;
-  scaled.roi =
-    scaled.costOfGoods > 0 ? round2((scaled.profitConfirmed / scaled.costOfGoods) * 100) : 0;
+  scaled.roi = scaled.costOfGoods > 0 ? round2((scaled.profitConfirmed / scaled.costOfGoods) * 100) : 0;
   return scaled;
 }
 
@@ -935,7 +1143,13 @@ function ordersWithinDays(days: number): OrderDto[] {
 }
 
 /** Scales a month's totals off the live 30-day window so history looks plausible. */
-function scaleMonth(base: PeriodMetricsDto, factor: number, key: string, from: string, to: string): DashboardHistoryMonth {
+function scaleMonth(
+  base: PeriodMetricsDto,
+  factor: number,
+  key: string,
+  from: string,
+  to: string
+): DashboardHistoryMonth {
   const s = (n: number): number => round2(n * factor);
   const profitConfirmed = s(base.profitConfirmed);
   const purchasePrice = s(base.costOfGoods);
@@ -986,7 +1200,8 @@ export function buildDemoDashboard(granularity: DashboardChartGranularity): Dash
       d.setMonth(d.getMonth() - i);
       d.setDate(1);
     }
-    const scale = granularity === DashboardChartGranularity.DAY ? 1 : granularity === DashboardChartGranularity.WEEK ? 7 : 30;
+    const scale =
+      granularity === DashboardChartGranularity.DAY ? 1 : granularity === DashboardChartGranularity.WEEK ? 7 : 30;
     const wobble = 0.65 + rand() * 0.7;
     const sales = round2((month.sales / 31) * scale * wobble);
     const netProfit = round2((month.profitConfirmed / 31) * scale * wobble);
@@ -1038,9 +1253,8 @@ export function buildDemoOrderStats(): OrderStatsDto {
     totalSales: month.sales,
     totalProfit: month.profitConfirmed,
     totalOrders: DEMO_ORDERS.length,
-    activeOrders: DEMO_ORDERS.filter(
-      (o) => o.status !== OrderStatus.COMPLETED && o.status !== OrderStatus.CANCELLED
-    ).length,
+    activeOrders: DEMO_ORDERS.filter((o) => o.status !== OrderStatus.COMPLETED && o.status !== OrderStatus.CANCELLED)
+      .length,
     todayOrders: today.orders,
     todayRevenue: today.sales,
     salesGrowth: 12.4,
@@ -1056,12 +1270,11 @@ export function buildDemoOrderStats(): OrderStatsDto {
  * badge, this page and the linked filtered lists all agree.
  */
 export function buildDemoActionCenter(): ActionCenterSummaryDto {
-  const cancelled = DEMO_ORDERS.filter((o) => o.fulfillmentState === OrderFulfillmentState.AMAZON_CANCELLED).length;
-  const blocked = DEMO_ORDERS.filter((o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED);
+  const cancelled = DEMO_ORDERS.filter((o) => o.stage === OrderStage.AMAZON_CANCELLED).length;
+  const blocked = DEMO_ORDERS.filter((o) => o.stage === OrderStage.PURCHASE_BLOCKED);
+  const held = DEMO_ORDERS.filter((o) => o.stage === OrderStage.TRACKING_HELD).length;
   const untracked = DEMO_ORDERS.filter((o) => o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED).length;
-  const outOfStock = DEMO_LISTINGS.filter(
-    (l) => l.status === ListingStatus.ACTIVE && l.quantity === 0
-  ).length;
+  const outOfStock = DEMO_LISTINGS.filter((l) => l.status === ListingStatus.ACTIVE && l.quantity === 0).length;
   const drafts = DEMO_LISTINGS.filter((l) => l.status === ListingStatus.DRAFT).length;
 
   const orderItems = [
@@ -1070,7 +1283,7 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: cancelled,
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.AMAZON_CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}`,
     },
     blocked.length > 0 && {
       key: ActionCenterItemKey.ORDER_FULFILLMENT_BLOCKED,
@@ -1081,7 +1294,14 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
         { code: AutoFulfillBlockedReason.CAP, count: 1 },
         { code: AutoFulfillBlockedReason.OUT_OF_STOCK, count: 1 },
       ],
-      actionPath: `/orders?fulfillmentState=${OrderFulfillmentState.ACTION_REQUIRED}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}`,
+    },
+    held > 0 && {
+      key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.CRITICAL,
+      count: held,
+      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
     },
     untracked > 0 && {
       key: ActionCenterItemKey.ORDER_UNTRACKED,
@@ -1181,7 +1401,10 @@ function demoMessage(
 
 /** Turns an invented buyer name into an eBay-style handle — no real accounts, no real brands. */
 function buyerHandle(name: string, suffix: number): string {
-  return `${name.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 12)}${suffix}`;
+  return `${name
+    .toLowerCase()
+    .replace(/[^a-z]/g, '_')
+    .slice(0, 12)}${suffix}`;
 }
 
 /** The two listings a pre-sale question links back to, via their real eBay item id. */
@@ -1227,14 +1450,7 @@ const CONVERSATION_SEEDS: Array<{
         3,
         true
       ),
-      demoMessage(
-        'demo-msg-1-3',
-        buyerHandle('Aaron Pike', 47),
-        'Great, appreciate the quick reply!',
-        0,
-        1,
-        false
-      ),
+      demoMessage('demo-msg-1-3', buyerHandle('Aaron Pike', 47), 'Great, appreciate the quick reply!', 0, 1, false),
     ],
   },
   {
@@ -1271,14 +1487,7 @@ const CONVERSATION_SEEDS: Array<{
     referenceId: null,
     otherPartyUsername: buyerHandle('Grace Okafor', 8),
     messages: [
-      demoMessage(
-        'demo-msg-3-1',
-        buyerHandle('Grace Okafor', 8),
-        'Item arrived a day early, thank you!',
-        18,
-        2,
-        true
-      ),
+      demoMessage('demo-msg-3-1', buyerHandle('Grace Okafor', 8), 'Item arrived a day early, thank you!', 18, 2, true),
       demoMessage(
         'demo-msg-3-2',
         STORE_SELLER_USERNAME,
@@ -1287,14 +1496,7 @@ const CONVERSATION_SEEDS: Array<{
         3,
         true
       ),
-      demoMessage(
-        'demo-msg-3-3',
-        buyerHandle('Grace Okafor', 8),
-        'Will definitely buy from you again.',
-        17,
-        6,
-        true
-      ),
+      demoMessage('demo-msg-3-3', buyerHandle('Grace Okafor', 8), 'Will definitely buy from you again.', 17, 6, true),
     ],
   },
   {
@@ -1347,14 +1549,7 @@ const CONVERSATION_SEEDS: Array<{
         2,
         true
       ),
-      demoMessage(
-        'demo-msg-5-3',
-        buyerHandle('Sofia Bianchi', 21),
-        'Perfect, ordering one now.',
-        9,
-        3,
-        true
-      ),
+      demoMessage('demo-msg-5-3', buyerHandle('Sofia Bianchi', 21), 'Perfect, ordering one now.', 9, 3, true),
     ],
   },
   {
@@ -1584,11 +1779,7 @@ const BUYER_MESSAGING: BuyerMessagingConfig = {
   },
 };
 
-function storeSettings(
-  id: string,
-  storeId: string | undefined,
-  isGlobal: boolean
-): StoreSettingsResponse {
+function storeSettings(id: string, storeId: string | undefined, isGlobal: boolean): StoreSettingsResponse {
   return {
     id,
     storeId,
@@ -1791,6 +1982,18 @@ export const DEMO_PREDEFINED_TEMPLATES = [
   { slug: 'ds-outdoor-survival', name: 'Outdoor Survival' },
   { slug: 'ds-toys-kids', name: 'Toys Kids' },
   { slug: 'ds-kitchen-dining', name: 'Kitchen Dining' },
+  { slug: 'valentines-day', name: "Valentine's Day" },
+  { slug: 'general-store-alt-2', name: 'General Store Alt 2' },
+  { slug: 'general-store-alt-3', name: 'General Store Alt 3' },
+  { slug: 'back-to-school', name: 'Back to School' },
+  { slug: 'tools-home-improvement', name: 'Tools & Home Improvement' },
+  { slug: 'electronics-pro', name: 'Electronics Pro' },
+  { slug: 'phone-accessories', name: 'Phone Accessories' },
+  { slug: 'health-household', name: 'Health & Household' },
+  { slug: 'industrial-scientific', name: 'Industrial & Scientific' },
+  { slug: 'office-products', name: 'Office Products' },
+  { slug: 'patio-lawn-garden', name: 'Patio, Lawn & Garden' },
+  { slug: 'general-store-alt', name: 'General Store Alt' },
 ].map((t, i) => ({
   id: `demo-tpl-${t.slug}`,
   slug: t.slug,
@@ -1805,7 +2008,12 @@ export const DEMO_PREDEFINED_TEMPLATES = [
 
 export const DEMO_BUSINESS_POLICIES: EbayBusinessPolicyDto[] = [
   { id: 'demo-pay-1', name: 'Standard payment', description: 'Immediate payment required', type: PolicyType.PAYMENT },
-  { id: 'demo-ship-1', name: 'Free 3-day shipping', description: 'Free economy shipping, 3-5 days', type: PolicyType.SHIPPING },
+  {
+    id: 'demo-ship-1',
+    name: 'Free 3-day shipping',
+    description: 'Free economy shipping, 3-5 days',
+    type: PolicyType.SHIPPING,
+  },
   { id: 'demo-ship-2', name: 'Expedited shipping', description: 'Buyer pays, 1-2 days', type: PolicyType.SHIPPING },
   { id: 'demo-ret-1', name: '30-day returns', description: 'Buyer pays return shipping', type: PolicyType.RETURN },
 ];
@@ -1869,9 +2077,18 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
 ];
 
 const JOB_ASINS = [
-  'B0SJ2A7C4D', 'B0SJ5E1F8G', 'B0SJ9H3K2L', 'B0SJ4M6N1P',
-  'B0SJ7Q2R5S', 'B0SJ1T8V3W', 'B0SJ6X4Y9Z', 'B0SJ3A5B7C',
-  'B0SJ8D2E6F', 'B0SJ2G9H4K', 'B0SJ5L1M8N', 'B0SJ7P3Q2R',
+  'B0SJ2A7C4D',
+  'B0SJ5E1F8G',
+  'B0SJ9H3K2L',
+  'B0SJ4M6N1P',
+  'B0SJ7Q2R5S',
+  'B0SJ1T8V3W',
+  'B0SJ6X4Y9Z',
+  'B0SJ3A5B7C',
+  'B0SJ8D2E6F',
+  'B0SJ2G9H4K',
+  'B0SJ5L1M8N',
+  'B0SJ7P3Q2R',
 ];
 
 /** Failures cycled through a demo job's failed items — includes the seller-fixable blacklist case. */
@@ -1896,11 +2113,7 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
       asin: JOB_ASINS[i % JOB_ASINS.length],
       productId: `demo-product-${(i % 20) + 1}`,
       listingId: !processed || failed ? undefined : `demo-listing-${(i % 20) + 1}`,
-      status: failed
-        ? ListingStatus.ERROR
-        : processed
-          ? ListingStatus.ACTIVE
-          : ListingStatus.DRAFT,
+      status: failed ? ListingStatus.ERROR : processed ? ListingStatus.ACTIVE : ListingStatus.DRAFT,
       ebayItemId: !processed || failed ? undefined : `1${(255000000000 + i * 137).toString()}`,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
@@ -1951,28 +2164,54 @@ function plan(
     updatedAt: stamp,
     prices: {
       [BillingInterval.MONTHLY]: {
-        id: `${id}-m`, planId: id, interval: BillingInterval.MONTHLY,
-        amountMicros: monthly * MICROS, currency: 'USD',
-        effectiveFrom: stamp, effectiveTo: null, providerPriceId: null,
-        createdAt: stamp, updatedAt: stamp,
+        id: `${id}-m`,
+        planId: id,
+        interval: BillingInterval.MONTHLY,
+        amountMicros: monthly * MICROS,
+        currency: 'USD',
+        effectiveFrom: stamp,
+        effectiveTo: null,
+        providerPriceId: null,
+        createdAt: stamp,
+        updatedAt: stamp,
       },
     },
     limits: {
       [BillingLimitKey.LISTINGS_PER_MONTH]: {
-        id: `${id}-l1`, planId: id, limitKey: BillingLimitKey.LISTINGS_PER_MONTH,
-        limitValue: listings, unit: 'listings', createdAt: stamp, updatedAt: stamp,
+        id: `${id}-l1`,
+        planId: id,
+        limitKey: BillingLimitKey.LISTINGS_PER_MONTH,
+        limitValue: listings,
+        unit: 'listings',
+        createdAt: stamp,
+        updatedAt: stamp,
       },
       [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: {
-        id: `${id}-l3`, planId: id, limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
-        limitValue: conversions, unit: 'conversions', createdAt: stamp, updatedAt: stamp,
+        id: `${id}-l3`,
+        planId: id,
+        limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+        limitValue: conversions,
+        unit: 'conversions',
+        createdAt: stamp,
+        updatedAt: stamp,
       },
       [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: {
-        id: `${id}-l4`, planId: id, limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
-        limitValue: bestSellers, unit: 'products', createdAt: stamp, updatedAt: stamp,
+        id: `${id}-l4`,
+        planId: id,
+        limitKey: BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH,
+        limitValue: bestSellers,
+        unit: 'products',
+        createdAt: stamp,
+        updatedAt: stamp,
       },
       [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: {
-        id: `${id}-l2`, planId: id, limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
-        limitValue: BILLING_UNLIMITED, unit: 'orders', createdAt: stamp, updatedAt: stamp,
+        id: `${id}-l2`,
+        planId: id,
+        limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+        limitValue: BILLING_UNLIMITED,
+        unit: 'orders',
+        createdAt: stamp,
+        updatedAt: stamp,
       },
     },
   };
@@ -1995,11 +2234,47 @@ export const DEMO_BILLING_PLANS: BillingPlanWithPricingDto[] = [
   plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 7_500, 4),
   plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 54.99, 3000, 200, 10_000, 5),
   plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 64.99, 4000, 250, 12_500, 6),
-  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 89.99, 5000, 300, 15_000, 7),
-  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 129.99, 7500, 350, 20_000, 8),
+  plan(
+    'growth',
+    'Growth',
+    'For high-volume sellers with a five-thousand-listing catalog.',
+    89.99,
+    5000,
+    300,
+    15_000,
+    7
+  ),
+  plan(
+    'advanced',
+    'Advanced',
+    'For power sellers managing a large, actively repriced catalog.',
+    129.99,
+    7500,
+    350,
+    20_000,
+    8
+  ),
   plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 164.99, 10000, 500, 25_000, 9),
-  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 229.99, 15000, 600, 35_000, 10),
-  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 284.99, 20000, 700, 50_000, 11),
+  plan(
+    'elite',
+    'Elite',
+    'For large operations with a fifteen-thousand-listing catalog.',
+    229.99,
+    15000,
+    600,
+    35_000,
+    10
+  ),
+  plan(
+    'business',
+    'Business',
+    'For multi-store businesses at twenty thousand listings.',
+    284.99,
+    20000,
+    700,
+    50_000,
+    11
+  ),
   plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 339.99, 25000, 800, 75_000, 12),
 ];
 
@@ -2015,8 +2290,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
   // By slug, not by index. The index silently pointed at a different plan the
   // moment the catalog grew a cheaper tier at the front — the demo then showed
   // "Nano" above Growth's quotas.
-  const growth =
-    DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
+  const growth = DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
@@ -2126,8 +2400,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
  * "nothing external in demo" reason `/billing/portal` returns an empty URL.
  */
 export function buildDemoBillingDetails(): BillingDetailsDto {
-  const growth =
-    DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
+  const growth = DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
   const now = new Date();
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
   const monthlyMicros = growth.prices[BillingInterval.MONTHLY]?.amountMicros ?? 0;

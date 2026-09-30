@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Todos los estados",
       "allStores": "Todas las tiendas",
-      "allTrackingStates": "Todos los estados de seguimiento",
+      "allTrackingStates": "Vinculados y no vinculados",
       "clearAll": "Borrar todo",
-      "resultCount": "{{count}} resultados"
+      "resultCount": "{{count}} resultados",
+      "allStages": "Todos los estados"
     },
     "stats": {
       "totalSales": "Ventas totales",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Monitoreado por SellerHill",
-      "untracked": "Sin monitorear",
+      "tracked": "Vinculado a un anuncio",
+      "untracked": "No vinculado a un anuncio",
       "problem": {
         "wrongPageType": "El proveedor de seguimiento no pudo leer la página del pedido de Amazon; puede que haya cambiado de formato. Se reintentará automáticamente.",
         "amazonSessionExpired": "La sesión de Amazon usada para leer este pedido caducó y hay que volver a iniciar sesión.",
@@ -156,6 +157,7 @@
       "buyerPayment": "Pago del comprador",
       "ebaySummary": "Resumen de ventas de eBay",
       "whatBuyerPaid": "Lo que pagó tu comprador",
+      "whatYouPaidAmazon": "Lo que pagaste a Amazon",
       "whatYouEarned": "Lo que ganaste",
       "earningsOrderTotal": "Total del pedido",
       "ebayCollectedFromBuyer": "eBay cobró al comprador",
@@ -194,6 +196,7 @@
       "copyState": "Copiar estado/provincia",
       "copyZip": "Copiar código postal",
       "copyCountry": "Copiar país/región",
+      "copyPhone": "Copiar teléfono",
       "copied": "Copiado",
       "amazonCosts": "Resumen del pedido de Amazon",
       "purchasePrice": "Precio de compra",
@@ -213,7 +216,8 @@
       "quantity": "Cantidad",
       "unit": "unidad",
       "sku": "SKU",
-      "na": "N/D"
+      "na": "N/D",
+      "ebayStatus": "Estado en eBay"
     },
     "modal": {
       "title": "Ingresar datos del pedido de Amazon",
@@ -240,6 +244,71 @@
       "orderNotTracked": "Este pedido no está vinculado a ninguna de tus publicaciones, por lo que un número de seguimiento convertido nunca se podría enviar a eBay. Primero vincula el pedido a su publicación.",
       "trackingAlreadyPushed": "eBay ya tiene el número de seguimiento original de este pedido y no se puede reemplazar, por lo que convertirlo ahora no cambiaría lo que ve el comprador.",
       "listingOverPlanLimit": "La publicación de este pedido estaba fuera del límite de publicaciones de tu plan cuando llegó el pedido. Los pedidos de publicaciones fuera del límite no reciben seguimiento de envío ni conversión de seguimiento."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Cancelado por Amazon",
+        "meaning": "Amazon canceló la compra. El comprador de eBay sigue esperando el artículo.",
+        "action": "Cumple el pedido de otra forma y luego vincula el nuevo pedido de Amazon."
+      },
+      "cancelled": {
+        "label": "Cancelado",
+        "meaning": "El pedido de eBay fue cancelado."
+      },
+      "delivered": {
+        "label": "Entregado",
+        "meaning": "Amazon reporta el paquete como entregado. No queda nada por hacer."
+      },
+      "test_run": {
+        "label": "Prueba",
+        "meaning": "Una prueba del pedido automático. No se hizo ningún pedido en Amazon ni se movió dinero."
+      },
+      "shipped": {
+        "label": "Enviado",
+        "meaning": "El rastreo se envió a eBay. Esperando la entrega."
+      },
+      "tracking_held": {
+        "label": "Rastreo retenido",
+        "meaning": "Amazon envió, pero el rastreo aún no llegó a eBay — normalmente la conversión del rastreo sigue pendiente.",
+        "action": "Convierte el rastreo o corrige la causa que se muestra en el pedido."
+      },
+      "buying": {
+        "label": "Comprando en Amazon",
+        "meaning": "El pedido automático está haciendo este pedido en Amazon ahora mismo."
+      },
+      "purchased": {
+        "label": "Comprado · esperando envío",
+        "meaning": "Hay un pedido de Amazon vinculado. Esperando que Amazon lo envíe."
+      },
+      "purchase_blocked": {
+        "label": "Compra bloqueada",
+        "meaning": "El pedido automático se detuvo en una verificación de seguridad antes de comprar. No se movió dinero.",
+        "action": "Corrige la causa mostrada, o compra en Amazon manualmente y vincula el pedido."
+      },
+      "awaiting_payment": {
+        "label": "Esperando pago",
+        "meaning": "El comprador aún no pagó. No compres hasta que pague."
+      },
+      "to_purchase": {
+        "label": "Por comprar",
+        "meaning": "Pagado, todavía sin pedido de Amazon vinculado.",
+        "action": "Compra en Amazon y vincula el pedido."
+      }
+    },
+    "stageTabs": {
+      "all": "Todos",
+      "action": "Requieren acción",
+      "to_purchase": "Por comprar",
+      "in_progress": "En curso",
+      "done": "Terminados",
+      "withCount": "{{label}} ({{count}})"
+    },
+    "stageLegend": {
+      "title": "Qué significan los estados",
+      "open": "Explicar los estados",
+      "columnStage": "Estado",
+      "columnMeaning": "Qué significa",
+      "columnAction": "Qué haces tú"
     }
   }
 }

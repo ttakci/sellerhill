@@ -1,18 +1,14 @@
-import { ProfitBasis, type OrderDto } from '@repo/shared';
-import { Badge, StatusBadge, Text, type TableColumn } from '@repo/ui';
+import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
+import { Badge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { fulfillmentStateToBadgeVariant } from '../../shared/fulfillment-state';
-import { orderStatusToBadgeStatus } from '../../shared/order-status';
+import { OrderStageBadge } from '../../shared/OrderStageBadge';
 import * as S from '../OrdersAllPage.style';
 
 import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 
-export function useOrdersColumns(
-  formatCurrency: (value: number) => string,
-  formatDate: (value: string) => string
-) {
+export function useOrdersColumns(formatCurrency: (value: number) => string, formatDate: (value: string) => string) {
   const { t } = useTranslation(['orders', 'translation']);
 
   return useMemo<TableColumn<OrderDto>[]>(
@@ -101,52 +97,41 @@ export function useOrdersColumns(
         ),
       },
       {
-        key: 'status',
-        header: t('orders.table.status'),
-        width: '8rem',
-        sortable: true,
-        render: (_value, order) => (
-          <StatusBadge status={orderStatusToBadgeStatus(order.status)} size="sm">
-            {t(`orders.status.${order.status}`)}
-          </StatusBadge>
-        ),
-      },
-      {
-        // ONE column answering "did Amazon buy this, and do I need to act?".
-        // Previously this showed the raw `auto_fulfill_status` (seven values,
-        // several internal) beside a separate cancellation badge, so the reader
-        // had to know the schema to interpret it — and an untouched order rendered
-        // a bare em dash that said nothing.
-        key: 'fulfillmentState',
-        header: t('orders.fulfillmentState.column'),
-        width: '13rem',
+        // ONE column: the stage badge, then the one line of context that makes
+        // it actionable — the blocked reason, the Amazon order id, the tracking
+        // number. The eBay status is a fact, not a status, and lives on the
+        // detail page's eBay card. (This replaced two columns — eBay status +
+        // Amazon fulfillment — that a seller had to combine in their head.)
+        key: 'stage',
+        header: t('orders.stageLegend.columnStage'),
+        width: '14rem',
         render: (_value, order) => {
-          const state = order.fulfillmentState;
-          if (!state) {
-            return (
-              <Text variant="body-sm" color="text.secondary">
-                —
-              </Text>
-            );
-          }
-          // The blocked reason is the actionable part of ACTION_REQUIRED — it
+          // The blocked reason is the actionable part of PURCHASE_BLOCKED — it
           // tells the seller WHAT to fix, so it is shown inline, not on hover.
-          const reasonLabel = order.autoFulfillBlockedReason
-            ? t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`)
-            : undefined;
+          const reasonLabel =
+            order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason
+              ? t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`)
+              : undefined;
+          const trackingShown =
+            order.stage === OrderStage.SHIPPED
+              ? order.convertedTrackingNumber || order.amazonTrackingNumber
+              : undefined;
           return (
             <S.AutoFulfillCell>
-              <Badge variant={fulfillmentStateToBadgeVariant(state)} size="xs" isPill>
-                {t(`orders.fulfillmentState.${state}`)}
-              </Badge>
+              <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="xs" />
               {reasonLabel && (
                 <Text variant="caption" color="text.secondary">
                   {reasonLabel}
                 </Text>
               )}
-              {order.amazonOrderId && (
+              {order.amazonOrderId && !order.isSimulated && (
                 <Text variant="caption" color="text.tertiary" numeric>
                   {order.amazonOrderId}
+                </Text>
+              )}
+              {trackingShown && (
+                <Text variant="caption" color="text.tertiary" numeric>
+                  {trackingShown}
                 </Text>
               )}
             </S.AutoFulfillCell>

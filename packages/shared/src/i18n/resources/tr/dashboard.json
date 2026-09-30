@@ -87,7 +87,10 @@
       "estimatedLabel": "Tahmini",
       "estimatedTooltip": "Amazon karşılaması beklenen siparişler tahmini maliyet kullanır (Amazon vergisi, yapılandırılan %{{rate}} oranında).",
       "uncostedLabel": "Maliyetsiz ciro",
-      "uncostedTooltip": "Amazon maliyeti henüz çözülemeyen satışlar — yalnızca ciro, kâr ifade etmez."
+      "uncostedTooltip": "Amazon maliyeti henüz çözülemeyen satışlar — yalnızca ciro, kâr ifade etmez.",
+      "untrackedExcludedLabel_one": "{{count}} takipsiz sipariş dahil edilmedi",
+      "untrackedExcludedLabel_other": "{{count}} takipsiz sipariş dahil edilmedi",
+      "untrackedExcludedTooltip": "Bir SellerHill listesiyle eşleşmeyen siparişler bu paneldeki hiçbir rakama dahil edilmez. Siparişler sayfasında \"Takip edilmiyor\" olarak görünmeye devam eder; dahil etmek için ilgili listeyi içe aktarın."
     }
   }
 }

@@ -32,6 +32,7 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "Hələ reytinq yoxdur",
+    "rankChange": "{{sign}}{{value}}%",
     "allowance": "Bu dövrdə {{limit}} məhsuldan {{remaining}} qalıb",
     "allowanceUnlimited": "Limitsiz məhsul görüntüləmə",
     "allowanceHint": "Gördüyünüz hər məhsul dövr ərzində bir dəfə sayılır; eyni siyahını bu gün yenidən açmaq təkrar sayılmır.",
@@ -47,7 +48,17 @@
       "product": "Məhsul",
       "price": "Qiymət",
       "rating": "Reytinq",
-      "reviews": "Rəylər"
+      "reviews": "Rəylər",
+      "rankChange": "Sıra dəyişikliyi (24 saat)"
+    },
+    "filters": {
+      "anyRating": "Bütün reytinqlər",
+      "ratingAtLeast": "{{value}}+ ulduz",
+      "minReviews": "Minimum rəy",
+      "priceMin": "Minimum qiymət",
+      "priceMax": "Maksimum qiymət",
+      "clear": "Filtrləri təmizlə",
+      "resultCount": "Bu səhifədəki {{total}} məhsuldan {{shown}}"
     },
     "states": {
       "loading": {
@@ -57,6 +68,10 @@
       "empty": {
         "title": "Bu səhifədə məhsul yoxdur",
         "description": "Bu siyahıda burada göstəriləcək heç nə yoxdur. Başqa kateqoriya və ya siyahı sınayın."
+      },
+      "noMatches": {
+        "title": "Filtrlərinizə uyğun məhsul yoxdur",
+        "description": "Bu siyahıdan daha çoxunu görmək üçün filtri yumşaldın. Filtrlər bu səhifədəki məhsullara tətbiq olunur."
       },
       "notFound": {
         "title": "Bu kateqoriya mövcud deyil",

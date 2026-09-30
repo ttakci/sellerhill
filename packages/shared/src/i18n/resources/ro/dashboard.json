@@ -87,7 +87,11 @@
       "estimatedLabel": "Estimat",
       "estimatedTooltip": "Comenzile care așteaptă îndeplinirea pe Amazon folosesc un cost estimat (taxa Amazon la rata configurată de {{rate}}%).",
       "uncostedLabel": "Venituri fără cost",
-      "uncostedTooltip": "Vânzări al căror cost Amazon nu a putut fi stabilit încă — doar venit, fără profit implicat."
+      "uncostedTooltip": "Vânzări al căror cost Amazon nu a putut fi stabilit încă — doar venit, fără profit implicat.",
+      "untrackedExcludedLabel_one": "{{count}} comandă neurmărită exclusă",
+      "untrackedExcludedLabel_few": "{{count}} comenzi neurmărite excluse",
+      "untrackedExcludedLabel_other": "{{count}} de comenzi neurmărite excluse",
+      "untrackedExcludedTooltip": "Comenzile care nu corespund unui anunț SellerHill nu intră în nicio cifră din acest panou. Rămân pe pagina Comenzi cu eticheta „Neurmărită”; importați anunțul pentru a le include."
     }
   }
 }

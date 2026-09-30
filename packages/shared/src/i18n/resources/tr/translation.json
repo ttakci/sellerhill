@@ -612,7 +612,7 @@
     "templates": {
       "eyebrow": "İlan şablonları",
       "sectionTitle": "Tasarımcıya ihtiyaç duymadan profesyonel ilanlar.",
-      "sectionSubtitle": "12 hazır şablondan birini seçin ya da kendi HTML'inizi yazın. Her Ayar Grubu kendi şablonunu kullanabilir. Aşağıdakiler gerçek şablonlarımızla oluşturulmuş önizlemelerdir.",
+      "sectionSubtitle": "24 hazır şablondan birini seçin ya da kendi HTML'inizi yazın. Her Ayar Grubu kendi şablonunu kullanabilir. Aşağıdakiler gerçek şablonlarımızla oluşturulmuş önizlemelerdir.",
       "names": {
         "generalStore": "Genel Mağaza",
         "techGadgets": "Teknoloji",
@@ -625,7 +625,19 @@
         "autoParts": "Oto Parça",
         "petSupplies": "Evcil Hayvan",
         "toysKids": "Oyuncak & Çocuk",
-        "minimalist": "Minimalist"
+        "minimalist": "Minimalist",
+        "valentinesDay": "Sevgililer Günü",
+        "generalStoreAlt2": "Genel Mağaza Alternatif 2",
+        "generalStoreAlt3": "Genel Mağaza Alternatif 3",
+        "backToSchool": "Okula Dönüş",
+        "toolsHomeImprovement": "Aletler & Ev Geliştirme",
+        "electronicsPro": "Elektronik Pro",
+        "phoneAccessories": "Telefon Aksesuarları",
+        "healthHousehold": "Sağlık & Ev Gereçleri",
+        "industrialScientific": "Endüstriyel & Bilimsel",
+        "officeProducts": "Ofis Malzemeleri",
+        "patioLawnGarden": "Bahçe & Dış Mekan",
+        "generalStoreAlt": "Genel Mağaza Alternatif"
       },
       "points": {
         "editable": "Tamamen düzenlenebilir: şablonu açın, dilediğiniz gibi değiştirin.",

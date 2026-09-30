@@ -87,7 +87,10 @@
       "estimatedLabel": "Təxmini",
       "estimatedTooltip": "Amazon-da yerinə yetirilməsi gözlənilən sifarişlər təxmini xərcdən istifadə edir (Amazon vergisi sizin təyin etdiyiniz {{rate}}% dərəcəsi ilə).",
       "uncostedLabel": "Maya dəyəri olmayan gəlir",
-      "uncostedTooltip": "Amazon xərci hələ müəyyən edilə bilməyən satışlar — yalnız gəlir, mənfəət nəzərdə tutulmur."
+      "uncostedTooltip": "Amazon xərci hələ müəyyən edilə bilməyən satışlar — yalnız gəlir, mənfəət nəzərdə tutulmur.",
+      "untrackedExcludedLabel_one": "{{count}} izlənməyən sifariş daxil edilməyib",
+      "untrackedExcludedLabel_other": "{{count}} izlənməyən sifariş daxil edilməyib",
+      "untrackedExcludedTooltip": "SellerHill elanı ilə uyğunlaşmayan sifarişlər bu paneldəki heç bir rəqəmə daxil edilmir. Onlar Sifarişlər səhifəsində «İzlənmir» olaraq qalır; daxil etmək üçün elanı idxal edin."
     }
   }
 }

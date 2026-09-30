@@ -15,15 +15,17 @@ import {
   BestSellersListType,
   SourceFetchOutcome, type BestSellersBrowseAllowanceDto, type BestSellersQueryDto,
 } from '@repo/shared';
-import { formatCurrency, getLocaleConfig, type TabNavItem } from '@repo/ui';
+import { formatCurrency, getLocaleConfig, type SelectOption, type TabNavItem } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetBestSellersQuery } from '../api/bestSellersApi';
 import { BestSellersViewState, type BestSellersRefusalBody } from '../bestSellers.types';
-import { useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
+import { departmentOfCategory, useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
+import { useBestSellersFilters } from '../hooks/useBestSellersFilters';
 import { useBestSellersSelection } from '../hooks/useBestSellersSelection';
 import { useBestSellersUrlState } from '../hooks/useBestSellersUrlState';
+import { BEST_SELLERS_RATING_OPTIONS, matchesBestSellersFilters } from '../utils/bestSellersFilters';
 
 import { BestSellersPage as BestSellersPageComponent } from './BestSellersPage.component';
 import type { BestSellersItemView, BestSellersPagination } from './BestSellersPage.types';
@@ -63,6 +65,7 @@ export const BestSellersPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
   const { listType, category, page, setListType, setCategory, setPage } = useBestSellersUrlState();
   const selection = useBestSellersSelection();
+  const filters = useBestSellersFilters();
 
   // `getLocaleConfig` carries `-u-nu-latn` for Urdu/Arabic so every figure keeps
   // Western digits — an ASIN beside an Arabic-Indic review count reads as a bug.
@@ -111,9 +114,20 @@ export const BestSellersPageContainer: React.FC = () => {
     return { status: error.status, body };
   }, [error]);
 
+  /*
+   * Filters run over the page already in the browser (at most 50 products).
+   * What they hide was still viewed as far as the allowance goes — the server
+   * counted the page when it answered.
+   */
+  const pageItems = useMemo(() => currentData?.list?.items ?? [], [currentData?.list?.items]);
+  const filteredItems = useMemo(
+    () => (filters.isActive ? pageItems.filter((item) => matchesBestSellersFilters(item, filters.criteria)) : pageItems),
+    [pageItems, filters.isActive, filters.criteria],
+  );
+
   const items = useMemo<BestSellersItemView[]>(
     () =>
-      (currentData?.list?.items ?? []).map((item) => {
+      filteredItems.map((item) => {
         const average = item.rating?.average ?? null;
         const reviewCount = item.rating?.count ?? null;
         const reviewsLabel = reviewCount === null ? null : countFormat.format(reviewCount);
@@ -133,12 +147,20 @@ export const BestSellersPageContainer: React.FC = () => {
             ? formatCurrency(item.price.amount, localeCfg.locale, item.price.currency, PRICE_FRACTION_DIGITS)
             : item.priceText,
           ratingLabel,
+          ratingValueLabel: average === null ? null : ratingFormat.format(average),
           reviewsLabel,
+          rankChangeLabel:
+            item.rankChangePercent === null
+              ? null
+              : t('bestSellers.rankChange', {
+                  sign: item.rankChangePercent > 0 ? '+' : '',
+                  value: countFormat.format(item.rankChangePercent),
+                }),
           isSelected: selection.isSelected(item.asin),
           isLocked: false,
         };
       }),
-    [currentData?.list?.items, countFormat, ratingFormat, localeCfg, selection, t],
+    [filteredItems, countFormat, ratingFormat, localeCfg, selection, t],
   );
 
   /*
@@ -161,7 +183,9 @@ export const BestSellersPageContainer: React.FC = () => {
       imageUrl: null,
       priceLabel: null,
       ratingLabel: null,
+      ratingValueLabel: null,
       reviewsLabel: null,
+      rankChangeLabel: null,
       isSelected: false,
       isLocked: true,
     }));
@@ -203,9 +227,13 @@ export const BestSellersPageContainer: React.FC = () => {
         return BestSellersViewState.UNAVAILABLE;
       case SourceFetchOutcome.FOUND:
       default:
-        return items.length > 0 || lockedCount > 0 ? BestSellersViewState.READY : BestSellersViewState.EMPTY;
+        if (items.length > 0 || lockedCount > 0) {
+          return BestSellersViewState.READY;
+        }
+        // Products arrived but every one failed a filter — say that, not "empty list".
+        return pageItems.length > 0 ? BestSellersViewState.NO_MATCHES : BestSellersViewState.EMPTY;
     }
-  }, [refusal, currentData, items.length, lockedCount]);
+  }, [refusal, currentData, items.length, pageItems.length, lockedCount]);
 
   const allowance = useMemo<BestSellersBrowseAllowanceDto | null>(
     () => currentData?.allowance ?? refusal?.body.allowance ?? data?.allowance ?? null,
@@ -232,6 +260,47 @@ export const BestSellersPageContainer: React.FC = () => {
     });
   }, [allowance, countFormat, t]);
 
+  const ratingOptions = useMemo<SelectOption[]>(
+    () =>
+      BEST_SELLERS_RATING_OPTIONS.map((value) => ({
+        value,
+        label:
+          value === ''
+            ? t('bestSellers.filters.anyRating')
+            : t('bestSellers.filters.ratingAtLeast', { value: ratingFormat.format(Number(value)) }),
+      })),
+    [ratingFormat, t],
+  );
+
+  /** "12 of 50 products on this page" — only while a filter is narrowing the page. */
+  const filterResultLabel = useMemo<string | null>(
+    () =>
+      filters.isActive && pageItems.length > 0
+        ? t('bestSellers.filters.resultCount', {
+            shown: countFormat.format(filteredItems.length),
+            total: countFormat.format(pageItems.length),
+          })
+        : null,
+    [filters.isActive, pageItems.length, filteredItems.length, countFormat, t],
+  );
+
+  const handleMinRatingChange = useCallback(
+    (value: string | number) => filters.setMinRating(String(value)),
+    [filters],
+  );
+  const handleMinReviewsChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => filters.setMinReviews(event.target.value),
+    [filters],
+  );
+  const handlePriceMinChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => filters.setPriceMin(event.target.value),
+    [filters],
+  );
+  const handlePriceMaxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => filters.setPriceMax(event.target.value),
+    [filters],
+  );
+
   const listTypeOptions = useMemo<TabNavItem[]>(
     () => BEST_SELLERS_LIST_TYPE_ORDER.map((value) => ({ id: value, label: t(`bestSellers.listTypes.${value}`) })),
     [t],
@@ -257,11 +326,13 @@ export const BestSellersPageContainer: React.FC = () => {
         name: t('bestSellers.allCategories'),
         depth: 0,
         isActive: category === BEST_SELLERS_ROOT_CATEGORY,
+        isActiveBranch: false,
         hasChildren: false,
         isExpanded: false,
       },
     ];
 
+    const activeDepartment = category === BEST_SELLERS_ROOT_CATEGORY ? null : departmentOfCategory(category);
     const departments = query
       ? categoryTree.departments.filter((entry) => entry.name.toLowerCase().includes(query))
       : categoryTree.departments;
@@ -277,6 +348,7 @@ export const BestSellersPageContainer: React.FC = () => {
         name: department.name,
         depth: 0,
         isActive: category === department.path,
+        isActiveBranch: category !== department.path && activeDepartment === department.path,
         hasChildren: true,
         isExpanded,
       });
@@ -294,6 +366,7 @@ export const BestSellersPageContainer: React.FC = () => {
           name: child.name,
           depth: 1,
           isActive: category === child.path,
+          isActiveBranch: false,
           hasChildren: false,
           isExpanded: false,
         });
@@ -333,11 +406,25 @@ export const BestSellersPageContainer: React.FC = () => {
     [setCategory],
   );
 
+  /*
+   * A department's sub-categories only exist once that department has been
+   * fetched — the API answers one level at a time. So opening a branch that was
+   * never visited IS a visit: the chevron navigates there (the list loads and
+   * the branch opens, since the active department is open by default). A
+   * pre-fetch that expanded without navigating would spend up to 50 products of
+   * the seller's allowance on a list they never looked at. Once the children
+   * are cached, the chevron is a plain expand/collapse toggle.
+   */
   const handleToggleCategoryExpand = useCallback(
     (path: string) => {
+      if (!categoryTree.isExpanded(path) && categoryTree.childrenOf(path) === undefined) {
+        setCategory(path);
+        setIsCategoryDrawerOpen(false);
+        return;
+      }
       categoryTree.toggleExpanded(path);
     },
-    [categoryTree],
+    [categoryTree, setCategory],
   );
 
   const handleCategorySearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -373,10 +460,6 @@ export const BestSellersPageContainer: React.FC = () => {
     },
     [selection, pageAsins],
   );
-
-  const handleControlClick = useCallback((event: React.SyntheticEvent) => {
-    event.stopPropagation();
-  }, []);
 
   const handleListSelected = useCallback(() => {
     if (selection.count === 0) {
@@ -436,12 +519,20 @@ export const BestSellersPageContainer: React.FC = () => {
         onOpenCategoryDrawer={handleOpenCategoryDrawer}
         onCloseCategoryDrawer={handleCloseCategoryDrawer}
         isSubCategory={category !== BEST_SELLERS_ROOT_CATEGORY}
+        ratingOptions={ratingOptions}
+        filterValues={filters.values}
+        onMinRatingChange={handleMinRatingChange}
+        onMinReviewsChange={handleMinReviewsChange}
+        onPriceMinChange={handlePriceMinChange}
+        onPriceMaxChange={handlePriceMaxChange}
+        hasActiveFilters={filters.isActive}
+        onClearFilters={filters.clear}
+        filterResultLabel={filterResultLabel}
         onBackToAllCategories={handleBackToAllCategories}
         selectedCount={selection.count}
         isAllOnPageSelected={isAllOnPageSelected}
         onToggleSelectAllOnPage={handleToggleSelectAllOnPage}
         onToggleItem={selection.toggle}
-        onControlClick={handleControlClick}
         onListSelected={handleListSelected}
         onClearSelection={selection.clear}
         onRetry={handleRetry}
