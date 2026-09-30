@@ -65,6 +65,7 @@ function buildHarness(options: {
             listing_id: 'listing-1',
             quantity: 1,
             listing_ebay_item_id: '99887766',
+            ebay_line_item_id: '10-99887766-1',
             shipped_detected_at: new Date('2026-08-20T00:00:00Z'),
           },
         ];
