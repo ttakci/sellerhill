@@ -130,6 +130,7 @@
         "quota_exhausted": "Достигнут месячный лимит",
         "cart": "Несоответствие корзины",
         "review_unreadable": "Не удалось прочитать итоговую сумму заказа",
+        "interrupted": "Покупка прервана — проверьте Amazon",
         "subscription_suspended": "Подписка приостановлена",
         "listing_over_plan_limit": "Листинг вне лимита тарифа",
         "order_already_fulfilled": "Уже отправлен — покупать нечего",

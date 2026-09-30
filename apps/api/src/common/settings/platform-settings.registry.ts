@@ -774,7 +774,7 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     category: PlatformSettingCategory.RETENTION,
     type: PlatformSettingType.NUMBER,
     envVar: 'RETENTION_LISTING_REVISIONS_DAYS',
-    defaultValue: '180',
+    defaultValue: '30',
     min: 30,
     max: 3650,
   }),

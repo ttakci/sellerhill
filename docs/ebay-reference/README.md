@@ -29,6 +29,10 @@ what could be obtained as real content; the "not obtainable" list is what could 
 | `notification-topics/getTopic-live-2026-09-30.json` | `GET /commerce/notification/v1/topic/{id}` against the PRODUCTION keyset | 200, eBay's own answer | Per topic: `scope` (USER/APPLICATION), `authorizationScopes`, `supportedPayloads` (schema versions), `filterable`. This — not a doc page — is the authority for which OAuth scope a subscription needs. |
 | `post-order/*.txt` | `https://developer.ebay.com/Devzone/post-order/<page>.html` (each file names its own URL on line 1) | 200, text-extracted (2026-09-30) | **Post-Order API v2 reference**: call conventions (`MakingACall`), returns (search / get / decide / issue_refund / mark_as_received / tracking), cancellations (search / get / approve / reject), inquiries (search / get / issue_refund), case search. |
 | `post-order/types/*.txt` | `https://developer.ebay.com/Devzone/post-order/types/<Type>.html` | 200, text-extracted (2026-09-30) | The enum VALUE lists the return payloads use: `ReturnStateEnum`, `ReturnStatusEnum`, `ReturnCountFilterEnum`, `ReturnReasonEnum`, `ReturnReasonTypeEnum`, `ReturnTypeEnum`, `ActivityOptionEnum`, `UserRoleFilterEnum`, `ReturnSortField`. |
+| `sell-inventory-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/inventory/openapi/3/sell_inventory_v1_oas3.json` | 200, raw (2026-09-30) | **Inventory API v1.18.5 OpenAPI.** `getInventoryItems` (`limit` 1–200, `offset` is a PAGE number), `getOffers` (one SKU per call), `getOffer` → `listing.{listingId, listingStatus, listingOnHold, soldQuantity}`, `bulkMigrateListing` requirements. |
+| `sell-analytics-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/analytics/openapi/3/sell_analytics_v1_oas3.json` | 200, raw (2026-09-30) | **Sell Analytics API v1.3.2 OpenAPI.** `getTrafficReport` (scope `sell.analytics.readonly`): dimensions, the 13 metrics, the `filter` grammar and its limits. |
+| `sell-feed-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/feed/openapi/3/sell_feed_v1_oas3.json` | 200, raw (2026-09-30) | **Feed API v1.3.1 OpenAPI.** `createInventoryTask` — "Presently, only one feed type is available: LMS_ACTIVE_INVENTORY_REPORT". |
+| `trading/GetMyeBaySelling.txt`, `GetItem.txt`, `GetSellerList.txt`, `GetSellerEvents.txt` | `https://developer.ebay.com/devzone/xml/docs/reference/ebay/<Call>.html` | 200, text-extracted (2026-09-30) | **Trading API call reference, version 1477.** Input fields, every output field with its description, the detail-level tables and the per-seller short-duration limits. |
 
 ## Not obtainable on 2026-09-29 (do not guess their content)
 
@@ -112,3 +116,61 @@ Every line is either quoted from a file in this folder or was observed in a real
 So a push subscription for cancellations, returns or inquiries needs a scope SellerHill does **not** request today (`sell.cancellation*`, `sell.return*`, `sell.inquiry*`): it would have to be enabled on the keyset first and every seller would have to reconnect. Polling needs neither. `createSubscription` itself needs `commerce.notification.subscription` and a body of `topicId`, `status` (ENABLED/DISABLED), `destinationId`, `payload` { `format`, `schemaVersion`, `deliveryProtocol` }.
 
 **Shared daily quotas that bound these** (production `getRateLimits`, 2026-09-30): `sell.fulfillment` 100,000 · `sell.fulfillment.refund` 100,000 · `post-order.return` 5,000 · `post-order.cancellation` 5,000 · `post-order.inquiry` 5,000 · `post-order.casemanagement` 5,000 · `commerce.notification` 10,000 · `payoutapi.sell.finances` 15,000 · Trading `GetOrders` 5,000.
+
+## Listing, traffic, watch-count and sold-quantity facts (2026-09-30)
+
+What eBay lets a seller application read about its own listings, from the local copies above plus
+read-only calls against the production keyset. Quotas are eBay's own `getRateLimits` answer
+for THIS application (stored hourly in `ebay_rate_limits`), not a doc page.
+
+### Limits that decide everything (application-wide, per day)
+
+| Resource | Limit | Source |
+|---|---:|---|
+| `sell.inventory` | 2,000,000 | `getRateLimits` |
+| `sell.feed` | 100,000 | `getRateLimits` |
+| Trading `GetMyeBaySelling`, `GetItem`, `GetSellerList`, `GetSellerEvents` | 5,000 each | `getRateLimits` |
+| `sell.analytics.traffic_report` | **100** | `getRateLimits` |
+| `buy.browse` | 5,000 | `getRateLimits` |
+| `commerce.notification` | 10,000 | `getRateLimits` |
+
+`getUserRateLimits` (called with a seller's token) lists only Trading write calls, `commerce.catalog`,
+`commerce.identity.user`, `commerce.media.document` and `sell.marketing.ad_report` — so none of the read
+limits above is per seller; they are shared by every seller of the application.
+
+### Views and impressions — `getTrafficReport` (works with the scope stores already grant)
+
+- Verified live: `dimension=LISTING`, metrics `LISTING_IMPRESSION_TOTAL, LISTING_VIEWS_TOTAL, CLICK_THROUGH_RATE, TRANSACTION, SALES_CONVERSION_RATE`, 30-day range → 200 records, one per listing id.
+- "If you specify dimension=LISTING without specifying any listing_ids in the parameter filter, the traffic report returned in the response contains a maximum of 200 listings." "You can specify to 200 different listingId values."
+- "The maximum range between the start and end dates is 90 days, and the earliest start date you can specify is two years prior to the current date."
+- "This filter only returns data for listings that have been either active or sold in last 90 days, and any unsold listings in the last 30 days."
+- `marketplace_ids`: "currently the filter allows only a single marketplace ID".
+- Sorting: "Sorting on the SALES_CONVERSION_RATE metric is not supported"; `TRANSACTION` only descending.
+- **100 calls a day for the whole application × 200 listings = at most 20,000 listing rows a day, for all sellers together.**
+
+### Watchers — Trading only
+
+- `Item.WatchCount`: "The number of watches placed on this item from buyers' My eBay accounts. Specify IncludeWatchCount as true in the request. Returned by GetMyeBaySelling only if greater than 0."
+- `GetMyeBaySelling` ActiveList returns `ItemID`, `SKU`, `Title`, `QuantityAvailable`, `SellingStatus.QuantitySold` and `WatchCount`, 200 entries a page at most. "GetMyeBaySelling has a limit of 25,000 items." "Per (seller) user ID, no more than 300 GetMyeBaySelling calls can be executed within any 15-second interval."
+- `GetSellerList` and `GetSellerEvents` take `IncludeWatchCount`; `GetSellerList` needs a start- or end-time range "less than 120 days" and 200 entries a page at most.
+- Browse `watchCount`: "This field is restricted to applications that have been granted permission to access this feature. You must submit an App Check ticket to request this access."
+- The Inventory API, the Feed report and the traffic report carry no watch count.
+
+### Hit counter — do not build on it
+
+- `GetItem` change history: "Item.HitCount (deprecated): Hit counters are no longer shown in View Item pages, so this field is no longer applicable."
+- `GetSellerList`: "This value indicates the number of page views that a listing has received in the last 30 days. We recommend that you use the getTrafficReport method of the Analytics API to return user traffic details received by a seller's listings."
+
+### Sold quantity
+
+- Inventory `getOffer` → `listing.soldQuantity`: "the quantity of the product that has been sold for the published offer" (one call per offer).
+- Trading `SellingStatus.QuantitySold`: "The total number of items purchased so far (in the listing's lifetime)."
+- Traffic report `TRANSACTION`: the transaction count inside the requested date range.
+- Browse `estimatedSoldQuantity`: "The estimated number of this item that have been sold."
+
+### Listing the catalogue, and hearing about changes
+
+- Feed `LMS_ACTIVE_INVENTORY_REPORT`: "a report that contains price and quantity information for all of the active listings for a specific seller" — every active listing whatever created it, but only ItemID, SKU, price and quantity (no title, no counts).
+- Inventory `getInventoryItems`: "retrieves all inventory item records defined for the seller's account" — Inventory-model records only. Live: needs an `Accept-Language` header (400 without it); the production store holds 368 records.
+- `GetSellerEvents`: "a list of the items on which a seller event has occurred" by modification, start or end time; "the time range you use should be less than 48 hours. If 3000 or more items are found, use a smaller time range."; "no more than 1000 GetSellerEvents calls … within any 15-second interval" per seller.
+- Notification topic `LISTING` (live `getTopic`): "notifies you of any listing events including creation, updates, and termination … whenever a listing transitions state or when specific data fields (such as price or quantity) are modified." USER scope, **authorizationScopes `sell.listing.read` / `sell.listing`** — scopes no connected store has granted. `ITEM_AVAILABILITY`, `ITEM_PRICE_REVISION` and `PRIORITY_LISTING_REVISION` need `buy.item.stream` and are described as eBay Partner Network topics; `WATCHLIST_REVISION` is the BUYER's own watch list (`buy.watchlist.read`). The live topic list had 27 entries on this date.

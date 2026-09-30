@@ -25,7 +25,7 @@ import { isOnAmazonAuthChallenge, probeAmazonAuth } from './amazon-auth-state';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
-import { AutoFulfillBlockedReason, shouldSkipFulfillStart } from './auto-fulfill-helpers';
+import { AutoFulfillBlockedReason, decideFulfillStart, FulfillStartDecision } from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
 
 /**
@@ -263,6 +263,9 @@ const CHECKOUT_SELECTORS = {
  * 1. Idempotency re-check: re-read `auto_fulfill_status` on start; if the
  *    order is already in a terminal state (placed / blocked / dry_run /
  *    skipped), no-op. This is what prevents a BullMQ retry from double-ordering.
+ *    A row still RUNNING at start means the previous PROCESS died mid-checkout
+ *    (the processor resets an in-process retry to PENDING first) — that is
+ *    blocked as INTERRUPTED, never re-entered (`decideFulfillStart`).
  * 2. Set `running` and run `checkout()` under the per-account rate limiter
  *    (1-concurrent SingletonLock invariant + ban-risk throttle).
  * 3. On `AutoFulfillBlockedError` → mark `blocked` and return WITHOUT throwing
@@ -328,8 +331,24 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       user_id: string;
       status: OrderStatus;
     }>(`SELECT auto_fulfill_status, user_id, status FROM orders WHERE ebay_order_id = $1`, [ebayOrderId]);
-    if (!order || shouldSkipFulfillStart(order.auto_fulfill_status)) {
+    const decision = order ? decideFulfillStart(order.auto_fulfill_status) : FulfillStartDecision.SKIP;
+    if (!order || decision === FulfillStartDecision.SKIP) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
+      return;
+    }
+    // Still RUNNING at job start = the previous process died mid-checkout
+    // (SIGKILL on deploy, OOM, host restart) and BullMQ handed the stalled job
+    // to us. The Place Order click may already have happened and `onPlaced`
+    // never ran, so re-entering the checkout risks a SECOND Amazon order.
+    // Fail closed: block, release the slot, let the seller check Amazon. An
+    // in-process transport retry never reaches this branch — the processor
+    // resets the row to PENDING before rethrowing.
+    if (decision === FulfillStartDecision.INTERRUPTED) {
+      await this.block(
+        ebayOrderId,
+        AutoFulfillBlockedReasonEnum.INTERRUPTED,
+        'row was still RUNNING when the job started: previous attempt died mid-checkout; not re-entering'
+      );
       return;
     }
     // The eBay sale was cancelled while this job waited (order sync re-reads an

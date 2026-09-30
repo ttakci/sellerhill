@@ -321,6 +321,7 @@ export class RefreshProcessorService extends WorkerHost {
     const tokenShare = tokensConsumed / products.length;
     const userIdsByProduct = await this.loadUserIdsByProduct(productIds);
     const pendingUpdates: PendingListingUpdate[] = [];
+    const checkedProductIds: string[] = [];
 
     // Token was spent for every requested ASIN whether or not data came back.
     // One bulk write for the whole batch instead of one round trip per ASIN.
@@ -344,6 +345,7 @@ export class RefreshProcessorService extends WorkerHost {
 
       try {
         pendingUpdates.push(...(await this.applyKeepaProduct(row, kp)));
+        checkedProductIds.push(row.id);
       } catch (error: unknown) {
         this.logger.error(
           `Refresh failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`
@@ -355,6 +357,29 @@ export class RefreshProcessorService extends WorkerHost {
     // the same seller now share a bulk call; previously they never could, and
     // each listing cost four eBay calls of its own.
     await this.productSyncService.flushUpdates(pendingUpdates);
+    await this.recordUnchangedChecks(checkedProductIds, pendingUpdates);
+  }
+
+  /**
+   * Log "checked, unchanged" for every listing this batch verified but did not
+   * push (see `ProductSyncService.recordUnchangedChecks`). Best-effort — a
+   * history row is never worth failing a batch whose products are already
+   * refreshed, and a BullMQ retry would only re-fetch them.
+   */
+  private async recordUnchangedChecks(
+    checkedProductIds: string[],
+    pending: PendingListingUpdate[]
+  ): Promise<void> {
+    try {
+      await this.productSyncService.recordUnchangedChecks(
+        checkedProductIds,
+        pending.map((update) => update.listingId)
+      );
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Failed to record unchanged refresh checks: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   /**
@@ -379,6 +404,7 @@ export class RefreshProcessorService extends WorkerHost {
       }
     }
     const pending: PendingListingUpdate[] = [];
+    const checkedProductIds: string[] = [];
     for (const row of products) {
       const plan = planScraperRefresh(
         {
@@ -400,11 +426,13 @@ export class RefreshProcessorService extends WorkerHost {
       }
       try {
         pending.push(...(await this.applyScraperPlan(row, plan)));
+        checkedProductIds.push(row.id);
       } catch (error: unknown) {
         this.logger.error(`Scraper refresh failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
     await this.productSyncService.flushUpdates(pending);
+    await this.recordUnchangedChecks(checkedProductIds, pending);
   }
 
   private async applyScraperPlan(

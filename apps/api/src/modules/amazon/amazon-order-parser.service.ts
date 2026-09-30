@@ -52,8 +52,10 @@ function isPlausibleTrackingNumber(value: string): boolean {
  *
  * Unrecognised text is `pending`, never echoed back: the first live order was
  * stamped with the status "grand total:" because a fallback selector matched
- * the order-summary label. An ETA line ("Arriving tomorrow") is shown before
- * the parcel ships, so it is pre-ship too.
+ * the order-summary label. An ETA line ("Arriving tomorrow") on its own says
+ * nothing about shipment — Amazon prints it before AND after the parcel ships
+ * — so a selector that yields one resolves to `pending` and leaves the real
+ * status to the progress tracker (`parseTrackerStatus`).
  */
 export function normalizeAmazonStatus(status: string): string {
   const lower = status.toLowerCase();
@@ -96,6 +98,18 @@ export function normalizeAmazonStatus(status: string): string {
  * the page's buttons out: "Cancel items" and "Return or replace items" are
  * both on every order page, and a substring match would cancel or return the
  * order in our books on every tick.
+ *
+ * Two rules come from the real progress-tracker layout (order
+ * 03-15243-67997, 2026-09-30, saved pages in the spec):
+ * - The ETA heading ("Arriving tomorrow", "Now expected …") is printed FIRST
+ *   and stays there after the parcel ships, so it is a DATE line, not a
+ *   status: it is remembered and the scan goes on. Three ticks once read it
+ *   as the status and never reached the "Shipped" heading under it.
+ * - The four milestone labels "Ordered · Shipped · Out for delivery ·
+ *   Delivered" are printed on EVERY tracker page, reached or not, right after
+ *   the status card. The first exact "Ordered" line ends the scan: whatever
+ *   the status card said has been read by then, and a label must never be
+ *   read as a status (a false "shipped" is an irreversible eBay push).
  */
 export function detectAmazonStatusLine(text: string): string | undefined {
   if (!text) {
@@ -105,7 +119,11 @@ export function detectAmazonStatusLine(text: string): string | undefined {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && line.length <= 48);
+  let etaSeen = false;
   for (const line of lines) {
+    if (/^ordered$/i.test(line)) {
+      return 'pending';
+    }
     if (/^cancell?ed\b/i.test(line)) {
       return 'cancelled';
     }
@@ -121,11 +139,14 @@ export function detectAmazonStatusLine(text: string): string | undefined {
     if (/^(preparing for (shipment|dispatch))\b/i.test(line)) {
       return 'processing';
     }
-    if (/^(arriving|not yet shipped|not shipped yet|now expected)\b/i.test(line)) {
+    if (/^(not yet shipped|not shipped yet)\b/i.test(line)) {
       return 'pending';
     }
+    if (/^(arriving|now expected)\b/i.test(line)) {
+      etaSeen = true;
+    }
   }
-  return undefined;
+  return etaSeen ? 'pending' : undefined;
 }
 
 /**
@@ -212,6 +233,30 @@ export class AmazonOrderParserService {
     const status = await this.extractStatus(page);
     const tracking = await this.extractTracking(page);
     return { status, ...tracking };
+  }
+
+  /**
+   * Delivery status from the progress tracker's own status card, or undefined.
+   *
+   * The tracker page ("Track package") carries the status as
+   * `<h1 class="pt-status-main-status">` — "Ordered", "Shipped",
+   * "Delivered" — separate from the promise card's ETA heading
+   * (`.pt-promise-main-slot`, "Arriving tomorrow"). Verified on two saved
+   * pages (2026-09-30): a shipped order reads "Shipped", an unshipped one
+   * "Ordered". Undefined when the card is not there, so the caller can fall
+   * back to the visible text (`detectAmazonStatusLine`).
+   */
+  async parseTrackerStatus(page: Page): Promise<string | undefined> {
+    const heading = page.locator('.pt-status-main-status').first();
+    const visible = await heading
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!visible) {
+      return undefined;
+    }
+    const text = (await heading.textContent().catch(() => null))?.trim();
+    return text ? normalizeAmazonStatus(text) : undefined;
   }
 
   private async extractStatus(page: Page): Promise<string> {

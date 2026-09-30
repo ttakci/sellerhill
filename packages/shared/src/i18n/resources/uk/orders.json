@@ -130,6 +130,7 @@
         "quota_exhausted": "Досягнуто місячного ліміту",
         "cart": "Невідповідність кошика",
         "review_unreadable": "Підсумок замовлення не читається",
+        "interrupted": "Покупку перервано — перевірте Amazon",
         "subscription_suspended": "Підписку призупинено",
         "listing_over_plan_limit": "Лістинг поза лімітом тарифу",
         "order_already_fulfilled": "Уже відправлено — купувати нічого",

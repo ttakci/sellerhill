@@ -130,6 +130,7 @@
         "quota_exhausted": "Aylıq kvota dolub",
         "cart": "Səbət uyğunsuzluğu",
         "review_unreadable": "Sifariş məbləği oxunmadı",
+        "interrupted": "Alış yarımçıq qaldı — Amazon'u yoxlayın",
         "subscription_suspended": "Abunəlik dayandırılıb",
         "listing_over_plan_limit": "Elan plan limitindən kənardadır",
         "order_already_fulfilled": "Artıq göndərilib — alınacaq heç nə yoxdur",

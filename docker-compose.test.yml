@@ -25,6 +25,9 @@ services:
       context: .
       dockerfile: Dockerfile.api
     restart: unless-stopped
+    # Same as production: let an in-flight BullMQ job (an Amazon checkout in
+    # particular) finish before Docker SIGKILLs the container on a deploy.
+    stop_grace_period: 5m
     environment:
       # `production` keeps the same runtime code paths as prod — the test env
       # differs by configuration only, never by a code branch.

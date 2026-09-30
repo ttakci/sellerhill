@@ -130,6 +130,7 @@
         "quota_exhausted": "Monthly quota reached",
         "cart": "Cart mismatch",
         "review_unreadable": "Order total unreadable",
+        "interrupted": "Purchase interrupted — check Amazon",
         "subscription_suspended": "Subscription suspended",
         "listing_over_plan_limit": "Listing outside plan limit",
         "order_already_fulfilled": "Already shipped — nothing to buy",

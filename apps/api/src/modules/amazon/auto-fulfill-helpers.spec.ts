@@ -1,6 +1,8 @@
 import { AutoFulfillBlockedReason, AutoFulfillStatus, OrderStatus } from '@repo/shared';
 
 import {
+  decideFulfillStart,
+  FulfillStartDecision,
   meetsCoarseCapGate,
   pickRoundRobinAccount,
   resolveAutoFulfillEligibility,
@@ -57,6 +59,31 @@ describe('shouldSkipFulfillStart', () => {
     expect(shouldSkipFulfillStart(AutoFulfillStatus.PENDING)).toBe(false);
     expect(shouldSkipFulfillStart(AutoFulfillStatus.RUNNING)).toBe(false);
     expect(shouldSkipFulfillStart(AutoFulfillStatus.FAILED)).toBe(false);
+  });
+});
+
+describe('decideFulfillStart', () => {
+  it('skips every terminal state', () => {
+    for (const status of [
+      AutoFulfillStatus.PLACED,
+      AutoFulfillStatus.BLOCKED,
+      AutoFulfillStatus.DRY_RUN,
+      AutoFulfillStatus.SKIPPED,
+    ]) {
+      expect(decideFulfillStart(status)).toBe(FulfillStartDecision.SKIP);
+    }
+  });
+
+  it('proceeds from pending and failed', () => {
+    expect(decideFulfillStart(AutoFulfillStatus.PENDING)).toBe(FulfillStartDecision.PROCEED);
+    expect(decideFulfillStart(AutoFulfillStatus.FAILED)).toBe(FulfillStartDecision.PROCEED);
+  });
+
+  // A row still at RUNNING when a job starts means the previous attempt died
+  // without cleaning up (SIGKILL on deploy, OOM, host restart). The Place Order
+  // click may already have happened, so the checkout must NOT re-enter.
+  it('reads RUNNING as an interrupted attempt, never as a restart', () => {
+    expect(decideFulfillStart(AutoFulfillStatus.RUNNING)).toBe(FulfillStartDecision.INTERRUPTED);
   });
 });
 

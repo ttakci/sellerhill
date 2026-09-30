@@ -130,6 +130,7 @@
         "quota_exhausted": "Quota mensuel atteint",
         "cart": "Panier non conforme",
         "review_unreadable": "Total de la commande illisible",
+        "interrupted": "Achat interrompu — vérifiez Amazon",
         "subscription_suspended": "Abonnement suspendu",
         "listing_over_plan_limit": "Annonce hors limite du forfait",
         "order_already_fulfilled": "Déjà expédiée — rien à acheter",

@@ -105,6 +105,25 @@ export class AutoFulfillProcessor extends WorkerHost {
                 `final-fail quota release failed for ${ebayOrderId}: ${(releaseErr as Error).message}`,
               );
             }
+          } else {
+            // Hand the row back as PENDING before BullMQ retries. The checkout
+            // reads RUNNING-at-start as "the previous PROCESS died mid-flight"
+            // and blocks the order (`decideFulfillStart` → INTERRUPTED) rather
+            // than risk a second Place Order click. An in-process retry is safe
+            // to re-enter — nothing is bought before the review step and no
+            // error escapes after the click — so it must not look interrupted.
+            // If this write fails the retry is refused as interrupted, which is
+            // the safe side.
+            try {
+              await this.db.query(
+                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+                [AutoFulfillStatus.PENDING, ebayOrderId],
+              );
+            } catch (resetErr) {
+              this.logger.warn(
+                `could not reset ${ebayOrderId} to pending before retry: ${(resetErr as Error).message} — the retry will be refused as interrupted`,
+              );
+            }
           }
           throw err;
         }
