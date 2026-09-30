@@ -18,13 +18,70 @@ export interface MatchableAddress {
   zipCode?: string;
 }
 
-/** Case/spacing/punctuation-insensitive comparison form. */
+/**
+ * USPS standard abbreviations Amazon applies when it saves an address. The eBay
+ * side keeps whatever the buyer typed ("115 Cambron Lane"), the Amazon side
+ * shows the standardised form ("115 CAMBRON LN"). Applied to BOTH sides token by
+ * token, so the table can only make equal addresses compare equal — an entry
+ * cannot make two different words collide unless they are the same USPS word.
+ */
+const USPS_TOKENS: Readonly<Record<string, string>> = {
+  street: 'st',
+  avenue: 'ave',
+  av: 'ave',
+  road: 'rd',
+  drive: 'dr',
+  lane: 'ln',
+  boulevard: 'blvd',
+  court: 'ct',
+  circle: 'cir',
+  place: 'pl',
+  terrace: 'ter',
+  highway: 'hwy',
+  parkway: 'pkwy',
+  trail: 'trl',
+  square: 'sq',
+  crossing: 'xing',
+  expressway: 'expy',
+  freeway: 'fwy',
+  heights: 'hts',
+  point: 'pt',
+  mount: 'mt',
+  north: 'n',
+  south: 's',
+  east: 'e',
+  west: 'w',
+  northeast: 'ne',
+  northwest: 'nw',
+  southeast: 'se',
+  southwest: 'sw',
+  apartment: 'apt',
+  suite: 'ste',
+  building: 'bldg',
+  floor: 'fl',
+  room: 'rm',
+  department: 'dept',
+};
+
+/** Case/spacing/punctuation-insensitive comparison form, USPS-abbreviated. */
 function normalize(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[.,#]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    value
+      .toLowerCase()
+      .replace(/[.,#]/g, ' ')
+      // "121Daniel" -> "121 daniel": Amazon inserts the space when it saves.
+      .replace(/(\d)([a-z])/g, '$1 $2')
+      .replace(/([a-z])(\d)/g, '$1 $2')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((token) => USPS_TOKENS[token] ?? token)
+      .join(' ')
+  );
+}
+
+/** Whole-token containment, so "15 cambron ln" is not found inside "115 cambron ln". */
+function containsTokens(haystack: string, needle: string): boolean {
+  return ` ${haystack} `.includes(` ${needle} `);
 }
 
 /** Leading house/building number of a street line, when present. */
@@ -70,7 +127,7 @@ export function addressBlockMatchesBuyer(
 
   // Street: require the house number AND the remaining street text.
   const streetNorm = normalize(street);
-  if (!haystack.includes(streetNorm)) {
+  if (!containsTokens(haystack, streetNorm)) {
     return false;
   }
   const number = streetNumber(streetNorm);
@@ -81,7 +138,7 @@ export function addressBlockMatchesBuyer(
   // Unit/suite line: if the buyer has one it must be present, otherwise a
   // same-street neighbouring unit would be accepted.
   const unit = buyer.street2?.trim();
-  if (unit && !haystack.includes(normalize(unit))) {
+  if (unit && !containsTokens(haystack, normalize(unit))) {
     return false;
   }
 

@@ -14,6 +14,7 @@ import {
   ACTIONABLE_ORDER_STAGES,
   buildFulfillmentStateSql,
   buildOrderStageSql,
+  canStartAutoFulfillManually,
   deriveFulfillmentState,
   deriveOrderStage,
   isSimulatedAmazonOrderId,
@@ -71,6 +72,7 @@ interface OrderRow {
   cost_capture_status: string;
   auto_fulfill_status: string | null;
   auto_fulfill_blocked_reason: string | null;
+  listing_over_plan_limit?: boolean | null;
   amazon_cancelled_at: Date | null;
   shipped_detected_at: Date | null;
   ebay_tracking_pushed_at: Date | null;
@@ -554,6 +556,16 @@ export class OrdersService {
         amazonCancelledAt: row.amazon_cancelled_at,
         shippedDetectedAt: row.shipped_detected_at,
         ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+      }),
+      canStartAutoFulfill: canStartAutoFulfillManually({
+        status: row.status as OrderStatus,
+        isTracked: !!row.listing_id,
+        listingOverPlanLimit: row.listing_over_plan_limit === true,
+        autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : null,
+        autoFulfillBlockedReason: row.auto_fulfill_blocked_reason
+          ? (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReason)
+          : null,
+        amazonOrderId: row.amazon_order_id,
       }),
       shippedDetectedAt: row.shipped_detected_at ? row.shipped_detected_at.toISOString() : null,
       ebayTrackingPushedAt: row.ebay_tracking_pushed_at ? row.ebay_tracking_pushed_at.toISOString() : null,

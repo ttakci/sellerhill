@@ -33,5 +33,12 @@ export interface OrderDetailsPageProps {
   canConvertTracking: boolean;
   isConvertingTracking: boolean;
   onConvertTracking?: () => void;
+  /**
+   * `OrderDto.canStartAutoFulfill` — the automatic purchase stopped before
+   * anything was bought and may be started again by hand.
+   */
+  canStartAutoFulfill: boolean;
+  isStartingAutoFulfill: boolean;
+  onStartAutoFulfill?: () => void;
   canCopyAddress: boolean;
 }

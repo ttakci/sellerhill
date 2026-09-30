@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!--
+  Amazon single-page checkout with every step COLLAPSED — the page order
+  17-15222-04697 stopped on (2026-09-30). The delivery card markup
+  (#deliver-to-customer-text, #deliver-to-address-text, the "Change" link with
+  slot id checkout-change-shipaddressselect) and the order-summary list are
+  kept verbatim from a live capture; names and addresses are FICTITIOUS and are
+  filled in by the test through the {{…}} placeholders.
+
+  The final "Place your order" control is deliberately NOT reproduced: its
+  markup has not been captured yet, and a guessed copy would test nothing.
+-->
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>Place Your Order - Amazon Checkout</title>
+<style>.aok-hidden,.a-popover-preload,.js-hide{display:none!important}</style>
+</head>
+<body>
+<div id="a-page">
+<div class="a-container checkout-experience-page-content">
+  <div id="checkout-experience-container" class="a-row a-ws-row">
+    <div id="checkout-experience-right-column" class="a-column a-span12 a-ws-span4 a-ws-span-last">
+      <div id="checkout-subtotals-section" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel">
+        <div id="subtotals" class="a-cardui celwidget rcx-checkout-custom-card no-trailing-space">
+          <ul id="subtotals-marketplace-table" class="a-unordered-list a-nostyle a-vertical a-spacing-none a-size-small a-color-base" role="list">
+            <li class="a-spacing-mini"><span class="a-list-item"><div class="order-summary-grid"><div class="order-summary-line-term"><span><span class="break-word">Items:</span></span></div><div class="order-summary-line-definition"><input type="hidden" name="subtotalLineType" value="ITEMS_TAX_EXCLUSIVE"><span class="aok-nowrap a-nowrap"><span data-shimmer-target="ordertotals-amount">$8.79</span></span></div></div></span></li>
+            <li class="a-spacing-mini"><span class="a-list-item"><div class="order-summary-grid"><div class="order-summary-line-term"><span><span class="break-word">Shipping &amp; handling:</span></span></div><div class="order-summary-line-definition"><span class="aok-nowrap a-nowrap"><span data-shimmer-target="ordertotals-amount">$0.00</span></span></div></div></span></li>
+            <li class="a-spacing-mini"><span class="a-list-item"><div class="order-summary-grid"><div class="order-summary-line-term"><span><span class="break-word">Estimated tax to be collected:</span></span></div><div class="order-summary-line-definition"><span class="aok-nowrap a-nowrap"><span data-shimmer-target="ordertotals-amount">$0.62</span></span></div></div></span></li>
+            <li data-testid="" class="a-spacing-mini"><span class="a-list-item a-size-medium a-color-base a-text-bold"><div class="order-summary-grid"><div class="order-summary-line-term"><span class="break-word">Order total:</span></div><div class="order-summary-line-definition"><span data-shimmer-target="ordertotals-amount">$9.41</span></div></div></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="checkout-experience-left-column" class="a-column a-span12 a-ws-span8">
+      <div id="checkout-delivery-address-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel collapsed">
+        <div class="a-cardui rcx-checkout-custom-card js-hide shrink-placeholder no-trailing-space">
+          <h2 class="a-size-medium a-spacing-none a-text-bold">Select a delivery address</h2>
+          <span class="aok-inline-block a-spacing-top-micro loading-text">Loading your address information...</span>
+        </div>
+        <div id="checkout-deliveryAddressPanel" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <div class="a-row">
+            <div class="a-column a-span8 a-spacing-none">
+              <div class="a-row">
+                <div class="a-column a-span12 a-spacing-base a-span-last">
+                  <span class="a-declarative" data-action="page-transit-no-update-action">
+                    <a id="change-delivery-link" class="a-link-normal a-text-normal" tabindex="-1" href="{{CHANGE_HREF}}">
+                      <div class="a-section">
+                        <h2 id="deliver-to-customer-text" class="a-size-medium a-color-base a-text-bold">
+                          Delivering to {{NAME}}
+                        </h2>
+                        <p class="a-spacing-none">
+                          <span id="deliver-to-address-text" class="a-color-base">
+                            {{ADDRESS}}
+                          </span>
+                        </p>
+                      </div>
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="a-column a-span4 a-text-right a-spacing-base a-span-last">
+              <span class="a-declarative" data-action="page-transit-no-update-action">
+                <a data-csa-c-slot-id="checkout-change-shipaddressselect" data-csa-c-type="widget" data-frompage="spc" data-topage="shipaddressselect" aria-label="Change delivery address" class="a-link-normal expand-panel-button celwidget" href="{{CHANGE_HREF}}">
+                  Change
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="checkout-payment-option-panel" class="a-section a-spacing-none checkout-experience-panel spp-panel cacheable-spp-panel collapsed">
+        <div id="checkout-paymentOptionPanel" class="a-cardui rcx-checkout-custom-card panel-content no-trailing-space">
+          <h2 id="payment-option-text-default" data-testid="_default" class="a-size-medium a-color-base a-text-bold"><span class="break-word">Paying with Mastercard 0000</span></h2>
+          <a data-csa-c-slot-id="checkout-change-payselect" aria-label="Change payment method" class="a-link-normal expand-panel-button celwidget" href="pay">Change</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

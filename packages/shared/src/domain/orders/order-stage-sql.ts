@@ -30,6 +30,7 @@ export function buildOrderStageSql(alias: string): string {
     WHEN ${shippedDetected} THEN '${OrderStage.TRACKING_HELD}'
     WHEN ${auto} IN ('${AutoFulfillStatus.PENDING}', '${AutoFulfillStatus.RUNNING}') THEN '${OrderStage.BUYING}'
     WHEN ${hasAmazonOrder} THEN '${OrderStage.PURCHASED}'
+    WHEN ${auto} = '${AutoFulfillStatus.PLACED}' THEN '${OrderStage.PURCHASED}'
     WHEN ${auto} IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}') THEN '${OrderStage.PURCHASE_BLOCKED}'
     WHEN ${status} = '${OrderStatus.PENDING}' THEN '${OrderStage.AWAITING_PAYMENT}'
     ELSE '${OrderStage.TO_PURCHASE}'

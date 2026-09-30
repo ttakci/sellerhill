@@ -252,6 +252,12 @@ export interface OrderDto {
   ebayTrackingPushedAt?: string | null;
   /** True when `amazonOrderId` is a dry-run placeholder, not a real purchase. */
   isSimulated?: boolean;
+  /**
+   * Whether the seller may start the automatic Amazon purchase by hand —
+   * `canStartAutoFulfillManually`, computed server-side so the button and the
+   * endpoint (`POST /amazon/orders/:id/start-auto-fulfill`) never disagree.
+   */
+  canStartAutoFulfill?: boolean;
 
   // Product
   product?: {
@@ -398,6 +404,16 @@ export interface OrderStatsDto {
 /** `GET /orders/stage-counts` — every stage is present, 0 when empty, so the
  *  tabs never render an undefined count. */
 export type OrderStageCountsDto = Record<OrderStage, number>;
+
+/**
+ * `POST /amazon/orders/:orderId/start-auto-fulfill` — the purchase was queued.
+ * `dryRun` is the chosen Amazon account's test-run flag, so the page can say
+ * "test run started, nothing will be bought" instead of implying a purchase.
+ */
+export interface StartAutoFulfillResultDto {
+  queued: true;
+  dryRun: boolean;
+}
 
 export interface OrderFiltersDto {
   search?: string;

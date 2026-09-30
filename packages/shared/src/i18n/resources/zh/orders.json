@@ -142,6 +142,14 @@
       "filter": {
         "all": "全部自动履约",
         "needsAttention": "需要关注"
+      },
+      "start": {
+        "button": "启动自动下单",
+        "confirmTitle": "现在就在 Amazon 上购买这个订单吗？",
+        "confirmDescription": "SellerHill 将使用你的自动下单 Amazon 账户为这笔销售下一个真实的 Amazon 订单，并寄送给 eBay 买家。你的消费上限依然有效，总额超过上限时购买会停止。只有在你尚未自行购买该商品时才继续。",
+        "confirm": "开始购买",
+        "queued": "购买已开始。订单状态会在几分钟内更新。",
+        "queuedDryRun": "测试运行已开始。该 Amazon 账户处于测试模式，不会购买任何商品。"
       }
     },
     "pagination": {
@@ -251,7 +259,12 @@
       "conversionDone": "物流单号已转换。",
       "orderNotTracked": "此订单未关联到您的任何商品刊登，因此转换后的物流单号永远无法发送到 eBay。请先把订单关联到对应的商品刊登。",
       "trackingAlreadyPushed": "eBay 已有此订单的原始物流单号且无法替换，因此现在转换不会改变买家看到的内容。",
-      "listingOverPlanLimit": "此订单到达时，其商品刊登已超出您套餐的商品刊登上限。来自上限之外商品刊登的订单不会进行货件追踪，也不会转换物流单号。"
+      "listingOverPlanLimit": "此订单到达时，其商品刊登已超出您套餐的商品刊登上限。来自上限之外商品刊登的订单不会进行货件追踪，也不会转换物流单号。",
+      "autoFulfillNotRestartable": "无法再次启动此订单的自动购买。它可能已经购买或正在处理中，也可能会产生第二笔购买。请检查你的 Amazon 订单并手动关联该订单。",
+      "autoFulfillNoAccount": "没有可用于自动下单的 Amazon 账户。请在设置中为某个 Amazon 账户开启自动下单并设置消费上限。",
+      "autoFulfillOverCap": "这笔销售超过了你的 Amazon 账户的消费上限。请在 Amazon 账户设置中提高上限，或手动购买该商品。",
+      "autoFulfillAlreadyStarted": "此订单的状态刚刚发生变化，购买可能已经开始。请刷新页面。",
+      "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。"
     },
     "stage": {
       "amazon_cancelled": {

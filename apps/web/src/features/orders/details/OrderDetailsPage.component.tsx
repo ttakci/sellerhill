@@ -108,6 +108,9 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   canConvertTracking,
   isConvertingTracking,
   onConvertTracking,
+  canStartAutoFulfill,
+  isStartingAutoFulfill,
+  onStartAutoFulfill,
   canCopyAddress,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
@@ -645,7 +648,25 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {order.trackingProblemCode && (
                 <InfoMessage>{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
               )}
-              <Button variant="primary" size="small" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
+              {canStartAutoFulfill && onStartAutoFulfill ? (
+                <Button
+                  variant="primary"
+                  size="small"
+                  fullWidth
+                  onClick={onStartAutoFulfill}
+                  isLoading={isStartingAutoFulfill}
+                >
+                  <Icon name="shopping-cart" size={16} />
+                  <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
+                </Button>
+              ) : null}
+              <Button
+                variant={canStartAutoFulfill ? 'secondary' : 'primary'}
+                size="small"
+                onClick={onOpenLinkAmazon}
+                fullWidth
+                isLoading={isUpdating}
+              >
                 <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
               </Button>
               {canConvertTracking && onConvertTracking ? (
