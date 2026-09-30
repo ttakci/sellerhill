@@ -1,0 +1,821 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_casemanagement_search__get.html
+Fetched: 2026-09-30 (text-extracted)
+
+Search Cases - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Search Cases
+
+##
+GET /post-order/v2/casemanagement/search
+
+This method is used to search for return requests and Item Not Received inquiries that have been escalated to eBay cases by the buyer.
+
+There are multiple filters available for this method, including the following:
+- Searching by item ID
+- Searching by order ID (or item ID/transaction ID)
+- Searching by return ID
+- Searching by case status
+- Searching by case creation date
+Pagination is also available for this method that allows the user to control how many and which cases are returned in the results set.
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+GET https://api.ebay.com/post-order/v2/casemanagement/search?
+case_creation_date_range_from=string&
+case_creation_date_range_to=string&
+case_status_filter=CaseStatusFilter&
+fieldgroups=CaseSearchFieldGroupEnum&
+item_id=string&
+limit=integer&
+offset=integer&
+order_id=string&
+return_id=string&
+sort=string&
+transaction_id=string
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+case_creation_date_range_from
+|
+string |
+Optional |
+
+The case_creation_date_range_from and case_creation_date_range_to query parameters are used if the user wants to retrieve cases that were created during a specific time range. The starting date range is input into the case_creation_date_range_from query parameter. The case_creation_date_range_from date must be older than the case_creation_date_range_to date, and it cannot be set back more than 18 months in the past. If the case_creation_date_range_from query parameter is used, but the case_creation_date_range_to query parameter is not used, the method will look for all cases created at or after this date/time, going forward 90 days from this date. The ISO-8601 date format should be used for this query parameter. Here's a sample of that format: 2015-05-15T03:52:39.000Z.
+|
+
+case_creation_date_range_to
+|
+string |
+Optional |
+
+The case_creation_date_range_from and case_creation_date_range_to query parameters are used if the user wants to retrieve cases that were created during a specific time range. The ending date range is input into the case_creation_date_range_to query parameter. The case_creation_date_range_to date must be more recent than the case_creation_date_range_from date. If the case_creation_date_range_from query parameter is used, but the case_creation_date_range_to query parameter is not used, the method will look for all cases created at or after the case_creation_date_range_from value, going forward 90 days from this date. The ISO-8601 date format should be used for this query parameter. Here's a sample of that format: 2015-05-15T03:52:39.000Z.
+|
+
+case_status_filter
+|
+string |
+Optional |
+
+This query parameter is used if the user wants to search for cases in a specific state. One of the enumeration values defined in the CaseStatusFilter type definition must be used in this query parameter.
+
+Applicable values are from CaseStatusFilter. |
+
+fieldgroups
+|
+string |
+Optional |
+
+In the future, the fieldgroups query parameter may be used in the request to control the amount of detail that is returned in the response, but for now, the scope of the response will be the same even if this query parameter is used and set to DEFAULT, which is the only supported value.
+
+Applicable values are from CaseSearchFieldGroupEnum. |
+
+item_id
+|
+string |
+--- |
+
+The unique eBay-assigned ID of a listing. If this parameter is used, eBay will search for any cases filed against this listing.
+
+This parameter is conditionally required if the transaction_id query parameter is used, as both Item ID and Transaction ID values are needed to identify a line item.
+|
+
+limit
+|
+integer |
+Optional |
+
+This parameter specifies the maximum number of cases to display per page of data. If this query parameter is not used, its value defaults to 25 (cases per page).
+
+Min value: 1
+Max value: 200
+Default value: 25
+|
+
+offset
+|
+integer |
+Optional |
+
+This parameter specifies the number of entries to skip in the result set before returning the first item in the paginated response. A 0-based index is used, so page '1' of results is returned if 0 is set in this field or if this query parameter is omitted. Specify a positive value equal to or lower than the number of pages available (which you determine by examining the results in the paginationOutput container of your initial call).
+
+Combine offset with the limit query parameter to control how many and which items are returned in the response.
+
+Min value: 0
+Default value: 0
+|
+
+order_id
+|
+string |
+Optional |
+
+The unique ID of an order. An order_id value is provided as a query parameter if the user wants to see if a case was filed against one or more order line items in the order specified in this field.
+
+Note: The order ID value changes as an order goes from the unpaid to the paid state.
+|
+
+return_id
+|
+string |
+Optional |
+
+The unique identifier of a return request. A return_id value is provided as a query parameter if the user wants to see if a particular return request has been escalated to a case.
+|
+
+sort
+|
+string |
+Optional |
+
+This query parameter is used if you want to control whether cases are retrieved in descending order (most recent cases returned at top of the response) or ascending order (oldest cases returned at top of the response). If this query parameter is used, either Descending or Ascending must be used as the value.
+
+Descending is the default value, so this query parameter is more useful if you want to sort cases in ascending order.
+
+Default: Descending
+|
+
+transaction_id
+|
+string |
+Optional |
+
+The unique eBay-assigned ID of the line item purchase. If this parameter is used, the item_id query parameter must also be used, as both Item ID and Transaction ID values are needed to identify a line item. If you use transaction_id without also supplying an item_id value, this parameter is ignored.
+|
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+This call has no request payload.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+Note: For information about the error fields and how to work with them, see Error Handling.
+
+The following lists all fields that could be included in the response.
+
+{ /* CaseSearchResponse */
+"members": [
+{ /* CaseSummaryType */
+"buyer": string,
+"caseId": integer,
+"caseStatusEnum": string,
+"claimAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"creationDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"itemId": integer,
+"lastModifiedDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"respondByDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"seller": string,
+"transactionId": integer
+}
+/* More CaseSummaryType nodes here */
+],
+"paginationOutput":
+{ /* PaginationOutput */
+"limit": integer,
+"offset": integer,
+"totalEntries": integer,
+"totalPages": integer
+},
+"totalNumberOfCases": integer
+}
+
+#### Response field descriptions
+
+Output Container/Field |
+Type |
+Occurrence |
+Meaning |
+
+members
+|
+array of CaseSummaryType |
+Always |
+
+An array of one or more cases that match the filter criteria in request.
+|
+
+members.buyer
+|
+string |
+Always |
+
+The eBay user ID of the buyer involved in the case.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+members.caseId
+|
+integer |
+Always |
+
+The unique identifier of the case.
+|
+
+members.caseStatusEnum
+|
+string |
+Always |
+
+This enumeration value indicates the current status of the case.
+
+The list of enumeration values that may be returned in this field are defined in the CaseStatusEnum type definition.
+
+Applicable values: See CaseStatusEnum
+
+|
+
+members.claimAmount
+|
+Amount |
+Always |
+
+This container displays the dollar value of the order line item associated with the case, which is generally the amount of the refund that the buyer will receive if the buyer is looking for a refund, or if the seller voluntarily refunds the buyer.
+|
+
+members.claimAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+members.claimAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+members.claimAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+members.claimAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+members.claimAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+members.creationDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the case was created.
+|
+
+members.creationDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+members.creationDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+members.itemId
+|
+integer |
+Always |
+
+The unique identifier of the eBay listing where the line item was purchased. This field is used in conjunction with the transactionId field to identify a line item that is associated with the case.
+|
+
+members.lastModifiedDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the last action was performed on the case.
+|
+
+members.lastModifiedDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+members.lastModifiedDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+members.respondByDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the deadline for when a buyer or seller must perform the next action on the case. This field will only be returned if there is a deadline associated with the next action.
+|
+
+members.respondByDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+members.respondByDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+members.seller
+|
+string |
+Always |
+
+The eBay user ID of the seller involved in the case.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+members.transactionId
+|
+integer |
+Always |
+
+The unique identifier of the purchase transaction. This value is created right when the buyer is committed to buying the item, whether that buyer uses a 'Buy it Now' capability, is the winning bidder of an auction, or the buyer's Best Offer is accepted by the seller. This field is used in conjunction with the itemId field to identify the line item that is associated with the case.
+|
+
+paginationOutput
+|
+PaginationOutput |
+Always |
+
+This container consists of metadata related to the current page of results. It shows the total number of cases that match the filter criteria, the total number of cases to show per page of results, and the total number of pages in the results set.
+|
+
+paginationOutput.limit
+|
+integer |
+Always |
+
+The maximum number of entries to return per request. This value is set through the limit query parameter in the request (or the default value is used if this query parameter is omitted).
+
+The value of the totalEntries field divided by the value of this field determines the value of the totalPages field.
+|
+
+paginationOutput.offset
+|
+integer |
+Always |
+
+The offset value indicates the number of entries to skip in the results set before returning the first entry in the paginated response. The offset query parameter is paired with the limit query parameter to control the number of entries returned in the response, and which entries appear on that page of data. For example, if you supply an offset of 0 and a limit of 10, the first page of the response contains the first 10 entries from the results set. If the offset was set to 10 and the limit was set to 20, the first page of the results set would contain entries 11-30.
+
+The offset value defaults to 0 if the offset query parameter is omitted from the request.
+|
+
+paginationOutput.totalEntries
+|
+integer |
+Always |
+
+The total number of entries that match the current input criteria of the request. This value divided by the value of the limit field determines the value of the totalPages field.
+|
+
+paginationOutput.totalPages
+|
+integer |
+Always |
+
+The total number of pages of entries that match the current input criteria of the request.
+
+This value is determined by dividing the value of the totalEntries field by the value of the limit field. If totalPages is more than 1, subsequent calls must be used to view subsequent pages in the results set.
+|
+
+totalNumberOfCases
+|
+integer |
+Always |
+
+This integer value indicates the total number of cases that were found based on the input filter(s) in the request.
+|
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Sample: Basic Call
+
+Search for open cases
+
+Description
+
+This call searches for open cases filed against the seller.
+
+Input
+
+To retrieve open cases only, the case_status_filter query parameter is used, and its value is set to OPEN.
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/casemanagement/search?
+case_status_filter=OPEN
+
+Output
+
+The search revealed that the seller has only one open case filed against their account. To retrieve more information about the case, the seller will want to grab the caseId value and run a 'Get Case' call using that ID value.
+
+JSON format.
+{
+"members": [
+{
+"buyer": "s*************4",
+"caseId": "5********3",
+"caseStatusEnum": "OPEN",
+"claimAmount":
+{
+"currency": "USD",
+"value": "81.0"
+},
+"creationDate":
+{
+"value": "2015-08-29T20:18:17.000Z"
+},
+"itemId": "2**********1",
+"lastModifiedDate":
+{
+"value": "2015-08-29T20:18:17.000Z"
+},
+"respondByDate":
+{
+"value": "2015-09-01T20:18:17.000Z"
+},
+"seller": "f***********6",
+"transactionId": "8********1"
+}
+],
+"paginationOutput":
+{
+"limit": 25,
+"offset": 0,
+"totalEntries": 1,
+"totalPages": 1
+},
+"totalNumberOfCases": 1
+}
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

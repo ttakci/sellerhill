@@ -1,0 +1,2288 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_cancellation-cancelid__get.html
+Fetched: 2026-09-30 (text-extracted)
+
+Get Cancellation - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Get Cancellation
+
+##
+GET /post-order/v2/cancellation/{cancelId}
+
+This method retrieves the details of a specific cancellation request.
+
+The response from this method depends on the value set for the fieldgroups query parameter. If the value of fieldgroups is set to SUMMARY, the response payload is identical to the payload retrieved in the GET /post-order/v2/cancellation/search method. If you set the value of fieldgroups to FULL, the response includes a history of each cancellation request and the list of each line item in the order.
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+GET https://api.ebay.com/post-order/v2/cancellation/{cancelId}?
+fieldgroups=GetCancelFieldGroup
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+cancelId
+|
+string |
+Required |
+
+Input the unique identifier for the cancellation request you wish to retrieve. The cancellation ID value is passed in as part of the call URI.
+|
+
+fieldgroups
+|
+string |
+Optional |
+
+The value set in this query parameter controls the level of detail that is returned in the response. One of the values defined in the GetCancelFieldGroup type definition must be used in this query parameter.
+
+Default: FULL.
+
+Applicable values are from GetCancelFieldGroup. |
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+This call has no request payload.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+Note: For information about the error fields and how to work with them, see Error Handling.
+
+The following lists all fields that could be included in the response.
+
+Supported response formats: application/json, application/xml
+
+For more information:
+
+- See GetCancelDetailResponse for a description of the response structure
+
+- See the following table for descriptions of each of the data elements returned
+
+- See the Samples for an example of the response format
+
+{ /* GetCancelDetailResponse */
+"cancelDetail":
+{ /* CancelDetail */
+"activityHistories": [
+{ /* CancelActivityHistory */
+"actionDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"activityParty": string,
+"activityType": string,
+"stateFrom": string,
+"stateTo": string
+}
+/* More CancelActivityHistory nodes here */
+],
+"buyerLoginName": string,
+"buyerResponseDueDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelCloseDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelCloseReason": token,
+"cancelId": string,
+"cancelReason": token,
+"cancelRequestDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelState": string,
+"cancelStatus": string,
+"legacyOrderId": string,
+"marketplaceId": string,
+"moneyMovementInfo": [
+{ /* can:MoneyMovementDetailType */
+"actualAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"creationDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"moneyMovementType": string,
+"requestedAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"status": string
+}
+/* More can:MoneyMovementDetailType nodes here */
+],
+"partialOrderType": string,
+"paymentStatus": string,
+"payoutRecoupInfo":
+{ /* PayoutRecoupInfo */
+"amountToRecoup":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"payoutId": integer
+},
+"refundInfo":
+{ /* RefundInfo */
+"actualRefundDetail":
+{ /* ActualRefundDetail */
+"actualRefund":
+{ /* ActualRefund */
+"donationAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"feeCreditAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"totalAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+}
+},
+"fundings": [
+{ /* RefundFundingType */
+"amount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"date":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"fundingSource":
+{ /* FundingSourceType */
+"brand": string,
+"memo": string,
+"type": string
+},
+"fundingStatus": string
+}
+/* More RefundFundingType nodes here */
+],
+"netChargeAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"outstandingAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"refundIssuedDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"refundStatus": string
+}
+},
+"requestorType": string,
+"requestRefundAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"sellerLoginName": string,
+"sellerResponseDueDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"shipmentDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+}
+}
+}
+
+#### Response field descriptions
+
+Output Container/Field |
+Type |
+Occurrence |
+Meaning |
+
+cancelDetail
+|
+CancelDetail |
+Always |
+
+Contains information about a cancelled order. If the value of the fieldgroups query parameter is set to FULL, the response also contains a record of all activity performed on the cancellation request plus the identifiers for each line item in the order.
+|
+
+cancelDetail.activityHistories
+|
+array of CancelActivityHistory |
+Conditionally |
+
+A complete list of the activity associated with the order cancellation request.
+|
+
+cancelDetail.activityHistories
+.actionDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container provides the date and time when the order cancellation request activity occurred.
+|
+
+cancelDetail.activityHistories
+.actionDate.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.activityHistories
+.actionDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.activityHistories
+.activityParty
+|
+string |
+Conditionally |
+
+This enumeration value indicates the party (buyer or seller) who performed the action on the order cancellation request.
+
+Applicable values are from PartyEnum:
+
+BUYER
+
+This enumeration value is returned if the buyer created or performed an action on an order cancellation request.
+
+SELLER
+
+This enumeration value is returned if the seller created or performed an action on an order cancellation request.
+
+UNKNOWN
+
+This enumeration value is returned if eBay cannot determine which eBay party created or performed an action on an order cancellation request.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.activityHistories
+.activityType
+|
+string |
+Conditionally |
+
+This enumeration value indicates the type of event or action that occurred with the order cancellation request.
+
+The list of enumeration values that may be returned in this field are defined in the CancelActivityTypeEnum type definition.
+
+Applicable values: See CancelActivityTypeEnum
+
+|
+
+cancelDetail.activityHistories
+.stateFrom
+|
+string |
+Conditionally |
+
+This enumeration value indicates the state of the order cancellation request prior to the performed action (defined in the activityType field).
+
+The list of enumeration values that may be returned in this field are defined in the CancelStateEnum type definition.
+
+Applicable values: See CancelStateEnum
+
+|
+
+cancelDetail.activityHistories
+.stateTo
+|
+string |
+Conditionally |
+
+This enumeration value indicates state of the order cancellation request following the performed action (defined in the activityType field). Depending on the type of activity, the state of the order cancellation process might not change, so it is possible that the stateTo value may be the same as the stateFrom value.
+
+The list of enumeration values that may be returned in this field are defined in the CancelStateEnum type definition.
+
+Applicable values: See CancelStateEnum
+
+|
+
+cancelDetail.buyerLoginName
+|
+string |
+Conditionally |
+
+The eBay username of the buyer involved in the order cancellation request.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+cancelDetail
+.buyerResponseDueDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time by which the buyer is required to respond to an active order cancellation request. This container is not returned if the order cancellation request does not currently require a response from the buyer.
+|
+
+cancelDetail
+.buyerResponseDueDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail
+.buyerResponseDueDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.cancelCloseDate
+|
+DateTime |
+Conditionally |
+
+A timestamp that indicates when the order cancellation request was closed. This field is only applicable and returned if/when the cancellation request is closed (regardless of outcome).
+|
+
+cancelDetail.cancelCloseDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.cancelCloseDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.cancelCloseReason
+|
+token |
+Conditionally |
+
+This enumeration value indicates the reason why the order cancellation request was closed. This field is only applicable and returned if/when the cancellation request was closed or if the buyer attempted to close the cancellation request.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelCloseReasonEnum type definition.
+
+Applicable values: See CancelCloseReasonEnum
+
+|
+
+cancelDetail.cancelId
+|
+string |
+Always |
+
+A unique eBay-assigned ID for an order cancellation request. All data in the cancelDetail container refers to this specific order cancellation request.
+|
+
+cancelDetail.cancelReason
+|
+token |
+Conditionally |
+
+This value indicates the reason why the user (either the buyer or seller, as defined in the requestorType field) initiated the order cancellation request.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelReasonEnum type definition.
+
+Applicable values: See CancelReasonEnum
+
+|
+
+cancelDetail.cancelRequestDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the order cancellation request was created.
+|
+
+cancelDetail.cancelRequestDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.cancelRequestDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.cancelState
+|
+string |
+Always |
+
+This value indicates the current state or condition of the cancellation process.
+
+This value, combined with the value of the cancelStatus field, can help you determine upcoming cancellation events and the appropriate actions you can take.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelStateEnum type definition.
+
+Applicable values: See CancelStateEnum
+
+|
+
+cancelDetail.cancelStatus
+|
+string |
+Always |
+
+This value indicates the last action taken by one of the parties associated with the order cancellation request.
+
+This value, combined with the value of the cancelState field, can help you determine upcoming events and the appropriate actions you can take on the cancellation.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelStatusEnum type definition.
+
+Applicable values: See CancelStatusEnum
+
+|
+
+cancelDetail.legacyOrderId
+|
+string |
+Always |
+
+The unique identifier of the order being cancelled or being considered for cancellation.
+
+Note: The unique identifier of an order changes as the order goes from unpaid to paid, so the IDs for both unpaid and paid orders may be returned in this field based on payment status.
+
+|
+
+cancelDetail.marketplaceId
+|
+string |
+Always |
+
+A unique identifier for the eBay marketplace where the order cancellation request was created.
+
+The full list of enumeration values that represent eBay marketplaces are defined in the MarketplaceIdEnum type definition.
+
+Applicable values: See MarketplaceIdEnum
+
+|
+
+cancelDetail.moneyMovementInfo
+|
+array of can:MoneyMovementDetailType |
+Conditionally |
+
+This array consists of detailed information on any and all money movement transactions that have occurred in regards to the order cancellation request.
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount
+|
+Amount |
+Conditionally |
+
+This container shows the actual amount of the monetary transaction. The actualAmount field will only show up if the monetary transaction was confirmed to be successful (corresponding status value shows as SUCCESS. If the status value shows any value other than SUCCESS, the expected amount of the monetary transaction can be seen in the requestedAmount field.
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.moneyMovementInfo
+.actualAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.moneyMovementInfo
+.creationDate
+|
+DateTime |
+Conditionally |
+
+This timestamp indicates the date and time when the monetary transaction occurred.
+|
+
+cancelDetail.moneyMovementInfo
+.creationDate.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.moneyMovementInfo
+.creationDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.moneyMovementInfo
+.moneyMovementType
+|
+string |
+Always |
+
+This enumeration value indicates the type of monetary transaction that is either in the process of being executed or has already executed.
+
+Monetary transactions include a seller's partial or full refund to the buyer, eBay refunding the buyer, or eBay recouping money from the seller for a buyer refund issued by eBay.
+
+Applicable values are from can:MoneyMovementTypeEnum:
+
+BUYER_PAYOUT
+
+This enumeration value indicates that the monetary transaction was a refund issued by eBay to the buyer.
+
+PAYPAL_REFUND
+
+THIS VALUE IS DEPRECATED.
+
+RECOUP_FROM_SELLER
+
+This enumeration value indicates that the monetary transaction involved eBay recouping money from the seller to reimburse eBay for the refund issued to the buyer.
+
+SELLER_VOLUNTARY_REFUND
+
+This enumeration value indicates that the monetary transaction involved the seller voluntarily giving the buyer a full refund for the item.
+
+UNKNOWN
+
+This enumeration value indicates that the type of monetary transaction cannot be determined.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount
+|
+Amount |
+Always |
+
+This container shows the expected amount of the transaction.
+
+This field is returned regardless of the value shown in the corresponding status field. The actualAmount field displays only when the monetary transaction was confirmed to be successful (status value is SUCCESS.
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.moneyMovementInfo
+.requestedAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.moneyMovementInfo
+.status
+|
+string |
+Conditionally |
+
+This enumeration value indicates the success or failure of the monetary transaction type (noted in the moneyMovementType field)
+
+The list of enumeration values that may be returned in this field are defined in the MoneyMovementStatusEnum type definition.
+
+Applicable values: See can:MoneyMovementStatusEnum
+
+|
+
+cancelDetail.partialOrderType
+|
+string |
+Conditionally |
+
+This value indicates whether the cancellation request is for the entire order, or only for a subset of one or more line items in an order.
+
+Currently, only full orders are eligible for cancellation, so the value returned here should be FULL_ORDER.
+
+Applicable values are from PartialOrderTypeEnum:
+
+FULL_ORDER
+
+This enumeration value indicates that the order cancellation request involves the entire order.
+
+PARTIAL_ORDER
+
+This enumeration value is not currently applicable, and is reserved for future use.
+
+UNKNOWN
+
+This enumeration value may get returned if eBay cannot determine the scope of the order cancellation.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.paymentStatus
+|
+string |
+Always |
+
+The value returned in this field will indicate whether or not the buyer has paid for the order that is being cancelled or considered for cancellation.
+
+Applicable values are from PaymentStatusEnum:
+
+MARK_AS_PAID
+
+This enumeration value indicates that the seller marked the payment status of the order as paid.
+
+NOT_PAID
+
+This enumeration value indicates that the payment status of the order is unpaid.
+
+ONLINE_PAID
+
+This enumeration value indicates that the payment status of the order is paid.
+
+PAYPAL_PAID
+
+THIS ENUMERATION VALUE IS DEPRECATED.
+
+UNKNOWN
+
+This enumeration value indicates that the payment status of the order cannot be determined.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.payoutRecoupInfo
+|
+PayoutRecoupInfo |
+Conditionally |
+
+This container shows the payout ID and payout amount associated with a paid order that is being cancelled or considered for cancellation. It will not be returned for unpaid orders.
+
+The payout amount data includes the sale price in the seller's currency, and if any currency conversion was necessary, it will also show the amount, currency, and exchange rate used for conversion.
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup
+|
+Amount |
+Conditionally |
+
+This container shows the amount of the seller payout which must be recouped from the seller by eBay in the case of a cancelled order
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.payoutRecoupInfo
+.amountToRecoup.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.payoutRecoupInfo
+.payoutId
+|
+integer |
+Conditionally |
+
+The unique identifier of the seller payout associated with the cancelled order.
+|
+
+cancelDetail.refundInfo
+|
+RefundInfo |
+Conditionally |
+
+This container provides detailed information about a buyer refund that was issued, or is scheduled to be issued for a cancelled order.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+|
+ActualRefundDetail |
+Conditionally |
+
+This container provides detailed information about a buyer refund that was issued, or is scheduled to be issued for a cancelled order.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund
+|
+ActualRefund |
+Conditionally |
+
+This container shows the total amount of the buyer refund that has been issued for the cancelled order. If a refund has not occured yet, this container will not be returned.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+|
+Amount |
+Conditionally |
+
+This container defines the refund amount for listings that included a charitable donation. This data includes the amount of the charitable donation refund, as well as currency conversion information when necessary including the current currency code, the value in the original currency, and the original currency's code.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.donationAmount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount of fees credited towards this refund as per eBay policy.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.feeCreditAmount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount of the refund that has been issued.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.actualRefund.totalAmount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+|
+array of RefundFundingType |
+Conditionally |
+
+This array shows one or more seller payment sources used for the buyer refund.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount
+|
+Amount |
+Conditionally |
+
+This container shows the amount debited/charged to the seller's funding source for the buyer refund.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.amount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.date
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates when the seller's funding source was debited/charged for the buyer refund.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.date.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.date.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.fundingSource
+|
+FundingSourceType |
+Conditionally |
+
+This container provides information about the seller's funding source for the buyer refund. A funding source can be available seller payout funds, a bank account on file, or a credit card on file.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.fundingSource.brand
+|
+string |
+Conditionally |
+
+The enumeration value here indicates the brand of credit card used to fund the buyer's refund. This field is only returned if the funding source type is CREDIT_CARD.
+
+Applicable values are from FundingMethodBrandEnum:
+
+AMERICAN_EXPRESS
+
+This enumeration value indicates that a American Express credit card will be used to fund the refund to the buyer.
+
+DISCOVER
+
+This enumeration value indicates that a Discover credit card will be used to fund the refund to the buyer.
+
+MASTERCARD
+
+This enumeration value indicates that a Mastercard credit card will be used to fund the refund to the buyer.
+
+VISA
+
+This enumeration value indicates that a Visa credit card will be used to fund the refund to the buyer.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.fundingSource.memo
+|
+string |
+Conditionally |
+
+This provides a note about the funding source. This field is only returned if available, or it might get returned as an empty string.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.fundingSource.type
+|
+string |
+Conditionally |
+
+The enumeration value here indicates the type of funding source, such as bank account, credit card, or available seller payout funds.
+
+Applicable values are from FundingMethodTypeEnum:
+
+AVAILABLE_FUNDS
+
+This enumeration value indicates that the refund will be funded by the seller's available payout funds that have not yet been deposited into the seller's bank account.
+
+CREDIT_CARD
+
+This enumeration value indicates that the seller's credit card will be used to fund the buyer's refund.
+
+DIRECT_DEBIT
+
+This enumeration value indicates that the seller's bank account on file will be debited to fund the buyer's refund.
+
+PAY_UPON_INVOICE
+
+This enumeration value indicates that the eBay will cover the buyer's refund, but will bill the seller through an invoice.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail.fundings
+.fundingStatus
+|
+string |
+Conditionally |
+
+The enumeration value returned in this field indicates if the debit/charge to the funding source was successful or not.
+
+Applicable values are from FundingStatusEnum:
+
+FAILED
+
+This enumeration value indicates that the refund was not successfully funded, which can mean there were insufficient funds in the account, or that the transaction failed for another reason.
+
+FUNDED
+
+This enumeration value indicates that the buyer refund was successfully funded.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount charged to the seller for this refund. The value will be in the seller's default currency.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.netChargeAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount
+|
+Amount |
+Conditionally |
+
+This container shows any outstanding dollar amount that is still due to the buyer for the refund. If a full refund has been successfully issued to the buyer, this value should be 0.0.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.outstandingAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.refundIssuedDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the date and time when the refund was issued to the buyer. This field will not be returned if a buyer refund has not occurred yet.
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.refundIssuedDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.refundIssuedDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.refundInfo
+.actualRefundDetail
+.refundStatus
+|
+string |
+Conditionally |
+
+This enumeration value indicates the current status of the refund for the cancelled order. The value in this field should be SUCCESS if the refund has been successfully issued to the buyer.
+
+The list of enumeration values that may be returned in this field are defined in the MoneyMovementStatusEnum type definition.
+
+Applicable values: See can:MoneyMovementStatusEnum
+
+|
+
+cancelDetail.requestorType
+|
+string |
+Always |
+
+The enumeration value returned here indicates who initiated the order cancellation request (either the buyer or seller).
+
+Applicable values are from PartyEnum:
+
+BUYER
+
+This enumeration value is returned if the buyer created or performed an action on an order cancellation request.
+
+SELLER
+
+This enumeration value is returned if the seller created or performed an action on an order cancellation request.
+
+UNKNOWN
+
+This enumeration value is returned if eBay cannot determine which eBay party created or performed an action on an order cancellation request.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancelDetail
+.requestRefundAmount
+|
+Amount |
+Conditionally |
+
+This container shows the amount of the refund that the buyer is expecting to receive if the order is successfully cancelled.
+
+The monetary amount indicated here is typically the full amount that the buyer paid for the order, including the item price and shipping fees.
+
+The information returned also includes any currency conversion information (as necessary), the current currency code, the value in the original currency, and the original currency's code.
+|
+
+cancelDetail
+.requestRefundAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail
+.requestRefundAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancelDetail
+.requestRefundAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancelDetail
+.requestRefundAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancelDetail
+.requestRefundAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancelDetail.sellerLoginName
+|
+string |
+Conditionally |
+
+The eBay username of the seller involved in the order cancellation request.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+cancelDetail
+.sellerResponseDueDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time by which the seller is required to respond to an active order cancellation request.
+
+This container is not returned if the order cancellation request does not currently require a response from the seller.
+|
+
+cancelDetail
+.sellerResponseDueDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail
+.sellerResponseDueDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancelDetail.shipmentDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time when the seller shipped the order (or a line item within the order) that the buyer is attempting to cancel.
+
+Once a seller ships one or more line items within an order, the order is no longer eligible for cancellation. This container is only applicable and returned if the seller shipped one or more line items in order, thus making it impossible for the order cancellation request to be granted.
+|
+
+cancelDetail.shipmentDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancelDetail.shipmentDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Available samples:
+
+- Get cancellation details ↓ -
+Retrieves the details of a specified cancellation request.
+
+- Get refund details on a cancelled cross-border trade order ↓ -
+Retrieves refund details on a cancelled cross-border trade order
+
+Sample: Get cancellation details
+
+Retrieves the details of a specified cancellation request.
+
+Description
+
+This call returns the full details of a specified cancellation request, including the full history of the cancellation request and the line items in the order.
+
+Input
+
+The cancelId value is passed in as a path parameter at the end of the URI. The user uses the fieldgroups query parameter and sets its value to FULL to retrieve full details on the cancellation request, including the full history of the cancellation request and the line items in the order.
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/cancellation/5********1?
+fieldgroups=FULL
+
+Output
+
+This cancellation request (identified in the cancelId field) has just been created by the seller on behalf of the buyer, which is indicated by the value in the activityHistories.activityType field. When a seller cancels an order on behalf of a buyer, the seller gives the cancellation reason as BUYER_CANCEL_OR_ADDRESS_ISSUE, which is indicated in the cancelDetail.cancelReason field. This cancellation reason given by the seller will ensure that the seller's account does not receive a seller defect. The cancelStateFrom and cancelStatetateTo values indicate that the seller has just initiated the cancellation request, and the next step is for the buyer to be refunded.
+
+JSON format.
+{
+"cancelDetail": {
+"cancelId": "5********1",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "0************9",
+"requestorType": "SELLER",
+"cancelReason": "BUYER_CANCEL_OR_ADDRESS_ISSUE",
+"cancelState": "REFUND_PENDING",
+"cancelStatus": "CANCEL_PENDING",
+"paymentStatus": "PAYPAL_PAID",
+"requestRefundAmount": {
+"value": 2.46,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2020-08-22T23:29:11.000Z",
+},
+"activityHistories": [
+{
+"activityType": "SELLER_CREATE_CANCEL",
+"activityParty": "SELLER",
+"actionDate": {
+"value": "2020-08-22T23:29:07.000Z",
+},
+"cancelStateFrom": "INITIAL",
+"cancelStatetateTo": "REFUND_PENDING"
+}
+]
+}
+}
+
+Back to list of samples
+
+Sample: Get refund details on a cancelled cross-border trade order
+
+Retrieves refund details on a cancelled cross-border trade order
+
+Description
+
+This call returns full details on a cancelled cross-border trade order. This particular order involved a Canadian seller (in eBay managed payments) selling an item on the eBay US marketplace. With managed payments, eBay actually refunds the buyer, and charges the seller. The response includes a netChargeAmount field that shows the net charge amount (to the seller) of the refund in Canadian dollars after the conversion of USD to CAD, and subtracting final values fees that will be reimbursed to the seller per eBay policy.
+
+Input
+
+The cancelId value is passed in as a path parameter at the end of the URI. The user uses the fieldgroups query parameter and sets its value to FULL to retrieve full details on the cancellation request, including the full history of the cancellation request and the details on the refund.
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/cancellation/5********5?
+fieldgroups=FULL
+
+Output
+
+This cancellation request was initiated by the buyer (see the BUYER_ASKED_CANCEL value in the cancelReason field) and the seller accepted the request and agreed to fully refund the buyer (see the SELLER_CREATE_CANCEL value in the first activityHistories.activityType node).
+
+Since this is an eBay managed payments order, eBay refunded the buyer and billed the seller. The seller can see full details on the refund and how eBay recouped this money under the refundInfo container. eBay US was the listing site, so the total amount of the buyer refund (in actualRefund.totalAmount field) and the final value fee credit amount (in actualRefund.feeCreditAmount field) are shown in US dollars. The actualRefundDetail.netChargeAmount container shows the net charge amount of the refund in Canadian dollars after the conversion of USD to CAD, and subtracting the final values fees amount in actualRefund.feeCreditAmount field. The exchange rate used to perform the conversion is also shown in the actualRefundDetail.netChargeAmount container.
+
+The actualRefundDetail.fundings container shows the seller's funding source to reimburse eBay for the buyer refund. In this case, eBay used the seller's available payout funds to recoup the buyer refund.
+
+JSON format.
+{
+"cancelDetail": {
+"cancelId": "5********5",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "0************9",
+"requestorType": "SELLER",
+"cancelReason": "BUYER_ASKED_CANCEL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_WITH_REFUND",
+"cancelCloseReason": "FULL_REFUNDED",
+"partialOrderType": "FULL_ORDER",
+"paymentStatus": "ONLINE_PAID",
+"requestRefundAmount": {
+"value": 34.67,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2020-08-11T22:32:10.000Z"
+},
+"cancelCloseDate": {
+"value": "2020-08-11T22:37:28.000Z"
+},
+"buyerLoginName": "p**********3",
+"sellerLoginName": "c**********3",
+"activityHistories": [
+{
+"activityType": "SELLER_CREATE_CANCEL",
+"activityParty": "SELLER",
+"actionDate": {
+"value": "2020-08-11T22:32:10.000Z"
+},
+"stateFrom": "INITIAL",
+"stateTo": "REFUND_PENDING"
+},
+{
+"activityType": "SYSTEM_REFUND",
+"activityParty": "UNKNOWN",
+"actionDate": {
+"value": "2020-08-11T22:32:11.000Z"
+},
+"stateFrom": "REFUND_PENDING",
+"stateTo": "REFUND_INITIATED"
+},
+{
+"activityType": "SYSTEM_NOTIFY_REFUND_STATUS",
+"activityParty": "UNKNOWN",
+"actionDate": {
+"value": "2020-08-11T22:37:27.000Z"
+},
+"stateFrom": "REFUND_INITIATED",
+"stateTo": "CLOSED"
+}
+],
+"moneyMovementInfo": [
+{
+"moneyMovementType": "SELLER_VOLUNTARY_REFUND",
+"status": "SUCCESS",
+"requestedAmount": {
+"value": 34.67,
+"currency": "USD"
+},
+"actualAmount": {
+"value": 34.67,
+"currency": "USD"
+},
+"creationDate": {
+"value": "2020-08-11T22:32:11.000Z"
+}
+}
+],
+"refundInfo": {
+"actualRefundDetail": {
+"actualRefund": {
+"totalAmount": {
+"value": 34.67,
+"currency": "USD"
+},
+"feeCreditAmount": {
+"value": 3.53,
+"currency": "USD"
+}
+},
+"netChargeAmount": {
+"value": 40.38,
+"convertedFromValue": 31.14,
+"convertedFromCurrency": "USD",
+"currency": "CAD",
+"exchangeRate": "1.29665"
+},
+"outstandingAmount": {
+"value": 0,
+"currency": "CAD"
+},
+"fundings": [
+{
+"date": {
+"value": "2020-08-11T22:32:11.556Z"
+},
+"amount": {
+"value": 40.38,
+"currency": "CAD"
+},
+"fundingSource": {
+"type": "AVAILABLE_FUNDS"
+},
+"fundingStatus": "FUNDED"
+}
+]
+}
+}
+}
+}
+
+Back to list of samples
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

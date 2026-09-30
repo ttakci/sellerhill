@@ -1,0 +1,456 @@
+{
+  "slug": "item_marked_shipped",
+  "deliveryChannel": "HTTPS webhook (POST)",
+  "eventLabel": "ITEM_MARKED_SHIPPED",
+  "name": "ITEM_MARKED_SHIPPED",
+  "sample": [],
+  "summary": "<p><span style=\"font-weight: 400;\">This notification includes the shipping carrier, the tracking number of the shipment, the order ID, and the line item ID</span>.</p>\r\n<p><strong>OAuth Scope</strong><br /><span>In addition to the standard OAuth scope (<a href=\"https://api.ebay.com/oauth/api_scope\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope</a>), this topic requires an access token created using the Authorization Code Grant flow with the following scope:<br /><a href=\"https://api.ebay.com/oauth/api_scope/commerce.shipping\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope/commerce.shipping</a><br /></span></p>\r\n<p><span>See <a href=\"https://developer.ebay.com/develop/guides-v2/authorization#working-with-oauth-scopes\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">Working with OAuth scopes</a> for more information.</span></p>\r\n<div></div>",
+  "shortSummary": "This notification can be sent to a buyer or seller when an item is marked as shipped by eBay or by the seller.",
+  "specVersion": "1.0.0",
+  "latestSpecHref": "/develop/api/spec/events/ITEM_MARKED_SHIPPED.yaml",
+  "specSaveAsFileName": "ITEM_MARKED_SHIPPED.yaml",
+  "documentation": {
+    "info": {
+      "title": "eBay Notifications",
+      "version": "1.0.0",
+      "description": "This contract defines eBay notification for ITEM_MARKED_SHIPPED."
+    },
+    "schemas": {
+      "MetaData": {
+        "type": "object",
+        "description": "This type specifies the metadata included with the notification.",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "This is the unique identifier of the Notification topic."
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "This specifies the version number of the topic schema."
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+            "default": "false"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "description": "This type includes information about the notification.",
+        "properties": {
+          "notificationId": {
+            "type": "string",
+            "description": "This is the unique identifier of the specific notification."
+          },
+          "eventDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient."
+          },
+          "publishDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+          },
+          "publishAttemptCount": {
+            "type": "integer",
+            "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+          },
+          "data": {
+            "description": "This container consists of specific information related to the item marked shipped data.",
+            "$ref": "#/components/schemas/ItemMarkedShippedData"
+          }
+        }
+      },
+      "ItemMarkedShippedData": {
+        "type": "object",
+        "description": "This type defines the payload for the <code>ITEM_MARKED_SHIPPED</code> event.",
+        "properties": {
+          "trackingNumber": {
+            "type": "string",
+            "description": "This string is the shipment tracking number."
+          },
+          "carrier": {
+            "type": "string",
+            "description": "This string is the shipping carrier (e.g., USPS, UPS, FedEx)."
+          },
+          "shippedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This timestamp indicates when the item was marked as shipped."
+          },
+          "orderId": {
+            "type": "string",
+            "description": "The unique identifier of the order associated with the shipment."
+          },
+          "itemId": {
+            "type": "string",
+            "description": "The unique identifier of the listing associated with the shipment."
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "The unique identifier of the transaction associated with the shipment."
+          },
+          "lineItemId": {
+            "type": "string",
+            "description": "The unique identifier of the order line item associated with the shipment."
+          },
+          "publicUserId": {
+            "type": "string",
+            "description": "This string is the immutable user identifier associated with the seller."
+          },
+          "username": {
+            "type": "string",
+            "description": "The seller's username.<br><br><span class=\"tablenote\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\"/api-docs/static/data-handling-update.html\" target=\"_blank\">Data Handling Compliance</a>. </span>.\n"
+          }
+        }
+      }
+    },
+    "channels": {
+      "ITEM_MARKED_SHIPPED": {
+        "subscribe": {
+          "message": {
+            "$ref": "#/components/messages/message"
+          },
+          "bindings": {
+            "http": {
+              "type": "request",
+              "method": "POST",
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "Content-Type": {
+                    "type": "string",
+                    "enum": [
+                      "application/json"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "methods": {
+      "subscribe_ITEM_MARKED_SHIPPED": {
+        "operationId": "subscribe_ITEM_MARKED_SHIPPED",
+        "action": "subscribe",
+        "channel": "ITEM_MARKED_SHIPPED",
+        "message": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "X-EBAY-SIGNATURE": {
+                "description": "ECC message signature header used to verify the payload.",
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/MetaData"
+              },
+              "notification": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "request": null,
+        "response": {
+          "rawSchema": {
+            "typeDetails": {
+              "type": "object",
+              "displayNameForType": "object"
+            },
+            "fields": [
+              {
+                "name": "metadata",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "MetaData",
+                  "displayNameForType": "MetaData"
+                },
+                "fields": [
+                  {
+                    "name": "topic",
+                    "description": "This is the unique identifier of the Notification topic.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "schemaVersion",
+                    "description": "This specifies the version number of the topic schema.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "deprecated",
+                    "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "boolean",
+                      "displayNameForType": "boolean"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "notification",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "Notification",
+                  "displayNameForType": "Notification"
+                },
+                "fields": [
+                  {
+                    "name": "notificationId",
+                    "description": "This is the unique identifier of the specific notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "eventDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishAttemptCount",
+                    "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "integer",
+                      "displayNameForType": "integer"
+                    }
+                  },
+                  {
+                    "name": "data",
+                    "description": "This container consists of specific information related to the item marked shipped data.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "ItemMarkedShippedData",
+                      "displayNameForType": "ItemMarkedShippedData"
+                    },
+                    "fields": [
+                      {
+                        "name": "trackingNumber",
+                        "description": "This string is the shipment tracking number.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "carrier",
+                        "description": "This string is the shipping carrier (e.g., USPS, UPS, FedEx).",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "shippedDate",
+                        "description": "This timestamp indicates when the item was marked as shipped.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "orderId",
+                        "description": "The unique identifier of the order associated with the shipment.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "itemId",
+                        "description": "The unique identifier of the listing associated with the shipment.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "transactionId",
+                        "description": "The unique identifier of the transaction associated with the shipment.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "lineItemId",
+                        "description": "The unique identifier of the order line item associated with the shipment.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "publicUserId",
+                        "description": "This string is the immutable user identifier associated with the seller.",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "username",
+                        "description": "The seller's username.<br><br><span class=\"tablenote\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\"/api-docs/static/data-handling-update.html\" target=\"_blank\">Data Handling Compliance</a>. </span>.\n",
+                        "occurrence": "Optional",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "operations": [
+      null
+    ],
+    "servers": [],
+    "document": {
+      "asyncapi": "2.0.0",
+      "info": {
+        "title": "eBay Notifications",
+        "version": "1.0.0",
+        "description": "This contract defines eBay notification for ITEM_MARKED_SHIPPED."
+      },
+      "components": {
+        "messages": {},
+        "schemas": {
+          "MetaData": {
+            "type": "object",
+            "description": "This type specifies the metadata included with the notification.",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "This is the unique identifier of the Notification topic."
+              },
+              "schemaVersion": {
+                "type": "string",
+                "description": "This specifies the version number of the topic schema."
+              },
+              "deprecated": {
+                "type": "boolean",
+                "description": "This boolean field indicates whether or not the topic is active or deprecated.",
+                "default": "false"
+              }
+            }
+          },
+          "Notification": {
+            "type": "object",
+            "description": "This type includes information about the notification.",
+            "properties": {
+              "notificationId": {
+                "type": "string",
+                "description": "This is the unique identifier of the specific notification."
+              },
+              "eventDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the event that triggered the notification was sent to the recipient."
+              },
+              "publishDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+              },
+              "publishAttemptCount": {
+                "type": "integer",
+                "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+              },
+              "data": {
+                "description": "This container consists of specific information related to the item marked shipped data.",
+                "$ref": "#/components/schemas/ItemMarkedShippedData"
+              }
+            }
+          },
+          "ItemMarkedShippedData": {
+            "type": "object",
+            "description": "This type defines the payload for the <code>ITEM_MARKED_SHIPPED</code> event.",
+            "properties": {
+              "trackingNumber": {
+                "type": "string",
+                "description": "This string is the shipment tracking number."
+              },
+              "carrier": {
+                "type": "string",
+                "description": "This string is the shipping carrier (e.g., USPS, UPS, FedEx)."
+              },
+              "shippedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This timestamp indicates when the item was marked as shipped."
+              },
+              "orderId": {
+                "type": "string",
+                "description": "The unique identifier of the order associated with the shipment."
+              },
+              "itemId": {
+                "type": "string",
+                "description": "The unique identifier of the listing associated with the shipment."
+              },
+              "transactionId": {
+                "type": "string",
+                "description": "The unique identifier of the transaction associated with the shipment."
+              },
+              "lineItemId": {
+                "type": "string",
+                "description": "The unique identifier of the order line item associated with the shipment."
+              },
+              "publicUserId": {
+                "type": "string",
+                "description": "This string is the immutable user identifier associated with the seller."
+              },
+              "username": {
+                "type": "string",
+                "description": "The seller's username.<br><br><span class=\"tablenote\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\"/api-docs/static/data-handling-update.html\" target=\"_blank\">Data Handling Compliance</a>. </span>.\n"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

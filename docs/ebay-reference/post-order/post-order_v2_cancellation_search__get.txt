@@ -1,0 +1,1283 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_cancellation_search__get.html
+Fetched: 2026-09-30 (text-extracted)
+
+Search Cancellations - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Search Cancellations
+
+##
+GET /post-order/v2/cancellation/search
+
+Use this method to search for and retrieve one or more order cancellations.
+
+Specify the search criteria using query parameters.
+
+The result set is paginated and returned one page at a time. Depending on the values of the limit and offset parameters, the results set (cancellations matching filter criteria) may contain only one page or multiple pages. If the results set has multiple pages, the user will need to make subsequent calls to view additional pages, adjusting the offset value each time.
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+GET https://api.ebay.com/post-order/v2/cancellation/search?
+cancel_id=string&
+creation_date_range_from=string&
+creation_date_range_to=string&
+item_id=string&
+legacy_order_id=string&
+limit=string&
+offset=string&
+role=UserRoleFilterEnum&
+sort=CancelSortField&
+transaction_id=string
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+cancel_id
+|
+string |
+Optional |
+
+The unigue identifier of a specific cancellation request. If this query parameter is used, any other query parameters that are included are ignored since the request will only return this specific cancellation request (if it is found).
+|
+
+creation_date_range_from
+|
+string |
+Optional |
+
+Use the creation_date_range_from and creation_date_range_to query parameters to retrieve cancellation requests that were created during a specific time range.
+
+Set creation_date_range_from to the beginning of the time range and set creation_date_range_to to a date that's after the start date. Do not set the start date more than 18 months in the past.
+
+If you set creation_date_range_from but do not set creation_date_range_to, the service searches through all cancellation requests created at or after the specified time, and searches forward 90 days from there.
+
+This parameter takes an ISO 8601-formatted date. For example:
+2015-05-15T03:00:00.000Z.
+|
+
+creation_date_range_to
+|
+string |
+Optional |
+
+Use creation_date_range_to in conjunction with the creation_date_range_from query parameter. See creation_date_range_to for details on how to set this parameter.
+
+This parameter takes an ISO 8601-formatted date.
+|
+
+item_id
+|
+string |
+--- |
+
+The unique eBay-assigned ID of a listing. If this parameter is used, eBay will search for any cancellation requests filed against this listing.
+
+This parameter is conditionally required if the transaction_id query parameter is used, as both Item ID and Transaction ID values are needed to identify a line item.
+|
+
+legacy_order_id
+|
+string |
+Optional |
+
+The unique eBay-assigned ID of an order. If this parameter is used, eBay will search for any cancellation requests filed against this order ID. Note: Note that order ID values change as an order goes from the unpaid to the paid state, and order IDs in both states are supported with this parameter.
+
+|
+
+limit
+|
+string |
+Optional |
+
+This parameter specifies the maximum number of order cancellations to return per page of data. If this query parameter is not used, its value defaults to 10 (order cancellations per page)Default: 10
+Maximum: 500
+Minimum: 1
+
+|
+
+offset
+|
+string |
+Optional |
+
+This parameter specifies the number of entries to skip in the result set before returning the first item in the paginated response. Combine offset with the limit query parameter to control how many and which items are returned in the response. For example, if you supply an offset value of 0 and a limit value of 10, the first page of the response will contain the first 10 items from the results set. If the offset value is 10 and the limit value is 20, the first page of the response will contain items 11-30 from the results set.
+Default: 0
+
+|
+
+role
+|
+string |
+Optional |
+
+Use this query parameter to filter the order cancellation results based on who inititated the order cancellation request. The supported values are BUYER and SELLER, and both value are case-sensitive (e.g. all CAPS are required).
+
+Default: SELLER
+
+Applicable values are from UserRoleFilterEnum. |
+
+sort
+|
+string |
+Optional |
+
+This query parameter allows a user to sort cancellation requests in the response by CANCEL_ID or by CANCEL_REQUEST_DATE, in ascending or descending order. One of these two enumeration values must be used as the sort value, and will be preceding by either a + (plus sign) to sort in ascending order, or a - (minus sign) to sort in descending order.
+
+So, to sort in ascending order according to cancellation ID, the following syntax would be used: sort=+CANCEL_ID. To sort in descending order according to cancellation request date, sort=-CANCEL_REQUEST_DATE would be used.
+
+Applicable values are from CancelSortField. |
+
+transaction_id
+|
+string |
+Optional |
+
+The unique eBay-assigned ID of the line item purchase. If this parameter is used, the item_id query parameter must also be used, as both Item ID and Transaction ID values are needed to identify a line item. If you use transaction_id without also supplying an item_id value, this parameter is ignored.
+|
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+This call has no request payload.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+Note: For information about the error fields and how to work with them, see Error Handling.
+
+The following lists all fields that could be included in the response.
+
+Supported response formats: application/json, application/xml
+
+For more information:
+
+- See FindCancelResponse for a description of the response structure
+
+- See the following table for descriptions of each of the data elements returned
+
+- See the Samples for an example of the response format
+
+{ /* FindCancelResponse */
+"cancellations": [
+{ /* CancelSummary */
+"buyerLoginName": string,
+"buyerResponseDueDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelCloseDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelCloseReason": string,
+"cancelId": string,
+"cancelReason": string,
+"cancelRequestDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"cancelState": string,
+"cancelStatus": string,
+"legacyOrderId": string,
+"marketplaceId": string,
+"partialOrderType": string,
+"paymentStatus": string,
+"payoutRecoupInfo":
+{ /* PayoutRecoupInfo */
+"amountToRecoup":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"payoutId": integer
+},
+"requestorType": string,
+"requestRefundAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"sellerLoginName": string,
+"sellerResponseDueDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"shipmentDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+}
+}
+/* More CancelSummary nodes here */
+],
+"paginationOutput":
+{ /* PaginationOutput */
+"limit": integer,
+"offset": integer,
+"totalEntries": integer,
+"totalPages": integer
+},
+"total": integer
+}
+
+#### Response field descriptions
+
+Output Container/Field |
+Type |
+Occurrence |
+Meaning |
+
+cancellations
+|
+array of CancelSummary |
+Always |
+
+An array of one or more order cancellation requests that match the request criteria.
+
+This array is returned as empty if no order cancellation requests match the input criteria.
+|
+
+cancellations.buyerLoginName
+|
+string |
+Conditionally |
+
+The eBay username of the buyer involved in the order cancellation request.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+cancellations
+.buyerResponseDueDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time by which the buyer is required to respond to an active order cancellation request. This container is not returned if the order cancellation request does not currently require a response from the buyer.
+|
+
+cancellations
+.buyerResponseDueDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancellations
+.buyerResponseDueDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancellations.cancelCloseDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates when the order cancellation request was closed. This field is only applicable and returned if/when the cancellation request is closed (regardless of outcome).
+|
+
+cancellations.cancelCloseDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancellations.cancelCloseDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancellations
+.cancelCloseReason
+|
+string |
+Conditionally |
+
+This enumeration value indicates the reason why the order cancellation request was closed. This field is only applicable and returned if/when the cancellation request was closed or if the buyer attempted to close the cancellation request.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelCloseReasonEnum type definition.
+
+Applicable values: See CancelCloseReasonEnum
+
+|
+
+cancellations.cancelId
+|
+string |
+Always |
+
+A unique eBay-assigned ID for an order cancellation request.
+|
+
+cancellations.cancelReason
+|
+string |
+Conditionally |
+
+This value indicates the reason why the user (either the buyer or seller, as defined in the requestorType field) initiated the order cancellation request.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelReasonEnum type definition.
+
+Applicable values: See CancelReasonEnum
+
+|
+
+cancellations
+.cancelRequestDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the order cancellation request was created.
+|
+
+cancellations
+.cancelRequestDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancellations
+.cancelRequestDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancellations.cancelState
+|
+string |
+Always |
+
+This value indicates the current state or condition of the cancellation process.
+
+This value, combined with the value of the cancelStatus field, can help you determine upcoming cancellation events and the appropriate actions you can take.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelStateEnum type definition.
+
+Applicable values: See CancelStateEnum
+
+|
+
+cancellations.cancelStatus
+|
+string |
+Always |
+
+This value indicates the last action taken by one of the parties associated with the order cancellation request.
+
+This value, combined with the value of the cancelState field, can help you determine upcoming events and the appropriate actions you can take on the cancellation.
+
+The full list of enumeration values that may get returned in this field are defined in the CancelStatusEnum type definition.
+
+Applicable values: See CancelStatusEnum
+
+|
+
+cancellations.legacyOrderId
+|
+string |
+Always |
+
+A unique eBay-assigned ID for the order being considered for cancellation.
+
+Note: The unique identifier of an order changes as the order goes from unpaid to paid, so the IDs for both unpaid and paid orders may be returned in this field based on payment status.
+
+|
+
+cancellations.marketplaceId
+|
+string |
+Always |
+
+A unique identifier for the eBay marketplace where the order cancellation request was created.
+
+The full list of enumeration values that represent eBay marketplaces are defined in the MarketplaceIdEnum type definition.
+
+Applicable values: See MarketplaceIdEnum
+
+|
+
+cancellations.partialOrderType
+|
+string |
+Conditionally |
+
+This value indicates whether the cancellation request is for the entire order, or only for a subset of one or more line items in an order.
+
+Currently, only full orders are eligible for cancellation, so the value returned here should be FULL_ORDER.
+
+Applicable values are from PartialOrderTypeEnum:
+
+FULL_ORDER
+
+This enumeration value indicates that the order cancellation request involves the entire order.
+
+PARTIAL_ORDER
+
+This enumeration value is not currently applicable, and is reserved for future use.
+
+UNKNOWN
+
+This enumeration value may get returned if eBay cannot determine the scope of the order cancellation.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancellations.paymentStatus
+|
+string |
+Always |
+
+The value returned in this field will indicate whether or not the buyer has paid for the order that is being cancelled or considered for cancellation.
+
+Applicable values are from PaymentStatusEnum:
+
+MARK_AS_PAID
+
+This enumeration value indicates that the seller marked the payment status of the order as paid.
+
+NOT_PAID
+
+This enumeration value indicates that the payment status of the order is unpaid.
+
+ONLINE_PAID
+
+This enumeration value indicates that the payment status of the order is paid.
+
+PAYPAL_PAID
+
+THIS ENUMERATION VALUE IS DEPRECATED.
+
+UNKNOWN
+
+This enumeration value indicates that the payment status of the order cannot be determined.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancellations.payoutRecoupInfo
+|
+PayoutRecoupInfo |
+Conditionally |
+
+This container shows the payout ID and payout amount associated with a paid order that is being cancelled or considered for cancellation. It will not be returned for unpaid orders.
+
+The payout amount data includes the sale price in the seller's currency, and if any currency conversion was necessary, it will also show the amount, currency, and exchange rate used for conversion.
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup
+|
+Amount |
+Conditionally |
+
+This container shows the amount of the seller payout which must be recouped from the seller by eBay in the case of a cancelled order
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancellations.payoutRecoupInfo
+.amountToRecoup.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancellations.payoutRecoupInfo
+.payoutId
+|
+integer |
+Conditionally |
+
+The unique identifier of the seller payout associated with the cancelled order.
+|
+
+cancellations.requestorType
+|
+string |
+Always |
+
+The enumeration value returned here indicates who initiated the order cancellation request (either the buyer or seller).
+
+Applicable values are from PartyEnum:
+
+BUYER
+
+This enumeration value is returned if the buyer created or performed an action on an order cancellation request.
+
+SELLER
+
+This enumeration value is returned if the seller created or performed an action on an order cancellation request.
+
+UNKNOWN
+
+This enumeration value is returned if eBay cannot determine which eBay party created or performed an action on an order cancellation request.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+cancellations
+.requestRefundAmount
+|
+Amount |
+Conditionally |
+
+This container shows the amount of the refund that the buyer is expecting to receive if the order is successfully cancelled.
+
+The monetary amount indicated here is typically the full amount that the buyer paid for the order, including the item price and shipping fees.
+
+The information returned also includes any currency conversion information (as necessary), the current currency code, the value in the original currency, and the original currency's code.
+|
+
+cancellations
+.requestRefundAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancellations
+.requestRefundAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+cancellations
+.requestRefundAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+cancellations
+.requestRefundAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+cancellations
+.requestRefundAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+cancellations.sellerLoginName
+|
+string |
+Conditionally |
+
+The eBay username of the seller involved in the order cancellation request.
+
+Note: Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to Data Handling Compliance.
+|
+
+cancellations
+.sellerResponseDueDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time by which the seller is required to respond to an active order cancellation request.
+
+This container is not returned if the order cancellation request does not currently require a response from the seller.
+|
+
+cancellations
+.sellerResponseDueDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancellations
+.sellerResponseDueDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+cancellations.shipmentDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the time when the seller shipped the order (or a line item within the order) that the buyer is attempting to cancel.
+
+Once a seller ships one or more line items within an order, the order is no longer eligible for cancellation. This container is only applicable and returned if the seller shipped one or more line items in order, thus making it impossible for the order cancellation request to be granted.
+|
+
+cancellations.shipmentDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+cancellations.shipmentDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+paginationOutput
+|
+PaginationOutput |
+Conditionally |
+
+The result set from this method is paginated because the request can result in a large number of matches. This container consists of metadata related to the current response page.
+
+It contains the page number and the cancellation entries per page, as well as the total amount of response pages and cancellation entries. This container is not returned if no cancellation requests match the input criteria.
+|
+
+paginationOutput.limit
+|
+integer |
+Always |
+
+The maximum number of entries to return per request. This value is set through the limit query parameter in the request (or the default value is used if this query parameter is omitted).
+
+The value of the totalEntries field divided by the value of this field determines the value of the totalPages field.
+|
+
+paginationOutput.offset
+|
+integer |
+Always |
+
+The offset value indicates the number of entries to skip in the results set before returning the first entry in the paginated response. The offset query parameter is paired with the limit query parameter to control the number of entries returned in the response, and which entries appear on that page of data. For example, if you supply an offset of 0 and a limit of 10, the first page of the response contains the first 10 entries from the results set. If the offset was set to 10 and the limit was set to 20, the first page of the results set would contain entries 11-30.
+
+The offset value defaults to 0 if the offset query parameter is omitted from the request.
+|
+
+paginationOutput.totalEntries
+|
+integer |
+Always |
+
+The total number of entries that match the current input criteria of the request. This value divided by the value of the limit field determines the value of the totalPages field.
+|
+
+paginationOutput.totalPages
+|
+integer |
+Always |
+
+The total number of pages of entries that match the current input criteria of the request.
+
+This value is determined by dividing the value of the totalEntries field by the value of the limit field. If totalPages is more than 1, subsequent calls must be used to view subsequent pages in the results set.
+|
+
+total
+|
+integer |
+Always |
+
+The total number of cancellation requests that match the input criteria. A value of 0 is returned if no cancellation requests match the input criteria.
+|
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Sample: Search for Cancellations
+
+A search with query filters and a sort.
+
+Description
+
+This call sample is used to search for order cancellations requested within a specific time period. The order cancellations are sorted by cancel request date in ascending order.
+
+Input
+
+The GET /cancellation/search operation uses the creation_date_range_from and creation_date_range_to query parameters to retrieve cancellation requests that were created within this time period. The sort query parameter sets the order in which the cancellation requests will be retrieved. The +CANCEL_REQUEST_DATE value means that order cancellations will be sorted based on their request date in ascending order, which means the oldest order cancellations (within the specified time period will be returned first).
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/cancellation/search?
+creation_date_range_from=2015-05-15T00:00:01.000Z&
+creation_date_range_to=2015-06-15T23:59:59.000Z&
+sort=+CANCEL_REQUEST_DATE
+
+Output
+
+Six order cancellations were found based on the input criteria. These order cancellations appear in ascending order based on the cancellation request date (shown in the cancelRequestDate field). Three of the cancellation requests were made by the seller and three were made by the buyer (indicated by the value in the requestorType field). All order cancellations are in the closed state (indicated by the cancelState field) and the reason for closure varies for each cancellation (reason indicated in the cancelCloseReason field).
+
+JSON format.
+{
+"cancellations": [
+{
+"cancelId": "5********2",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********1-9********7",
+"requestorType": "SELLER",
+"cancelReason": "OUT_OF_STOCK_OR_CANNOT_FULFILL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_WITH_REFUND",
+"cancelCloseReason": "FULL_REFUNDED",
+"paymentStatus": "UNKNOWN",
+"requestRefundAmount": {
+"value": 0,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-05-18T22:42:11.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-05-18T22:42:11.000Z",
+}
+},
+{
+"cancelId": "5********6",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********1-9********7",
+"requestorType": "SELLER",
+"cancelReason": "OUT_OF_STOCK_OR_CANNOT_FULFILL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_UNKNOWN_REFUND",
+"cancelCloseReason": "BUYER_CONFIRM_TIMEOUT_NON_PAYPAL_PAID",
+"buyerResponseDueDate": {
+"value": "2015-05-29T06:00:00.000Z",
+},
+"paymentStatus": "UNKNOWN",
+"requestRefundAmount": {
+"value": 1.23,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-05-26T19:03:45.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-05-29T06:05:38.000Z",
+}
+},
+{
+"cancelId": "5********8",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********2-9********8",
+"requestorType": "BUYER",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_FOR_COMMITMENT",
+"cancelCloseReason": "SELLER_APPROVE_TIMEOUT_UNPAID",
+"sellerResponseDueDate": {
+"value": "2015-05-30T06:00:00.000Z",
+},
+"paymentStatus": "NOT_PAID",
+"requestRefundAmount": {
+"value": 1.23,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-05-26T19:32:22.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-05-30T06:25:48.000Z",
+}
+},
+{
+"cancelId": "5********8",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********3-9********8",
+"requestorType": "BUYER",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_FOR_COMMITMENT",
+"cancelCloseReason": "SELLER_APPROVE_TIMEOUT_UNPAID",
+"sellerResponseDueDate": {
+"value": "2015-05-31T06:00:00.000Z",
+},
+"paymentStatus": "NOT_PAID",
+"requestRefundAmount": {
+"value": 1.23,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-05-27T18:26:44.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-05-31T06:11:20.000Z",
+}
+},
+{
+"cancelId": "5********0",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********9-9********9",
+"requestorType": "BUYER",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_REJECTED",
+"cancelCloseReason": "SELLER_DECLINE",
+"shipmentDate": {
+"value": "2015-06-03T07:00:00.000Z",
+},
+"sellerResponseDueDate": {
+"value": "2015-06-07T06:00:00.000Z",
+},
+"paymentStatus": "MARK_AS_PAID",
+"requestRefundAmount": {
+"value": 1.23,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-06-03T16:26:05.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-06-03T16:34:29.000Z",
+}
+},
+{
+"cancelId": "5********3",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********3-9********6",
+"requestorType": "SELLER",
+"cancelReason": "OUT_OF_STOCK_OR_CANNOT_FULFILL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_WITH_REFUND",
+"cancelCloseReason": "FULL_REFUNDED",
+"paymentStatus": "PAYPAL_PAID",
+"requestRefundAmount": {
+"value": 2.46,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-06-13T00:32:09.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-06-13T00:37:06.000Z",
+}
+}
+],
+"total": 6,
+"paginationOutput": {
+"offset": 1,
+"limit": 6,
+"totalPages": 1,
+"totalEntries": 6
+}
+}
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+1.0
+2015-06-30 |
+
+- Call (added): New call.
+
+|
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

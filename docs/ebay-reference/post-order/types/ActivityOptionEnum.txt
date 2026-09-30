@@ -1,0 +1,534 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ActivityOptionEnum.html
+Fetched: 2026-09-30 (text-extracted)
+
+ActivityOptionEnum - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ActivityOptionEnum
+
+This enumerated type lists all possible activities that may occur during the return process.
+
+If these values are returned in the activityDue fields of the buyerResponseDue or sellerResponseDue containers, it is the buyer's or seller's next expected action on the return request. If these values are returned under the responseHistory container, it is a return request action that has already occurred.
+
+Types that use ActivityOptionEnum:
+
+AvailableOptionType,
+ReturnResponseDueType,
+ReturnResponseHistoryType
+
+Calls that use one or more values of ActivityOptionEnum:
+
+/post-order/v2/return POST,
+/post-order/v2/return/search GET,
+/post-order/v2/return/{returnId} GET
+
+## Enumeration Values
+
+Value |
+Description |
+
+AUTO_APPROVE_REMORSE |
+This enumeration value indicates that the auto-approve disposition rule for a remorse return has been activated by the system. |
+
+BUYER_ACCEPT_REPLACEMENT_OFFER |
+This enumeration value indicates that the buyer has accepted, or has the option to accept the offered replacement item. Note: This value is not currently supported.
+|
+
+BUYER_ACCEPTS_NON_PAYPAL_PARTIAL_REFUND |
+This enumeration value indicates that the buyer accepted the seller's partial refund offer. |
+
+BUYER_ACCEPTS_PARTIAL_REFUND |
+This enumeration value indicates that the buyer accepted the seller's partial refund offer. |
+
+BUYER_CLOSE_RETURN |
+This enumeration value indicates that the buyer closed the return request. |
+
+BUYER_CREATE_RETURN |
+This enumeration value indicates that the buyer created a return request. |
+
+BUYER_DECLINE_PARTIAL_REFUND |
+This enumeration value indicates that the buyer declined the seller's partial refund offer. |
+
+BUYER_DECLINE_REPLACEMENT_OFFER |
+This enumeration value indicates that the buyer has declined, or has the option to decline the offered replacement item. Note: This value is not currently supported.
+|
+
+BUYER_ESCALATE |
+This enumeration value indicates that the buyer escalated the return request to a return case. |
+
+BUYER_MARK_AS_RECEIVED |
+This enumeration value indicates that the buyer has marked, or is expected to mark a replacement item as received. Note: This value is not currently supported.
+|
+
+BUYER_MARK_REFUND_RECEIVED |
+This enumeration value indicates that the buyer has marked, or is expected to mark a refund as received. |
+
+BUYER_MARK_RETURN_SHIPPED |
+This enumeration value indicates that the buyer has marked, or is expected to mark the return item as shipped. |
+
+BUYER_PRINT_SHIPPING_LABEL |
+This enumeration value indicates that the buyer's next action is to print the return shipping label that is available. |
+
+BUYER_PROVIDE_LABEL |
+This enumeration value indicates that the buyer has provided, or is expected to provide a return shipping label. |
+
+BUYER_PROVIDE_TRACKING_INFO |
+This enumeration value indicates that the buyer has provided, or is expected to provide shipment tracking information for the item that is being returned to the seller. |
+
+BUYER_SEND_MESSAGE |
+This enumeration value indicates that the buyer's next possible action is to send a message to the seller and/or eBay. |
+
+BUYER_UPDATE_TRACKING |
+This enumeration value indicates that the buyer's next possible action is to update the shipment tracking information. |
+
+BUYER_VOID_LABEL |
+This enumeration value indicates that the buyer voided the shipping label that was available. |
+
+CHARGEBACK_OPEN |
+This enumeration value indicates that system cancelled the return request because the buyer opened a chargeback request. |
+
+DELETE_FILE |
+This enumeration value indicates that a file associated with a return request was deleted. |
+
+EBAY_RULE_AUTO_APPROVE |
+This enumeration value indicates that eBay's automated business rules have approved a return request. |
+
+EMAIL_SHIPPING_LABEL |
+This enumeration value indicates that the buyer's or seller's next action is to email the link to a shipping label for themselves or for their order partner. |
+
+EXTERNAL_CLAIM_OPENED |
+This enumeration value indicates that the system has been notified that an external claim has been opened. |
+
+GENERAL_TIME_OUT |
+This enumeration value indicates that the system timed out. |
+
+NOTIFIED_DELIVERED |
+This enumeration value indicates that the eBay system has been notified that a return item has been delivered to the recipient. |
+
+NOTIFIED_SHIPPED |
+This enumeration value indicates that the eBay system has been notified that a return item has been shipped. |
+
+NOTIFY_REPLACEMENT_DELIVERED |
+This enumeration value indicates that the system has been notified that a replacement item has been delivered to the buyer. Note: This value is not currently supported.
+|
+
+NOTIFY_REPLACEMENT_SHIPPED |
+This enumeration value indicates that the system has been notified that a replacement item has been shipped by the seller. Note: This value is not currently supported.
+|
+
+NOTIFY_UPDATE_REFUND_STATUS |
+This enumeration value indicates that the system has been notified that the refund status has to be updated. |
+
+OTHER |
+This enumeration value indicates that action or next possible action cannot be determined. |
+
+REMINDER_BUYER_TO_RESPOND_RE_OFFER |
+This enumeration value indicates that the system was reminded that the buyer has to respond to a reply to a seller's offer to resolve the return request. |
+
+REMINDER_BUYER_TO_SHIP |
+This enumeration value indicates that the system was reminded that the buyer has to return ship the item. |
+
+REMINDER_FOR_REFUND |
+This enumeration value indicates that the system was reminded that the seller must refund the buyer. |
+
+REMINDER_FOR_REFUND_NO_SHIPPING |
+This enumeration value indicates that the system was reminded that the seller must refund the buyer and that the buyer is not expected to return ship the item. |
+
+REMINDER_FOR_RMA |
+This enumeration value indicates that the system was reminded that a Return Merchandise Authorization (RMA) is associated with the return request. |
+
+REMINDER_FOR_SHIPPING |
+This enumeration value indicates that the system was reminded that an item must be shipped. |
+
+REMINDER_SELLER_TO_RESPOND |
+This enumeration value indicates that the system was reminded that the seller has to make a response on the return request. |
+
+REMINDER_SELLER_TO_SHIP |
+This enumeration value indicates that the system was reminded that the seller has to ship the replacement item. Note: This value is not currently supported.
+|
+
+SELLER_APPROVE_REQUEST |
+This enumeration value is returned if the seller has approved a return request, or if approving the return request is one of their next options. |
+
+SELLER_DECLINE_REQUEST |
+This enumeration value is returned if the seller has declined a return request, or if declining the return request is one of their next options. |
+
+SELLER_ESCALATE |
+This enumeration value indicates that the seller escalated the return request to a return case. |
+
+SELLER_ISSUE_REFUND |
+This enumeration value indicates that the seller has issued a refund. |
+
+SELLER_ISSUE_STORE_CREDIT_REFUND |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+SELLER_MARK_AS_RECEIVED |
+This enumeration value indicates that the seller has marked, or is expected to mark a return item as received. |
+
+SELLER_MARK_REFUND_SENT |
+This enumeration value indicates that the seller has marked, or is expected to mark the refund as sent. |
+
+SELLER_MARK_REPLACEMENT_SHIPPED |
+This enumeration value indicates that the seller has marked, or is expected to mark the replacement item as shipped. Note: This value is not currently supported.
+|
+
+SELLER_OFFER_PARTIAL_REFUND |
+This enumeration value indicates that the seller has offered, or has the option to offer a partial refund to the buyer. |
+
+SELLER_OFFER_REPLACEMENT |
+This enumeration value indicates that the seller has offered, or has the option to offer a replacement item to the buyer. Note: This value is not currently supported.
+|
+
+SELLER_OFFER_RETURNS |
+This enumeration value indicates that the seller offer returns to buyers. |
+
+SELLER_PRINT_SHIPPING_LABEL |
+This enumeration value indicates that the seller's next action is to print the shipping label that is available. |
+
+SELLER_PROVIDE_LABEL |
+This enumeration value indicates that the seller has provided, or is expected to provide a shipping label. |
+
+SELLER_PROVIDE_RMA |
+This enumeration value indicates that the seller's next possible action is to provide a return merchandise authorization (RMA) number to the buyer. |
+
+SELLER_PROVIDE_TRACKING_INFO |
+This enumeration value indicates that the seller has provided, or is expected to provide shipment tracking information for the replacement item that is being sent to the buyer. Note: This value is not currently supported.
+|
+
+SELLER_RETRY_REFUND |
+This enumeration value indicates that the seller's next possible action is to retry the refund operation. |
+
+SELLER_SEND_MESSAGE |
+This enumeration value indicates that the seller's next possible action is to send a message to the buyer and/or eBay. |
+
+SELLER_UPDATE_TRACKING |
+This enumeration value indicates that the seller's next possible action is to update the shipment tracking information. |
+
+SELLER_VOID_LABEL |
+This enumeration value indicates that the seller voided the shipping label that was available. |
+
+SUBMIT_FILE |
+This enumeration value indicates that a file was associated with a return request. |
+
+SYSTEM_BUYER_PARTIAL_REFUND_AS_PAYOUT |
+This enumeration value indicates that the system paid the buyer a partial refund. |
+
+SYSTEM_BUYER_REFUND_AS_PAYOUT |
+This enumeration value indicates that the payment system paid the buyer the refund amount. |
+
+SYSTEM_CLOSE_RETURN |
+This enumeration value indicates that the system closed the return request. |
+
+SYSTEM_CREATE_RETURN |
+This enumeration value indicates that the system created the return request. |
+
+SYSTEM_IMMEDIATE_REFUND |
+This enumeration value indicates that the payment system initiated an immediate refund to the buyer. |
+
+SYSTEM_INITIATED_REFUND |
+This enumeration value indicates that the system has automatically initiated a refund to the buyer. |
+
+SYSTEM_SELLER_CHARGE |
+This enumeration value indicates that eBay has automatically initiated a refund from the seller for the return. |
+
+TIME_OUT_AFTER_DECLINE |
+This enumeration value indicates that the system timed out after the return request was declined. |
+
+TIME_OUT_AFTER_REFUNDED |
+This enumeration value indicates that the system timed out after the refund. |
+
+TIME_OUT_AFTER_REFUNDED_AS_PAYOUT |
+This enumeration value indicates that the system timed out after the system paid out the buyer. |
+
+TIME_OUT_AFTER_REPLACED |
+This enumeration value indicates that the system timed out after the replacement item operation. Note: This value is not currently supported.
+|
+
+TIME_OUT_FOR_AUTHENTICATION |
+For Returns with Authenticity Guarantee items, this enumeration value indicates the authenticator took too long to authenticate the returned item. |
+
+TIME_OUT_FOR_AUTHORIZE |
+This enumeration value indicates that the system timed out while waiting for the seller to authorize the return request. |
+
+TIME_OUT_FOR_AUTO_REFUND |
+This enumeration value indicates that the system timed out while waiting for the auto refund operation. |
+
+TIME_OUT_FOR_BUYER_RECOUP |
+This enumeration value indicates that the system timed out while waiting for the buyer recoupment operation. |
+
+TIME_OUT_FOR_DELIVERY |
+This enumeration value indicates that the system timed out for delivery. |
+
+TIME_OUT_FOR_ESCALATION |
+This enumeration value indicates that the system timed out while waiting for the return request to be escalated. |
+
+TIME_OUT_FOR_ESCALATION_AFTER_SMIR |
+This enumeration value indicates that the system timed out while waiting for the return request to be escalated after the 'Seller make it right' period has ended. |
+
+TIME_OUT_FOR_ITEM_REPLACED |
+This enumeration value indicates that the system timed out while waiting for the replacement item operation. Note: This value is not currently supported.
+|
+
+TIME_OUT_FOR_MARK_REFUND_RECEIVED |
+This enumeration value indicates that the system timed out for mark refund received operation. |
+
+TIME_OUT_FOR_MARK_REFUND_SENT |
+This enumeration value indicates that the system timed out for mark refund sent operation. |
+
+TIME_OUT_FOR_MASS_PAYOUT |
+This enumeration value indicates that the system timed out while waiting for the mass payout operation. |
+
+TIME_OUT_FOR_PAYOUT |
+This enumeration value indicates that the system timed out while waiting for the seller payout operation. |
+
+TIME_OUT_FOR_PROVIDE_LABEL |
+This enumeration value indicates that the system timed out while waiting for the buyer or seller to create/provide a shipping label. |
+
+TIME_OUT_FOR_REFUND |
+This enumeration value indicates that the system timed out while trying to process a refund operation. |
+
+TIME_OUT_FOR_REPLACEMENT_DELIVERED_ITEM_NOT_RETURNED |
+This enumeration value indicates that the system timed out while waiting for the replacement item to be marked as delivered. Note: This value is not currently supported.
+|
+
+TIME_OUT_FOR_REPLACEMENT_SHIPPED |
+This enumeration value indicates that the system timed out while waiting for the seller to mark the replacement item as shipped. Note: This value is not currently supported.
+|
+
+TIME_OUT_FOR_RETURN_SHIPPING |
+This enumeration value indicates that the system timed out while waiting for return shipping operation. |
+
+TIME_OUT_FOR_RMA |
+This enumeration value indicates that the system timed out while waiting for the seller to provide the Return Merchandise Authorization (RMA). |
+
+TIME_OUT_FOR_SELLER_INVOICE |
+This enumeration value indicates that the system timed out while waiting for the seller to be invoiced for the buyer refund. |
+
+TIME_OUT_FOR_SELLER_PAYOUT |
+This enumeration value indicates that the system timed out while waiting for the seller payout operation. |
+
+TIME_OUT_FOR_SHIPMENT_TRACKING |
+This enumeration value indicates that the system timed out for shipment tracking. |
+
+TIME_OUT_FOR_SHIPPING |
+This enumeration value indicates that the system timed out while waiting for shipment tracking information. |
+
+TIME_OUT_FOR_SHIPPING_SYSTEM_CLOSE |
+This enumeration value indicates that the system timed out while waiting for shipment tracking system to close the tracking number. |
+
+* See the Enumeration Index to see exact use of each enumeration value in the API.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

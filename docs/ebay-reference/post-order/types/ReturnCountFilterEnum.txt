@@ -1,0 +1,276 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ReturnCountFilterEnum.html
+Fetched: 2026-09-30 (text-extracted)
+
+ReturnCountFilterEnum - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ReturnCountFilterEnum
+
+This enumerated type lists all values that can be passed in the return_state query parameter of the GET /post-order/v2/return/search method. These values specify the state of the return requests returned by a search request. These return state classifications will also get returned in the countSummary array in the GET /post-order/v2/return/search response.
+
+Type that uses ReturnCountFilterEnum:
+
+CountSummaryType
+
+Call that uses one or more values of ReturnCountFilterEnum:
+
+/post-order/v2/return/search GET
+
+## Enumeration Values
+
+Value |
+Description |
+
+ALL_OPEN |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests. |
+
+ALL_OPEN_REPLACEMENT |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests where the buyer has requested a replacement item. Note: This value is not currently supported.
+|
+
+ALL_OPEN_RETURN |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests where the buyer wants to return the item for a refund. |
+
+CLOSED |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all return requests that have been closed. |
+
+EBAY_PLUS |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests where the line item is an eBay Plus item. |
+
+ITEM_DELIVERED |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve return requests where a return item has been delivered to their destination. |
+
+ITEM_SHIPPED |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve return requests where a return item has been shipped. |
+
+RETURN_STARTED |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve newly-opened return requests. |
+
+SELLER_ACTION_DUE |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests that are currently awaiting a seller action. |
+
+SELLER_ACTION_OVERDUE |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests where a seller action is overdue. |
+
+SELLER_NO_ACTION |
+This enumeration value is set in the return_state query parameter field if the user wishes to retrieve all open return requests where no seller action is currently due. |
+
+UNKNOWN |
+This enumeration value should not be used in the return_state query parameter field. |
+
+* See the Enumeration Index to see exact use of each enumeration value in the API.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

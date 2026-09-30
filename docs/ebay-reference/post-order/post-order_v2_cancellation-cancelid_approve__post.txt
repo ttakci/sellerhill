@@ -1,0 +1,339 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_cancellation-cancelid_approve__post.html
+Fetched: 2026-09-30 (text-extracted)
+
+Approve Cancellation - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Approve Cancellation
+
+##
+POST /post-order/v2/cancellation/{cancelId}/approve
+
+This method approves a buyer's order cancellation request on behalf of the seller.Important! Due to EU & UK Payments regulatory requirements, an additional security verification via Digital Signatures is required for certain API calls that are made on behalf of EU/UK sellers, including this method. Please refer to Digital Signatures for APIs to learn more on the impacted APIs and the process to create signature to be included in the HTTP payload. If the order is eligible for cancellation and the seller agrees, this method cancels the order and notifies the buyer of the cancellation.
+
+This method has no request or response payloads. The cancelId value is passed in as a path parameter and if the order is successfully cancelled, an HTTP status code of 200 is returned.
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+POST https://api.ebay.com/post-order/v2/cancellation/{cancelId}/approve
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+cancelId
+|
+string |
+Required |
+
+The unique eBay-assigned identifier of the cancellation request to be approved. The cancellation ID value is passed in as part of the call URI.
+|
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+This call has no request payload.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+This call has no response payload.
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Sample: Approve a cancellation
+
+The seller approves the buyers request for an order cancellation.
+
+Description
+
+Sellers must approve all buyer-initiated cancellation requests before an order is actually cancelled.
+
+Input
+
+There is no payload with this request. Supply the cancellation ID as a path parameter in the call.
+
+URL format. See also the non-wrapped version of this URL.
+
+POST https://api.ebay.com/post-order/v2/cancellation/5********6/approve
+
+Output
+
+A successful call returns an HTTP code of 200; there is no payload for the response.
+
+JSON format.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.
