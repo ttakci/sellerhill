@@ -251,6 +251,7 @@ export class OrderSyncService {
             entity,
             listingOverPlanLimit,
             lineItem?.legacyItemId ?? null,
+            lineItem?.lineItemId ?? null,
             ingest.mayInsert
           );
           // An order from before the store was connected that we never held:
@@ -477,6 +478,7 @@ export class OrderSyncService {
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
     listingOverPlanLimit = false,
     ebayLegacyItemId: string | null = null,
+    ebayLineItemId: string | null = null,
     mayInsert = true
   ): Promise<{ id: string; inserted: boolean; skipped?: boolean }> {
     // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
@@ -509,7 +511,7 @@ export class OrderSyncService {
         order_date, last_ebay_event_at,
         cost_capture_status,
         ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
-        listing_over_plan_limit, ebay_legacy_item_id,
+        listing_over_plan_limit, ebay_legacy_item_id, ebay_line_item_id,
         ebay_cancel_state, ebay_cancelled_at, ebay_refunded_amount, ebay_refunded_at
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
@@ -519,8 +521,8 @@ export class OrderSyncService {
         $23, $24, $25,
         $26,
         $27, $28, $29,
-        $30, $31,
-        $32, $33, $34, $35
+        $30, $31, $32,
+        $33, $34, $35, $36
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         -- Never a bare EXCLUDED.status: an order is re-read every time eBay
@@ -555,6 +557,9 @@ export class OrderSyncService {
         -- fills a blank (an order ingested before migration 111). It is NOT the
         -- listing link: adopting an order into a listing stays an explicit act.
         ebay_legacy_item_id = COALESCE(orders.ebay_legacy_item_id, EXCLUDED.ebay_legacy_item_id),
+        -- The order LINE ITEM id (what a shipping fulfillment names) never
+        -- changes either; fills the blank of an order ingested before 131.
+        ebay_line_item_id = COALESCE(orders.ebay_line_item_id, EXCLUDED.ebay_line_item_id),
         -- What eBay reports about a cancellation / refund. COALESCE so a later
         -- read that lacks the field never blanks a captured value.
         ebay_cancel_state = COALESCE(EXCLUDED.ebay_cancel_state, orders.ebay_cancel_state),
@@ -598,6 +603,7 @@ export class OrderSyncService {
         // listing_id: the decision belongs to the order's first ingest.
         listingOverPlanLimit,
         ebayLegacyItemId,
+        ebayLineItemId,
         entity.ebayCancelState,
         entity.ebayCancelledAt ? entity.ebayCancelledAt.toISOString() : null,
         entity.ebayRefundedAmount,

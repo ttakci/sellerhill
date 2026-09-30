@@ -269,6 +269,15 @@ describe('order change tracking — source guards', () => {
     }
   });
 
+  it('stores the eBay order line item id at sync and never blanks it on a later read', () => {
+    // The shipping fulfillment names `lineItems[].lineItemId`, not the
+    // listing's legacy item id (eBay answered 400 "Invalid line item id" on
+    // the first live conversion). Like ebay_legacy_item_id it never changes,
+    // so it only ever fills a blank.
+    expect(sync).toMatch(/lineItem\?\.lineItemId \?\? null/);
+    expect(sync).toContain('ebay_line_item_id = COALESCE(orders.ebay_line_item_id, EXCLUDED.ebay_line_item_id)');
+  });
+
   it('never restores the address of a buyer whose data was erased', () => {
     expect(sync).not.toMatch(/shipping_address = EXCLUDED\.shipping_address,/);
     expect(sync).toMatch(
