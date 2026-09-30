@@ -33,6 +33,7 @@ import {
   pickOrderIdFromHistoryCards,
   type ReviewCostLines,
 } from './order-confirmation';
+import { stripScriptBlocks } from './your-orders-card';
 
 /**
  * Fail-closed obstacle. Thrown by every step helper in this service to signal
@@ -316,13 +317,15 @@ const CHECKOUT_SELECTORS = {
     '#widget-purchaseConfirmationStatus .a-alert-heading, .a-alert-inline-success .a-alert-heading',
   // The review page's cost summary, read BEFORE the click (the thank-you page has none).
   reviewSummary: '#subtotals-marketplace-table',
-  // "Your Orders" cards — same (live-UNVERIFIED) list as amazon-scraping.service.ts.
+  // "Your Orders" cards. `.order-card.js-order-card` is the live 2026-10 markup
+  // (`__fixtures__/checkout/your-orders.html`) and goes first: each miss below
+  // it costs a 4 s wait. The rest are older layouts kept as fallbacks.
   historyOrderCards: [
+    '.js-order-card',
+    '.order-card',
     '[data-component="order-card"]',
     '.yo1JGqUWoy0k__order-card',
-    '.order-card',
     '[data-testid="order-card"]',
-    '.js-order-card',
   ],
 
   // Generic Amazon signin-redirect URL fragments.
@@ -1965,7 +1968,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         }
       }
       await this.snap(page, ebayOrderId, 'order-history');
-      const candidates = cardsHtml.flatMap((html) => html.match(/\d{3}-\d{7}-\d{7}/g) ?? []);
+      const candidates = cardsHtml.flatMap((html) => stripScriptBlocks(html).match(/\d{3}-\d{7}-\d{7}/g) ?? []);
       const taken = new Set<string>();
       if (candidates.length > 0) {
         const rows = await this.db.query<{ amazon_order_id: string }>(

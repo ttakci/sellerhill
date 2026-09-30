@@ -12,6 +12,8 @@
  * review page read just before the click; the id is looked up in "Your Orders".
  */
 
+import { stripScriptBlocks } from './your-orders-card';
+
 /** Costs as Amazon's review page itemises them. */
 export interface ReviewCostLines {
   items: number;
@@ -67,9 +69,14 @@ export function isOrderPlacedPage(url: string, headingText: string | null): bool
  * links our ASIN, only an id no other order already carries. No match → null,
  * and the order stays PLACED-without-id for cost-capture to link.
  *
- * The card markup is NOT verified against a live "Your Orders" page yet (the
- * list selectors in `amazon-scraping.service.ts` carry the same caveat); the
- * `order-history` evidence snap exists to settle that.
+ * Checked against a live "Your Orders" page (2026-10-01,
+ * `__fixtures__/checkout/your-orders.html`): each card links its product as
+ * `/dp/<ASIN>` and its details as `order-details?orderID=<id>`. Script blocks
+ * are dropped first — the first live card embeds a ~100 KB library.
+ *
+ * `purchaseId` on the thank-you page is NOT the order number: the order that
+ * page confirmed on 2026-09-30 carried purchaseId 106-… and appeared in Your
+ * Orders as 113-…. It is never used as the id.
  */
 export function pickOrderIdFromHistoryCards(
   cardsHtml: readonly string[],
@@ -78,7 +85,7 @@ export function pickOrderIdFromHistoryCards(
   maxCards = 5
 ): string | null {
   const asinLink = new RegExp(`/(?:dp|gp/product)/${asin}(?![A-Z0-9])`, 'i');
-  for (const html of cardsHtml.slice(0, maxCards)) {
+  for (const html of cardsHtml.slice(0, maxCards).map(stripScriptBlocks)) {
     if (!asinLink.test(html)) {
       continue;
     }

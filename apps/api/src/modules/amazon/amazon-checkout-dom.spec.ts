@@ -6,6 +6,7 @@ import { chromium, type Browser, type Page, type Route } from 'playwright';
 
 import { AmazonCheckoutService, AutoFulfillBlockedError, type PlacedResult } from './amazon-checkout.service';
 import { parseReviewCostLines, type ReviewCostLines } from './order-confirmation';
+import { parseOrderCardHeader } from './your-orders-card';
 
 /**
  * The checkout step helpers driven in a real Chromium against the checkout
@@ -108,6 +109,10 @@ describeWithBrowser('AmazonCheckoutService checkout DOM steps (live-captured mar
       }
       return route.fulfill({ status: 404, body: 'not in fixture' });
     });
+    // "Your Orders" is read on Amazon's real host after a placement.
+    await page.route('https://www.amazon.com/your-orders/**', (route: Route) =>
+      route.fulfill({ contentType: 'text/html', body: fs.readFileSync(path.join(FIXTURES, 'your-orders.html'), 'utf8') })
+    );
     await page.goto(startPath.startsWith('https://') ? startPath : BASE + startPath);
     return harness;
   }
@@ -261,6 +266,53 @@ describeWithBrowser('AmazonCheckoutService checkout DOM steps (live-captured mar
         tax: 0.62,
         shipping: 0,
       });
+    } finally {
+      await h.page.close();
+    }
+  });
+
+  function resolveFromHistory(h: Harness, asin: string, takenIds: string[]): Promise<string | null> {
+    (h.service as unknown as { db: unknown }).db = {
+      query: (_sql: string, params: [string[]]) =>
+        Promise.resolve(params[0].filter((id) => takenIds.includes(id)).map((id) => ({ amazon_order_id: id }))),
+    };
+    return (h.service as unknown as {
+      resolveOrderIdFromHistory: (page: Page, asin: string, marketplace: string, id: string) => Promise<string | null>;
+    }).resolveOrderIdFromHistory(h.page, asin, 'AMAZON_US', 'eb-dom-test');
+  }
+
+  it('Your Orders (live markup): reads the newest card for our ASIN, never from its embedded script', async () => {
+    const h = await open('spc');
+    try {
+      await expect(resolveFromHistory(h, 'B0SHTEST01', [])).resolves.toBe('111-2222222-3333333');
+      // The decoy ASIN lives only inside the first card's script and in the second card.
+      await expect(resolveFromHistory(h, 'B0OTHER001', [])).resolves.toBe('111-4444444-5555555');
+    } finally {
+      await h.page.close();
+    }
+  });
+
+  it('Your Orders: an id another order already holds is not reused', async () => {
+    const h = await open('spc');
+    try {
+      await expect(resolveFromHistory(h, 'B0SHTEST01', ['111-2222222-3333333'])).resolves.toBeNull();
+    } finally {
+      await h.page.close();
+    }
+  });
+
+  it('Your Orders: the card header yields the placed date and total the cost-capture matcher needs', async () => {
+    const h = await open('spc');
+    try {
+      await h.page.goto('https://www.amazon.com/your-orders/orders');
+      const headers = await h.page.locator('.order-card .order-header').allTextContents();
+      const parsed = headers.map(parseOrderCardHeader);
+      expect(parsed.map((p) => p.grandTotal)).toEqual([9.47, 14.88, 1.14]);
+      expect(parsed.map((p) => p.orderDate?.toDateString())).toEqual([
+        new Date(2026, 8, 30).toDateString(),
+        new Date(2026, 8, 29).toDateString(),
+        new Date(2026, 6, 27).toDateString(),
+      ]);
     } finally {
       await h.page.close();
     }

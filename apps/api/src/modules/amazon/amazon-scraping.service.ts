@@ -15,6 +15,7 @@ import {
 } from './amazon-order-parser.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { BrowserStateManager } from './browser-state-manager.service';
+import { parseOrderCardHeader } from './your-orders-card';
 
 export interface ScrapingProgress {
   stage: 'logging_in' | 'navigating' | 'scraping' | 'saving' | 'done' | 'error';
@@ -161,12 +162,18 @@ const AMAZON_LOGIN_SELECTORS = {
 // ---------------------------------------------------------------------------
 const ORDER_LIST_SELECTORS = {
   // Each order is a card. Amazon has shipped multiple layouts — try each.
+  // `.order-card` is the live 2026-10 markup (checked against a capture,
+  // `__fixtures__/checkout/your-orders.html`).
   orderCard: [
+    '.order-card',
     '[data-component="order-card"]',
     '.yo1JGqUWoy0k__order-card',
-    '.order-card',
     '[data-testid="order-card"]',
   ],
+  // The live card header: "Order placed · <date> · Total · $<amount> · Ship to ·
+  // Order #". It has no per-field hooks, so date and total are read from its
+  // text by label (`parseOrderCardHeader`) when the selectors below miss.
+  orderHeader: '.order-header',
   // "View order details" / invoice link carries the orderId in the URL.
   orderDetailsLink: 'a[href*="orderID="], a[href*="order-details"], a[href*="/gp/your-account/order-details"]',
   // Order id literal fallback ("Order # 111-2222222-3333333").
@@ -801,8 +808,13 @@ export class AmazonScrapingService {
       return null;
     }
 
-    // Order date — "Placed on January 15, 2025".
-    let orderDate = new Date();
+    // The live card header, read once: the fallback for date and total below.
+    const headerEl = card.locator(ORDER_LIST_SELECTORS.orderHeader).first();
+    const header = parseOrderCardHeader((await headerEl.textContent({ timeout: 500 }).catch(() => null)) ?? '');
+
+    // Order date — "Placed on January 15, 2025" (older layouts) or the live
+    // header's "Order placed · September 30, 2026".
+    let orderDate = header.orderDate ?? new Date();
     const dateEl = card.locator(ORDER_LIST_SELECTORS.orderDate).first();
     if (
       await dateEl
@@ -871,6 +883,9 @@ export class AmazonScrapingService {
       tax = parsed.tax;
       shipping = parsed.shipping;
       purchasePrice = parsed.subtotal || grandTotal - tax - shipping;
+    }
+    if (grandTotal === 0 && header.grandTotal !== null) {
+      grandTotal = header.grandTotal;
     }
     if (grandTotal === 0) {
       const totalEl = card.locator(ORDER_LIST_SELECTORS.total).first();
