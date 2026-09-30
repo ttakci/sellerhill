@@ -6,7 +6,7 @@ import { chromium, type Browser, type Page, type Route } from 'playwright';
 
 import { AmazonCheckoutService, AutoFulfillBlockedError, type PlacedResult } from './amazon-checkout.service';
 import { parseReviewCostLines, type ReviewCostLines } from './order-confirmation';
-import { parseOrderCardHeader } from './your-orders-card';
+import { parseOrderCardHeader, parseOrderCardRecipient } from './your-orders-card';
 
 /**
  * The checkout step helpers driven in a real Chromium against the checkout
@@ -312,6 +312,19 @@ describeWithBrowser('AmazonCheckoutService checkout DOM steps (live-captured mar
         new Date(2026, 8, 30).toDateString(),
         new Date(2026, 8, 29).toDateString(),
         new Date(2026, 6, 27).toDateString(),
+      ]);
+      // "Ship to" — the matcher's buyer check. The third card has none (like a
+      // digital order) and must read as unknown, never as someone.
+      const recipients = await h.page.locator('.order-card').evaluateAll((cards) =>
+        cards.map((card) => [
+          card.querySelector('.yohtmlc-recipient .a-popover-trigger')?.textContent ?? '',
+          card.querySelector('.yohtmlc-recipient')?.textContent ?? '',
+        ]),
+      );
+      expect(recipients.map(([name, block]) => parseOrderCardRecipient(name, block))).toEqual([
+        { name: 'Sam Buyer', zip: '97024' },
+        { name: 'Lee Other', zip: '72764' },
+        { name: null, zip: null },
       ]);
     } finally {
       await h.page.close();

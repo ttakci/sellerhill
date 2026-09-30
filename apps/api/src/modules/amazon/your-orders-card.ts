@@ -33,6 +33,30 @@ export function parseOrderCardHeader(text: string): OrderCardHeader {
   };
 }
 
+export interface OrderCardRecipient {
+  name: string | null;
+  zip: string | null;
+}
+
+/**
+ * Read the "Ship to" recipient of a card: `nameText` is the popover trigger
+ * (`.yohtmlc-recipient .a-popover-trigger`, the name Amazon prints under
+ * "Ship to"), `blockText` the whole recipient block, whose hidden popover holds
+ * the address ("4820 JUNIPER CT FAIRVIEW, OR 97024-1111 United States").
+ *
+ * The postcode is only accepted right after a two-letter state, so a five-digit
+ * house number ("12345 MAIN ST") can never pass for it. Anything unreadable is
+ * null — the matcher then refuses to link rather than guess.
+ */
+export function parseOrderCardRecipient(nameText: string, blockText: string): OrderCardRecipient {
+  const name = nameText.replace(/\s+/g, ' ').trim();
+  // No trailing \b: textContent joins sibling rows without a space, so the
+  // postcode can run straight into "United States" ("72764United States").
+  const zips = [...blockText.replace(/\s+/g, ' ').matchAll(/\b[A-Z]{2}\s+(\d{5})(?:-\d{4})?(?!\d)/g)];
+  const zip = zips.length > 0 ? zips[zips.length - 1][1] : null;
+  return { name: name.length > 0 ? name : null, zip };
+}
+
 /**
  * Drop every `<script>` block from a card's outer HTML. The live first card
  * embeds Amazon's ~100 KB client-side decryption library and each card a

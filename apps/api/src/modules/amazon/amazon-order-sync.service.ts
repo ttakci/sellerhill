@@ -35,9 +35,10 @@ interface AmazonAccountSyncRow {
  *    both scrape + per-order writes) so a failed run re-pulls the same
  *    window next tick.
  *
- * Never force-links: the matcher requires ASIN + quantity + amount-within-
- * tolerance + date-within-window. A confident miss just leaves the eBay order
- * in pending/provisional for manual linking.
+ * Never force-links: the matcher requires ASIN + quantity + the Amazon ship-to
+ * recipient being the eBay buyer + date-within-window, and refuses a tie between
+ * two eBay orders. A confident miss just leaves the eBay order in
+ * pending/provisional for manual linking.
  */
 @Injectable()
 export class AmazonOrderSyncService {
@@ -132,7 +133,8 @@ export class AmazonOrderSyncService {
     // 60-day look-back window covers the full Amazon→eBay sale→purchase path
     // (rarely more than a few days, but generous to avoid missing slow cases).
     const candidates = await this.databaseService.query<CandidateEbayOrderRow>(
-      `SELECT o.id, o.ebay_order_id, p.asin, o.quantity, o.sale_total, o.order_date
+      `SELECT o.id, o.ebay_order_id, p.asin, o.quantity, o.purchase_price, o.order_date,
+              o.buyer_name, o.shipping_address
        FROM orders o
        LEFT JOIN listings l ON l.id = o.listing_id
        LEFT JOIN products p ON p.id = l.product_id
@@ -157,7 +159,7 @@ export class AmazonOrderSyncService {
     // Track eBay candidate order IDs already consumed by a prior Amazon order
     // in this run, so two Amazon rows can't both write to the same eBay order.
     // (The strict matcher could otherwise pick the same eBay row twice when
-    // two Amazon orders have identical ASIN/qty/amount/date signatures.)
+    // two Amazon orders have identical ASIN/qty/recipient/date signatures.)
     // Matcher strictness is operator-tunable at runtime (admin panel), so read
     // it once per run rather than freezing it at construction.
     const [tolerancePct, windowDays] = await Promise.all([

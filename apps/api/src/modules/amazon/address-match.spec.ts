@@ -1,4 +1,4 @@
-import { addressBlockMatchesBuyer, type MatchableAddress } from './address-match';
+import { addressBlockMatchesBuyer, recipientMatchesBuyer, type MatchableAddress } from './address-match';
 
 const buyer: MatchableAddress = {
   fullName: 'Jane Buyer',
@@ -140,5 +140,32 @@ describe('addressBlockMatchesBuyer', () => {
   it('refuses to match when the buyer address lacks zip or street', () => {
     expect(addressBlockMatchesBuyer('anything', { ...buyer, zipCode: undefined })).toBe(false);
     expect(addressBlockMatchesBuyer('anything', { ...buyer, street: undefined })).toBe(false);
+  });
+});
+
+describe('recipientMatchesBuyer', () => {
+  const buyer = { name: 'Sam A. Buyer', zip: '97024-1111' };
+
+  it('matches the upper-cased Amazon name without the middle initial, ZIP+4 against ZIP', () => {
+    expect(recipientMatchesBuyer({ name: 'SAM BUYER', zip: '97024' }, buyer)).toBe(true);
+  });
+
+  it('ignores accents and punctuation', () => {
+    expect(recipientMatchesBuyer({ name: "José O'Neil", zip: '10001' }, { name: 'JOSE O NEIL', zip: '10001' })).toBe(true);
+  });
+
+  it('refuses another person at the same postcode', () => {
+    expect(recipientMatchesBuyer({ name: 'LEE BUYER', zip: '97024' }, buyer)).toBe(false);
+  });
+
+  it('refuses the right person at another postcode', () => {
+    expect(recipientMatchesBuyer({ name: 'SAM BUYER', zip: '97025' }, buyer)).toBe(false);
+  });
+
+  it('refuses when either side is missing a name or a postcode', () => {
+    expect(recipientMatchesBuyer({ name: null, zip: '97024' }, buyer)).toBe(false);
+    expect(recipientMatchesBuyer({ name: 'SAM BUYER', zip: null }, buyer)).toBe(false);
+    expect(recipientMatchesBuyer({ name: 'SAM BUYER', zip: '97024' }, { name: 'Sam Buyer' })).toBe(false);
+    expect(recipientMatchesBuyer({ name: 'A.', zip: '97024' }, buyer)).toBe(false);
   });
 });
