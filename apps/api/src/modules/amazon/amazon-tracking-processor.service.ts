@@ -5,6 +5,7 @@ import {
   ConversionOutcome,
   mayPushToEbay,
   EbayAccountStatus,
+  type EbayMarketplaceId,
   extractCorrelationId,
   generateCorrelationId,
   OrderStatus,
@@ -44,6 +45,11 @@ interface AmazonOrderRow {
   quantity: number;
   // From listing JOIN (ebay_item_id was removed from orders)
   listing_ebay_item_id: string | null;
+  // The eBay ORDER LINE ITEM id (getOrders `lineItems[].lineItemId`), which is
+  // what a shipping fulfillment names — NOT the listing id above (eBay: 400
+  // "Invalid line item id"). Stored at sync since migration 131; NULL on an
+  // order ingested before it, then read once from getOrder at push time.
+  ebay_line_item_id: string | null;
   // Start of the bounded deferral window — first time this order was
   // observed SHIPPED. Stamped with COALESCE so a retry never resets it.
   shipped_detected_at: Date | null;
@@ -55,6 +61,7 @@ interface AmazonOrderRow {
 interface EbayAccountRow {
   id: string;
   status: EbayAccountStatus;
+  marketplace_id: EbayMarketplaceId;
 }
 
 /** Result of attempting the shipped-transition eBay push. */
@@ -114,7 +121,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         `SELECT o.id, o.user_id, o.ebay_account_id, o.ebay_order_id, o.status,
                 o.amazon_order_id, o.amazon_account_id, o.amazon_tracking_number,
                 o.amazon_tracking_carrier, o.listing_id, o.quantity,
-                o.shipped_detected_at, o.listing_over_plan_limit,
+                o.shipped_detected_at, o.listing_over_plan_limit, o.ebay_line_item_id,
                 l.ebay_item_id as listing_ebay_item_id
          FROM orders o
          LEFT JOIN listings l ON o.listing_id = l.id
@@ -449,7 +456,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
 
     // Get eBay account for API call
     const ebayAccounts = await this.databaseService.query<EbayAccountRow>(
-      `SELECT id, status FROM ebay_accounts WHERE id = $1`,
+      `SELECT id, status, marketplace_id FROM ebay_accounts WHERE id = $1`,
       [order.ebay_account_id]
     );
 
@@ -465,12 +472,23 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       return { pushed: false };
     }
 
-    // Get the eBay line item ID from the linked listing
-    const lineItemId = order.listing_ebay_item_id;
-    if (!lineItemId) {
+    // A fulfillment needs a linked listing (the order is otherwise not ours to
+    // ship) — permanently unpushable, like a dead account.
+    if (!order.listing_ebay_item_id) {
       this.logger.error(`No eBay item ID for order ${order.id}`);
       return { pushed: false };
     }
+
+    // Fresh access token, refreshed on demand. eBay access tokens live ~2h;
+    // this job fires 6–24h after order sync, so the raw ebay_accounts column
+    // value is virtually always expired by the time we push.
+    const accessToken = await this.ebayService.getAccountAccessToken(order.ebay_account_id);
+
+    // The fulfillment names the order LINE ITEM, never the listing — resolved
+    // BEFORE the conversion so a missing id can never spend a paid conversion
+    // on a push that cannot be made. A transient failure here throws, so the
+    // next tick retries; the stored conversion (if any) is reused then.
+    const lineItemId = await this.resolveLineItemId(order, accessToken, ebayAccount.marketplace_id);
 
     // Resolve the number the BUYER sees. `TrackingConversionService` owns this
     // because an external conversion is billed, needs the buyer address, and
@@ -538,11 +556,6 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       };
     }
 
-    // Fresh access token, refreshed on demand. eBay access tokens live ~2h;
-    // this job fires 6–24h after order sync, so the raw ebay_accounts column
-    // value is virtually always expired by the time we push.
-    const accessToken = await this.ebayService.getAccountAccessToken(order.ebay_account_id);
-
     const { trackingNumber, shippingCarrierCode } = conversion;
 
     await this.ebayFulfillmentService.createShippingFulfillment(
@@ -584,6 +597,41 @@ export class AmazonTrackingProcessorService extends WorkerHost {
    * parser's 'pending' fallback on a layout miss must not rewind the order
    * and cause a duplicate shipped transition later).
    */
+  /**
+   * The eBay order line item id a shipping fulfillment must name.
+   *
+   * Stored at order sync since migration 131. An order ingested before it
+   * is completed with ONE `getOrder` read (Fulfillment quota, negligible at
+   * one call per shipped order) and remembered, so the read never repeats.
+   * eBay reporting no line item is thrown, not substituted: the listing's
+   * legacy item id is the wrong identifier (400 "Invalid line item id"), and
+   * a throw lets the next tick retry instead of settling a wrong push.
+   */
+  private async resolveLineItemId(
+    order: AmazonOrderRow,
+    accessToken: string,
+    marketplaceId: EbayMarketplaceId
+  ): Promise<string> {
+    if (order.ebay_line_item_id) {
+      return order.ebay_line_item_id;
+    }
+    const ebayOrder = await this.ebayFulfillmentService.fetchOrderById(
+      accessToken,
+      marketplaceId,
+      order.ebay_order_id
+    );
+    const lineItemId = ebayOrder?.lineItems?.[0]?.lineItemId;
+    if (!lineItemId) {
+      throw new Error(`Order ${order.id}: eBay reported no line item for ${order.ebay_order_id}; cannot create a fulfillment`);
+    }
+    await this.databaseService.query(
+      `UPDATE orders SET ebay_line_item_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [lineItemId, order.id]
+    );
+    order.ebay_line_item_id = lineItemId;
+    return lineItemId;
+  }
+
   private shouldApplyStatus(prev: OrderStatus, next: OrderStatus): boolean {
     if (prev === next) {
       return false;
