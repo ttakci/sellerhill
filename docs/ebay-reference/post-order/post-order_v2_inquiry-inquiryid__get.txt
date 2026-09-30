@@ -1,0 +1,2937 @@
+Source: https://developer.ebay.com/Devzone/post-order/post-order_v2_inquiry-inquiryid__get.html
+Fetched: 2026-09-30 (text-extracted)
+
+Get Inquiry - eBay Post-Order API Reference
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Get Inquiry
+
+##
+GET /post-order/v2/inquiry/{inquiryId}
+
+This method retrieves details about the specified INR inquiry and a summary of the activity to date with respect to the inquiry. The response can also include provisional refund state and an estimated resolution date when the inquiry is in a provisional refund eligible flow. The summary includes any actions taken by the buyer, the seller, the Inquiry service, or customer support representatives.
+
+This method is not supported in the Sandbox environment.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Input
+
+See also Samples.
+
+#### Resource URI (production)
+
+GET https://api.ebay.com/post-order/v2/inquiry/{inquiryId}
+
+#### URI parameters
+
+Parameter |
+Type |
+Required? |
+Meaning |
+
+inquiryId
+|
+string |
+Required |
+
+The unique ID of the inquiry for which details and history are to be retrieved. The inquiry ID value is passed in as part of the call URI.
+|
+
+#### HTTP request headers
+
+All requests made to eBay REST operations require you to provide the authorization HTTP header for authentication.
+
+See HTTP request headers for details.
+
+#### Authorization
+
+This call uses standard authorization tokens. See Making a Call for details.
+
+#### Payload model
+
+This call has no request payload.
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Output
+
+See also Samples.
+
+#### Payload model
+
+Note: For information about the error fields and how to work with them, see Error Handling.
+
+The following lists all fields that could be included in the response.
+
+{ /* InquiryDetailsResponse */
+"claimAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"creationReason": string,
+"extTransactionId": string,
+"initiator": string,
+"inquiryClosureDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"inquiryContentOnHold": boolean,
+"inquiryDetails":
+{ /* InquiryDetails */
+"appealDetails":
+{ /* AppealDetails */
+"appealCloseReasonEnum": string,
+"appealDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"appealReasonCode": string,
+"appealRefundAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"appealStatus": string,
+"appealStatusEnum": string,
+"eligibleForAppeal": boolean
+},
+"creationDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"escalationDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"expirationDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"lastBuyerRespDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"provisionalRefund":
+{ /* ProvisionalRefund */
+"refundProvided": boolean,
+"refundReversed": boolean
+},
+"refundAmounts":
+{ /* RefundAmounts */
+"buyerFinalAcceptRefundAmt":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"buyerInitExpectRefundAmt":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"donationAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"feeCreditAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"internationalRefundAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"refundAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+}
+},
+"refundChargeAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"refundDeadlineDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"totalAmount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+}
+},
+"inquiryHistoryDetails":
+{ /* ClaimHistoryResponse */
+"history": [
+{ /* ClaimHistoryEventModel */
+"action": string,
+"actor": string,
+"date":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"description": string,
+"moneyMovement":
+{ /* MoneyMovementEntries */
+"moneyMovementEntryList": [
+{ /* MoneyMovementEntry */
+"amount":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"date":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"fundingSource":
+{ /* FundingSource */
+"brand": string,
+"memo": string,
+"type": string
+},
+"fundingStatus": string,
+"type": string
+}
+/* More MoneyMovementEntry nodes here */
+]
+}
+}
+/* More ClaimHistoryEventModel nodes here */
+],
+"shipmentTrackingDetails":
+{ /* ShipmentTrackingDetailType */
+"carrier": string,
+"currentStatus": string,
+"estimateFromDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"estimateToDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"trackingNumber": string,
+"trackingURL": string
+}
+},
+"inquiryId": string,
+"inquiryQuantity": integer,
+"itemDetails":
+{ /* ItemDetails */
+"itemOnHold": boolean,
+"itemPictureUrl": string,
+"itemPrice":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"itemTitle": string,
+"viewPurchasedItemUrl": string
+},
+"itemId": string,
+"resolutionEstimate":
+{ /* ResolutionEstimate */
+"resolutionEstimateDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+}
+},
+"returnDetails":
+{ /* ReturnAddress */
+"address":
+{ /* Address */
+"addressLine1": string,
+"addressLine2": string,
+"addressType": string,
+"city": string,
+"country": string,
+"county": string,
+"isTransliterated": boolean,
+"nationalRegion": string,
+"postalCode": string,
+"script": string,
+"stateOrProvince": string,
+"transliteratedFromScript": string,
+"worldRegion": string
+},
+"editable": boolean,
+"firstName": string,
+"lastName": string,
+"RMA": string
+},
+"sellerMakeItRightByDate":
+{ /* DateTime */
+"formattedValue": string,
+"value": datetime
+},
+"shippingCost":
+{ /* Amount */
+"convertedFromCurrency": string,
+"convertedFromValue": number,
+"currency": string,
+"exchangeRate": string,
+"value": number
+},
+"state": string,
+"status": string,
+"transactionId": string,
+"viewPPTrasanctionUrl": string
+}
+
+#### Response field descriptions
+
+Output Container/Field |
+Type |
+Occurrence |
+Meaning |
+
+claimAmount
+|
+Amount |
+Always |
+
+This container displays the dollar value of the order line item associated with the inquiry, which is generally the amount of the refund that the buyer will receive if the buyer is looking for a refund, or if the seller voluntarily refunds the buyer.
+
+Note: There's a possibility that this value can be inaccurate if the buyer passed in an inaccurate value into the claimQuantity field when the inquiry was created.
+|
+
+claimAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+claimAmount.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+claimAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+claimAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+claimAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+creationReason
+|
+string |
+Always |
+
+The enumeration value in this field indicates why the buyer created an INR inquiry for the line item.
+
+The list of enumeration values that may be returned in this field are defined in the INRCreationReasonEnum type definition.
+
+Applicable values: See INRCreationReasonEnum
+
+|
+
+extTransactionId
+|
+string |
+Conditionally |
+
+This string value is the unique identifier of the payment transaction for the order. This field will only be returned if the payment transaction happened outside of eBay's system.
+|
+
+initiator
+|
+string |
+Always |
+
+The party who created this inquiry. In most cases, this value will be BUYER.
+
+Applicable values are from UserPartyEnum:
+
+BUYER
+
+This enumeration value indicates that the initiator of the action is the buyer.
+
+CSR
+
+This enumeration value indicates that the initiator of the action is an eBay customer support representative.
+
+SELLER
+
+This enumeration value indicates that the initiator of the action is the seller.
+
+SYSTEM
+
+This enumeration value indicates that the initiator of the action is the eBay system.
+
+UNKNOWN
+
+This enumeration value indicates that the initiator of the action cannot be determined.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryClosureDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates when the inquiry was closed.
+
+This container will only be returned if the INR inquiry has been closed.
+|
+
+inquiryClosureDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryClosureDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryContentOnHold
+|
+boolean |
+Conditionally |
+
+This field indicates the item content related to the inquiry is hidden (the respective content is not returned). This field is returned as 'true' if the corresponding inquiry content is on hold due to eBay policy violation; false otherwise.
+|
+
+inquiryDetails
+|
+InquiryDetails |
+Conditionally |
+
+This container provides details on the specified INR inquiry.
+|
+
+inquiryDetails.appealDetails
+|
+AppealDetails |
+Conditionally |
+
+This container consists of information related to the appeal of a case decision. This container is only returned for an INR inquiry that was escalated into a case and the case decision was appealed by the buyer or seller.
+|
+
+inquiryDetails.appealDetails
+.appealCloseReasonEnum
+|
+string |
+Conditionally |
+
+This enumeration value indicates why the appeal on the case decision was closed. This field will only be returned if an appeal was made on a case decision and this appeal has been closed.
+
+The list of enumeration values that may be returned in this field are defined in the AppealCloseReasonEnum type definition.
+
+Applicable values: See AppealCloseReasonEnum
+
+|
+
+inquiryDetails.appealDetails
+.appealDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the date and time when the appeal was initiated by buyer or seller. This field will only be returned if an appeal was made on the case decision.
+|
+
+inquiryDetails.appealDetails
+.appealDate.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails.appealDetails
+.appealDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails.appealDetails
+.appealReasonCode
+|
+string |
+Conditionally |
+
+This string value is a string representation of why the buyer or seller appealed the case decision. This field is only returned if the buyer or seller made an appeal on the case decision.
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount refunded to the seller if the seller wins an appeal on a case decision going against the seller. The value will be in the seller's default currency. This field is only returned if the seller made an appeal on the case decision.
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.appealDetails
+.appealRefundAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.appealDetails
+.appealStatus
+|
+string |
+Conditionally |
+
+This enumeration value indicates whether or not eBay has accepted the buyer's or seller's appeal on the case decision. This field is only returned if the buyer or seller has attempted to make an appeal on the case decision.
+
+Applicable values are from AppealGrantStatusEnum:
+
+DENIED
+
+This enumeration value indicates that the buyer's or seller's appeal was denied.
+
+GRANTED
+
+This enumeration value indicates that the buyer's or seller's appeal was granted.
+
+OTHER
+
+This enumeration value indicates that the outcome of the buyer's or seller's appeal is unknown.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryDetails.appealDetails
+.appealStatusEnum
+|
+string |
+Conditionally |
+
+This enumeration value indicates the current status of the appeal against the case decision.
+
+The list of enumeration values that may be returned in this field are defined in the AppealStatusEnum type definition.
+
+Applicable values: See AppealStatusEnum
+
+|
+
+inquiryDetails.appealDetails
+.eligibleForAppeal
+|
+boolean |
+Conditionally |
+
+This boolean field will be returned as true if the buyer or seller is eligible to appeal the decision on the case.
+|
+
+inquiryDetails.creationDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the INR inquiry was created by the buyer.
+|
+
+inquiryDetails.creationDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails.creationDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails.escalationDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates when the INR inquiry was escalated to a case. This container is not returned if the inquiry was not escalated.
+|
+
+inquiryDetails.escalationDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails.escalationDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails.expirationDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the INR inquiry will naturally expire if no further action is taken.
+|
+
+inquiryDetails.expirationDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails.expirationDate
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails
+.lastBuyerRespDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the buyer last responded to, or performed an action on the INR inquiry.
+|
+
+inquiryDetails
+.lastBuyerRespDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails
+.lastBuyerRespDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails
+.provisionalRefund
+|
+ProvisionalRefund |
+Conditionally |
+
+This container indicates whether a provisional refund was issued to the buyer and whether the provisional refund was later reversed.
+|
+
+inquiryDetails
+.provisionalRefund
+.refundProvided
+|
+boolean |
+Conditionally |
+
+This value indicates whether a provisional refund was issued to the buyer.
+|
+
+inquiryDetails
+.provisionalRefund
+.refundReversed
+|
+boolean |
+Conditionally |
+
+This value indicates whether the provisional refund was later reversed.
+|
+
+inquiryDetails.refundAmounts
+|
+RefundAmounts |
+Conditionally |
+
+This container consists of details related to the expected and actual buyer refund amounts related to an INR inquiry or case. This container is only returned if a refund is scheduled to, or has been issued to the buyer.
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+|
+Amount |
+Conditionally |
+
+This container shows the refund amount finally accepted by the buyer.
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.buyerFinalAcceptRefundAmt
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+|
+Amount |
+Conditionally |
+
+This container shows the refund amount initially expected by the buyer.
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.buyerInitExpectRefundAmt
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.refundAmounts
+.donationAmount
+|
+Amount |
+Conditionally |
+
+This container defines the refund amount for listings that included a charitable donation. This data includes the amount of the charitable donation refunded, as well as currency conversion information when necessary including the current currency code, the value in the original currency, and the original currency's code.
+|
+
+inquiryDetails.refundAmounts
+.donationAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.donationAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.donationAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.donationAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.donationAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount of fees credited towards this refund as per eBay policy.
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.feeCreditAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+|
+Amount |
+Conditionally |
+
+This container shows the refund amount issued to the buyer for the international leg of a Global Shipping Program shipment. This container only applies for international orders where the seller used the Global Shipping Program to ship the order.
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.internationalRefundAmount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails.refundAmounts
+.refundAmount
+|
+Amount |
+Conditionally |
+
+This container shows the refund amount issued to the buyer.
+|
+
+inquiryDetails.refundAmounts
+.refundAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.refundAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.refundAmounts
+.refundAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.refundAmounts
+.refundAmount.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.refundAmounts
+.refundAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails
+.refundChargeAmount
+|
+Amount |
+Conditionally |
+
+This container shows the total amount charged to the seller for this buyer refund. The value will be in the seller's default currency. This container is only applicable and is only returned if a refund has been issued to the buyer.
+|
+
+inquiryDetails
+.refundChargeAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails
+.refundChargeAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails
+.refundChargeAmount.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails
+.refundChargeAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails
+.refundChargeAmount.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryDetails
+.refundDeadlineDate
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates when the seller is required to issue a refund for the INR inquiry. This container is only returned if the buyer is seeking a full refund and no longer wants the missing item.
+|
+
+inquiryDetails
+.refundDeadlineDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryDetails
+.refundDeadlineDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryDetails.totalAmount
+|
+Amount |
+Always |
+
+This container shows the total cost of the order, including the item price and shipping fees. This will generally be the amount that the buyer will expect to receive if the buyer is seeking a full refund for the missing item.
+|
+
+inquiryDetails.totalAmount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.totalAmount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryDetails.totalAmount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryDetails.totalAmount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryDetails.totalAmount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryHistoryDetails
+|
+ClaimHistoryResponse |
+Always |
+
+This container consists of information about the events and actions that have occurred throughout the course of the specified INR inquiry.
+|
+
+inquiryHistoryDetails.history
+|
+array of ClaimHistoryEventModel |
+Always |
+
+This array contains one or more events or actions associated with an INR inquiry or a case.
+|
+
+inquiryHistoryDetails.history
+.action
+|
+string |
+Always |
+
+This string value indicates the action initiated by one of the parties involved with the INR inquiry or case.
+|
+
+inquiryHistoryDetails.history
+.actor
+|
+string |
+Always |
+
+This enumeration value indicates the party that took this action.
+
+Applicable values are from UserPartyEnum:
+
+BUYER
+
+This enumeration value indicates that the initiator of the action is the buyer.
+
+CSR
+
+This enumeration value indicates that the initiator of the action is an eBay customer support representative.
+
+SELLER
+
+This enumeration value indicates that the initiator of the action is the seller.
+
+SYSTEM
+
+This enumeration value indicates that the initiator of the action is the eBay system.
+
+UNKNOWN
+
+This enumeration value indicates that the initiator of the action cannot be determined.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryHistoryDetails.history
+.date
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates the date and time of this event or action.
+|
+
+inquiryHistoryDetails.history
+.date.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryHistoryDetails.history
+.date.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryHistoryDetails.history
+.description
+|
+string |
+Conditionally |
+
+A text-based description of this event or action. This field is returned if available.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+|
+MoneyMovementEntries |
+Conditionally |
+
+This container provides details on one or more monetary transactions that were involved with the event or action. This container is not returned if no monetary transaction was involved with the event or action.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+|
+array of MoneyMovementEntry |
+Conditionally |
+
+This array contains details about one or more monetary transactions associated with an INR inquiry or a case. This array is only returned if monetary transactions have occurred with the INR inquiry or case.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+|
+Amount |
+Conditionally |
+
+This container shows the amount of the monetary transaction.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.amount
+.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.date
+|
+DateTime |
+Conditionally |
+
+The timestamp in this container indicates the date/time of the monetary transaction.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.date
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.date
+.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+.fundingSource
+|
+FundingSource |
+Conditionally |
+
+This container provides details about the seller's funding source to issue a buyer refund, such as available seller payout funds, a bank account, or a credit card on file. This container is only applicable and returned if the monetary transaction is related to a buyer refund.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+.fundingSource.brand
+|
+string |
+Conditionally |
+
+The enumeration value here indicates the brand of credit card used to fund the refund. This will be the seller's credit card on file with eBay.
+
+This field is only returned if the funding source type is CREDIT_CARD.
+
+Applicable values are from FundingMethodBrandEnum:
+
+AMERICAN_EXPRESS
+
+This enumeration value indicates that a American Express credit card will be used to fund the refund to the buyer.
+
+DISCOVER
+
+This enumeration value indicates that a Discover credit card will be used to fund the refund to the buyer.
+
+MASTERCARD
+
+This enumeration value indicates that a Mastercard credit card will be used to fund the refund to the buyer.
+
+VISA
+
+This enumeration value indicates that a Visa credit card will be used to fund the refund to the buyer.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+.fundingSource.memo
+|
+string |
+Conditionally |
+
+This provides a note about the funding source. This field is only returned if available, or it might get returned as an empty string.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+.fundingSource.type
+|
+string |
+Conditionally |
+
+he enumeration value here indicates the type of funding source, such as bank account, credit card, or available seller payout funds.
+
+Applicable values are from FundingMethodTypeEnum:
+
+AVAILABLE_FUNDS
+
+This enumeration value indicates that the refund will be funded by the seller's available payout funds that have not yet been deposited into the seller's bank account.
+
+CREDIT_CARD
+
+This enumeration value indicates that the seller's credit card will be used to fund the buyer's refund.
+
+DIRECT_DEBIT
+
+This enumeration value indicates that the seller's bank account on file will be debited to fund the buyer's refund.
+
+PAY_UPON_INVOICE
+
+This enumeration value indicates that the eBay will cover the buyer's refund, but will bill the seller through an invoice.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList
+.fundingStatus
+|
+string |
+Conditionally |
+
+This enumeration value indicates if eBay was able to successfully 'fund' a refund to the buyer using the seller's preferred method of payment for buyer refunds. This field is only applicable and returned if the monetary transaction is related to a buyer refund.
+
+Applicable values are from FundingStatusEnum:
+
+FAILED
+
+This enumeration value indicates that the refund was not successfully funded, which can mean there were insufficient funds in the account, or that the transaction failed for another reason.
+
+FUNDED
+
+This enumeration value indicates that the buyer refund was successfully funded.
+
+Code so that your app gracefully handles any future changes to this list.
+|
+
+inquiryHistoryDetails.history
+.moneyMovement
+.moneyMovementEntryList.type
+|
+string |
+Conditionally |
+
+This string value indicates the type of monetary transaction, such as a refund.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+|
+ShipmentTrackingDetailType |
+Conditionally |
+
+This container will show detailed shipment tracking information if an INR item is being shipped to the buyer, or if the buyer is returning an item to the seller. This container is only returned if shipment tracking is currently relevant to the inquiry or case.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.carrier
+|
+string |
+Conditionally |
+
+The name of the shipping carrier handling the shipment. This field is generally always returned with the shipmentTrackingDetails container unless the tracking number has yet to be provided for the order line item.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.currentStatus
+|
+string |
+Conditionally |
+
+The current status of the shipment, such as delivered or still in-transit. This field is returned if it is known and available.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateFromDate
+|
+DateTime |
+Conditionally |
+
+The date and time in this container is the earliest date that the shipment is estimated to be delivered, based on the shipping service being used, the stated handling time, and when the package was shipped. This container is returned if it is known and available.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateFromDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateFromDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateToDate
+|
+DateTime |
+Conditionally |
+
+The date and time in this container is the latest date that the shipment is estimated to be delivered, based on the shipping service being used, the stated handling time, and when the package was shipped. If the package is not received by this date, the buyer or seller should contact their order partner to get status, and then ask eBay to step in if the problem cannot be resolved. This container is returned if it is known and available.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateToDate.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.estimateToDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.trackingNumber
+|
+string |
+Conditionally |
+
+A unique identifier used to track the shipment of the order line item. This field is generally always returned with the shipmentTrackingDetails container unless the tracking number has yet to be provided for the order line item.
+|
+
+inquiryHistoryDetails
+.shipmentTrackingDetails
+.trackingURL
+|
+string |
+Conditionally |
+
+This field provides the URL to the shipping carrier's shipment tracking page. This field is returned if available.
+|
+
+inquiryId
+|
+string |
+Always |
+
+The unique identifier of the INR inquiry for which details have been retrieved. All information returned in the response is relevant to this specific INR inquiry.
+|
+
+inquiryQuantity
+|
+integer |
+Always |
+
+This integer is the quantity of the line item purchased by the buyer. This value is the same value passed into the claimQuantity field when the INR inquiry was created. If the claimQuantity field was omitted when the INR inquiry was created, this value defaults to 1.
+|
+
+itemDetails
+|
+ItemDetails |
+Always |
+
+This container consists of details related to the item associated with the INR inquiry, including the item title, price, and the URL of the gallery picture.
+|
+
+itemDetails.itemOnHold
+|
+boolean |
+Conditionally |
+
+This field indicates the item related to the inquiry is hidden (the respective content is not returned). This field is returned as 'true' if the item is on hold due to eBay policy violation; false otherwise.
+|
+
+itemDetails.itemPictureUrl
+|
+string |
+Conditionally |
+
+This field provides an URL where the gallery picture of the item may be viewed. This field is returned when available. If the item is on hold, this field may not be returned.
+|
+
+itemDetails.itemPrice
+|
+Amount |
+Always |
+
+This container shows the final price of the line item, or the amount of money that the buyer agreed to pay for the item.
+|
+
+itemDetails.itemPrice
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+itemDetails.itemPrice
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+itemDetails.itemPrice.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+itemDetails.itemPrice
+.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+itemDetails.itemPrice.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+itemDetails.itemTitle
+|
+string |
+Always |
+
+The title of the eBay listing. If the item is on hold, the itemID of the listing is returned instead of the title.
+|
+
+itemDetails
+.viewPurchasedItemUrl
+|
+string |
+Conditionally |
+
+When available, this field provides the URL to the item purchase page. If the item is on hold, a placeholder may be returned instead of the gallery picture.
+|
+
+itemId
+|
+string |
+Always |
+
+The unique identifier of the eBay listing where the line item was purchased. This field is used in conjunction with the transactionId field to identify a line item that is associated with the INR inquiry.
+|
+
+resolutionEstimate
+|
+ResolutionEstimate |
+Conditionally |
+
+This container provides the estimated date and time by which eBay expects to resolve the INR inquiry. This container is only returned if the claim is in the provisional refund eligible flow.
+|
+
+resolutionEstimate
+.resolutionEstimateDate
+|
+DateTime |
+Conditionally |
+
+This value indicates the estimated resolution date for the inquiry.
+|
+
+resolutionEstimate
+.resolutionEstimateDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+resolutionEstimate
+.resolutionEstimateDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+returnDetails
+|
+ReturnAddress |
+Conditionally |
+
+This container consists of information related to a buyer returning an order to the seller, including the seller's return address and the RMA number (if applicable). This container is only returned under the following circumstances: - The INR inquiry was escalated to a case.
+- The seller already shipped the order line item
+- The buyer's desired outcome upon creating the INR inquiry was to get a full refund for the missing order line item
+
+|
+
+returnDetails.address
+|
+Address |
+Conditionally |
+
+This container shows the full return address of the seller.
+|
+
+returnDetails.address
+.addressLine1
+|
+string |
+Conditionally |
+
+The first line of the street address. The first line of the street address is always used by containers using the Address type.
+|
+
+returnDetails.address
+.addressLine2
+|
+string |
+Conditionally |
+
+The second line of the street address. This field is not always used, but it should be provided if applicable. It might be used for something like 'Suite Number' or 'Apt Number'.
+|
+
+returnDetails.address
+.addressType
+|
+string |
+Conditionally |
+
+This enumeration value indicates whether the address is a business, a personal address, PO Box, or other type of address. This field is not always used by containers using the Address type.
+
+The list of enumeration values that may be returned in this field are defined in the AddressTypeEnum type definition.
+
+Applicable values: See AddressTypeEnum
+
+|
+
+returnDetails.address.city
+|
+string |
+Conditionally |
+
+The city of the address. This field is always used by containers using the Address type.
+|
+
+returnDetails.address.country
+|
+string |
+Conditionally |
+
+This enumeration value indicates the country of the address. The three-letter country codes of the ISO 3166-1 Standard are used. This field is always used by containers using the Address type.
+
+The list of two-digit country codes that may be returned in this field are defined in the CountryCodeEnum type definition.
+
+Applicable values: See CountryCodeEnum
+
+|
+
+returnDetails.address.county
+|
+string |
+Conditionally |
+
+The county of the address. This field is not always used, but it should be provided if applicable.
+|
+
+returnDetails.address
+.isTransliterated
+|
+boolean |
+Conditionally |
+
+This Boolean field is returned as true if language transliteration was required.
+|
+
+returnDetails.address
+.nationalRegion
+|
+string |
+Conditionally |
+
+This string value indicates a specific region or metropolitan area within a country in which the address resides. Not all countries have defined national regions.
+|
+
+returnDetails.address
+.postalCode
+|
+string |
+Conditionally |
+
+The postal code of the address. This field is always used by containers using the Address type.
+|
+
+returnDetails.address.script
+|
+string |
+Conditionally |
+
+This enumeration value indicates the language that the address has been transliterated into. This field is only returned if transliteration was required (and the isTransliterated field is true. Transliteration is required for languages that use special characters, such as Japanese, Chinese, or Arabic.
+
+The list of language enumeration values that may be returned in this field are defined in the LanguageScriptEnum type definition.
+
+Applicable values: See LanguageScriptEnum
+
+|
+
+returnDetails.address
+.stateOrProvince
+|
+string |
+Conditionally |
+
+The state or province of the address. This field is always used by containers using the Address type.
+|
+
+returnDetails.address
+.transliteratedFromScript
+|
+string |
+Conditionally |
+
+This enumeration value indicates the language that the address has been transliterated from. This field is only returned if transliteration was required (and the isTransliterated field is 'true'. Transliteration is required for languages that use special characters, such as Japanese, Chinese, or Arabic.
+
+The list of language enumeration values that may be returned in this field are defined in the LanguageScriptEnum type definition.
+
+Applicable values: See LanguageScriptEnum
+
+|
+
+returnDetails.address
+.worldRegion
+|
+string |
+Conditionally |
+
+This string value indicates the region of the world in which the address resides. This field is not always used by containers using the Address type.
+
+The list of world region enumeration values that may be returned in this field are defined in the WorldRegionEnum type definition.
+
+Applicable values: See WorldRegionEnum
+
+|
+
+returnDetails.editable
+|
+boolean |
+Conditionally |
+
+This boolean field indicates whether or not the seller's return address (shown in the address container) can be modified. A value of true indicates that the return address can be modified, and a value of false indicates that the return address cannot be modified.
+|
+
+returnDetails.firstName
+|
+string |
+Conditionally |
+
+The first name associated with the return address, or if applicable, a business or store name.
+|
+
+returnDetails.lastName
+|
+string |
+Conditionally |
+
+The last name associated with the return address. This field will only be returned if applicable.
+|
+
+returnDetails.RMA
+|
+string |
+Conditionally |
+
+The Return Merchandise Authorization (RMA) identifier authorizing this return. This field is only returned if an RMA number exists for the order line item.
+|
+
+sellerMakeItRightByDate
+|
+DateTime |
+Always |
+
+The timestamp in this container indicates when the seller is expected to resolve this INR inquiry.
+|
+
+sellerMakeItRightByDate
+.formattedValue
+|
+string |
+Conditionally |
+
+Reserved for future use. X-EBAY-C-CULTRUREPREF HTTP header. -->
+|
+
+sellerMakeItRightByDate.value
+|
+datetime |
+Conditionally |
+
+This timestamp indicates the date and time when an action or event occurred.
+
+The timestamp is formatted as an ISO 8601 string, which is based on the 24-hour Coordinated Universal Time (UTC) clock.
+
+Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].[sss]Z
+Example: 2022-03-20T00:00:00.000Z
+|
+
+shippingCost
+|
+Amount |
+Conditionally |
+
+This container shows the cost of shipping the order line item associated with this inquiry.
+|
+
+shippingCost
+.convertedFromCurrency
+|
+string |
+Conditionally |
+
+The three-letter ISO 4217 code representing the currency of the amount in the convertedFromValue field. This value is the pre-conversion currency.
+
+If no conversion occurs, this should not be populated.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+shippingCost
+.convertedFromValue
+|
+number |
+Conditionally |
+
+The monetary amount before any conversion is performed, in the currency specified by the convertedFromCurrency field. This value is the pre-conversion amount. The value field contains the converted amount of this value, in the currency specified by the currency field.
+
+If no conversion occurs, this should not be populated.
+|
+
+shippingCost.currency
+|
+string |
+Conditionally |
+
+A three-letter ISO 4217 code that indicates the currency of the amount in the value field. This field is always returned with any container using Amount type.
+
+The list of three-digit currency codes that may be returned in this field are defined in the CurrencyCodeEnum type definition.
+
+Applicable values: See CurrencyCodeEnum
+
+|
+
+shippingCost.exchangeRate
+|
+string |
+Conditionally |
+
+This field shows the exchange rate used to convert the amount in the convertedFromValue field to amount in the value field. This field is only returned when eBay does a currency version.
+|
+
+shippingCost.value
+|
+number |
+Conditionally |
+
+The monetary amount, in the currency specified by the currency field. This field is always returned with any container using Amount type.
+|
+
+state
+|
+string |
+Always |
+
+This enumerated value indicates the current state of the INR inquiry. Depending on the state, some seller actions may be restricted.
+
+The list of values that may be returned in this field are defined in the InquiryStateEnum type definition.
+
+Applicable values: See InquiryStateEnum
+
+|
+
+status
+|
+string |
+Always |
+
+This enumeration value indicates the current status of the INR inquiry.
+
+The list of enumeration values that may be returned in this field are defined in the InquiryStatusEnum type definition.
+
+Applicable values: See InquiryStatusEnum
+
+|
+
+transactionId
+|
+string |
+Always |
+
+The unique identifier of the purchase transaction. This value is created right when the buyer is committed to buying the item, whether that buyer uses a 'Buy it Now' capability, is the winning bidder of an auction, or the buyer's Best Offer is accepted by the seller. This field is used in conjunction with the itemId field to identify the line item that is associated with the INR inquiry.
+|
+
+viewPPTrasanctionUrl
+|
+string |
+Conditionally |
+
+THIS FIELD IS DEPRECATED.
+|
+
+null
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Samples
+
+New to making API calls? Please see Making a Call.
+
+Note: Some item IDs, user IDs, or other data in these samples might no longer be active on eBay. If necessary, you can substitute current eBay data in your requests.
+
+Available samples:
+
+- Get Inquiry Details ↓ -
+This operation returns information about an INR inquiry.
+
+- Refund for an incomplete order ↓ -
+Retrieve an INR inquiry for a cross-border trade line item.
+
+Sample: Get Inquiry Details
+
+This operation returns information about an INR inquiry.
+
+Description
+
+Use this operation to retrieve full details about the inquiry, including any actions taken by the buyer, the seller, the Inquiry service, and eBay customer support representatives.
+
+Input
+
+There is no input payload with this request. Supply the inquiry ID as a path parameter in the call.
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/inquiry/5********9
+
+Output
+
+The information returned by this operation includes the amount (EUR 131) that this claim is worth to the buyer; the identity of the inquiry's initiator (the buyer); the identity, details, and number of units in the order line item; the deadline for the seller to resolve this inquiry; the current status of this inquiry; as well as shipment tracking details, and the various events and actions taken to date with regard to this inquiry. The key dates, amounts, and appeal information for this inquiry are also returned.
+
+JSON format.
+{
+"inquiryId": "5********9",
+"itemId": "2**********0",
+"transactionId": "8********9",
+"claimAmount": {
+"value": 131.0,
+"currency": "EUR"
+},
+"shippingCost": {
+"value": 0.0,
+"currency": "EUR"
+},
+"inquiryQuantity": 1,
+"initiator": "BUYER",
+"sellerMakeItRightByDate": {
+"value": "2015-06-25T18:59:31.000Z"
+},
+"status": "CLOSED",
+"extTransactionId": "0***************A",
+"inquiryDetails": {
+"creationDate": {
+"value": "2015-06-26T16:47:56.000Z"
+},
+"expirationDate": {
+"value": "2015-09-26T16:47:56.000Z"
+},
+"totalAmount": {
+"value": 131.0,
+"currency": "EUR"
+},
+"refundDeadlineDate": {
+"value": "2015-08-01T19:13:55.000Z"
+},
+"lastBuyerRespDate": {
+"value": "2015-07-01T19:13:55.000Z"
+}
+},
+"itemDetails": {
+"itemTitle": "Single item Single seller Order PPThu Jan 15 03:19:06 MST 2015",
+"itemPrice": {
+"value": 131.0,
+"currency": "EUR"
+},
+"itemPictureUrl": "https://i.ebayimg.ebay.com/00/s/M********w/z/O**********Qm/$_1.JPG?set_id=8********F",
+"viewPurchasedItemUrl": "https://cgi.de.paradise.ebay.com/ws/eBayISAPI.dll?ViewItemVersion&item=2*******0&tid=8*******9&view=all"
+},
+"viewPPTrasanctionUrl": "https://payments.ebay.com/ws/eBayISAPI.dll?UnifiedCheckoutSummaryRedirect2PP&buyerorseller=0&itemid=2*******0&transid=8********0"
+}
+
+Back to list of samples
+
+Sample: Refund for an incomplete order
+
+Retrieve an INR inquiry for a cross-border trade line item.
+
+Description
+
+A seller wants to get the current status and full details of an Item Not Received inquiry. In this particular case, the buyer received a multiple line item order, but the order was missing a line item.
+
+Input
+
+The seller passes in the inquiry ID as a path parameter. There is no request payload for this call.
+
+URL format. See also the non-wrapped version of this URL.
+
+GET https://api.ebay.com/post-order/v2/inquiry/5********3
+
+Output
+
+The response of the call indicates that the reason for the INR inquiry was that the buyer received an incomplete order (see the creationReason field). The specific line item that was missing from the order is identified with the itemId and transactionId values.
+
+The buyer seeks a refund for the order line item instead of having the seller send the missing item. The buyer ends up receiving the full refund, and the moneyMovementEntryList.fundingSource container indicates that the funds for the buyer refund is retrieved through the seller's available payout funds. The seller was a Canadian seller that listed the item on the eBay US marketplace, so the moneyMovementEntryList.amount container shows the amount of the refund in Canadian dollars.
+
+The inquiryDetails.totalAmount container shows the total amount (34.56 in USD) of the refund, the inquiryDetails.refundAmounts.feeCreditAmount container shows the selling fee credits amount (0.89 in USD) due back to the seller, and the inquiryDetails.refundChargeAmount container shows the net amount (33.67 in USD) charged to the seller for recoupment of the buyer's refund. The 33.67 value is derived from subtracing the fee credit amount (0.89) from the total amount of the refund (34.56). The 33.67 net charge is converted into Canadian dollars (43.71), and the exchange rate used is also shown in the exchangeRate field.
+
+JSON format.
+{
+"inquiryId": "5********3",
+"itemId": "2**********7",
+"transactionId": "1********15",
+"claimAmount": {
+"value": 34.56,
+"currency": "USD"
+},
+"shippingCost": {
+"value": 0,
+"currency": "USD"
+},
+"inquiryQuantity": 1,
+"initiator": "BUYER",
+"sellerMakeItRightByDate": {
+"value": "2020-08-14T06:59:59.000Z"
+},
+"creationReason": "INCOMPLETE_ORDER",
+"inquiryPaymentInfo": null,
+"inquiryClosureDate": {
+"value": "2020-08-12T05:08:48.000Z"
+},
+"state": "CLOSED",
+"status": "CLOSED",
+"inquiryDetails": {
+"creationDate": {
+"value": "2020-08-11T01:21:57.000Z"
+},
+"expirationDate": {
+"value": "2020-08-14T07:00:00.000Z"
+},
+"escalationDate": null,
+"refundAmounts": {
+"refundAmount": null,
+"feeCreditAmount": {
+"value": 0.89,
+"currency": "USD"
+},
+"buyerFinalAcceptRefundAmt": {
+"value": 0,
+"currency": "USD"
+},
+"buyerInitExpectRefundAmt": {
+"value": 0,
+"currency": "USD"
+},
+"internationalRefundAmount": {
+"value": 3.2,
+"currency": "USD"
+}
+},
+"refundChargeAmount": {
+"value": 43.71,
+"convertedFromValue": 33.67,
+"convertedFromCurrency": "USD",
+"currency": "CAD",
+"exchangeRate": "1.29826"
+},
+"appealDetails": {
+"eligibleForAppeal": false,
+"appealStatus": null,
+"appealDate": null,
+"appealReasonCode": null,
+"appealCloseReasonEnum": null,
+"appealStatusEnum": null,
+"appealRefundAmount": null
+},
+"totalAmount": {
+"value": 34.56,
+"currency": "USD"
+},
+"refundDeadlineDate": {
+"value": "2020-08-15T05:08:48.000Z"
+},
+"lastBuyerRespDate": null
+},
+"extTransactionId": null,
+"viewPPTrasanctionUrl": "http://L*************1/ws/eBayISAPI.dll?UnifiedCheckoutSummaryRedirect2PP&buyerorseller=1&itemid=2**********7&transid=1*********5",
+"itemDetails": {
+"itemTitle": "test item Active CBT ",
+"itemPrice": {
+"value": 34.56,
+"currency": "USD"
+},
+"itemPictureUrl": "https://i.qa.ebayimg.com/00/s/M**********w/z/Q*************Pf/$_0.JPG?set_id=8********7",
+"viewPurchasedItemUrl": "http://L*************1/ws/eBayISAPI.dll?ViewItemVersion&item=2**********7&tid=1*********5&view=all"
+},
+"returnDetails": null,
+"inquiryHistoryDetails": {
+"history": [
+{
+"date": {
+"value": "2020-08-11T01:21:57.000Z"
+},
+"action": "A CPS case was created.",
+"actor": "BUYER",
+"description": "active CBT feature testing",
+"moneyMovement": null
+},
+{
+"date": {
+"value": "2020-08-11T01:24:08.000Z"
+},
+"action": "Auto Dispose Approve the case",
+"actor": "SYSTEM",
+"description": null,
+"moneyMovement": null
+},
+{
+"date": {
+"value": "2020-08-12T05:03:39.000Z"
+},
+"action": "Voluntary refund pending",
+"actor": "SELLER",
+"description": null,
+"moneyMovement": null
+},
+{
+"date": {
+"value": "2020-08-12T05:08:48.000Z"
+},
+"action": "Voluntary refund completed or failed",
+"actor": "SYSTEM",
+"description": null,
+"moneyMovement": {
+"moneyMovementEntryList": [
+{
+"date": {
+"value": "2020-08-12T05:03:37.087Z"
+},
+"type": "REFUND",
+"fundingSource": {
+"type": "AVAILABLE_FUNDS"
+},
+"fundingStatus": "FUNDED",
+"amount": {
+"value": 43.71,
+"convertedFromValue": 33.67,
+"convertedFromCurrency": "USD",
+"currency": "CAD"
+}
+}
+]
+}
+}
+],
+"shipmentTrackingDetails": {
+"trackingURL": null,
+"trackingNumber": null,
+"carrier": null,
+"estimateFromDate": null,
+"estimateToDate": null,
+"currentStatus": null
+}
+}
+}
+
+Back to list of samples
+
+Input
+Output
+Samples
+Change History
+
+|
+
+## Change History
+
+Change Date |
+Description |
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

@@ -9,6 +9,7 @@ import {
   buildAmazonProductUrl,
   buildAmazonSiteUrl,
   OrderCostCaptureStatus,
+  OrderStatus,
   PlatformSettingKey,
   SIMULATED_AMAZON_ORDER_PREFIX,
 } from '@repo/shared';
@@ -322,12 +323,26 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    */
   async runForOrder(ebayOrderId: string, amazonAccountId: string): Promise<void> {
     // Idempotency: never double-order on BullMQ retry.
-    const [order] = await this.db.query<{ auto_fulfill_status: AutoFulfillStatus; user_id: string }>(
-      `SELECT auto_fulfill_status, user_id FROM orders WHERE ebay_order_id = $1`,
-      [ebayOrderId]
-    );
+    const [order] = await this.db.query<{
+      auto_fulfill_status: AutoFulfillStatus;
+      user_id: string;
+      status: OrderStatus;
+    }>(`SELECT auto_fulfill_status, user_id, status FROM orders WHERE ebay_order_id = $1`, [ebayOrderId]);
     if (!order || shouldSkipFulfillStart(order.auto_fulfill_status)) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
+      return;
+    }
+    // The eBay sale was cancelled while this job waited (order sync re-reads an
+    // order whenever eBay modifies it). Nothing is bought for a sale that no
+    // longer exists. SKIPPED, not BLOCKED: there is nothing for the seller to fix.
+    if (order.status === OrderStatus.CANCELLED) {
+      this.logger.log(`skip fulfill ${ebayOrderId}: the eBay order is cancelled`);
+      await this.setStatus(ebayOrderId, AutoFulfillStatus.SKIPPED, AutoFulfillBlockedReasonEnum.ORDER_CANCELLED);
+      await this.quotaEnforcement
+        .releaseAmazonOrder(order.user_id, ebayOrderId)
+        .catch((err: unknown) =>
+          this.logger.warn(`quota release failed for cancelled ${ebayOrderId}: ${(err as Error).message}`)
+        );
       return;
     }
     // Entitlement is re-checked at EXECUTION, not only at enqueue. The job can

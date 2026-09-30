@@ -470,6 +470,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   {statusLabel}
                 </Text>
               </Meta>
+              {order.ebayCancelledAt ? (
+                <Meta icon="x-circle" label={t('orders.detail.ebayCancelledOn')}>
+                  <Text variant="body" weight="semibold">
+                    {formatDate(order.ebayCancelledAt)}
+                  </Text>
+                </Meta>
+              ) : null}
               <Meta icon="circle-dollar-sign" label={t('orders.detail.subtotal')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.salePrice)}
@@ -549,6 +556,33 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Text>
               </Meta>
             </S.MetaList>
+            {/* What eBay reports was refunded (paymentSummary.refunds). NULL
+                means eBay reported no refund, so the block is absent — never a
+                "0.00" row that would read as a refund of nothing. */}
+            {order.ebayRefundedAmount !== null && order.ebayRefundedAmount !== undefined ? (
+              <>
+                <S.GroupLabel>
+                  <Text variant="caption" color="text.tertiary">
+                    {t('orders.detail.refundGroup')}
+                  </Text>
+                </S.GroupLabel>
+                <S.MetaList>
+                  <Meta icon="undo-2" label={t('orders.detail.refundedAmount')}>
+                    <Text variant="body" weight="semibold" numeric>
+                      −{formatCurrency(order.ebayRefundedAmount)}
+                    </Text>
+                  </Meta>
+                  {order.ebayRefundedAt ? (
+                    <Meta icon="calendar" label={t('orders.detail.refundedOn')}>
+                      <Text variant="body" weight="semibold">
+                        {formatDate(order.ebayRefundedAt)}
+                      </Text>
+                    </Meta>
+                  ) : null}
+                </S.MetaList>
+                <InfoMessage>{t('orders.detail.refundNote')}</InfoMessage>
+              </>
+            ) : null}
           </S.SectionContent>
         </SettingsCard>
 

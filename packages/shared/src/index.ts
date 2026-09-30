@@ -89,6 +89,7 @@ export * from './domain/keepa/index';
 
 // Domain - Orders
 export * from './domain/orders/index';
+export * from './domain/returns/index';
 
 // Domain - Dashboard
 export * from './domain/dashboard/index';

@@ -131,6 +131,14 @@ describe('selectResumableOrders', () => {
     ).toEqual([]);
   });
 
+  it('excludes a row whose eBay sale was cancelled during the lapse', () => {
+    expect(
+      selectResumableOrders([
+        { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.CANCELLED },
+      ]),
+    ).toEqual([]);
+  });
+
   it('still selects a suspension block that is pre-shipment with no amazon id', () => {
     const row = { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.WAITING_SHIPMENT };
     expect(selectResumableOrders([row])).toEqual([row]);
@@ -161,11 +169,18 @@ describe('resolveAutoFulfillEligibility', () => {
     });
   });
 
+  it('refuses a cancelled sale with its own reason, so the unpaid recheck stops asking about it', () => {
+    expect(resolveAutoFulfillEligibility(OrderStatus.CANCELLED)).toEqual({
+      eligible: false,
+      reason: AutoFulfillBlockedReason.ORDER_CANCELLED,
+    });
+  });
+
   it('refuses every status the resume sweep refuses', () => {
     // The two rules are written independently but must not disagree: anything
     // `selectResumableOrders` excludes as already-served has to be ineligible
     // here too, or the insert path would buy what the sweep refuses to re-arm.
-    for (const status of [OrderStatus.SHIPPED, OrderStatus.COMPLETED]) {
+    for (const status of [OrderStatus.SHIPPED, OrderStatus.COMPLETED, OrderStatus.CANCELLED]) {
       expect(resolveAutoFulfillEligibility(status).eligible).toBe(false);
     }
   });

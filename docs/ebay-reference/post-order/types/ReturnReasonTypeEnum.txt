@@ -1,0 +1,256 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ReturnReasonTypeEnum.html
+Fetched: 2026-09-30 (text-extracted)
+
+ReturnReasonTypeEnum - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ReturnReasonTypeEnum
+
+This enumeration type lists the broad categories about why a buyer opens a return request.
+
+Type that uses ReturnReasonTypeEnum:
+
+ReturnCreationInfoType
+
+Calls that use one or more values of ReturnReasonTypeEnum:
+
+/post-order/v2/return POST,
+/post-order/v2/return/search GET,
+/post-order/v2/return/{returnId} GET
+
+## Enumeration Values
+
+Value |
+Description |
+
+CANCEL |
+This enumeration value is returned if a cancellation request was made by the buyer after the item was already shipped by the seller. |
+
+INSTORE |
+This enumeration value is returned if the return item was part of an In-Store Pickup or a Click and Collect order, and the buyer is returning the item to a local brick-and-mortar store. |
+
+REMORSE |
+This enumeration value is returned if the buyer is returning the item for a buyer's remorse reason, which means that there is nothing actually wrong with the item. |
+
+SNAD |
+This enumeration value is returned if the buyer found the item to be Significantly Not As Described, so the buyer wants to return the item. |
+
+UNKNOWN |
+This enumeration value is returned if the return reason category is not known. |
+
+* See the Enumeration Index to see exact use of each enumeration value in the API.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

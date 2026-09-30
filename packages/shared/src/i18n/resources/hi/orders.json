@@ -133,7 +133,8 @@
         "subscription_suspended": "सब्सक्रिप्शन निलंबित",
         "listing_over_plan_limit": "लिस्टिंग प्लान की सीमा से बाहर",
         "order_already_fulfilled": "पहले ही शिप हो चुका — खरीदने को कुछ नहीं",
-        "order_not_paid": "खरीदार के भुगतान की प्रतीक्षा"
+        "order_not_paid": "खरीदार के भुगतान की प्रतीक्षा",
+        "order_cancelled": "eBay पर रद्द — खरीदने के लिए कुछ नहीं"
       },
       "reasonLabel": "कारण: {{reason}}",
       "amazonCancelledBadge": "Amazon ने रद्द किया",
@@ -217,7 +218,13 @@
       "unit": "यूनिट",
       "sku": "SKU",
       "na": "लागू नहीं",
-      "ebayStatus": "eBay स्टेटस"
+      "ebayStatus": "eBay स्टेटस",
+      "ebayCancelledOn": "eBay पर रद्द होने की तारीख",
+      "refundGroup": "खरीदार को रिफ़ंड",
+      "refundedAmount": "रिफ़ंड राशि",
+      "refundedOn": "रिफ़ंड की तारीख",
+      "refundNote": "यह eBay द्वारा बताई गई रिफ़ंड राशि है। इसमें eBay द्वारा वसूला गया बिक्री कर शामिल नहीं है, इसलिए खरीदार को इससे अधिक मिला हो सकता है।",
+      "cancelledAmazonOpenAction": "इस बिक्री के लिए Amazon ऑर्डर पहले ही दिया जा चुका था। उसे Amazon पर रद्द करें, या भेजा जा चुका हो तो आइटम वापस करें।"
     },
     "modal": {
       "title": "Amazon ऑर्डर की जानकारी दर्ज करें",

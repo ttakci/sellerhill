@@ -133,7 +133,8 @@
         "subscription_suspended": "Abonelik askıya alındı",
         "listing_over_plan_limit": "İlan, paket limitinin dışında",
         "order_already_fulfilled": "Zaten kargolanmış — alınacak bir şey yok",
-        "order_not_paid": "Alıcının ödemesi bekleniyor"
+        "order_not_paid": "Alıcının ödemesi bekleniyor",
+        "order_cancelled": "eBay'de iptal edildi — alınacak bir şey yok"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
@@ -217,7 +218,13 @@
       "unit": "adet",
       "sku": "SKU",
       "na": "Mevcut Değil",
-      "ebayStatus": "eBay durumu"
+      "ebayStatus": "eBay durumu",
+      "ebayCancelledOn": "eBay'de iptal tarihi",
+      "refundGroup": "Alıcıya iade edilen",
+      "refundedAmount": "İade tutarı",
+      "refundedOn": "İade tarihi",
+      "refundNote": "eBay'in bildirdiği iade tutarıdır. eBay'in tahsil ettiği satış vergisini içermez; alıcıya yapılan iade daha yüksek olabilir.",
+      "cancelledAmazonOpenAction": "Bu satış için Amazon siparişi zaten verilmişti. Siparişi Amazon'da iptal edin; kargolandıysa ürünü iade edin."
     },
     "modal": {
       "title": "Amazon Sipariş Bilgisi Gir",

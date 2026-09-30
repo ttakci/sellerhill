@@ -10,6 +10,7 @@ import arListingSettingsGroup from './resources/ar/listingSettingsGroup.json';
 import arMessages from './resources/ar/messages.json';
 import arOrders from './resources/ar/orders.json';
 import arProfile from './resources/ar/profile.json';
+import arReturns from './resources/ar/returns.json';
 import arStoreSettings from './resources/ar/storeSettings.json';
 import arTranslation from './resources/ar/translation.json';
 import azActionCenter from './resources/az/actionCenter.json';
@@ -24,6 +25,7 @@ import azListingSettingsGroup from './resources/az/listingSettingsGroup.json';
 import azMessages from './resources/az/messages.json';
 import azOrders from './resources/az/orders.json';
 import azProfile from './resources/az/profile.json';
+import azReturns from './resources/az/returns.json';
 import azStoreSettings from './resources/az/storeSettings.json';
 import azTranslation from './resources/az/translation.json';
 import deActionCenter from './resources/de/actionCenter.json';
@@ -38,6 +40,7 @@ import deListingSettingsGroup from './resources/de/listingSettingsGroup.json';
 import deMessages from './resources/de/messages.json';
 import deOrders from './resources/de/orders.json';
 import deProfile from './resources/de/profile.json';
+import deReturns from './resources/de/returns.json';
 import deStoreSettings from './resources/de/storeSettings.json';
 import deTranslation from './resources/de/translation.json';
 import enActionCenter from './resources/en/actionCenter.json';
@@ -54,6 +57,7 @@ import enListingSettingsGroup from './resources/en/listingSettingsGroup.json';
 import enMessages from './resources/en/messages.json';
 import enOrders from './resources/en/orders.json';
 import enProfile from './resources/en/profile.json';
+import enReturns from './resources/en/returns.json';
 import enStoreSettings from './resources/en/storeSettings.json';
 import enTranslation from './resources/en/translation.json';
 import esActionCenter from './resources/es/actionCenter.json';
@@ -68,6 +72,7 @@ import esListingSettingsGroup from './resources/es/listingSettingsGroup.json';
 import esMessages from './resources/es/messages.json';
 import esOrders from './resources/es/orders.json';
 import esProfile from './resources/es/profile.json';
+import esReturns from './resources/es/returns.json';
 import esStoreSettings from './resources/es/storeSettings.json';
 import esTranslation from './resources/es/translation.json';
 import frActionCenter from './resources/fr/actionCenter.json';
@@ -82,6 +87,7 @@ import frListingSettingsGroup from './resources/fr/listingSettingsGroup.json';
 import frMessages from './resources/fr/messages.json';
 import frOrders from './resources/fr/orders.json';
 import frProfile from './resources/fr/profile.json';
+import frReturns from './resources/fr/returns.json';
 import frStoreSettings from './resources/fr/storeSettings.json';
 import frTranslation from './resources/fr/translation.json';
 import hiActionCenter from './resources/hi/actionCenter.json';
@@ -96,6 +102,7 @@ import hiListingSettingsGroup from './resources/hi/listingSettingsGroup.json';
 import hiMessages from './resources/hi/messages.json';
 import hiOrders from './resources/hi/orders.json';
 import hiProfile from './resources/hi/profile.json';
+import hiReturns from './resources/hi/returns.json';
 import hiStoreSettings from './resources/hi/storeSettings.json';
 import hiTranslation from './resources/hi/translation.json';
 import itActionCenter from './resources/it/actionCenter.json';
@@ -110,6 +117,7 @@ import itListingSettingsGroup from './resources/it/listingSettingsGroup.json';
 import itMessages from './resources/it/messages.json';
 import itOrders from './resources/it/orders.json';
 import itProfile from './resources/it/profile.json';
+import itReturns from './resources/it/returns.json';
 import itStoreSettings from './resources/it/storeSettings.json';
 import itTranslation from './resources/it/translation.json';
 import ptActionCenter from './resources/pt/actionCenter.json';
@@ -124,6 +132,7 @@ import ptListingSettingsGroup from './resources/pt/listingSettingsGroup.json';
 import ptMessages from './resources/pt/messages.json';
 import ptOrders from './resources/pt/orders.json';
 import ptProfile from './resources/pt/profile.json';
+import ptReturns from './resources/pt/returns.json';
 import ptStoreSettings from './resources/pt/storeSettings.json';
 import ptTranslation from './resources/pt/translation.json';
 import roActionCenter from './resources/ro/actionCenter.json';
@@ -138,6 +147,7 @@ import roListingSettingsGroup from './resources/ro/listingSettingsGroup.json';
 import roMessages from './resources/ro/messages.json';
 import roOrders from './resources/ro/orders.json';
 import roProfile from './resources/ro/profile.json';
+import roReturns from './resources/ro/returns.json';
 import roStoreSettings from './resources/ro/storeSettings.json';
 import roTranslation from './resources/ro/translation.json';
 import ruActionCenter from './resources/ru/actionCenter.json';
@@ -152,6 +162,7 @@ import ruListingSettingsGroup from './resources/ru/listingSettingsGroup.json';
 import ruMessages from './resources/ru/messages.json';
 import ruOrders from './resources/ru/orders.json';
 import ruProfile from './resources/ru/profile.json';
+import ruReturns from './resources/ru/returns.json';
 import ruStoreSettings from './resources/ru/storeSettings.json';
 import ruTranslation from './resources/ru/translation.json';
 import trActionCenter from './resources/tr/actionCenter.json';
@@ -168,6 +179,7 @@ import trListingSettingsGroup from './resources/tr/listingSettingsGroup.json';
 import trMessages from './resources/tr/messages.json';
 import trOrders from './resources/tr/orders.json';
 import trProfile from './resources/tr/profile.json';
+import trReturns from './resources/tr/returns.json';
 import trStoreSettings from './resources/tr/storeSettings.json';
 import trTranslation from './resources/tr/translation.json';
 import ukActionCenter from './resources/uk/actionCenter.json';
@@ -182,6 +194,7 @@ import ukListingSettingsGroup from './resources/uk/listingSettingsGroup.json';
 import ukMessages from './resources/uk/messages.json';
 import ukOrders from './resources/uk/orders.json';
 import ukProfile from './resources/uk/profile.json';
+import ukReturns from './resources/uk/returns.json';
 import ukStoreSettings from './resources/uk/storeSettings.json';
 import ukTranslation from './resources/uk/translation.json';
 import urActionCenter from './resources/ur/actionCenter.json';
@@ -196,6 +209,7 @@ import urListingSettingsGroup from './resources/ur/listingSettingsGroup.json';
 import urMessages from './resources/ur/messages.json';
 import urOrders from './resources/ur/orders.json';
 import urProfile from './resources/ur/profile.json';
+import urReturns from './resources/ur/returns.json';
 import urStoreSettings from './resources/ur/storeSettings.json';
 import urTranslation from './resources/ur/translation.json';
 import zhActionCenter from './resources/zh/actionCenter.json';
@@ -210,6 +224,7 @@ import zhListingSettingsGroup from './resources/zh/listingSettingsGroup.json';
 import zhMessages from './resources/zh/messages.json';
 import zhOrders from './resources/zh/orders.json';
 import zhProfile from './resources/zh/profile.json';
+import zhReturns from './resources/zh/returns.json';
 import zhStoreSettings from './resources/zh/storeSettings.json';
 import zhTranslation from './resources/zh/translation.json';
 
@@ -228,6 +243,7 @@ export {
   enMessages,
   enOrders,
   enProfile,
+  enReturns,
   enStoreSettings,
   enTranslation,
   trActionCenter,
@@ -244,6 +260,7 @@ export {
   trMessages,
   trOrders,
   trProfile,
+  trReturns,
   trStoreSettings,
   trTranslation,
   ruActionCenter,
@@ -258,6 +275,7 @@ export {
   ruMessages,
   ruOrders,
   ruProfile,
+  ruReturns,
   ruStoreSettings,
   ruTranslation,
   hiActionCenter,
@@ -272,6 +290,7 @@ export {
   hiMessages,
   hiOrders,
   hiProfile,
+  hiReturns,
   hiStoreSettings,
   hiTranslation,
   urActionCenter,
@@ -286,6 +305,7 @@ export {
   urMessages,
   urOrders,
   urProfile,
+  urReturns,
   urStoreSettings,
   urTranslation,
   arActionCenter,
@@ -300,6 +320,7 @@ export {
   arMessages,
   arOrders,
   arProfile,
+  arReturns,
   arStoreSettings,
   arTranslation,
   azActionCenter,
@@ -314,6 +335,7 @@ export {
   azMessages,
   azOrders,
   azProfile,
+  azReturns,
   azStoreSettings,
   azTranslation,
   deActionCenter,
@@ -328,6 +350,7 @@ export {
   deMessages,
   deOrders,
   deProfile,
+  deReturns,
   deStoreSettings,
   deTranslation,
   frActionCenter,
@@ -342,6 +365,7 @@ export {
   frMessages,
   frOrders,
   frProfile,
+  frReturns,
   frStoreSettings,
   frTranslation,
   esActionCenter,
@@ -356,6 +380,7 @@ export {
   esMessages,
   esOrders,
   esProfile,
+  esReturns,
   esStoreSettings,
   esTranslation,
   itActionCenter,
@@ -370,6 +395,7 @@ export {
   itMessages,
   itOrders,
   itProfile,
+  itReturns,
   itStoreSettings,
   itTranslation,
   roActionCenter,
@@ -384,6 +410,7 @@ export {
   roMessages,
   roOrders,
   roProfile,
+  roReturns,
   roStoreSettings,
   roTranslation,
   ukActionCenter,
@@ -398,6 +425,7 @@ export {
   ukMessages,
   ukOrders,
   ukProfile,
+  ukReturns,
   ukStoreSettings,
   ukTranslation,
   zhActionCenter,
@@ -412,6 +440,7 @@ export {
   zhMessages,
   zhOrders,
   zhProfile,
+  zhReturns,
   zhStoreSettings,
   zhTranslation,
   ptActionCenter,
@@ -426,6 +455,7 @@ export {
   ptMessages,
   ptOrders,
   ptProfile,
+  ptReturns,
   ptStoreSettings,
   ptTranslation,
 };
@@ -455,6 +485,7 @@ export const i18nResources = {
     listings: enListings,
     profile: enProfile,
     orders: enOrders,
+    returns: enReturns,
   },
   tr: {
     translation: trTranslation,
@@ -473,6 +504,7 @@ export const i18nResources = {
     listings: trListings,
     profile: trProfile,
     orders: trOrders,
+    returns: trReturns,
   },
   ru: {
     translation: ruTranslation,
@@ -489,6 +521,7 @@ export const i18nResources = {
     listings: ruListings,
     profile: ruProfile,
     orders: ruOrders,
+    returns: ruReturns,
   },
   hi: {
     translation: hiTranslation,
@@ -505,6 +538,7 @@ export const i18nResources = {
     listings: hiListings,
     profile: hiProfile,
     orders: hiOrders,
+    returns: hiReturns,
   },
   ur: {
     translation: urTranslation,
@@ -521,6 +555,7 @@ export const i18nResources = {
     listings: urListings,
     profile: urProfile,
     orders: urOrders,
+    returns: urReturns,
   },
   ar: {
     translation: arTranslation,
@@ -537,6 +572,7 @@ export const i18nResources = {
     listings: arListings,
     profile: arProfile,
     orders: arOrders,
+    returns: arReturns,
   },
   az: {
     translation: azTranslation,
@@ -553,6 +589,7 @@ export const i18nResources = {
     listings: azListings,
     profile: azProfile,
     orders: azOrders,
+    returns: azReturns,
   },
   de: {
     actionCenter: deActionCenter,
@@ -566,6 +603,7 @@ export const i18nResources = {
     listingSettingsGroup: deListingSettingsGroup,
     messages: deMessages,
     orders: deOrders,
+    returns: deReturns,
     profile: deProfile,
     storeSettings: deStoreSettings,
     translation: deTranslation,
@@ -582,6 +620,7 @@ export const i18nResources = {
     listingSettingsGroup: frListingSettingsGroup,
     messages: frMessages,
     orders: frOrders,
+    returns: frReturns,
     profile: frProfile,
     storeSettings: frStoreSettings,
     translation: frTranslation,
@@ -598,6 +637,7 @@ export const i18nResources = {
     listingSettingsGroup: esListingSettingsGroup,
     messages: esMessages,
     orders: esOrders,
+    returns: esReturns,
     profile: esProfile,
     storeSettings: esStoreSettings,
     translation: esTranslation,
@@ -614,6 +654,7 @@ export const i18nResources = {
     listingSettingsGroup: itListingSettingsGroup,
     messages: itMessages,
     orders: itOrders,
+    returns: itReturns,
     profile: itProfile,
     storeSettings: itStoreSettings,
     translation: itTranslation,
@@ -630,6 +671,7 @@ export const i18nResources = {
     listingSettingsGroup: roListingSettingsGroup,
     messages: roMessages,
     orders: roOrders,
+    returns: roReturns,
     profile: roProfile,
     storeSettings: roStoreSettings,
     translation: roTranslation,
@@ -646,6 +688,7 @@ export const i18nResources = {
     listingSettingsGroup: ukListingSettingsGroup,
     messages: ukMessages,
     orders: ukOrders,
+    returns: ukReturns,
     profile: ukProfile,
     storeSettings: ukStoreSettings,
     translation: ukTranslation,
@@ -662,6 +705,7 @@ export const i18nResources = {
     listingSettingsGroup: zhListingSettingsGroup,
     messages: zhMessages,
     orders: zhOrders,
+    returns: zhReturns,
     profile: zhProfile,
     storeSettings: zhStoreSettings,
     translation: zhTranslation,
@@ -678,6 +722,7 @@ export const i18nResources = {
     listingSettingsGroup: ptListingSettingsGroup,
     messages: ptMessages,
     orders: ptOrders,
+    returns: ptReturns,
     profile: ptProfile,
     storeSettings: ptStoreSettings,
     translation: ptTranslation,

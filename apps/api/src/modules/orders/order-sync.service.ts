@@ -33,7 +33,8 @@ import { ProductsService } from '../products/products.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { AutoFulfillQueueService } from './auto-fulfill-queue.service';
-import { EbayFulfillmentService } from './ebay-fulfillment.service';
+import { EBAY_GET_ORDERS_MAX_LIMIT, EbayFulfillmentService } from './ebay-fulfillment.service';
+import { buildSyncedStatusSql, decideIngest } from './ebay-order-changes';
 import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
@@ -57,6 +58,19 @@ const AWAITING_PAYMENT_RECHECK_LIMIT = 20;
  * cancels them after four days and the window closes after seven.
  */
 const AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS = 1;
+
+/**
+ * Runaway guard for one store in one tick: 50 pages of 200 is 10,000 modified
+ * orders. eBay documents `offset` paging with a `total`, so the loop normally
+ * ends on `offset >= total`; this only stops a response that never converges.
+ */
+const ORDER_SYNC_MAX_PAGES = 50;
+
+/**
+ * How far the next window reaches back before this run started. Covers clock
+ * skew between us and eBay and an order modified while its page was in flight.
+ */
+const ORDER_SYNC_OVERLAP_MS = 5 * 60 * 1000;
 
 export interface EbayAccountForSync {
   id: string;
@@ -157,24 +171,29 @@ export class OrderSyncService {
       return 0;
     }
 
-    // An order that arrived unpaid was skipped rather than purchased. Order
-    // sync never re-fetches an order (the window filters on creationdate and
-    // never overlaps), so without this sweep that skip would be permanent and
-    // the seller would silently lose automation on every slow-paying order.
+    // An order that arrived unpaid was skipped rather than purchased. The
+    // re-sync below does see the order again once eBay modifies it, but it
+    // deliberately starts automation only on a first insert, so this sweep is
+    // still what releases a slow-paying order for purchase.
     await this.releaseOrdersAwaitingPayment(userId, accessToken, marketplaceId);
 
-    // Only fetch orders since last sync (or account creation if never synced)
+    // Every order MODIFIED since the last sync (or since the store was
+    // connected, the first time). Filtering on the modification date is what
+    // lets a cancellation, a refund or a shipment made on eBay reach us — a
+    // creation-date window showed each order exactly once.
+    const syncStartedAt = new Date();
     const syncFromDate = account.last_ebay_sync_at
       ? new Date(account.last_ebay_sync_at).toISOString()
       : account.created_at.toISOString();
     let totalSynced = 0;
-    let cursor: string | undefined;
+    let offset = 0;
+    let pages = 0;
 
-    do {
+    for (;;) {
       const result = await this.fulfillmentService.fetchOrders(accessToken, marketplaceId, {
-        fromDateString: syncFromDate,
-        limit: 50,
-        cursor,
+        modifiedFrom: syncFromDate,
+        limit: EBAY_GET_ORDERS_MAX_LIMIT,
+        offset,
       });
 
       for (const ebayOrder of result.orders) {
@@ -223,11 +242,27 @@ export class OrderSyncService {
             purchasePrice
           );
 
-          const { inserted } = await this.upsertOrder(
+          const ingest = decideIngest({
+            orderCreatedAt: entity.orderDate,
+            storeConnectedAt: account.created_at,
+            now: syncStartedAt,
+          });
+          const { inserted, skipped } = await this.upsertOrder(
             entity,
             listingOverPlanLimit,
             lineItem?.legacyItemId ?? null,
+            ingest.mayInsert
           );
+          // An order from before the store was connected that we never held:
+          // not ours to record (see `decideIngest`).
+          if (skipped) {
+            continue;
+          }
+          // The one-time side effects below run only for a new AND recent sale.
+          // `inserted` alone is no longer enough: re-reading by modification
+          // date can surface an order we missed weeks ago, and buying it now —
+          // or thanking the buyer now — would be acting on stale news.
+          const freshSale = ingest.isFreshSale(inserted);
 
           // Recompute net_profit + cost_capture_status only for brand-new
           // inserts. Re-syncs that changed ebay_earnings are already handled
@@ -244,7 +279,7 @@ export class OrderSyncService {
           // of our listings. We KNOW this sale happened, so deplete the shared
           // product stock by the sold quantity (best estimate until the next 12h
           // Keepa sync), then trigger per-listing quantity recompute + eBay push.
-          if (inserted && listingId && entity.quantity > 0) {
+          if (freshSale && listingId && entity.quantity > 0) {
             try {
               const match = await this.databaseService.query<{ product_id: string }>(
                 `SELECT product_id FROM listings WHERE id = $1`,
@@ -281,7 +316,7 @@ export class OrderSyncService {
           // Auto-fulfill (best-effort; never fails order sync). Fires only on a
           // genuine new matched order — same gate as sale-driven stock sync. See
           // `maybeEnqueueAutoFulfill` for the toggle/cap/round-robin resolution.
-          if (inserted && listingId && entity.quantity > 0) {
+          if (freshSale && listingId && entity.quantity > 0) {
             try {
               await this.maybeEnqueueAutoFulfill(entity, listingOverPlanLimit);
             } catch (err) {
@@ -303,7 +338,7 @@ export class OrderSyncService {
           // parcel landed. Unlike the purchase gate, an UNPAID order is still
           // messaged — eBay only surfaces orders that cleared checkout, and a
           // thank-you costs nothing if the payment later fails.
-          if (inserted && !isOrderAlreadyFulfilled(entity.status)) {
+          if (freshSale && !isOrderAlreadyFulfilled(entity.status) && entity.status !== OrderStatus.CANCELLED) {
             await this.buyerMessages
               .enqueue({
                 ebayOrderId: entity.ebayOrderId,
@@ -328,8 +363,20 @@ export class OrderSyncService {
         }
       }
 
-      cursor = result.nextCursor;
-    } while (cursor);
+      offset += result.orders.length;
+      pages += 1;
+      if (result.orders.length === 0 || offset >= result.total) {
+        break;
+      }
+      if (pages >= ORDER_SYNC_MAX_PAGES) {
+        // A runaway guard, not an expected path: the watermark below still
+        // advances, so say loudly that this window was cut short.
+        this.logger.error(
+          `Order sync for account ${ebayAccountId} stopped after ${pages} pages (${offset} of ${result.total} orders)`
+        );
+        break;
+      }
+    }
 
     // Update last_synced_at for all synced orders
     await this.databaseService.query(
@@ -339,10 +386,14 @@ export class OrderSyncService {
     );
 
     // Update last_ebay_sync_at on the account itself
+    // The watermark is when this run STARTED, minus an overlap — not "now". An
+    // order modified while the pages were being read would otherwise fall
+    // between two windows and its change would never be seen. Re-reading an
+    // order is idempotent, so the overlap costs nothing.
     await this.databaseService.query(
-      `UPDATE ebay_accounts SET last_ebay_sync_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      `UPDATE ebay_accounts SET last_ebay_sync_at = $2, updated_at = CURRENT_TIMESTAMP
        WHERE id = $1`,
-      [ebayAccountId]
+      [ebayAccountId, new Date(syncStartedAt.getTime() - ORDER_SYNC_OVERLAP_MS).toISOString()]
     );
 
     this.logger.log(`Synced ${totalSynced} orders for user ${userId}`);
@@ -425,8 +476,9 @@ export class OrderSyncService {
   private async upsertOrder(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
     listingOverPlanLimit = false,
-    ebayLegacyItemId: string | null = null
-  ): Promise<{ id: string; inserted: boolean }> {
+    ebayLegacyItemId: string | null = null,
+    mayInsert = true
+  ): Promise<{ id: string; inserted: boolean; skipped?: boolean }> {
     // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
     // the seller's payout (partial refund, adjusted shipping, etc.). When the
     // value changes we must recompute net_profit — the ON CONFLICT SET clause
@@ -438,6 +490,11 @@ export class OrderSyncService {
       [entity.ebayOrderId]
     );
     const prevEbayEarnings = existing.length > 0 ? Number(existing[0].ebay_earnings) : null;
+
+    // Update-only mode: an order we do not hold and may not admit is left alone.
+    if (existing.length === 0 && !mayInsert) {
+      return { id: '', inserted: false, skipped: true };
+    }
 
     const result = await this.databaseService.query<{ id: string; inserted: boolean }>(
       `INSERT INTO orders (
@@ -452,7 +509,8 @@ export class OrderSyncService {
         order_date, last_ebay_event_at,
         cost_capture_status,
         ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
-        listing_over_plan_limit, ebay_legacy_item_id
+        listing_over_plan_limit, ebay_legacy_item_id,
+        ebay_cancel_state, ebay_cancelled_at, ebay_refunded_amount, ebay_refunded_at
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
@@ -461,10 +519,14 @@ export class OrderSyncService {
         $23, $24, $25,
         $26,
         $27, $28, $29,
-        $30, $31
+        $30, $31,
+        $32, $33, $34, $35
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
-        status = EXCLUDED.status,
+        -- Never a bare EXCLUDED.status: an order is re-read every time eBay
+        -- modifies it, and eBay's view is coarser than ours (it never reports
+        -- "delivered"). See mergeSyncedOrderStatus.
+        status = ${buildSyncedStatusSql()},
         order_fulfillment_status = EXCLUDED.order_fulfillment_status,
         payment_status = EXCLUDED.payment_status,
         sale_price = EXCLUDED.sale_price,
@@ -474,7 +536,13 @@ export class OrderSyncService {
         ebay_earnings = EXCLUDED.ebay_earnings,
         currency = EXCLUDED.currency,
         quantity = EXCLUDED.quantity,
-        shipping_address = EXCLUDED.shipping_address,
+        -- An erased buyer stays erased: after an eBay account-deletion
+        -- notification nulled this row's buyer data (migration 130), a re-read
+        -- must not write the address back.
+        shipping_address = CASE
+          WHEN orders.buyer_data_erased_at IS NOT NULL THEN orders.shipping_address
+          ELSE EXCLUDED.shipping_address
+        END,
         last_ebay_event_at = EXCLUDED.last_ebay_event_at,
         -- COALESCE, never a bare EXCLUDED: eBay assesses the marketplace fee
         -- when the buyer's payment settles, which can be after we first pulled
@@ -487,6 +555,12 @@ export class OrderSyncService {
         -- fills a blank (an order ingested before migration 111). It is NOT the
         -- listing link: adopting an order into a listing stays an explicit act.
         ebay_legacy_item_id = COALESCE(orders.ebay_legacy_item_id, EXCLUDED.ebay_legacy_item_id),
+        -- What eBay reports about a cancellation / refund. COALESCE so a later
+        -- read that lacks the field never blanks a captured value.
+        ebay_cancel_state = COALESCE(EXCLUDED.ebay_cancel_state, orders.ebay_cancel_state),
+        ebay_cancelled_at = COALESCE(EXCLUDED.ebay_cancelled_at, orders.ebay_cancelled_at),
+        ebay_refunded_amount = COALESCE(EXCLUDED.ebay_refunded_amount, orders.ebay_refunded_amount),
+        ebay_refunded_at = COALESCE(EXCLUDED.ebay_refunded_at, orders.ebay_refunded_at),
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id, (xmax = 0) AS inserted`,
@@ -524,6 +598,10 @@ export class OrderSyncService {
         // listing_id: the decision belongs to the order's first ingest.
         listingOverPlanLimit,
         ebayLegacyItemId,
+        entity.ebayCancelState,
+        entity.ebayCancelledAt ? entity.ebayCancelledAt.toISOString() : null,
+        entity.ebayRefundedAmount,
+        entity.ebayRefundedAt ? entity.ebayRefundedAt.toISOString() : null,
       ]
     );
 
@@ -852,13 +930,14 @@ export class OrderSyncService {
             AND auto_fulfill_status = $2
             AND auto_fulfill_blocked_reason = $3
             AND amazon_order_id IS NULL
-            AND status NOT IN ($4, $5)`,
+            AND status NOT IN ($4, $5, $6)`,
         [
           userId,
           AutoFulfillStatus.BLOCKED,
           AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
           OrderStatus.SHIPPED,
           OrderStatus.COMPLETED,
+          OrderStatus.CANCELLED,
         ]
       );
       const resumableIds = new Set(selectResumableOrders(rows).map((r) => r.ebay_order_id));
@@ -921,11 +1000,12 @@ export class OrderSyncService {
    * have since been paid for.
    *
    * This is the other half of the ORDER_NOT_PAID gate. Refusing to buy an
-   * unpaid order is only safe if the refusal can be undone — and order sync
-   * cannot undo it on its own, because it filters on `creationdate` with
-   * non-overlapping windows, so an order is fetched exactly once and its later
-   * payment is never observed. Each candidate therefore costs one metered
-   * `getOrder` call, which is why the candidate set is bounded hard:
+   * unpaid order is only safe if the refusal can be undone. Order sync does
+   * see the order again once eBay modifies it (it filters on
+   * `lastmodifieddate`), but it starts automation only on a first insert, so
+   * this sweep remains the path that releases a now-paid order. Each candidate
+   * costs one metered `getOrder` call, which is why the candidate set is
+   * bounded hard:
    *
    *  - `order_date` within 7 days. eBay cancels an unpaid order after four, so
    *    anything older will never be paid and asking again buys nothing.
@@ -1018,8 +1098,9 @@ export class OrderSyncService {
 
           const eligibility = resolveAutoFulfillEligibility(status);
           if (!eligibility.eligible) {
-            // Paid but already fulfilled while we waited — somebody shipped it
-            // by hand. Re-label it so the reason matches what actually happened.
+            // Already fulfilled while we waited (somebody shipped it by hand),
+            // or cancelled on eBay. Re-label it so the reason matches what
+            // actually happened — either way it leaves the recheck set.
             await this.setAutoFulfillStatus(
               row.ebay_order_id,
               AutoFulfillStatus.SKIPPED,

@@ -104,6 +104,20 @@
         "description_other": "{{count}} ordini sono stati spediti su Amazon da oltre {{hours}} ore ma non sono stati segnati come spediti su eBay, perché i loro numeri di tracciamento non hanno potuto essere convertiti. Non inviamo mai i numeri di tracciamento Amazon originali ai tuoi acquirenti. Risolvi la causa e verranno spediti automaticamente: fino ad allora rischiano difetti per spedizione in ritardo.",
         "action": "Vedi gli ordini"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay ha annullato una vendita che avevi già acquistato su Amazon",
+        "description_one": "{{count}} ordine è stato annullato su eBay negli ultimi {{days}} giorni, ma l'ordine Amazon effettuato per quell'ordine è ancora aperto. Nessuno aspetta più quell'articolo: annulla l'ordine Amazon o restituisci l'articolo se è già stato spedito.",
+        "description_many": "{{count}} ordini sono stati annullati su eBay negli ultimi {{days}} giorni, ma gli ordini Amazon effettuati per quegli ordini sono ancora aperti. Nessuno aspetta più quegli articoli: annulla gli ordini Amazon o restituisci gli articoli se sono già stati spediti.",
+        "description_other": "{{count}} ordini sono stati annullati su eBay negli ultimi {{days}} giorni, ma gli ordini Amazon effettuati per quegli ordini sono ancora aperti. Nessuno aspetta più quegli articoli: annulla gli ordini Amazon o restituisci gli articoli se sono già stati spediti.",
+        "action": "Controlla gli ordini"
+      },
+      "return_seller_action_due": {
+        "title": "Resi in attesa della tua risposta",
+        "description_one": "{{count}} reso ha un passaggio che eBay si aspetta da te. Rispondi su eBay prima della scadenza indicata nella pagina Resi.",
+        "description_many": "{{count}} resi hanno un passaggio che eBay si aspetta da te. Rispondi su eBay prima delle scadenze indicate nella pagina Resi.",
+        "description_other": "{{count}} resi hanno un passaggio che eBay si aspetta da te. Rispondi su eBay prima delle scadenze indicate nella pagina Resi.",
+        "action": "Vedi i resi"
+      },
       "ebay_account_disconnected": {
         "title": "Un negozio eBay ha perso la connessione",
         "description_one": "{{count}} negozio non è più autorizzato. Sincronizzazione degli ordini, riprezzamento e pubblicazione sono fermi per questo negozio finché non lo ricolleghi.",

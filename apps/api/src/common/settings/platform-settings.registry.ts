@@ -102,6 +102,43 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 100,
   }),
+  // --- Periodic return sweep (Post-Order API, 5,000 calls/day app-wide) ---
+  def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_RETURN_SYNC_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_CRON,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.STRING,
+    envVar: 'EBAY_RETURN_SYNC_CRON',
+    // Every 10 minutes: how often a few MORE stores are picked up. How often
+    // one store is swept is the interval below.
+    defaultValue: '*/10 * * * *',
+    requiresRestart: true,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_RETURN_SYNC_INTERVAL_HOURS',
+    // 500 stores x 4 sweeps/day = 2,000 calls, 40% of the 5,000/day ceiling.
+    defaultValue: '6',
+    min: 1,
+    max: 168,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN',
+    defaultValue: '25',
+    min: 1,
+    max: 200,
+  }),
   // --- Keepa refresh: the dominant recurring provider cost ---
   def({
     key: PlatformSettingKey.KEEPA_REFRESH_ENABLED,

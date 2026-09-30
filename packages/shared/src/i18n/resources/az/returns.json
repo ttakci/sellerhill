@@ -1,0 +1,94 @@
+{
+  "returns": {
+    "title": "Qaytarmalar",
+    "subtitle_one": "{{count}} qaytarma",
+    "subtitle_other": "{{count}} qaytarma",
+    "loading": "Qaytarmalar yüklənir…",
+    "notice": "Qaytarmalara eBay-də cavab verin. Bu səhifə sizdən nə gözlənildiyini və son tarixi göstərir.",
+    "tabs": {
+      "all": "Hamısı",
+      "action": "Tədbir tələb edir",
+      "in_progress": "Davam edən",
+      "closed": "Bağlanan",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Qaytarma statusu"
+    },
+    "filters": {
+      "search": "Qaytarma №, sifariş № və ya məhsul axtar…",
+      "allStores": "Bütün mağazalar",
+      "clear": "Təmizlə",
+      "resultCount_one": "{{count}} nəticə",
+      "resultCount_other": "{{count}} nəticə"
+    },
+    "columns": {
+      "product": "Məhsul",
+      "return": "Qaytarma",
+      "status": "Status",
+      "due": "Sizdən gözlənilən",
+      "reason": "Səbəb",
+      "refund": "Geri ödəniş",
+      "opened": "Açılıb"
+    },
+    "bucket": {
+      "unconfirmed": "Təsdiqlənməyib",
+      "action_overdue": "Vaxtı keçib",
+      "action_due": "Tədbir gözləyir",
+      "escalated": "eBay-ə ötürülüb",
+      "in_progress": "Davam edir",
+      "closed": "Bağlanıb"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay bu qaytarmanı son vaxtlar təsdiqləməyib, ona görə son məlum vəziyyəti köhnəlmiş ola bilər. Onu eBay-də yoxlayın.",
+      "action_overdue": "eBay-in sizdən cavab gözlədiyi tarix artıq keçib.",
+      "action_due": "eBay bu qaytarma üzrə sizdən bir addım gözləyir.",
+      "escalated": "Bu qaytarma eBay-də işə çevrilib.",
+      "in_progress": "Qaytarma açıqdır; hazırda sizdən heç nə gözlənilmir.",
+      "closed": "eBay bu qaytarmanı bağlayıb."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Qaytarma sorğusunu təsdiqləyin",
+      "SELLER_DECLINE_REQUEST": "Qaytarma sorğusunu rədd edin",
+      "SELLER_ISSUE_REFUND": "Geri ödənişi edin",
+      "SELLER_MARK_AS_RECEIVED": "Qaytarılan məhsulu alınmış kimi qeyd edin",
+      "SELLER_MARK_REFUND_SENT": "Geri ödənişi göndərilmiş kimi qeyd edin",
+      "SELLER_OFFER_PARTIAL_REFUND": "Qismən geri ödəniş təklif edin",
+      "SELLER_PRINT_SHIPPING_LABEL": "Göndəriş etiketini çap edin",
+      "SELLER_PROVIDE_LABEL": "Göndəriş etiketi təqdim edin",
+      "SELLER_PROVIDE_RMA": "Alıcıya RMA nömrəsi verin",
+      "SELLER_RETRY_REFUND": "Geri ödənişi yenidən sınayın",
+      "REMINDER_FOR_REFUND": "Alıcıya pulu qaytarın",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya pulu qaytarın (məhsulun geri göndərilməsi gözlənilmir)",
+      "REMINDER_FOR_RMA": "RMA xatırlatması: eBay-də cavab verin",
+      "REMINDER_SELLER_TO_RESPOND": "Qaytarma sorğusuna cavab verin",
+      "other": "eBay-də cavab verin"
+    },
+    "dueBy": "Son tarix: {{date}}",
+    "reasonType": {
+      "CANCEL": "Göndərişdən sonra ləğv",
+      "INSTORE": "Mağazaya qaytarma",
+      "REMORSE": "Alıcı fikrini dəyişib",
+      "SNAD": "Təsvirə uyğun deyil",
+      "UNKNOWN": "Səbəb göstərilməyib"
+    },
+    "refund": {
+      "refunded": "Geri ödənilib",
+      "estimated": "Təxmini"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Sifariş",
+    "viewOrder": "Sifarişə bax",
+    "unknownProduct": "Naməlum məhsul",
+    "empty": {
+      "title": "Hələ qaytarma yoxdur",
+      "description": "Alıcıların eBay-də açdığı qaytarmalar burada görünəcək."
+    },
+    "emptyFiltered": {
+      "title": "Filtrlərə uyğun qaytarma yoxdur",
+      "description": "Başqa tab, mağaza və ya axtarış sınayın.",
+      "action": "Filtrləri təmizlə"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "returns": {
+    "title": "Rückgaben",
+    "subtitle_one": "{{count}} Rückgabe",
+    "subtitle_other": "{{count}} Rückgaben",
+    "loading": "Rückgaben werden geladen…",
+    "notice": "Beantworten Sie Rückgaben bei eBay. Diese Seite zeigt, was fällig ist und bis wann.",
+    "tabs": {
+      "all": "Alle",
+      "action": "Handlungsbedarf",
+      "in_progress": "In Bearbeitung",
+      "closed": "Geschlossen",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Rückgabestatus"
+    },
+    "filters": {
+      "search": "Rückgabe-Nr., Bestellnr. oder Produkt suchen…",
+      "allStores": "Alle Shops",
+      "clear": "Zurücksetzen",
+      "resultCount_one": "{{count}} Ergebnis",
+      "resultCount_other": "{{count}} Ergebnisse"
+    },
+    "columns": {
+      "product": "Produkt",
+      "return": "Rückgabe",
+      "status": "Status",
+      "due": "Fällige Aktion",
+      "reason": "Grund",
+      "refund": "Erstattung",
+      "opened": "Eröffnet"
+    },
+    "bucket": {
+      "unconfirmed": "Nicht bestätigt",
+      "action_overdue": "Überfällig",
+      "action_due": "Aktion fällig",
+      "escalated": "An eBay eskaliert",
+      "in_progress": "In Bearbeitung",
+      "closed": "Geschlossen"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay hat diese Rückgabe zuletzt nicht bestätigt; der letzte bekannte Stand kann veraltet sein. Prüfen Sie sie bei eBay.",
+      "action_overdue": "Die Frist, bis zu der eBay Ihre Antwort erwartet hat, ist abgelaufen.",
+      "action_due": "eBay wartet bei dieser Rückgabe auf eine Aktion von Ihnen.",
+      "escalated": "Diese Rückgabe wurde zu einem eBay-Fall eskaliert.",
+      "in_progress": "Die Rückgabe ist offen; derzeit ist nichts von Ihnen fällig.",
+      "closed": "eBay hat diese Rückgabe geschlossen."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Rückgabeanfrage annehmen",
+      "SELLER_DECLINE_REQUEST": "Rückgabeanfrage ablehnen",
+      "SELLER_ISSUE_REFUND": "Rückerstattung veranlassen",
+      "SELLER_MARK_AS_RECEIVED": "Zurückgesendeten Artikel als erhalten markieren",
+      "SELLER_MARK_REFUND_SENT": "Rückerstattung als gesendet markieren",
+      "SELLER_OFFER_PARTIAL_REFUND": "Teilrückerstattung anbieten",
+      "SELLER_PRINT_SHIPPING_LABEL": "Versandetikett drucken",
+      "SELLER_PROVIDE_LABEL": "Versandetikett bereitstellen",
+      "SELLER_PROVIDE_RMA": "Dem Käufer eine RMA-Nummer mitteilen",
+      "SELLER_RETRY_REFUND": "Rückerstattung erneut versuchen",
+      "REMINDER_FOR_REFUND": "Dem Käufer den Betrag erstatten",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Dem Käufer den Betrag erstatten (der Artikel wird nicht zurückerwartet)",
+      "REMINDER_FOR_RMA": "RMA-Erinnerung: bei eBay antworten",
+      "REMINDER_SELLER_TO_RESPOND": "Auf die Rückgabeanfrage antworten",
+      "other": "Bei eBay antworten"
+    },
+    "dueBy": "bis {{date}}",
+    "reasonType": {
+      "CANCEL": "Stornierung nach Versand",
+      "INSTORE": "Rückgabe im Geschäft",
+      "REMORSE": "Käufer hat es sich anders überlegt",
+      "SNAD": "Nicht wie beschrieben",
+      "UNKNOWN": "Grund nicht angegeben"
+    },
+    "refund": {
+      "refunded": "Erstattet",
+      "estimated": "Geschätzt"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Bestellung",
+    "viewOrder": "Bestellung ansehen",
+    "unknownProduct": "Unbekanntes Produkt",
+    "empty": {
+      "title": "Noch keine Rückgaben",
+      "description": "Rückgaben, die Käufer bei eBay eröffnen, erscheinen hier."
+    },
+    "emptyFiltered": {
+      "title": "Keine Rückgaben entsprechen den Filtern",
+      "description": "Versuchen Sie einen anderen Tab, Shop oder Suchbegriff.",
+      "action": "Filter zurücksetzen"
+    }
+  }
+}

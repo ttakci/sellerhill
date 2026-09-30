@@ -1,6 +1,6 @@
 # eBay reference documents (local copies)
 
-Official eBay documents fetched on **2026-09-29** and stored here so that decisions about
+Official eBay documents fetched on **2026-09-29** (order, return and notification documents on **2026-09-30**) and stored here so that decisions about
 eBay can be made from the primary source without re-fetching. **Read these first.** Re-fetch
 only to refresh a copy, and update the date and the table below when you do.
 
@@ -22,12 +22,21 @@ what could be obtained as real content; the "not obtainable" list is what could 
 | `api-license-agreement.txt` / `.html` | `https://developer.ebay.com/join/api-license-agreement/` | 200, text + raw HTML | **eBay API License Agreement.** See "Clauses that matter" below. |
 | `user-agreement.txt` / `.html` | `https://www.ebay.com/help/policies/member-behavior-policies/user-agreement?id=4259` | 200, text + raw HTML | **eBay User Agreement** (the site terms every eBay account is bound by). |
 | `www.ebay.com-robots.txt` | `https://www.ebay.com/robots.txt` | 200, raw | `Disallow: /sch/`, `Disallow: /bin/` (purchase-history pages live under `/bin/`), `Disallow: /usr/`-class paths, most `/itm/*` query variants. |
+| `sell-fulfillment-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/fulfillment/openapi/3/sell_fulfillment_v1_oas3.json` | 200, raw (2026-09-30) | **Fulfillment API v1.20.7 OpenAPI.** `getOrders` / `getOrder` / `issueRefund` / `createShippingFulfillment` / payment disputes, with each method's OAuth scopes. Enum VALUES are not in the file (see "Not obtainable"). |
+| `commerce-notification-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/commerce/notification/openapi/3/commerce_notification_v1_oas3.json` | 200, raw (2026-09-30) | **Notification API v1.6.7 OpenAPI** (destination, subscription, topic, public key). |
+| `sell-finances-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/finances/openapi/3/sell_finances_v1_oas3.json` | 200, raw (2026-09-30) | **Finances API v1.19.0 OpenAPI** (payouts, transactions). Not used yet. |
+| `notification-topics/<TOPIC>.v1.0.0.asyncapi.yaml` + `<TOPIC>.meta.json` | embedded in `https://developer.ebay.com/api-docs/commerce/notification/overview.html` | 200, extracted (2026-09-30) | **The payload contract of each topic** (AsyncAPI 2.0.0) plus eBay's summary, description and samples: `ORDER_CONFIRMATION`, `ORDER_CANCELLATION_ACTIVITY`, `ORDER_RETURN_ACTIVITY`, `ORDER_INQUIRY_ACTIVITY`, `ITEM_MARKED_SHIPPED`, `NEW_MESSAGE`. The page embeds all 29 topics; re-extract others from it the same way. |
+| `notification-topics/getTopic-live-2026-09-30.json` | `GET /commerce/notification/v1/topic/{id}` against the PRODUCTION keyset | 200, eBay's own answer | Per topic: `scope` (USER/APPLICATION), `authorizationScopes`, `supportedPayloads` (schema versions), `filterable`. This — not a doc page — is the authority for which OAuth scope a subscription needs. |
+| `post-order/*.txt` | `https://developer.ebay.com/Devzone/post-order/<page>.html` (each file names its own URL on line 1) | 200, text-extracted (2026-09-30) | **Post-Order API v2 reference**: call conventions (`MakingACall`), returns (search / get / decide / issue_refund / mark_as_received / tracking), cancellations (search / get / approve / reject), inquiries (search / get / issue_refund), case search. |
+| `post-order/types/*.txt` | `https://developer.ebay.com/Devzone/post-order/types/<Type>.html` | 200, text-extracted (2026-09-30) | The enum VALUE lists the return payloads use: `ReturnStateEnum`, `ReturnStatusEnum`, `ReturnCountFilterEnum`, `ReturnReasonEnum`, `ReturnReasonTypeEnum`, `ReturnTypeEnum`, `ActivityOptionEnum`, `UserRoleFilterEnum`, `ReturnSortField`. |
 
 ## Not obtainable on 2026-09-29 (do not guess their content)
 
 - **API Call Limits page** (`/develop/get-started/api-call-limits`): 403 from eBay's edge on every variant tried. The number that matters for *this* application comes from eBay itself anyway: run `pnpm --filter api ebay:limits-probe -- --api-name browse` (or any `api_name`) against the production keyset. The public sign-in page states "New accounts include a free access tier … 5,000 API calls per day".
 - **Marketplace Insights API docs** (`/api-docs/buy/marketplace-insights/...`): every URL returned a 200 sign-in/navigation shell with no article body. Whether it is one of the License Agreement's "Restricted APIs" is therefore unread here; the Agreement's own definition ("APIs that provide information about market trends, pricing strategies, sales volumes…") is in `api-license-agreement.txt`.
 - **Browse API method HTML pages** (`/api-docs/buy/browse/resources/...`): 403. Their content is the OpenAPI JSON above; nothing is lost.
+- **Fulfillment API enum type pages** (tried 2026-09-30, 403 on every variant): `https://developer.ebay.com/api-docs/sell/fulfillment/types/sel:CancelStateEnum`, `…/types/sel:OrderPaymentStatusEnum`, `…/types/sel:RefundStatusEnum`, `…/types/sel:CancelRequestStateEnum`, `…/types/api:ReasonForRefundEnum`. The OpenAPI file types these fields as plain strings, so the VALUE LISTS are not in this folder. What is known instead is under "Order, cancellation, refund and return facts" below: the documented fields that make the enums unnecessary, and the values observed in real production responses. **`ReasonForRefundEnum` is required input for `issueRefund` — that method must not be implemented until the page is saved here** (open the URL in a browser and save the page into this folder).
+- **Fulfillment API method HTML pages** (`/api-docs/sell/fulfillment/resources/...`, `/overview.html`): 403. Their content is the OpenAPI JSON above.
 
 ## Clauses that matter (verbatim, from the local copies)
 
@@ -65,3 +74,41 @@ what could be obtained as real content; the "not obtainable" list is what could 
 - `getItem` / `getItems` return `estimatedAvailabilities[].estimatedSoldQuantity` ("The estimated number of this item that have been sold."). `getItems` takes at most 20 `item_ids` per call.
 - `Seller.username`: "Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place." Whether `sellers:{…}` accepts that id for U.S. sellers is not stated in these documents.
 - No "sold items in the last N days" method exists in the Browse API; sold volume can only be inferred by sampling `estimatedSoldQuantity` over time.
+
+### Order, cancellation, refund and return facts (2026-09-30)
+
+Every line is either quoted from a file in this folder or was observed in a real response from the production keyset on 2026-09-30 (marked **observed**). Nothing here is inferred.
+
+**Fulfillment `getOrders`** (`sell-fulfillment-v1-oas3.json`)
+- Scopes: `sell.fulfillment` or `sell.fulfillment.readonly`.
+- `filter` criteria: `creationdate:[from..to]`, `lastmodifieddate:[from..to]` ("the orders.modifiedDate field"), `orderfulfillmentstatus:{NOT_STARTED|IN_PROGRESS}` / `{FULFILLED|IN_PROGRESS}`. **"If creationdate and lastmodifieddate are both included, only creationdate is used."** Timestamps are ISO 8601 UTC; `[`, `]`, `{`, `|`, `}` must be percent-encoded.
+- Paging is `limit` (default 50, **max 200** — "If a requested limit is more than 200, the call fails") and zero-based `offset`. There is no continuation-token parameter.
+- "getOrders can return orders up to two years old."
+- `Order.cancelStatus` is "always returned"; with no cancel request `cancelState` is `NONE_REQUESTED` and `cancelRequests` is empty. "For the getOrders call: This array is returned but is always empty. For the getOrder call: This array is returned fully populated." `cancelStatus.cancelledDate`: "The date and time the order was cancelled, if applicable."
+- `Order.paymentSummary.refunds[]` "is always returned, but is returned as an empty array unless the seller has submitted a partial or full refund"; each entry has `amount` ("the seller's net amount … eBay-collected tax will not be included"), `refundDate` ("not returned until the refund has been issued"), `refundId`, `refundReferenceId`, `refundStatus`.
+- `paymentSummary.totalDueSeller` "is subject to change … if a partial or full refund occurs with the order."
+- **Observed** (50 orders of one store): `orderFulfillmentStatus` ∈ {`FULFILLED`, `NOT_STARTED`}; `orderPaymentStatus` ∈ {`PAID`, `FULLY_REFUNDED`}; `cancelStatus.cancelState` ∈ {`NONE_REQUESTED`, `CANCELED`}, and the one `CANCELED` order carried a `cancelledDate`; `refunds[].refundStatus` = `REFUNDED`. A `lastmodifieddate:[<60 days ago>..]` filter answered 200 with 157 orders.
+
+**Fulfillment `issueRefund`** — scope **`sell.finances`** (not one SellerHill requests today). Body: `reasonForRefund` (required, `ReasonForRefundEnum` — values not obtainable, see above), `comment` (max 100), and either `orderLevelRefundAmount` or `refundItems[]`. Processed asynchronously; success returns `refundStatus: PENDING`. "Due to EU & UK Payments regulatory requirements, an additional security verification via Digital Signatures is required" for EU/UK sellers.
+
+**Post-Order API** (`post-order/MakingACall.txt`)
+- Base `https://api.ebay.com` (sandbox `https://api.sandbox.ebay.com`). "Each Post-Order API call requires the Authorization and X-EBAY-C-MARKETPLACE-ID HTTP headers"; `Content-Type: application/json`. "The Post Order API accepts both OAuth and Auth'n'Auth tokens … OAuth – Prefix a valid User access token with the string \"IAF \" (with a space)."
+- The doc pages name **no OAuth scope**. **Observed**: `GET /post-order/v2/return/search`, `/cancellation/search` and `/inquiry/search` all answered **200** with a user token whose consented scopes are the ones SellerHill already requests (`sell.fulfillment`, `sell.inventory`, `sell.account`, …) — no new consent is needed to READ returns.
+- `GET /post-order/v2/return/search`: "This method is not supported in the Sandbox environment." Query: `creation_date_range_from` ("cannot be set to more than 18 months in the past. If you specify a creation_date_range_from value, but do not specify a creation_date_range_to value, the method returns all return requests created at or after the specified timestamp and goes forward for the following 90 days"), `limit` (1–200, default 25), `offset`, `return_state` (`ReturnCountFilterEnum`: `ALL_OPEN`, `CLOSED`, `SELLER_ACTION_DUE`, `SELLER_ACTION_OVERDUE`, …), `order_id`, `return_id`, `item_id` + `transaction_id`.
+- Response `members[]` (`ReturnSummaryType`): `returnId`, `orderId`, `state` (`ReturnStateEnum`), `status` (`ReturnStatusEnum`), `currentType` ("Currently, the only supported value is MONEY_BACK"), `creationInfo` { `item` { `itemId`, `transactionId`, `returnQuantity` }, `reason`, `reasonType` (`CANCEL` | `INSTORE` | `REMORSE` | `SNAD` | `UNKNOWN`), `comments.content`, `creationDate.value` }, `sellerTotalRefund` / `buyerTotalRefund` { `estimatedRefundAmount`, `actualRefundAmount` }, `sellerResponseDue` { `activityDue` (`ActivityOptionEnum`), `respondByDate.value` } — "This container indicates the next action the seller is responsible for, and the 'due date' for this action. This container might not be returned if there is currently no action due from the seller." — `escalationInfo.caseId`, `sellerAvailableOptions[]`, plus `paginationOutput` { `offset`, `limit`, `totalPages`, `totalEntries` }.
+- `POST /post-order/v2/return/{returnId}/issue_refund`: "not supported in the Sandbox environment"; requires `refundDetail` with `itemizedRefundDetail[]` (`refundAmount`, `refundFeeType`) whose amounts "should equal" `totalAmount`; same EU/UK Digital Signature note.
+
+**Notification topics** (`notification-topics/getTopic-live-2026-09-30.json`; all `scope: USER`, not filterable, JSON over HTTPS)
+
+| Topic | `authorizationScopes` | Schema versions |
+|---|---|---|
+| `ORDER_CONFIRMATION` | `sell.fulfillment`, `sell.fulfillment.readonly` | 1.0, 1.1 |
+| `ORDER_CANCELLATION_ACTIVITY` | `sell.cancellation.read`, `sell.cancellation` | 1.0 |
+| `ORDER_RETURN_ACTIVITY` | `sell.return.read`, `sell.return` | 1.0 |
+| `ORDER_INQUIRY_ACTIVITY` | `sell.inquiry.read`, `sell.inquiry` | 1.0 |
+| `ITEM_MARKED_SHIPPED` | `commerce.shipping` | 1.0 |
+| `NEW_MESSAGE` | `commerce.message` | 1.0 |
+
+So a push subscription for cancellations, returns or inquiries needs a scope SellerHill does **not** request today (`sell.cancellation*`, `sell.return*`, `sell.inquiry*`): it would have to be enabled on the keyset first and every seller would have to reconnect. Polling needs neither. `createSubscription` itself needs `commerce.notification.subscription` and a body of `topicId`, `status` (ENABLED/DISABLED), `destinationId`, `payload` { `format`, `schemaVersion`, `deliveryProtocol` }.
+
+**Shared daily quotas that bound these** (production `getRateLimits`, 2026-09-30): `sell.fulfillment` 100,000 · `sell.fulfillment.refund` 100,000 · `post-order.return` 5,000 · `post-order.cancellation` 5,000 · `post-order.inquiry` 5,000 · `post-order.casemanagement` 5,000 · `commerce.notification` 10,000 · `payoutapi.sell.finances` 15,000 · Trading `GetOrders` 5,000.

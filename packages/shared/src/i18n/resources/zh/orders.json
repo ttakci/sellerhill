@@ -133,7 +133,8 @@
         "subscription_suspended": "订阅已暂停",
         "listing_over_plan_limit": "商品刊登超出套餐上限",
         "order_already_fulfilled": "已发货，无需采购",
-        "order_not_paid": "等待买家付款"
+        "order_not_paid": "等待买家付款",
+        "order_cancelled": "已在 eBay 取消，无需采购"
       },
       "reasonLabel": "原因：{{reason}}",
       "amazonCancelledBadge": "Amazon 已取消",
@@ -217,7 +218,13 @@
       "unit": "件",
       "sku": "SKU",
       "na": "不适用",
-      "ebayStatus": "eBay 状态"
+      "ebayStatus": "eBay 状态",
+      "ebayCancelledOn": "eBay 取消日期",
+      "refundGroup": "已退款给买家",
+      "refundedAmount": "退款金额",
+      "refundedOn": "退款日期",
+      "refundNote": "这是 eBay 报告的退款金额，不包含 eBay 代收的销售税，因此买家实际收到的退款可能更多。",
+      "cancelledAmazonOpenAction": "此订单已在 Amazon 下单采购。请在 Amazon 上取消；如已发货，请办理退货。"
     },
     "modal": {
       "title": "填写 Amazon 订单信息",

@@ -104,6 +104,20 @@
         "description_other": "{{count}} pedidos se enviaron en Amazon hace más de {{hours}} horas pero no se han marcado como enviados en eBay, porque sus números de seguimiento no se pudieron convertir. Nunca enviamos a tus compradores los números de seguimiento originales de Amazon. Resuelve la causa y se enviarán automáticamente; mientras tanto, corren el riesgo de defectos por envío tardío.",
         "action": "Ver pedidos"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay canceló una venta que ya compraste en Amazon",
+        "description_one": "{{count}} pedido fue cancelado en eBay en los últimos {{days}} días, pero el pedido de Amazon hecho para él sigue abierto. Ya nadie espera ese artículo: cancela el pedido de Amazon o devuelve el artículo si ya se envió.",
+        "description_many": "{{count}} pedidos fueron cancelados en eBay en los últimos {{days}} días, pero los pedidos de Amazon hechos para ellos siguen abiertos. Ya nadie espera esos artículos: cancela los pedidos de Amazon o devuelve los artículos si ya se enviaron.",
+        "description_other": "{{count}} pedidos fueron cancelados en eBay en los últimos {{days}} días, pero los pedidos de Amazon hechos para ellos siguen abiertos. Ya nadie espera esos artículos: cancela los pedidos de Amazon o devuelve los artículos si ya se enviaron.",
+        "action": "Revisar pedidos"
+      },
+      "return_seller_action_due": {
+        "title": "Devoluciones que esperan tu respuesta",
+        "description_one": "{{count}} devolución tiene un paso que eBay espera de ti. Responde en eBay antes de la fecha límite que aparece en la página Devoluciones.",
+        "description_many": "{{count}} devoluciones tienen un paso que eBay espera de ti. Responde en eBay antes de las fechas límite que aparecen en la página Devoluciones.",
+        "description_other": "{{count}} devoluciones tienen un paso que eBay espera de ti. Responde en eBay antes de las fechas límite que aparecen en la página Devoluciones.",
+        "action": "Ver devoluciones"
+      },
       "ebay_account_disconnected": {
         "title": "Una tienda de eBay perdió su conexión",
         "description_one": "{{count}} tienda ya no está autorizada. La sincronización de pedidos, el repricing y la publicación están detenidos para ella hasta que vuelvas a conectarla.",

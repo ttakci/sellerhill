@@ -25,6 +25,8 @@ import {
   EbayConversationType,
   EbayMarketplaceId,
   EbayMessageDto,
+  EbayReturnReasonType,
+  EbayReturnSellerActivity,
   EbayUnreadCountDto,
   EntitlementState,
   ListingFailureCode,
@@ -37,6 +39,7 @@ import {
   OrderStage,
   OrderStatus,
   deriveOrderStage,
+  deriveReturnBucket,
   PolicyType,
   ProfitBasis,
   SourceFetchOutcome,
@@ -60,6 +63,7 @@ import {
   type DashboardDataDto,
   type DashboardHistoryMonth,
   type EbayBusinessPolicyDto,
+  type EbayReturnDto,
   type ListingDto,
   type ListingJobDto,
   type ListingJobItemDto,
@@ -1030,6 +1034,198 @@ function buildOrders(): OrderDto[] {
 }
 
 export const DEMO_ORDERS: OrderDto[] = buildOrders();
+
+/* ── eBay returns ─────────────────────────────────────────────────────── */
+
+/**
+ * Returns are filed against orders the demo already shows, so order ids,
+ * products and stores line up with the Orders page. `state` / `status` /
+ * `reason` are real values of eBay's Post-Order enums. The bucket is derived
+ * by the shared `deriveReturnBucket`, never typed in, so every bucket the page
+ * can render is present and none can contradict its own fields.
+ */
+const RETURN_SEEDS: Array<{
+  state: string;
+  status: string;
+  reason: string;
+  reasonType: EbayReturnReasonType;
+  comment: string | null;
+  /** eBay `ActivityOptionEnum` — deliberately a string: one seed carries a value the page does not localize. */
+  activity: string | null;
+  /** Hours from now until eBay's response deadline (negative = already missed). */
+  respondInHours: number | null;
+  refunded: boolean;
+  /** False = filed against an eBay order this account does not hold: no product, no link. */
+  knownOrder: boolean;
+}> = [
+  {
+    // Deadline missed — the one row that must read red.
+    state: 'RETURN_REQUESTED',
+    status: 'RETURN_REQUESTED',
+    reason: 'NOT_AS_DESCRIBED',
+    reasonType: EbayReturnReasonType.SNAD,
+    comment: 'The colour is much darker than in the photos. I would like to send it back.',
+    activity: EbayReturnSellerActivity.SELLER_APPROVE_REQUEST,
+    respondInHours: -6,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'ITEM_DELIVERED',
+    status: 'ITEM_DELIVERED',
+    reason: 'NO_LONGER_NEED_ITEM',
+    reasonType: EbayReturnReasonType.REMORSE,
+    comment: 'I no longer need it. It was sent back unopened.',
+    activity: EbayReturnSellerActivity.SELLER_ISSUE_REFUND,
+    respondInHours: 30,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'RETURN_REQUESTED',
+    status: 'RETURN_REQUESTED',
+    reason: 'ARRIVED_DAMAGED',
+    reasonType: EbayReturnReasonType.SNAD,
+    comment:
+      'The box arrived crushed and one corner of the item is cracked. I have photos of the packaging and of the damage if you need them before deciding.',
+    activity: EbayReturnSellerActivity.REMINDER_SELLER_TO_RESPOND,
+    respondInHours: 52,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    // An activity value the page does not localize: it must read "Respond on
+    // eBay", never the raw enum. eBay set no deadline on this one.
+    state: 'RETURN_REQUESTED',
+    status: 'RETURN_REQUESTED',
+    reason: 'ORDERED_WRONG_ITEM',
+    reasonType: EbayReturnReasonType.REMORSE,
+    comment: 'I ordered the wrong size by mistake.',
+    activity: 'SELLER_SEND_MESSAGE',
+    respondInHours: null,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'ITEM_DELIVERED',
+    status: 'ESCALATED',
+    reason: 'DEFECTIVE_ITEM',
+    reasonType: EbayReturnReasonType.SNAD,
+    comment: 'It stopped working after two days.',
+    activity: null,
+    respondInHours: null,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'ITEM_READY_TO_SHIP',
+    status: 'READY_FOR_SHIPPING',
+    reason: 'WRONG_SIZE',
+    reasonType: EbayReturnReasonType.REMORSE,
+    comment: 'Too small for what I needed.',
+    activity: null,
+    respondInHours: null,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'ITEM_SHIPPED',
+    status: 'ITEM_SHIPPED',
+    reason: 'BUYER_CANCEL_ORDER',
+    reasonType: EbayReturnReasonType.CANCEL,
+    comment: null,
+    activity: null,
+    respondInHours: null,
+    refunded: false,
+    knownOrder: true,
+  },
+  {
+    state: 'CLOSED',
+    status: 'CLOSED',
+    reason: 'FOUND_BETTER_PRICE',
+    reasonType: EbayReturnReasonType.REMORSE,
+    comment: 'Found the same item cheaper elsewhere.',
+    activity: null,
+    respondInHours: null,
+    refunded: true,
+    knownOrder: true,
+  },
+  {
+    state: 'CLOSED',
+    status: 'CLOSED',
+    reason: 'NO_REASON',
+    reasonType: EbayReturnReasonType.UNKNOWN,
+    comment: null,
+    activity: null,
+    respondInHours: null,
+    refunded: true,
+    knownOrder: false,
+  },
+];
+
+function buildReturns(): EbayReturnDto[] {
+  const now = new Date();
+  // Shipped or completed, matched to a listing, and old enough to have arrived.
+  const cutoff = isoDaysAgo(5);
+  const returnable = DEMO_ORDERS.filter(
+    (o) =>
+      o.isTracked && (o.status === OrderStatus.SHIPPED || o.status === OrderStatus.COMPLETED) && o.createdAt <= cutoff
+  );
+
+  return RETURN_SEEDS.map((seed, k) => {
+    const order = returnable[(k * 2 + 1) % returnable.length];
+    const orderIndex = DEMO_ORDERS.indexOf(order);
+    const respondBy =
+      seed.respondInHours === null ? null : new Date(now.getTime() + seed.respondInHours * 3600000).toISOString();
+    const refund = round2(order.salePrice + order.saleShipping);
+
+    return {
+      id: `demo-return-${k + 1}`,
+      returnId: String(5012345678 + k * 7919),
+      // Same split the demo Orders page uses for its store filter.
+      ebayAccountId: orderIndex % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
+      ebayOrderId: seed.knownOrder ? order.ebayOrderId : `13-${20480 + k * 17}-${51200 + k * 3}`,
+      orderId: seed.knownOrder ? order.id : null,
+      ebayItemId: seed.knownOrder ? order.product?.ebayItemId ?? null : `1${255900000000 + k * 211}`,
+      returnQuantity: order.product?.quantity ?? 1,
+      bucket: deriveReturnBucket(
+        {
+          state: seed.state,
+          status: seed.status,
+          sellerActivityDue: seed.activity,
+          sellerRespondBy: respondBy,
+          // The demo is always "just synced", so nothing derives as unconfirmed.
+          lastSyncedAt: now,
+        },
+        now
+      ),
+      state: seed.state,
+      status: seed.status,
+      reason: seed.reason,
+      reasonType: seed.reasonType,
+      buyerComment: seed.comment,
+      buyerLoginName: order.buyerUsername ?? null,
+      sellerActivityDue: seed.activity,
+      sellerRespondBy: respondBy,
+      estimatedRefundAmount: refund,
+      actualRefundAmount: seed.refunded ? refund : null,
+      currency: DEMO_CURRENCY,
+      // Opened a few days after the sale, once the parcel had arrived.
+      createdOnEbayAt: new Date(new Date(order.createdAt).getTime() + 4 * 86400000).toISOString(),
+      lastSyncedAt: isoHoursAgo(1),
+      product:
+        seed.knownOrder && order.product
+          ? {
+              title: order.product.title,
+              imageUrl: order.product.imageUrl ?? null,
+              asin: order.product.asin ?? null,
+            }
+          : null,
+    };
+  });
+}
+
+export const DEMO_RETURNS: EbayReturnDto[] = buildReturns();
 
 /* ── Dashboard ────────────────────────────────────────────────────────── */
 

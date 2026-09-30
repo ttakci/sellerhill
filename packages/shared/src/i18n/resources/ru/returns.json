@@ -1,0 +1,98 @@
+{
+  "returns": {
+    "title": "Возвраты",
+    "subtitle_one": "{{count}} возврат",
+    "subtitle_few": "{{count}} возврата",
+    "subtitle_many": "{{count}} возвратов",
+    "subtitle_other": "{{count}} возврата",
+    "loading": "Загружаем возвраты…",
+    "notice": "Отвечайте на возвраты на eBay. Здесь видно, что от вас требуется и к какому сроку.",
+    "tabs": {
+      "all": "Все",
+      "action": "Требуют действий",
+      "in_progress": "В работе",
+      "closed": "Закрытые",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Статус возврата"
+    },
+    "filters": {
+      "search": "Поиск по номеру возврата, заказа или товару…",
+      "allStores": "Все магазины",
+      "clear": "Сбросить",
+      "resultCount_one": "{{count}} результат",
+      "resultCount_few": "{{count}} результата",
+      "resultCount_many": "{{count}} результатов",
+      "resultCount_other": "{{count}} результата"
+    },
+    "columns": {
+      "product": "Товар",
+      "return": "Возврат",
+      "status": "Статус",
+      "due": "Что требуется",
+      "reason": "Причина",
+      "refund": "Возврат средств",
+      "opened": "Открыт"
+    },
+    "bucket": {
+      "unconfirmed": "Не подтверждён",
+      "action_overdue": "Срок истёк",
+      "action_due": "Требуется действие",
+      "escalated": "Передан в eBay",
+      "in_progress": "В работе",
+      "closed": "Закрыт"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay давно не подтверждал этот возврат, поэтому его последнее известное состояние могло устареть. Проверьте его на eBay.",
+      "action_overdue": "Срок, к которому eBay ждал вашего ответа, уже прошёл.",
+      "action_due": "eBay ждёт от вас действия по этому возврату.",
+      "escalated": "Этот возврат переведён в спор на eBay.",
+      "in_progress": "Возврат открыт, сейчас от вас ничего не требуется.",
+      "closed": "eBay закрыл этот возврат."
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "Одобрите запрос на возврат",
+      "SELLER_DECLINE_REQUEST": "Отклоните запрос на возврат",
+      "SELLER_ISSUE_REFUND": "Оформите возврат средств",
+      "SELLER_MARK_AS_RECEIVED": "Отметьте возвращённый товар как полученный",
+      "SELLER_MARK_REFUND_SENT": "Отметьте возврат средств как отправленный",
+      "SELLER_OFFER_PARTIAL_REFUND": "Предложите частичный возврат средств",
+      "SELLER_PRINT_SHIPPING_LABEL": "Распечатайте транспортную этикетку",
+      "SELLER_PROVIDE_LABEL": "Предоставьте транспортную этикетку",
+      "SELLER_PROVIDE_RMA": "Сообщите покупателю номер RMA",
+      "SELLER_RETRY_REFUND": "Повторите возврат средств",
+      "REMINDER_FOR_REFUND": "Верните деньги покупателю",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "Верните деньги покупателю (товар обратно не ожидается)",
+      "REMINDER_FOR_RMA": "Напоминание об RMA: ответьте на eBay",
+      "REMINDER_SELLER_TO_RESPOND": "Ответьте на запрос о возврате",
+      "other": "Ответьте на eBay"
+    },
+    "dueBy": "до {{date}}",
+    "reasonType": {
+      "CANCEL": "Отмена после отправки",
+      "INSTORE": "Возврат в магазин",
+      "REMORSE": "Покупатель передумал",
+      "SNAD": "Не соответствует описанию",
+      "UNKNOWN": "Причина не указана"
+    },
+    "refund": {
+      "refunded": "Возвращено",
+      "estimated": "Ориентировочно"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "Заказ",
+    "viewOrder": "Открыть заказ",
+    "unknownProduct": "Неизвестный товар",
+    "empty": {
+      "title": "Возвратов пока нет",
+      "description": "Возвраты, которые покупатели открывают на eBay, появятся здесь."
+    },
+    "emptyFiltered": {
+      "title": "Нет возвратов, соответствующих фильтрам",
+      "description": "Попробуйте другую вкладку, магазин или запрос.",
+      "action": "Сбросить фильтры"
+    }
+  }
+}

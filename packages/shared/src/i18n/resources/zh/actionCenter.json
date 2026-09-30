@@ -90,6 +90,16 @@
         "description_other": "有 {{count}} 笔订单在 {{hours}} 多小时前已在 Amazon 发货，但因物流单号无法转换，尚未在 eBay 标记为已发货。我们绝不会把原始的 Amazon 物流单号发给您的买家。解决原因后，订单会自动发货，在此之前存在延迟发货缺陷的风险。",
         "action": "查看订单"
       },
+      "order_cancelled_amazon_open": {
+        "title": "eBay 取消了一笔您已在 Amazon 采购的订单",
+        "description_other": "最近 {{days}} 天内有 {{count}} 笔订单在 eBay 被取消，但为其下的 Amazon 订单仍未关闭。已经没有买家在等这些商品——请取消 Amazon 订单；如已发货，请办理退货。",
+        "action": "查看订单"
+      },
+      "return_seller_action_due": {
+        "title": "等待您回复的退货",
+        "description_other": "有 {{count}} 笔退货需要您完成 eBay 要求的下一步。请在“退货”页面显示的截止时间前到 eBay 处理。",
+        "action": "查看退货"
+      },
       "ebay_account_disconnected": {
         "title": "有 eBay 店铺失去了连接",
         "description_other": "有 {{count}} 个店铺已不再获得授权。在您重新连接之前，这些店铺的订单同步、调价和发布都已停止。",

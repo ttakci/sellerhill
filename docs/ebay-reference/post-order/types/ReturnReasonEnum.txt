@@ -1,0 +1,332 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ReturnReasonEnum.html
+Fetched: 2026-09-30 (text-extracted)
+
+ReturnReasonEnum - API Reference - Post-Order API
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+eBay Post-Order APIVersion 2.10.0
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# ReturnReasonEnum
+
+This enumerated type lists the possible values that the buyer can use when creating a return request or draft with the POST /post-order/v2/return or POST /post-order/v2/return/draft methods.
+
+Types that use ReturnReasonEnum:
+
+ReturnCreationInfoType,
+ReturnEligibilityItemType,
+ReturnRequestType
+
+Calls that use one or more values of ReturnReasonEnum:
+
+/post-order/v2/return POST,
+/post-order/v2/return/search GET,
+/post-order/v2/return/{returnId} GET
+
+## Enumeration Values
+
+Value |
+Description |
+
+ARRIVED_DAMAGED |
+This enumeration value indicates the buyer wants to return the item because the item arrived damaged. |
+
+ARRIVED_LATE |
+This enumeration value indicates the buyer wants to return the item because the item arrived late, as defined by the estimated shipping time window. |
+
+BUYER_CANCEL_ORDER |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+BUYER_NO_SHOW |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+BUYER_NOT_SCHEDULED |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+BUYER_REFUSED_TO_PICKUP |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+CUSTOMIZED |
+This enumeration value indicates that the item is being returned to the seller after the authentication partner deemed that the item has been customized, and customized items are not eligible for the Authenticity Guarantee program. |
+
+DEFECTIVE_ITEM |
+This enumeration value indicates the buyer wants to return the item because the item is defective. |
+
+DIFFERENT_FROM_LISTING |
+This enumeration value indicates the buyer wants to return the item because the buyer feels that the actual item is a lot different than the item portrayed in the listing. |
+
+DOES_NOT_FIT |
+This enumeration value indicates that a Parts & Accessory item is being returned by a buyer because the item does not fit the buyer's vehicle.
+
+Important! If this return reason is returned, the buyer will be eligible for a free return shipping label provided by eBay, but the seller must use the Process Return Request method to provide a Return Merchandise Authorization (RMA) number before eBay will generate and provide the free return shipping label to the buyer. |
+
+EXPIRED_ITEM |
+This enumeration value indicates the buyer wants to return the item because the expiration date stamped on the product has been surpassed. This reason is only appicable to food items, or other items that have expiration dates. |
+
+FAKE_OR_COUNTERFEIT |
+This enumeration value indicates the buyer wants to return the item because the item may possibly be inauthentic or counterfeit. |
+
+FOUND_BETTER_PRICE |
+This enumeration value indicates the buyer wants to return the item because the buyer found a better price for the item elsewhere. |
+
+IN_STORE_RETURN |
+This enumeration value indicates the buyer returned an In-Store Pickup item. This value only applies to In-Store Pickup orders. |
+
+MISCATEGORIZED |
+This enumeration value indicates that the item is being returned to the seller after the authentication partner deemed that the item was miscategorized, and is not actually eligible as an Authenticity Guarantee item. |
+
+MISSING_PARTS |
+This enumeration value indicates the buyer wants to return the item because the buyer discovered that the item was missing one or more parts. |
+
+NO_LONGER_NEED_ITEM |
+This enumeration value indicates the buyer wants to return the item because the buyer no longer wants the item. |
+
+NO_REASON |
+This enumeration value indicates the buyer wants to return the item for no particular reason. |
+
+NOT_AS_DESCRIBED |
+This enumeration value indicates the buyer wants to return the item because the received item does not match the item's description in the listing. |
+
+ORDERED_ACCIDENTALLY |
+This enumeration value indicates the buyer wants to return the item because the buyer accidentally purchased the item. |
+
+ORDERED_DIFFERENT_ITEM |
+This enumeration value indicates the buyer wants to return the item because the buyer received an item that was the wrong item completely. |
+
+ORDERED_WRONG_ITEM |
+This enumeration value indicates the buyer wants to return the item because the wrong item was purchased by mistake. |
+
+OTHER |
+This enumeration value indicates the return reason was not classified, or is unknown. |
+
+OUT_OF_STOCK |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+RETURNING_GIFT |
+This enumeration value indicates the buyer wants to return the item because the item was a gift that they do not want. |
+
+VALET_DELIVERY_ISSUES |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+VALET_UNAVAILABLE |
+THIS ENUMERATION VALUE IS DEPRECATED. |
+
+WITHDRAW_FROM_PURCHASE_CONTRACT |
+This enumeration value is returned if the buyer has withdrawn from the purchase contract for the item. This value is only supported for eligible EU returns. |
+
+WRONG_SIZE |
+This enumeration value indicates the buyer wants to return the item because the item (e.g. clothing) is the wrong size. |
+
+* See the Enumeration Index to see exact use of each enumeration value in the API.
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2026 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

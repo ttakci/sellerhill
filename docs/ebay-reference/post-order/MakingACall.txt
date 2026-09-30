@@ -1,0 +1,415 @@
+Source: https://developer.ebay.com/Devzone/post-order/concepts/MakingACall.html
+Fetched: 2026-09-30 (text-extracted)
+
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+
+Making a Call - eBay Post-Order API Reference
+
+eBay Post-Order API
+
+-
+Join
+
+-
+About the Developers Program
+
+-
+Benefits
+
+-
+Policies
+
+-
+API License Agreement
+
+-
+DevelopNew
+
+-
+Get Started
+
+-
+Authorization
+
+-
+Using eBay RESTful APIs
+
+-
+API Call Limits
+
+-
+API Deprecations
+
+-
+API Site Status
+
+-
+Selling Apps
+
+-
+Listing Management
+
+-
+Selling Metadata
+
+-
+Account Management
+
+-
+Order Management
+
+-
+Communication
+
+-
+Marketing and Promotions
+
+-
+Analytics and Reporting
+
+-
+Other APIs
+
+-
+Buying Apps
+
+-
+Inventory Discovery & Refresh
+
+-
+Marketing and Discounts
+
+-
+Marketplace Metadata
+
+-
+Checkout/Bid
+
+-
+Research APIs
+
+-
+Other APIs
+
+-
+Apps Settings & Insights
+
+-
+SDKs & Widgets
+
+-
+Tools
+
+-
+
+eBay Sandbox
+
+-
+Create Test Users
+
+-
+Reset Password
+
+-
+Sandbox Status
+
+-
+API Explorer
+
+-
+WSDL Pruner
+
+-
+Grow
+
+-
+Application Growth Check
+
+-
+Affiliate Program
+
+-
+Loyalty Program
+
+-
+Events
+
+-
+Awards
+
+-
+Updates
+
+-
+API updates
+
+-
+Newsletter
+
+-
+Blog
+
+-
+Support
+
+-
+API Status
+
+-
+FAQs
+
+-
+
+Developer Community Forum
+
+-
+Knowledge Base
+
+-
+Developer Account Support
+
+-
+Developer Technical Support
+
+-
+
+-
+Application Keysets
+
+-
+User Access Tokens
+
+-
+
+Alerts and Notifications
+
+-
+Application Reports
+
+-
+Profile & contacts
+
+-
+
+- User Guide
+
+- Making a Call
+
+- API Reference
+
+- Release Notes
+
+# Post-Order API – Making a Call
+
+Post Order is a RESTful API and you can follow the normal procedure for making a REST call when employing the operations in this API.
+
+This document gives an overview of how to put together a Post Order call. It describes the operation HTTP methods, endpoints, HTTP headers, and payload formats. The document also covers general information you might find useful when making Post Order calls. The guide contains the following sections:
+
+- Call Structure
+
+- Base Endpoints
+
+- HTTP Headers
+
+- Request and Response Payload Formats
+
+- A Call Example
+
+## Call Structure
+
+Create a call to the Post-Order API by combining the following elements:
+
+- HTTP Method—Each request to an Post-Order API operation consists of an HTTP method plus a URI. The URI is often referred to as the endpoint of the operation. Post Order operations make use of the following HTTP methods: GET, POST, PUT, and DELETE. Refer to the details of each call in the Call Reference for the needed method and the associated endpoint.
+
+- Endpoint—Post-Order API requests uses endpoints that point to either the production server or the Sandbox testing environment. The complete endpoint for a Post Order operation is made up of the base endpoint plus the URI to the operation's resource.
+
+- HTTP Headers—Each Post-Order API call requires the Authorization and X-EBAY-C-MARKETPLACE-ID HTTP headers. See HTTP Headers for a complete list of the supported headers.
+
+- Payload—Format your payload as either a JSON or XML object, depending on how you've configured your HTTP headers. See the Call Reference for the details on the fields you can supply in the payload for each of the Post Order operations. Some operations in the Post-Order API have required input fields that you must supply in the payload of the call. Fields that are not marked as being required are optional.
+
+Note: The Developers Program Knowledge Base is a good source of code samples. To find code samples and other useful information for the Post-Order API, select Post-Order API from the Search By Product drop-down menu and click Search. |
+
+## Base Endpoints
+
+While each API call has a unique endpoint, all calls share a common base endpoint to which the unique URI endpoint for the call is appended.
+
+The API supports two environments, one for testing and one for production use. The base endpoints for these environments are as follows:
+
+Sandbox base endpoint:
+
+https://api.sandbox.ebay.com
+
+Production base endpoint:
+
+https://api.ebay.com
+
+Note: When making calls, be sure you're using an authorization token that is generated for the environment you are addressing. |
+
+## HTTP Headers
+
+You must include a set of HTTP headers in each Post Order call you make. The following table lists both the required header values, along with the optional headers:
+
+Header |
+Description |
+Applicable Values |
+
+Authorization |
+The Authentication token validates the caller has permission to access the eBay servers.
+Tokens often contain the consent needed to make a call on behalf of the user for whom the call is being made. The Post Order API accepts both OAuth and Auth'n'Auth tokens as input for this header. - Auth'n'Auth – Prefix a valid eBay token with the word "TOKEN " (with a space).
+For more on Auth'n'Auth tokens, see Getting Tokens.
+- OAuth – Prefix a valid User access token with the string "IAF " (with a space).
+For more information on OAuth tokens, see OAuth access tokens.
+
+Required |
+TOKEN <authorization-token-value> |
+
+Content-Type |
+The MIME type of the body of the request. Must be JSON.
+Required |
+application/json |
+
+X-EBAY-C-MARKETPLACE-ID |
+The global ID of the eBay site on which the transaction took place.
+Required |
+The full list of enumeration values that represent eBay marketplaces are defined in the MarketplaceIdEnum type definition. Examples of marketplaces include:
+EBAY_US, EBAY_UK, EBAY_DE, EBAY_AU, and EBAY_CA. |
+
+Accept |
+The media type for the response. Defaults to JSON (the only supported media type). |
+application/json |
+
+Important! The Authorization header requires you to supply a current and valid authorization token. For details on generating a valid token, see Getting Tokens. |
+
+## Request and Response Payload Formats
+
+Post Order supports JSON as the input and output format. See HTTP Headers for details on specifying the payload format.
+
+In most cases, the standard JSON grammar rules are followed, as described in RFC 4627. However, you should be aware of the following special case.
+
+For the most part, formatting JSON payloads is straight forward. However, when a field has both an attribute and a value, the value requires a special JSON representation. For example, you might encounter a call that requires the use of an attribute to help specify the details of a field (as in a product ID, where it is given both a type attribute, as well as a value: <productId type=ISBN>1234567890</productId>). In JSON requests and responses, attributes like this are preceded by an at-sign ("@"), and the product ID values are represented with a "__value__" name.
+
+Here's an example of how to specify the product ID in JSON:
+
+"productId": {
+"@type":"ISBN" ,
+"__value__":"1********0"
+} ,
+
+Back to top
+
+## A Call Example
+
+To put it all together, here is an example cancellation/search call that returns all the open cancellations associated with an account.
+
+### The Request
+
+As covered above, combine an HTTP method, an endpoint, the HTTP headers, and a payload to create a call.
+
+#### The Operation
+
+The operation is the HTTP method plus a URI endpoint. The following example operation makes use of the Sandbox environment:
+
+GET https://api.sandbox.ebay.com/post-order/v2/cancellation/search
+
+#### The Headers
+
+The following headers (1) set JSON as the request and response payload formats (even though search has no request payload), (2) supply the authentication token needed to make the call, and (3) set EBAY_US as the marketplace:
+
+Header |
+Value |
+
+Authorization |
+TOKEN <authorization-token-value> |
+
+X-EBAY-C-MARKETPLACE-ID |
+EBAY_US |
+
+Content-Type |
+application/json |
+
+Accept |
+application/json |
+
+#### The Request Payload
+
+The cancellation/search operation does not use a request payload.
+
+### The Response
+
+The response payload from a successful cancellation/search request displays all the current cancellations associated with the account. A JSON response resembles the following:
+
+{
+"cancellations": [
+{
+"cancelId": "5********2",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********1-9********7",
+"requestorType": "SELLER",
+"cancelReason": "OUT_OF_STOCK_OR_CANNOT_FULFILL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_WITH_REFUND",
+"cancelCloseReason": "FULL_REFUNDED",
+"paymentStatus": "UNKNOWN",
+"requestRefundAmount": {
+"value": 0,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-05-18T22:42:11.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-05-18T22:42:11.000Z",
+}
+},
+{
+"cancelId": "5********3",
+"marketplaceId": "EBAY_US",
+"legacyOrderId": "1**********3-9********7",
+"requestorType": "SELLER",
+"cancelReason": "OUT_OF_STOCK_OR_CANNOT_FULFILL",
+"cancelState": "CLOSED",
+"cancelStatus": "CANCEL_CLOSED_WITH_REFUND",
+"cancelCloseReason": "FULL_REFUNDED",
+"paymentStatus": "PAYPAL_PAID",
+"requestRefundAmount": {
+"value": 2.46,
+"currency": "USD"
+},
+"cancelRequestDate": {
+"value": "2015-06-13T00:32:09.000Z",
+},
+"cancelCloseDate": {
+"value": "2015-06-13T00:37:06.000Z",
+}
+}
+],
+"total": 2,
+"paginationOutput": {
+"offset": 1,
+"limit": 6,
+"totalPages": 1,
+"totalEntries": 2
+}
+}
+
+-->
+
+FAQs
+Developer Community Forum
+Developer Technical Support
+APIs
+API License Agreement
+
+Copyright 1999-2025 eBay Inc. All rights reserved.
+User agreement,
+Privacy policy,
+Cookies.

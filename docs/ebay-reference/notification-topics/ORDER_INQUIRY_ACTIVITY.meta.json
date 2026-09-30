@@ -1,0 +1,1047 @@
+{
+  "slug": "order_inquiry_activity",
+  "deliveryChannel": "HTTPS webhook (POST)",
+  "eventLabel": "ORDER_INQUIRY_ACTIVITY",
+  "name": "ORDER_INQUIRY_ACTIVITY",
+  "mdGenerationStatus": "success",
+  "sample": [],
+  "summary": "<p><strong>OAuth Scope</strong><br /><span>In addition to the standard OAuth scope (<a href=\"https://api.ebay.com/oauth/api_scope\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">https://api.ebay.com/oauth/api_scope</a>), this topic requires an access token created using the Authorization Code Grant flow with the following scope:<br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.inquiry\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\">https://api.ebay.com/oauth/api_scope/sell.inquiry</a><a href=\"https://api.ebay.com/oauth/api_scope/sell.return.read\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\"></a><br /><a href=\"https://api.ebay.com/oauth/api_scope/sell.inquiry.read\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\">https://api.ebay.com/oauth/api_scope/sell.inquiry.read</a><br /></span><span></span></p>\r\n<p><span>See <a href=\"https://developer.ebay.com/develop/guides-v2/authorization#working-with-oauth-scopes\" class=\"external-link\" target=\"_blank\" rel=\"nofollow noopener\" title=\"Follow link\">Working with OAuth scopes</a> for more information.</span></p>",
+  "shortSummary": "This notification is sent to a seller when when an inquiry lifecycle activity occurs.",
+  "specVersion": "1.0.0",
+  "mdGenerationError": "",
+  "latestSpecHref": "/develop/api/spec/events/ORDER_INQUIRY_ACTIVITY.yaml",
+  "specSaveAsFileName": "ORDER_INQUIRY_ACTIVITY.yaml",
+  "documentation": {
+    "info": {
+      "title": "eBay Order Inquiry Activity Notifications",
+      "version": "1.0.0",
+      "description": "This contract defines the payload for eBay order inquiry activity notifications. The service dispatches notifications to users when an order inquiry lifecycle activity occurs or when a response reminder is generated for an order inquiry. Topic can be subscribed with buy and sell scope only.\n"
+    },
+    "schemas": {
+      "Metadata": {
+        "type": "object",
+        "description": "This type specifies the metadata included with the notification.",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "This is the unique identifier of the Notification topic."
+          },
+          "schemaVersion": {
+            "type": "string",
+            "description": "This specifies the version number of the topic schema."
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+            "default": "false"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "description": "This type includes information about the notification.",
+        "properties": {
+          "notificationId": {
+            "type": "string",
+            "description": "This is the unique identifier of the specific notification."
+          },
+          "eventDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+          },
+          "publishDate": {
+            "type": "string",
+            "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+          },
+          "publishAttemptCount": {
+            "type": "integer",
+            "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+          },
+          "data": {
+            "$ref": "#/components/schemas/OrderInquiryActivityData",
+            "description": "This container consists of specific information for the order inquiry activity notification."
+          }
+        }
+      },
+      "OrderInquiryActivityData": {
+        "type": "object",
+        "description": "This type defines the base payload for the ORDER_INQUIRY_ACTIVITY notification.",
+        "required": [
+          "activityType",
+          "activityDate",
+          "orderInquiry"
+        ],
+        "properties": {
+          "activityType": {
+            "$ref": "#/components/schemas/OrderInquiryActivityType",
+            "description": "The value returned in this field indicates the type of activity that occurred with the order inquiry."
+          },
+          "activityDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the order inquiry activity occurred. This date is returned as a UTC-formatted timestamp."
+          },
+          "orderInquiry": {
+            "$ref": "#/components/schemas/OrderInquiry",
+            "description": "This object contains detailed information on the order inquiry associated with the activity."
+          }
+        }
+      },
+      "OrderInquiryActivityType": {
+        "type": "string",
+        "description": "This enumeration type contains the list of order inquiry activity events.",
+        "enum": [
+          {
+            "value": "INQUIRY_CREATED",
+            "description": "This value indicates the order inquiry was opened/created."
+          },
+          {
+            "value": "INQUIRY_REFERRAL_CREATED",
+            "description": "This value indicates that  the inquiry has been referred to eBay Customer Support."
+          },
+          {
+            "value": "INQUIRY_REFERRAL_DECIDED",
+            "description": "This value indicates that a decision has been made on the order inquiry that was referred to eBay customer support."
+          },
+          {
+            "value": "INQUIRY_REFERRAL_ON_HOLD",
+            "description": "This value indicates that the order inquiry referral is on hold so that eBay customer support can gather further details before a decision outcome is reached."
+          },
+          {
+            "value": "INQUIRY_CLOSED",
+            "description": "This value indicates that the order inquiry was closed."
+          },
+          {
+            "value": "SELLER_RESPONSE_REMINDER",
+            "description": "This value indicates that the notification event is a reminder to the seller that an action is required on their part for the order inquiry."
+          }
+        ]
+      },
+      "OrderInquiry": {
+        "type": "object",
+        "description": "This type contains detailed information on the order inquiry associated with the activity.",
+        "required": [
+          "inquiryId",
+          "inquiryStatus",
+          "initiator",
+          "inquiryLineItems",
+          "type",
+          "seller"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/InquiryType",
+            "description": "The value returned in this field indicates the type of order inquiry associated with the event."
+          },
+          "inquiryId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order inquiry."
+          },
+          "inquiryStatus": {
+            "$ref": "#/components/schemas/InquiryStatus",
+            "description": "The value in this field represents the status of the order inquiry."
+          },
+          "initiator": {
+            "$ref": "#/components/schemas/Initiator",
+            "description": "The value returned in this field indicates the party who filed the inquiry, such as BUYER."
+          },
+          "openedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the order inquiry was opened. This date is returned as a UTC-formatted timestamp."
+          },
+          "closedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the date when the order inquiry was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed order inquiries."
+          },
+          "seller": {
+            "$ref": "#/components/schemas/Seller",
+            "description": "This object identifies the seller involved in the order inquiry."
+          },
+          "sellerAvailableActions": {
+            "$ref": "#/components/schemas/SellerAvailableActions",
+            "description": "This object describes the actions currently available to the seller in response to the order inquiry."
+          },
+          "inquiryCase": {
+            "$ref": "#/components/schemas/InquiryCase",
+            "description": "This object is only returned if the order inquiry has been referred to eBay customer support, and indicates the current status of the referral."
+          },
+          "inquiryRefund": {
+            "$ref": "#/components/schemas/InquiryRefund",
+            "description": "This object is used to indicate the current status of a refund that is due to the buyer for the order inquiry."
+          },
+          "inquiryLineItems": {
+            "type": "array",
+            "description": "This object identifies the line item and the order that is associated with the order inquiry.",
+            "items": {
+              "$ref": "#/components/schemas/InquiryLineItem"
+            }
+          }
+        }
+      },
+      "Seller": {
+        "type": "object",
+        "description": "This type is used to identify the seller involved in the order inquiry.",
+        "required": [
+          "userId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "This string is the public user identifier of the seller."
+          },
+          "username": {
+            "type": "string",
+            "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>"
+          }
+        }
+      },
+      "InquiryLineItem": {
+        "type": "object",
+        "description": "This type contains information on the order line item attached to the order inquiry.",
+        "required": [
+          "inquiryLineItemId",
+          "orderLineItemId",
+          "orderId"
+        ],
+        "properties": {
+          "inquiryLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order inquiry line item."
+          },
+          "orderLineItemId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order line item."
+          },
+          "orderId": {
+            "type": "string",
+            "description": "This string is the unique identifier of the order."
+          }
+        }
+      },
+      "SellerAvailableActions": {
+        "type": "object",
+        "description": "This type contains the actions currently available to the seller.",
+        "properties": {
+          "respondByAction": {
+            "$ref": "#/components/schemas/RespondByAction",
+            "description": "This object contains the primary action required from the seller and its due date."
+          },
+          "secondaryActions": {
+            "type": "array",
+            "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action.",
+            "items": {
+              "$ref": "#/components/schemas/InquiryAction"
+            }
+          }
+        }
+      },
+      "RespondByAction": {
+        "type": "object",
+        "description": "This type contains the primary action required from the seller and its due date.",
+        "properties": {
+          "respondAction": {
+            "$ref": "#/components/schemas/InquiryAction",
+            "description": "This component is an order inquiry action available to the seller."
+          },
+          "responseDueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "This string is the due date for completing the required seller action."
+          }
+        }
+      },
+      "InquiryAction": {
+        "type": "string",
+        "description": "This enumeration type contains the list of actions that can be taken by the seller to address an order inquiry.",
+        "enum": [
+          {
+            "value": "SEND_MESSAGE",
+            "description": "This value indicates that the seller can take the action of sending a message to the buyer to update the buyer on the whereabouts of the item."
+          },
+          {
+            "value": "PROVIDE_REFUND",
+            "description": "This value indicates that the seller can issue a refund for the item that is part of the order inquiry."
+          },
+          {
+            "value": "PROVIDE_TRACKING_INFO",
+            "description": "This value indicates that the seller can provide shipment or tracking information to help resolve the order inquiry."
+          },
+          {
+            "value": "REFER_INQUIRY_TO_EBAY",
+            "description": "This value indicates that the seller can refer or escalate the order inquiry to eBay for further review or handling."
+          }
+        ]
+      },
+      "InquiryStatus": {
+        "type": "string",
+        "description": "The value of this enumeration represents the lifecycle status of the order inquiry.",
+        "enum": [
+          {
+            "value": "OPEN",
+            "description": "This value indicates that the order inquiry is currently open and in progress."
+          },
+          {
+            "value": "CLOSED",
+            "description": "This value indicates that the order inquiry is closed."
+          }
+        ]
+      },
+      "InquiryCase": {
+        "type": "object",
+        "description": "This type is used to indicate the current status of an order inquiry that has been referred to eBay customer support.",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/InquiryCaseStatus",
+            "description": "The value returned in this field indicates the current status of an order inquiry case filed against an order inquiry."
+          }
+        }
+      },
+      "InquiryCaseStatus": {
+        "type": "string",
+        "description": "This enumeration type contains the list of possible values used to indicate the status of an order inquiry case.",
+        "enum": [
+          {
+            "value": "OPEN",
+            "description": "This value indicates that an order inquiry case filed against the order inquiry is currently open."
+          },
+          {
+            "value": "ON_HOLD",
+            "description": "This value indicates that an order inquiry case filed against the order inquiry is on hold. This state may occur if either the buyer or seller appeals a previous case decision, or it could just indicate that eBay customer support needs more time to research the case."
+          },
+          {
+            "value": "CLOSED",
+            "description": "This value indicates that an order inquiry case filed against the order inquiry has been closed."
+          }
+        ]
+      },
+      "InquiryRefund": {
+        "type": "object",
+        "description": "This enumeration type contains the different states that an order inquiry refund can be in.",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/InquiryRefundStatus",
+            "description": "The value returned in this field indicates the current status of any refund due to the buyer for the order inquiry."
+          }
+        }
+      },
+      "InquiryType": {
+        "type": "string",
+        "description": "This enumeration type defines the different types of order inquiries.",
+        "enum": [
+          {
+            "value": "ITEM_NOT_RECEIVED",
+            "description": "This value indicates that an Item Not Received (INR) inquiry has been filed against the line item. Buyers may open INR inquiries if they have not received their item within the expected delivery range and/or the seller has not provided any shipment tracking information."
+          }
+        ]
+      },
+      "Initiator": {
+        "type": "string",
+        "description": "The value of this enumeration indicates the party who filed the order inquiry.",
+        "enum": [
+          {
+            "value": "BUYER",
+            "description": "This value indicates that the buyer filed the order inquiry."
+          },
+          {
+            "value": "SELLER",
+            "description": "This value indicates that the seller filed the inquiry."
+          },
+          {
+            "value": "EBAY",
+            "description": "This value indicates that eBay filed the order inquiry."
+          }
+        ]
+      },
+      "InquiryRefundStatus": {
+        "type": "string",
+        "description": "The value of this enumeration indicates the refund lifecycle status associated with the order inquiry.",
+        "enum": [
+          {
+            "value": "PENDING",
+            "description": "This value indicates that the refund has been initiated and is pending."
+          },
+          {
+            "value": "PROCESSING",
+            "description": "This value indicates that the refund is currently being processed."
+          },
+          {
+            "value": "COMPLETED",
+            "description": "This value indicates that the refund has been completed successfully."
+          },
+          {
+            "value": "FAILED",
+            "description": "This value indicates that the refund failed and must be initiated once again."
+          },
+          {
+            "value": "PARTIALLY_REFUNDED",
+            "description": "This value indicates that the seller has successfully issued a partial refund."
+          }
+        ]
+      }
+    },
+    "channels": {
+      "ORDER_INQUIRY_ACTIVITY": {
+        "subscribe": {
+          "message": {
+            "$ref": "#/components/messages/message"
+          },
+          "bindings": {
+            "http": {
+              "type": "request",
+              "method": "POST",
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "Content-Type": {
+                    "type": "string",
+                    "enum": [
+                      "application/json"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "methods": {
+      "subscribe_ORDER_INQUIRY_ACTIVITY": {
+        "operationId": "subscribe_ORDER_INQUIRY_ACTIVITY",
+        "action": "subscribe",
+        "channel": "ORDER_INQUIRY_ACTIVITY",
+        "message": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "X-EBAY-SIGNATURE": {
+                "description": "The ECC message signature. This signature is used to process and validate the message payload.",
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/MetaData",
+                "description": "This component contains the metadata for the notification."
+              },
+              "notification": {
+                "$ref": "#/components/schemas/Notification",
+                "description": "This component contains the notification details."
+              }
+            }
+          }
+        },
+        "request": null,
+        "response": {
+          "rawSchema": {
+            "typeDetails": {
+              "type": "object",
+              "displayNameForType": "object"
+            },
+            "fields": [
+              {
+                "name": "metadata",
+                "description": "This component contains the metadata for the notification.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "MetaData",
+                  "displayNameForType": "MetaData"
+                }
+              },
+              {
+                "name": "notification",
+                "description": "This component contains the notification details.",
+                "occurrence": "Optional",
+                "typeDetails": {
+                  "type": "Notification",
+                  "displayNameForType": "Notification"
+                },
+                "fields": [
+                  {
+                    "name": "notificationId",
+                    "description": "This is the unique identifier of the specific notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "eventDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishDate",
+                    "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "string",
+                      "displayNameForType": "string"
+                    }
+                  },
+                  {
+                    "name": "publishAttemptCount",
+                    "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "integer",
+                      "displayNameForType": "integer"
+                    }
+                  },
+                  {
+                    "name": "data",
+                    "description": "This container consists of specific information for the order inquiry activity notification.",
+                    "occurrence": "Optional",
+                    "typeDetails": {
+                      "type": "OrderInquiryActivityData",
+                      "displayNameForType": "OrderInquiryActivityData"
+                    },
+                    "fields": [
+                      {
+                        "name": "activityType",
+                        "description": "The value returned in this field indicates the type of activity that occurred with the order inquiry.",
+                        "occurrence": "Required",
+                        "typeDetails": {
+                          "type": "OrderInquiryActivityType",
+                          "displayNameForType": "OrderInquiryActivityType"
+                        }
+                      },
+                      {
+                        "name": "activityDate",
+                        "description": "This string is the date when the order inquiry activity occurred. This date is returned as a UTC-formatted timestamp.",
+                        "occurrence": "Required",
+                        "typeDetails": {
+                          "type": "string",
+                          "displayNameForType": "string"
+                        }
+                      },
+                      {
+                        "name": "orderInquiry",
+                        "description": "This object contains detailed information on the order inquiry associated with the activity.",
+                        "occurrence": "Required",
+                        "typeDetails": {
+                          "type": "OrderInquiry",
+                          "displayNameForType": "OrderInquiry"
+                        },
+                        "fields": [
+                          {
+                            "name": "type",
+                            "description": "The value returned in this field indicates the type of order inquiry associated with the event.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "InquiryType",
+                              "displayNameForType": "InquiryType"
+                            }
+                          },
+                          {
+                            "name": "inquiryId",
+                            "description": "This string is the unique identifier of the order inquiry.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "inquiryStatus",
+                            "description": "The value in this field represents the status of the order inquiry.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "InquiryStatus",
+                              "displayNameForType": "InquiryStatus"
+                            }
+                          },
+                          {
+                            "name": "initiator",
+                            "description": "The value returned in this field indicates the party who filed the inquiry, such as BUYER.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "Initiator",
+                              "displayNameForType": "Initiator"
+                            }
+                          },
+                          {
+                            "name": "openedDate",
+                            "description": "This string is the date when the order inquiry was opened. This date is returned as a UTC-formatted timestamp.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "closedDate",
+                            "description": "This string is the date when the order inquiry was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed order inquiries.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "string",
+                              "displayNameForType": "string"
+                            }
+                          },
+                          {
+                            "name": "seller",
+                            "description": "This object identifies the seller involved in the order inquiry.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "Seller",
+                              "displayNameForType": "Seller"
+                            },
+                            "fields": [
+                              {
+                                "name": "userId",
+                                "description": "This string is the public user identifier of the seller.",
+                                "occurrence": "Required",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "username",
+                                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "sellerAvailableActions",
+                            "description": "This object describes the actions currently available to the seller in response to the order inquiry.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "SellerAvailableActions",
+                              "displayNameForType": "SellerAvailableActions"
+                            },
+                            "fields": [
+                              {
+                                "name": "respondByAction",
+                                "description": "This object contains the primary action required from the seller and its due date.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "RespondByAction",
+                                  "displayNameForType": "RespondByAction"
+                                },
+                                "fields": [
+                                  {
+                                    "name": "respondAction",
+                                    "description": "This component is an order inquiry action available to the seller.",
+                                    "occurrence": "Optional",
+                                    "typeDetails": {
+                                      "type": "InquiryAction",
+                                      "displayNameForType": "InquiryAction"
+                                    }
+                                  },
+                                  {
+                                    "name": "responseDueDate",
+                                    "description": "This string is the due date for completing the required seller action.",
+                                    "occurrence": "Optional",
+                                    "typeDetails": {
+                                      "type": "string",
+                                      "displayNameForType": "string"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "secondaryActions",
+                                "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "array",
+                                  "displayNameForType": "InquiryAction",
+                                  "of": "InquiryAction",
+                                  "displayNameForOf": "InquiryAction"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "inquiryCase",
+                            "description": "This object is only returned if the order inquiry has been referred to eBay customer support, and indicates the current status of the referral.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "InquiryCase",
+                              "displayNameForType": "InquiryCase"
+                            },
+                            "fields": [
+                              {
+                                "name": "status",
+                                "description": "The value returned in this field indicates the current status of an order inquiry case filed against an order inquiry.",
+                                "occurrence": "Required",
+                                "typeDetails": {
+                                  "type": "InquiryCaseStatus",
+                                  "displayNameForType": "InquiryCaseStatus"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "inquiryRefund",
+                            "description": "This object is used to indicate the current status of a refund that is due to the buyer for the order inquiry.",
+                            "occurrence": "Optional",
+                            "typeDetails": {
+                              "type": "InquiryRefund",
+                              "displayNameForType": "InquiryRefund"
+                            },
+                            "fields": [
+                              {
+                                "name": "status",
+                                "description": "The value returned in this field indicates the current status of any refund due to the buyer for the order inquiry.",
+                                "occurrence": "Optional",
+                                "typeDetails": {
+                                  "type": "InquiryRefundStatus",
+                                  "displayNameForType": "InquiryRefundStatus"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "inquiryLineItems",
+                            "description": "This object identifies the line item and the order that is associated with the order inquiry.",
+                            "occurrence": "Required",
+                            "typeDetails": {
+                              "type": "array",
+                              "displayNameForType": "array",
+                              "of": "InquiryLineItem",
+                              "displayNameForOf": "InquiryLineItem"
+                            },
+                            "fields": [
+                              {
+                                "name": "inquiryLineItemId",
+                                "description": "This string is the unique identifier of the order inquiry line item.",
+                                "occurrence": "Required",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderLineItemId",
+                                "description": "This string is the unique identifier of the order line item.",
+                                "occurrence": "Required",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              },
+                              {
+                                "name": "orderId",
+                                "description": "This string is the unique identifier of the order.",
+                                "occurrence": "Required",
+                                "typeDetails": {
+                                  "type": "string",
+                                  "displayNameForType": "string"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "operations": [
+      null
+    ],
+    "servers": [],
+    "document": {
+      "asyncapi": "2.0.0",
+      "info": {
+        "title": "eBay Order Inquiry Activity Notifications",
+        "version": "1.0.0",
+        "description": "This contract defines the payload for eBay order inquiry activity notifications. The service dispatches notifications to users when an order inquiry lifecycle activity occurs or when a response reminder is generated for an order inquiry. Topic can be subscribed with buy and sell scope only.\n"
+      },
+      "components": {
+        "messages": {},
+        "schemas": {
+          "Metadata": {
+            "type": "object",
+            "description": "This type specifies the metadata included with the notification.",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "This is the unique identifier of the Notification topic."
+              },
+              "schemaVersion": {
+                "type": "string",
+                "description": "This specifies the version number of the topic schema."
+              },
+              "deprecated": {
+                "type": "boolean",
+                "description": "This Boolean field indicates whether or not the topic is active or deprecated.",
+                "default": "false"
+              }
+            }
+          },
+          "Notification": {
+            "type": "object",
+            "description": "This type includes information about the notification.",
+            "properties": {
+              "notificationId": {
+                "type": "string",
+                "description": "This is the unique identifier of the specific notification."
+              },
+              "eventDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the even that triggered the notifications was sent to the recipient."
+              },
+              "publishDate": {
+                "type": "string",
+                "description": "This is the timestamp that indicates the date and time (in UTC format) when the notification was sent to the recipient."
+              },
+              "publishAttemptCount": {
+                "type": "integer",
+                "description": "This integer value indicates whether this is the first, second, or third attempt to send the notification to the recipient. When a notification is sent successfully the first time, the integer value returned will be 1."
+              },
+              "data": {
+                "$ref": "#/components/schemas/OrderInquiryActivityData",
+                "description": "This container consists of specific information for the order inquiry activity notification."
+              }
+            }
+          },
+          "OrderInquiryActivityData": {
+            "type": "object",
+            "description": "This type defines the base payload for the ORDER_INQUIRY_ACTIVITY notification.",
+            "properties": {
+              "activityType": {
+                "$ref": "#/components/schemas/OrderInquiryActivityType",
+                "description": "The value returned in this field indicates the type of activity that occurred with the order inquiry."
+              },
+              "activityDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the order inquiry activity occurred. This date is returned as a UTC-formatted timestamp."
+              },
+              "orderInquiry": {
+                "$ref": "#/components/schemas/OrderInquiry",
+                "description": "This object contains detailed information on the order inquiry associated with the activity."
+              }
+            }
+          },
+          "OrderInquiryActivityType": {
+            "type": "string",
+            "description": "This enumeration type contains the list of order inquiry activity events. | - **INQUIRY_CREATED**: This value indicates the order inquiry was opened/created. - **INQUIRY_REFERRAL_CREATED**: This value indicates that  the inquiry has been referred to eBay Customer Support. - **INQUIRY_REFERRAL_DECIDED**: This value indicates that a decision has been made on the order inquiry that was referred to eBay customer support. - **INQUIRY_REFERRAL_ON_HOLD**: This value indicates that the order inquiry referral is on hold so that eBay customer support can gather further details before a decision outcome is reached. - **INQUIRY_CLOSED**: This value indicates that the order inquiry was closed. - **SELLER_RESPONSE_REMINDER**: This value indicates that the notification event is a reminder to the seller that an action is required on their part for the order inquiry.",
+            "enum": [
+              "INQUIRY_CREATED",
+              "INQUIRY_REFERRAL_CREATED",
+              "INQUIRY_REFERRAL_DECIDED",
+              "INQUIRY_REFERRAL_ON_HOLD",
+              "INQUIRY_CLOSED",
+              "SELLER_RESPONSE_REMINDER"
+            ]
+          },
+          "OrderInquiry": {
+            "type": "object",
+            "description": "This type contains detailed information on the order inquiry associated with the activity.",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/InquiryType",
+                "description": "The value returned in this field indicates the type of order inquiry associated with the event."
+              },
+              "inquiryId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order inquiry."
+              },
+              "inquiryStatus": {
+                "$ref": "#/components/schemas/InquiryStatus",
+                "description": "The value in this field represents the status of the order inquiry."
+              },
+              "initiator": {
+                "$ref": "#/components/schemas/Initiator",
+                "description": "The value returned in this field indicates the party who filed the inquiry, such as BUYER."
+              },
+              "openedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the order inquiry was opened. This date is returned as a UTC-formatted timestamp."
+              },
+              "closedDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the date when the order inquiry was closed. This date is returned as a UTC-formatted timestamp. This date is only applicable and returned for closed order inquiries."
+              },
+              "seller": {
+                "$ref": "#/components/schemas/Seller",
+                "description": "This object identifies the seller involved in the order inquiry."
+              },
+              "sellerAvailableActions": {
+                "$ref": "#/components/schemas/SellerAvailableActions",
+                "description": "This object describes the actions currently available to the seller in response to the order inquiry."
+              },
+              "inquiryCase": {
+                "$ref": "#/components/schemas/InquiryCase",
+                "description": "This object is only returned if the order inquiry has been referred to eBay customer support, and indicates the current status of the referral."
+              },
+              "inquiryRefund": {
+                "$ref": "#/components/schemas/InquiryRefund",
+                "description": "This object is used to indicate the current status of a refund that is due to the buyer for the order inquiry."
+              },
+              "inquiryLineItems": {
+                "type": "array",
+                "description": "This object identifies the line item and the order that is associated with the order inquiry."
+              }
+            }
+          },
+          "Seller": {
+            "type": "object",
+            "description": "This type is used to identify the seller involved in the order inquiry.",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "description": "This string is the public user identifier of the seller."
+              },
+              "username": {
+                "type": "string",
+                "description": "This string is the public user name of the user.<br><br><span class=\\\"tablenote\\\"><strong>Note:</strong> Effective September 26, 2025, select developers will no longer receive username data for U.S. users through this field. Instead, an immutable user ID will be returned in its place. For more information, please refer to <a href=\\\"/api-docs/static/data-handling-update.html\\\" target=\\\"_blank\\\">Data Handling Compliance</a>.</span>"
+              }
+            }
+          },
+          "InquiryLineItem": {
+            "type": "object",
+            "description": "This type contains information on the order line item attached to the order inquiry.",
+            "properties": {
+              "inquiryLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order inquiry line item."
+              },
+              "orderLineItemId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order line item."
+              },
+              "orderId": {
+                "type": "string",
+                "description": "This string is the unique identifier of the order."
+              }
+            }
+          },
+          "SellerAvailableActions": {
+            "type": "object",
+            "description": "This type contains the actions currently available to the seller.",
+            "properties": {
+              "respondByAction": {
+                "$ref": "#/components/schemas/RespondByAction",
+                "description": "This object contains the primary action required from the seller and its due date."
+              },
+              "secondaryActions": {
+                "type": "array",
+                "description": "This array contains other optional actions currently available to the seller in addition to the primary respond-by action."
+              }
+            }
+          },
+          "RespondByAction": {
+            "type": "object",
+            "description": "This type contains the primary action required from the seller and its due date.",
+            "properties": {
+              "respondAction": {
+                "$ref": "#/components/schemas/InquiryAction",
+                "description": "This component is an order inquiry action available to the seller."
+              },
+              "responseDueDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "This string is the due date for completing the required seller action."
+              }
+            }
+          },
+          "InquiryAction": {
+            "type": "string",
+            "description": "This enumeration type contains the list of actions that can be taken by the seller to address an order inquiry. | - **SEND_MESSAGE**: This value indicates that the seller can take the action of sending a message to the buyer to update the buyer on the whereabouts of the item. - **PROVIDE_REFUND**: This value indicates that the seller can issue a refund for the item that is part of the order inquiry. - **PROVIDE_TRACKING_INFO**: This value indicates that the seller can provide shipment or tracking information to help resolve the order inquiry. - **REFER_INQUIRY_TO_EBAY**: This value indicates that the seller can refer or escalate the order inquiry to eBay for further review or handling.",
+            "enum": [
+              "SEND_MESSAGE",
+              "PROVIDE_REFUND",
+              "PROVIDE_TRACKING_INFO",
+              "REFER_INQUIRY_TO_EBAY"
+            ]
+          },
+          "InquiryStatus": {
+            "type": "string",
+            "description": "The value of this enumeration represents the lifecycle status of the order inquiry. | - **OPEN**: This value indicates that the order inquiry is currently open and in progress. - **CLOSED**: This value indicates that the order inquiry is closed.",
+            "enum": [
+              "OPEN",
+              "CLOSED"
+            ]
+          },
+          "InquiryCase": {
+            "type": "object",
+            "description": "This type is used to indicate the current status of an order inquiry that has been referred to eBay customer support.",
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/InquiryCaseStatus",
+                "description": "The value returned in this field indicates the current status of an order inquiry case filed against an order inquiry."
+              }
+            }
+          },
+          "InquiryCaseStatus": {
+            "type": "string",
+            "description": "This enumeration type contains the list of possible values used to indicate the status of an order inquiry case. | - **OPEN**: This value indicates that an order inquiry case filed against the order inquiry is currently open. - **ON_HOLD**: This value indicates that an order inquiry case filed against the order inquiry is on hold. This state may occur if either the buyer or seller appeals a previous case decision, or it could just indicate that eBay customer support needs more time to research the case. - **CLOSED**: This value indicates that an order inquiry case filed against the order inquiry has been closed.",
+            "enum": [
+              "OPEN",
+              "ON_HOLD",
+              "CLOSED"
+            ]
+          },
+          "InquiryRefund": {
+            "type": "object",
+            "description": "This enumeration type contains the different states that an order inquiry refund can be in.",
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/InquiryRefundStatus",
+                "description": "The value returned in this field indicates the current status of any refund due to the buyer for the order inquiry."
+              }
+            }
+          },
+          "InquiryType": {
+            "type": "string",
+            "description": "This enumeration type defines the different types of order inquiries. | - **ITEM_NOT_RECEIVED**: This value indicates that an Item Not Received (INR) inquiry has been filed against the line item. Buyers may open INR inquiries if they have not received their item within the expected delivery range and/or the seller has not provided any shipment tracking information.",
+            "enum": [
+              "ITEM_NOT_RECEIVED"
+            ]
+          },
+          "Initiator": {
+            "type": "string",
+            "description": "The value of this enumeration indicates the party who filed the order inquiry. | - **BUYER**: This value indicates that the buyer filed the order inquiry. - **SELLER**: This value indicates that the seller filed the inquiry. - **EBAY**: This value indicates that eBay filed the order inquiry.",
+            "enum": [
+              "BUYER",
+              "SELLER",
+              "EBAY"
+            ]
+          },
+          "InquiryRefundStatus": {
+            "type": "string",
+            "description": "The value of this enumeration indicates the refund lifecycle status associated with the order inquiry. | - **PENDING**: This value indicates that the refund has been initiated and is pending. - **PROCESSING**: This value indicates that the refund is currently being processed. - **COMPLETED**: This value indicates that the refund has been completed successfully. - **FAILED**: This value indicates that the refund failed and must be initiated once again. - **PARTIALLY_REFUNDED**: This value indicates that the seller has successfully issued a partial refund.",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "PARTIALLY_REFUNDED"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

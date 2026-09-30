@@ -64,6 +64,9 @@ interface OrderRow {
   ebay_marketplace_fee: string | null;
   ebay_fee_basis_amount: string | null;
   ebay_collect_remit_tax: string | null;
+  ebay_cancelled_at: Date | null;
+  ebay_refunded_amount: string | null;
+  ebay_refunded_at: Date | null;
   net_profit: string;
   cost_capture_status: string;
   auto_fulfill_status: string | null;
@@ -588,6 +591,12 @@ export class OrdersService {
       // from the estimate this is meant to replace.
       ebayMarketplaceFee: row.ebay_marketplace_fee !== null ? parseFloat(row.ebay_marketplace_fee) : null,
       ebayCollectRemitTax: row.ebay_collect_remit_tax !== null ? parseFloat(row.ebay_collect_remit_tax) : null,
+      ebayCancelledAt: row.ebay_cancelled_at ? row.ebay_cancelled_at.toISOString() : null,
+      ebayRefundedAmount:
+        row.ebay_refunded_amount !== null && row.ebay_refunded_amount !== undefined
+          ? parseFloat(row.ebay_refunded_amount)
+          : null,
+      ebayRefundedAt: row.ebay_refunded_at ? row.ebay_refunded_at.toISOString() : null,
       details: {
         purchaseSummary: {
           subtotal: parseFloat(row.sale_price) || 0,
