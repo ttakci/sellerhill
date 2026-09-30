@@ -15,7 +15,7 @@ import {
 } from './amazon-order-parser.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { BrowserStateManager } from './browser-state-manager.service';
-import { parseOrderCardHeader } from './your-orders-card';
+import { parseOrderCardHeader, parseOrderCardRecipient } from './your-orders-card';
 
 export interface ScrapingProgress {
   stage: 'logging_in' | 'navigating' | 'scraping' | 'saving' | 'done' | 'error';
@@ -96,6 +96,10 @@ export interface AmazonListOrderRow {
   shipping: number;
   purchasePrice: number;
   orderDate: Date;
+  /** "Ship to" name on the card; null when unreadable (the matcher then refuses). */
+  recipientName?: string | null;
+  /** 5-digit postcode of the card's ship-to address; null when unreadable. */
+  recipientZip?: string | null;
 }
 
 /**
@@ -174,6 +178,10 @@ const ORDER_LIST_SELECTORS = {
   // Order #". It has no per-field hooks, so date and total are read from its
   // text by label (`parseOrderCardHeader`) when the selectors below miss.
   orderHeader: '.order-header',
+  // "Ship to" block: the popover trigger carries the recipient name, the
+  // (hidden) popover the address — the matcher's buyer check reads both.
+  recipient: '.yohtmlc-recipient',
+  recipientName: '.yohtmlc-recipient .a-popover-trigger',
   // "View order details" / invoice link carries the orderId in the URL.
   orderDetailsLink: 'a[href*="orderID="], a[href*="order-details"], a[href*="/gp/your-account/order-details"]',
   // Order id literal fallback ("Order # 111-2222222-3333333").
@@ -907,6 +915,21 @@ export class AmazonScrapingService {
       purchasePrice = Math.max(0, grandTotal - tax - shipping);
     }
 
+    // "Ship to" recipient — textContent, not a visibility wait: the address sits
+    // in a popover that stays hidden until hovered.
+    const recipient = parseOrderCardRecipient(
+      (await card
+        .locator(ORDER_LIST_SELECTORS.recipientName)
+        .first()
+        .textContent({ timeout: 500 })
+        .catch(() => null)) ?? '',
+      (await card
+        .locator(ORDER_LIST_SELECTORS.recipient)
+        .first()
+        .textContent({ timeout: 500 })
+        .catch(() => null)) ?? '',
+    );
+
     return {
       amazonOrderId,
       asin,
@@ -916,6 +939,8 @@ export class AmazonScrapingService {
       shipping,
       purchasePrice,
       orderDate,
+      recipientName: recipient.name,
+      recipientZip: recipient.zip,
     };
   }
 

@@ -89,6 +89,47 @@ function streetNumber(street: string): string | null {
   return /^\s*(\d+)/.exec(street)?.[1] ?? null;
 }
 
+/** A person's name as comparable tokens: case, accents, punctuation and initials dropped. */
+function nameTokens(name: string): string[] {
+  return name
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length > 1);
+}
+
+/**
+ * Whether the recipient Amazon printed on an order ("Ship to") is the eBay
+ * buyer. We ship every Amazon order to the eBay buyer, so this is what tells two
+ * orders for the same product in the same week apart — the amount cannot (the
+ * eBay side is revenue, the Amazon side is cost).
+ *
+ * BOTH must hold: the 5-digit postcode is equal, and every name word of the
+ * shorter name appears in the longer one ("John A. Smith" = "JOHN SMITH";
+ * Amazon upper-cases and drops middle initials). A missing name or postcode on
+ * either side is not a match — the caller must not guess.
+ */
+export function recipientMatchesBuyer(
+  recipient: { name?: string | null; zip?: string | null },
+  buyer: { name?: string | null; zip?: string | null },
+): boolean {
+  const zipA = recipient.zip?.trim().slice(0, 5);
+  const zipB = buyer.zip?.trim().slice(0, 5);
+  if (!zipA || !zipB || !/^\d{5}$/.test(zipA) || zipA !== zipB) {
+    return false;
+  }
+  const a = nameTokens(recipient.name ?? '');
+  const b = nameTokens(buyer.name ?? '');
+  if (a.length === 0 || b.length === 0) {
+    return false;
+  }
+  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
+  const pool = new Set(longer);
+  return shorter.every((token) => pool.has(token));
+}
+
 /**
  * Whether a saved Amazon address block's rendered text identifies the eBay
  * buyer's address.

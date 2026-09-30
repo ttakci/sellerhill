@@ -2,7 +2,7 @@ import type { AmazonListOrderRow } from './amazon-scraping.service';
 import { pickBestMatch, type CandidateEbayOrderRow } from './pick-best-match';
 
 const base = {
-  tolerancePct: 5,
+  tolerancePct: 15,
   windowDays: 7,
 };
 
@@ -16,6 +16,8 @@ function makeAmazon(overrides: Partial<AmazonListOrderRow> = {}): AmazonListOrde
     shipping: 0,
     purchasePrice: 47,
     orderDate: new Date('2026-07-10T00:00:00Z'),
+    recipientName: 'SAM BUYER',
+    recipientZip: '97024',
     ...overrides,
   };
 }
@@ -26,19 +28,17 @@ function makeCandidate(overrides: Partial<CandidateEbayOrderRow> = {}): Candidat
     ebay_order_id: '12-34567-89012',
     asin: 'B0XYZ12345',
     quantity: 1,
-    sale_total: 49.5,
+    purchase_price: 46,
     order_date: new Date('2026-07-12T00:00:00Z'),
+    buyer_name: 'Sam Buyer',
+    shipping_address: { fullName: 'Sam Buyer', zipCode: '97024-1111' },
     ...overrides,
   };
 }
 
 describe('pickBestMatch', () => {
   it('returns the only matching candidate', () => {
-    const best = pickBestMatch({
-      amazon: makeAmazon(),
-      candidates: [makeCandidate()],
-      ...base,
-    });
+    const best = pickBestMatch({ amazon: makeAmazon(), candidates: [makeCandidate()], ...base });
     expect(best).not.toBeNull();
     expect(best?.orderId).toBe('ebay-row-1');
     expect(best?.ebayOrderId).toBe('12-34567-89012');
@@ -55,43 +55,60 @@ describe('pickBestMatch', () => {
   });
 
   it('returns null when candidates list is empty', () => {
+    expect(pickBestMatch({ amazon: makeAmazon(), candidates: [], ...base })).toBeNull();
+  });
+
+  it('same product, same week, two buyers: the recipient picks the right eBay order', () => {
+    const sam = makeCandidate({ id: 'sam', ebay_order_id: 'A' });
+    const lee = makeCandidate({
+      id: 'lee',
+      ebay_order_id: 'B',
+      buyer_name: 'Lee Other',
+      shipping_address: { fullName: 'Lee Other', zipCode: '72764' },
+    });
+    const best = pickBestMatch({ amazon: makeAmazon(), candidates: [lee, sam], ...base });
+    expect(best?.orderId).toBe('sam');
+  });
+
+  it('falls back to buyer_name when the ship-to carries no name', () => {
     const best = pickBestMatch({
       amazon: makeAmazon(),
-      candidates: [],
+      candidates: [makeCandidate({ shipping_address: { zipCode: '97024' } })],
       ...base,
     });
-    expect(best).toBeNull();
+    expect(best?.orderId).toBe('ebay-row-1');
   });
 
-  it('picks the highest-scoring candidate when multiple match', () => {
-    // closer amount wins (smaller diffPct → higher score)
-    const close = makeCandidate({ id: 'close', sale_total: 49.9 });
-    const far = makeCandidate({ id: 'far', sale_total: 47.6 }); // ~4.8% off vs 0.2% off
-    const best = pickBestMatch({
-      amazon: makeAmazon({ grandTotal: 50 }),
-      candidates: [far, close],
-      ...base,
-    });
-    expect(best?.orderId).toBe('close');
+  it('prefers the candidate whose date is closer', () => {
+    const near = makeCandidate({ id: 'near', ebay_order_id: 'A', order_date: new Date('2026-07-10T00:00:00Z') });
+    const far = makeCandidate({ id: 'far', ebay_order_id: 'B', order_date: new Date('2026-07-15T00:00:00Z') });
+    expect(pickBestMatch({ amazon: makeAmazon(), candidates: [far, near], ...base })?.orderId).toBe('near');
   });
 
-  it('skips candidates already consumed (caller guards via Set)', () => {
-    // Sanity check: the helper itself is pure — caller is responsible for
-    // de-duping. Here we verify that if the same candidate id appears twice,
-    // both are scored independently (so the caller MUST de-dupe externally).
-    const dup = makeCandidate({ id: 'dup', sale_total: 49.5 });
-    const best = pickBestMatch({
-      amazon: makeAmazon(),
-      candidates: [dup, dup],
-      ...base,
-    });
-    expect(best?.orderId).toBe('dup');
+  it('refuses a tie between two different eBay orders (the seller links it by hand)', () => {
+    const one = makeCandidate({ id: 'one', ebay_order_id: 'A' });
+    const two = makeCandidate({ id: 'two', ebay_order_id: 'B' });
+    expect(pickBestMatch({ amazon: makeAmazon(), candidates: [one, two], ...base })).toBeNull();
   });
 
-  it('returns null when amount is outside tolerance', () => {
+  it('the same eBay order listed twice is not a tie (caller de-dupes across Amazon rows)', () => {
+    const dup = makeCandidate({ id: 'dup' });
+    expect(pickBestMatch({ amazon: makeAmazon(), candidates: [dup, dup], ...base })?.orderId).toBe('dup');
+  });
+
+  it('an Amazon total far from the expected cost still links — the amount is a tie-break only', () => {
     const best = pickBestMatch({
       amazon: makeAmazon({ grandTotal: 100 }),
-      candidates: [makeCandidate({ sale_total: 50 })],
+      candidates: [makeCandidate({ purchase_price: 50 })],
+      ...base,
+    });
+    expect(best?.orderId).toBe('ebay-row-1');
+  });
+
+  it('returns null when the recipient is not the eBay buyer', () => {
+    const best = pickBestMatch({
+      amazon: makeAmazon({ recipientName: 'SOMEONE ELSE' }),
+      candidates: [makeCandidate()],
       ...base,
     });
     expect(best).toBeNull();
