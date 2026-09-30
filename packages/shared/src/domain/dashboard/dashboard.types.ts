@@ -87,13 +87,18 @@ export interface PeriodMetricsDto {
   profitConfirmed: number;
   /** SUM(net_profit) where cost_capture_status = 'provisional' (product-only costs). */
   profitProvisional: number;
-  /** SUM(sale_total) where cost_capture_status in ('pending','failed','untracked'). */
+  /** SUM(sale_total) where cost_capture_status in ('pending','failed'). */
   revenueUncosted: number;
   /** # of non-cancelled orders with cost_capture_status = 'pending'. */
   ordersPendingCapture: number;
   /** # of non-cancelled orders with cost_capture_status = 'failed'. */
   ordersCaptureFailed: number;
-  /** # of non-cancelled orders with cost_capture_status = 'untracked'. */
+  /**
+   * # of non-cancelled orders in the period with no SellerHill listing
+   * (`listing_id IS NULL`). These are EXCLUDED from every other figure in this
+   * DTO — the dashboard describes the business SellerHill manages, not the
+   * whole eBay store — and this count exists so the card can say so.
+   */
   ordersUntracked: number;
   /** SUM(purchase_price) on non-cancelled — Amazon product cost. */
   costOfGoods: number;

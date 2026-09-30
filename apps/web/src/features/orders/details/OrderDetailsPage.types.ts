@@ -6,11 +6,18 @@ export interface OrderDetailsPageProps {
   isUpdating: boolean;
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
+  /** eBay's own order status, localized — shown as a fact in the eBay card. */
   statusLabel: string;
+  /** `orders.stage.<stage>.meaning` — one sentence under the hero badge. */
+  stageMeaning: string;
+  /** `orders.stage.<stage>.action` for a stage that needs the seller, else null. */
+  stageAction: string | null;
   roiLabel: string;
   totalAmazonCost: number;
   /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */
   amazonTotalBeforeTax: number;
+  /** The buyer's phone as eBay prints it (`+1 843-408-1812`), or null. */
+  buyerPhoneDisplay: string | null;
   onBack: () => void;
   onCopyAddress: () => void;
   onOpenLinkAmazon: () => void;

@@ -10,8 +10,14 @@ describe('best-sellers egress guard', () => {
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
 
+  it('the scraper is called from ONE place, so every caller passes the proxy check', () => {
+    // `getPage` and `getCategories` both go through `resolveList`; a second
+    // call site would be a path that skips the NO_PROXY refusal below.
+    expect(src.split('this.client.fetchBestSellers(').length - 1).toBe(1);
+  });
+
   it('BestSellersService returns NO_PROXY on an empty proxy list before calling the scraper', () => {
-    const start = src.indexOf('async getPage(');
+    const start = src.indexOf('private async resolveList(');
     const end = src.indexOf('private fetchDeduped(');
     expect(start).toBeGreaterThan(-1);
     expect(end).toBeGreaterThan(start);

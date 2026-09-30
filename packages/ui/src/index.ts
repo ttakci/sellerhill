@@ -77,7 +77,15 @@ export type { FilePickerProps } from './molecules/FilePicker';
 export { TextInput } from './molecules/TextInput';
 export type { TextInputProps, TextInputSize } from './molecules/TextInput';
 
-export { PhoneInput, buildCountryOptions, describePhoneNumber, isValidPhone, toE164, DEFAULT_COUNTRY } from './molecules/PhoneInput';
+export {
+  PhoneInput,
+  buildCountryOptions,
+  describePhoneNumber,
+  formatPhoneNumber,
+  isValidPhone,
+  toE164,
+  DEFAULT_COUNTRY,
+} from './molecules/PhoneInput';
 export type { PhoneInputProps, CountryOption, CountryCode } from './molecules/PhoneInput';
 
 export { ValidationMessage } from './molecules/ValidationMessage';
@@ -104,10 +112,7 @@ export type { MessageModalProps } from './molecules/MessageModal/index';
 export { Table } from './molecules/Table';
 export type { BulkAction, TableColumn, TableProps } from './molecules/Table';
 export { TablePagination } from './molecules/Table/TablePagination.component';
-export type {
-  TablePaginationProps,
-  TablePaginationVariant,
-} from './molecules/Table/TablePagination.types';
+export type { TablePaginationProps, TablePaginationVariant } from './molecules/Table/TablePagination.types';
 
 export { SettingsCard } from './molecules/SettingsCard';
 export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } from './molecules/SettingsCard';

@@ -1,9 +1,10 @@
-import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import { formatCurrency, formatDate, formatPhoneNumber, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
+import { orderStageHasAction } from '../shared/order-stage';
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
@@ -70,6 +71,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
     return translated === key ? order.status : translated;
   }, [order, t]);
 
+  const stageMeaning = useMemo(() => (order ? t(`orders.stage.${order.stage}.meaning`) : ''), [order, t]);
+  const stageAction = useMemo(
+    () => (order && orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null),
+    [order, t]
+  );
+
   const totalAmazonCost = useMemo(() => {
     if (!order) {
       return 0;
@@ -82,6 +89,13 @@ export const OrderDetailsPageContainer: React.FC = () => {
       return 0;
     }
     return order.purchasePrice + (order.amazonShipping || 0);
+  }, [order]);
+
+  const buyerPhoneDisplay = useMemo(() => {
+    if (!order?.buyerPhone) {
+      return null;
+    }
+    return formatPhoneNumber(order.buyerPhone, order.shippingAddress?.country) || null;
   }, [order]);
 
   const roiLabel = useMemo(() => {
@@ -191,9 +205,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         statusLabel={statusLabel}
+        stageMeaning={stageMeaning}
+        stageAction={stageAction}
         roiLabel={roiLabel}
         totalAmazonCost={totalAmazonCost}
         amazonTotalBeforeTax={amazonTotalBeforeTax}
+        buyerPhoneDisplay={buyerPhoneDisplay}
         onBack={handleBack}
         onCopyAddress={handleCopyAddress}
         onOpenLinkAmazon={() => setIsLinkModalOpen(true)}

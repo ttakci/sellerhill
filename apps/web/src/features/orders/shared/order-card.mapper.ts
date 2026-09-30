@@ -1,4 +1,4 @@
-import { ProfitBasis, type OrderDto } from '@repo/shared';
+import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
 import type { OrderCardProps } from './OrderCard';
@@ -62,8 +62,7 @@ export const toOrderCardProps = (
     });
   }
 
-  const profitTone =
-    order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
+  const profitTone = order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
 
   // A card can carry both at once: an untracked order (no matched listing)
   // can never reach `linked`, so its profit is also always an estimate/unknown.
@@ -74,17 +73,21 @@ export const toOrderCardProps = (
   if (order.profitBasis === ProfitBasis.ESTIMATED) {
     statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
   }
+  // The blocked reason is what makes "Purchase blocked" actionable — the
+  // table column shows it inline, so the card must too.
+  if (order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason) {
+    statsBadges.push({
+      label: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
+      variant: 'error',
+    });
+  }
 
   return {
     productTitle,
     imageUrl: order.product?.imageUrl,
     ebayOrderId: order.ebayOrderId,
-    status: order.status,
-    statusLabel: (() => {
-      const key = `orders.status.${order.status}`;
-      const translated = t(key);
-      return translated === key ? order.status : translated;
-    })(),
+    stage: order.stage,
+    shippedDetectedAt: order.shippedDetectedAt,
     statsBadges: statsBadges.length > 0 ? statsBadges : undefined,
     meta,
     stats: [

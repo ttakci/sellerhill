@@ -30,6 +30,36 @@ export enum OrderFulfillmentState {
   MANUAL = 'manual',
 }
 
+/**
+ * ONE seller-facing status per order, derived from columns that already exist.
+ * Answers "what is happening to this order, and do I need to act?" — which
+ * neither the eBay status (`OrderStatus`) nor `OrderFulfillmentState` did on
+ * its own. Priority order = enum order: `deriveOrderStage` returns the FIRST
+ * matching member. See docs/superpowers/specs/2026-09-29-order-stages-design.md.
+ */
+export enum OrderStage {
+  AMAZON_CANCELLED = 'amazon_cancelled',
+  CANCELLED = 'cancelled',
+  DELIVERED = 'delivered',
+  TEST_RUN = 'test_run',
+  SHIPPED = 'shipped',
+  TRACKING_HELD = 'tracking_held',
+  BUYING = 'buying',
+  PURCHASED = 'purchased',
+  PURCHASE_BLOCKED = 'purchase_blocked',
+  AWAITING_PAYMENT = 'awaiting_payment',
+  TO_PURCHASE = 'to_purchase',
+}
+
+/** The list page's counted tabs — groupings over `OrderStage`. */
+export enum OrderStageTab {
+  ALL = 'all',
+  ACTION = 'action',
+  TO_PURCHASE = 'to_purchase',
+  IN_PROGRESS = 'in_progress',
+  DONE = 'done',
+}
+
 export enum OrderStatus {
   COMPLETED = 'completed',
   SHIPPED = 'shipped',
@@ -198,6 +228,13 @@ export interface OrderDto {
    * outranking a placed order, a simulated order never counting as purchased).
    */
   fulfillmentState?: OrderFulfillmentState;
+  /** The one seller-facing status — see `OrderStage` / `deriveOrderStage`. */
+  stage: OrderStage;
+  /** `orders.shipped_detected_at` (089): Amazon first observed shipped. Drives
+   *  the "tracking held" badge's amber → red switch on the web. */
+  shippedDetectedAt?: string | null;
+  /** `orders.ebay_tracking_pushed_at` (089): eBay received the fulfillment. */
+  ebayTrackingPushedAt?: string | null;
   /** True when `amazonOrderId` is a dry-run placeholder, not a real purchase. */
   isSimulated?: boolean;
 
@@ -330,6 +367,10 @@ export interface OrderStatsDto {
   returnRate?: number;
 }
 
+/** `GET /orders/stage-counts` — every stage is present, 0 when empty, so the
+ *  tabs never render an undefined count. */
+export type OrderStageCountsDto = Record<OrderStage, number>;
+
 export interface OrderFiltersDto {
   search?: string;
   dateFrom?: string;
@@ -337,6 +378,10 @@ export interface OrderFiltersDto {
   status?: OrderStatus;
   /** Filter by connected eBay store (ebay_accounts.id). */
   ebayAccountId?: string;
+  /** Filter to one or more stages (`?stage=a,b`). The list page's tabs send
+   *  a group, the Status select sends one. Unknown values are dropped by the
+   *  controller. */
+  stages?: OrderStage[];
   /**
    * When true, restrict to orders whose automated Amazon fulfillment hit a
    * fail-closed obstacle (`auto_fulfill_status IN ('blocked','failed')`) so

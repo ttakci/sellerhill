@@ -27,14 +27,16 @@ export const CategoryTree: React.FC<CategoryTreeComponentProps> = ({
 
   return (
     <S.Wrapper className={className}>
-      <SearchField
-        value={searchValue}
-        onChange={onSearchChange}
-        placeholder={t('bestSellers.categorySearchPlaceholder')}
-        aria-label={t('bestSellers.categorySearchPlaceholder')}
-        size="small"
-        fullWidth
-      />
+      <S.SearchSlot>
+        <SearchField
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder={t('bestSellers.categorySearchPlaceholder')}
+          aria-label={t('bestSellers.categorySearchPlaceholder')}
+          size="medium"
+          fullWidth
+        />
+      </S.SearchSlot>
 
       <S.List role="tree" aria-label={t('bestSellers.categories.title')}>
         {rows.map((row) => (
@@ -78,8 +80,8 @@ export const CategoryTree: React.FC<CategoryTreeComponentProps> = ({
             <S.RowLabel>
               <Text
                 variant="body-sm"
-                weight={row.isActive ? 'semibold' : 'regular'}
-                color={row.isActive ? 'brand.primary' : 'text.primary'}
+                weight={row.isActive || row.isActiveBranch ? 'semibold' : 'regular'}
+                color={row.isActive || row.isActiveBranch ? 'brand.primary' : 'text.primary'}
                 truncate
               >
                 {row.name}

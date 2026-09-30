@@ -60,6 +60,18 @@ const TEMPLATE_PREVIEWS = [
   { key: 'petSupplies', file: 'pet-supplies' },
   { key: 'toysKids', file: 'toys-kids' },
   { key: 'minimalist', file: 'minimalist' },
+  { key: 'valentinesDay', file: 'valentines-day' },
+  { key: 'generalStoreAlt2', file: 'general-store-alt-2' },
+  { key: 'generalStoreAlt3', file: 'general-store-alt-3' },
+  { key: 'backToSchool', file: 'back-to-school' },
+  { key: 'toolsHomeImprovement', file: 'tools-home-improvement' },
+  { key: 'electronicsPro', file: 'electronics-pro' },
+  { key: 'phoneAccessories', file: 'phone-accessories' },
+  { key: 'healthHousehold', file: 'health-household' },
+  { key: 'industrialScientific', file: 'industrial-scientific' },
+  { key: 'officeProducts', file: 'office-products' },
+  { key: 'patioLawnGarden', file: 'patio-lawn-garden' },
+  { key: 'generalStoreAlt', file: 'general-store-alt' },
 ] as const;
 
 type TemplateKey = (typeof TEMPLATE_PREVIEWS)[number]['key'];

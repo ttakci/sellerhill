@@ -15,6 +15,12 @@ export interface TextInputInnerComponentProps {
   field: InnerFieldProps;
   error?: FieldError;
   label?: string;
+  /**
+   * Shown only on a label-less (compact) field, e.g. a toolbar filter. With a
+   * floating label the label itself sits where a placeholder would, so the two
+   * would overlap.
+   */
+  placeholder?: string;
   iconLeft?: IconName;
   iconRight?: IconName;
   isDisabled?: boolean;

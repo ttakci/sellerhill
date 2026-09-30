@@ -174,6 +174,25 @@ export interface BestSellersPageDto {
   lockedCount: number;
 }
 
+/** `GET /v1/best-sellers/categories` query. */
+export interface BestSellersCategoriesQueryDto {
+  listType?: BestSellersListType;
+  marketplace?: AmazonMarketplace;
+}
+
+/**
+ * `GET /v1/best-sellers/categories`: the department list of one list type,
+ * with no products. The category tree otherwise gets its departments only
+ * from the root list page, so a page opened straight into a department (deep
+ * link, reload, back button) had none. It charges nothing against the product
+ * allowance, which meters products seen, not the tree beside them.
+ * `categories` is empty unless `outcome` is FOUND.
+ */
+export interface BestSellersCategoriesDto {
+  outcome: SourceFetchOutcome;
+  categories: BestSellersCategoryDto[];
+}
+
 /** i18n keys the API returns as the `message` of a refused request (mapped to HTTP statuses in the controller). */
 export enum BestSellersErrorKey {
   /** 404 — the operator switched the feature off. */

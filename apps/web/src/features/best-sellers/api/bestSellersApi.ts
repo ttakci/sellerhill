@@ -7,7 +7,12 @@
  * while — flipping between two tabs must not re-request a list already shown.
  */
 
-import type { BestSellersPageDto, BestSellersQueryDto } from '@repo/shared';
+import type {
+  BestSellersCategoriesDto,
+  BestSellersCategoriesQueryDto,
+  BestSellersPageDto,
+  BestSellersQueryDto,
+} from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -21,7 +26,13 @@ export const bestSellersApi = baseApi.injectEndpoints({
       providesTags: ['BestSellers'],
       keepUnusedDataFor: BEST_SELLERS_KEEP_UNUSED_SECONDS,
     }),
+    /** The root department list of one list type, with no products (not counted against the allowance). */
+    getBestSellersCategories: builder.query<BestSellersCategoriesDto, BestSellersCategoriesQueryDto>({
+      query: (params) => ({ url: '/best-sellers/categories', method: 'GET', params }),
+      providesTags: ['BestSellers'],
+      keepUnusedDataFor: BEST_SELLERS_KEEP_UNUSED_SECONDS,
+    }),
   }),
 });
 
-export const { useGetBestSellersQuery } = bestSellersApi;
+export const { useGetBestSellersQuery, useGetBestSellersCategoriesQuery } = bestSellersApi;

@@ -10,11 +10,11 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { type BestSellersPageDto } from '@repo/shared';
+import { type BestSellersCategoriesDto, type BestSellersPageDto } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-import { BestSellersQueryDto } from './best-sellers.dto';
+import { BestSellersCategoriesQueryDto, BestSellersQueryDto } from './best-sellers.dto';
 import { BestSellersService } from './best-sellers.service';
 
 /**
@@ -59,5 +59,29 @@ export class BestSellersController {
     @Query() query: BestSellersQueryDto,
   ): Promise<BestSellersPageDto> {
     return this.bestSellers.getPage(req.user.sub, query);
+  }
+
+  @Get('categories')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'The department list of an Amazon Best Sellers list, without products',
+    description:
+      'Categories of the root (all departments) page of one list type, read from the same shared cache ' +
+      'as `GET /best-sellers`. Shows no product, so it is NOT counted against the Best Sellers product ' +
+      'allowance; a cache miss still counts against the hidden daily fetch cap. `categories` is empty ' +
+      'unless `outcome` is `found`.',
+  })
+  @ApiOkResponse({ description: 'Department list (empty on a non-found outcome)' })
+  @ApiBadRequestResponse({ description: 'Invalid query, or a marketplace that is not enabled' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiNotFoundResponse({ description: 'Feature disabled by the operator' })
+  @ApiTooManyRequestsResponse({ description: 'Hidden anti-abuse cap on live fetches (cache misses) reached today' })
+  @ApiServiceUnavailableResponse({ description: 'Scraper service unreachable' })
+  async getCategories(
+    @Request() req: { user: { sub: string } },
+    @Query() query: BestSellersCategoriesQueryDto,
+  ): Promise<BestSellersCategoriesDto> {
+    return this.bestSellers.getCategories(req.user.sub, query);
   }
 }

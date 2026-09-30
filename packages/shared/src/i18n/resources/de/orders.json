@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Alle Status",
       "allStores": "Alle Shops",
-      "allTrackingStates": "Alle Tracking-Status",
+      "allTrackingStates": "Verknüpft und nicht verknüpft",
       "clearAll": "Alle zurücksetzen",
-      "resultCount": "{{count}} Ergebnisse"
+      "resultCount": "{{count}} Ergebnisse",
+      "allStages": "Alle Status"
     },
     "stats": {
       "totalSales": "Gesamtumsatz",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Von SellerHill verfolgt",
-      "untracked": "Nicht verfolgt",
+      "tracked": "Mit einem Angebot verknüpft",
+      "untracked": "Mit keinem Angebot verknüpft",
       "problem": {
         "wrongPageType": "Der Tracking-Anbieter konnte die Bestellseite von Amazon nicht lesen – möglicherweise hat sich das Format geändert. Es wird automatisch erneut versucht.",
         "amazonSessionExpired": "Die Amazon-Sitzung, mit der diese Bestellung gelesen wurde, ist abgelaufen und muss neu angemeldet werden.",
@@ -156,6 +157,7 @@
       "buyerPayment": "Zahlung des Käufers",
       "ebaySummary": "eBay-Verkaufsübersicht",
       "whatBuyerPaid": "Was Ihr Käufer bezahlt hat",
+      "whatYouPaidAmazon": "Was Sie an Amazon bezahlt haben",
       "whatYouEarned": "Was Sie verdient haben",
       "earningsOrderTotal": "Bestellsumme",
       "ebayCollectedFromBuyer": "Von eBay beim Käufer eingezogen",
@@ -194,6 +196,7 @@
       "copyState": "Bundesland/Region kopieren",
       "copyZip": "Postleitzahl kopieren",
       "copyCountry": "Land/Region kopieren",
+      "copyPhone": "Telefonnummer kopieren",
       "copied": "Kopiert",
       "amazonCosts": "Amazon-Bestellübersicht",
       "purchasePrice": "Einkaufspreis",
@@ -213,7 +216,8 @@
       "quantity": "Menge",
       "unit": "Stück",
       "sku": "SKU",
-      "na": "k. A."
+      "na": "k. A.",
+      "ebayStatus": "eBay-Status"
     },
     "modal": {
       "title": "Amazon-Bestelldaten eingeben",
@@ -240,6 +244,71 @@
       "orderNotTracked": "Diese Bestellung ist mit keinem Ihrer Angebote verknüpft, daher könnte eine umgewandelte Sendungsnummer nie an eBay gesendet werden. Verknüpfen Sie die Bestellung zuerst mit ihrem Angebot.",
       "trackingAlreadyPushed": "eBay hat die ursprüngliche Sendungsnummer für diese Bestellung bereits erhalten, und sie kann nicht ersetzt werden. Eine Umwandlung würde daher nichts an dem ändern, was der Käufer sieht.",
       "listingOverPlanLimit": "Das Angebot dieser Bestellung lag beim Eingang der Bestellung außerhalb des Angebotslimits Ihres Tarifs. Für Bestellungen aus Angeboten außerhalb des Limits gibt es weder Sendungsverfolgung noch Umwandlung von Sendungsnummern."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Von Amazon storniert",
+        "meaning": "Amazon hat den Kauf storniert. Der eBay-Käufer wartet weiterhin auf den Artikel.",
+        "action": "Erfüllen Sie die Bestellung auf anderem Weg und verknüpfen Sie dann die neue Amazon-Bestellung."
+      },
+      "cancelled": {
+        "label": "Storniert",
+        "meaning": "Die eBay-Bestellung wurde storniert."
+      },
+      "delivered": {
+        "label": "Zugestellt",
+        "meaning": "Amazon meldet das Paket als zugestellt. Nichts mehr zu tun."
+      },
+      "test_run": {
+        "label": "Testlauf",
+        "meaning": "Ein Probelauf der automatischen Bestellung. Keine Amazon-Bestellung, kein Geldfluss."
+      },
+      "shipped": {
+        "label": "Versandt",
+        "meaning": "Die Sendungsverfolgung wurde an eBay übermittelt. Zustellung wird erwartet."
+      },
+      "tracking_held": {
+        "label": "Tracking zurückgehalten",
+        "meaning": "Amazon hat versandt, aber das Tracking ist noch nicht bei eBay — meist steht die Tracking-Umwandlung noch aus.",
+        "action": "Wandeln Sie das Tracking um oder beheben Sie die in der Bestellung angezeigte Ursache."
+      },
+      "buying": {
+        "label": "Wird bei Amazon gekauft",
+        "meaning": "Die automatische Bestellung gibt diese Bestellung gerade bei Amazon auf."
+      },
+      "purchased": {
+        "label": "Gekauft · wartet auf Versand",
+        "meaning": "Eine Amazon-Bestellung ist verknüpft. Es wird auf den Versand durch Amazon gewartet."
+      },
+      "purchase_blocked": {
+        "label": "Kauf blockiert",
+        "meaning": "Die automatische Bestellung wurde vor dem Kauf an einer Sicherheitsprüfung gestoppt. Kein Geldfluss.",
+        "action": "Beheben Sie die angezeigte Ursache oder kaufen Sie manuell bei Amazon und verknüpfen Sie die Bestellung."
+      },
+      "awaiting_payment": {
+        "label": "Wartet auf Zahlung",
+        "meaning": "Der Käufer hat noch nicht bezahlt. Kaufen Sie erst nach Zahlungseingang."
+      },
+      "to_purchase": {
+        "label": "Zu kaufen",
+        "meaning": "Bezahlt, noch keine Amazon-Bestellung verknüpft.",
+        "action": "Bei Amazon kaufen und die Bestellung verknüpfen."
+      }
+    },
+    "stageTabs": {
+      "all": "Alle",
+      "action": "Handlungsbedarf",
+      "to_purchase": "Zu kaufen",
+      "in_progress": "In Bearbeitung",
+      "done": "Erledigt",
+      "withCount": "{{label}} ({{count}})"
+    },
+    "stageLegend": {
+      "title": "Was die Status bedeuten",
+      "open": "Status erklären",
+      "columnStage": "Status",
+      "columnMeaning": "Bedeutung",
+      "columnAction": "Was Sie tun"
     }
   }
 }

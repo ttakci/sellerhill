@@ -36,6 +36,7 @@ export const PeriodCard = (props: PeriodCardContainerProps): React.ReactElement 
       profitPositive: metrics.netProfit >= 0,
       hasEstimated: metrics.profitProvisional !== 0,
       hasUncosted: metrics.revenueUncosted !== 0,
+      hasUntrackedExcluded: metrics.ordersUntracked > 0,
     }),
     [metrics, formatters],
   );

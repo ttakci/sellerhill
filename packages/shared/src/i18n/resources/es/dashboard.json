@@ -87,7 +87,11 @@
       "estimatedLabel": "Estimada",
       "estimatedTooltip": "Los pedidos que esperan su cumplimiento en Amazon usan un costo estimado (impuesto de Amazon a la tasa configurada de {{rate}}%).",
       "uncostedLabel": "Ingresos sin costo",
-      "uncostedTooltip": "Ventas cuyo costo de Amazon aún no se pudo determinar: solo ingresos, sin ganancia implícita."
+      "uncostedTooltip": "Ventas cuyo costo de Amazon aún no se pudo determinar: solo ingresos, sin ganancia implícita.",
+      "untrackedExcludedLabel_one": "{{count}} pedido sin seguimiento excluido",
+      "untrackedExcludedLabel_many": "{{count}} pedidos sin seguimiento excluidos",
+      "untrackedExcludedLabel_other": "{{count}} pedidos sin seguimiento excluidos",
+      "untrackedExcludedTooltip": "Los pedidos que no coinciden con una publicación de SellerHill quedan fuera de todas las cifras de este panel. Siguen en la página de Pedidos como «Sin seguimiento»; importa la publicación para incluirlos."
     }
   }
 }

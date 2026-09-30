@@ -17,6 +17,7 @@ export const TablePagination = ({
   labelRowsPerPage,
   labelInfo,
   variant = 'footer',
+  compact = false,
 }: TablePaginationProps): React.ReactElement => {
   const start = Math.min((page - 1) * rowsPerPage + 1, count);
   const end = Math.min(page * rowsPerPage, count);
@@ -51,7 +52,7 @@ export const TablePagination = ({
   };
 
   return (
-    <S.PaginationContainer className={className} $variant={variant}>
+    <S.PaginationContainer className={className} $variant={variant} $compact={compact}>
       <S.RowsPerPage>
         <S.PaginationLabel>{rowsPerPageLabel}</S.PaginationLabel>
         <S.SelectWrapper>
@@ -65,8 +66,8 @@ export const TablePagination = ({
         </S.SelectWrapper>
       </S.RowsPerPage>
 
-      <S.NavigationWrapper>
-        <S.PageInfo>
+      <S.NavigationWrapper $compact={compact}>
+        <S.PageInfo $compact={compact}>
           <S.PaginationLabel>
             {count > 0
               ? renderLabelInfo()
@@ -76,7 +77,7 @@ export const TablePagination = ({
           </S.PaginationLabel>
         </S.PageInfo>
 
-        <S.Navigation>
+        <S.Navigation $compact={compact}>
           <S.NavButton
             variant="ghost"
             onClick={() => handlePageChange(page - 1)}

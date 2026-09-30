@@ -31,6 +31,7 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "暂无评分",
+    "rankChange": "{{sign}}{{value}}%",
     "allowance": "本周期还剩 {{remaining}}/{{limit}} 件商品可查看",
     "allowanceUnlimited": "不限商品查看数量",
     "allowanceHint": "每件看到的商品每个周期只计一次；今天再次打开同一榜单不会重复计算。",
@@ -45,7 +46,17 @@
       "product": "商品",
       "price": "价格",
       "rating": "评分",
-      "reviews": "评价"
+      "reviews": "评价",
+      "rankChange": "排名变化（24 小时）"
+    },
+    "filters": {
+      "anyRating": "所有评分",
+      "ratingAtLeast": "{{value}} 星及以上",
+      "minReviews": "最少评论数",
+      "priceMin": "最低价格",
+      "priceMax": "最高价格",
+      "clear": "清除筛选",
+      "resultCount": "本页 {{total}} 件商品中的 {{shown}} 件"
     },
     "states": {
       "loading": {
@@ -55,6 +66,10 @@
       "empty": {
         "title": "本页没有商品",
         "description": "这个榜单在这里没有内容。请试试其他分类或榜单。"
+      },
+      "noMatches": {
+        "title": "没有符合筛选条件的商品",
+        "description": "放宽筛选条件即可查看此榜单的更多商品。筛选仅作用于本页商品。"
       },
       "notFound": {
         "title": "该分类不可用",

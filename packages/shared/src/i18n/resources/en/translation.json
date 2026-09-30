@@ -612,7 +612,7 @@
     "templates": {
       "eyebrow": "Listing templates",
       "sectionTitle": "Professional-looking listings, no designer needed.",
-      "sectionSubtitle": "Pick one of 12 ready-made templates or write your own HTML. Every Setting Group can use its own template. The previews below are rendered with our real templates.",
+      "sectionSubtitle": "Pick one of 24 ready-made templates or write your own HTML. Every Setting Group can use its own template. The previews below are rendered with our real templates.",
       "names": {
         "generalStore": "General Store",
         "techGadgets": "Tech",
@@ -625,7 +625,19 @@
         "autoParts": "Auto Parts",
         "petSupplies": "Pet Supplies",
         "toysKids": "Toys & Kids",
-        "minimalist": "Minimalist"
+        "minimalist": "Minimalist",
+        "valentinesDay": "Valentine's Day",
+        "generalStoreAlt2": "General Store Alt 2",
+        "generalStoreAlt3": "General Store Alt 3",
+        "backToSchool": "Back to School",
+        "toolsHomeImprovement": "Tools & Home Improvement",
+        "electronicsPro": "Electronics Pro",
+        "phoneAccessories": "Phone Accessories",
+        "healthHousehold": "Health & Household",
+        "industrialScientific": "Industrial & Scientific",
+        "officeProducts": "Office Products",
+        "patioLawnGarden": "Patio, Lawn & Garden",
+        "generalStoreAlt": "General Store Alt"
       },
       "points": {
         "editable": "Fully editable: open the template and change anything you like.",

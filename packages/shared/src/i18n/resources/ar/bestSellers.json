@@ -36,6 +36,7 @@
     "rating": "★ {{average}}",
     "ratingWithReviews": "★ {{average}} ({{reviews}})",
     "noRating": "لا يوجد تقييم بعد",
+    "rankChange": "{{sign}}{{value}}%",
     "allowance": "بقي {{remaining}} من {{limit}} منتجًا في هذه الفترة",
     "allowanceUnlimited": "عرض غير محدود للمنتجات",
     "allowanceHint": "كل منتج تراه يُحتسب مرة واحدة في الفترة؛ وفتح القائمة نفسها مجددًا اليوم لا يُحتسب مرتين.",
@@ -55,7 +56,17 @@
       "product": "المنتج",
       "price": "السعر",
       "rating": "التقييم",
-      "reviews": "المراجعات"
+      "reviews": "المراجعات",
+      "rankChange": "تغيّر الترتيب (24 ساعة)"
+    },
+    "filters": {
+      "anyRating": "أي تقييم",
+      "ratingAtLeast": "{{value}}+ نجوم",
+      "minReviews": "الحد الأدنى للمراجعات",
+      "priceMin": "أدنى سعر",
+      "priceMax": "أعلى سعر",
+      "clear": "مسح عوامل التصفية",
+      "resultCount": "{{shown}} من {{total}} منتجًا في هذه الصفحة"
     },
     "states": {
       "loading": {
@@ -65,6 +76,10 @@
       "empty": {
         "title": "لا توجد منتجات في هذه الصفحة",
         "description": "لا يوجد ما يُعرض هنا في هذه القائمة. جرّب فئة أو قائمة أخرى."
+      },
+      "noMatches": {
+        "title": "لا توجد منتجات تطابق عوامل التصفية",
+        "description": "خفّف أحد عوامل التصفية لرؤية المزيد من هذه القائمة. تُطبَّق عوامل التصفية على منتجات هذه الصفحة."
       },
       "notFound": {
         "title": "هذه الفئة غير متاحة",

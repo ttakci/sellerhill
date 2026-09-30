@@ -87,7 +87,14 @@
       "estimatedLabel": "تقديري",
       "estimatedTooltip": "تستخدم الطلبات التي تنتظر التنفيذ عبر Amazon تكلفة تقديرية (ضريبة Amazon بالنسبة التي حددتها وهي {{rate}}%).",
       "uncostedLabel": "إيرادات بدون تكلفة",
-      "uncostedTooltip": "مبيعات لم يتم تحديد تكلفة Amazon الخاصة بها بعد، فهي إيرادات فقط دون احتساب أي ربح."
+      "uncostedTooltip": "مبيعات لم يتم تحديد تكلفة Amazon الخاصة بها بعد، فهي إيرادات فقط دون احتساب أي ربح.",
+      "untrackedExcludedLabel_zero": "لم يُستبعد أي طلب غير متتبَّع",
+      "untrackedExcludedLabel_one": "تم استبعاد طلب واحد غير متتبَّع",
+      "untrackedExcludedLabel_two": "تم استبعاد طلبين غير متتبَّعين",
+      "untrackedExcludedLabel_few": "تم استبعاد {{count}} طلبات غير متتبَّعة",
+      "untrackedExcludedLabel_many": "تم استبعاد {{count}} طلبًا غير متتبَّع",
+      "untrackedExcludedLabel_other": "تم استبعاد {{count}} طلب غير متتبَّع",
+      "untrackedExcludedTooltip": "الطلبات التي لم تُطابق أي إعلان في SellerHill لا تُدرج في أي رقم في هذه اللوحة. تبقى ظاهرة في صفحة الطلبات تحت \"غير متتبَّع\"؛ استورد الإعلان لإدراجها."
     }
   }
 }

@@ -7,6 +7,10 @@ export interface ListingCardStat {
   label: string;
   value: string;
   tone?: StatTone;
+  /** Optional glyph before the value (e.g. a filled star beside a rating). */
+  icon?: IconName;
+  /** Theme color path for `icon`; also fills it (a star reads as a rating only when solid). */
+  iconColor?: string;
 }
 
 /** Labeled meta row (Brand, ASIN, eBay ID, …). Optional storeType renders value as IdBadge link. */
@@ -56,4 +60,9 @@ export interface ListingCardProps {
   selected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
   selectionAriaLabel?: string;
+  /**
+   * The trailing "Details →" affordance. Default true; a card whose click does
+   * something other than open a detail page (e.g. ticks it) hides it.
+   */
+  showDetailAction?: boolean;
 }

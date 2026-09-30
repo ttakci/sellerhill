@@ -1,8 +1,8 @@
-import { Badge, Icon, IdBadge, StatusBadge, Text } from '@repo/ui';
+import { Badge, Icon, IdBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { orderStatusToBadgeStatus } from '../order-status';
+import { OrderStageBadge } from '../OrderStageBadge';
 
 import * as S from './OrderCard.style';
 import type { OrderCardProps } from './OrderCard.types';
@@ -11,8 +11,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   productTitle,
   imageUrl,
   ebayOrderId,
-  status,
-  statusLabel,
+  stage,
+  shippedDetectedAt,
   statsBadges,
   meta,
   stats,
@@ -30,13 +30,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       aria-label={ebayOrderId}
       $hoverEffect={hoverEffect}
     >
-      <S.Image>
-        {imageUrl ? (
-          <img src={imageUrl} alt={productTitle} />
-        ) : (
-          <Icon name="image" size={28} />
-        )}
-      </S.Image>
+      <S.Image>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
 
       <S.Content>
         <S.HeaderBlock>
@@ -44,9 +38,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             <S.Title variant="body" weight="semibold" color="text.primary">
               {productTitle}
             </S.Title>
-            <StatusBadge status={orderStatusToBadgeStatus(status)} size="sm">
-              {statusLabel}
-            </StatusBadge>
+            <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
           </S.TitleRow>
 
           {meta.length > 0 && (

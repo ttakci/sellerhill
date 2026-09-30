@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "Tüm durumlar",
       "allStores": "Tüm mağazalar",
-      "allTrackingStates": "Tüm takip durumları",
+      "allTrackingStates": "Bağlı ve bağlı olmayan",
       "clearAll": "Temizle",
-      "resultCount": "{{count}} sonuç"
+      "resultCount": "{{count}} sonuç",
+      "allStages": "Tüm durumlar"
     },
     "stats": {
       "totalSales": "Toplam Satış",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "SellerHill tarafından takip ediliyor",
-      "untracked": "Takip edilmiyor",
+      "tracked": "Bir listeye bağlı",
+      "untracked": "Listeye bağlı değil",
       "problem": {
         "wrongPageType": "Takip sağlayıcısı Amazon sipariş sayfasını okuyamadı — sayfa biçimi değişmiş olabilir. Bu otomatik olarak yeniden denenecek.",
         "amazonSessionExpired": "Bu siparişi okumak için kullanılan Amazon oturumunun süresi doldu ve yeniden giriş yapılması gerekiyor.",
@@ -156,6 +157,7 @@
       "buyerPayment": "Alıcı Ödemesi",
       "ebaySummary": "eBay Satış Özeti",
       "whatBuyerPaid": "Alıcının Ödediği",
+      "whatYouPaidAmazon": "Amazon'a Ödediğiniz",
       "whatYouEarned": "Kazancınız",
       "earningsOrderTotal": "Sipariş Toplamı",
       "ebayCollectedFromBuyer": "eBay'in Alıcıdan Tahsil Ettiği",
@@ -194,6 +196,7 @@
       "copyState": "Eyalet/bölgeyi kopyala",
       "copyZip": "Posta kodunu kopyala",
       "copyCountry": "Ülkeyi kopyala",
+      "copyPhone": "Telefonu kopyala",
       "copied": "Kopyalandı",
       "amazonCosts": "Amazon Sipariş Özeti",
       "purchasePrice": "Satın Alma Fiyatı",
@@ -213,7 +216,8 @@
       "quantity": "Adet",
       "unit": "adet",
       "sku": "SKU",
-      "na": "Mevcut Değil"
+      "na": "Mevcut Değil",
+      "ebayStatus": "eBay durumu"
     },
     "modal": {
       "title": "Amazon Sipariş Bilgisi Gir",
@@ -240,6 +244,71 @@
       "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
       "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir.",
       "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Amazon iptal etti",
+        "meaning": "Amazon satın almayı iptal etti. eBay alıcısına ürün hâlâ borçlu.",
+        "action": "Siparişi başka yoldan gönderin, sonra yeni Amazon siparişini bağlayın."
+      },
+      "cancelled": {
+        "label": "İptal",
+        "meaning": "eBay siparişi iptal edildi."
+      },
+      "delivered": {
+        "label": "Teslim edildi",
+        "meaning": "Amazon paketi teslim edildi olarak bildirdi. Yapılacak bir şey kalmadı."
+      },
+      "test_run": {
+        "label": "Test",
+        "meaning": "Otomatik siparişin deneme çalışması. Amazon'da sipariş verilmedi, para çıkmadı."
+      },
+      "shipped": {
+        "label": "Kargolandı",
+        "meaning": "Takip numarası eBay'e gönderildi. Teslimat bekleniyor."
+      },
+      "tracking_held": {
+        "label": "Takip bekletiliyor",
+        "meaning": "Amazon kargoladı ama takip henüz eBay'e ulaşmadı — genellikle takip dönüşümü bekliyordur.",
+        "action": "Takibi dönüştürün ya da siparişte görünen nedeni giderin."
+      },
+      "buying": {
+        "label": "Amazon'da alınıyor",
+        "meaning": "Otomatik sipariş şu anda Amazon'da bu siparişi veriyor."
+      },
+      "purchased": {
+        "label": "Satın alındı · kargo bekleniyor",
+        "meaning": "Bir Amazon siparişi bağlı. Amazon'un kargolaması bekleniyor."
+      },
+      "purchase_blocked": {
+        "label": "Satın alma engellendi",
+        "meaning": "Otomatik sipariş, satın almadan önce bir güvenlik kontrolünde durdu. Para çıkmadı.",
+        "action": "Görünen nedeni giderin ya da Amazon'dan elle alıp siparişi bağlayın."
+      },
+      "awaiting_payment": {
+        "label": "Ödeme bekleniyor",
+        "meaning": "Alıcı henüz ödemedi. Ödemeden önce satın almayın."
+      },
+      "to_purchase": {
+        "label": "Satın alınacak",
+        "meaning": "Ödendi, henüz bağlı bir Amazon siparişi yok.",
+        "action": "Amazon'dan satın alın ve siparişi bağlayın."
+      }
+    },
+    "stageTabs": {
+      "all": "Tümü",
+      "action": "Aksiyon gerekli",
+      "to_purchase": "Satın alınacak",
+      "in_progress": "Devam eden",
+      "done": "Tamamlanan",
+      "withCount": "{{label}} ({{count}})"
+    },
+    "stageLegend": {
+      "title": "Durumlar ne anlama geliyor",
+      "open": "Durumları açıkla",
+      "columnStage": "Durum",
+      "columnMeaning": "Anlamı",
+      "columnAction": "Siz ne yaparsınız"
     }
   }
 }

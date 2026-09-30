@@ -27,9 +27,10 @@
     "filters": {
       "allStatuses": "All statuses",
       "allStores": "All stores",
-      "allTrackingStates": "All tracking states",
+      "allTrackingStates": "Linked and not linked",
       "clearAll": "Clear all",
-      "resultCount": "{{count}} results"
+      "resultCount": "{{count}} results",
+      "allStages": "All statuses"
     },
     "stats": {
       "totalSales": "Total Sales",
@@ -90,8 +91,8 @@
       }
     },
     "tracking": {
-      "tracked": "Tracked by SellerHill",
-      "untracked": "Not tracked",
+      "tracked": "Linked to a listing",
+      "untracked": "Not linked to a listing",
       "problem": {
         "wrongPageType": "The tracking provider could not read Amazon's order page — it may have changed format. This will be retried automatically.",
         "amazonSessionExpired": "The Amazon session used to read this order has expired and needs to be signed in again.",
@@ -156,6 +157,7 @@
       "buyerPayment": "Buyer Payment",
       "ebaySummary": "eBay Sales Summary",
       "whatBuyerPaid": "What your buyer paid",
+      "whatYouPaidAmazon": "What you paid Amazon",
       "whatYouEarned": "What you earned",
       "earningsOrderTotal": "Order total",
       "ebayCollectedFromBuyer": "eBay collected from buyer",
@@ -194,6 +196,7 @@
       "copyState": "Copy state/province",
       "copyZip": "Copy zip code",
       "copyCountry": "Copy country/region",
+      "copyPhone": "Copy phone",
       "copied": "Copied",
       "amazonCosts": "Amazon Order Summary",
       "purchasePrice": "Purchase Price",
@@ -213,7 +216,8 @@
       "quantity": "Quantity",
       "unit": "unit",
       "sku": "SKU",
-      "na": "N/A"
+      "na": "N/A",
+      "ebayStatus": "eBay status"
     },
     "modal": {
       "title": "Enter Amazon Order Info",
@@ -240,6 +244,71 @@
       "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
       "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees.",
       "listingOverPlanLimit": "This order's listing was outside your plan's listing limit when the order arrived. Orders from listings outside the limit get no shipment tracking or tracking conversion."
+    },
+    "stage": {
+      "amazon_cancelled": {
+        "label": "Amazon cancelled",
+        "meaning": "Amazon cancelled the purchase. The eBay buyer is still owed the item.",
+        "action": "Fulfil this order another way, then link the new Amazon order."
+      },
+      "cancelled": {
+        "label": "Cancelled",
+        "meaning": "The eBay order was cancelled."
+      },
+      "delivered": {
+        "label": "Delivered",
+        "meaning": "Amazon reports the parcel delivered. Nothing left to do."
+      },
+      "test_run": {
+        "label": "Test run",
+        "meaning": "A dry run of automatic ordering. No Amazon order was placed and no money moved."
+      },
+      "shipped": {
+        "label": "Shipped",
+        "meaning": "Tracking has been sent to eBay. Waiting for delivery."
+      },
+      "tracking_held": {
+        "label": "Tracking held",
+        "meaning": "Amazon shipped, but the tracking has not reached eBay yet — usually the tracking conversion is still pending.",
+        "action": "Convert the tracking, or fix the cause shown on the order."
+      },
+      "buying": {
+        "label": "Buying on Amazon",
+        "meaning": "Automatic ordering is placing this order on Amazon right now."
+      },
+      "purchased": {
+        "label": "Purchased · awaiting shipment",
+        "meaning": "An Amazon order is linked. Waiting for Amazon to ship it."
+      },
+      "purchase_blocked": {
+        "label": "Purchase blocked",
+        "meaning": "Automatic ordering stopped at a safety check before buying. No money moved.",
+        "action": "Fix the reason shown, or buy on Amazon by hand and link the order."
+      },
+      "awaiting_payment": {
+        "label": "Awaiting payment",
+        "meaning": "The buyer has not paid yet. Do not buy until they do."
+      },
+      "to_purchase": {
+        "label": "To purchase",
+        "meaning": "Paid, and no Amazon order is linked yet.",
+        "action": "Buy on Amazon and link the order."
+      }
+    },
+    "stageTabs": {
+      "all": "All",
+      "action": "Needs action",
+      "to_purchase": "To purchase",
+      "in_progress": "In progress",
+      "done": "Done",
+      "withCount": "{{label}} ({{count}})"
+    },
+    "stageLegend": {
+      "title": "What the statuses mean",
+      "open": "Explain the statuses",
+      "columnStage": "Status",
+      "columnMeaning": "What it means",
+      "columnAction": "What you do"
     }
   }
 }

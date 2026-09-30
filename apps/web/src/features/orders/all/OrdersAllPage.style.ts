@@ -3,6 +3,16 @@ import { PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
+/** The counted stage tabs on the left, the legend trigger on the right. */
+export const TabsRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  margin-bottom: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
 export const FilterBar = styled.div`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
@@ -95,4 +105,3 @@ export const AutoFulfillCell = styled.div`
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
-

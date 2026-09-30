@@ -7,18 +7,19 @@
  */
 
 import {
-  Badge,
   Button,
   Checkbox,
   DataTable,
   Drawer,
   EmptyState,
   Icon,
-  IdBadge,
   PageHeader,
+  Select,
   Skeleton,
   TabNav,
-  Text, type TableColumn,
+  Text,
+  TextInput,
+  type TableColumn,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,11 +30,14 @@ import * as S from './BestSellersPage.style';
 import type { BestSellersItemView, BestSellersPageComponentProps } from './BestSellersPage.types';
 import { CategoryTree } from './CategoryTree';
 
-import { ProductTableCell } from '@/domain-ui';
+import { ListingCard, ProductTableCell, type ListingCardMetaItem } from '@/domain-ui';
 
-/** Amazon renders 100 products as two pages of 50; four columns keeps a page to ~13 rows. */
-const GRID_MIN_ITEM_WIDTH = '17rem';
-const GRID_MAX_COLUMNS = 4;
+/**
+ * Same grid as the eBay Listings page — the card IS the listings card, laid out
+ * horizontally, so it needs the same minimum track and the same two-column cap.
+ */
+const GRID_MIN_ITEM_WIDTH = '24rem';
+const GRID_MAX_COLUMNS = 2;
 
 const EMPTY_VALUE = '—';
 
@@ -61,11 +65,19 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   onCloseCategoryDrawer,
   isSubCategory,
   onBackToAllCategories,
+  ratingOptions,
+  filterValues,
+  onMinRatingChange,
+  onMinReviewsChange,
+  onPriceMinChange,
+  onPriceMaxChange,
+  hasActiveFilters,
+  onClearFilters,
+  filterResultLabel,
   selectedCount,
   isAllOnPageSelected,
   onToggleSelectAllOnPage,
   onToggleItem,
-  onControlClick,
   onListSelected,
   onClearSelection,
   onRetry,
@@ -162,31 +174,31 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     },
   ];
 
+  /*
+   * A locked placeholder mirrors the horizontal listings card — square image
+   * slot beside title, meta and stat strip — so the grid keeps one rhythm. It
+   * holds only skeleton bars (the server withheld the product), blurred, with
+   * the lock disc on top, unblurred.
+   */
   const renderLockedGridCard = (item: BestSellersItemView) => (
     <S.LockedCard
       key={item.asin}
-      variant="bordered"
+      variant="elevated"
       padding="none"
       role="img"
       aria-label={t('bestSellers.locked.rowLabel')}
     >
       <S.LockedCardBody aria-hidden="true">
-        <S.CardTopRow>
-          <Skeleton width="2.5rem" height="1.25rem" radius="full" />
-          <Skeleton width="1.125rem" height="1.125rem" radius="sm" />
-        </S.CardTopRow>
-        <S.CardImageFrame>
-          <Skeleton width="60%" height="80%" radius="md" />
-        </S.CardImageFrame>
-        <S.CardBody>
+        <S.LockedImageSlot>
+          <Skeleton width="100%" height="100%" radius="sm" />
+        </S.LockedImageSlot>
+        <S.LockedCardLines>
           <Skeleton width="90%" height="0.875rem" />
-          <Skeleton width="60%" height="0.875rem" />
-          <S.CardMetaRow>
-            <Skeleton width="30%" height="1rem" />
-            <Skeleton width="35%" height="0.75rem" />
-          </S.CardMetaRow>
-          <Skeleton width="45%" height="1.25rem" radius="sm" />
-        </S.CardBody>
+          <Skeleton width="65%" height="0.875rem" />
+          <Skeleton width="45%" height="0.75rem" />
+          <Skeleton width="55%" height="0.75rem" />
+          <Skeleton width="100%" height="3rem" radius="sm" />
+        </S.LockedCardLines>
       </S.LockedCardBody>
       <S.LockedOverlay>
         <S.LockedBadge>
@@ -196,60 +208,55 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     </S.LockedCard>
   );
 
-  const renderGridCard = (item: BestSellersItemView) =>
-    item.isLocked ? (
-      renderLockedGridCard(item)
-    ) : (
-      <S.GridCard
+  /*
+   * The eBay Listings card, fed Amazon figures: rank, review count and ASIN as
+   * labelled meta rows, price and star rating in the stat strip (a third stat
+   * wrapped the strip onto two lines at this card width). Clicking the card ticks
+   * it (there is no detail page to open), so the "Details" arrow is hidden.
+   */
+  const renderGridCard = (item: BestSellersItemView) => {
+    if (item.isLocked) {
+      return renderLockedGridCard(item);
+    }
+    const meta: ListingCardMetaItem[] = [];
+    if (item.rankLabel) {
+      meta.push({ label: t('bestSellers.table.rank'), value: item.rankLabel, icon: 'bar-chart' });
+    }
+    if (item.rankChangeLabel) {
+      meta.push({ label: t('bestSellers.table.rankChange'), value: item.rankChangeLabel, icon: 'trending-up' });
+    }
+    if (item.reviewsLabel) {
+      meta.push({ label: t('bestSellers.table.reviews'), value: item.reviewsLabel, icon: 'message-circle' });
+    }
+    meta.push({ label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon', icon: 'barcode' });
+
+    return (
+      <ListingCard
         key={item.asin}
-        variant="interactive"
-        padding="none"
-        aria-pressed={item.isSelected}
+        title={item.title}
+        imageUrl={item.imageUrl ?? undefined}
+        meta={meta}
+        stats={[
+          { label: t('bestSellers.table.price'), value: item.priceLabel ?? EMPTY_VALUE },
+          item.ratingValueLabel
+            ? {
+                label: t('bestSellers.table.rating'),
+                value: item.ratingValueLabel,
+                icon: 'star',
+                iconColor: 'semantic.warning',
+              }
+            : { label: t('bestSellers.table.rating'), value: EMPTY_VALUE },
+        ]}
+        orientation="horizontal"
+        selectable
+        selected={item.isSelected}
+        onSelectedChange={() => onToggleItem(item.asin)}
+        selectionAriaLabel={item.title}
         onClick={() => onToggleItem(item.asin)}
-      >
-        <S.CardTopRow>
-          {item.rankLabel ? (
-            <Badge variant={item.isSelected ? 'primary' : 'neutral'} size="sm" isPill>
-              {item.rankLabel}
-            </Badge>
-          ) : (
-            <span />
-          )}
-          <S.CardControl onClick={onControlClick}>
-            <Checkbox checked={item.isSelected} onChange={() => onToggleItem(item.asin)} aria-label={item.title} />
-          </S.CardControl>
-        </S.CardTopRow>
-
-        <S.CardImageFrame>
-          {item.imageUrl ? (
-            <S.CardImage src={item.imageUrl} alt={item.title} loading="lazy" />
-          ) : (
-            <Icon name="image" size={40} color="text.tertiary" />
-          )}
-        </S.CardImageFrame>
-
-        <S.CardBody>
-          <S.CardTitleClamp title={item.title}>
-            <Text variant="body" weight="semibold" color="text.primary">
-              {item.title}
-            </Text>
-          </S.CardTitleClamp>
-
-          <S.CardMetaRow>
-            <Text variant="body" weight="bold" color="text.primary" numeric>
-              {item.priceLabel ?? EMPTY_VALUE}
-            </Text>
-            <Text variant="body-sm" color="text.secondary" numeric>
-              {item.ratingLabel ?? t('bestSellers.noRating')}
-            </Text>
-          </S.CardMetaRow>
-
-          <S.CardFooter onClick={onControlClick}>
-            <IdBadge id={item.asin} storeType="amazon" size="sm" />
-          </S.CardFooter>
-        </S.CardBody>
-      </S.GridCard>
+        showDetailAction={false}
+      />
     );
+  };
 
   /**
    * One `EmptyState` for every non-grid situation, first load included, so
@@ -266,6 +273,17 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
             icon="loader"
             title={t('bestSellers.states.loading.title')}
             description={t('bestSellers.states.loading.description')}
+          />
+        );
+      case BestSellersViewState.NO_MATCHES:
+        return (
+          <EmptyState
+            icon="filter"
+            title={t('bestSellers.states.noMatches.title')}
+            description={t('bestSellers.states.noMatches.description')}
+            action={t('bestSellers.filters.clear')}
+            onAction={onClearFilters}
+            size="lg"
           />
         );
       case BestSellersViewState.NOT_FOUND:
@@ -405,11 +423,62 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
               />
 
               <S.FilterRow>
-                {isSubCategory && (
-                  <Button variant="text" size="small" onClick={onBackToAllCategories}>
-                    <Icon name="arrow-left" size={14} />
+                <S.FilterSelect>
+                  <Select
+                    value={filterValues.minRating}
+                    onChange={onMinRatingChange}
+                    options={ratingOptions}
+                    placeholder={t('bestSellers.filters.anyRating')}
+                    iconLeft="star"
+                    size="medium"
+                    fullWidth
+                  />
+                </S.FilterSelect>
+                <S.FilterNumber>
+                  <TextInput
+                    name="bestSellersMinReviews"
+                    value={filterValues.minReviews}
+                    onChange={onMinReviewsChange}
+                    placeholder={t('bestSellers.filters.minReviews')}
+                    ariaLabel={t('bestSellers.filters.minReviews')}
+                    iconLeft="message-circle"
+                    type="number"
+                    size="medium"
+                    fullWidth
+                  />
+                </S.FilterNumber>
+                <S.FilterPriceRange>
+                  <TextInput
+                    name="bestSellersPriceMin"
+                    value={filterValues.priceMin}
+                    onChange={onPriceMinChange}
+                    placeholder={t('bestSellers.filters.priceMin')}
+                    ariaLabel={t('bestSellers.filters.priceMin')}
+                    iconLeft="circle-dollar-sign"
+                    type="number"
+                    size="medium"
+                    fullWidth
+                  />
+                  <S.RangeSeparator>
+                    <Text variant="body" color="text.tertiary">
+                      –
+                    </Text>
+                  </S.RangeSeparator>
+                  <TextInput
+                    name="bestSellersPriceMax"
+                    value={filterValues.priceMax}
+                    onChange={onPriceMaxChange}
+                    placeholder={t('bestSellers.filters.priceMax')}
+                    ariaLabel={t('bestSellers.filters.priceMax')}
+                    type="number"
+                    size="medium"
+                    fullWidth
+                  />
+                </S.FilterPriceRange>
+                {hasActiveFilters && (
+                  <Button variant="text" size="small" onClick={onClearFilters}>
                     <Text variant="body-sm" weight="semibold">
-                      {t('bestSellers.backToAllCategories')}
+                      {t('bestSellers.filters.clear')}
                     </Text>
                   </Button>
                 )}
@@ -425,6 +494,11 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
               </S.FilterRow>
 
               <S.MetaRow>
+                {filterResultLabel && (
+                  <Text variant="caption" weight="semibold" color="text.primary" numeric>
+                    {filterResultLabel}
+                  </Text>
+                )}
                 {selectedCount > 0 && (
                   <Text variant="caption" weight="semibold" color="brand.primary" numeric>
                     {t('bestSellers.selected', { count: selectedCount })}

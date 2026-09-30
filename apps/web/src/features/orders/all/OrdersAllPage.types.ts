@@ -1,5 +1,5 @@
-import type { OrderDto } from '@repo/shared';
-import type { TableColumn, ViewMode } from '@repo/ui';
+import type { OrderDto, OrderStageTab } from '@repo/shared';
+import type { TabNavItem, TableColumn, ViewMode } from '@repo/ui';
 
 export interface OrdersAllPageProps {
   orders: OrderDto[];
@@ -17,15 +17,17 @@ export interface OrdersAllPageProps {
   };
   search: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  status: string;
-  onStatusChange: (value: string | number) => void;
-  statusOptions: { value: string | number; label: string }[];
+  /** Counted stage tabs (All · Needs action · To purchase · In progress · Done). */
+  tab: OrderStageTab;
+  tabItems: TabNavItem[];
+  onTabChange: (tabId: string) => void;
+  /** The Status select — one stage; choosing one returns the rail to "All". */
+  stage: string;
+  onStageChange: (value: string | number) => void;
+  stageOptions: { value: string | number; label: string }[];
   ebayAccountId: string;
   onEbayAccountChange: (value: string | number) => void;
   storeOptions: { value: string | number; label: string }[];
-  fulfillmentState: string;
-  onFulfillmentStateChange: (value: string | number) => void;
-  fulfillmentStateOptions: { value: string | number; label: string }[];
   trackingState: string;
   onTrackingStateChange: (value: string | number) => void;
   trackingStateOptions: { value: string | number; label: string }[];

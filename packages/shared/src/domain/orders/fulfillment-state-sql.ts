@@ -37,7 +37,11 @@ export function buildFulfillmentStateSql(alias: string): string {
     WHEN ${simulated} THEN '${OrderFulfillmentState.SIMULATED}'
     WHEN ${autoStatus} = '${AutoFulfillStatus.PLACED}' THEN '${OrderFulfillmentState.PURCHASED}'
     WHEN ${autoStatus} IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}')
-      THEN CASE WHEN ${settled} THEN '${OrderFulfillmentState.MANUAL}' ELSE '${OrderFulfillmentState.ACTION_REQUIRED}' END
+      THEN CASE
+        WHEN ${hasAmazonOrder} THEN '${OrderFulfillmentState.MANUAL}'
+        WHEN ${settled} THEN '${OrderFulfillmentState.MANUAL}'
+        ELSE '${OrderFulfillmentState.ACTION_REQUIRED}'
+      END
     WHEN ${autoStatus} IN ('${AutoFulfillStatus.PENDING}', '${AutoFulfillStatus.RUNNING}')
       THEN '${OrderFulfillmentState.IN_PROGRESS}'
     WHEN ${autoStatus} = '${AutoFulfillStatus.DRY_RUN}' THEN '${OrderFulfillmentState.SIMULATED}'

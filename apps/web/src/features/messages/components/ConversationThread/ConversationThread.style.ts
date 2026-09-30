@@ -72,12 +72,20 @@ export const Messages = styled.div`
   background: ${tkn('colors.background.secondary')};
 `;
 
-export const Bubble = styled.div<{ $mine: boolean }>`
+/**
+ * The 36rem chat-bubble cap fits a short reply, but eBay's own system
+ * notices are a full inline-styled e-mail template (see \`SafeHtmlFrame\`) —
+ * clamping one into chat-bubble width left most of the e-mail's own layout
+ * squeezed into a narrow column with dead space around it. Those get the
+ * full row width instead, like an e-mail client would give them.
+ */
+export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
   align-self: ${({ $mine }) => ($mine ? 'flex-end' : 'flex-start')};
-  max-width: min(100%, 36rem);
+  max-width: ${({ $wide }) => ($wide ? '100%' : 'min(100%, 36rem)')};
+  width: ${({ $wide }) => ($wide ? '100%' : 'auto')};
   min-width: 0;
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.lg')};

@@ -87,7 +87,10 @@
       "estimatedLabel": "Estimated",
       "estimatedTooltip": "Orders awaiting Amazon fulfillment use an estimated cost (Amazon tax at your configured rate of {{rate}}%).",
       "uncostedLabel": "Revenue without cost",
-      "uncostedTooltip": "Sales whose Amazon cost could not be resolved yet — revenue only, no profit implied."
+      "uncostedTooltip": "Sales whose Amazon cost could not be resolved yet — revenue only, no profit implied.",
+      "untrackedExcludedLabel_one": "{{count}} untracked order excluded",
+      "untrackedExcludedLabel_other": "{{count}} untracked orders excluded",
+      "untrackedExcludedTooltip": "Orders that did not match a SellerHill listing are left out of every figure on this dashboard. They stay on the Orders page under \"Not tracked\"; import the listing to include them."
     }
   }
 }

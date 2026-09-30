@@ -87,7 +87,11 @@
       "estimatedLabel": "Stimato",
       "estimatedTooltip": "Gli ordini in attesa dell'evasione Amazon usano un costo stimato (imposte Amazon all'aliquota configurata del {{rate}}%).",
       "uncostedLabel": "Ricavi senza costo",
-      "uncostedTooltip": "Vendite il cui costo Amazon non è ancora stato determinato: solo ricavi, nessun profitto implicito."
+      "uncostedTooltip": "Vendite il cui costo Amazon non è ancora stato determinato: solo ricavi, nessun profitto implicito.",
+      "untrackedExcludedLabel_one": "{{count}} ordine non tracciato escluso",
+      "untrackedExcludedLabel_many": "{{count}} ordini non tracciati esclusi",
+      "untrackedExcludedLabel_other": "{{count}} ordini non tracciati esclusi",
+      "untrackedExcludedTooltip": "Gli ordini che non corrispondono a un’inserzione SellerHill sono esclusi da tutte le cifre di questa dashboard. Restano nella pagina Ordini come «Non tracciato»; importa l’inserzione per includerli."
     }
   }
 }

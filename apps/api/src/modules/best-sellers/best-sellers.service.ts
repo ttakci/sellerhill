@@ -18,6 +18,8 @@ import {
   SUPPORTED_AMAZON_MARKETPLACES,
   SourceFetchOutcome,
   type BestSellersBrowseAllowanceDto,
+  type BestSellersCategoriesDto,
+  type BestSellersCategoriesQueryDto,
   type BestSellersListDto,
   type BestSellersPageDto,
   type BestSellersQueryDto,
@@ -49,6 +51,24 @@ import {
 interface CachedListPage {
   list: BestSellersListDto;
   fetchedAt: string | null;
+}
+
+/** Which list page to resolve. */
+interface ListTarget {
+  listType: BestSellersListType;
+  category: string;
+  page: number;
+  marketplace: AmazonMarketplace;
+}
+
+/** A list page before the seller's allowance is applied; `list` only when `outcome` is FOUND. */
+interface ResolvedList {
+  outcome: SourceFetchOutcome;
+  list: BestSellersListDto | null;
+  /** When served from the shared cache, the time it was fetched; null on a live fetch. */
+  cachedAt: string | null;
+  fetchedAt: string | null;
+  viewKey: string;
 }
 
 /** A page after the seller's product allowance has been applied to it. */
@@ -109,14 +129,75 @@ export class BestSellersService {
   ) {}
 
   async getPage(userId: string, query: BestSellersQueryDto): Promise<BestSellersPageDto> {
+    const resolved = await this.resolveList(userId, {
+      listType: query.listType ?? BestSellersListType.BEST_SELLERS,
+      category: normalizeCategory(query.category ?? BEST_SELLERS_ROOT_CATEGORY),
+      page: query.page ?? 1,
+      marketplace: query.marketplace ?? AmazonMarketplace.AMAZON_US,
+    });
+
+    // A found page, cached or live, is a page the seller sees, so the product
+    // allowance applies to it either way.
+    if (resolved.outcome === SourceFetchOutcome.FOUND && resolved.list) {
+      const metered = await this.applyAllowance(userId, resolved.viewKey, resolved.list);
+      return {
+        outcome: SourceFetchOutcome.FOUND,
+        list: metered.list,
+        cachedAt: resolved.cachedAt,
+        fetchedAt: resolved.fetchedAt,
+        allowance: metered.allowance,
+        lockedCount: metered.lockedCount,
+      };
+    }
+    // Nothing was shown, so the allowance is reported, not charged.
+    return {
+      outcome: resolved.outcome,
+      list: null,
+      cachedAt: null,
+      fetchedAt: resolved.fetchedAt,
+      allowance: await this.readAllowance(userId),
+      lockedCount: 0,
+    };
+  }
+
+  /**
+   * The department list of one list type, WITHOUT its products.
+   *
+   * The seller-facing category tree is built one level at a time from list
+   * answers, and its root level only ever came from the root list page. A deep
+   * link, a reload or a back-navigation straight into a department therefore
+   * showed no departments at all. Fetching the root PAGE to recover them would
+   * charge up to 50 products of the seller's allowance for a list they never
+   * looked at, and the allowance meters products SEEN, not the tree beside
+   * them. So this reads the same shared root page (cache, else one live fetch
+   * that then serves everyone) and hands back only its categories. The hidden
+   * fetch cap still applies to a miss: proxy capacity was spent.
+   */
+  async getCategories(userId: string, query: BestSellersCategoriesQueryDto): Promise<BestSellersCategoriesDto> {
+    const resolved = await this.resolveList(userId, {
+      listType: query.listType ?? BestSellersListType.BEST_SELLERS,
+      category: BEST_SELLERS_ROOT_CATEGORY,
+      page: 1,
+      marketplace: query.marketplace ?? AmazonMarketplace.AMAZON_US,
+    });
+    return {
+      outcome: resolved.outcome,
+      categories: resolved.outcome === SourceFetchOutcome.FOUND && resolved.list ? resolved.list.categories : [],
+    };
+  }
+
+  /**
+   * One list page, from the shared cache or a live scraper fetch: the single
+   * place that talks to the scraper, applies the hidden fetch cap and refuses
+   * to fetch without a proxy. It charges NOTHING against the seller's product
+   * allowance; the callers decide what, if anything, the seller sees.
+   */
+  private async resolveList(userId: string, target: ListTarget): Promise<ResolvedList> {
     if (!(await this.platformSettings.getBoolean(PlatformSettingKey.BEST_SELLERS_ENABLED))) {
       throw new NotFoundException(BestSellersErrorKey.DISABLED);
     }
 
-    const listType = query.listType ?? BestSellersListType.BEST_SELLERS;
-    const category = normalizeCategory(query.category ?? BEST_SELLERS_ROOT_CATEGORY);
-    const page = query.page ?? 1;
-    const marketplace = query.marketplace ?? AmazonMarketplace.AMAZON_US;
+    const { listType, category, page, marketplace } = target;
     if (!SUPPORTED_AMAZON_MARKETPLACES.includes(marketplace)) {
       throw new BadRequestException(BestSellersErrorKey.UNSUPPORTED_MARKETPLACE);
     }
@@ -128,22 +209,19 @@ export class BestSellersService {
     const fetchCap = resolveDailyFetchLimit(await this.platformSettings.getNumber(PlatformSettingKey.BEST_SELLERS_DAILY_FETCH_LIMIT));
     const counterKey = this.redis.keys.key('best-sellers', 'fetches', userId, utcDayKey(new Date()));
 
-    // A hit costs no fetch allowance — but it IS a page the seller sees, so the
-    // product allowance applies to it exactly as to a live page.
+    // A hit costs no fetch allowance.
     const cached = await this.readCache(cacheKey);
     if (cached) {
-      const metered = await this.applyAllowance(userId, viewKey, cached.list);
       return {
         outcome: SourceFetchOutcome.FOUND,
-        list: metered.list,
+        list: cached.list,
         cachedAt: cached.fetchedAt,
         fetchedAt: cached.fetchedAt,
-        allowance: metered.allowance,
-        lockedCount: metered.lockedCount,
+        viewKey,
       };
     }
 
-    // Miss → count it against the hidden fetch cap BEFORE the fetch, so a burst
+    // Miss: count it against the hidden fetch cap BEFORE the fetch, so a burst
     // of parallel misses cannot all pass the check on the same stale count.
     const usedBefore = await this.readCounter(counterKey);
     if (!decideFetchAllowed(usedBefore, fetchCap)) {
@@ -156,9 +234,8 @@ export class BestSellersService {
 
     const proxies = await this.productSource.proxies();
     if (proxies.length === 0) {
-      // No proxy → no request. The server's own IP is never used, and a fetch
-      // that never happened is not charged against the cap; nothing was shown,
-      // so nothing is charged against the allowance either.
+      // No proxy, no request. The server's own IP is never used, and a fetch
+      // that never happened is not charged against the cap.
       await this.refund(counterKey);
       this.logger.warn(`Best Sellers fetch skipped: no scraper proxy configured (${listType} ${category || 'root'} p${page})`);
       return {
@@ -166,8 +243,7 @@ export class BestSellersService {
         list: null,
         cachedAt: null,
         fetchedAt: null,
-        allowance: await this.readAllowance(userId),
-        lockedCount: 0,
+        viewKey,
       };
     }
 
@@ -195,28 +271,12 @@ export class BestSellersService {
 
     if (response.outcome === SourceFetchOutcome.FOUND && response.list) {
       await this.writeCache(cacheKey, { list: response.list, fetchedAt: response.fetchedAt });
-      const metered = await this.applyAllowance(userId, viewKey, response.list);
-      return {
-        outcome: SourceFetchOutcome.FOUND,
-        list: metered.list,
-        cachedAt: null,
-        fetchedAt: response.fetchedAt,
-        allowance: metered.allowance,
-        lockedCount: metered.lockedCount,
-      };
+      return { outcome: SourceFetchOutcome.FOUND, list: response.list, cachedAt: null, fetchedAt: response.fetchedAt, viewKey };
     }
     // Any other outcome (blocked / parse_failed / not_found) is transient or
-    // final for this request only: not cached, the seller may retry, the fetch
-    // charge stands because the proxy capacity was spent — and no product was
-    // shown, so the allowance is reported, not charged.
-    return {
-      outcome: response.outcome,
-      list: null,
-      cachedAt: null,
-      fetchedAt: response.fetchedAt,
-      allowance: await this.readAllowance(userId),
-      lockedCount: 0,
-    };
+    // final for this request only: not cached, the seller may retry, and the
+    // fetch charge stands because the proxy capacity was spent.
+    return { outcome: response.outcome, list: null, cachedAt: null, fetchedAt: response.fetchedAt, viewKey };
   }
 
   /** One scraper call per cache key while it is in flight. */

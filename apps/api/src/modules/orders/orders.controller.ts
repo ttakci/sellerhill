@@ -2,8 +2,10 @@ import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   OrderFulfillmentState,
+  OrderStage,
   type OrderDto,
   type OrderFiltersDto,
+  type OrderStageCountsDto,
   type OrderStatsDto,
   UpdateOrderAmazonDetailsDto,
   type OrderSyncResponseDto,
@@ -34,6 +36,7 @@ export class OrdersController {
     @Query('dateTo') dateTo?: string,
     @Query('autoFulfillNeedsAttention') autoFulfillNeedsAttention?: string,
     @Query('fulfillmentState') fulfillmentState?: string,
+    @Query('stage') stage?: string,
     @Query('tracked') tracked?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
@@ -41,11 +44,16 @@ export class OrdersController {
     // Validate against the enum rather than passing the raw string through: the
     // service maps this value to a fixed SQL clause, so an unknown value must be
     // dropped, not forwarded.
-    const isKnownState = Object.values(OrderFulfillmentState).includes(
-      fulfillmentState as OrderFulfillmentState
-    );
+    const isKnownState = Object.values(OrderFulfillmentState).includes(fulfillmentState as OrderFulfillmentState);
     // Tri-state: 'true'/'false' → boolean, anything else (incl. absent) → no filter.
     const isTracked = tracked === 'true' ? true : tracked === 'false' ? false : undefined;
+    // `?stage=a,b` — unknown values are dropped, not forwarded (the service
+    // interpolates nothing from here, but an unknown stage would silently
+    // return an empty list, which reads as "no orders").
+    const stages = (stage ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s): s is OrderStage => (Object.values(OrderStage) as string[]).includes(s));
     const filters: OrderFiltersDto = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -54,16 +62,26 @@ export class OrdersController {
       ebayAccountId,
       dateFrom,
       dateTo,
-      autoFulfillNeedsAttention:
-        autoFulfillNeedsAttention === 'true' ? true : undefined,
-      fulfillmentState: isKnownState
-        ? (fulfillmentState as OrderFulfillmentState)
-        : undefined,
+      autoFulfillNeedsAttention: autoFulfillNeedsAttention === 'true' ? true : undefined,
+      fulfillmentState: isKnownState ? (fulfillmentState as OrderFulfillmentState) : undefined,
       isTracked,
+      stages: stages.length > 0 ? stages : undefined,
       sortBy,
       sortOrder,
     };
     return this.ordersService.findAll(req.user.sub, filters);
+  }
+
+  @Get('stage-counts')
+  @ApiOperation({ summary: 'Count orders per stage for the list page tabs' })
+  @ApiResponse({ status: 200, description: 'One count per OrderStage (0 when none).' })
+  getStageCounts(
+    @Request() req: { user: { sub: string } },
+    @Query('ebayAccountId') ebayAccountId?: string,
+    @Query('tracked') tracked?: string
+  ): Promise<OrderStageCountsDto> {
+    const isTracked = tracked === 'true' ? true : tracked === 'false' ? false : undefined;
+    return this.ordersService.getStageCounts(req.user.sub, { ebayAccountId, isTracked });
   }
 
   @Get('stats')
