@@ -45,10 +45,9 @@ export const SelectionControl = styled.div`
 `;
 
 /**
- * Title first, across the whole width; then the facts on the left with the
- * photo at rest on the right (horizontal), or the photo above (vertical).
- * See OrderCard — the two cards share one anatomy, and CLAUDE.md "Card
- * anatomy" says why the photo moved to the right.
+ * Title row first (title left, status badge right); then the photo on the
+ * LEFT with the facts beside it (horizontal), or the photo above (vertical).
+ * See OrderCard — the two cards share one anatomy (CLAUDE.md "Card anatomy").
  */
 export const Top = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
@@ -59,16 +58,18 @@ export const Top = styled.div<{ $orientation: ListingCardOrientation }>`
   flex: 1;
 `;
 
+/** Checkbox · one-line title · status badge on the right; badges may wrap under on a phone. */
 export const TitleRow = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
 export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
-  flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column-reverse')};
+  flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column')};
   align-items: ${({ $orientation }) => ($orientation === 'horizontal' ? 'flex-start' : 'stretch')};
   gap: ${tkn('spacing.md+')};
   min-width: 0;
@@ -127,24 +128,36 @@ export const Content = styled.div`
   flex: 1;
 `;
 
-/** Block-level host for the tooltip, so the clamped title keeps the full content width. */
+/** Block-level host for the tooltip, so the one-line title can shrink and truncate. */
 export const TitleSlot = styled.div`
   display: flex;
+  flex: 1 1 12rem;
+  min-width: 0;
+
+  & > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+`;
+
+/** One line, ellipsis — the full title is on the tooltip. */
+export const Title = styled(Text)`
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 `;
 
-export const Title = styled(Text)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
+/** Status badge pinned to the title row's right edge. */
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: ${tkn('spacing.xs')};
+  margin-left: auto;
+  flex: 0 1 auto;
 `;
 
 /** Label / value pairs, no icons — the label column is the only ornament. */

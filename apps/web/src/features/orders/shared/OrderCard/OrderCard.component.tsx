@@ -1,4 +1,4 @@
-import { Badge, Icon, IdBadge, Text } from '@repo/ui';
+import { Badge, Icon, IdBadge, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 
 import { OrderStageBadge } from '../OrderStageBadge';
@@ -21,24 +21,31 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 }) => (
   <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId} $hoverEffect={hoverEffect}>
     <S.Top>
-      <S.Title variant="body" weight="semibold" color="text.primary">
-        {productTitle}
-      </S.Title>
+      <S.TitleRow>
+        <S.TitleSlot>
+          <Tooltip content={productTitle} position="top" variant="dark">
+            <S.Title variant="body" weight="semibold" color="text.primary">
+              {productTitle}
+            </S.Title>
+          </Tooltip>
+        </S.TitleSlot>
+        {/* The stage and whatever qualifies it (estimated profit, blocked
+            reason, not linked) sit together opposite the title: one glance
+            says where the order stands and why. */}
+        <S.BadgeRow>
+          <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
+          {statsBadges?.map((badge) => (
+            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
+              {badge.label}
+            </Badge>
+          ))}
+        </S.BadgeRow>
+      </S.TitleRow>
 
       <S.Body>
-        <S.Content>
-          {/* The stage and whatever qualifies it (estimated profit, blocked
-            reason, not linked) sit together: one glance says where the order
-            stands and why. */}
-          <S.BadgeRow>
-            <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
-            {statsBadges?.map((badge) => (
-              <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
-                {badge.label}
-              </Badge>
-            ))}
-          </S.BadgeRow>
+        <S.Image>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
 
+        <S.Content>
           {meta.length > 0 && (
             <S.MetaList>
               {meta.map((item) => (
@@ -62,8 +69,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </S.MetaList>
           )}
         </S.Content>
-
-        <S.Image>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
       </S.Body>
     </S.Top>
 

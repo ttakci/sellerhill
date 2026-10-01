@@ -31,7 +31,7 @@ export const Wrapper = styled(Card)<{ $clickable: boolean }>`
     `}
 `;
 
-/** Title row across the whole width, then ids on the left with the photo at rest on the right — the OrderCard anatomy. */
+/** Title row (title left, bucket badge right), then the photo on the left with the ids beside it — the OrderCard anatomy. */
 export const Header = styled.div`
   display: flex;
   flex-direction: column;
@@ -81,19 +81,37 @@ export const HeaderText = styled.div`
 export const TitleRow = styled.div`
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
-export const Title = styled(Text)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex: 1;
+/** Block host for the tooltip so the one-line title can shrink and truncate. */
+export const TitleSlot = styled.div`
+  display: flex;
+  flex: 1 1 12rem;
   min-width: 0;
-  overflow-wrap: anywhere;
+
+  & > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+`;
+
+/** One line, ellipsis — the full title is on the tooltip. */
+export const Title = styled(Text)`
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+`;
+
+/** The bucket badge, pinned to the title row's right edge. */
+export const BadgeSlot = styled.div`
+  display: flex;
+  margin-left: auto;
+  flex: 0 0 auto;
 `;
 
 /** Muted label + value on one line (return id, order id, reason). */
