@@ -164,7 +164,7 @@ const lightColors: ThemeColors = {
     /* The moving lights (2026-10-01): they carry most of the colour now, the
        static wash underneath is only a base, so the canvas never reads darker
        than before — it just breathes. */
-    auroraBlue: 'rgba(59, 130, 246, 0.34)',
+    auroraBlue: 'rgba(59, 130, 246, 0.25)',
     auroraSky: 'rgba(14, 165, 233, 0.28)',
     auroraMint: 'rgba(20, 184, 166, 0.26)',
   },
@@ -362,7 +362,7 @@ const darkColors: ThemeColors = {
     glowBlue: 'rgba(79, 110, 247, 0.18)',
     glowAmber: 'rgba(251, 191, 36, 0.12)',
     glowMint: 'rgba(52, 211, 153, 0.12)',
-    auroraBlue: 'rgba(79, 110, 247, 0.16)',
+    auroraBlue: 'rgba(79, 110, 247, 0.12)',
     auroraSky: 'rgba(56, 189, 248, 0.12)',
     auroraMint: 'rgba(52, 211, 153, 0.12)',
   },
