@@ -7,8 +7,6 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
-  -webkit-backdrop-filter: blur(0.25rem);
-  backdrop-filter: blur(0.25rem);
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;

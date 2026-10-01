@@ -1012,11 +1012,19 @@ export const ContentInner = styled.div<{ $fitsViewport?: boolean }>`
     padding: ${tkn('spacing.md')} ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
   }
 `;
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/** The indeterminate bar's fill slides across its track and wraps. */
+const loadingSlide = keyframes`
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
 `;
 
+/**
+ * The blocking overlay: the page behind is only dimmed a notch (no blur, no
+ * white wash — the screen stays recognisable), and a small navy card with the
+ * SellerHill wordmark and an indeterminate bar says it is busy. The card is
+ * navy because the wordmark's "SELLER" is white and must sit on a dark
+ * surface.
+ */
 export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   position: fixed;
   top: 0;
@@ -1024,7 +1032,6 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   right: 0;
   bottom: 0;
   background: ${tkn('colors.surface.loadingOverlay')};
-  backdrop-filter: blur(0.25rem); /* 4px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1035,10 +1042,37 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   visibility: ${({ $visible }) => ($visible ? 'visible' : 'hidden')};
   transition: all ${tkn('transitions.normal')};
+`;
 
-  svg {
-    animation: ${spin} 1s linear infinite;
-    color: ${tkn('colors.brand.primary')};
+export const LoadingCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
+  background: ${tkn('colors.sidebar.background')};
+  border-radius: ${tkn('radius.xl')};
+  box-shadow: ${tkn('shadows.xl')};
+`;
+
+export const LoadingTrack = styled.div`
+  width: 8rem;
+  height: 0.25rem;
+  overflow: hidden;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.sidebar.divider')};
+`;
+
+export const LoadingFill = styled.div`
+  width: 40%;
+  height: 100%;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.landing.accentAmber')};
+  animation: ${loadingSlide} 1.1s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    width: 100%;
+    animation: none;
   }
 `;
 export const PageTitle = styled(Text)`
