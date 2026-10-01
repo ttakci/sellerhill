@@ -351,6 +351,40 @@
       "columnStage": "Stare",
       "columnMeaning": "Ce înseamnă",
       "columnAction": "Ce faceți"
+    },
+    "timeline": {
+      "title": "Cum decurge comanda",
+      "step": {
+        "received": "Comandă primită",
+        "purchase": "Cumpărare de pe Amazon",
+        "amazon_shipped": "Expediată de Amazon",
+        "ebay_tracking": "Urmărire pe eBay",
+        "delivered": "Livrată",
+        "sale_cancelled": "Vânzare anulată pe eBay",
+        "message_order_received": "Mesaj de comandă primită",
+        "message_shipped": "Mesaj de expediere",
+        "message_delivered": "Mesaj de livrare",
+        "message_feedback_request": "Solicitare de feedback"
+      },
+      "note": {
+        "received": "Comanda a sosit de pe eBay.",
+        "bought_auto": "Comanda automată a cumpărat produsul de pe Amazon.",
+        "bought_linked": "O comandă Amazon este asociată acestei vânzări.",
+        "purchase_not_recorded": "SellerHill nu are o comandă Amazon pentru această vânzare.",
+        "amazon_shipped": "Amazon a predat coletul curierului.",
+        "waiting_shipment": "Se așteaptă ca Amazon să expedieze. Comanda este verificată la intervale regulate.",
+        "shipment_not_observed": "SellerHill nu a urmărit o expediere Amazon pentru această vânzare.",
+        "upcoming_shipment": "Apare aici când Amazon expediază coletul.",
+        "tracking_pushed": "Numărul de urmărire a fost trimis la eBay; cumpărătorul tău poate urmări coletul.",
+        "tracking_not_by_us": "SellerHill nu a trimis numărul de urmărire pentru această vânzare.",
+        "upcoming_tracking": "Se trimite la eBay când Amazon expediază coletul.",
+        "delivered": "Amazon raportează coletul ca livrat.",
+        "waiting_delivery": "Se așteaptă livrarea. Comanda este verificată la intervale regulate.",
+        "delivery_not_tracked": "SellerHill nu urmărește livrarea acestei vânzări.",
+        "upcoming_delivery": "Apare aici când coletul este livrat.",
+        "message_sent": "Trimis cumpărătorului.",
+        "message_failed": "Nu a putut fi trimis."
+      }
     }
   }
 }

@@ -351,6 +351,40 @@
       "columnStage": "स्टेटस",
       "columnMeaning": "मतलब",
       "columnAction": "आप क्या करें"
+    },
+    "timeline": {
+      "title": "इस ऑर्डर की प्रगति",
+      "step": {
+        "received": "ऑर्डर प्राप्त हुआ",
+        "purchase": "Amazon से खरीद",
+        "amazon_shipped": "Amazon ने शिप किया",
+        "ebay_tracking": "eBay पर ट्रैकिंग",
+        "delivered": "डिलीवर हुआ",
+        "sale_cancelled": "eBay पर बिक्री रद्द हुई",
+        "message_order_received": "ऑर्डर प्राप्ति संदेश",
+        "message_shipped": "शिपिंग संदेश",
+        "message_delivered": "डिलीवरी संदेश",
+        "message_feedback_request": "फ़ीडबैक अनुरोध"
+      },
+      "note": {
+        "received": "ऑर्डर eBay से आया।",
+        "bought_auto": "स्वचालित ऑर्डर ने आइटम Amazon से खरीद लिया।",
+        "bought_linked": "इस बिक्री से एक Amazon ऑर्डर लिंक है।",
+        "purchase_not_recorded": "SellerHill में इस बिक्री के लिए कोई Amazon ऑर्डर दर्ज नहीं है।",
+        "amazon_shipped": "Amazon ने पार्सल कूरियर को सौंप दिया।",
+        "waiting_shipment": "Amazon के शिप करने की प्रतीक्षा है। ऑर्डर नियमित अंतराल पर जाँचा जाता है।",
+        "shipment_not_observed": "SellerHill ने इस बिक्री के लिए Amazon शिपमेंट को ट्रैक नहीं किया।",
+        "upcoming_shipment": "Amazon के पार्सल शिप करते ही यहाँ दिखेगा।",
+        "tracking_pushed": "ट्रैकिंग नंबर eBay को भेज दिया गया; आपका खरीदार पार्सल को ट्रैक कर सकता है।",
+        "tracking_not_by_us": "इस बिक्री का ट्रैकिंग नंबर SellerHill ने नहीं भेजा।",
+        "upcoming_tracking": "Amazon के पार्सल शिप करते ही eBay को भेजा जाएगा।",
+        "delivered": "Amazon के अनुसार पार्सल डिलीवर हो गया है।",
+        "waiting_delivery": "डिलीवरी की प्रतीक्षा है। ऑर्डर नियमित अंतराल पर जाँचा जाता है।",
+        "delivery_not_tracked": "SellerHill इस बिक्री की डिलीवरी को ट्रैक नहीं कर रहा है।",
+        "upcoming_delivery": "पार्सल डिलीवर होते ही यहाँ दिखेगा।",
+        "message_sent": "खरीदार को भेजा गया।",
+        "message_failed": "भेजा नहीं जा सका।"
+      }
     }
   }
 }

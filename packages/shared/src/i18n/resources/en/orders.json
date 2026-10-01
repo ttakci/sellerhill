@@ -351,6 +351,40 @@
       "columnStage": "Status",
       "columnMeaning": "What it means",
       "columnAction": "What you do"
+    },
+    "timeline": {
+      "title": "How this order is going",
+      "step": {
+        "received": "Order received",
+        "purchase": "Bought on Amazon",
+        "amazon_shipped": "Shipped by Amazon",
+        "ebay_tracking": "Tracking on eBay",
+        "delivered": "Delivered",
+        "sale_cancelled": "Sale cancelled on eBay",
+        "message_order_received": "Order received message",
+        "message_shipped": "Shipping message",
+        "message_delivered": "Delivery message",
+        "message_feedback_request": "Feedback request"
+      },
+      "note": {
+        "received": "The order arrived from eBay.",
+        "bought_auto": "The automatic order bought the item on Amazon.",
+        "bought_linked": "An Amazon order is linked to this sale.",
+        "purchase_not_recorded": "SellerHill holds no Amazon order for this sale.",
+        "amazon_shipped": "Amazon handed the parcel to the carrier.",
+        "waiting_shipment": "Waiting for Amazon to ship. The order is checked at regular intervals.",
+        "shipment_not_observed": "SellerHill did not follow an Amazon shipment for this sale.",
+        "upcoming_shipment": "Appears here once Amazon ships the parcel.",
+        "tracking_pushed": "The tracking number was sent to eBay; your buyer can follow the parcel.",
+        "tracking_not_by_us": "SellerHill did not send the tracking number for this sale.",
+        "upcoming_tracking": "Sent to eBay once Amazon ships the parcel.",
+        "delivered": "Amazon reports the parcel as delivered.",
+        "waiting_delivery": "Waiting for delivery. The order is checked at regular intervals.",
+        "delivery_not_tracked": "SellerHill is not following the delivery of this sale.",
+        "upcoming_delivery": "Appears here once the parcel is delivered.",
+        "message_sent": "Sent to the buyer.",
+        "message_failed": "Could not be sent."
+      }
     }
   }
 }

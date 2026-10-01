@@ -15,8 +15,8 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { orderStageShowsReason } from '../shared/order-stage';
 import { OrderStageBadge } from '../shared/OrderStageBadge';
+import { OrderTimeline } from '../shared/OrderTimeline';
 import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 
 import * as S from './OrderDetailsPage.style';
@@ -96,8 +96,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   formatCurrency,
   formatDate,
   statusLabel,
-  stageMeaning,
-  stageAction,
+  timelineRows,
   roiLabel,
   totalAmazonCost,
   amazonTotalBeforeTax,
@@ -158,15 +157,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
   const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
-  // The reason explains why nothing was bought (or why the outcome is not
-  // known); once the seller linked the order by hand the stage moves on and a
-  // stale "Reason: address" must not linger under it.
-  const autoFulfillReasonLabel =
-    orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
-      ? t('orders.autoFulfill.reasonLabel', {
-          reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
-        })
-      : undefined;
 
   /*
    * `saleTax`/`saleTotal` are captured once at order-sync ingest from eBay's
@@ -218,38 +208,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             />
           </S.StatusBadgeSlot>
 
-          {/*
-            The stage's meaning and — when the stage needs the seller — its next
-            step, instead of a bare reason code. "blocked · address" told the
-            seller nothing about what to DO.
-          */}
+          {/* What the stage means and what to do about it live in the
+              timeline card below, on the step the order is standing on — the
+              hero used to print them as three loose sentences above the title. */}
           <S.HeroLede>
-            <Text variant="body-sm" color="text.secondary">
-              {stageMeaning}
-            </Text>
-            {stageAction && (
-              <Text variant="body-sm" weight="semibold">
-                {stageAction}
-              </Text>
-            )}
-            {autoFulfillReasonLabel && (
-              <Text variant="caption" color="text.secondary">
-                {autoFulfillReasonLabel}
-              </Text>
-            )}
-            {/* eBay's own deadline, while the seller still has to act. */}
-            {shipByLabel && (
-              <Text
-                variant="body-sm"
-                weight={isShipByUrgent ? 'semibold' : undefined}
-                color={isShipByUrgent ? 'semantic.error' : 'text.secondary'}
-              >
-                {t('orders.detail.shipByNotice', { date: shipByLabel })}
-              </Text>
-            )}
-            {multiItemCount !== null && (
-              <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
-            )}
             <S.ProductTitle variant="h3" weight="semibold">
               {productTitle}
             </S.ProductTitle>
@@ -373,6 +335,29 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           )}
         </S.HeroInfo>
       </S.Hero>
+
+      {/* The order's path, step by step: what happened and when, where it is
+          standing now, and what is still ahead. */}
+      {timelineRows.length > 0 && (
+        <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
+          <S.TimelineBody>
+            {/* eBay's own deadline, while the seller still has to act. */}
+            {shipByLabel && (
+              <Text
+                variant="body-sm"
+                weight={isShipByUrgent ? 'semibold' : undefined}
+                color={isShipByUrgent ? 'semantic.error' : 'text.secondary'}
+              >
+                {t('orders.detail.shipByNotice', { date: shipByLabel })}
+              </Text>
+            )}
+            {multiItemCount !== null && (
+              <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
+            )}
+            <OrderTimeline rows={timelineRows} />
+          </S.TimelineBody>
+        </SettingsCard>
+      )}
 
       <S.SectionGrid>
         {/* Customer */}

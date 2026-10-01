@@ -351,6 +351,40 @@
       "columnStage": "اسٹیٹس",
       "columnMeaning": "مطلب",
       "columnAction": "آپ کیا کریں"
+    },
+    "timeline": {
+      "title": "اس آرڈر کی پیش رفت",
+      "step": {
+        "received": "آرڈر موصول ہوا",
+        "purchase": "Amazon سے خریداری",
+        "amazon_shipped": "Amazon نے بھیج دیا",
+        "ebay_tracking": "eBay پر ٹریکنگ",
+        "delivered": "پہنچ گیا",
+        "sale_cancelled": "eBay پر فروخت منسوخ ہو گئی",
+        "message_order_received": "آرڈر موصول ہونے کا پیغام",
+        "message_shipped": "ترسیل کا پیغام",
+        "message_delivered": "ڈیلیوری کا پیغام",
+        "message_feedback_request": "فیڈبیک کی درخواست"
+      },
+      "note": {
+        "received": "آرڈر eBay سے آیا۔",
+        "bought_auto": "خودکار آرڈر نے آئٹم Amazon سے خرید لیا۔",
+        "bought_linked": "اس فروخت سے ایک Amazon آرڈر لنک ہے۔",
+        "purchase_not_recorded": "SellerHill میں اس فروخت کے لیے کوئی Amazon آرڈر درج نہیں ہے۔",
+        "amazon_shipped": "Amazon نے پارسل کوریئر کے حوالے کر دیا۔",
+        "waiting_shipment": "Amazon کے بھیجنے کا انتظار ہے۔ آرڈر باقاعدہ وقفوں سے چیک کیا جاتا ہے۔",
+        "shipment_not_observed": "SellerHill نے اس فروخت کے لیے Amazon کی ترسیل کو ٹریک نہیں کیا۔",
+        "upcoming_shipment": "Amazon کے پارسل بھیجتے ہی یہاں نظر آئے گا۔",
+        "tracking_pushed": "ٹریکنگ نمبر eBay کو بھیج دیا گیا؛ آپ کا خریدار پارسل کو ٹریک کر سکتا ہے۔",
+        "tracking_not_by_us": "اس فروخت کا ٹریکنگ نمبر SellerHill نے نہیں بھیجا۔",
+        "upcoming_tracking": "Amazon کے پارسل بھیجتے ہی eBay کو بھیج دیا جائے گا۔",
+        "delivered": "Amazon کے مطابق پارسل پہنچا دیا گیا ہے۔",
+        "waiting_delivery": "ترسیل کا انتظار ہے۔ آرڈر باقاعدہ وقفوں سے چیک کیا جاتا ہے۔",
+        "delivery_not_tracked": "SellerHill اس فروخت کی ڈیلیوری کو ٹریک نہیں کر رہا۔",
+        "upcoming_delivery": "پارسل پہنچتے ہی یہاں نظر آئے گا۔",
+        "message_sent": "خریدار کو بھیج دیا گیا۔",
+        "message_failed": "بھیجا نہیں جا سکا۔"
+      }
     }
   }
 }

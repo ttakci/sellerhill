@@ -244,6 +244,79 @@ export enum AutoFulfillEvent {
 }
 
 /**
+ * The rows of the order detail page's timeline (`buildOrderTimeline`). The five
+ * main steps are the order's path; `sale_cancelled` closes the timeline of a
+ * sale eBay cancelled; the `message_*` rows are buyer messages the log proves
+ * were sent (or failed), listed under the step they belong to.
+ */
+export enum OrderTimelineStepKey {
+  RECEIVED = 'received',
+  PURCHASE = 'purchase',
+  AMAZON_SHIPPED = 'amazon_shipped',
+  EBAY_TRACKING = 'ebay_tracking',
+  DELIVERED = 'delivered',
+  SALE_CANCELLED = 'sale_cancelled',
+  MESSAGE_ORDER_RECEIVED = 'message_order_received',
+  MESSAGE_SHIPPED = 'message_shipped',
+  MESSAGE_DELIVERED = 'message_delivered',
+  MESSAGE_FEEDBACK_REQUEST = 'message_feedback_request',
+}
+
+export enum OrderTimelineStepState {
+  /** It happened. */
+  DONE = 'done',
+  /** The step the order is on; the platform (or the calendar) is working. */
+  CURRENT = 'current',
+  /** The step the order is on, and it needs the seller. */
+  ATTENTION = 'attention',
+  /** Not reached yet. */
+  UPCOMING = 'upcoming',
+  /** Did not happen through this platform, and will not any more. */
+  SKIPPED = 'skipped',
+}
+
+/**
+ * Which sentence a timeline step carries (`orders.timeline.note.<note>`).
+ * `stage` means "the order's stage explains this step": the web renders
+ * `orders.stage.<stage>.meaning` and, where the stage has one, its action and
+ * the automatic-purchase reason.
+ */
+export enum OrderTimelineNote {
+  STAGE = 'stage',
+  RECEIVED = 'received',
+  BOUGHT_AUTO = 'bought_auto',
+  BOUGHT_LINKED = 'bought_linked',
+  PURCHASE_NOT_RECORDED = 'purchase_not_recorded',
+  AMAZON_SHIPPED = 'amazon_shipped',
+  WAITING_SHIPMENT = 'waiting_shipment',
+  SHIPMENT_NOT_OBSERVED = 'shipment_not_observed',
+  UPCOMING_SHIPMENT = 'upcoming_shipment',
+  TRACKING_PUSHED = 'tracking_pushed',
+  TRACKING_NOT_BY_US = 'tracking_not_by_us',
+  UPCOMING_TRACKING = 'upcoming_tracking',
+  DELIVERED = 'delivered',
+  WAITING_DELIVERY = 'waiting_delivery',
+  DELIVERY_NOT_TRACKED = 'delivery_not_tracked',
+  UPCOMING_DELIVERY = 'upcoming_delivery',
+  MESSAGE_SENT = 'message_sent',
+  MESSAGE_FAILED = 'message_failed',
+}
+
+/** One row of the order timeline — codes and facts only, never a sentence. */
+export interface OrderTimelineStepDto {
+  key: OrderTimelineStepKey;
+  state: OrderTimelineStepState;
+  note: OrderTimelineNote;
+  /** When it happened (ISO), or null when it has not or the time is unknown. */
+  at: string | null;
+  /** An identifier that belongs to the step: the Amazon order number, the
+   *  tracking number eBay received. */
+  reference?: string | null;
+  /** A buyer-message row, rendered as a sub-step. */
+  isMessage?: boolean;
+}
+
+/**
  * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
  * at read time (no DB column). CONFIRMED = LINKED (real Amazon costs);
  * ESTIMATED = PROVISIONAL (purchase price + configured tax rate).
@@ -323,6 +396,11 @@ export interface OrderDto {
   lineItemCount?: number | null;
   /** eBay's ship-by deadline for the (first) line item, or null. */
   shipByDate?: string | null;
+  /**
+   * The step-by-step timeline (`buildOrderTimeline`). Present on the single
+   * order read only — the list never renders it.
+   */
+  timeline?: OrderTimelineStepDto[];
 
   // Product
   product?: {

@@ -299,7 +299,20 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         await this.refreshTrackingHtml(order, amazonStatus.trackingUrl, amazonStatus.trackingHtml);
       }
 
-      if (applyStatus) {
+      if (applyStatus && normalizedStatus === OrderStatus.COMPLETED) {
+        // `delivered_at` (migration 133) is the tick that read "Delivered" —
+        // the detection time the order timeline shows, never Amazon's own
+        // timestamp. COALESCE: a completed order is terminal, but a first
+        // stamp must never be moved by anything that reaches here again.
+        await this.databaseService.query(
+          `UPDATE orders
+              SET status = $1,
+                  delivered_at = COALESCE(delivered_at, CURRENT_TIMESTAMP),
+                  updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2`,
+          [normalizedStatus, orderId]
+        );
+      } else if (applyStatus) {
         await this.databaseService.query(
           `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
           [normalizedStatus, orderId]

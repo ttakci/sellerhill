@@ -301,12 +301,19 @@ export class ActionCenterService {
      * checkout. Unlike an unbounded exclusion, this one is self-clearing — an
      * order not purchased simply ages into the count — so the two converge
      * instead of drifting apart forever.
+     *
+     * TRACKED orders only, and the link therefore lands on the list's default
+     * (tracked) view: a sale with no SellerHill listing behind it is the
+     * untracked item's job below, and a store run from another tool would
+     * otherwise raise "N orders waiting for you to buy" for sales that tool
+     * is fulfilling.
      */
     const awaiting = await this.db.query<CountRow>(
       `SELECT COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
           AND ${stage} = $2
+          AND o.listing_id IS NOT NULL
           AND o.order_date < NOW() - ($3 || ' hours')::INTERVAL`,
       [userId, OrderStage.TO_PURCHASE, String(AWAITING_PURCHASE_GRACE_HOURS)]
     );
@@ -316,7 +323,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.WARNING,
       count: toCount(awaiting[0]?.count),
       context: { hours: AWAITING_PURCHASE_GRACE_HOURS },
-      actionPath: `/orders?stage=${OrderStage.TO_PURCHASE}${allOrders}`,
+      actionPath: `/orders?stage=${OrderStage.TO_PURCHASE}`,
     });
 
     /*

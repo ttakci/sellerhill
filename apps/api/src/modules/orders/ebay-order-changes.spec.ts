@@ -3,12 +3,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { OrderStatus } from '@repo/shared';
+import { AutoFulfillStatus, OrderStatus } from '@repo/shared';
 
 import {
   buildSyncedStatusSql,
   decideIngest,
   FRESH_SALE_WINDOW_DAYS,
+  initialAutoFulfillStatus,
   mergeSyncedOrderStatus,
   readCancellation,
   readRefunds,
@@ -236,6 +237,25 @@ describe('decideIngest', () => {
   });
 });
 
+describe('initialAutoFulfillStatus', () => {
+  // `pending` reads as "buying on Amazon". A new row may start there only when
+  // the purchase gate is about to run for it — every other row would say
+  // "buying" for ever with no job behind it (15 such rows on the first store).
+  it('starts at pending only for a fresh, tracked sale with a quantity', () => {
+    expect(initialAutoFulfillStatus({ freshIfInserted: true, hasListing: true, quantity: 1 })).toBe(
+      AutoFulfillStatus.PENDING
+    );
+  });
+
+  it.each([
+    ['no SellerHill listing behind the sale', { freshIfInserted: true, hasListing: false, quantity: 1 }],
+    ['first seen long after it was placed', { freshIfInserted: false, hasListing: true, quantity: 1 }],
+    ['no quantity', { freshIfInserted: true, hasListing: true, quantity: 0 }],
+  ])('starts at skipped: %s', (_label, input) => {
+    expect(initialAutoFulfillStatus(input)).toBe(AutoFulfillStatus.SKIPPED);
+  });
+});
+
 /**
  * Source guards. Each of these reverted-looking-harmless edits would silently
  * bring back "an order is read once": the wrong filter, the old paging, a bare
@@ -305,6 +325,33 @@ describe('order change tracking — source guards', () => {
     expect(sync.match(/if \(inserted && listingId && entity\.quantity > 0\)/g)).toHaveLength(1);
     expect(sync.match(/if \(freshSale && listingId && entity\.quantity > 0\)/g)).toHaveLength(2);
     expect(sync).toMatch(/if \(freshSale && !isOrderAlreadyFulfilled\(entity\.status\)/);
+  });
+
+  it('a new row is inserted with its own starting automation status, never the column default', () => {
+    // The INSERT names the column and binds it; the conflict path never
+    // rewrites it (automation state belongs to the paths that act on it).
+    expect(sync).toMatch(/ebay_line_item_count, ebay_ship_by_date,\s+auto_fulfill_status\s+\) VALUES/);
+    expect(sync).toContain('$39::auto_fulfill_status');
+    expect(sync).toMatch(
+      /initialAutoFulfillStatus\(\{\s+freshIfInserted: ingest\.isFreshSale\(true\),\s+hasListing: !!listingId,\s+quantity: entity\.quantity,\s+\}\)/
+    );
+    const conflict = sync.slice(
+      sync.indexOf('ON CONFLICT (ebay_order_id) DO UPDATE SET'),
+      sync.indexOf('RETURNING id, (xmax = 0)')
+    );
+    expect(conflict).not.toContain('auto_fulfill_status');
+  });
+
+  it('a failed enqueue never leaves the order reading "buying"', () => {
+    const caught = sync.slice(
+      sync.indexOf('await this.maybeEnqueueAutoFulfill(entity, listingOverPlanLimit);'),
+      sync.indexOf('// Buyer auto-messaging (best-effort; never fails order sync).')
+    );
+    expect(caught).toContain('await this.failStrandedAutoFulfill(entity.userId, entity.ebayOrderId);');
+    const settle = sync.slice(sync.indexOf('private async failStrandedAutoFulfill('));
+    expect(settle.slice(0, settle.indexOf('  /**'))).toMatch(
+      /AND auto_fulfill_status = \$3\s+AND auto_fulfill_submitted_at IS NULL/
+    );
   });
 
   it('the watermark is the run start minus the overlap, not "now"', () => {
