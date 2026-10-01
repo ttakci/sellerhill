@@ -54,7 +54,7 @@ export const amazonApi = baseApi.injectEndpoints({
         success: boolean;
         message: string;
         linked?: boolean;
-        reason?: 'cost_capture_failed';
+        reason?: 'cost_capture_failed' | 'order_not_found';
       },
       { orderId: string; amazonAccountId: string; amazonOrderId: string }
     >({

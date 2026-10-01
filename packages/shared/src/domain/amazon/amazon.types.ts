@@ -84,6 +84,14 @@ export interface AmazonScrapedOrderData {
    * `AmazonController.linkAmazonOrder` (Task 5: scrape integrity).
    */
   costCaptureFailed: boolean;
+  /**
+   * True when the page's visible text prints the requested Amazon order id —
+   * the proof that this account really holds that order. A manual link whose
+   * costs could not be read still attaches the order when this is true (the
+   * seller named the order; only its figures are missing), and attaches
+   * nothing when it is false (a mistyped id, or a page that is not the order).
+   */
+  orderIdOnPage: boolean;
 }
 
 /**
