@@ -10,6 +10,21 @@ const isTab = (value: string): value is OrderStageTab => (Object.values(OrderSta
 const isStage = (value: string): value is OrderStage => (Object.values(OrderStage) as string[]).includes(value);
 
 /**
+ * The listing-link filter (`?tracking=`). The list opens on TRACKED orders —
+ * the sales of listings SellerHill manages (operator decision, 2026-10-01): a
+ * store connected with years of history shows hundreds of sales the platform
+ * can neither cost nor fulfil, and they buried the handful it is working on.
+ * "All" and "Not tracked" are one select away, and the default is the only
+ * value left out of the URL — so a link that must show everything says so
+ * with `tracking=all`.
+ */
+const TRACKING = { ALL: 'all', TRACKED: 'tracked', UNTRACKED: 'untracked' } as const;
+const DEFAULT_TRACKING: string = TRACKING.TRACKED;
+
+const readTracking = (value: string | null): string =>
+  value === TRACKING.ALL || value === TRACKING.UNTRACKED || value === TRACKING.TRACKED ? value : DEFAULT_TRACKING;
+
+/**
  * Orders list UI filters + server query DTO (search debounce, stage tab +
  * stage select, store, listing-link, page, date range).
  *
@@ -29,6 +44,7 @@ export function useOrdersFilters() {
   const storeFromUrl = searchParams.get('store') ?? '';
   const stageFromUrl = searchParams.get('stage') ?? '';
   const tabFromUrl = searchParams.get('tab') ?? '';
+  const trackingFromUrl = readTracking(searchParams.get('tracking'));
   /** True when the URL already expresses an intent — a tab, a stage, or any
    *  deep-link filter (the dashboard's "view all" carries dates + tracking).
    *  Only a bare `/orders` may be opened on "Needs action" by the container. */
@@ -43,7 +59,7 @@ export function useOrdersFilters() {
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
   const [stage, setStage] = useState(isStage(stageFromUrl) ? stageFromUrl : '');
   const [tab, setTab] = useState<OrderStageTab>(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
-  const [trackingState, setTrackingState] = useState(() => searchParams.get('tracking') ?? '');
+  const [trackingState, setTrackingState] = useState(trackingFromUrl);
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
@@ -61,6 +77,13 @@ export function useOrdersFilters() {
     setTab(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
     setPage(1);
   }, [tabFromUrl]);
+
+  // …and for the listing-link filter: an Action Center row carries
+  // `tracking=all`, the next plain visit to `/orders` is back on the default.
+  useEffect(() => {
+    setTrackingState(trackingFromUrl);
+    setPage(1);
+  }, [trackingFromUrl]);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -86,15 +109,21 @@ export function useOrdersFilters() {
    */
   const trackingOptions = useMemo(
     () => [
-      { value: '', label: t('orders.filters.allTrackingStates') },
-      { value: 'tracked', label: t('orders.tracking.tracked') },
-      { value: 'untracked', label: t('orders.tracking.untracked') },
+      { value: TRACKING.ALL, label: t('orders.filters.allTrackingStates') },
+      { value: TRACKING.TRACKED, label: t('orders.tracking.tracked') },
+      { value: TRACKING.UNTRACKED, label: t('orders.tracking.untracked') },
     ],
     [t]
   );
 
   const hasActiveFilters = Boolean(
-    search || ebayAccountId || dateFrom || dateTo || stage || tab !== OrderStageTab.ALL || trackingState
+    search ||
+      ebayAccountId ||
+      dateFrom ||
+      dateTo ||
+      stage ||
+      tab !== OrderStageTab.ALL ||
+      trackingState !== DEFAULT_TRACKING
   );
 
   const serverQuery: OrderFiltersDto = useMemo(
@@ -107,7 +136,8 @@ export function useOrdersFilters() {
       dateTo: dateTo || undefined,
       // The select narrows to one stage; otherwise the tab's group applies.
       stages: stage ? [stage as OrderStage] : tab === OrderStageTab.ALL ? undefined : [...ORDER_STAGE_TABS[tab]],
-      isTracked: trackingState === 'tracked' ? true : trackingState === 'untracked' ? false : undefined,
+      isTracked:
+        trackingState === TRACKING.TRACKED ? true : trackingState === TRACKING.UNTRACKED ? false : undefined,
       // No sortBy on purpose: the API then floats the stages that need the
       // seller to the top, then newest first.
     }),
@@ -174,14 +204,15 @@ export function useOrdersFilters() {
 
   const handleTrackingStateChange = useCallback(
     (value: string | number) => {
-      const v = String(value);
+      const v = readTracking(String(value));
       setTrackingState(v);
       setPage(1);
       const next = new URLSearchParams(searchParams);
-      if (v) {
-        next.set('tracking', v);
-      } else {
+      // The default stays out of the URL, like every other filter's default.
+      if (v === DEFAULT_TRACKING) {
         next.delete('tracking');
+      } else {
+        next.set('tracking', v);
       }
       setSearchParams(next, { replace: true });
     },
@@ -198,7 +229,7 @@ export function useOrdersFilters() {
     setEbayAccountId('');
     setStage('');
     setTab(OrderStageTab.ALL);
-    setTrackingState('');
+    setTrackingState(DEFAULT_TRACKING);
     setPage(1);
     const next = new URLSearchParams();
     if (fromDashboard) {

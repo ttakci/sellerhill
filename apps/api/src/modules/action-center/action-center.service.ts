@@ -212,6 +212,13 @@ export class ActionCenterService {
      * count and the list without needing an acknowledge flag.
      */
     const stage = buildOrderStageSql('o');
+    /*
+     * The orders list opens on TRACKED orders by default (2026-10-01), while
+     * these counts are over every order of the seller. Each stage link
+     * therefore asks for all of them explicitly — otherwise "3 need you" could
+     * land on a list of two.
+     */
+    const allOrders = '&tracking=all';
 
     // Amazon cancelled after we paid, and the eBay sale is still owed to the
     // buyer — the most urgent thing the platform can tell a seller.
@@ -227,7 +234,7 @@ export class ActionCenterService {
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: toCount(cancelled[0]?.count),
-      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}${allOrders}`,
     });
 
     /*
@@ -261,7 +268,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.CRITICAL,
       count: blockedTotal,
       breakdown: buildBreakdown(blockedTally),
-      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}${allOrders}`,
     });
 
     /*
@@ -282,7 +289,7 @@ export class ActionCenterService {
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: toCount(unknown[0]?.count),
-      actionPath: `/orders?stage=${OrderStage.PURCHASE_UNKNOWN}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_UNKNOWN}${allOrders}`,
     });
 
     /*
@@ -309,7 +316,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.WARNING,
       count: toCount(awaiting[0]?.count),
       context: { hours: AWAITING_PURCHASE_GRACE_HOURS },
-      actionPath: `/orders?stage=${OrderStage.TO_PURCHASE}`,
+      actionPath: `/orders?stage=${OrderStage.TO_PURCHASE}${allOrders}`,
     });
 
     /*
@@ -418,7 +425,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.CRITICAL,
       count: toCount(held[0]?.count),
       context: { hours: HELD_GRACE_HOURS },
-      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
+      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}${allOrders}`,
     });
 
     /*
@@ -454,7 +461,7 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.WARNING,
       count: toCount(cancelledOpen[0]?.count),
       context: { days: CANCELLED_AMAZON_OPEN_WINDOW_DAYS },
-      actionPath: `/orders?stage=${OrderStage.CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.CANCELLED}${allOrders}`,
     });
 
     return items;
