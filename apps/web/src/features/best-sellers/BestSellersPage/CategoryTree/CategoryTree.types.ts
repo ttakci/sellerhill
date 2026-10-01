@@ -1,23 +1,24 @@
 import type React from 'react';
 
 /**
- * One rendered row of the two-level category tree — a department (`depth: 0`)
- * or one of its sub-categories (`depth: 1`). Pre-flattened by the container so
- * the component only maps over an array and never branches on raw category
- * data (see `useBestSellersCategoryTree`).
+ * One rendered row of the category tree — a department (`depth: 0`) or any
+ * level below it. Pre-flattened by the container so the component only maps
+ * over an array and never branches on raw category data (see
+ * `flattenCategoryTree`).
  */
 export interface BestSellersCategoryTreeRow {
-  /** Stable React key — the department path alone, or `department::child` for a sub-row. */
+  /** Stable React key — the category path (unique in the tree, `root` for the root row). */
   key: string;
   /** Value to pass to `onSelect` / the `category` query param; `''` for the root row. */
   path: string;
   name: string;
-  depth: 0 | 1;
+  /** 0 for the root row and the departments; one level deeper per generation. */
+  depth: number;
   /** True when this exact path is the category currently being browsed. */
   isActive: boolean;
-  /** Department rows only — a sub-category of it is the one being browsed. */
+  /** An ancestor of the category being browsed. */
   isActiveBranch: boolean;
-  /** Department rows only — whether it has a chevron at all. */
+  /** Whether it has a chevron at all (children exist, or were never fetched). */
   hasChildren: boolean;
   isExpanded: boolean;
 }

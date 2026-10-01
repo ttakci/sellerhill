@@ -1,6 +1,9 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
+/** Generations past this share one indent. */
+const MAX_INDENT_DEPTH = 4;
+
 /**
  * Layout only — the surrounding sidebar card (desktop) or the Drawer body
  * (mobile) owns the surface/border/sticky positioning, since this component
@@ -31,9 +34,10 @@ export const List = styled.div`
 `;
 
 /**
- * One tree row. Depth drives the indent; a sub-category (depth 1) has no
- * chevron slot, so its label starts flush with its parent's label, not with
- * the parent's chevron.
+ * One tree row. Depth drives the indent, one chevron slot per generation
+ * (capped, so a deep branch never pushes labels out of the 18rem sidebar); a
+ * leaf below the top level has no chevron slot, so its label starts flush
+ * with its parent's label, not with the parent's chevron.
  *
  * The active row uses the table's own selected-row language (`colors.table.*`
  * tint + a left accent bar), so "where am I" reads the same here as a picked
@@ -42,13 +46,13 @@ export const List = styled.div`
  * was visible. The accent is an inset shadow, not a border, so the label never
  * shifts when a row becomes active.
  */
-export const Row = styled.div<{ $depth: 0 | 1; $active: boolean }>`
+export const Row = styled.div<{ $depth: number; $active: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
   min-height: 2.25rem;
   padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  padding-left: ${({ $depth, theme }) => ($depth === 1 ? `calc(${tkn('spacing.sm')({ theme })} + 1.5rem)` : tkn('spacing.sm')({ theme }))};
+  padding-left: ${({ $depth, theme }) => `calc(${tkn('spacing.sm')({ theme })} + ${Math.min($depth, MAX_INDENT_DEPTH) * 1.5}rem)`};
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
   user-select: none;
