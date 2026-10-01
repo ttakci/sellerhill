@@ -76,6 +76,13 @@
         "description_other": "{{count}} pedidos fueron detenidos por una verificación de seguridad, así que no se movió dinero. Corrige los motivos indicados abajo y podrán continuar.",
         "action": "Revisar pedidos"
       },
+      "order_purchase_unknown": {
+        "title": "Compra no confirmada — revisa Amazon primero",
+        "description_one": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
+        "description_many": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
+        "description_other": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
+        "action": "Revisar pedidos"
+      },
       "order_awaiting_purchase": {
         "title": "Vendido, pero nadie lo ha comprado en Amazon",
         "description_one": "{{count}} pedido de más de {{hours}} horas no tiene compra en Amazon ni ninguna automatización en curso. No se enviará a menos que lo compres tú.",

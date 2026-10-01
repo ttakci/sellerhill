@@ -67,8 +67,11 @@ RETURNING id
 
 - The write throws → nothing was clicked → the error propagates and BullMQ
   retries as today.
-- Zero rows → another run already claimed the click → stop without clicking
-  and settle the order as unknown.
+- Zero rows → this run does not click. Which way it settles depends on why
+  the claim was lost: a stamp already exists (another run clicked) → unknown
+  outcome; the order now carries a real Amazon order id (linked by hand
+  mid-checkout) → SKIPPED; neither (the stale-run sweep took the row) → a
+  plain error and a retry, since nothing was clicked.
 - One row → click. From here the order is either PLACED or unknown; no code
   path may return it to PENDING or FAILED.
 
@@ -127,11 +130,21 @@ How it resolves — three exits, no others:
 
 The third exit is the only thing that ever clears a stamp, and it needs two
 independent facts: the account's "Your Orders" was scanned AFTER the click
-(`amazon_accounts.last_orders_sync_at > auto_fulfill_submitted_at`) and
-linked nothing, AND the seller confirms in a dialog that says what they are
-asserting. Before a scan has run the endpoint answers 409
-`orders.errors.purchaseNotYetChecked`. "Not found" alone never re-arms an
-order; neither does the seller alone.
+(`amazon_accounts.last_orders_sync_at > auto_fulfill_submitted_at`, where the
+watermark is the moment the scan STARTED) and linked nothing, AND the seller
+confirms in a dialog that says what they are asserting. Before a scan has run
+the endpoint answers 409 `orders.errors.purchaseNotYetChecked` and queues the
+scan. "Not found" alone never re-arms an order; neither does the seller alone.
+
+"Linked nothing" must not be confused with "saw nothing". A scan that sees an
+Amazon order for the same product, dated around the click, on the account the
+click was made on, but cannot match it with certainty (an unreadable ship-to,
+a tie) records it as a SUSPECT on the eBay order
+(`orders.auto_fulfill_suspect_amazon_order_id`). While a suspect stands — it
+is not yet linked to any sale — the endpoint answers 409
+`orders.errors.purchaseFoundOnAmazon` and the seller links by hand. A row
+stamped by migration `132` has no click account, so every one of the seller's
+accounts must have been scanned.
 
 Action Center: `ORDER_PURCHASE_UNKNOWN`, CRITICAL, linking
 `/orders?stage=purchase_unknown`.
@@ -173,9 +186,11 @@ Candidate rule changes in `order-matcher.ts` / `amazon-order-sync.service.ts`:
 | Rule | Today | v2 |
 |---|---|---|
 | Amazon order id already on another order | not checked (F1) | skipped before matching (one `= ANY($1)` query per run) |
-| Amazon order date vs eBay order date | within 7 days either side (F2) | from 1 day before the eBay order (timezone slack) to 7 days after |
-| Order with a click stamp | same as any | Amazon order dated within 1 day of the stamp, and scraped from the account the click was made on |
-| Amount | tie-break bonus only | still not an equality gate, but a sanity bound: an Amazon total above 3× or below ⅓ of the expected cost (unit price × quantity, with tax) refuses the automatic link |
+| Amazon order date vs eBay order date | within 7 days either side (F2) | from 2 days before the eBay order to 7 days after. The 2 days are slack only: Amazon prints a DATE in the account's timezone, eBay carries an instant |
+| Order with a click stamp | same as any | Amazon order dated within 2 days of the stamp, and scraped from the account the click was made on |
+| Amount | tie-break bonus only | still not an equality gate, but a sanity bound: an Amazon total above 3× or below ⅓ of the expected cost refuses the automatic link. NOT applied to an order with a click stamp — refusing the genuine order over a price move would make it look "not found" |
+| Scan cutoff | `card date < since instant` — which dropped every order placed on the same calendar day as the previous scan | the start of the `since` day (UTC) less one day (`scanCutoffMs`) |
+| Unknown-outcome orders | scanned once, like any other | the days around the click are re-read on every scan while the order is unknown |
 | Tie between two eBay orders | refused | unchanged |
 
 A refused link changes nothing: the order stays where it was and the seller
@@ -184,7 +199,9 @@ links it by hand. There is still no force-link.
 Scan only when there is something to find: the candidate query moves ahead of
 the scrape. No pending or provisional order for the user in the last 60 days
 → no browser is opened and the watermark is left alone. With candidates, the
-scrape starts from `max(watermark, oldest candidate's order date − 1 day)`.
+scrape starts from `max(watermark, oldest candidate's order date − 2 days)`,
+and reaches back to its own sale for a candidate that already names an Amazon
+order or that the automatic checkout clicked for.
 `enqueueAccount` gains an optional delay for the 5-minute post-click run.
 
 ## 6. Enqueue-time fixes
@@ -198,11 +215,15 @@ scrape starts from `max(watermark, oldest candidate's order date − 1 day)`.
   pick fall back to today's LRU over all enabled accounts.
 - **Provisional cost is unit price × quantity (F6)**, at ingest and in
   `recomputeProfit`'s fallback. Existing rows are not backfilled.
-- **A pending cancel request holds the purchase.** A stored
-  `ebay_cancel_state` other than NULL / `NONE_REQUESTED` writes BLOCKED with
-  the new reason `cancel_requested` — BLOCKED rather than SKIPPED because the
-  seller has to answer the request on eBay. Manually retryable once it is
-  settled.
+- **Re-armed purchases are queued with BullMQ `deduplication`, not a fixed
+  `jobId`.** An order blocked at execution and later re-armed by the
+  suspension-resume or unpaid-recheck sweep reused the id of its kept
+  completed job, so the add was silently dropped and the order sat at PENDING
+  for ever (the same defect the cost-capture queue had).
+
+The cancel-request hold is NOT applied at enqueue. `getOrders` never lists the
+requests and the stored `cancelState` cannot tell a rejected request from an
+open one, so the one authoritative check is the live re-read in §7.
 
 ## 7. Checkout-time guards (all before the click)
 
@@ -213,7 +234,14 @@ scrape starts from `max(watermark, oldest candidate's order date − 1 day)`.
   `getOrder` does populate) → BLOCKED `cancel_requested`; no longer
   paid-and-unshipped → SKIPPED `order_already_fulfilled`. A failed read
   throws: BullMQ retries, and exhaustion is FAILED (restartable), never a
-  purchase on stale data.
+  purchase on stale data. A MANUAL start skips the cancel-request hold and
+  nothing else: no documented field tells a request the seller rejected from
+  an open one, so without the override such an order could never be bought
+  automatically again. The seller sees the reason before clicking.
+- **Already bought.** An order that carries a real Amazon order id (linked by
+  hand, or by cost capture, while the job waited) is not bought: `runForOrder`
+  settles it as SKIPPED, and the click claim carries the same condition in
+  SQL for a link that lands mid-checkout.
 - **Quantity (F3).** For quantity > 1 the cart quantity must be readable and
   equal, else `cart`. Quantity 1 keeps today's rule.
 - **Loss limit.** `store_settings.auto_fulfill_max_loss NUMERIC(10,2) NULL`
@@ -229,13 +257,15 @@ scrape starts from `max(watermark, oldest candidate's order date − 1 day)`.
 ## 8. eBay shipping fulfillment is read before it is written
 
 `handleShipped` calls `GET /order/{orderId}/shipping_fulfillment` before the
-tracking conversion. A fulfillment that already names our line item means
-eBay has it: record its `shipmentTrackingNumber` as
+tracking conversion. A fulfillment that already names our line item (or lists
+no line items at all) means eBay has it: record its `shipmentTrackingNumber` as
 `ebay_tracking_pushed_number`, stamp `ebay_tracking_pushed_at`, do not
 convert and do not POST. This covers a POST that timed out after eBay
 accepted it, a DB write that failed after a successful POST, and a seller who
 marked the order shipped on eBay by hand. One extra read per shipped
-transition, on the 100,000/day Fulfillment pool.
+transition, on the 100,000/day Fulfillment pool. A read that fails throws; a
+404 on the collection is read as "none", so an unexpected answer cannot hold
+every push for ever.
 
 ## 9. Ship-by deadline
 
@@ -270,6 +300,14 @@ account-deletion erasure does not need to reach it. The writer is fail-soft:
 a failed insert logs and never changes the outcome of a run. Retention 400
 days (floor 90) through the `data-retention` manifest. Read with SQL for now;
 no screen.
+
+## Loss limit resolution
+
+Store > Global, with one difference from the other store settings: a store
+row that carries NO limit inherits the global one. A per-store row can be
+created by a focused drawer (blacklist, buyer messaging) that never mentions
+the field, and its NULL must not switch off a guard the seller set globally.
+A store therefore cannot opt out of a global limit.
 
 ## State reference
 
@@ -340,3 +378,17 @@ Unverifiable before production, and to be said so: the live `getOrder`
 cancel-request shape (only `NONE_REQUESTED` and `CANCELED` have been observed)
 and the fulfillment list on a real shipped order. Both fail towards not
 buying / not pushing twice.
+
+## Review findings folded in (2026-10-01)
+
+An independent review of the implementation found, and this design now
+includes: the day-granular scan cutoff and the suspect rule (§2, §5) — without
+them the "not on Amazon" confirmation could unlock an order that existed; the
+already-bought guard (§7); the amount bound not applying to clicked orders
+(§5); a consumed candidate leaving the matcher's pool; status writes that
+never move a row out of PLACED; the loss-limit inheritance above; and the
+re-arm queue ids (§6).
+
+Deliberately not done: a unique index on `orders.amazon_order_id`. The cost
+capture never links an id twice, but a seller may legitimately link one
+Amazon order to two sales of the same buyer by hand.

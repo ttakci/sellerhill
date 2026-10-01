@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Anunț în afara limitei planului",
         "order_already_fulfilled": "Deja expediată — nu este nimic de cumpărat",
         "order_not_paid": "Se așteaptă plata cumpărătorului",
-        "order_cancelled": "Anulată pe eBay — nimic de cumpărat"
+        "order_cancelled": "Anulată pe eBay — nimic de cumpărat",
+        "multi_item_order": "Comanda are mai multe produse — cumpără manual",
+        "cancel_requested": "Cumpărătorul a cerut anularea — răspunde pe eBay",
+        "loss_limit": "Peste limita ta de pierdere"
       },
       "reasonLabel": "Motiv: {{reason}}",
       "amazonCancelledBadge": "Anulată de Amazon",
@@ -150,6 +153,13 @@
         "confirm": "Pornește achiziția",
         "queued": "Achiziția a pornit. Starea comenzii se actualizează în câteva minute.",
         "queuedDryRun": "A pornit un test. Acest cont Amazon este în modul de test, deci nu se va cumpăra nimic."
+      },
+      "notPurchased": {
+        "button": "Nu este pe Amazon",
+        "confirmTitle": "Confirmi că Amazon nu are nicio comandă pentru această vânzare?",
+        "confirmDescription": "Continuă doar după ce te-ai uitat la comenzile acestui cont Amazon și comanda nu este acolo. SellerHill verifică și el lista de comenzi a contului și refuză până când această verificare are loc. După aceea, comanda automată poate fi pornită din nou — dacă totuși comanda există pe Amazon, produsul va fi cumpărat de două ori.",
+        "confirm": "Da, nu este acolo",
+        "done": "Marcată ca necumpărată. Poți porni din nou comanda automată."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Suma rambursată",
       "refundedOn": "Data rambursării",
       "refundNote": "Este suma rambursării raportată de eBay. Nu include taxa pe vânzări colectată de eBay, deci cumpărătorul poate să fi primit mai mult.",
-      "cancelledAmazonOpenAction": "Pentru această vânzare fusese deja plasată o comandă pe Amazon. Anulați-o pe Amazon sau returnați produsul dacă a fost deja expediat."
+      "cancelledAmazonOpenAction": "Pentru această vânzare fusese deja plasată o comandă pe Amazon. Anulați-o pe Amazon sau returnați produsul dacă a fost deja expediat.",
+      "shipBy": "Expediere până la",
+      "shipByNotice": "Termen de expediere eBay: {{date}}",
+      "multiItemNotice": "Produse în această comandă eBay: {{count}}. SellerHill îl urmărește doar pe primul și nu cumpără automat această comandă — cumpără și expediază tu celelalte produse."
     },
     "modal": {
       "title": "Introduceți informațiile comenzii Amazon",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Niciun cont Amazon nu este pregătit pentru comenzi automate. În Setări, activează comenzile automate pentru un cont Amazon și setează o limită de cheltuieli.",
       "autoFulfillOverCap": "Această vânzare depășește limita de cheltuieli a contului tău Amazon. Mărește limita din setările contului Amazon sau cumpără produsul manual.",
       "autoFulfillAlreadyStarted": "Starea acestei comenzi tocmai s-a schimbat, deci achiziția poate să fi pornit deja. Reîncarcă pagina.",
-      "autoFulfillQuotaExhausted": "Limita de comenzi automate a planului tău pentru această perioadă s-a epuizat."
+      "autoFulfillQuotaExhausted": "Limita de comenzi automate a planului tău pentru această perioadă s-a epuizat.",
+      "purchaseNotYetChecked": "SellerHill nu a verificat încă comenzile acestui cont Amazon de la încercarea de cumpărare. Verificarea a fost pornită acum — încearcă din nou peste câteva minute.",
+      "purchaseNotUnknown": "Această comandă nu așteaptă o confirmare de achiziție. Poate fi deja asociată sau în curs. Reîncarcă pagina.",
+      "purchaseFoundOnAmazon": "SellerHill a găsit o comandă Amazon pentru acest produs, plasată în jurul momentului încercării de cumpărare, dar nu a putut-o asocia cu certitudine acestei vânzări. Deschide comenzile tale Amazon și asociaz-o manual. Dacă acea comandă aparține altei vânzări, asociaz-o mai întâi acelei vânzări."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Cumpărată · așteaptă expedierea",
         "meaning": "O comandă Amazon este asociată. Se așteaptă ca Amazon să o expedieze."
+      },
+      "purchase_unknown": {
+        "label": "Achiziție neconfirmată",
+        "meaning": "Butonul de comandă a fost apăsat pe Amazon, dar nu a venit nicio confirmare. Comanda poate exista.",
+        "action": "Verifică mai întâi comenzile tale Amazon. Dacă comanda este acolo, asociaz-o. Nu cumpăra din nou înainte să verifici."
       },
       "purchase_blocked": {
         "label": "Cumpărare blocată",

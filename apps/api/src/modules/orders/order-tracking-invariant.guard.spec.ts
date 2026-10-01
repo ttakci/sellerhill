@@ -8,9 +8,33 @@ const source = fs
   .replace(/\r\n/g, '\n');
 
 describe('order ingest tracking invariant', () => {
-  it('matches only active SellerHill listings', () => {
-    expect(source).toContain('AND status = $3');
-    expect(source).toContain('[lineItem.legacyItemId, userId, ListingStatus.ACTIVE]');
+  // A buyer who paid for an item whose listing ended a minute later is still
+  // owed the item. Matching on ACTIVE left that order untracked for ever (no
+  // cost, no automatic purchase, off the dashboard), so the match is on the
+  // eBay item id alone — UNIQUE, and a draft has none (operator decision,
+  // 2026-10-01). What stays pinned is everything below: the listing is still
+  // assigned at FIRST ingest only, never on a re-sync.
+  it('matches a sale to its SellerHill listing by eBay item id, whatever the listing status', () => {
+    expect(source).toContain('WHERE ebay_item_id = $1 AND user_id = $2\n               LIMIT 1');
+    expect(source).toContain('[lineItem.legacyItemId, userId]');
+    expect(source).not.toContain('ListingStatus.ACTIVE]');
+  });
+
+  it('stores the product cost of an ORDER as unit price x quantity', () => {
+    expect(source).toContain('purchasePrice = toOrderCost(productData.purchasePrice, lineItem?.quantity);');
+    expect(source).toContain('resolvedPurchase = toOrderCost(productData.purchasePrice, o.quantity);');
+  });
+
+  it('never buys one line of a multi-item order', () => {
+    const body = source.slice(
+      source.indexOf('private async maybeEnqueueAutoFulfill('),
+      source.indexOf('private async resolveAndEnqueueAutoFulfill(')
+    );
+    const guardAt = body.indexOf('if (entity.lineItemCount > 1) {');
+    expect(guardAt).toBeGreaterThan(-1);
+    expect(body).toContain('AutoFulfillBlockedReason.MULTI_ITEM_ORDER');
+    // …ahead of the chain that enqueues a real purchase.
+    expect(guardAt).toBeLessThan(body.indexOf('await this.resolveAndEnqueueAutoFulfill('));
   });
 
   it('does not attach a listing on conflict re-sync', () => {

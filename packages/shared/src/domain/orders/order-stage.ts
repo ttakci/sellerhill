@@ -17,6 +17,11 @@ export interface OrderStageInput {
   shippedDetectedAt?: string | Date | null;
   /** `orders.ebay_tracking_pushed_at` — eBay received a fulfillment (089). */
   ebayTrackingPushedAt?: string | Date | null;
+  /**
+   * `orders.auto_fulfill_submitted_at` (132) — stamped immediately before the
+   * Place Order click. Set while nothing proves the purchase = outcome unknown.
+   */
+  autoFulfillSubmittedAt?: string | Date | null;
 }
 
 /** Priority order — the first rule that matches wins. */
@@ -62,6 +67,12 @@ export function deriveOrderStage(input: OrderStageInput): OrderStage {
   if (input.amazonOrderId || input.autoFulfillStatus === AutoFulfillStatus.PLACED) {
     return OrderStage.PURCHASED;
   }
+  // The click went out and nothing above proves a purchase (no Amazon order
+  // id, not PLACED). The order may exist on Amazon: it must read as neither
+  // "blocked, try again" nor "to purchase", or it gets bought twice.
+  if (input.autoFulfillSubmittedAt) {
+    return OrderStage.PURCHASE_UNKNOWN;
+  }
   if (input.autoFulfillStatus === AutoFulfillStatus.BLOCKED || input.autoFulfillStatus === AutoFulfillStatus.FAILED) {
     return OrderStage.PURCHASE_BLOCKED;
   }
@@ -78,6 +89,7 @@ export const ORDER_STAGE_ORDER: readonly OrderStage[] = Object.values(OrderStage
 export const ACTIONABLE_ORDER_STAGES: readonly OrderStage[] = [
   OrderStage.AMAZON_CANCELLED,
   OrderStage.TRACKING_HELD,
+  OrderStage.PURCHASE_UNKNOWN,
   OrderStage.PURCHASE_BLOCKED,
 ];
 

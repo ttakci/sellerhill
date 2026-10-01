@@ -73,6 +73,12 @@
         "description_other": "{{count}} orders were stopped by a safety check, so no money moved. Fix the reasons below and they can go through.",
         "action": "Review orders"
       },
+      "order_purchase_unknown": {
+        "title": "Purchase not confirmed — check Amazon first",
+        "description_one": "Orders whose Amazon purchase could not be confirmed: {{count}}. The order button was pressed but no confirmation came back, so the order may exist. Check Amazon and link it before anything is bought again.",
+        "description_other": "Orders whose Amazon purchase could not be confirmed: {{count}}. The order button was pressed but no confirmation came back, so the order may exist. Check Amazon and link it before anything is bought again.",
+        "action": "Review orders"
+      },
       "order_awaiting_purchase": {
         "title": "Sold, but nobody has bought it on Amazon",
         "description_one": "{{count}} order older than {{hours}} hours has no Amazon purchase and no automation running on it. It will not ship unless you buy it yourself.",

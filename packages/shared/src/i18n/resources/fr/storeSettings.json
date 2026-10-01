@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Passer automatiquement les commandes Amazon après les ventes eBay",
     "autoFulfillEnabledHint": "Lorsque cette option est activée, SellerHill achète l'article sur Amazon avec votre compte acheteur lié. Désactivez-la pour commander manuellement.",
     "autoFulfillEnabledInfo": "Activez cette option uniquement après avoir connecté et configuré un compte acheteur Amazon. La commande automatique exige également que le paramètre d'exécution automatique et le plafond de dépense de ce compte soient activés.",
+    "lossLimit": {
+      "enabled": "Arrêter les commandes automatiques à perte",
+      "enabledHint": "Lorsqu'elle est activée, une commande automatique est arrêtée avant l'achat si le total Amazon dépasse votre versement eBay de plus que le montant ci-dessous. La commande vous attend alors. Désactivée par défaut. Une boutique sans limite propre utilise la limite globale.",
+      "amount": "Perte maximale par commande",
+      "amountHint": "Dans la devise de votre boutique. 0 signifie ne jamais acheter à perte."
+    },
     "trackingConversionProvider": "Conversion du numéro de suivi",
     "trackingConversionProviderHint": "Les numéros de transporteur réels sont transmis tels quels. Amazon Logistics (TBA) passe sans modification.",
     "trackingConversionProviderLocal": "Intégrée (locale)",

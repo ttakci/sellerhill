@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Max order total (auto-fulfill cap)",
       "autoFulfillCapTotalHint": "Per-account spend ceiling (USD). Orders above this total skip this account. Required to enable auto-fulfillment.",
       "autoFulfillCapTotalPlaceholder": "e.g., 250",
+      "cartOwnershipNote": "Use this Amazon account only for SellerHill. Its cart is emptied before every automatic order, so anything you put in it yourself is removed.",
       "autoFulfillDryRun": "Dry-run (run the flow without placing the order)",
       "autoFulfillDryRunHint": "Runs the full checkout flow up to (not including) Place Order so the review total can be captured and surfaced for review."
     },

@@ -113,6 +113,14 @@ export interface StoreSettings {
     // auto-purchased on Amazon.
     autoFulfillEnabled: boolean;
 
+    // Loss limit per automatic order (`store_settings.auto_fulfill_max_loss`,
+    // migration 132): the most by which the Amazon total at the review step may
+    // exceed the eBay payout. Above it the purchase is stopped BEFORE the Place
+    // Order click (`loss_limit`). NULL = no limit (the default — some sellers
+    // deliberately fulfil at a small loss to protect their account); 0 = never
+    // at a loss. Optional on the type because rows read before 132 lack it.
+    autoFulfillMaxLoss?: number | null;
+
     // Carrier-mapping provider used when an auto-fulfilled order ships and the
     // tracking number must be relayed to eBay. Persisted LOWERCASE ('local' | 'api')
     // — the tracking processor compares case-sensitively. Default 'local'.

@@ -76,6 +76,10 @@ interface OrderRow {
   amazon_cancelled_at: Date | null;
   shipped_detected_at: Date | null;
   ebay_tracking_pushed_at: Date | null;
+  /** The Place Order click stamp (migration 132). */
+  auto_fulfill_submitted_at?: Date | null;
+  ebay_line_item_count?: number | null;
+  ebay_ship_by_date?: Date | null;
   shipping_address: {
     fullName?: string;
     street?: string;
@@ -556,6 +560,7 @@ export class OrdersService {
         amazonCancelledAt: row.amazon_cancelled_at,
         shippedDetectedAt: row.shipped_detected_at,
         ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+        autoFulfillSubmittedAt: row.auto_fulfill_submitted_at ?? null,
       }),
       canStartAutoFulfill: canStartAutoFulfillManually({
         status: row.status as OrderStatus,
@@ -566,7 +571,11 @@ export class OrdersService {
           ? (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReason)
           : null,
         amazonOrderId: row.amazon_order_id,
+        submittedAt: row.auto_fulfill_submitted_at ?? null,
+        lineItemCount: row.ebay_line_item_count ?? null,
       }),
+      lineItemCount: row.ebay_line_item_count ?? null,
+      shipByDate: row.ebay_ship_by_date ? row.ebay_ship_by_date.toISOString() : null,
       shippedDetectedAt: row.shipped_detected_at ? row.shipped_detected_at.toISOString() : null,
       ebayTrackingPushedAt: row.ebay_tracking_pushed_at ? row.ebay_tracking_pushed_at.toISOString() : null,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,

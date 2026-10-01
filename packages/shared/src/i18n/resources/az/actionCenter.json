@@ -73,6 +73,12 @@
         "description_other": "{{count}} sifariş təhlükəsizlik yoxlaması ilə dayandırıldı, ona görə pul köçürülmədi. Aşağıdakı səbəbləri aradan qaldırın, sifarişlər davam edə bilər.",
         "action": "Sifarişlərə bax"
       },
+      "order_purchase_unknown": {
+        "title": "Alış təsdiqlənmədi — əvvəlcə Amazon-u yoxlayın",
+        "description_one": "Amazon alışı təsdiqlənə bilməyən sifarişlərin sayı: {{count}}. Sifariş düyməsi basıldı, amma təsdiq gəlmədi; sifariş yaranmış ola bilər. Yenidən nəsə alınmazdan əvvəl Amazon-u yoxlayıb sifarişi bağlayın.",
+        "description_other": "Amazon alışı təsdiqlənə bilməyən sifarişlərin sayı: {{count}}. Sifariş düyməsi basıldı, amma təsdiq gəlmədi; sifariş yaranmış ola bilər. Yenidən nəsə alınmazdan əvvəl Amazon-u yoxlayıb sifarişi bağlayın.",
+        "action": "Sifarişlərə bax"
+      },
       "order_awaiting_purchase": {
         "title": "Satılıb, lakin heç kim Amazon-dan almayıb",
         "description_one": "{{hours}} saatdan köhnə {{count}} sifarişin Amazon alışı yoxdur və üzərində işləyən avtomatlaşdırma da yoxdur. Özünüz almasanız, göndərilməyəcək.",

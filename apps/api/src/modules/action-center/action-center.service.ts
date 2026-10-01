@@ -265,6 +265,27 @@ export class ActionCenterService {
     });
 
     /*
+     * The Place Order click went out and nothing proved the purchase. Its own
+     * item, never folded into "blocked": a blocked order needs a fix and a
+     * retry, this one needs the seller to look at Amazon BEFORE anything is
+     * bought again — the opposite instruction.
+     */
+    const unknown = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM orders o
+        WHERE o.user_id = $1
+          AND ${stage} = $2`,
+      [userId, OrderStage.PURCHASE_UNKNOWN]
+    );
+    items.push({
+      key: ActionCenterItemKey.ORDER_PURCHASE_UNKNOWN,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.CRITICAL,
+      count: toCount(unknown[0]?.count),
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_UNKNOWN}`,
+    });
+
+    /*
      * Nobody is going to buy this but the seller.
      *
      * This is the one probe whose count is deliberately NARROWER than the list

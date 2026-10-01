@@ -42,6 +42,7 @@ export enum DataRetentionTable {
   BEST_SELLERS_VIEWS = 'best_sellers_views',
   EBAY_NOTIFICATION_EVENTS = 'ebay_notification_events',
   EBAY_NOTIFICATION_RAW_CAPTURES = 'ebay_notification_raw_captures',
+  AUTO_FULFILL_EVENTS = 'auto_fulfill_events',
 }
 
 export interface DataRetentionRule {
@@ -140,6 +141,14 @@ export const DATA_RETENTION_RULES: readonly DataRetentionRule[] = [
     minDays: 7,
     rationale:
       'Verbatim capture of every eBay notification POST (signature_ok / parsed_ok). Diagnostic only — nothing reads it back.',
+  },
+  {
+    table: DataRetentionTable.AUTO_FULFILL_EVENTS,
+    timestampColumn: 'created_at',
+    settingKey: PlatformSettingKey.RETENTION_AUTO_FULFILL_EVENTS_DAYS,
+    minDays: 90,
+    rationale:
+      'Audit trail of automatic Amazon purchases (migration 132): which step ran, on which account, with which totals. Nothing re-derives state from it — the click boundary lives on orders.auto_fulfill_submitted_at — so it is evidence only, but evidence about spent money, hence the long floor.',
   },
 ] as const;
 

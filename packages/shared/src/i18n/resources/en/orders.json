@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Listing outside plan limit",
         "order_already_fulfilled": "Already shipped — nothing to buy",
         "order_not_paid": "Waiting for buyer payment",
-        "order_cancelled": "Cancelled on eBay — nothing to buy"
+        "order_cancelled": "Cancelled on eBay — nothing to buy",
+        "multi_item_order": "Order has several items — buy by hand",
+        "cancel_requested": "Buyer asked to cancel — answer on eBay",
+        "loss_limit": "Over your loss limit"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",
@@ -150,6 +153,13 @@
         "confirm": "Start purchase",
         "queued": "The purchase has started. The order's status updates in a few minutes.",
         "queuedDryRun": "A test run has started. This Amazon account is in test mode, so nothing will be bought."
+      },
+      "notPurchased": {
+        "button": "It is not on Amazon",
+        "confirmTitle": "Confirm that Amazon has no order for this sale?",
+        "confirmDescription": "Only continue after you have looked at this Amazon account's orders and the order is not there. SellerHill checks the account's order list too and refuses until that check has run. Afterwards the automatic order can be started again — if the order does exist on Amazon, the item would be bought twice.",
+        "confirm": "Yes, it is not there",
+        "done": "Marked as not purchased. You can start the automatic order again."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Refunded amount",
       "refundedOn": "Refund date",
       "refundNote": "The amount eBay reports for the refund. It leaves out any sales tax eBay collected, so the buyer may have received more.",
-      "cancelledAmazonOpenAction": "An Amazon order was already placed for this sale. Cancel it on Amazon, or return the item if it has shipped."
+      "cancelledAmazonOpenAction": "An Amazon order was already placed for this sale. Cancel it on Amazon, or return the item if it has shipped.",
+      "shipBy": "Ship by",
+      "shipByNotice": "eBay ship-by date: {{date}}",
+      "multiItemNotice": "This eBay order holds {{count}} items. SellerHill tracks only the first one and does not buy this order automatically — buy and ship the other items yourself."
     },
     "modal": {
       "title": "Enter Amazon Order Info",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "No Amazon account is ready for automatic orders. In Settings, turn on automatic orders for an Amazon account and set a spending cap.",
       "autoFulfillOverCap": "This sale is over your Amazon account's spending cap. Raise the cap in the Amazon account's settings, or buy the item by hand.",
       "autoFulfillAlreadyStarted": "This order's status changed a moment ago, so the purchase may already have started. Refresh the page.",
-      "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up."
+      "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up.",
+      "purchaseNotYetChecked": "SellerHill has not yet checked this Amazon account's orders since the purchase attempt. The check has now been started — try again in a few minutes.",
+      "purchaseNotUnknown": "This order is not waiting for a purchase confirmation. It may already be linked or in progress. Refresh the page.",
+      "purchaseFoundOnAmazon": "SellerHill found an Amazon order for this product, placed around the time of the purchase attempt, but could not match it to this sale with certainty. Open your Amazon orders and link it by hand. If that order belongs to another sale, link it to that sale first."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Purchased · awaiting shipment",
         "meaning": "An Amazon order is linked. Waiting for Amazon to ship it."
+      },
+      "purchase_unknown": {
+        "label": "Purchase not confirmed",
+        "meaning": "The order button was pressed on Amazon, but no confirmation came back. The order may exist.",
+        "action": "Check your Amazon orders first. If the order is there, link it. Do not buy it again before you have checked."
       },
       "purchase_blocked": {
         "label": "Purchase blocked",

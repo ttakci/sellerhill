@@ -5,8 +5,9 @@ import { OrderSyncService } from './order-sync.service';
 /**
  * `OrderSyncService.startAutoFulfillManually` against a fake database that
  * answers by statement shape. What it must guarantee: a refusal changes
- * nothing, the store toggle is never consulted, the claim is a compare-and-set
- * on the approved state, and exactly one job is queued per successful claim.
+ * nothing, the store toggle does not decide (the fake store has it OFF), the
+ * claim is a compare-and-set on the approved state, and exactly one job is
+ * queued per successful claim.
  */
 
 interface OrderRowFake {
@@ -19,10 +20,13 @@ interface OrderRowFake {
   auto_fulfill_blocked_reason: AutoFulfillBlockedReason | null;
   amazon_order_id: string | null;
   amazon_account_id: string | null;
+  auto_fulfill_submitted_at?: Date | null;
+  ebay_line_item_count?: number | null;
 }
 
 interface AccountFake {
   id: string;
+  status?: string;
   last_used_at: Date | null;
   auto_fulfill_cap_total: string;
   auto_fulfill_dry_run: boolean;
@@ -50,6 +54,9 @@ function harness(opts: {
   suspended?: boolean;
   quotaAllowed?: boolean;
   enqueueThrows?: boolean;
+  /** The product's current Amazon unit price (default 10). `null` = unknown. */
+  unitPrice?: number | null;
+  quantity?: number;
 }) {
   const statements: { sql: string; params: unknown[] }[] = [];
   const db = {
@@ -57,6 +64,9 @@ function harness(opts: {
       statements.push({ sql, params });
       if (sql.includes('FROM orders') && sql.includes('WHERE id = $1 AND user_id = $2') && sql.trim().startsWith('SELECT')) {
         return Promise.resolve(opts.row ? [opts.row] : []);
+      }
+      if (sql.includes('SELECT listing_id, quantity FROM orders')) {
+        return Promise.resolve([{ listing_id: opts.row?.listing_id ?? null, quantity: opts.quantity ?? 1 }]);
       }
       if (sql.includes('FROM amazon_accounts')) {
         return Promise.resolve(opts.accounts ?? []);
@@ -67,9 +77,19 @@ function harness(opts: {
       return Promise.resolve([]);
     }),
   };
+  // The store's automatic-order toggle is OFF. A manual start must go through
+  // anyway: the toggle means "buy new sales on their own", a click is a request
+  // for this one order. (The settings ARE read — for the Amazon tax rate the
+  // cost estimate uses.)
   const storeSettings = {
-    getResolvedSettings: jest.fn(() => Promise.reject(new Error('the store toggle must not be read'))),
+    getResolvedSettings: jest.fn(() => Promise.resolve({ autoFulfillEnabled: false, amazonTaxRate: 0 })),
   };
+  const products = {
+    getProductPriceAndImageByListingId: jest.fn(() =>
+      Promise.resolve(opts.unitPrice === null ? null : { purchasePrice: opts.unitPrice ?? 10, productImageUrl: null })
+    ),
+  };
+  const events = { record: jest.fn(() => Promise.resolve()) };
   const queue = {
     enqueue: jest.fn(() => Promise.resolve()),
     enqueueManual: jest.fn(() => (opts.enqueueThrows ? Promise.reject(new Error('redis down')) : Promise.resolve())),
@@ -85,12 +105,13 @@ function harness(opts: {
     db as never,
     {} as never,
     {} as never,
-    {} as never,
+    products as never,
     {} as never,
     storeSettings as never,
     queue as never,
     quota as never,
-    {} as never
+    {} as never,
+    events as never
   );
   const recompute = jest.spyOn(service, 'recomputeProfit').mockResolvedValue(undefined);
   const writes = () => statements.filter((s) => s.sql.trim().startsWith('UPDATE'));
@@ -103,7 +124,7 @@ const accounts: AccountFake[] = [
 ];
 
 describe('OrderSyncService.startAutoFulfillManually', () => {
-  it('queues a payment-blocked order on the account it was last tried on, without reading the store toggle', async () => {
+  it('queues a payment-blocked order on the account it was last tried on, although the store toggle is off', async () => {
     const h = harness({ row: blockedRow(), accounts });
 
     const result = await h.service.startAutoFulfillManually('user-1', 'order-1');
@@ -112,7 +133,6 @@ describe('OrderSyncService.startAutoFulfillManually', () => {
     expect(h.queue.enqueueManual).toHaveBeenCalledTimes(1);
     expect(h.queue.enqueueManual).toHaveBeenCalledWith('17-15222-04697', 'acc-b');
     expect(h.queue.enqueue).not.toHaveBeenCalled();
-    expect(h.storeSettings.getResolvedSettings).not.toHaveBeenCalled();
 
     const claim = h.statements.find((s) => s.sql.includes('RETURNING ebay_order_id'));
     expect(claim?.sql).toContain('auto_fulfill_blocked_reason IS NOT DISTINCT FROM $6');
@@ -126,6 +146,69 @@ describe('OrderSyncService.startAutoFulfillManually', () => {
       null,
     ]);
     expect(claim?.sql).not.toContain('amazon_order_id = NULL');
+    // The claim itself refuses a row whose Place Order click was stamped.
+    expect(claim?.sql).toContain('auto_fulfill_submitted_at IS NULL');
+  });
+
+  it('refuses a row whose Place Order click was stamped, whatever its status and reason', async () => {
+    const h = harness({
+      row: blockedRow({ auto_fulfill_submitted_at: new Date('2026-10-01T10:00:00Z') }),
+      accounts,
+    });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({
+      ok: false,
+      errorKey: 'orders.errors.autoFulfillNotRestartable',
+    });
+    expect(h.writes()).toHaveLength(0);
+    expect(h.queue.enqueueManual).not.toHaveBeenCalled();
+  });
+
+  it('refuses a multi-item order — the checkout would buy one item of several', async () => {
+    const h = harness({ row: blockedRow({ ebay_line_item_count: 2 }), accounts });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({
+      ok: false,
+      errorKey: 'orders.errors.autoFulfillNotRestartable',
+    });
+    expect(h.queue.enqueueManual).not.toHaveBeenCalled();
+  });
+
+  it('prefers a healthy account over an older one that needs re-authentication', async () => {
+    const h = harness({
+      row: blockedRow({ amazon_account_id: 'gone' }),
+      accounts: [
+        { ...accounts[0], status: 'needs_reauth' },
+        { ...accounts[1], status: 'active' },
+      ],
+    });
+
+    await h.service.startAutoFulfillManually('user-1', 'order-1');
+
+    expect(h.queue.enqueueManual).toHaveBeenCalledWith('17-15222-04697', 'acc-b');
+  });
+
+  // The coarse cap compares the ESTIMATED AMAZON COST (unit price x quantity),
+  // not the eBay sale total: a $60 sale whose product costs $10 is under a $50 cap.
+  it('passes the cap gate on the Amazon cost estimate even when the eBay sale is above the cap', async () => {
+    const h = harness({ row: blockedRow({ sale_total: '60.00' }), accounts, unitPrice: 10 });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({ ok: true, dryRun: true });
+  });
+
+  it('multiplies the unit price by the quantity for the cap gate', async () => {
+    const h = harness({ row: blockedRow(), accounts, unitPrice: 20, quantity: 3 });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({
+      ok: false,
+      errorKey: 'orders.errors.autoFulfillOverCap',
+    });
+  });
+
+  it('lets an unknown price through to the review-step cap', async () => {
+    const h = harness({ row: blockedRow(), accounts, unitPrice: null });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({ ok: true, dryRun: true });
   });
 
   it('falls back to round-robin when the last account is no longer usable', async () => {
@@ -162,7 +245,7 @@ describe('OrderSyncService.startAutoFulfillManually', () => {
   it.each([
     ['no usable account', { accounts: [] }, 'orders.errors.autoFulfillNoAccount'],
     [
-      'sale over the account cap',
+      'estimated Amazon cost over the account cap',
       { accounts: [{ ...accounts[1], auto_fulfill_cap_total: '5' }] },
       'orders.errors.autoFulfillOverCap',
     ],

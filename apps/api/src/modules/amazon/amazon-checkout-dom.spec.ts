@@ -76,6 +76,8 @@ describeWithBrowser('AmazonCheckoutService checkout DOM steps (live-captured mar
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
+      {} as never,
       {} as never
     );
     // Real pacing is 4.5 s per step; the DOM behaviour under test does not depend on it.

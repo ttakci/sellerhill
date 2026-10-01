@@ -1,5 +1,6 @@
 import {
   type AmazonAccountPublicDto,
+  type ConfirmNotPurchasedResultDto,
   type CreateAmazonAccountFormData,
   type StartAutoFulfillResultDto,
   type UpdateAmazonAccountFormData,
@@ -95,6 +96,20 @@ export const amazonApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Orders'],
     }),
+    /**
+     * Declare that an automatic purchase whose outcome is unknown did NOT
+     * happen (the order is in the `purchase_unknown` stage). The server
+     * refuses with a 409 i18n key until it has scanned the Amazon account's
+     * orders after the click — and queues that scan, so a retry a few minutes
+     * later succeeds.
+     */
+    confirmNotPurchased: builder.mutation<ConfirmNotPurchasedResultDto, { orderId: string }>({
+      query: ({ orderId }) => ({
+        url: `/amazon/orders/${orderId}/confirm-not-purchased`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
@@ -107,4 +122,5 @@ export const {
   useLinkAmazonOrderMutation,
   useConvertOrderTrackingMutation,
   useStartAutoFulfillMutation,
+  useConfirmNotPurchasedMutation,
 } = amazonApi;

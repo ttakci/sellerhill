@@ -16,6 +16,7 @@ describe('Action Center order links', () => {
     expect(src).not.toMatch(/\/orders\?fulfillmentState=/);
     expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.AMAZON_CANCELLED\}/);
     expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.PURCHASE_BLOCKED\}/);
+    expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.PURCHASE_UNKNOWN\}/);
     expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.TO_PURCHASE\}/);
     expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.TRACKING_HELD\}/);
   });

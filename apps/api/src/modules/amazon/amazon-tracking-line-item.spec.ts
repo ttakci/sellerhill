@@ -34,6 +34,14 @@ function pushCalls(h: { createShippingFulfillment: jest.Mock }): PushCall[] {
 function buildHarness(options: {
   storedLineItemId: string | null;
   fetchedOrder?: { lineItems?: Array<{ lineItemId?: string; legacyItemId?: string }> } | null;
+  /** What eBay's getShippingFulfillments answers (default: none exist). */
+  existingFulfillments?: Array<{
+    fulfillmentId?: string;
+    lineItems?: Array<{ lineItemId?: string }>;
+    shipmentTrackingNumber?: string;
+  }>;
+  /** Make the fulfillment read fail (transport). */
+  fulfillmentReadFails?: boolean;
 }) {
   const queries: Array<{ sql: string; params: unknown[] }> = [];
   const databaseService = {
@@ -81,9 +89,13 @@ function buildHarness(options: {
 
   const createShippingFulfillment = jest.fn().mockResolvedValue('fulfillment-1');
   const fetchOrderById = jest.fn().mockResolvedValue(options.fetchedOrder ?? null);
+  const fetchShippingFulfillments = options.fulfillmentReadFails
+    ? jest.fn().mockRejectedValue(new Error('ETIMEDOUT'))
+    : jest.fn().mockResolvedValue(options.existingFulfillments ?? []);
   const ebayFulfillmentService = {
     createShippingFulfillment,
     fetchOrderById,
+    fetchShippingFulfillments,
   } as unknown as EbayFulfillmentService;
   const ebayService = {
     getAccountAccessToken: jest.fn().mockResolvedValue('token'),
@@ -95,14 +107,15 @@ function buildHarness(options: {
   } as unknown as AmazonTrackingQueueService;
   const buyerMessages = { enqueue: jest.fn().mockResolvedValue(undefined) } as unknown as BuyerMessageQueueService;
   const platformSettings = { getNumber: jest.fn().mockResolvedValue(3) } as unknown as PlatformSettingsService;
+  const resolveForOrder = jest.fn().mockResolvedValue({
+    trackingNumber: 'AQUAA0359110926YQ',
+    shippingCarrierCode: 'AQUILINE',
+    shipmentId: null,
+    outcome: 'converted',
+  });
   const trackingConversion = {
     refreshTrackingHtml: jest.fn().mockResolvedValue(true),
-    resolveForOrder: jest.fn().mockResolvedValue({
-      trackingNumber: 'AQUAA0359110926YQ',
-      shippingCarrierCode: 'AQUILINE',
-      shipmentId: null,
-      outcome: 'converted',
-    }),
+    resolveForOrder,
   } as unknown as TrackingConversionService;
   const quotaEnforcement = { isSuspended: jest.fn().mockResolvedValue(false) } as unknown as QuotaEnforcementService;
 
@@ -127,6 +140,8 @@ function buildHarness(options: {
     queries,
     createShippingFulfillment,
     fetchOrderById,
+    fetchShippingFulfillments,
+    resolveForOrder,
   };
 }
 
@@ -165,5 +180,62 @@ describe('AmazonTrackingProcessorService — the eBay push names the order LINE 
     await h.process().catch(() => undefined);
 
     expect(h.createShippingFulfillment).not.toHaveBeenCalled();
+  });
+});
+
+// A fulfillment is a POST with no idempotency key and no update endpoint, and
+// the push is retried on every tick until it is recorded. eBay is asked what
+// it already holds first, so a request that timed out after eBay accepted it,
+// a local write that failed after a successful POST, or a seller who marked
+// the order shipped by hand never produces a second fulfillment.
+describe('AmazonTrackingProcessorService — the eBay fulfillment is read before it is written', () => {
+  it('posts when eBay holds no fulfillment for the line item', async () => {
+    const h = buildHarness({ storedLineItemId: '10-12345-67890' });
+
+    await h.process();
+
+    expect(h.fetchShippingFulfillments).toHaveBeenCalledWith('token', '03-15243-67997');
+    expect(h.createShippingFulfillment).toHaveBeenCalledTimes(1);
+  });
+
+  it('records an existing fulfillment and neither converts nor posts again', async () => {
+    const h = buildHarness({
+      storedLineItemId: '10-12345-67890',
+      existingFulfillments: [
+        {
+          fulfillmentId: 'f-1',
+          lineItems: [{ lineItemId: '10-12345-67890' }],
+          shipmentTrackingNumber: 'AQUAA0359110926YQ',
+        },
+      ],
+    });
+
+    await h.process();
+
+    expect(h.createShippingFulfillment).not.toHaveBeenCalled();
+    // No paid conversion for a shipment eBay already has.
+    expect(h.resolveForOrder).not.toHaveBeenCalled();
+    const recorded = h.queries.find((q) => q.sql.includes('ebay_tracking_pushed_number = COALESCE'));
+    expect(recorded?.params).toEqual(['AQUAA0359110926YQ', 'order-1']);
+  });
+
+  it('posts when the only fulfillment belongs to another line item', async () => {
+    const h = buildHarness({
+      storedLineItemId: '10-12345-67890',
+      existingFulfillments: [{ fulfillmentId: 'f-1', lineItems: [{ lineItemId: 'another-line' }] }],
+    });
+
+    await h.process();
+
+    expect(h.createShippingFulfillment).toHaveBeenCalledTimes(1);
+  });
+
+  it('posts nothing when the read fails — "could not read" is not "none"', async () => {
+    const h = buildHarness({ storedLineItemId: '10-12345-67890', fulfillmentReadFails: true });
+
+    await h.process().catch(() => undefined);
+
+    expect(h.createShippingFulfillment).not.toHaveBeenCalled();
+    expect(h.resolveForOrder).not.toHaveBeenCalled();
   });
 });

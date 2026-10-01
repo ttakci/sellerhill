@@ -31,12 +31,19 @@ export class AmazonOrderSyncQueueService {
    * an add whose id a kept completed job still holds — that stopped this queue
    * for a week (see the processor).
    */
-  async enqueueAccount(accountId: string): Promise<void> {
+  async enqueueAccount(accountId: string, opts: { delayMs?: number } = {}): Promise<void> {
+    const delayed = typeof opts.delayMs === 'number' && opts.delayMs > 0;
     await this.queue.add(
       'sync-account',
       stampCurrentCorrelation({ accountId }),
       {
-        deduplication: { id: `acct-${accountId}` },
+        // A delayed run (the look for an order a few minutes after a Place
+        // Order click) gets its OWN deduplication id. Sharing the scheduled
+        // tick's id would drop it whenever a tick's job for the account was
+        // already waiting or running — and that earlier scan would read the
+        // order list before the new order appeared on it.
+        deduplication: { id: `acct-${accountId}${delayed ? '-after-click' : ''}` },
+        ...(delayed ? { delay: opts.delayMs } : {}),
         removeOnComplete: 100,
         attempts: 3,
         backoff: { type: 'exponential', delay: 60_000 },

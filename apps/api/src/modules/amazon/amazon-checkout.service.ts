@@ -5,9 +5,11 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import {
   AmazonMarketplace,
   AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum,
+  AutoFulfillEvent,
   AutoFulfillStatus,
   buildAmazonProductUrl,
   buildAmazonSiteUrl,
+  isSimulatedAmazonOrderId,
   OrderCostCaptureStatus,
   OrderStatus,
   PlatformSettingKey,
@@ -18,14 +20,21 @@ import type { Locator, Page } from 'playwright';
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { AutoFulfillEventLog, type AutoFulfillEventDetail } from '../orders/auto-fulfill-event-log.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { addressBlockMatchesBuyer } from './address-match';
 import { isOnAmazonAuthChallenge, probeAmazonAuth } from './amazon-auth-state';
+import { AmazonOrderSyncQueueService } from './amazon-order-sync.queue';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
-import { AutoFulfillBlockedReason, decideFulfillStart, FulfillStartDecision } from './auto-fulfill-helpers';
+import {
+  AutoFulfillBlockedReason,
+  decideFulfillStart,
+  exceedsLossLimit,
+  FulfillStartDecision,
+} from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
 import {
   isOrderPlacedPage,
@@ -51,6 +60,32 @@ export class AutoFulfillBlockedError extends Error {
     this.name = 'AutoFulfillBlockedError';
   }
 }
+
+/**
+ * The order already carries a real Amazon order id — the seller bought and
+ * linked it by hand (or cost capture linked it) while this job was queued or
+ * mid-checkout. Not an obstacle and not a failure: there is simply nothing
+ * left to buy. `runForOrder` settles the row as SKIPPED without a retry.
+ */
+export class AutoFulfillAlreadyPurchasedError extends Error {
+  constructor(ebayOrderId: string) {
+    super(`order ${ebayOrderId} already has an Amazon order linked; nothing to buy`);
+    this.name = 'AutoFulfillAlreadyPurchasedError';
+  }
+}
+
+/**
+ * How long after a click with an unproven outcome (or a placement whose order
+ * number could not be read) the account's "Your Orders" list is scanned for
+ * it. Amazon's list can lag the click by a minute or two.
+ */
+const RECONCILE_AFTER_CLICK_DELAY_MS = 5 * 60 * 1000;
+
+/** Blocked reasons that mean "the click went out, the outcome is not known". */
+const UNKNOWN_OUTCOME_REASONS: readonly AutoFulfillBlockedReason[] = [
+  AutoFulfillBlockedReasonEnum.NO_CONFIRMATION,
+  AutoFulfillBlockedReasonEnum.INTERRUPTED,
+];
 
 /** Result of a successful Place Order click — parsed from the confirmation DOM. */
 export interface PlacedResult {
@@ -339,9 +374,13 @@ const CHECKOUT_SELECTORS = {
  * 1. Idempotency re-check: re-read `auto_fulfill_status` on start; if the
  *    order is already in a terminal state (placed / blocked / dry_run /
  *    skipped), no-op. This is what prevents a BullMQ retry from double-ordering.
- *    A row still RUNNING at start means the previous PROCESS died mid-checkout
- *    (the processor resets an in-process retry to PENDING first) — that is
- *    blocked as INTERRUPTED, never re-entered (`decideFulfillStart`).
+ *    The CLICK STAMP (`orders.auto_fulfill_submitted_at`, written as a
+ *    compare-and-set immediately before the Place Order click) decides the
+ *    rest: a stamped row that is not PLACED is an unknown outcome and is never
+ *    re-entered; an unstamped RUNNING row died before the click and is run
+ *    again (`decideFulfillStart`).
+ * 1b. Re-read the eBay sale LIVE (`OrderSyncService.recheckBeforePurchase`):
+ *    cancelled, shipped, multi-item or under a cancel request → nothing is bought.
  * 2. Set `running` and run `checkout()` under the per-account rate limiter
  *    (1-concurrent SingletonLock invariant + ban-risk throttle).
  * 3. On `AutoFulfillBlockedError` → mark `blocked` and return WITHOUT throwing
@@ -374,7 +413,9 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly orderSyncQueue: AmazonOrderSyncQueueService,
+    private readonly events: AutoFulfillEventLog
   ) {}
 
   onModuleInit(): void {
@@ -400,31 +441,47 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * BullMQ retry safe — if a previous attempt already PLACED/BLOCKED/DRY_RUN,
    * we no-op regardless of how the retry was scheduled.
    */
-  async runForOrder(ebayOrderId: string, amazonAccountId: string): Promise<void> {
+  async runForOrder(ebayOrderId: string, amazonAccountId: string, opts: { manual?: boolean } = {}): Promise<void> {
     // Idempotency: never double-order on BullMQ retry.
     const [order] = await this.db.query<{
       auto_fulfill_status: AutoFulfillStatus;
       user_id: string;
       status: OrderStatus;
-    }>(`SELECT auto_fulfill_status, user_id, status FROM orders WHERE ebay_order_id = $1`, [ebayOrderId]);
-    const decision = order ? decideFulfillStart(order.auto_fulfill_status) : FulfillStartDecision.SKIP;
+      auto_fulfill_submitted_at: Date | null;
+      amazon_order_id: string | null;
+    }>(
+      `SELECT auto_fulfill_status, user_id, status, auto_fulfill_submitted_at, amazon_order_id
+         FROM orders WHERE ebay_order_id = $1`,
+      [ebayOrderId]
+    );
+    const decision = order
+      ? decideFulfillStart(order.auto_fulfill_status, order.auto_fulfill_submitted_at)
+      : FulfillStartDecision.SKIP;
     if (!order || decision === FulfillStartDecision.SKIP) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
       return;
     }
-    // Still RUNNING at job start = the previous process died mid-checkout
-    // (SIGKILL on deploy, OOM, host restart) and BullMQ handed the stalled job
-    // to us. The Place Order click may already have happened and `onPlaced`
-    // never ran, so re-entering the checkout risks a SECOND Amazon order.
-    // Fail closed: block, release the slot, let the seller check Amazon. An
-    // in-process transport retry never reaches this branch — the processor
-    // resets the row to PENDING before rethrowing.
-    if (decision === FulfillStartDecision.INTERRUPTED) {
-      await this.block(
+    // The Place Order click was stamped by an earlier run and the order is not
+    // PLACED: that run clicked and never proved the purchase (it died, or its
+    // confirmation could not be read). The Amazon order may exist, so the
+    // checkout is NOT entered. A RUNNING row with NO stamp never reaches this
+    // branch — it died before the click and is simply run again.
+    if (decision === FulfillStartDecision.UNKNOWN_OUTCOME) {
+      await this.settleIfClickWasSent(
         ebayOrderId,
-        AutoFulfillBlockedReasonEnum.INTERRUPTED,
-        'row was still RUNNING when the job started: previous attempt died mid-checkout; not re-entering'
+        amazonAccountId,
+        'a job started on a row whose Place Order click was already stamped; not re-entering the checkout'
       );
+      return;
+    }
+    const context = { userId: order.user_id, amazonAccountId };
+    // Somebody already bought it. A job can wait in the queue (backoff, a busy
+    // rate limiter) long enough for the seller to buy the item by hand and
+    // link it — the manual link never touches `auto_fulfill_status`, so the
+    // row still reads PENDING. Buying now would be the second purchase. (A
+    // `SIM-` id is a dry-run placeholder, not a purchase.)
+    if (order.amazon_order_id && !isSimulatedAmazonOrderId(order.amazon_order_id)) {
+      await this.settleAlreadyPurchased(ebayOrderId, context);
       return;
     }
     // The eBay sale was cancelled while this job waited (order sync re-reads an
@@ -454,21 +511,194 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       );
       return;
     }
+    // The last look at the eBay sale, LIVE. The row read above is as old as
+    // the last sync tick, and a buyer who cancels usually does so in the first
+    // minutes. A read that fails THROWS (BullMQ retries; nothing was clicked):
+    // "could not check" is never taken for "still wanted".
+    const prePurchase = await this.orderSync.recheckBeforePurchase(ebayOrderId, opts.manual === true);
+    if (!prePurchase.proceed) {
+      const note = `eBay now reports this sale as not purchasable (${prePurchase.reason})`;
+      if (prePurchase.status === AutoFulfillStatus.BLOCKED) {
+        await this.block(ebayOrderId, prePurchase.reason, note);
+        await this.events.record(ebayOrderId, AutoFulfillEvent.BLOCKED, {
+          ...context,
+          detail: { reason: prePurchase.reason, stage: 'ebay_recheck' },
+        });
+      } else {
+        this.logger.log(`skip fulfill ${ebayOrderId}: ${note}`);
+        await this.setStatus(ebayOrderId, AutoFulfillStatus.SKIPPED, prePurchase.reason);
+        await this.quotaEnforcement
+          .releaseAmazonOrder(order.user_id, ebayOrderId)
+          .catch((err: unknown) =>
+            this.logger.warn(`quota release failed for skipped ${ebayOrderId}: ${(err as Error).message}`)
+          );
+        await this.events.record(ebayOrderId, AutoFulfillEvent.SKIPPED, {
+          ...context,
+          detail: { reason: prePurchase.reason, stage: 'ebay_recheck' },
+        });
+      }
+      return;
+    }
+    await this.events.record(ebayOrderId, AutoFulfillEvent.EBAY_RECHECK_PASSED, context);
+
     // A platform-level proxy gate used to sit here (pool empty/exhausted).
     // Proxying is now the user's own optional per-account choice (migration
     // 080) — see the R2 check in `checkout()`, which only fails closed when
     // THIS account opted in and the browser context failed to honor it.
     await this.setStatus(ebayOrderId, AutoFulfillStatus.RUNNING);
+    await this.events.record(ebayOrderId, AutoFulfillEvent.ATTEMPT_STARTED, {
+      ...context,
+      detail: { manual: opts.manual === true, previousStatus: order.auto_fulfill_status },
+    });
 
     try {
       await this.rateLimiter.schedule(amazonAccountId, () => this.checkout(ebayOrderId, amazonAccountId));
     } catch (err) {
+      if (err instanceof AutoFulfillAlreadyPurchasedError) {
+        // Linked by hand while the checkout was running; the claim refused to click.
+        await this.settleAlreadyPurchased(ebayOrderId, context);
+        return;
+      }
       if (err instanceof AutoFulfillBlockedError) {
         await this.block(ebayOrderId, err.reason, err.message);
+        const unknown = UNKNOWN_OUTCOME_REASONS.includes(err.reason);
+        await this.events.record(
+          ebayOrderId,
+          unknown ? AutoFulfillEvent.PURCHASE_UNKNOWN : AutoFulfillEvent.BLOCKED,
+          { ...context, detail: { reason: err.reason } }
+        );
+        if (unknown) {
+          // The click went out and nothing proved the purchase: look for the
+          // order on Amazon instead of waiting for the 3-hourly tick.
+          await this.scheduleReconciliation(amazonAccountId, ebayOrderId);
+        }
         return; // deliberate stop — do NOT throw (no BullMQ retry)
       }
       // transport/infra — let BullMQ retry; processor marks `failed` on exhaustion.
       throw err;
+    }
+  }
+
+  /** The order was bought some other way: stop automation for it, quietly. */
+  private async settleAlreadyPurchased(
+    ebayOrderId: string,
+    context: { userId: string; amazonAccountId: string }
+  ): Promise<void> {
+    this.logger.log(`skip fulfill ${ebayOrderId}: an Amazon order is already linked to it`);
+    await this.setStatus(ebayOrderId, AutoFulfillStatus.SKIPPED);
+    await this.quotaEnforcement
+      .releaseAmazonOrder(context.userId, ebayOrderId)
+      .catch((err: unknown) =>
+        this.logger.warn(`quota release failed for already-purchased ${ebayOrderId}: ${(err as Error).message}`)
+      );
+    await this.events.record(ebayOrderId, AutoFulfillEvent.SKIPPED, {
+      ...context,
+      detail: { reason: 'already_purchased' },
+    });
+  }
+
+  /**
+   * Was the Place Order click already sent for this order? If so, settle it as
+   * an UNKNOWN OUTCOME and answer true — the caller must then neither retry nor
+   * mark it failed, because the Amazon order may exist.
+   *
+   * Reads the click stamp, not the status: the stamp is the one fact that says
+   * the click went out. A PLACED row also answers true (it is settled; nothing
+   * may downgrade it). Called by `runForOrder` for a stamped row and by
+   * `AutoFulfillProcessor` before it writes PENDING / FAILED after an error.
+   */
+  async settleIfClickWasSent(ebayOrderId: string, amazonAccountId: string, note: string): Promise<boolean> {
+    const [row] = await this.db.query<{
+      auto_fulfill_status: AutoFulfillStatus;
+      auto_fulfill_submitted_at: Date | null;
+      user_id: string;
+    }>(`SELECT auto_fulfill_status, auto_fulfill_submitted_at, user_id FROM orders WHERE ebay_order_id = $1`, [
+      ebayOrderId,
+    ]);
+    if (!row?.auto_fulfill_submitted_at) {
+      return false;
+    }
+    if (row.auto_fulfill_status === AutoFulfillStatus.PLACED) {
+      return true;
+    }
+    // An order already blocked (`no_confirmation`) keeps the reason it has.
+    if (row.auto_fulfill_status !== AutoFulfillStatus.BLOCKED) {
+      await this.block(ebayOrderId, AutoFulfillBlockedReasonEnum.INTERRUPTED, note);
+    }
+    await this.events.record(ebayOrderId, AutoFulfillEvent.PURCHASE_UNKNOWN, {
+      userId: row.user_id,
+      amazonAccountId,
+      detail: { cause: 'click_stamped' },
+    });
+    await this.scheduleReconciliation(amazonAccountId, ebayOrderId);
+    return true;
+  }
+
+  /**
+   * THE CLICK BOUNDARY. Stamp `auto_fulfill_submitted_at` as a compare-and-set
+   * immediately before the Place Order click.
+   *
+   * - The write THROWS (DB down) → nothing was clicked; the error propagates
+   *   and BullMQ retries the job, which is safe.
+   * - The claim is LOST to a stamp that already exists → another run sent the
+   *   click. Blocked as an unknown outcome; this run does not click.
+   * - The claim is LOST because the order now carries a real Amazon order id
+   *   (linked by hand mid-checkout) → `AutoFulfillAlreadyPurchasedError`; this
+   *   run does not click and the row is settled as SKIPPED.
+   * - The claim is LOST with no stamp → the row left RUNNING under us (the
+   *   stale-run sweep settled it). Nothing was clicked; a plain error lets the
+   *   processor hand the job back for a retry.
+   * - The claim is WON → the caller clicks. From here the order is either
+   *   PLACED or unknown; no path may return it to PENDING or FAILED.
+   *
+   * The buyer account is written with the stamp: reconciliation and the
+   * seller's "not purchased" confirmation both need to know which Amazon
+   * account's order list to read.
+   */
+  private async claimPlaceOrderClick(ebayOrderId: string, amazonAccountId: string): Promise<void> {
+    const claimed = await this.db.query<{ id: string }>(
+      `UPDATE orders
+          SET auto_fulfill_submitted_at = CURRENT_TIMESTAMP,
+              amazon_account_id = $2,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE ebay_order_id = $1
+          AND auto_fulfill_submitted_at IS NULL
+          AND auto_fulfill_status = $3
+          AND (amazon_order_id IS NULL OR amazon_order_id LIKE $4)
+        RETURNING id`,
+      [ebayOrderId, amazonAccountId, AutoFulfillStatus.RUNNING, `${SIMULATED_AMAZON_ORDER_PREFIX}%`]
+    );
+    if (claimed.length === 1) {
+      return;
+    }
+    const [row] = await this.db.query<{ auto_fulfill_submitted_at: Date | null; amazon_order_id: string | null }>(
+      `SELECT auto_fulfill_submitted_at, amazon_order_id FROM orders WHERE ebay_order_id = $1`,
+      [ebayOrderId]
+    );
+    if (row?.amazon_order_id && !isSimulatedAmazonOrderId(row.amazon_order_id)) {
+      throw new AutoFulfillAlreadyPurchasedError(ebayOrderId);
+    }
+    if (row?.auto_fulfill_submitted_at) {
+      throw new AutoFulfillBlockedError(
+        AutoFulfillBlockedReasonEnum.INTERRUPTED,
+        'the Place Order click was already claimed by another run; this run did not click'
+      );
+    }
+    throw new Error(
+      `auto-fulfill ${ebayOrderId}: the row left RUNNING before the Place Order click could be claimed; nothing was clicked`
+    );
+  }
+
+  /** Look for the order on Amazon soon, instead of at the next 3-hourly tick. Never throws. */
+  private async scheduleReconciliation(amazonAccountId: string, ebayOrderId: string): Promise<void> {
+    try {
+      await this.orderSyncQueue.enqueueAccount(amazonAccountId, { delayMs: RECONCILE_AFTER_CLICK_DELAY_MS });
+    } catch (err) {
+      this.logger.warn(
+        `could not queue the Amazon order scan for ${ebayOrderId} (the scheduled tick will run it): ${
+          (err as Error).message
+        }`
+      );
     }
   }
 
@@ -484,13 +714,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // rejected credentials) and must fail closed rather than loop on the money
     // path.
     const authResolution = { attempted: false };
-    const { userId, asin, quantity, ship, capTotal, dryRun, proxyEnabled, marketplace } = await this.loadInputs(
-      ebayOrderId,
-      amazonAccountId
-    );
+    const { userId, asin, quantity, ship, capTotal, dryRun, proxyEnabled, marketplace, ebayAccountId, ebayEarnings } =
+      await this.loadInputs(ebayOrderId, amazonAccountId);
     if (!asin) {
       throw new AutoFulfillBlockedError('no_asin');
     }
+    const record = (event: AutoFulfillEvent, detail?: AutoFulfillEventDetail): Promise<void> =>
+      this.events.record(ebayOrderId, event, { userId, amazonAccountId, detail });
 
     // Step 1: session/login (reuse scraping's login incl. 2FA-TOTP). The page
     // returned is authenticated and lives in the proxy-aware persistent
@@ -557,6 +787,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         timeout: 30_000,
       });
       await this.verifyCartContents(page, asin, quantity, ebayOrderId);
+      await record(AutoFulfillEvent.CART_VERIFIED, { quantity });
       await this.humanDelay();
       // Mandatory step: without it the flow never leaves the cart, and the
       // review-total read later fails as a misleading `cap` block.
@@ -582,10 +813,12 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // as an unreadable review total.
       await this.assertStillAuthenticated(page, ebayOrderId, 'post-proceed', authResolution, userId, amazonAccountId);
       await this.selectShipToAddress(page, ship, ebayOrderId); // throws 'address' on friction
+      await record(AutoFulfillEvent.ADDRESS_VERIFIED);
 
       // Step 4: payment
       await this.humanDelay();
       await this.selectDefaultPayment(page); // throws 'payment' on decline signals
+      await record(AutoFulfillEvent.PAYMENT_SELECTED);
 
       // Step 5: review-step HARD CAP — read total, abort if over cap (no click).
       await this.humanDelay();
@@ -607,6 +840,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           } [${title}]; refusing to proceed without cap check`
         );
       }
+      await record(AutoFulfillEvent.REVIEW_TOTAL_READ, { grandTotal });
       // Read at checkout time so an operator can flip the hard cap off (or
       // back on) from the admin panel without restarting the API mid-incident.
       const hardStop = await this.platformSettings.getBoolean(PlatformSettingKey.AUTO_FULFILL_REVIEW_CAP_HARD_STOP);
@@ -614,6 +848,29 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await this.snap(page, ebayOrderId, 'cap');
         throw new AutoFulfillBlockedError('cap', `grandTotal ${grandTotal.toFixed(2)} > cap ${capTotal.toFixed(2)}`);
       }
+      await record(AutoFulfillEvent.CAP_CHECK_PASSED, {
+        grandTotal,
+        cap: capTotal === Number.POSITIVE_INFINITY ? null : capTotal,
+      });
+
+      // LOSS LIMIT — the seller's own per-store setting (off unless set). The
+      // cap above is one absolute figure per buyer account; it says nothing
+      // about THIS sale. An item sold for a $10 payout whose Amazon price rose
+      // to $45 passes a $50 cap and loses $35. Resolved now, not at enqueue,
+      // so the comparison uses the real Amazon total. A settings read that
+      // fails throws: nothing was clicked, and a guard the seller set must not
+      // be skipped because it could not be read.
+      const maxLoss = await this.orderSync.resolveAutoFulfillMaxLoss(userId, ebayAccountId);
+      if (exceedsLossLimit({ grandTotal, ebayEarnings, maxLoss })) {
+        await this.snap(page, ebayOrderId, 'loss-limit');
+        throw new AutoFulfillBlockedError(
+          AutoFulfillBlockedReasonEnum.LOSS_LIMIT,
+          `Amazon total ${grandTotal.toFixed(2)} exceeds the eBay payout ${Number(ebayEarnings).toFixed(
+            2
+          )} by more than the store's loss limit ${Number(maxLoss).toFixed(2)}`
+        );
+      }
+      await record(AutoFulfillEvent.LOSS_CHECK_PASSED, { grandTotal, ebayEarnings, maxLoss });
 
       // The Place Order control must be ON SCREEN before we accept the total as
       // the review-step figure. Without this the flow could pass the cap check
@@ -652,6 +909,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
             capTotal === Number.POSITIVE_INFINITY ? 'inf' : capTotal.toFixed(2)
           }`
         );
+        await record(AutoFulfillEvent.DRY_RUN_STOPPED, { grandTotal });
         return;
       }
 
@@ -668,6 +926,15 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // only record of a card declined AFTER the click (`no_confirmation`).
       await this.snap(page, ebayOrderId, 'place-order-review');
       await this.humanDelay();
+      // ===== THE CLICK BOUNDARY =====
+      // Everything above is retry-safe: no money has moved. The stamp below is
+      // claimed in the database BEFORE the click, so "was the click sent?" is a
+      // stored fact rather than an inference. Past this line the order is
+      // either PLACED or an unknown outcome — nothing may write PENDING or
+      // FAILED, and nothing below may throw anything but `no_confirmation`
+      // (`click-boundary.guard.spec.ts`).
+      await this.claimPlaceOrderClick(ebayOrderId, amazonAccountId);
+      await record(AutoFulfillEvent.SUBMIT_CLAIMED, { grandTotal });
       // I-2 (money-safety): if clickFirstAvailable / waitForLoadState throw
       // AFTER the browser already received the click event (navigation-
       // intercepted / element-detached race), rethrow → BullMQ retry →
@@ -683,6 +950,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       } catch (err) {
         this.logger.warn(`place-order click threw; falling through to confirmation parse: ${(err as Error).message}`);
       }
+      await record(AutoFulfillEvent.PLACE_ORDER_CLICKED);
       await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => undefined);
       let placed: PlacedResult;
       try {
@@ -692,9 +960,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         // `snap` never throws, so a proven order still reaches `onPlaced`.
         await this.snap(page, ebayOrderId, 'after-place-order');
       }
+      await record(AutoFulfillEvent.CONFIRMATION_DETECTED, { orderIdOnPage: placed.amazonOrderId !== null });
       if (!placed.amazonOrderId) {
         // Never throws: an unread id leaves the order PLACED for cost-capture.
         placed.amazonOrderId = await this.resolveOrderIdFromHistory(page, asin, marketplace, ebayOrderId);
+      }
+      if (placed.amazonOrderId) {
+        await record(AutoFulfillEvent.ORDER_ID_DETECTED, { amazonOrderId: placed.amazonOrderId });
       }
       // onPlaced sets `auto_fulfill_status='placed'` atomically in its Layer 1
       // UPDATE (or the Layer 2 minimal fallback). Do NOT setStatus(PLACED) again
@@ -704,6 +976,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // mark the order PLACED with NO amazon_order_id persisted, orphaning it and
       // hiding the stuck-at-RUNNING signal. See onPlaced's I-3 JSDoc contract.
       await this.onPlaced(ebayOrderId, amazonAccountId, userId, placed);
+      await record(AutoFulfillEvent.PLACED, {
+        amazonOrderId: placed.amazonOrderId,
+        total: Math.round((placed.purchasePrice + placed.tax + placed.shipping) * 100) / 100,
+      });
+      if (!placed.amazonOrderId) {
+        // Proven but unnumbered: read the number from "Your Orders" soon.
+        await this.scheduleReconciliation(amazonAccountId, ebayOrderId);
+      }
       this.logger.log(
         `placed ${ebayOrderId}: amazon=${placed.amazonOrderId} total=${(
           placed.purchasePrice +
@@ -1070,6 +1350,19 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       throw new AutoFulfillBlockedError('cart', `cart quantity ${cartQty} != order quantity ${qty}`);
     }
     if (cartQty === null) {
+      // For ONE unit an unreadable stepper is tolerated: the cart default is 1
+      // and the row + ASIN are already verified. For MORE than one it is not.
+      // The quantity is set on the product page with a best-effort select, and
+      // if that silently did nothing the cart holds 1 — fewer units than the
+      // buyer paid for. The review-step cap only stops OVER-buying, so an
+      // unverifiable multi-unit cart must stop here.
+      if (qty > 1) {
+        await this.snap(page, ebayOrderId, 'cart-mismatch');
+        throw new AutoFulfillBlockedError(
+          'cart',
+          `cart quantity unreadable for an order of ${qty} units; refusing to continue without verifying it`
+        );
+      }
       this.logger.warn(
         `verifyCartContents: quantity unreadable for ${ebayOrderId} — proceeding on row/ASIN match only`
       );
@@ -2109,18 +2402,24 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     dryRun: boolean;
     proxyEnabled: boolean;
     marketplace: AmazonMarketplace;
+    /** The order's eBay store — the loss limit is a per-store setting. */
+    ebayAccountId: string | null;
+    /** eBay's payout for the sale (`totalDueSeller`); null/0 = not reported. */
+    ebayEarnings: number | null;
   }> {
     const [row] = await this.db.query<{
       user_id: string;
       asin: string | null;
       quantity: number;
+      ebay_account_id: string | null;
+      ebay_earnings: string | number | null;
       shipping_address: unknown;
       auto_fulfill_cap_total: string | number | null;
       auto_fulfill_dry_run: boolean;
       proxy_enabled: boolean;
       marketplace: string;
     }>(
-      `SELECT o.user_id, p.asin, o.quantity, o.shipping_address,
+      `SELECT o.user_id, p.asin, o.quantity, o.ebay_account_id, o.ebay_earnings, o.shipping_address,
               a.auto_fulfill_cap_total, a.auto_fulfill_dry_run, a.proxy_enabled, a.marketplace
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
@@ -2170,6 +2469,8 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       dryRun: !!row.auto_fulfill_dry_run,
       proxyEnabled: !!row.proxy_enabled,
       marketplace: (row.marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US,
+      ebayAccountId: row.ebay_account_id,
+      ebayEarnings: row.ebay_earnings === null ? null : Number(row.ebay_earnings),
     };
   }
 
@@ -2342,14 +2643,22 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     return row?.id ?? null;
   }
 
-  /** Update auto_fulfill status + attempted_at. Optional blocked_reason. */
+  /**
+   * Update auto_fulfill status + attempted_at. Optional blocked_reason.
+   *
+   * NEVER moves a row out of PLACED. PLACED is written by `onPlaced` alone and
+   * is final; if two runs for one order ever overlap, the one that loses the
+   * click claim reaches `block()` after the winner has already placed the
+   * order, and an unconditional write here would turn a real purchase back
+   * into "blocked".
+   */
   private async setStatus(ebayOrderId: string, status: AutoFulfillStatus, reason?: string): Promise<void> {
     await this.db.query(
       `UPDATE orders SET auto_fulfill_status = $1,
           auto_fulfill_blocked_reason = COALESCE($2, auto_fulfill_blocked_reason),
           auto_fulfill_attempted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-        WHERE ebay_order_id = $3`,
-      [status, reason ?? null, ebayOrderId]
+        WHERE ebay_order_id = $3 AND auto_fulfill_status <> $4`,
+      [status, reason ?? null, ebayOrderId, AutoFulfillStatus.PLACED]
     );
   }
 

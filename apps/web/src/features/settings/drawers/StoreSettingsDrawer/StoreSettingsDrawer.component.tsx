@@ -122,6 +122,27 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             </AutomationField>
             <ToggleRow>
               <LabelWithInfo>
+                <Text variant="body-sm">{t('storeSettings:storeSettings.lossLimit.enabled')}</Text>
+                <InfoTip text={t('storeSettings:storeSettings.lossLimit.enabledHint')} />
+              </LabelWithInfo>
+              <Toggle checked={props.lossLimitEnabled} onChange={props.onLossLimitEnabledChange} />
+            </ToggleRow>
+            {props.lossLimitEnabled && (
+              <AutomationField>
+                <LabelWithInfo>
+                  <Text variant="body-sm">{t('storeSettings:storeSettings.lossLimit.amount')}</Text>
+                  <InfoTip text={t('storeSettings:storeSettings.lossLimit.amountHint')} />
+                </LabelWithInfo>
+                <ModernTextInput
+                  name="autoFulfillMaxLoss"
+                  type="number"
+                  value={String(props.lossLimitAmount)}
+                  onChange={props.onLossLimitAmountChange}
+                />
+              </AutomationField>
+            )}
+            <ToggleRow>
+              <LabelWithInfo>
                 <Text variant="body-sm">
                   {t('storeSettings:storeSettings.trackingConversionEnabled')}
                 </Text>

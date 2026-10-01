@@ -8,6 +8,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { ProductsModule } from '../products/products.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
+import { AutoFulfillEventLog } from './auto-fulfill-event-log.service';
 import { AutoFulfillQueueService, AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.service';
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
 import { OrderSyncProcessorService } from './order-sync-processor.service';
@@ -40,7 +41,8 @@ import { StockSyncQueueService } from './stock-sync-queue.service';
     OrderSyncProcessorService,
     StockSyncQueueService,
     AutoFulfillQueueService,
+    AutoFulfillEventLog,
   ],
-  exports: [OrdersService, OrderSyncService, AutoFulfillQueueService],
+  exports: [OrdersService, OrderSyncService, AutoFulfillQueueService, AutoFulfillEventLog],
 })
 export class OrdersModule {}

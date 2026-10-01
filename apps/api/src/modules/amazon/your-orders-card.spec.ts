@@ -1,4 +1,10 @@
-import { parseOrderCardHeader, parseOrderCardRecipient, stripScriptBlocks } from './your-orders-card';
+import {
+  SCAN_CUTOFF_SLACK_DAYS,
+  parseOrderCardHeader,
+  parseOrderCardRecipient,
+  scanCutoffMs,
+  stripScriptBlocks,
+} from './your-orders-card';
 
 describe('parseOrderCardHeader', () => {
   // textContent of a live card's `.order-header` (2026-10-01), names changed.
@@ -60,5 +66,34 @@ describe('stripScriptBlocks', () => {
       '<div><script>var a = "/dp/B0OTHER001";</script><a href="/dp/B0SHTEST01">x</a>' +
       '<script type="text/template">999-9999999-9999999</script></div>';
     expect(stripScriptBlocks(html)).toBe('<div><a href="/dp/B0SHTEST01">x</a></div>');
+  });
+});
+
+describe('scanCutoffMs', () => {
+  // A card carries a date only, parsed as that day's midnight; `since` is an
+  // instant. Compared directly, every order placed on the same calendar day as
+  // the previous scan read as "older than the cutoff" and was never seen.
+  it('admits an order placed on the same day as the previous scan', () => {
+    const previousScan = new Date('2026-09-30T09:00:00Z');
+    const cardDate = new Date('2026-09-30T00:00:00Z').getTime();
+    expect(cardDate).toBeGreaterThanOrEqual(scanCutoffMs(previousScan));
+  });
+
+  it('admits the day before as well (the account prints dates in its own timezone)', () => {
+    const previousScan = new Date('2026-10-01T01:00:00Z');
+    const cardDate = new Date('2026-09-30T00:00:00Z').getTime();
+    expect(cardDate).toBeGreaterThanOrEqual(scanCutoffMs(previousScan));
+  });
+
+  it('still cuts off older history', () => {
+    const previousScan = new Date('2026-09-30T09:00:00Z');
+    const cardDate = new Date('2026-09-28T00:00:00Z').getTime();
+    expect(cardDate).toBeLessThan(scanCutoffMs(previousScan));
+  });
+
+  it('is the start of the since-day less the slack, whatever the time of day', () => {
+    const expected = Date.UTC(2026, 8, 30) - SCAN_CUTOFF_SLACK_DAYS * 86_400_000;
+    expect(scanCutoffMs(new Date('2026-09-30T00:00:00Z'))).toBe(expected);
+    expect(scanCutoffMs(new Date('2026-09-30T23:59:59Z'))).toBe(expected);
   });
 });

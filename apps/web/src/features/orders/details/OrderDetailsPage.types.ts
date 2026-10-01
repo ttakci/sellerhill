@@ -40,5 +40,20 @@ export interface OrderDetailsPageProps {
   canStartAutoFulfill: boolean;
   isStartingAutoFulfill: boolean;
   onStartAutoFulfill?: () => void;
+  /**
+   * The order is in the `purchase_unknown` stage: the Place Order click went
+   * out and nothing confirmed it. The seller may declare it "not purchased" —
+   * the server allows that only once it has scanned the Amazon account's
+   * orders after the click.
+   */
+  canConfirmNotPurchased: boolean;
+  isConfirmingNotPurchased: boolean;
+  onConfirmNotPurchased?: () => void;
+  /** eBay's ship-by date, formatted, while the seller still has to act; else null. */
+  shipByLabel: string | null;
+  /** The ship-by date is less than a day away, or already past. */
+  isShipByUrgent: boolean;
+  /** How many items the eBay order holds when it is more than one, else null. */
+  multiItemCount: number | null;
   canCopyAddress: boolean;
 }

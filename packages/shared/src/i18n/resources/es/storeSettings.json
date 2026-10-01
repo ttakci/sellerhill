@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Realizar pedidos de Amazon automáticamente tras las ventas de eBay",
     "autoFulfillEnabledHint": "Si está activado, SellerHill compra el artículo en Amazon con tu cuenta de comprador vinculada. Desactívalo para hacer los pedidos manualmente.",
     "autoFulfillEnabledInfo": "Actívalo solo después de conectar y configurar una cuenta de comprador de Amazon. Los pedidos automáticos también requieren que estén activados el ajuste de cumplimiento automático y el límite de gasto de esa cuenta.",
+    "lossLimit": {
+      "enabled": "Detener pedidos automáticos con pérdida",
+      "enabledHint": "Si está activado, un pedido automático se detiene antes de comprar cuando el total de Amazon supera tu pago de eBay en más del importe indicado abajo. El pedido queda esperándote. Desactivado por defecto. Una tienda sin límite propio usa el límite global.",
+      "amount": "Pérdida máxima por pedido",
+      "amountHint": "En la moneda de tu tienda. 0 significa no comprar nunca con pérdida."
+    },
     "trackingConversionProvider": "Conversión del número de seguimiento",
     "trackingConversionProviderHint": "Los números de transportistas reales se reenvían tal cual. Amazon Logistics (TBA) pasa sin cambios.",
     "trackingConversionProviderLocal": "Integrado (local)",
