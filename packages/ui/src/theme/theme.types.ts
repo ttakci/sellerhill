@@ -143,6 +143,10 @@ export interface ThemeColors {
     glowBlue: string;
     glowAmber: string;
     glowMint: string;
+    /** The three drifting aurora lights behind the whole shell (AppShell `AuroraLight`). */
+    auroraBlue: string;
+    auroraSky: string;
+    auroraMint: string;
   };
 
   // Dashboard period card headers (Sellerboard-style bands) + chart/P&L palette

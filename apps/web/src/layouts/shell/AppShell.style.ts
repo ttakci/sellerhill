@@ -16,10 +16,90 @@ export const LayoutWrapper = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  /* Its own stacking context, so the aurora lights can sit at z-index -1:
+     above this background, below everything the shell renders. */
+  position: relative;
+  isolation: isolate;
   background: ${({ theme }: { theme: Theme }) =>
     theme.mode === 'dark'
       ? theme.colors.background.primary
       : theme.colors.background.gradient || theme.colors.background.primary};
+`;
+
+/*
+ * The aurora MOVES (2026-10-01, operator: "give it some life, without
+ * overdoing it"). Three large radial lights drift about a tenth of the viewport over
+ * 32–46 s, alternating, so the frosted panes above them shift colour almost
+ * imperceptibly. Transform-only animation on a gradient (no filter), so it is
+ * composited and costs nothing; `prefers-reduced-motion` freezes them.
+ */
+const auroraDriftA = keyframes`
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(10vw, 9vh, 0) scale(1.14); }
+`;
+const auroraDriftB = keyframes`
+  from { transform: translate3d(0, 0, 0) scale(1.06); }
+  to { transform: translate3d(-11vw, 10vh, 0) scale(0.92); }
+`;
+const auroraDriftC = keyframes`
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(9vw, -10vh, 0) scale(1.12); }
+`;
+
+export const Aurora = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+`;
+
+export const AuroraLight = styled.div<{ $light: 'blue' | 'sky' | 'mint' }>`
+  position: absolute;
+  width: 70vw;
+  height: 70vw;
+  max-width: 64rem;
+  max-height: 64rem;
+  border-radius: 50%;
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+
+  /* The keyframes object itself is interpolated (not its name) so Emotion
+     registers the @keyframes rule along with the class. */
+  animation-name: ${({ $light }) => ($light === 'sky' ? auroraDriftB : $light === 'mint' ? auroraDriftC : auroraDriftA)};
+
+  ${({ $light, theme }) => {
+    switch ($light) {
+      case 'sky':
+        return `
+          top: -32vw;
+          right: -22vw;
+          background: radial-gradient(circle at center, ${theme.colors.glass.auroraSky} 0%, transparent 66%);
+          animation-duration: 40s;
+        `;
+      case 'mint':
+        return `
+          bottom: -38vw;
+          left: 18vw;
+          background: radial-gradient(circle at center, ${theme.colors.glass.auroraMint} 0%, transparent 66%);
+          animation-duration: 46s;
+        `;
+      case 'blue':
+      default:
+        return `
+          top: -28vw;
+          left: -24vw;
+          background: radial-gradient(circle at center, ${theme.colors.glass.auroraBlue} 0%, transparent 66%);
+          animation-duration: 32s;
+        `;
+    }
+  }}
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 /**

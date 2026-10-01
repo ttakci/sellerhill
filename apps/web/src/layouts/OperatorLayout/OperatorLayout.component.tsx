@@ -40,6 +40,11 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
+        <S.Aurora aria-hidden="true">
+          <S.AuroraLight $light="blue" />
+          <S.AuroraLight $light="sky" />
+          <S.AuroraLight $light="mint" />
+        </S.Aurora>
         <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={onCloseMobileSidebar} />
 
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
