@@ -47,7 +47,7 @@ const lightColors: ThemeColors = {
      * here raises R toward B.
      */
     gradient:
-      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.16), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(14, 165, 233, 0.12), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.12), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.08), transparent 62%), linear-gradient(180deg, #f3f6fc 0%, #f7f9fd 100%)',
+      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.11), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(14, 165, 233, 0.08), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.08), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.05), transparent 62%), linear-gradient(180deg, #f3f6fc 0%, #f7f9fd 100%)',
   },
 
   surface: {
@@ -134,6 +134,28 @@ const lightColors: ThemeColors = {
     neutral: '#e5e7eb',
   },
 
+  /*
+   * Extra badge hues (2026-10-01). Twelve order stages cannot each get their
+   * own colour from four semantic tones, and the operator asked for exactly
+   * that. Four more literal hues inside the product's own palette (no violet,
+   * no rose): teal, sky, orange, navy. Ink / tint / hairline per hue, same
+   * triple the semantic badges use.
+   */
+  badge: {
+    teal: '#0f766e',
+    tealTint: '#f0fdfa',
+    tealBorder: '#99f6e4',
+    sky: '#0369a1',
+    skyTint: '#f0f9ff',
+    skyBorder: '#bae6fd',
+    orange: '#c2410c',
+    orangeTint: '#fff7ed',
+    orangeBorder: '#fed7aa',
+    navy: '#1e3a8a',
+    navyTint: '#e8eefc',
+    navyBorder: '#c3d2f5',
+  },
+
   sidebar: {
     background: '#0c1f52',
     foreground: '#ffffff',
@@ -151,7 +173,12 @@ const lightColors: ThemeColors = {
 
   glass: {
     surface: 'rgba(255, 255, 255, 0.50)',
-    surfaceStrong: 'rgba(255, 255, 255, 0.76)',
+    surfaceStrong: 'rgba(255, 255, 255, 0.84)',
+    /* The drawer / modal panel: near-opaque, so a form never sits over
+       legible page text, and its body canvas: a cool slate wash the cards
+       lift off (white on 76 % white read as "faint", 2026-10-01). */
+    panel: 'rgba(255, 255, 255, 0.94)',
+    panelCanvas: 'rgba(226, 232, 240, 0.55)',
     header: 'rgba(255, 255, 255, 0.52)',
     edge: 'rgba(255, 255, 255, 0.9)',
     tint: 'rgba(37, 99, 235, 0.06)',
@@ -164,9 +191,9 @@ const lightColors: ThemeColors = {
     /* The moving lights (2026-10-01): they carry most of the colour now, the
        static wash underneath is only a base, so the canvas never reads darker
        than before — it just breathes. */
-    auroraBlue: 'rgba(59, 130, 246, 0.25)',
-    auroraSky: 'rgba(14, 165, 233, 0.28)',
-    auroraMint: 'rgba(20, 184, 166, 0.26)',
+    auroraBlue: 'rgba(59, 130, 246, 0.17)',
+    auroraSky: 'rgba(14, 165, 233, 0.19)',
+    auroraMint: 'rgba(20, 184, 166, 0.17)',
   },
 
   dashboard: {
@@ -319,6 +346,21 @@ const darkColors: ThemeColors = {
     neutral: 'rgba(107, 114, 128, 0.2)',
   },
 
+  badge: {
+    teal: '#5eead4',
+    tealTint: 'rgba(45, 212, 191, 0.12)',
+    tealBorder: 'rgba(45, 212, 191, 0.25)',
+    sky: '#7dd3fc',
+    skyTint: 'rgba(56, 189, 248, 0.12)',
+    skyBorder: 'rgba(56, 189, 248, 0.25)',
+    orange: '#fdba74',
+    orangeTint: 'rgba(251, 146, 60, 0.12)',
+    orangeBorder: 'rgba(251, 146, 60, 0.25)',
+    navy: '#a5b4fc',
+    navyTint: 'rgba(129, 140, 248, 0.12)',
+    navyBorder: 'rgba(129, 140, 248, 0.25)',
+  },
+
   dashboard: {
     /* Identical to light — the bands are always-dark by design (see light block). */
     periodTodayGradient: 'linear-gradient(135deg, #3f63c2 0%, #2d4aa0 100%)',
@@ -353,6 +395,8 @@ const darkColors: ThemeColors = {
   glass: {
     surface: 'rgba(17, 19, 24, 0.70)',
     surfaceStrong: 'rgba(17, 19, 24, 0.86)',
+    panel: 'rgba(17, 19, 24, 0.94)',
+    panelCanvas: 'rgba(255, 255, 255, 0.04)',
     header: 'rgba(13, 15, 24, 0.72)',
     edge: 'rgba(255, 255, 255, 0.08)',
     tint: 'rgba(79, 110, 247, 0.10)',

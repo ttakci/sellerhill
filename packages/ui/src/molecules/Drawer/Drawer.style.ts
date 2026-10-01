@@ -35,12 +35,14 @@ export const Panel = styled.aside<{ $isOpen: boolean }>`
    */
   max-width: 32rem; /* 512px — canonical drawer width */
   /*
-   * The strong pane (2026-10-01): 76 % white plus the blur, so the page
-   * behind becomes a soft wash and never legible text under a form — the one
-   * reason drawers stayed opaque in the first glass round. The panel is the
-   * single surface; header, body and footer are transparent over it.
+   * The panel (2026-10-01, round 5): 94 % white plus the blur, so the page
+   * behind is only a faint wash and never legible text under a form. The
+   * header and footer sit on the panel; the BODY is a cool slate canvas
+   * (glass.panelCanvas) so the cards inside it lift off the way page cards
+   * lift off the aurora — white cards on a 76 % white pane read as "faint".
    */
   ${({ theme }) => glassSurfaceStrong(theme)}
+  background: ${tkn('colors.glass.sheen')}, ${tkn('colors.glass.panel')};
   border-width: 0 0 0 0.0625rem;
   box-shadow: ${tkn('shadows.xl')};
   display: flex;
@@ -75,9 +77,8 @@ export const HeaderText = styled.div`
 `;
 
 /**
- * Transparent over the panel's own pane: the drawer is ONE surface, and the
- * cards inside it (`glassSurface`) lift off it the way page cards lift off
- * the canvas.
+ * The body canvas: a cool slate wash on the panel, so the cards inside it
+ * (`glassSurface`, white) lift off it the way page cards lift off the aurora.
  */
 export const Body = styled.div`
   padding: ${tkn('spacing.lg')};
@@ -87,7 +88,7 @@ export const Body = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  background: transparent;
+  background: ${tkn('colors.glass.panelCanvas')};
 `;
 
 export const Footer = styled.div`

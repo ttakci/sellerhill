@@ -97,6 +97,21 @@ export interface ThemeColors {
     info: string;
     neutral: string;
   };
+  /** Extra badge hues beyond the four semantic tones — ink / tint / hairline per hue. */
+  badge: {
+    teal: string;
+    tealTint: string;
+    tealBorder: string;
+    sky: string;
+    skyTint: string;
+    skyBorder: string;
+    orange: string;
+    orangeTint: string;
+    orangeBorder: string;
+    navy: string;
+    navyTint: string;
+    navyBorder: string;
+  };
 
   // Sidebar-specific (dark panel tokens)
   sidebar: {
@@ -128,6 +143,10 @@ export interface ThemeColors {
     surface: string;
     /** A pane on a pane (the receipt panel inside the order hero, a table head). */
     surfaceStrong: string;
+    /** The drawer / modal panel — near-opaque, a form never sits over legible page text. */
+    panel: string;
+    /** The drawer body canvas the cards lift off. */
+    panelCanvas: string;
     /** The sticky top bar. */
     header: string;
     /** The outer hairline of a pane. */

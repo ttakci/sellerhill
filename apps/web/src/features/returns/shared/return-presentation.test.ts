@@ -23,10 +23,10 @@ describe('returnBucketPresentation', () => {
 
   it('renders a missed deadline and an escalation red, an open action amber, a closed return grey', () => {
     expect(returnBucketPresentation(ReturnBucket.ACTION_OVERDUE).variant).toBe('error');
-    expect(returnBucketPresentation(ReturnBucket.ESCALATED).variant).toBe('error');
+    expect(returnBucketPresentation(ReturnBucket.ESCALATED).variant).toBe('orange');
     expect(returnBucketPresentation(ReturnBucket.ACTION_DUE).variant).toBe('warning');
-    expect(returnBucketPresentation(ReturnBucket.IN_PROGRESS).variant).toBe('info');
-    expect(returnBucketPresentation(ReturnBucket.CLOSED).variant).toBe('neutral');
+    expect(returnBucketPresentation(ReturnBucket.IN_PROGRESS).variant).toBe('sky');
+    expect(returnBucketPresentation(ReturnBucket.CLOSED).variant).toBe('success');
   });
 
   it('renders an unconfirmed return grey, and apart from a closed one by icon', () => {

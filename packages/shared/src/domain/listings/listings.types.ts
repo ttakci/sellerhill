@@ -378,8 +378,19 @@ export interface ListingRevisionDto {
   id: string;
   previousPrice: number;
   newPrice: number;
+  /** The quantity sent to eBay (the quantity formula's result), before / after. */
   previousQuantity: number;
   newQuantity: number;
+  /**
+   * The AMAZON stock the product carried at this check, before / after
+   * (migration 134). `previous*` is what the listing's prior revision
+   * recorded; both are `null` on rows written before the column existed.
+   * The status is what makes "20+" render as "20+" (`formatSourceStock`).
+   */
+  previousSourceStock: number | null;
+  previousSourceStockStatus: SourceStockStatus | null;
+  newSourceStock: number | null;
+  newSourceStockStatus: SourceStockStatus | null;
   recordedAt: string;
 }
 
