@@ -29,6 +29,7 @@ export const TabNav: React.FC<TabNavProps> = ({
           >
             {item.icon && <Icon name={item.icon} size="sm" />}
             {item.label}
+            {item.count !== undefined && <S.TabCount $isActive={isActive}>{item.count}</S.TabCount>}
           </S.TabButton>
         );
       })}

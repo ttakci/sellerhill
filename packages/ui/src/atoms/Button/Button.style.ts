@@ -140,6 +140,7 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
       case 'primary':
         return css`
           background-color: ${theme.colors.brand.primary};
+          background-image: ${theme.colors.brand.gradient};
           color: ${theme.colors.text.inverse};
           box-shadow: ${glow(theme.colors.brand.primary, 'rest')};
 

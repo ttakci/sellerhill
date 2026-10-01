@@ -29,6 +29,10 @@ export const LayoutWrapper = styled.div`
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
   width: ${(props) => (props.$isCollapsed ? '3.75rem' : SIDEBAR_WIDTH)};
   background: ${tkn('colors.sidebar.background')};
+  /* The rail lights from the top like the canvas beside it (glass redesign). */
+  background-image:
+    radial-gradient(30rem 22rem at 0% 0%, ${tkn('colors.sidebar.glow')}, transparent 70%),
+    radial-gradient(24rem 30rem at 100% 100%, ${tkn('colors.sidebar.glowAlt')}, transparent 70%);
   color: ${tkn('colors.sidebar.text')};
   border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   transition: width ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
@@ -236,13 +240,15 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
             'spacing.md+'
           )({ theme })}`
         : `${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`};
-  /* Selected item is a full-width filled pill (brand-blue), not a left accent bar */
+  /* Selected item is a full-width brand-gradient pill with a soft glow, not a left accent bar */
   border-radius: ${tkn('radius.md')};
   color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.sidebar.text)};
-  background: ${(props) => (props.$active ? tkn('colors.sidebar.accent')(props) : 'transparent')};
+  background: ${(props) => (props.$active ? tkn('colors.sidebar.accentGradient')(props) : 'transparent')};
+  box-shadow: ${(props) => (props.$active ? tkn('colors.sidebar.accentGlow')(props) : 'none')};
   cursor: pointer;
   transition:
     background ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')},
     color ${tkn('transitions.fast')};
   position: relative;
   font-weight: ${({ $active, theme }) =>
@@ -252,7 +258,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
 
   &:hover {
     background: ${(props) =>
-      props.$active ? tkn('colors.sidebar.accent')(props) : tkn('colors.sidebar.hover')(props)};
+      props.$active ? tkn('colors.sidebar.accentGradient')(props) : tkn('colors.sidebar.hover')(props)};
   }
 `;
 
@@ -501,12 +507,15 @@ export const HeaderContainer = styled.header`
   height: ${APP_CHROME_HEIGHT};
   min-height: ${APP_CHROME_HEIGHT};
   max-height: ${APP_CHROME_HEIGHT};
-  background: ${tkn('colors.surface.primary')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  /* Frosted: the page scrolls under it and shows through as a blur. */
+  background: ${tkn('colors.glass.header')};
+  -webkit-backdrop-filter: blur(1.25rem) saturate(1.5);
+  backdrop-filter: blur(1.25rem) saturate(1.5);
+  border-bottom: 0.0625rem solid ${tkn('colors.glass.edge')};
   position: sticky;
   top: 0;
   z-index: ${tkn('zIndex.sticky')};
-  box-shadow: ${tkn('shadows.sm')};
+  box-shadow: none;
   width: 100%;
   box-sizing: border-box;
 

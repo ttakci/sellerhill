@@ -5,6 +5,12 @@ export interface TabNavItem {
   id: string;
   label: string;
   icon?: IconName;
+  /**
+   * A count beside the label (open items, rows in this tab), rendered as a
+   * small pill. Preferred over baking "(5)" into the label — the figure gets
+   * tabular numerals and its own quiet surface, and the label stays a word.
+   */
+  count?: number;
 }
 
 export interface TabNavProps {

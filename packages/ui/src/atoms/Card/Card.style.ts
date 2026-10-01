@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 
+import { glassSurface } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 import type { CardPadding, CardVariant } from './Card.types';
@@ -9,7 +10,9 @@ export const CardContainer = styled.div<{
   $padding: CardPadding;
   $hoverable?: boolean;
 }>`
-  background: ${tkn('colors.surface.primary')};
+  /* Every card is a frosted pane over the aurora (glass redesign, 2026-10-01);
+     \`flat\` alone stays a plain transparent box. */
+  ${(props) => (props.$variant === 'flat' ? '' : glassSurface(props.theme))}
   /* radius.lg (12px) is the documented card tier. This was radius.sm (6px), which
      put every card on the badge/table-cell radius and made surfaces read flat. */
   border-radius: ${tkn('radius.lg')};
@@ -21,35 +24,25 @@ export const CardContainer = styled.div<{
   /* Variant styles */
   ${(props) => {
     switch (props.$variant) {
-      case 'bordered':
-        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
-      case 'elevated':
-        /* Borderless white card on soft canvas — shadow defines the edge */
-        return `box-shadow: ${tkn('shadows.sm')(props)}; border: none;`;
       case 'flat':
         return '';
       case 'interactive':
         return `
-          border: 1px solid ${tkn('colors.border.primary')(props)};
           cursor: pointer;
           &:hover {
-            box-shadow: ${tkn('shadows.lg')(props)};
+            box-shadow: ${tkn('shadows.glassHover')(props)};
             transform: translateY(-0.125rem);
           }
           &:active {
             transform: translateY(0);
-            box-shadow: ${tkn('shadows.sm')(props)};
+            box-shadow: ${tkn('shadows.glass')(props)};
           }
         `;
-      case 'stat':
-        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
-      case 'section':
-        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
       default:
-        return `
-          border: 1px solid ${tkn('colors.border.primary')(props)};
-          box-shadow: ${tkn('shadows.sm')(props)};
-        `;
+        /* bordered / elevated / stat / section / default all share the pane —
+           the variants used to differ by border-vs-shadow, which the glass
+           edge + glass shadow now carry for every one of them. */
+        return '';
     }
   }}
 
@@ -79,7 +72,7 @@ export const CardContainer = styled.div<{
     `
     cursor: pointer;
     &:hover {
-      box-shadow: ${tkn('shadows.md')(props)};
+      box-shadow: ${tkn('shadows.glassHover')(props)};
       transform: translateY(-0.0625rem);
     }
   `}

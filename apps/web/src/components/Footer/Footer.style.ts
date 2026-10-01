@@ -4,7 +4,7 @@ import { tkn } from '@repo/ui';
 export const FooterWrapper = styled.footer`
   padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
-  background: ${tkn('colors.background.primary')};
+  background: transparent;
   margin-top: auto;
   display: flex;
   flex-direction: column;

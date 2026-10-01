@@ -19,48 +19,21 @@ export const toOrderCardProps = (
       ? order.product.title
       : t('orders.detail.unknownProduct');
 
+  // Four facts at most: who, when, which order, which product. The eBay item
+  // id and a quantity of one say nothing a card needs — they live in the
+  // table and on the detail page.
   const meta: OrderCardProps['meta'] = [
-    {
-      label: t('orders.table.orderNumber'),
-      value: order.ebayOrderId,
-      icon: 'receipt',
-    },
-    {
-      label: t('orders.table.buyer'),
-      value: order.buyerName || '—',
-      icon: 'user',
-    },
-    {
-      label: t('orders.table.date'),
-      value: formatDate(order.createdAt),
-      icon: 'calendar',
-    },
+    { label: t('orders.table.orderNumber'), value: order.ebayOrderId },
+    { label: t('orders.table.buyer'), value: order.buyerName || '—' },
+    { label: t('orders.table.date'), value: formatDate(order.createdAt) },
   ];
 
-  if (order.product?.quantity) {
-    meta.push({
-      label: t('orders.detail.quantity'),
-      value: String(order.product.quantity),
-      icon: 'box',
-    });
+  if (order.product?.quantity && order.product.quantity > 1) {
+    meta.push({ label: t('orders.detail.quantity'), value: String(order.product.quantity) });
   }
 
   if (order.product?.asin) {
-    meta.push({
-      label: t('orders.table.asin'),
-      value: order.product.asin,
-      storeType: 'amazon',
-      icon: 'barcode',
-    });
-  }
-
-  if (order.product?.ebayItemId) {
-    meta.push({
-      label: t('orders.table.ebayId'),
-      value: order.product.ebayItemId,
-      storeType: 'ebay',
-      icon: 'tag',
-    });
+    meta.push({ label: t('orders.table.asin'), value: order.product.asin, storeType: 'amazon' });
   }
 
   const profitTone = order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';

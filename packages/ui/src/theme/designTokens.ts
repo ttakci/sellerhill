@@ -113,6 +113,15 @@ export const shadowTokens = {
   md: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
   lg: '0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04)',
   xl: '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04)',
+  /**
+   * The frosted-glass card (2026-10-01): a one-pixel white highlight along the
+   * top edge (the light catching the glass), a hairline contact shadow and a
+   * long, soft, BRAND-TINTED drop — neutral grey under a translucent white
+   * surface reads as dirt, a blue-tinted one reads as depth over the aurora.
+   */
+  glass: 'inset 0 1px 0 rgb(255 255 255 / 0.75), 0 1px 2px rgb(15 23 42 / 0.04), 0 16px 40px -20px rgb(37 99 235 / 0.28)',
+  /** The lift a glass card takes on hover — same tint, a little more throw. */
+  glassHover: 'inset 0 1px 0 rgb(255 255 255 / 0.85), 0 2px 4px rgb(15 23 42 / 0.05), 0 24px 48px -20px rgb(37 99 235 / 0.35)',
 } as const;
 
 /**
@@ -139,7 +148,14 @@ export const shadowTokens = {
  */
 export const typographyTokens = {
   fontFamily: {
-    heading: "'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    /*
+     * Manrope for headings and figures (2026-10-01, operator-approved trial for
+     * the glass redesign): a geometric face with real weight at 700/800 and
+     * tabular numerals, so a page title and a profit figure carry character
+     * that Inter at 500 never did. Body stays Lexend — the dense-table rule
+     * above still holds; only the display tier changed.
+     */
+    heading: "'Manrope', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
     body: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
     sans: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
     mono: "'JetBrains Mono', monospace",
@@ -152,7 +168,7 @@ export const typographyTokens = {
     md: '0.9375rem', // 15px - headingSM / callout
     lg: '1.0625rem', // 17px - Section titles (h3), metric-sm
     xl: '1.1875rem', // 19px - headingMD: sub-section (h2), metric
-    xxl: '1.4375rem', // 23px - headingLG: page titles (h1)
+    xxl: '1.625rem', // 26px - headingLG: page titles (h1) — raised from 23px with the Manrope display tier
     xxxl: '2rem', // 32px - headingXL
     '3xl': '2.5rem', // 40px - headingXXL: display
     '4xl': '3rem', // 48px - Landing display headings

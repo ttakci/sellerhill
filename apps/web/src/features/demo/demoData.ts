@@ -809,13 +809,14 @@ const BUYER_NAMES = [
   'Liam Sutter',
 ];
 
-const CITIES: [string, string, string][] = [
-  ['Austin', 'TX', '78704'],
-  ['Portland', 'OR', '97209'],
-  ['Columbus', 'OH', '43215'],
-  ['Tampa', 'FL', '33602'],
-  ['Denver', 'CO', '80202'],
-  ['Raleigh', 'NC', '27601'],
+/** City, state, zip and the area code a 555 number for that city carries. */
+const CITIES: [string, string, string, string][] = [
+  ['Austin', 'TX', '78704', '512'],
+  ['Portland', 'OR', '97209', '503'],
+  ['Columbus', 'OH', '43215', '614'],
+  ['Tampa', 'FL', '33602', '813'],
+  ['Denver', 'CO', '80202', '303'],
+  ['Raleigh', 'NC', '27601', '919'],
 ];
 
 /**
@@ -932,7 +933,11 @@ function buildOrders(): OrderDto[] {
       netProfit = round2(ebayEarnings - purchasePrice - purchasePrice * 0.06);
     }
 
-    const [city, state, zip] = CITIES[i % CITIES.length];
+    const [city, state, zip, areaCode] = CITIES[i % CITIES.length];
+    // eBay carries the buyer's number on the ship-to address, and the API maps
+    // it onto `buyerPhone` from there; the detail page prints it under the
+    // address like eBay's own order page. Bare digits, as eBay hands them over.
+    const buyerPhone = `${areaCode}555${String(100 + ((i * 37) % 900)).padStart(4, '0')}`;
     const buyerName = BUYER_NAMES[i % BUYER_NAMES.length];
 
     /*
@@ -972,6 +977,7 @@ function buildOrders(): OrderDto[] {
       createdAt: recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i),
       isTracked: costCaptureStatus !== OrderCostCaptureStatus.UNTRACKED,
       buyerName,
+      buyerPhone,
       buyerUsername: buyerName
         .toLowerCase()
         .replace(/[^a-z]/g, '_')
@@ -1027,6 +1033,7 @@ function buildOrders(): OrderDto[] {
         state,
         zipCode: zip,
         country: 'US',
+        phone: buyerPhone,
       },
       fees: { transactionFee, advertisingFee: adFee },
     });

@@ -1,5 +1,13 @@
-import { ORDER_STAGE_TABS, OrderStageTab } from '@repo/shared';
-import { formatCurrency, formatDate, getLocaleConfig, type TabNavItem, type ViewMode } from '@repo/ui';
+import { ORDER_STAGE_TABS, OrderStageTab, type OrderDto } from '@repo/shared';
+import {
+  formatCurrency,
+  formatDate,
+  formatPercent,
+  getLocaleConfig,
+  useIsMobile,
+  type TabNavItem,
+  type ViewMode,
+} from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +25,11 @@ import { useLocale } from '@/utils/useLocale';
 export const OrdersAllPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['orders', 'translation']);
   const { localeNavigate } = useLocale();
-  const [tableView, setTableView] = useState<ViewMode>('grid');
+  /* Rows are the default on a desk — a seller scans twenty sales down one
+     column of profit figures; cards are the default where a table would
+     have to scroll sideways. */
+  const isMobile = useIsMobile();
+  const [tableView, setTableView] = useState<ViewMode>(isMobile ? 'grid' : 'table');
 
   const {
     page,
@@ -83,10 +95,8 @@ export const OrdersAllPageContainer: React.FC = () => {
     () =>
       Object.values(OrderStageTab).map((tabId) => ({
         id: tabId,
-        label:
-          tabId === OrderStageTab.ALL
-            ? t(`orders.stageTabs.${tabId}`)
-            : t('orders.stageTabs.withCount', { label: t(`orders.stageTabs.${tabId}`), count: countFor(tabId) }),
+        label: t(`orders.stageTabs.${tabId}`),
+        count: tabId === OrderStageTab.ALL ? undefined : countFor(tabId),
       })),
     [countFor, t]
   );
@@ -114,9 +124,19 @@ export const OrdersAllPageContainer: React.FC = () => {
     () => resolveStoreCurrency(ebayAccountsData?.items ?? [], ebayAccountId),
     [ebayAccountsData, ebayAccountId]
   );
+  /* Always two decimals: "$9,8" beside "$24,99" reads as a typo on a page
+     whose whole job is to be believed about money. */
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, currency),
+    (value: number) => formatCurrency(value, localeCfg.locale, currency, 2),
     [localeCfg, currency]
+  );
+
+  /* Net margin on the sale, shown under the profit figure. Only on an order
+     whose profit is known — an estimate carries its badge instead. */
+  const fmtMargin = useCallback(
+    (order: OrderDto): string | null =>
+      order.salePrice > 0 && order.profitBasis ? formatPercent(order.netProfit / order.salePrice, localeCfg.locale, 1) : null,
+    [localeCfg]
   );
 
   const fmtDate = useCallback(
@@ -131,7 +151,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate);
+  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin);
 
   const handleDownload = useCallback(() => {
     const headers = [
