@@ -1,5 +1,5 @@
 import type { OrderStage } from '@repo/shared';
-import type { BadgeVariant, IconName } from '@repo/ui';
+import type { BadgeVariant } from '@repo/ui';
 
 export type OrderCardStatTone = 'default' | 'positive' | 'negative';
 
@@ -18,13 +18,11 @@ export interface OrderCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
-  /** Leading row icon — mirrors ListingCard's meta rows (receipt for order #, user for buyer, …). */
-  icon?: IconName;
 }
 
 /**
- * ListingCard-parity order surface: product-first, dense meta + 3 stats.
- * Callers map OrderDto → these props (formatters stay outside the card).
+ * Product-first order surface: title, stage, a few labelled facts, and the
+ * money row. Callers map OrderDto → these props (formatters stay outside).
  */
 export interface OrderCardProps {
   /** Product title (primary heading) */

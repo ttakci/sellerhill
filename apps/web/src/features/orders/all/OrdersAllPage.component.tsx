@@ -1,5 +1,17 @@
 import type { OrderDto } from '@repo/shared';
-import { Button, DataTable, EmptyState, PageHeader, SearchField, Select, TabNav, Text } from '@repo/ui';
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  Icon,
+  IconButton,
+  PageHeader,
+  SearchField,
+  Select,
+  TabNav,
+  Text,
+  ViewToggle,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -50,7 +62,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   return (
     <S.Container>
       {/*
-        No manual "sync from eBay" action: the 15-minute cron already keeps this
+        No manual "sync from eBay" action: the 20-minute cron already keeps this
         list current, and eBay meters the Fulfillment API per APPLICATION across
         every seller — a user-triggered pull spends a shared quota for almost no
         new information.
@@ -62,27 +74,27 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         backAriaLabel={t('translation:common.back')}
       />
 
-      {/* One rail answers "what needs me / what is in flight / what is done";
-          the legend beside it explains every badge the table can show. */}
-      <S.TabsRow>
-        <TabNav
-          items={tabItems}
-          value={tab}
-          onChange={onTabChange}
-          variant="underline"
-          ariaLabel={t('orders.stageLegend.columnStage')}
-        />
-        <OrderStageLegend />
-      </S.TabsRow>
+      <S.Toolbar>
+        {/* One rail answers "what needs me / what is in flight / what is done";
+            the legend beside it explains every badge the table can show. */}
+        <S.TabsRow>
+          <TabNav
+            items={tabItems}
+            value={tab}
+            onChange={onTabChange}
+            variant="underline"
+            ariaLabel={t('orders.stageLegend.columnStage')}
+          />
+          <OrderStageLegend />
+        </S.TabsRow>
 
-      <S.FilterBar>
-        <S.FilterBarRow>
+        <S.FilterRow>
           <S.SearchWrapper>
             <SearchField
               value={search}
               onChange={onSearchChange}
               placeholder={t('orders.actions.search')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SearchWrapper>
@@ -92,7 +104,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onStageChange}
               options={stageOptions}
               placeholder={t('orders.filters.allStages')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SelectWrapper>
@@ -102,7 +114,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onEbayAccountChange}
               options={storeOptions}
               placeholder={t('orders.filters.allStores')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SelectWrapper>
@@ -112,31 +124,33 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onTrackingStateChange}
               options={trackingStateOptions}
               placeholder={t('orders.filters.allTrackingStates')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SelectWrapper>
           <S.FilterActions>
-            <S.ResultCount variant="caption" weight="medium">
-              {t('orders.filters.resultCount', { count: resultCount })}
-            </S.ResultCount>
             {hasActiveFilters && (
               <Button variant="text" size="small" onClick={onClearFilters}>
-                <Text variant="body">{t('orders.filters.clearAll')}</Text>
+                <Text variant="body-sm">{t('orders.filters.clearAll')}</Text>
               </Button>
             )}
+            <ViewToggle viewMode={tableView} onViewModeChange={onTableViewChange} />
+            <IconButton variant="ghost" onClick={onDownload} title={t('orders.actions.export')}>
+              <Icon name="download" size={20} />
+            </IconButton>
           </S.FilterActions>
-        </S.FilterBarRow>
-      </S.FilterBar>
+        </S.FilterRow>
+      </S.Toolbar>
 
       <DataTable
-        gridMinItemWidth="26rem"
-        gridMaxColumns={2}
+        gridMinItemWidth="24rem"
+        gridMaxColumns={3}
         columns={columns}
         data={orders}
         renderGridCard={renderGridCard}
         viewMode={tableView}
         onViewModeChange={onTableViewChange}
+        hideViewToggle
         emptyContent={
           hasActiveFilters ? (
             <EmptyState
@@ -157,7 +171,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
           )
         }
         loading={isInitialLoading}
-        onDownload={onDownload}
         pagination={pagination}
         onRowClick={(row) => onOrderClick(row.id)}
       />

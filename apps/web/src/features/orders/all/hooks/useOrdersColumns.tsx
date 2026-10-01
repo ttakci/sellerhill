@@ -9,7 +9,23 @@ import * as S from '../OrdersAllPage.style';
 
 import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 
-export function useOrdersColumns(formatCurrency: (value: number) => string, formatDate: (value: string) => string) {
+/**
+ * Seven columns, read left to right the way a seller asks about a sale:
+ * which order · which product · who · where it stands · what it sold for ·
+ * what it cost · what was left. The date rides under the order number — a
+ * sale is "12-11247 on Oct 1", not two facts in two columns — and the margin
+ * rides under the profit, so the one figure that matters carries its own
+ * context. Money columns are right-aligned with tabular numerals.
+ *
+ * `sortable` flags are deliberately absent: the page never wires `onSort`
+ * (the API floats what needs the seller to the top, then newest first), and a
+ * sort affordance that does nothing is worse than none.
+ */
+export function useOrdersColumns(
+  formatCurrency: (value: number) => string,
+  formatDate: (value: string) => string,
+  formatMargin: (order: OrderDto) => string | null
+) {
   const { t } = useTranslation(['orders', 'translation']);
 
   return useMemo<TableColumn<OrderDto>[]>(
@@ -17,37 +33,33 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
       {
         key: 'ebayOrderId',
         header: t('orders.table.orderNumber'),
-        width: '10rem',
-        sortable: true,
+        width: '9.75rem',
         render: (_value, order) => (
-          <Text variant="body" weight="semibold" color="brand.primary">
-            {order.ebayOrderId}
-          </Text>
+          <S.OrderCell>
+            <Text variant="body-sm" weight="semibold" numeric>
+              {order.ebayOrderId}
+            </Text>
+            <Text variant="caption" color="text.secondary" numeric>
+              {formatDate(order.createdAt)}
+            </Text>
+          </S.OrderCell>
         ),
       },
       {
         // Same cell as the listings table — one implementation in domain-ui, so
         // the two product columns cannot drift apart again.
+        // No width: under `table-layout: fixed` the one unsized column takes
+        // whatever the sized ones leave, so the table always fits its card and
+        // the profit column is never pushed off the right edge.
         key: 'product',
         header: t('orders.table.product'),
-        width: '20.5rem',
         render: (_value, order) => {
           const meta: ProductTableCellMetaRow[] = [];
           if (order.product?.asin) {
-            meta.push({
-              label: t('orders.table.asin'),
-              id: order.product.asin,
-              storeType: 'amazon',
-              icon: 'barcode',
-            });
+            meta.push({ label: t('orders.table.asin'), id: order.product.asin, storeType: 'amazon' });
           }
           if (order.product?.ebayItemId) {
-            meta.push({
-              label: t('orders.table.ebayId'),
-              id: order.product.ebayItemId,
-              storeType: 'ebay',
-              icon: 'tag',
-            });
+            meta.push({ label: t('orders.table.ebayId'), id: order.product.ebayItemId, storeType: 'ebay' });
           }
           return (
             <ProductTableCell
@@ -57,8 +69,8 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
               subtitle={
                 // No matched listing — price/stock/auto-fulfill/tracking never
                 // run for this order, and cost_capture_status stays 'untracked'
-                // forever. Independent of the fulfillment-state badge, which
-                // only describes automation on an order we already recognize.
+                // forever. Independent of the stage badge, which only describes
+                // automation on an order we already recognize.
                 !order.isTracked ? (
                   <Badge variant="neutral" size="xs">
                     {t('orders.tracking.untracked')}
@@ -70,27 +82,16 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
         },
       },
       {
-        key: 'createdAt',
-        header: t('orders.table.date'),
-        width: '8rem',
-        sortable: true,
-        render: (_value, order) => (
-          <Text variant="body-sm" color="text.secondary">
-            {formatDate(order.createdAt)}
-          </Text>
-        ),
-      },
-      {
         key: 'buyer',
         header: t('orders.table.buyer'),
-        width: '12rem',
+        width: '8.5rem',
         render: (_value, order) => (
           <S.BuyerCell>
-            <Text variant="body" weight="medium">
+            <Text variant="body-sm" weight="medium">
               {order.buyerName || '—'}
             </Text>
             {order.buyerEmail ? (
-              <Text variant="caption" color="text.secondary">
+              <Text variant="caption" color="text.secondary" truncate>
                 {order.buyerEmail}
               </Text>
             ) : null}
@@ -101,15 +102,11 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
         // ONE column: the stage badge, then the one line of context that makes
         // it actionable — the blocked reason, the Amazon order id, the tracking
         // number. The eBay status is a fact, not a status, and lives on the
-        // detail page's eBay card. (This replaced two columns — eBay status +
-        // Amazon fulfillment — that a seller had to combine in their head.)
+        // detail page's eBay card.
         key: 'stage',
         header: t('orders.stageLegend.columnStage'),
-        width: '14rem',
+        width: '11.5rem',
         render: (_value, order) => {
-          // The reason is the actionable part — WHAT to fix (blocked), why the
-          // outcome is unknown, or why automation left the order to the seller
-          // — so it is shown inline, not on hover.
           const reasonLabel =
             orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
               ? t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`)
@@ -119,8 +116,8 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
           return (
-            <S.AutoFulfillCell>
-              <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="xs" />
+            <S.StageCell>
+              <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
               {reasonLabel && (
                 <Text variant="caption" color="text.secondary">
                   {reasonLabel}
@@ -136,18 +133,17 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
                   {trackingShown}
                 </Text>
               )}
-            </S.AutoFulfillCell>
+            </S.StageCell>
           );
         },
       },
       {
         key: 'salePrice',
         header: t('orders.table.salePrice'),
-        width: '7.5rem',
+        width: '6rem',
         align: 'right',
-        sortable: true,
         render: (_value, order) => (
-          <Text variant="body" weight="semibold" numeric>
+          <Text variant="body-sm" numeric>
             {formatCurrency(order.salePrice)}
           </Text>
         ),
@@ -155,9 +151,8 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
       {
         key: 'purchasePrice',
         header: t('orders.table.purchasePrice'),
-        width: '7.5rem',
+        width: '6rem',
         align: 'right',
-        sortable: true,
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary" numeric>
             {formatCurrency(order.purchasePrice)}
@@ -167,29 +162,35 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
       {
         key: 'netProfit',
         header: t('orders.table.netProfit'),
-        width: '8.5rem',
+        width: '7.5rem',
         align: 'right',
-        sortable: true,
-        render: (_value, order) => (
-          <S.ProfitCell>
-            <Text
-              variant="body"
-              weight="semibold"
-              color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
-              numeric
-            >
-              {order.netProfit >= 0 ? '+' : ''}
-              {formatCurrency(order.netProfit)}
-            </Text>
-            {order.profitBasis === ProfitBasis.ESTIMATED && (
-              <Badge variant="warning" size="xs">
-                {t('orders.estimateBadge')}
-              </Badge>
-            )}
-          </S.ProfitCell>
-        ),
+        render: (_value, order) => {
+          const margin = formatMargin(order);
+          return (
+            <S.ProfitCell>
+              <Text
+                variant="body"
+                weight="semibold"
+                color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
+                numeric
+              >
+                {order.netProfit >= 0 ? '+' : ''}
+                {formatCurrency(order.netProfit)}
+              </Text>
+              {order.profitBasis === ProfitBasis.ESTIMATED ? (
+                <Badge variant="warning" size="xs">
+                  {t('orders.estimateBadge')}
+                </Badge>
+              ) : margin ? (
+                <Text variant="caption" color="text.secondary" numeric>
+                  {margin}
+                </Text>
+              ) : null}
+            </S.ProfitCell>
+          );
+        },
       },
     ],
-    [t, formatCurrency, formatDate]
+    [t, formatCurrency, formatDate, formatMargin]
   );
 }

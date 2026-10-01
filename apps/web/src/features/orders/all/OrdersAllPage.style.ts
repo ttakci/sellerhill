@@ -1,7 +1,21 @@
 import styled from '@emotion/styled';
-import { PageContainer, Text as UIText, tkn } from '@repo/ui';
+import { PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
+
+/*
+ * The controls sit on the page canvas, not in a card of their own. The page
+ * used to stack three chrome layers before the first row — a tab rail, a
+ * white filter card and the table's own toolbar — and the data was the
+ * fourth surface down. Now the rail, the filter row and the table are one
+ * column: title → rail → controls → rows.
+ */
+export const Toolbar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
 
 /** The counted stage tabs on the left, the legend trigger on the right. */
 export const TabsRow = styled.div`
@@ -9,78 +23,63 @@ export const TabsRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
-  margin-bottom: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
-export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  overflow: visible;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
-`;
-
-export const FilterBarRow = styled.div`
+export const FilterRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.sm')};
   flex-wrap: wrap;
+  min-width: 0;
 
-  @media (max-width: ${tkn('breakpoints.md')}) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     flex-direction: column;
     align-items: stretch;
-    gap: ${tkn('spacing.sm')};
   }
 `;
 
 export const SearchWrapper = styled.div`
   min-width: 0;
-  width: 16rem;
+  width: 17rem;
   flex-shrink: 0;
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     width: 100%;
   }
 `;
 
 export const SelectWrapper = styled.div`
-  width: 12rem;
+  width: 11.5rem;
   flex-shrink: 0;
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     width: 100%;
   }
 `;
 
+/** View toggle, export and "clear" — pushed to the row's far end. */
 export const FilterActions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xs')};
   margin-left: auto;
-  min-height: ${tkn('controls.height.medium')};
   flex-wrap: wrap;
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     margin-left: 0;
-    min-height: auto;
+    justify-content: space-between;
   }
 `;
 
-export const ResultCount = styled(UIText)`
+/** Order number over its date — one column answers "which sale, when". */
+export const OrderCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+  /* An eBay order id never wraps — split across two lines it stops reading as one id. */
   white-space: nowrap;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.sm')};
 `;
 
 export const BuyerCell = styled.div`
@@ -90,18 +89,19 @@ export const BuyerCell = styled.div`
   min-width: 0;
 `;
 
+/** Signed profit over its margin, both flush right with the money columns. */
 export const ProfitCell = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 
-export const AutoFulfillCell = styled.div`
+export const StageCell = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;

@@ -205,4 +205,11 @@ export type { MarketplaceContextValue, MarketplaceProviderProps } from './contex
 export { useIsMobile, useLoading, useMediaQuery, useTheme, useToast, useUI } from './hooks';
 
 // Utility exports
-export { formatCompactNumber, formatCurrency, formatDate, formatMicroCurrency, getLocaleConfig } from './utils/format';
+export {
+  formatCompactNumber,
+  formatCurrency,
+  formatDate,
+  formatMicroCurrency,
+  formatPercent,
+  getLocaleConfig,
+} from './utils/format';

@@ -18,6 +18,8 @@ export interface OrderDetailsPageProps {
    */
   timelineRows: OrderTimelineRow[];
   roiLabel: string;
+  /** Net margin on the sale (profit ÷ sale price), formatted; null when the sale is zero. */
+  marginLabel: string | null;
   totalAmazonCost: number;
   /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */
   amazonTotalBeforeTax: number;
