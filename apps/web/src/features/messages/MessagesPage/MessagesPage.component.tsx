@@ -6,6 +6,7 @@
  */
 
 import {
+  Button,
   Dropdown,
   EmptyState,
   Icon,
@@ -72,7 +73,7 @@ export const MessagesPageComponent = ({
               width="14rem"
               items={storeSelector.items}
               trigger={
-                <S.StoreTrigger type="button">
+                <Button variant="secondary" size="small">
                   <Icon name="storefront" size={16} />
                   <S.StoreLabel>
                     <Text variant="body-sm" weight="medium" truncate>
@@ -80,7 +81,7 @@ export const MessagesPageComponent = ({
                     </Text>
                   </S.StoreLabel>
                   <Icon name="chevron-down" size={14} color="text.tertiary" />
-                </S.StoreTrigger>
+                </Button>
               }
             />
           </S.ToolbarRight>

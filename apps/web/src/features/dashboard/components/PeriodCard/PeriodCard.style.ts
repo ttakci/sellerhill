@@ -12,16 +12,15 @@ export const Root = styled(Card)<{ $active: boolean }>`
   padding: 0;
   display: flex;
   flex-direction: column;
-  border-color: ${({ $active, theme }) =>
-    $active ? theme.colors.brand.primary : theme.colors.border.primary};
-  box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.lg : theme.shadows.sm)};
+  border-color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.glass.edge)};
+  box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.glassHover : theme.shadows.glass)};
   transition:
     box-shadow ${tkn('transitions.fast')},
     transform ${tkn('transitions.fast')},
     border-color ${tkn('transitions.fast')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.lg')};
+    box-shadow: ${tkn('shadows.glassHover')};
     transform: translateY(-0.125rem);
   }
 
@@ -66,7 +65,7 @@ export const Body = styled.div`
   flex-direction: column;
   padding: ${tkn('spacing.md')};
   gap: ${tkn('spacing.sm-md')};
-  background: ${tkn('colors.surface.primary')};
+  /* Transparent: the pane's own frosted surface shows through. */
   flex: 1;
 `;
 
@@ -97,8 +96,8 @@ export const TrendChip = styled.span<{ $positive: boolean }>`
   align-items: center;
   gap: ${tkn('spacing.2xs')};
   padding: 0 ${tkn('spacing.xs')};
-  height: 1.125rem;
-  border-radius: ${tkn('radius.full')};
+  height: 1.25rem;
+  border-radius: ${tkn('radius.sm')};
   background: ${({ $positive, theme }) =>
     $positive ? theme.colors.semanticTint.success : theme.colors.semanticTint.error};
   color: ${({ $positive, theme }) =>
@@ -137,7 +136,7 @@ export const NoteChip = styled.span<{ $tone: 'warning' | 'neutral' }>`
   align-items: center;
   gap: ${tkn('spacing.2xs')};
   padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs+')};
-  border-radius: ${tkn('radius.md')};
+  border-radius: ${tkn('radius.sm')};
   background: ${({ $tone, theme }) =>
     $tone === 'warning' ? theme.colors.semanticTint.warning : theme.colors.semanticTint.neutral};
   border: 0.0625rem solid
@@ -163,26 +162,14 @@ export const DetailRow = styled.div`
   font-variant-numeric: tabular-nums;
 `;
 
-export const MoreButton = styled.button<{ $expanded: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.2xs')};
-  width: 100%;
-  padding: ${tkn('spacing.xs')} 0 0;
-  background: transparent;
-  border: none;
+/** The expand control is the Button atom; this row only draws the hairline above it. */
+export const MoreRow = styled.div`
+  padding-top: ${tkn('spacing.2xs')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  cursor: pointer;
-  font: inherit;
-  color: ${tkn('colors.brand.primary')};
+`;
 
-  svg {
-    transition: transform ${tkn('transitions.fast')};
-    transform: ${({ $expanded }) => ($expanded ? 'rotate(180deg)' : 'none')};
-  }
-
-  &:hover {
-    color: ${tkn('colors.brand.primaryHover')};
-  }
+export const MoreChevron = styled.span<{ $expanded: boolean }>`
+  display: inline-flex;
+  transition: transform ${tkn('transitions.fast')};
+  transform: ${({ $expanded }) => ($expanded ? 'rotate(180deg)' : 'none')};
 `;

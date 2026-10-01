@@ -35,20 +35,24 @@ import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
 const listingStatusToBadgeStatus = (status: ListingStatus): string =>
   status === ListingStatus.RETRYING ? 'pending' : status;
 
+/**
+ * A fact row. Labels carry no icon — the one exception is an automation rule,
+ * whose glyph is coloured by its state and is therefore a signal, not decoration.
+ */
 const Meta = ({
   icon,
-  iconColor = 'brand.primary',
+  iconColor,
   label,
   children,
 }: {
-  icon: IconName;
+  icon?: IconName;
   iconColor?: string;
   label: string;
   children: React.ReactNode;
 }): React.ReactElement => (
   <S.MetaRow>
     <S.MetaLabel>
-      <Icon name={icon} size={16} color={iconColor} />
+      {icon && iconColor ? <Icon name={icon} size={16} color={iconColor} /> : null}
       <Text variant="body-sm" color="text.secondary">
         {label}
       </Text>
@@ -95,7 +99,7 @@ const Kpi = ({
   color?: string;
 }): React.ReactElement => (
   <S.KpiItem>
-    <S.KpiLabel variant="caption" color="text.tertiary">
+    <S.KpiLabel variant="caption" color="text.secondary">
       {label}
     </S.KpiLabel>
     <Text variant="metric-sm" weight="semibold" numeric color={color}>
@@ -308,7 +312,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
           <S.IdList>
             <S.IdItem>
               <S.IdItemLabel>
-                <Icon name="barcode" size={16} color="brand.primary" />
                 <Text variant="body-sm" color="text.secondary">
                   {t('listings.table.asin')}
                 </Text>
@@ -318,7 +321,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             {listing.ebayListingId ? (
               <S.IdItem>
                 <S.IdItemLabel>
-                  <Icon name="tag" size={16} color="brand.primary" />
                   <Text variant="body-sm" color="text.secondary">
                     {t('listings.table.ebayId')}
                   </Text>
@@ -328,7 +330,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             ) : null}
             <S.IdItem>
               <S.IdItemLabel>
-                <Icon name="key-round" size={16} color="brand.primary" />
                 <Text variant="body-sm" color="text.secondary">
                   {t('listings.detail.listingId')}
                 </Text>
@@ -337,7 +338,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             </S.IdItem>
             <S.IdItem>
               <S.IdItemLabel>
-                <Icon name="calendar" size={16} color="brand.primary" />
                 <Text variant="body-sm" color="text.secondary">
                   {t('listings.detail.createdAt')}
                 </Text>
@@ -348,7 +348,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             </S.IdItem>
             <S.IdItem>
               <S.IdItemLabel>
-                <Icon name="history" size={16} color="brand.primary" />
                 <Text variant="body-sm" color="text.secondary">
                   {t('listings.detail.updatedAt')}
                 </Text>
@@ -388,12 +387,12 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       <S.SectionGrid>
         <SettingsCard variant="section" header={{ title: t('listings.detail.performance') }}>
           <S.MetaList>
-            <Meta icon="box" label={t('listings.table.stock')}>
+            <Meta label={t('listings.table.stock')}>
               <Text variant="body" weight="semibold" numeric>
                 {listing.quantity}
               </Text>
             </Meta>
-            <Meta icon="shopping-bag" label={t('listings.table.amazonStock')}>
+            <Meta label={t('listings.table.amazonStock')}>
               <Text variant="body" weight="semibold" numeric>
                 {amazonStockText}
               </Text>
@@ -403,12 +402,12 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                 </Text>
               )}
             </Meta>
-            <Meta icon="shopping-cart" label={t('listings.table.sold')}>
+            <Meta label={t('listings.table.sold')}>
               <Text variant="body" weight="semibold" numeric>
                 {listing.soldCount ?? 0}
               </Text>
             </Meta>
-            <Meta icon="clock" label={t('listings.table.lastSale')}>
+            <Meta label={t('listings.table.lastSale')}>
               <Text variant="body" weight="semibold">
                 {listing.lastSaleAt ? formatDate(listing.lastSaleAt) : '—'}
               </Text>
@@ -420,17 +419,14 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             offer yet, so this card only shows what's currently attached. */}
         <SettingsCard variant="section" header={{ title: t('listings.detail.ebayPolicies') }}>
           <SettingsInfoRow
-            icon="payments"
             label={t('listings.businessPolicies.paymentPolicy')}
             value={paymentPolicyLabel}
           />
           <SettingsInfoRow
-            icon="truck"
             label={t('listings.businessPolicies.shippingPolicy')}
             value={shippingPolicyLabel}
           />
           <SettingsInfoRow
-            icon="undo-2"
             label={t('listings.businessPolicies.returnPolicy')}
             value={returnPolicyLabel}
           />
@@ -451,22 +447,22 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
           }
         >
           <S.MetaList>
-            <Meta icon="layers" label={t('listings.detail.groupNameLabel')}>
+            <Meta label={t('listings.detail.groupNameLabel')}>
               <Text variant="body" weight="semibold">
                 {strategyGroupLabel}
               </Text>
             </Meta>
-            <Meta icon="box" label={t('listings.detail.groupDefaultQuantityLabel')}>
+            <Meta label={t('listings.detail.groupDefaultQuantityLabel')}>
               <Text variant="body" weight="semibold" numeric>
                 {groupDefaultQuantityLabel}
               </Text>
             </Meta>
-            <Meta icon="sliders-horizontal" label={t('listings.detail.groupStockBufferLabel')}>
+            <Meta label={t('listings.detail.groupStockBufferLabel')}>
               <Text variant="body" weight="semibold" numeric>
                 {groupStockBufferLabel}
               </Text>
             </Meta>
-            <Meta icon="badge-percent" label={t('listings.detail.groupMarginLabel')}>
+            <Meta label={t('listings.detail.groupMarginLabel')}>
               <S.MarginValueRow>
                 <Text variant="body" weight="semibold">
                   {groupMarginSummaryLabel}

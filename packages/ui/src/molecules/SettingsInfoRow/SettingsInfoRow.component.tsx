@@ -22,9 +22,11 @@ export const SettingsInfoRow = ({
   return (
     <S.Row>
       <S.Left>
-        <S.RowIcon>
-          <Icon name={icon} size={18} color="brand.primary" />
-        </S.RowIcon>
+        {icon ? (
+          <S.RowIcon>
+            <Icon name={icon} size={18} color="brand.primary" />
+          </S.RowIcon>
+        ) : null}
         <Text variant="body-sm" color="text.secondary">
           {label}
         </Text>

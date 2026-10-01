@@ -55,38 +55,24 @@ export const ProgressMain = styled.div`
   min-width: 0;
 `;
 
-/* Toplam / Başarılı / Hata — label above value, identical to the list card's
-   StatsGrid so the summary card and the grid cards read as one system. */
+/** Total / succeeded / failed — label over value, separated from the rows above by one hairline. */
 export const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
-  gap: 0;
-  background: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.sm')};
-  /* Roomier interior so it reads as a real box, not a thin strip. */
-  padding: ${tkn('spacing.sm-md')};
-  /* Only above — it is the last thing in the card, so there is no "after"
-     gap to keep tight (unlike the list card, which has a footer below it). */
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   margin-top: ${tkn('spacing.xs')};
 `;
 
 export const StatCell = styled.div`
-  text-align: center;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
   min-width: 0;
-
-  &:not(:last-child) {
-    border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
-  }
 `;
 
 export const StatLabel = styled(UIText)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
@@ -157,20 +143,12 @@ export const SectionHeader = styled.div`
 /* Search-by-ASIN/error-message bar for the item list — same visual shape as
    the job list page's FilterBar. */
 export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  /* The controls sit on the page canvas — no card of their own, so the first
+     row of data is the first surface on the page (see the orders list). */
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  flex-wrap: wrap;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
+  min-width: 0;
 `;
 
 export const SearchWrapper = styled.div`

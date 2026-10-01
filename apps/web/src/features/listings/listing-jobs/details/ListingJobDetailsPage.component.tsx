@@ -4,7 +4,6 @@ import {
   ConfirmModal,
   DataTable,
   EmptyState,
-  Icon, type IconName,
   IdBadge,
   PageHeader,
   SearchField,
@@ -21,14 +20,10 @@ import { JobProgressRing } from '../shared/JobProgressRing';
 import * as S from './ListingJobDetailsPage.style';
 import type { ListingJobDetailsPageComponentProps } from './ListingJobDetailsPage.types';
 
-const jobMetaRow = (
-  icon: IconName,
-  label: string,
-  value: React.ReactNode
-): React.ReactElement => (
+/** A label / value row — no icon; the label column is the only ornament. */
+const jobMetaRow = (label: string, value: React.ReactNode): React.ReactElement => (
   <S.MetaRow>
     <S.MetaLabel>
-      <Icon name={icon} size={16} color="brand.primary" />
       <Text variant="body-sm" color="text.secondary">
         {label}
       </Text>
@@ -109,23 +104,23 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
         </S.ItemCardHeader>
 
         <S.MetaList>
-          {jobMetaRow('barcode', t('listings.jobs.items.asin'), (
+          {jobMetaRow(t('listings.jobs.items.asin'), (
             <IdBadge id={item.asin} storeType="amazon" size="sm" />
           ))}
           {item.ebayItemId
-            ? jobMetaRow('tag', t('listings.jobs.items.ebayId'), (
+            ? jobMetaRow(t('listings.jobs.items.ebayId'), (
                 <IdBadge id={item.ebayItemId} storeType="ebay" size="sm" />
               ))
             : null}
           {reason
-            ? jobMetaRow('alert-triangle', t('listings.jobs.items.reason'), (
+            ? jobMetaRow(t('listings.jobs.items.reason'), (
                 <Text variant="body-sm" color="semantic.error">
                   {reason}
                 </Text>
               ))
             : null}
           {reference
-            ? jobMetaRow('file-text', t('listings.jobs.items.reference'), (
+            ? jobMetaRow(t('listings.jobs.items.reference'), (
                 <Text variant="caption" color="text.tertiary">
                   {reference}
                 </Text>
@@ -209,7 +204,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
             <S.StatsGrid>
               <S.StatCell>
-                <S.StatLabel variant="caption" color="text.tertiary">
+                <S.StatLabel variant="caption" color="text.secondary">
                   {t('listings.jobs.table.total')}
                 </S.StatLabel>
                 <S.StatValue variant="body-sm" weight="bold" numeric>
@@ -217,7 +212,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 </S.StatValue>
               </S.StatCell>
               <S.StatCell>
-                <S.StatLabel variant="caption" color="text.tertiary">
+                <S.StatLabel variant="caption" color="text.secondary">
                   {t('listings.jobs.stats.success')}
                 </S.StatLabel>
                 <S.StatValue variant="body-sm" weight="bold" $tone="positive" numeric>
@@ -225,7 +220,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 </S.StatValue>
               </S.StatCell>
               <S.StatCell>
-                <S.StatLabel variant="caption" color="text.tertiary">
+                <S.StatLabel variant="caption" color="text.secondary">
                   {t('listings.jobs.stats.failed')}
                 </S.StatLabel>
                 <S.StatValue

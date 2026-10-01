@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import * as S from './EbayAccountCard.style';
 import type { EbayAccountCardProps } from './EbayAccountCard.types';
 
+import { getEbayAccountStatusLabel } from '@/features/ebay/utils/ebayAccountStatusLabel';
+
 /**
  * eBay store card — OAuth-connected, so there is nothing to EDIT here (unlike
  * Amazon's credential-based accounts). The one action it carries is
@@ -23,7 +25,9 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store, onDisco
             </Text>
             <Text variant="body" weight="semibold">{store.displayName}</Text>
           </S.StoreIdText>
-          <StatusBadge status={store.status} size="sm" />
+          <StatusBadge status={store.status} size="sm">
+            {getEbayAccountStatusLabel(store.status, t)}
+          </StatusBadge>
         </S.StoreHead>
 
         <S.StoreMetaList>

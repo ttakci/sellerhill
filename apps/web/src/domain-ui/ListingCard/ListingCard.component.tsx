@@ -1,6 +1,5 @@
 import { Badge, Checkbox, Icon, IdBadge, Text, Tooltip } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingCard.style';
 import type { ListingCardMetaItem, ListingCardProps } from './ListingCard.types';
@@ -43,10 +42,8 @@ export const ListingCard = ({
   selected,
   onSelectedChange,
   selectionAriaLabel,
-  showDetailAction = true,
   ...rest
 }: ListingCardProps): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
   const statusVariant = status?.tone === 'active' ? 'success' : 'neutral';
 
@@ -72,16 +69,12 @@ export const ListingCard = ({
         </S.SelectionControl>
       )}
 
-      <S.Image $orientation={orientation}>
-        {imageUrl ? (
-          <img src={imageUrl} alt={title} />
-        ) : (
-          <Icon name="image" size={orientation === 'horizontal' ? 32 : 48} />
-        )}
-      </S.Image>
+      <S.Top $orientation={orientation}>
+        <S.Image $orientation={orientation}>
+          {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
+        </S.Image>
 
-      <S.Content $orientation={orientation}>
-        <S.HeaderBlock>
+        <S.Content>
           {/* The title is clamped to two lines, so the full text lives on the tooltip. */}
           <S.TitleSlot>
             <Tooltip content={title} position="top" variant="dark">
@@ -91,69 +84,54 @@ export const ListingCard = ({
             </Tooltip>
           </S.TitleSlot>
 
+          {status ? (
+            <S.BadgeRow>
+              <Badge variant={statusVariant} size="xs">
+                {status.label}
+              </Badge>
+            </S.BadgeRow>
+          ) : null}
+
           {meta.length > 0 && (
             <S.MetaList>
               {meta.map((item) => (
-                <S.MetaRow key={`${item.label}-${item.value}`}>
-                  <S.MetaLabelRow>
-                    {item.icon ? (
-                      <Icon name={item.icon} size={14} color="brand.primary" />
-                    ) : null}
-                    <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
+                <React.Fragment key={`${item.label}-${item.value}`}>
+                  <S.MetaLabel>
+                    <Text variant="caption" color="text.secondary">
                       {item.label}
-                    </S.MetaLabel>
-                  </S.MetaLabelRow>
+                    </Text>
+                  </S.MetaLabel>
                   <S.MetaValue>
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" />
                     ) : (
-                      <S.MetaValueText variant="caption" weight="bold" color="text.primary">
+                      <S.MetaValueText variant="body-sm" color="text.primary">
                         {item.value}
                       </S.MetaValueText>
                     )}
                   </S.MetaValue>
-                </S.MetaRow>
+                </React.Fragment>
               ))}
             </S.MetaList>
           )}
-        </S.HeaderBlock>
+        </S.Content>
+      </S.Top>
 
-        <S.StatsGrid>
-          {stats.map((stat) => (
-            <S.StatCell key={stat.label}>
-              <S.StatLabel variant="caption" color="text.tertiary">
-                {stat.label}
-              </S.StatLabel>
-              <S.StatValueRow>
-                {stat.icon ? (
-                  <Icon name={stat.icon} size={14} color={stat.iconColor} filled />
-                ) : null}
-                <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
-                  {stat.value}
-                </S.StatValue>
-              </S.StatValueRow>
-            </S.StatCell>
-          ))}
-        </S.StatsGrid>
-
-        <S.Footer>
-          {status ? (
-            <Badge variant={statusVariant} size="sm">
-              {status.label}
-            </Badge>
-          ) : (
-            <span />
-          )}
-          {showDetailAction && (
-            <S.DetailAction>
-              <Text variant="body-sm" weight="semibold" color="brand.primary">
-                {t('translation:common.details')}
-              </Text>
-              <Icon name="arrow-right" size={14} color="brand.primary" />
-            </S.DetailAction>
-          )}
-        </S.Footer>
-      </S.Content>
+      <S.StatsGrid>
+        {stats.map((stat) => (
+          <S.StatCell key={stat.label}>
+            <S.StatLabel variant="caption" color="text.secondary">
+              {stat.label}
+            </S.StatLabel>
+            <S.StatValueRow>
+              {stat.icon ? <Icon name={stat.icon} size={14} color={stat.iconColor} filled /> : null}
+              <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
+                {stat.value}
+              </S.StatValue>
+            </S.StatValueRow>
+          </S.StatCell>
+        ))}
+      </S.StatsGrid>
     </S.Wrapper>
   );
 };

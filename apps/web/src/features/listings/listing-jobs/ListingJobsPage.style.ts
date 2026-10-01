@@ -8,20 +8,12 @@ export const FilterBarWrapper = styled.div`
 `;
 
 export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  /* The controls sit on the page canvas — no card of their own, so the first
+     row of data is the first surface on the page (see the orders list). */
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  overflow: visible;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
+  min-width: 0;
 `;
 
 export const FilterBarRow = styled.div`
@@ -73,26 +65,26 @@ export const FilterActions = styled.div`
 export const ResultCount = styled(UIText)``;
 
 /**
- * Dense job card — compact padding, inline stats, no large empty metric tiles.
- * Horizontal feel on tablet+ (meta left, progress fills).
+ * One pane: id + status, the progress ring, then the counts under a hairline.
+ * No tinted stat box and no "Details →" footer — the whole card is the button.
  */
 export const JobCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  padding: 0;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  overflow: hidden;
   cursor: pointer;
   transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
+    box-shadow ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.md')};
-    border-color: ${tkn('colors.brand.primary')};
+    box-shadow: ${tkn('shadows.glassHover')};
+    transform: translateY(-0.125rem);
   }
 
   &:focus-visible {
@@ -109,6 +101,7 @@ export const JobCardHeader = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
+  padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
 `;
 
 export const JobCardBody = styled.div`
@@ -116,6 +109,8 @@ export const JobCardBody = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
+  flex: 1;
+  padding: 0 ${tkn('spacing.md+')} ${tkn('spacing.md+')};
 `;
 
 /*
@@ -147,41 +142,25 @@ export const ProgressCounts = styled.div`
   min-width: 0;
 `;
 
-/* Success / failed / remaining — label above value, matching ListingCard's
-   StatsGrid so every card family reads a stat the same way. auto-fit (not a
-   fixed repeat(3)) so 2 cells split the row evenly instead of leaving a dead
-   third column when "remaining" is hidden (job fully processed). */
+/** Success / failed / remaining — label over value, under one hairline. */
 export const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
-  gap: 0;
-  background: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.sm')};
-  /* Roomier interior so it reads as a real box, not a thin strip. */
-  padding: ${tkn('spacing.sm-md')};
-  /* Only above — it is the last element in JobCardBody now, so the space
-     after it is owned by Footer below, kept tight there instead. */
-  margin-top: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
   flex-shrink: 0;
 `;
 
 export const StatCell = styled.div`
-  text-align: center;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
   min-width: 0;
-
-  &:not(:last-child) {
-    border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
-  }
 `;
 
 export const StatLabel = styled(UIText)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
@@ -198,22 +177,6 @@ export const StatValue = styled(UIText)<{ $tone?: 'default' | 'positive' | 'nega
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
-export const Footer = styled.div`
-  margin-top: auto;
-  /* JobCard's own flex gap already separates this from the stats box above —
-     no extra padding on top of it, so the gap after the box stays tight. */
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-shrink: 0;
-`;
-
-/** "Detay" label + arrow — the same trailing affordance ListingCard/OrderCard use. */
-export const DetailAction = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-`;
 
 /** Compact progress cell for table */
 export const TableProgress = styled.div`

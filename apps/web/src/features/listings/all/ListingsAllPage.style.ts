@@ -10,20 +10,12 @@ export const FilterBarWrapper = styled.div`
 `;
 
 export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  /* The controls sit on the page canvas — no card of their own, so the first
+     row of data is the first surface on the page (see the orders list). */
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  overflow: visible;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
+  min-width: 0;
 `;
 
 export const FilterBarRow = styled.div`
@@ -77,11 +69,6 @@ export const FilterActions = styled.div`
 
 export const ResultCount = styled(UIText)`
   white-space: nowrap;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
 `;
 
 export const AdvancedDivider = styled.div`
@@ -89,31 +76,16 @@ export const AdvancedDivider = styled.div`
   margin: 0;
 `;
 
-export const AdvancedHeader = styled.button<{ $isOpen: boolean }>`
+/** Hosts the Button atom that toggles the advanced filters — layout only. */
+export const AdvancedHeaderRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: ${tkn('spacing.sm')} 0;
-  color: ${tkn('colors.text.primary')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  transition: color ${tkn('transitions.fast')};
-
-  &:hover {
-    color: ${tkn('colors.brand.primary')};
-  }
 `;
 
 export const AdvancedChevron = styled.span<{ $isOpen: boolean }>`
   display: inline-flex;
   transition: transform ${tkn('transitions.fast')};
   transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
-  color: inherit;
-  margin-left: auto;
 `;
 
 export const NumericFilterGrid = styled.div`

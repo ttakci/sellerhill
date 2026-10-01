@@ -29,7 +29,6 @@ export const toListingCardProps = (
     meta.push({
       label: t('listings.table.brand'),
       value: listing.brand,
-      icon: 'building-2',
     });
   }
 
@@ -37,7 +36,6 @@ export const toListingCardProps = (
     label: t('listings.table.asin'),
     value: listing.asin,
     storeType: 'amazon',
-    icon: 'barcode',
   });
 
   if (listing.ebayListingId) {
@@ -45,7 +43,6 @@ export const toListingCardProps = (
       label: t('listings.table.ebayId'),
       value: listing.ebayListingId,
       storeType: 'ebay',
-      icon: 'tag',
     });
   }
 
@@ -53,7 +50,6 @@ export const toListingCardProps = (
     meta.push({
       label: t('listings.table.sold'),
       value: String(listing.soldCount),
-      icon: 'shopping-cart',
     });
   }
 
@@ -77,11 +73,11 @@ export const toListingCardProps = (
     stats: [
       {
         label: t('listings.table.price'),
-        value: formatCurrency(listing.price, locale, listing.currency || 'USD'),
+        value: formatCurrency(listing.price, locale, listing.currency || 'USD', 2),
       },
       {
         label: t('listings.table.estimatedProfit'),
-        value: `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`,
+        value: `${profit >= 0 ? '+' : ''}${formatCurrency(profit, locale, listing.currency || 'USD', 2)}`,
         tone: profit >= 0 ? 'positive' : 'negative',
       },
       {

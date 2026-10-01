@@ -4,7 +4,6 @@ import {
   formatDate,
   formatPercent,
   getLocaleConfig,
-  useIsMobile,
   type TabNavItem,
   type ViewMode,
 } from '@repo/ui';
@@ -28,8 +27,8 @@ export const OrdersAllPageContainer: React.FC = () => {
   /* Rows are the default on a desk — a seller scans twenty sales down one
      column of profit figures; cards are the default where a table would
      have to scroll sideways. */
-  const isMobile = useIsMobile();
-  const [tableView, setTableView] = useState<ViewMode>(isMobile ? 'grid' : 'table');
+  // Cards by default on every width; the table is one toggle away.
+  const [tableView, setTableView] = useState<ViewMode>('grid');
 
   const {
     page,
