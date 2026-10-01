@@ -208,10 +208,23 @@ export const TimelineBody = styled.div`
   min-width: 0;
 `;
 
+/**
+ * Each card is as tall as its content (`align-items: start`): the grid used
+ * to stretch all three to the tallest, and the customer card — four address
+ * lines — carried a void under them. The row rhythm still lines the first
+ * rows up across the cards; only the bottoms differ.
+ */
 export const SectionGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: ${tkn('spacing.lg')};
+
+  /* SettingsCard fills its slot (height: 100%), which under a grid resolves
+     to the row's height and stretches it anyway; each card here is content-high. */
+  & > * {
+    height: auto;
+  }
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -44,7 +44,7 @@ const lightColors: ThemeColors = {
      * Still no lavender: blue and amber never meet at the same point.
      */
     gradient:
-      'radial-gradient(70rem 48rem at -6% -10%, rgba(59, 130, 246, 0.80), transparent 62%), radial-gradient(56rem 42rem at 104% -4%, rgba(251, 191, 36, 0.66), transparent 60%), radial-gradient(64rem 46rem at 58% 116%, rgba(20, 184, 166, 0.66), transparent 62%), radial-gradient(44rem 34rem at 30% 60%, rgba(96, 165, 250, 0.38), transparent 62%), linear-gradient(180deg, #e3ecfa 0%, #e9f0fa 100%)',
+      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.50), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(251, 191, 36, 0.38), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.38), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.20), transparent 62%), linear-gradient(180deg, #e8eff9 0%, #edf2fa 100%)',
   },
 
   surface: {
@@ -142,14 +142,14 @@ const lightColors: ThemeColors = {
     divider: '#ffffff14',
     accentGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
     accentGlow: '0 8px 20px -8px rgba(59, 130, 246, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
-    glow: 'rgba(59, 130, 246, 0.65)',
-    glowAlt: 'rgba(20, 184, 166, 0.28)',
+    glow: 'rgba(59, 130, 246, 0.50)',
+    glowAlt: 'rgba(20, 184, 166, 0.22)',
   },
 
   glass: {
-    surface: 'rgba(255, 255, 255, 0.46)',
-    surfaceStrong: 'rgba(255, 255, 255, 0.74)',
-    header: 'rgba(255, 255, 255, 0.48)',
+    surface: 'rgba(255, 255, 255, 0.50)',
+    surfaceStrong: 'rgba(255, 255, 255, 0.76)',
+    header: 'rgba(255, 255, 255, 0.52)',
     edge: 'rgba(255, 255, 255, 0.9)',
     tint: 'rgba(37, 99, 235, 0.06)',
     sheen: 'linear-gradient(135deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.25) 55%, rgba(255, 255, 255, 0.45) 100%)',

@@ -102,7 +102,7 @@ export const TabCount = styled.span<{ $isActive: boolean }>`
   height: 1.25rem;
   padding: 0 ${tkn('spacing.xs+')};
   box-sizing: border-box;
-  border-radius: ${tkn('radius.full')};
+  border-radius: ${tkn('radius.sm')};
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
