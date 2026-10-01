@@ -106,7 +106,7 @@ export const ChangeRow = styled.div`
 `;
 
 export const ChangeLabel = styled.span`
-  flex: 0 0 3.5rem;
+  flex: 0 0 6.5rem;
 `;
 
 export const ChangeValues = styled.div`

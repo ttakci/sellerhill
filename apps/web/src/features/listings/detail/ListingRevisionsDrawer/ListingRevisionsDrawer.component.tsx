@@ -89,6 +89,17 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
           increased={row.priceIncreased}
           delta={row.priceDelta}
         />
+        {row.newSourceStock !== null && (
+          <ChangeLine
+            label={t('listings.detail.revisions.sourceStockChange')}
+            labelTooltip={t('listings.detail.revisions.sourceStockTooltip')}
+            previous={row.previousSourceStock ?? row.newSourceStock}
+            next={row.newSourceStock}
+            changed={row.sourceStockChanged}
+            increased={row.sourceStockIncreased}
+            delta={row.sourceStockDelta}
+          />
+        )}
         <ChangeLine
           label={t('listings.detail.revisions.quantityChange')}
           labelTooltip={t('listings.detail.revisions.quantityTooltip')}

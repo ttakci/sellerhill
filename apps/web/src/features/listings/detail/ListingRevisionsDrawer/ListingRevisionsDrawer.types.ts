@@ -45,6 +45,16 @@ export interface ListingRevisionRow {
   quantityIncreased: boolean;
   /** e.g. `-1` — only set when the stock actually moved. */
   quantityDelta: string | null;
+  /**
+   * The Amazon stock at this check, formatted (`20+` for a lower bound).
+   * `previousSourceStock` is `null` when the prior row recorded none
+   * (rows older than migration 134): the line then shows the new value alone.
+   */
+  previousSourceStock: string | null;
+  newSourceStock: string | null;
+  sourceStockChanged: boolean;
+  sourceStockIncreased: boolean;
+  sourceStockDelta: string | null;
 }
 
 export interface ListingRevisionsDrawerComponentProps {

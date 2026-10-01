@@ -198,6 +198,42 @@ interface PublishOutcome {
   error?: unknown;
 }
 
+/** One `listing_revisions` row as `pg` returns it (NUMERIC comes back as text). */
+interface RevisionRow {
+  id: string;
+  previous_price: string;
+  new_price: string;
+  previous_quantity: number;
+  new_quantity: number;
+  recorded_at: Date;
+  previous_source_stock: number | null;
+  previous_source_stock_status: string | null;
+  new_source_stock: number | null;
+  new_source_stock_status: string | null;
+}
+
+const SOURCE_STOCK_STATUSES = new Set<string>(Object.values(SourceStockStatus));
+
+function asSourceStockStatus(value: string | null): SourceStockStatus | null {
+  return value && SOURCE_STOCK_STATUSES.has(value) ? (value as SourceStockStatus) : null;
+}
+
+/** The one mapping both revision reads share — the Amazon-stock columns are NULL on rows older than migration 134. */
+function mapRevisionRow(row: RevisionRow): ListingRevisionDto {
+  return {
+    id: row.id,
+    previousPrice: Number(row.previous_price),
+    newPrice: Number(row.new_price),
+    previousQuantity: row.previous_quantity,
+    newQuantity: row.new_quantity,
+    previousSourceStock: row.previous_source_stock,
+    previousSourceStockStatus: asSourceStockStatus(row.previous_source_stock_status),
+    newSourceStock: row.new_source_stock,
+    newSourceStockStatus: asSourceStockStatus(row.new_source_stock_status),
+    recordedAt: row.recorded_at.toISOString(),
+  };
+}
+
 @Injectable()
 export class ListingsService {
   private readonly logger = new Logger(ListingsService.name);
@@ -890,15 +926,9 @@ export class ListingsService {
     );
     const total = parseInt(countResult[0]?.count || '0', 10);
 
-    const results = await this.databaseService.query<{
-      id: string;
-      previous_price: string;
-      new_price: string;
-      previous_quantity: number;
-      new_quantity: number;
-      recorded_at: Date;
-    }>(
-      `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at
+    const results = await this.databaseService.query<RevisionRow>(
+      `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
+              r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status
        FROM listing_revisions r
        JOIN listings l ON l.id = r.listing_id
        WHERE r.listing_id = $1 AND l.user_id = $2
@@ -907,14 +937,7 @@ export class ListingsService {
       [listingId, userId, limit, offset]
     );
 
-    const items: ListingRevisionDto[] = results.map((row) => ({
-      id: row.id,
-      previousPrice: Number(row.previous_price),
-      newPrice: Number(row.new_price),
-      previousQuantity: row.previous_quantity,
-      newQuantity: row.new_quantity,
-      recordedAt: row.recorded_at.toISOString(),
-    }));
+    const items: ListingRevisionDto[] = results.map((row) => mapRevisionRow(row));
 
     // The product's own last-checked time, plus the newest revision across
     // ALL pages (not just this one) — a correlated MAX() rather than a second
@@ -999,13 +1022,7 @@ export class ListingsService {
     );
     const total = parseInt(countResult[0]?.count || '0', 10);
 
-    const results = await this.databaseService.query<{
-      id: string;
-      previous_price: string;
-      new_price: string;
-      previous_quantity: number;
-      new_quantity: number;
-      recorded_at: Date;
+    const results = await this.databaseService.query<RevisionRow & {
       listing_id: string;
       asin: string;
       title: string;
@@ -1015,6 +1032,7 @@ export class ListingsService {
       store_name: string | null;
     }>(
       `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
+              r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status,
               l.id AS listing_id, l.ebay_account_id,
               p.asin, p.title, p.image_urls,
               ea.marketplace_id AS ebay_marketplace_id,
@@ -1034,12 +1052,7 @@ export class ListingsService {
         ? row.image_urls
         : (JSON.parse(String(row.image_urls ?? '[]')) as string[]);
       return {
-        id: row.id,
-        previousPrice: Number(row.previous_price),
-        newPrice: Number(row.new_price),
-        previousQuantity: row.previous_quantity,
-        newQuantity: row.new_quantity,
-        recordedAt: row.recorded_at.toISOString(),
+        ...mapRevisionRow(row),
         listingId: row.listing_id,
         asin: row.asin,
         title: row.title,

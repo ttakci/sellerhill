@@ -528,12 +528,26 @@ export class ProductSyncService {
       return;
     }
 
+    // The Amazon stock at this check (products.stock is already updated by
+    // the time the fan-out runs) and what the listing's latest revision
+    // recorded as its Amazon stock — "previous" — so the drawer can show the
+    // source stock moving even when the eBay quantity did not.
     await this.databaseService.query(
       `INSERT INTO listing_revisions (
-         listing_id, previous_price, new_price, previous_quantity, new_quantity
+         listing_id, previous_price, new_price, previous_quantity, new_quantity,
+         previous_source_stock, previous_source_stock_status, new_source_stock, new_source_stock_status
        )
-       SELECT l.id, l.price, l.price, l.quantity, l.quantity
+       SELECT l.id, l.price, l.price, l.quantity, l.quantity,
+              prev.new_source_stock, prev.new_source_stock_status, p.stock, p.stock_status
        FROM listings l
+       JOIN products p ON p.id = l.product_id
+       LEFT JOIN LATERAL (
+         SELECT r.new_source_stock, r.new_source_stock_status
+         FROM listing_revisions r
+         WHERE r.listing_id = l.id
+         ORDER BY r.recorded_at DESC, r.id DESC
+         LIMIT 1
+       ) prev ON TRUE
        WHERE l.product_id = ANY($1::uuid[])
          AND l.status = $2
          AND l.over_plan_limit = FALSE
@@ -558,11 +572,23 @@ export class ProductSyncService {
 
     await this.databaseService.query(
       `INSERT INTO listing_revisions (
-         listing_id, previous_price, new_price, previous_quantity, new_quantity
+         listing_id, previous_price, new_price, previous_quantity, new_quantity,
+         previous_source_stock, previous_source_stock_status, new_source_stock, new_source_stock_status
        )
-       SELECT * FROM unnest(
+       SELECT t.listing_id, t.previous_price, t.new_price, t.previous_quantity, t.new_quantity,
+              prev.new_source_stock, prev.new_source_stock_status, p.stock, p.stock_status
+       FROM unnest(
          $1::uuid[], $2::numeric[], $3::numeric[], $4::int[], $5::int[]
-       ) AS t(listing_id, previous_price, new_price, previous_quantity, new_quantity)`,
+       ) AS t(listing_id, previous_price, new_price, previous_quantity, new_quantity)
+       JOIN listings l ON l.id = t.listing_id
+       JOIN products p ON p.id = l.product_id
+       LEFT JOIN LATERAL (
+         SELECT r.new_source_stock, r.new_source_stock_status
+         FROM listing_revisions r
+         WHERE r.listing_id = l.id
+         ORDER BY r.recorded_at DESC, r.id DESC
+         LIMIT 1
+       ) prev ON TRUE`,
       [
         updates.map((update) => update.listingId),
         updates.map((update) => update.previousPrice),

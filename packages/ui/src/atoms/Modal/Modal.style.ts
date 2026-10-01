@@ -33,6 +33,7 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
 export const ModalContainer = styled.div<{ $size: string }>`
   /* The strong pane — same glass as the drawer, see Drawer.style.ts. */
   ${({ theme }) => glassSurfaceStrong(theme)}
+  background: ${tkn('colors.glass.sheen')}, ${tkn('colors.glass.panel')};
   border-radius: ${tkn('radius.xl')};
   width: 100%;
   margin: auto;

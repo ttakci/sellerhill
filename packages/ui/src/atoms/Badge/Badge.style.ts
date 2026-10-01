@@ -93,6 +93,42 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
           color: ${t.colors.text.secondary};
           border-color: ${t.colors.semanticTintBorder.neutral};
         `;
+      case 'teal':
+        return `
+          background: ${t.colors.badge.tealTint};
+          color: ${t.colors.badge.teal};
+          border-color: ${t.colors.badge.tealBorder};
+        `;
+      case 'sky':
+        return `
+          background: ${t.colors.badge.skyTint};
+          color: ${t.colors.badge.sky};
+          border-color: ${t.colors.badge.skyBorder};
+        `;
+      case 'orange':
+        return `
+          background: ${t.colors.badge.orangeTint};
+          color: ${t.colors.badge.orange};
+          border-color: ${t.colors.badge.orangeBorder};
+        `;
+      case 'navy':
+        return `
+          background: ${t.colors.badge.navyTint};
+          color: ${t.colors.badge.navy};
+          border-color: ${t.colors.badge.navyBorder};
+        `;
+      case 'solidNavy':
+        return `
+          background: ${t.colors.sidebar.background};
+          color: ${t.colors.sidebar.text};
+          border-color: ${t.colors.sidebar.background};
+        `;
+      case 'solidAmber':
+        return `
+          background: ${t.colors.semantic.warning};
+          color: ${t.colors.text.inverse};
+          border-color: ${t.colors.semantic.warning};
+        `;
       default:
         return '';
     }

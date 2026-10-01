@@ -76,6 +76,7 @@ import {
   type ProfileDto,
   type StoreSettingsResponse,
   type UserDto,
+  type ListingRevisionDto,
   type ListingRevisionWithListingDto,
 } from '@repo/shared';
 
@@ -661,14 +662,7 @@ const REFRESH_STEP_HOURS = 6;
  * one is a legitimate change. Drafts get none — the refresh pipeline never
  * touches a draft.
  */
-export function demoListingRevisions(listingId: string): {
-  id: string;
-  previousPrice: number;
-  newPrice: number;
-  previousQuantity: number;
-  newQuantity: number;
-  recordedAt: string;
-}[] {
+export function demoListingRevisions(listingId: string): ListingRevisionDto[] {
   const listing = DEMO_LISTINGS.find((l) => l.id === listingId);
   if (!listing || listing.status === ListingStatus.DRAFT) {
     return [];
@@ -694,6 +688,9 @@ export function demoListingRevisions(listingId: string): {
   // (older) row's `previousX`.
   let newPrice = listing.price;
   let newQuantity = listing.quantity;
+  const liveSourceStockRaw = listing.quantity + 5;
+  let newSourceStock = Math.min(20, liveSourceStockRaw);
+  let newSourceStockStatus = liveSourceStockRaw > 20 ? SourceStockStatus.AT_LEAST : SourceStockStatus.EXACT;
   // Changes land on the refresh schedule — four checks a day, one every six
   // hours — so the history reads like the cadence the product runs on. A check
   // that found nothing to change writes no row, which is why rows skip slots.
@@ -721,17 +718,39 @@ export function demoListingRevisions(listingId: string): {
       previousQuantity = Math.max(0, newQuantity - 1);
     }
 
+    // The Amazon stock behind the eBay quantity: the quantity plus the
+    // group's buffer, moving more often than the quantity it feeds (a
+    // 24 → 19 drop leaves a quantity of 5 at 5). Amazon prints no exact
+    // count above 20, so anything over it is a "20+" lower bound.
+    const previousSourceStockRaw = Math.max(
+      0,
+      previousQuantity + 3 + Math.floor(rand() * 8) - (rand() < 0.3 ? 2 : 0)
+    );
+    const previousSourceStock = Math.min(20, previousSourceStockRaw);
+    const previousSourceStockStatus =
+      previousSourceStockRaw > 20
+        ? SourceStockStatus.AT_LEAST
+        : previousSourceStock === 0
+          ? SourceStockStatus.OUT_OF_STOCK
+          : SourceStockStatus.EXACT;
+
     rows.push({
       id: `demo-rev-${idx}-${i + 1}`,
       previousPrice,
       newPrice,
       previousQuantity,
       newQuantity,
+      previousSourceStock,
+      previousSourceStockStatus,
+      newSourceStock,
+      newSourceStockStatus,
       recordedAt: isoHoursAgo(hoursAgo),
     });
 
     newPrice = previousPrice;
     newQuantity = previousQuantity;
+    newSourceStock = previousSourceStock;
+    newSourceStockStatus = previousSourceStockStatus;
     const slots = Math.max(1, Math.round((avgStepDays * (0.5 + rand()) * 24) / REFRESH_STEP_HOURS));
     hoursAgo += slots * REFRESH_STEP_HOURS;
   }

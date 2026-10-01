@@ -1,4 +1,4 @@
-import type { ListingRevisionDto } from '@repo/shared';
+import { formatSourceStock, type ListingRevisionDto } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ function formatPriceDelta(
     return null;
   }
   const sign = diff > 0 ? '+' : '-';
-  const amount = formatCurrency(Math.abs(diff), locale, currency);
+  const amount = formatCurrency(Math.abs(diff), locale, currency, 2);
   if (previous === 0) {
     return `${sign}${amount}`;
   }
@@ -84,9 +84,15 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
     // Reflects the true latest state regardless of which page is open — the
     // API computes it against the newest revision across ALL pages, not just
     // the one currently loaded (see `getListingRevisions`'s correlated MAX()).
-    if (data.lastCheckedAt !== lastCheckedAt || Boolean(data.hasUncommittedCheck) !== hasUncommittedCheck) {
-      setLastCheckedAt(data.lastCheckedAt ?? null);
-      setHasUncommittedCheck(Boolean(data.hasUncommittedCheck));
+    // Normalised BEFORE the comparison: a response with no `lastCheckedAt`
+    // (undefined, as the demo fixtures answer) compared against the stored
+    // null re-ran this render-phase update on every render — an infinite
+    // loop, since React does not bail out of render-phase setState.
+    const nextLastCheckedAt = data.lastCheckedAt ?? null;
+    const nextHasUncommittedCheck = Boolean(data.hasUncommittedCheck);
+    if (nextLastCheckedAt !== lastCheckedAt || nextHasUncommittedCheck !== hasUncommittedCheck) {
+      setLastCheckedAt(nextLastCheckedAt);
+      setHasUncommittedCheck(nextHasUncommittedCheck);
     }
   }
 
@@ -105,6 +111,10 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
     () =>
       accumulated.map((revision) => {
         const qtyDiff = revision.newQuantity - revision.previousQuantity;
+        const sourceDiff =
+          revision.previousSourceStock !== null && revision.newSourceStock !== null
+            ? revision.newSourceStock - revision.previousSourceStock
+            : 0;
         return {
           id: revision.id,
           recordedAt: formatDate(revision.recordedAt, localeCfg.locale, {
@@ -114,8 +124,8 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
             hour: '2-digit',
             minute: '2-digit',
           }),
-          previousPrice: formatCurrency(revision.previousPrice, localeCfg.locale, currency),
-          newPrice: formatCurrency(revision.newPrice, localeCfg.locale, currency),
+          previousPrice: formatCurrency(revision.previousPrice, localeCfg.locale, currency, 2),
+          newPrice: formatCurrency(revision.newPrice, localeCfg.locale, currency, 2),
           priceChanged: revision.previousPrice !== revision.newPrice,
           priceIncreased: revision.newPrice > revision.previousPrice,
           priceDelta: formatPriceDelta(
@@ -129,6 +139,17 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
           quantityChanged: qtyDiff !== 0,
           quantityIncreased: qtyDiff > 0,
           quantityDelta: qtyDiff === 0 ? null : `${qtyDiff > 0 ? '+' : '-'}${Math.abs(qtyDiff)}`,
+          previousSourceStock:
+            revision.previousSourceStock === null
+              ? null
+              : formatSourceStock(revision.previousSourceStock, revision.previousSourceStockStatus),
+          newSourceStock:
+            revision.newSourceStock === null
+              ? null
+              : formatSourceStock(revision.newSourceStock, revision.newSourceStockStatus),
+          sourceStockChanged: sourceDiff !== 0,
+          sourceStockIncreased: sourceDiff > 0,
+          sourceStockDelta: sourceDiff === 0 ? null : `${sourceDiff > 0 ? '+' : '-'}${Math.abs(sourceDiff)}`,
         };
       }),
     [accumulated, currency, localeCfg.locale]
