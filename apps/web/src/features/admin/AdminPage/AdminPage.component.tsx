@@ -183,7 +183,7 @@ export const AdminPageComponent = ({
                 {t('admin.overview.noWarnings')}
               </Text>
             )}
-            <S.Rows>
+            <S.ListPane>
               {operations?.warnings.map((warning, index) => (
                 <S.Row key={`${warning.kind}-${warning.subject ?? index}`}>
                   <Text variant="body-sm">{t(`admin.warnings.${warning.kind}`, { subject: warning.subject })}</Text>
@@ -192,7 +192,7 @@ export const AdminPageComponent = ({
                   </Badge>
                 </S.Row>
               ))}
-            </S.Rows>
+            </S.ListPane>
           </S.Section>
         </S.Rows>
       )}
@@ -200,7 +200,7 @@ export const AdminPageComponent = ({
       {/* Warnings live on Overview only — this tab used to repeat the exact
           same list above the queue rows. */}
       {activeTab === 'queues' && (
-        <S.Rows>
+        <S.ListPane>
           {operations?.queues.map((queue) => (
             <S.Row key={queue.name}>
               <Text variant="body" weight="semibold">
@@ -215,7 +215,7 @@ export const AdminPageComponent = ({
               </Text>
             </S.Row>
           ))}
-        </S.Rows>
+        </S.ListPane>
       )}
 
       {activeTab === 'costs' && (
@@ -352,7 +352,7 @@ export const AdminPageComponent = ({
             <Text variant="h4" weight="semibold">
               {t('admin.billing.quota.title')}
             </Text>
-            <S.Rows>
+            <S.ListPane>
               {billingMetrics?.quotaPressure.map((summary) => (
                 <S.Row key={summary.resource}>
                   <Text variant="body" weight="semibold">
@@ -368,8 +368,8 @@ export const AdminPageComponent = ({
                   </Text>
                 </S.Row>
               ))}
-            </S.Rows>
-            <S.Rows>
+            </S.ListPane>
+            <S.ListPane>
               {billingMetrics?.quotaPressure.flatMap((summary) =>
                 summary.bands.map((band) => (
                   <S.Row key={`${summary.resource}-${band.band}`}>
@@ -380,7 +380,7 @@ export const AdminPageComponent = ({
                   </S.Row>
                 ))
               )}
-            </S.Rows>
+            </S.ListPane>
           </S.Section>
         </S.Rows>
       )}
@@ -418,7 +418,7 @@ export const AdminPageComponent = ({
             <Text variant="h4" weight="semibold">
               {t('admin.listingQuality.coverage')}
             </Text>
-            <S.Rows>
+            <S.ListPane>
               {(listingQuality.summary?.coverage ?? []).slice(0, 12).map((row) => (
                 <S.Row key={`${row.categoryId}-${row.layer}`}>
                   <Text variant="body-sm">
@@ -430,7 +430,7 @@ export const AdminPageComponent = ({
                   </Text>
                 </S.Row>
               ))}
-            </S.Rows>
+            </S.ListPane>
           </S.Section>
 
           <S.Section>
@@ -445,7 +445,7 @@ export const AdminPageComponent = ({
               onChange={(event) => listingQuality.onSearchChange(event.target.value)}
               placeholder={t('admin.listingQuality.searchPlaceholder')}
             />
-            <S.Rows>
+            <S.ListPane>
               {listingQuality.defaults.map((row) => (
                 <S.Row key={row.id}>
                   <Text variant="body-sm">
@@ -469,7 +469,7 @@ export const AdminPageComponent = ({
                   </S.RowActions>
                 </S.Row>
               ))}
-            </S.Rows>
+            </S.ListPane>
           </S.Section>
         </S.Rows>
       )}

@@ -23,6 +23,8 @@ export const CarouselViewport = styled.div`
   position: relative;
   display: flex;
   overflow: hidden;
+  /* The viewport takes the horizontal swipe; vertical panning stays the page's. */
+  touch-action: pan-y;
   min-width: 0;
   flex: 1 1 auto;
   min-height: 0;

@@ -13,10 +13,7 @@ export const Shell = styled(Modal)`
   width: min(24rem, calc(100vw - ${tkn('spacing.xl')}));
   max-width: min(24rem, calc(100vw - ${tkn('spacing.xl')})) !important;
   border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.surface.primary')};
-  box-shadow: ${tkn('shadows.xl')};
   overflow: hidden;
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
 `;
 
 export const Content = styled.div`

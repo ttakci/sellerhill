@@ -242,30 +242,46 @@ export const ThContent = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
   gap: ${tkn('spacing.2xs')};
 `;
 
-export const SortIconWrapper = styled.div<{ $sortable?: boolean }>`
-  display: flex;
+/**
+ * Header label + chevron as ONE button, so clicking the column name sorts
+ * too. Inherits the th's uppercase/tracking/colour so a sortable header
+ * looks exactly like a static one until it is hovered.
+ */
+export const SortButton = styled.button`
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: ${tkn('colors.brand.primary')};
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
+  margin: -${tkn('spacing.2xs')} -${tkn('spacing.xs')};
+  border: none;
+  border-radius: ${tkn('radius.sm')};
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
+  white-space: inherit;
   cursor: pointer;
-  padding: ${tkn('spacing.xs')};
-  margin: -${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.md')};
-  transition: background-color ${tkn('transitions.fast')};
+  transition: background-color ${tkn('transitions.fast')}, color ${tkn('transitions.fast')};
 
   &:hover {
-    background: ${tkn('colors.background.secondary')};
+    background: ${tkn('colors.table.rowHover')};
+    color: ${tkn('colors.text.primary')};
   }
 
-  &:active {
-    background: ${tkn('colors.background.tertiary')};
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.0625rem;
   }
 `;
 
-export const SortIcon = styled.div<{ $active: boolean; $rotated: boolean }>`
-  display: flex;
+export const SortIcon = styled.span<{ $active: boolean; $rotated: boolean }>`
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: ${tkn('colors.brand.primary')};
   transform: ${(props) => (props.$rotated ? 'rotate(180deg)' : 'rotate(0deg)')};
   opacity: ${(props) => (props.$active ? 1 : 0.3)};
   transition:

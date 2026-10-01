@@ -31,12 +31,20 @@ export const Wrapper = styled(Card)<{ $clickable: boolean }>`
     `}
 `;
 
+/** Title row across the whole width, then ids on the left with the photo at rest on the right — the OrderCard anatomy. */
 export const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
+`;
+
+export const HeaderBody = styled.div`
   display: flex;
   align-items: flex-start;
   gap: ${tkn('spacing.md')};
   min-width: 0;
-  padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
 `;
 
 /** Transparent shell — same treatment as the product cell and the order card (no grey plate). */
@@ -76,12 +84,6 @@ export const TitleRow = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
-  margin-bottom: ${tkn('spacing.2xs')};
-
-  /* Title and badge cannot share ~200px: the badge drops under the title. */
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    flex-direction: column;
-  }
 `;
 
 export const Title = styled(Text)`

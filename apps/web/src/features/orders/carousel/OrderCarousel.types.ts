@@ -1,5 +1,7 @@
 import type { OrderDto } from '@repo/shared';
 
+import type { SwipeNavigationHandlers } from '@/hooks/useSwipeNavigation';
+
 export interface OrderCarouselProps {
   orders: OrderDto[];
   onViewAll: () => void;
@@ -18,4 +20,6 @@ export interface OrderCarouselComponentProps extends OrderCarouselProps {
   onNext: () => void;
   onPrev: () => void;
   onGoTo: (index: number) => void;
+  /** Touch handlers for swiping between slides on a phone; spread on the viewport. */
+  swipeHandlers: SwipeNavigationHandlers;
 }

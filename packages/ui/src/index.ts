@@ -119,6 +119,8 @@ export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } 
 
 export { SettingsActionRow } from './molecules/SettingsActionRow';
 export type { SettingsActionRowProps, SettingsActionRowVariant } from './molecules/SettingsActionRow';
+export { DisclosureButton } from './molecules/DisclosureButton';
+export type { DisclosureButtonProps } from './molecules/DisclosureButton';
 
 export { SettingsInfoRow } from './molecules/SettingsInfoRow';
 export type { SettingsInfoRowProps } from './molecules/SettingsInfoRow';

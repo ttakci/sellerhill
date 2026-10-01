@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
 
+import { glassSurfaceStrong } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
+  -webkit-backdrop-filter: blur(0.25rem);
+  backdrop-filter: blur(0.25rem);
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
@@ -28,7 +31,8 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
 `;
 
 export const ModalContainer = styled.div<{ $size: string }>`
-  background: ${tkn('colors.background.secondary')};
+  /* The strong pane — same glass as the drawer, see Drawer.style.ts. */
+  ${({ theme }) => glassSurfaceStrong(theme)}
   border-radius: ${tkn('radius.xl')};
   width: 100%;
   margin: auto;

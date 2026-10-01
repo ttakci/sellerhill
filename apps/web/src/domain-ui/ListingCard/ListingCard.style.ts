@@ -36,28 +36,43 @@ export const Wrapper = styled(Card)<{
   }
 `;
 
+/** The checkbox sits in the title row, in flow — never floated over the photo or the title. */
 export const SelectionControl = styled.div`
-  position: absolute;
-  top: ${tkn('spacing.sm')};
-  left: ${tkn('spacing.sm')};
-  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 `;
 
-/** Image beside (horizontal) or above (vertical) the facts. */
+/**
+ * Title first, across the whole width; then the facts on the left with the
+ * photo at rest on the right (horizontal), or the photo above (vertical).
+ * See OrderCard — the two cards share one anatomy, and CLAUDE.md "Card
+ * anatomy" says why the photo moved to the right.
+ */
 export const Top = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
-  flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column')};
-  gap: ${tkn('spacing.md+')};
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
+`;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    flex-direction: column;
-  }
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
+  display: flex;
+  flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column-reverse')};
+  align-items: ${({ $orientation }) => ($orientation === 'horizontal' ? 'flex-start' : 'stretch')};
+  gap: ${tkn('spacing.md+')};
+  min-width: 0;
+  flex: 1;
 `;
 
 export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
@@ -68,13 +83,12 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
   flex-shrink: 0;
   background: transparent;
   border-radius: ${tkn('radius.sm')};
-  align-self: flex-start;
 
   ${({ $orientation }) =>
     $orientation === 'horizontal'
       ? `
-        width: 7.5rem;
-        height: 7.5rem;
+        width: 6.5rem;
+        height: 6.5rem;
       `
       : `
         width: 100%;
@@ -92,9 +106,16 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 100%;
-    height: 9rem;
-    aspect-ratio: auto;
+    ${({ $orientation }) =>
+      $orientation === 'horizontal'
+        ? `
+        width: 5rem;
+        height: 5rem;
+      `
+        : `
+        height: 9rem;
+        aspect-ratio: auto;
+      `}
   }
 `;
 

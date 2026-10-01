@@ -92,6 +92,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     path: '/messages',
     match: 'exact',
     section: 'sales',
+    fitsViewport: true,
     breadcrumbs: [{ labelKey: 'translation:menu.messages', path: '/messages' }],
   },
   {

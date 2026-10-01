@@ -23,6 +23,7 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
   onNext,
   onPrev,
   onGoTo,
+  swipeHandlers,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -47,7 +48,7 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
-      <S.CarouselViewport>
+      <S.CarouselViewport {...swipeHandlers}>
         {listings.map((listing, index) => {
           const slideClass = index === currentSlide ? 'active' : index < currentSlide ? 'prev' : '';
           const card = toListingCardProps(listing, t, locale);

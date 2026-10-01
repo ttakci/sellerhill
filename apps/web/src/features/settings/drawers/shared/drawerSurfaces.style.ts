@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { glassSurface, tkn } from '@repo/ui';
 
 /**
  * The section stack every drawer body uses. It deliberately adds NO padding of
@@ -16,17 +16,13 @@ export const BodyStack = styled.div`
 `;
 
 /**
- * White form surface inside drawers.
- * Drawer body uses a soft canvas (background.primary); this card is pure white
- * with a light border + shadow so fields read as one elevated block. The border
- * is what keeps the card's edge legible where the canvas behind it is nearly as
- * light as the card itself — the shadow alone disappears at that contrast.
+ * Form surface inside drawers — the same frosted pane every page card uses,
+ * at the card radius, so a drawer's sections lift off the drawer the way
+ * page cards lift off the canvas (the drawer panel itself is the strong pane).
  */
 export const FormCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
+  ${({ theme }) => glassSurface(theme)}
+  border-radius: ${tkn('radius.lg')};
   padding: ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;

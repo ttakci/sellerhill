@@ -23,7 +23,24 @@
 import styled from '@emotion/styled';
 import { Card, PageContainer, tkn } from '@repo/ui';
 
-export const Container = PageContainer;
+/**
+ * The inbox is the one page that must FIT the viewport instead of scrolling
+ * it (2026-10-01, operator: "it keeps moving; the competitor's is fixed"). The
+ * container takes the remaining height of the shell's content area and the
+ * `Shell` below fills it; only the conversation list and the thread scroll,
+ * each inside its own pane, so the rail, the list header, the thread header
+ * and the composer never move. `min-height: 0` is what lets a flex child be
+ * shorter than its content — without it the chain falls back to content
+ * height and the whole page scrolls again.
+ */
+export const Container = styled(PageContainer)`
+  /* ContentInner is a flex column whose automatic minimum height the
+     layout drops on this route (routeMeta fitsViewport), so this page
+     takes exactly the content area's remaining height and the Shell below
+     absorbs the rest. */
+  flex: 1 1 0%;
+  min-height: 0;
+`;
 
 /** Store filter row (and, below `xl`, the type/folder switches) — on the
  * page canvas, like every other list page's filter row. */
@@ -73,8 +90,13 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  height: 74vh;
-  min-height: 32rem;
+  /* Fills whatever the page header and toolbar leave (see Container above);
+     the floor only matters on a very short viewport, where the content area
+     scrolls rather than the panes collapsing to nothing. */
+  flex: 1 1 auto;
+  min-height: 12rem;
+  padding: 0;
+  overflow: hidden;
 
   & > [data-pane='list'] {
     display: ${({ $threadOpen }) => ($threadOpen ? 'none' : 'flex')};
@@ -107,8 +129,8 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
 `;
 
 /** Tinted so the rail reads as a sidebar-within-the-card, not a fourth
- * white box — the same `background.secondary` the thread's message canvas
- * already uses for the same reason. */
+ * white box — the same `glass.tint` wash the thread's message canvas and
+ * every card's figures row use. */
 export const RailPane = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
@@ -116,7 +138,7 @@ export const RailPane = styled.div`
   min-height: 0;
   padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
   overflow-y: auto;
-  background: ${tkn('colors.background.secondary')};
+  background: ${tkn('colors.glass.tint')};
   border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 

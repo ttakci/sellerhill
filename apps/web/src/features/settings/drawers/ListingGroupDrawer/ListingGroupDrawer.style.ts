@@ -149,7 +149,7 @@ export const AddRangeButton = styled(Button)`
 
 export const TemplateTypeToggle = styled.div`
   display: flex;
-  background: ${tkn('colors.background.tertiary')};
+  background: ${tkn('colors.glass.tint')};
   padding: ${tkn('spacing.xs')};
   border-radius: ${tkn('radius.lg')};
   gap: ${tkn('spacing.xs')};

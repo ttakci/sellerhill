@@ -29,7 +29,8 @@ export const CalculateButton = styled(Button)`
 export const BreakdownList = styled.div`
   display: flex;
   flex-direction: column;
-  background: ${tkn('colors.background.tertiary')};
+  background: ${tkn('colors.glass.tint')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
   overflow: hidden;
 `;

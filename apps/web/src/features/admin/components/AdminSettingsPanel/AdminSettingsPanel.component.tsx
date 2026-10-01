@@ -3,8 +3,8 @@ import {
   Badge,
   Button,
   ConfirmModal,
+  DisclosureButton,
   EmptyState,
-  Icon,
   ModernTextInput,
   SearchField,
   SegmentedControl,
@@ -71,25 +71,23 @@ export const AdminSettingsPanelComponent = ({
 
       {groups.map((group) => (
         <S.Category key={group.category}>
-          <S.CategoryHeader
-            type="button"
-            $isOpen={group.isOpen}
-            onClick={() => onToggleCategory(group.category)}
-            aria-expanded={group.isOpen}
-          >
-            <S.CategoryTitle>
-              <Text variant="h4" weight="semibold">
-                {group.title}
-              </Text>
-              <Text variant="caption" color="text.tertiary" numeric>
-                {t('admin.settings.count', { count: group.rows.length })}
-              </Text>
-              {group.changedCount > 0 && (
-                <Badge variant="success">{t('admin.settings.changedCount', { count: group.changedCount })}</Badge>
-              )}
-            </S.CategoryTitle>
-            <Icon name="chevron-down" size={18} />
-          </S.CategoryHeader>
+          <DisclosureButton
+            label={group.title}
+            isOpen={group.isOpen}
+            onToggle={() => onToggleCategory(group.category)}
+            meta={
+              <>
+                <Text variant="caption" color="text.tertiary" numeric>
+                  {t('admin.settings.count', { count: group.rows.length })}
+                </Text>
+                {group.changedCount > 0 && (
+                  <Badge variant="success" size="xs">
+                    {t('admin.settings.changedCount', { count: group.changedCount })}
+                  </Badge>
+                )}
+              </>
+            }
+          />
 
           {group.isOpen && (
             <>
