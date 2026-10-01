@@ -134,6 +134,7 @@ export type { PageHeaderProps } from './molecules/PageHeader';
 
 /** Standard AppLayout page shells — no outer padding (gutter from ContentInner) */
 export { PageContainer, PageContainerWithMobileBar } from './styles/pageLayout.style';
+export { glassSurface, glassSurfaceStrong } from './styles/glass';
 export { SearchField } from './molecules/SearchField';
 export type { SearchFieldProps } from './molecules/SearchField';
 
@@ -205,4 +206,11 @@ export type { MarketplaceContextValue, MarketplaceProviderProps } from './contex
 export { useIsMobile, useLoading, useMediaQuery, useTheme, useToast, useUI } from './hooks';
 
 // Utility exports
-export { formatCompactNumber, formatCurrency, formatDate, formatMicroCurrency, getLocaleConfig } from './utils/format';
+export {
+  formatCompactNumber,
+  formatCurrency,
+  formatDate,
+  formatMicroCurrency,
+  formatPercent,
+  getLocaleConfig,
+} from './utils/format';

@@ -1,17 +1,5 @@
 import { ProfitBasis } from '@repo/shared';
-import {
-  Badge,
-  Button,
-  CopyableText,
-  EmptyState,
-  Icon,
-  IconName,
-  IdBadge,
-  InfoMessage,
-  PageHeader,
-  SettingsCard,
-  Text,
-} from '@repo/ui';
+import { Badge, Button, CopyableText, EmptyState, Icon, IdBadge, InfoMessage, PageHeader, SettingsCard, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,19 +10,10 @@ import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 import * as S from './OrderDetailsPage.style';
 import type { OrderDetailsPageProps } from './OrderDetailsPage.types';
 
-/** Icon + label on the left, value right-aligned — matches the listing detail page's Meta row. */
-const Meta = ({
-  icon,
-  label,
-  children,
-}: {
-  icon: IconName;
-  label: string;
-  children: React.ReactNode;
-}): React.ReactElement => (
+/** Label on the left, value right-aligned. No icon: the label is the signpost. */
+const Meta = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
   <S.MetaRow>
     <S.MetaLabel>
-      <Icon name={icon} size={16} color="brand.primary" />
       <Text variant="body-sm" color="text.secondary">
         {label}
       </Text>
@@ -43,50 +22,67 @@ const Meta = ({
   </S.MetaRow>
 );
 
-/** One headline number in the hero money strip — mirrors the listing detail
- *  page's Kpi. Only Net Kâr passes a `color`. */
-const Kpi = ({
-  label,
-  value,
-  color = 'text.primary',
-}: {
-  label: string;
-  value: string;
-  color?: string;
-}): React.ReactElement => (
-  <S.KpiItem>
-    <S.KpiLabel variant="caption" color="text.tertiary">
-      {label}
-    </S.KpiLabel>
-    <Text variant="metric-sm" weight="semibold" numeric color={color}>
+/** A money row of a card — the figure in tabular numerals, emphasised on a total. */
+const Money = ({ label, value, total = false }: { label: string; value: string; total?: boolean }): React.ReactElement => (
+  <Meta label={label}>
+    <Text variant={total ? 'metric-sm' : 'body-sm'} weight={total ? 'semibold' : 'medium'} numeric>
       {value}
     </Text>
-  </S.KpiItem>
+  </Meta>
 );
 
-/** Same row, but the value stacks below the label — for multi-line content
- *  (a shipping address, an email + phone pair) that reads better left-aligned. */
+/** Same row, value stacked BELOW the label — for multi-line content such as an address. */
 const MetaBlock = ({
-  icon,
   label,
   rows,
   children,
 }: {
-  icon: IconName;
   label: string;
   /** How many shared row units the block spans, so the rows under it keep lining up with the neighbouring cards. */
   rows?: number;
   children: React.ReactNode;
 }): React.ReactElement => (
   <S.MetaBlockRow $rows={rows}>
-    <S.MetaLabel>
-      <Icon name={icon} size={16} color="brand.primary" />
+    <Text variant="body-sm" color="text.secondary">
+      {label}
+    </Text>
+    <S.MetaBlockValue>{children}</S.MetaBlockValue>
+  </S.MetaBlockRow>
+);
+
+/** One line of the receipt: label, dotted leader, figure. */
+const LedgerLine = ({
+  label,
+  value,
+  total = false,
+  color,
+}: {
+  label: string;
+  value: string;
+  total?: boolean;
+  color?: string;
+}): React.ReactElement => (
+  <S.LedgerLine $total={total}>
+    <Text variant="body-sm" color={total ? 'text.primary' : 'text.secondary'} weight={total ? 'semibold' : undefined}>
+      {label}
+    </Text>
+    <S.LedgerLeader aria-hidden />
+    <Text variant={total ? 'body' : 'body-sm'} weight={total ? 'semibold' : 'medium'} numeric color={color}>
+      {value}
+    </Text>
+  </S.LedgerLine>
+);
+
+/** A record fact in the hero's label / value grid. */
+const Fact = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
+  <>
+    <S.FactLabel>
       <Text variant="body-sm" color="text.secondary">
         {label}
       </Text>
-    </S.MetaLabel>
-    <S.MetaBlockValue>{children}</S.MetaBlockValue>
-  </S.MetaBlockRow>
+    </S.FactLabel>
+    <S.FactValue>{children}</S.FactValue>
+  </>
 );
 
 export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
@@ -98,6 +94,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   statusLabel,
   timelineRows,
   roiLabel,
+  marginLabel,
   totalAmazonCost,
   amazonTotalBeforeTax,
   buyerPhoneDisplay,
@@ -121,9 +118,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
-  /* Loading and not-found both route through the shared EmptyState molecule.
-     They used to be a bespoke block — loading was one line of grey text, so the
-     two states looked like different pages. */
+  /* Loading and not-found both route through the shared EmptyState molecule
+     so the two states look like the same page. */
   if (isLoading) {
     return (
       <S.Container>
@@ -155,6 +151,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   }
 
   const profitPositive = order.netProfit >= 0;
+  const profitColor = profitPositive ? 'semantic.success' : 'semantic.error';
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
   const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
 
@@ -172,168 +169,126 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const resolvedSaleTotal = order.salePrice + order.saleShipping + resolvedSaleTax;
 
   /*
-   * No header action cluster. "Link Amazon" and "Copy address" used to render
-   * BOTH here and inside their own cards — on desktop that meant two identical
-   * primary CTAs competing on one screen. Each action now lives once, in the
-   * card that owns it, plus the mobile action bar.
+   * The order number IS the page title — a detail page is named after its
+   * record, not after the word "details". The stage sits beside it in the
+   * header's action slot: the one status of the page, read before anything
+   * else. Actions stay in the card that owns them (plus the mobile bar), so
+   * no primary button competes with the stage up here.
    */
   return (
     <S.Container>
       <PageHeader
-        title={t('orders.detail.title')}
-        subtitle={`${order.ebayOrderId} · ${formatDate(order.createdAt)}`}
+        title={order.ebayOrderId}
+        subtitle={formatDate(order.createdAt)}
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
+        actions={
+          <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="md" withTooltip={false} />
+        }
       />
 
-      <S.Hero variant="elevated" padding="lg">
-        <S.ProductImage>
-          {order.product?.imageUrl ? (
-            <img src={order.product.imageUrl} alt={productTitle} />
-          ) : (
-            <Icon name="image" size={48} />
-          )}
-        </S.ProductImage>
+      <S.Hero variant="elevated" padding="none">
+        <S.Product>
+          <S.ProductImage>
+            {order.product?.imageUrl ? (
+              <img src={order.product.imageUrl} alt={productTitle} />
+            ) : (
+              <Icon name="image" size={48} />
+            )}
+          </S.ProductImage>
 
-        <S.HeroInfo>
-          {/* ONE badge: the seller-facing stage. The eBay status is a fact
-              about the sale, not a status of the work, and sits in the eBay
-              card below. */}
-          <S.StatusBadgeSlot>
-            <OrderStageBadge
-              stage={order.stage}
-              shippedDetectedAt={order.shippedDetectedAt}
-              size="md"
-              withTooltip={false}
-            />
-          </S.StatusBadgeSlot>
-
-          {/* What the stage means and what to do about it live in the
-              timeline card below, on the step the order is standing on — the
-              hero used to print them as three loose sentences above the title. */}
-          <S.HeroLede>
+          <S.ProductInfo>
             <S.ProductTitle variant="h3" weight="semibold">
               {productTitle}
             </S.ProductTitle>
-          </S.HeroLede>
 
-          {/* Record facts as labelled icon rows — the listing detail hero's
-              IdList pattern, so the two detail pages read as one design. */}
-          <S.IdList>
-            <S.IdItem>
-              <S.IdItemLabel>
-                <Icon name="receipt" size={16} color="brand.primary" />
-                <Text variant="body-sm" color="text.secondary">
-                  {t('orders.table.orderNumber')}
+            <S.FactList>
+              <Fact label={t('orders.table.buyer')}>
+                <Text variant="body-sm">{order.buyerName || '—'}</Text>
+              </Fact>
+              <Fact label={t('orders.detail.quantity')}>
+                <Text variant="body-sm" numeric>
+                  {order.product?.quantity || 1} {t('orders.detail.unit')}
                 </Text>
-              </S.IdItemLabel>
-              <S.IdValue variant="body-sm" numeric>
-                {order.ebayOrderId}
-              </S.IdValue>
-            </S.IdItem>
-            <S.IdItem>
-              <S.IdItemLabel>
-                <Icon name="user" size={16} color="brand.primary" />
-                <Text variant="body-sm" color="text.secondary">
-                  {t('orders.table.buyer')}
-                </Text>
-              </S.IdItemLabel>
-              <S.IdValue variant="body-sm">{order.buyerName || '—'}</S.IdValue>
-            </S.IdItem>
-            <S.IdItem>
-              <S.IdItemLabel>
-                <Icon name="calendar" size={16} color="brand.primary" />
-                <Text variant="body-sm" color="text.secondary">
-                  {t('orders.table.date')}
-                </Text>
-              </S.IdItemLabel>
-              <Text variant="body-sm" numeric>
-                {formatDate(order.createdAt)}
-              </Text>
-            </S.IdItem>
-            <S.IdItem>
-              <S.IdItemLabel>
-                <Icon name="box" size={16} color="brand.primary" />
-                <Text variant="body-sm" color="text.secondary">
-                  {t('orders.detail.quantity')}
-                </Text>
-              </S.IdItemLabel>
-              <Text variant="body-sm" weight="semibold" numeric>
-                {order.product?.quantity || 1} {t('orders.detail.unit')}
-              </Text>
-            </S.IdItem>
-            {order.product?.sku ? (
-              <S.IdItem>
-                <S.IdItemLabel>
-                  <Icon name="scan-barcode" size={16} color="brand.primary" />
-                  <Text variant="body-sm" color="text.secondary">
-                    {t('orders.detail.sku')}
-                  </Text>
-                </S.IdItemLabel>
-                <S.IdValue variant="body-sm">{order.product.sku}</S.IdValue>
-              </S.IdItem>
-            ) : null}
-            {order.product?.asin ? (
-              <S.IdItem>
-                <S.IdItemLabel>
-                  <Icon name="barcode" size={16} color="brand.primary" />
-                  <Text variant="body-sm" color="text.secondary">
-                    {t('orders.detail.asin')}
-                  </Text>
-                </S.IdItemLabel>
-                <IdBadge id={order.product.asin} storeType="amazon" size="sm" plain />
-              </S.IdItem>
-            ) : null}
-            {order.product?.ebayItemId ? (
-              <S.IdItem>
-                <S.IdItemLabel>
-                  <Icon name="tag" size={16} color="brand.primary" />
-                  <Text variant="body-sm" color="text.secondary">
-                    {t('orders.detail.ebayItemId')}
-                  </Text>
-                </S.IdItemLabel>
-                <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" plain />
-              </S.IdItem>
-            ) : null}
-          </S.IdList>
+              </Fact>
+              {order.product?.sku ? (
+                <Fact label={t('orders.detail.sku')}>
+                  <Text variant="body-sm">{order.product.sku}</Text>
+                </Fact>
+              ) : null}
+              {order.product?.asin ? (
+                <Fact label={t('orders.detail.asin')}>
+                  <IdBadge id={order.product.asin} storeType="amazon" size="sm" plain />
+                </Fact>
+              ) : null}
+              {order.product?.ebayItemId ? (
+                <Fact label={t('orders.detail.ebayItemId')}>
+                  <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" plain />
+                </Fact>
+              ) : null}
+            </S.FactList>
+          </S.ProductInfo>
+        </S.Product>
 
-          {/* The whole money story in one neutral strip — the listing detail
-              hero's KpiStrip. This absorbed the old standalone green "Net Kâr"
-              box AND the separate "Net Kâr Analizi" formula card: eBay earnings
-              and total Amazon cost (the formula's two terms) are KPIs here now. */}
-          <S.KpiStrip>
-            <S.KpiItem>
-              <S.KpiLabelRow>
-                <S.KpiLabel variant="caption" color="text.tertiary">
-                  {t('orders.detail.netProfitResult')}
-                </S.KpiLabel>
-                {isEstimated && (
-                  <Badge variant="warning" size="xs">
-                    {t('orders.estimateBadge')}
-                  </Badge>
-                )}
-              </S.KpiLabelRow>
-              <Text
-                variant="metric-sm"
-                weight="semibold"
-                numeric
-                color={profitPositive ? 'semantic.success' : 'semantic.error'}
-              >
-                {formatCurrency(order.netProfit)}
+        {/* The receipt: the one figure the seller came for, then the lines
+            that produced it — sale, what eBay paid out, what Amazon took. A
+            number a seller can check line by line is a number they trust. */}
+        <S.Ledger>
+          <S.LedgerHead>
+            <S.LedgerLabelRow>
+              <Text variant="body-sm" color="text.secondary">
+                {t('orders.detail.netProfitResult')}
               </Text>
-            </S.KpiItem>
-            <Kpi label={t('orders.detail.roi')} value={roiLabel} />
-            <Kpi label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} />
-            <Kpi label={t('orders.detail.totalAmazonCost')} value={formatCurrency(totalAmazonCost)} />
-            <Kpi label={t('orders.table.salePrice')} value={formatCurrency(order.salePrice)} />
-          </S.KpiStrip>
+              {isEstimated && (
+                <Badge variant="warning" size="xs">
+                  {t('orders.estimateBadge')}
+                </Badge>
+              )}
+            </S.LedgerLabelRow>
+            <S.HeadlineFigure variant="display" numeric $positive={profitPositive}>
+              {profitPositive ? '+' : ''}
+              {formatCurrency(order.netProfit)}
+            </S.HeadlineFigure>
+            <S.LedgerRatios>
+              {marginLabel && (
+                <S.LedgerRatio>
+                  <Text variant="caption" color="text.secondary">
+                    {t('orders.detail.margin')}
+                  </Text>
+                  <Text variant="body-sm" weight="semibold" numeric>
+                    {marginLabel}
+                  </Text>
+                </S.LedgerRatio>
+              )}
+              <S.LedgerRatio>
+                <Text variant="caption" color="text.secondary">
+                  {t('orders.detail.roi')}
+                </Text>
+                <Text variant="body-sm" weight="semibold" numeric>
+                  {roiLabel}
+                </Text>
+              </S.LedgerRatio>
+            </S.LedgerRatios>
+          </S.LedgerHead>
+
+          <S.LedgerLines>
+            <LedgerLine label={t('orders.table.salePrice')} value={formatCurrency(order.salePrice)} />
+            <LedgerLine label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} />
+            <LedgerLine label={t('orders.detail.totalAmazonCost')} value={`−${formatCurrency(totalAmazonCost)}`} />
+            <LedgerLine
+              label={t('orders.detail.netProfitResult')}
+              value={formatCurrency(order.netProfit)}
+              total
+              color={profitColor}
+            />
+          </S.LedgerLines>
 
           {isEstimated && (
             <S.EstimateNote variant="caption" color="text.tertiary">
               {t('orders.estimateNote')}
             </S.EstimateNote>
           )}
-        </S.HeroInfo>
+        </S.Ledger>
       </S.Hero>
 
       {/* The order's path, step by step: what happened and when, where it is
@@ -341,15 +296,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       {timelineRows.length > 0 && (
         <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
           <S.TimelineBody>
-            {/* eBay's own deadline, while the seller still has to act. */}
             {shipByLabel && (
-              <Text
-                variant="body-sm"
-                weight={isShipByUrgent ? 'semibold' : undefined}
-                color={isShipByUrgent ? 'semantic.error' : 'text.secondary'}
-              >
+              <InfoMessage type={isShipByUrgent ? 'error' : 'info'}>
                 {t('orders.detail.shipByNotice', { date: shipByLabel })}
-              </Text>
+              </InfoMessage>
             )}
             {multiItemCount !== null && (
               <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
@@ -364,8 +314,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         <SettingsCard variant="section" header={{ title: t('orders.detail.customerInfo') }}>
           <S.SectionContent>
             <S.MetaList>
-              {/* Spans 4 shared row units: name + up to 6 address lines + phone. */}
-              <MetaBlock icon="map-pin" label={t('orders.detail.shipTo')} rows={4}>
+              <MetaBlock label={t('orders.detail.shipTo')} rows={4}>
                 <Text variant="body" weight="semibold">
                   {order.shippingAddress?.fullName || order.buyerName ? (
                     <CopyableText
@@ -421,11 +370,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                       />
                     </Text>
                     {/* The buyer's phone belongs with the ship-to block, the
-                        way eBay's own order page prints it — it is part of the
-                        label, not of "contact". */}
+                        way eBay's own order page prints it. */}
                     {buyerPhoneDisplay ? (
                       <S.AddressPhoneRow>
-                        <Icon name="phone" size={14} />
+                        <Icon name="phone" size={14} color="text.tertiary" />
                         <Text variant="body-sm" color="text.secondary">
                           <CopyableText
                             value={buyerPhoneDisplay}
@@ -438,18 +386,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   </S.AddressBlock>
                 ) : null}
               </MetaBlock>
-              <Meta icon="mail" label={t('orders.detail.contact')}>
+              <Meta label={t('orders.detail.contact')}>
                 <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
-              </Meta>
-              <Meta icon="box" label={t('orders.detail.quantity')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {order.product?.quantity || 1} {t('orders.detail.unit')}
-                </Text>
-              </Meta>
-              <Meta icon="barcode" label={t('orders.detail.sku')}>
-                <Text variant="body" weight="semibold">
-                  {order.product?.sku || t('orders.detail.na')}
-                </Text>
               </Meta>
             </S.MetaList>
             {canCopyAddress && (
@@ -466,53 +404,35 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         {/* eBay summary */}
         <SettingsCard variant="section" header={{ title: t('orders.detail.ebaySummary') }}>
           <S.SectionContent>
-            {/* Group labels are one shared row unit tall (S.GroupLabel) so the
-                rows under them stay level with the neighbouring cards. */}
             <S.GroupLabel>
               <Text variant="body-sm" weight="semibold">
                 {t('orders.detail.whatBuyerPaid')}
               </Text>
             </S.GroupLabel>
             <S.MetaList>
-              <Meta icon="info" label={t('orders.detail.ebayStatus')}>
-                <Text variant="body" weight="semibold">
+              <Meta label={t('orders.detail.ebayStatus')}>
+                <Text variant="body-sm" weight="medium">
                   {statusLabel}
                 </Text>
               </Meta>
               {order.ebayCancelledAt ? (
-                <Meta icon="x-circle" label={t('orders.detail.ebayCancelledOn')}>
-                  <Text variant="body" weight="semibold">
+                <Meta label={t('orders.detail.ebayCancelledOn')}>
+                  <Text variant="body-sm" weight="medium">
                     {formatDate(order.ebayCancelledAt)}
                   </Text>
                 </Meta>
               ) : null}
               {order.shipByDate ? (
-                <Meta icon="clock" label={t('orders.detail.shipBy')}>
-                  <Text variant="body" weight="semibold" numeric>
+                <Meta label={t('orders.detail.shipBy')}>
+                  <Text variant="body-sm" weight="medium" numeric>
                     {formatDate(order.shipByDate)}
                   </Text>
                 </Meta>
               ) : null}
-              <Meta icon="circle-dollar-sign" label={t('orders.detail.subtotal')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.salePrice)}
-                </Text>
-              </Meta>
-              <Meta icon="truck" label={t('orders.detail.shipping')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.saleShipping)}
-                </Text>
-              </Meta>
-              <Meta icon="percent" label={t('orders.detail.salesTax')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(resolvedSaleTax)}
-                </Text>
-              </Meta>
-              <Meta icon="receipt" label={t('orders.detail.orderTotal')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(resolvedSaleTotal)}
-                </Text>
-              </Meta>
+              <Money label={t('orders.detail.subtotal')} value={formatCurrency(order.salePrice)} />
+              <Money label={t('orders.detail.shipping')} value={formatCurrency(order.saleShipping)} />
+              <Money label={t('orders.detail.salesTax')} value={formatCurrency(resolvedSaleTax)} />
+              <Money label={t('orders.detail.orderTotal')} value={formatCurrency(resolvedSaleTotal)} />
             </S.MetaList>
             <S.GroupLabel>
               <Text variant="body-sm" weight="semibold">
@@ -520,11 +440,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Text>
             </S.GroupLabel>
             <S.MetaList>
-              <Meta icon="receipt" label={t('orders.detail.earningsOrderTotal')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(resolvedSaleTotal)}
-                </Text>
-              </Meta>
+              <Money label={t('orders.detail.earningsOrderTotal')} value={formatCurrency(resolvedSaleTotal)} />
             </S.MetaList>
             <S.GroupLabel>
               <Text variant="caption" color="text.tertiary">
@@ -532,11 +448,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Text>
             </S.GroupLabel>
             <S.MetaList>
-              <Meta icon="percent" label={t('orders.detail.ebayCollectedTax')}>
-                <Text variant="body" weight="semibold" numeric>
-                  −{formatCurrency(resolvedSaleTax)}
-                </Text>
-              </Meta>
+              <Money label={t('orders.detail.ebayCollectedTax')} value={`−${formatCurrency(resolvedSaleTax)}`} />
             </S.MetaList>
             <S.GroupLabel>
               <Text variant="caption" color="text.tertiary">
@@ -547,30 +459,20 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {/* `ebayMarketplaceFee` is eBay's own reported figure (migration
                   098); `transactionFee` is only the seller's configured-percent
                   ESTIMATE, shown here solely when eBay has not reported yet. */}
-              <Meta icon="coins" label={t('orders.detail.transactionFees')}>
-                <Text variant="body" weight="semibold" numeric>
-                  −{formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}
-                </Text>
-              </Meta>
+              <Money
+                label={t('orders.detail.transactionFees')}
+                value={`−${formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}`}
+              />
               {/* `adFee` is the settings group's configured FIXED fee — an
                   estimate, not a charge eBay reported. eBay's own figure above
-                  already contains its per-order fixed portion, so listing this
-                  beside it double-counted and the rows stopped adding up to the
-                  earnings. Shown only while eBay has not reported the real fee. */}
+                  already contains its per-order fixed portion, so it is listed
+                  only while eBay has not reported the real fee. */}
               {(order.ebayMarketplaceFee === null || order.ebayMarketplaceFee === undefined) && order.adFee > 0 ? (
-                <Meta icon="megaphone" label={t('orders.detail.adFee')}>
-                  <Text variant="body" weight="semibold" numeric>
-                    −{formatCurrency(order.adFee)}
-                  </Text>
-                </Meta>
+                <Money label={t('orders.detail.adFee')} value={`−${formatCurrency(order.adFee)}`} />
               ) : null}
             </S.MetaList>
             <S.MetaList>
-              <Meta icon="wallet-cards" label={t('orders.detail.orderEarnings')}>
-                <Text variant="metric-sm" weight="bold" numeric>
-                  {formatCurrency(order.ebayEarnings)}
-                </Text>
-              </Meta>
+              <Money label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} total />
             </S.MetaList>
             {/* What eBay reports was refunded (paymentSummary.refunds). NULL
                 means eBay reported no refund, so the block is absent — never a
@@ -583,14 +485,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   </Text>
                 </S.GroupLabel>
                 <S.MetaList>
-                  <Meta icon="undo-2" label={t('orders.detail.refundedAmount')}>
-                    <Text variant="body" weight="semibold" numeric>
-                      −{formatCurrency(order.ebayRefundedAmount)}
-                    </Text>
-                  </Meta>
+                  <Money label={t('orders.detail.refundedAmount')} value={`−${formatCurrency(order.ebayRefundedAmount)}`} />
                   {order.ebayRefundedAt ? (
-                    <Meta icon="calendar" label={t('orders.detail.refundedOn')}>
-                      <Text variant="body" weight="semibold">
+                    <Meta label={t('orders.detail.refundedOn')}>
+                      <Text variant="body-sm" weight="medium">
                         {formatDate(order.ebayRefundedAt)}
                       </Text>
                     </Meta>
@@ -606,52 +504,29 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         <SettingsCard variant="section" header={{ title: t('orders.detail.amazonCosts') }}>
           <S.SectionContent>
             {/* Same lines, same order, same names as Amazon's own Order Summary
-                (Item(s) Subtotal / Shipping & Handling / Total before tax /
-                Estimated tax to be collected / Grand Total) so the seller can
-                check this card against the Amazon page line by line. The
-                label mirrors the eBay card's "What your buyer paid" so both
-                cards' rows start on the same shared row unit. */}
+                so the seller can check this card against the Amazon page line
+                by line. */}
             <S.GroupLabel>
               <Text variant="body-sm" weight="semibold">
                 {t('orders.detail.whatYouPaidAmazon')}
               </Text>
             </S.GroupLabel>
             <S.MetaList>
-              <Meta icon="shopping-bag" label={t('orders.detail.itemSubtotal')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.purchasePrice)}
-                </Text>
-              </Meta>
-              <Meta icon="truck" label={t('orders.detail.shippingHandling')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.amazonShipping || 0)}
-                </Text>
-              </Meta>
-              <Meta icon="receipt" label={t('orders.detail.totalBeforeTax')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(amazonTotalBeforeTax)}
-                </Text>
-              </Meta>
-              <Meta icon="percent" label={t('orders.detail.estimatedTax')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.amazonTax || 0)}
-                </Text>
-              </Meta>
-              <Meta icon="circle-dollar-sign" label={t('orders.detail.grandTotal')}>
-                <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(totalAmazonCost)}
-                </Text>
-              </Meta>
+              <Money label={t('orders.detail.itemSubtotal')} value={formatCurrency(order.purchasePrice)} />
+              <Money label={t('orders.detail.shippingHandling')} value={formatCurrency(order.amazonShipping || 0)} />
+              <Money label={t('orders.detail.totalBeforeTax')} value={formatCurrency(amazonTotalBeforeTax)} />
+              <Money label={t('orders.detail.estimatedTax')} value={formatCurrency(order.amazonTax || 0)} />
+              <Money label={t('orders.detail.grandTotal')} value={formatCurrency(totalAmazonCost)} total />
               {order.amazonTrackingNumber && (
-                <Meta icon="truck" label={t('orders.detail.amazonTracking')}>
-                  <Text variant="body" weight="semibold">
+                <Meta label={t('orders.detail.amazonTracking')}>
+                  <Text variant="body-sm" weight="medium" numeric>
                     {order.amazonTrackingNumber}
                   </Text>
                 </Meta>
               )}
               {order.convertedTrackingNumber && (
-                <Meta icon="repeat" label={t('orders.detail.convertedTracking')}>
-                  <Text variant="body" weight="semibold">
+                <Meta label={t('orders.detail.convertedTracking')}>
+                  <Text variant="body-sm" weight="medium" numeric>
                     {order.convertedTrackingNumber}
                   </Text>
                 </Meta>
@@ -659,7 +534,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </S.MetaList>
             <S.SectionActions>
               {order.trackingProblemCode && (
-                <InfoMessage>{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
+                <InfoMessage type="warning">{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
               )}
               {canStartAutoFulfill && onStartAutoFulfill ? (
                 <Button

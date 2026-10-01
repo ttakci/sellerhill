@@ -5,36 +5,43 @@ import { tkn } from '../../theme/tkn';
 
 import type { BadgeSize, BadgeVariant } from './Badge.types';
 
+/**
+ * A badge is a small rectangle with softly rounded corners — never a pill
+ * (operator decision, 2026-10-01: pills read as buttons and the oval shape
+ * sits awkwardly in a table cell). `isPill` is accepted for source
+ * compatibility and ignored. The text gets real room on every size: a label
+ * squeezed into a 10px capsule read as an afterthought beside 14px body text.
+ */
 export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize; $isPill: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${({ $isPill, theme }: { $isPill: boolean; theme: Theme }) =>
-    $isPill ? tkn('radius.full')({ theme }) : tkn('radius.sm')({ theme })};
+  border-radius: ${tkn('radius.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   white-space: nowrap;
-  letter-spacing: ${tkn('typography.letterSpacing.wide')};
+  letter-spacing: ${tkn('typography.letterSpacing.normal')};
   border: 0.0625rem solid transparent;
+  box-sizing: border-box;
 
   ${({ $size, theme }: { $size: BadgeSize; theme: Theme }) => {
     switch ($size) {
       case 'xs':
         return `
-          padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.xs+')({ theme })};
-          font-size: ${tkn('typography.fontSize.2xs')({ theme })};
-          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
+          padding: ${tkn('spacing.2xs+')({ theme })} ${tkn('spacing.xs+')({ theme })};
+          font-size: ${tkn('typography.fontSize.xs')({ theme })};
+          line-height: ${tkn('typography.lineHeight.tight')({ theme })};
         `;
       case 'sm':
         return `
-          padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.sm')({ theme })};
-          font-size: ${tkn('typography.fontSize.xs')({ theme })};
-          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
+          padding: ${tkn('spacing.xs')({ theme })} ${tkn('spacing.sm')({ theme })};
+          font-size: ${tkn('typography.fontSize.sm')({ theme })};
+          line-height: ${tkn('typography.lineHeight.tight')({ theme })};
         `;
       case 'md':
         return `
-          padding: ${tkn('spacing.2xs+')({ theme })} ${tkn('spacing.sm+')({ theme })};
-          font-size: ${tkn('typography.fontSize.xs')({ theme })};
-          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
+          padding: ${tkn('spacing.xs+')({ theme })} ${tkn('spacing.sm+')({ theme })};
+          font-size: ${tkn('typography.fontSize.sm')({ theme })};
+          line-height: ${tkn('typography.lineHeight.tight')({ theme })};
         `;
       default:
         return '';

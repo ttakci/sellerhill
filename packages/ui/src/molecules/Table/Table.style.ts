@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 
+import { glassSurface } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 export const TableContainer = styled.div`
   width: 100%;
-  overflow: visible;
-  background: ${tkn('colors.surface.primary')};
+  /* The pane clips its own corners: the head's translucent fill and the
+     rounded corners used to disagree at the top edge. */
+  overflow: hidden;
+  ${({ theme }) => glassSurface(theme)}
   /* Panel-level surface — same tier as Card, was on the badge radius. */
   border-radius: ${tkn('radius.lg')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const OverflowWrapper = styled.div`
@@ -61,7 +62,7 @@ export const ColAuto = styled.col<{ $width?: string | number }>`
 `;
 
 export const Thead = styled.thead`
-  background: ${tkn('colors.background.primary')};
+  background: ${tkn('colors.glass.surfaceStrong')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   position: sticky;
   top: 0;
@@ -71,7 +72,8 @@ export const Thead = styled.thead`
 export const Tbody = styled.tbody``;
 
 export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?: number }>`
-  background: ${tkn('colors.surface.primary')};
+  /* Transparent: the rows sit ON the glass pane rather than painting over it. */
+  background: transparent;
   transition: background-color ${tkn('transitions.fast')};
   /* Floor, not a fixed height — a taller cell (2-line product title) still grows.
      Lowered 3.25rem -> 2.5rem so the tightened cell padding actually takes effect. */
@@ -143,10 +145,11 @@ export const Th = styled.th<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: ${tkn('colors.background.primary')};
+  background: ${tkn('colors.glass.surfaceStrong')};
   transition: color ${tkn('transitions.fast')};
   position: relative;
-  border-right: 0.0625rem solid ${tkn('colors.border.primary')};
+  /* No vertical rules between header cells — the spreadsheet grid is gone. */
+  border-right: none;
 
   position: sticky;
   top: 0;
@@ -289,7 +292,9 @@ export const Td = styled.td<{
   background: inherit;
   transition: background-color ${tkn('transitions.fast')};
   overflow: visible;
-  border-right: 0.0625rem solid ${tkn('colors.border.primary')};
+  /* No vertical rules between cells either: a row is one line of a ledger,
+     not a grid of boxes. */
+  border-right: none;
 
   ${({ $sticky, $left, theme }) =>
     $sticky &&

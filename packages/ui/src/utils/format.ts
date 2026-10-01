@@ -52,6 +52,17 @@ export const formatCurrency = (
   }).format(value);
 
 /**
+ * Format a ratio as a percentage (0.253 → "25.3%"), with a fixed number of
+ * decimals so a column of margins lines up.
+ */
+export const formatPercent = (value: number, locale: string = 'en-US', fractionDigits: number = 1): string =>
+  getNumberFormat(locale, {
+    style: 'percent',
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(value);
+
+/**
  * Format a number in compact notation (e.g., 1.2K, 3.4M).
  */
 export const formatCompactNumber = (

@@ -1,82 +1,48 @@
 import styled from '@emotion/styled';
-import { Card, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
+import { Card, glassSurfaceStrong, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
-/*
- * Hero and the section cards used to be hand-rolled copies of the Card atom
- * (same surface/radius/shadow/padding, retyped) — plus a third copy for the KPI
- * strip. They now extend the atom, so a change to the card language reaches
- * this page too.
+/**
+ * The hero is one card with two halves: the product on the left, the money
+ * on the right. The right half is the page's one memorable element — the
+ * profit explained as a receipt (sale → earnings → cost → profit) rather than
+ * five equal-sized figures in a grey strip. Everything else on the page is
+ * quiet so this reads first.
  */
 export const Hero = styled(Card)`
-  position: relative;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: ${tkn('spacing.lg')};
-
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
-    align-items: start;
-    gap: ${tkn('spacing.xl')};
-  }
-`;
-
-/**
- * Status + fulfillment badges. Flows above the title on phones; pins to the
- * hero card's top-right corner from `md` up — the listing detail page's
- * StatusBadgeSlot pattern, widened to hold two or three badges.
- */
-export const StatusBadgeSlot = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    position: absolute;
-    top: ${tkn('spacing.lg')};
-    right: ${tkn('spacing.lg')};
-    z-index: 1;
-    max-width: 45%;
-    justify-content: flex-end;
-  }
-`;
-
-/**
- * Wraps the fulfillment notices + product title. Given right padding from `md`
- * up so long lines clear the badge slot pinned to the card's top-right corner.
- */
-export const HeroLede = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-  min-width: 0;
-
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    padding-right: 45%;
-  }
-`;
-
-/**
- * The product title heads the hero, not the page (see PageHeader). Clamped —
- * Amazon titles run long.
- */
-export const ProductTitle = styled(Text)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
   overflow: hidden;
+
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+`;
+
+/** Image beside the product facts. Stacks on a phone. */
+export const Product = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.lg')};
   min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    flex-direction: column;
+  }
 `;
 
 export const ProductImage = styled.div`
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 14rem;
+  position: relative;
+  width: 12rem;
+  height: 12rem;
+  flex-shrink: 0;
   /* Transparent, per the product-image rule — a grey plate behind a cut-out
-     product shot reads as a broken image. */
-  background: transparent;
+     product shot reads as a broken image. A soft brand light sits BEHIND the
+     product instead, so the shot floats on the pane rather than sitting on it. */
+  background: radial-gradient(closest-side, ${tkn('colors.glass.glowBlue')}, transparent 72%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,109 +54,150 @@ export const ProductImage = styled.div`
     object-fit: contain;
   }
 
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    max-height: none;
+  svg {
+    color: ${tkn('colors.text.disabled')};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 100%;
+    height: 11rem;
   }
 `;
 
-export const HeroInfo = styled.div`
+export const ProductInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
-
-  /* Small top padding nudges the first row clear of the badge slot pinned to
-     the card's top-right corner from md up. */
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    padding-top: ${tkn('spacing.md')};
-  }
+  flex: 1;
 `;
 
-/** Marketplace ids + record facts as labelled icon rows — the listing detail
- *  page's IdList pattern, so the two detail heroes read identically. */
-export const IdList = styled.div`
+/** The product title heads the hero, not the page. Clamped — Amazon titles run long. */
+export const ProductTitle = styled(Text)`
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+`;
+
+/** Record facts as a label / value grid — no icons, the label column is the ornament. */
+export const FactList = styled.dl`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: ${tkn('spacing.lg')};
+  row-gap: ${tkn('spacing.xs')};
+  align-items: baseline;
+  margin: 0;
+  min-width: 0;
+`;
+
+export const FactLabel = styled.dt`
+  margin: 0;
+  white-space: nowrap;
+`;
+
+export const FactValue = styled.dd`
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+/**
+ * The receipt. A tinted panel off the product half by one hairline, the
+ * headline figure on top and the lines that produce it underneath.
+ */
+export const Ledger = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const IdItem = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
-  gap: ${tkn('spacing.sm')};
-  align-items: center;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
+  /* A pane on the pane: a touch more opaque than the hero so the receipt
+     reads as a card laid on the glass, and lit from behind by the mint light
+     the canvas also carries. */
+  ${({ theme }) => glassSurfaceStrong(theme)}
+  background-image: radial-gradient(26rem 18rem at 100% 0%, ${tkn('colors.glass.glowMint')}, transparent 70%), ${tkn('colors.glass.sheen')};
+  border: none;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  box-shadow: none;
   min-width: 0;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    gap: ${tkn('spacing.2xs')};
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    border-top: none;
+    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
 `;
 
-/** Leading icon + label for an id / fact row. */
-export const IdItemLabel = styled.div`
+export const LedgerHead = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+`;
+
+/**
+ * The one figure the page shouts: gradient ink (emerald → teal → brand for a
+ * profit, red → orange for a loss). Clipped to the glyphs, so it is still
+ * typography, not a badge. The Text atom sets `color`; the fill is forced
+ * transparent so the gradient shows through.
+ */
+export const HeadlineFigure = styled(Text)<{ $positive: boolean }>`
+  display: inline-block;
+  background: ${({ $positive, theme }) =>
+    $positive ? theme.colors.glass.profitGradient : theme.colors.glass.lossGradient};
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: ${tkn('typography.letterSpacing.tighter')};
+`;
+
+export const LedgerLabelRow = styled.div`
   display: flex;
   align-items: center;
+  gap: ${tkn('spacing.xs')};
+  flex-wrap: wrap;
+`;
+
+/** Margin and ROI — two small labelled figures under the headline. */
+export const LedgerRatios = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.xs')};
+`;
+
+export const LedgerRatio = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 
-/** A plain fact value (order #, buyer, date) sharing the IdList's right column. */
-export const IdValue = styled(Text)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
+export const LedgerLines = styled.div`
+  display: flex;
+  flex-direction: column;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+`;
+
+/** One line of the receipt: label left, figure right, a dotted leader between. */
+export const LedgerLine = styled.div<{ $total?: boolean }>`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} 0;
+  border-top: ${({ $total, theme }) => ($total ? `0.0625rem solid ${theme.colors.border.control}` : 'none')};
+  margin-top: ${({ $total, theme }) => ($total ? theme.spacing.xs : '0')};
+`;
+
+export const LedgerLeader = styled.span`
+  flex: 1;
+  min-width: ${tkn('spacing.md')};
+  border-bottom: 0.0625rem dotted ${tkn('colors.border.control')};
+  transform: translateY(-0.25rem);
 `;
 
 export const EstimateNote = styled(Text)`
   line-height: ${tkn('typography.lineHeight.normal')};
-`;
-
-/**
- * The money story as ONE strip — Net Kâr, ROI, eBay earnings, total Amazon cost,
- * sale — sharing a single neutral surface separated by hairlines. Copied from
- * the listing detail hero's KpiStrip so the two pages are the same design.
- * Replaces the old standalone green "Net Kâr" box AND the separate "Net Kâr
- * Analizi" formula card, whose numbers all appear here now.
- */
-export const KpiStrip = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.background.tertiary')};
-`;
-
-export const KpiItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  flex: 1 1 8rem;
-  min-width: 8rem;
-  padding: 0 ${tkn('spacing.sm')};
-  border-left: 0.0625rem solid ${tkn('colors.border.secondary')};
-
-  &:first-of-type {
-    border-left: none;
-  }
-`;
-
-/** Order KPI labels ("Toplam Amazon Maliyeti", "Sipariş Kazancı") run longer
- *  than the listing detail's, so they wrap rather than collide with a sibling. */
-export const KpiLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
-  line-height: ${tkn('typography.lineHeight.tight')};
-`;
-
-/** Net Kâr's label + its "Tahmini" badge, sharing the KpiItem's label line. */
-export const KpiLabelRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
 `;
 
 /** Timeline card body: the deadline / multi-item notices, then the steps. */
@@ -201,10 +208,23 @@ export const TimelineBody = styled.div`
   min-width: 0;
 `;
 
+/**
+ * Each card is as tall as its content (`align-items: start`): the grid used
+ * to stretch all three to the tallest, and the customer card — four address
+ * lines — carried a void under them. The row rhythm still lines the first
+ * rows up across the cards; only the bottoms differ.
+ */
 export const SectionGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: ${tkn('spacing.lg')};
+
+  /* SettingsCard fills its slot (height: 100%), which under a grid resolves
+     to the row's height and stretches it anyway; each card here is content-high. */
+  & > * {
+    height: auto;
+  }
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -222,25 +242,21 @@ export const StateCard = styled(Card)`
 
 /**
  * ONE row unit for the three section cards (customer / eBay / Amazon).
- * Every row, group label and the address block below is a whole multiple of it
- * and the cards' bodies all start at the same y, so a row (and its divider) in
- * one card lines up with the same-numbered row in its neighbours when the
- * cards sit side by side. Rows are `height`, not `padding`, for that reason —
- * padding-driven rows drift with font metrics. Anything taller than its slot
- * (a long address) only pushes the rows BELOW it down; nothing overflows.
+ * Every row and group label is a whole multiple of it and the cards' bodies
+ * all start at the same y, so a row (and its divider) in one card lines up
+ * with the same-numbered row in its neighbours when the cards sit side by
+ * side. Rows are `height`, not `padding`, for that reason — padding-driven
+ * rows drift with font metrics.
  */
-const ROW = tkn('controls.height.mediumLabeled');
+const ROW = tkn('controls.height.small');
 
-/** Vertical stack for a SettingsCard body. No gap between rows: the gap
- *  would break the shared row rhythm (see ROW). */
 export const SectionContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
 `;
 
-/** Space above a card's action buttons, kept out of the row rhythm so it
- *  cannot shift the rows above it. */
+/** Space above a card's action buttons, kept out of the row rhythm. */
 export const SectionActions = styled.div`
   display: flex;
   flex-direction: column;
@@ -248,9 +264,6 @@ export const SectionActions = styled.div`
   margin-top: ${tkn('spacing.md')};
 `;
 
-/** Row list — matches the listing detail page's Meta rows exactly (same
- *  border, icon+label pairing) so the two detail pages read as one
- *  design language. */
 export const MetaList = styled.div`
   display: flex;
   flex-direction: column;
@@ -271,7 +284,7 @@ export const MetaRow = styled.div`
   gap: ${tkn('spacing.md')};
   height: ${ROW};
   box-sizing: border-box;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
 /** A group label ("What your buyer paid", "Selling costs") — one full row
@@ -280,15 +293,11 @@ export const GroupLabel = styled.div`
   display: flex;
   align-items: flex-end;
   height: ${ROW};
-  padding-bottom: ${tkn('spacing.sm')};
+  padding-bottom: ${tkn('spacing.xs+')};
   box-sizing: border-box;
 `;
 
-/** Icon + label, left side of a Meta row. */
 export const MetaLabel = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
@@ -300,9 +309,8 @@ export const MetaValue = styled.div`
 `;
 
 /**
- * Same row chrome as MetaRow, but the value stacks BELOW the label instead
- * of beside it — for content that reads better left-aligned across several
- * lines (a shipping address, an email + phone pair) than squeezed right.
+ * Same row chrome as MetaRow, but the value stacks BELOW the label — for
+ * content that reads better left-aligned across several lines (an address).
  */
 export const MetaBlockRow = styled.div<{ $rows?: number }>`
   display: flex;
@@ -311,9 +319,9 @@ export const MetaBlockRow = styled.div<{ $rows?: number }>`
   /* min-height, not height: an address longer than its slot grows the row
      instead of overflowing it. */
   min-height: calc(${ROW} * ${({ $rows = 1 }) => $rows});
-  padding: ${tkn('spacing.md')} 0;
+  padding: ${tkn('spacing.sm-md')} 0;
   box-sizing: border-box;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
 export const MetaBlockValue = styled.div`
@@ -328,7 +336,7 @@ export const AddressBlock = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
-/** Phone line under the ship-to address: icon + copyable number, on one row. */
+/** Phone line under the ship-to address. */
 export const AddressPhoneRow = styled.div`
   display: flex;
   align-items: center;
@@ -386,8 +394,6 @@ export const FormRow = styled.div`
   }
 `;
 
-/* `FormLabel` and `InfoText` were unreachable dead styles and are gone.
-   ErrorText now extends Text instead of hand-setting font-family/size. */
 export const ErrorText = styled(Text)`
   display: block;
 `;

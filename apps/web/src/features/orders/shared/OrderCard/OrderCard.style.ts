@@ -1,30 +1,31 @@
 import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { glassSurface, Text, tkn } from '@repo/ui';
 
 import type { OrderCardStatTone } from './OrderCard.types';
 
-/** Horizontal product card — mirrors ListingCard elevated language */
+/**
+ * One quiet surface: product + facts above a hairline, the money row below it.
+ * The grey stat box, the icon on every row, the mono bold values and the
+ * "Details →" footer are gone — each was a second visual system inside one
+ * card, and together they read as a template rather than a record.
+ */
 export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
   position: relative;
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: ${tkn('spacing.lg')};
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  max-width: 100%;
   min-width: 0;
+  padding: 0;
   text-align: left;
   cursor: pointer;
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  ${({ theme }) => glassSurface(theme)}
   border-radius: ${tkn('radius.lg')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
   box-sizing: border-box;
+  overflow: hidden;
   transition:
-    border-color ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')},
     box-shadow ${tkn('transitions.fast')};
   font: inherit;
   color: inherit;
@@ -33,8 +34,8 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
     $hoverEffect &&
     css`
       &:hover {
-        box-shadow: ${theme.shadows.md};
-        border-color: ${theme.colors.brand.primary};
+        box-shadow: ${theme.shadows.glassHover};
+        transform: translateY(-0.125rem);
       }
     `}
 
@@ -42,9 +43,16 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
     outline-offset: 0.125rem;
   }
+`;
 
-  /* Fixed-width image + row layout crushes content into ~130-150px on a
-     360-375px viewport. Stack instead so both get the card's full width. */
+/** Image beside the facts; stacks on a phone where the two cannot share the width. */
+export const Top = styled.div`
+  display: flex;
+  gap: ${tkn('spacing.md+')};
+  padding: ${tkn('spacing.md+')};
+  min-width: 0;
+  flex: 1;
+
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     flex-direction: column;
   }
@@ -57,9 +65,8 @@ export const Image = styled.div`
   overflow: hidden;
   flex-shrink: 0;
   background: transparent;
-  border-radius: ${tkn('radius.md')};
-  width: 10.5rem;
-  height: 10.5rem;
+  width: 6.5rem;
+  height: 6.5rem;
   align-self: flex-start;
 
   img {
@@ -74,9 +81,7 @@ export const Image = styled.div`
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     width: 100%;
-    height: auto;
-    max-height: 12rem;
-    align-self: stretch;
+    height: 9rem;
   }
 `;
 
@@ -86,22 +91,6 @@ export const Content = styled.div`
   gap: ${tkn('spacing.sm')};
   min-width: 0;
   flex: 1;
-  overflow: hidden;
-`;
-
-export const HeaderBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-`;
-
-export const TitleRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-  margin-bottom: ${tkn('spacing.md')};
 `;
 
 export const Title = styled(Text)`
@@ -109,109 +98,61 @@ export const Title = styled(Text)`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
   min-width: 0;
 `;
 
-export const MetaList = styled.div`
+/** The stage badge and the one-line chips that qualify it, on one wrapping row. */
+export const BadgeRow = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
-export const MetaRow = styled.div`
-  display: grid;
-  grid-template-columns: 5.75rem minmax(0, 1fr);
-  column-gap: ${tkn('spacing.sm')};
-  align-items: center;
-  min-width: 0;
-`;
-
-/** Leading icon + label, left column of a meta row — mirrors ListingCard. */
-export const MetaLabelRow = styled.div`
-  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: ${tkn('spacing.xs')};
+`;
+
+/** Label / value pairs, no icons — the label column is the only ornament. */
+export const MetaList = styled.dl`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: ${tkn('spacing.md')};
+  row-gap: ${tkn('spacing.xs')};
+  align-items: baseline;
+  margin: ${tkn('spacing.2xs')} 0 0;
   min-width: 0;
 `;
 
-export const MetaLabel = styled(Text)`
-  line-height: ${tkn('typography.lineHeight.tight')};
-  overflow: hidden;
-  text-overflow: ellipsis;
+export const MetaLabel = styled.dt`
+  margin: 0;
   white-space: nowrap;
 `;
 
-export const MetaValue = styled.div`
+export const MetaValue = styled.dd`
+  margin: 0;
   min-width: 0;
-  display: flex;
-  align-items: center;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   a {
     max-width: 100%;
     overflow: hidden;
   }
-
-  a > span:first-of-type {
-    font-weight: ${tkn('typography.fontWeight.bold')};
-    color: ${tkn('colors.text.primary')};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 `;
 
-export const MetaValueText = styled(Text)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: ${tkn('typography.lineHeight.tight')};
-  font-family: ${tkn('typography.fontFamily.mono')};
-`;
-
-export const StatsGrid = styled.div`
+/** Sale · cost · profit, under one hairline. */
+export const MoneyRow = styled.div`
   display: grid;
-  /* Was a rigid repeat(3, 1fr) with vertical dividers, which is exactly what
-     crushed at a narrow track: three currency values in ~55px each. Cells now
-     reflow to two rows before they truncate. */
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
-  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.md')};
-  padding: ${tkn('spacing.sm-md')};
-  margin-top: ${tkn('spacing.sm')};
-  flex-shrink: 0;
-`;
-
-/* A row of its own, spanning every column, so the stat labels below it start
-   one line lower. It used to be absolutely positioned in the strip's top-right
-   corner, where it sat on top of the last column's heading — "KÂR" was covered
-   by "Takip edilmiyor" on every untracked order. */
-export const StatsBadge = styled.div`
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 export const StatCell = styled.div`
-  /* Left-aligned: centred values in a reflowing grid never line up with each
-     other, and money reads better against a common left edge. */
-  text-align: left;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
-`;
-
-export const StatLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
-  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
 export const StatValue = styled(Text)<{ $tone: OrderCardStatTone }>`
@@ -224,20 +165,4 @@ export const StatValue = styled(Text)<{ $tone: OrderCardStatTone }>`
     }
     return theme.colors.text.primary;
   }};
-  line-height: ${tkn('typography.lineHeight.tight')};
-`;
-
-export const Footer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
-  padding-top: ${tkn('spacing.md')};
-  flex-shrink: 0;
-`;
-
-/** "Detay" label + arrow — the same trailing affordance the Settings carousels' cards use. */
-export const DetailAction = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
 `;

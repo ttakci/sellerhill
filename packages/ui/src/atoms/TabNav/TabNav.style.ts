@@ -91,3 +91,24 @@ export const TabButton = styled.button<{ $isActive: boolean; $variant: 'underlin
       }
     `}
 `;
+
+/** The count pill beside a tab label — tabular figures on a quiet surface,
+ *  brand-tinted on the selected tab so the figure and the underline agree. */
+export const TabCount = styled.span<{ $isActive: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 ${tkn('spacing.xs+')};
+  box-sizing: border-box;
+  border-radius: ${tkn('radius.sm')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: ${({ $isActive, theme }) => ($isActive ? theme.colors.brand.secondary : theme.colors.background.tertiary)};
+  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.brand.primary : theme.colors.text.secondary)};
+  transition: all ${tkn('transitions.fast')};
+`;

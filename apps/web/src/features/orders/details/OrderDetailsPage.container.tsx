@@ -1,5 +1,13 @@
 import { OrderStage } from '@repo/shared';
-import { formatCurrency, formatDate, formatPhoneNumber, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import {
+  formatCurrency,
+  formatDate,
+  formatPercent,
+  formatPhoneNumber,
+  getLocaleConfig,
+  useLoading,
+  useUI,
+} from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -58,8 +66,9 @@ export const OrderDetailsPageContainer: React.FC = () => {
     () => resolveStoreCurrency(ebayAccountsData?.items ?? [], order?.ebayAccountId),
     [ebayAccountsData, order?.ebayAccountId]
   );
+  /* Always two decimals — a page about money must never print "$9,8". */
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, currency),
+    (value: number) => formatCurrency(value, localeCfg.locale, currency, 2),
     [localeCfg, currency]
   );
 
@@ -153,10 +162,18 @@ export const OrderDetailsPageContainer: React.FC = () => {
 
   const roiLabel = useMemo(() => {
     if (!order || totalAmazonCost === 0) {
-      return '0.0%';
+      return formatPercent(0, localeCfg.locale, 1);
     }
-    return `${((order.netProfit / totalAmazonCost) * 100).toFixed(1)}%`;
-  }, [order, totalAmazonCost]);
+    return formatPercent(order.netProfit / totalAmazonCost, localeCfg.locale, 1);
+  }, [order, totalAmazonCost, localeCfg]);
+
+  /* Net margin on the sale — the figure a seller compares across orders. */
+  const marginLabel = useMemo(() => {
+    if (!order || order.salePrice <= 0) {
+      return null;
+    }
+    return formatPercent(order.netProfit / order.salePrice, localeCfg.locale, 1);
+  }, [order, localeCfg]);
 
   const canCopyAddress = Boolean(order?.shippingAddress);
 
@@ -382,6 +399,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
         statusLabel={statusLabel}
         timelineRows={timelineRows}
         roiLabel={roiLabel}
+        marginLabel={marginLabel}
         totalAmazonCost={totalAmazonCost}
         amazonTotalBeforeTax={amazonTotalBeforeTax}
         buyerPhoneDisplay={buyerPhoneDisplay}

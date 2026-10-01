@@ -1,6 +1,5 @@
 import { Badge, Icon, IdBadge, Text } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { OrderStageBadge } from '../OrderStageBadge';
 
@@ -19,86 +18,66 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   onClick,
   className,
   hoverEffect = true,
-}) => {
-  const { t } = useTranslation(['translation']);
-
-  return (
-    <S.Wrapper
-      type="button"
-      onClick={onClick}
-      className={className}
-      aria-label={ebayOrderId}
-      $hoverEffect={hoverEffect}
-    >
+}) => (
+  <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId} $hoverEffect={hoverEffect}>
+    <S.Top>
       <S.Image>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
 
       <S.Content>
-        <S.HeaderBlock>
-          <S.TitleRow>
-            <S.Title variant="body" weight="semibold" color="text.primary">
-              {productTitle}
-            </S.Title>
-            <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
-          </S.TitleRow>
+        <S.Title variant="body" weight="semibold" color="text.primary">
+          {productTitle}
+        </S.Title>
 
-          {meta.length > 0 && (
-            <S.MetaList>
-              {meta.map((item) => (
-                <S.MetaRow key={`${item.label}-${item.value}`}>
-                  <S.MetaLabelRow>
-                    {item.icon ? <Icon name={item.icon} size={14} color="brand.primary" /> : null}
-                    <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
-                      {item.label}
-                    </S.MetaLabel>
-                  </S.MetaLabelRow>
-                  <S.MetaValue>
-                    {item.storeType ? (
-                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
-                    ) : (
-                      <S.MetaValueText variant="caption" weight="bold" color="text.primary">
-                        {item.value}
-                      </S.MetaValueText>
-                    )}
-                  </S.MetaValue>
-                </S.MetaRow>
-              ))}
-            </S.MetaList>
-          )}
-        </S.HeaderBlock>
-
-        <S.StatsGrid>
-          {statsBadges && statsBadges.length > 0 && (
-            <S.StatsBadge>
-              {statsBadges.map((badge) => (
-                <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
-                  {badge.label}
-                </Badge>
-              ))}
-            </S.StatsBadge>
-          )}
-          {stats.map((stat) => (
-            <S.StatCell key={stat.label}>
-              <S.StatLabel variant="caption" color="text.tertiary">
-                {stat.label}
-              </S.StatLabel>
-              <S.StatValue variant="body-sm" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
-                {stat.value}
-              </S.StatValue>
-            </S.StatCell>
+        {/* The stage and whatever qualifies it (estimated profit, blocked
+            reason, not linked) sit together: one glance says where the order
+            stands and why. */}
+        <S.BadgeRow>
+          <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
+          {statsBadges?.map((badge) => (
+            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
+              {badge.label}
+            </Badge>
           ))}
-        </S.StatsGrid>
+        </S.BadgeRow>
 
-        <S.Footer>
-          <S.DetailAction>
-            <Text variant="body-sm" weight="semibold" color="brand.primary">
-              {t('translation:common.details')}
-            </Text>
-            <Icon name="arrow-right" size={14} color="brand.primary" />
-          </S.DetailAction>
-        </S.Footer>
+        {meta.length > 0 && (
+          <S.MetaList>
+            {meta.map((item) => (
+              <React.Fragment key={`${item.label}-${item.value}`}>
+                <S.MetaLabel>
+                  <Text variant="body-sm" color="text.secondary">
+                    {item.label}
+                  </Text>
+                </S.MetaLabel>
+                <S.MetaValue>
+                  {item.storeType ? (
+                    <IdBadge id={item.value} storeType={item.storeType} size="sm" plain />
+                  ) : (
+                    <Text variant="body-sm" color="text.primary" numeric>
+                      {item.value}
+                    </Text>
+                  )}
+                </S.MetaValue>
+              </React.Fragment>
+            ))}
+          </S.MetaList>
+        )}
       </S.Content>
-    </S.Wrapper>
-  );
-};
+    </S.Top>
+
+    <S.MoneyRow>
+      {stats.map((stat) => (
+        <S.StatCell key={stat.label}>
+          <Text variant="caption" color="text.secondary">
+            {stat.label}
+          </Text>
+          <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
+            {stat.value}
+          </S.StatValue>
+        </S.StatCell>
+      ))}
+    </S.MoneyRow>
+  </S.Wrapper>
+);
 
 OrderCard.displayName = 'OrderCard';
