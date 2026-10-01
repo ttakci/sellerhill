@@ -49,6 +49,8 @@ export interface ThemeColors {
     primary: string;
     primaryHover: string;
     secondary: string;
+    /** The filled-control gradient (primary button, selected nav row). */
+    gradient: string;
   };
 
   // Accent (emerald — for "Active" status, success emphasis, distinct from semantic.success)
@@ -106,6 +108,41 @@ export interface ThemeColors {
     active: string;
     accent: string;
     divider: string;
+    /** The selected nav row: a brand gradient pill with a soft glow (glass redesign). */
+    accentGradient: string;
+    accentGlow: string;
+    /** The two colour lights the rail is lit with — blue from the top, teal from the foot. */
+    glow: string;
+    glowAlt: string;
+  };
+
+  /**
+   * Frosted glass (2026-10-01). Every card-tier surface in the app is a
+   * translucent white pane over the aurora canvas, blurred by
+   * `backdrop-filter`. These are the only colours allowed to be translucent
+   * in the system: an input, a menu or a drawer stays opaque, because text
+   * behind a control must never bleed into it.
+   */
+  glass: {
+    /** The card pane. */
+    surface: string;
+    /** A pane on a pane (the receipt panel inside the order hero, a table head). */
+    surfaceStrong: string;
+    /** The sticky top bar. */
+    header: string;
+    /** The outer hairline of a pane. */
+    edge: string;
+    /** A brand-tinted wash for a pane that should read "selected" or "live". */
+    tint: string;
+    /** The diagonal light across a pane — what makes translucent white read as glass. */
+    sheen: string;
+    /** Gradient ink for the one headline figure a page is allowed to shout. */
+    profitGradient: string;
+    lossGradient: string;
+    /** The soft colour lights the canvas is lit with (see background.gradient). */
+    glowBlue: string;
+    glowAmber: string;
+    glowMint: string;
   };
 
   // Dashboard period card headers (Sellerboard-style bands) + chart/P&L palette

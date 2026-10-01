@@ -245,10 +245,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Badge>
               )}
             </S.LedgerLabelRow>
-            <Text variant="display" numeric color={profitColor}>
+            <S.HeadlineFigure variant="display" numeric $positive={profitPositive}>
               {profitPositive ? '+' : ''}
               {formatCurrency(order.netProfit)}
-            </Text>
+            </S.HeadlineFigure>
             <S.LedgerRatios>
               {marginLabel && (
                 <S.LedgerRatio>

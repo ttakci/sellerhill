@@ -1,14 +1,13 @@
 import styled from '@emotion/styled';
 
+import { glassSurface } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 import { SettingsCardVariant } from './SettingsCard.types';
 
 export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  ${({ theme }) => glassSurface(theme)}
   border-radius: ${tkn('radius.lg')};
-  box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -27,7 +26,7 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
   justify-content: space-between;
   align-items: center;
   gap: ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
+  background: transparent;
 
   @media (max-width: 63.9375rem) {
     flex-direction: ${({ $variant }) => ($variant === 'panel' ? 'column' : 'row')};

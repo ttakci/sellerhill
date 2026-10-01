@@ -1,6 +1,6 @@
 import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { glassSurface, Text, tkn } from '@repo/ui';
 
 import type { OrderCardStatTone } from './OrderCard.types';
 
@@ -20,14 +20,12 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
   padding: 0;
   text-align: left;
   cursor: pointer;
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  ${({ theme }) => glassSurface(theme)}
   border-radius: ${tkn('radius.lg')};
-  box-shadow: ${tkn('shadows.sm')};
   box-sizing: border-box;
   overflow: hidden;
   transition:
-    border-color ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')},
     box-shadow ${tkn('transitions.fast')};
   font: inherit;
   color: inherit;
@@ -36,8 +34,8 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
     $hoverEffect &&
     css`
       &:hover {
-        box-shadow: ${theme.shadows.md};
-        border-color: ${theme.colors.border.control};
+        box-shadow: ${theme.shadows.glassHover};
+        transform: translateY(-0.125rem);
       }
     `}
 
@@ -147,7 +145,7 @@ export const MoneyRow = styled.div`
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.surface.secondary')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 export const StatCell = styled.div`

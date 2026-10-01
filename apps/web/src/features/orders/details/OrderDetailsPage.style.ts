@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
+import { Card, glassSurfaceStrong, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
@@ -24,7 +24,8 @@ export const Hero = styled(Card)`
 /** Image beside the product facts. Stacks on a phone. */
 export const Product = styled.div`
   display: flex;
-  gap: ${tkn('spacing.lg')};
+  align-items: center;
+  gap: ${tkn('spacing.xl')};
   padding: ${tkn('spacing.lg')};
   min-width: 0;
 
@@ -34,12 +35,14 @@ export const Product = styled.div`
 `;
 
 export const ProductImage = styled.div`
-  width: 10rem;
-  height: 10rem;
+  position: relative;
+  width: 12rem;
+  height: 12rem;
   flex-shrink: 0;
   /* Transparent, per the product-image rule — a grey plate behind a cut-out
-     product shot reads as a broken image. */
-  background: transparent;
+     product shot reads as a broken image. A soft brand light sits BEHIND the
+     product instead, so the shot floats on the pane rather than sitting on it. */
+  background: radial-gradient(closest-side, ${tkn('colors.glass.glowBlue')}, transparent 72%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,8 +112,14 @@ export const Ledger = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.lg')};
-  background: ${tkn('colors.surface.secondary')};
+  /* A pane on the pane: a touch more opaque than the hero so the receipt
+     reads as a card laid on the glass, and lit from behind by the mint light
+     the canvas also carries. */
+  ${({ theme }) => glassSurfaceStrong(theme)}
+  background-image: radial-gradient(26rem 18rem at 100% 0%, ${tkn('colors.glass.glowMint')}, transparent 70%), ${tkn('colors.glass.sheen')};
+  border: none;
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  box-shadow: none;
   min-width: 0;
 
   @media (min-width: ${tkn('breakpoints.lg')}) {
@@ -123,6 +132,22 @@ export const LedgerHead = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
+`;
+
+/**
+ * The one figure the page shouts: gradient ink (emerald → teal → brand for a
+ * profit, red → orange for a loss). Clipped to the glyphs, so it is still
+ * typography, not a badge. The Text atom sets `color`; the fill is forced
+ * transparent so the gradient shows through.
+ */
+export const HeadlineFigure = styled(Text)<{ $positive: boolean }>`
+  display: inline-block;
+  background: ${({ $positive, theme }) =>
+    $positive ? theme.colors.glass.profitGradient : theme.colors.glass.lossGradient};
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: ${tkn('typography.letterSpacing.tighter')};
 `;
 
 export const LedgerLabelRow = styled.div`

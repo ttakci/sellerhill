@@ -36,8 +36,15 @@ const lightColors: ThemeColors = {
      * The bottom stop stays a hair off #FFFFFF so white cards (surface.primary)
      * still lift off the page down there.
      */
+    /*
+     * The aurora (2026-10-01, glass redesign). Three soft colour lights —
+     * brand blue top-left, amber top-right, mint at the foot — over a near-
+     * white ground. The lights are what the frosted cards blur, so they must
+     * be visible but never loud: every one is a radial wash at ≤ 0.2 alpha.
+     * Still no lavender: blue and amber never meet at the same point.
+     */
     gradient:
-      'linear-gradient(165deg, #d7e5fb 0%, #e3edfc 30%, #edf4fd 62%, #f4f8fe 100%)',
+      'radial-gradient(64rem 44rem at -6% -10%, rgba(59, 130, 246, 0.55), transparent 60%), radial-gradient(52rem 38rem at 104% -4%, rgba(251, 191, 36, 0.42), transparent 58%), radial-gradient(60rem 42rem at 58% 116%, rgba(20, 184, 166, 0.42), transparent 60%), radial-gradient(40rem 30rem at 30% 60%, rgba(96, 165, 250, 0.22), transparent 60%), linear-gradient(180deg, #e9f0fb 0%, #eef3fb 100%)',
   },
 
   surface: {
@@ -82,6 +89,7 @@ const lightColors: ThemeColors = {
     primary: '#2563eb',
     primaryHover: '#1d4ed8',
     secondary: '#eef3ff',
+    gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
   },
 
   accent: {
@@ -103,12 +111,13 @@ const lightColors: ThemeColors = {
     neutral: '#f3f4f6',
   },
 
-  /* Zebra is neutral (was the blue-tinted `#eef3ff`, which competed with the
-     blue selection); hover is a real step down from BOTH stripes (was `#FFFFFF`,
-     identical to the odd row); selection is unmistakably chromatic. */
+  /* Rows sit on a frosted pane now, so the stripe and the hover are ALPHA
+     washes rather than opaque fills — an opaque row would paint over the glass
+     and the table would stop being one. Zebra stays neutral (selection is the
+     chromatic state); hover is a faint brand wash. */
   table: {
-    rowZebra: '#f8fafc',
-    rowHover: '#eef2f7',
+    rowZebra: 'rgba(255, 255, 255, 0.38)',
+    rowHover: 'rgba(37, 99, 235, 0.08)',
     rowSelected: '#dbeafe',
     rowSelectedHover: '#c7dcfd',
     rowSelectedAccent: '#2563eb',
@@ -127,10 +136,28 @@ const lightColors: ThemeColors = {
     foreground: '#ffffff',
     text: '#ffffff',
     textMuted: 'rgba(255, 255, 255, 0.65)',
-    hover: '#162b6e',
+    hover: 'rgba(255, 255, 255, 0.08)',
     active: '#162b6e',
     accent: '#2563eb',
     divider: '#ffffff14',
+    accentGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    accentGlow: '0 8px 20px -8px rgba(59, 130, 246, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+    glow: 'rgba(59, 130, 246, 0.45)',
+    glowAlt: 'rgba(20, 184, 166, 0.18)',
+  },
+
+  glass: {
+    surface: 'rgba(255, 255, 255, 0.52)',
+    surfaceStrong: 'rgba(255, 255, 255, 0.78)',
+    header: 'rgba(255, 255, 255, 0.55)',
+    edge: 'rgba(255, 255, 255, 0.9)',
+    tint: 'rgba(37, 99, 235, 0.06)',
+    sheen: 'linear-gradient(135deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.25) 55%, rgba(255, 255, 255, 0.45) 100%)',
+    profitGradient: 'linear-gradient(120deg, #059669 0%, #0d9488 50%, #2563eb 100%)',
+    lossGradient: 'linear-gradient(120deg, #dc2626 0%, #ea580c 100%)',
+    glowBlue: 'rgba(37, 99, 235, 0.20)',
+    glowAmber: 'rgba(245, 158, 11, 0.18)',
+    glowMint: 'rgba(16, 185, 129, 0.16)',
   },
 
   dashboard: {
@@ -246,6 +273,7 @@ const darkColors: ThemeColors = {
     primary: '#4f6ef7',
     primaryHover: '#6b85f8',
     secondary: 'rgba(79, 110, 247, 0.14)',
+    gradient: 'linear-gradient(135deg, #6b85f8 0%, #4f6ef7 100%)',
   },
 
   accent: {
@@ -307,6 +335,24 @@ const darkColors: ThemeColors = {
     active: '#1c1f2e',
     accent: '#4f6ef7', // tracks brand.primary — was stale indigo #6366f1
     divider: '#ffffff12',
+    accentGradient: 'linear-gradient(135deg, #6b85f8 0%, #4f6ef7 100%)',
+    accentGlow: '0 8px 20px -8px rgba(79, 110, 247, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+    glow: 'rgba(79, 110, 247, 0.35)',
+    glowAlt: 'rgba(52, 211, 153, 0.14)',
+  },
+
+  glass: {
+    surface: 'rgba(17, 19, 24, 0.70)',
+    surfaceStrong: 'rgba(17, 19, 24, 0.86)',
+    header: 'rgba(13, 15, 24, 0.72)',
+    edge: 'rgba(255, 255, 255, 0.08)',
+    tint: 'rgba(79, 110, 247, 0.10)',
+    sheen: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%)',
+    profitGradient: 'linear-gradient(120deg, #34d399 0%, #2dd4bf 50%, #60a5fa 100%)',
+    lossGradient: 'linear-gradient(120deg, #f87171 0%, #fb923c 100%)',
+    glowBlue: 'rgba(79, 110, 247, 0.18)',
+    glowAmber: 'rgba(251, 191, 36, 0.12)',
+    glowMint: 'rgba(52, 211, 153, 0.12)',
   },
 
   landing: {

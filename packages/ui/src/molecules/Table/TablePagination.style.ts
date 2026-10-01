@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 
 import { IconButton } from '../../atoms/IconButton';
+import { glassSurface } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 import type { TablePaginationVariant } from './TablePagination.types';
@@ -13,16 +14,15 @@ export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant
   width: 100%;
   font-size: ${tkn('typography.fontSize.sm')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  background: ${tkn('colors.surface.primary')};
 
   ${({ $variant, theme }) =>
     $variant === 'detached'
       ? `
-        border: 0.0625rem solid ${theme.colors.border.primary};
+        ${glassSurface(theme)}
         border-radius: ${theme.radius.lg};
-        box-shadow: ${theme.shadows.sm};
       `
       : `
+        background: transparent;
         border-top: 0.0625rem solid ${theme.colors.border.secondary};
       `}
 

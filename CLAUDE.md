@@ -1546,7 +1546,7 @@ Redesign tokens (from the figma Make redesign, https://sweet-yang-69529706.figma
 - **Sidebar background is per-theme**: light deep blue `#0c1f52`, dark near-black `#0d0f18`.
 - **Borders are alpha-based**: `#00000014` (light) / `#ffffff12` (dark) — not solid hex.
 - **`accent` token category** (emerald `#10b981`) is for "Active" status badges and success emphasis. Distinct from `semantic.success` (system success states).
-- **Font**: **Inter** for headings + **Lexend** for body/UI (`typographyTokens.fontFamily.heading`/`body`, both with Noto Devanagari/Arabic/SC fallbacks), **JetBrains Mono** for codes. Lexend is drawn for reading fluency (wide apertures, tall x-height) which suits dense tables/forms; Inter keeps titles neutral. Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts`; base `body` rule in `apps/web/src/index.css`.
+- **Font**: **Manrope** for headings and figures (since the 2026-10-01 glass redesign; was Inter) + **Lexend** for body/UI (`typographyTokens.fontFamily.heading`/`body`, both with Noto Devanagari/Arabic/SC fallbacks), **JetBrains Mono** for codes. Lexend is drawn for reading fluency (wide apertures, tall x-height) which suits dense tables/forms; Manrope gives titles and money real weight at 700/800 with tabular numerals. Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts`; base `body` rule in `apps/web/src/index.css`.
   - **Do not change the app's families without a concrete defect** (rendering, legibility, a missing glyph). A single-family Source Sans 3 swap (`fb00bc9`) was reverted, and unifying on the landing's typefaces was tried on 2026-09-03 and rejected on sight by the operator — marketing faces read heavy and wide at 14px across dense tables. The landing sells, the app is read all day; do not re-propose it as a "brand consistency" cleanup.
 - **Body is 14px, not 16.** `typographyTokens.fontSize.base` (0.875rem) is the primary reading size and the value-text size for every form control (TextInput/Select/SearchField/MessageComposer). `fontSize.md` (15px) is the `h4` heading step. Heading leading is tight (`lineHeight.display` 1.1 / `tight` 1.2 / `snug` 1.3); body is `normal` 1.47.
 - **Text ink** (light): primary `#27272a` (soft neutral charcoal — deliberately not slate-900, which users found harsh), secondary `#475569`. Dark `text.primary` is `#e2e8f0`.
@@ -1564,8 +1564,8 @@ All values come from `packages/ui/src/theme/designTokens.ts` + `atoms/Text/Text.
 
 | Variant | Size | Use for |
 |---|---|---|
-| `h1` | 23px / semibold(500) | Page titles (`PageHeader`) |
-| `h2` | 19px / semibold(500) | Rare large section titles |
+| `h1` | 26px / bold(600), Manrope | Page titles (`PageHeader`) |
+| `h2` | 19px / bold(600), Manrope | Rare large section titles |
 | `h3` | 17px / semibold(500) | Drawer titles, major section |
 | `h4` | 15px / semibold(500) | Card titles (`SettingsCard`, `QuickActionCard`) |
 | `h5` | 13px / semibold(500) | Small section labels |
@@ -1574,8 +1574,8 @@ All values come from `packages/ui/src/theme/designTokens.ts` + `atoms/Text/Text.
 | `body-xs` | 10px / regular | Micro meta |
 | `caption` / `overline` | 11px / 10px | Meta, helper, chips |
 | `mono` | 11px | Codes / IDs only |
-| `metric` | 19px / semibold(500) / tabular-nums | KPI figures (period cards, detail-page headline). Headings are for titles — do **not** repurpose `h1`/`h2` for numbers |
-| `metric-sm` | 17px / semibold(500) / tabular-nums | Secondary KPI figures (net profit under a headline metric) |
+| `metric` | 19px / bold(600), Manrope / tabular-nums | KPI figures (period cards, detail-page headline). Headings are for titles — do **not** repurpose `h1`/`h2` for numbers |
+| `metric-sm` | 17px / bold(600), Manrope / tabular-nums | Secondary KPI figures (net profit under a headline metric) |
 
 **`numeric` prop** — any figure rendered in a column (money, counts, percentages) must set `<Text numeric>` so digits are tabular and stack down the column. `metric` / `metric-sm` already enable it. A money cell in `body`/`body-sm` without `numeric` visibly jitters row to row.
 
@@ -1755,6 +1755,15 @@ The operator asked for the app to read as premium and trustworthy; the orders li
 - **Order card** (`OrderCard`, also the dashboard carousel): image · title · stage badge + qualifying chips on one row · a `<dl>` of order no / buyer / date (/ quantity when > 1 / ASIN) · the money row. No "Details →" footer — the whole card is the button.
 - **Order detail**: the PAGE TITLE IS THE ORDER NUMBER (a detail page is named after its record), the subtitle is the order date, and the stage badge sits in the header's `actions` slot. The hero is one card with two halves: the product (image, title, a `<dl>` of buyer / quantity / SKU / ASIN / eBay ID) and **the receipt** — net profit at `display` size in the profit colour, margin + ROI under it, then four dotted-leader lines (sale → order earnings → −Amazon cost → net profit). This replaced the five-equal-KPI grey strip; it is the page's one loud element, so nothing else on the page competes with it. The three section cards keep the shared row-rhythm mechanism (`ROW` = `controls.height.small`) with icon-less `Meta` / `Money` rows; totals render `metric-sm`.
 - `formatPercent(ratio, locale, fractionDigits)` lives in `packages/ui/src/utils/format.ts` beside the other formatters (`0.253 → "25.3%"`, locale-aware).
+
+**Round 2 — the light-glass language (2026-10-01, operator chose "açık cam / Apple-Stripe", whole shell, new display face).** The restrained round 1 read as "no difference", so the shell and every card-tier surface now carry one explicit visual language. Everything is tokens + one helper; a screen opts in by using the atoms.
+- **The canvas is lit, not painted.** `background.gradient` (light) is the AURORA: three radial colour lights — brand blue top-left, amber top-right, teal at the foot — over `#e9f0fb`, each ≤ 0.55 alpha and never overlapping into lavender. It sits on `LayoutWrapper` (viewport-fixed), so panes blur it as the page scrolls under them.
+- **Every card-tier surface is a frosted pane**: `glassSurface(theme)` / `glassSurfaceStrong(theme)` (`packages/ui/src/styles/glass.ts`, exported from `@repo/ui`) = sheen gradient over `colors.glass.surface` (52 % white) + `backdrop-filter: blur(1.5rem) saturate(1.5)` + a white `glass.edge` hairline + `shadows.glass` (inset top highlight, hairline contact shadow, long brand-tinted drop; `shadows.glassHover` on lift). Applied in `Card` (all variants but `flat`), `SettingsCard`, `Table`'s container (rows are transparent, `table.rowZebra`/`rowHover` are alpha washes, no vertical cell rules), the detached `TablePagination`, and `OrderCard`. **Inputs, menus, drawers and modals stay opaque** — text behind a control must never bleed into it — and `backdrop-filter` makes a pane the containing block of a `position: fixed` child, so never put one inside a pane.
+- **The top bar is frosted** (`colors.glass.header` + blur, `glass.edge` hairline, no shadow); the **sidebar is lit** by `sidebar.glow`/`glowAlt` radial lights and the selected nav row is `sidebar.accentGradient` + `sidebar.accentGlow`; the **primary `Button` is `brand.gradient`** over `brand.primary`. The footer is transparent.
+- **Display type is Manrope** (`fontFamily.heading`, loaded in `apps/web/index.html` at 500–800): `h1` (now 26px), `h2`, `metric`, `metric-sm` and `display` render at `fontWeight.bold`; `h3`–`h5` stay semibold. Body/UI stays Lexend — the 2026-09-03 "marketing faces in dense tables" rejection was about BODY text and still holds.
+- **One headline figure per page may use gradient ink**: `colors.glass.profitGradient` / `lossGradient` clipped to the glyphs (`S.HeadlineFigure` on the order detail, `-webkit-text-fill-color: transparent`). Nothing else on a page gets gradient text.
+- The product shot in the order hero floats on a `glass.glowBlue` radial behind it; the receipt pane adds `glass.glowMint`. These are the only per-feature lights — a new page takes its atmosphere from the canvas and the atoms, not from its own gradients.
+- Dark-theme values exist for every new token (`glass.*`, `brand.gradient`, `sidebar.glow*`) so the type stays total; dark mode itself is still disabled.
 
 ### Order detail (`apps/web/src/features/orders/details/`)
 Same `SettingsCard` pattern as listing detail — same font sizes/weights, no header icons (row icons instead). Net Profit Analysis / Customer / eBay Sale Summary / Amazon Order Summary are each a `SettingsCard`. Two row shapes: `Meta` (icon+label left, value right, single line) and `MetaBlock` (icon+label line, value stacked **below**, left-aligned) for content that doesn't fit a right-aligned single line, such as a shipping address.

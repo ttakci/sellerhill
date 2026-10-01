@@ -26,14 +26,14 @@ const variantStyles = {
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xxl};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.semibold};
+    font-weight: ${theme.typography.fontWeight.bold};
     letter-spacing: ${theme.typography.letterSpacing.tighter};
   `,
   h2: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xl};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.semibold};
+    font-weight: ${theme.typography.fontWeight.bold};
     letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   h3: (theme: Theme) => `
@@ -104,7 +104,7 @@ const variantStyles = {
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xl};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.semibold};
+    font-weight: ${theme.typography.fontWeight.bold};
     letter-spacing: ${theme.typography.letterSpacing.tight};
     font-variant-numeric: tabular-nums;
   `,
@@ -112,7 +112,7 @@ const variantStyles = {
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.lg};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.semibold};
+    font-weight: ${theme.typography.fontWeight.bold};
     letter-spacing: ${theme.typography.letterSpacing.tight};
     font-variant-numeric: tabular-nums;
   `,
