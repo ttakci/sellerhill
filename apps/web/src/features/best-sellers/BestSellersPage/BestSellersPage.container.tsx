@@ -21,10 +21,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useGetBestSellersQuery } from '../api/bestSellersApi';
 import { BestSellersViewState, type BestSellersRefusalBody } from '../bestSellers.types';
-import { departmentOfCategory, useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
+import { useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
 import { useBestSellersFilters } from '../hooks/useBestSellersFilters';
 import { useBestSellersSelection } from '../hooks/useBestSellersSelection';
 import { useBestSellersUrlState } from '../hooks/useBestSellersUrlState';
+import { flattenCategoryTree } from '../utils/bestSellersCategoryTree';
 import { BEST_SELLERS_RATING_OPTIONS, matchesBestSellersFilters } from '../utils/bestSellersFilters';
 
 import { BestSellersPage as BestSellersPageComponent } from './BestSellersPage.component';
@@ -310,70 +311,41 @@ export const BestSellersPageContainer: React.FC = () => {
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
 
   /*
-   * A department-context answer's own `categories` occasionally still carries
-   * the full top-level department list alongside that department's real
-   * children (Amazon renders the whole sidebar accordion, not just the open
-   * branch) — `isRoot` entries and the branch's own breadcrumb echo of itself
-   * are dropped so a department's "children" never duplicate the department
-   * list underneath it.
+   * The tree is a real tree (department → any depth), built from the cached
+   * per-node answers — see `flattenCategoryTree`. The root row is added here
+   * because it is not an Amazon node, only the "all categories" reset.
    */
   const categoryTreeRows = useMemo<BestSellersCategoryTreeRow[]>(() => {
     const query = categorySearch.trim().toLowerCase();
-    const rows: BestSellersCategoryTreeRow[] = [
-      {
-        key: 'root',
-        path: BEST_SELLERS_ROOT_CATEGORY,
-        name: t('bestSellers.allCategories'),
-        depth: 0,
-        isActive: category === BEST_SELLERS_ROOT_CATEGORY,
-        isActiveBranch: false,
-        hasChildren: false,
-        isExpanded: false,
-      },
-    ];
-
-    const activeDepartment = category === BEST_SELLERS_ROOT_CATEGORY ? null : departmentOfCategory(category);
-    const departments = query
-      ? categoryTree.departments.filter((entry) => entry.name.toLowerCase().includes(query))
-      : categoryTree.departments;
-
-    departments.forEach((department) => {
-      if (!department.path) {
-        return;
-      }
-      const isExpanded = categoryTree.isExpanded(department.path);
-      rows.push({
-        key: department.path,
-        path: department.path,
-        name: department.name,
-        depth: 0,
-        isActive: category === department.path,
-        isActiveBranch: category !== department.path && activeDepartment === department.path,
-        hasChildren: true,
-        isExpanded,
-      });
-      if (!isExpanded) {
-        return;
-      }
-      const children = categoryTree.childrenOf(department.path) ?? [];
-      children.forEach((child) => {
-        if (!child.path || child.isRoot || child.path === department.path) {
-          return;
-        }
-        rows.push({
-          key: `${department.path}::${child.path}`,
-          path: child.path,
-          name: child.name,
-          depth: 1,
-          isActive: category === child.path,
-          isActiveBranch: false,
-          hasChildren: false,
-          isExpanded: false,
-        });
-      });
+    const nodeRows = flattenCategoryTree({
+      bucket: categoryTree.bucket,
+      category,
+      isExpanded: categoryTree.isExpanded,
+      query,
     });
-
-    return rows;
+    const root: BestSellersCategoryTreeRow = {
+      key: 'root',
+      path: BEST_SELLERS_ROOT_CATEGORY,
+      name: t('bestSellers.allCategories'),
+      depth: 0,
+      isActive: category === BEST_SELLERS_ROOT_CATEGORY,
+      isActiveBranch: false,
+      hasChildren: false,
+      isExpanded: false,
+    };
+    return [
+      root,
+      ...nodeRows.map((row) => ({
+        key: row.path,
+        path: row.path,
+        name: row.name,
+        depth: row.depth,
+        isActive: row.isActive,
+        isActiveBranch: row.isActiveBranch,
+        hasChildren: row.hasChildren,
+        isExpanded: row.isExpanded,
+      })),
+    ];
   }, [categoryTree, categorySearch, category, t]);
 
   /*
@@ -407,7 +379,7 @@ export const BestSellersPageContainer: React.FC = () => {
   );
 
   /*
-   * A department's sub-categories only exist once that department has been
+   * A category's sub-categories only exist once that category has been
    * fetched — the API answers one level at a time. So opening a branch that was
    * never visited IS a visit: the chevron navigates there (the list loads and
    * the branch opens, since the active department is open by default). A
@@ -417,7 +389,7 @@ export const BestSellersPageContainer: React.FC = () => {
    */
   const handleToggleCategoryExpand = useCallback(
     (path: string) => {
-      if (!categoryTree.isExpanded(path) && categoryTree.childrenOf(path) === undefined) {
+      if (!categoryTree.isExpanded(path) && categoryTree.bucket.nodes[path]?.children === undefined) {
         setCategory(path);
         setIsCategoryDrawerOpen(false);
         return;
@@ -513,7 +485,7 @@ export const BestSellersPageContainer: React.FC = () => {
         onCategorySearchChange={handleCategorySearchChange}
         onCategorySelect={handleCategorySelect}
         onToggleCategoryExpand={handleToggleCategoryExpand}
-        hasDepartments={categoryTree.departments.length > 0}
+        hasDepartments={(categoryTree.bucket.rootChildren?.length ?? 0) > 0}
         activeCategoryLabel={activeCategoryLabel}
         isCategoryDrawerOpen={isCategoryDrawerOpen}
         onOpenCategoryDrawer={handleOpenCategoryDrawer}

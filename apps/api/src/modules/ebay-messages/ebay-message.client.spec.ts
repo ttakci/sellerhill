@@ -88,6 +88,7 @@ describe('EbayMessageClient', () => {
             media: [],
           },
           otherPartyUsername: null,
+          imageUrl: null,
         },
       ],
       total: 1,
@@ -253,6 +254,7 @@ describe('mapConversation / mapMessage', () => {
       createdAt: '',
       latestMessage: null,
       otherPartyUsername: null,
+      imageUrl: null,
     });
     expect(mapMessage({ messageId: 'm1', readStatus: true, messageMedia: [{ mediaName: 'a.jpg', mediaType: 'IMAGE', mediaUrl: 'https://i' }, 3] })).toEqual({
       messageId: 'm1',

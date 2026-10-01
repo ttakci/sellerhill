@@ -53,8 +53,8 @@ const lightColors: ThemeColors = {
   surface: {
     primary: '#FFFFFF',
     secondary: '#f8fafc',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    loadingOverlay: 'rgba(255, 255, 255, 0.7)',
+    overlay: 'rgba(0, 0, 0, 0.4)',
+    loadingOverlay: 'rgba(0, 0, 0, 0.35)',
   },
 
   text: {

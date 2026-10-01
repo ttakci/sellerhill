@@ -12,6 +12,9 @@ import { ColumnManager } from './ColumnManager';
 import * as S from './DataTable.style';
 import type { DataTableComponentProps } from './DataTable.types';
 
+/** Stat cells in a skeleton card's footer strip. */
+const SKELETON_STAT_COUNT = 4;
+
 export const DataTableComponent = <T,>({
   columns,
   data,
@@ -131,13 +134,26 @@ export const DataTableComponent = <T,>({
         <S.GridContainer $minItemWidth={gridMinItemWidth} $maxColumns={gridMaxColumns}>
           {showSkeleton ? (
             skeletonRows.map((_, cardIndex) => (
-              <S.SkeletonGridCard key={cardIndex}>
-                <Skeleton width="4.5rem" height="4.5rem" radius="md" />
-                <S.SkeletonGridCardBody>
-                  <Skeleton width="70%" height="0.875rem" />
-                  <Skeleton width="45%" height="0.75rem" />
-                  <Skeleton width="30%" height="0.75rem" />
-                </S.SkeletonGridCardBody>
+              <S.SkeletonGridCard key={cardIndex} aria-hidden="true">
+                <S.SkeletonGridCardHeader>
+                  <Skeleton width="60%" height="1rem" />
+                </S.SkeletonGridCardHeader>
+                <S.SkeletonGridCardMain>
+                  <Skeleton width="5.5rem" height="5.5rem" radius="md" />
+                  <S.SkeletonGridCardBody>
+                    <Skeleton width="70%" height="0.875rem" />
+                    <Skeleton width="50%" height="0.75rem" />
+                    <Skeleton width="60%" height="0.75rem" />
+                  </S.SkeletonGridCardBody>
+                </S.SkeletonGridCardMain>
+                <S.SkeletonGridCardFooter>
+                  {Array.from({ length: SKELETON_STAT_COUNT }).map((__, statIndex) => (
+                    <S.SkeletonGridCardStat key={statIndex}>
+                      <Skeleton width="60%" height="0.625rem" />
+                      <Skeleton width="80%" height="0.875rem" />
+                    </S.SkeletonGridCardStat>
+                  ))}
+                </S.SkeletonGridCardFooter>
               </S.SkeletonGridCard>
             ))
           ) : isEmpty ? (

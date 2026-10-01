@@ -198,8 +198,19 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
           </S.ContentArea>
         </S.MainContent>
 
-        <S.LoadingOverlay $visible={loadingIsLoading}>
-          <Icon name="loader" size={48} />
+        <S.LoadingOverlay
+          $visible={loadingIsLoading}
+          role="status"
+          aria-live="polite"
+          aria-hidden={!loadingIsLoading}
+          aria-label={t('translation:common.loading')}
+        >
+          <S.LoadingCard>
+            <Logo layout="wordmark" height={22} />
+            <S.LoadingTrack>
+              <S.LoadingFill />
+            </S.LoadingTrack>
+          </S.LoadingCard>
         </S.LoadingOverlay>
 
         <ConfirmModal

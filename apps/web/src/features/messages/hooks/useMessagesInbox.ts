@@ -1,7 +1,7 @@
 /**
  * Data half of the Messages page: which store is active, the conversation
- * list, the open thread, the page-open unread recount and the one-shot
- * mark-as-read when a thread with unread messages is opened.
+ * list, the open thread, the live unread count per conversation type and the
+ * one-shot mark-as-read when a thread with unread messages is opened.
  *
  * Every Message API read carries the URL-state `type` — never a row's own
  * `type` — so a list and its writes always talk about the same folder.
@@ -11,9 +11,10 @@ import type { EbayAccountPublicDto, EbayConversationDto, EbayMessageDto } from '
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
+  MESSAGES_BREAKDOWN_POLL_INTERVAL_MS,
   useGetConversationThreadQuery,
   useGetConversationsQuery,
-  useRefreshUnreadMutation,
+  useGetUnreadBreakdownQuery,
   useSetConversationReadMutation,
 } from '../api/messagesApi';
 import type { MessagesUrlState } from '../messages.types';
@@ -85,20 +86,13 @@ export function useMessagesInbox(state: MessagesUrlState) {
     [thread, conversationId],
   );
 
-  /* ─── page-open unread recount: once per store per mount ─── */
+  /* ─── unread per conversation type — counted live from eBay, which also
+   * corrects the sidebar badge (the server stores the recount) ─── */
 
-  const [refreshUnread] = useRefreshUnreadMutation();
-  const refreshedAccounts = useRef(new Set<string>());
-  useEffect(() => {
-    if (!ebayAccountId || !messagingEnabled || refreshedAccounts.current.has(ebayAccountId)) {
-      return;
-    }
-    refreshedAccounts.current.add(ebayAccountId);
-    // Background recount — a failure only leaves the badge at its last value.
-    refreshUnread({ ebayAccountId })
-      .unwrap()
-      .catch(() => undefined);
-  }, [ebayAccountId, messagingEnabled, refreshUnread]);
+  const { data: unreadBreakdown } = useGetUnreadBreakdownQuery(
+    { ebayAccountId },
+    { skip: !ebayAccountId || !messagingEnabled, pollingInterval: MESSAGES_BREAKDOWN_POLL_INTERVAL_MS },
+  );
 
   /* ─── opening an unread thread marks it read — once per conversation id ─── */
 
@@ -149,6 +143,7 @@ export function useMessagesInbox(state: MessagesUrlState) {
     messagingEnabled,
     conversations,
     conversationsTotal: conversationsPage?.total ?? 0,
+    unreadBreakdown,
     isListLoading: isListLoading || (isListFetching && conversations.length === 0),
     thread,
     threadMessages,

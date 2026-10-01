@@ -26,6 +26,7 @@ import {
   buildDemoDashboard,
   buildDemoOrderStats,
   buildDemoUnread,
+  buildDemoUnreadBreakdown,
   demoAllListingRevisions,
   demoJobItems,
   demoListingRevisions,
@@ -421,15 +422,11 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   }
 
   /*
-   * Bookkeeping writes the Messages page fires ON ITS OWN — the unread recount
-   * on page open and the mark-read when a thread is opened. The visitor did
-   * not ask to change anything, so they answer silently: routing them through
-   * `demoWrite` would raise the "this is a demo" notice the moment the page
-   * loads. They still persist nothing.
+   * Bookkeeping writes the Messages page fires ON ITS OWN — the mark-read when
+   * a thread is opened. The visitor did not ask to change anything, so they
+   * answer silently: routing them through `demoWrite` would raise the "this is
+   * a demo" notice the moment the page loads. They still persist nothing.
    */
-  if (method !== 'GET' && path === '/ebay/messages/refresh-unread') {
-    return ok({ unread: buildDemoUnread().total });
-  }
   if (method !== 'GET' && /^\/ebay\/messages\/conversations\/[^/]+\/read$/.test(path)) {
     return ok({});
   }
@@ -472,6 +469,10 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/ebay/messages/unread-count') {
     return ok(buildDemoUnread());
+  }
+
+  if (path === '/ebay/messages/unread-breakdown') {
+    return ok(buildDemoUnreadBreakdown());
   }
 
   if (path === '/ebay/messages/conversations') {

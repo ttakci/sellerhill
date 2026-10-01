@@ -7,10 +7,7 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
-  /* The page behind softens, so the frosted panel reads as glass over it
-     rather than a sheet laid on a dimmed photo. */
-  -webkit-backdrop-filter: blur(0.25rem);
-  backdrop-filter: blur(0.25rem);
+  /* Dimmed a notch, never blurred: the page behind stays recognisable. */
   display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
   z-index: ${tkn('zIndex.overlay')};
   animation: fadeIn ${tkn('transitions.normal')};

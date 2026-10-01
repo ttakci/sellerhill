@@ -68,21 +68,57 @@ export const RowCheck = styled.div`
 `;
 
 /**
- * Initials avatar. Unread rows get the SOLID brand fill (the same
- * treatment `table.rowSelectedAccent`-style emphasis uses elsewhere) so an
- * unread conversation reads at a glance without relying on bold text alone;
- * read rows get the quiet tint every brand-tinted disc in this app uses
- * (`EmptyState`'s icon circle, `CardStat`'s icon tile).
+ * The row's leading visual: the photo of the item the buyer is writing about
+ * (transparent plate, like every product image in the app) with the buyer's
+ * initial as a small badge on its corner — or, with no photo, the initial
+ * disc on its own. Unread rows get the SOLID brand fill so unread reads at a
+ * glance without relying on bold text alone; read rows get the quiet tint
+ * every brand-tinted disc in this app uses (`EmptyState`'s icon circle).
+ * The badge sits on logical insets so RTL mirrors it by document direction.
  */
-export const Avatar = styled.div<{ $unread: boolean }>`
+export const Thumb = styled.div`
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+`;
+
+export const ThumbImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  border-radius: ${tkn('radius.md')};
+`;
+
+export const Avatar = styled.div<{ $unread: boolean; $large?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: ${({ $large }) => ($large ? '3.5rem' : '1.5rem')};
+  height: ${({ $large }) => ($large ? '3.5rem' : '1.5rem')};
   border-radius: ${tkn('radius.full')};
   background: ${({ $unread, theme }) => ($unread ? theme.colors.brand.primary : theme.colors.brand.secondary)};
+  ${({ $large, theme }) =>
+    $large ? '' : `border: 0.125rem solid ${theme.colors.surface.primary};`}
+  box-sizing: border-box;
+`;
+
+export const AvatarBadge = styled.div`
+  position: absolute;
+  inset-inline-end: -0.25rem;
+  inset-block-end: -0.25rem;
+`;
+
+/** Marks an unread conversation next to the sender's name. */
+export const UnreadDot = styled.span`
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.primary')};
 `;
 
 export const RowMain = styled.div`
@@ -125,6 +161,19 @@ export const RowLine = styled.span`
     flex: 1 1 auto;
     min-width: 0;
   }
+`;
+
+/** Name line: the unread dot, the name (takes the slack) and the date. */
+export const NameLine = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+export const NameText = styled.span`
+  flex: 1 1 auto;
+  min-width: 0;
 `;
 
 export const RowMeta = styled.div`

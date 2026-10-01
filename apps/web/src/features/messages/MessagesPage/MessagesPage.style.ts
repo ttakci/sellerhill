@@ -139,6 +139,12 @@ export const RailPane = styled.div`
   border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
+/** The label takes the slack so the unread count badge sits at the row's end. */
+export const RailItemLabel = styled.span`
+  flex: 1 1 auto;
+  min-width: 0;
+`;
+
 export const RailGroup = styled.nav`
   display: flex;
   flex-direction: column;
