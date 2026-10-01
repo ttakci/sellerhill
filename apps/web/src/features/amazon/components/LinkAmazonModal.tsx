@@ -78,11 +78,11 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
           handleClose();
         } else {
           setProgress(null);
-          setError(
-            res.reason === 'cost_capture_failed'
-              ? t('amazon.linking.costCaptureFailed')
-              : res.message,
-          );
+          // An unreadable cost summary no longer fails the link (the order is
+          // attached and its costs follow); what is left is "no such order
+          // in this account" or a scrape error, whose raw text is not for
+          // the seller.
+          setError(t('amazon.linking.errorScraping'));
         }
       })
       .catch((err: unknown) => {

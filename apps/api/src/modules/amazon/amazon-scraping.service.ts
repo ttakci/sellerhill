@@ -274,9 +274,15 @@ export class AmazonScrapingService {
       try {
         onProgress?.({ stage: 'navigating', message: 'Navigating to order page...' });
 
+        // The address Amazon's own "View order details" link carries today
+        // (`__fixtures__/checkout/your-orders.html`), so the manual link reads
+        // the page the seller sees. The first failed manual link (2026-10-01)
+        // went to the legacy /gp/your-account/order-details address and found
+        // no cost summary on it. The tracking scrapes below keep the legacy
+        // address: it is the one verified live for them.
         const orderUrl = `${buildAmazonSiteUrl(
           account.marketplace as AmazonMarketplace
-        )}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+        )}/your-orders/order-details?orderID=${encodeURIComponent(amazonOrderId)}`;
         await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForTimeout(2000);
 
@@ -300,6 +306,10 @@ export class AmazonScrapingService {
         onProgress?.({ stage: 'scraping', message: 'Scraping order details...' });
 
         const scrapedData = await this.parserService.parseOrderPage(page, amazonOrderId);
+
+        if (scrapedData.costCaptureFailed) {
+          await this.saveLinkEvidence(page, amazonOrderId);
+        }
 
         // Amazon renders the "Track package" anchor site-relative
         // (/progress-tracker/package/?orderId=...); parseOrderPage returns that raw
@@ -344,6 +354,27 @@ export class AmazonScrapingService {
 
       onProgress?.({ stage: 'error', message });
       throw error;
+    }
+  }
+
+  /**
+   * Keeps the page a manual link could not read costs from — address, screenshot
+   * and HTML — under `fulfillment-evidence/link-<amazonOrderId>/`, so the next
+   * unreadable page is diagnosed from what Amazon actually served. Same
+   * directory, hourly TTL sweep and PII rules as the checkout evidence
+   * (`AmazonCheckoutService.snap`). Never throws.
+   */
+  private async saveLinkEvidence(page: Page, amazonOrderId: string): Promise<void> {
+    const root = process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
+    const dir = path.join(root, `link-${amazonOrderId.replace(/[^A-Za-z0-9-]/g, '_')}`);
+    const stem = path.join(dir, `cost-unreadable-${Date.now()}`);
+    try {
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(`${stem}.url.txt`, page.url(), 'utf8');
+      await fs.writeFile(`${stem}.html`, await page.content(), 'utf8');
+      await page.screenshot({ path: `${stem}.png`, fullPage: true });
+    } catch (err) {
+      this.logger.warn(`link evidence failed for ${amazonOrderId}: ${(err as Error).message}`);
     }
   }
 

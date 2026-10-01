@@ -174,7 +174,7 @@ export class AmazonController {
     success: boolean;
     message: string;
     linked?: boolean;
-    reason?: 'cost_capture_failed';
+    reason?: 'cost_capture_failed' | 'order_not_found';
   }> {
     const userId = req.user.sub;
 
@@ -221,24 +221,59 @@ export class AmazonController {
 
     try {
       // Scrape the Amazon order
-      const scrapedData = await this.scrapingService.scrapeOrder(userId, dto.amazonAccountId, dto.amazonOrderId);
+      const scrapedData = await this.scrapingService.scrapeOrder(
+        userId,
+        dto.amazonAccountId,
+        dto.amazonOrderId.trim()
+      );
 
-      // Scrape reached the order page but the financial-summary DOM was missing
-      // (or all values were 0/NaN). NEVER silently overwrite existing costs with
-      // zeros — that would understate Amazon costs and overstate net profit.
-      // Preserve prior values; recompute with scrapeFailed:true so the row is
-      // authoritatively marked FAILED while net_profit reflects last-known costs.
-      // (No separate status UPDATE — recompute owns cost_capture_status now.)
+      // The cost summary could not be read (DOM missing, or every value 0/NaN).
+      // The seller NAMED the order, so the link itself must not depend on that
+      // (operator decision, 2026-10-01): the manual link is the recovery after
+      // a failed automatic purchase, and refusing it left the order unlinked
+      // and untracked — and, marked FAILED, outside the automatic cost capture
+      // too. So: attach the order and start tracking, write NO cost (never a
+      // zero), and leave the order provisional so the 3-hourly cost capture
+      // fills the real figures in.
       if (scrapedData.costCaptureFailed) {
-        await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id, {
-          scrapeFailed: true,
-        });
-        return {
-          success: false,
-          linked: false,
-          reason: 'cost_capture_failed',
-          message: '',
-        };
+        // …but only an order this account really holds. Without the id on the
+        // page (mistyped id, wrong account, not the order page) nothing is
+        // written and the order keeps its state.
+        if (!scrapedData.orderIdOnPage) {
+          return { success: false, linked: false, reason: 'order_not_found', message: '' };
+        }
+
+        await this.databaseService.query(
+          `UPDATE orders SET
+            amazon_account_id = $1,
+            -- Costs captured for a DIFFERENT Amazon order are not this order's;
+            -- a re-link of the same id keeps what it already had.
+            amazon_linked_at = CASE WHEN amazon_order_id = $2 THEN amazon_linked_at ELSE NULL END,
+            amazon_order_id = $2,
+            amazon_tracking_number = COALESCE($3, amazon_tracking_number),
+            amazon_tracking_carrier = COALESCE($4, amazon_tracking_carrier),
+            amazon_tracking_url = COALESCE($5, amazon_tracking_url),
+            amazon_cancelled_at = NULL,
+            updated_at = CURRENT_TIMESTAMP
+           WHERE id = $6`,
+          [
+            dto.amazonAccountId,
+            scrapedData.amazonOrderId,
+            scrapedData.trackingNumber || null,
+            scrapedData.trackingCarrier || null,
+            scrapedData.trackingUrl || null,
+            orderId,
+          ]
+        );
+        await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id);
+        await this.trackingQueueService.scheduleOrderTracking(orderId, dto.amazonAccountId);
+        if (scrapedData.status === 'shipped') {
+          await this.trackingQueueService.triggerImmediateTracking(orderId, dto.amazonAccountId);
+        }
+        this.logger.warn(
+          `Amazon order ${scrapedData.amazonOrderId} linked WITHOUT costs (summary unreadable) — left to cost capture`
+        );
+        return { success: true, linked: true, reason: 'cost_capture_failed', message: '' };
       }
 
       // Use first item's price as purchase price (or grand total for single item)
