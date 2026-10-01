@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "商品刊登超出套餐上限",
         "order_already_fulfilled": "已发货，无需采购",
         "order_not_paid": "等待买家付款",
-        "order_cancelled": "已在 eBay 取消，无需采购"
+        "order_cancelled": "已在 eBay 取消，无需采购",
+        "multi_item_order": "订单含多件商品 — 请手动购买",
+        "cancel_requested": "买家申请取消 — 请在 eBay 上回复",
+        "loss_limit": "超出您的亏损上限"
       },
       "reasonLabel": "原因：{{reason}}",
       "amazonCancelledBadge": "Amazon 已取消",
@@ -150,6 +153,13 @@
         "confirm": "开始购买",
         "queued": "购买已开始。订单状态会在几分钟内更新。",
         "queuedDryRun": "测试运行已开始。该 Amazon 账户处于测试模式，不会购买任何商品。"
+      },
+      "notPurchased": {
+        "button": "Amazon 上没有",
+        "confirmTitle": "确认 Amazon 上没有这笔销售对应的订单？",
+        "confirmDescription": "只有在您查看过该 Amazon 账户的订单并且确实没有这笔订单之后才继续。SellerHill 也会检查该账户的订单列表，在检查完成之前不会接受确认。之后可以重新启动自动下单——如果订单其实已在 Amazon 上存在，商品将被购买两次。",
+        "confirm": "是的，没有",
+        "done": "已标记为未购买。您可以重新启动自动下单。"
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "退款金额",
       "refundedOn": "退款日期",
       "refundNote": "这是 eBay 报告的退款金额，不包含 eBay 代收的销售税，因此买家实际收到的退款可能更多。",
-      "cancelledAmazonOpenAction": "此订单已在 Amazon 下单采购。请在 Amazon 上取消；如已发货，请办理退货。"
+      "cancelledAmazonOpenAction": "此订单已在 Amazon 下单采购。请在 Amazon 上取消；如已发货，请办理退货。",
+      "shipBy": "最晚发货时间",
+      "shipByNotice": "eBay 最晚发货时间：{{date}}",
+      "multiItemNotice": "这笔 eBay 订单包含 {{count}} 件商品。SellerHill 只跟踪第一件，并且不会自动购买此订单——请自行购买并发出其余商品。"
     },
     "modal": {
       "title": "填写 Amazon 订单信息",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "没有可用于自动下单的 Amazon 账户。请在设置中为某个 Amazon 账户开启自动下单并设置消费上限。",
       "autoFulfillOverCap": "这笔销售超过了你的 Amazon 账户的消费上限。请在 Amazon 账户设置中提高上限，或手动购买该商品。",
       "autoFulfillAlreadyStarted": "此订单的状态刚刚发生变化，购买可能已经开始。请刷新页面。",
-      "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。"
+      "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。",
+      "purchaseNotYetChecked": "自本次购买尝试以来，SellerHill 尚未检查该 Amazon 账户的订单。检查现已启动——请几分钟后重试。",
+      "purchaseNotUnknown": "该订单并未在等待购买确认。它可能已被关联或正在处理中。请刷新页面。",
+      "purchaseFoundOnAmazon": "SellerHill 在 Amazon 上找到了一笔该商品的订单，下单时间与本次购买尝试相近，但无法确定它对应这笔销售。请打开您的 Amazon 订单并手动关联。如果该订单属于另一笔销售，请先将其关联到那笔销售。"
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "已购买 · 等待发货",
         "meaning": "已关联一个 Amazon 订单。等待 Amazon 发货。"
+      },
+      "purchase_unknown": {
+        "label": "购买未确认",
+        "meaning": "已在 Amazon 上点击下单按钮，但没有收到确认。订单可能已经生成。",
+        "action": "请先查看您的 Amazon 订单。如果订单在那里，请将其关联。确认之前不要再次购买。"
       },
       "purchase_blocked": {
         "label": "下单被阻止",

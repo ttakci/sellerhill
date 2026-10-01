@@ -73,6 +73,12 @@
         "description_other": "{{count}} Bestellungen wurden durch eine Sicherheitsprüfung gestoppt, es wurde also kein Geld bewegt. Beheben Sie die unten genannten Gründe, dann können sie durchlaufen.",
         "action": "Bestellungen prüfen"
       },
+      "order_purchase_unknown": {
+        "title": "Kauf nicht bestätigt — zuerst Amazon prüfen",
+        "description_one": "Bestellungen, deren Amazon-Kauf nicht bestätigt werden konnte: {{count}}. Der Bestellbutton wurde gedrückt, aber es kam keine Bestätigung, die Bestellung existiert also möglicherweise. Prüfen Sie Amazon und verknüpfen Sie sie, bevor erneut etwas gekauft wird.",
+        "description_other": "Bestellungen, deren Amazon-Kauf nicht bestätigt werden konnte: {{count}}. Der Bestellbutton wurde gedrückt, aber es kam keine Bestätigung, die Bestellung existiert also möglicherweise. Prüfen Sie Amazon und verknüpfen Sie sie, bevor erneut etwas gekauft wird.",
+        "action": "Bestellungen prüfen"
+      },
       "order_awaiting_purchase": {
         "title": "Verkauft, aber noch nicht bei Amazon gekauft",
         "description_one": "{{count}} Bestellung, die älter als {{hours}} Stunden ist, hat keinen Amazon-Einkauf und keine laufende Automatisierung. Sie wird nur versendet, wenn Sie sie selbst kaufen.",

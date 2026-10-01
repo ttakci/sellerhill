@@ -207,6 +207,7 @@ export enum PlatformSettingKey {
   RETENTION_BEST_SELLERS_VIEWS_DAYS = 'retention.bestSellersViewsDays',
   RETENTION_EBAY_NOTIFICATION_EVENTS_DAYS = 'retention.ebayNotificationEventsDays',
   RETENTION_EBAY_NOTIFICATION_RAW_CAPTURES_DAYS = 'retention.ebayNotificationRawCapturesDays',
+  RETENTION_AUTO_FULFILL_EVENTS_DAYS = 'retention.autoFulfillEventsDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',

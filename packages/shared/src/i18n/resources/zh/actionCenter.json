@@ -70,6 +70,11 @@
         "description_other": "有 {{count}} 笔订单被安全检查拦截，因此没有产生任何扣款。解决下方所列的原因后，即可继续执行。",
         "action": "查看订单"
       },
+      "order_purchase_unknown": {
+        "title": "购买未确认 — 请先查看 Amazon",
+        "description_other": "无法确认 Amazon 购买的订单数：{{count}}。已点击下单按钮但未收到确认，订单可能已经生成。再次购买任何东西之前，请先查看 Amazon 并关联订单。",
+        "action": "查看订单"
+      },
       "order_awaiting_purchase": {
         "title": "已售出，但尚未在 Amazon 采购",
         "description_other": "有 {{count}} 笔超过 {{hours}} 小时的订单尚未在 Amazon 采购，也没有任何自动化在处理。除非您自行采购，否则它们不会发货。",

@@ -1,11 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { AutoFulfillStatus, extractCorrelationId, generateCorrelationId } from '@repo/shared';
+import { AutoFulfillEvent, AutoFulfillStatus, extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { AutoFulfillEventLog } from '../orders/auto-fulfill-event-log.service';
 
 import { AmazonCheckoutService } from './amazon-checkout.service';
 import { AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.constants';
@@ -13,6 +14,8 @@ import { AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.constants';
 interface AutoFulfillJobData {
   ebayOrderId: string;
   amazonAccountId: string;
+  /** Set by the seller's "Start automatic order" click (`enqueueManual`). */
+  manual?: boolean;
 }
 
 /**
@@ -32,6 +35,11 @@ interface AutoFulfillJobData {
  *    retries the job (attempts: 3 from Task 5).
  *  - On the FINAL attempt, mark `auto_fulfill_status = 'failed'` BEFORE
  *    rethrowing so the row is not left at `running` once BullMQ gives up.
+ *  - NEITHER write may touch a row whose Place Order click was stamped
+ *    (`orders.auto_fulfill_submitted_at`): the Amazon order may exist, so the
+ *    row is settled as an unknown outcome instead and the job ends WITHOUT a
+ *    retry. Both UPDATEs also carry `auto_fulfill_submitted_at IS NULL` — the
+ *    predicate, not the check before it, is what makes this structural.
  *
  * Double-run safety (I-4): the producer enqueues with
  * `jobId: fulfill-${ebayOrderId}` so BullMQ collapses any duplicate enqueue
@@ -50,6 +58,7 @@ export class AutoFulfillProcessor extends WorkerHost {
     private readonly checkout: AmazonCheckoutService,
     private readonly db: DatabaseService,
     private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly events: AutoFulfillEventLog,
   ) {
     super();
   }
@@ -70,9 +79,39 @@ export class AutoFulfillProcessor extends WorkerHost {
         const { ebayOrderId, amazonAccountId } = job.data;
         this.logger.log(`processing fulfill ${ebayOrderId} (attempt ${job.attemptsMade + 1})`);
         try {
-          await this.checkout.runForOrder(ebayOrderId, amazonAccountId);
+          await this.checkout.runForOrder(ebayOrderId, amazonAccountId, { manual: job.data.manual === true });
         } catch (err) {
+          // THE CLICK BOUNDARY, seen from here. If the Place Order click was
+          // stamped, this error escaped AFTER money may have moved: the row is
+          // settled as an unknown outcome and the job ends — no PENDING reset,
+          // no FAILED, no retry. A failure of this check itself falls through
+          // to the writes below, which carry the same condition in SQL.
+          const clickWasSent = await this.checkout
+            .settleIfClickWasSent(
+              ebayOrderId,
+              amazonAccountId,
+              `an error escaped the checkout after the Place Order click: ${(err as Error).message}`,
+            )
+            .catch((settleErr: unknown) => {
+              this.logger.error(
+                `could not check the click stamp for ${ebayOrderId}: ${(settleErr as Error).message}`,
+              );
+              return false;
+            });
+          if (clickWasSent) {
+            this.logger.error(
+              `fulfill ${ebayOrderId}: error after the Place Order click — settled as unknown outcome, not retried: ${
+                (err as Error).message
+              }`,
+              (err as Error).stack,
+            );
+            return;
+          }
           const isLast = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
+          await this.events.record(ebayOrderId, isLast ? AutoFulfillEvent.FAILED : AutoFulfillEvent.RETRY_SCHEDULED, {
+            amazonAccountId,
+            detail: { attempt: job.attemptsMade + 1, error: (err as Error).message.slice(0, 300) },
+          });
           if (isLast) {
             const failedErr = err as Error;
             this.logger.error(
@@ -81,7 +120,8 @@ export class AutoFulfillProcessor extends WorkerHost {
             );
             try {
               await this.db.query(
-                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP
+                  WHERE ebay_order_id = $2 AND auto_fulfill_submitted_at IS NULL`,
                 [AutoFulfillStatus.FAILED, ebayOrderId],
               );
             } catch (markErr) {
@@ -106,22 +146,21 @@ export class AutoFulfillProcessor extends WorkerHost {
               );
             }
           } else {
-            // Hand the row back as PENDING before BullMQ retries. The checkout
-            // reads RUNNING-at-start as "the previous PROCESS died mid-flight"
-            // and blocks the order (`decideFulfillStart` → INTERRUPTED) rather
-            // than risk a second Place Order click. An in-process retry is safe
-            // to re-enter — nothing is bought before the review step and no
-            // error escapes after the click — so it must not look interrupted.
-            // If this write fails the retry is refused as interrupted, which is
-            // the safe side.
+            // Hand the row back as PENDING before BullMQ retries, so the order
+            // reads "buying" (queued) rather than "running" while it waits out
+            // the backoff. The retry is safe to re-enter: the row carries no
+            // click stamp, so nothing was bought. If this write fails the row
+            // stays RUNNING without a stamp, which the next attempt re-enters
+            // just the same (`decideFulfillStart`).
             try {
               await this.db.query(
-                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP
+                  WHERE ebay_order_id = $2 AND auto_fulfill_submitted_at IS NULL`,
                 [AutoFulfillStatus.PENDING, ebayOrderId],
               );
             } catch (resetErr) {
               this.logger.warn(
-                `could not reset ${ebayOrderId} to pending before retry: ${(resetErr as Error).message} — the retry will be refused as interrupted`,
+                `could not reset ${ebayOrderId} to pending before retry: ${(resetErr as Error).message}`,
               );
             }
           }

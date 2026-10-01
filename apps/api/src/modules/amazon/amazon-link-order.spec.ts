@@ -53,6 +53,7 @@ function build(data: AmazonScrapedOrderData) {
     db as never,
     orderSync as never,
     quota as never,
+    {} as never,
     {} as never
   );
   const link = () =>

@@ -817,6 +817,18 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 7,
     max: 365,
   }),
+  def({
+    // Audit trail of automatic Amazon purchases (migration 132). The record an
+    // operator reads when investigating a duplicate or a missing purchase, so
+    // it outlives every order lifecycle by a wide margin.
+    key: PlatformSettingKey.RETENTION_AUTO_FULFILL_EVENTS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_AUTO_FULFILL_EVENTS_DAYS',
+    defaultValue: '400',
+    min: 90,
+    max: 3650,
+  }),
 ];
 
 /** Registry lookup by key. Unknown keys are rejected at the API boundary. */

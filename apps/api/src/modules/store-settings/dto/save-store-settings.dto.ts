@@ -98,6 +98,20 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
 
   @ApiPropertyOptional({
     description:
+      'Loss limit per automatic order: the most by which the Amazon total may exceed the eBay payout. ' +
+      'Omitted = unchanged, null = no limit, 0 = never buy at a loss.',
+    example: 5,
+    nullable: true,
+  })
+  // `@IsOptional` skips both undefined (unchanged) and null (limit off).
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100000)
+  autoFulfillMaxLoss?: number | null;
+
+  @ApiPropertyOptional({
+    description:
       "How the Amazon tracking number is relayed to eBay. Persisted LOWERCASE. " +
       "'local' passes it through as Amazon_Logistics; 'aquiline' converts it to an " +
       "AQUAA…YQ number under the AQUILINE carrier so the buyer never sees the supplier.",

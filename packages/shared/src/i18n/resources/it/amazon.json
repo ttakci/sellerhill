@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Totale massimo dell'ordine (limite di evasione automatica)",
       "autoFulfillCapTotalHint": "Limite di spesa per account (USD). Gli ordini oltre questo totale saltano questo account. Obbligatorio per attivare l'evasione automatica.",
       "autoFulfillCapTotalPlaceholder": "es. 250",
+      "cartOwnershipNote": "Usa questo account Amazon solo per SellerHill. Il carrello viene svuotato prima di ogni ordine automatico, quindi tutto ciò che ci hai messo tu viene rimosso.",
       "autoFulfillDryRun": "Prova a secco (esegui il flusso senza effettuare l'ordine)",
       "autoFulfillDryRunHint": "Esegue l'intero flusso di checkout fino a Effettua ordine (escluso), così il totale di riepilogo può essere acquisito e mostrato per la verifica."
     },

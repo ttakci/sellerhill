@@ -76,6 +76,13 @@
         "description_other": "{{count}} de comenzi au fost oprite de o verificare de siguranță, deci nu s-au mutat bani. Remediați motivele de mai jos și comenzile pot continua.",
         "action": "Verifică comenzile"
       },
+      "order_purchase_unknown": {
+        "title": "Achiziție neconfirmată — verifică mai întâi Amazon",
+        "description_one": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
+        "description_few": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
+        "description_other": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
+        "action": "Verifică comenzile"
+      },
       "order_awaiting_purchase": {
         "title": "Vândută, dar nimeni nu a cumpărat-o pe Amazon",
         "description_one": "{{count}} comandă mai veche de {{hours}} ore nu are nicio achiziție Amazon și nicio automatizare în desfășurare. Nu va fi expediată decât dacă o cumpărați dvs.",

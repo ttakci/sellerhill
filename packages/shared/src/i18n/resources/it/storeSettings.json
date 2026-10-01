@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Effettua automaticamente gli ordini Amazon dopo le vendite eBay",
     "autoFulfillEnabledHint": "Quando è attivo, SellerHill acquista l'articolo su Amazon con il tuo account acquirente collegato. Disattivalo per ordinare manualmente.",
     "autoFulfillEnabledInfo": "Attivalo solo dopo aver collegato e configurato un account acquirente Amazon. L'ordine automatico richiede anche che siano attivi l'impostazione di evasione automatica e il limite di spesa di quell'account.",
+    "lossLimit": {
+      "enabled": "Ferma gli ordini automatici in perdita",
+      "enabledHint": "Se attivo, un ordine automatico viene fermato prima dell'acquisto quando il totale Amazon supera il tuo incasso eBay di oltre l'importo indicato sotto. L'ordine resta in attesa di te. Disattivato per impostazione predefinita. Un negozio senza un proprio limite usa quello globale.",
+      "amount": "Perdita massima per ordine",
+      "amountHint": "Nella valuta del tuo negozio. 0 significa non acquistare mai in perdita."
+    },
     "trackingConversionProvider": "Conversione del numero di tracciamento",
     "trackingConversionProviderHint": "I numeri dei corrieri reali vengono inoltrati così come sono. Amazon Logistics (TBA) passa invariato.",
     "trackingConversionProviderLocal": "Integrato (locale)",

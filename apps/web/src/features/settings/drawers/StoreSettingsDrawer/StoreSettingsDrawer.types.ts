@@ -54,6 +54,13 @@ export interface StoreSettingsDrawerComponentProps {
   checkBlacklist: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
+  /**
+   * Loss limit for automatic orders (`store_settings.auto_fulfill_max_loss`):
+   * the most by which the Amazon total may exceed the eBay payout before the
+   * purchase is stopped. Off = no limit; on with 0 = never buy at a loss.
+   */
+  lossLimitEnabled: boolean;
+  lossLimitAmount: number;
   /** Whether tracking numbers are converted at all. Maps to
    *  `tracking_conversion_provider` being `aquiline` rather than `local` —
    *  presented as one on/off choice because there is only ever one external
@@ -100,6 +107,8 @@ export interface StoreSettingsDrawerComponentProps {
   onToggleCheckBlacklist: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
+  onLossLimitEnabledChange: (checked: boolean) => void;
+  onLossLimitAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTrackingConversionEnabledChange: (enabled: boolean) => void;
   onTrackingConversionScopeChange: (scope: TrackingConversionScope) => void;
   onTrackingConvertManualOrdersChange: (checked: boolean) => void;

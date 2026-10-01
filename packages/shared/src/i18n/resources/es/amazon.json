@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Total máximo del pedido (límite del cumplimiento automático)",
       "autoFulfillCapTotalHint": "Tope de gasto por cuenta (USD). Los pedidos que superen este total omiten esta cuenta. Obligatorio para activar el cumplimiento automático.",
       "autoFulfillCapTotalPlaceholder": "p. ej., 250",
+      "cartOwnershipNote": "Usa esta cuenta de Amazon solo para SellerHill. Su carrito se vacía antes de cada pedido automático, así que se elimina cualquier cosa que hayas puesto tú.",
       "autoFulfillDryRun": "Simulación (ejecuta el flujo sin realizar el pedido)",
       "autoFulfillDryRunHint": "Ejecuta todo el flujo de compra hasta antes de Realizar pedido, para poder capturar el total de la revisión y mostrarlo para su revisión."
     },

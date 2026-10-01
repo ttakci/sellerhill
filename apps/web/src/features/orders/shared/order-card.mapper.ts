@@ -1,6 +1,7 @@
 import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
+import { orderStageShowsReason } from './order-stage';
 import type { OrderCardProps } from './OrderCard';
 
 /**
@@ -73,12 +74,14 @@ export const toOrderCardProps = (
   if (order.profitBasis === ProfitBasis.ESTIMATED) {
     statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
   }
-  // The blocked reason is what makes "Purchase blocked" actionable — the
-  // table column shows it inline, so the card must too.
-  if (order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason) {
+  // The reason is what makes "Purchase blocked" / "Purchase not confirmed"
+  // actionable, and what explains a "To purchase" order automation left to the
+  // seller — the table column shows it inline, so the card must too. Red only
+  // where the stage itself is red.
+  if (orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason) {
     statsBadges.push({
       label: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
-      variant: 'error',
+      variant: order.stage === OrderStage.TO_PURCHASE ? 'warning' : 'error',
     });
   }
 

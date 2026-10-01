@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
     "autoFulfillEnabledHint": "When on, SellerHill buys the item on Amazon with your linked buyer account. Disable to order manually.",
     "autoFulfillEnabledInfo": "Enable this only after connecting and configuring an Amazon buyer account. Automatic ordering also requires that account's auto-fulfillment setting and spending cap to be enabled.",
+    "lossLimit": {
+      "enabled": "Stop automatic orders that would lose money",
+      "enabledHint": "When on, an automatic order is stopped before buying if the Amazon total is higher than your eBay payout by more than the amount below. The order then waits for you. Off by default. A store without its own limit uses the global one.",
+      "amount": "Largest loss per order",
+      "amountHint": "In your store's currency. 0 means never buy at a loss."
+    },
     "trackingConversionProvider": "Tracking-number conversion",
     "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged.",
     "trackingConversionProviderLocal": "Built-in (local)",

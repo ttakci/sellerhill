@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Totalul maxim al comenzii (plafon de îndeplinire automată)",
       "autoFulfillCapTotalHint": "Plafon de cheltuieli pentru fiecare cont (USD). Comenzile care depășesc acest total ocolesc acest cont. Obligatoriu pentru activarea îndeplinirii automate.",
       "autoFulfillCapTotalPlaceholder": "ex.: 250",
+      "cartOwnershipNote": "Folosește acest cont Amazon doar pentru SellerHill. Coșul lui este golit înaintea fiecărei comenzi automate, așa că orice ai pus tu în el este șters.",
       "autoFulfillDryRun": "Rulare de probă (rulează fluxul fără a plasa comanda)",
       "autoFulfillDryRunHint": "Rulează întregul flux de finalizare a comenzii până la (fără a include) Plasează comanda, astfel încât totalul de verificare să poată fi preluat și afișat pentru revizuire."
     },

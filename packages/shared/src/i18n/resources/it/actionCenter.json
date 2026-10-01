@@ -76,6 +76,13 @@
         "description_other": "{{count}} ordini sono stati fermati da un controllo di sicurezza, quindi nessun denaro è stato addebitato. Risolvi i motivi indicati qui sotto e potranno procedere.",
         "action": "Controlla gli ordini"
       },
+      "order_purchase_unknown": {
+        "title": "Acquisto non confermato — controlla prima Amazon",
+        "description_one": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
+        "description_many": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
+        "description_other": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
+        "action": "Controlla gli ordini"
+      },
       "order_awaiting_purchase": {
         "title": "Venduto, ma nessuno l'ha acquistato su Amazon",
         "description_one": "{{count}} ordine più vecchio di {{hours}} ore non ha alcun acquisto su Amazon né automazione attiva. Non verrà spedito a meno che tu non lo acquisti di persona.",

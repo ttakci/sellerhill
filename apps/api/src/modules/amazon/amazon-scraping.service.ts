@@ -15,7 +15,7 @@ import {
 } from './amazon-order-parser.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { BrowserStateManager } from './browser-state-manager.service';
-import { parseOrderCardHeader, parseOrderCardRecipient } from './your-orders-card';
+import { parseOrderCardHeader, parseOrderCardRecipient, scanCutoffMs } from './your-orders-card';
 
 export interface ScrapingProgress {
   stage: 'logging_in' | 'navigating' | 'scraping' | 'saving' | 'done' | 'error';
@@ -697,7 +697,9 @@ export class AmazonScrapingService {
       let suspect = !postNavUrl.includes('/your-orders/orders');
 
       const results: AmazonListOrderRow[] = [];
-      const sinceMs = since.getTime();
+      // A DAY cutoff, not the raw instant: cards carry a date only (see
+      // `scanCutoffMs` for the same-day orders the instant comparison dropped).
+      const sinceMs = scanCutoffMs(since);
       let walkedPastSince = false;
       const maxPages = 10; // hard stop — don't walk forever on a malformed DOM
 

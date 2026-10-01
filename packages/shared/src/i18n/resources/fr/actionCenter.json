@@ -76,6 +76,13 @@
         "description_other": "{{count}} commandes ont été arrêtées par un contrôle de sécurité, aucun paiement n'a donc eu lieu. Corrigez les motifs ci-dessous et elles pourront aboutir.",
         "action": "Examiner les commandes"
       },
+      "order_purchase_unknown": {
+        "title": "Achat non confirmé — vérifiez d'abord Amazon",
+        "description_one": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
+        "description_many": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
+        "description_other": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
+        "action": "Examiner les commandes"
+      },
       "order_awaiting_purchase": {
         "title": "Vendu, mais personne ne l'a acheté sur Amazon",
         "description_one": "{{count}} commande de plus de {{hours}} heures n'a aucun achat Amazon et aucune automatisation en cours. Elle ne sera pas expédiée si vous ne l'achetez pas vous-même.",

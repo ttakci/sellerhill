@@ -88,7 +88,11 @@ function buildHarness(options: {
   } as unknown as AmazonScrapingService;
 
   const createShippingFulfillment = jest.fn().mockResolvedValue(undefined);
-  const ebayFulfillmentService = { createShippingFulfillment } as unknown as EbayFulfillmentService;
+  const ebayFulfillmentService = {
+    createShippingFulfillment,
+    // eBay holds no fulfillment yet (the read that precedes every push).
+    fetchShippingFulfillments: jest.fn().mockResolvedValue([]),
+  } as unknown as EbayFulfillmentService;
   const ebayService = {
     getAccountAccessToken: jest.fn().mockResolvedValue('token'),
   } as unknown as EbayService;

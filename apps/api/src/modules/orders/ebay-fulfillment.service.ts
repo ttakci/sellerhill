@@ -17,7 +17,13 @@ import axios from 'axios';
 
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
-import { readCancellation, readRefunds, type EbayCancelStatus, type EbayOrderRefund } from './ebay-order-changes';
+import {
+  readCancellation,
+  readRefunds,
+  readShipByDate,
+  type EbayCancelStatus,
+  type EbayOrderRefund,
+} from './ebay-order-changes';
 import { parseEbayAmount, sumCollectAndRemitTax } from './ebay-order-financials';
 
 /**
@@ -32,7 +38,12 @@ interface EbayOrderLineItem {
   deliveryCost?: { shippingCost?: { value: string; currency: string } };
   itemUrl?: string;
   sku?: string;
-  lineItemFulfillmentInstructions?: { minEstimatedDeliveryDate?: string; maxEstimatedDeliveryDate?: string };
+  lineItemFulfillmentInstructions?: {
+    minEstimatedDeliveryDate?: string;
+    maxEstimatedDeliveryDate?: string;
+    /** "The latest date and time by which the seller should ship line item". */
+    shipByDate?: string;
+  };
   /** Sales tax eBay collects from the buyer and remits itself. See `sumCollectAndRemitTax`. */
   ebayCollectAndRemitTaxes?: Array<{ amount?: { value?: string; currency?: string } }>;
 }
@@ -105,6 +116,18 @@ interface EbayShipTo {
     postalCode?: string;
     countryCode?: string;
   };
+}
+
+/**
+ * One entry of `getShippingFulfillments` (`ShippingFulfillment` in the local
+ * Fulfillment OpenAPI): which line items it covers and the tracking it carries.
+ */
+export interface EbayShippingFulfillment {
+  fulfillmentId?: string;
+  lineItems?: Array<{ lineItemId?: string; quantity?: number }>;
+  shipmentTrackingNumber?: string;
+  shippingCarrierCode?: string;
+  shippedDate?: string;
 }
 
 /** eBay's documented page ceiling for getOrders ("If a requested limit is more than 200, the call fails"). */
@@ -295,6 +318,12 @@ export class EbayFulfillmentService {
         : this.mapOrderStatus(ebayOrder.orderFulfillmentStatus, ebayOrder.orderPaymentStatus),
       ebayCancelState: cancellation.cancelState,
       ebayCancelledAt: cancellation.cancelledAt,
+      // Populated only on a single-order read (`getOrder`); 0 from `getOrders`.
+      cancelRequestCount: cancellation.cancelRequestCount,
+      // The platform reads ONE line item. The count is kept so a multi-item
+      // order is never bought automatically and says so on its detail page.
+      lineItemCount: ebayOrder.lineItems?.length ?? 0,
+      shipByDate: readShipByDate(lineItem?.lineItemFulfillmentInstructions?.shipByDate),
       ebayRefundedAmount: refunds.refundedAmount,
       ebayRefundedAt: refunds.refundedAt,
       orderFulfillmentStatus: ebayOrder.orderFulfillmentStatus,
@@ -347,6 +376,53 @@ export class EbayFulfillmentService {
       orderDate: ebayOrder.creationDate ? new Date(ebayOrder.creationDate) : null,
       lastEbayEventAt: ebayOrder.lastModifiedDate ? new Date(ebayOrder.lastModifiedDate) : null,
     };
+  }
+
+  /**
+   * The fulfillments eBay already holds for an order (`getShippingFulfillments`).
+   *
+   * Read BEFORE a fulfillment is created: `createShippingFulfillment` is a POST
+   * with no idempotency key and no update endpoint, so a request that timed out
+   * after eBay accepted it — or a local write that failed after a successful
+   * POST — would otherwise be sent a second time. Also what tells us the seller
+   * already marked the order shipped on eBay by hand.
+   *
+   * Metered like every other Fulfillment read. Throws on a transport failure:
+   * "could not read" must never be taken for "nothing there".
+   */
+  async fetchShippingFulfillments(accessToken: string, ebayOrderId: string): Promise<EbayShippingFulfillment[]> {
+    await this.ebayCallBudget.acquire(EbayApiResource.FULFILLMENT, EbayCallPriority.BACKGROUND);
+
+    const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
+    const url = `${baseUrl}/sell/fulfillment/v1/order/${ebayOrderId}/shipping_fulfillment`;
+    try {
+      const response = await axios.get<{ fulfillments?: EbayShippingFulfillment[] }>(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+      return Array.isArray(response.data?.fulfillments) ? response.data.fulfillments : [];
+    } catch (error: unknown) {
+      // A 404 on the fulfillment collection of an order we hold is read as "no
+      // fulfillment exists". The documented answer for that case is an empty
+      // list, and this has not been observed live — but treating a 404 as a
+      // failure would hold EVERY tracking push for ever if eBay answers that
+      // way, which is the worse mistake. Any other failure still throws.
+      const status =
+        error instanceof Error && 'response' in error
+          ? (error as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 404) {
+        this.logger.warn(`eBay answered 404 for the fulfillments of ${ebayOrderId}; read as none`);
+        return [];
+      }
+      this.logger.error(
+        `Failed to read shipping fulfillments for ${ebayOrderId}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
   }
 
   /**

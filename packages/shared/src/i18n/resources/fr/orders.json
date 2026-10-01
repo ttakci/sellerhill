@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Annonce hors limite du forfait",
         "order_already_fulfilled": "Déjà expédiée — rien à acheter",
         "order_not_paid": "En attente du paiement de l'acheteur",
-        "order_cancelled": "Annulée sur eBay — rien à acheter"
+        "order_cancelled": "Annulée sur eBay — rien à acheter",
+        "multi_item_order": "La commande contient plusieurs articles — achetez à la main",
+        "cancel_requested": "L'acheteur a demandé l'annulation — répondez sur eBay",
+        "loss_limit": "Au-dessus de votre limite de perte"
       },
       "reasonLabel": "Motif : {{reason}}",
       "amazonCancelledBadge": "Annulée par Amazon",
@@ -150,6 +153,13 @@
         "confirm": "Lancer l'achat",
         "queued": "L'achat a démarré. Le statut de la commande se met à jour dans quelques minutes.",
         "queuedDryRun": "Un test a démarré. Ce compte Amazon est en mode test : rien ne sera acheté."
+      },
+      "notPurchased": {
+        "button": "Elle n'est pas sur Amazon",
+        "confirmTitle": "Confirmer qu'Amazon n'a aucune commande pour cette vente ?",
+        "confirmDescription": "Ne continuez qu'après avoir consulté les commandes de ce compte Amazon et constaté que la commande n'y figure pas. SellerHill vérifie aussi la liste des commandes du compte et refuse tant que cette vérification n'a pas eu lieu. Ensuite, la commande automatique peut être relancée — si la commande existe bien sur Amazon, l'article sera acheté deux fois.",
+        "confirm": "Oui, elle n'y est pas",
+        "done": "Marquée comme non achetée. Vous pouvez relancer la commande automatique."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Montant remboursé",
       "refundedOn": "Date du remboursement",
       "refundNote": "Montant du remboursement indiqué par eBay. Il n'inclut pas la taxe de vente collectée par eBay ; l'acheteur a donc pu recevoir davantage.",
-      "cancelledAmazonOpenAction": "Une commande Amazon avait déjà été passée pour cette vente. Annulez-la sur Amazon, ou retournez l'article s'il a déjà été expédié."
+      "cancelledAmazonOpenAction": "Une commande Amazon avait déjà été passée pour cette vente. Annulez-la sur Amazon, ou retournez l'article s'il a déjà été expédié.",
+      "shipBy": "Expédier avant le",
+      "shipByNotice": "Date limite d'expédition eBay : {{date}}",
+      "multiItemNotice": "Nombre d'articles dans cette commande eBay : {{count}}. SellerHill ne suit que le premier et n'achète pas cette commande automatiquement — achetez et expédiez les autres articles vous-même."
     },
     "modal": {
       "title": "Saisir les infos de la commande Amazon",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Aucun compte Amazon n'est prêt pour les commandes automatiques. Dans les paramètres, activez les commandes automatiques sur un compte Amazon et définissez un plafond de dépenses.",
       "autoFulfillOverCap": "Cette vente dépasse le plafond de dépenses de votre compte Amazon. Augmentez le plafond dans les paramètres du compte Amazon ou achetez l'article manuellement.",
       "autoFulfillAlreadyStarted": "Le statut de cette commande vient de changer : l'achat a peut-être déjà démarré. Actualisez la page.",
-      "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période."
+      "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période.",
+      "purchaseNotYetChecked": "SellerHill n'a pas encore vérifié les commandes de ce compte Amazon depuis la tentative d'achat. La vérification vient d'être lancée — réessayez dans quelques minutes.",
+      "purchaseNotUnknown": "Cette commande n'attend pas de confirmation d'achat. Elle est peut-être déjà associée ou en cours. Actualisez la page.",
+      "purchaseFoundOnAmazon": "SellerHill a trouvé une commande Amazon pour ce produit, passée vers le moment de la tentative d'achat, mais n'a pas pu la rattacher à cette vente avec certitude. Ouvrez vos commandes Amazon et associez-la à la main. Si cette commande correspond à une autre vente, associez-la d'abord à cette vente."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Achetée · en attente d'expédition",
         "meaning": "Une commande Amazon est liée. En attente de l'expédition par Amazon."
+      },
+      "purchase_unknown": {
+        "label": "Achat non confirmé",
+        "meaning": "Le bouton de commande a été actionné sur Amazon, mais aucune confirmation n'est revenue. La commande existe peut-être.",
+        "action": "Vérifiez d'abord vos commandes Amazon. Si la commande s'y trouve, associez-la. N'achetez pas de nouveau avant d'avoir vérifié."
       },
       "purchase_blocked": {
         "label": "Achat bloqué",

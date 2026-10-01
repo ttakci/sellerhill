@@ -20,6 +20,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
+import { findFulfillmentForLineItem } from '../orders/existing-fulfillment';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
@@ -489,6 +490,34 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     // on a push that cannot be made. A transient failure here throws, so the
     // next tick retries; the stored conversion (if any) is reused then.
     const lineItemId = await this.resolveLineItemId(order, accessToken, ebayAccount.marketplace_id);
+
+    // READ BEFORE WRITE. A fulfillment is a POST with no idempotency key and
+    // no update endpoint, and this method is retried on every tick until the
+    // push is recorded — so a request that timed out after eBay accepted it,
+    // or a local write that failed after a successful POST, would be sent
+    // again. A seller who marked the order shipped on eBay by hand looks the
+    // same. If eBay already holds a fulfillment for the line item, record it
+    // and stop: no conversion is bought and nothing is posted. A read that
+    // fails throws (next tick retries) — "could not read" is not "none".
+    const existing = findFulfillmentForLineItem(
+      await this.ebayFulfillmentService.fetchShippingFulfillments(accessToken, order.ebay_order_id),
+      lineItemId
+    );
+    if (existing) {
+      await this.databaseService.query(
+        `UPDATE orders SET
+           ebay_tracking_pushed_number = COALESCE(ebay_tracking_pushed_number, $1),
+           ebay_tracking_pushed_at = COALESCE(ebay_tracking_pushed_at, CURRENT_TIMESTAMP),
+           updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2`,
+        [existing.shipmentTrackingNumber || null, order.id]
+      );
+      this.logger.log(
+        `eBay order ${order.ebay_order_id} already has a shipping fulfillment` +
+          `${existing.fulfillmentId ? ` (${existing.fulfillmentId})` : ''}; recorded, not sent again`
+      );
+      return { pushed: true };
+    }
 
     // Resolve the number the BUYER sees. `TrackingConversionService` owns this
     // because an external conversion is billed, needs the buyer address, and

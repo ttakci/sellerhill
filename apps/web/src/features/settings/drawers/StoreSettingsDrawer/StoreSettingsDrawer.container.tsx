@@ -77,6 +77,13 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
+  // The loss limit is stored as one nullable number (NULL = no limit, 0 = never
+  // at a loss) but presented as a switch plus an amount, so "off" and "0" are
+  // two visibly different choices.
+  const [lossLimitEnabled, setLossLimitEnabled] = useState(
+    config?.autoFulfillMaxLoss !== null && config?.autoFulfillMaxLoss !== undefined
+  );
+  const [lossLimitAmount, setLossLimitAmount] = useState(config?.autoFulfillMaxLoss ?? 0);
   // The provider is stored as an enum but presented as a single on/off choice:
   // `local` (send the Amazon number as-is) vs `aquiline` (convert it). Showing
   // the seller two vendor names would ask them to pick an implementation
@@ -150,6 +157,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
+      setLossLimitEnabled(next?.autoFulfillMaxLoss !== null && next?.autoFulfillMaxLoss !== undefined);
+      setLossLimitAmount(next?.autoFulfillMaxLoss ?? 0);
       setTrackingConversionEnabled(
         (next?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
           TrackingConversionProvider.LOCAL
@@ -187,6 +196,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         checkBlacklist,
         amazonTaxRate,
         autoFulfillEnabled,
+        // Explicit null turns the limit off; the API reads an OMITTED field as
+        // "leave unchanged", which is what the focused drawers rely on.
+        autoFulfillMaxLoss: lossLimitEnabled ? Math.max(0, lossLimitAmount) : null,
         // Conversion no longer depends on the address at all: the provider
         // requires only `accountOrigin` to create a profile (verified live,
         // 2026-09-02) and we send it no `storeAddress`. The address is still
@@ -301,6 +313,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
+      lossLimitEnabled={lossLimitEnabled}
+      lossLimitAmount={lossLimitAmount}
       trackingConversionEnabled={trackingConversionEnabled}
       onTrackingConversionEnabledChange={handleTrackingConversionEnabledChange}
       trackingConversionScope={trackingConversionScope}
@@ -335,6 +349,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onToggleCheckBlacklist={setCheckBlacklist}
       onAmazonTaxRateChange={(e) => setAmazonTaxRate(Number(e.target.value) || 0)}
       onAutoFulfillEnabledChange={setAutoFulfillEnabled}
+      onLossLimitEnabledChange={setLossLimitEnabled}
+      onLossLimitAmountChange={(e) => setLossLimitAmount(Math.max(0, Number(e.target.value) || 0))}
     />
   );
 };
