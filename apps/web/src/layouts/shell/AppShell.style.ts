@@ -35,7 +35,7 @@ export const LayoutWrapper = styled.div`
  */
 const auroraDriftA = keyframes`
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(10vw, 9vh, 0) scale(1.14); }
+  to { transform: translate3d(10vw, 9vh, 0) scale(1.06); }
 `;
 const auroraDriftB = keyframes`
   from { transform: translate3d(0, 0, 0) scale(1.06); }
