@@ -1,11 +1,16 @@
 import styled from '@emotion/styled';
 
+import { glassSurfaceStrong } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
+  /* The page behind softens, so the frosted panel reads as glass over it
+     rather than a sheet laid on a dimmed photo. */
+  -webkit-backdrop-filter: blur(0.25rem);
+  backdrop-filter: blur(0.25rem);
   display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
   z-index: ${tkn('zIndex.overlay')};
   animation: fadeIn ${tkn('transitions.normal')};
@@ -29,7 +34,14 @@ export const Panel = styled.aside<{ $isOpen: boolean }>`
    * products as users move from one drawer to another.
    */
   max-width: 32rem; /* 512px — canonical drawer width */
-  background: ${tkn('colors.surface.primary')};
+  /*
+   * The strong pane (2026-10-01): 76 % white plus the blur, so the page
+   * behind becomes a soft wash and never legible text under a form — the one
+   * reason drawers stayed opaque in the first glass round. The panel is the
+   * single surface; header, body and footer are transparent over it.
+   */
+  ${({ theme }) => glassSurfaceStrong(theme)}
+  border-width: 0 0 0 0.0625rem;
   box-shadow: ${tkn('shadows.xl')};
   display: flex;
   flex-direction: column;
@@ -51,7 +63,7 @@ export const Header = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
   flex-shrink: 0;
-  background: ${tkn('colors.surface.primary')};
+  background: transparent;
 `;
 
 export const HeaderText = styled.div`
@@ -63,9 +75,9 @@ export const HeaderText = styled.div`
 `;
 
 /**
- * Soft canvas (not pure white) so white borderless cards read clearly.
- * Light: background.primary ≈ #f4f7ff · cards: surface.primary #fff
- * Header + footer stay surface.primary.
+ * Transparent over the panel's own pane: the drawer is ONE surface, and the
+ * cards inside it (`glassSurface`) lift off it the way page cards lift off
+ * the canvas.
  */
 export const Body = styled.div`
   padding: ${tkn('spacing.lg')};
@@ -75,7 +87,7 @@ export const Body = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  background: ${tkn('colors.background.primary')};
+  background: transparent;
 `;
 
 export const Footer = styled.div`
@@ -85,7 +97,7 @@ export const Footer = styled.div`
   justify-content: flex-end;
   gap: ${tkn('spacing.sm-md')};
   flex-shrink: 0;
-  background: ${tkn('colors.surface.primary')};
+  background: transparent;
 `;
 
 export const CloseButton = styled.button`

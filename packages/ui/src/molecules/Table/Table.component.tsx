@@ -106,16 +106,28 @@ export const TableComponent = <T,>({
                     $width={column.width}
                   >
                     <S.ThContent $align={column.align}>
-                      {column.header}
-                      {column.sortable && (
-                        <S.SortIconWrapper onClick={() => onSort(column.key)}>
+                      {column.sortable ? (
+                        /* The whole label is the sort control, not just the
+                           chevron (operator request, 2026-10-01): a 16px icon
+                           was the only hit area and the name beside it did
+                           nothing. */
+                        <S.SortButton
+                          type="button"
+                          onClick={() => onSort(column.key)}
+                          aria-sort={
+                            sortColumn === column.key ? (sortDirection === 'asc' ? 'ascending' : 'descending') : undefined
+                          }
+                        >
+                          {column.header}
                           <S.SortIcon
                             $active={sortColumn === column.key}
                             $rotated={sortColumn === column.key && sortDirection === 'asc'}
                           >
                             <Icon name="chevron-down" size={16} />
                           </S.SortIcon>
-                        </S.SortIconWrapper>
+                        </S.SortButton>
+                      ) : (
+                        column.header
                       )}
                     </S.ThContent>
                   </S.Th>

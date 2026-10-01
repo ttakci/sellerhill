@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { ListingCarouselComponent } from './ListingCarousel.component';
 import type { ListingCarouselProps } from './ListingCarousel.types';
 
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
+
 export const ListingCarousel: React.FC<ListingCarouselProps> = ({
   listings,
   onViewAll,
@@ -34,6 +36,7 @@ export const ListingCarousel: React.FC<ListingCarouselProps> = ({
     [recentListings.length],
   );
   const prevSlide = useCallback(() => setCurrentSlide((prev) => Math.max(prev - 1, 0)), []);
+  const swipeHandlers = useSwipeNavigation(nextSlide, prevSlide);
 
   return (
     <ListingCarouselComponent
@@ -49,6 +52,7 @@ export const ListingCarousel: React.FC<ListingCarouselProps> = ({
       onNext={nextSlide}
       onPrev={prevSlide}
       onGoTo={goToSlide}
+      swipeHandlers={swipeHandlers}
     />
   );
 };

@@ -38,13 +38,16 @@ const lightColors: ThemeColors = {
      */
     /*
      * The aurora (2026-10-01, glass redesign). Three soft colour lights —
-     * brand blue top-left, amber top-right, mint at the foot — over a near-
+     * brand blue top-left, SKY blue top-right, mint at the foot — over a near-
      * white ground. The lights are what the frosted cards blur, so they must
-     * be visible but never loud: every one is a radial wash at ≤ 0.2 alpha.
-     * Still no lavender: blue and amber never meet at the same point.
+     * be visible but never loud. The top-right light was amber at first and
+     * the operator rejected the yellow on sight (2026-10-01); it is now sky
+     * (#0ea5e9, hue ~199) so the two top lights read as one cool wash with a
+     * slight temperature shift, not as two colours. Still no lavender: nothing
+     * here raises R toward B.
      */
     gradient:
-      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.50), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(251, 191, 36, 0.38), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.38), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.20), transparent 62%), linear-gradient(180deg, #e8eff9 0%, #edf2fa 100%)',
+      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.30), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(14, 165, 233, 0.22), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.24), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.12), transparent 62%), linear-gradient(180deg, #f3f6fc 0%, #f7f9fd 100%)',
   },
 
   surface: {

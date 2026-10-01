@@ -1,5 +1,7 @@
 import type { ListingDto } from '@repo/shared';
 
+import type { SwipeNavigationHandlers } from '@/hooks/useSwipeNavigation';
+
 /**
  * Public props for the ListingCarousel container.
  * Consumed by the overview page (Task 4) — slide state is owned internally.
@@ -26,4 +28,6 @@ export interface ListingCarouselComponentProps extends ListingCarouselProps {
   onNext: () => void;
   onPrev: () => void;
   onGoTo: (index: number) => void;
+  /** Touch handlers for swiping between slides on a phone; spread on the viewport. */
+  swipeHandlers: SwipeNavigationHandlers;
 }

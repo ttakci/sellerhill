@@ -29,33 +29,35 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
       aria-label={clickable ? t('returns.viewOrder') : undefined}
     >
       <S.Header>
-        <S.Image>{row.imageUrl ? <img src={row.imageUrl} alt="" /> : <Icon name="image" size={28} />}</S.Image>
-        <S.HeaderText>
-          <S.TitleRow>
-            <S.Title variant="body" weight="semibold" color="text.primary">
-              {row.productTitle}
-            </S.Title>
-            <ReturnBucketBadge bucket={row.bucket} size="sm" />
-          </S.TitleRow>
-          <S.IdRow>
-            <Text variant="caption" color="text.tertiary">
-              {t('returns.columns.return')}
-            </Text>
-            <Text variant="caption" weight="semibold" color="text.primary" numeric>
-              {row.returnId}
-            </Text>
-          </S.IdRow>
-          {row.ebayOrderId && (
+        <S.TitleRow>
+          <S.Title variant="body" weight="semibold" color="text.primary">
+            {row.productTitle}
+          </S.Title>
+          <ReturnBucketBadge bucket={row.bucket} size="sm" />
+        </S.TitleRow>
+        <S.HeaderBody>
+          <S.HeaderText>
             <S.IdRow>
               <Text variant="caption" color="text.tertiary">
-                {t('returns.order')}
+                {t('returns.columns.return')}
               </Text>
-              <Text variant="caption" color="text.secondary" numeric>
-                {row.ebayOrderId}
+              <Text variant="caption" weight="semibold" color="text.primary" numeric>
+                {row.returnId}
               </Text>
             </S.IdRow>
-          )}
-        </S.HeaderText>
+            {row.ebayOrderId && (
+              <S.IdRow>
+                <Text variant="caption" color="text.tertiary">
+                  {t('returns.order')}
+                </Text>
+                <Text variant="caption" color="text.secondary" numeric>
+                  {row.ebayOrderId}
+                </Text>
+              </S.IdRow>
+            )}
+          </S.HeaderText>
+          <S.Image>{row.imageUrl ? <img src={row.imageUrl} alt="" /> : <Icon name="image" size={28} />}</S.Image>
+        </S.HeaderBody>
       </S.Header>
 
       <S.Reason>

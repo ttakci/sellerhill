@@ -20,53 +20,6 @@ export const LabelRow = styled.div`
   min-width: 0;
 `;
 
-/** One collapsible category group in the Settings tab accordion. */
-export const SettingsCategoryCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
-`;
-
-/** Clickable header — the whole row toggles the category, chevron rotates with state. */
-export const SettingsCategoryHeader = styled.button<{ $isOpen: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: ${tkn('spacing.sm')};
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-
-  svg {
-    transition: transform ${tkn('transitions.fast')};
-    transform: ${({ $isOpen }) => ($isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
-    color: ${tkn('colors.text.secondary')};
-    flex-shrink: 0;
-  }
-
-  &:hover svg {
-    color: ${tkn('colors.brand.primary')};
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid ${tkn('colors.brand.primary')};
-    outline-offset: 0.125rem;
-    border-radius: ${tkn('radius.sm')};
-  }
-`;
-
-/** Category title + setting count, grouped so they read as one label. */
-export const SettingsCategoryHeaderTitle = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  min-width: 0;
-`;
-
 export const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -105,12 +58,28 @@ export const Section = styled.section`
   padding-block: ${tkn('spacing.sm')};
 `;
 
+/**
+ * A list of hairline rows on its own pane — warnings, queues, quota bands,
+ * aspect coverage. Rows used to sit bare on the canvas; every other list in
+ * the app lives inside a pane, and the console must read as the same product.
+ */
+export const ListPane = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  padding: 0 ${tkn('spacing.md+')};
+`;
+
 export const Row = styled.div`
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
-  padding-block: ${tkn('spacing.sm')};
-  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  padding-block: ${tkn('spacing.sm-md')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 export const RowMain = styled.div`

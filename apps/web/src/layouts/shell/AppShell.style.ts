@@ -899,13 +899,24 @@ export const ContentArea = styled.main`
  * Feature pages use `PageContainer` with padding: 0 — never double-pad.
  * Title starts at the same inset on every route.
  */
-export const ContentInner = styled.div`
+export const ContentInner = styled.div<{ $fitsViewport?: boolean }>`
   max-width: ${CONTENT_MAX_WIDTH};
   width: 100%;
   margin: 0 auto;
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')} ${tkn('spacing.lg')};
   box-sizing: border-box;
   flex: 1;
+  /* A flex column, so a page that must FIT the content area (the Messages
+     inbox) can take the remaining height with flex: 1 + min-height: 0 and
+     scroll inside its own panes. Every other page is content-high as before:
+     a block child of a flex column keeps its auto height. */
+  display: flex;
+  flex-direction: column;
+  /* On a route that fits the viewport (routeMeta fitsViewport) the
+     automatic minimum is dropped, so the page's own min-height: 0 can take
+     effect and the inbox scrolls inside its panes; everywhere else the
+     automatic minimum keeps the footer below the page's content. */
+  min-height: ${({ $fitsViewport }) => ($fitsViewport ? '0' : 'auto')};
 
   @media (min-width: 48rem) {
     padding: ${tkn('spacing.md')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};
