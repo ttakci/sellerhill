@@ -23,7 +23,7 @@ const parseEnum = <T extends string>(raw: string | null, allowed: T[], fallback:
 /**
  * The folder rail is a client grouping; this is the `conversation_status` it
  * sends to eBay. "All" sends ACTIVE so archived and deleted conversations never
- * appear there; UNREAD and ARCHIVE are filtered by eBay itself.
+ * appear there; UNREAD, ARCHIVE and DELETE are filtered by eBay itself.
  */
 export function folderToStatus(folder: MessagesFolder): EbayConversationStatus {
   if (folder === MessagesFolder.UNREAD) {
@@ -31,6 +31,9 @@ export function folderToStatus(folder: MessagesFolder): EbayConversationStatus {
   }
   if (folder === MessagesFolder.ARCHIVE) {
     return EbayConversationStatus.ARCHIVE;
+  }
+  if (folder === MessagesFolder.DELETED) {
+    return EbayConversationStatus.DELETE;
   }
   return EbayConversationStatus.ACTIVE;
 }

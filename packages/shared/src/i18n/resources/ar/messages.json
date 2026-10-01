@@ -9,7 +9,11 @@
       "ebay": "من eBay",
       "all": "الكل",
       "unread": "غير مقروءة",
-      "archive": "الأرشيف"
+      "archive": "الأرشيف",
+      "inbox": "الوارد",
+      "unreadMembers": "غير مقروءة من الأعضاء",
+      "unreadEbay": "غير مقروءة من eBay",
+      "deleted": "المحذوفة"
     },
     "list": {
       "empty": "لا توجد محادثات هنا بعد.",
@@ -19,7 +23,8 @@
       "listing": "بخصوص {{title}}",
       "select": "تحديد",
       "selectAll": "تحديد الكل",
-      "noStores": "قم بربط متجر eBay لعرض رسائلك."
+      "noStores": "قم بربط متجر eBay لعرض رسائلك.",
+      "emptyDeleted": "لا توجد محادثات محذوفة."
     },
     "thread": {
       "empty": "اختر محادثة لعرضها.",

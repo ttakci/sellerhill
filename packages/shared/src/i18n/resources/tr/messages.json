@@ -9,7 +9,11 @@
       "ebay": "eBay'den",
       "all": "Tümü",
       "unread": "Okunmamış",
-      "archive": "Arşiv"
+      "archive": "Arşiv",
+      "inbox": "Gelen kutusu",
+      "unreadMembers": "Üyelerden okunmamış",
+      "unreadEbay": "eBay'den okunmamış",
+      "deleted": "Silinenler"
     },
     "list": {
       "empty": "Henüz konuşma yok.",
@@ -19,7 +23,8 @@
       "listing": "{{title}} hakkında",
       "select": "Seç",
       "selectAll": "Tümünü seç",
-      "noStores": "Mesajlarınızı görmek için bir eBay mağazası bağlayın."
+      "noStores": "Mesajlarınızı görmek için bir eBay mağazası bağlayın.",
+      "emptyDeleted": "Silinmiş konuşma yok."
     },
     "thread": {
       "empty": "Görüntülemek için bir konuşma seçin.",

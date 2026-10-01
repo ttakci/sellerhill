@@ -50,6 +50,11 @@ export const Toolbar = styled.div`
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   min-width: 0;
+
+  /* Only the rail's stand-in lives here; with the rail shown the row is gone. */
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    display: none;
+  }
 `;
 
 /** The rail's stand-in below `xl`; hidden once the rail itself is shown. */
@@ -63,14 +68,6 @@ export const CompactFilters = styled.div`
   @media (min-width: ${tkn('breakpoints.xl')}) {
     display: none;
   }
-`;
-
-/** Shrink-wraps the Dropdown (its own container is `width: 100%`). */
-export const ToolbarRight = styled.div`
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  margin-left: auto;
 `;
 
 /** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */

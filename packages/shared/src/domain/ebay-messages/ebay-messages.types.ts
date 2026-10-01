@@ -88,4 +88,6 @@ export enum MessagesFolder {
   ALL = 'all',
   UNREAD = 'unread',
   ARCHIVE = 'archive',
+  /** eBay's "Deleted" folder — `conversation_status=DELETE` (2026-10-01, so the rail mirrors eBay's own). */
+  DELETED = 'deleted',
 }

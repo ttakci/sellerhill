@@ -9,7 +9,11 @@
       "ebay": "From eBay",
       "all": "All",
       "unread": "Unread",
-      "archive": "Archive"
+      "archive": "Archive",
+      "inbox": "Inbox",
+      "unreadMembers": "Unread from members",
+      "unreadEbay": "Unread from eBay",
+      "deleted": "Deleted"
     },
     "list": {
       "empty": "No conversations here yet.",
@@ -19,7 +23,8 @@
       "listing": "Regarding {{title}}",
       "select": "Select",
       "selectAll": "Select all",
-      "noStores": "Connect an eBay store to see your messages."
+      "noStores": "Connect an eBay store to see your messages.",
+      "emptyDeleted": "No deleted conversations."
     },
     "thread": {
       "empty": "Select a conversation to view it.",
