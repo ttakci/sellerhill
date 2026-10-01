@@ -22,7 +22,10 @@ export interface ReturnsPageProps {
   hasActiveFilters: boolean;
   resultCount: number;
   isInitialLoading: boolean;
-  /** Opens the order behind a return; a row whose order we do not hold is left inert. */
+  /** Opens the return in the detail drawer. */
   onRowOpen: (row: ReturnRowView) => void;
   onCardKeyDown: (event: React.KeyboardEvent<HTMLDivElement>, row: ReturnRowView) => void;
+  /** The return open in the detail drawer (`?r=`), or null. */
+  selectedReturnId: string | null;
+  onCloseDetail: () => void;
 }

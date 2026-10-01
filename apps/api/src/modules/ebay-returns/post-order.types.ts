@@ -113,3 +113,101 @@ export interface ReturnSearchParams {
   /** ISO 8601, e.g. `2021-05-15T03:52:39.000Z` (the reference's own example). */
   creationDateFrom: string;
 }
+
+/* ── GET /post-order/v2/return/{returnId} (fieldgroups=FULL → `detail` only) ── */
+
+/** eBay `ResponseHistoryAttributesType` (only the fields this module reads). */
+export interface PostOrderResponseHistoryAttributes {
+  partialRefundAmount?: PostOrderAmount;
+  RMA?: string;
+  updatedTrackingNumber?: string;
+}
+
+/** eBay `ReturnResponseHistoryType`. */
+export interface PostOrderResponseHistoryEntry {
+  /** `ActivityOptionEnum`. */
+  activity?: string;
+  attributes?: PostOrderResponseHistoryAttributes;
+  author?: string;
+  creationDate?: PostOrderDateTime;
+  fromState?: string;
+  notes?: string;
+  toState?: string;
+}
+
+/** eBay `ShipmentTrackingType` (only the fields this module reads). */
+export interface PostOrderShipmentTracking {
+  carrierName?: string;
+  carrierUsed?: string;
+  trackingNumber?: string;
+  actualShipDate?: PostOrderDateTime;
+  actualDeliveryDate?: PostOrderDateTime;
+  deliveryStatus?: string;
+  markAsReceived?: boolean;
+  labelId?: string;
+}
+
+/** eBay `ShipmentType`. */
+export interface PostOrderReturnShipmentInfo {
+  allShipmentTrackings?: PostOrderShipmentTracking[];
+}
+
+/** eBay `ReturnCloseInfoType`. */
+export interface PostOrderReturnCloseInfo {
+  returnCloseDate?: PostOrderDateTime;
+  returnCloseReason?: string;
+}
+
+/** eBay `ReturnItemDetailType` (only the field this module reads). */
+export interface PostOrderReturnItemDetail {
+  itemPrice?: PostOrderAmount;
+}
+
+/**
+ * eBay `ReturnDetailType` — the `detail` container. It carries every field of
+ * the search summary (same names) plus the history, the shipment and the
+ * closing information.
+ */
+export interface PostOrderReturnDetail extends PostOrderReturnSummary {
+  responseHistory?: PostOrderResponseHistoryEntry[];
+  returnShipmentInfo?: PostOrderReturnShipmentInfo;
+  closeInfo?: PostOrderReturnCloseInfo;
+  itemDetail?: PostOrderReturnItemDetail;
+}
+
+/** eBay `GetDetailResponse`. */
+export interface PostOrderReturnDetailResponse {
+  detail?: PostOrderReturnDetail;
+}
+
+/* ── Write bodies (docs/ebay-reference/post-order/post-order_v2_return-returnid_*__post.txt) ── */
+
+/** `POST …/decide` — `DecideReturnRequest`. Only the documented APPROVE decision is sent. */
+export interface PostOrderDecideReturnRequest {
+  decision: 'APPROVE';
+  comments?: PostOrderText;
+}
+
+/** `POST …/issue_refund` — `IssueRefundRequest`. */
+export interface PostOrderIssueRefundRequest {
+  refundDetail: {
+    itemizedRefundDetail: Array<{
+      refundAmount: PostOrderAmount;
+      /** `RefundFeeTypeEnum`; the reference's own sample uses `PURCHASE_PRICE`. */
+      refundFeeType: string;
+    }>;
+    /** "should equal the sum of the values in the itemizedRefundDetail.refundAmount field(s)". */
+    totalAmount: PostOrderAmount;
+  };
+  comments?: PostOrderText;
+}
+
+/** `POST …/mark_as_received` — comments only. */
+export interface PostOrderMarkReceivedRequest {
+  comments?: PostOrderText;
+}
+
+/** `refundStatus` in the decide / issue_refund answers (`Refund_MoneyMovementStatusEnum`). */
+export interface PostOrderRefundStatusResponse {
+  refundStatus?: string;
+}

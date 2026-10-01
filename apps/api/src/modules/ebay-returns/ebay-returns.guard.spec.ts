@@ -3,9 +3,12 @@
 // Source-grep invariants for the eBay returns module. Each one is a rule a
 // mocked unit test would keep passing after it was broken:
 //
-//   1. The module only READS from eBay. A Post-Order write (issue_refund,
-//      decide, mark_as_received) moves real money or settles a buyer's claim
-//      on a real seller's store, and must never appear here by accident.
+//   1. Exactly five Post-Order calls exist, all documented locally, and the
+//      three WRITES (decide, mark_as_received, issue_refund) live in the
+//      client alone, are sent once (never inside the retry wrapper) and are
+//      reached only through `EbayReturnsActionsService.act`, which checks the
+//      operator's switch, suspension and eBay's own option list BEFORE the
+//      call. A write that moves real money must never appear anywhere else.
 //   2. Post-Order takes the user token with the `IAF ` prefix. The prefix the
 //      other eBay REST APIs use is rejected — every call would fail.
 //   3. Every seller-facing read is scoped to the calling user.
@@ -59,32 +62,102 @@ describe('ebay-returns module invariants', () => {
     );
   });
 
-  describe('read-only against eBay', () => {
-    it.each(SOURCE_FILES)('%s issues no HTTP write', (file) => {
+  describe('the five documented Post-Order calls, and no other', () => {
+    const WRITE_FILES = SOURCE_FILES.filter((file) => file !== 'post-order.client.ts');
+
+    it.each(WRITE_FILES)('%s issues no HTTP call of its own', (file) => {
       const code = stripComments(source(file));
-      // axios.post( / http.put<T>( / client.delete( / .patch( / .request(
-      expect(code).not.toMatch(/\.(post|put|delete|patch|request)\s*[<(]/);
-      // axios({ method: 'POST' }) and friends.
+      // axios.post( / http.put<T>( / client.delete( / .patch( / .request( / axios.get(
+      expect(code).not.toMatch(/\baxios\b/);
+      // An HTTP verb call: `.post(` / `.put<T>(`, but not a Map's own `.delete(id)`.
+      expect(code).not.toMatch(/\.(post|put|patch|request)\s*[<(]/);
+      expect(code).not.toMatch(/(?<!Cache)\.delete\s*[<(]/);
       expect(code).not.toMatch(/method\s*:\s*['"`](post|put|delete|patch)['"`]/i);
     });
 
-    it('calls exactly one Post-Order path, and it is the return search', () => {
+    it('names exactly the documented paths, and only in the client', () => {
       const paths = SOURCE_FILES.flatMap(
-        (file) => stripComments(source(file)).match(/\/post-order\/v2\/[\w/{}$.-]*/g) ?? []
+        (file) => stripComments(source(file)).match(/\/post-order\/v2\/[\w/{}$.()-]*/g) ?? []
       );
-      expect(paths).toEqual(['/post-order/v2/return/search']);
+      expect(paths.sort()).toEqual(
+        [
+          '/post-order/v2/return/search',
+          '/post-order/v2/return/${encodeURIComponent(returnId)}',
+          '/post-order/v2/return/${pathUnderReturn}',
+        ].sort()
+      );
+      const client = stripComments(source('post-order.client.ts'));
+      // The three write suffixes, each exactly once, each a documented page.
+      for (const suffix of ['/decide', '/mark_as_received', '/issue_refund']) {
+        expect(client.match(new RegExp(`\\$\\{encodeURIComponent\\(returnId\\)\\}${suffix}\``, 'g'))).toHaveLength(1);
+      }
+      expect(client).not.toMatch(/escalate|send_message|add_shipping_label|file\/upload|mark_refund_sent|preference/);
     });
 
-    it('reaches it with GET', () => {
-      expect(stripComments(source('post-order.client.ts'))).toMatch(
-        /axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/search`/
-      );
+    it('reads with GET and writes with ONE un-retried POST', () => {
+      const client = stripComments(source('post-order.client.ts'));
+      expect(client).toMatch(/axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/search`/);
+      expect(client).toMatch(/axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/\$\{encodeURIComponent\(returnId\)\}`/);
+      // The one POST, in the private `write`, outside withEbayRateLimitRetry.
+      expect(client.match(/axios\.post</g)).toHaveLength(1);
+      const writeStart = client.indexOf('private async write(');
+      const postAt = client.indexOf('axios.post<', writeStart);
+      expect(writeStart).toBeGreaterThan(-1);
+      expect(postAt).toBeGreaterThan(writeStart);
+      expect(client.slice(writeStart, postAt)).not.toContain('withEbayRateLimitRetry');
+      // Charged before it goes out, at the seller's priority.
+      expect(client.slice(writeStart, postAt)).toContain('await this.chargeReturn(EbayCallPriority.INTERACTIVE)()');
+      // Only APPROVE is ever decided — the decline value is not in the local reference.
+      expect(source('post-order.types.ts')).toContain("decision: 'APPROVE';");
     });
 
-    it('exposes only GET routes to the seller', () => {
+    it('exposes exactly one write route, the action route', () => {
       const controller = stripComments(source('ebay-returns.controller.ts'));
       expect(controller).toMatch(/@Get\(/);
-      expect(controller).not.toMatch(/@(Post|Put|Patch|Delete|All)\(/);
+      expect(controller.match(/@(Post|Put|Patch|Delete|All)\(/g)).toEqual(['@Post(']);
+      expect(controller).toContain("@Post(':id/actions/:action')");
+      expect(controller).toContain('isEbayReturnAction(action)');
+    });
+
+    it('gates every write: switch → suspension → sandbox → live option list → one call → audit', () => {
+      const code = stripComments(source('ebay-returns-actions.service.ts'));
+      const act = code.slice(code.indexOf('async act('), code.indexOf('private assertOffered('));
+      const order = [
+        'this.actionsEnabled()',
+        'this.quotaEnforcement.isSuspended(userId)',
+        'this.postOrder.isReturnSearchSupported()',
+        'this.readLiveOrThrow(userId, id, true)',
+        'this.assertOffered(live, action)',
+        'this.ebay.getAccountAccessToken(',
+        'this.postOrder.decideReturn(',
+        'this.postOrder.markReturnReceived(',
+        'this.postOrder.issueReturnRefund(',
+        "outcome: 'sent'",
+      ].map((needle) => act.indexOf(needle));
+      for (const index of order) {
+        expect(index).toBeGreaterThan(-1);
+      }
+      expect([...order]).toEqual([...order].sort((a, b) => a - b));
+      // The live read before a write is never the cached one.
+      expect(act).not.toContain('this.readLive(userId, id, false)');
+      // Approve sends the documented decision and nothing else.
+      expect(act).toContain("decision: 'APPROVE'");
+      expect(code).not.toMatch(/decision:\s*['"`](DECLINE|OFFER_PARTIAL_REFUND|PROVIDE_RMA)/);
+    });
+
+    it('refunds eBay’s own computed amount as one purchase-price line', () => {
+      const code = stripComments(source('ebay-returns-actions.service.ts'));
+      expect(code).toContain("export const REFUND_FEE_TYPE_PURCHASE_PRICE = 'PURCHASE_PRICE';");
+      expect(code).toContain('Number(live.row.estimatedRefundAmount)');
+      expect(code).toContain('totalAmount: { value, currency }');
+    });
+
+    it('scopes its own reads to the caller', () => {
+      for (const literal of templateLiterals(source('ebay-returns-actions.service.ts')).filter((l) =>
+        /\bFROM ebay_returns\b/.test(l)
+      )) {
+        expect(literal).toContain('WHERE r.user_id = $1');
+      }
     });
   });
 
@@ -108,9 +181,11 @@ describe('ebay-returns module invariants', () => {
       expect(client).toContain("'X-EBAY-C-MARKETPLACE-ID': marketplaceId");
     });
 
-    it('charges the shared Post-Order quota at background priority', () => {
-      expect(client).toContain('this.budget.acquire(EbayApiResource.POST_ORDER_RETURN, EbayCallPriority.BACKGROUND)');
+    it('charges the shared Post-Order quota: the sweep at background priority, a seller at interactive', () => {
+      expect(client).toContain('this.budget.acquire(EbayApiResource.POST_ORDER_RETURN, priority)');
+      expect(client).toContain('priority: EbayCallPriority = EbayCallPriority.BACKGROUND');
       expect(client).toContain('acquireBudget: this.chargeReturn()');
+      expect(client.match(/this\.chargeReturn\(EbayCallPriority\.INTERACTIVE\)/g)).toHaveLength(2);
     });
 
     it('never sends `offset` — its documented meaning is ambiguous, so only the first page is read', () => {
@@ -129,8 +204,8 @@ describe('ebay-returns module invariants', () => {
     const statements = templateLiterals(service).filter((literal) => /\bFROM ebay_returns\b/.test(literal));
 
     it('finds the statements it is checking', () => {
-      // The count, the page and the bucket counts.
-      expect(statements.length).toBeGreaterThanOrEqual(3);
+      // The count, the page, the single row and the bucket counts.
+      expect(statements.length).toBeGreaterThanOrEqual(4);
     });
 
     it('scopes every statement over ebay_returns by user_id', () => {
@@ -143,7 +218,7 @@ describe('ebay-returns module invariants', () => {
     it('binds the caller as the first parameter of every query', () => {
       const code = stripComments(service);
       const seeds = code.match(/const params: QueryParam\[\] = \[[^\]]*\];/g) ?? [];
-      expect(seeds.length).toBeGreaterThanOrEqual(2);
+      expect(seeds.length).toBeGreaterThanOrEqual(3);
       for (const seed of seeds) {
         expect(seed).toBe('const params: QueryParam[] = [userId];');
       }
@@ -169,8 +244,8 @@ describe('ebay-returns module invariants', () => {
       expect(controller).toContain('@UseGuards(JwtAuthGuard)');
       expect(controller).not.toContain('OperatorSurface');
       // Every handler passes the authenticated user id, never one from the query string.
-      const handlers = stripComments(controller).match(/this\.returns\.\w+\([^,)]+/g) ?? [];
-      expect(handlers.length).toBeGreaterThanOrEqual(2);
+      const handlers = stripComments(controller).match(/this\.(returns|actions)\.\w+\([^,)]+/g) ?? [];
+      expect(handlers.length).toBeGreaterThanOrEqual(4);
       for (const handler of handlers) {
         expect(handler).toMatch(/\(req\.user\.sub$/);
       }
@@ -180,8 +255,8 @@ describe('ebay-returns module invariants', () => {
       const controller = stripComments(source('ebay-returns.controller.ts'));
       const counts = controller.indexOf("@Get('counts')");
       expect(counts).toBeGreaterThan(-1);
-      expect(controller).not.toMatch(/@Get\('[^']*:/);
       expect(counts).toBeLessThan(controller.indexOf('@Get()'));
+      expect(counts).toBeLessThan(controller.indexOf("@Get(':id/detail')"));
     });
   });
 

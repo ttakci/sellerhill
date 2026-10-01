@@ -4,7 +4,7 @@
     "subtitle_one": "{{count}} return",
     "subtitle_other": "{{count}} returns",
     "loading": "Loading returns…",
-    "notice": "Respond to returns on eBay. This page shows what is due and by when.",
+    "notice": "Open a return to see its history and what eBay is waiting for. Where eBay allows it, you can approve it, mark it received or refund from here; everything else is answered on eBay.",
     "tabs": {
       "all": "All",
       "action": "Needs action",
@@ -60,7 +60,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Refund the buyer (the item is not expected back)",
       "REMINDER_FOR_RMA": "RMA reminder: respond on eBay",
       "REMINDER_SELLER_TO_RESPOND": "Respond to the return request",
-      "other": "Respond on eBay"
+      "other": "Respond on eBay",
+      "SELLER_SEND_MESSAGE": "Send the buyer a message",
+      "SELLER_ESCALATE": "Escalate to eBay",
+      "SELLER_OFFER_REPLACEMENT": "Offer a replacement"
     },
     "dueBy": "by {{date}}",
     "reasonType": {
@@ -89,6 +92,114 @@
       "title": "No returns match your filters",
       "description": "Try another tab, store or search term.",
       "action": "Clear filters"
+    },
+    "detail": {
+      "title": "Return {{id}}",
+      "titleLoading": "Return",
+      "open": "Open return",
+      "loadFailed": "This return could not be loaded",
+      "loadFailedDescription": "Try again in a moment, or open it on eBay.",
+      "offline": "eBay could not be reached just now, so this is the last state SellerHill saw. Actions are offered once eBay answers again.",
+      "whatYouCanDo": "What you can do",
+      "nothingToDo": "Nothing is waiting for you on this return.",
+      "openOnEbay": "Open on eBay",
+      "alsoOnEbay": "Also on eBay: {{options}}",
+      "buyer": "Buyer",
+      "quantity": "Quantity",
+      "returnType": "Return type",
+      "itemPrice": "Item price",
+      "closedAs": "Closed as",
+      "closedAt": "Closed on",
+      "shipment": "Return shipment",
+      "shippedAt": "Shipped",
+      "deliveredAt": "Delivered",
+      "markedReceived": "Marked as received",
+      "yes": "Yes",
+      "no": "No",
+      "journey": "Journey",
+      "journeyEmpty": "eBay has not recorded any step yet.",
+      "partialRefundOffered": "Offered a partial refund of {{amount}}",
+      "trackingNumber": "Tracking {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Approve return",
+        "mark_received": "Mark as received",
+        "issue_refund": "Issue refund"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Refund {{amount}}"
+      },
+      "confirm": {
+        "approve": "Approve this return request on eBay? The buyer will be told to send the item back.",
+        "mark_received": "Tell eBay the returned item has arrived? Do this only once you have it in hand.",
+        "issue_refund": "Refund {{amount}} to the buyer now? eBay moves the money as soon as it accepts this, and it cannot be undone from here."
+      },
+      "done": {
+        "approve": "The return was approved on eBay.",
+        "mark_received": "The item was marked as received on eBay.",
+        "issue_refund": "The refund was issued on eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Buyer opened the return",
+      "BUYER_PRINT_SHIPPING_LABEL": "Buyer printed the shipping label",
+      "BUYER_PROVIDE_TRACKING_INFO": "Buyer added tracking",
+      "BUYER_MARK_RETURN_SHIPPED": "Buyer marked the item as shipped",
+      "BUYER_ESCALATE": "Buyer escalated to eBay",
+      "BUYER_CLOSE_RETURN": "Buyer closed the return",
+      "BUYER_SEND_MESSAGE": "Buyer sent a message",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Buyer accepted the partial refund",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Buyer declined the partial refund",
+      "BUYER_MARK_REFUND_RECEIVED": "Buyer confirmed the refund arrived",
+      "SELLER_APPROVE_REQUEST": "Seller approved the return",
+      "SELLER_DECLINE_REQUEST": "Seller declined the return",
+      "SELLER_ISSUE_REFUND": "Seller issued the refund",
+      "SELLER_MARK_AS_RECEIVED": "Seller marked the item as received",
+      "SELLER_OFFER_PARTIAL_REFUND": "Seller offered a partial refund",
+      "SELLER_PROVIDE_RMA": "Seller provided an RMA number",
+      "SELLER_PROVIDE_LABEL": "Seller provided a shipping label",
+      "SELLER_SEND_MESSAGE": "Seller sent a message",
+      "SELLER_ESCALATE": "Seller escalated to eBay",
+      "SELLER_OFFER_REPLACEMENT": "Seller offered a replacement",
+      "SELLER_PROVIDE_TRACKING_INFO": "Seller added tracking",
+      "SYSTEM_CREATE_RETURN": "eBay opened the return",
+      "SYSTEM_CLOSE_RETURN": "eBay closed the return",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay refunded the buyer immediately",
+      "SYSTEM_INITIATED_REFUND": "eBay issued the refund",
+      "EBAY_RULE_AUTO_APPROVE": "eBay approved the return automatically",
+      "buyerOther": "Buyer step",
+      "sellerOther": "Seller step",
+      "ebayOther": "eBay step"
+    },
+    "returnType": {
+      "MONEY_BACK": "Money back",
+      "REPLACEMENT": "Replacement",
+      "EXCHANGE": "Exchange"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Fully refunded",
+      "PARTIAL_REFUNDED": "Partially refunded",
+      "NO_REFUND": "Closed without a refund",
+      "other": "Closed"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Delivered",
+      "IN_TRANSIT": "In transit",
+      "OUT_FOR_DELIVERY": "Out for delivery",
+      "NOT_SHIPPED": "Not shipped yet",
+      "SHIPPED": "Shipped"
+    },
+    "errors": {
+      "actionsDisabled": "In-app return actions are switched off on this platform. Answer the return on eBay.",
+      "actionNotAvailable": "eBay no longer offers this action on the return. Refresh and check what is waiting now.",
+      "suspended": "Your subscription is suspended, so return actions are paused. Settle the invoice on the Billing page.",
+      "ebayRejected": "eBay refused this action. Open the return on eBay to see why.",
+      "unavailable": "eBay could not be reached. Try again in a moment.",
+      "sandbox": "Return actions are not available on the eBay sandbox.",
+      "refundAmountUnknown": "eBay did not report a refund amount for this return, so the refund has to be issued on eBay.",
+      "notFound": "This return was not found."
     }
   }
 }

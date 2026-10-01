@@ -1,2 +1,7 @@
 export { ReturnsPageContainer } from './ReturnsPage';
-export { useGetReturnCountsQuery, useGetReturnsQuery } from './api/returns.api';
+export {
+  useActOnReturnMutation,
+  useGetReturnCountsQuery,
+  useGetReturnDetailQuery,
+  useGetReturnsQuery,
+} from './api/returns.api';

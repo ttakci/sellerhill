@@ -43,6 +43,7 @@ import {
   DEMO_LISTINGS,
   DEMO_ORDERS,
   demoOrderTimeline,
+  demoReturnDetail,
   DEMO_PREDEFINED_TEMPLATES,
   DEMO_PROFILE,
   DEMO_RETURNS,
@@ -575,6 +576,12 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/returns/counts') {
     return ok(countReturnBuckets(params));
+  }
+
+  const returnDetail = /^\/returns\/(demo-return-[\w-]+)\/detail$/.exec(path);
+  if (returnDetail) {
+    const found = DEMO_RETURNS.find((r) => r.id === returnDetail[1]);
+    return found ? ok(demoReturnDetail(found)) : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
   const orderDetail = /^\/orders\/(demo-order-[\w-]+)$/.exec(path);

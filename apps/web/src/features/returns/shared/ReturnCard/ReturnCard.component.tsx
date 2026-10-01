@@ -26,7 +26,7 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
       onKeyDown={clickable ? onKeyDown : undefined}
       role={clickable ? 'button' : undefined}
       tabIndex={clickable ? 0 : undefined}
-      aria-label={clickable ? t('returns.viewOrder') : undefined}
+      aria-label={clickable ? t('returns.detail.open') : undefined}
     >
       <S.Header>
         <S.TitleRow>

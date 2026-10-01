@@ -4,7 +4,7 @@
     "subtitle_one": "{{count}} ریٹرن",
     "subtitle_other": "{{count}} ریٹرنز",
     "loading": "ریٹرنز لوڈ ہو رہے ہیں…",
-    "notice": "ریٹرنز کا جواب eBay پر دیں۔ یہ صفحہ دکھاتا ہے کہ آپ سے کیا درکار ہے اور کب تک۔",
+    "notice": "کسی ریٹرن کو کھولیں تاکہ اس کی تاریخ اور eBay کیا چاہتا ہے، دیکھ سکیں۔ جہاں eBay اجازت دے، آپ یہیں سے اسے منظور کر سکتے ہیں، موصول ہونے کا نشان لگا سکتے ہیں یا ریفنڈ دے سکتے ہیں؛ باقی سب eBay پر کیا جاتا ہے۔",
     "tabs": {
       "all": "سب",
       "action": "کارروائی درکار",
@@ -60,7 +60,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "خریدار کو ریفنڈ کریں (آئٹم کی واپسی متوقع نہیں)",
       "REMINDER_FOR_RMA": "RMA یاد دہانی: eBay پر جواب دیں",
       "REMINDER_SELLER_TO_RESPOND": "ریٹرن کی درخواست کا جواب دیں",
-      "other": "eBay پر جواب دیں"
+      "other": "eBay پر جواب دیں",
+      "SELLER_SEND_MESSAGE": "خریدار کو پیغام بھیجیں",
+      "SELLER_ESCALATE": "eBay کے حوالے کریں",
+      "SELLER_OFFER_REPLACEMENT": "متبادل پیش کریں"
     },
     "dueBy": "{{date}} تک",
     "reasonType": {
@@ -89,6 +92,114 @@
       "title": "کوئی ریٹرن آپ کے فلٹرز سے مطابقت نہیں رکھتا",
       "description": "کوئی دوسرا ٹیب، سٹور یا تلاش آزمائیں۔",
       "action": "فلٹرز صاف کریں"
+    },
+    "detail": {
+      "title": "ریٹرن {{id}}",
+      "titleLoading": "ریٹرن",
+      "open": "ریٹرن کھولیں",
+      "loadFailed": "یہ ریٹرن لوڈ نہیں ہو سکا",
+      "loadFailedDescription": "تھوڑی دیر بعد دوبارہ کوشش کریں یا اسے eBay پر کھولیں۔",
+      "offline": "ابھی eBay سے رابطہ نہیں ہو سکا؛ یہ SellerHill کی معلوم آخری حالت ہے۔ eBay کے دوبارہ جواب دینے پر کارروائیاں پیش کی جائیں گی۔",
+      "whatYouCanDo": "آپ کیا کر سکتے ہیں",
+      "nothingToDo": "اس ریٹرن میں آپ سے کچھ درکار نہیں۔",
+      "openOnEbay": "eBay پر کھولیں",
+      "alsoOnEbay": "eBay پر یہ بھی: {{options}}",
+      "buyer": "خریدار",
+      "quantity": "تعداد",
+      "returnType": "ریٹرن کی قسم",
+      "itemPrice": "آئٹم کی قیمت",
+      "closedAs": "اس طور بند",
+      "closedAt": "بند ہونے کی تاریخ",
+      "shipment": "ریٹرن شپمنٹ",
+      "shippedAt": "بھیجا گیا",
+      "deliveredAt": "ڈیلیور ہوا",
+      "markedReceived": "موصول ہونے کا نشان لگا",
+      "yes": "ہاں",
+      "no": "نہیں",
+      "journey": "مراحل",
+      "journeyEmpty": "eBay نے ابھی کوئی مرحلہ درج نہیں کیا۔",
+      "partialRefundOffered": "{{amount}} کے جزوی ریفنڈ کی پیشکش کی گئی",
+      "trackingNumber": "ٹریکنگ {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "ریٹرن منظور کریں",
+        "mark_received": "موصول ہونے کا نشان لگائیں",
+        "issue_refund": "ریفنڈ جاری کریں"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "{{amount}} ریفنڈ کریں"
+      },
+      "confirm": {
+        "approve": "یہ ریٹرن درخواست eBay پر منظور کریں؟ خریدار سے آئٹم واپس بھیجنے کو کہا جائے گا۔",
+        "mark_received": "eBay کو بتائیں کہ واپس کیا گیا آئٹم پہنچ گیا ہے؟ یہ تبھی کریں جب آئٹم آپ کے پاس ہو۔",
+        "issue_refund": "خریدار کو ابھی {{amount}} ریفنڈ کریں؟ eBay قبول کرتے ہی رقم منتقل کر دیتا ہے اور اسے یہاں سے واپس نہیں لیا جا سکتا۔"
+      },
+      "done": {
+        "approve": "ریٹرن eBay پر منظور ہو گیا۔",
+        "mark_received": "آئٹم eBay پر موصول ہونے کے طور پر نشان زد ہو گیا۔",
+        "issue_refund": "ریفنڈ eBay پر جاری ہو گیا۔"
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "خریدار نے ریٹرن کھولا",
+      "BUYER_PRINT_SHIPPING_LABEL": "خریدار نے شپنگ لیبل پرنٹ کیا",
+      "BUYER_PROVIDE_TRACKING_INFO": "خریدار نے ٹریکنگ شامل کی",
+      "BUYER_MARK_RETURN_SHIPPED": "خریدار نے آئٹم کو بھیجا گیا نشان زد کیا",
+      "BUYER_ESCALATE": "خریدار نے معاملہ eBay کے حوالے کیا",
+      "BUYER_CLOSE_RETURN": "خریدار نے ریٹرن بند کیا",
+      "BUYER_SEND_MESSAGE": "خریدار نے پیغام بھیجا",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "خریدار نے جزوی ریفنڈ قبول کیا",
+      "BUYER_DECLINE_PARTIAL_REFUND": "خریدار نے جزوی ریفنڈ مسترد کیا",
+      "BUYER_MARK_REFUND_RECEIVED": "خریدار نے ریفنڈ ملنے کی تصدیق کی",
+      "SELLER_APPROVE_REQUEST": "بیچنے والے نے ریٹرن منظور کیا",
+      "SELLER_DECLINE_REQUEST": "بیچنے والے نے ریٹرن مسترد کیا",
+      "SELLER_ISSUE_REFUND": "بیچنے والے نے ریفنڈ جاری کیا",
+      "SELLER_MARK_AS_RECEIVED": "بیچنے والے نے آئٹم کو موصول نشان زد کیا",
+      "SELLER_OFFER_PARTIAL_REFUND": "بیچنے والے نے جزوی ریفنڈ کی پیشکش کی",
+      "SELLER_PROVIDE_RMA": "بیچنے والے نے RMA نمبر دیا",
+      "SELLER_PROVIDE_LABEL": "بیچنے والے نے شپنگ لیبل فراہم کیا",
+      "SELLER_SEND_MESSAGE": "بیچنے والے نے پیغام بھیجا",
+      "SELLER_ESCALATE": "بیچنے والے نے معاملہ eBay کے حوالے کیا",
+      "SELLER_OFFER_REPLACEMENT": "بیچنے والے نے متبادل پیش کیا",
+      "SELLER_PROVIDE_TRACKING_INFO": "بیچنے والے نے ٹریکنگ شامل کی",
+      "SYSTEM_CREATE_RETURN": "eBay نے ریٹرن کھولا",
+      "SYSTEM_CLOSE_RETURN": "eBay نے ریٹرن بند کیا",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay نے خریدار کو فوری ریفنڈ دیا",
+      "SYSTEM_INITIATED_REFUND": "eBay نے ریفنڈ جاری کیا",
+      "EBAY_RULE_AUTO_APPROVE": "eBay نے ریٹرن خودکار طور پر منظور کیا",
+      "buyerOther": "خریدار کا مرحلہ",
+      "sellerOther": "بیچنے والے کا مرحلہ",
+      "ebayOther": "eBay کا مرحلہ"
+    },
+    "returnType": {
+      "MONEY_BACK": "رقم کی واپسی",
+      "REPLACEMENT": "متبادل",
+      "EXCHANGE": "تبادلہ"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "پورا ریفنڈ ہوا",
+      "PARTIAL_REFUNDED": "جزوی ریفنڈ ہوا",
+      "NO_REFUND": "بغیر ریفنڈ بند",
+      "other": "بند"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "ڈیلیور ہوا",
+      "IN_TRANSIT": "راستے میں",
+      "OUT_FOR_DELIVERY": "ڈیلیوری کے لیے نکلا",
+      "NOT_SHIPPED": "ابھی بھیجا نہیں گیا",
+      "SHIPPED": "بھیجا گیا"
+    },
+    "errors": {
+      "actionsDisabled": "اس پلیٹ فارم پر ایپ کے اندر ریٹرن کارروائیاں بند ہیں۔ ریٹرن کا جواب eBay پر دیں۔",
+      "actionNotAvailable": "eBay اب اس ریٹرن پر یہ کارروائی پیش نہیں کر رہا۔ ریفریش کریں اور دیکھیں کہ اب کیا درکار ہے۔",
+      "suspended": "آپ کی سبسکرپشن معطل ہے، اس لیے ریٹرن کارروائیاں رکی ہوئی ہیں۔ بلنگ صفحے پر انوائس ادا کریں۔",
+      "ebayRejected": "eBay نے یہ کارروائی مسترد کر دی۔ وجہ دیکھنے کے لیے ریٹرن eBay پر کھولیں۔",
+      "unavailable": "eBay سے رابطہ نہیں ہو سکا۔ تھوڑی دیر بعد دوبارہ کوشش کریں۔",
+      "sandbox": "eBay سینڈ باکس میں ریٹرن کارروائیاں دستیاب نہیں ہیں۔",
+      "refundAmountUnknown": "eBay نے اس ریٹرن کے لیے ریفنڈ کی رقم نہیں بتائی، اس لیے ریفنڈ eBay پر جاری کرنا ہوگا۔",
+      "notFound": "یہ ریٹرن نہیں ملا۔"
     }
   }
 }

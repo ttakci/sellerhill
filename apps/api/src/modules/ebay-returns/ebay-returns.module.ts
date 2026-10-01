@@ -8,6 +8,7 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
 
+import { EbayReturnsActionsService } from './ebay-returns-actions.service';
 import { EbayReturnsSyncProcessor } from './ebay-returns-sync.processor';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import { EBAY_RETURNS_SYNC_QUEUE } from './ebay-returns.constants';
@@ -17,9 +18,10 @@ import { PostOrderClient } from './post-order.client';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 /**
- * eBay returns (read only): the Post-Order client, the periodic sweep that
- * copies each store's returns into `ebay_returns`, and the `returns` routes
- * the seller's page reads.
+ * eBay returns: the Post-Order client, the periodic sweep that copies each
+ * store's returns into `ebay_returns`, the `returns` routes the seller's page
+ * reads, and the three in-app actions (`EbayReturnsActionsService`, behind the
+ * `ebay.returns.actionsEnabled` switch).
  *
  * Imports only EbayModule (the per-store token) and BillingModule (the
  * suspension check) — EbayModule already imports BillingModule, and nothing
@@ -41,6 +43,7 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
     EbayReturnsSyncService,
     EbayReturnsSyncProcessor,
     EbayReturnsService,
+    EbayReturnsActionsService,
   ],
   // The schedule is exported for the Action Center, which must call a return
   // stale on the very interval the sweep refreshes it at.

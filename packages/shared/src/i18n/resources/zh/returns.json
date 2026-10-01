@@ -3,7 +3,7 @@
     "title": "退货",
     "subtitle_other": "{{count}} 笔退货",
     "loading": "正在加载退货…",
-    "notice": "请在 eBay 上处理退货。此页面显示需要您做什么以及截止时间。",
+    "notice": "打开一条退货即可查看其历史记录以及 eBay 正在等待什么。在 eBay 允许的情况下，您可以在这里批准退货、标记为已收到或发放退款；其他操作均在 eBay 上完成。",
     "tabs": {
       "all": "全部",
       "action": "需要处理",
@@ -58,7 +58,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "向买家退款（买家无需寄回商品）",
       "REMINDER_FOR_RMA": "RMA 提醒：请在 eBay 上回复",
       "REMINDER_SELLER_TO_RESPOND": "回复退货请求",
-      "other": "请在 eBay 上回复"
+      "other": "请在 eBay 上回复",
+      "SELLER_SEND_MESSAGE": "给买家发消息",
+      "SELLER_ESCALATE": "升级至 eBay",
+      "SELLER_OFFER_REPLACEMENT": "提供替换品"
     },
     "dueBy": "截止 {{date}}",
     "reasonType": {
@@ -87,6 +90,114 @@
       "title": "没有符合筛选条件的退货",
       "description": "请尝试其他标签页、店铺或搜索词。",
       "action": "清除筛选"
+    },
+    "detail": {
+      "title": "退货 {{id}}",
+      "titleLoading": "退货",
+      "open": "打开退货",
+      "loadFailed": "无法加载此退货",
+      "loadFailedDescription": "请稍后重试，或在 eBay 上打开。",
+      "offline": "目前无法连接 eBay，这是 SellerHill 已知的最后状态。eBay 恢复响应后将再次提供操作。",
+      "whatYouCanDo": "您可以做什么",
+      "nothingToDo": "此退货没有需要您处理的事项。",
+      "openOnEbay": "在 eBay 上打开",
+      "alsoOnEbay": "eBay 上还可：{{options}}",
+      "buyer": "买家",
+      "quantity": "数量",
+      "returnType": "退货类型",
+      "itemPrice": "商品价格",
+      "closedAs": "关闭结果",
+      "closedAt": "关闭日期",
+      "shipment": "退货运单",
+      "shippedAt": "已寄出",
+      "deliveredAt": "已送达",
+      "markedReceived": "已标记为收到",
+      "yes": "是",
+      "no": "否",
+      "journey": "处理过程",
+      "journeyEmpty": "eBay 尚未记录任何步骤。",
+      "partialRefundOffered": "已提出 {{amount}} 的部分退款",
+      "trackingNumber": "物流单号 {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "批准退货",
+        "mark_received": "标记为已收到",
+        "issue_refund": "发放退款"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "退款 {{amount}}"
+      },
+      "confirm": {
+        "approve": "在 eBay 上批准此退货申请？买家将被要求寄回商品。",
+        "mark_received": "告知 eBay 退回的商品已到达？请在商品到手后再操作。",
+        "issue_refund": "现在向买家退款 {{amount}}？eBay 一经接受即转账，且无法在这里撤销。"
+      },
+      "done": {
+        "approve": "退货已在 eBay 上批准。",
+        "mark_received": "商品已在 eBay 上标记为已收到。",
+        "issue_refund": "退款已在 eBay 上发放。"
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "买家发起了退货",
+      "BUYER_PRINT_SHIPPING_LABEL": "买家打印了运单",
+      "BUYER_PROVIDE_TRACKING_INFO": "买家添加了物流信息",
+      "BUYER_MARK_RETURN_SHIPPED": "买家将商品标记为已寄出",
+      "BUYER_ESCALATE": "买家升级至 eBay",
+      "BUYER_CLOSE_RETURN": "买家关闭了退货",
+      "BUYER_SEND_MESSAGE": "买家发送了消息",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "买家接受了部分退款",
+      "BUYER_DECLINE_PARTIAL_REFUND": "买家拒绝了部分退款",
+      "BUYER_MARK_REFUND_RECEIVED": "买家确认已收到退款",
+      "SELLER_APPROVE_REQUEST": "卖家批准了退货",
+      "SELLER_DECLINE_REQUEST": "卖家拒绝了退货",
+      "SELLER_ISSUE_REFUND": "卖家发放了退款",
+      "SELLER_MARK_AS_RECEIVED": "卖家将商品标记为已收到",
+      "SELLER_OFFER_PARTIAL_REFUND": "卖家提出了部分退款",
+      "SELLER_PROVIDE_RMA": "卖家提供了 RMA 编号",
+      "SELLER_PROVIDE_LABEL": "卖家提供了运单",
+      "SELLER_SEND_MESSAGE": "卖家发送了消息",
+      "SELLER_ESCALATE": "卖家升级至 eBay",
+      "SELLER_OFFER_REPLACEMENT": "卖家提供了替换品",
+      "SELLER_PROVIDE_TRACKING_INFO": "卖家添加了物流信息",
+      "SYSTEM_CREATE_RETURN": "eBay 发起了退货",
+      "SYSTEM_CLOSE_RETURN": "eBay 关闭了退货",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay 立即向买家退款",
+      "SYSTEM_INITIATED_REFUND": "eBay 发放了退款",
+      "EBAY_RULE_AUTO_APPROVE": "eBay 自动批准了退货",
+      "buyerOther": "买家步骤",
+      "sellerOther": "卖家步骤",
+      "ebayOther": "eBay 步骤"
+    },
+    "returnType": {
+      "MONEY_BACK": "退款",
+      "REPLACEMENT": "替换",
+      "EXCHANGE": "换货"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "已全额退款",
+      "PARTIAL_REFUNDED": "已部分退款",
+      "NO_REFUND": "未退款关闭",
+      "other": "已关闭"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "已送达",
+      "IN_TRANSIT": "运输中",
+      "OUT_FOR_DELIVERY": "派送中",
+      "NOT_SHIPPED": "尚未寄出",
+      "SHIPPED": "已寄出"
+    },
+    "errors": {
+      "actionsDisabled": "此平台已关闭应用内退货操作，请在 eBay 上处理退货。",
+      "actionNotAvailable": "eBay 已不再为此退货提供该操作。请刷新并查看当前需要处理的事项。",
+      "suspended": "您的订阅已暂停，退货操作已停用。请在“账单”页面结清发票。",
+      "ebayRejected": "eBay 拒绝了此操作。请在 eBay 上打开退货查看原因。",
+      "unavailable": "无法连接 eBay，请稍后重试。",
+      "sandbox": "eBay 沙盒环境不支持退货操作。",
+      "refundAmountUnknown": "eBay 未提供此退货的退款金额，退款需在 eBay 上发放。",
+      "notFound": "未找到此退货。"
     }
   }
 }

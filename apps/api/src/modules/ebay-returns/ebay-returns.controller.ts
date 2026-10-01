@@ -1,12 +1,32 @@
 // apps/api/src/modules/ebay-returns/ebay-returns.controller.ts
 
-import { BadRequestException, Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Request,
+  ServiceUnavailableException,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { PaginatedReturnsDto, ReturnBucketCountsDto, ReturnTab } from '@repo/shared';
+import {
+  EbayReturnActionResultDto,
+  EbayReturnDetailDto,
+  isEbayReturnAction,
+  PaginatedReturnsDto,
+  ReturnBucketCountsDto,
+  ReturnTab,
+} from '@repo/shared';
 import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+import { EbayReturnsActionsService, ReturnActionError } from './ebay-returns-actions.service';
 import { EbayReturnsService } from './ebay-returns.service';
 
 type AuthedRequest = { user: { sub: string } };
@@ -40,17 +60,43 @@ function parsePositiveInt(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function parseReturnId(value: string): string {
+  if (!isUUID(value)) {
+    throw new BadRequestException('id must be a UUID');
+  }
+  return value;
+}
+
+/** A refused or failed action keeps its i18n key as the message and takes the status the service chose. */
+function rethrowReturnAction(error: unknown): never {
+  if (error instanceof ReturnActionError) {
+    if (error.status === 404) {
+      throw new NotFoundException(error.key);
+    }
+    if (error.status === 503) {
+      throw new ServiceUnavailableException(error.key);
+    }
+    throw new ConflictException(error.key);
+  }
+  throw error;
+}
+
 /**
- * eBay returns — the seller's own, read from `ebay_returns`. A customer
- * surface (staff roles are refused by `JwtAuthGuard`), read-only: there is no
- * route that writes to eBay.
+ * eBay returns — the seller's own. The list and the counts read
+ * `ebay_returns`; the detail adds one live eBay read; the ONE write route
+ * (`POST :id/actions/:action`) performs a documented Post-Order action
+ * through `EbayReturnsActionsService`, which holds every gate. A customer
+ * surface (staff roles are refused by `JwtAuthGuard`).
  */
 @ApiTags('returns')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller({ path: 'returns', version: '1' })
 export class EbayReturnsController {
-  constructor(private readonly returns: EbayReturnsService) {}
+  constructor(
+    private readonly returns: EbayReturnsService,
+    private readonly actions: EbayReturnsActionsService
+  ) {}
 
   // Declared before any parameterised route, so `counts` can never be read as an id.
   @Get('counts')
@@ -85,5 +131,32 @@ export class EbayReturnsController {
       ebayAccountId: parseAccountId(ebayAccountId),
       search: typeof search === 'string' && search.trim() !== '' ? search.trim() : undefined,
     });
+  }
+
+  @Get(':id/detail')
+  @ApiOperation({ summary: 'One return in full: the stored row plus a live read from eBay' })
+  async detail(@Request() req: AuthedRequest, @Param('id') id: string): Promise<EbayReturnDetailDto> {
+    try {
+      return await this.actions.detail(req.user.sub, parseReturnId(id));
+    } catch (error) {
+      rethrowReturnAction(error);
+    }
+  }
+
+  @Post(':id/actions/:action')
+  @ApiOperation({ summary: 'Approve the return, mark the item received or issue the refund on eBay' })
+  async act(
+    @Request() req: AuthedRequest,
+    @Param('id') id: string,
+    @Param('action') action: string
+  ): Promise<EbayReturnActionResultDto> {
+    if (!isEbayReturnAction(action)) {
+      throw new BadRequestException('unknown return action');
+    }
+    try {
+      return await this.actions.act(req.user.sub, parseReturnId(id), action);
+    } catch (error) {
+      rethrowReturnAction(error);
+    }
   }
 }

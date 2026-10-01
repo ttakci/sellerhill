@@ -75,7 +75,50 @@ export enum EbayReturnSellerActivity {
   REMINDER_FOR_REFUND_NO_SHIPPING = 'REMINDER_FOR_REFUND_NO_SHIPPING',
   REMINDER_FOR_RMA = 'REMINDER_FOR_RMA',
   REMINDER_SELLER_TO_RESPOND = 'REMINDER_SELLER_TO_RESPOND',
+  SELLER_SEND_MESSAGE = 'SELLER_SEND_MESSAGE',
+  SELLER_ESCALATE = 'SELLER_ESCALATE',
+  SELLER_OFFER_REPLACEMENT = 'SELLER_OFFER_REPLACEMENT',
 }
+
+/**
+ * The `ActivityOptionEnum` values the return history localizes (past tense,
+ * `returns.history.<value>`). Any other value renders as a generic "buyer /
+ * seller / eBay step" line by its prefix — never the raw enum.
+ */
+export const EBAY_RETURN_HISTORY_ACTIVITIES = [
+  'BUYER_CREATE_RETURN',
+  'BUYER_PRINT_SHIPPING_LABEL',
+  'BUYER_PROVIDE_TRACKING_INFO',
+  'BUYER_MARK_RETURN_SHIPPED',
+  'BUYER_ESCALATE',
+  'BUYER_CLOSE_RETURN',
+  'BUYER_SEND_MESSAGE',
+  'BUYER_ACCEPTS_PARTIAL_REFUND',
+  'BUYER_DECLINE_PARTIAL_REFUND',
+  'BUYER_MARK_REFUND_RECEIVED',
+  'SELLER_APPROVE_REQUEST',
+  'SELLER_DECLINE_REQUEST',
+  'SELLER_ISSUE_REFUND',
+  'SELLER_MARK_AS_RECEIVED',
+  'SELLER_OFFER_PARTIAL_REFUND',
+  'SELLER_PROVIDE_RMA',
+  'SELLER_PROVIDE_LABEL',
+  'SELLER_SEND_MESSAGE',
+  'SELLER_ESCALATE',
+  'SELLER_OFFER_REPLACEMENT',
+  'SELLER_PROVIDE_TRACKING_INFO',
+  'SYSTEM_CREATE_RETURN',
+  'SYSTEM_CLOSE_RETURN',
+  'SYSTEM_IMMEDIATE_REFUND',
+  'SYSTEM_INITIATED_REFUND',
+  'EBAY_RULE_AUTO_APPROVE',
+] as const;
+
+/** eBay `ReturnTypeEnum` (docs/ebay-reference/post-order/types/ReturnTypeEnum.txt). */
+export const EBAY_RETURN_TYPES = ['MONEY_BACK', 'REPLACEMENT', 'EXCHANGE'] as const;
+
+/** `closeInfo.returnCloseReason` values the page localizes; the enum's own page is not in the local reference. */
+export const EBAY_RETURN_CLOSE_REASONS = ['FULL_REFUNDED', 'PARTIAL_REFUNDED', 'NO_REFUND'] as const;
 
 /** eBay `ReturnStateEnum` / `ReturnStatusEnum` value that means the return is over. */
 export const EBAY_RETURN_CLOSED = 'CLOSED';
@@ -142,3 +185,79 @@ export interface PaginatedReturnsDto {
 }
 
 export type ReturnBucketCountsDto = Record<ReturnBucket, number>;
+
+/**
+ * The return actions SellerHill performs itself, each one a documented
+ * Post-Order call (docs/ebay-reference/post-order/):
+ * - approve        → `POST /post-order/v2/return/{returnId}/decide` with `APPROVE`
+ * - mark_received  → `POST /post-order/v2/return/{returnId}/mark_as_received`
+ * - issue_refund   → `POST /post-order/v2/return/{returnId}/issue_refund`
+ * Offered only while eBay lists the matching option on the return
+ * (`resolveReturnActions`) and the operator's switch is on.
+ */
+export enum EbayReturnAction {
+  APPROVE = 'approve',
+  MARK_RECEIVED = 'mark_received',
+  ISSUE_REFUND = 'issue_refund',
+}
+
+/** One entry of eBay's `responseHistory` — what happened to the return, by whom, when. */
+export interface EbayReturnHistoryEntryDto {
+  /** eBay `ActivityOptionEnum`, carried as sent. */
+  activity: string | null;
+  /** Who acted, as eBay names them (a login name, or eBay itself). */
+  author: string | null;
+  at: string | null;
+  fromState: string | null;
+  toState: string | null;
+  notes: string | null;
+  /** A partial-refund offer made in this step. */
+  partialRefundAmount: number | null;
+  trackingNumber: string | null;
+  rma: string | null;
+}
+
+/** One return shipment eBay tracks (`returnShipmentInfo.allShipmentTrackings[]`). */
+export interface EbayReturnShipmentDto {
+  trackingNumber: string | null;
+  carrier: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  /** eBay's delivery status, carried as sent. */
+  deliveryStatus: string | null;
+  markedReceived: boolean;
+  labelId: string | null;
+}
+
+/**
+ * One return in full: the stored row plus what a live
+ * `GET /post-order/v2/return/{returnId}` said a moment ago. When that read
+ * fails `live` is false and the live-only parts are empty — the page then
+ * shows the stored row and offers no action.
+ */
+export interface EbayReturnDetailDto extends EbayReturnDto {
+  /** True when eBay answered the detail read; false = stored data only. */
+  live: boolean;
+  /** The operator's switch for in-app actions. */
+  actionsEnabled: boolean;
+  /** In-app actions eBay lists on the return right now (empty while the switch is off). */
+  availableActions: EbayReturnAction[];
+  /** Every `sellerAvailableOptions[].actionType` eBay listed, carried as sent. */
+  ebayOptions: string[];
+  /** The eBay page for the next action (`sellerAvailableOptions[].actionURL`), when eBay gave one. */
+  ebayUrl: string | null;
+  history: EbayReturnHistoryEntryDto[];
+  shipments: EbayReturnShipmentDto[];
+  /** eBay `ReturnTypeEnum` (`currentType`), carried as sent. */
+  returnType: string | null;
+  itemPrice: number | null;
+  /** eBay `closeInfo.returnCloseReason`, carried as sent. */
+  closeReason: string | null;
+  closedAt: string | null;
+}
+
+export interface EbayReturnActionResultDto {
+  action: EbayReturnAction;
+  /** `refundStatus` from eBay's answer, when the call returns one (decide / issue_refund). */
+  refundStatus: string | null;
+}

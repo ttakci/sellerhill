@@ -14,7 +14,6 @@ import { ReturnsPageComponent } from './ReturnsPage.component';
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
-import { useLocale } from '@/utils/useLocale';
 
 const TAB_IDS: readonly ReturnTab[] = Object.values(ReturnTab);
 
@@ -23,15 +22,15 @@ const isTab = (value: string): value is ReturnTab => (TAB_IDS as readonly string
 /**
  * eBay returns — which ones need the seller, what exactly is due, and by when.
  *
- * Read-only: there is no approve / refund action here. The seller responds on
- * eBay; this page is the work queue that tells them where to look first.
+ * A row opens the return in the detail drawer (`?r=`), which reads it live
+ * from eBay and offers the in-app actions eBay lists on it; anything else is
+ * answered on eBay through the drawer's link.
  */
 export const ReturnsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['returns', 'translation']);
-  const { localeNavigate } = useLocale();
 
   const {
-    state: { tab, page, store, search },
+    state: { tab, page, store, search, selected },
     searchInput,
     rowsPerPage,
     hasActiveFilters,
@@ -42,6 +41,7 @@ export const ReturnsPageContainer: React.FC = () => {
     setSearchInput,
     setRowsPerPage,
     clearFilters,
+    setSelected,
   } = useReturnsUrlState();
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
@@ -137,15 +137,10 @@ export const ReturnsPageContainer: React.FC = () => {
 
   const handleStoreChange = useCallback((value: string | number) => setStore(String(value)), [setStore]);
 
-  /* A return filed against an order we do not hold has nowhere to go. */
-  const handleRowOpen = useCallback(
-    (row: ReturnRowView) => {
-      if (row.orderId) {
-        localeNavigate(`/orders/${row.orderId}`);
-      }
-    },
-    [localeNavigate]
-  );
+  /* Every row opens — a return filed against an order we do not hold still
+     has a history, a deadline and actions of its own. */
+  const handleRowOpen = useCallback((row: ReturnRowView) => setSelected(row.id), [setSelected]);
+  const handleCloseDetail = useCallback(() => setSelected(null), [setSelected]);
 
   const handleCardKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>, row: ReturnRowView) => {
@@ -186,6 +181,8 @@ export const ReturnsPageContainer: React.FC = () => {
         isInitialLoading={isLoading || isFetching}
         onRowOpen={handleRowOpen}
         onCardKeyDown={handleCardKeyDown}
+        selectedReturnId={selected || null}
+        onCloseDetail={handleCloseDetail}
       />
     </EbayAccountGuard>
   );

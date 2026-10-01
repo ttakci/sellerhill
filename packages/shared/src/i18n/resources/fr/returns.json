@@ -5,7 +5,7 @@
     "subtitle_many": "{{count}} retours",
     "subtitle_other": "{{count}} retours",
     "loading": "Chargement des retours…",
-    "notice": "Répondez aux retours sur eBay. Cette page indique ce qui est attendu et pour quand.",
+    "notice": "Ouvrez un retour pour voir son historique et ce qu'eBay attend. Là où eBay l'autorise, vous pouvez l'approuver, le marquer comme reçu ou rembourser d'ici ; tout le reste se répond sur eBay.",
     "tabs": {
       "all": "Tous",
       "action": "Action requise",
@@ -62,7 +62,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rembourser l'acheteur (le renvoi de l'article n'est pas attendu)",
       "REMINDER_FOR_RMA": "Rappel RMA : répondre sur eBay",
       "REMINDER_SELLER_TO_RESPOND": "Répondre à la demande de retour",
-      "other": "Répondre sur eBay"
+      "other": "Répondre sur eBay",
+      "SELLER_SEND_MESSAGE": "Envoyer un message à l'acheteur",
+      "SELLER_ESCALATE": "Transmettre à eBay",
+      "SELLER_OFFER_REPLACEMENT": "Proposer un remplacement"
     },
     "dueBy": "avant le {{date}}",
     "reasonType": {
@@ -91,6 +94,114 @@
       "title": "Aucun retour ne correspond à vos filtres",
       "description": "Essayez un autre onglet, une autre boutique ou une autre recherche.",
       "action": "Effacer les filtres"
+    },
+    "detail": {
+      "title": "Retour {{id}}",
+      "titleLoading": "Retour",
+      "open": "Ouvrir le retour",
+      "loadFailed": "Impossible de charger ce retour",
+      "loadFailedDescription": "Réessayez dans un instant ou ouvrez-le sur eBay.",
+      "offline": "eBay est injoignable pour le moment ; voici le dernier état connu de SellerHill. Les actions seront proposées dès qu'eBay répondra à nouveau.",
+      "whatYouCanDo": "Ce que vous pouvez faire",
+      "nothingToDo": "Rien n'est attendu de vous sur ce retour.",
+      "openOnEbay": "Ouvrir sur eBay",
+      "alsoOnEbay": "Également sur eBay : {{options}}",
+      "buyer": "Acheteur",
+      "quantity": "Quantité",
+      "returnType": "Type de retour",
+      "itemPrice": "Prix de l'article",
+      "closedAs": "Clôturé comme",
+      "closedAt": "Clôturé le",
+      "shipment": "Expédition du retour",
+      "shippedAt": "Expédié",
+      "deliveredAt": "Livré",
+      "markedReceived": "Marqué comme reçu",
+      "yes": "Oui",
+      "no": "Non",
+      "journey": "Parcours",
+      "journeyEmpty": "eBay n'a encore enregistré aucune étape.",
+      "partialRefundOffered": "Remboursement partiel de {{amount}} proposé",
+      "trackingNumber": "Suivi {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Approuver le retour",
+        "mark_received": "Marquer comme reçu",
+        "issue_refund": "Rembourser"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Rembourser {{amount}}"
+      },
+      "confirm": {
+        "approve": "Approuver cette demande de retour sur eBay ? L'acheteur sera invité à renvoyer l'article.",
+        "mark_received": "Indiquer à eBay que l'article retourné est arrivé ? Ne le faites qu'une fois l'article en main.",
+        "issue_refund": "Rembourser {{amount}} à l'acheteur maintenant ? eBay transfère l'argent dès qu'il l'accepte, et cela ne peut pas être annulé d'ici."
+      },
+      "done": {
+        "approve": "Le retour a été approuvé sur eBay.",
+        "mark_received": "L'article a été marqué comme reçu sur eBay.",
+        "issue_refund": "Le remboursement a été effectué sur eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "L'acheteur a ouvert le retour",
+      "BUYER_PRINT_SHIPPING_LABEL": "L'acheteur a imprimé l'étiquette d'expédition",
+      "BUYER_PROVIDE_TRACKING_INFO": "L'acheteur a ajouté un suivi",
+      "BUYER_MARK_RETURN_SHIPPED": "L'acheteur a marqué l'article comme expédié",
+      "BUYER_ESCALATE": "L'acheteur a transmis le litige à eBay",
+      "BUYER_CLOSE_RETURN": "L'acheteur a clôturé le retour",
+      "BUYER_SEND_MESSAGE": "L'acheteur a envoyé un message",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "L'acheteur a accepté le remboursement partiel",
+      "BUYER_DECLINE_PARTIAL_REFUND": "L'acheteur a refusé le remboursement partiel",
+      "BUYER_MARK_REFUND_RECEIVED": "L'acheteur a confirmé avoir reçu le remboursement",
+      "SELLER_APPROVE_REQUEST": "Le vendeur a approuvé le retour",
+      "SELLER_DECLINE_REQUEST": "Le vendeur a refusé le retour",
+      "SELLER_ISSUE_REFUND": "Le vendeur a effectué le remboursement",
+      "SELLER_MARK_AS_RECEIVED": "Le vendeur a marqué l'article comme reçu",
+      "SELLER_OFFER_PARTIAL_REFUND": "Le vendeur a proposé un remboursement partiel",
+      "SELLER_PROVIDE_RMA": "Le vendeur a fourni un numéro RMA",
+      "SELLER_PROVIDE_LABEL": "Le vendeur a fourni une étiquette d'expédition",
+      "SELLER_SEND_MESSAGE": "Le vendeur a envoyé un message",
+      "SELLER_ESCALATE": "Le vendeur a transmis le litige à eBay",
+      "SELLER_OFFER_REPLACEMENT": "Le vendeur a proposé un remplacement",
+      "SELLER_PROVIDE_TRACKING_INFO": "Le vendeur a ajouté un suivi",
+      "SYSTEM_CREATE_RETURN": "eBay a ouvert le retour",
+      "SYSTEM_CLOSE_RETURN": "eBay a clôturé le retour",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay a remboursé l'acheteur immédiatement",
+      "SYSTEM_INITIATED_REFUND": "eBay a effectué le remboursement",
+      "EBAY_RULE_AUTO_APPROVE": "eBay a approuvé le retour automatiquement",
+      "buyerOther": "Étape de l'acheteur",
+      "sellerOther": "Étape du vendeur",
+      "ebayOther": "Étape d'eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Remboursement",
+      "REPLACEMENT": "Remplacement",
+      "EXCHANGE": "Échange"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Entièrement remboursé",
+      "PARTIAL_REFUNDED": "Partiellement remboursé",
+      "NO_REFUND": "Clôturé sans remboursement",
+      "other": "Clôturé"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Livré",
+      "IN_TRANSIT": "En transit",
+      "OUT_FOR_DELIVERY": "En cours de livraison",
+      "NOT_SHIPPED": "Pas encore expédié",
+      "SHIPPED": "Expédié"
+    },
+    "errors": {
+      "actionsDisabled": "Les actions de retour depuis l'application sont désactivées sur cette plateforme. Répondez au retour sur eBay.",
+      "actionNotAvailable": "eBay ne propose plus cette action sur ce retour. Actualisez et vérifiez ce qui est attendu maintenant.",
+      "suspended": "Votre abonnement est suspendu, les actions de retour sont donc en pause. Réglez la facture sur la page Facturation.",
+      "ebayRejected": "eBay a refusé cette action. Ouvrez le retour sur eBay pour en voir la raison.",
+      "unavailable": "eBay est injoignable. Réessayez dans un instant.",
+      "sandbox": "Les actions de retour ne sont pas disponibles sur le sandbox eBay.",
+      "refundAmountUnknown": "eBay n'a pas communiqué de montant de remboursement pour ce retour ; le remboursement doit être effectué sur eBay.",
+      "notFound": "Ce retour est introuvable."
     }
   }
 }

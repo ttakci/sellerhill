@@ -217,6 +217,30 @@ export class EbayReturnsService {
     return { items: rows.map((row) => this.toDto(row, now, freshnessHours)), total, page, limit };
   }
 
+  /** One of the caller's returns by SellerHill id — the stored row only (the live half is the actions service's). */
+  async findOne(userId: string, id: string): Promise<EbayReturnDto | null> {
+    const { freshnessHours } = await this.bucketContext();
+    const params: QueryParam[] = [userId];
+    params.push(id);
+    const rows = await this.database.query<ReturnListRow>(
+      `SELECT r.id, r.return_id, r.ebay_account_id, r.ebay_order_id, r.order_id,
+              r.ebay_item_id, r.return_quantity, r.state, r.status, r.reason, r.reason_type,
+              r.buyer_comment, r.buyer_login_name, r.seller_activity_due, r.seller_respond_by,
+              r.estimated_refund_amount, r.actual_refund_amount, r.currency,
+              r.created_on_ebay_at, r.last_synced_at,
+              l.id AS listing_id,
+              l.title AS listing_title,
+              l.asin AS listing_asin,
+              p.image_urls AS product_image_urls
+         FROM ebay_returns r
+       ${PRODUCT_JOINS}
+        WHERE r.user_id = $1 AND r.id = $2::uuid`,
+      params
+    );
+    const row = rows[0];
+    return row ? this.toDto(row, new Date(), freshnessHours) : null;
+  }
+
   /** How many returns sit in each bucket — every bucket present, zero-filled. */
   async counts(userId: string, filter: { ebayAccountId?: string } = {}): Promise<ReturnBucketCountsDto> {
     const params: QueryParam[] = [userId];
