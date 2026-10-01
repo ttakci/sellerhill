@@ -286,7 +286,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
                   value={search}
                   onChange={onSearchChange}
                   placeholder={t('listings.jobs.filters.searchPlaceholder')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SearchWrapper>
@@ -296,7 +296,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
                   onChange={onStoreFilterChange}
                   options={storeOptions}
                   placeholder={t('listings.filters.allStores')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>

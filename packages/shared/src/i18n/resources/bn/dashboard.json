@@ -1,0 +1,96 @@
+{
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "subtitle": "বিক্রয়, মুনাফা ও লিস্টিংয়ের পারফরম্যান্স",
+    "greeting": "হ্যালো, {{name}}",
+    "selectStore": "স্টোর নির্বাচন করুন",
+    "allStores": "সব স্টোর",
+    "noData": "এখনও কোনো ডেটা নেই",
+    "backToDashboard": "ড্যাশবোর্ডে ফিরুন",
+    "tabs": {
+      "cards": "কার্ড",
+      "chart": "চার্ট",
+      "pnl": "লাভ-ক্ষতি"
+    },
+    "today": "আজ",
+    "thisWeek": "এই সপ্তাহ",
+    "thisMonth": "এই মাস",
+    "thisYear": "এই বছর",
+    "metrics": {
+      "sales": "বিক্রয়",
+      "units": "ইউনিট",
+      "orders": "অর্ডার",
+      "ordersUnits": "অর্ডার / ইউনিট",
+      "refunds": "রিফান্ড",
+      "refundRate": "রিফান্ডের হার",
+      "grossProfit": "মোট মুনাফা",
+      "netProfit": "নিট মুনাফা",
+      "estimatedPayout": "আনুমানিক পেআউট",
+      "margin": "মার্জিন",
+      "roi": "ROI",
+      "avgOrderValue": "গড় অর্ডার",
+      "costOfGoods": "পণ্যের খরচ",
+      "transactionFees": "লেনদেন ফি",
+      "adFees": "বিজ্ঞাপন ফি",
+      "amazonShipping": "Amazon শিপিং",
+      "amazonTax": "Amazon কর",
+      "revenueUncosted": "খরচ ছাড়া আয়"
+    },
+    "card": {
+      "showMore": "আরও বিস্তারিত",
+      "showLess": "কম বিস্তারিত",
+      "activeHint": "নিচের তালিকাগুলি ফিল্টার করা হচ্ছে"
+    },
+    "listingsSection": "লিস্টিং",
+    "ordersSection": "অর্ডার",
+    "listingsCount": "{{count}}টির বিক্রি হয়েছে",
+    "ordersCount": "{{count}}টি অর্ডার",
+    "viewAllListings": "সব দেখুন",
+    "viewAllOrders": "সব দেখুন",
+    "listingsEmptyTitle": "বিক্রি হওয়া কোনো লিস্টিং নেই",
+    "listingsEmptySubtitle": "নির্বাচিত সময়ে অর্ডার পাওয়া লিস্টিংগুলি এখানে দেখা যাবে।",
+    "ordersEmptyTitle": "এই সময়ে কোনো অর্ডার নেই",
+    "ordersEmptySubtitle": "বিক্রি এলে নির্বাচিত সময়ের অর্ডারগুলি এখানে দেখা যাবে।",
+    "chart": {
+      "title": "পারফরম্যান্স",
+      "subtitle": "বিক্রয়ের পরিমাণের বিপরীতে নিট মুনাফা",
+      "summary": "সময়কালের সারসংক্ষেপ",
+      "granularity": {
+        "day": "30 দিন",
+        "week": "12 সপ্তাহ",
+        "month": "12 মাস"
+      },
+      "series": {
+        "netProfit": "নিট মুনাফা",
+        "sales": "বিক্রয়",
+        "units": "ইউনিট",
+        "refunds": "রিফান্ড"
+      }
+    },
+    "pnl": {
+      "title": "লাভ ও ক্ষতি",
+      "subtitle": "গত 12 মাসের মাসভিত্তিক বিভাজন",
+      "parameter": "মেট্রিক / সময়কাল",
+      "currentPeriod": "বর্তমান সময়কাল",
+      "heatmap": "হিট ম্যাপ",
+      "export": "CSV ডাউনলোড"
+    },
+    "groups": {
+      "revenue": "আয়",
+      "costs": "খরচ",
+      "profit": "মুনাফা",
+      "ratios": "অনুপাত"
+    },
+    "profit": {
+      "confirmedLabel": "নিশ্চিত",
+      "confirmedTooltip": "যে অর্ডারগুলির প্রকৃত Amazon খরচ ধরা হয়েছে, সেগুলির মুনাফা। অজানা খরচ কখনও শূন্য ধরা হয় না।",
+      "estimatedLabel": "আনুমানিক",
+      "estimatedTooltip": "Amazon পূরণের অপেক্ষায় থাকা অর্ডারে আনুমানিক খরচ ব্যবহার হয় (আপনার নির্ধারিত {{rate}}% হারে Amazon কর)।",
+      "uncostedLabel": "খরচ ছাড়া আয়",
+      "uncostedTooltip": "যে বিক্রির Amazon খরচ এখনও নির্ণয় করা যায়নি — শুধু আয়, কোনো মুনাফা বোঝানো হয়নি।",
+      "untrackedExcludedLabel_one": "{{count}}টি অট্র্যাকড অর্ডার বাদ দেওয়া হয়েছে",
+      "untrackedExcludedLabel_other": "{{count}}টি অট্র্যাকড অর্ডার বাদ দেওয়া হয়েছে",
+      "untrackedExcludedTooltip": "যে অর্ডারগুলি কোনো SellerHill লিস্টিংয়ের সাথে মেলেনি, সেগুলি এই ড্যাশবোর্ডের প্রতিটি সংখ্যা থেকে বাদ রাখা হয়। সেগুলি অর্ডার পৃষ্ঠায় \"ট্র্যাক করা হয়নি\"-এর নিচে থাকে; অন্তর্ভুক্ত করতে লিস্টিংটি আমদানি করুন।"
+    }
+  }
+}

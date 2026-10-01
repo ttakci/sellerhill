@@ -28,6 +28,21 @@ import azProfile from './resources/az/profile.json';
 import azReturns from './resources/az/returns.json';
 import azStoreSettings from './resources/az/storeSettings.json';
 import azTranslation from './resources/az/translation.json';
+import bnActionCenter from './resources/bn/actionCenter.json';
+import bnAmazon from './resources/bn/amazon.json';
+import bnAuth from './resources/bn/auth.json';
+import bnBestSellers from './resources/bn/bestSellers.json';
+import bnBilling from './resources/bn/billing.json';
+import bnDashboard from './resources/bn/dashboard.json';
+import bnEbay from './resources/bn/ebay.json';
+import bnListings from './resources/bn/listings.json';
+import bnListingSettingsGroup from './resources/bn/listingSettingsGroup.json';
+import bnMessages from './resources/bn/messages.json';
+import bnOrders from './resources/bn/orders.json';
+import bnProfile from './resources/bn/profile.json';
+import bnReturns from './resources/bn/returns.json';
+import bnStoreSettings from './resources/bn/storeSettings.json';
+import bnTranslation from './resources/bn/translation.json';
 import deActionCenter from './resources/de/actionCenter.json';
 import deAmazon from './resources/de/amazon.json';
 import deAuth from './resources/de/auth.json';
@@ -590,6 +605,23 @@ export const i18nResources = {
     profile: azProfile,
     orders: azOrders,
     returns: azReturns,
+  },
+  bn: {
+    translation: bnTranslation,
+    actionCenter: bnActionCenter,
+    amazon: bnAmazon,
+    billing: bnBilling,
+    auth: bnAuth,
+    bestSellers: bnBestSellers,
+    dashboard: bnDashboard,
+    ebay: bnEbay,
+    storeSettings: bnStoreSettings,
+    listingSettingsGroup: bnListingSettingsGroup,
+    messages: bnMessages,
+    listings: bnListings,
+    profile: bnProfile,
+    orders: bnOrders,
+    returns: bnReturns,
   },
   de: {
     actionCenter: deActionCenter,

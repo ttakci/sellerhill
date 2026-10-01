@@ -42,7 +42,7 @@ describe('resolveStripeLocale', () => {
   // Stripe Checkout has no Hindi, Urdu, Arabic, Azerbaijani or Ukrainian: sending
   // one is an API error that would break checkout, so they must resolve to
   // English, never pass through.
-  it.each(['hi', 'ur', 'ar', 'ar-MA', 'az', 'uk', '', undefined, null])(
+  it.each(['hi', 'ur', 'ar', 'ar-MA', 'az', 'bn', 'uk', '', undefined, null])(
     'falls back to en for %p',
     (header) => {
       expect(resolveStripeLocale(header)).toBe('en');

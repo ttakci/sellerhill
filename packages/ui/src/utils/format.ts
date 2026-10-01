@@ -120,6 +120,8 @@ const LOCALE_CONFIGS = {
   ur: { locale: 'ur-PK-u-nu-latn' },
   ar: { locale: 'ar-MA-u-nu-latn' },
   az: { locale: 'az-AZ' },
+  // Bengali defaults to Bengali digits (০১২); the same Latin-digit rule as Urdu/Arabic.
+  bn: { locale: 'bn-BD-u-nu-latn' },
   de: { locale: 'de-DE' },
   fr: { locale: 'fr-FR' },
   es: { locale: 'es-MX' },
