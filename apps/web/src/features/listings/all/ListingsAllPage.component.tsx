@@ -148,7 +148,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   value={filters.search}
                   onChange={onSearchChange}
                   placeholder={t('listings.filters.searchPlaceholder')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SearchWrapper>
@@ -159,7 +159,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   onChange={onCategoryChange}
                   options={categoryOptions}
                   placeholder={t('listings.filters.allCategories')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>
@@ -170,7 +170,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                     onChange={onStatusChange}
                     options={statusOptions}
                     placeholder={t('listings.filters.allStatuses')}
-                    size="medium"
+                    size="small"
                     fullWidth
                   />
                 </S.SelectWrapper>
@@ -181,7 +181,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   onChange={onTrackingStateChange}
                   options={trackingOptions}
                   placeholder={t('listings.filters.allTrackingStates')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>
@@ -191,7 +191,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   onChange={onEbayAccountChange}
                   options={storeOptions}
                   placeholder={t('listings.filters.allStores')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>

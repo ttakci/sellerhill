@@ -2,7 +2,7 @@
 //
 // Every stage renders a label and a meaning sentence (badge + tooltip +
 // legend), and the four stages a seller can act on render an action
-// sentence — in all 15 locales. A missing key renders as the raw key with no
+// sentence — in all 16 locales. A missing key renders as the raw key with no
 // error, which is how a Turkish seller ends up reading
 // "orders.stage.tracking_held.label".
 

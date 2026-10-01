@@ -1,0 +1,62 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay স্টোর সংযুক্ত করুন",
+      "subtitle": "লিস্টিং ও অর্ডার পরিচালনা করতে আপনার eBay বিক্রেতা অ্যাকাউন্ট যুক্ত করুন",
+      "connectButton": "eBay অ্যাকাউন্ট সংযুক্ত করুন",
+      "connectingButton": "সংযুক্ত হচ্ছে...",
+      "marketplaceLabel": "মার্কেটপ্লেস",
+      "marketplaceUS": "যুক্তরাষ্ট্র (eBay.com)",
+      "marketplaceUK": "যুক্তরাজ্য (eBay.co.uk)",
+      "marketplaceDE": "জার্মানি (eBay.de)",
+      "marketplaceFR": "ফ্রান্স (eBay.fr)",
+      "marketplaceIT": "ইতালি (eBay.it)",
+      "marketplaceES": "স্পেন (eBay.es)",
+      "marketplaceUsOnlyNote": "এই মুহূর্তে শুধু যুক্তরাষ্ট্র (eBay.com) মার্কেটপ্লেস সমর্থিত।",
+      "successMessage": "eBay অ্যাকাউন্ট সফলভাবে সংযুক্ত হয়েছে!",
+      "errorMessage": "eBay অ্যাকাউন্ট সংযুক্ত করা যায়নি",
+      "alreadyConnected": "এই eBay অ্যাকাউন্ট ইতিমধ্যে সংযুক্ত আছে"
+    },
+    "accounts": {
+      "title": "সংযুক্ত eBay অ্যাকাউন্ট",
+      "loadingDescription": "আপনার সংযুক্ত স্টোরগুলি আনা হচ্ছে।",
+      "noAccounts": "এখনও কোনো eBay অ্যাকাউন্ট সংযুক্ত হয়নি",
+      "statusActive": "সক্রিয়",
+      "statusRevoked": "প্রত্যাহৃত",
+      "statusError": "ত্রুটি",
+      "disconnectButton": "সংযোগ বিচ্ছিন্ন করুন",
+      "refreshTokenButton": "টোকেন রিফ্রেশ করুন"
+    },
+    "callback": {
+      "processing": "eBay সংযোগ প্রক্রিয়া চলছে...",
+      "success": "eBay অ্যাকাউন্ট সফলভাবে সংযুক্ত হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...",
+      "error": "eBay অ্যাকাউন্ট সংযুক্ত করা যায়নি। আবার চেষ্টা করুন।",
+      "cancelled": "eBay সংযোগ বাতিল করা হয়েছে।"
+    },
+    "errors": {
+      "invalidState": "state প্যারামিটার সঠিক নয়",
+      "authorizationFailed": "eBay অনুমোদন ব্যর্থ হয়েছে",
+      "tokenExchangeFailed": "অনুমোদন কোডকে টোকেনে রূপান্তর করা যায়নি",
+      "accountAlreadyConnected": "এই eBay স্টোরটি অন্য একটি SellerHill অ্যাকাউন্টের সাথে সংযুক্ত। যে অ্যাকাউন্টে সংযুক্ত করেছিলেন সেটি দিয়ে সাইন ইন করুন; সেটিতে ঢুকতে না পারলে সহায়তায় যোগাযোগ করুন।",
+      "ebayTrialAlreadyUsed": "এই eBay স্টোর ইতিমধ্যে তার বিনামূল্যে ট্রায়াল ব্যবহার করেছে। এটি সংযুক্ত করতে একটি প্ল্যান বেছে নিন।",
+      "noAuthorizationCode": "eBay থেকে কোনো অনুমোদন কোড পাওয়া যায়নি",
+      "storeOwnedByAnotherAccount": "এই eBay স্টোরটি একটি ভিন্ন SellerHill অ্যাকাউন্টের সাথে যুক্ত। স্থানান্তরের জন্য সহায়তায় যোগাযোগ করুন।",
+      "accountNotFound": "সেই eBay স্টোরটি পাওয়া যায়নি।",
+      "identityUnavailable": "আমরা eBay-এর সাথে আপনার eBay অ্যাকাউন্ট নিশ্চিত করতে পারিনি। কিছুই সংযুক্ত হয়নি — একটু পরে আবার চেষ্টা করুন।",
+      "messagingScopeMissing": "বার্তা চালু করতে আপনার eBay স্টোর আবার সংযুক্ত করুন — বর্তমান অনুমোদনে বার্তা অন্তর্ভুক্ত নয়।",
+      "messagingReplyNotAllowed": "eBay থেকে আসা বার্তার উত্তর এখানে দেওয়া যায় না।",
+      "messagingUnavailable": "eBay বার্তা সাময়িকভাবে অনুপলব্ধ। আবার চেষ্টা করুন।",
+      "messagingRejected": "eBay এই অনুরোধ গ্রহণ করেনি। বার্তাটি পরীক্ষা করে আবার চেষ্টা করুন।",
+      "messageTooLong": "একটি বার্তা সর্বোচ্চ 2000 অক্ষরের হতে পারে।"
+    },
+    "onboarding": {
+      "title": "আপনার eBay স্টোর সংযুক্ত করুন",
+      "header": "মার্কেটপ্লেস সেটআপ",
+      "description": "আপনার আইটেম সিঙ্ক শুরু করতে প্রথমে আপনার eBay স্টোর সংযুক্ত করতে হবে।",
+      "connectButton": "eBay অ্যাকাউন্ট",
+      "skipButton": "আপাতত এড়িয়ে যান",
+      "usOnlyNote": "বর্তমানে শুধু US মার্কেটপ্লেস সমর্থিত। আরও অঞ্চল শীঘ্রই আসছে।",
+      "brandingDescription": "আপনার সব বিক্রয় প্রক্রিয়া এক জায়গা থেকে পরিচালনা করতে আপনার eBay স্টোরকে SellerHill-এর সাথে যুক্ত করুন।"
+    }
+  }
+}

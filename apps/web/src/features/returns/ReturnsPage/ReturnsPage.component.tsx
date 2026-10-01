@@ -63,7 +63,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
               onChange={onSearchChange}
               placeholder={t('returns.filters.search')}
               aria-label={t('returns.filters.search')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SearchWrapper>
@@ -73,7 +73,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
               onChange={onEbayAccountChange}
               options={storeOptions}
               placeholder={t('returns.filters.allStores')}
-              size="medium"
+              size="small"
               fullWidth
             />
           </S.SelectWrapper>
