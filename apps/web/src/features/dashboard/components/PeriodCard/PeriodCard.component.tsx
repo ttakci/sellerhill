@@ -4,7 +4,7 @@
  * compact metric grid and an expandable cost/ratio breakdown.
  */
 
-import { Icon, Text, Tooltip } from '@repo/ui';
+import { Button, Icon, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 
 import * as S from './PeriodCard.style';
@@ -254,12 +254,16 @@ export const PeriodCardComponent = ({
         </>
       )}
 
-      <S.MoreButton type="button" $expanded={isExpanded} onClick={onToggleDetails}>
-        <Text variant="caption" weight="semibold" color="inherit">
-          {isExpanded ? labels.showLess : labels.showMore}
-        </Text>
-        <Icon name="chevron-down" size={14} />
-      </S.MoreButton>
+      <S.MoreRow>
+        <Button variant="text" size="xsmall" fullWidth onClick={onToggleDetails}>
+          <Text variant="caption" weight="semibold" color="brand.primary">
+            {isExpanded ? labels.showLess : labels.showMore}
+          </Text>
+          <S.MoreChevron $expanded={isExpanded}>
+            <Icon name="chevron-down" size={14} color="brand.primary" />
+          </S.MoreChevron>
+        </Button>
+      </S.MoreRow>
     </S.Body>
   </S.Root>
 );

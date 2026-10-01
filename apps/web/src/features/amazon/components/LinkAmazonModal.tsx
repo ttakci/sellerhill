@@ -1,5 +1,5 @@
 import { type AmazonAccountPublicDto } from '@repo/shared';
-import { Dialog, ModernTextInput, Text } from '@repo/ui';
+import { Dialog, ModernSelect, ModernTextInput, Text } from '@repo/ui';
 import React, { type ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -99,8 +99,8 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
 
   const hasAccounts = accounts.length > 0;
 
-  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAccountId(e.target.value);
+  const handleSelectChange = (value: string | number) => {
+    setSelectedAccountId(String(value));
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -178,19 +178,17 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
       }}
     >
       <S.BodyStack>
-        <div>
-          <S.AccountLabel variant="h5" weight="medium">
-            {t('amazon.linking.selectAccount')}
-          </S.AccountLabel>
-          <S.NativeSelect value={selectedAccountId} onChange={handleSelectChange}>
-            <option value="">{t('amazon.linking.selectAccountPlaceholder')}</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.label || account.email} ({account.status})
-              </option>
-            ))}
-          </S.NativeSelect>
-        </div>
+        <ModernSelect
+          label={t('amazon.linking.selectAccount')}
+          placeholder={t('amazon.linking.selectAccountPlaceholder')}
+          value={selectedAccountId}
+          onChange={handleSelectChange}
+          options={accounts.map((account) => ({
+            value: account.id,
+            label: `${account.label || account.email} (${account.status})`,
+          }))}
+          fullWidth
+        />
 
         <ModernTextInput
           name="amazonOrderId"

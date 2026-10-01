@@ -208,15 +208,17 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
             </S.FilterBarRow>
 
             <S.AdvancedDivider />
-            <S.AdvancedHeader type="button" $isOpen={advancedOpen} onClick={onToggleAdvanced}>
-              <Icon name="sliders-horizontal" size={18} />
-              <Text variant="body-sm" weight="semibold" color="text.primary">
-                {t('listings.filters.advancedFilters')}
-              </Text>
-              <S.AdvancedChevron $isOpen={advancedOpen}>
-                <Icon name="chevron-down" size={18} />
-              </S.AdvancedChevron>
-            </S.AdvancedHeader>
+            <S.AdvancedHeaderRow>
+              <Button variant="text" size="small" onClick={onToggleAdvanced}>
+                <Icon name="sliders-horizontal" size={16} color="brand.primary" />
+                <Text variant="body-sm" weight="semibold" color="brand.primary">
+                  {t('listings.filters.advancedFilters')}
+                </Text>
+                <S.AdvancedChevron $isOpen={advancedOpen}>
+                  <Icon name="chevron-down" size={16} color="brand.primary" />
+                </S.AdvancedChevron>
+              </Button>
+            </S.AdvancedHeaderRow>
 
             {advancedOpen && (
               <S.NumericFilterGrid>

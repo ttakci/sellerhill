@@ -11,7 +11,8 @@ const EMPTY_VALUE = '—';
 
 /**
  * Grid-view twin of a returns table row: the same facts in the same order —
- * which product, which return, what is due and by when, why, how much.
+ * which product, which return, why, then what is due and by when, how much.
+ * The whole card is the button; there is no "View order" footer.
  */
 export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, className }) => {
   const { t } = useTranslation(['returns']);
@@ -19,7 +20,6 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
 
   return (
     <S.Wrapper
-      padding="lg"
       className={className}
       $clickable={clickable}
       onClick={onOpen}
@@ -58,43 +58,6 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
         </S.HeaderText>
       </S.Header>
 
-      <S.Facts>
-        <S.Fact $wide>
-          <S.FactLabel variant="caption" color="text.tertiary">
-            {t('returns.columns.due')}
-          </S.FactLabel>
-          <Text variant="body-sm" weight="semibold" color="text.primary">
-            {row.dueLabel ?? EMPTY_VALUE}
-          </Text>
-          {row.dueBy && (
-            <Text variant="caption" weight="medium" color={row.isOverdue ? 'semantic.error' : 'text.secondary'}>
-              {row.dueBy}
-            </Text>
-          )}
-        </S.Fact>
-        <S.Fact>
-          <S.FactLabel variant="caption" color="text.tertiary">
-            {t('returns.columns.refund')}
-          </S.FactLabel>
-          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
-            {row.refundAmount ?? EMPTY_VALUE}
-          </Text>
-          {row.refundLabel && (
-            <Text variant="caption" color="text.secondary">
-              {row.refundLabel}
-            </Text>
-          )}
-        </S.Fact>
-        <S.Fact>
-          <S.FactLabel variant="caption" color="text.tertiary">
-            {t('returns.columns.opened')}
-          </S.FactLabel>
-          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
-            {row.openedAt ?? EMPTY_VALUE}
-          </Text>
-        </S.Fact>
-      </S.Facts>
-
       <S.Reason>
         <S.IdRow>
           <Text variant="caption" color="text.tertiary">
@@ -113,16 +76,42 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
         )}
       </S.Reason>
 
-      {clickable && (
-        <S.Footer>
-          <S.DetailAction>
-            <Text variant="body-sm" weight="semibold" color="brand.primary">
-              {t('returns.viewOrder')}
+      <S.Facts>
+        <S.Fact $wide>
+          <S.FactLabel variant="caption" color="text.secondary">
+            {t('returns.columns.due')}
+          </S.FactLabel>
+          <Text variant="body-sm" weight="semibold" color="text.primary">
+            {row.dueLabel ?? EMPTY_VALUE}
+          </Text>
+          {row.dueBy && (
+            <Text variant="caption" weight="medium" color={row.isOverdue ? 'semantic.error' : 'text.secondary'}>
+              {row.dueBy}
             </Text>
-            <Icon name="arrow-right" size={14} color="brand.primary" />
-          </S.DetailAction>
-        </S.Footer>
-      )}
+          )}
+        </S.Fact>
+        <S.Fact>
+          <S.FactLabel variant="caption" color="text.secondary">
+            {t('returns.columns.refund')}
+          </S.FactLabel>
+          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
+            {row.refundAmount ?? EMPTY_VALUE}
+          </Text>
+          {row.refundLabel && (
+            <Text variant="caption" color="text.secondary">
+              {row.refundLabel}
+            </Text>
+          )}
+        </S.Fact>
+        <S.Fact>
+          <S.FactLabel variant="caption" color="text.secondary">
+            {t('returns.columns.opened')}
+          </S.FactLabel>
+          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
+            {row.openedAt ?? EMPTY_VALUE}
+          </Text>
+        </S.Fact>
+      </S.Facts>
     </S.Wrapper>
   );
 };

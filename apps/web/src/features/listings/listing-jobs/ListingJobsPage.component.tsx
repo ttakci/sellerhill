@@ -3,7 +3,6 @@ import {
   Button,
   DataTable,
   EmptyState,
-  Icon,
   PageHeader,
   SearchField,
   Select,
@@ -55,10 +54,9 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
 
     return (
       /*
-       * Job id top-left / status badge top-right (opposite corners of the
-       * header row instead of a labeled meta row), created date pushed to
-       * the far right of the progress row, label-above-value stats box, and
-       * a "Detay ->" footer instead of a bare icon.
+       * Job id top-left / status badge top-right, the progress ring with the
+       * created date beside it, then the counts under a hairline. The whole
+       * card is the button — no "Details →" footer.
        */
       <S.JobCard key={job.id} variant="elevated" onClick={() => onJobClick(job.id)}>
         <S.JobCardHeader>
@@ -87,23 +85,24 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
               {formatJobDate(job.createdAt)}
             </Text>
           </S.ProgressRow>
+        </S.JobCardBody>
 
-          <S.StatsGrid>
+        <S.StatsGrid>
             <S.StatCell>
-              <S.StatLabel variant="caption" color="text.tertiary">
+              <S.StatLabel variant="caption" color="text.secondary">
                 {t('listings.jobs.stats.success')}
               </S.StatLabel>
-              <S.StatValue variant="body-sm" weight="bold" $tone="positive" numeric>
+              <S.StatValue variant="body" weight="semibold" $tone="positive" numeric>
                 {job.successCount}
               </S.StatValue>
             </S.StatCell>
             <S.StatCell>
-              <S.StatLabel variant="caption" color="text.tertiary">
+              <S.StatLabel variant="caption" color="text.secondary">
                 {t('listings.jobs.stats.failed')}
               </S.StatLabel>
               <S.StatValue
-                variant="body-sm"
-                weight="bold"
+                variant="body"
+                weight="semibold"
                 $tone={job.failedCount > 0 ? 'negative' : 'default'}
                 numeric
               >
@@ -112,25 +111,15 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
             </S.StatCell>
             {remaining > 0 ? (
               <S.StatCell>
-                <S.StatLabel variant="caption" color="text.tertiary">
+                <S.StatLabel variant="caption" color="text.secondary">
                   {t('listings.jobs.stats.remaining')}
                 </S.StatLabel>
-                <S.StatValue variant="body-sm" weight="bold" numeric>
+                <S.StatValue variant="body" weight="semibold" numeric>
                   {remaining}
                 </S.StatValue>
               </S.StatCell>
             ) : null}
           </S.StatsGrid>
-        </S.JobCardBody>
-
-        <S.Footer>
-          <S.DetailAction>
-            <Text variant="body-sm" weight="semibold" color="brand.primary">
-              {t('translation:common.details')}
-            </Text>
-            <Icon name="arrow-right" size={14} color="brand.primary" />
-          </S.DetailAction>
-        </S.Footer>
       </S.JobCard>
     );
   };

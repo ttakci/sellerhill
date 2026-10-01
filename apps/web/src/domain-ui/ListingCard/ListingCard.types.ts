@@ -18,7 +18,7 @@ export interface ListingCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
-  /** Leading row icon — mirrors the job-item cards (barcode for ASIN, tag for eBay ID, …). */
+  /** @deprecated Labels carry no icon any more (2026-10-01); accepted and ignored. */
   icon?: IconName;
 }
 
@@ -60,9 +60,6 @@ export interface ListingCardProps {
   selected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
   selectionAriaLabel?: string;
-  /**
-   * The trailing "Details →" affordance. Default true; a card whose click does
-   * something other than open a detail page (e.g. ticks it) hides it.
-   */
+  /** @deprecated The card has no "Details →" footer any more — the whole card is the button. Accepted and ignored. */
   showDetailAction?: boolean;
 }

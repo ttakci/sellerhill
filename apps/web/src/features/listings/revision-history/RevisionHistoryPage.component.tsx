@@ -92,7 +92,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
       header: t('listings.table.product'),
       render: (_value, row) => {
         const meta: ProductTableCellMetaRow[] = [
-          { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon', icon: 'barcode' },
+          { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon' },
         ];
         return <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} subtitle={row.storeName} />;
       },
@@ -134,7 +134,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
 
   const renderGridCard = (row: RevisionHistoryRow) => {
     const meta: ProductTableCellMetaRow[] = [
-      { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon', icon: 'barcode' },
+      { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon' },
     ];
     return (
       <S.RevisionCard key={row.id} variant="elevated" onClick={() => onRowClick(row)}>
@@ -267,7 +267,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
         renderGridCard={renderGridCard}
         viewMode={viewMode}
         onViewModeChange={onViewModeChange}
-        defaultViewMode="table"
+        defaultViewMode="grid"
         hideViewToggle={isEmpty || isInitialLoading}
         emptyContent={emptyState}
         emptyMessage={t('listings.revisionHistory.empty')}

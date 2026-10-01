@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { ViewMode } from '../../molecules/ViewToggle/ViewToggle.types';
 
 import { DataTableComponent } from './DataTable.component';
@@ -23,10 +22,10 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
     skeletonCount = 6,
   } = props;
 
-  const isMobile = useIsMobile();
-  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(
-    defaultViewMode ?? (isMobile ? 'grid' : 'table')
-  );
+  /* Cards are the default on every width (operator decision, 2026-10-01): a
+     card carries the product photo and reads the way a seller thinks about a
+     sale or a listing; the table stays one toggle away for scanning figures. */
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(defaultViewMode ?? 'grid');
 
   const viewMode = controlledViewMode ?? internalViewMode;
 

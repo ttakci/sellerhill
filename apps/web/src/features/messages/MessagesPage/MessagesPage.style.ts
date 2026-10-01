@@ -25,18 +25,14 @@ import { Card, PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
-/** Store filter row (and, below `xl`, the type/folder switches) — the same
- * bordered, shadowed bar every other list page's filter row uses. */
+/** Store filter row (and, below `xl`, the type/folder switches) — on the
+ * page canvas, like every other list page's filter row. */
 export const Toolbar = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  min-width: 0;
 `;
 
 /** The rail's stand-in below `xl`; hidden once the rail itself is shown. */
@@ -60,31 +56,10 @@ export const ToolbarRight = styled.div`
   margin-left: auto;
 `;
 
-export const StoreTrigger = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  max-width: 14rem;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm-md')};
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.background.secondary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  cursor: pointer;
-  color: ${tkn('colors.text.primary')};
-  font: inherit;
-  white-space: nowrap;
-  transition:
-    border-color ${tkn('transitions.fast')},
-    background ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.surface.secondary')};
-    border-color: ${tkn('colors.brand.primary')};
-  }
-`;
-
+/** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */
 export const StoreLabel = styled.span`
   min-width: 0;
+  max-width: 12rem;
   overflow: hidden;
 `;
 

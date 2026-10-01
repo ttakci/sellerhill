@@ -25,7 +25,7 @@ export const RevisionHistoryPageContainer: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
   const [storeFilter, setStoreFilter] = useState('');
   const [drawer, setDrawer] = useState<RevisionHistoryDrawerState>(EMPTY_DRAWER);

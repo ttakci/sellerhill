@@ -1,8 +1,8 @@
 import type { IconName } from '../../atoms/Icon';
 
 export interface SettingsInfoRowProps {
-  /** Icon shown inside the tinted circle to the left of the label. */
-  icon: IconName;
+  /** Optional glyph in a tinted disc before the label. Omit it on a plain fact row — the label column is ornament enough. */
+  icon?: IconName;
   /** Row label (e.g. "Phone Number"). */
   label: string;
   /** Current value, right-aligned next to the edit action. */

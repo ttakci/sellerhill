@@ -5,20 +5,12 @@ export const Container = PageContainer;
 
 /* Same geometry as the Listings / Orders / Jobs filter bars. */
 export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  /* The controls sit on the page canvas — no card of their own, so the first
+     row of data is the first surface on the page (see the orders list). */
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  overflow: visible;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
+  min-width: 0;
 `;
 
 export const SearchWrapper = styled.div`

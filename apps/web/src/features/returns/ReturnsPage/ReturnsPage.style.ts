@@ -12,17 +12,12 @@ export const TabsRow = styled.div`
 `;
 
 export const FilterBar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
-  box-shadow: ${tkn('shadows.sm')};
-  overflow: visible;
-  box-sizing: border-box;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
+  /* The controls sit on the page canvas — no card of their own, so the first
+     row of data is the first surface on the page (see the orders list). */
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
 `;
 
 export const FilterBarRow = styled.div`
@@ -73,9 +68,6 @@ export const FilterActions = styled.div`
 
 export const ResultCount = styled(UIText)`
   white-space: nowrap;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.sm')};
 `;
 
 /** A table cell that stacks a primary line over its context line(s). */

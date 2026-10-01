@@ -51,7 +51,7 @@ export function useListingsColumns(locale: string) {
         render: (_value, listing) => {
           const displayName = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
           const meta: ProductTableCellMetaRow[] = [
-            { label: t('listings.table.asin'), id: listing.asin, storeType: 'amazon', icon: 'barcode' },
+            { label: t('listings.table.asin'), id: listing.asin, storeType: 'amazon' },
           ];
           if (listing.ebayListingId) {
             meta.push({

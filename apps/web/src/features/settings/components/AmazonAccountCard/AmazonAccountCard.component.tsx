@@ -8,6 +8,8 @@ import { CARD_ACTION_ICON_SIZE } from '../cardMetrics';
 import * as S from './AmazonAccountCard.style';
 import type { AmazonAccountCardProps } from './AmazonAccountCard.types';
 
+import { getAmazonAccountStatusLabel } from '@/features/amazon/utils/amazonAccountStatusLabel';
+
 export const AmazonAccountCard: React.FC<AmazonAccountCardProps> = ({ account, onClick }) => {
   const { t } = useTranslation(['translation']);
 
@@ -34,7 +36,9 @@ export const AmazonAccountCard: React.FC<AmazonAccountCardProps> = ({ account, o
       <S.AccountMain>
         <S.AccountHead>
           <Text variant="body" weight="semibold">{account.displayName}</Text>
-          <StatusBadge status={account.status} size="sm" />
+          <StatusBadge status={account.status} size="sm">
+            {getAmazonAccountStatusLabel(account.status, t)}
+          </StatusBadge>
         </S.AccountHead>
 
         <S.AccountMetaList>
