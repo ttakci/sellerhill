@@ -61,7 +61,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
             value={search}
             onChange={onSearchChange}
             placeholder={t('listings.products.searchPlaceholder')}
-            size="medium"
+            size="small"
             fullWidth
           />
         </S.SearchWrapper>

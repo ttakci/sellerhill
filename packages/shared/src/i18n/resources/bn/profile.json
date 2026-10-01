@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "প্রোফাইল",
+    "subtitle": "আপনার অ্যাকাউন্ট সেটিংস ও ব্যক্তিগত তথ্য পরিচালনা করুন।",
+    "personalInfo": "ব্যক্তিগত তথ্য",
+    "firstName": "নামের প্রথম অংশ",
+    "lastName": "নামের শেষ অংশ",
+    "emailAddress": "ইমেইল ঠিকানা",
+    "phone": "ফোন",
+    "bio": "পরিচিতি",
+    "address": "ঠিকানা",
+    "country": "দেশ",
+    "cityState": "শহর/রাজ্য",
+    "postalCode": "পোস্ট কোড",
+    "taxId": "কর আইডি",
+    "edit": "সম্পাদনা",
+    "home": "হোম",
+    "defaultJobTitle": "টিম ম্যানেজার",
+    "locationNotSet": "অবস্থান সেট করা নেই",
+    "defaultBio": "পেশাদার ই-কমার্স ম্যানেজার।",
+    "updateSuccess": "প্রোফাইল সফলভাবে হালনাগাদ হয়েছে।",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL",
+    "deactivateAccount": "অ্যাকাউন্ট নিষ্ক্রিয় করুন",
+    "saveChanges": "সব পরিবর্তন সংরক্ষণ করুন",
+    "storeOwner": "স্টোরের মালিক"
+  }
+}

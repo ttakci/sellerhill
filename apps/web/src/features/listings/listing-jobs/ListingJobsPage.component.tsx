@@ -175,7 +175,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   value={search}
                   onChange={onSearchChange}
                   placeholder={t('listings.jobs.filters.searchPlaceholder')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SearchWrapper>
@@ -185,7 +185,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   onChange={onStatusFilterChange}
                   options={statusOptions}
                   placeholder={t('listings.jobs.filters.allStatuses')}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>
@@ -194,7 +194,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   value={datePreset}
                   onChange={onDatePresetChange}
                   options={datePresetOptions}
-                  size="medium"
+                  size="small"
                   fullWidth
                 />
               </S.SelectWrapper>

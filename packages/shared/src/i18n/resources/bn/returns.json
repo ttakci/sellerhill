@@ -1,0 +1,205 @@
+{
+  "returns": {
+    "title": "রিটার্ন",
+    "subtitle_one": "{{count}}টি রিটার্ন",
+    "subtitle_other": "{{count}}টি রিটার্ন",
+    "loading": "রিটার্ন লোড হচ্ছে…",
+    "notice": "একটি রিটার্ন খুলে এর ইতিহাস ও eBay কীসের অপেক্ষায় তা দেখুন। eBay অনুমতি দিলে এখান থেকে অনুমোদন, প্রাপ্তি চিহ্নিত বা ফেরত দিতে পারেন; বাকি সবকিছুর উত্তর eBay-তে দেওয়া হয়।",
+    "tabs": {
+      "all": "সব",
+      "action": "পদক্ষেপ প্রয়োজন",
+      "in_progress": "চলমান",
+      "closed": "বন্ধ",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "রিটার্নের স্ট্যাটাস"
+    },
+    "filters": {
+      "search": "রিটার্ন আইডি, অর্ডার আইডি বা পণ্য খুঁজুন…",
+      "allStores": "সব স্টোর",
+      "clear": "মুছুন",
+      "resultCount_one": "{{count}}টি ফলাফল",
+      "resultCount_other": "{{count}}টি ফলাফল"
+    },
+    "columns": {
+      "product": "পণ্য",
+      "return": "রিটার্ন",
+      "status": "স্ট্যাটাস",
+      "due": "যা করণীয়",
+      "reason": "কারণ",
+      "refund": "রিফান্ড",
+      "opened": "খোলা"
+    },
+    "bucket": {
+      "unconfirmed": "নিশ্চিত নয়",
+      "action_overdue": "সময় পেরিয়েছে",
+      "action_due": "পদক্ষেপ বাকি",
+      "escalated": "eBay-তে উত্থাপিত",
+      "in_progress": "চলমান",
+      "closed": "বন্ধ"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay সম্প্রতি এই রিটার্ন নিশ্চিত করেনি, তাই এর শেষ জানা অবস্থা পুরনো হতে পারে। eBay-তে দেখুন।",
+      "action_overdue": "eBay যে তারিখের মধ্যে আপনার উত্তর আশা করেছিল তা পেরিয়ে গেছে।",
+      "action_due": "এই রিটার্নে eBay আপনার কাছ থেকে একটি পদক্ষেপের অপেক্ষায়।",
+      "escalated": "এই রিটার্ন একটি eBay কেসে উত্থাপিত হয়েছে।",
+      "in_progress": "রিটার্ন খোলা এবং এখন আপনার কিছু করার নেই।",
+      "closed": "eBay এই রিটার্ন বন্ধ করেছে।"
+    },
+    "activity": {
+      "SELLER_APPROVE_REQUEST": "রিটার্ন অনুরোধ অনুমোদন করুন",
+      "SELLER_DECLINE_REQUEST": "রিটার্ন অনুরোধ প্রত্যাখ্যান করুন",
+      "SELLER_ISSUE_REFUND": "রিফান্ড দিন",
+      "SELLER_MARK_AS_RECEIVED": "ফেরত আসা আইটেম প্রাপ্ত হিসেবে চিহ্নিত করুন",
+      "SELLER_MARK_REFUND_SENT": "রিফান্ড পাঠানো হয়েছে হিসেবে চিহ্নিত করুন",
+      "SELLER_OFFER_PARTIAL_REFUND": "আংশিক রিফান্ডের প্রস্তাব দিন",
+      "SELLER_PRINT_SHIPPING_LABEL": "শিপিং লেবেল প্রিন্ট করুন",
+      "SELLER_PROVIDE_LABEL": "একটি শিপিং লেবেল দিন",
+      "SELLER_PROVIDE_RMA": "ক্রেতাকে একটি RMA নম্বর দিন",
+      "SELLER_RETRY_REFUND": "রিফান্ড আবার চেষ্টা করুন",
+      "REMINDER_FOR_REFUND": "ক্রেতাকে ফেরত দিন",
+      "REMINDER_FOR_REFUND_NO_SHIPPING": "ক্রেতাকে ফেরত দিন (আইটেম ফেরত আসার কথা নয়)",
+      "REMINDER_FOR_RMA": "RMA অনুস্মারক: eBay-তে উত্তর দিন",
+      "REMINDER_SELLER_TO_RESPOND": "রিটার্ন অনুরোধের উত্তর দিন",
+      "other": "eBay-তে উত্তর দিন",
+      "SELLER_SEND_MESSAGE": "ক্রেতাকে একটি বার্তা পাঠান",
+      "SELLER_ESCALATE": "eBay-তে উত্থাপন করুন",
+      "SELLER_OFFER_REPLACEMENT": "প্রতিস্থাপনের প্রস্তাব দিন"
+    },
+    "dueBy": "{{date}}-এর মধ্যে",
+    "reasonType": {
+      "CANCEL": "পাঠানোর পরে বাতিল",
+      "INSTORE": "দোকানে ফেরত",
+      "REMORSE": "ক্রেতা মত বদলেছেন",
+      "SNAD": "বর্ণনার সাথে মেলেনি",
+      "UNKNOWN": "কারণ উল্লেখ নেই"
+    },
+    "refund": {
+      "refunded": "ফেরত দেওয়া",
+      "estimated": "আনুমানিক"
+    },
+    "product": {
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "order": "অর্ডার",
+    "viewOrder": "অর্ডার দেখুন",
+    "unknownProduct": "অজানা পণ্য",
+    "empty": {
+      "title": "এখনও কোনো রিটার্ন নেই",
+      "description": "আপনার ক্রেতারা eBay-তে যে রিটার্ন খুলবেন তা এখানে দেখা যাবে।"
+    },
+    "emptyFiltered": {
+      "title": "আপনার ফিল্টারের সাথে কোনো রিটার্ন মেলেনি",
+      "description": "অন্য ট্যাব, স্টোর বা খোঁজার শব্দ দেখুন।",
+      "action": "ফিল্টার মুছুন"
+    },
+    "detail": {
+      "title": "রিটার্ন {{id}}",
+      "titleLoading": "রিটার্ন",
+      "open": "রিটার্ন খুলুন",
+      "loadFailed": "এই রিটার্ন লোড করা যায়নি",
+      "loadFailedDescription": "একটু পরে আবার চেষ্টা করুন, বা eBay-তে খুলুন।",
+      "offline": "eBay এখন পৌঁছানো যায়নি, তাই এটি SellerHill-এর শেষ দেখা অবস্থা। eBay আবার সাড়া দিলে পদক্ষেপ দেওয়া হবে।",
+      "whatYouCanDo": "আপনি যা করতে পারেন",
+      "nothingToDo": "এই রিটার্নে আপনার অপেক্ষায় কিছু নেই।",
+      "openOnEbay": "eBay-তে খুলুন",
+      "alsoOnEbay": "eBay-তেও: {{options}}",
+      "buyer": "ক্রেতা",
+      "quantity": "পরিমাণ",
+      "returnType": "রিটার্নের ধরন",
+      "itemPrice": "আইটেমের মূল্য",
+      "closedAs": "বন্ধ হয়েছে",
+      "closedAt": "বন্ধের তারিখ",
+      "shipment": "রিটার্ন শিপমেন্ট",
+      "shippedAt": "পাঠানো",
+      "deliveredAt": "ডেলিভারি",
+      "markedReceived": "প্রাপ্ত হিসেবে চিহ্নিত",
+      "yes": "হ্যাঁ",
+      "no": "না",
+      "journey": "যাত্রা",
+      "journeyEmpty": "eBay এখনও কোনো ধাপ রেকর্ড করেনি।",
+      "partialRefundOffered": "{{amount}} আংশিক রিফান্ডের প্রস্তাব",
+      "trackingNumber": "ট্র্যাকিং {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "রিটার্ন অনুমোদন",
+        "mark_received": "প্রাপ্ত চিহ্নিত করুন",
+        "issue_refund": "রিফান্ড দিন"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "{{amount}} ফেরত দিন"
+      },
+      "confirm": {
+        "approve": "eBay-তে এই রিটার্ন অনুরোধ অনুমোদন করবেন? ক্রেতাকে আইটেমটি ফেরত পাঠাতে বলা হবে।",
+        "mark_received": "eBay-কে জানাবেন যে ফেরত আসা আইটেম পৌঁছেছে? আইটেমটি হাতে পেলেই এটি করুন।",
+        "issue_refund": "এখন ক্রেতাকে {{amount}} ফেরত দেবেন? eBay এটি গ্রহণ করার সাথে সাথে টাকা পাঠায়, এবং এখান থেকে তা আর ফেরানো যায় না।"
+      },
+      "done": {
+        "approve": "রিটার্নটি eBay-তে অনুমোদিত হয়েছে।",
+        "mark_received": "আইটেমটি eBay-তে প্রাপ্ত হিসেবে চিহ্নিত হয়েছে।",
+        "issue_refund": "রিফান্ডটি eBay-তে দেওয়া হয়েছে।"
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "ক্রেতা রিটার্ন খুলেছেন",
+      "BUYER_PRINT_SHIPPING_LABEL": "ক্রেতা শিপিং লেবেল প্রিন্ট করেছেন",
+      "BUYER_PROVIDE_TRACKING_INFO": "ক্রেতা ট্র্যাকিং যোগ করেছেন",
+      "BUYER_MARK_RETURN_SHIPPED": "ক্রেতা আইটেম পাঠানো হয়েছে চিহ্নিত করেছেন",
+      "BUYER_ESCALATE": "ক্রেতা eBay-তে উত্থাপন করেছেন",
+      "BUYER_CLOSE_RETURN": "ক্রেতা রিটার্ন বন্ধ করেছেন",
+      "BUYER_SEND_MESSAGE": "ক্রেতা একটি বার্তা পাঠিয়েছেন",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "ক্রেতা আংশিক রিফান্ড গ্রহণ করেছেন",
+      "BUYER_DECLINE_PARTIAL_REFUND": "ক্রেতা আংশিক রিফান্ড প্রত্যাখ্যান করেছেন",
+      "BUYER_MARK_REFUND_RECEIVED": "ক্রেতা রিফান্ড পৌঁছেছে নিশ্চিত করেছেন",
+      "SELLER_APPROVE_REQUEST": "বিক্রেতা রিটার্ন অনুমোদন করেছেন",
+      "SELLER_DECLINE_REQUEST": "বিক্রেতা রিটার্ন প্রত্যাখ্যান করেছেন",
+      "SELLER_ISSUE_REFUND": "বিক্রেতা রিফান্ড দিয়েছেন",
+      "SELLER_MARK_AS_RECEIVED": "বিক্রেতা আইটেম প্রাপ্ত চিহ্নিত করেছেন",
+      "SELLER_OFFER_PARTIAL_REFUND": "বিক্রেতা আংশিক রিফান্ডের প্রস্তাব দিয়েছেন",
+      "SELLER_PROVIDE_RMA": "বিক্রেতা একটি RMA নম্বর দিয়েছেন",
+      "SELLER_PROVIDE_LABEL": "বিক্রেতা একটি শিপিং লেবেল দিয়েছেন",
+      "SELLER_SEND_MESSAGE": "বিক্রেতা একটি বার্তা পাঠিয়েছেন",
+      "SELLER_ESCALATE": "বিক্রেতা eBay-তে উত্থাপন করেছেন",
+      "SELLER_OFFER_REPLACEMENT": "বিক্রেতা প্রতিস্থাপনের প্রস্তাব দিয়েছেন",
+      "SELLER_PROVIDE_TRACKING_INFO": "বিক্রেতা ট্র্যাকিং যোগ করেছেন",
+      "SYSTEM_CREATE_RETURN": "eBay রিটার্ন খুলেছে",
+      "SYSTEM_CLOSE_RETURN": "eBay রিটার্ন বন্ধ করেছে",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay ক্রেতাকে তৎক্ষণাৎ ফেরত দিয়েছে",
+      "SYSTEM_INITIATED_REFUND": "eBay রিফান্ড দিয়েছে",
+      "EBAY_RULE_AUTO_APPROVE": "eBay রিটার্ন স্বয়ংক্রিয়ভাবে অনুমোদন করেছে",
+      "buyerOther": "ক্রেতার ধাপ",
+      "sellerOther": "বিক্রেতার ধাপ",
+      "ebayOther": "eBay ধাপ"
+    },
+    "returnType": {
+      "MONEY_BACK": "টাকা ফেরত",
+      "REPLACEMENT": "প্রতিস্থাপন",
+      "EXCHANGE": "বিনিময়"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "পুরো ফেরত দেওয়া",
+      "PARTIAL_REFUNDED": "আংশিক ফেরত দেওয়া",
+      "NO_REFUND": "রিফান্ড ছাড়া বন্ধ",
+      "other": "বন্ধ"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "ডেলিভারি হয়েছে",
+      "IN_TRANSIT": "পথে",
+      "OUT_FOR_DELIVERY": "ডেলিভারির জন্য বেরিয়েছে",
+      "NOT_SHIPPED": "এখনও পাঠানো হয়নি",
+      "SHIPPED": "পাঠানো হয়েছে"
+    },
+    "errors": {
+      "actionsDisabled": "এই প্ল্যাটফর্মে অ্যাপের ভেতর থেকে রিটার্ন পদক্ষেপ বন্ধ আছে। রিটার্নের উত্তর eBay-তে দিন।",
+      "actionNotAvailable": "eBay আর এই রিটার্নে এই পদক্ষেপ দিচ্ছে না। রিফ্রেশ করে এখন কী অপেক্ষায় আছে দেখুন।",
+      "suspended": "আপনার সাবস্ক্রিপশন স্থগিত, তাই রিটার্ন পদক্ষেপ বিরতিতে। বিলিং পৃষ্ঠায় ইনভয়েস পরিশোধ করুন।",
+      "ebayRejected": "eBay এই পদক্ষেপ প্রত্যাখ্যান করেছে। কারণ দেখতে রিটার্নটি eBay-তে খুলুন।",
+      "unavailable": "eBay পৌঁছানো যায়নি। একটু পরে আবার চেষ্টা করুন।",
+      "sandbox": "eBay স্যান্ডবক্সে রিটার্ন পদক্ষেপ পাওয়া যায় না।",
+      "refundAmountUnknown": "eBay এই রিটার্নের জন্য কোনো রিফান্ড পরিমাণ জানায়নি, তাই রিফান্ড eBay-তে দিতে হবে।",
+      "notFound": "এই রিটার্ন পাওয়া যায়নি।"
+    }
+  }
+}

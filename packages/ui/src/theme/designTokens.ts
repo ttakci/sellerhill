@@ -155,9 +155,9 @@ export const typographyTokens = {
      * that Inter at 500 never did. Body stays Lexend — the dense-table rule
      * above still holds; only the display tier changed.
      */
-    heading: "'Manrope', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    body: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    sans: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    heading: "'Manrope', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans Bengali', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    body: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans Bengali', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    sans: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans Bengali', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   fontSize: {

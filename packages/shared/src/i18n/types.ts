@@ -70,7 +70,7 @@ export type TranslationKeys = NestedKeyOf<TranslationResource>;
 /**
  * Supported languages
  */
-export type SupportedLanguage = 'en' | 'tr' | 'ru' | 'hi' | 'ur' | 'ar' | 'az' | 'de' | 'fr' | 'es' | 'it' | 'ro' | 'uk' | 'zh' | 'pt';
+export type SupportedLanguage = 'en' | 'tr' | 'ru' | 'hi' | 'ur' | 'ar' | 'az' | 'bn' | 'de' | 'fr' | 'es' | 'it' | 'ro' | 'uk' | 'zh' | 'pt';
 
 /**
  * Language configuration
@@ -119,6 +119,11 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     code: 'az',
     name: 'Azerbaijani',
     nativeName: 'Azərbaycanca',
+  },
+  bn: {
+    code: 'bn',
+    name: 'Bengali',
+    nativeName: 'বাংলা',
   },
   de: {
     code: 'de',
