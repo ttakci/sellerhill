@@ -56,6 +56,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
+        <S.Aurora aria-hidden="true">
+          <S.AuroraLight $light="blue" />
+          <S.AuroraLight $light="sky" />
+          <S.AuroraLight $light="mint" />
+        </S.Aurora>
         {/* Mobile Sidebar Overlay */}
         <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={onCloseMobileSidebar} />
 
