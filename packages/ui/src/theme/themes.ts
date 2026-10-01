@@ -47,7 +47,7 @@ const lightColors: ThemeColors = {
      * here raises R toward B.
      */
     gradient:
-      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.30), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(14, 165, 233, 0.22), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.24), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.12), transparent 62%), linear-gradient(180deg, #f3f6fc 0%, #f7f9fd 100%)',
+      'radial-gradient(66rem 46rem at -6% -10%, rgba(59, 130, 246, 0.16), transparent 62%), radial-gradient(54rem 40rem at 104% -4%, rgba(14, 165, 233, 0.12), transparent 60%), radial-gradient(62rem 44rem at 58% 116%, rgba(20, 184, 166, 0.12), transparent 62%), radial-gradient(42rem 32rem at 30% 60%, rgba(96, 165, 250, 0.08), transparent 62%), linear-gradient(180deg, #f3f6fc 0%, #f7f9fd 100%)',
   },
 
   surface: {
@@ -161,6 +161,12 @@ const lightColors: ThemeColors = {
     glowBlue: 'rgba(37, 99, 235, 0.20)',
     glowAmber: 'rgba(245, 158, 11, 0.18)',
     glowMint: 'rgba(16, 185, 129, 0.16)',
+    /* The moving lights (2026-10-01): they carry most of the colour now, the
+       static wash underneath is only a base, so the canvas never reads darker
+       than before — it just breathes. */
+    auroraBlue: 'rgba(59, 130, 246, 0.34)',
+    auroraSky: 'rgba(14, 165, 233, 0.28)',
+    auroraMint: 'rgba(20, 184, 166, 0.26)',
   },
 
   dashboard: {
@@ -356,6 +362,9 @@ const darkColors: ThemeColors = {
     glowBlue: 'rgba(79, 110, 247, 0.18)',
     glowAmber: 'rgba(251, 191, 36, 0.12)',
     glowMint: 'rgba(52, 211, 153, 0.12)',
+    auroraBlue: 'rgba(79, 110, 247, 0.16)',
+    auroraSky: 'rgba(56, 189, 248, 0.12)',
+    auroraMint: 'rgba(52, 211, 153, 0.12)',
   },
 
   landing: {
