@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "İlan, paket limitinin dışında",
         "order_already_fulfilled": "Zaten kargolanmış — alınacak bir şey yok",
         "order_not_paid": "Alıcının ödemesi bekleniyor",
-        "order_cancelled": "eBay'de iptal edildi — alınacak bir şey yok"
+        "order_cancelled": "eBay'de iptal edildi — alınacak bir şey yok",
+        "multi_item_order": "Siparişte birden fazla ürün var — elle alın",
+        "cancel_requested": "Alıcı iptal istedi — eBay'de yanıtlayın",
+        "loss_limit": "Zarar limitinizin üzerinde"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
@@ -150,6 +153,13 @@
         "confirm": "Satın almayı başlat",
         "queued": "Satın alma başladı. Siparişin durumu birkaç dakika içinde güncellenir.",
         "queuedDryRun": "Test çalıştırması başladı. Bu Amazon hesabı test modunda olduğu için hiçbir şey satın alınmayacak."
+      },
+      "notPurchased": {
+        "button": "Amazon'da yok",
+        "confirmTitle": "Bu satış için Amazon'da sipariş olmadığını onaylıyor musunuz?",
+        "confirmDescription": "Yalnızca bu Amazon hesabının siparişlerine bakıp siparişin orada olmadığını gördüyseniz devam edin. SellerHill de hesabın sipariş listesini kontrol eder ve bu kontrol yapılmadan onayı kabul etmez. Onaydan sonra otomatik sipariş yeniden başlatılabilir; sipariş aslında Amazon'da varsa ürün iki kez alınır.",
+        "confirm": "Evet, orada yok",
+        "done": "Satın alınmadı olarak işaretlendi. Otomatik siparişi yeniden başlatabilirsiniz."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "İade tutarı",
       "refundedOn": "İade tarihi",
       "refundNote": "eBay'in bildirdiği iade tutarıdır. eBay'in tahsil ettiği satış vergisini içermez; alıcıya yapılan iade daha yüksek olabilir.",
-      "cancelledAmazonOpenAction": "Bu satış için Amazon siparişi zaten verilmişti. Siparişi Amazon'da iptal edin; kargolandıysa ürünü iade edin."
+      "cancelledAmazonOpenAction": "Bu satış için Amazon siparişi zaten verilmişti. Siparişi Amazon'da iptal edin; kargolandıysa ürünü iade edin.",
+      "shipBy": "Son gönderim tarihi",
+      "shipByNotice": "eBay son gönderim tarihi: {{date}}",
+      "multiItemNotice": "Bu eBay siparişinde {{count}} ürün var. SellerHill yalnızca ilkini izler ve bu siparişi otomatik satın almaz; diğer ürünleri kendiniz alıp gönderin."
     },
     "modal": {
       "title": "Amazon Sipariş Bilgisi Gir",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Otomatik sipariş için hazır bir Amazon hesabı yok. Ayarlar'da bir Amazon hesabı için otomatik siparişi açın ve harcama limiti girin.",
       "autoFulfillOverCap": "Bu satış Amazon hesabınızın harcama limitini aşıyor. Limiti Amazon hesabının ayarlarından yükseltin veya ürünü elle alın.",
       "autoFulfillAlreadyStarted": "Siparişin durumu az önce değişti, satın alma zaten başlamış olabilir. Sayfayı yenileyin.",
-      "autoFulfillQuotaExhausted": "Planınızın bu dönemki otomatik sipariş limiti doldu."
+      "autoFulfillQuotaExhausted": "Planınızın bu dönemki otomatik sipariş limiti doldu.",
+      "purchaseNotYetChecked": "SellerHill, satın alma denemesinden sonra bu Amazon hesabının siparişlerini henüz kontrol etmedi. Kontrol şimdi başlatıldı; birkaç dakika sonra yeniden deneyin.",
+      "purchaseNotUnknown": "Bu sipariş satın alma onayı beklemiyor. Zaten bağlanmış ya da işlemde olabilir. Sayfayı yenileyin.",
+      "purchaseFoundOnAmazon": "SellerHill, satın alma denemesiyle aynı zamanlarda bu ürün için verilmiş bir Amazon siparişi buldu ama onu bu satışla kesin olarak eşleştiremedi. Amazon siparişlerinizi açıp siparişi elle bağlayın. O sipariş başka bir satışa aitse önce o satışa bağlayın."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Satın alındı · kargo bekleniyor",
         "meaning": "Bir Amazon siparişi bağlı. Amazon'un kargolaması bekleniyor."
+      },
+      "purchase_unknown": {
+        "label": "Satın alma doğrulanamadı",
+        "meaning": "Amazon'da sipariş düğmesine basıldı ama onay gelmedi. Sipariş oluşmuş olabilir.",
+        "action": "Önce Amazon siparişlerinizi kontrol edin. Sipariş oradaysa bağlayın. Kontrol etmeden yeniden satın almayın."
       },
       "purchase_blocked": {
         "label": "Satın alma engellendi",

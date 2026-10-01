@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "eBay 售出后自动下达 Amazon 订单",
     "autoFulfillEnabledHint": "开启后，SellerHill 会使用您已关联的买家账号在 Amazon 上购买商品。关闭则需手动下单。",
     "autoFulfillEnabledInfo": "请仅在连接并配置好 Amazon 买家账号之后再开启。自动下单还要求该账号的自动履约设置和支出上限已启用。",
+    "lossLimit": {
+      "enabled": "停止会亏损的自动下单",
+      "enabledHint": "开启后，如果 Amazon 总额超出您的 eBay 收款的差额大于下方金额，自动下单会在购买前停止，订单将等待您处理。默认关闭。 没有单独设置上限的店铺使用全局上限。",
+      "amount": "每笔订单的最大亏损",
+      "amountHint": "以您店铺的货币计。0 表示绝不亏本购买。"
+    },
     "trackingConversionProvider": "物流单号转换",
     "trackingConversionProviderHint": "真实的承运商单号将原样转发。Amazon Logistics（TBA）单号保持不变。",
     "trackingConversionProviderLocal": "内置（本地）",

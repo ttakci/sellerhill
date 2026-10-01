@@ -44,6 +44,28 @@ describe('deriveOrderStage', () => {
     ).toBe(OrderStage.PURCHASED);
   });
 
+  it('reads a clicked purchase with no proof as unknown — never as blocked or to-purchase', () => {
+    const clicked = { ...paid, autoFulfillSubmittedAt: '2026-10-01T00:00:00Z' };
+    expect(deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.BLOCKED })).toBe(
+      OrderStage.PURCHASE_UNKNOWN
+    );
+    expect(deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.FAILED })).toBe(
+      OrderStage.PURCHASE_UNKNOWN
+    );
+    expect(deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.SKIPPED })).toBe(
+      OrderStage.PURCHASE_UNKNOWN
+    );
+  });
+
+  it('a clicked purchase is buying while the job runs, and purchased once proven or linked', () => {
+    const clicked = { ...paid, autoFulfillSubmittedAt: '2026-10-01T00:00:00Z' };
+    expect(deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.RUNNING })).toBe(OrderStage.BUYING);
+    expect(deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.PLACED })).toBe(OrderStage.PURCHASED);
+    expect(
+      deriveOrderStage({ ...clicked, autoFulfillStatus: AutoFulfillStatus.BLOCKED, amazonOrderId: '113-1' })
+    ).toBe(OrderStage.PURCHASED);
+  });
+
   it('reports queued and running automation as buying', () => {
     expect(deriveOrderStage({ ...paid, autoFulfillStatus: AutoFulfillStatus.PENDING })).toBe(OrderStage.BUYING);
     expect(deriveOrderStage({ ...paid, autoFulfillStatus: AutoFulfillStatus.RUNNING })).toBe(OrderStage.BUYING);
@@ -149,7 +171,12 @@ describe('deriveOrderStage', () => {
 describe('stage groupings', () => {
   it('flags exactly the stages a seller must act on', () => {
     expect([...ACTIONABLE_ORDER_STAGES].sort()).toEqual(
-      [OrderStage.AMAZON_CANCELLED, OrderStage.TRACKING_HELD, OrderStage.PURCHASE_BLOCKED].sort()
+      [
+        OrderStage.AMAZON_CANCELLED,
+        OrderStage.TRACKING_HELD,
+        OrderStage.PURCHASE_UNKNOWN,
+        OrderStage.PURCHASE_BLOCKED,
+      ].sort()
     );
   });
 

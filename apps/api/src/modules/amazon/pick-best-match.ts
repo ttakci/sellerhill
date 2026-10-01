@@ -16,6 +16,16 @@ export interface CandidateEbayOrderRow {
   buyer_name: string | null;
   /** The orders `shipping_address` JSONB (the eBay buyer's ship-to). */
   shipping_address: { fullName?: string; zipCode?: string } | null;
+  /** `orders.auto_fulfill_submitted_at` — the automatic checkout's Place Order click. */
+  auto_fulfill_submitted_at?: Date | null;
+  /** `orders.amazon_account_id` — for a clicked order, the account the click was made on. */
+  amazon_account_id?: string | null;
+  /**
+   * An Amazon order id the row already holds (a hand link whose costs could
+   * not be read). Such a row is filled from THAT order only and is never
+   * offered to the matcher — the caller filters it out.
+   */
+  amazon_order_id?: string | null;
 }
 
 /**
@@ -33,6 +43,8 @@ export interface PickBestMatchInput {
   candidates: CandidateEbayOrderRow[];
   tolerancePct: number;
   windowDays: number;
+  /** The Amazon account whose order list `amazon` was read from. */
+  accountId?: string;
 }
 
 /**
@@ -45,7 +57,7 @@ export interface PickBestMatchInput {
  * `AmazonOrderSyncService`.
  */
 export function pickBestMatch(input: PickBestMatchInput): MatchPick | null {
-  const { amazon, candidates, tolerancePct, windowDays } = input;
+  const { amazon, candidates, tolerancePct, windowDays, accountId } = input;
   let best: MatchPick | null = null;
   let tied = false;
   for (const c of candidates) {
@@ -65,6 +77,12 @@ export function pickBestMatch(input: PickBestMatchInput): MatchPick | null {
         orderDate: c.order_date.toISOString(),
         buyerName: c.shipping_address?.fullName || c.buyer_name,
         buyerZip: c.shipping_address?.zipCode ?? null,
+        submittedAt: c.auto_fulfill_submitted_at ? c.auto_fulfill_submitted_at.toISOString() : null,
+        // Only decidable when both sides are known; unknown never refuses.
+        clickedOnThisAccount:
+          c.auto_fulfill_submitted_at && c.amazon_account_id && accountId
+            ? c.amazon_account_id === accountId
+            : undefined,
       },
       tolerancePct,
       windowDays,

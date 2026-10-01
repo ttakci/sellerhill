@@ -2,8 +2,11 @@ import {
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
   MANUALLY_RETRYABLE_BLOCKED_REASONS,
+  ConfirmNotPurchasedRefusal,
   OrderStatus,
   canStartAutoFulfillManually,
+  resolveConfirmNotPurchased,
+  type ConfirmNotPurchasedInput,
   type ManualAutoFulfillInput,
 } from '@repo/shared';
 
@@ -57,6 +60,7 @@ describe('canStartAutoFulfillManually', () => {
       AutoFulfillBlockedReason.ORDER_NOT_PAID,
       AutoFulfillBlockedReason.ORDER_ALREADY_FULFILLED,
       AutoFulfillBlockedReason.LISTING_OVER_PLAN_LIMIT,
+      AutoFulfillBlockedReason.MULTI_ITEM_ORDER,
     ]) {
       expect(
         canStartAutoFulfillManually({ ...base, autoFulfillStatus: AutoFulfillStatus.SKIPPED, autoFulfillBlockedReason: reason })
@@ -97,5 +101,60 @@ describe('canStartAutoFulfillManually', () => {
   it('refuses an untracked order and one over the plan limit', () => {
     expect(canStartAutoFulfillManually({ ...base, isTracked: false })).toBe(false);
     expect(canStartAutoFulfillManually({ ...base, listingOverPlanLimit: true })).toBe(false);
+  });
+
+  it('refuses EVERY otherwise-allowed state once the Place Order click was stamped', () => {
+    const submittedAt = '2026-10-01T10:00:00Z';
+    for (const reason of MANUALLY_RETRYABLE_BLOCKED_REASONS) {
+      expect(canStartAutoFulfillManually({ ...base, autoFulfillBlockedReason: reason, submittedAt })).toBe(false);
+    }
+    for (const autoFulfillStatus of [AutoFulfillStatus.FAILED, AutoFulfillStatus.DRY_RUN, AutoFulfillStatus.SKIPPED]) {
+      expect(
+        canStartAutoFulfillManually({ ...base, autoFulfillStatus, autoFulfillBlockedReason: null, submittedAt })
+      ).toBe(false);
+    }
+  });
+
+  it('refuses a multi-item order — the checkout buys one line of several', () => {
+    expect(canStartAutoFulfillManually({ ...base, lineItemCount: 2 })).toBe(false);
+    expect(canStartAutoFulfillManually({ ...base, lineItemCount: 1 })).toBe(true);
+    expect(canStartAutoFulfillManually({ ...base, lineItemCount: null })).toBe(true);
+  });
+});
+
+describe('resolveConfirmNotPurchased', () => {
+  const unknown: ConfirmNotPurchasedInput = {
+    status: OrderStatus.WAITING_SHIPMENT,
+    autoFulfillStatus: AutoFulfillStatus.BLOCKED,
+    amazonOrderId: null,
+    submittedAt: '2026-10-01T10:00:00Z',
+    accountScannedAt: '2026-10-01T10:06:00Z',
+  };
+
+  it('allows it only after a scan that finished AFTER the click', () => {
+    expect(resolveConfirmNotPurchased(unknown)).toBeNull();
+  });
+
+  it('refuses before any scan, and for a scan older than (or equal to) the click', () => {
+    for (const accountScannedAt of [null, '2026-10-01T09:59:59Z', '2026-10-01T10:00:00Z', 'not-a-date']) {
+      expect(resolveConfirmNotPurchased({ ...unknown, accountScannedAt })).toBe(
+        ConfirmNotPurchasedRefusal.NOT_YET_CHECKED
+      );
+    }
+  });
+
+  it('refuses when the order is not in the unknown state', () => {
+    const notUnknown: Partial<ConfirmNotPurchasedInput>[] = [
+      { submittedAt: null },
+      { amazonOrderId: '113-1234567-1234567' },
+      { autoFulfillStatus: AutoFulfillStatus.PLACED },
+      { autoFulfillStatus: AutoFulfillStatus.RUNNING },
+      { autoFulfillStatus: AutoFulfillStatus.PENDING },
+      { status: OrderStatus.CANCELLED },
+      { status: OrderStatus.SHIPPED },
+    ];
+    for (const patch of notUnknown) {
+      expect(resolveConfirmNotPurchased({ ...unknown, ...patch })).toBe(ConfirmNotPurchasedRefusal.NOT_UNKNOWN);
+    }
   });
 });

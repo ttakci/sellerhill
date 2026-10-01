@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Amazon-Bestellungen nach eBay-Verkäufen automatisch aufgeben",
     "autoFulfillEnabledHint": "Wenn aktiviert, kauft SellerHill den Artikel mit Ihrem verknüpften Käuferkonto bei Amazon. Deaktivieren Sie dies, um manuell zu bestellen.",
     "autoFulfillEnabledInfo": "Aktivieren Sie dies erst, nachdem Sie ein Amazon-Käuferkonto verbunden und konfiguriert haben. Für die automatische Bestellung müssen außerdem die Einstellung zur automatischen Abwicklung und das Ausgabenlimit dieses Kontos aktiviert sein.",
+    "lossLimit": {
+      "enabled": "Automatische Bestellungen mit Verlust stoppen",
+      "enabledHint": "Wenn aktiviert, wird eine automatische Bestellung vor dem Kauf gestoppt, sobald die Amazon-Gesamtsumme Ihre eBay-Auszahlung um mehr als den untenstehenden Betrag übersteigt. Die Bestellung wartet dann auf Sie. Standardmäßig aus. Ein Shop ohne eigenes Limit verwendet das globale.",
+      "amount": "Höchster Verlust pro Bestellung",
+      "amountHint": "In der Währung Ihres Shops. 0 bedeutet: nie mit Verlust kaufen."
+    },
     "trackingConversionProvider": "Umwandlung von Sendungsnummern",
     "trackingConversionProviderHint": "Echte Versandnummern werden unverändert weitergeleitet. Amazon Logistics (TBA) wird unverändert durchgereicht.",
     "trackingConversionProviderLocal": "Integriert (lokal)",

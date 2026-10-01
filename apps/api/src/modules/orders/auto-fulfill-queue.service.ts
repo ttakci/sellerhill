@@ -18,10 +18,15 @@ import {
  * consumer side. Keeping the queue registered in OrdersModule avoids a circular
  * module dep (AmazonModule already imports OrdersModule for `recomputeProfit`).
  *
- * `jobId` is keyed per eBay order id so BullMQ dedupes across retries: one
- * fulfillment attempt per order, even if the producer fires twice or the
- * processor exhausts its attempts and the queue is re-enqueued. The queue name
- * + jobId prefix live in `auto-fulfill-queue.constants.ts` (shared with the
+ * One WAITING-OR-ACTIVE job per eBay order, through BullMQ `deduplication` —
+ * NEVER a fixed `jobId`. BullMQ silently ignores an add whose jobId a KEPT job
+ * still holds, and `removeOnComplete: 100` keeps completed jobs: an order that
+ * was blocked at execution (its job completed) and later re-armed by the
+ * suspension-resume or unpaid-recheck sweep was "enqueued" into nothing and sat
+ * at PENDING ("buying") for ever. `deduplication` releases the id when the job
+ * finishes. Double-purchase safety does not rest on the id at all: it rests on
+ * the click stamp and the status re-check in the checkout. The queue name +
+ * id prefix live in `auto-fulfill-queue.constants.ts` (shared with the
  * consumer) so a rename can never silently detach the worker from the queue.
  */
 export { AUTO_FULFILL_QUEUE };
@@ -33,12 +38,11 @@ export class AutoFulfillQueueService {
   constructor(@InjectQueue(AUTO_FULFILL_QUEUE) private readonly queue: Queue) {}
 
   async enqueue(ebayOrderId: string, amazonAccountId: string): Promise<void> {
-    // jobId per order => dedup; one fulfillment attempt per order across BullMQ retries.
     await this.queue.add(
       'fulfill-order',
       stampCurrentCorrelation({ ebayOrderId, amazonAccountId }),
       {
-        jobId: `${AUTO_FULFILL_JOB_ID_PREFIX}${ebayOrderId}`,
+        deduplication: { id: `${AUTO_FULFILL_JOB_ID_PREFIX}${ebayOrderId}` },
         attempts: 3,
         backoff: { type: 'exponential', delay: 60_000 },
         removeOnComplete: 100,
@@ -57,11 +61,15 @@ export class AutoFulfillQueueService {
    * the click would enqueue nothing. Duplicate protection does not rest on the
    * id here: `OrderSyncService.startAutoFulfillManually` claims the row with a
    * compare-and-set first, so only one click per blocked state reaches this.
+   *
+   * `manual: true` travels with the job: the seller asked for THIS order, so
+   * the pre-purchase check does not hold it for an open cancel request (it
+   * still refuses a cancelled, shipped or multi-item sale).
    */
   async enqueueManual(ebayOrderId: string, amazonAccountId: string): Promise<void> {
     await this.queue.add(
       'fulfill-order',
-      stampCurrentCorrelation({ ebayOrderId, amazonAccountId }),
+      stampCurrentCorrelation({ ebayOrderId, amazonAccountId, manual: true }),
       {
         jobId: `${AUTO_FULFILL_JOB_ID_PREFIX}${ebayOrderId}-manual-${Date.now()}`,
         attempts: 3,

@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Maximaler Bestellwert (Limit der automatischen Abwicklung)",
       "autoFulfillCapTotalHint": "Ausgabenlimit pro Konto (USD). Bestellungen über diesem Betrag überspringen dieses Konto. Erforderlich, um die automatische Abwicklung zu aktivieren.",
       "autoFulfillCapTotalPlaceholder": "z. B. 250",
+      "cartOwnershipNote": "Nutzen Sie dieses Amazon-Konto nur für SellerHill. Sein Warenkorb wird vor jeder automatischen Bestellung geleert, daher wird alles entfernt, was Sie selbst hineingelegt haben.",
       "autoFulfillDryRun": "Testlauf (Ablauf ausführen, ohne die Bestellung aufzugeben)",
       "autoFulfillDryRunHint": "Führt den gesamten Bestellablauf bis vor „Bestellung aufgeben“ aus, damit der Gesamtbetrag der Übersicht erfasst und zur Prüfung angezeigt werden kann."
     },

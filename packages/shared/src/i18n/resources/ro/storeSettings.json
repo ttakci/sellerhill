@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "Plasează automat comenzi Amazon după vânzările eBay",
     "autoFulfillEnabledHint": "Când este activat, SellerHill cumpără articolul pe Amazon cu contul dvs. de cumpărător asociat. Dezactivați pentru a comanda manual.",
     "autoFulfillEnabledInfo": "Activați acest lucru doar după conectarea și configurarea unui cont de cumpărător Amazon. Comandarea automată necesită și ca setarea de îndeplinire automată și plafonul de cheltuieli ale acelui cont să fie activate.",
+    "lossLimit": {
+      "enabled": "Oprește comenzile automate în pierdere",
+      "enabledHint": "Când este activă, o comandă automată este oprită înainte de cumpărare dacă totalul Amazon depășește încasarea ta eBay cu mai mult decât suma de mai jos. Comanda te așteaptă. Dezactivată implicit. Un magazin fără limită proprie folosește limita globală.",
+      "amount": "Pierderea maximă pe comandă",
+      "amountHint": "În moneda magazinului tău. 0 înseamnă să nu cumperi niciodată în pierdere."
+    },
     "trackingConversionProvider": "Conversia numărului de urmărire",
     "trackingConversionProviderHint": "Numerele reale ale curierilor sunt transmise ca atare. Amazon Logistics (TBA) trece nemodificat.",
     "trackingConversionProviderLocal": "Încorporat (local)",

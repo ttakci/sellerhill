@@ -11,6 +11,31 @@
  * Reading by LABEL survives class-name churn better than any class selector.
  */
 
+/**
+ * How many whole days before the scan's `since` instant an order may be dated
+ * and still be read. Covers the gap between the server's clock and the day
+ * Amazon prints (the account's own timezone).
+ */
+export const SCAN_CUTOFF_SLACK_DAYS = 1;
+
+/**
+ * The cutoff a "Your Orders" scan compares each card's date against.
+ *
+ * A card carries a DATE ("September 30, 2026"), parsed as that day's midnight,
+ * while `since` is an INSTANT — normally the moment the previous scan started.
+ * Comparing the two directly dropped every order placed on the same calendar
+ * day as that previous scan: midnight is always before 09:00, so the first
+ * card read as "older than the cutoff", paging stopped, and the order was
+ * never seen by any later scan either. The cutoff is therefore the START of
+ * the `since` day (UTC), less `SCAN_CUTOFF_SLACK_DAYS`. Re-reading an order
+ * that was already handled is harmless: an Amazon order id an order row
+ * already holds is never linked a second time.
+ */
+export function scanCutoffMs(since: Date): number {
+  const startOfDay = Date.UTC(since.getUTCFullYear(), since.getUTCMonth(), since.getUTCDate());
+  return startOfDay - SCAN_CUTOFF_SLACK_DAYS * 86_400_000;
+}
+
 export interface OrderCardHeader {
   orderDate: Date | null;
   grandTotal: number | null;

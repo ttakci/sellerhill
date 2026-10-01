@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Inserzione oltre il limite del piano",
         "order_already_fulfilled": "Già spedito — nulla da acquistare",
         "order_not_paid": "In attesa del pagamento dell'acquirente",
-        "order_cancelled": "Annullato su eBay: niente da acquistare"
+        "order_cancelled": "Annullato su eBay: niente da acquistare",
+        "multi_item_order": "L'ordine contiene più articoli — acquista a mano",
+        "cancel_requested": "L'acquirente ha chiesto l'annullamento — rispondi su eBay",
+        "loss_limit": "Oltre il tuo limite di perdita"
       },
       "reasonLabel": "Motivo: {{reason}}",
       "amazonCancelledBadge": "Annullato da Amazon",
@@ -150,6 +153,13 @@
         "confirm": "Avvia acquisto",
         "queued": "L'acquisto è partito. Lo stato dell'ordine si aggiorna tra pochi minuti.",
         "queuedDryRun": "È partita una prova. Questo account Amazon è in modalità test, quindi non verrà acquistato nulla."
+      },
+      "notPurchased": {
+        "button": "Non è su Amazon",
+        "confirmTitle": "Confermi che su Amazon non c'è un ordine per questa vendita?",
+        "confirmDescription": "Continua solo dopo aver guardato gli ordini di questo account Amazon e aver visto che l'ordine non c'è. Anche SellerHill controlla l'elenco ordini dell'account e rifiuta finché quel controllo non è stato eseguito. Dopo, l'ordine automatico può essere avviato di nuovo: se l'ordine esiste davvero su Amazon, l'articolo verrà acquistato due volte.",
+        "confirm": "Sì, non c'è",
+        "done": "Segnato come non acquistato. Puoi avviare di nuovo l'ordine automatico."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Importo rimborsato",
       "refundedOn": "Data del rimborso",
       "refundNote": "È l'importo del rimborso comunicato da eBay. Non include l'imposta sulle vendite riscossa da eBay, quindi l'acquirente potrebbe aver ricevuto di più.",
-      "cancelledAmazonOpenAction": "Per questa vendita era già stato effettuato un ordine su Amazon. Annullalo su Amazon oppure restituisci l'articolo se è già stato spedito."
+      "cancelledAmazonOpenAction": "Per questa vendita era già stato effettuato un ordine su Amazon. Annullalo su Amazon oppure restituisci l'articolo se è già stato spedito.",
+      "shipBy": "Spedire entro",
+      "shipByNotice": "Termine di spedizione eBay: {{date}}",
+      "multiItemNotice": "Articoli in questo ordine eBay: {{count}}. SellerHill segue solo il primo e non acquista questo ordine automaticamente: acquista e spedisci tu gli altri articoli."
     },
     "modal": {
       "title": "Inserisci i dati dell'ordine Amazon",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Nessun account Amazon è pronto per gli ordini automatici. Nelle impostazioni attiva gli ordini automatici su un account Amazon e imposta un limite di spesa.",
       "autoFulfillOverCap": "Questa vendita supera il limite di spesa del tuo account Amazon. Aumenta il limite nelle impostazioni dell'account Amazon o acquista l'articolo manualmente.",
       "autoFulfillAlreadyStarted": "Lo stato di questo ordine è appena cambiato, quindi l'acquisto potrebbe essere già partito. Aggiorna la pagina.",
-      "autoFulfillQuotaExhausted": "Il limite di ordini automatici del tuo piano per questo periodo è esaurito."
+      "autoFulfillQuotaExhausted": "Il limite di ordini automatici del tuo piano per questo periodo è esaurito.",
+      "purchaseNotYetChecked": "SellerHill non ha ancora controllato gli ordini di questo account Amazon dal tentativo di acquisto. Il controllo è stato avviato ora: riprova tra qualche minuto.",
+      "purchaseNotUnknown": "Questo ordine non è in attesa di una conferma d'acquisto. Potrebbe essere già collegato o in corso. Aggiorna la pagina.",
+      "purchaseFoundOnAmazon": "SellerHill ha trovato un ordine Amazon per questo prodotto, effettuato intorno al momento del tentativo di acquisto, ma non è riuscito ad abbinarlo con certezza a questa vendita. Apri i tuoi ordini Amazon e collegalo a mano. Se quell'ordine appartiene a un'altra vendita, collegalo prima a quella."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Acquistato · in attesa di spedizione",
         "meaning": "Un ordine Amazon è collegato. In attesa che Amazon lo spedisca."
+      },
+      "purchase_unknown": {
+        "label": "Acquisto non confermato",
+        "meaning": "Il pulsante dell'ordine è stato premuto su Amazon, ma non è tornata alcuna conferma. L'ordine potrebbe esistere.",
+        "action": "Controlla prima i tuoi ordini Amazon. Se l'ordine c'è, collegalo. Non acquistare di nuovo prima di aver controllato."
       },
       "purchase_blocked": {
         "label": "Acquisto bloccato",

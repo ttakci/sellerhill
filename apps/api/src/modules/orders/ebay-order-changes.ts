@@ -18,6 +18,12 @@ export interface EbayCancelStatus {
   cancelState?: string;
   /** "The date and time the order was cancelled, if applicable." */
   cancelledDate?: string;
+  /**
+   * The buyer's cancellation requests. Documented as "always empty" on
+   * `getOrders` and "fully populated" on `getOrder`, so only the single-order
+   * read before a purchase can count them.
+   */
+  cancelRequests?: unknown[];
 }
 
 export interface EbayOrderRefund {
@@ -48,6 +54,8 @@ export interface OrderCancellation {
   cancelState: string | null;
   cancelledAt: Date | null;
   isCancelled: boolean;
+  /** How many cancel requests the payload lists (0 on `getOrders`, by contract). */
+  cancelRequestCount: number;
 }
 
 export function readCancellation(cancelStatus: EbayCancelStatus | undefined | null): OrderCancellation {
@@ -57,7 +65,13 @@ export function readCancellation(cancelStatus: EbayCancelStatus | undefined | nu
     cancelState,
     cancelledAt,
     isCancelled: cancelledAt !== null || cancelState === EBAY_CANCEL_STATE_CANCELED,
+    cancelRequestCount: Array.isArray(cancelStatus?.cancelRequests) ? cancelStatus.cancelRequests.length : 0,
   };
+}
+
+/** eBay's ship-by deadline for a line item, or null when absent or unparseable. */
+export function readShipByDate(value: string | undefined | null): Date | null {
+  return parseDate(value ?? undefined);
 }
 
 export interface OrderRefundSummary {

@@ -46,6 +46,12 @@ export enum OrderStage {
   TRACKING_HELD = 'tracking_held',
   BUYING = 'buying',
   PURCHASED = 'purchased',
+  /**
+   * The Place Order click went out (`orders.auto_fulfill_submitted_at`) and no
+   * confirmation came back. The Amazon order may exist, so nothing may buy it
+   * again until the outcome is known — see the 2026-10-01 order-flow design.
+   */
+  PURCHASE_UNKNOWN = 'purchase_unknown',
   PURCHASE_BLOCKED = 'purchase_blocked',
   AWAITING_PAYMENT = 'awaiting_payment',
   TO_PURCHASE = 'to_purchase',
@@ -183,6 +189,58 @@ export enum AutoFulfillBlockedReason {
    * execution, because a cancellation can land while the job waits in the queue.
    */
   ORDER_CANCELLED = 'order_cancelled',
+  /**
+   * The eBay order holds more than one line item. The platform reads only the
+   * first, so an automatic purchase would buy one item of several and leave the
+   * order looking complete. Written with status SKIPPED: the seller buys and
+   * ships every item by hand. Never manually retryable.
+   */
+  MULTI_ITEM_ORDER = 'multi_item_order',
+  /**
+   * The buyer asked eBay to cancel and the request is still open. Nothing is
+   * bought for a sale that may be about to disappear. BLOCKED rather than
+   * SKIPPED because the seller has to answer the request on eBay; retryable by
+   * hand once it is settled.
+   */
+  CANCEL_REQUESTED = 'cancel_requested',
+  /**
+   * The Amazon total at the review step exceeded the eBay payout by more than
+   * the store's `autoFulfillMaxLoss`. Stopped before the click; retryable by
+   * hand (after raising the limit, or once the price falls).
+   */
+  LOSS_LIMIT = 'loss_limit',
+}
+
+/**
+ * One step of an automatic Amazon purchase, as written to the append-only
+ * `auto_fulfill_events` audit trail (migration 132). The trail is evidence for
+ * "what did the automation do with this order's money" — it is never read back
+ * to decide anything; the click boundary lives on
+ * `orders.auto_fulfill_submitted_at`.
+ */
+export enum AutoFulfillEvent {
+  ATTEMPT_STARTED = 'attempt_started',
+  MANUAL_START = 'manual_start',
+  EBAY_RECHECK_PASSED = 'ebay_recheck_passed',
+  CART_VERIFIED = 'cart_verified',
+  ADDRESS_VERIFIED = 'address_verified',
+  PAYMENT_SELECTED = 'payment_selected',
+  REVIEW_TOTAL_READ = 'review_total_read',
+  CAP_CHECK_PASSED = 'cap_check_passed',
+  LOSS_CHECK_PASSED = 'loss_check_passed',
+  DRY_RUN_STOPPED = 'dry_run_stopped',
+  SUBMIT_CLAIMED = 'submit_claimed',
+  PLACE_ORDER_CLICKED = 'place_order_clicked',
+  CONFIRMATION_DETECTED = 'confirmation_detected',
+  ORDER_ID_DETECTED = 'order_id_detected',
+  PLACED = 'placed',
+  PURCHASE_UNKNOWN = 'purchase_unknown',
+  BLOCKED = 'blocked',
+  SKIPPED = 'skipped',
+  FAILED = 'failed',
+  RETRY_SCHEDULED = 'retry_scheduled',
+  RECONCILIATION_LINKED = 'reconciliation_linked',
+  CONFIRMED_NOT_PURCHASED = 'confirmed_not_purchased',
 }
 
 /**
@@ -258,6 +316,13 @@ export interface OrderDto {
    * endpoint (`POST /amazon/orders/:id/start-auto-fulfill`) never disagree.
    */
   canStartAutoFulfill?: boolean;
+  /**
+   * How many line items the eBay order holds. Above 1 the platform tracks only
+   * the first one and never buys automatically — the detail page says so.
+   */
+  lineItemCount?: number | null;
+  /** eBay's ship-by deadline for the (first) line item, or null. */
+  shipByDate?: string | null;
 
   // Product
   product?: {
@@ -413,6 +478,15 @@ export type OrderStageCountsDto = Record<OrderStage, number>;
 export interface StartAutoFulfillResultDto {
   queued: true;
   dryRun: boolean;
+}
+
+/**
+ * `POST /amazon/orders/:orderId/confirm-not-purchased` — the click stamp was
+ * cleared: the order left the `purchase_unknown` stage and the automatic
+ * purchase may be started again.
+ */
+export interface ConfirmNotPurchasedResultDto {
+  cleared: true;
 }
 
 export interface OrderFiltersDto {

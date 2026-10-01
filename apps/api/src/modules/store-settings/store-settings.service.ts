@@ -29,6 +29,8 @@ interface StoreSettingsEntity {
   amazon_tax_rate: string | number; // NUMERIC(5,2) — coerced via Number() in mapper
   // A2 auto-fulfillment master toggle (migration 036).
   auto_fulfill_enabled: boolean;
+  // Loss limit per automatic order (migration 132). NUMERIC(10,2); NULL = off.
+  auto_fulfill_max_loss: string | number | null;
   // Carrier-mapping provider; persisted LOWERCASE — the tracking processor
   // compares the raw DB string case-sensitively (migration 036, default 'local').
   tracking_conversion_provider: string;
@@ -94,6 +96,7 @@ export class StoreSettingsService {
         blacklist: createDefaultBlacklist(),
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
+        autoFulfillMaxLoss: null,
         // Conversion is ON by default (migration 112). A seller with no row has
         // not chosen the raw Amazon number — they have chosen nothing.
         trackingConversionProvider: TrackingConversionProvider.AQUILINE,
@@ -143,6 +146,7 @@ export class StoreSettingsService {
       blacklist,
       amazonTaxRate,
       autoFulfillEnabled,
+      autoFulfillMaxLoss,
       trackingConversionProvider,
       trackingConversionScope,
       trackingConvertManualOrders,
@@ -179,6 +183,15 @@ export class StoreSettingsService {
     // separate boolean parameter because node-postgres serializes both as NULL.
     const buyerMessagingProvided = buyerMessaging !== undefined;
     const buyerMessagingJson = buyerMessaging ? JSON.stringify(buyerMessaging) : null;
+    // The loss limit has the same three states: omitted (a focused drawer that
+    // does not own it — leave unchanged), explicit null (the seller turned the
+    // limit off) and a number. COALESCE cannot express "set to NULL", hence the
+    // separate provided flag.
+    const maxLossProvided = autoFulfillMaxLoss !== undefined;
+    const maxLossValue =
+      typeof autoFulfillMaxLoss === 'number' && Number.isFinite(autoFulfillMaxLoss) && autoFulfillMaxLoss >= 0
+        ? Math.round(autoFulfillMaxLoss * 100) / 100
+        : null;
 
     // Ship-from / return address for Aquiline profiles. Same "omitted or
     // blank means leave unchanged" rule as country/state/zipCode above — the
@@ -197,8 +210,8 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -220,6 +233,10 @@ export class StoreSettingsService {
                 ship_from_address_line1 = COALESCE($16, store_settings.ship_from_address_line1),
                 ship_from_address_line2 = COALESCE($17, store_settings.ship_from_address_line2),
                 ship_from_city = COALESCE($18, store_settings.ship_from_city),
+                auto_fulfill_max_loss = CASE
+                  WHEN $20::boolean THEN EXCLUDED.auto_fulfill_max_loss
+                  ELSE store_settings.auto_fulfill_max_loss
+                END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -242,14 +259,16 @@ export class StoreSettingsService {
           shipFromAddressLine1Value,
           shipFromAddressLine2Value,
           shipFromCityValue,
+          maxLossValue,
+          maxLossProvided,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss)
+            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19, $20::numeric)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -271,6 +290,10 @@ export class StoreSettingsService {
                 ship_from_address_line1 = COALESCE($17, store_settings.ship_from_address_line1),
                 ship_from_address_line2 = COALESCE($18, store_settings.ship_from_address_line2),
                 ship_from_city = COALESCE($19, store_settings.ship_from_city),
+                auto_fulfill_max_loss = CASE
+                  WHEN $21::boolean THEN EXCLUDED.auto_fulfill_max_loss
+                  ELSE store_settings.auto_fulfill_max_loss
+                END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -294,6 +317,8 @@ export class StoreSettingsService {
           shipFromAddressLine1Value,
           shipFromAddressLine2Value,
           shipFromCityValue,
+          maxLossValue,
+          maxLossProvided,
         ]
       );
     }
@@ -321,6 +346,13 @@ export class StoreSettingsService {
       blacklist: parsedBlacklist,
       amazonTaxRate: Number(entity.amazon_tax_rate) || 0,
       autoFulfillEnabled: !!entity.auto_fulfill_enabled,
+      // NULL (or anything unparseable) = no limit; 0 is a real limit ("never at a loss").
+      autoFulfillMaxLoss:
+        entity.auto_fulfill_max_loss !== null &&
+        entity.auto_fulfill_max_loss !== undefined &&
+        Number.isFinite(Number(entity.auto_fulfill_max_loss))
+          ? Number(entity.auto_fulfill_max_loss)
+          : null,
       // Normalize: tolerate any stray uppercase from older rows; persist LOWERCASE.
       // Compare to the string literal `'api'` (not the enum) to avoid
       // `no-unsafe-enum-comparison` between the DB-side string and the enum,

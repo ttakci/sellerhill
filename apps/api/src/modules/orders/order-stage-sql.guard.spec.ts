@@ -24,6 +24,7 @@ interface Row {
   amazon_cancelled_at: string | null;
   shipped_detected_at: string | null;
   ebay_tracking_pushed_at: string | null;
+  auto_fulfill_submitted_at: string | null;
 }
 
 const NULLABLE_COLUMNS = [
@@ -31,6 +32,7 @@ const NULLABLE_COLUMNS = [
   'amazon_order_id',
   'shipped_detected_at',
   'ebay_tracking_pushed_at',
+  'auto_fulfill_submitted_at',
 ] as const;
 
 function evaluateCondition(condition: string, row: Row, alias: string): boolean {
@@ -162,14 +164,17 @@ function* everyRow(): Generator<Row> {
         for (const cancelledAt of stamps) {
           for (const shippedAt of stamps) {
             for (const pushedAt of stamps) {
-              yield {
-                status,
-                auto_fulfill_status: auto,
-                amazon_order_id: amazonId,
-                amazon_cancelled_at: cancelledAt,
-                shipped_detected_at: shippedAt,
-                ebay_tracking_pushed_at: pushedAt,
-              };
+              for (const submittedAt of stamps) {
+                yield {
+                  status,
+                  auto_fulfill_status: auto,
+                  amazon_order_id: amazonId,
+                  amazon_cancelled_at: cancelledAt,
+                  shipped_detected_at: shippedAt,
+                  ebay_tracking_pushed_at: pushedAt,
+                  auto_fulfill_submitted_at: submittedAt,
+                };
+              }
             }
           }
         }
@@ -189,11 +194,12 @@ describe('buildOrderStageSql', () => {
         amazonCancelledAt: row.amazon_cancelled_at,
         shippedDetectedAt: row.shipped_detected_at,
         ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+        autoFulfillSubmittedAt: row.auto_fulfill_submitted_at,
       });
       expect({ row, stage: evaluateCase(sql, row, ALIAS) }).toEqual({ row, stage: expected });
       combos += 1;
     }
-    expect(combos).toBe(statuses.length * autos.length * amazonIds.length * 8);
+    expect(combos).toBe(statuses.length * autos.length * amazonIds.length * 16);
   });
 
   it('can produce every stage, so no branch is unreachable', () => {

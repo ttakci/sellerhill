@@ -90,6 +90,7 @@
       "autoFulfillCapTotal": "Maksimum sifariş məbləği (avtomatik yerinə yetirmə limiti)",
       "autoFulfillCapTotalHint": "Hesab üzrə xərc həddi (USD). Bu məbləğdən yuxarı sifarişlər bu hesabı keçir. Avtomatik yerinə yetirməni aktiv etmək üçün tələb olunur.",
       "autoFulfillCapTotalPlaceholder": "məs., 250",
+      "cartOwnershipNote": "Bu Amazon hesabını yalnız SellerHill üçün istifadə edin. Hər avtomatik sifarişdən əvvəl səbəti boşaldılır, ona görə özünüz əlavə etdiyiniz hər şey silinir.",
       "autoFulfillDryRun": "Sınaq rejimi (sifariş verilmədən axını icra et)",
       "autoFulfillDryRunHint": "Sifariş təsdiqinə (daxil olmaqla deyil) qədər tam ödəniş axınını icra edir ki, yekun məbləğ qeydə alınıb yoxlanış üçün göstərilsin."
     },

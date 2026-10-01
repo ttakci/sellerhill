@@ -7,25 +7,32 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  AmazonAccountStatus,
   AutoFulfillBlockedReason,
+  AutoFulfillEvent,
   AutoFulfillStatus,
   BuyerMessageEventType,
   EbayAccountStatus,
-  ListingStatus,
   OrderCostCaptureStatus,
   OrderStatus,
+  ConfirmNotPurchasedRefusal,
   canStartAutoFulfillManually,
   isOrderAlreadyFulfilled,
   isSimulatedAmazonOrderId,
+  resolveConfirmNotPurchased,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import {
+  STALE_RUNNING_MINUTES,
+  decidePrePurchase,
+  estimateAmazonOrderCost,
   meetsCoarseCapGate,
   pickRoundRobinAccount,
   resolveAutoFulfillEligibility,
   selectResumableOrders,
+  type PrePurchaseDecision,
   type ResumableOrderRow,
 } from '../amazon/auto-fulfill-helpers';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
@@ -34,9 +41,10 @@ import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
+import { AutoFulfillEventLog } from './auto-fulfill-event-log.service';
 import { AutoFulfillQueueService } from './auto-fulfill-queue.service';
 import { EBAY_GET_ORDERS_MAX_LIMIT, EbayFulfillmentService } from './ebay-fulfillment.service';
-import { buildSyncedStatusSql, decideIngest } from './ebay-order-changes';
+import { buildSyncedStatusSql, decideIngest, mergeSyncedOrderStatus } from './ebay-order-changes';
 import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
@@ -62,12 +70,34 @@ const AWAITING_PAYMENT_RECHECK_LIMIT = 20;
 const AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS = 1;
 
 /**
+ * A product's unit price as the cost of an ORDER: unit price × quantity sold,
+ * to the cent. A missing or zero price stays 0 ("unknown"), never a guess.
+ */
+export function toOrderCost(unitPrice: number | null | undefined, quantity: number | null | undefined): number {
+  const price = Number(unitPrice);
+  if (!Number.isFinite(price) || price <= 0) {
+    return 0;
+  }
+  const qty = Math.max(1, Math.floor(Number(quantity) || 1));
+  return Math.round(price * qty * 100) / 100;
+}
+
+/**
  * Outcome of `startAutoFulfillManually`. A refusal carries an i18n key the
  * controller returns as the error message; `notFound` maps to a 404.
  */
 export type ManualAutoFulfillStart =
   | { ok: true; dryRun: boolean }
   | { ok: false; errorKey: string; notFound?: boolean };
+
+/**
+ * Outcome of `confirmNotPurchased`. A `notYetChecked` refusal names the Amazon
+ * accounts whose order list still has to be scanned, so the caller can queue
+ * that scan and the seller can try again in a few minutes.
+ */
+export type ConfirmNotPurchasedResult =
+  | { ok: true }
+  | { ok: false; errorKey: string; notFound?: boolean; accountsToScan?: string[] };
 
 /**
  * Runaway guard for one store in one tick: 50 pages of 200 is 10,000 modified
@@ -107,7 +137,8 @@ export class OrderSyncService {
     private readonly storeSettingsService: StoreSettingsService,
     private readonly autoFulfillQueue: AutoFulfillQueueService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly buyerMessages: BuyerMessageQueueService
+    private readonly buyerMessages: BuyerMessageQueueService,
+    private readonly autoFulfillEvents: AutoFulfillEventLog
   ) {}
 
   /**
@@ -173,6 +204,7 @@ export class OrderSyncService {
     // blocked reason is treated as permanent), so restart it by hand here for
     // any order this user has parked at BLOCKED / subscription_suspended.
     await this.resumeSuspendedAutoFulfill(userId);
+    await this.settleStaleRunningAutoFulfill(userId);
 
     // Get fresh access token
     const accessToken = await this.ebayService.getActiveAccountAccessToken(userId);
@@ -217,15 +249,22 @@ export class OrderSyncService {
           let listingOverPlanLimit = false;
 
           if (lineItem?.legacyItemId) {
+            // Matched on the eBay item id alone — NOT on the listing still being
+            // ACTIVE. A buyer who paid for an item whose listing ended a minute
+            // later (sold out, ended by the seller, retired by reconciliation)
+            // is still owed the item, and filtering on ACTIVE left that order
+            // untracked for ever: no cost, no automatic purchase, no dashboard.
+            // `ebay_item_id` is UNIQUE and a draft has none, so this is still at
+            // most one row.
             const match = await this.databaseService.query<{
               id: string;
               product_id: string;
               over_plan_limit: boolean;
             }>(
               `SELECT id, product_id, over_plan_limit FROM listings
-               WHERE ebay_item_id = $1 AND user_id = $2 AND status = $3
+               WHERE ebay_item_id = $1 AND user_id = $2
                LIMIT 1`,
-              [lineItem.legacyItemId, userId, ListingStatus.ACTIVE]
+              [lineItem.legacyItemId, userId]
             );
 
             if (match.length > 0) {
@@ -234,13 +273,16 @@ export class OrderSyncService {
             }
           }
 
-          // Get purchase price from product via listing
+          // Provisional product cost from the listing's product: the UNIT price
+          // times the quantity sold. It used to store the unit price alone, so
+          // the estimated profit of a multi-quantity order was overstated and
+          // cost capture compared Amazon's order total with one unit's price.
           let purchasePrice: number | undefined;
 
           if (listingId) {
             const productData = await this.productsService.getProductPriceAndImageByListingId(listingId);
             if (productData) {
-              purchasePrice = productData.purchasePrice;
+              purchasePrice = toOrderCost(productData.purchasePrice, lineItem?.quantity);
             }
           }
 
@@ -522,7 +564,8 @@ export class OrderSyncService {
         cost_capture_status,
         ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
         listing_over_plan_limit, ebay_legacy_item_id, ebay_line_item_id,
-        ebay_cancel_state, ebay_cancelled_at, ebay_refunded_amount, ebay_refunded_at
+        ebay_cancel_state, ebay_cancelled_at, ebay_refunded_amount, ebay_refunded_at,
+        ebay_line_item_count, ebay_ship_by_date
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
@@ -532,7 +575,8 @@ export class OrderSyncService {
         $26,
         $27, $28, $29,
         $30, $31, $32,
-        $33, $34, $35, $36
+        $33, $34, $35, $36,
+        $37, $38
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         -- Never a bare EXCLUDED.status: an order is re-read every time eBay
@@ -576,6 +620,12 @@ export class OrderSyncService {
         ebay_cancelled_at = COALESCE(EXCLUDED.ebay_cancelled_at, orders.ebay_cancelled_at),
         ebay_refunded_amount = COALESCE(EXCLUDED.ebay_refunded_amount, orders.ebay_refunded_amount),
         ebay_refunded_at = COALESCE(EXCLUDED.ebay_refunded_at, orders.ebay_refunded_at),
+        -- How many line items the order holds, and eBay's ship-by deadline
+        -- (migration 132). COALESCE for the same reason: a read that lacks the
+        -- field must not blank it; an order ingested before 132 is filled in
+        -- the next time eBay modifies it.
+        ebay_line_item_count = COALESCE(EXCLUDED.ebay_line_item_count, orders.ebay_line_item_count),
+        ebay_ship_by_date = COALESCE(EXCLUDED.ebay_ship_by_date, orders.ebay_ship_by_date),
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id, (xmax = 0) AS inserted`,
@@ -618,6 +668,8 @@ export class OrderSyncService {
         entity.ebayCancelledAt ? entity.ebayCancelledAt.toISOString() : null,
         entity.ebayRefundedAmount,
         entity.ebayRefundedAt ? entity.ebayRefundedAt.toISOString() : null,
+        entity.lineItemCount > 0 ? entity.lineItemCount : null,
+        entity.shipByDate ? entity.shipByDate.toISOString() : null,
       ]
     );
 
@@ -658,12 +710,13 @@ export class OrderSyncService {
         amazon_shipping: string | number | null;
         amazon_linked_at: Date | null;
         listing_id: string | null;
+        quantity: number | null;
         asin: string | null;
         fees: { ebayFeePercent?: number; fixedFeeAmount?: number } | null;
       }>(
         `SELECT o.id, o.user_id, o.sale_total, o.ebay_earnings, o.purchase_price,
                 o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
-                o.listing_id, p.asin,
+                o.listing_id, o.quantity, p.asin,
                 lsg.fees
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
@@ -700,7 +753,8 @@ export class OrderSyncService {
       if (resolvedPurchase <= 0 && hasListingMatch) {
         const productData = await this.productsService.getProductPriceAndImageByListingId(o.listing_id as string);
         if (productData?.purchasePrice) {
-          resolvedPurchase = productData.purchasePrice;
+          // The ORDER's product cost: unit price x quantity (see `toOrderCost`).
+          resolvedPurchase = toOrderCost(productData.purchasePrice, o.quantity);
         }
       }
 
@@ -822,11 +876,22 @@ export class OrderSyncService {
       );
       return;
     }
+    // The platform reads ONE line item of an order. Buying it for an order
+    // that holds several would leave the others unbought while the order read
+    // as handled — so nothing is bought, and the reason says why. SKIPPED: the
+    // seller buys and ships every item by hand.
+    if (entity.lineItemCount > 1) {
+      await this.setAutoFulfillStatus(
+        entity.ebayOrderId,
+        AutoFulfillStatus.SKIPPED,
+        AutoFulfillBlockedReason.MULTI_ITEM_ORDER
+      );
+      return;
+    }
     await this.resolveAndEnqueueAutoFulfill({
       userId: entity.userId,
       ebayAccountId: entity.ebayAccountId,
       ebayOrderId: entity.ebayOrderId,
-      saleTotal: Number(entity.saleTotal) || 0,
     });
   }
 
@@ -858,7 +923,6 @@ export class OrderSyncService {
     userId: string;
     ebayAccountId: string;
     ebayOrderId: string;
-    saleTotal: number;
   }): Promise<void> {
     const settings = await this.storeSettingsService.getResolvedSettings(input.userId, input.ebayAccountId);
     if (!settings.autoFulfillEnabled) {
@@ -867,10 +931,11 @@ export class OrderSyncService {
     }
     const enabled = await this.databaseService.query<{
       id: string;
+      status: string | null;
       last_used_at: Date | null;
       auto_fulfill_cap_total: string | number | null;
     }>(
-      `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts
+      `SELECT id, status, last_used_at, auto_fulfill_cap_total FROM amazon_accounts
         WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
       [input.userId]
     );
@@ -878,13 +943,22 @@ export class OrderSyncService {
       await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
-    const pick = pickRoundRobinAccount(enabled.map((a) => ({ id: a.id, lastUsedAt: a.last_used_at })));
+    // Healthy accounts first: an account needing re-authentication is only
+    // tried when no working one exists (see `pickRoundRobinAccount`).
+    const pick = pickRoundRobinAccount(
+      enabled.map((a) => ({
+        id: a.id,
+        lastUsedAt: a.last_used_at,
+        healthy: (a.status as AmazonAccountStatus | null) === AmazonAccountStatus.ACTIVE,
+      }))
+    );
     if (!pick) {
       await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
     const cap = Number(enabled.find((a) => a.id === pick.id)!.auto_fulfill_cap_total);
-    if (!meetsCoarseCapGate(input.saleTotal, cap)) {
+    const estimatedCost = await this.estimateAmazonCostForOrder(input.ebayOrderId, input.userId);
+    if (!meetsCoarseCapGate(estimatedCost, cap)) {
       await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
@@ -936,9 +1010,12 @@ export class OrderSyncService {
       auto_fulfill_blocked_reason: AutoFulfillBlockedReason | null;
       amazon_order_id: string | null;
       amazon_account_id: string | null;
+      auto_fulfill_submitted_at: Date | null;
+      ebay_line_item_count: number | null;
     }>(
       `SELECT ebay_order_id, sale_total, status, listing_id, listing_over_plan_limit,
-              auto_fulfill_status, auto_fulfill_blocked_reason, amazon_order_id, amazon_account_id
+              auto_fulfill_status, auto_fulfill_blocked_reason, amazon_order_id, amazon_account_id,
+              auto_fulfill_submitted_at, ebay_line_item_count
          FROM orders
         WHERE id = $1 AND user_id = $2`,
       [orderId, userId]
@@ -953,6 +1030,8 @@ export class OrderSyncService {
       autoFulfillStatus: row.auto_fulfill_status,
       autoFulfillBlockedReason: row.auto_fulfill_blocked_reason,
       amazonOrderId: row.amazon_order_id,
+      submittedAt: row.auto_fulfill_submitted_at,
+      lineItemCount: row.ebay_line_item_count,
     });
     if (!allowed) {
       return { ok: false, errorKey: 'orders.errors.autoFulfillNotRestartable' };
@@ -963,21 +1042,29 @@ export class OrderSyncService {
 
     const pool = await this.databaseService.query<{
       id: string;
+      status: string | null;
       last_used_at: Date | null;
       auto_fulfill_cap_total: string | number;
       auto_fulfill_dry_run: boolean;
     }>(
-      `SELECT id, last_used_at, auto_fulfill_cap_total, auto_fulfill_dry_run FROM amazon_accounts
+      `SELECT id, status, last_used_at, auto_fulfill_cap_total, auto_fulfill_dry_run FROM amazon_accounts
         WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
       [userId]
     );
     const pick =
       pool.find((a) => a.id === row.amazon_account_id) ??
-      pickRoundRobinAccount(pool.map((a) => ({ ...a, lastUsedAt: a.last_used_at })));
+      pickRoundRobinAccount(
+        pool.map((a) => ({
+          ...a,
+          lastUsedAt: a.last_used_at,
+          healthy: (a.status as AmazonAccountStatus | null) === AmazonAccountStatus.ACTIVE,
+        }))
+      );
     if (!pick) {
       return { ok: false, errorKey: 'orders.errors.autoFulfillNoAccount' };
     }
-    if (!meetsCoarseCapGate(Number(row.sale_total) || 0, Number(pick.auto_fulfill_cap_total))) {
+    const estimatedCost = await this.estimateAmazonCostForOrder(row.ebay_order_id, userId);
+    if (!meetsCoarseCapGate(estimatedCost, Number(pick.auto_fulfill_cap_total))) {
       return { ok: false, errorKey: 'orders.errors.autoFulfillOverCap' };
     }
 
@@ -999,6 +1086,7 @@ export class OrderSyncService {
           AND auto_fulfill_status = $5
           AND auto_fulfill_blocked_reason IS NOT DISTINCT FROM $6
           AND amazon_order_id IS NOT DISTINCT FROM $7
+          AND auto_fulfill_submitted_at IS NULL
         RETURNING ebay_order_id`,
       [
         AutoFulfillStatus.PENDING,
@@ -1046,7 +1134,308 @@ export class OrderSyncService {
     this.logger.log(
       `Manual auto-fulfill queued for ${row.ebay_order_id} on account ${pick.id}${pick.auto_fulfill_dry_run ? ' (dry run)' : ''}`
     );
+    await this.autoFulfillEvents.record(row.ebay_order_id, AutoFulfillEvent.MANUAL_START, {
+      userId,
+      amazonAccountId: pick.id,
+      detail: { previousStatus: row.auto_fulfill_status, previousReason: row.auto_fulfill_blocked_reason },
+    });
     return { ok: true, dryRun: pick.auto_fulfill_dry_run === true };
+  }
+
+  /**
+   * What the Amazon purchase for an order is expected to cost: the product's
+   * CURRENT unit price x the quantity sold, plus the seller's configured Amazon
+   * tax rate. Null when the price is unknown. Only the coarse cap gate reads
+   * it; the review-step total on Amazon is the real guard. Never throws — an
+   * estimate that cannot be made is "unknown", not a reason to stop.
+   */
+  private async estimateAmazonCostForOrder(ebayOrderId: string, userId: string): Promise<number | null> {
+    try {
+      const [row] = await this.databaseService.query<{ listing_id: string | null; quantity: number | null }>(
+        `SELECT listing_id, quantity FROM orders WHERE ebay_order_id = $1`,
+        [ebayOrderId]
+      );
+      if (!row?.listing_id) {
+        return null;
+      }
+      const product = await this.productsService.getProductPriceAndImageByListingId(row.listing_id);
+      const settings = await this.storeSettingsService.getResolvedSettings(userId, null);
+      return estimateAmazonOrderCost({
+        unitPrice: product?.purchasePrice ?? null,
+        quantity: row.quantity,
+        taxRatePct: Number(settings.amazonTaxRate) || 0,
+      });
+    } catch (err) {
+      this.logger.warn(`Amazon cost estimate unavailable for ${ebayOrderId}: ${(err as Error).message}`);
+      return null;
+    }
+  }
+
+  /**
+   * The seller's loss limit for an order's store (Store > Global > Default),
+   * or null when none is set. Read by the checkout at the review step. Throws
+   * when the settings cannot be read: a guard the seller configured must not be
+   * skipped silently, and at that point nothing has been clicked.
+   */
+  async resolveAutoFulfillMaxLoss(userId: string, ebayAccountId: string | null): Promise<number | null> {
+    const settings = await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId);
+    if (settings.autoFulfillMaxLoss !== null && settings.autoFulfillMaxLoss !== undefined) {
+      return settings.autoFulfillMaxLoss;
+    }
+    // A store row with NO limit inherits the global one. A per-store row can be
+    // created by a focused drawer (blacklist, buyer messaging) that never
+    // mentions this field, and its NULL must not silently switch off a guard
+    // the seller set globally. The cost: a store cannot opt OUT of a global
+    // limit — the protective reading, for a setting about losing money.
+    if (settings.isGlobal) {
+      return null;
+    }
+    const global = await this.storeSettingsService.getResolvedSettings(userId, null);
+    return global.autoFulfillMaxLoss ?? null;
+  }
+
+  /**
+   * The last look at the eBay sale before money is spent, from a LIVE
+   * `getOrder` read (one Fulfillment call per automatic purchase).
+   *
+   * The stored row is as old as the last sync tick — up to 20 minutes — and a
+   * buyer who changes their mind usually does so in the first minutes. What
+   * eBay says now is written back (forward-only status, cancel state, line
+   * count) and then judged by `decidePrePurchase`.
+   *
+   * THROWS when eBay cannot be read (transport, budget, the order no longer
+   * returned): "could not check" is never taken for "still wanted". The caller
+   * lets BullMQ retry; exhaustion is FAILED, which the seller can restart.
+   */
+  async recheckBeforePurchase(ebayOrderId: string, manual: boolean): Promise<PrePurchaseDecision> {
+    const [row] = await this.databaseService.query<{
+      user_id: string;
+      ebay_account_id: string;
+      status: OrderStatus;
+      marketplace_id: string;
+    }>(
+      `SELECT o.user_id, o.ebay_account_id, o.status, ea.marketplace_id
+         FROM orders o
+         JOIN ebay_accounts ea ON ea.id = o.ebay_account_id
+        WHERE o.ebay_order_id = $1`,
+      [ebayOrderId]
+    );
+    if (!row) {
+      throw new Error(`pre-purchase check: order ${ebayOrderId} or its eBay store was not found`);
+    }
+    const accessToken = await this.ebayService.getAccountAccessToken(row.ebay_account_id);
+    const fresh = await this.fulfillmentService.fetchOrderById(
+      accessToken,
+      row.marketplace_id as EbayMarketplaceId,
+      ebayOrderId
+    );
+    if (!fresh) {
+      throw new Error(`pre-purchase check: eBay no longer returns order ${ebayOrderId}`);
+    }
+    const live = this.fulfillmentService.mapEbayOrderToEntity(fresh, row.user_id, row.ebay_account_id);
+    const status = mergeSyncedOrderStatus(row.status, live.status);
+
+    await this.databaseService.query(
+      `UPDATE orders
+          SET status = $2,
+              ebay_cancel_state = COALESCE($3, ebay_cancel_state),
+              ebay_cancelled_at = COALESCE($4, ebay_cancelled_at),
+              ebay_line_item_count = COALESCE($5, ebay_line_item_count),
+              updated_at = CURRENT_TIMESTAMP
+        WHERE ebay_order_id = $1`,
+      [
+        ebayOrderId,
+        status,
+        live.ebayCancelState,
+        live.ebayCancelledAt ? live.ebayCancelledAt.toISOString() : null,
+        live.lineItemCount > 0 ? live.lineItemCount : null,
+      ]
+    );
+
+    return decidePrePurchase({
+      status,
+      cancelState: live.ebayCancelState,
+      cancelRequestCount: live.cancelRequestCount,
+      lineItemCount: live.lineItemCount,
+      manual,
+    });
+  }
+
+  /**
+   * The seller declares that an unconfirmed purchase did NOT happen
+   * (`POST /amazon/orders/:id/confirm-not-purchased`).
+   *
+   * This is the ONLY thing that ever clears the click stamp, and it takes two
+   * independent facts (`resolveConfirmNotPurchased`): the Amazon account's
+   * order list was scanned AFTER the click and linked nothing, and the seller
+   * says so. "Not found" alone never re-arms a purchase — the scan is strict
+   * and Amazon's list can lag — and neither does the seller alone.
+   *
+   * On success the row becomes FAILED with no reason (why the click produced
+   * no order is not known, so none is claimed), which is the state the "Start
+   * automatic order" button accepts.
+   */
+  async confirmNotPurchased(userId: string, orderId: string): Promise<ConfirmNotPurchasedResult> {
+    const [row] = await this.databaseService.query<{
+      ebay_order_id: string;
+      status: OrderStatus;
+      auto_fulfill_status: AutoFulfillStatus | null;
+      amazon_order_id: string | null;
+      amazon_account_id: string | null;
+      auto_fulfill_submitted_at: Date | null;
+      suspect_unclaimed: boolean;
+    }>(
+      `SELECT o.ebay_order_id, o.status, o.auto_fulfill_status, o.amazon_order_id, o.amazon_account_id,
+              o.auto_fulfill_submitted_at,
+              (o.auto_fulfill_suspect_amazon_order_id IS NOT NULL
+                AND NOT EXISTS (
+                  SELECT 1 FROM orders held
+                   WHERE held.amazon_order_id = o.auto_fulfill_suspect_amazon_order_id
+                )) AS suspect_unclaimed
+         FROM orders o
+        WHERE o.id = $1 AND o.user_id = $2`,
+      [orderId, userId]
+    );
+    if (!row) {
+      return { ok: false, notFound: true, errorKey: 'orders.errors.notFound' };
+    }
+    // A scan saw an Amazon order that may be this purchase (same product, dated
+    // around the click) and could not match it with certainty. Until that order
+    // is linked to SOME sale — this one or another — "it is not on Amazon" is
+    // not a claim the system can accept.
+    if (row.suspect_unclaimed && row.auto_fulfill_submitted_at && !row.amazon_order_id) {
+      return { ok: false, errorKey: 'orders.errors.purchaseFoundOnAmazon' };
+    }
+
+    // The account the click was made on; a row stamped by migration 132 has
+    // none, and then EVERY one of the seller's accounts must have been scanned.
+    const accounts = await this.databaseService.query<{ id: string; last_orders_sync_at: Date | null }>(
+      row.amazon_account_id
+        ? `SELECT id, last_orders_sync_at FROM amazon_accounts WHERE id = $1 AND user_id = $2`
+        : `SELECT id, last_orders_sync_at FROM amazon_accounts WHERE $1::text IS NULL AND user_id = $2`,
+      [row.amazon_account_id, userId]
+    );
+    const scanTimes = accounts.map((a) => (a.last_orders_sync_at ? new Date(a.last_orders_sync_at).getTime() : null));
+    const accountScannedAt =
+      scanTimes.length > 0 && scanTimes.every((t): t is number => t !== null)
+        ? new Date(Math.min(...scanTimes))
+        : null;
+
+    const refusal = resolveConfirmNotPurchased({
+      status: row.status,
+      autoFulfillStatus: row.auto_fulfill_status,
+      amazonOrderId: row.amazon_order_id,
+      submittedAt: row.auto_fulfill_submitted_at,
+      accountScannedAt,
+    });
+    if (refusal === ConfirmNotPurchasedRefusal.NOT_UNKNOWN) {
+      return { ok: false, errorKey: 'orders.errors.purchaseNotUnknown' };
+    }
+    if (refusal === ConfirmNotPurchasedRefusal.NOT_YET_CHECKED) {
+      return {
+        ok: false,
+        errorKey: 'orders.errors.purchaseNotYetChecked',
+        accountsToScan: accounts.map((a) => a.id),
+      };
+    }
+
+    const cleared = await this.databaseService.query<{ ebay_order_id: string }>(
+      `UPDATE orders
+          SET auto_fulfill_submitted_at = NULL,
+              auto_fulfill_suspect_amazon_order_id = NULL,
+              auto_fulfill_status = $3,
+              auto_fulfill_blocked_reason = NULL,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND user_id = $2
+          AND auto_fulfill_submitted_at IS NOT NULL
+          AND amazon_order_id IS NULL
+          AND auto_fulfill_status NOT IN ($4, $5, $6)
+        RETURNING ebay_order_id`,
+      [
+        orderId,
+        userId,
+        AutoFulfillStatus.FAILED,
+        AutoFulfillStatus.PLACED,
+        AutoFulfillStatus.PENDING,
+        AutoFulfillStatus.RUNNING,
+      ]
+    );
+    if (cleared.length === 0) {
+      // Linked, placed or restarted between the read and the write.
+      return { ok: false, errorKey: 'orders.errors.purchaseNotUnknown' };
+    }
+    this.logger.warn(
+      `Order ${row.ebay_order_id}: seller confirmed the unproven purchase did not happen; click stamp cleared`
+    );
+    await this.autoFulfillEvents.record(row.ebay_order_id, AutoFulfillEvent.CONFIRMED_NOT_PURCHASED, {
+      userId,
+      amazonAccountId: row.amazon_account_id,
+      detail: { clickedAt: row.auto_fulfill_submitted_at?.toISOString() ?? null },
+    });
+    return { ok: true };
+  }
+
+  /**
+   * Settle automatic purchases that have sat at RUNNING for longer than any
+   * checkout takes (`STALE_RUNNING_MINUTES`). Nothing else ever moves such a
+   * row: it happens when the job that owned it is gone (retries exhausted
+   * while the row could not be written, a removed job, a process that died
+   * with no stalled-job hand-over) and the order then read "buying" for ever.
+   *
+   * The click stamp decides which way it settles:
+   *  - stamped   → BLOCKED / interrupted: the click went out, outcome unknown.
+   *  - unstamped → FAILED: nothing was clicked; the seller can start it again.
+   *
+   * A job that is in fact still alive loses nothing it should keep: its own
+   * stamp claim is a compare-and-set on `status = running`, so it finds the
+   * row taken and stops before the click. Best-effort; never breaks order sync.
+   */
+  private async settleStaleRunningAutoFulfill(userId: string): Promise<void> {
+    try {
+      const settled = await this.databaseService.query<{ ebay_order_id: string; submitted: boolean }>(
+        `UPDATE orders
+            SET auto_fulfill_status = CASE
+                  WHEN auto_fulfill_submitted_at IS NULL THEN $2::auto_fulfill_status
+                  ELSE $3::auto_fulfill_status
+                END,
+                auto_fulfill_blocked_reason = CASE
+                  WHEN auto_fulfill_submitted_at IS NULL THEN NULL
+                  ELSE $4::varchar
+                END,
+                updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = $1
+            AND auto_fulfill_status = $5::auto_fulfill_status
+            AND auto_fulfill_attempted_at < NOW() - ($6::int * INTERVAL '1 minute')
+          RETURNING ebay_order_id, (auto_fulfill_submitted_at IS NOT NULL) AS submitted`,
+        [
+          userId,
+          AutoFulfillStatus.FAILED,
+          AutoFulfillStatus.BLOCKED,
+          AutoFulfillBlockedReason.INTERRUPTED,
+          AutoFulfillStatus.RUNNING,
+          STALE_RUNNING_MINUTES,
+        ]
+      );
+      for (const row of settled) {
+        this.logger.warn(
+          `Auto-fulfill for ${row.ebay_order_id} sat at RUNNING past ${STALE_RUNNING_MINUTES} min; settled as ${
+            row.submitted ? 'unknown outcome (the click was sent)' : 'failed (nothing was clicked)'
+          }`
+        );
+        await this.autoFulfillEvents.record(
+          row.ebay_order_id,
+          row.submitted ? AutoFulfillEvent.PURCHASE_UNKNOWN : AutoFulfillEvent.FAILED,
+          { userId, detail: { cause: 'stale_running' } }
+        );
+        await this.quotaEnforcement
+          .releaseAmazonOrder(userId, row.ebay_order_id)
+          .catch((err: unknown) =>
+            this.logger.warn(`quota release failed for stale ${row.ebay_order_id}: ${(err as Error).message}`)
+          );
+      }
+    } catch (err) {
+      this.logger.warn(`Stale auto-fulfill sweep skipped for user ${userId}: ${(err as Error).message}`);
+    }
   }
 
   /**
@@ -1083,15 +1472,16 @@ export class OrderSyncService {
       // `selectResumableOrders` re-applies both in code so the rule stays
       // unit-testable.
       const rows = await this.databaseService.query<
-        ResumableOrderRow & { ebay_account_id: string; sale_total: string | number | null }
+        ResumableOrderRow & { ebay_account_id: string }
       >(
-        `SELECT ebay_order_id, ebay_account_id, sale_total, status, amazon_order_id,
-                auto_fulfill_status, auto_fulfill_blocked_reason
+        `SELECT ebay_order_id, ebay_account_id, status, amazon_order_id,
+                auto_fulfill_status, auto_fulfill_blocked_reason, auto_fulfill_submitted_at
            FROM orders
           WHERE user_id = $1
             AND auto_fulfill_status = $2
             AND auto_fulfill_blocked_reason = $3
             AND amazon_order_id IS NULL
+            AND auto_fulfill_submitted_at IS NULL
             AND status NOT IN ($4, $5, $6)`,
         [
           userId,
@@ -1131,7 +1521,6 @@ export class OrderSyncService {
             userId,
             ebayAccountId: row.ebay_account_id,
             ebayOrderId: row.ebay_order_id,
-            saleTotal: Number(row.sale_total) || 0,
           });
           requeued += 1;
         } catch (rowErr) {
@@ -1189,14 +1578,14 @@ export class OrderSyncService {
       const rows = await this.databaseService.query<{
         ebay_order_id: string;
         ebay_account_id: string;
-        sale_total: string | number | null;
       }>(
-        `SELECT ebay_order_id, ebay_account_id, sale_total
+        `SELECT ebay_order_id, ebay_account_id
            FROM orders
           WHERE user_id = $1
             AND auto_fulfill_status = $2
             AND auto_fulfill_blocked_reason = $3
             AND amazon_order_id IS NULL
+            AND auto_fulfill_submitted_at IS NULL
             AND order_date > NOW() - INTERVAL '7 days'
             AND (
               auto_fulfill_attempted_at IS NULL
@@ -1279,7 +1668,6 @@ export class OrderSyncService {
             userId,
             ebayAccountId: row.ebay_account_id,
             ebayOrderId: row.ebay_order_id,
-            saleTotal: Number(row.sale_total) || 0,
           });
           released += 1;
         } catch (rowErr) {

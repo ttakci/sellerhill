@@ -46,6 +46,10 @@ export interface SaveStoreSettingsRequest {
     // Optional on the request — service defaults to false. Response always carries it.
     autoFulfillEnabled?: boolean;
 
+    // Loss limit per automatic order. Three states: omitted = leave unchanged
+    // (a focused drawer that does not own it), null = no limit, number = limit.
+    autoFulfillMaxLoss?: number | null;
+
     // Carrier-mapping provider; persisted LOWERCASE ('local' | 'api').
     // Optional on the request — service defaults to LOCAL. Response always carries it.
     trackingConversionProvider?: TrackingConversionProvider;

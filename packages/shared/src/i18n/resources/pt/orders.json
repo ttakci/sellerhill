@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Anúncio fora do limite do plano",
         "order_already_fulfilled": "Já enviado — nada a comprar",
         "order_not_paid": "Aguardando o pagamento do comprador",
-        "order_cancelled": "Cancelado no eBay — nada a comprar"
+        "order_cancelled": "Cancelado no eBay — nada a comprar",
+        "multi_item_order": "O pedido tem vários itens — compre manualmente",
+        "cancel_requested": "O comprador pediu cancelamento — responda no eBay",
+        "loss_limit": "Acima do seu limite de prejuízo"
       },
       "reasonLabel": "Motivo: {{reason}}",
       "amazonCancelledBadge": "Cancelado pela Amazon",
@@ -150,6 +153,13 @@
         "confirm": "Iniciar compra",
         "queued": "A compra começou. O status do pedido é atualizado em alguns minutos.",
         "queuedDryRun": "Um teste começou. Esta conta Amazon está em modo de teste, então nada será comprado."
+      },
+      "notPurchased": {
+        "button": "Não está na Amazon",
+        "confirmTitle": "Confirmar que a Amazon não tem um pedido para esta venda?",
+        "confirmDescription": "Continue somente depois de olhar os pedidos desta conta Amazon e ver que o pedido não está lá. O SellerHill também verifica a lista de pedidos da conta e recusa até que essa verificação tenha sido feita. Depois disso, o pedido automático pode ser iniciado novamente — se o pedido existir na Amazon, o item será comprado duas vezes.",
+        "confirm": "Sim, não está lá",
+        "done": "Marcado como não comprado. Você pode iniciar o pedido automático novamente."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Valor reembolsado",
       "refundedOn": "Data do reembolso",
       "refundNote": "É o valor do reembolso informado pelo eBay. Não inclui o imposto sobre vendas recolhido pelo eBay, então o comprador pode ter recebido mais.",
-      "cancelledAmazonOpenAction": "Um pedido na Amazon já havia sido feito para esta venda. Cancele-o na Amazon ou devolva o item se já tiver sido enviado."
+      "cancelledAmazonOpenAction": "Um pedido na Amazon já havia sido feito para esta venda. Cancele-o na Amazon ou devolva o item se já tiver sido enviado.",
+      "shipBy": "Enviar até",
+      "shipByNotice": "Prazo de envio do eBay: {{date}}",
+      "multiItemNotice": "Itens neste pedido do eBay: {{count}}. O SellerHill acompanha apenas o primeiro e não compra este pedido automaticamente — compre e envie os outros itens você mesmo."
     },
     "modal": {
       "title": "Informar dados do pedido da Amazon",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Nenhuma conta Amazon está pronta para pedidos automáticos. Em Configurações, ative os pedidos automáticos em uma conta Amazon e defina um limite de gastos.",
       "autoFulfillOverCap": "Esta venda passa do limite de gastos da sua conta Amazon. Aumente o limite nas configurações da conta Amazon ou compre o item manualmente.",
       "autoFulfillAlreadyStarted": "O status deste pedido acabou de mudar, então a compra pode já ter começado. Atualize a página.",
-      "autoFulfillQuotaExhausted": "O limite de pedidos automáticos do seu plano neste período foi atingido."
+      "autoFulfillQuotaExhausted": "O limite de pedidos automáticos do seu plano neste período foi atingido.",
+      "purchaseNotYetChecked": "O SellerHill ainda não verificou os pedidos desta conta Amazon desde a tentativa de compra. A verificação foi iniciada agora — tente novamente em alguns minutos.",
+      "purchaseNotUnknown": "Este pedido não está aguardando uma confirmação de compra. Ele pode já estar vinculado ou em andamento. Atualize a página.",
+      "purchaseFoundOnAmazon": "O SellerHill encontrou um pedido na Amazon para este produto, feito por volta da tentativa de compra, mas não conseguiu associá-lo a esta venda com certeza. Abra seus pedidos na Amazon e vincule-o manualmente. Se esse pedido pertencer a outra venda, vincule-o primeiro a essa venda."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Comprado · aguardando envio",
         "meaning": "Um pedido da Amazon está vinculado. Aguardando a Amazon enviar."
+      },
+      "purchase_unknown": {
+        "label": "Compra não confirmada",
+        "meaning": "O botão de pedido foi acionado na Amazon, mas nenhuma confirmação voltou. O pedido pode existir.",
+        "action": "Verifique primeiro seus pedidos na Amazon. Se o pedido estiver lá, vincule-o. Não compre de novo antes de verificar."
       },
       "purchase_blocked": {
         "label": "Compra bloqueada",

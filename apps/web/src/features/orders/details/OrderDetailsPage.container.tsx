@@ -5,11 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
-import { orderStageHasAction } from '../shared/order-stage';
+import { isShipByUrgent, orderStageHasAction, orderStageHasDeadline } from '../shared/order-stage';
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
-import { useConvertOrderTrackingMutation, useStartAutoFulfillMutation } from '@/features/amazon/api/amazon.api';
+import {
+  useConfirmNotPurchasedMutation,
+  useConvertOrderTrackingMutation,
+  useStartAutoFulfillMutation,
+} from '@/features/amazon/api/amazon.api';
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
@@ -36,6 +40,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
   const [, { isLoading: isUpdating }] = useUpdateOrderAmazonDetailsMutation();
   const [convertTracking, { isLoading: isConvertingTracking }] = useConvertOrderTrackingMutation();
   const [startAutoFulfill, { isLoading: isStartingAutoFulfill }] = useStartAutoFulfillMutation();
+  const [confirmNotPurchased, { isLoading: isConfirmingNotPurchased }] = useConfirmNotPurchasedMutation();
 
   useLoading(isUpdating);
 
@@ -260,6 +265,71 @@ export const OrderDetailsPageContainer: React.FC = () => {
     );
   }, [showMessage, closeMessage, runStartAutoFulfill, t]);
 
+  /*
+   * "It is not on Amazon": the seller declares that an automatic purchase whose
+   * outcome is unknown did not happen, which brings the automatic order back.
+   * The server holds the real rule — it refuses until it has scanned the Amazon
+   * account's orders after the click — so this only asks, in words that say
+   * what is being asserted, and shows the answer.
+   */
+  const canConfirmNotPurchased = order?.stage === OrderStage.PURCHASE_UNKNOWN;
+
+  const runConfirmNotPurchased = useCallback(() => {
+    if (!id) {
+      return;
+    }
+    closeMessage();
+    confirmNotPurchased({ orderId: id })
+      .unwrap()
+      .then(() => {
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: 'orders:orders.autoFulfill.notPurchased.done',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t
+        );
+        void refetch();
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t
+        );
+        void refetch();
+      });
+  }, [id, confirmNotPurchased, showMessage, closeMessage, t, refetch]);
+
+  const handleConfirmNotPurchased = useCallback(() => {
+    showMessage(
+      {
+        type: 'warning',
+        headerKey: 'orders:orders.autoFulfill.notPurchased.confirmTitle',
+        descriptionKey: 'orders:orders.autoFulfill.notPurchased.confirmDescription',
+        primaryButton: { labelKey: 'orders:orders.autoFulfill.notPurchased.confirm', onClick: runConfirmNotPurchased },
+        secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
+      },
+      t
+    );
+  }, [showMessage, closeMessage, runConfirmNotPurchased, t]);
+
+  /* eBay's ship-by date is shown while the seller still has something to do. */
+  const shipBy = useMemo(() => {
+    if (!order?.shipByDate || !orderStageHasDeadline(order.stage)) {
+      return { label: null, urgent: false };
+    }
+    return { label: fmtDate(order.shipByDate), urgent: isShipByUrgent(order.shipByDate, new Date()) };
+  }, [order, fmtDate]);
+
+  const multiItemCount = order?.lineItemCount && order.lineItemCount > 1 ? order.lineItemCount : null;
+
   const handleBack = () => {
     localeNavigate('/orders');
   };
@@ -296,6 +366,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
         canStartAutoFulfill={canStartAutoFulfill}
         isStartingAutoFulfill={isStartingAutoFulfill}
         onStartAutoFulfill={handleStartAutoFulfill}
+        canConfirmNotPurchased={canConfirmNotPurchased}
+        isConfirmingNotPurchased={isConfirmingNotPurchased}
+        onConfirmNotPurchased={handleConfirmNotPurchased}
+        shipByLabel={shipBy.label}
+        isShipByUrgent={shipBy.urgent}
+        multiItemCount={multiItemCount}
       />
       {id && (
         <LinkAmazonModal

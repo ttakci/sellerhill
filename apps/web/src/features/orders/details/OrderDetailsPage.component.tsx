@@ -1,4 +1,4 @@
-import { OrderStage, ProfitBasis } from '@repo/shared';
+import { ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -15,6 +15,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { orderStageShowsReason } from '../shared/order-stage';
 import { OrderStageBadge } from '../shared/OrderStageBadge';
 import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 
@@ -111,6 +112,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   canStartAutoFulfill,
   isStartingAutoFulfill,
   onStartAutoFulfill,
+  canConfirmNotPurchased,
+  isConfirmingNotPurchased,
+  onConfirmNotPurchased,
+  shipByLabel,
+  isShipByUrgent,
+  multiItemCount,
   canCopyAddress,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
@@ -151,10 +158,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
   const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
-  // The reason explains a BLOCK; once the seller linked the order by hand the
-  // stage moves on and a stale "Reason: address" must not linger under it.
+  // The reason explains why nothing was bought (or why the outcome is not
+  // known); once the seller linked the order by hand the stage moves on and a
+  // stale "Reason: address" must not linger under it.
   const autoFulfillReasonLabel =
-    order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason
+    orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
       ? t('orders.autoFulfill.reasonLabel', {
           reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
         })
@@ -228,6 +236,19 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               <Text variant="caption" color="text.secondary">
                 {autoFulfillReasonLabel}
               </Text>
+            )}
+            {/* eBay's own deadline, while the seller still has to act. */}
+            {shipByLabel && (
+              <Text
+                variant="body-sm"
+                weight={isShipByUrgent ? 'semibold' : undefined}
+                color={isShipByUrgent ? 'semantic.error' : 'text.secondary'}
+              >
+                {t('orders.detail.shipByNotice', { date: shipByLabel })}
+              </Text>
+            )}
+            {multiItemCount !== null && (
+              <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
             )}
             <S.ProductTitle variant="h3" weight="semibold">
               {productTitle}
@@ -480,6 +501,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   </Text>
                 </Meta>
               ) : null}
+              {order.shipByDate ? (
+                <Meta icon="clock" label={t('orders.detail.shipBy')}>
+                  <Text variant="body" weight="semibold" numeric>
+                    {formatDate(order.shipByDate)}
+                  </Text>
+                </Meta>
+              ) : null}
               <Meta icon="circle-dollar-sign" label={t('orders.detail.subtotal')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.salePrice)}
@@ -658,6 +686,21 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 >
                   <Icon name="shopping-cart" size={16} />
                   <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
+                </Button>
+              ) : null}
+              {/* Purchase not confirmed: linking the order found on Amazon is
+                  the primary action (the button below); declaring it "not on
+                  Amazon" is the secondary one. */}
+              {canConfirmNotPurchased && onConfirmNotPurchased ? (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  fullWidth
+                  onClick={onConfirmNotPurchased}
+                  isLoading={isConfirmingNotPurchased}
+                >
+                  <Icon name="help" size={16} />
+                  <Text variant="body-sm">{t('orders.autoFulfill.notPurchased.button')}</Text>
                 </Button>
               ) : null}
               <Button

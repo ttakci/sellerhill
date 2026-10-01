@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "eBay satışlarından sonra Amazon siparişlerini otomatik oluştur",
     "autoFulfillEnabledHint": "Açık olduğunda SellerHill, bağlı alıcı hesabınızla ürünü Amazon'da satın alır. Manuel sipariş için kapatın.",
     "autoFulfillEnabledInfo": "Bu ayarı yalnızca bir Amazon alıcı hesabını bağlayıp yapılandırdıktan sonra açın. Otomatik sipariş için ilgili hesabın otomatik sipariş ayarı ve harcama limiti de etkin olmalıdır.",
+    "lossLimit": {
+      "enabled": "Zarar ettirecek otomatik siparişleri durdur",
+      "enabledHint": "Açıkken, Amazon toplamı eBay kazancınızı aşağıdaki tutardan fazla aşıyorsa otomatik sipariş satın almadan önce durdurulur ve sipariş sizi bekler. Varsayılan olarak kapalıdır. Kendi limiti olmayan mağaza genel limiti kullanır.",
+      "amount": "Sipariş başına en fazla zarar",
+      "amountHint": "Mağazanızın para biriminde. 0, hiçbir zaman zararına alma demektir."
+    },
     "trackingConversionProvider": "Takip numarası dönüştürme",
     "trackingConversionProviderHint": "Gerçek kargo takip numaraları olduğu gibi iletilir. Amazon Logistics (TBA) numaraları değiştirilmeden geçer.",
     "trackingConversionProviderLocal": "Yerleşik (yerel)",

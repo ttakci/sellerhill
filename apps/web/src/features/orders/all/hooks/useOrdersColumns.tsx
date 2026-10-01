@@ -3,6 +3,7 @@ import { Badge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { orderStageShowsReason } from '../../shared/order-stage';
 import { OrderStageBadge } from '../../shared/OrderStageBadge';
 import * as S from '../OrdersAllPage.style';
 
@@ -106,10 +107,11 @@ export function useOrdersColumns(formatCurrency: (value: number) => string, form
         header: t('orders.stageLegend.columnStage'),
         width: '14rem',
         render: (_value, order) => {
-          // The blocked reason is the actionable part of PURCHASE_BLOCKED — it
-          // tells the seller WHAT to fix, so it is shown inline, not on hover.
+          // The reason is the actionable part — WHAT to fix (blocked), why the
+          // outcome is unknown, or why automation left the order to the seller
+          // — so it is shown inline, not on hover.
           const reasonLabel =
-            order.stage === OrderStage.PURCHASE_BLOCKED && order.autoFulfillBlockedReason
+            orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
               ? t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`)
               : undefined;
           const trackingShown =

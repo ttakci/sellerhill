@@ -18,6 +18,7 @@ const LOCALES: string[] = [...SUPPORTED_LOCALES];
 const ACTION_STAGES = [
   OrderStage.AMAZON_CANCELLED,
   OrderStage.TRACKING_HELD,
+  OrderStage.PURCHASE_UNKNOWN,
   OrderStage.PURCHASE_BLOCKED,
   OrderStage.TO_PURCHASE,
 ];

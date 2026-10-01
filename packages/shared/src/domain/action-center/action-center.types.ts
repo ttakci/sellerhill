@@ -89,6 +89,12 @@ export enum ActionCenterItemKey {
    */
   ORDER_FULFILLMENT_BLOCKED = 'order_fulfillment_blocked',
   /**
+   * The Place Order click went out on Amazon and no confirmation came back
+   * (`OrderStage.PURCHASE_UNKNOWN`). The order may exist, so the instruction is
+   * the opposite of a blocked order: check Amazon BEFORE buying anything.
+   */
+  ORDER_PURCHASE_UNKNOWN = 'order_purchase_unknown',
+  /**
    * Nobody has bought the item on Amazon and automation is not going to:
    * no Amazon order, not shipped, and old enough that it is not just in flight.
    */

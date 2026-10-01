@@ -29,7 +29,16 @@ describe('readCancellation', () => {
       cancelState: 'NONE_REQUESTED',
       cancelledAt: null,
       isCancelled: false,
+      cancelRequestCount: 0,
     });
+  });
+
+  it('counts the cancel requests a single-order read carries (getOrders always sends none)', () => {
+    expect(readCancellation({ cancelState: 'IN_PROGRESS', cancelRequests: [{}, {}] }).cancelRequestCount).toBe(2);
+    expect(readCancellation({ cancelState: 'NONE_REQUESTED', cancelRequests: [] }).cancelRequestCount).toBe(0);
+    expect(readCancellation(undefined).cancelRequestCount).toBe(0);
+    // A request is still not a cancellation.
+    expect(readCancellation({ cancelState: 'IN_PROGRESS', cancelRequests: [{}] }).isCancelled).toBe(false);
   });
 
   it('never reads a state it does not know as a cancellation', () => {

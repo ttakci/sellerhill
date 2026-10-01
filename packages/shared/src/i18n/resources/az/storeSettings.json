@@ -23,6 +23,12 @@
     "autoFulfillEnabled": "eBay satışlarından sonra Amazon sifarişlərini avtomatik ver",
     "autoFulfillEnabledHint": "Aktiv olduqda, SellerHill məhsulu əlaqələndirilmiş alıcı hesabınızla Amazon-dan alır. Sifarişləri əl ilə vermək üçün deaktiv edin.",
     "autoFulfillEnabledInfo": "Bunu yalnız Amazon alıcı hesabını qoşub konfiqurasiya etdikdən sonra aktiv edin. Avtomatik sifariş həm də həmin hesabın avtomatik yerinə yetirmə parametrinin və xərc limitinin aktiv olmasını tələb edir.",
+    "lossLimit": {
+      "enabled": "Zərərlə nəticələnəcək avtomatik sifarişləri dayandır",
+      "enabledHint": "Aktiv olduqda, Amazon məbləği eBay ödənişinizi aşağıdakı məbləğdən çox üstələyirsə, avtomatik sifariş alışdan əvvəl dayandırılır və sifariş sizi gözləyir. Standart olaraq söndürülüb. Öz limiti olmayan mağaza ümumi limitdən istifadə edir.",
+      "amount": "Sifariş üzrə maksimum zərər",
+      "amountHint": "Mağazanızın valyutasında. 0 heç vaxt zərərlə almamaq deməkdir."
+    },
     "trackingConversionProvider": "İzləmə nömrəsinin çevrilməsi",
     "trackingConversionProviderHint": "Real daşıyıcı nömrələri olduğu kimi ötürülür. Amazon Logistics (TBA) dəyişdirilmədən keçir.",
     "trackingConversionProviderLocal": "Daxili (lokal)",

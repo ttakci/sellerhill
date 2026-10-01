@@ -18,6 +18,7 @@ export function buildOrderStageSql(alias: string): string {
   const hasAmazonOrder = `${alias}.amazon_order_id IS NOT NULL`;
   const shippedDetected = `${alias}.shipped_detected_at IS NOT NULL`;
   const pushed = `${alias}.ebay_tracking_pushed_at IS NOT NULL`;
+  const submitted = `${alias}.auto_fulfill_submitted_at IS NOT NULL`;
 
   return `CASE
     WHEN ${status} = '${OrderStatus.CANCELLED}' THEN '${OrderStage.CANCELLED}'
@@ -31,6 +32,7 @@ export function buildOrderStageSql(alias: string): string {
     WHEN ${auto} IN ('${AutoFulfillStatus.PENDING}', '${AutoFulfillStatus.RUNNING}') THEN '${OrderStage.BUYING}'
     WHEN ${hasAmazonOrder} THEN '${OrderStage.PURCHASED}'
     WHEN ${auto} = '${AutoFulfillStatus.PLACED}' THEN '${OrderStage.PURCHASED}'
+    WHEN ${submitted} THEN '${OrderStage.PURCHASE_UNKNOWN}'
     WHEN ${auto} IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}') THEN '${OrderStage.PURCHASE_BLOCKED}'
     WHEN ${status} = '${OrderStatus.PENDING}' THEN '${OrderStage.AWAITING_PAYMENT}'
     ELSE '${OrderStage.TO_PURCHASE}'

@@ -76,6 +76,13 @@
         "description_other": "{{count}} pedidos foram interrompidos por uma verificação de segurança, então nenhum dinheiro foi movimentado. Corrija os motivos abaixo e eles poderão prosseguir.",
         "action": "Revisar pedidos"
       },
+      "order_purchase_unknown": {
+        "title": "Compra não confirmada — verifique a Amazon primeiro",
+        "description_one": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
+        "description_many": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
+        "description_other": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
+        "action": "Revisar pedidos"
+      },
       "order_awaiting_purchase": {
         "title": "Vendido, mas ninguém comprou na Amazon",
         "description_one": "{{count}} pedido com mais de {{hours}} horas não tem compra na Amazon nem automação em execução. Ele não será enviado a menos que você mesmo o compre.",

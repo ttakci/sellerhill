@@ -18,28 +18,63 @@ import {
 export type AutoFulfillBlockedReason = `${AutoFulfillBlockedReasonEnum}`;
 
 /**
- * Coarse pre-filter using the eBay sale_total. This is NOT the hard cap — the
- * hard cap is the Amazon review-step grand-total check. This only avoids
- * enqueueing orders that obviously exceed the cap.
+ * What the Amazon purchase is expected to cost: the product's last known
+ * price times the quantity, plus the seller's configured Amazon tax rate.
+ * Shipping is not estimated. Null when the price is unknown — never a guess.
  */
-export function meetsCoarseCapGate(saleTotal: number, capTotal: number | null): boolean {
+export function estimateAmazonOrderCost(input: {
+  unitPrice: number | null | undefined;
+  quantity: number | null | undefined;
+  taxRatePct: number | null | undefined;
+}): number | null {
+  const unitPrice = Number(input.unitPrice);
+  if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+    return null;
+  }
+  const quantity = Math.max(1, Math.floor(Number(input.quantity) || 1));
+  const taxRate = Math.max(0, Number(input.taxRatePct) || 0);
+  return Math.round(unitPrice * quantity * (1 + taxRate / 100) * 100) / 100;
+}
+
+/**
+ * Coarse pre-filter on the ESTIMATED AMAZON COST. This is NOT the hard cap —
+ * the hard cap is the Amazon review-step grand-total check. This only avoids
+ * enqueueing orders that obviously exceed the cap.
+ *
+ * It used to compare the eBay sale total, which is revenue: a sale above the
+ * cap whose Amazon cost sat below it was refused for no reason. An unknown
+ * estimate passes — the review-step cap is the guard, and refusing on "we do
+ * not know the price" would stop every order of a product with a blank price.
+ */
+export function meetsCoarseCapGate(estimatedCost: number | null, capTotal: number | null): boolean {
   if (capTotal === null) {
     return false;
   }
-  return saleTotal > 0 && saleTotal <= capTotal;
+  if (estimatedCost === null) {
+    return true;
+  }
+  return estimatedCost <= capTotal;
 }
 
 /**
  * Round-robin selection: the enabled account with the oldest lastUsedAt
  * (null treated as 0 = oldest). Ties broken by id ascending. Deterministic.
+ *
+ * HEALTHY ACCOUNTS FIRST: an account marked `healthy: false` is picked only
+ * when no healthy one exists. Picking a `needs_reauth` / `locked` account
+ * while a working one sat idle blocked the order on `login` for nothing; the
+ * fallback keeps the old behaviour (try it, and let the block name the real
+ * problem).
  */
-export function pickRoundRobinAccount<T extends { id: string; lastUsedAt: Date | null }>(
+export function pickRoundRobinAccount<T extends { id: string; lastUsedAt: Date | null; healthy?: boolean }>(
   accounts: T[],
 ): T | null {
   if (accounts.length === 0) {
     return null;
   }
-  return [...accounts].sort((a, b) => {
+  const healthy = accounts.filter((a) => a.healthy !== false);
+  const pool = healthy.length > 0 ? healthy : accounts;
+  return [...pool].sort((a, b) => {
     const at = a.lastUsedAt ? a.lastUsedAt.getTime() : 0;
     const bt = b.lastUsedAt ? b.lastUsedAt.getTime() : 0;
     if (at !== bt) {
@@ -108,30 +143,125 @@ export enum FulfillStartDecision {
   /** Nothing bought yet — run the checkout. */
   PROCEED = 'proceed',
   /**
-   * The row is still RUNNING while a job STARTS: the previous attempt died
-   * without cleaning up (SIGKILL on deploy, OOM, host restart). The Place
-   * Order click may already have gone out, so re-entering the checkout could
-   * buy the item twice. Fail closed: block with INTERRUPTED and let the seller
-   * check Amazon. An in-process retry never lands here — the processor resets
-   * the row to PENDING before rethrowing a transport error.
+   * The Place Order click was stamped (`orders.auto_fulfill_submitted_at`) and
+   * the order is not PLACED: a previous run clicked and never proved the
+   * purchase. The Amazon order may exist, so the checkout is NOT entered — the
+   * order is settled as unknown and reconciled against "Your Orders".
    */
-  INTERRUPTED = 'interrupted',
+  UNKNOWN_OUTCOME = 'unknown_outcome',
 }
 
 /**
- * The one decision a starting fulfillment job makes from the stored status.
- * `shouldSkipFulfillStart` is kept for the SKIP half; this adds the third
- * answer, INTERRUPTED, which the checkout turns into a blocked order.
+ * The one decision a starting fulfillment job makes, from the stored status
+ * AND the click stamp.
+ *
+ * The stamp is written, as a compare-and-set, immediately before the Place
+ * Order click. That makes "was the click sent?" a fact in the database instead
+ * of an inference from the status:
+ *  - stamp set, not PLACED → UNKNOWN_OUTCOME, whatever the status says.
+ *  - RUNNING with NO stamp → PROCEED. The previous process died (deploy
+ *    SIGKILL, OOM) BEFORE the click, so nothing was bought and re-entering is
+ *    safe. This used to block every such order as `interrupted`, although
+ *    almost all of them died long before the click.
  */
-export function decideFulfillStart(status: AutoFulfillStatus): FulfillStartDecision {
+export function decideFulfillStart(
+  status: AutoFulfillStatus,
+  submittedAt: Date | string | null | undefined,
+): FulfillStartDecision {
+  if (status === AutoFulfillStatus.PLACED) {
+    return FulfillStartDecision.SKIP;
+  }
+  if (submittedAt) {
+    return FulfillStartDecision.UNKNOWN_OUTCOME;
+  }
   if (shouldSkipFulfillStart(status)) {
     return FulfillStartDecision.SKIP;
   }
-  if (status === AutoFulfillStatus.RUNNING) {
-    return FulfillStartDecision.INTERRUPTED;
-  }
   return FulfillStartDecision.PROCEED;
 }
+
+/** eBay's `cancelState` when nobody asked to cancel (documented: "always returned"). */
+export const EBAY_CANCEL_STATE_NONE_REQUESTED = 'NONE_REQUESTED';
+
+export type PrePurchaseDecision =
+  | { proceed: true }
+  | {
+      proceed: false;
+      status: AutoFulfillStatus.SKIPPED | AutoFulfillStatus.BLOCKED;
+      reason: AutoFulfillBlockedReasonEnum;
+    };
+
+/**
+ * The last look at the eBay sale, taken from a LIVE `getOrder` read right
+ * before the checkout starts. The stored row can be 20 minutes stale, and a
+ * buyer who cancels usually does so in the first minutes after buying.
+ *
+ *  - cancelled / already fulfilled / not paid → the same answers the ingest
+ *    gate gives (`resolveAutoFulfillEligibility`), SKIPPED.
+ *  - more than one line item → SKIPPED `multi_item_order`: the checkout buys
+ *    ONE line and the order would then look complete.
+ *  - an open cancel request → BLOCKED `cancel_requested`. Read without relying
+ *    on an enum list (the value pages are not obtainable): `cancelState` is
+ *    documented as `NONE_REQUESTED` when there is no request, and `getOrder`
+ *    populates `cancelRequests`. A request the seller REJECTED cannot be told
+ *    apart from an open one by documented fields, so a MANUAL start — the
+ *    seller saying "buy this one" — skips this hold; it never skips the rest.
+ */
+export function decidePrePurchase(input: {
+  status: OrderStatus;
+  cancelState: string | null;
+  cancelRequestCount: number;
+  lineItemCount: number;
+  manual: boolean;
+}): PrePurchaseDecision {
+  const eligibility = resolveAutoFulfillEligibility(input.status);
+  if (!eligibility.eligible) {
+    return { proceed: false, status: AutoFulfillStatus.SKIPPED, reason: eligibility.reason };
+  }
+  if (input.lineItemCount > 1) {
+    return {
+      proceed: false,
+      status: AutoFulfillStatus.SKIPPED,
+      reason: AutoFulfillBlockedReasonEnum.MULTI_ITEM_ORDER,
+    };
+  }
+  const cancelRequested =
+    input.cancelRequestCount > 0 ||
+    (input.cancelState !== null && input.cancelState !== '' && input.cancelState !== EBAY_CANCEL_STATE_NONE_REQUESTED);
+  if (cancelRequested && !input.manual) {
+    return {
+      proceed: false,
+      status: AutoFulfillStatus.BLOCKED,
+      reason: AutoFulfillBlockedReasonEnum.CANCEL_REQUESTED,
+    };
+  }
+  return { proceed: true };
+}
+
+/**
+ * Loss guard at the review step. `maxLoss` null = the seller did not set one.
+ * True when the Amazon total exceeds the eBay payout by MORE than the limit.
+ * An unknown payout (0 / not finite) never blocks: the guard exists to stop a
+ * known loss, and eBay can report earnings late.
+ */
+export function exceedsLossLimit(input: {
+  grandTotal: number;
+  ebayEarnings: number | null | undefined;
+  maxLoss: number | null | undefined;
+}): boolean {
+  if (input.maxLoss === null || input.maxLoss === undefined) {
+    return false;
+  }
+  const maxLoss = Number(input.maxLoss);
+  const earnings = Number(input.ebayEarnings);
+  if (!Number.isFinite(maxLoss) || maxLoss < 0 || !Number.isFinite(earnings) || earnings <= 0) {
+    return false;
+  }
+  return input.grandTotal - earnings > maxLoss + 0.001;
+}
+
+/** A RUNNING row older than this is settled by the stale-run sweep. */
+export const STALE_RUNNING_MINUTES = 60;
 
 export interface ResumableOrderRow {
   ebay_order_id: string;
@@ -141,6 +271,8 @@ export interface ResumableOrderRow {
   status: string;
   /** Non-null once *anything* bought this item (manual link, dry run). */
   amazon_order_id: string | null;
+  /** The click stamp — a stamped row may already be bought, so it never resumes. */
+  auto_fulfill_submitted_at?: Date | string | null;
 }
 
 /**
@@ -171,6 +303,7 @@ export function selectResumableOrders(rows: ResumableOrderRow[]): ResumableOrder
       (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReasonEnum | null) ===
         AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED &&
       row.amazon_order_id === null &&
+      !row.auto_fulfill_submitted_at &&
       (row.status as OrderStatus) !== OrderStatus.SHIPPED &&
       (row.status as OrderStatus) !== OrderStatus.COMPLETED &&
       (row.status as OrderStatus) !== OrderStatus.CANCELLED,

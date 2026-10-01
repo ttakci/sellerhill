@@ -73,6 +73,12 @@
         "description_other": "{{count}} sipariş bir güvenlik kontrolünde durduruldu, para çıkmadı. Aşağıdaki nedenleri giderdiğinizde devam edebilirler.",
         "action": "Siparişleri incele"
       },
+      "order_purchase_unknown": {
+        "title": "Satın alma doğrulanamadı — önce Amazon'u kontrol edin",
+        "description_one": "Amazon satın alması doğrulanamayan sipariş sayısı: {{count}}. Sipariş düğmesine basıldı ama onay gelmedi; sipariş oluşmuş olabilir. Yeniden bir şey alınmadan önce Amazon'u kontrol edip siparişi bağlayın.",
+        "description_other": "Amazon satın alması doğrulanamayan sipariş sayısı: {{count}}. Sipariş düğmesine basıldı ama onay gelmedi; sipariş oluşmuş olabilir. Yeniden bir şey alınmadan önce Amazon'u kontrol edip siparişi bağlayın.",
+        "action": "Siparişleri incele"
+      },
       "order_awaiting_purchase": {
         "title": "Satıldı ama Amazon'dan kimse satın almadı",
         "description_one": "{{hours}} saatten eski {{count}} siparişin Amazon satın alması yok ve üzerinde çalışan bir otomasyon da yok. Siz almazsanız kargolanmayacak.",

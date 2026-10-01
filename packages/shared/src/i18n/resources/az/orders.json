@@ -135,7 +135,10 @@
         "listing_over_plan_limit": "Elan plan limitindən kənardadır",
         "order_already_fulfilled": "Artıq göndərilib — alınacaq heç nə yoxdur",
         "order_not_paid": "Alıcının ödənişi gözlənilir",
-        "order_cancelled": "eBay-də ləğv edildi — alınacaq bir şey yoxdur"
+        "order_cancelled": "eBay-də ləğv edildi — alınacaq bir şey yoxdur",
+        "multi_item_order": "Sifarişdə bir neçə məhsul var — əl ilə alın",
+        "cancel_requested": "Alıcı ləğv istədi — eBay-də cavab verin",
+        "loss_limit": "Zərər limitinizdən yuxarıdır"
       },
       "reasonLabel": "Səbəb: {{reason}}",
       "amazonCancelledBadge": "Amazon ləğv etdi",
@@ -150,6 +153,13 @@
         "confirm": "Alışı başlat",
         "queued": "Alış başladı. Sifarişin statusu bir neçə dəqiqəyə yenilənəcək.",
         "queuedDryRun": "Test işə salındı. Bu Amazon hesabı test rejimindədir, ona görə heç nə alınmayacaq."
+      },
+      "notPurchased": {
+        "button": "Amazon-da yoxdur",
+        "confirmTitle": "Bu satış üçün Amazon-da sifariş olmadığını təsdiqləyirsiniz?",
+        "confirmDescription": "Yalnız bu Amazon hesabının sifarişlərinə baxıb sifarişin orada olmadığını gördükdən sonra davam edin. SellerHill də hesabın sifariş siyahısını yoxlayır və bu yoxlama aparılmayınca təsdiqi qəbul etmir. Bundan sonra avtomatik sifariş yenidən başladıla bilər — sifariş əslində Amazon-da varsa, məhsul iki dəfə alınacaq.",
+        "confirm": "Bəli, orada yoxdur",
+        "done": "Alınmamış kimi qeyd edildi. Avtomatik sifarişi yenidən başlada bilərsiniz."
       }
     },
     "pagination": {
@@ -233,7 +243,10 @@
       "refundedAmount": "Geri qaytarılan məbləğ",
       "refundedOn": "Geri qaytarma tarixi",
       "refundNote": "eBay-in bildirdiyi geri qaytarma məbləğidir. eBay-in yığdığı satış vergisi buraya daxil deyil, ona görə alıcıya daha çox qaytarılmış ola bilər.",
-      "cancelledAmazonOpenAction": "Bu satış üçün Amazon sifarişi artıq verilmişdi. Onu Amazon-da ləğv edin; göndərilibsə, məhsulu geri qaytarın."
+      "cancelledAmazonOpenAction": "Bu satış üçün Amazon sifarişi artıq verilmişdi. Onu Amazon-da ləğv edin; göndərilibsə, məhsulu geri qaytarın.",
+      "shipBy": "Son göndərmə tarixi",
+      "shipByNotice": "eBay-də son göndərmə tarixi: {{date}}",
+      "multiItemNotice": "Bu eBay sifarişində {{count}} məhsul var. SellerHill yalnız birincini izləyir və bu sifarişi avtomatik almır — digər məhsulları özünüz alıb göndərin."
     },
     "modal": {
       "title": "Amazon sifariş məlumatını daxil edin",
@@ -264,7 +277,10 @@
       "autoFulfillNoAccount": "Avtomatik sifarişlər üçün hazır Amazon hesabı yoxdur. Ayarlarda bir Amazon hesabı üçün avtomatik sifarişi aktiv edin və xərc limiti təyin edin.",
       "autoFulfillOverCap": "Bu satış Amazon hesabınızın xərc limitini keçir. Limiti Amazon hesabının ayarlarında artırın və ya məhsulu əl ilə alın.",
       "autoFulfillAlreadyStarted": "Bu sifarişin statusu indicə dəyişdi, alış artıq başlamış ola bilər. Səhifəni yeniləyin.",
-      "autoFulfillQuotaExhausted": "Planınızın bu dövr üçün avtomatik sifariş limiti bitib."
+      "autoFulfillQuotaExhausted": "Planınızın bu dövr üçün avtomatik sifariş limiti bitib.",
+      "purchaseNotYetChecked": "SellerHill alış cəhdindən sonra bu Amazon hesabının sifarişlərini hələ yoxlamayıb. Yoxlama indi başladıldı — bir neçə dəqiqədən sonra yenidən cəhd edin.",
+      "purchaseNotUnknown": "Bu sifariş alış təsdiqi gözləmir. Artıq bağlanmış və ya icrada ola bilər. Səhifəni yeniləyin.",
+      "purchaseFoundOnAmazon": "SellerHill bu məhsul üçün alış cəhdi ilə təxminən eyni vaxtda verilmiş bir Amazon sifarişi tapdı, lakin onu bu satışla dəqiq uyğunlaşdıra bilmədi. Amazon sifarişlərinizi açıb onu əl ilə bağlayın. Həmin sifariş başqa satışa aiddirsə, əvvəlcə onu o satışa bağlayın."
     },
     "stage": {
       "amazon_cancelled": {
@@ -300,6 +316,11 @@
       "purchased": {
         "label": "Alındı · göndəriş gözlənilir",
         "meaning": "Bir Amazon sifarişi bağlıdır. Amazon-un göndərməsi gözlənilir."
+      },
+      "purchase_unknown": {
+        "label": "Alış təsdiqlənmədi",
+        "meaning": "Amazon-da sifariş düyməsi basıldı, amma təsdiq gəlmədi. Sifariş yaranmış ola bilər.",
+        "action": "Əvvəlcə Amazon sifarişlərinizi yoxlayın. Sifariş oradadırsa, onu bağlayın. Yoxlamadan yenidən almayın."
       },
       "purchase_blocked": {
         "label": "Alış bloklandı",
