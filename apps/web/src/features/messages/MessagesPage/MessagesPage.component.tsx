@@ -45,9 +45,39 @@ export const MessagesPageComponent = ({
   threadProps,
 }: MessagesPageComponentProps): React.ReactElement => (
   <S.Container>
-    <PageHeader title={title} subtitle={subtitle} onBack={onBack} backAriaLabel={backLabel} backMobileOnly />
+    <PageHeader
+      title={title}
+      subtitle={subtitle}
+      onBack={onBack}
+      backAriaLabel={backLabel}
+      backMobileOnly
+      actions={
+        showToolbar && storeSelector ? (
+          <Dropdown
+            align="right"
+            width="14rem"
+            items={storeSelector.items}
+            trigger={
+              <Button variant="secondary" size="small">
+                <Icon name="storefront" size={16} />
+                <S.StoreLabel>
+                  <Text variant="body-sm" weight="medium" truncate>
+                    {storeSelector.label}
+                  </Text>
+                </S.StoreLabel>
+                <Icon name="chevron-down" size={14} color="text.tertiary" />
+              </Button>
+            }
+          />
+        ) : undefined
+      }
+    />
 
-    {showToolbar && (
+    {/* Below `xl` the rail is hidden, so its stand-in sits in a row of its own;
+        at `xl` and above the row renders nothing and is hidden outright, so the
+        inbox starts right under the title (the store switcher lives in the
+        header's actions slot). */}
+    {showToolbar && messagingEnabled && (
       <S.Toolbar>
         {messagingEnabled && (
           <S.CompactFilters>
@@ -64,27 +94,6 @@ export const MessagesPageComponent = ({
               onChange={compactFilters.onFolderChange}
             />
           </S.CompactFilters>
-        )}
-
-        {storeSelector && (
-          <S.ToolbarRight>
-            <Dropdown
-              align="right"
-              width="14rem"
-              items={storeSelector.items}
-              trigger={
-                <Button variant="secondary" size="small">
-                  <Icon name="storefront" size={16} />
-                  <S.StoreLabel>
-                    <Text variant="body-sm" weight="medium" truncate>
-                      {storeSelector.label}
-                    </Text>
-                  </S.StoreLabel>
-                  <Icon name="chevron-down" size={14} color="text.tertiary" />
-                </Button>
-              }
-            />
-          </S.ToolbarRight>
         )}
       </S.Toolbar>
     )}
