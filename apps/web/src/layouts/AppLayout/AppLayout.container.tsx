@@ -13,7 +13,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
-import { resolveBreadcrumbs } from '@/app/routeMeta';
+import { resolveBreadcrumbs, resolveRouteMeta } from '@/app/routeMeta';
 import {
   ACTION_CENTER_POLL_INTERVAL_MS,
   useGetActionCenterQuery,
@@ -119,6 +119,7 @@ export const AppLayout: React.FC = () => {
     () => resolveBreadcrumbs(pathWithoutLocale, t),
     [pathWithoutLocale, t]
   );
+  const fitsViewport = useMemo(() => resolveRouteMeta(pathWithoutLocale)?.fitsViewport ?? false, [pathWithoutLocale]);
 
   /*
    * The nav badge is the whole point of the Action Center: it is what makes a
@@ -214,6 +215,7 @@ export const AppLayout: React.FC = () => {
       mobileSidebarOpen={mobileSidebarOpen}
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       pathWithoutLocale={pathWithoutLocale}
+      fitsViewport={fitsViewport}
       isDraftsActive={isDraftsActive}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}

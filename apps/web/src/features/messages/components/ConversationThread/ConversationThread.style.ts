@@ -22,7 +22,7 @@ export const Header = styled.div`
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.secondary')};
+  background: ${tkn('colors.glass.tint')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
@@ -69,7 +69,7 @@ export const Messages = styled.div`
   min-height: 0;
   overflow-y: auto;
   padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.background.secondary')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 /**

@@ -3,6 +3,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { OrderCarouselComponent } from './OrderCarousel.component';
 import type { OrderCarouselProps } from './OrderCarousel.types';
 
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
+
 export const OrderCarousel: React.FC<OrderCarouselProps> = ({
   orders,
   onViewAll,
@@ -30,6 +32,7 @@ export const OrderCarousel: React.FC<OrderCarouselProps> = ({
     [recentOrders.length]
   );
   const prevSlide = useCallback(() => setCurrentSlide((prev) => Math.max(prev - 1, 0)), []);
+  const swipeHandlers = useSwipeNavigation(nextSlide, prevSlide);
 
   return (
     <OrderCarouselComponent
@@ -46,6 +49,7 @@ export const OrderCarousel: React.FC<OrderCarouselProps> = ({
       onNext={nextSlide}
       onPrev={prevSlide}
       onGoTo={goToSlide}
+      swipeHandlers={swipeHandlers}
     />
   );
 };

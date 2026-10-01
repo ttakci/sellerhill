@@ -55,26 +55,21 @@ export const ListingCard = ({
       className={className}
       variant="elevated"
     >
-      {selectable && (
-        <S.SelectionControl
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <Checkbox
-            checked={!!selected}
-            onChange={(checked) => onSelectedChange?.(checked)}
-            aria-label={selectionAriaLabel}
-          />
-        </S.SelectionControl>
-      )}
-
       <S.Top $orientation={orientation}>
-        <S.Image $orientation={orientation}>
-          {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
-        </S.Image>
-
-        <S.Content>
+        <S.TitleRow>
+          {selectable && (
+            <S.SelectionControl
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Checkbox
+                checked={!!selected}
+                onChange={(checked) => onSelectedChange?.(checked)}
+                aria-label={selectionAriaLabel}
+              />
+            </S.SelectionControl>
+          )}
           {/* The title is clamped to two lines, so the full text lives on the tooltip. */}
           <S.TitleSlot>
             <Tooltip content={title} position="top" variant="dark">
@@ -83,38 +78,46 @@ export const ListingCard = ({
               </S.Title>
             </Tooltip>
           </S.TitleSlot>
+        </S.TitleRow>
 
-          {status ? (
-            <S.BadgeRow>
-              <Badge variant={statusVariant} size="xs">
-                {status.label}
-              </Badge>
-            </S.BadgeRow>
-          ) : null}
+        <S.Body $orientation={orientation}>
+          <S.Content>
+            {status ? (
+              <S.BadgeRow>
+                <Badge variant={statusVariant} size="xs">
+                  {status.label}
+                </Badge>
+              </S.BadgeRow>
+            ) : null}
 
-          {meta.length > 0 && (
-            <S.MetaList>
-              {meta.map((item) => (
-                <React.Fragment key={`${item.label}-${item.value}`}>
-                  <S.MetaLabel>
-                    <Text variant="caption" color="text.secondary">
-                      {item.label}
-                    </Text>
-                  </S.MetaLabel>
-                  <S.MetaValue>
-                    {item.storeType ? (
-                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
-                    ) : (
-                      <S.MetaValueText variant="body-sm" color="text.primary">
-                        {item.value}
-                      </S.MetaValueText>
-                    )}
-                  </S.MetaValue>
-                </React.Fragment>
-              ))}
-            </S.MetaList>
-          )}
-        </S.Content>
+            {meta.length > 0 && (
+              <S.MetaList>
+                {meta.map((item) => (
+                  <React.Fragment key={`${item.label}-${item.value}`}>
+                    <S.MetaLabel>
+                      <Text variant="caption" color="text.secondary">
+                        {item.label}
+                      </Text>
+                    </S.MetaLabel>
+                    <S.MetaValue>
+                      {item.storeType ? (
+                        <IdBadge id={item.value} storeType={item.storeType} size="sm" />
+                      ) : (
+                        <S.MetaValueText variant="body-sm" color="text.primary">
+                          {item.value}
+                        </S.MetaValueText>
+                      )}
+                    </S.MetaValue>
+                  </React.Fragment>
+                ))}
+              </S.MetaList>
+            )}
+          </S.Content>
+
+          <S.Image $orientation={orientation}>
+            {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
+          </S.Image>
+        </S.Body>
       </S.Top>
 
       <S.StatsGrid>

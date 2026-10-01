@@ -23,7 +23,7 @@ export const ListHeader = styled.div`
   gap: ${tkn('spacing.sm')};
   min-height: 3rem;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.secondary')};
+  background: ${tkn('colors.glass.tint')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 

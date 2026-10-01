@@ -25,37 +25,6 @@ export const Category = styled(Card)`
   padding: ${tkn('spacing.md')};
 `;
 
-export const CategoryHeader = styled.button<{ $isOpen: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  width: 100%;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  color: inherit;
-  cursor: pointer;
-  text-align: start;
-
-  svg {
-    transition: transform 0.15s ease;
-    transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${tkn('colors.brand.primary')};
-    outline-offset: 2px;
-  }
-`;
-
-export const CategoryTitle = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-`;
-
 export const EmailTest = styled.div`
   display: flex;
   align-items: center;

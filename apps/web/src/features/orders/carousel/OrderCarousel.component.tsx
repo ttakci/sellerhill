@@ -22,6 +22,7 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
   onNext,
   onPrev,
   onGoTo,
+  swipeHandlers,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -48,7 +49,7 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
-      <S.CarouselViewport>
+      <S.CarouselViewport {...swipeHandlers}>
         {orders.map((order, index) => {
           const slideClass = index === currentSlide ? 'active' : index < currentSlide ? 'prev' : '';
           const card = toOrderCardProps(order, t, formatCurrency, formatDate);

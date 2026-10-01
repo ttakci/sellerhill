@@ -29,6 +29,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   mobileSidebarOpen,
   isLogoutConfirmOpen,
   pathWithoutLocale,
+  fitsViewport,
   isDraftsActive,
   userName,
   loadingIsLoading,
@@ -510,7 +511,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </S.HeaderContainer>
 
           <S.ContentArea>
-            <S.ContentInner>
+            <S.ContentInner $fitsViewport={fitsViewport}>
               <Outlet />
             </S.ContentInner>
           </S.ContentArea>

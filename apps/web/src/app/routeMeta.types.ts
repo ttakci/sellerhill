@@ -12,6 +12,14 @@ export interface AppRouteMeta {
    * derived from this list.
    */
   section?: NavSection;
+  /**
+   * The page fills the content area and scrolls INSIDE its own panes (the
+   * Messages inbox) instead of scrolling the page. `AppLayout` drops
+   * `ContentInner`'s automatic minimum height on such a route so a
+   * `flex: 1; min-height: 0` page container can take exactly the remaining
+   * height. Every other route keeps the content-high page.
+   */
+  fitsViewport?: boolean;
   /** Breadcrumb segments after home (label keys resolved via t) */
   breadcrumbs: Array<{
     labelKey: string;

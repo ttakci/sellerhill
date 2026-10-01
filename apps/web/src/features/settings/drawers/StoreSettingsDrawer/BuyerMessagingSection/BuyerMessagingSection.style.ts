@@ -12,9 +12,9 @@ export const MasterCard = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
   padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.background.tertiary')};
+  background: ${tkn('colors.glass.tint')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.md')};
 `;
 
 export const ToggleRow = styled.div`

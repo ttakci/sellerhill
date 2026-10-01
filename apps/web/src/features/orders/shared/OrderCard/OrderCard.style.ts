@@ -45,17 +45,29 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
   }
 `;
 
-/** Image beside the facts; stacks on a phone where the two cannot share the width. */
+/**
+ * The card body: the title first, across the whole width, then the facts on
+ * the left with the photo at rest on the right (2026-10-01, see CLAUDE.md
+ * "Card anatomy"). Everything textual shares ONE left axis, so a grid of
+ * cards scans as a column; the photo is the terminal anchor, not the thing
+ * that indents every line after it. There is no stacking breakpoint: on a
+ * phone the photo simply gets smaller.
+ */
 export const Top = styled.div`
   display: flex;
-  gap: ${tkn('spacing.md+')};
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
+`;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    flex-direction: column;
-  }
+export const Body = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.md+')};
+  min-width: 0;
+  flex: 1;
 `;
 
 export const Image = styled.div`
@@ -67,7 +79,6 @@ export const Image = styled.div`
   background: transparent;
   width: 6.5rem;
   height: 6.5rem;
-  align-self: flex-start;
 
   img {
     width: 100%;
@@ -80,8 +91,8 @@ export const Image = styled.div`
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 100%;
-    height: 9rem;
+    width: 5rem;
+    height: 5rem;
   }
 `;
 
