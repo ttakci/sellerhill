@@ -5,7 +5,7 @@
     "subtitle_many": "{{count}} resi",
     "subtitle_other": "{{count}} resi",
     "loading": "Caricamento dei resi…",
-    "notice": "Rispondi ai resi su eBay. Questa pagina mostra cosa è richiesto ed entro quando.",
+    "notice": "Apri un reso per vederne la cronologia e cosa attende eBay. Dove eBay lo consente, puoi approvarlo, segnarlo come ricevuto o rimborsare da qui; tutto il resto si risolve su eBay.",
     "tabs": {
       "all": "Tutti",
       "action": "Richiedono azione",
@@ -62,7 +62,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rimborsa l'acquirente (non è prevista la restituzione dell'oggetto)",
       "REMINDER_FOR_RMA": "Promemoria RMA: rispondi su eBay",
       "REMINDER_SELLER_TO_RESPOND": "Rispondi alla richiesta di reso",
-      "other": "Rispondi su eBay"
+      "other": "Rispondi su eBay",
+      "SELLER_SEND_MESSAGE": "Invia un messaggio all'acquirente",
+      "SELLER_ESCALATE": "Inoltra a eBay",
+      "SELLER_OFFER_REPLACEMENT": "Proponi una sostituzione"
     },
     "dueBy": "entro il {{date}}",
     "reasonType": {
@@ -91,6 +94,114 @@
       "title": "Nessun reso corrisponde ai filtri",
       "description": "Prova un'altra scheda, un altro negozio o un'altra ricerca.",
       "action": "Cancella filtri"
+    },
+    "detail": {
+      "title": "Reso {{id}}",
+      "titleLoading": "Reso",
+      "open": "Apri reso",
+      "loadFailed": "Impossibile caricare questo reso",
+      "loadFailedDescription": "Riprova tra un istante o aprilo su eBay.",
+      "offline": "eBay non è raggiungibile al momento; questo è l'ultimo stato noto a SellerHill. Le azioni saranno proposte quando eBay risponderà di nuovo.",
+      "whatYouCanDo": "Cosa puoi fare",
+      "nothingToDo": "Nulla è in attesa da parte tua su questo reso.",
+      "openOnEbay": "Apri su eBay",
+      "alsoOnEbay": "Anche su eBay: {{options}}",
+      "buyer": "Acquirente",
+      "quantity": "Quantità",
+      "returnType": "Tipo di reso",
+      "itemPrice": "Prezzo dell'articolo",
+      "closedAs": "Chiuso come",
+      "closedAt": "Chiuso il",
+      "shipment": "Spedizione del reso",
+      "shippedAt": "Spedito",
+      "deliveredAt": "Consegnato",
+      "markedReceived": "Segnato come ricevuto",
+      "yes": "Sì",
+      "no": "No",
+      "journey": "Percorso",
+      "journeyEmpty": "eBay non ha ancora registrato alcun passaggio.",
+      "partialRefundOffered": "Proposto un rimborso parziale di {{amount}}",
+      "trackingNumber": "Tracciamento {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Approva reso",
+        "mark_received": "Segna come ricevuto",
+        "issue_refund": "Emetti rimborso"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Rimborsa {{amount}}"
+      },
+      "confirm": {
+        "approve": "Approvare questa richiesta di reso su eBay? All'acquirente verrà chiesto di rispedire l'articolo.",
+        "mark_received": "Comunicare a eBay che l'articolo reso è arrivato? Fallo solo quando lo hai in mano.",
+        "issue_refund": "Rimborsare {{amount}} all'acquirente adesso? eBay trasferisce il denaro non appena lo accetta e non è possibile annullarlo da qui."
+      },
+      "done": {
+        "approve": "Il reso è stato approvato su eBay.",
+        "mark_received": "L'articolo è stato segnato come ricevuto su eBay.",
+        "issue_refund": "Il rimborso è stato emesso su eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "L'acquirente ha aperto il reso",
+      "BUYER_PRINT_SHIPPING_LABEL": "L'acquirente ha stampato l'etichetta di spedizione",
+      "BUYER_PROVIDE_TRACKING_INFO": "L'acquirente ha aggiunto il tracciamento",
+      "BUYER_MARK_RETURN_SHIPPED": "L'acquirente ha segnato l'articolo come spedito",
+      "BUYER_ESCALATE": "L'acquirente ha inoltrato il caso a eBay",
+      "BUYER_CLOSE_RETURN": "L'acquirente ha chiuso il reso",
+      "BUYER_SEND_MESSAGE": "L'acquirente ha inviato un messaggio",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "L'acquirente ha accettato il rimborso parziale",
+      "BUYER_DECLINE_PARTIAL_REFUND": "L'acquirente ha rifiutato il rimborso parziale",
+      "BUYER_MARK_REFUND_RECEIVED": "L'acquirente ha confermato di aver ricevuto il rimborso",
+      "SELLER_APPROVE_REQUEST": "Il venditore ha approvato il reso",
+      "SELLER_DECLINE_REQUEST": "Il venditore ha rifiutato il reso",
+      "SELLER_ISSUE_REFUND": "Il venditore ha emesso il rimborso",
+      "SELLER_MARK_AS_RECEIVED": "Il venditore ha segnato l'articolo come ricevuto",
+      "SELLER_OFFER_PARTIAL_REFUND": "Il venditore ha proposto un rimborso parziale",
+      "SELLER_PROVIDE_RMA": "Il venditore ha fornito un numero RMA",
+      "SELLER_PROVIDE_LABEL": "Il venditore ha fornito un'etichetta di spedizione",
+      "SELLER_SEND_MESSAGE": "Il venditore ha inviato un messaggio",
+      "SELLER_ESCALATE": "Il venditore ha inoltrato il caso a eBay",
+      "SELLER_OFFER_REPLACEMENT": "Il venditore ha proposto una sostituzione",
+      "SELLER_PROVIDE_TRACKING_INFO": "Il venditore ha aggiunto il tracciamento",
+      "SYSTEM_CREATE_RETURN": "eBay ha aperto il reso",
+      "SYSTEM_CLOSE_RETURN": "eBay ha chiuso il reso",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay ha rimborsato subito l'acquirente",
+      "SYSTEM_INITIATED_REFUND": "eBay ha emesso il rimborso",
+      "EBAY_RULE_AUTO_APPROVE": "eBay ha approvato il reso automaticamente",
+      "buyerOther": "Passaggio dell'acquirente",
+      "sellerOther": "Passaggio del venditore",
+      "ebayOther": "Passaggio di eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Rimborso",
+      "REPLACEMENT": "Sostituzione",
+      "EXCHANGE": "Cambio"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Rimborsato per intero",
+      "PARTIAL_REFUNDED": "Rimborsato in parte",
+      "NO_REFUND": "Chiuso senza rimborso",
+      "other": "Chiuso"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Consegnato",
+      "IN_TRANSIT": "In transito",
+      "OUT_FOR_DELIVERY": "In consegna",
+      "NOT_SHIPPED": "Non ancora spedito",
+      "SHIPPED": "Spedito"
+    },
+    "errors": {
+      "actionsDisabled": "Le azioni sui resi dall'app sono disattivate su questa piattaforma. Rispondi al reso su eBay.",
+      "actionNotAvailable": "eBay non offre più questa azione su questo reso. Aggiorna e controlla cosa è in attesa adesso.",
+      "suspended": "Il tuo abbonamento è sospeso, quindi le azioni sui resi sono in pausa. Salda la fattura nella pagina Fatturazione.",
+      "ebayRejected": "eBay ha rifiutato questa azione. Apri il reso su eBay per vederne il motivo.",
+      "unavailable": "eBay non è raggiungibile. Riprova tra un istante.",
+      "sandbox": "Le azioni sui resi non sono disponibili nel sandbox di eBay.",
+      "refundAmountUnknown": "eBay non ha indicato un importo di rimborso per questo reso, quindi il rimborso va emesso su eBay.",
+      "notFound": "Questo reso non è stato trovato."
     }
   }
 }

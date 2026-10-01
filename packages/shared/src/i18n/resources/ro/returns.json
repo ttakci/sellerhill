@@ -5,7 +5,7 @@
     "subtitle_few": "{{count}} retururi",
     "subtitle_other": "{{count}} de retururi",
     "loading": "Se încarcă retururile…",
-    "notice": "Răspunde la retururi pe eBay. Această pagină arată ce ai de făcut și până când.",
+    "notice": "Deschide un retur ca să vezi istoricul lui și ce așteaptă eBay. Acolo unde eBay permite, poți să-l aprobi, să-l marchezi ca primit sau să rambursezi de aici; tot restul se răspunde pe eBay.",
     "tabs": {
       "all": "Toate",
       "action": "Necesită acțiune",
@@ -62,7 +62,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rambursează cumpărătorul (nu se așteaptă returnarea produsului)",
       "REMINDER_FOR_RMA": "Memento RMA: răspunde pe eBay",
       "REMINDER_SELLER_TO_RESPOND": "Răspunde la cererea de retur",
-      "other": "Răspunde pe eBay"
+      "other": "Răspunde pe eBay",
+      "SELLER_SEND_MESSAGE": "Trimite un mesaj cumpărătorului",
+      "SELLER_ESCALATE": "Escaladează la eBay",
+      "SELLER_OFFER_REPLACEMENT": "Oferă un înlocuitor"
     },
     "dueBy": "până la {{date}}",
     "reasonType": {
@@ -91,6 +94,114 @@
       "title": "Niciun retur nu corespunde filtrelor",
       "description": "Încearcă altă filă, alt magazin sau altă căutare.",
       "action": "Șterge filtrele"
+    },
+    "detail": {
+      "title": "Retur {{id}}",
+      "titleLoading": "Retur",
+      "open": "Deschide returul",
+      "loadFailed": "Acest retur nu a putut fi încărcat",
+      "loadFailedDescription": "Încearcă din nou peste puțin timp sau deschide-l pe eBay.",
+      "offline": "eBay nu a putut fi contactat acum; acesta este ultimul stadiu cunoscut de SellerHill. Acțiunile vor fi oferite când eBay răspunde din nou.",
+      "whatYouCanDo": "Ce poți face",
+      "nothingToDo": "Nimic nu așteaptă de la tine la acest retur.",
+      "openOnEbay": "Deschide pe eBay",
+      "alsoOnEbay": "Și pe eBay: {{options}}",
+      "buyer": "Cumpărător",
+      "quantity": "Cantitate",
+      "returnType": "Tip de retur",
+      "itemPrice": "Prețul articolului",
+      "closedAs": "Închis ca",
+      "closedAt": "Închis la",
+      "shipment": "Expedierea returului",
+      "shippedAt": "Expediat",
+      "deliveredAt": "Livrat",
+      "markedReceived": "Marcat ca primit",
+      "yes": "Da",
+      "no": "Nu",
+      "journey": "Parcurs",
+      "journeyEmpty": "eBay nu a înregistrat încă niciun pas.",
+      "partialRefundOffered": "S-a oferit o rambursare parțială de {{amount}}",
+      "trackingNumber": "Urmărire {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Aprobă returul",
+        "mark_received": "Marchează ca primit",
+        "issue_refund": "Emite rambursarea"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Rambursează {{amount}}"
+      },
+      "confirm": {
+        "approve": "Aprobi această cerere de retur pe eBay? Cumpărătorului i se va cere să trimită articolul înapoi.",
+        "mark_received": "Îi comunici lui eBay că articolul returnat a ajuns? Fă asta doar când îl ai în mână.",
+        "issue_refund": "Rambursezi {{amount}} cumpărătorului acum? eBay mută banii imediat ce acceptă, iar acest lucru nu poate fi anulat de aici."
+      },
+      "done": {
+        "approve": "Returul a fost aprobat pe eBay.",
+        "mark_received": "Articolul a fost marcat ca primit pe eBay.",
+        "issue_refund": "Rambursarea a fost emisă pe eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Cumpărătorul a deschis returul",
+      "BUYER_PRINT_SHIPPING_LABEL": "Cumpărătorul a tipărit eticheta de expediere",
+      "BUYER_PROVIDE_TRACKING_INFO": "Cumpărătorul a adăugat urmărirea",
+      "BUYER_MARK_RETURN_SHIPPED": "Cumpărătorul a marcat articolul ca expediat",
+      "BUYER_ESCALATE": "Cumpărătorul a escaladat la eBay",
+      "BUYER_CLOSE_RETURN": "Cumpărătorul a închis returul",
+      "BUYER_SEND_MESSAGE": "Cumpărătorul a trimis un mesaj",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Cumpărătorul a acceptat rambursarea parțială",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Cumpărătorul a refuzat rambursarea parțială",
+      "BUYER_MARK_REFUND_RECEIVED": "Cumpărătorul a confirmat primirea rambursării",
+      "SELLER_APPROVE_REQUEST": "Vânzătorul a aprobat returul",
+      "SELLER_DECLINE_REQUEST": "Vânzătorul a refuzat returul",
+      "SELLER_ISSUE_REFUND": "Vânzătorul a emis rambursarea",
+      "SELLER_MARK_AS_RECEIVED": "Vânzătorul a marcat articolul ca primit",
+      "SELLER_OFFER_PARTIAL_REFUND": "Vânzătorul a oferit o rambursare parțială",
+      "SELLER_PROVIDE_RMA": "Vânzătorul a furnizat un număr RMA",
+      "SELLER_PROVIDE_LABEL": "Vânzătorul a furnizat o etichetă de expediere",
+      "SELLER_SEND_MESSAGE": "Vânzătorul a trimis un mesaj",
+      "SELLER_ESCALATE": "Vânzătorul a escaladat la eBay",
+      "SELLER_OFFER_REPLACEMENT": "Vânzătorul a oferit un înlocuitor",
+      "SELLER_PROVIDE_TRACKING_INFO": "Vânzătorul a adăugat urmărirea",
+      "SYSTEM_CREATE_RETURN": "eBay a deschis returul",
+      "SYSTEM_CLOSE_RETURN": "eBay a închis returul",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay a rambursat imediat cumpărătorul",
+      "SYSTEM_INITIATED_REFUND": "eBay a emis rambursarea",
+      "EBAY_RULE_AUTO_APPROVE": "eBay a aprobat returul automat",
+      "buyerOther": "Pasul cumpărătorului",
+      "sellerOther": "Pasul vânzătorului",
+      "ebayOther": "Pasul eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Banii înapoi",
+      "REPLACEMENT": "Înlocuire",
+      "EXCHANGE": "Schimb"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Rambursat integral",
+      "PARTIAL_REFUNDED": "Rambursat parțial",
+      "NO_REFUND": "Închis fără rambursare",
+      "other": "Închis"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Livrat",
+      "IN_TRANSIT": "În tranzit",
+      "OUT_FOR_DELIVERY": "În curs de livrare",
+      "NOT_SHIPPED": "Neexpediat încă",
+      "SHIPPED": "Expediat"
+    },
+    "errors": {
+      "actionsDisabled": "Acțiunile pentru retururi din aplicație sunt dezactivate pe această platformă. Răspunde la retur pe eBay.",
+      "actionNotAvailable": "eBay nu mai oferă această acțiune pentru acest retur. Reîncarcă și verifică ce așteaptă acum.",
+      "suspended": "Abonamentul tău este suspendat, așa că acțiunile pentru retururi sunt oprite. Achită factura din pagina Facturare.",
+      "ebayRejected": "eBay a refuzat această acțiune. Deschide returul pe eBay ca să vezi motivul.",
+      "unavailable": "eBay nu a putut fi contactat. Încearcă din nou peste puțin timp.",
+      "sandbox": "Acțiunile pentru retururi nu sunt disponibile în sandbox-ul eBay.",
+      "refundAmountUnknown": "eBay nu a raportat o sumă de rambursat pentru acest retur, așa că rambursarea trebuie emisă pe eBay.",
+      "notFound": "Acest retur nu a fost găsit."
     }
   }
 }

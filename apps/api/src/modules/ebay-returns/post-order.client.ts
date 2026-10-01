@@ -10,7 +10,12 @@ import { withEbayRateLimitRetry } from '../ebay/ebay-http-retry';
 
 import { RETURN_SEARCH_LIMIT, RETURN_SEARCH_SORT } from './ebay-returns.constants';
 import type {
+  PostOrderDecideReturnRequest,
+  PostOrderIssueRefundRequest,
+  PostOrderMarkReceivedRequest,
   PostOrderPaginationOutput,
+  PostOrderRefundStatusResponse,
+  PostOrderReturnDetail,
   PostOrderReturnSearchResponse,
   PostOrderReturnSummary,
   ReturnSearchParams,
@@ -37,19 +42,39 @@ export class PostOrderResponseError extends Error {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** eBay refused a Post-Order call with a 4xx — the return is not in a state that allows it, or the body was wrong. */
+export class PostOrderRejectedError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+    this.name = 'PostOrderRejectedError';
+  }
+}
+
 /**
- * eBay Post-Order API — READ ONLY. The one call implemented is
- * `GET /post-order/v2/return/search`
- * (docs/ebay-reference/post-order/post-order_v2_return_search__get.txt).
+ * eBay Post-Order API, for returns. Five calls, every one documented in
+ * docs/ebay-reference/post-order/:
+ * - `GET  /post-order/v2/return/search`               — the sweep (BACKGROUND)
+ * - `GET  /post-order/v2/return/{returnId}`           — the detail pane (INTERACTIVE)
+ * - `POST /post-order/v2/return/{returnId}/decide`           (APPROVE only)
+ * - `POST /post-order/v2/return/{returnId}/mark_as_received`
+ * - `POST /post-order/v2/return/{returnId}/issue_refund`
  *
- * Nothing here writes to eBay: no refund, no decision, no "mark as received".
- * `ebay-returns.guard.spec.ts` fails if a write verb is ever added.
+ * The three writes settle a buyer's claim or move real money on a real
+ * seller's store, so they are reachable only through
+ * `EbayReturnsActionsService` (operator switch, live option check, audit
+ * row); `ebay-returns.guard.spec.ts` keeps every other path out of here.
+ * A write is sent ONCE — never inside `withEbayRateLimitRetry`: a refund
+ * replayed after a timeout eBay had in fact processed would be a second
+ * refund.
  *
  * Quota: `post-order.return` is 5,000 calls a day for the WHOLE application
- * (production `getRateLimits`, 2026-09-30), so every attempt — a retry
- * included — is charged to `EbayApiResource.POST_ORDER_RETURN` at BACKGROUND
- * priority before it goes out. `EbayBudgetExhaustedError` propagates to the
- * caller, which stops the sweep.
+ * (production `getRateLimits`, 2026-09-30), so every attempt is charged to
+ * `EbayApiResource.POST_ORDER_RETURN` before it goes out — the sweep at
+ * BACKGROUND priority, a seller's own read or action at INTERACTIVE.
+ * `EbayBudgetExhaustedError` propagates to the caller.
  */
 @Injectable()
 export class PostOrderClient {
@@ -84,12 +109,7 @@ export class PostOrderClient {
     const response = await withEbayRateLimitRetry(
       () =>
         axios.get<unknown>(`${this.baseUrl()}/post-order/v2/return/search`, {
-          headers: {
-            Authorization: `${POST_ORDER_AUTH_PREFIX}${accessToken}`,
-            'X-EBAY-C-MARKETPLACE-ID': marketplaceId,
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
+          headers: this.headers(accessToken, marketplaceId),
           params: {
             creation_date_range_from: params.creationDateFrom,
             limit: RETURN_SEARCH_LIMIT,
@@ -120,6 +140,99 @@ export class PostOrderClient {
   }
 
   /**
+   * One return in full (`fieldgroups=FULL` is the documented default: the
+   * `detail` container only). A body without `detail` is an error, never an
+   * empty return.
+   */
+  async getReturn(accessToken: string, marketplaceId: string, returnId: string): Promise<PostOrderReturnDetail> {
+    const response = await withEbayRateLimitRetry(
+      () =>
+        axios.get<unknown>(`${this.baseUrl()}/post-order/v2/return/${encodeURIComponent(returnId)}`, {
+          headers: this.headers(accessToken, marketplaceId),
+          params: { fieldgroups: 'FULL' },
+          timeout: REQUEST_TIMEOUT_MS,
+        }),
+      { logger: this.logger, acquireBudget: this.chargeReturn(EbayCallPriority.INTERACTIVE) }
+    );
+    const body: unknown = response.data;
+    if (!isRecord(body) || !isRecord(body.detail)) {
+      throw new PostOrderResponseError('eBay return detail answered without a `detail` container');
+    }
+    return body.detail as PostOrderReturnDetail;
+  }
+
+  /** `decide` with `APPROVE` — "The seller must approve all buyer-initiated return requests before they are allowed." */
+  async decideReturn(
+    accessToken: string,
+    marketplaceId: string,
+    returnId: string,
+    body: PostOrderDecideReturnRequest
+  ): Promise<PostOrderRefundStatusResponse> {
+    return this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/decide`, body);
+  }
+
+  /** "This method can be used on behalf of a seller to mark a return item as received." No response payload. */
+  async markReturnReceived(
+    accessToken: string,
+    marketplaceId: string,
+    returnId: string,
+    body: PostOrderMarkReceivedRequest
+  ): Promise<void> {
+    await this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/mark_as_received`, body);
+  }
+
+  /** "Issue a refund for a returned item." */
+  async issueReturnRefund(
+    accessToken: string,
+    marketplaceId: string,
+    returnId: string,
+    body: PostOrderIssueRefundRequest
+  ): Promise<PostOrderRefundStatusResponse> {
+    return this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/issue_refund`, body);
+  }
+
+  /**
+   * One attempt, charged first, never retried (see the class comment). A 4xx
+   * is eBay's refusal (`PostOrderRejectedError`, the status kept, the body
+   * logged at warn without the request); anything else propagates as the
+   * transport error it is.
+   */
+  private async write(
+    accessToken: string,
+    marketplaceId: string,
+    pathUnderReturn: string,
+    body: unknown
+  ): Promise<PostOrderRefundStatusResponse> {
+    await this.chargeReturn(EbayCallPriority.INTERACTIVE)();
+    try {
+      const response = await axios.post<unknown>(`${this.baseUrl()}/post-order/v2/return/${pathUnderReturn}`, body, {
+        headers: this.headers(accessToken, marketplaceId),
+        timeout: REQUEST_TIMEOUT_MS,
+      });
+      const data: unknown = response.data;
+      return isRecord(data) && typeof data.refundStatus === 'string' ? { refundStatus: data.refundStatus } : {};
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response && error.response.status >= 400 && error.response.status < 500) {
+        const status = error.response.status;
+        this.logger.warn(
+          `eBay refused ${pathUnderReturn.replace(/^[^/]+/, '{returnId}')} with HTTP ${status}: ${describeErrorBody(error.response.data)}`
+        );
+        throw new PostOrderRejectedError(`eBay refused the return call with HTTP ${status}`, status);
+      }
+      throw error;
+    }
+  }
+
+  private headers(accessToken: string, marketplaceId: string): Record<string, string> {
+    return {
+      Authorization: `${POST_ORDER_AUTH_PREFIX}${accessToken}`,
+      'X-EBAY-C-MARKETPLACE-ID': marketplaceId,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+  }
+
+  /**
    * eBay's reference for this call: "This method is not supported in the
    * Sandbox environment." A deployment on sandbox keys (local dev, the test
    * stack) therefore has nothing to ask — the sweep checks this before it
@@ -134,9 +247,25 @@ export class PostOrderClient {
     return this.config.get<string>('EBAY_REST_API_URL') || DEFAULT_REST_BASE;
   }
 
-  private chargeReturn(): () => Promise<void> {
+  private chargeReturn(priority: EbayCallPriority = EbayCallPriority.BACKGROUND): () => Promise<void> {
     return async () => {
-      await this.budget.acquire(EbayApiResource.POST_ORDER_RETURN, EbayCallPriority.BACKGROUND);
+      await this.budget.acquire(EbayApiResource.POST_ORDER_RETURN, priority);
     };
   }
+}
+
+/**
+ * eBay's error envelope for the log line: the `errorId` / `message` pairs
+ * only — never the whole body, which can echo the request (a comment, an
+ * amount) back.
+ */
+function describeErrorBody(data: unknown): string {
+  if (!isRecord(data) || !Array.isArray(data.errors)) {
+    return 'no error body';
+  }
+  return data.errors
+    .filter(isRecord)
+    .map((e) => `${String(e.errorId ?? '?')} ${String(e.message ?? '')}`.trim())
+    .join('; ')
+    .slice(0, 300);
 }

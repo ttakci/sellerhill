@@ -27,6 +27,7 @@ import {
   EbayConversationType,
   EbayMarketplaceId,
   EbayMessageDto,
+  EbayReturnAction,
   EbayReturnReasonType,
   EbayReturnSellerActivity,
   EbayUnreadCountDto,
@@ -65,7 +66,10 @@ import {
   type DashboardDataDto,
   type DashboardHistoryMonth,
   type EbayBusinessPolicyDto,
+  type EbayReturnDetailDto,
   type EbayReturnDto,
+  type EbayReturnHistoryEntryDto,
+  type EbayReturnShipmentDto,
   type ListingDto,
   type ListingJobDto,
   type ListingJobItemDto,
@@ -1293,6 +1297,120 @@ function buildReturns(): EbayReturnDto[] {
 }
 
 export const DEMO_RETURNS: EbayReturnDto[] = buildReturns();
+
+const DEMO_RETURN_URL = 'https://www.ebay.com/rtn/Return/ReturnDetails?returnId=';
+
+/**
+ * `GET /returns/:id/detail` for a demo return: the row plus a journey that
+ * fits its state (filed → approved → shipped → refunded, as far as it got),
+ * the options eBay would list at that point, and the shipment once it is on
+ * its way. In-app actions are offered exactly where the real API would offer
+ * them; the write itself goes through `demoWrite` and persists nothing.
+ */
+export function demoReturnDetail(row: EbayReturnDto): EbayReturnDetailDto {
+  const filedAt = new Date(row.createdOnEbayAt ?? isoDaysAgo(6)).getTime();
+  const at = (daysAfter: number): string => new Date(filedAt + daysAfter * 86400000).toISOString();
+  const requested = row.state === 'RETURN_REQUESTED';
+  const shipped = row.state === 'ITEM_SHIPPED' || row.state === 'ITEM_DELIVERED';
+  const closed = row.state === 'CLOSED';
+  const approved = !requested;
+
+  const history: EbayReturnHistoryEntryDto[] = [
+    {
+      activity: 'BUYER_CREATE_RETURN',
+      author: row.buyerLoginName,
+      at: at(0),
+      fromState: null,
+      toState: 'RETURN_REQUESTED',
+      notes: row.buyerComment,
+      partialRefundAmount: null,
+      trackingNumber: null,
+      rma: null,
+    },
+  ];
+  if (approved) {
+    history.push({
+      activity: 'SELLER_APPROVE_REQUEST',
+      author: 'demo-seller',
+      at: at(1),
+      fromState: 'RETURN_REQUESTED',
+      toState: 'ITEM_READY_TO_SHIP',
+      notes: null,
+      partialRefundAmount: null,
+      trackingNumber: null,
+      rma: null,
+    });
+  }
+  const trackingNumber = shipped || closed ? `9400 1000 0000 ${String(row.returnId).slice(-4)} 0001` : null;
+  if (trackingNumber) {
+    history.push({
+      activity: 'BUYER_MARK_RETURN_SHIPPED',
+      author: row.buyerLoginName,
+      at: at(2),
+      fromState: 'ITEM_READY_TO_SHIP',
+      toState: 'ITEM_SHIPPED',
+      notes: null,
+      partialRefundAmount: null,
+      trackingNumber,
+      rma: null,
+    });
+  }
+  if (row.actualRefundAmount !== null) {
+    history.push({
+      activity: 'SELLER_ISSUE_REFUND',
+      author: 'demo-seller',
+      at: at(5),
+      fromState: 'ITEM_DELIVERED',
+      toState: 'CLOSED',
+      notes: null,
+      partialRefundAmount: null,
+      trackingNumber: null,
+      rma: null,
+    });
+  }
+
+  const shipments: EbayReturnShipmentDto[] = trackingNumber
+    ? [
+        {
+          trackingNumber,
+          carrier: 'USPS',
+          shippedAt: at(2),
+          deliveredAt: closed || row.state === 'ITEM_DELIVERED' ? at(4) : null,
+          deliveryStatus: closed || row.state === 'ITEM_DELIVERED' ? 'DELIVERED' : 'IN_TRANSIT',
+          markedReceived: closed,
+          labelId: null,
+        },
+      ]
+    : [];
+
+  const ebayOptions = closed
+    ? []
+    : requested
+      ? ['SELLER_APPROVE_REQUEST', 'SELLER_DECLINE_REQUEST', 'SELLER_SEND_MESSAGE']
+      : shipped
+        ? ['SELLER_MARK_AS_RECEIVED', 'SELLER_ISSUE_REFUND', 'SELLER_SEND_MESSAGE']
+        : ['SELLER_SEND_MESSAGE'];
+  const availableActions: EbayReturnAction[] = requested
+    ? [EbayReturnAction.APPROVE]
+    : shipped
+      ? [EbayReturnAction.MARK_RECEIVED, EbayReturnAction.ISSUE_REFUND]
+      : [];
+
+  return {
+    ...row,
+    live: true,
+    actionsEnabled: true,
+    availableActions,
+    ebayOptions,
+    ebayUrl: `${DEMO_RETURN_URL}${row.returnId}`,
+    history,
+    shipments,
+    returnType: 'MONEY_BACK',
+    itemPrice: row.estimatedRefundAmount,
+    closeReason: closed ? (row.actualRefundAmount !== null ? 'FULL_REFUNDED' : 'NO_REFUND') : null,
+    closedAt: closed ? at(5) : null,
+  };
+}
 
 /* ── Dashboard ────────────────────────────────────────────────────────── */
 

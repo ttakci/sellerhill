@@ -1,4 +1,13 @@
-import { EbayReturnReasonType, EbayReturnSellerActivity, ReturnBucket } from '@repo/shared';
+import {
+  EBAY_RETURN_CLOSE_REASONS,
+  EBAY_RETURN_HISTORY_ACTIVITIES,
+  EBAY_RETURN_TYPES,
+  EbayReturnReasonType,
+  EbayReturnSellerActivity,
+  ReturnBucket,
+} from '@repo/shared';
+
+import type { ReturnHistoryActor } from '../returns.types';
 
 import type { ReturnBucketPresentation } from './return-presentation.types';
 
@@ -42,6 +51,43 @@ export function resolveSellerActivityKey(activity: string | null | undefined): s
     return null;
   }
   return SELLER_ACTIVITIES.includes(activity) ? activity : RETURN_ACTIVITY_OTHER_KEY;
+}
+
+const HISTORY_ACTIVITIES: readonly string[] = EBAY_RETURN_HISTORY_ACTIVITIES;
+const RETURN_TYPES: readonly string[] = EBAY_RETURN_TYPES;
+const CLOSE_REASONS: readonly string[] = EBAY_RETURN_CLOSE_REASONS;
+
+/** Who did a history step, read from eBay's activity name prefix. */
+export function resolveHistoryActor(activity: string | null | undefined): ReturnHistoryActor {
+  if (activity?.startsWith('BUYER_')) {
+    return 'buyer';
+  }
+  if (activity?.startsWith('SELLER_')) {
+    return 'seller';
+  }
+  return 'ebay';
+}
+
+/**
+ * `returns.history.<key>` for one step of eBay's `responseHistory`. A value the
+ * page does not localize renders as the generic line for its actor
+ * (`buyerOther` / `sellerOther` / `ebayOther`), never the raw enum.
+ */
+export function resolveHistoryActivityKey(activity: string | null | undefined): string {
+  if (activity && HISTORY_ACTIVITIES.includes(activity)) {
+    return activity;
+  }
+  return `${resolveHistoryActor(activity)}Other`;
+}
+
+/** `returns.returnType.<key>`, or null for an absent / undocumented type. */
+export function resolveReturnTypeKey(type: string | null | undefined): string | null {
+  return type && RETURN_TYPES.includes(type) ? type : null;
+}
+
+/** `returns.closeReason.<key>` — an unknown reason renders the generic "closed" line. */
+export function resolveCloseReasonKey(reason: string | null | undefined): string {
+  return reason && CLOSE_REASONS.includes(reason) ? reason : 'other';
 }
 
 /** `returns.reasonType.<key>` — an absent or undocumented category reads as eBay's own UNKNOWN. */

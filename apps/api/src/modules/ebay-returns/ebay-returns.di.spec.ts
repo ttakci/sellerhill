@@ -16,6 +16,7 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
+import { EbayReturnsActionsService } from './ebay-returns-actions.service';
 import { EbayReturnsSyncProcessor } from './ebay-returns-sync.processor';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import { EbayReturnsController } from './ebay-returns.controller';
@@ -54,8 +55,21 @@ describe('ebay-returns dependency injection metadata', () => {
     expect(paramTypes(EbayReturnsService)).toEqual([DatabaseService, ReturnSweepScheduleService]);
   });
 
-  it('EbayReturnsController resolves the read service', () => {
-    expect(paramTypes(EbayReturnsController)).toEqual([EbayReturnsService]);
+  it('EbayReturnsController resolves the read service and the actions service', () => {
+    expect(paramTypes(EbayReturnsController)).toEqual([EbayReturnsService, EbayReturnsActionsService]);
+  });
+
+  it('EbayReturnsActionsService resolves its eight dependencies in order', () => {
+    expect(paramTypes(EbayReturnsActionsService)).toEqual([
+      DatabaseService,
+      PlatformSettingsService,
+      QuotaEnforcementService,
+      EbayService,
+      PostOrderClient,
+      EbayReturnsService,
+      EbayReturnsSyncService,
+      ReturnSweepScheduleService,
+    ]);
   });
 
   it('EbayReturnsSyncProcessor resolves the sweep and the settings after its queue', () => {

@@ -8,7 +8,7 @@
     "subtitle_many": "{{count}} مرتجعًا",
     "subtitle_other": "{{count}} مرتجع",
     "loading": "جارٍ تحميل المرتجعات…",
-    "notice": "استجب لطلبات الإرجاع على eBay. تعرض هذه الصفحة المطلوب منك وموعده النهائي.",
+    "notice": "افتح طلب إرجاع لعرض سجله وما ينتظره eBay منك. حيث يسمح eBay بذلك، يمكنك الموافقة عليه أو تعليمه كمستلَم أو رد المبلغ من هنا؛ وكل ما عدا ذلك يُنجَز على eBay.",
     "tabs": {
       "all": "الكل",
       "action": "تحتاج إجراء",
@@ -68,7 +68,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "أعد المبلغ إلى المشتري (لا يُنتظر إرجاع المنتج)",
       "REMINDER_FOR_RMA": "تذكير RMA: استجب على eBay",
       "REMINDER_SELLER_TO_RESPOND": "استجب لطلب الإرجاع",
-      "other": "استجب على eBay"
+      "other": "استجب على eBay",
+      "SELLER_SEND_MESSAGE": "إرسال رسالة إلى المشتري",
+      "SELLER_ESCALATE": "تصعيد الأمر إلى eBay",
+      "SELLER_OFFER_REPLACEMENT": "عرض بديل"
     },
     "dueBy": "قبل {{date}}",
     "reasonType": {
@@ -97,6 +100,114 @@
       "title": "لا توجد مرتجعات تطابق عوامل التصفية",
       "description": "جرّب تبويبًا أو متجرًا أو بحثًا آخر.",
       "action": "مسح عوامل التصفية"
+    },
+    "detail": {
+      "title": "إرجاع {{id}}",
+      "titleLoading": "إرجاع",
+      "open": "فتح طلب الإرجاع",
+      "loadFailed": "تعذّر تحميل طلب الإرجاع هذا",
+      "loadFailedDescription": "حاول مجددًا بعد قليل أو افتحه على eBay.",
+      "offline": "تعذّر الوصول إلى eBay الآن؛ هذه آخر حالة يعرفها SellerHill. ستُعرض الإجراءات عندما يستجيب eBay مجددًا.",
+      "whatYouCanDo": "ما يمكنك فعله",
+      "nothingToDo": "لا شيء مطلوب منك في طلب الإرجاع هذا.",
+      "openOnEbay": "فتح على eBay",
+      "alsoOnEbay": "أيضًا على eBay: {{options}}",
+      "buyer": "المشتري",
+      "quantity": "الكمية",
+      "returnType": "نوع الإرجاع",
+      "itemPrice": "سعر المنتج",
+      "closedAs": "أُغلق كـ",
+      "closedAt": "تاريخ الإغلاق",
+      "shipment": "شحنة الإرجاع",
+      "shippedAt": "تاريخ الشحن",
+      "deliveredAt": "تاريخ التسليم",
+      "markedReceived": "مُعلَّم كمستلَم",
+      "yes": "نعم",
+      "no": "لا",
+      "journey": "مسار الطلب",
+      "journeyEmpty": "لم يسجّل eBay أي خطوة بعد.",
+      "partialRefundOffered": "عُرض رد جزئي بقيمة {{amount}}",
+      "trackingNumber": "رقم التتبع {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "الموافقة على الإرجاع",
+        "mark_received": "تعليم كمستلَم",
+        "issue_refund": "رد المبلغ"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "رد {{amount}}"
+      },
+      "confirm": {
+        "approve": "هل تريد الموافقة على طلب الإرجاع هذا على eBay؟ سيُطلب من المشتري إعادة المنتج.",
+        "mark_received": "هل تريد إبلاغ eBay بوصول المنتج المُعاد؟ افعل ذلك فقط بعد استلامه فعليًا.",
+        "issue_refund": "هل تريد رد {{amount}} إلى المشتري الآن؟ يحوّل eBay المبلغ فور قبوله، ولا يمكن التراجع عن ذلك من هنا."
+      },
+      "done": {
+        "approve": "تمت الموافقة على الإرجاع على eBay.",
+        "mark_received": "تم تعليم المنتج كمستلَم على eBay.",
+        "issue_refund": "تم رد المبلغ على eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "فتح المشتري طلب الإرجاع",
+      "BUYER_PRINT_SHIPPING_LABEL": "طبع المشتري ملصق الشحن",
+      "BUYER_PROVIDE_TRACKING_INFO": "أضاف المشتري رقم تتبع",
+      "BUYER_MARK_RETURN_SHIPPED": "علّم المشتري المنتج كمشحون",
+      "BUYER_ESCALATE": "صعّد المشتري الأمر إلى eBay",
+      "BUYER_CLOSE_RETURN": "أغلق المشتري طلب الإرجاع",
+      "BUYER_SEND_MESSAGE": "أرسل المشتري رسالة",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "قبل المشتري الرد الجزئي",
+      "BUYER_DECLINE_PARTIAL_REFUND": "رفض المشتري الرد الجزئي",
+      "BUYER_MARK_REFUND_RECEIVED": "أكد المشتري وصول المبلغ المسترد",
+      "SELLER_APPROVE_REQUEST": "وافق البائع على الإرجاع",
+      "SELLER_DECLINE_REQUEST": "رفض البائع الإرجاع",
+      "SELLER_ISSUE_REFUND": "رد البائع المبلغ",
+      "SELLER_MARK_AS_RECEIVED": "علّم البائع المنتج كمستلَم",
+      "SELLER_OFFER_PARTIAL_REFUND": "عرض البائع ردًا جزئيًا",
+      "SELLER_PROVIDE_RMA": "قدّم البائع رقم RMA",
+      "SELLER_PROVIDE_LABEL": "قدّم البائع ملصق شحن",
+      "SELLER_SEND_MESSAGE": "أرسل البائع رسالة",
+      "SELLER_ESCALATE": "صعّد البائع الأمر إلى eBay",
+      "SELLER_OFFER_REPLACEMENT": "عرض البائع بديلًا",
+      "SELLER_PROVIDE_TRACKING_INFO": "أضاف البائع رقم تتبع",
+      "SYSTEM_CREATE_RETURN": "فتح eBay طلب الإرجاع",
+      "SYSTEM_CLOSE_RETURN": "أغلق eBay طلب الإرجاع",
+      "SYSTEM_IMMEDIATE_REFUND": "رد eBay المبلغ إلى المشتري فورًا",
+      "SYSTEM_INITIATED_REFUND": "رد eBay المبلغ",
+      "EBAY_RULE_AUTO_APPROVE": "وافق eBay على الإرجاع تلقائيًا",
+      "buyerOther": "خطوة من المشتري",
+      "sellerOther": "خطوة من البائع",
+      "ebayOther": "خطوة من eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "استرداد المبلغ",
+      "REPLACEMENT": "بديل",
+      "EXCHANGE": "استبدال"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "استُرد المبلغ بالكامل",
+      "PARTIAL_REFUNDED": "استُرد المبلغ جزئيًا",
+      "NO_REFUND": "أُغلق دون رد المبلغ",
+      "other": "مُغلق"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "تم التسليم",
+      "IN_TRANSIT": "قيد النقل",
+      "OUT_FOR_DELIVERY": "خرج للتسليم",
+      "NOT_SHIPPED": "لم يُشحن بعد",
+      "SHIPPED": "تم الشحن"
+    },
+    "errors": {
+      "actionsDisabled": "إجراءات الإرجاع داخل التطبيق معطّلة على هذه المنصة. استجب لطلب الإرجاع على eBay.",
+      "actionNotAvailable": "لم يعد eBay يتيح هذا الإجراء لطلب الإرجاع هذا. حدّث الصفحة وتحقق مما هو مطلوب الآن.",
+      "suspended": "اشتراكك موقوف، لذا إجراءات الإرجاع متوقفة. سدّد الفاتورة من صفحة الفوترة.",
+      "ebayRejected": "رفض eBay هذا الإجراء. افتح طلب الإرجاع على eBay لمعرفة السبب.",
+      "unavailable": "تعذّر الوصول إلى eBay. حاول مجددًا بعد قليل.",
+      "sandbox": "إجراءات الإرجاع غير متاحة في بيئة eBay التجريبية.",
+      "refundAmountUnknown": "لم يُبلغ eBay عن مبلغ الرد لطلب الإرجاع هذا، لذا يجب رد المبلغ على eBay.",
+      "notFound": "لم يُعثر على طلب الإرجاع هذا."
     }
   }
 }

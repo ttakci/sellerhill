@@ -2,6 +2,7 @@ import { Button, DataTable, EmptyState, InfoMessage, PageHeader, SearchField, Se
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ReturnDetailDrawer } from '../ReturnDetailDrawer';
 import type { ReturnRowView } from '../returns.types';
 import { ReturnCard } from '../shared/ReturnCard';
 
@@ -27,24 +28,21 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   isInitialLoading,
   onRowOpen,
   onCardKeyDown,
+  selectedReturnId,
+  onCloseDetail,
 }) => {
   const { t } = useTranslation(['returns', 'translation']);
 
   const renderGridCard = (row: ReturnRowView) => (
-    <ReturnCard
-      key={row.id}
-      row={row}
-      onOpen={row.orderId ? () => onRowOpen(row) : undefined}
-      onKeyDown={(event) => onCardKeyDown(event, row)}
-    />
+    <ReturnCard key={row.id} row={row} onOpen={() => onRowOpen(row)} onKeyDown={(event) => onCardKeyDown(event, row)} />
   );
 
   return (
     <S.Container>
       <PageHeader title={t('returns.title')} subtitle={subtitle} />
 
-      {/* Said once, plainly: nothing on this page acts on a return. The seller
-          responds on eBay; this is the queue that says where to look first. */}
+      {/* Said once, plainly: open a return to see its history and act on it;
+          what the app cannot do itself is answered on eBay. */}
       <InfoMessage>{t('returns.notice')}</InfoMessage>
 
       <S.TabsRow>
@@ -121,6 +119,8 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
         pagination={pagination}
         onRowClick={onRowOpen}
       />
+
+      <ReturnDetailDrawer returnId={selectedReturnId} onClose={onCloseDetail} />
     </S.Container>
   );
 };

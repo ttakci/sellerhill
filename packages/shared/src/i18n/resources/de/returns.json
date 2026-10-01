@@ -4,7 +4,7 @@
     "subtitle_one": "{{count}} Rückgabe",
     "subtitle_other": "{{count}} Rückgaben",
     "loading": "Rückgaben werden geladen…",
-    "notice": "Beantworten Sie Rückgaben bei eBay. Diese Seite zeigt, was fällig ist und bis wann.",
+    "notice": "Öffnen Sie eine Rückgabe, um ihren Verlauf zu sehen und worauf eBay wartet. Wo eBay es zulässt, können Sie sie von hier aus genehmigen, als erhalten markieren oder erstatten; alles andere wird bei eBay beantwortet.",
     "tabs": {
       "all": "Alle",
       "action": "Handlungsbedarf",
@@ -60,7 +60,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Dem Käufer den Betrag erstatten (der Artikel wird nicht zurückerwartet)",
       "REMINDER_FOR_RMA": "RMA-Erinnerung: bei eBay antworten",
       "REMINDER_SELLER_TO_RESPOND": "Auf die Rückgabeanfrage antworten",
-      "other": "Bei eBay antworten"
+      "other": "Bei eBay antworten",
+      "SELLER_SEND_MESSAGE": "Dem Käufer eine Nachricht senden",
+      "SELLER_ESCALATE": "An eBay eskalieren",
+      "SELLER_OFFER_REPLACEMENT": "Ersatz anbieten"
     },
     "dueBy": "bis {{date}}",
     "reasonType": {
@@ -89,6 +92,114 @@
       "title": "Keine Rückgaben entsprechen den Filtern",
       "description": "Versuchen Sie einen anderen Tab, Shop oder Suchbegriff.",
       "action": "Filter zurücksetzen"
+    },
+    "detail": {
+      "title": "Rückgabe {{id}}",
+      "titleLoading": "Rückgabe",
+      "open": "Rückgabe öffnen",
+      "loadFailed": "Diese Rückgabe konnte nicht geladen werden",
+      "loadFailedDescription": "Versuchen Sie es gleich noch einmal oder öffnen Sie sie bei eBay.",
+      "offline": "eBay war gerade nicht erreichbar; dies ist der letzte Stand, den SellerHill kennt. Aktionen werden angeboten, sobald eBay wieder antwortet.",
+      "whatYouCanDo": "Was Sie tun können",
+      "nothingToDo": "Bei dieser Rückgabe wartet nichts auf Sie.",
+      "openOnEbay": "Bei eBay öffnen",
+      "alsoOnEbay": "Außerdem bei eBay: {{options}}",
+      "buyer": "Käufer",
+      "quantity": "Menge",
+      "returnType": "Art der Rückgabe",
+      "itemPrice": "Artikelpreis",
+      "closedAs": "Geschlossen als",
+      "closedAt": "Geschlossen am",
+      "shipment": "Rücksendung",
+      "shippedAt": "Versendet",
+      "deliveredAt": "Zugestellt",
+      "markedReceived": "Als erhalten markiert",
+      "yes": "Ja",
+      "no": "Nein",
+      "journey": "Verlauf",
+      "journeyEmpty": "eBay hat noch keinen Schritt aufgezeichnet.",
+      "partialRefundOffered": "Teilerstattung von {{amount}} angeboten",
+      "trackingNumber": "Sendungsnummer {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Rückgabe genehmigen",
+        "mark_received": "Als erhalten markieren",
+        "issue_refund": "Erstatten"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "{{amount}} erstatten"
+      },
+      "confirm": {
+        "approve": "Diesen Rückgabeantrag bei eBay genehmigen? Der Käufer wird gebeten, den Artikel zurückzusenden.",
+        "mark_received": "eBay mitteilen, dass der zurückgesendete Artikel angekommen ist? Tun Sie das erst, wenn Sie ihn in der Hand haben.",
+        "issue_refund": "Dem Käufer jetzt {{amount}} erstatten? eBay überweist das Geld, sobald es dies annimmt; von hier aus lässt es sich nicht rückgängig machen."
+      },
+      "done": {
+        "approve": "Die Rückgabe wurde bei eBay genehmigt.",
+        "mark_received": "Der Artikel wurde bei eBay als erhalten markiert.",
+        "issue_refund": "Die Erstattung wurde bei eBay veranlasst."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Käufer hat die Rückgabe eröffnet",
+      "BUYER_PRINT_SHIPPING_LABEL": "Käufer hat das Versandetikett gedruckt",
+      "BUYER_PROVIDE_TRACKING_INFO": "Käufer hat eine Sendungsnummer hinzugefügt",
+      "BUYER_MARK_RETURN_SHIPPED": "Käufer hat den Artikel als versendet markiert",
+      "BUYER_ESCALATE": "Käufer hat an eBay eskaliert",
+      "BUYER_CLOSE_RETURN": "Käufer hat die Rückgabe geschlossen",
+      "BUYER_SEND_MESSAGE": "Käufer hat eine Nachricht gesendet",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Käufer hat die Teilerstattung angenommen",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Käufer hat die Teilerstattung abgelehnt",
+      "BUYER_MARK_REFUND_RECEIVED": "Käufer hat den Erhalt der Erstattung bestätigt",
+      "SELLER_APPROVE_REQUEST": "Verkäufer hat die Rückgabe genehmigt",
+      "SELLER_DECLINE_REQUEST": "Verkäufer hat die Rückgabe abgelehnt",
+      "SELLER_ISSUE_REFUND": "Verkäufer hat erstattet",
+      "SELLER_MARK_AS_RECEIVED": "Verkäufer hat den Artikel als erhalten markiert",
+      "SELLER_OFFER_PARTIAL_REFUND": "Verkäufer hat eine Teilerstattung angeboten",
+      "SELLER_PROVIDE_RMA": "Verkäufer hat eine RMA-Nummer angegeben",
+      "SELLER_PROVIDE_LABEL": "Verkäufer hat ein Versandetikett bereitgestellt",
+      "SELLER_SEND_MESSAGE": "Verkäufer hat eine Nachricht gesendet",
+      "SELLER_ESCALATE": "Verkäufer hat an eBay eskaliert",
+      "SELLER_OFFER_REPLACEMENT": "Verkäufer hat Ersatz angeboten",
+      "SELLER_PROVIDE_TRACKING_INFO": "Verkäufer hat eine Sendungsnummer hinzugefügt",
+      "SYSTEM_CREATE_RETURN": "eBay hat die Rückgabe eröffnet",
+      "SYSTEM_CLOSE_RETURN": "eBay hat die Rückgabe geschlossen",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay hat den Käufer sofort erstattet",
+      "SYSTEM_INITIATED_REFUND": "eBay hat die Erstattung veranlasst",
+      "EBAY_RULE_AUTO_APPROVE": "eBay hat die Rückgabe automatisch genehmigt",
+      "buyerOther": "Schritt des Käufers",
+      "sellerOther": "Schritt des Verkäufers",
+      "ebayOther": "Schritt von eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Geld zurück",
+      "REPLACEMENT": "Ersatz",
+      "EXCHANGE": "Umtausch"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Vollständig erstattet",
+      "PARTIAL_REFUNDED": "Teilweise erstattet",
+      "NO_REFUND": "Ohne Erstattung geschlossen",
+      "other": "Geschlossen"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Zugestellt",
+      "IN_TRANSIT": "Unterwegs",
+      "OUT_FOR_DELIVERY": "In Zustellung",
+      "NOT_SHIPPED": "Noch nicht versendet",
+      "SHIPPED": "Versendet"
+    },
+    "errors": {
+      "actionsDisabled": "Rückgabe-Aktionen aus der App sind auf dieser Plattform abgeschaltet. Beantworten Sie die Rückgabe bei eBay.",
+      "actionNotAvailable": "eBay bietet diese Aktion bei dieser Rückgabe nicht mehr an. Aktualisieren Sie und prüfen Sie, was jetzt ansteht.",
+      "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Rückgabe-Aktionen pausiert. Begleichen Sie die Rechnung auf der Abrechnungsseite.",
+      "ebayRejected": "eBay hat diese Aktion abgelehnt. Öffnen Sie die Rückgabe bei eBay, um den Grund zu sehen.",
+      "unavailable": "eBay war nicht erreichbar. Versuchen Sie es gleich noch einmal.",
+      "sandbox": "Rückgabe-Aktionen sind in der eBay-Sandbox nicht verfügbar.",
+      "refundAmountUnknown": "eBay hat für diese Rückgabe keinen Erstattungsbetrag gemeldet; die Erstattung muss bei eBay veranlasst werden.",
+      "notFound": "Diese Rückgabe wurde nicht gefunden."
     }
   }
 }
