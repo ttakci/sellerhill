@@ -2,7 +2,7 @@ export interface LinkResult {
   success: boolean;
   message: string;
   linked?: boolean;
-  reason?: 'cost_capture_failed';
+  reason?: 'cost_capture_failed' | 'order_not_found';
 }
 
 export interface LinkAmazonModalProps {

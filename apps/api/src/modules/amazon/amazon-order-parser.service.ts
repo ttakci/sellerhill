@@ -191,6 +191,15 @@ export function resolveTrackingCarrier(trackingNumber: string | undefined, pageT
   return undefined;
 }
 
+/**
+ * True when `visibleText` prints `amazonOrderId` ("Order # 113-1234567-1234567").
+ * An empty id never matches — `''.includes('')` would call every page a proof.
+ */
+export function isOrderIdOnPage(visibleText: string, amazonOrderId: string): boolean {
+  const id = amazonOrderId.trim();
+  return id.length > 0 && visibleText.includes(id);
+}
+
 @Injectable()
 export class AmazonOrderParserService {
   private readonly logger = new Logger(AmazonOrderParserService.name);
@@ -208,8 +217,16 @@ export class AmazonOrderParserService {
     // Extract tracking info
     const tracking = await this.extractTracking(page);
 
+    // VISIBLE text only (see extractTracking) — the id also sits in URLs and
+    // script state of pages that are not this order.
+    const visibleText = await page
+      .locator('body')
+      .innerText()
+      .catch(() => '');
+
     return {
       amazonOrderId,
+      orderIdOnPage: isOrderIdOnPage(visibleText, amazonOrderId),
       orderDate: await this.extractOrderDate(page),
       status: statusText,
       items,
@@ -371,22 +388,31 @@ export class AmazonOrderParserService {
    * Tracking extraction is separate and unaffected.
    */
   private async extractFinancials(page: Page): Promise<AmazonFinancials> {
-    // Financial summary is in an order-summary or payment-breakdown section
-    const summarySection = page.locator('#orderSummary, .payment-breakdown, [data-component="orderSummary"]').first();
+    // `#od-subtotals` first: on the live order-details page (captured
+    // 2026-10-01, `__fixtures__/checkout/order-details.html`) it holds the five
+    // cost lines and nothing else. The wider `[data-component="orderSummary"]`
+    // block around it also carries the ship-to address, the payment widget and
+    // that widget's inline <style>/<script> text, so it is the fallback only.
+    const candidates = ['#od-subtotals', '#orderSummary, .payment-breakdown, [data-component="orderSummary"]'];
 
-    if (
-      !(await summarySection
-        .first()
+    for (const selector of candidates) {
+      const section = page.locator(selector).first();
+      const visible = await section
         .waitFor({ state: 'visible', timeout: 3000 })
         .then(() => true)
-        .catch(() => false))
-    ) {
-      this.logger.warn('Could not find order summary section');
-      return { ok: false };
+        .catch(() => false);
+      if (!visible) {
+        continue;
+      }
+      const text = (await section.textContent().catch(() => '')) ?? '';
+      const financials = this.parseFinancialsFromText(text);
+      if (financials.ok) {
+        return financials;
+      }
     }
 
-    const text = (await summarySection.textContent().catch(() => '')) ?? '';
-    return this.parseFinancialsFromText(text);
+    this.logger.warn('Could not read the order summary section');
+    return { ok: false };
   }
 
   /**
