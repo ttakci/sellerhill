@@ -1479,7 +1479,7 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: cancelled,
-      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}`,
+      actionPath: `/orders?stage=${OrderStage.AMAZON_CANCELLED}&tracking=all`,
     },
     blocked.length > 0 && {
       key: ActionCenterItemKey.ORDER_FULFILLMENT_BLOCKED,
@@ -1490,14 +1490,14 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
         { code: AutoFulfillBlockedReason.CAP, count: 1 },
         { code: AutoFulfillBlockedReason.OUT_OF_STOCK, count: 1 },
       ],
-      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}`,
+      actionPath: `/orders?stage=${OrderStage.PURCHASE_BLOCKED}&tracking=all`,
     },
     held > 0 && {
       key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
       group: ActionCenterGroup.ORDERS,
       severity: ActionCenterSeverity.CRITICAL,
       count: held,
-      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}`,
+      actionPath: `/orders?stage=${OrderStage.TRACKING_HELD}&tracking=all`,
     },
     untracked > 0 && {
       key: ActionCenterItemKey.ORDER_UNTRACKED,

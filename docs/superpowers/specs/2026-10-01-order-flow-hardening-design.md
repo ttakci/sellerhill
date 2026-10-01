@@ -379,6 +379,13 @@ cancel-request shape (only `NONE_REQUESTED` and `CANCELED` have been observed)
 and the fulfillment list on a real shipped order. Both fail towards not
 buying / not pushing twice.
 
+Checked read-only on production after the deploy (2026-10-01): `getOrder`
+returns `cancelStatus: { cancelState: "NONE_REQUESTED", cancelRequests: [] }`
+and a `shipByDate`; `getShippingFulfillments` answers HTTP 200 with an empty
+list for an unshipped order and one entry naming the order line item for a
+shipped one. An open cancel request, and a full shipped transition behind the
+new read, are still to be seen.
+
 ## Review findings folded in (2026-10-01)
 
 An independent review of the implementation found, and this design now
