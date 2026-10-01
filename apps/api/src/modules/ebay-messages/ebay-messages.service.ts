@@ -9,6 +9,7 @@ import {
   EbayConversationThreadDto,
   EbayConversationType,
   EbaySendMessageResultDto,
+  EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
   PaginatedConversationsDto,
   hasMessagingScopes,
@@ -59,6 +60,12 @@ interface UnreadAccountRow {
   message_subscription_id: string | null;
 }
 
+interface ListingImageRow {
+  ebay_item_id: string | null;
+  /** JSONB array (already parsed by pg); a legacy row may hold a JSON string. */
+  image_urls: string[] | string | null;
+}
+
 export interface ThreadQuery {
   ebayAccountId: string;
   type: EbayConversationType;
@@ -101,12 +108,51 @@ export class EbayMessagesService {
         EbayCallPriority.INTERACTIVE
       )
     );
+    const images = await this.loadListingImages(
+      q.ebayAccountId,
+      result.items.map((item) => item.referenceId)
+    );
     return {
-      items: result.items.map((item) => ({ ...item, otherPartyUsername: resolveOtherParty(item, account) })),
+      items: result.items.map((item) => ({
+        ...item,
+        otherPartyUsername: resolveOtherParty(item, account),
+        imageUrl: item.referenceId ? (images.get(item.referenceId) ?? null) : null,
+      })),
       total: result.total,
       page: q.page,
       limit: q.limit,
     };
+  }
+
+  /**
+   * Photos for the conversations on one page: eBay names the item a thread is
+   * about (`referenceId` = item id), and the store's own listings know that
+   * item's product. Fail-soft — a missing picture only leaves the avatar.
+   */
+  private async loadListingImages(ebayAccountId: string, referenceIds: Array<string | null>): Promise<Map<string, string>> {
+    const ids = [...new Set(referenceIds.filter((id): id is string => !!id))];
+    const images = new Map<string, string>();
+    if (ids.length === 0) {
+      return images;
+    }
+    try {
+      const rows = await this.db.query<ListingImageRow>(
+        `SELECT l.ebay_item_id, p.image_urls
+           FROM listings l
+           JOIN products p ON p.id = l.product_id
+          WHERE l.ebay_account_id = $1 AND l.ebay_item_id = ANY($2::text[])`,
+        [ebayAccountId, ids]
+      );
+      for (const row of rows) {
+        const url = firstImageUrl(row.image_urls);
+        if (row.ebay_item_id && url) {
+          images.set(row.ebay_item_id, url);
+        }
+      }
+    } catch (error: unknown) {
+      this.logger.warn(`Conversation images unavailable for eBay account ${ebayAccountId}: ${errorText(error)}`);
+    }
+    return images;
   }
 
   async getThread(userId: string, conversationId: string, q: ThreadQuery): Promise<EbayConversationThreadDto> {
@@ -230,9 +276,25 @@ export class EbayMessagesService {
     ebayAccountId: string,
     priority: EbayCallPriority = EbayCallPriority.INTERACTIVE
   ): Promise<number> {
+    return (await this.unreadBreakdown(userId, ebayAccountId, priority)).total;
+  }
+
+  /**
+   * The same recount, kept per conversation type — the folder rail shows
+   * "N unread" beside each type. It also stores the sum, so the sidebar badge
+   * is corrected by the same two eBay calls.
+   */
+  async unreadBreakdown(
+    userId: string,
+    ebayAccountId: string,
+    priority: EbayCallPriority = EbayCallPriority.INTERACTIVE
+  ): Promise<EbayUnreadBreakdownDto> {
     const account = await this.loadAccount(userId, ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(ebayAccountId);
-    let unread = 0;
+    const counts: Record<EbayConversationType, number> = {
+      [EbayConversationType.FROM_MEMBERS]: 0,
+      [EbayConversationType.FROM_EBAY]: 0,
+    };
     for (const type of [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY]) {
       const result = await this.call(account, () =>
         this.client.getConversations(
@@ -241,13 +303,18 @@ export class EbayMessagesService {
           priority
         )
       );
-      unread += result.total;
+      counts[type] = result.total;
     }
+    const total = counts[EbayConversationType.FROM_MEMBERS] + counts[EbayConversationType.FROM_EBAY];
     await this.db.query(
       'UPDATE ebay_accounts SET unread_message_count = $1, unread_message_synced_at = NOW() WHERE id = $2',
-      [unread, ebayAccountId]
+      [total, ebayAccountId]
     );
-    return unread;
+    return {
+      total,
+      members: counts[EbayConversationType.FROM_MEMBERS],
+      ebay: counts[EbayConversationType.FROM_EBAY],
+    };
   }
 
   /** Ownership (ACTIVE + this user's) and the messaging scopes, in one read. */
@@ -315,6 +382,20 @@ function resolveOtherParty(item: EbayConversationDto, account: MessagingAccountR
     return sender;
   }
   return latest.recipientUsername || null;
+}
+
+/** First photo of `products.image_urls`, tolerating a legacy JSON-string row. */
+function firstImageUrl(raw: string[] | string | null): string | null {
+  let urls: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      urls = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  const first: unknown = Array.isArray(urls) ? urls[0] : null;
+  return typeof first === 'string' && first !== '' ? first : null;
 }
 
 function isStale(syncedAt: Date | null): boolean {

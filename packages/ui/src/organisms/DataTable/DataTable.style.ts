@@ -125,27 +125,53 @@ export const SkeletonRow = styled.div`
   }
 `;
 
-/* Grid-mode skeleton card — generic thumbnail + text-line shape. Sits inside
-   the same GridContainer as real cards, so it inherits the exact column
-   count/track width the real grid would use for this page. */
+/* Grid-mode skeleton card — the shape of the app's list cards (a title line,
+   a thumbnail beside a few text lines, a footer strip of stats), so the grid
+   does not change height when the real cards arrive. Sits inside the same
+   GridContainer as real cards, so it inherits the exact column count/track
+   width the real grid would use for this page. */
 export const SkeletonGridCard = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.md')};
+  flex-direction: column;
   background: ${tkn('colors.surface.primary')};
   border-radius: ${tkn('radius.lg')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   box-shadow: ${tkn('shadows.sm')};
-  min-height: 6rem;
+  overflow: hidden;
+`;
+
+export const SkeletonGridCardHeader = styled.div`
+  padding: ${tkn('spacing.md')} ${tkn('spacing.md')} 0;
+`;
+
+export const SkeletonGridCardMain = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')};
 `;
 
 export const SkeletonGridCardBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
   flex: 1;
   min-width: 0;
+`;
+
+export const SkeletonGridCardFooter = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.secondary')};
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+export const SkeletonGridCardStat = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const ColumnManagerContent = styled.div`

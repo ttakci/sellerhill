@@ -155,6 +155,7 @@ export function mapConversation(raw: unknown): EbayConversationDto | null {
     createdAt: asString(raw.createdDate),
     latestMessage: mapMessage(raw.latestMessage),
     otherPartyUsername: null,
+    imageUrl: null,
   };
 }
 

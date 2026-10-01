@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type {
   EbayConversationThreadDto,
   EbaySendMessageResultDto,
+  EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
   PaginatedConversationsDto,
 } from '@repo/shared';
@@ -68,6 +69,19 @@ export class EbayMessagesController {
   async unread(@Request() req: AuthedRequest): Promise<EbayUnreadCountDto> {
     try {
       return await this.messages.unreadCount(req.user.sub);
+    } catch (error: unknown) {
+      rethrowMessagingError(error);
+    }
+  }
+
+  @Get('unread-breakdown')
+  @ApiOperation({ summary: 'One store’s unread conversations, counted from eBay and split by type' })
+  async unreadBreakdown(
+    @Request() req: AuthedRequest,
+    @Query() q: EbayRefreshUnreadDto
+  ): Promise<EbayUnreadBreakdownDto> {
+    try {
+      return await this.messages.unreadBreakdown(req.user.sub, q.ebayAccountId);
     } catch (error: unknown) {
       rethrowMessagingError(error);
     }

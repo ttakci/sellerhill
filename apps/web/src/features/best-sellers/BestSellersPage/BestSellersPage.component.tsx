@@ -41,6 +41,9 @@ const GRID_MAX_COLUMNS = 2;
 
 const EMPTY_VALUE = '—';
 
+/** Placeholder cards while a list loads — enough to fill a screen, far fewer than the 50 that arrive. */
+const SKELETON_CARD_COUNT = 10;
+
 export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   viewState,
   items,
@@ -258,22 +261,15 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   };
 
   /**
-   * One `EmptyState` for every non-grid situation, first load included, so
-   * loading, empty and each refusal read as the same screen. It sits inside
+   * One `EmptyState` for every non-grid situation, so empty and each refusal
+   * read as the same screen. (The first load is not one of them: it is the
+   * table's own skeleton grid — see `loading` below.) It sits inside
    * the DataTable's own empty slot when the toolbar still applies (the seller
    * can switch list or category out of a refused one), and on its own card
    * when the feature is switched off altogether.
    */
   const renderState = () => {
     switch (viewState) {
-      case BestSellersViewState.LOADING:
-        return (
-          <EmptyState
-            icon="loader"
-            title={t('bestSellers.states.loading.title')}
-            description={t('bestSellers.states.loading.description')}
-          />
-        );
       case BestSellersViewState.NO_MATCHES:
         return (
           <EmptyState
@@ -526,6 +522,8 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
               onSelectionChange={onSelectionChange}
               isRowSelectable={isRowSelectable}
               emptyContent={renderState()}
+              loading={viewState === BestSellersViewState.LOADING}
+              skeletonCount={SKELETON_CARD_COUNT}
               pagination={isReady ? pagination : undefined}
             />
 

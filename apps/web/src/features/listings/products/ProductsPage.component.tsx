@@ -73,14 +73,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
         data={products}
         renderGridCard={renderGridCard}
         emptyContent={
-          isLoading ? (
-            <EmptyState
-              icon="loader"
-              title={t('listings.empty.loadingTitle')}
-              description={t('listings.empty.loadingSubtitle')}
-              size="md"
-            />
-          ) : search.trim() ? (
+          search.trim() ? (
             <EmptyState
               icon="search"
               title={t('listings.empty.filtersTitle')}
@@ -98,6 +91,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
             />
           )
         }
+        loading={isLoading}
         onDownload={onDownload}
         pagination={pagination}
       />

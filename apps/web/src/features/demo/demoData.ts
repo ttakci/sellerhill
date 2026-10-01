@@ -30,6 +30,7 @@ import {
   EbayReturnAction,
   EbayReturnReasonType,
   EbayReturnSellerActivity,
+  EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
   EntitlementState,
   ListingFailureCode,
@@ -2021,6 +2022,7 @@ export const DEMO_CONVERSATIONS: EbayConversationDto[] = CONVERSATION_SEEDS.map(
     createdAt: seed.messages[0]?.createdAt ?? isoDaysAgo(1),
     latestMessage,
     otherPartyUsername: seed.otherPartyUsername,
+    imageUrl: DEMO_LISTINGS.find((l) => l.ebayListingId === seed.referenceId)?.imageUrls[0] ?? null,
   } satisfies EbayConversationDto;
 });
 
@@ -2040,6 +2042,15 @@ export function demoThread(conversationId: string): EbayConversationThreadDto | 
     page: 1,
     limit: seed.messages.length,
   };
+}
+
+/** `GET /ebay/messages/unread-breakdown` — the folder rail's per-type counts, from the fixtures above. */
+export function buildDemoUnreadBreakdown(): EbayUnreadBreakdownDto {
+  const count = (type: EbayConversationType): number =>
+    DEMO_CONVERSATIONS.filter((c) => c.type === type).reduce((sum, c) => sum + c.unreadCount, 0);
+  const members = count(EbayConversationType.FROM_MEMBERS);
+  const ebay = count(EbayConversationType.FROM_EBAY);
+  return { total: members + ebay, members, ebay };
 }
 
 /** `GET /ebay/messages/unread-count` — the sidebar badge, summed from the fixtures above. */

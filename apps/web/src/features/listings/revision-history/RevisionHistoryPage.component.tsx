@@ -236,16 +236,6 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
   };
 
   const emptyState = (() => {
-    if (isInitialLoading) {
-      return (
-        <EmptyState
-          icon="loader"
-          title={t('translation:common.loading')}
-          description={t('listings.revisionHistory.subtitle')}
-          size="md"
-        />
-      );
-    }
     if (isFilterEmpty) {
       return (
         <EmptyState
@@ -320,6 +310,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
         defaultViewMode="grid"
         hideViewToggle={isEmpty || isInitialLoading}
         emptyContent={emptyState}
+        loading={isInitialLoading}
         emptyMessage={t('listings.revisionHistory.empty')}
         pagination={pagination}
         onRowClick={onRowClick}

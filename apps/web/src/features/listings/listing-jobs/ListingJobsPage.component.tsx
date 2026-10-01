@@ -125,16 +125,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   };
 
   const emptyState = (() => {
-    if (isInitialLoading) {
-      return (
-        <EmptyState
-          icon="loader"
-          title={t('listings.jobs.emptyLoading')}
-          description={t('listings.jobs.subtitle')}
-          size="md"
-        />
-      );
-    }
     if (isFilterEmpty) {
       return (
         <EmptyState
@@ -223,6 +213,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
         defaultViewMode="grid"
         hideViewToggle={isEmpty || isInitialLoading}
         emptyContent={emptyState}
+        loading={isInitialLoading}
         emptyMessage={t('listings.jobs.empty')}
         onDownload={isEmpty || isInitialLoading ? undefined : onDownload}
         pagination={pagination}

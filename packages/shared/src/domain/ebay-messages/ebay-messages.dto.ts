@@ -34,6 +34,12 @@ export interface EbayConversationDto {
   createdAt: string;
   latestMessage: EbayMessageDto | null;
   otherPartyUsername: string | null;
+  /**
+   * First photo of the listing the conversation is about, resolved from our
+   * own listings (`referenceId` = eBay item id). `null` when the item is not
+   * one of the store's tracked listings, or the thread has no item at all.
+   */
+  imageUrl: string | null;
 }
 
 /** `GET .../conversations` — server-paginated, per the codebase's list-endpoint rule. */
@@ -60,6 +66,18 @@ export interface EbayConversationThreadDto {
 export interface EbayUnreadCountDto {
   total: number;
   byAccount: Array<{ ebayAccountId: string; unread: number }>;
+}
+
+/**
+ * `GET .../unread-breakdown` — one store's unread conversations counted live
+ * from eBay, split by conversation type. Feeds the folder rail's counts.
+ */
+export interface EbayUnreadBreakdownDto {
+  total: number;
+  /** FROM_MEMBERS — buyer↔seller threads. */
+  members: number;
+  /** FROM_EBAY — eBay system notices. */
+  ebay: number;
 }
 
 /** Result of sending a reply. */

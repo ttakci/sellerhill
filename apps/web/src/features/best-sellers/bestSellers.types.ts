@@ -2,7 +2,7 @@
  * Best Sellers feature-wide types (shared by the page and its hooks).
  */
 
-import type { BestSellersBrowseAllowanceDto, BestSellersCategoryDto, BestSellersListType } from '@repo/shared';
+import type { BestSellersBrowseAllowanceDto, BestSellersListType } from '@repo/shared';
 
 /** URL-backed browse position: which list, which category, which of the two pages. */
 export interface BestSellersUrlState {
@@ -38,23 +38,35 @@ export interface BestSellersSelection {
 }
 
 /**
- * The client-side category tree cache (`useBestSellersCategoryTree`). Amazon's
- * alias grammar caps a category at two segments — a department, or one
- * sub-category under it — so this is a two-level tree: departments at the
- * root, each one's own sub-categories revealed once the seller has visited it.
+ * One known node of the category tree. Amazon's alias is always
+ * `<department>` or `<department>/<nodeId>`, but the node id can sit at ANY
+ * depth under that department, so the tree is a real tree: each answer tells
+ * us the chain above the browsed node, the node itself and its children.
+ */
+export interface BestSellersCategoryNode {
+  name: string;
+  /** Path of the parent node; `null` for a department (a child of the root). */
+  parent: string | null;
+  /** Child paths once this node has been visited; `undefined` while never fetched. */
+  children: string[] | undefined;
+}
+
+/**
+ * The client-side category tree cache (`useBestSellersCategoryTree`), one per
+ * list type — Movers & Shakers does not carry the same departments as Best
+ * Sellers.
  */
 export interface BestSellersCategoryTreeListTypeBucket {
-  departments: BestSellersCategoryDto[];
-  childrenByDepartment: Record<string, BestSellersCategoryDto[]>;
+  /** Department paths (the root's children); `undefined` until the root answer or its fallback fetch arrived. */
+  rootChildren: string[] | undefined;
+  nodes: Record<string, BestSellersCategoryNode>;
 }
 
 export interface BestSellersCategoryTreeState {
-  /** Root-level departments for the active list type, once seen (empty until then). */
-  departments: BestSellersCategoryDto[];
-  /** A department's own sub-categories, once visited; `undefined` if never fetched. */
-  childrenOf: (departmentPath: string) => BestSellersCategoryDto[] | undefined;
-  isExpanded: (departmentPath: string) => boolean;
-  toggleExpanded: (departmentPath: string) => void;
+  bucket: BestSellersCategoryTreeListTypeBucket;
+  /** Whether a node's children are shown (open by default along the active chain). */
+  isExpanded: (path: string) => boolean;
+  toggleExpanded: (path: string) => void;
 }
 
 /** What the page shows instead of (or around) the product grid. */

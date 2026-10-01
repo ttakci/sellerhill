@@ -58,6 +58,7 @@ const conversation = (over: Partial<EbayConversationDto> = {}): EbayConversation
   createdAt: '2026-09-29T00:00:00.000Z',
   latestMessage: message(),
   otherPartyUsername: null,
+  imageUrl: null,
   ...over,
 });
 
@@ -152,6 +153,80 @@ describe('EbayMessagesService', () => {
       expect(result.page).toBe(3);
       expect(result.limit).toBe(10);
       expect(result.items.map((i) => i.otherPartyUsername)).toEqual(['buyer_a', 'buyer_b', 'buyer_c', null]);
+    });
+
+    it('attaches the first listing photo to a conversation about one of the store listings', async () => {
+      const { service, db, client } = build();
+      db.query.mockImplementation((sql: string) => {
+        if (/FROM ebay_accounts\s+WHERE id = \$1 AND user_id = \$2/.test(sql)) {
+          return Promise.resolve([accountRow()]);
+        }
+        if (/FROM listings l/.test(sql)) {
+          return Promise.resolve([{ ebay_item_id: '111', image_urls: ['https://img/1.jpg', 'https://img/2.jpg'] }]);
+        }
+        return Promise.resolve([]);
+      });
+      client.getConversations.mockResolvedValue({
+        items: [
+          conversation({ conversationId: 'a', referenceId: '111' }),
+          conversation({ conversationId: 'b', referenceId: '222' }),
+          conversation({ conversationId: 'c', referenceId: null }),
+        ],
+        total: 3,
+      });
+
+      const result = await service.listConversations(USER, {
+        ebayAccountId: ACCOUNT,
+        type: EbayConversationType.FROM_MEMBERS,
+        page: 1,
+        limit: 25,
+      });
+
+      expect(result.items.map((i) => i.imageUrl)).toEqual(['https://img/1.jpg', null, null]);
+      const [, params] = db.query.mock.calls.find(([sql]) => /FROM listings l/.test(sql as string)) as [string, unknown[]];
+      expect(params).toEqual([ACCOUNT, ['111', '222']]);
+    });
+
+    it('still lists the conversations when the photo lookup fails', async () => {
+      const { service, db, client } = build();
+      db.query.mockImplementation((sql: string) => {
+        if (/FROM ebay_accounts\s+WHERE id = \$1 AND user_id = \$2/.test(sql)) {
+          return Promise.resolve([accountRow()]);
+        }
+        return Promise.reject(new Error('db down'));
+      });
+      client.getConversations.mockResolvedValue({
+        items: [conversation({ conversationId: 'a', referenceId: '111' })],
+        total: 1,
+      });
+
+      const result = await service.listConversations(USER, {
+        ebayAccountId: ACCOUNT,
+        type: EbayConversationType.FROM_MEMBERS,
+        page: 1,
+        limit: 25,
+      });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].imageUrl).toBeNull();
+    });
+  });
+
+  describe('unreadBreakdown', () => {
+    it('counts each conversation type from eBay and stores the sum for the sidebar badge', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.getConversations
+        .mockResolvedValueOnce({ items: [], total: 7 })
+        .mockResolvedValueOnce({ items: [], total: 3 });
+
+      const result = await service.unreadBreakdown(USER, ACCOUNT);
+
+      expect(result).toEqual({ total: 10, members: 7, ebay: 3 });
+      const types = (client.getConversations.mock.calls as unknown[][]).map((call) => (call[1] as { type: string }).type);
+      expect(types).toEqual([EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY]);
+      const update = db.query.mock.calls.find(([sql]) => /UPDATE ebay_accounts/.test(sql as string)) as [string, unknown[]];
+      expect(update[1]).toEqual([10, ACCOUNT]);
     });
   });
 
