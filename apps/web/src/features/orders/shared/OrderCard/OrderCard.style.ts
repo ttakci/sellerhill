@@ -46,20 +46,40 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
 `;
 
 /**
- * The card body: the title first, across the whole width, then the facts on
- * the left with the photo at rest on the right (2026-10-01, see CLAUDE.md
- * "Card anatomy"). Everything textual shares ONE left axis, so a grid of
- * cards scans as a column; the photo is the terminal anchor, not the thing
- * that indents every line after it. There is no stacking breakpoint: on a
- * phone the photo simply gets smaller.
+ * The card body (2026-10-01, the operator's final anatomy): the title row
+ * first — title on the left, one line, cut with an ellipsis (the full text is
+ * on the tooltip), the stage and its chips on the RIGHT of the same row —
+ * then the photo on the LEFT with the facts beside it, then the figures row.
+ * No stacking breakpoint: on a phone the photo gets smaller and the badges
+ * may wrap under the title, still right-aligned.
  */
 export const Top = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
+`;
+
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+/** Block host for the tooltip so the one-line title can shrink and truncate. */
+export const TitleSlot = styled.div`
+  display: flex;
+  flex: 1 1 12rem;
+  min-width: 0;
+
+  & > * {
+    min-width: 0;
+    max-width: 100%;
+  }
 `;
 
 export const Body = styled.div`
@@ -104,20 +124,24 @@ export const Content = styled.div`
   flex: 1;
 `;
 
+/** One line, ellipsis — the full title is on the tooltip. */
 export const Title = styled(Text)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 `;
 
-/** The stage badge and the one-line chips that qualify it, on one wrapping row. */
+/** The stage badge and the chips that qualify it, pinned to the title row's right edge. */
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: ${tkn('spacing.xs')};
+  margin-left: auto;
+  flex: 0 1 auto;
 `;
 
 /** Label / value pairs, no icons — the label column is the only ornament. */
