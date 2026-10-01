@@ -86,7 +86,11 @@ export class AmazonOrderSyncProcessor extends WorkerHost {
           'sync-account',
           stampCurrentCorrelation({ accountId: account.id }),
           {
-            jobId: `acct-${account.id}`,
+            // Deduplication, never a fixed jobId: BullMQ silently drops an add
+            // whose jobId a KEPT completed job still holds, and with
+            // removeOnComplete keeping the last 100 a one-account install never
+            // synced again after its first run (2026-09-23 → 2026-10-01).
+            deduplication: { id: `acct-${account.id}` },
             attempts: 3,
             backoff: { type: 'exponential', delay: 60_000 },
             removeOnComplete: 100,

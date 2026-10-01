@@ -25,16 +25,18 @@ export class AmazonOrderSyncQueueService {
   ) {}
 
   /**
-   * Enqueue a per-account sync job. `jobId` is bucketed per account so a
-   * burst (manual + scheduled) collapses to one in-flight job per account —
-   * BullMQ dedupes by jobId until the job completes.
+   * Enqueue a per-account sync job. A burst (manual + scheduled) collapses to
+   * one waiting/active job per account through BullMQ deduplication, which
+   * releases the id once the job finishes. Never a fixed `jobId`: BullMQ drops
+   * an add whose id a kept completed job still holds — that stopped this queue
+   * for a week (see the processor).
    */
   async enqueueAccount(accountId: string): Promise<void> {
     await this.queue.add(
       'sync-account',
       stampCurrentCorrelation({ accountId }),
       {
-        jobId: `acct-${accountId}`,
+        deduplication: { id: `acct-${accountId}` },
         removeOnComplete: 100,
         attempts: 3,
         backoff: { type: 'exponential', delay: 60_000 },
