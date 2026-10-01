@@ -351,6 +351,40 @@
       "columnStage": "Статус",
       "columnMeaning": "Що це означає",
       "columnAction": "Що робити вам"
+    },
+    "timeline": {
+      "title": "Перебіг замовлення",
+      "step": {
+        "received": "Замовлення отримано",
+        "purchase": "Покупка на Amazon",
+        "amazon_shipped": "Відправлено Amazon",
+        "ebay_tracking": "Трекінг на eBay",
+        "delivered": "Доставлено",
+        "sale_cancelled": "Продаж скасовано на eBay",
+        "message_order_received": "Повідомлення про отримання замовлення",
+        "message_shipped": "Повідомлення про відправку",
+        "message_delivered": "Повідомлення про доставку",
+        "message_feedback_request": "Прохання про відгук"
+      },
+      "note": {
+        "received": "Замовлення надійшло з eBay.",
+        "bought_auto": "Автоматичне замовлення купило товар на Amazon.",
+        "bought_linked": "До цього продажу прив'язано замовлення Amazon.",
+        "purchase_not_recorded": "У SellerHill немає замовлення Amazon для цього продажу.",
+        "amazon_shipped": "Amazon передав посилку перевізнику.",
+        "waiting_shipment": "Очікується відправка з боку Amazon. Замовлення перевіряється через регулярні проміжки.",
+        "shipment_not_observed": "SellerHill не відстежував відправку Amazon за цим продажем.",
+        "upcoming_shipment": "З'явиться тут, коли Amazon відправить посилку.",
+        "tracking_pushed": "Трек-номер передано на eBay; покупець може відстежувати посилку.",
+        "tracking_not_by_us": "Трек-номер за цим продажем надіслав не SellerHill.",
+        "upcoming_tracking": "Буде передано на eBay, коли Amazon відправить посилку.",
+        "delivered": "Amazon повідомляє, що посилку доставлено.",
+        "waiting_delivery": "Очікується доставка. Замовлення перевіряється через регулярні проміжки.",
+        "delivery_not_tracked": "SellerHill не відстежує доставку за цим продажем.",
+        "upcoming_delivery": "З'явиться тут, коли посилку буде доставлено.",
+        "message_sent": "Надіслано покупцеві.",
+        "message_failed": "Не вдалося надіслати."
+      }
     }
   }
 }

@@ -351,6 +351,40 @@
       "columnStage": "Estado",
       "columnMeaning": "Qué significa",
       "columnAction": "Qué haces tú"
+    },
+    "timeline": {
+      "title": "Cómo va este pedido",
+      "step": {
+        "received": "Pedido recibido",
+        "purchase": "Compra en Amazon",
+        "amazon_shipped": "Enviado por Amazon",
+        "ebay_tracking": "Rastreo en eBay",
+        "delivered": "Entregado",
+        "sale_cancelled": "Venta cancelada en eBay",
+        "message_order_received": "Mensaje de pedido recibido",
+        "message_shipped": "Mensaje de envío",
+        "message_delivered": "Mensaje de entrega",
+        "message_feedback_request": "Solicitud de valoración"
+      },
+      "note": {
+        "received": "El pedido llegó de eBay.",
+        "bought_auto": "El pedido automático compró el artículo en Amazon.",
+        "bought_linked": "Hay un pedido de Amazon vinculado a esta venta.",
+        "purchase_not_recorded": "SellerHill no tiene un pedido de Amazon para esta venta.",
+        "amazon_shipped": "Amazon entregó el paquete al transportista.",
+        "waiting_shipment": "Esperando que Amazon lo envíe. El pedido se revisa a intervalos regulares.",
+        "shipment_not_observed": "SellerHill no siguió un envío de Amazon para esta venta.",
+        "upcoming_shipment": "Aparece aquí cuando Amazon envía el paquete.",
+        "tracking_pushed": "El número de rastreo se envió a eBay; tu comprador puede seguir el paquete.",
+        "tracking_not_by_us": "SellerHill no envió el número de rastreo de esta venta.",
+        "upcoming_tracking": "Se envía a eBay cuando Amazon envía el paquete.",
+        "delivered": "Amazon informa que el paquete fue entregado.",
+        "waiting_delivery": "Esperando la entrega. El pedido se revisa a intervalos regulares.",
+        "delivery_not_tracked": "SellerHill no sigue la entrega de esta venta.",
+        "upcoming_delivery": "Aparece aquí cuando el paquete se entrega.",
+        "message_sent": "Enviado al comprador.",
+        "message_failed": "No se pudo enviar."
+      }
     }
   }
 }

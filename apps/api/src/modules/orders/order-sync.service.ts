@@ -44,7 +44,12 @@ import { StoreSettingsService } from '../store-settings/store-settings.service';
 import { AutoFulfillEventLog } from './auto-fulfill-event-log.service';
 import { AutoFulfillQueueService } from './auto-fulfill-queue.service';
 import { EBAY_GET_ORDERS_MAX_LIMIT, EbayFulfillmentService } from './ebay-fulfillment.service';
-import { buildSyncedStatusSql, decideIngest, mergeSyncedOrderStatus } from './ebay-order-changes';
+import {
+  buildSyncedStatusSql,
+  decideIngest,
+  initialAutoFulfillStatus,
+  mergeSyncedOrderStatus,
+} from './ebay-order-changes';
 import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
@@ -304,7 +309,14 @@ export class OrderSyncService {
             listingOverPlanLimit,
             lineItem?.legacyItemId ?? null,
             lineItem?.lineItemId ?? null,
-            ingest.mayInsert
+            ingest.mayInsert,
+            // What a NEW row starts as: `pending` only when the purchase gate
+            // below is about to run for it (see `initialAutoFulfillStatus`).
+            initialAutoFulfillStatus({
+              freshIfInserted: ingest.isFreshSale(true),
+              hasListing: !!listingId,
+              quantity: entity.quantity,
+            })
           );
           // An order from before the store was connected that we never held:
           // not ours to record (see `decideIngest`).
@@ -375,6 +387,7 @@ export class OrderSyncService {
             } catch (err) {
               const msg = err instanceof Error ? err.message : String(err);
               this.logger.warn(`Auto-fulfill enqueue skipped for ${entity.ebayOrderId}: ${msg}`);
+              await this.failStrandedAutoFulfill(entity.userId, entity.ebayOrderId);
             }
           }
 
@@ -531,7 +544,8 @@ export class OrderSyncService {
     listingOverPlanLimit = false,
     ebayLegacyItemId: string | null = null,
     ebayLineItemId: string | null = null,
-    mayInsert = true
+    mayInsert = true,
+    initialAutoStatus: AutoFulfillStatus = AutoFulfillStatus.SKIPPED
   ): Promise<{ id: string; inserted: boolean; skipped?: boolean }> {
     // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
     // the seller's payout (partial refund, adjusted shipping, etc.). When the
@@ -565,7 +579,8 @@ export class OrderSyncService {
         ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
         listing_over_plan_limit, ebay_legacy_item_id, ebay_line_item_id,
         ebay_cancel_state, ebay_cancelled_at, ebay_refunded_amount, ebay_refunded_at,
-        ebay_line_item_count, ebay_ship_by_date
+        ebay_line_item_count, ebay_ship_by_date,
+        auto_fulfill_status
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
@@ -576,7 +591,8 @@ export class OrderSyncService {
         $27, $28, $29,
         $30, $31, $32,
         $33, $34, $35, $36,
-        $37, $38
+        $37, $38,
+        $39::auto_fulfill_status
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         -- Never a bare EXCLUDED.status: an order is re-read every time eBay
@@ -670,6 +686,9 @@ export class OrderSyncService {
         entity.ebayRefundedAt ? entity.ebayRefundedAt.toISOString() : null,
         entity.lineItemCount > 0 ? entity.lineItemCount : null,
         entity.shipByDate ? entity.shipByDate.toISOString() : null,
+        // INSERT only, like listing_id: what automation does with the order
+        // afterwards is written by the paths that do it, never by a re-sync.
+        initialAutoStatus,
       ]
     );
 
@@ -843,9 +862,10 @@ export class OrderSyncService {
    *  5. Stamp `last_used_at` on the picked account so the next order rotates.
    *  6. Enqueue one BullMQ job (deduped per eBay order id).
    *
-   * Note: `auto_fulfill_status` defaults to `pending` on order insert
-   * (migration 038), so the enqueued path leaves the row at `pending` for the
-   * processor (Task 8) to pick up. Only the skip paths write `skipped` here.
+   * Note: a row reaching this method was INSERTED at `pending`
+   * (`initialAutoFulfillStatus`), so the enqueued path leaves it there for the
+   * processor to pick up. Only the skip paths write `skipped` here; a row the
+   * gate never reaches (untracked, stale, zero quantity) starts at `skipped`.
    */
   private async maybeEnqueueAutoFulfill(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
@@ -1692,6 +1712,32 @@ export class OrderSyncService {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(`Awaiting-payment recheck skipped for user ${userId}: ${msg}`);
+    }
+  }
+
+  /**
+   * The enqueue itself failed (queue unreachable, a resolution query threw)
+   * and nothing else will ever pick the order up: left at `pending` it would
+   * read "buying on Amazon" for ever with no job behind it. FAILED is the
+   * honest state — nothing was bought — and it is the one the seller can
+   * restart from ("Start automatic order"). Scoped to a row still PENDING with
+   * no click stamp, so it can never touch an attempt that did start.
+   */
+  private async failStrandedAutoFulfill(userId: string, ebayOrderId: string): Promise<void> {
+    try {
+      await this.databaseService.query(
+        `UPDATE orders
+            SET auto_fulfill_status = $1,
+                auto_fulfill_blocked_reason = NULL,
+                updated_at = CURRENT_TIMESTAMP
+          WHERE ebay_order_id = $2
+            AND auto_fulfill_status = $3
+            AND auto_fulfill_submitted_at IS NULL`,
+        [AutoFulfillStatus.FAILED, ebayOrderId, AutoFulfillStatus.PENDING]
+      );
+      await this.quotaEnforcement.releaseAmazonOrder(userId, ebayOrderId);
+    } catch (err) {
+      this.logger.warn(`Could not settle stranded auto-fulfill for ${ebayOrderId}: ${(err as Error).message}`);
     }
   }
 

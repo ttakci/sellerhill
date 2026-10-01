@@ -11,7 +11,7 @@
 // (README "Not obtainable"), so nothing below depends on an enum list: a
 // cancellation is read from `cancelledDate`, a refund from `refunds[]`.
 
-import { OrderStatus } from '@repo/shared';
+import { AutoFulfillStatus, OrderStatus } from '@repo/shared';
 
 export interface EbayCancelStatus {
   /** "always returned"; `NONE_REQUESTED` when no cancel request was made. */
@@ -179,6 +179,30 @@ export interface IngestDecision {
    * be acting on stale news.
    */
   isFreshSale: (inserted: boolean) => boolean;
+}
+
+/**
+ * The automation status a NEW order row is inserted with.
+ *
+ * `pending` means "a purchase job is about to be queued" and reads as the
+ * `buying` stage. The column's default used to hand it to EVERY new row, so a
+ * sale the platform will never buy — no SellerHill listing behind it, or first
+ * seen long after it was placed — said "buying on Amazon" for ever, with no
+ * job anywhere. A row now starts at `pending` only when the automatic-purchase
+ * gate in the sync loop (`freshSale && listingId && entity.quantity > 0`) is
+ * about to run for it; every other row starts at `skipped` (no reason: nothing
+ * went wrong, automation simply does not apply). Keep this predicate equal to
+ * that gate.
+ */
+export function initialAutoFulfillStatus(input: {
+  /** `IngestDecision.isFreshSale(true)` — what the sale is IF this is an insert. */
+  freshIfInserted: boolean;
+  hasListing: boolean;
+  quantity: number;
+}): AutoFulfillStatus {
+  return input.freshIfInserted && input.hasListing && input.quantity > 0
+    ? AutoFulfillStatus.PENDING
+    : AutoFulfillStatus.SKIPPED;
 }
 
 export function decideIngest(input: {

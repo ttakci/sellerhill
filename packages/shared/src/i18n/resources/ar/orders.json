@@ -351,6 +351,40 @@
       "columnStage": "الحالة",
       "columnMeaning": "ماذا تعني",
       "columnAction": "ما الذي تفعله"
+    },
+    "timeline": {
+      "title": "سير هذا الطلب",
+      "step": {
+        "received": "تم استلام الطلب",
+        "purchase": "الشراء من أمازون",
+        "amazon_shipped": "شحنته أمازون",
+        "ebay_tracking": "التتبع على eBay",
+        "delivered": "تم التسليم",
+        "sale_cancelled": "أُلغي البيع على eBay",
+        "message_order_received": "رسالة استلام الطلب",
+        "message_shipped": "رسالة الشحن",
+        "message_delivered": "رسالة التسليم",
+        "message_feedback_request": "طلب التقييم"
+      },
+      "note": {
+        "received": "وصل الطلب من eBay.",
+        "bought_auto": "اشترى الطلب التلقائي المنتج من أمازون.",
+        "bought_linked": "يوجد طلب أمازون مرتبط بهذا البيع.",
+        "purchase_not_recorded": "لا يوجد لدى SellerHill طلب أمازون لهذا البيع.",
+        "amazon_shipped": "سلّمت أمازون الطرد إلى شركة الشحن.",
+        "waiting_shipment": "بانتظار أن تشحنه أمازون. يُفحص الطلب على فترات منتظمة.",
+        "shipment_not_observed": "لم يتابع SellerHill شحنة أمازون لهذا البيع.",
+        "upcoming_shipment": "يظهر هنا عندما تشحن أمازون الطرد.",
+        "tracking_pushed": "تم إرسال رقم التتبع إلى eBay؛ يمكن للمشتري متابعة الطرد.",
+        "tracking_not_by_us": "لم يرسل SellerHill رقم التتبع لهذا البيع.",
+        "upcoming_tracking": "يُرسل إلى eBay عندما تشحن أمازون الطرد.",
+        "delivered": "تفيد أمازون بأن الطرد تم تسليمه.",
+        "waiting_delivery": "بانتظار التسليم. يُفحص الطلب على فترات منتظمة.",
+        "delivery_not_tracked": "لا يتابع SellerHill تسليم هذا البيع.",
+        "upcoming_delivery": "يظهر هنا عند تسليم الطرد.",
+        "message_sent": "أُرسلت إلى المشتري.",
+        "message_failed": "تعذّر الإرسال."
+      }
     }
   }
 }

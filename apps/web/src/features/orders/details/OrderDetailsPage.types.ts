@@ -1,5 +1,7 @@
 import type { OrderDto } from '@repo/shared';
 
+import type { OrderTimelineRow } from '../shared/order-timeline.types';
+
 export interface OrderDetailsPageProps {
   order: OrderDto | undefined;
   isLoading: boolean;
@@ -8,10 +10,13 @@ export interface OrderDetailsPageProps {
   formatDate: (value: string) => string;
   /** eBay's own order status, localized — shown as a fact in the eBay card. */
   statusLabel: string;
-  /** `orders.stage.<stage>.meaning` — one sentence under the hero badge. */
-  stageMeaning: string;
-  /** `orders.stage.<stage>.action` for a stage that needs the seller, else null. */
-  stageAction: string | null;
+  /**
+   * The order's steps (received → bought → shipped → tracking on eBay →
+   * delivered), resolved for display. The step the order is standing on
+   * carries the stage's meaning, its action and the automatic-purchase reason
+   * — which is why the hero no longer prints them as loose sentences.
+   */
+  timelineRows: OrderTimelineRow[];
   roiLabel: string;
   totalAmazonCost: number;
   /** Amazon's "Total before tax" line: item subtotal + shipping & handling. */

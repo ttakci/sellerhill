@@ -351,6 +351,40 @@
       "columnStage": "Statut",
       "columnMeaning": "Signification",
       "columnAction": "Ce que vous faites"
+    },
+    "timeline": {
+      "title": "Déroulement de la commande",
+      "step": {
+        "received": "Commande reçue",
+        "purchase": "Achat sur Amazon",
+        "amazon_shipped": "Expédiée par Amazon",
+        "ebay_tracking": "Suivi sur eBay",
+        "delivered": "Livrée",
+        "sale_cancelled": "Vente annulée sur eBay",
+        "message_order_received": "Message de réception de commande",
+        "message_shipped": "Message d'expédition",
+        "message_delivered": "Message de livraison",
+        "message_feedback_request": "Demande d'évaluation"
+      },
+      "note": {
+        "received": "La commande est arrivée d'eBay.",
+        "bought_auto": "La commande automatique a acheté l'article sur Amazon.",
+        "bought_linked": "Une commande Amazon est liée à cette vente.",
+        "purchase_not_recorded": "SellerHill n'a aucune commande Amazon pour cette vente.",
+        "amazon_shipped": "Amazon a remis le colis au transporteur.",
+        "waiting_shipment": "En attente de l'expédition par Amazon. La commande est vérifiée à intervalles réguliers.",
+        "shipment_not_observed": "SellerHill n'a pas suivi d'expédition Amazon pour cette vente.",
+        "upcoming_shipment": "Apparaît ici dès qu'Amazon expédie le colis.",
+        "tracking_pushed": "Le numéro de suivi a été envoyé à eBay ; votre acheteur peut suivre le colis.",
+        "tracking_not_by_us": "SellerHill n'a pas envoyé le numéro de suivi de cette vente.",
+        "upcoming_tracking": "Envoyé à eBay dès qu'Amazon expédie le colis.",
+        "delivered": "Amazon indique que le colis a été livré.",
+        "waiting_delivery": "En attente de livraison. La commande est vérifiée à intervalles réguliers.",
+        "delivery_not_tracked": "SellerHill ne suit pas la livraison de cette vente.",
+        "upcoming_delivery": "Apparaît ici dès que le colis est livré.",
+        "message_sent": "Envoyé à l'acheteur.",
+        "message_failed": "N'a pas pu être envoyé."
+      }
     }
   }
 }
