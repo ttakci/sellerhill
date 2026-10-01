@@ -351,6 +351,40 @@
       "columnStage": "Status",
       "columnMeaning": "O que significa",
       "columnAction": "O que você faz"
+    },
+    "timeline": {
+      "title": "Andamento do pedido",
+      "step": {
+        "received": "Pedido recebido",
+        "purchase": "Compra na Amazon",
+        "amazon_shipped": "Enviado pela Amazon",
+        "ebay_tracking": "Rastreio no eBay",
+        "delivered": "Entregue",
+        "sale_cancelled": "Venda cancelada no eBay",
+        "message_order_received": "Mensagem de pedido recebido",
+        "message_shipped": "Mensagem de envio",
+        "message_delivered": "Mensagem de entrega",
+        "message_feedback_request": "Pedido de avaliação"
+      },
+      "note": {
+        "received": "O pedido chegou do eBay.",
+        "bought_auto": "O pedido automático comprou o item na Amazon.",
+        "bought_linked": "Um pedido da Amazon está vinculado a esta venda.",
+        "purchase_not_recorded": "O SellerHill não tem um pedido da Amazon para esta venda.",
+        "amazon_shipped": "A Amazon entregou o pacote à transportadora.",
+        "waiting_shipment": "Aguardando a Amazon enviar. O pedido é verificado em intervalos regulares.",
+        "shipment_not_observed": "O SellerHill não acompanhou um envio da Amazon para esta venda.",
+        "upcoming_shipment": "Aparece aqui quando a Amazon enviar o pacote.",
+        "tracking_pushed": "O código de rastreio foi enviado ao eBay; seu comprador pode acompanhar o pacote.",
+        "tracking_not_by_us": "O SellerHill não enviou o código de rastreio desta venda.",
+        "upcoming_tracking": "É enviado ao eBay quando a Amazon enviar o pacote.",
+        "delivered": "A Amazon informa que o pacote foi entregue.",
+        "waiting_delivery": "Aguardando a entrega. O pedido é verificado em intervalos regulares.",
+        "delivery_not_tracked": "O SellerHill não acompanha a entrega desta venda.",
+        "upcoming_delivery": "Aparece aqui quando o pacote for entregue.",
+        "message_sent": "Enviada ao comprador.",
+        "message_failed": "Não foi possível enviar."
+      }
     }
   }
 }

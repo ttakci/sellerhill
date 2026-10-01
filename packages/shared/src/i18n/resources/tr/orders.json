@@ -351,6 +351,40 @@
       "columnStage": "Durum",
       "columnMeaning": "Anlamı",
       "columnAction": "Siz ne yaparsınız"
+    },
+    "timeline": {
+      "title": "Sipariş süreci",
+      "step": {
+        "received": "Sipariş alındı",
+        "purchase": "Amazon'dan satın alma",
+        "amazon_shipped": "Amazon kargoya verdi",
+        "ebay_tracking": "Takip numarası eBay'de",
+        "delivered": "Teslim edildi",
+        "sale_cancelled": "Satış eBay'de iptal edildi",
+        "message_order_received": "Sipariş alındı mesajı",
+        "message_shipped": "Kargo mesajı",
+        "message_delivered": "Teslimat mesajı",
+        "message_feedback_request": "Değerlendirme isteği"
+      },
+      "note": {
+        "received": "Sipariş eBay'den geldi.",
+        "bought_auto": "Otomatik sipariş ürünü Amazon'dan satın aldı.",
+        "bought_linked": "Bu satışa bir Amazon siparişi bağlı.",
+        "purchase_not_recorded": "SellerHill'de bu satış için kayıtlı bir Amazon siparişi yok.",
+        "amazon_shipped": "Amazon paketi kargoya verdi.",
+        "waiting_shipment": "Amazon'un kargoya vermesi bekleniyor. Sipariş düzenli aralıklarla kontrol edilir.",
+        "shipment_not_observed": "SellerHill bu satış için bir Amazon kargosu izlemedi.",
+        "upcoming_shipment": "Amazon paketi kargoya verince burada görünür.",
+        "tracking_pushed": "Takip numarası eBay'e gönderildi; alıcınız paketi izleyebilir.",
+        "tracking_not_by_us": "Bu satışın takip numarasını SellerHill göndermedi.",
+        "upcoming_tracking": "Amazon paketi kargoya verince eBay'e gönderilir.",
+        "delivered": "Amazon paketi teslim edildi olarak bildirdi.",
+        "waiting_delivery": "Teslimat bekleniyor. Sipariş düzenli aralıklarla kontrol edilir.",
+        "delivery_not_tracked": "SellerHill bu satışın teslimatını izlemiyor.",
+        "upcoming_delivery": "Paket teslim edilince burada görünür.",
+        "message_sent": "Alıcıya gönderildi.",
+        "message_failed": "Gönderilemedi."
+      }
     }
   }
 }

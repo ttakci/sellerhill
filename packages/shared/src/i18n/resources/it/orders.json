@@ -351,6 +351,40 @@
       "columnStage": "Stato",
       "columnMeaning": "Cosa significa",
       "columnAction": "Cosa fai tu"
+    },
+    "timeline": {
+      "title": "Andamento dell'ordine",
+      "step": {
+        "received": "Ordine ricevuto",
+        "purchase": "Acquisto su Amazon",
+        "amazon_shipped": "Spedito da Amazon",
+        "ebay_tracking": "Tracking su eBay",
+        "delivered": "Consegnato",
+        "sale_cancelled": "Vendita annullata su eBay",
+        "message_order_received": "Messaggio di ordine ricevuto",
+        "message_shipped": "Messaggio di spedizione",
+        "message_delivered": "Messaggio di consegna",
+        "message_feedback_request": "Richiesta di feedback"
+      },
+      "note": {
+        "received": "L'ordine è arrivato da eBay.",
+        "bought_auto": "L'ordine automatico ha acquistato l'articolo su Amazon.",
+        "bought_linked": "Un ordine Amazon è collegato a questa vendita.",
+        "purchase_not_recorded": "SellerHill non ha un ordine Amazon per questa vendita.",
+        "amazon_shipped": "Amazon ha affidato il pacco al corriere.",
+        "waiting_shipment": "In attesa che Amazon spedisca. L'ordine viene controllato a intervalli regolari.",
+        "shipment_not_observed": "SellerHill non ha seguito una spedizione Amazon per questa vendita.",
+        "upcoming_shipment": "Compare qui quando Amazon spedisce il pacco.",
+        "tracking_pushed": "Il numero di tracking è stato inviato a eBay; il tuo acquirente può seguire il pacco.",
+        "tracking_not_by_us": "SellerHill non ha inviato il numero di tracking di questa vendita.",
+        "upcoming_tracking": "Viene inviato a eBay quando Amazon spedisce il pacco.",
+        "delivered": "Amazon segnala il pacco come consegnato.",
+        "waiting_delivery": "In attesa della consegna. L'ordine viene controllato a intervalli regolari.",
+        "delivery_not_tracked": "SellerHill non segue la consegna di questa vendita.",
+        "upcoming_delivery": "Compare qui quando il pacco viene consegnato.",
+        "message_sent": "Inviato all'acquirente.",
+        "message_failed": "Invio non riuscito."
+      }
     }
   }
 }

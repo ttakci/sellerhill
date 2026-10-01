@@ -5,7 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
-import { isShipByUrgent, orderStageHasAction, orderStageHasDeadline } from '../shared/order-stage';
+import {
+  isShipByUrgent,
+  orderStageHasAction,
+  orderStageHasDeadline,
+  orderStageShowsReason,
+} from '../shared/order-stage';
+import { toOrderTimelineRows } from '../shared/order-timeline';
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
@@ -78,7 +84,6 @@ export const OrderDetailsPageContainer: React.FC = () => {
     return translated === key ? order.status : translated;
   }, [order, t]);
 
-  const stageMeaning = useMemo(() => (order ? t(`orders.stage.${order.stage}.meaning`) : ''), [order, t]);
   const stageAction = useMemo(() => {
     if (!order) {
       return null;
@@ -96,6 +101,34 @@ export const OrderDetailsPageContainer: React.FC = () => {
     }
     return orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null;
   }, [order, t]);
+
+  /*
+   * The step-by-step timeline. The step the order is standing on explains
+   * itself with the stage's own sentence, the action and — where the stage
+   * shows one — why the automatic purchase stopped. Once the seller linked the
+   * order by hand the stage moves on, so a stale "Reason: address" never
+   * lingers under a later step.
+   */
+  const timelineRows = useMemo(() => {
+    if (!order) {
+      return [];
+    }
+    const reasonLabel =
+      orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
+        ? t('orders.autoFulfill.reasonLabel', {
+            reason: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
+          })
+        : null;
+    return toOrderTimelineRows(order.timeline, {
+      t,
+      formatDate: fmtDate,
+      stage: order.stage,
+      shippedDetectedAt: order.shippedDetectedAt,
+      stageAction,
+      reasonLabel,
+      now: new Date(),
+    });
+  }, [order, t, fmtDate, stageAction]);
 
   const totalAmazonCost = useMemo(() => {
     if (!order) {
@@ -347,8 +380,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         statusLabel={statusLabel}
-        stageMeaning={stageMeaning}
-        stageAction={stageAction}
+        timelineRows={timelineRows}
         roiLabel={roiLabel}
         totalAmazonCost={totalAmazonCost}
         amazonTotalBeforeTax={amazonTotalBeforeTax}

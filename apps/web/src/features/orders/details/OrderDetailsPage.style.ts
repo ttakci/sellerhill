@@ -193,6 +193,14 @@ export const KpiLabelRow = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
+/** Timeline card body: the deadline / multi-item notices, then the steps. */
+export const TimelineBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
 export const SectionGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;

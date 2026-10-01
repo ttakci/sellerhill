@@ -42,6 +42,7 @@ import {
   DEMO_LISTING_JOBS,
   DEMO_LISTINGS,
   DEMO_ORDERS,
+  demoOrderTimeline,
   DEMO_PREDEFINED_TEMPLATES,
   DEMO_PROFILE,
   DEMO_RETURNS,
@@ -577,7 +578,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   const orderDetail = /^\/orders\/(demo-order-[\w-]+)$/.exec(path);
   if (orderDetail) {
     const found = DEMO_ORDERS.find((o) => o.id === orderDetail[1]);
-    return found ? ok(found) : { error: { status: 404, data: { message: 'Not found' } } };
+    return found
+      ? ok({ ...found, timeline: demoOrderTimeline(found) })
+      : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
   /* ── Configuration surfaces ──────────────────────────────────────────

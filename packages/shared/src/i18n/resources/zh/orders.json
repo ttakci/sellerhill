@@ -351,6 +351,40 @@
       "columnStage": "状态",
       "columnMeaning": "含义",
       "columnAction": "您需要做什么"
+    },
+    "timeline": {
+      "title": "订单进度",
+      "step": {
+        "received": "已收到订单",
+        "purchase": "在 Amazon 购买",
+        "amazon_shipped": "Amazon 已发货",
+        "ebay_tracking": "物流信息已到 eBay",
+        "delivered": "已送达",
+        "sale_cancelled": "销售已在 eBay 取消",
+        "message_order_received": "订单确认消息",
+        "message_shipped": "发货消息",
+        "message_delivered": "送达消息",
+        "message_feedback_request": "评价请求"
+      },
+      "note": {
+        "received": "订单已从 eBay 到达。",
+        "bought_auto": "自动下单已在 Amazon 购买该商品。",
+        "bought_linked": "此销售已关联一个 Amazon 订单。",
+        "purchase_not_recorded": "SellerHill 中没有此销售对应的 Amazon 订单。",
+        "amazon_shipped": "Amazon 已将包裹交给承运商。",
+        "waiting_shipment": "等待 Amazon 发货。系统会定期检查该订单。",
+        "shipment_not_observed": "SellerHill 未跟踪此销售的 Amazon 发货。",
+        "upcoming_shipment": "Amazon 发货后会显示在这里。",
+        "tracking_pushed": "运单号已发送到 eBay；买家可以跟踪包裹。",
+        "tracking_not_by_us": "此销售的运单号不是由 SellerHill 发送的。",
+        "upcoming_tracking": "Amazon 发货后会发送到 eBay。",
+        "delivered": "Amazon 显示包裹已送达。",
+        "waiting_delivery": "等待送达。系统会定期检查该订单。",
+        "delivery_not_tracked": "SellerHill 未跟踪此销售的送达情况。",
+        "upcoming_delivery": "包裹送达后会显示在这里。",
+        "message_sent": "已发送给买家。",
+        "message_failed": "发送失败。"
+      }
     }
   }
 }

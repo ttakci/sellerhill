@@ -15,7 +15,9 @@ import {
   BillingUsagePeriodStatus,
   BlacklistType,
   BuyerMessageEventType,
+  BuyerMessageStatus,
   BuyerMessageTemplateKind,
+  buildOrderTimeline,
   DashboardChartGranularity,
   DashboardPeriodKey,
   EbayAccountStatus,
@@ -1034,6 +1036,45 @@ function buildOrders(): OrderDto[] {
 }
 
 export const DEMO_ORDERS: OrderDto[] = buildOrders();
+
+/**
+ * The order detail page's timeline for a demo order — built by the SAME shared
+ * builder the API uses, so the demo can never show steps the product does not
+ * produce. The fixture carries no purchase or delivery time, so those two are
+ * placed where they would plausibly fall: the purchase minutes after the sale,
+ * the delivery two days after the tracking reached eBay.
+ */
+export function demoOrderTimeline(order: OrderDto): NonNullable<OrderDto['timeline']> {
+  const after = (iso: string | null | undefined, minutes: number): string | null =>
+    iso ? new Date(new Date(iso).getTime() + minutes * 60_000).toISOString() : null;
+  const purchasedAt = after(order.createdAt, 25);
+  const messages =
+    order.stage === OrderStage.SHIPPED || order.stage === OrderStage.DELIVERED
+      ? [
+          {
+            event: BuyerMessageEventType.ORDER_RECEIVED,
+            status: BuyerMessageStatus.SENT,
+            at: after(order.createdAt, 2),
+          },
+        ]
+      : [];
+  return buildOrderTimeline({
+    stage: order.stage,
+    autoFulfillStatus: order.autoFulfillStatus ?? null,
+    amazonOrderId: order.amazonOrderId,
+    orderDate: order.createdAt,
+    autoFulfillAttemptedAt: order.autoFulfillStatus ? after(order.createdAt, 20) : null,
+    autoFulfillSubmittedAt: purchasedAt,
+    amazonLinkedAt: order.amazonOrderId && !order.isSimulated ? purchasedAt : null,
+    amazonCancelledAt: order.amazonCancelledAt,
+    shippedDetectedAt: order.shippedDetectedAt,
+    ebayTrackingPushedAt: order.ebayTrackingPushedAt,
+    ebayTrackingPushedNumber: order.ebayTrackingPushedNumber,
+    deliveredAt: order.stage === OrderStage.DELIVERED ? after(order.ebayTrackingPushedAt, 2 * 24 * 60) : null,
+    messages,
+    now: new Date(),
+  });
+}
 
 /* ── eBay returns ─────────────────────────────────────────────────────── */
 

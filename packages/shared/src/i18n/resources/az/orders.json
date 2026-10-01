@@ -351,6 +351,40 @@
       "columnStage": "Status",
       "columnMeaning": "Mənası",
       "columnAction": "Siz nə edirsiniz"
+    },
+    "timeline": {
+      "title": "Sifarişin gedişi",
+      "step": {
+        "received": "Sifariş alındı",
+        "purchase": "Amazon-dan alış",
+        "amazon_shipped": "Amazon göndərdi",
+        "ebay_tracking": "İzləmə nömrəsi eBay-də",
+        "delivered": "Çatdırıldı",
+        "sale_cancelled": "Satış eBay-də ləğv edildi",
+        "message_order_received": "Sifariş alındı mesajı",
+        "message_shipped": "Göndərmə mesajı",
+        "message_delivered": "Çatdırılma mesajı",
+        "message_feedback_request": "Rəy istəyi"
+      },
+      "note": {
+        "received": "Sifariş eBay-dən gəldi.",
+        "bought_auto": "Avtomatik sifariş məhsulu Amazon-dan aldı.",
+        "bought_linked": "Bu satışa bir Amazon sifarişi bağlıdır.",
+        "purchase_not_recorded": "SellerHill-də bu satış üçün Amazon sifarişi yoxdur.",
+        "amazon_shipped": "Amazon bağlamanı daşıyıcıya təhvil verdi.",
+        "waiting_shipment": "Amazon-un göndərməsi gözlənilir. Sifariş müntəzəm aralıqlarla yoxlanılır.",
+        "shipment_not_observed": "SellerHill bu satış üçün Amazon göndərişini izləmədi.",
+        "upcoming_shipment": "Amazon bağlamanı göndərəndə burada görünəcək.",
+        "tracking_pushed": "İzləmə nömrəsi eBay-ə göndərildi; alıcınız bağlamanı izləyə bilər.",
+        "tracking_not_by_us": "Bu satışın izləmə nömrəsini SellerHill göndərməyib.",
+        "upcoming_tracking": "Amazon bağlamanı göndərəndə eBay-ə göndəriləcək.",
+        "delivered": "Amazon bağlamanın çatdırıldığını bildirir.",
+        "waiting_delivery": "Çatdırılma gözlənilir. Sifariş müntəzəm aralıqlarla yoxlanılır.",
+        "delivery_not_tracked": "SellerHill bu satışın çatdırılmasını izləmir.",
+        "upcoming_delivery": "Bağlama çatdırılanda burada görünəcək.",
+        "message_sent": "Alıcıya göndərildi.",
+        "message_failed": "Göndərilə bilmədi."
+      }
     }
   }
 }

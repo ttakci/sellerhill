@@ -351,6 +351,40 @@
       "columnStage": "Status",
       "columnMeaning": "Bedeutung",
       "columnAction": "Was Sie tun"
+    },
+    "timeline": {
+      "title": "Verlauf dieser Bestellung",
+      "step": {
+        "received": "Bestellung eingegangen",
+        "purchase": "Kauf bei Amazon",
+        "amazon_shipped": "Von Amazon versendet",
+        "ebay_tracking": "Sendungsverfolgung bei eBay",
+        "delivered": "Zugestellt",
+        "sale_cancelled": "Verkauf bei eBay storniert",
+        "message_order_received": "Nachricht zum Bestelleingang",
+        "message_shipped": "Versandnachricht",
+        "message_delivered": "Zustellnachricht",
+        "message_feedback_request": "Bewertungsanfrage"
+      },
+      "note": {
+        "received": "Die Bestellung ist von eBay eingegangen.",
+        "bought_auto": "Die automatische Bestellung hat den Artikel bei Amazon gekauft.",
+        "bought_linked": "Mit diesem Verkauf ist eine Amazon-Bestellung verknüpft.",
+        "purchase_not_recorded": "SellerHill kennt für diesen Verkauf keine Amazon-Bestellung.",
+        "amazon_shipped": "Amazon hat das Paket dem Versanddienstleister übergeben.",
+        "waiting_shipment": "Es wird auf den Versand durch Amazon gewartet. Die Bestellung wird in regelmäßigen Abständen geprüft.",
+        "shipment_not_observed": "SellerHill hat für diesen Verkauf keinen Amazon-Versand verfolgt.",
+        "upcoming_shipment": "Erscheint hier, sobald Amazon das Paket versendet.",
+        "tracking_pushed": "Die Sendungsnummer wurde an eBay übermittelt; Ihr Käufer kann das Paket verfolgen.",
+        "tracking_not_by_us": "Die Sendungsnummer für diesen Verkauf wurde nicht von SellerHill übermittelt.",
+        "upcoming_tracking": "Wird an eBay übermittelt, sobald Amazon das Paket versendet.",
+        "delivered": "Amazon meldet das Paket als zugestellt.",
+        "waiting_delivery": "Zustellung wird erwartet. Die Bestellung wird in regelmäßigen Abständen geprüft.",
+        "delivery_not_tracked": "SellerHill verfolgt die Zustellung dieses Verkaufs nicht.",
+        "upcoming_delivery": "Erscheint hier, sobald das Paket zugestellt ist.",
+        "message_sent": "An den Käufer gesendet.",
+        "message_failed": "Konnte nicht gesendet werden."
+      }
     }
   }
 }

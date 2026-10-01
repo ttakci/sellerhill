@@ -351,6 +351,40 @@
       "columnStage": "Статус",
       "columnMeaning": "Что это значит",
       "columnAction": "Что делать вам"
+    },
+    "timeline": {
+      "title": "Ход заказа",
+      "step": {
+        "received": "Заказ получен",
+        "purchase": "Покупка на Amazon",
+        "amazon_shipped": "Отправлено Amazon",
+        "ebay_tracking": "Трекинг на eBay",
+        "delivered": "Доставлен",
+        "sale_cancelled": "Продажа отменена на eBay",
+        "message_order_received": "Сообщение о получении заказа",
+        "message_shipped": "Сообщение об отправке",
+        "message_delivered": "Сообщение о доставке",
+        "message_feedback_request": "Просьба об отзыве"
+      },
+      "note": {
+        "received": "Заказ поступил с eBay.",
+        "bought_auto": "Автоматический заказ купил товар на Amazon.",
+        "bought_linked": "К этой продаже привязан заказ Amazon.",
+        "purchase_not_recorded": "В SellerHill нет заказа Amazon для этой продажи.",
+        "amazon_shipped": "Amazon передал посылку перевозчику.",
+        "waiting_shipment": "Ожидается отправка со стороны Amazon. Заказ проверяется через регулярные промежутки.",
+        "shipment_not_observed": "SellerHill не отслеживал отправку Amazon по этой продаже.",
+        "upcoming_shipment": "Появится здесь, когда Amazon отправит посылку.",
+        "tracking_pushed": "Трек-номер передан на eBay; покупатель может отслеживать посылку.",
+        "tracking_not_by_us": "Трек-номер по этой продаже отправил не SellerHill.",
+        "upcoming_tracking": "Будет передан на eBay, когда Amazon отправит посылку.",
+        "delivered": "Amazon сообщает, что посылка доставлена.",
+        "waiting_delivery": "Ожидается доставка. Заказ проверяется через регулярные промежутки.",
+        "delivery_not_tracked": "SellerHill не отслеживает доставку по этой продаже.",
+        "upcoming_delivery": "Появится здесь, когда посылка будет доставлена.",
+        "message_sent": "Отправлено покупателю.",
+        "message_failed": "Не удалось отправить."
+      }
     }
   }
 }

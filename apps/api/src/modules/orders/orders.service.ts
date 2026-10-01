@@ -3,10 +3,11 @@
  * Database-backed order management with real eBay order data
  */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
+  BuyerMessageStatus,
   EbayAccountStatus,
   OrderCostCaptureStatus,
   OrderStage,
@@ -14,14 +15,17 @@ import {
   ACTIONABLE_ORDER_STAGES,
   buildFulfillmentStateSql,
   buildOrderStageSql,
+  buildOrderTimeline,
   canStartAutoFulfillManually,
   deriveFulfillmentState,
   deriveOrderStage,
   isSimulatedAmazonOrderId,
+  type BuyerMessageEventType,
   type OrderDto,
   type OrderFiltersDto,
   type OrderStageCountsDto,
   type OrderStatsDto,
+  type OrderTimelineMessage,
   type UpdateOrderAmazonDetailsDto,
 } from '@repo/shared';
 
@@ -72,6 +76,11 @@ interface OrderRow {
   cost_capture_status: string;
   auto_fulfill_status: string | null;
   auto_fulfill_blocked_reason: string | null;
+  auto_fulfill_attempted_at?: Date | null;
+  /** The Amazon order's costs were captured (auto placement or a link). */
+  amazon_linked_at?: Date | null;
+  /** The tracking tick that read "Delivered" (migration 133). */
+  delivered_at?: Date | null;
   listing_over_plan_limit?: boolean | null;
   amazon_cancelled_at: Date | null;
   shipped_detected_at: Date | null;
@@ -115,6 +124,8 @@ interface ShippingAddressData {
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly orderSyncService: OrderSyncService,
@@ -378,7 +389,62 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
-    return this.mapRowToDto(results[0]);
+    const row = results[0];
+    const dto = this.mapRowToDto(row);
+    // The step-by-step timeline belongs to the detail page only: it needs the
+    // buyer-message log, and the list never renders it.
+    return {
+      ...dto,
+      timeline: buildOrderTimeline({
+        stage: dto.stage,
+        autoFulfillStatus: dto.autoFulfillStatus ?? null,
+        amazonOrderId: row.amazon_order_id,
+        orderDate: row.order_date,
+        autoFulfillAttemptedAt: row.auto_fulfill_attempted_at ?? null,
+        autoFulfillSubmittedAt: row.auto_fulfill_submitted_at ?? null,
+        amazonLinkedAt: row.amazon_linked_at ?? null,
+        amazonCancelledAt: row.amazon_cancelled_at,
+        shippedDetectedAt: row.shipped_detected_at,
+        ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+        ebayTrackingPushedNumber: row.ebay_tracking_pushed_number,
+        deliveredAt: row.delivered_at ?? null,
+        ebayCancelledAt: row.ebay_cancelled_at,
+        messages: await this.loadTimelineMessages(userId, row.ebay_order_id),
+        now: new Date(),
+      }),
+    };
+  }
+
+  /**
+   * The buyer messages the log proves were sent — or tried and failed — for
+   * one order. `skipped` entries are left out (a switched-off event is not a
+   * step of the order). Fail-soft: the timeline is worth showing without its
+   * message rows, so a log read failure never breaks the order page.
+   */
+  private async loadTimelineMessages(userId: string, ebayOrderId: string): Promise<OrderTimelineMessage[]> {
+    try {
+      const rows = await this.databaseService.query<{
+        event_type: string;
+        status: string;
+        at: Date | null;
+      }>(
+        `SELECT event_type, status, COALESCE(sent_at, created_at) AS at
+           FROM buyer_message_log
+          WHERE ebay_order_id = $1
+            AND user_id = $2
+            AND status IN ($3, $4)
+          ORDER BY created_at ASC`,
+        [ebayOrderId, userId, BuyerMessageStatus.SENT, BuyerMessageStatus.FAILED]
+      );
+      return rows.map((r) => ({
+        event: r.event_type as BuyerMessageEventType,
+        status: r.status as BuyerMessageStatus,
+        at: r.at,
+      }));
+    } catch (err) {
+      this.logger.warn(`Timeline messages unavailable for ${ebayOrderId}: ${(err as Error).message}`);
+      return [];
+    }
   }
 
   /**
