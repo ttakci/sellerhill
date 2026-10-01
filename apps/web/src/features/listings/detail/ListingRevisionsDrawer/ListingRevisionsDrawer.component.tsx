@@ -135,7 +135,7 @@ export const ListingRevisionsDrawerComponent = ({
               <ProductTableCell
                 title={subject.title}
                 imageUrl={subject.imageUrl}
-                meta={[{ label: t('listings.table.asin'), id: subject.asin, storeType: 'amazon', icon: 'barcode' }]}
+                meta={[{ label: t('listings.table.asin'), id: subject.asin, storeType: 'amazon' }]}
                 subtitle={subject.storeName}
               />
             </S.SubjectCell>

@@ -165,7 +165,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, listing?.currency ?? 'USD'),
+    (value: number) => formatCurrency(value, localeCfg.locale, listing?.currency ?? 'USD', 2),
     [listing?.currency, localeCfg.locale]
   );
 

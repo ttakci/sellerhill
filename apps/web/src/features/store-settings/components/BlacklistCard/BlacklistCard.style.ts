@@ -70,23 +70,6 @@ export const ScopeSection = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
-export const ScopeTag = styled.div<{ $status: string }>`
-  display: inline-flex;
-  align-items: center;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.sm')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.background.tertiary')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.text.secondary')};
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
-  white-space: normal;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-`;
-
 export const ActionButton = styled(IconButtonAtom)`
   width: 2rem; /* 32px */
   height: 2rem; /* 32px */

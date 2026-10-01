@@ -201,7 +201,7 @@ export const IdItem = styled.div`
   }
 `;
 
-/** Leading icon + label for an id / timestamp row — matches the fact-card Meta rows. */
+/** Label of an id / timestamp row — no icon; the label column is the ornament. */
 export const IdItemLabel = styled.div`
   display: flex;
   align-items: center;
@@ -226,27 +226,20 @@ export const UpdatedValueRow = styled.div`
 `;
 
 /**
- * The money story as ONE strip — profit, ROI, sale price, cost, margin — sharing
- * a single surface and separated by hairlines.
- *
- * Deliberately not one box per number: five filled boxes in a row read as five
- * competing objects, which is exactly the checkerboard this replaced. One
- * surface with rules says "these belong together and are read across", and the
- * only colour left in it is the profit value itself, so the eye lands there
- * first instead of on five equal grey rectangles.
+ * The money story as ONE strip — profit, ROI, sale price, cost, margin — under
+ * a single hairline on the pane's own surface. Not a tinted box inside the
+ * card (one surface per card), and not five boxes: the only colour in it is
+ * the profit figure, so the eye lands there first.
  */
 export const KpiStrip = styled.div`
   display: flex;
   flex-wrap: wrap;
   row-gap: ${tkn('spacing.md')};
-  /* Base: a small separation from the id list above (on top of HeroInfo's gap). */
   margin-top: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.background.tertiary')};
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
 
-  /* From md up HeroInfo is card-height, so push the profit bar to the bottom —
-     it fills the card and gains breathing room above it in one move. */
+  /* From md up HeroInfo is card-height, so push the strip to the bottom. */
   @media (min-width: ${tkn('breakpoints.md')}) {
     margin-top: auto;
   }
@@ -258,17 +251,10 @@ export const KpiItem = styled.div`
   gap: ${tkn('spacing.2xs')};
   flex: 1 1 7rem;
   min-width: 7rem;
-  padding: 0 ${tkn('spacing.sm')};
-  border-left: 0.0625rem solid ${tkn('colors.border.secondary')};
-
-  &:first-of-type {
-    border-left: none;
-  }
+  padding-right: ${tkn('spacing.md')};
 `;
 
 export const KpiLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
   white-space: nowrap;
 `;
@@ -332,8 +318,6 @@ export const DefItem = styled.div`
 `;
 
 export const DefLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 

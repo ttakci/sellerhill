@@ -5,7 +5,7 @@ export interface ProductTableCellMetaRow {
   label: string;
   id: string;
   storeType: StoreType;
-  /** Leading row icon — matches the listing cards (barcode for ASIN, tag for eBay ID). */
+  /** @deprecated Labels carry no icon any more (2026-10-01); accepted and ignored. */
   icon?: IconName;
 }
 

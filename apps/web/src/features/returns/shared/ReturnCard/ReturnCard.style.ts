@@ -4,11 +4,15 @@ import { Card, Text, tkn } from '@repo/ui';
 
 /** The card surface itself comes from `Card`; only layout and the click affordance are added here. */
 export const Wrapper = styled(Card)<{ $clickable: boolean }>`
-  gap: ${tkn('spacing.md')};
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
   min-width: 0;
   box-sizing: border-box;
+  overflow: hidden;
 
   ${({ $clickable, theme }: { theme: Theme; $clickable: boolean }) =>
     $clickable &&
@@ -16,8 +20,8 @@ export const Wrapper = styled(Card)<{ $clickable: boolean }>`
       cursor: pointer;
 
       &:hover {
-        border-color: ${theme.colors.brand.primary};
-        box-shadow: ${theme.shadows.md};
+        box-shadow: ${theme.shadows.glassHover};
+        transform: translateY(-0.125rem);
       }
 
       &:focus-visible {
@@ -32,6 +36,7 @@ export const Header = styled.div`
   align-items: flex-start;
   gap: ${tkn('spacing.md')};
   min-width: 0;
+  padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
 `;
 
 /** Transparent shell — same treatment as the product cell and the order card (no grey plate). */
@@ -98,14 +103,16 @@ export const IdRow = styled.div`
   min-width: 0;
 `;
 
+/** Due · refund · opened, under one hairline at the foot of the card. */
 export const Facts = styled.div`
   display: grid;
   /* Reflows to two rows before a value truncates — never a fixed repeat(3, 1fr). */
   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding: ${tkn('spacing.sm-md')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  margin-top: auto;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 export const Fact = styled.div<{ $wide?: boolean }>`
@@ -118,8 +125,6 @@ export const Fact = styled.div<{ $wide?: boolean }>`
 `;
 
 export const FactLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
@@ -128,6 +133,7 @@ export const Reason = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
   min-width: 0;
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')} ${tkn('spacing.md+')};
 `;
 
 /** The buyer's own words — two lines, the full text on the tooltip. */
@@ -139,14 +145,3 @@ export const Comment = styled(Text)`
   overflow-wrap: anywhere;
 `;
 
-export const Footer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
-`;
-
-export const DetailAction = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-`;

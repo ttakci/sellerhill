@@ -41,31 +41,9 @@ export const ToolbarRight = styled.div`
   align-self: center;
 `;
 
-export const StoreTrigger = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  max-width: 14rem;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm-md')};
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  cursor: pointer;
-  color: ${tkn('colors.text.primary')};
-  font: inherit;
-  white-space: nowrap;
-  transition:
-    border-color ${tkn('transitions.fast')},
-    background ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.surface.secondary')};
-    border-color: ${tkn('colors.brand.primary')};
-  }
-`;
-
-/** Long store names truncate instead of widening the toolbar. */
+/** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */
 export const StoreLabel = styled.span`
   min-width: 0;
+  max-width: 12rem;
   overflow: hidden;
 `;

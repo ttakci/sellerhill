@@ -1,4 +1,4 @@
-import { Card, Checkbox, Icon, Text } from '@repo/ui';
+import { Badge, Card, Checkbox, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -53,9 +53,9 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
         <S.CardBody>
           <S.ScopeSection>
             {types.map((type) => (
-              <S.ScopeTag key={type} $status={type}>
+              <Badge key={type} variant="neutral" size="xs">
                 {t(`storeSettings:storeSettings.blacklistType_${type}`)}
-              </S.ScopeTag>
+              </Badge>
             ))}
           </S.ScopeSection>
         </S.CardBody>

@@ -129,7 +129,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
           <ProductTableCell
             title={row.title}
             imageUrl={row.imageUrl ?? undefined}
-            meta={[{ label: t('listings:listings.table.asin'), id: row.asin, storeType: 'amazon', icon: 'barcode' }]}
+            meta={[{ label: t('listings:listings.table.asin'), id: row.asin, storeType: 'amazon' }]}
           />
         ),
     },
@@ -220,15 +220,15 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     }
     const meta: ListingCardMetaItem[] = [];
     if (item.rankLabel) {
-      meta.push({ label: t('bestSellers.table.rank'), value: item.rankLabel, icon: 'bar-chart' });
+      meta.push({ label: t('bestSellers.table.rank'), value: item.rankLabel });
     }
     if (item.rankChangeLabel) {
-      meta.push({ label: t('bestSellers.table.rankChange'), value: item.rankChangeLabel, icon: 'trending-up' });
+      meta.push({ label: t('bestSellers.table.rankChange'), value: item.rankChangeLabel });
     }
     if (item.reviewsLabel) {
-      meta.push({ label: t('bestSellers.table.reviews'), value: item.reviewsLabel, icon: 'message-circle' });
+      meta.push({ label: t('bestSellers.table.reviews'), value: item.reviewsLabel });
     }
-    meta.push({ label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon', icon: 'barcode' });
+    meta.push({ label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon' });
 
     return (
       <ListingCard
@@ -253,7 +253,6 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
         onSelectedChange={() => onToggleItem(item.asin)}
         selectionAriaLabel={item.title}
         onClick={() => onToggleItem(item.asin)}
-        showDetailAction={false}
       />
     );
   };

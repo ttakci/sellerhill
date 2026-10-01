@@ -2,6 +2,8 @@ import { Card, EmptyState, PageHeader, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getEbayAccountStatusLabel } from '../utils/ebayAccountStatusLabel';
+
 import * as S from './StoresPage.style';
 import type { StoresPageComponentProps } from './StoresPage.types';
 
@@ -41,7 +43,9 @@ export const StoresPageComponent = ({
                 <S.StoreIconWrapper>
                   <Text variant="body-sm" weight="semibold">eBay</Text>
                 </S.StoreIconWrapper>
-                <StatusBadge status={account.status} size="sm" />
+                <StatusBadge status={account.status} size="sm">
+                  {getEbayAccountStatusLabel(account.status, t)}
+                </StatusBadge>
               </S.StoreCardHeader>
               <S.StoreCardBody>
                 <Text variant="h4" weight="semibold">{account.storeName || account.ebayUsername || account.sellerId}</Text>
