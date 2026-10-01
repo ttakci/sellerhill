@@ -9,7 +9,11 @@
       "ebay": "eBay-dən",
       "all": "Hamısı",
       "unread": "Oxunmamış",
-      "archive": "Arxiv"
+      "archive": "Arxiv",
+      "inbox": "Gələnlər",
+      "unreadMembers": "Üzvlərdən oxunmamış",
+      "unreadEbay": "eBay-dən oxunmamış",
+      "deleted": "Silinənlər"
     },
     "list": {
       "empty": "Hələ heç bir yazışma yoxdur.",
@@ -19,7 +23,8 @@
       "listing": "{{title}} ilə bağlı",
       "select": "Seç",
       "selectAll": "Hamısını seç",
-      "noStores": "Mesajlarınızı görmək üçün eBay mağazası qoşun."
+      "noStores": "Mesajlarınızı görmək üçün eBay mağazası qoşun.",
+      "emptyDeleted": "Silinmiş söhbət yoxdur."
     },
     "thread": {
       "empty": "Baxmaq üçün bir yazışma seçin.",

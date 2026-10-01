@@ -313,6 +313,8 @@ function filterConversations(params: Record<string, string>): EbayConversationDt
     rows = rows.filter((conversation) => conversation.unreadCount > 0);
   } else if (params.status === String(EbayConversationStatus.ARCHIVE)) {
     rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ARCHIVE);
+  } else if (params.status === String(EbayConversationStatus.DELETE)) {
+    rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.DELETE);
   } else {
     rows = rows.filter((conversation) => conversation.status === EbayConversationStatus.ACTIVE);
   }

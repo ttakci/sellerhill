@@ -9,7 +9,11 @@
       "ebay": "Von eBay",
       "all": "Alle",
       "unread": "Ungelesen",
-      "archive": "Archiv"
+      "archive": "Archiv",
+      "inbox": "Posteingang",
+      "unreadMembers": "Ungelesen von Mitgliedern",
+      "unreadEbay": "Ungelesen von eBay",
+      "deleted": "Gelöscht"
     },
     "list": {
       "empty": "Noch keine Unterhaltungen vorhanden.",
@@ -19,7 +23,8 @@
       "listing": "Betrifft {{title}}",
       "select": "Auswählen",
       "selectAll": "Alle auswählen",
-      "noStores": "Verbinden Sie einen eBay-Shop, um Ihre Nachrichten zu sehen."
+      "noStores": "Verbinden Sie einen eBay-Shop, um Ihre Nachrichten zu sehen.",
+      "emptyDeleted": "Keine gelöschten Unterhaltungen."
     },
     "thread": {
       "empty": "Wählen Sie eine Unterhaltung aus, um sie anzuzeigen.",

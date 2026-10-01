@@ -23,13 +23,14 @@ import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPaginatio
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 
-const FOLDERS: MessagesFolder[] = [MessagesFolder.ALL, MessagesFolder.UNREAD, MessagesFolder.ARCHIVE];
+const FOLDERS: MessagesFolder[] = [MessagesFolder.ALL, MessagesFolder.UNREAD, MessagesFolder.ARCHIVE, MessagesFolder.DELETED];
 const TYPES: EbayConversationType[] = [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY];
 
 const FOLDER_ICON: Record<MessagesFolder, IconName> = {
   [MessagesFolder.ALL]: 'inbox',
   [MessagesFolder.UNREAD]: 'mail',
   [MessagesFolder.ARCHIVE]: 'archive',
+  [MessagesFolder.DELETED]: 'trash',
 };
 
 const TYPE_ICON: Record<EbayConversationType, IconName> = {
@@ -42,16 +43,24 @@ const TYPE_LABEL_KEY: Record<EbayConversationType, string> = {
   [EbayConversationType.FROM_EBAY]: 'messages.folders.ebay',
 };
 
+/** eBay's own wording for the unread entry of each type ("Unread from members" / "Unread from eBay"). */
+const UNREAD_LABEL_KEY: Record<EbayConversationType, string> = {
+  [EbayConversationType.FROM_MEMBERS]: 'messages.folders.unreadMembers',
+  [EbayConversationType.FROM_EBAY]: 'messages.folders.unreadEbay',
+};
+
 const FOLDER_LABEL_KEY: Record<MessagesFolder, string> = {
   [MessagesFolder.ALL]: 'messages.folders.all',
   [MessagesFolder.UNREAD]: 'messages.folders.unread',
   [MessagesFolder.ARCHIVE]: 'messages.folders.archive',
+  [MessagesFolder.DELETED]: 'messages.folders.deleted',
 };
 
 const EMPTY_KEY: Record<MessagesFolder, string> = {
   [MessagesFolder.ALL]: 'messages.list.empty',
   [MessagesFolder.UNREAD]: 'messages.list.emptyUnread',
   [MessagesFolder.ARCHIVE]: 'messages.list.emptyArchive',
+  [MessagesFolder.DELETED]: 'messages.list.emptyDeleted',
 };
 
 /** Attachments render only over https. */
@@ -169,8 +178,8 @@ export const MessagesPageContainer = (): React.ReactElement => {
     [conversations, conversationId, selectedSet, formatListDate],
   );
 
-  /* In the archive folder the counterpart of "archive" is "move back to the inbox". */
-  const inArchive = folder === MessagesFolder.ARCHIVE;
+  /* In the archive and deleted folders the counterpart of "archive" is "move back to the inbox". */
+  const inArchive = folder === MessagesFolder.ARCHIVE || folder === MessagesFolder.DELETED;
   const archiveTarget = inArchive ? EbayConversationStatus.ACTIVE : EbayConversationStatus.ARCHIVE;
   const archiveLabel = inArchive ? t('messages.actions.unarchive') : t('messages.actions.archive');
   const archiveIcon: IconName = inArchive ? 'inbox' : 'archive';
@@ -282,21 +291,42 @@ export const MessagesPageContainer = (): React.ReactElement => {
 
   /* ─── folders: the rail (≥ lg) and its compact stand-in (< lg) ─── */
 
-  const folderGroups = useMemo<MessagesFolderGroupView[]>(
-    () =>
-      TYPES.map((groupType) => ({
-        key: groupType,
-        label: t(TYPE_LABEL_KEY[groupType]),
-        items: FOLDERS.map((groupFolder) => ({
-          key: `${groupType}-${groupFolder}`,
-          label: t(FOLDER_LABEL_KEY[groupFolder]),
-          icon: FOLDER_ICON[groupFolder],
-          isActive: type === groupType && folder === groupFolder,
-          onSelect: () => setTypeAndFolder(groupType, groupFolder),
-        })),
-      })),
-    [t, type, folder, setTypeAndFolder],
-  );
+  /*
+   * The rail mirrors eBay's own Messages page (operator request, 2026-10-01;
+   * the competitor does the same): an Inbox group with "From members",
+   * "Unread from members", "From eBay", "Unread from eBay" in eBay's order,
+   * then Archive and Deleted. eBay's API needs a conversation TYPE on every
+   * read, so there is no combined "all types" entry and Archive / Deleted are
+   * split by type under their own headings.
+   */
+  const folderGroups = useMemo<MessagesFolderGroupView[]>(() => {
+    const item = (
+      groupType: EbayConversationType,
+      groupFolder: MessagesFolder,
+      label: string,
+      icon: IconName,
+    ) => ({
+      key: `${groupType}-${groupFolder}`,
+      label,
+      icon,
+      isActive: type === groupType && folder === groupFolder,
+      onSelect: () => setTypeAndFolder(groupType, groupFolder),
+    });
+    const byType = (groupFolder: MessagesFolder) =>
+      TYPES.map((groupType) => item(groupType, groupFolder, t(TYPE_LABEL_KEY[groupType]), TYPE_ICON[groupType]));
+    return [
+      {
+        key: 'inbox',
+        label: t('messages.folders.inbox'),
+        items: TYPES.flatMap((groupType) => [
+          item(groupType, MessagesFolder.ALL, t(TYPE_LABEL_KEY[groupType]), TYPE_ICON[groupType]),
+          item(groupType, MessagesFolder.UNREAD, t(UNREAD_LABEL_KEY[groupType]), FOLDER_ICON[MessagesFolder.UNREAD]),
+        ]),
+      },
+      { key: 'archive', label: t(FOLDER_LABEL_KEY[MessagesFolder.ARCHIVE]), items: byType(MessagesFolder.ARCHIVE) },
+      { key: 'deleted', label: t(FOLDER_LABEL_KEY[MessagesFolder.DELETED]), items: byType(MessagesFolder.DELETED) },
+    ];
+  }, [t, type, folder, setTypeAndFolder]);
 
   const compactFilters = useMemo<MessagesCompactFilters>(
     () => ({

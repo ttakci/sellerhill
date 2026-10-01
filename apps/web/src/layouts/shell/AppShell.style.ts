@@ -917,6 +917,9 @@ export const ContentInner = styled.div<{ $fitsViewport?: boolean }>`
      effect and the inbox scrolls inside its panes; everywhere else the
      automatic minimum keeps the footer below the page's content. */
   min-height: ${({ $fitsViewport }) => ($fitsViewport ? '0' : 'auto')};
+  /* A page that fits the viewport wants every pixel for its panes: the
+     bottom gutter shrinks to the top one. */
+  ${({ $fitsViewport, theme }) => ($fitsViewport ? `padding-bottom: ${theme.spacing.md} !important;` : '')}
 
   @media (min-width: 48rem) {
     padding: ${tkn('spacing.md')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};

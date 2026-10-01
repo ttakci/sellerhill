@@ -9,7 +9,11 @@
       "ebay": "Do eBay",
       "all": "Todas",
       "unread": "Não lidas",
-      "archive": "Arquivo"
+      "archive": "Arquivo",
+      "inbox": "Caixa de entrada",
+      "unreadMembers": "Não lidas de membros",
+      "unreadEbay": "Não lidas do eBay",
+      "deleted": "Excluídas"
     },
     "list": {
       "empty": "Ainda não há conversas aqui.",
@@ -19,7 +23,8 @@
       "listing": "Sobre {{title}}",
       "select": "Selecionar",
       "selectAll": "Selecionar tudo",
-      "noStores": "Conecte uma loja do eBay para ver suas mensagens."
+      "noStores": "Conecte uma loja do eBay para ver suas mensagens.",
+      "emptyDeleted": "Nenhuma conversa excluída."
     },
     "thread": {
       "empty": "Selecione uma conversa para visualizá-la.",

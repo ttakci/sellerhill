@@ -9,7 +9,11 @@
       "ebay": "De la eBay",
       "all": "Toate",
       "unread": "Necitite",
-      "archive": "Arhivă"
+      "archive": "Arhivă",
+      "inbox": "Mesaje primite",
+      "unreadMembers": "Necitite de la membri",
+      "unreadEbay": "Necitite de la eBay",
+      "deleted": "Șterse"
     },
     "list": {
       "empty": "Nu există încă nicio conversație.",
@@ -19,7 +23,8 @@
       "listing": "Referitor la {{title}}",
       "select": "Selectează",
       "selectAll": "Selectează tot",
-      "noStores": "Conectează un magazin eBay pentru a-ți vedea mesajele."
+      "noStores": "Conectează un magazin eBay pentru a-ți vedea mesajele.",
+      "emptyDeleted": "Nicio conversație ștearsă."
     },
     "thread": {
       "empty": "Selectează o conversație pentru a o vizualiza.",
