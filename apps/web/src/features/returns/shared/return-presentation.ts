@@ -8,12 +8,15 @@ import type { ReturnBucketPresentation } from './return-presentation.types';
 // recently is grey with a question mark, never a colour that claims a state.
 // The icon tells the two reds (and the two greys) apart.
 const PRESENTATION: Record<ReturnBucket, ReturnBucketPresentation> = {
+  // One colour per bucket (operator decision, 2026-10-01): grey = we cannot
+  // confirm it, red = past eBay's deadline, amber = your turn, orange = in an
+  // eBay case, sky = moving, green = closed.
   [ReturnBucket.UNCONFIRMED]: { variant: 'neutral', icon: 'help' },
   [ReturnBucket.ACTION_OVERDUE]: { variant: 'error', icon: 'alert-triangle' },
   [ReturnBucket.ACTION_DUE]: { variant: 'warning', icon: 'alert-circle' },
-  [ReturnBucket.ESCALATED]: { variant: 'error', icon: 'shield-alert' },
-  [ReturnBucket.IN_PROGRESS]: { variant: 'info', icon: 'clock' },
-  [ReturnBucket.CLOSED]: { variant: 'neutral', icon: 'check-circle' },
+  [ReturnBucket.ESCALATED]: { variant: 'orange', icon: 'shield-alert' },
+  [ReturnBucket.IN_PROGRESS]: { variant: 'sky', icon: 'clock' },
+  [ReturnBucket.CLOSED]: { variant: 'success', icon: 'check-circle' },
 };
 
 export function returnBucketPresentation(bucket: ReturnBucket): ReturnBucketPresentation {

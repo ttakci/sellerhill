@@ -15,12 +15,13 @@ import { ListingRevisionsDrawer } from '@/features/listings/detail/ListingRevisi
  * column's bare-string header, instead of a `caption` variant that would
  * render at a visibly different size/weight next to its siblings.
  */
-const StockHeader = (): React.ReactElement => {
+/** Column label + the "what this number is" tooltip, for both stock columns. */
+const StockHeader = ({ labelKey, tooltipKey }: { labelKey: string; tooltipKey: string }): React.ReactElement => {
   const { t } = useTranslation(['listings']);
   return (
     <S.StockHeader>
-      {t('listings.table.stock')}
-      <Tooltip content={t('listings.detail.revisions.quantityTooltip')} position="top" variant="dark">
+      {t(labelKey)}
+      <Tooltip content={t(tooltipKey)} position="top" variant="dark">
         <Icon name="info" size={12} color="text.tertiary" />
       </Tooltip>
     </S.StockHeader>
@@ -110,8 +111,35 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
       ),
     },
     {
+      key: 'sourceStock',
+      header: (
+        <StockHeader
+          labelKey="listings.detail.revisions.sourceStockChange"
+          tooltipKey="listings.detail.revisions.sourceStockTooltip"
+        />
+      ),
+      render: (_value, row) =>
+        row.newSourceStock === null ? (
+          <Text variant="body-sm" color="text.tertiary">
+            —
+          </Text>
+        ) : (
+          <ChangeCell
+            previous={row.previousSourceStock ?? row.newSourceStock}
+            next={row.newSourceStock}
+            changed={row.sourceStockChanged}
+            increased={row.sourceStockIncreased}
+          />
+        ),
+    },
+    {
       key: 'quantity',
-      header: <StockHeader />,
+      header: (
+        <StockHeader
+          labelKey="listings.detail.revisions.quantityChange"
+          tooltipKey="listings.detail.revisions.quantityTooltip"
+        />
+      ),
       render: (_value, row) => (
         <ChangeCell
           previous={row.previousQuantity}
@@ -155,11 +183,33 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
               />
             </S.ChangeValues>
           </S.ChangeRow>
+          {row.newSourceStock !== null && (
+            <S.ChangeRow>
+              <S.ChangeLabel>
+                <S.CardLabelRow>
+                  <Text variant="caption" color="text.tertiary">
+                    {t('listings.detail.revisions.sourceStockChange')}
+                  </Text>
+                  <Tooltip content={t('listings.detail.revisions.sourceStockTooltip')} position="top" variant="dark">
+                    <Icon name="info" size={12} color="text.tertiary" />
+                  </Tooltip>
+                </S.CardLabelRow>
+              </S.ChangeLabel>
+              <S.ChangeValues>
+                <ChangeCell
+                  previous={row.previousSourceStock ?? row.newSourceStock}
+                  next={row.newSourceStock}
+                  changed={row.sourceStockChanged}
+                  increased={row.sourceStockIncreased}
+                />
+              </S.ChangeValues>
+            </S.ChangeRow>
+          )}
           <S.ChangeRow>
             <S.ChangeLabel>
               <S.CardLabelRow>
                 <Text variant="caption" color="text.tertiary">
-                  {t('listings.table.stock')}
+                  {t('listings.detail.revisions.quantityChange')}
                 </Text>
                 <Tooltip content={t('listings.detail.revisions.quantityTooltip')} position="top" variant="dark">
                   <Icon name="info" size={12} color="text.tertiary" />

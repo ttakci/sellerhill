@@ -1,4 +1,4 @@
-import { OrderStage } from '@repo/shared';
+import { ORDER_STAGE_ORDER, OrderStage } from '@repo/shared';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -23,10 +23,15 @@ describe('orderStagePresentation', () => {
     }
   });
 
-  it('renders the actionable stages red, "to purchase" amber', () => {
-    expect(orderStagePresentation(OrderStage.PURCHASE_BLOCKED, { now }).variant).toBe('error');
+  it('renders the money-at-risk stages in the red family, "to purchase" amber', () => {
+    expect(orderStagePresentation(OrderStage.PURCHASE_BLOCKED, { now }).variant).toBe('orange');
     expect(orderStagePresentation(OrderStage.AMAZON_CANCELLED, { now }).variant).toBe('error');
-    expect(orderStagePresentation(OrderStage.TO_PURCHASE, { now }).variant).toBe('warning');
+    expect(orderStagePresentation(OrderStage.TO_PURCHASE, { now }).variant).toBe('solidAmber');
+  });
+
+  it('gives every stage its own badge colour (operator decision, 2026-10-01)', () => {
+    const variants = ORDER_STAGE_ORDER.map((stage) => orderStagePresentation(stage, { now }).variant);
+    expect(new Set(variants).size).toBe(variants.length);
   });
 
   it('keeps a held tracking amber for 12 hours, then red', () => {
@@ -45,10 +50,10 @@ describe('orderStagePresentation', () => {
     expect(orderStageHasAction(OrderStage.SHIPPED)).toBe(false);
   });
 
-  it('renders an unconfirmed purchase red, with its own icon — not the blocked triangle', () => {
+  it('renders an unconfirmed purchase navy, with its own icon — not the blocked triangle', () => {
     const unknown = orderStagePresentation(OrderStage.PURCHASE_UNKNOWN, { now });
     const blocked = orderStagePresentation(OrderStage.PURCHASE_BLOCKED, { now });
-    expect(unknown.variant).toBe('error');
+    expect(unknown.variant).toBe('solidNavy');
     expect(unknown.icon).not.toBe(blocked.icon);
   });
 });

@@ -40,87 +40,44 @@ export const getStatusColors = (status: string, theme: AppTheme): StatusColorCon
   const normalized = status.toLowerCase();
   const t = theme;
 
+  // One hue per status (2026-10-01): the states that sit side by side on a
+  // page never share a colour — a job list reads pending amber · processing
+  // blue · completed green · failed red · cancelled grey; a listing reads
+  // active green · draft navy · inactive grey; an account reads active green
+  // · verifying sky · error red.
+  const semantic = (tone: 'success' | 'info' | 'warning' | 'error'): StatusColorConfig => ({
+    background: t.colors.semanticTint[tone],
+    color: t.colors.semantic[tone],
+    border: t.colors.semanticTintBorder[tone],
+  });
+  const hue = (name: 'teal' | 'sky' | 'orange' | 'navy'): StatusColorConfig => ({
+    background: t.colors.badge[`${name}Tint`],
+    color: t.colors.badge[name],
+    border: t.colors.badge[`${name}Border`],
+  });
+  const neutral: StatusColorConfig = {
+    background: t.colors.semanticTint.neutral,
+    color: t.colors.text.tertiary,
+    border: t.colors.semanticTintBorder.neutral,
+  };
+
   const map: StatusColorMap = {
-    active: {
-      background: t.colors.semanticTint.success,
-      color: t.colors.semantic.success,
-      border: t.colors.semanticTintBorder.success,
-    },
-    verifying: {
-      background: t.colors.semanticTint.info,
-      color: t.colors.semantic.info,
-      border: t.colors.semanticTintBorder.info,
-    },
-    completed: {
-      background: t.colors.semanticTint.success,
-      color: t.colors.semantic.success,
-      border: t.colors.semanticTintBorder.success,
-    },
-    success: {
-      background: t.colors.semanticTint.success,
-      color: t.colors.semantic.success,
-      border: t.colors.semanticTintBorder.success,
-    },
-    processing: {
-      background: t.colors.semanticTint.info,
-      color: t.colors.semantic.info,
-      border: t.colors.semanticTintBorder.info,
-    },
-    pending: {
-      background: t.colors.semanticTint.warning,
-      color: t.colors.semantic.warning,
-      border: t.colors.semanticTintBorder.warning,
-    },
-    failed: {
-      background: t.colors.semanticTint.error,
-      color: t.colors.semantic.error,
-      border: t.colors.semanticTintBorder.error,
-    },
-    error: {
-      background: t.colors.semanticTint.error,
-      color: t.colors.semantic.error,
-      border: t.colors.semanticTintBorder.error,
-    },
-    warning: {
-      background: t.colors.semanticTint.warning,
-      color: t.colors.semantic.warning,
-      border: t.colors.semanticTintBorder.warning,
-    },
-    draft: {
-      background: t.colors.semanticTint.neutral,
-      color: t.colors.text.tertiary,
-      border: t.colors.semanticTintBorder.neutral,
-    },
-    inactive: {
-      background: t.colors.semanticTint.neutral,
-      color: t.colors.text.tertiary,
-      border: t.colors.semanticTintBorder.neutral,
-    },
-    shipped: {
-      background: t.colors.semanticTint.info,
-      color: t.colors.semantic.info,
-      border: t.colors.semanticTintBorder.info,
-    },
-    cancelled: {
-      background: t.colors.semanticTint.error,
-      color: t.colors.semantic.error,
-      border: t.colors.semanticTintBorder.error,
-    },
-    both: {
-      background: t.colors.semanticTint.info,
-      color: t.colors.semantic.info,
-      border: t.colors.semanticTintBorder.info,
-    },
-    title: {
-      background: t.colors.semanticTint.warning,
-      color: t.colors.semantic.warning,
-      border: t.colors.semanticTintBorder.warning,
-    },
-    description: {
-      background: t.colors.semanticTint.info,
-      color: t.colors.semantic.info,
-      border: t.colors.semanticTintBorder.info,
-    },
+    active: semantic('success'),
+    verifying: hue('sky'),
+    completed: semantic('success'),
+    success: semantic('success'),
+    processing: semantic('info'),
+    pending: semantic('warning'),
+    failed: semantic('error'),
+    error: semantic('error'),
+    warning: hue('orange'),
+    draft: hue('navy'),
+    inactive: neutral,
+    shipped: hue('teal'),
+    cancelled: neutral,
+    both: semantic('info'),
+    title: semantic('warning'),
+    description: hue('teal'),
   };
 
   return (

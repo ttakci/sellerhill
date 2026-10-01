@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { glassSurface, tkn } from '@repo/ui';
 
 export const BodyStack = styled.div`
   display: flex;
@@ -8,7 +8,8 @@ export const BodyStack = styled.div`
   min-height: 100%;
 `;
 
-/** One card per revision — same elevated white surface the other drawers use. */
+/** One card per revision — the same frosted pane every drawer section uses,
+ * lifting off the drawer's slate canvas. */
 export const List = styled.div`
   display: flex;
   flex-direction: column;
@@ -16,14 +17,12 @@ export const List = styled.div`
 `;
 
 export const Card = styled.div`
+  ${({ theme }) => glassSurface(theme)}
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.md')};
-  box-shadow: ${tkn('shadows.sm')};
+  border-radius: ${tkn('radius.lg')};
 `;
 
 export const CardHead = styled.div`
@@ -53,7 +52,7 @@ export const ChangeLabel = styled.span`
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.2xs')};
-  flex: 0 0 4.25rem;
+  flex: 0 0 6.5rem;
 `;
 
 /** Product identity + "go to listing" — shown only when the drawer is opened

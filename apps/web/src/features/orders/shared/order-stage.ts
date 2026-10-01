@@ -2,24 +2,30 @@ import { ACTIONABLE_ORDER_STAGES, isTrackingHeldOverdue, ORDER_STAGE_ORDER, Orde
 
 import type { OrderStagePresentation } from './order-stage.types';
 
-// Colours group by MEANING (red = money/reputation at risk, amber = your
-// work, blue/primary/secondary = the system is working, green/grey = done);
-// the icon and the legend tell the stages within a group apart.
+// Every stage has its OWN look (operator decision, 2026-10-01: four shared
+// tones made "blocked", "Amazon cancelled" and "not confirmed" one red badge
+// apart from their icons). Nine hues inside the product's palette plus two
+// FILLED badges for the two states that must shout — "buy this" (solid
+// amber) and "check Amazon before anything is bought again" (solid navy).
+// The hue still carries the meaning: red / orange for money at risk, ambers
+// for the seller's own work, blues for the system working (sky → brand →
+// teal as the order moves), green / grey for done.
 const PRESENTATION: Record<OrderStage, OrderStagePresentation> = {
   [OrderStage.AMAZON_CANCELLED]: { variant: 'error', icon: 'x-circle' },
   [OrderStage.CANCELLED]: { variant: 'neutral', icon: 'x-circle' },
   [OrderStage.DELIVERED]: { variant: 'success', icon: 'package-check' },
-  [OrderStage.TEST_RUN]: { variant: 'neutral', icon: 'info' },
-  [OrderStage.SHIPPED]: { variant: 'info', icon: 'truck' },
+  [OrderStage.TEST_RUN]: { variant: 'secondary', icon: 'info' },
+  [OrderStage.SHIPPED]: { variant: 'teal', icon: 'truck' },
+  // Amber while waiting, red once overdue (orderStagePresentation below).
   [OrderStage.TRACKING_HELD]: { variant: 'warning', icon: 'alert-circle' },
-  [OrderStage.BUYING]: { variant: 'secondary', icon: 'loader' },
+  [OrderStage.BUYING]: { variant: 'sky', icon: 'loader' },
   [OrderStage.PURCHASED]: { variant: 'primary', icon: 'shopping-bag' },
-  // Red with a question mark, not the blocked stage's warning triangle: the
+  // Solid navy with a question mark, not the blocked stage's orange triangle: the
   // instruction is the opposite ("check Amazon before you buy anything").
-  [OrderStage.PURCHASE_UNKNOWN]: { variant: 'error', icon: 'help' },
-  [OrderStage.PURCHASE_BLOCKED]: { variant: 'error', icon: 'alert-triangle' },
-  [OrderStage.AWAITING_PAYMENT]: { variant: 'neutral', icon: 'circle-dollar-sign' },
-  [OrderStage.TO_PURCHASE]: { variant: 'warning', icon: 'shopping-cart' },
+  [OrderStage.PURCHASE_UNKNOWN]: { variant: 'solidNavy', icon: 'help' },
+  [OrderStage.PURCHASE_BLOCKED]: { variant: 'orange', icon: 'alert-triangle' },
+  [OrderStage.AWAITING_PAYMENT]: { variant: 'navy', icon: 'circle-dollar-sign' },
+  [OrderStage.TO_PURCHASE]: { variant: 'solidAmber', icon: 'shopping-cart' },
 };
 
 export function orderStagePresentation(

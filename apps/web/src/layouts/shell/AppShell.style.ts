@@ -986,11 +986,14 @@ export const ContentInner = styled.div<{ $fitsViewport?: boolean }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')} ${tkn('spacing.lg')};
   box-sizing: border-box;
   flex: 1;
-  /* A flex column, so a page that must FIT the content area (the Messages
-     inbox) can take the remaining height with flex: 1 + min-height: 0 and
-     scroll inside its own panes. Every other page is content-high as before:
-     a block child of a flex column keeps its auto height. */
-  display: flex;
+  /* A flex column ONLY on a route that fits the viewport (the Messages
+     inbox), so that page can take the remaining height with flex: 1 +
+     min-height: 0 and scroll inside its own panes. Every other page stays a
+     BLOCK child: under a flex column the page container's height becomes
+     definite, a card inside it with height: 100% (SettingsCard) then asks for
+     the whole page, and its overflow-hidden siblings (the order hero) are
+     squeezed to a strip (2026-10-01). */
+  display: ${({ $fitsViewport }) => ($fitsViewport ? 'flex' : 'block')};
   flex-direction: column;
   /* On a route that fits the viewport (routeMeta fitsViewport) the
      automatic minimum is dropped, so the page's own min-height: 0 can take

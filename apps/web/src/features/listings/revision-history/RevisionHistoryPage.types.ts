@@ -24,6 +24,11 @@ export interface RevisionHistoryRow {
   newQuantity: string;
   quantityChanged: boolean;
   quantityIncreased: boolean;
+  /** Amazon stock at this check, formatted; `null` on rows older than migration 134. */
+  previousSourceStock: string | null;
+  newSourceStock: string | null;
+  sourceStockChanged: boolean;
+  sourceStockIncreased: boolean;
 }
 
 /** State for the "all revisions of this listing" drawer, opened from a row. */

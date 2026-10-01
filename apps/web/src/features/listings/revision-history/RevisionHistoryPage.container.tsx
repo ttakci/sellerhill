@@ -1,4 +1,4 @@
-import type { ListingRevisionWithListingDto } from '@repo/shared';
+import { formatSourceStock, type ListingRevisionWithListingDto } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -72,6 +72,10 @@ export const RevisionHistoryPageContainer: React.FC = () => {
     () =>
       items.map((revision: ListingRevisionWithListingDto) => {
         const qtyDiff = revision.newQuantity - revision.previousQuantity;
+        const sourceDiff =
+          revision.previousSourceStock !== null && revision.newSourceStock !== null
+            ? revision.newSourceStock - revision.previousSourceStock
+            : 0;
         return {
           id: revision.id,
           listingId: revision.listingId,
@@ -81,14 +85,24 @@ export const RevisionHistoryPageContainer: React.FC = () => {
           storeName: revision.storeName,
           currency: revision.currency,
           recordedAt: formatRowDate(revision.recordedAt),
-          previousPrice: formatCurrency(revision.previousPrice, locale, revision.currency),
-          newPrice: formatCurrency(revision.newPrice, locale, revision.currency),
+          previousPrice: formatCurrency(revision.previousPrice, locale, revision.currency, 2),
+          newPrice: formatCurrency(revision.newPrice, locale, revision.currency, 2),
           priceChanged: revision.previousPrice !== revision.newPrice,
           priceIncreased: revision.newPrice > revision.previousPrice,
           previousQuantity: String(revision.previousQuantity),
           newQuantity: String(revision.newQuantity),
           quantityChanged: qtyDiff !== 0,
           quantityIncreased: qtyDiff > 0,
+          previousSourceStock:
+            revision.previousSourceStock === null
+              ? null
+              : formatSourceStock(revision.previousSourceStock, revision.previousSourceStockStatus),
+          newSourceStock:
+            revision.newSourceStock === null
+              ? null
+              : formatSourceStock(revision.newSourceStock, revision.newSourceStockStatus),
+          sourceStockChanged: sourceDiff !== 0,
+          sourceStockIncreased: sourceDiff > 0,
         };
       }),
     [items, formatRowDate, locale]
