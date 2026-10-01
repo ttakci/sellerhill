@@ -6,6 +6,7 @@
  */
 
 import {
+  Badge,
   Button,
   Dropdown,
   EmptyState,
@@ -128,9 +129,16 @@ export const MessagesPageComponent = ({
                   onClick={item.onSelect}
                 >
                   <Icon name={item.icon} size={16} color={item.isActive ? 'brand.primary' : 'text.secondary'} />
-                  <Text variant="body-sm" weight={item.isActive ? 'semibold' : 'medium'} color="inherit">
-                    {item.label}
-                  </Text>
+                  <S.RailItemLabel>
+                    <Text variant="body-sm" weight={item.isActive ? 'semibold' : 'medium'} color="inherit">
+                      {item.label}
+                    </Text>
+                  </S.RailItemLabel>
+                  {!!item.count && (
+                    <Badge variant="primary" size="xs" isPill>
+                      {item.count}
+                    </Badge>
+                  )}
                 </S.RailItem>
               ))}
             </S.RailGroup>

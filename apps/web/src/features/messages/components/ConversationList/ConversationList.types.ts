@@ -6,6 +6,8 @@ export interface ConversationRowView {
   otherParty: string;
   /** Single uppercase letter for the row avatar, resolved by the container. */
   avatarLabel: string;
+  /** Photo of the listing the thread is about; null → the avatar stands alone. */
+  imageUrl: string | null;
   title: string | null;
   snippet: string;
   date: string;

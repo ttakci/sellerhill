@@ -14,6 +14,8 @@ export interface MessagesFolderItemView {
   key: string;
   label: string;
   icon: IconName;
+  /** Unread conversations behind this folder; 0 / undefined renders no badge. */
+  count?: number;
   isActive: boolean;
   onSelect: () => void;
 }

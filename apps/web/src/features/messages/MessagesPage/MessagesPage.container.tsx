@@ -89,6 +89,9 @@ const avatarInitial = (name: string | null | undefined): string => {
   return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
 };
 
+/** "Unread (12)" — the count is omitted at 0 so a clean inbox reads clean. */
+const withCount = (label: string, count: number): string => (count > 0 ? `${label} (${count})` : label);
+
 /** Same store label the dashboard filter shows. */
 const storeLabel = (account: EbayAccountPublicDto): string =>
   account.storeName || account.ebayUsername || account.sellerId;
@@ -166,6 +169,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
           id: conversation.conversationId,
           otherParty,
           avatarLabel: avatarInitial(otherParty),
+          imageUrl: conversation.imageUrl ?? null,
           title: conversation.title,
           snippet: toSnippet(conversation.latestMessage?.body),
           date: formatListDate(conversation.latestMessage?.createdAt ?? conversation.createdAt),
@@ -291,6 +295,15 @@ export const MessagesPageContainer = (): React.ReactElement => {
 
   /* ─── folders: the rail (≥ lg) and its compact stand-in (< lg) ─── */
 
+  /** Unread conversations per type, counted live from eBay. */
+  const unreadByType = useMemo<Record<EbayConversationType, number>>(
+    () => ({
+      [EbayConversationType.FROM_MEMBERS]: inbox.unreadBreakdown?.members ?? 0,
+      [EbayConversationType.FROM_EBAY]: inbox.unreadBreakdown?.ebay ?? 0,
+    }),
+    [inbox.unreadBreakdown],
+  );
+
   /*
    * The rail mirrors eBay's own Messages page (operator request, 2026-10-01;
    * the competitor does the same): an Inbox group with "From members",
@@ -309,6 +322,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
       key: `${groupType}-${groupFolder}`,
       label,
       icon,
+      count: groupFolder === MessagesFolder.UNREAD ? unreadByType[groupType] : 0,
       isActive: type === groupType && folder === groupFolder,
       onSelect: () => setTypeAndFolder(groupType, groupFolder),
     });
@@ -326,13 +340,13 @@ export const MessagesPageContainer = (): React.ReactElement => {
       { key: 'archive', label: t(FOLDER_LABEL_KEY[MessagesFolder.ARCHIVE]), items: byType(MessagesFolder.ARCHIVE) },
       { key: 'deleted', label: t(FOLDER_LABEL_KEY[MessagesFolder.DELETED]), items: byType(MessagesFolder.DELETED) },
     ];
-  }, [t, type, folder, setTypeAndFolder]);
+  }, [t, type, folder, setTypeAndFolder, unreadByType]);
 
   const compactFilters = useMemo<MessagesCompactFilters>(
     () => ({
       typeItems: TYPES.map((entry) => ({
         id: entry,
-        label: t(TYPE_LABEL_KEY[entry]),
+        label: withCount(t(TYPE_LABEL_KEY[entry]), unreadByType[entry]),
         icon: TYPE_ICON[entry],
       })),
       typeValue: type,
@@ -342,7 +356,13 @@ export const MessagesPageContainer = (): React.ReactElement => {
           setType(next);
         }
       },
-      folderOptions: FOLDERS.map((entry) => ({ value: entry, label: t(FOLDER_LABEL_KEY[entry]) })),
+      folderOptions: FOLDERS.map((entry) => ({
+        value: entry,
+        label:
+          entry === MessagesFolder.UNREAD
+            ? withCount(t(FOLDER_LABEL_KEY[entry]), unreadByType[type])
+            : t(FOLDER_LABEL_KEY[entry]),
+      })),
       folderValue: folder,
       onFolderChange: (value: string) => {
         const next = FOLDERS.find((entry) => String(entry) === value);
@@ -351,7 +371,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         }
       },
     }),
-    [t, type, folder, setType, setFolder],
+    [t, type, folder, setType, setFolder, unreadByType],
   );
 
   /* ─── store filter — only worth showing with more than one store ─── */

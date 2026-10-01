@@ -14,6 +14,7 @@ import type {
   EbayConversationType,
   EbayReplyMessage,
   EbaySendMessageResultDto,
+  EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
   PaginatedConversationsDto,
 } from '@repo/shared';
@@ -27,6 +28,12 @@ import { baseApi } from '@/api/baseApi';
  * the webhook, so polling it costs eBay nothing.
  */
 export const MESSAGES_UNREAD_POLL_INTERVAL_MS = 120_000;
+
+/**
+ * How often an OPEN Messages page recounts its store's unread per type. Two
+ * Message API calls against the 500,000/day pool, only while the page is open.
+ */
+export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 120_000;
 
 export interface ConversationsQueryArgs {
   ebayAccountId: string;
@@ -49,6 +56,19 @@ export const messagesApi = baseApi.injectEndpoints({
     getUnreadMessageCount: builder.query<EbayUnreadCountDto, void>({
       query: () => ({ url: '/ebay/messages/unread-count' }),
       providesTags: [{ type: 'Messages', id: 'UNREAD' }],
+    }),
+    getUnreadBreakdown: builder.query<EbayUnreadBreakdownDto, { ebayAccountId: string }>({
+      query: (params) => ({ url: '/ebay/messages/unread-breakdown', params }),
+      providesTags: [{ type: 'Messages', id: 'BREAKDOWN' }],
+      // The server stores the recount it just made, so the sidebar badge has to re-read.
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(baseApi.util.invalidateTags([{ type: 'Messages', id: 'UNREAD' }]));
+        } catch {
+          // A failed recount leaves the badge at its last value.
+        }
+      },
     }),
     getConversations: builder.query<PaginatedConversationsDto, ConversationsQueryArgs>({
       query: (params) => ({ url: '/ebay/messages/conversations', params }),
@@ -78,25 +98,29 @@ export const messagesApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: 'Messages', id: 'LIST' }, { type: 'Messages', id: 'UNREAD' }],
+      invalidatesTags: [
+        { type: 'Messages', id: 'LIST' },
+        { type: 'Messages', id: 'UNREAD' },
+        { type: 'Messages', id: 'BREAKDOWN' },
+      ],
     }),
     bulkConversationStatus: builder.mutation<{ succeeded: string[]; failed: string[] }, EbayBulkConversationStatus>({
       query: (body) => ({ url: '/ebay/messages/conversations/bulk-status', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Messages', id: 'LIST' }, { type: 'Messages', id: 'UNREAD' }],
-    }),
-    refreshUnread: builder.mutation<{ unread: number }, { ebayAccountId: string }>({
-      query: (body) => ({ url: '/ebay/messages/refresh-unread', method: 'POST', body }),
-      invalidatesTags: [{ type: 'Messages', id: 'UNREAD' }],
+      invalidatesTags: [
+        { type: 'Messages', id: 'LIST' },
+        { type: 'Messages', id: 'UNREAD' },
+        { type: 'Messages', id: 'BREAKDOWN' },
+      ],
     }),
   }),
 });
 
 export const {
   useGetUnreadMessageCountQuery,
+  useGetUnreadBreakdownQuery,
   useGetConversationsQuery,
   useGetConversationThreadQuery,
   useReplyToConversationMutation,
   useSetConversationReadMutation,
   useBulkConversationStatusMutation,
-  useRefreshUnreadMutation,
 } = messagesApi;

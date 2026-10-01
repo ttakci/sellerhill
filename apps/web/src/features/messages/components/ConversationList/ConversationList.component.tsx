@@ -69,24 +69,52 @@ export const ConversationList = ({
                 aria-label={t('messages.list.select')}
               />
             </S.RowCheck>
-            <S.Avatar $unread={row.unreadCount > 0} aria-hidden>
-              <Text variant="body-sm" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
-                {row.avatarLabel}
-              </Text>
-            </S.Avatar>
+            <S.Thumb aria-hidden>
+              {row.imageUrl ? (
+                <>
+                  <S.ThumbImage src={row.imageUrl} alt="" loading="lazy" />
+                  <S.AvatarBadge>
+                    <S.Avatar $unread={row.unreadCount > 0}>
+                      <Text variant="caption" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
+                        {row.avatarLabel}
+                      </Text>
+                    </S.Avatar>
+                  </S.AvatarBadge>
+                </>
+              ) : (
+                <S.Avatar $unread={row.unreadCount > 0} $large>
+                  <Text variant="body" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
+                    {row.avatarLabel}
+                  </Text>
+                </S.Avatar>
+              )}
+            </S.Thumb>
             <S.RowMain>
               <S.RowButton type="button" onClick={() => onOpen(row.id)} aria-current={row.isActive || undefined}>
-                <S.RowLine>
-                  <Text variant="body" weight={row.unreadCount > 0 ? 'semibold' : 'medium'} truncate>
-                    {row.otherParty}
-                  </Text>
-                  <Text variant="caption" color="text.tertiary" numeric>
+                <S.NameLine>
+                  {row.unreadCount > 0 && <S.UnreadDot aria-hidden />}
+                  <S.NameText>
+                    <Text
+                      variant="body"
+                      weight={row.unreadCount > 0 ? 'semibold' : 'medium'}
+                      color={row.unreadCount > 0 ? 'text.primary' : 'text.secondary'}
+                      truncate
+                    >
+                      {row.otherParty}
+                    </Text>
+                  </S.NameText>
+                  <Text variant="caption" color={row.unreadCount > 0 ? 'brand.primary' : 'text.tertiary'} numeric>
                     {row.date}
                   </Text>
-                </S.RowLine>
+                </S.NameLine>
                 {row.title && (
                   <S.RowLine>
-                    <Text variant="body-sm" weight={row.unreadCount > 0 ? 'semibold' : 'regular'} truncate>
+                    <Text
+                      variant="body-sm"
+                      weight={row.unreadCount > 0 ? 'semibold' : 'regular'}
+                      color={row.unreadCount > 0 ? 'text.primary' : 'text.secondary'}
+                      truncate
+                    >
                       {row.title}
                     </Text>
                     {row.unreadCount > 0 && (
@@ -97,7 +125,7 @@ export const ConversationList = ({
                   </S.RowLine>
                 )}
                 <S.RowLine>
-                  <Text variant="body-sm" color="text.secondary" truncate>
+                  <Text variant="body-sm" color={row.unreadCount > 0 ? 'text.secondary' : 'text.tertiary'} truncate>
                     {row.snippet}
                   </Text>
                   {!row.title && row.unreadCount > 0 && (
