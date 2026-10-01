@@ -78,18 +78,21 @@ export const ListingCard = ({
               </S.Title>
             </Tooltip>
           </S.TitleSlot>
+          {status ? (
+            <S.BadgeRow>
+              <Badge variant={statusVariant} size="xs">
+                {status.label}
+              </Badge>
+            </S.BadgeRow>
+          ) : null}
         </S.TitleRow>
 
         <S.Body $orientation={orientation}>
-          <S.Content>
-            {status ? (
-              <S.BadgeRow>
-                <Badge variant={statusVariant} size="xs">
-                  {status.label}
-                </Badge>
-              </S.BadgeRow>
-            ) : null}
+          <S.Image $orientation={orientation}>
+            {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
+          </S.Image>
 
+          <S.Content>
             {meta.length > 0 && (
               <S.MetaList>
                 {meta.map((item) => (
@@ -113,10 +116,6 @@ export const ListingCard = ({
               </S.MetaList>
             )}
           </S.Content>
-
-          <S.Image $orientation={orientation}>
-            {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
-          </S.Image>
         </S.Body>
       </S.Top>
 
