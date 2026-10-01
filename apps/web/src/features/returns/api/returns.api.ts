@@ -1,11 +1,21 @@
 /**
  * eBay returns — RTK Query endpoints.
  *
- * Read-only on purpose: the page shows what is due and by when, and the seller
- * acts on eBay. There is no approve / refund mutation here.
+ * The list and the counts are read from our own table (filled by the sweep).
+ * The detail read is LIVE (one Post-Order call, at the seller's priority) and
+ * the three actions are the only writes — each one a documented Post-Order
+ * call the API sends once, after checking eBay's own option list.
  */
 
-import { ReturnTab, type PaginatedReturnsDto, type ReturnBucketCountsDto, type ReturnsQueryDto } from '@repo/shared';
+import {
+  ReturnTab,
+  type EbayReturnAction,
+  type EbayReturnActionResultDto,
+  type EbayReturnDetailDto,
+  type PaginatedReturnsDto,
+  type ReturnBucketCountsDto,
+  type ReturnsQueryDto,
+} from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -47,7 +57,21 @@ export const returnsApi = baseApi.injectEndpoints({
       },
       providesTags: ['Returns'],
     }),
+    /** The stored row plus a live read from eBay (history, shipments, the options eBay lists right now). */
+    getReturnDetail: builder.query<EbayReturnDetailDto, string>({
+      query: (id) => ({ url: `/returns/${encodeURIComponent(id)}/detail` }),
+      providesTags: (_result, _error, id) => [{ type: 'Returns', id }, 'Returns'],
+    }),
+    /** One of the three in-app actions. The API re-reads the return from eBay before sending anything. */
+    actOnReturn: builder.mutation<EbayReturnActionResultDto, { id: string; action: EbayReturnAction }>({
+      query: ({ id, action }) => ({
+        url: `/returns/${encodeURIComponent(id)}/actions/${action}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Returns'],
+    }),
   }),
 });
 
-export const { useGetReturnsQuery, useGetReturnCountsQuery } = returnsApi;
+export const { useGetReturnsQuery, useGetReturnCountsQuery, useGetReturnDetailQuery, useActOnReturnMutation } =
+  returnsApi;

@@ -1,5 +1,5 @@
 /**
- * URL-backed Returns page state: `?tab=&page=&store=&q=`.
+ * URL-backed Returns page state: `?tab=&page=&store=&q=&r=`.
  *
  * Everything that decides WHICH returns are listed lives in the query string,
  * so a filtered view is shareable and survives a refresh. Defaults are omitted
@@ -29,6 +29,8 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
   const page = Math.max(1, Math.floor(Number(params.get('page') ?? '1')) || 1);
   const store = params.get('store') ?? '';
   const search = (params.get('q') ?? '').trim();
+  // The open return. Not a filter: it does not touch the page or the tab.
+  const selected = params.get('r') ?? '';
 
   /* Captured once: only a bare `/returns` may be opened on "Needs action" by
      the container. Reading it live would bounce a seller back to that tab the
@@ -72,6 +74,7 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
   const setTab = useCallback((value: ReturnTab) => patch({ tab: value, page: null }), [patch]);
   const setPage = useCallback((value: number) => patch({ page: String(value) }), [patch]);
   const setStore = useCallback((value: string) => patch({ store: value, page: null }), [patch]);
+  const setSelected = useCallback((id: string | null) => patch({ r: id }), [patch]);
   const setRowsPerPage = useCallback(
     (rows: number) => {
       setRowsPerPageState(rows);
@@ -86,7 +89,7 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
 
   return useMemo(
     () => ({
-      state: { tab, page, store, search },
+      state: { tab, page, store, search, selected },
       searchInput,
       rowsPerPage,
       hasActiveFilters: Boolean(search || store || tab !== ReturnTab.ALL),
@@ -97,12 +100,15 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
       setSearchInput,
       setRowsPerPage,
       clearFilters,
+      setSelected,
     }),
     [
       tab,
       page,
       store,
       search,
+      selected,
+      setSelected,
       searchInput,
       rowsPerPage,
       openedWithSelection,

@@ -128,6 +128,14 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'true',
   }),
   def({
+    key: PlatformSettingKey.EBAY_RETURNS_ACTIONS_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_RETURNS_ACTIONS_ENABLED',
+    // Off until the first real return has proven the write calls (no Sandbox).
+    defaultValue: 'false',
+  }),
+  def({
     key: PlatformSettingKey.EBAY_RETURN_SYNC_QUOTA_PERCENT,
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,

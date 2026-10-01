@@ -5,7 +5,7 @@
     "subtitle_many": "{{count}} devoluciones",
     "subtitle_other": "{{count}} devoluciones",
     "loading": "Cargando devoluciones…",
-    "notice": "Responde las devoluciones en eBay. Esta página muestra qué está pendiente y para cuándo.",
+    "notice": "Abre una devolución para ver su historial y qué espera eBay. Donde eBay lo permite, puedes aprobarla, marcarla como recibida o reembolsar desde aquí; todo lo demás se responde en eBay.",
     "tabs": {
       "all": "Todas",
       "action": "Requieren acción",
@@ -62,7 +62,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Reembolsa al comprador (no se espera que devuelva el artículo)",
       "REMINDER_FOR_RMA": "Recordatorio de RMA: responde en eBay",
       "REMINDER_SELLER_TO_RESPOND": "Responde a la solicitud de devolución",
-      "other": "Responde en eBay"
+      "other": "Responde en eBay",
+      "SELLER_SEND_MESSAGE": "Enviar un mensaje al comprador",
+      "SELLER_ESCALATE": "Escalar a eBay",
+      "SELLER_OFFER_REPLACEMENT": "Ofrecer un reemplazo"
     },
     "dueBy": "antes del {{date}}",
     "reasonType": {
@@ -91,6 +94,114 @@
       "title": "Ninguna devolución coincide con los filtros",
       "description": "Prueba con otra pestaña, tienda o búsqueda.",
       "action": "Borrar filtros"
+    },
+    "detail": {
+      "title": "Devolución {{id}}",
+      "titleLoading": "Devolución",
+      "open": "Abrir devolución",
+      "loadFailed": "No se pudo cargar esta devolución",
+      "loadFailedDescription": "Inténtalo de nuevo en un momento o ábrela en eBay.",
+      "offline": "No se pudo contactar con eBay ahora mismo; este es el último estado que conoce SellerHill. Las acciones se ofrecerán cuando eBay vuelva a responder.",
+      "whatYouCanDo": "Qué puedes hacer",
+      "nothingToDo": "Nada está pendiente de ti en esta devolución.",
+      "openOnEbay": "Abrir en eBay",
+      "alsoOnEbay": "También en eBay: {{options}}",
+      "buyer": "Comprador",
+      "quantity": "Cantidad",
+      "returnType": "Tipo de devolución",
+      "itemPrice": "Precio del artículo",
+      "closedAs": "Cerrada como",
+      "closedAt": "Cerrada el",
+      "shipment": "Envío de la devolución",
+      "shippedAt": "Enviado",
+      "deliveredAt": "Entregado",
+      "markedReceived": "Marcado como recibido",
+      "yes": "Sí",
+      "no": "No",
+      "journey": "Recorrido",
+      "journeyEmpty": "eBay aún no ha registrado ningún paso.",
+      "partialRefundOffered": "Se ofreció un reembolso parcial de {{amount}}",
+      "trackingNumber": "Seguimiento {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Aprobar devolución",
+        "mark_received": "Marcar como recibido",
+        "issue_refund": "Emitir reembolso"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Reembolsar {{amount}}"
+      },
+      "confirm": {
+        "approve": "¿Aprobar esta solicitud de devolución en eBay? Se le pedirá al comprador que envíe el artículo de vuelta.",
+        "mark_received": "¿Indicar a eBay que el artículo devuelto ya llegó? Hazlo solo cuando lo tengas en tus manos.",
+        "issue_refund": "¿Reembolsar {{amount}} al comprador ahora? eBay mueve el dinero en cuanto lo acepta y no se puede deshacer desde aquí."
+      },
+      "done": {
+        "approve": "La devolución se aprobó en eBay.",
+        "mark_received": "El artículo se marcó como recibido en eBay.",
+        "issue_refund": "El reembolso se emitió en eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "El comprador abrió la devolución",
+      "BUYER_PRINT_SHIPPING_LABEL": "El comprador imprimió la etiqueta de envío",
+      "BUYER_PROVIDE_TRACKING_INFO": "El comprador agregó el seguimiento",
+      "BUYER_MARK_RETURN_SHIPPED": "El comprador marcó el artículo como enviado",
+      "BUYER_ESCALATE": "El comprador escaló a eBay",
+      "BUYER_CLOSE_RETURN": "El comprador cerró la devolución",
+      "BUYER_SEND_MESSAGE": "El comprador envió un mensaje",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "El comprador aceptó el reembolso parcial",
+      "BUYER_DECLINE_PARTIAL_REFUND": "El comprador rechazó el reembolso parcial",
+      "BUYER_MARK_REFUND_RECEIVED": "El comprador confirmó que recibió el reembolso",
+      "SELLER_APPROVE_REQUEST": "El vendedor aprobó la devolución",
+      "SELLER_DECLINE_REQUEST": "El vendedor rechazó la devolución",
+      "SELLER_ISSUE_REFUND": "El vendedor emitió el reembolso",
+      "SELLER_MARK_AS_RECEIVED": "El vendedor marcó el artículo como recibido",
+      "SELLER_OFFER_PARTIAL_REFUND": "El vendedor ofreció un reembolso parcial",
+      "SELLER_PROVIDE_RMA": "El vendedor proporcionó un número RMA",
+      "SELLER_PROVIDE_LABEL": "El vendedor proporcionó una etiqueta de envío",
+      "SELLER_SEND_MESSAGE": "El vendedor envió un mensaje",
+      "SELLER_ESCALATE": "El vendedor escaló a eBay",
+      "SELLER_OFFER_REPLACEMENT": "El vendedor ofreció un reemplazo",
+      "SELLER_PROVIDE_TRACKING_INFO": "El vendedor agregó el seguimiento",
+      "SYSTEM_CREATE_RETURN": "eBay abrió la devolución",
+      "SYSTEM_CLOSE_RETURN": "eBay cerró la devolución",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay reembolsó al comprador de inmediato",
+      "SYSTEM_INITIATED_REFUND": "eBay emitió el reembolso",
+      "EBAY_RULE_AUTO_APPROVE": "eBay aprobó la devolución automáticamente",
+      "buyerOther": "Paso del comprador",
+      "sellerOther": "Paso del vendedor",
+      "ebayOther": "Paso de eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Reembolso",
+      "REPLACEMENT": "Reemplazo",
+      "EXCHANGE": "Cambio"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Reembolsada por completo",
+      "PARTIAL_REFUNDED": "Reembolsada parcialmente",
+      "NO_REFUND": "Cerrada sin reembolso",
+      "other": "Cerrada"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Entregado",
+      "IN_TRANSIT": "En tránsito",
+      "OUT_FOR_DELIVERY": "En reparto",
+      "NOT_SHIPPED": "Aún no enviado",
+      "SHIPPED": "Enviado"
+    },
+    "errors": {
+      "actionsDisabled": "Las acciones de devolución desde la aplicación están desactivadas en esta plataforma. Responde la devolución en eBay.",
+      "actionNotAvailable": "eBay ya no ofrece esta acción en la devolución. Actualiza y revisa qué está pendiente ahora.",
+      "suspended": "Tu suscripción está suspendida, así que las acciones de devolución están en pausa. Paga la factura en la página de Facturación.",
+      "ebayRejected": "eBay rechazó esta acción. Abre la devolución en eBay para ver el motivo.",
+      "unavailable": "No se pudo contactar con eBay. Inténtalo de nuevo en un momento.",
+      "sandbox": "Las acciones de devolución no están disponibles en el sandbox de eBay.",
+      "refundAmountUnknown": "eBay no informó un monto de reembolso para esta devolución, así que el reembolso debe emitirse en eBay.",
+      "notFound": "No se encontró esta devolución."
     }
   }
 }

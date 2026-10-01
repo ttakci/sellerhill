@@ -6,7 +6,7 @@
     "subtitle_many": "{{count}} возвратов",
     "subtitle_other": "{{count}} возврата",
     "loading": "Загружаем возвраты…",
-    "notice": "Отвечайте на возвраты на eBay. Здесь видно, что от вас требуется и к какому сроку.",
+    "notice": "Откройте возврат, чтобы увидеть его историю и чего ждёт eBay. Там, где eBay это разрешает, вы можете одобрить возврат, отметить товар полученным или вернуть деньги отсюда; всё остальное решается на eBay.",
     "tabs": {
       "all": "Все",
       "action": "Требуют действий",
@@ -64,7 +64,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Верните деньги покупателю (товар обратно не ожидается)",
       "REMINDER_FOR_RMA": "Напоминание об RMA: ответьте на eBay",
       "REMINDER_SELLER_TO_RESPOND": "Ответьте на запрос о возврате",
-      "other": "Ответьте на eBay"
+      "other": "Ответьте на eBay",
+      "SELLER_SEND_MESSAGE": "Написать покупателю",
+      "SELLER_ESCALATE": "Передать на eBay",
+      "SELLER_OFFER_REPLACEMENT": "Предложить замену"
     },
     "dueBy": "до {{date}}",
     "reasonType": {
@@ -93,6 +96,114 @@
       "title": "Нет возвратов, соответствующих фильтрам",
       "description": "Попробуйте другую вкладку, магазин или запрос.",
       "action": "Сбросить фильтры"
+    },
+    "detail": {
+      "title": "Возврат {{id}}",
+      "titleLoading": "Возврат",
+      "open": "Открыть возврат",
+      "loadFailed": "Не удалось загрузить этот возврат",
+      "loadFailedDescription": "Повторите попытку через минуту или откройте его на eBay.",
+      "offline": "eBay сейчас недоступен, показано последнее состояние, известное SellerHill. Действия появятся, когда eBay снова ответит.",
+      "whatYouCanDo": "Что вы можете сделать",
+      "nothingToDo": "По этому возврату от вас ничего не требуется.",
+      "openOnEbay": "Открыть на eBay",
+      "alsoOnEbay": "Также на eBay: {{options}}",
+      "buyer": "Покупатель",
+      "quantity": "Количество",
+      "returnType": "Тип возврата",
+      "itemPrice": "Цена товара",
+      "closedAs": "Закрыт как",
+      "closedAt": "Дата закрытия",
+      "shipment": "Обратная отправка",
+      "shippedAt": "Отправлено",
+      "deliveredAt": "Доставлено",
+      "markedReceived": "Отмечено полученным",
+      "yes": "Да",
+      "no": "Нет",
+      "journey": "Ход возврата",
+      "journeyEmpty": "eBay пока не зафиксировал ни одного шага.",
+      "partialRefundOffered": "Предложен частичный возврат {{amount}}",
+      "trackingNumber": "Трек-номер {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Одобрить возврат",
+        "mark_received": "Отметить полученным",
+        "issue_refund": "Вернуть деньги"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Вернуть {{amount}}"
+      },
+      "confirm": {
+        "approve": "Одобрить этот запрос на возврат на eBay? Покупателю предложат отправить товар обратно.",
+        "mark_received": "Сообщить eBay, что возвращённый товар получен? Делайте это, только когда товар у вас на руках.",
+        "issue_refund": "Вернуть покупателю {{amount}} сейчас? eBay переведёт деньги сразу после подтверждения, отменить это отсюда нельзя."
+      },
+      "done": {
+        "approve": "Возврат одобрен на eBay.",
+        "mark_received": "Товар отмечен полученным на eBay.",
+        "issue_refund": "Деньги возвращены на eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Покупатель открыл возврат",
+      "BUYER_PRINT_SHIPPING_LABEL": "Покупатель распечатал ярлык",
+      "BUYER_PROVIDE_TRACKING_INFO": "Покупатель добавил трек-номер",
+      "BUYER_MARK_RETURN_SHIPPED": "Покупатель отметил товар отправленным",
+      "BUYER_ESCALATE": "Покупатель передал спор на eBay",
+      "BUYER_CLOSE_RETURN": "Покупатель закрыл возврат",
+      "BUYER_SEND_MESSAGE": "Покупатель отправил сообщение",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Покупатель принял частичный возврат",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Покупатель отклонил частичный возврат",
+      "BUYER_MARK_REFUND_RECEIVED": "Покупатель подтвердил получение денег",
+      "SELLER_APPROVE_REQUEST": "Продавец одобрил возврат",
+      "SELLER_DECLINE_REQUEST": "Продавец отклонил возврат",
+      "SELLER_ISSUE_REFUND": "Продавец вернул деньги",
+      "SELLER_MARK_AS_RECEIVED": "Продавец отметил товар полученным",
+      "SELLER_OFFER_PARTIAL_REFUND": "Продавец предложил частичный возврат",
+      "SELLER_PROVIDE_RMA": "Продавец указал номер RMA",
+      "SELLER_PROVIDE_LABEL": "Продавец предоставил ярлык",
+      "SELLER_SEND_MESSAGE": "Продавец отправил сообщение",
+      "SELLER_ESCALATE": "Продавец передал спор на eBay",
+      "SELLER_OFFER_REPLACEMENT": "Продавец предложил замену",
+      "SELLER_PROVIDE_TRACKING_INFO": "Продавец добавил трек-номер",
+      "SYSTEM_CREATE_RETURN": "eBay открыл возврат",
+      "SYSTEM_CLOSE_RETURN": "eBay закрыл возврат",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay сразу вернул деньги покупателю",
+      "SYSTEM_INITIATED_REFUND": "eBay выполнил возврат денег",
+      "EBAY_RULE_AUTO_APPROVE": "eBay автоматически одобрил возврат",
+      "buyerOther": "Шаг покупателя",
+      "sellerOther": "Шаг продавца",
+      "ebayOther": "Шаг eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Возврат денег",
+      "REPLACEMENT": "Замена",
+      "EXCHANGE": "Обмен"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Деньги возвращены полностью",
+      "PARTIAL_REFUNDED": "Деньги возвращены частично",
+      "NO_REFUND": "Закрыт без возврата денег",
+      "other": "Закрыт"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Доставлено",
+      "IN_TRANSIT": "В пути",
+      "OUT_FOR_DELIVERY": "Передано курьеру",
+      "NOT_SHIPPED": "Ещё не отправлено",
+      "SHIPPED": "Отправлено"
+    },
+    "errors": {
+      "actionsDisabled": "Действия с возвратами из приложения отключены на этой платформе. Ответьте на возврат на eBay.",
+      "actionNotAvailable": "eBay больше не предлагает это действие по данному возврату. Обновите страницу и проверьте, что требуется сейчас.",
+      "suspended": "Ваша подписка приостановлена, поэтому действия с возвратами недоступны. Оплатите счёт на странице «Оплата».",
+      "ebayRejected": "eBay отклонил это действие. Откройте возврат на eBay, чтобы узнать причину.",
+      "unavailable": "Не удалось связаться с eBay. Повторите попытку через минуту.",
+      "sandbox": "Действия с возвратами недоступны в песочнице eBay.",
+      "refundAmountUnknown": "eBay не сообщил сумму возврата, поэтому вернуть деньги нужно на eBay.",
+      "notFound": "Этот возврат не найден."
     }
   }
 }

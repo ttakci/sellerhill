@@ -147,6 +147,12 @@ export enum PlatformSettingKey {
   EBAY_RETURN_SYNC_INTERVAL_HOURS = 'ebay.returnSync.intervalHours',
   /** Stores per tick. */
   EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.returnSync.maxAccountsPerRun',
+  /**
+   * In-app return actions (approve / mark received / issue refund) — OFF by
+   * default: the Post-Order write calls have no Sandbox and move real money,
+   * so they are switched on only after the first real return has proven them.
+   */
+  EBAY_RETURNS_ACTIONS_ENABLED = 'ebay.returns.actionsEnabled',
 
   // --- Amazon order sync / tracking ---
   /**

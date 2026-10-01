@@ -16,7 +16,7 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-interface ClaimedAccount {
+export interface ClaimedAccount {
   id: string;
   user_id: string;
   marketplace_id: string | null;
@@ -222,7 +222,8 @@ export class EbayReturnsSyncService {
    * id, for the same seller only. It is NULL when we hold no such order, and
    * an existing link is never dropped by a later sweep (COALESCE).
    */
-  private async upsertReturn(account: ClaimedAccount, row: EbayReturnRow): Promise<void> {
+  /** Also called by `EbayReturnsActionsService` after an action, with the fresh detail read. */
+  async upsertReturn(account: Pick<ClaimedAccount, 'id' | 'user_id'>, row: EbayReturnRow): Promise<void> {
     await this.database.query(
       `INSERT INTO ebay_returns (
          user_id, ebay_account_id, return_id, ebay_order_id, order_id,

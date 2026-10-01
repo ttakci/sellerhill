@@ -6,7 +6,7 @@
     "subtitle_many": "{{count}} повернень",
     "subtitle_other": "{{count}} повернення",
     "loading": "Завантажуємо повернення…",
-    "notice": "Відповідайте на повернення на eBay. Тут видно, що від вас потрібно і до якого терміну.",
+    "notice": "Відкрийте повернення, щоб побачити його історію та чого чекає eBay. Там, де eBay дозволяє, ви можете схвалити його, позначити товар отриманим або повернути кошти звідси; усе інше вирішується на eBay.",
     "tabs": {
       "all": "Усі",
       "action": "Потребують дій",
@@ -64,7 +64,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Поверніть гроші покупцеві (товар назад не очікується)",
       "REMINDER_FOR_RMA": "Нагадування про RMA: дайте відповідь на eBay",
       "REMINDER_SELLER_TO_RESPOND": "Дайте відповідь на запит про повернення",
-      "other": "Дайте відповідь на eBay"
+      "other": "Дайте відповідь на eBay",
+      "SELLER_SEND_MESSAGE": "Написати покупцеві",
+      "SELLER_ESCALATE": "Передати на eBay",
+      "SELLER_OFFER_REPLACEMENT": "Запропонувати заміну"
     },
     "dueBy": "до {{date}}",
     "reasonType": {
@@ -93,6 +96,114 @@
       "title": "Немає повернень, що відповідають фільтрам",
       "description": "Спробуйте іншу вкладку, магазин або запит.",
       "action": "Скинути фільтри"
+    },
+    "detail": {
+      "title": "Повернення {{id}}",
+      "titleLoading": "Повернення",
+      "open": "Відкрити повернення",
+      "loadFailed": "Не вдалося завантажити це повернення",
+      "loadFailedDescription": "Спробуйте ще раз за хвилину або відкрийте його на eBay.",
+      "offline": "eBay зараз недоступний; показано останній стан, відомий SellerHill. Дії з'являться, коли eBay знову відповість.",
+      "whatYouCanDo": "Що ви можете зробити",
+      "nothingToDo": "За цим поверненням від вас нічого не потрібно.",
+      "openOnEbay": "Відкрити на eBay",
+      "alsoOnEbay": "Також на eBay: {{options}}",
+      "buyer": "Покупець",
+      "quantity": "Кількість",
+      "returnType": "Тип повернення",
+      "itemPrice": "Ціна товару",
+      "closedAs": "Закрито як",
+      "closedAt": "Дата закриття",
+      "shipment": "Зворотне відправлення",
+      "shippedAt": "Відправлено",
+      "deliveredAt": "Доставлено",
+      "markedReceived": "Позначено отриманим",
+      "yes": "Так",
+      "no": "Ні",
+      "journey": "Перебіг",
+      "journeyEmpty": "eBay ще не зафіксував жодного кроку.",
+      "partialRefundOffered": "Запропоновано часткове повернення {{amount}}",
+      "trackingNumber": "Трек-номер {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Схвалити повернення",
+        "mark_received": "Позначити отриманим",
+        "issue_refund": "Повернути кошти"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "Повернути {{amount}}"
+      },
+      "confirm": {
+        "approve": "Схвалити цей запит на повернення на eBay? Покупця попросять відправити товар назад.",
+        "mark_received": "Повідомити eBay, що повернутий товар отримано? Робіть це лише тоді, коли товар у вас на руках.",
+        "issue_refund": "Повернути покупцеві {{amount}} зараз? eBay перекаже кошти одразу після підтвердження, і скасувати це звідси не можна."
+      },
+      "done": {
+        "approve": "Повернення схвалено на eBay.",
+        "mark_received": "Товар позначено отриманим на eBay.",
+        "issue_refund": "Кошти повернуто на eBay."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Покупець відкрив повернення",
+      "BUYER_PRINT_SHIPPING_LABEL": "Покупець роздрукував етикетку",
+      "BUYER_PROVIDE_TRACKING_INFO": "Покупець додав трек-номер",
+      "BUYER_MARK_RETURN_SHIPPED": "Покупець позначив товар відправленим",
+      "BUYER_ESCALATE": "Покупець передав спір на eBay",
+      "BUYER_CLOSE_RETURN": "Покупець закрив повернення",
+      "BUYER_SEND_MESSAGE": "Покупець надіслав повідомлення",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Покупець прийняв часткове повернення",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Покупець відхилив часткове повернення",
+      "BUYER_MARK_REFUND_RECEIVED": "Покупець підтвердив отримання коштів",
+      "SELLER_APPROVE_REQUEST": "Продавець схвалив повернення",
+      "SELLER_DECLINE_REQUEST": "Продавець відхилив повернення",
+      "SELLER_ISSUE_REFUND": "Продавець повернув кошти",
+      "SELLER_MARK_AS_RECEIVED": "Продавець позначив товар отриманим",
+      "SELLER_OFFER_PARTIAL_REFUND": "Продавець запропонував часткове повернення",
+      "SELLER_PROVIDE_RMA": "Продавець надав номер RMA",
+      "SELLER_PROVIDE_LABEL": "Продавець надав етикетку",
+      "SELLER_SEND_MESSAGE": "Продавець надіслав повідомлення",
+      "SELLER_ESCALATE": "Продавець передав спір на eBay",
+      "SELLER_OFFER_REPLACEMENT": "Продавець запропонував заміну",
+      "SELLER_PROVIDE_TRACKING_INFO": "Продавець додав трек-номер",
+      "SYSTEM_CREATE_RETURN": "eBay відкрив повернення",
+      "SYSTEM_CLOSE_RETURN": "eBay закрив повернення",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay одразу повернув кошти покупцеві",
+      "SYSTEM_INITIATED_REFUND": "eBay повернув кошти",
+      "EBAY_RULE_AUTO_APPROVE": "eBay схвалив повернення автоматично",
+      "buyerOther": "Крок покупця",
+      "sellerOther": "Крок продавця",
+      "ebayOther": "Крок eBay"
+    },
+    "returnType": {
+      "MONEY_BACK": "Повернення коштів",
+      "REPLACEMENT": "Заміна",
+      "EXCHANGE": "Обмін"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Кошти повернуто повністю",
+      "PARTIAL_REFUNDED": "Кошти повернуто частково",
+      "NO_REFUND": "Закрито без повернення коштів",
+      "other": "Закрито"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Доставлено",
+      "IN_TRANSIT": "У дорозі",
+      "OUT_FOR_DELIVERY": "Передано кур'єру",
+      "NOT_SHIPPED": "Ще не відправлено",
+      "SHIPPED": "Відправлено"
+    },
+    "errors": {
+      "actionsDisabled": "Дії з поверненнями з застосунку вимкнено на цій платформі. Дайте відповідь на повернення на eBay.",
+      "actionNotAvailable": "eBay більше не пропонує цю дію для цього повернення. Оновіть сторінку та перевірте, що потрібно зараз.",
+      "suspended": "Вашу підписку призупинено, тому дії з поверненнями недоступні. Сплатіть рахунок на сторінці «Оплата».",
+      "ebayRejected": "eBay відхилив цю дію. Відкрийте повернення на eBay, щоб дізнатися причину.",
+      "unavailable": "Не вдалося зв'язатися з eBay. Спробуйте ще раз за хвилину.",
+      "sandbox": "Дії з поверненнями недоступні в пісочниці eBay.",
+      "refundAmountUnknown": "eBay не повідомив суму повернення, тому кошти потрібно повернути на eBay.",
+      "notFound": "Це повернення не знайдено."
     }
   }
 }

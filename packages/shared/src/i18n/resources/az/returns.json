@@ -4,7 +4,7 @@
     "subtitle_one": "{{count}} qaytarma",
     "subtitle_other": "{{count}} qaytarma",
     "loading": "Qaytarmalar yüklənir…",
-    "notice": "Qaytarmalara eBay-də cavab verin. Bu səhifə sizdən nə gözlənildiyini və son tarixi göstərir.",
+    "notice": "Qaytarmanı açaraq onun tarixçəsini və eBay-in sizdən nə gözlədiyini görün. eBay icazə verdiyi yerlərdə onu buradan təsdiqləyə, alındı kimi işarələyə və ya geri ödəniş edə bilərsiniz; qalan hər şey eBay-də cavablandırılır.",
     "tabs": {
       "all": "Hamısı",
       "action": "Tədbir tələb edir",
@@ -60,7 +60,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya pulu qaytarın (məhsulun geri göndərilməsi gözlənilmir)",
       "REMINDER_FOR_RMA": "RMA xatırlatması: eBay-də cavab verin",
       "REMINDER_SELLER_TO_RESPOND": "Qaytarma sorğusuna cavab verin",
-      "other": "eBay-də cavab verin"
+      "other": "eBay-də cavab verin",
+      "SELLER_SEND_MESSAGE": "Alıcıya mesaj göndərin",
+      "SELLER_ESCALATE": "eBay-ə yönləndirin",
+      "SELLER_OFFER_REPLACEMENT": "Əvəzedici təklif edin"
     },
     "dueBy": "Son tarix: {{date}}",
     "reasonType": {
@@ -89,6 +92,114 @@
       "title": "Filtrlərə uyğun qaytarma yoxdur",
       "description": "Başqa tab, mağaza və ya axtarış sınayın.",
       "action": "Filtrləri təmizlə"
+    },
+    "detail": {
+      "title": "Qaytarma {{id}}",
+      "titleLoading": "Qaytarma",
+      "open": "Qaytarmanı aç",
+      "loadFailed": "Bu qaytarma yüklənə bilmədi",
+      "loadFailedDescription": "Bir az sonra yenidən cəhd edin və ya onu eBay-də açın.",
+      "offline": "Hazırda eBay-ə çatmaq mümkün olmadı; bu, SellerHill-in bildiyi son vəziyyətdir. eBay yenidən cavab verəndə əməliyyatlar təklif olunacaq.",
+      "whatYouCanDo": "Nə edə bilərsiniz",
+      "nothingToDo": "Bu qaytarmada sizdən gözlənilən bir şey yoxdur.",
+      "openOnEbay": "eBay-də aç",
+      "alsoOnEbay": "eBay-də həmçinin: {{options}}",
+      "buyer": "Alıcı",
+      "quantity": "Miqdar",
+      "returnType": "Qaytarma növü",
+      "itemPrice": "Məhsulun qiyməti",
+      "closedAs": "Bağlanma səbəbi",
+      "closedAt": "Bağlanma tarixi",
+      "shipment": "Qaytarma göndərişi",
+      "shippedAt": "Göndərildi",
+      "deliveredAt": "Çatdırıldı",
+      "markedReceived": "Alındı kimi işarələndi",
+      "yes": "Bəli",
+      "no": "Xeyr",
+      "journey": "Gedişat",
+      "journeyEmpty": "eBay hələ heç bir addım qeyd etməyib.",
+      "partialRefundOffered": "{{amount}} məbləğində qismən geri ödəniş təklif edildi",
+      "trackingNumber": "İzləmə {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "Qaytarmanı təsdiqlə",
+        "mark_received": "Alındı kimi işarələ",
+        "issue_refund": "Geri ödəniş et"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "{{amount}} geri ödə"
+      },
+      "confirm": {
+        "approve": "Bu qaytarma sorğusu eBay-də təsdiqlənsin? Alıcıdan məhsulu geri göndərməsi istəniləcək.",
+        "mark_received": "eBay-ə qaytarılan məhsulun çatdığı bildirilsin? Bunu yalnız məhsul əlinizdə olanda edin.",
+        "issue_refund": "Alıcıya indi {{amount}} geri ödənilsin? eBay qəbul edən kimi pulu köçürür və bu, buradan geri alına bilməz."
+      },
+      "done": {
+        "approve": "Qaytarma eBay-də təsdiqləndi.",
+        "mark_received": "Məhsul eBay-də alındı kimi işarələndi.",
+        "issue_refund": "Geri ödəniş eBay-də edildi."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Alıcı qaytarmanı açdı",
+      "BUYER_PRINT_SHIPPING_LABEL": "Alıcı göndəriş etiketini çap etdi",
+      "BUYER_PROVIDE_TRACKING_INFO": "Alıcı izləmə əlavə etdi",
+      "BUYER_MARK_RETURN_SHIPPED": "Alıcı məhsulu göndərildi kimi işarələdi",
+      "BUYER_ESCALATE": "Alıcı məsələni eBay-ə yönləndirdi",
+      "BUYER_CLOSE_RETURN": "Alıcı qaytarmanı bağladı",
+      "BUYER_SEND_MESSAGE": "Alıcı mesaj göndərdi",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Alıcı qismən geri ödənişi qəbul etdi",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Alıcı qismən geri ödənişi rədd etdi",
+      "BUYER_MARK_REFUND_RECEIVED": "Alıcı geri ödənişin çatdığını təsdiqlədi",
+      "SELLER_APPROVE_REQUEST": "Satıcı qaytarmanı təsdiqlədi",
+      "SELLER_DECLINE_REQUEST": "Satıcı qaytarmanı rədd etdi",
+      "SELLER_ISSUE_REFUND": "Satıcı geri ödəniş etdi",
+      "SELLER_MARK_AS_RECEIVED": "Satıcı məhsulu alındı kimi işarələdi",
+      "SELLER_OFFER_PARTIAL_REFUND": "Satıcı qismən geri ödəniş təklif etdi",
+      "SELLER_PROVIDE_RMA": "Satıcı RMA nömrəsi verdi",
+      "SELLER_PROVIDE_LABEL": "Satıcı göndəriş etiketi təqdim etdi",
+      "SELLER_SEND_MESSAGE": "Satıcı mesaj göndərdi",
+      "SELLER_ESCALATE": "Satıcı məsələni eBay-ə yönləndirdi",
+      "SELLER_OFFER_REPLACEMENT": "Satıcı əvəzedici təklif etdi",
+      "SELLER_PROVIDE_TRACKING_INFO": "Satıcı izləmə əlavə etdi",
+      "SYSTEM_CREATE_RETURN": "eBay qaytarmanı açdı",
+      "SYSTEM_CLOSE_RETURN": "eBay qaytarmanı bağladı",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay alıcıya dərhal geri ödəniş etdi",
+      "SYSTEM_INITIATED_REFUND": "eBay geri ödəniş etdi",
+      "EBAY_RULE_AUTO_APPROVE": "eBay qaytarmanı avtomatik təsdiqlədi",
+      "buyerOther": "Alıcı addımı",
+      "sellerOther": "Satıcı addımı",
+      "ebayOther": "eBay addımı"
+    },
+    "returnType": {
+      "MONEY_BACK": "Pulun qaytarılması",
+      "REPLACEMENT": "Əvəzedici",
+      "EXCHANGE": "Dəyişdirmə"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Tam geri ödənildi",
+      "PARTIAL_REFUNDED": "Qismən geri ödənildi",
+      "NO_REFUND": "Geri ödənişsiz bağlandı",
+      "other": "Bağlandı"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Çatdırıldı",
+      "IN_TRANSIT": "Yoldadır",
+      "OUT_FOR_DELIVERY": "Çatdırılmaya çıxıb",
+      "NOT_SHIPPED": "Hələ göndərilməyib",
+      "SHIPPED": "Göndərildi"
+    },
+    "errors": {
+      "actionsDisabled": "Tətbiqdaxili qaytarma əməliyyatları bu platformada söndürülüb. Qaytarmanı eBay-də cavablandırın.",
+      "actionNotAvailable": "eBay bu qaytarmada artıq bu əməliyyatı təklif etmir. Səhifəni yeniləyib indi nə gözlənildiyinə baxın.",
+      "suspended": "Abunəliyiniz dayandırıldığı üçün qaytarma əməliyyatları durdurulub. Fakturanı Ödənişlər səhifəsindən ödəyin.",
+      "ebayRejected": "eBay bu əməliyyatı rədd etdi. Səbəbi görmək üçün qaytarmanı eBay-də açın.",
+      "unavailable": "eBay-ə çatmaq mümkün olmadı. Bir az sonra yenidən cəhd edin.",
+      "sandbox": "Qaytarma əməliyyatları eBay sandbox mühitində mövcud deyil.",
+      "refundAmountUnknown": "eBay bu qaytarma üçün geri ödəniş məbləği bildirməyib, ona görə geri ödəniş eBay-də edilməlidir.",
+      "notFound": "Bu qaytarma tapılmadı."
     }
   }
 }

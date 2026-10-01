@@ -4,7 +4,7 @@
     "subtitle_one": "{{count}} iade",
     "subtitle_other": "{{count}} iade",
     "loading": "İadeler yükleniyor…",
-    "notice": "İadeleri eBay üzerinden yanıtlayın. Bu sayfa sizden ne beklendiğini ve son tarihini gösterir.",
+    "notice": "Bir iadeyi açınca geçmişini ve eBay'in sizden ne beklediğini görürsünüz. eBay izin verdiğinde onaylama, teslim alındı işaretleme ve geri ödemeyi buradan yapabilirsiniz; geri kalan her şey eBay üzerinden yanıtlanır.",
     "tabs": {
       "all": "Tümü",
       "action": "Aksiyon gerekli",
@@ -60,7 +60,10 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya geri ödeme yapın (ürünün geri gönderilmesi beklenmiyor)",
       "REMINDER_FOR_RMA": "RMA hatırlatması: eBay'de yanıtlayın",
       "REMINDER_SELLER_TO_RESPOND": "İade talebini yanıtlayın",
-      "other": "eBay'de yanıtlayın"
+      "other": "eBay'de yanıtlayın",
+      "SELLER_SEND_MESSAGE": "Alıcıya mesaj gönderin",
+      "SELLER_ESCALATE": "eBay'e taşıyın",
+      "SELLER_OFFER_REPLACEMENT": "Yenisiyle değişim önerin"
     },
     "dueBy": "Son tarih: {{date}}",
     "reasonType": {
@@ -89,6 +92,114 @@
       "title": "Filtrelere uyan iade yok",
       "description": "Başka bir sekme, mağaza veya arama deneyin.",
       "action": "Filtreleri temizle"
+    },
+    "detail": {
+      "title": "İade {{id}}",
+      "titleLoading": "İade",
+      "open": "İadeyi aç",
+      "loadFailed": "Bu iade yüklenemedi",
+      "loadFailedDescription": "Biraz sonra tekrar deneyin ya da eBay'de açın.",
+      "offline": "eBay'e şu an ulaşılamadı; gördüğünüz, SellerHill'in bildiği son durum. eBay yeniden yanıt verdiğinde işlemler sunulur.",
+      "whatYouCanDo": "Yapabilecekleriniz",
+      "nothingToDo": "Bu iadede sizden bekleyen bir şey yok.",
+      "openOnEbay": "eBay'de aç",
+      "alsoOnEbay": "eBay'de ayrıca: {{options}}",
+      "buyer": "Alıcı",
+      "quantity": "Adet",
+      "returnType": "İade türü",
+      "itemPrice": "Ürün fiyatı",
+      "closedAs": "Kapanış nedeni",
+      "closedAt": "Kapanış tarihi",
+      "shipment": "İade kargosu",
+      "shippedAt": "Gönderildi",
+      "deliveredAt": "Teslim edildi",
+      "markedReceived": "Teslim alındı işaretlendi",
+      "yes": "Evet",
+      "no": "Hayır",
+      "journey": "Süreç",
+      "journeyEmpty": "eBay henüz bir adım kaydetmedi.",
+      "partialRefundOffered": "{{amount}} tutarında kısmi geri ödeme önerildi",
+      "trackingNumber": "Takip {{number}}",
+      "rma": "RMA {{rma}}"
+    },
+    "actions": {
+      "button": {
+        "approve": "İadeyi onayla",
+        "mark_received": "Teslim alındı işaretle",
+        "issue_refund": "Geri ödeme yap"
+      },
+      "buttonWithAmount": {
+        "issue_refund": "{{amount}} geri öde"
+      },
+      "confirm": {
+        "approve": "Bu iade talebi eBay'de onaylansın mı? Alıcıdan ürünü geri göndermesi istenir.",
+        "mark_received": "eBay'e iade edilen ürünün ulaştığı bildirilsin mi? Bunu yalnızca ürün elinizdeyken yapın.",
+        "issue_refund": "Alıcıya şimdi {{amount}} geri ödensin mi? eBay kabul eder etmez parayı aktarır ve bu işlem buradan geri alınamaz."
+      },
+      "done": {
+        "approve": "İade eBay'de onaylandı.",
+        "mark_received": "Ürün eBay'de teslim alındı olarak işaretlendi.",
+        "issue_refund": "Geri ödeme eBay'de yapıldı."
+      }
+    },
+    "history": {
+      "BUYER_CREATE_RETURN": "Alıcı iadeyi açtı",
+      "BUYER_PRINT_SHIPPING_LABEL": "Alıcı kargo etiketini yazdırdı",
+      "BUYER_PROVIDE_TRACKING_INFO": "Alıcı takip numarası ekledi",
+      "BUYER_MARK_RETURN_SHIPPED": "Alıcı ürünü gönderildi olarak işaretledi",
+      "BUYER_ESCALATE": "Alıcı konuyu eBay'e taşıdı",
+      "BUYER_CLOSE_RETURN": "Alıcı iadeyi kapattı",
+      "BUYER_SEND_MESSAGE": "Alıcı mesaj gönderdi",
+      "BUYER_ACCEPTS_PARTIAL_REFUND": "Alıcı kısmi geri ödemeyi kabul etti",
+      "BUYER_DECLINE_PARTIAL_REFUND": "Alıcı kısmi geri ödemeyi reddetti",
+      "BUYER_MARK_REFUND_RECEIVED": "Alıcı geri ödemenin ulaştığını onayladı",
+      "SELLER_APPROVE_REQUEST": "Satıcı iadeyi onayladı",
+      "SELLER_DECLINE_REQUEST": "Satıcı iadeyi reddetti",
+      "SELLER_ISSUE_REFUND": "Satıcı geri ödemeyi yaptı",
+      "SELLER_MARK_AS_RECEIVED": "Satıcı ürünü teslim alındı olarak işaretledi",
+      "SELLER_OFFER_PARTIAL_REFUND": "Satıcı kısmi geri ödeme önerdi",
+      "SELLER_PROVIDE_RMA": "Satıcı RMA numarası verdi",
+      "SELLER_PROVIDE_LABEL": "Satıcı kargo etiketi sağladı",
+      "SELLER_SEND_MESSAGE": "Satıcı mesaj gönderdi",
+      "SELLER_ESCALATE": "Satıcı konuyu eBay'e taşıdı",
+      "SELLER_OFFER_REPLACEMENT": "Satıcı yenisiyle değişim önerdi",
+      "SELLER_PROVIDE_TRACKING_INFO": "Satıcı takip numarası ekledi",
+      "SYSTEM_CREATE_RETURN": "eBay iadeyi açtı",
+      "SYSTEM_CLOSE_RETURN": "eBay iadeyi kapattı",
+      "SYSTEM_IMMEDIATE_REFUND": "eBay alıcıya anında geri ödeme yaptı",
+      "SYSTEM_INITIATED_REFUND": "eBay geri ödemeyi yaptı",
+      "EBAY_RULE_AUTO_APPROVE": "eBay iadeyi otomatik onayladı",
+      "buyerOther": "Alıcı adımı",
+      "sellerOther": "Satıcı adımı",
+      "ebayOther": "eBay adımı"
+    },
+    "returnType": {
+      "MONEY_BACK": "Para iadesi",
+      "REPLACEMENT": "Yenisiyle değişim",
+      "EXCHANGE": "Değişim"
+    },
+    "closeReason": {
+      "FULL_REFUNDED": "Tamamı geri ödendi",
+      "PARTIAL_REFUNDED": "Kısmen geri ödendi",
+      "NO_REFUND": "Geri ödeme yapılmadan kapandı",
+      "other": "Kapandı"
+    },
+    "deliveryStatus": {
+      "DELIVERED": "Teslim edildi",
+      "IN_TRANSIT": "Yolda",
+      "OUT_FOR_DELIVERY": "Dağıtımda",
+      "NOT_SHIPPED": "Henüz gönderilmedi",
+      "SHIPPED": "Gönderildi"
+    },
+    "errors": {
+      "actionsDisabled": "Uygulama içi iade işlemleri bu platformda kapalı. İadeyi eBay üzerinden yanıtlayın.",
+      "actionNotAvailable": "eBay bu iadede artık bu işlemi sunmuyor. Yenileyip sizden ne beklendiğine bakın.",
+      "suspended": "Aboneliğiniz askıda olduğu için iade işlemleri duraklatıldı. Faturayı Faturalandırma sayfasından ödeyin.",
+      "ebayRejected": "eBay bu işlemi reddetti. Nedenini görmek için iadeyi eBay'de açın.",
+      "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
+      "sandbox": "İade işlemleri eBay sandbox ortamında kullanılamaz.",
+      "refundAmountUnknown": "eBay bu iade için geri ödeme tutarı bildirmedi; geri ödemenin eBay üzerinden yapılması gerekiyor.",
+      "notFound": "Bu iade bulunamadı."
     }
   }
 }
