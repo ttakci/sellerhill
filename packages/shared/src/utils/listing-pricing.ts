@@ -30,6 +30,14 @@ export interface ListingPriceBreakdown {
   /** The reverse-fee result before the $0.99 floor could apply. */
   priceBeforeFloor: number;
   minPriceFloorApplied: boolean;
+  /** True when the group's price-ending rule moved the price. */
+  priceRoundingApplied: boolean;
+  /** The configured ending (0–99), or null when rounding is off. */
+  priceEndingCents: number | null;
+  /** The price right before the ending rule (after the floor). */
+  priceBeforeRounding: number;
+  /** finalPrice − priceBeforeRounding; never negative. */
+  roundingAmount: number;
   finalPrice: number;
 }
 
@@ -80,6 +88,34 @@ export function applyEbayFees(netTarget: number, fees: FeeConfig): number {
 const round2 = (value: number): number => Math.round(value * 100) / 100;
 
 /**
+ * The group's price ending as whole cents (0–99), or null when rounding is
+ * off or the stored value is unusable — a bad value must read as "off", never
+ * as a wrong price.
+ */
+export function resolvePriceEndingCents(fees: FeeConfig | null | undefined): number | null {
+  if (!fees?.priceRoundingEnabled) {
+    return null;
+  }
+  const cents = Number(fees.priceEndingCents);
+  return Number.isInteger(cents) && cents >= 0 && cents <= 99 ? cents : null;
+}
+
+/**
+ * Round a price UP to the next amount ending in `endingCents` (99 → $x.99).
+ * Up, never to the nearest: rounding down would cut the seller's target
+ * profit, while rounding up adds at most 99 cents. Done in integer cents so
+ * no float drift can push a price that already has the ending a dollar up.
+ */
+export function applyPriceEnding(price: number, endingCents: number): number {
+  const priceCents = Math.round(price * 100);
+  let candidate = Math.floor(priceCents / 100) * 100 + endingCents;
+  if (candidate < priceCents) {
+    candidate += 100;
+  }
+  return candidate / 100;
+}
+
+/**
  * Calculate the eBay list price + profit metrics for one Amazon price under
  * a settings group's repricing strategy, fees, and the estimated Amazon
  * purchase-tax rate (Store Settings → Amazon Satış Alış Vergi Oranı).
@@ -128,16 +164,26 @@ export function calculateListingPrice(
   const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
   const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
   const priceBeforeFloor = applyEbayFees(netTarget, fees);
-  const ebayFeeAmount = priceBeforeFloor * (ebayFeePercent / 100);
 
   // Enforce minimum price (eBay requirement: typically $0.99 for USD).
   const minPrice = 0.99;
   const minPriceFloorApplied = priceBeforeFloor < minPrice;
-  const finalPrice = minPriceFloorApplied ? minPrice : priceBeforeFloor;
+  const priceBeforeRounding = minPriceFloorApplied ? minPrice : priceBeforeFloor;
+
+  // Price ending last, after the floor: it only ever moves the price up, so
+  // it can never undo the floor or the seller's target.
+  const priceEndingCents = resolvePriceEndingCents(fees);
+  const finalPrice =
+    priceEndingCents === null ? priceBeforeRounding : applyPriceEnding(priceBeforeRounding, priceEndingCents);
+  const roundingAmount = round2(finalPrice - priceBeforeRounding);
+  const priceRoundingApplied = roundingAmount > 0;
+
+  const ebayFeeAmount = (priceRoundingApplied ? finalPrice : priceBeforeFloor) * (ebayFeePercent / 100);
 
   // Profit net of the TRUE cost (Amazon price + tax), so the tax markup
-  // above is never counted as profit.
-  const estimatedProfit = netTarget - trueCost;
+  // above is never counted as profit. The cents the ending rule added are
+  // real extra revenue, less eBay's percentage on them.
+  const estimatedProfit = netTarget - trueCost + roundingAmount * Math.max(1 - ebayFeePercent / 100, 0);
   const profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
   const roi = trueCost > 0 ? (estimatedProfit / trueCost) * 100 : 0;
 
@@ -162,6 +208,10 @@ export function calculateListingPrice(
       fixedFeeAmount,
       priceBeforeFloor: round2(priceBeforeFloor),
       minPriceFloorApplied,
+      priceRoundingApplied,
+      priceEndingCents,
+      priceBeforeRounding: round2(priceBeforeRounding),
+      roundingAmount,
       finalPrice,
     },
   };

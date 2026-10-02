@@ -140,6 +140,7 @@
       "maxFeePercent": "Le pourcentage de frais ne peut pas dépasser 100 %",
       "minFeePercent": "Le pourcentage de frais doit être supérieur ou égal à 0",
       "minFixedFee": "Les frais fixes doivent être supérieurs ou égaux à 0",
+      "priceEndingRange": "Saisissez un nombre entier de 0 à 99",
       "invalidNumber": "Saisissez un nombre valide sans zéro initial (par exemple 0.4, et non 04)",
       "templateRequired": "Le contenu du modèle est obligatoire",
       "templateMinLength": "Le modèle doit contenir au moins 10 caractères",
@@ -209,10 +210,18 @@
         "netTarget": "Objectif avant frais eBay",
         "ebayFee": "Frais eBay ({{pct}})",
         "fixedFee": "Frais fixes",
-        "floorApplied": "Inférieur au minimum eBay de 0,99 $, relevé à"
+        "floorApplied": "Inférieur au minimum eBay de 0,99 $, relevé à",
+        "rounding": "Arrondi au supérieur à {{ending}}"
       }
     },
     "feesAndTaxes": "Frais et taxes",
+    "priceRounding": {
+      "title": "Arrondir la fin du prix",
+      "info": "Chaque prix calculé est arrondi au montant supérieur se terminant ainsi ; votre bénéfice cible ne diminue donc jamais. Un prix fixé manuellement sur une annonce n’est pas modifié.",
+      "endingLabel": "Fin du prix (centimes, 0–99)",
+      "example": "Exemple : {{from}} devient {{to}}.",
+      "hint": "Saisissez un nombre entier de 0 à 99 — 99 donne des prix comme $24.99."
+    },
     "amazonTaxRateNote": "Votre calcul de prix tient automatiquement compte de la taxe estimée que vous payez en achetant sur Amazon. Définissez ce taux dans Paramètres de la boutique → Taux de taxe sur les ventes Amazon.",
     "stockControl": "Gestion du stock",
     "ebayStockQuantity": "Stock eBay",

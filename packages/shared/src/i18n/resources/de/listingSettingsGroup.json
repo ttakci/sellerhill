@@ -139,6 +139,7 @@
       "maxFeePercent": "Der Gebührenprozentsatz darf 100 % nicht überschreiten",
       "minFeePercent": "Der Gebührenprozentsatz muss 0 oder größer sein",
       "minFixedFee": "Die feste Gebühr muss 0 oder größer sein",
+      "priceEndingRange": "Geben Sie eine ganze Zahl von 0 bis 99 ein",
       "invalidNumber": "Geben Sie eine gültige Zahl ohne führende Null ein (zum Beispiel 0.4, nicht 04)",
       "templateRequired": "Der Vorlageninhalt ist erforderlich",
       "templateMinLength": "Die Vorlage muss mindestens 10 Zeichen lang sein",
@@ -208,10 +209,18 @@
         "netTarget": "Zielwert vor eBay-Gebühren",
         "ebayFee": "eBay-Gebühr ({{pct}})",
         "fixedFee": "Feste Gebühr",
-        "floorApplied": "Unter dem eBay-Minimum von 0,99 $, angehoben auf"
+        "floorApplied": "Unter dem eBay-Minimum von 0,99 $, angehoben auf",
+        "rounding": "Aufgerundet auf {{ending}}"
       }
     },
     "feesAndTaxes": "Gebühren und Steuern",
+    "priceRounding": {
+      "title": "Preisendung runden",
+      "info": "Jeder berechnete Preis wird auf den nächsten Betrag mit dieser Endung aufgerundet, sodass Ihr Zielgewinn nie sinkt. Ein Preis, den Sie in einem Angebot fest eingestellt haben, bleibt unverändert.",
+      "endingLabel": "Preisendung (Cent, 0–99)",
+      "example": "Beispiel: Aus {{from}} wird {{to}}.",
+      "hint": "Geben Sie eine ganze Zahl von 0 bis 99 ein — 99 ergibt Preise wie $24.99."
+    },
     "amazonTaxRateNote": "Ihre Preisberechnung berücksichtigt automatisch die geschätzte Steuer, die Sie beim Einkauf bei Amazon zahlen. Legen Sie diesen Satz unter Shop-Einstellungen → Amazon-Umsatzsteuersatz fest.",
     "stockControl": "Bestandssteuerung",
     "ebayStockQuantity": "eBay-Bestand",

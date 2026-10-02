@@ -140,6 +140,7 @@
       "maxFeePercent": "O percentual da taxa não pode exceder 100%",
       "minFeePercent": "O percentual da taxa deve ser 0 ou maior",
       "minFixedFee": "A taxa fixa deve ser 0 ou maior",
+      "priceEndingRange": "Digite um número inteiro de 0 a 99",
       "invalidNumber": "Digite um número válido sem zero à esquerda (por exemplo, 0.4, não 04)",
       "templateRequired": "O conteúdo do modelo é obrigatório",
       "templateMinLength": "O modelo deve ter pelo menos 10 caracteres",
@@ -209,10 +210,18 @@
         "netTarget": "Meta antes das taxas do eBay",
         "ebayFee": "Taxa do eBay ({{pct}})",
         "fixedFee": "Taxa fixa",
-        "floorApplied": "Abaixo do mínimo de $0.99 do eBay, elevado para"
+        "floorApplied": "Abaixo do mínimo de $0.99 do eBay, elevado para",
+        "rounding": "Arredondado para cima até {{ending}}"
       }
     },
     "feesAndTaxes": "Taxas e impostos",
+    "priceRounding": {
+      "title": "Arredondar o final do preço",
+      "info": "Cada preço calculado é arredondado para cima até o próximo valor com esse final, então seu lucro-alvo nunca diminui. Um preço fixado manualmente em um anúncio não é alterado.",
+      "endingLabel": "Final do preço (centavos, 0–99)",
+      "example": "Exemplo: {{from}} passa a {{to}}.",
+      "hint": "Digite um número inteiro de 0 a 99 — com 99 os preços ficam como $24.99."
+    },
     "amazonTaxRateNote": "O cálculo do seu preço considera automaticamente o imposto estimado que você paga ao comprar na Amazon. Defina essa alíquota em Configuração da loja → Alíquota de imposto sobre vendas da Amazon.",
     "stockControl": "Controle de estoque",
     "ebayStockQuantity": "Estoque no eBay",

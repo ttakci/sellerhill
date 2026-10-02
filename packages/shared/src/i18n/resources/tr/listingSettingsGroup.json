@@ -139,6 +139,7 @@
       "maxFeePercent": "Ücret yüzdesi %100'ü geçemez",
       "minFeePercent": "Ücret yüzdesi 0 veya daha büyük olmalıdır",
       "minFixedFee": "Sabit ücret 0 veya daha büyük olmalıdır",
+      "priceEndingRange": "0 ile 99 arasında bir tam sayı girin",
       "invalidNumber": "Başında gereksiz sıfır olmadan geçerli bir sayı girin (örneğin 04 değil 0.4)",
       "templateRequired": "Şablon içeriği gereklidir",
       "templateMinLength": "Şablon en az 10 karakter olmalıdır",
@@ -208,10 +209,18 @@
         "netTarget": "eBay ücretleri öncesi hedef",
         "ebayFee": "eBay ücreti ({{pct}})",
         "fixedFee": "Sabit ücret",
-        "floorApplied": "eBay'in $0.99 minimumunun altında, şuna yükseltildi"
+        "floorApplied": "eBay'in $0.99 minimumunun altında, şuna yükseltildi",
+        "rounding": "{{ending}} sonuna yukarı yuvarlandı"
       }
     },
     "feesAndTaxes": "Ücretler ve Vergiler",
+    "priceRounding": {
+      "title": "Fiyat sonunu yuvarla",
+      "info": "Hesaplanan her fiyat, bu sonla biten bir üst tutara yuvarlanır; hedef kârınız asla azalmaz. Bir listede elle sabitlediğiniz fiyat değişmez.",
+      "endingLabel": "Fiyat sonu (cent, 0–99)",
+      "example": "Örnek: {{from}} → {{to}} olur.",
+      "hint": "0 ile 99 arasında tam sayı girin — 99 yazarsanız fiyatlar $24.99 gibi biter."
+    },
     "amazonTaxRateNote": "Fiyat hesaplanırken Amazon'dan alışverişte ödediğiniz tahmini vergi de otomatik olarak dikkate alınır. Bu oranı Mağaza Ayarları → Amazon Satış Vergisi Oranı bölümünden ayarlayabilirsiniz.",
     "stockControl": "Stok Kontrolü",
     "ebayStockQuantity": "eBay Stok",
