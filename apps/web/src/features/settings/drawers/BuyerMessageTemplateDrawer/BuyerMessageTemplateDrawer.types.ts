@@ -8,7 +8,7 @@ export const TEMPLATE_EVENT_OPTIONS: BuyerMessageEventType[] = [
 ];
 
 export const PLACEHOLDER_TOKENS = [
-  '{{buyer_username}}',
+  '{{buyer_name}}',
   '{{item_title}}',
   '{{order_id}}',
   '{{tracking_number}}',

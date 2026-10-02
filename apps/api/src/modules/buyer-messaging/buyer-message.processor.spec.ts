@@ -1,3 +1,6 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import { EBAY_MESSAGING_SCOPES } from '@repo/shared';
 
 import { BuyerMessageProcessor } from './buyer-message.processor';
@@ -11,6 +14,7 @@ import { BuyerMessageProcessor } from './buyer-message.processor';
 
 const ORDER_ROW = {
   buyer_username: 'buyer_a',
+  buyer_name: 'Alex Buyer',
   item_title: 'Widget',
   order_id: '12-34',
   tracking_number: null,
@@ -55,7 +59,7 @@ function build(orderRow: Record<string, unknown> | null, grantedScopes: string[]
   const provider = { sendMessage: jest.fn().mockResolvedValue({ providerMessageId: 'pm-1' }) };
   const quota = { isSuspended: jest.fn().mockResolvedValue(false) };
   const processor = new BuyerMessageProcessor(db as never, messageService as never, provider, quota as never);
-  return { processor, db, provider };
+  return { processor, db, provider, messageService };
 }
 
 /** The params of the buyer_message_log INSERT (status is $7, error $8). */
@@ -63,6 +67,55 @@ function loggedRow(db: { query: jest.Mock }): unknown[] {
   const call = (db.query.mock.calls as unknown[][]).find(([sql]) => /INSERT INTO buyer_message_log/.test(sql as string));
   return (call?.[1] as unknown[]) ?? [];
 }
+
+describe('BuyerMessageProcessor — what the buyer reads', () => {
+  const SOURCE = readFileSync(join(__dirname, 'buyer-message.processor.ts'), 'utf8');
+  const SHIPPED_BODY = 'Hi {{buyer_name}},\nTracking number: {{tracking_number}}\nCarrier: {{carrier}}';
+
+  function buildWithBody(orderRow: Record<string, unknown>) {
+    const built = build(orderRow, [...EBAY_MESSAGING_SCOPES]);
+    return built;
+  }
+
+  it('greets by first name and prints the number eBay received under its carrier', async () => {
+    const { processor, provider, messageService } = buildWithBody({
+      ...ORDER_ROW,
+      buyer_name: 'joseph smith',
+      tracking_number: 'AQUAA0359110926YQ',
+      carrier: 'AQUILINE',
+    });
+    messageService.resolveTemplate.mockResolvedValue({ kind: 'custom', ref: 't', versionHash: 'h', body: SHIPPED_BODY });
+
+    await processor.process(job);
+
+    expect(provider.sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buyerUsername: 'buyer_a',
+        body: 'Hi Joseph,\nTracking number: AQUAA0359110926YQ\nCarrier: Aquiline',
+      }),
+    );
+  });
+
+  it('prints no tracking line at all when eBay has received no number', async () => {
+    const { processor, provider, messageService } = buildWithBody({ ...ORDER_ROW, buyer_name: null });
+    messageService.resolveTemplate.mockResolvedValue({ kind: 'custom', ref: 't', versionHash: 'h', body: SHIPPED_BODY });
+
+    await processor.process(job);
+
+    expect(provider.sendMessage).toHaveBeenCalledWith(expect.objectContaining({ body: 'Hi there,' }));
+  });
+
+  it('{{tracking_number}} is the number pushed to eBay — the Amazon number is never selected as it', () => {
+    expect(SOURCE).toMatch(/o\.ebay_tracking_pushed_number AS tracking_number/);
+    expect(SOURCE).not.toMatch(/amazon_tracking_number\s+AS\s+tracking_number/);
+    expect(SOURCE).not.toMatch(/COALESCE\([^)]*amazon_tracking_number/);
+  });
+
+  it('the log INSERT casts its twice-used status parameter (a bare $7 does not parse)', () => {
+    expect(SOURCE).not.toMatch(/\$7\s*=\s*'sent'/);
+    expect(SOURCE.match(/\$7::buyer_message_status/g)).toHaveLength(2);
+  });
+});
 
 describe('BuyerMessageProcessor', () => {
   it('sends to the real buyer username when the store can message', async () => {

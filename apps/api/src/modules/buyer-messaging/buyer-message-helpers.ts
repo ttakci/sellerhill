@@ -2,6 +2,7 @@
 import { createHash } from 'crypto';
 
 import {
+  AQUILINE_EBAY_CARRIER_CODE,
   BuyerMessageEventType,
   type BuyerMessageContext,
   type BuyerMessagingConfig,
@@ -10,20 +11,88 @@ import {
 
 const PLACEHOLDER = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
 
-/** Replace {{token}} with context values; unknown tokens become empty string. */
+/**
+ * Tokens whose value may legitimately be missing. A line that names one of
+ * them and gets nothing is dropped whole, so a buyer never reads a dangling
+ * "Tracking number:" label.
+ */
+const OPTIONAL_TOKENS = new Set(['tracking_number', 'carrier', 'estimated_delivery']);
+
+const GREETING_FALLBACK = 'there';
+
+function resolveToken(name: string, ctx: BuyerMessageContext): string {
+  switch (name) {
+    case 'buyer_name': return ctx.buyerName ?? '';
+    case 'buyer_username': return ctx.buyerUsername ?? '';
+    case 'item_title': return ctx.itemTitle ?? '';
+    case 'order_id': return ctx.orderId ?? '';
+    case 'tracking_number': return ctx.trackingNumber ?? '';
+    case 'carrier': return ctx.carrier ?? '';
+    case 'store_name': return ctx.storeName ?? '';
+    case 'estimated_delivery': return ctx.estimatedDelivery ?? '';
+    default: return '';
+  }
+}
+
+/**
+ * Replace {{token}} with context values; unknown tokens become empty string.
+ * A line whose optional token (tracking number, carrier, estimated delivery)
+ * resolved empty is removed, and the blank lines it leaves are collapsed.
+ */
 export function renderTemplate(body: string, ctx: BuyerMessageContext): string {
-  return body.replace(PLACEHOLDER, (full, name: string) => {
-    switch (name) {
-      case 'buyer_username': return ctx.buyerUsername ?? '';
-      case 'item_title': return ctx.itemTitle ?? '';
-      case 'order_id': return ctx.orderId ?? '';
-      case 'tracking_number': return ctx.trackingNumber ?? '';
-      case 'carrier': return ctx.carrier ?? '';
-      case 'store_name': return ctx.storeName ?? '';
-      case 'estimated_delivery': return ctx.estimatedDelivery ?? '';
-      default: return '';
+  const lines: string[] = [];
+  for (const line of body.split('\n')) {
+    let missingOptional = false;
+    const rendered = line.replace(PLACEHOLDER, (_full, name: string) => {
+      const value = resolveToken(name, ctx);
+      if (!value && OPTIONAL_TOKENS.has(name)) {
+        missingOptional = true;
+      }
+      return value;
+    });
+    if (!missingOptional) {
+      lines.push(rendered);
     }
-  });
+  }
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
+ * The name a message greets the buyer by: the first word of the name eBay
+ * holds for them ("John" from "john smith"). eBay hands names over in whatever
+ * case the buyer typed, so a lower-case first name or an all-capitals full
+ * name is re-cased; anything else ("McDonald", "ABC Trading") stays as written.
+ * No usable name → "there", never the eBay username.
+ */
+export function greetingName(fullName: string | null | undefined): string {
+  const name = (fullName ?? '').trim().replace(/\s+/g, ' ');
+  if (!name) {
+    return GREETING_FALLBACK;
+  }
+  const first = name.split(' ')[0].replace(/[.,;:]+$/, '');
+  if (!/\p{L}{2,}/u.test(first)) {
+    return GREETING_FALLBACK;
+  }
+  // "joseph" is always a typing habit; "ABC" is only one when the WHOLE name
+  // is shouted ("JOHN SMITH"), otherwise it is an acronym and stays.
+  const typedLower = first === first.toLowerCase();
+  const typedUpper = name === name.toUpperCase();
+  if (!typedLower && !typedUpper) {
+    return first;
+  }
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+/** eBay carrier code → what a buyer reads ("Amazon_Logistics" → "Amazon Logistics", "AQUILINE" → "Aquiline"). */
+export function formatCarrierForBuyer(carrierCode: string | null | undefined): string | undefined {
+  const code = (carrierCode ?? '').trim();
+  if (!code) {
+    return undefined;
+  }
+  if (code === AQUILINE_EBAY_CARRIER_CODE) {
+    return code.charAt(0) + code.slice(1).toLowerCase();
+  }
+  return code.replace(/_/g, ' ');
 }
 
 /** Returns the event config iff the feature is enabled AND the event is enabled; else null. */
