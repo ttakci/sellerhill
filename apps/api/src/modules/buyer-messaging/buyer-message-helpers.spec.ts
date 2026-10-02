@@ -9,6 +9,8 @@ import {
 } from '@repo/shared';
 
 import {
+  formatCarrierForBuyer,
+  greetingName,
   renderTemplate,
   resolveEventConfig,
   buyerMessageJobId,
@@ -17,6 +19,7 @@ import {
 } from './buyer-message-helpers';
 
 const ctx: BuyerMessageContext = {
+  buyerName: 'John',
   buyerUsername: 'jdoe',
   itemTitle: 'Red Widget',
   orderId: '12-0-12345',
@@ -34,7 +37,58 @@ describe('renderTemplate', () => {
     expect(renderTemplate('X {{unknown_token}} Y', ctx)).toBe('X  Y');
   });
   it('is case-sensitive on placeholder names', () => {
-    expect(renderTemplate('{{buyer_username}} vs {{Buyer_Username}}', ctx)).toBe('jdoe vs ');
+    expect(renderTemplate('{{buyer_username}} vs {{Buyer_Username}}!', ctx)).toBe('jdoe vs !');
+  });
+  it('greets by name through {{buyer_name}}', () => {
+    expect(renderTemplate('Hi {{buyer_name}},', ctx)).toBe('Hi John,');
+  });
+
+  const SHIPPED = 'Hi {{buyer_name}},\n\nOn its way!\n\nTracking number: {{tracking_number}}\nCarrier: {{carrier}}\n\nThanks!';
+
+  it('prints the tracking number and carrier it is given', () => {
+    expect(renderTemplate(SHIPPED, ctx)).toBe(
+      'Hi John,\n\nOn its way!\n\nTracking number: TN123\nCarrier: UPS\n\nThanks!',
+    );
+  });
+  it('drops a line whose tracking number or carrier is missing — never a dangling label', () => {
+    const out = renderTemplate(SHIPPED, { ...ctx, trackingNumber: undefined, carrier: undefined });
+    expect(out).toBe('Hi John,\n\nOn its way!\n\nThanks!');
+  });
+  it('keeps the tracking line when only the carrier is unknown', () => {
+    const out = renderTemplate(SHIPPED, { ...ctx, carrier: undefined });
+    expect(out).toBe('Hi John,\n\nOn its way!\n\nTracking number: TN123\n\nThanks!');
+  });
+});
+
+describe('greetingName', () => {
+  it.each([
+    ['john smith', 'John'],
+    ['JOHN SMITH', 'John'],
+    ['joseph Smith', 'Joseph'],
+    ['John Smith', 'John'],
+    ['  Mary-Ann   Jones ', 'Mary-Ann'],
+    ['McDonald Ronald', 'McDonald'],
+    ['ABC Trading LLC', 'ABC'],
+    ['Şule Yılmaz', 'Şule'],
+  ])('%p → %p', (full, expected) => {
+    expect(greetingName(full)).toBe(expected);
+  });
+  it.each([null, undefined, '', '   ', 'J. Smith', '12345'])('falls back to "there" for %p', (full) => {
+    expect(greetingName(full)).toBe('there');
+  });
+});
+
+describe('formatCarrierForBuyer', () => {
+  it.each([
+    ['AQUILINE', 'Aquiline'],
+    ['Amazon_Logistics', 'Amazon Logistics'],
+    ['DHL_Express', 'DHL Express'],
+    ['USPS', 'USPS'],
+  ])('%p → %p', (code, expected) => {
+    expect(formatCarrierForBuyer(code)).toBe(expected);
+  });
+  it.each([null, undefined, '', '  '])('is undefined for %p', (code) => {
+    expect(formatCarrierForBuyer(code)).toBeUndefined();
   });
 });
 

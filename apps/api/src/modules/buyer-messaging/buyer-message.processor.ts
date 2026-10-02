@@ -7,13 +7,21 @@ import { DelayedError, Job } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
-import { isSuspendedMessageExpired, redactForLog, renderTemplate } from './buyer-message-helpers';
+import {
+  formatCarrierForBuyer,
+  greetingName,
+  isSuspendedMessageExpired,
+  redactForLog,
+  renderTemplate,
+} from './buyer-message-helpers';
 import { type BuyerMessageJobData } from './buyer-message-queue.service';
 import { BuyerMessagingProvider } from './buyer-message.provider';
 import { BuyerMessageService } from './buyer-message.service';
 import { BUYER_MESSAGE_QUEUE, BUYER_MESSAGING_DEFAULTS, BUYER_MESSAGE_TOKEN } from './buyer-messaging.constants';
 
 interface OrderCtx {
+  /** Display value for `{{buyer_name}}` — the buyer's first name, or "there". */
+  buyerName: string;
   /** Display value for `{{buyer_username}}` only — falls back to "there". */
   buyerUsername: string;
   /** The real eBay username the message is addressed to; null when the order has none. */
@@ -214,8 +222,18 @@ export class BuyerMessageProcessor extends WorkerHost {
 
   /**
    * Load buyer/item/tracking context via orders -> listings -> products join.
-   * Schema (verified against migrations 012/022/024/010/111):
-   *   - orders.amazon_tracking_number, orders.amazon_tracking_carrier (migration 024)
+   * Schema (verified against migrations 012/022/024/010/075/089/111):
+   *   - `{{tracking_number}}` is orders.ebay_tracking_pushed_number (089) — the
+   *     number eBay RECEIVED — and nothing else. The supplier's own number
+   *     (orders.amazon_tracking_number) must never be rendered into a message:
+   *     a seller pays for the conversion precisely so the buyer never sees it.
+   *     No pushed number → the token is empty and its line is dropped.
+   *   - `{{carrier}}` is the carrier that pushed number went out under: the
+   *     converted carrier when the pushed number is the converted one (075),
+   *     the Amazon carrier when the seller chose no conversion and the raw
+   *     number is what eBay holds, otherwise unknown (a fulfillment found
+   *     already on eBay) and left empty.
+   *   - `{{buyer_name}}` comes from orders.buyer_name, then the ship-to name.
    *   - ebay_accounts.store_name (migration 022, nullable), ebay_accounts.seller_id (migration 002)
    *   - listings.ebay_item_id (migration 010; nullable for drafts since 032) - the
    *     persistent eBay item id pointer; we use it directly instead of digging
@@ -230,6 +248,7 @@ export class BuyerMessageProcessor extends WorkerHost {
   private async loadOrderCtx(ebayOrderId: string, ebayAccountId: string): Promise<OrderCtx | null> {
     const rows = await this.db.query<{
       buyer_username: string | null;
+      buyer_name: string | null;
       item_title: string;
       order_id: string;
       tracking_number: string | null;
@@ -238,10 +257,16 @@ export class BuyerMessageProcessor extends WorkerHost {
       legacy_item_id: string | null;
     }>(
       `SELECT o.buyer_username,
+              COALESCE(NULLIF(o.buyer_name, ''), o.shipping_address->>'fullName') AS buyer_name,
               COALESCE(p.title, o.ebay_order_id) AS item_title,
               o.ebay_order_id AS order_id,
-              o.amazon_tracking_number AS tracking_number,
-              o.amazon_tracking_carrier  AS carrier,
+              o.ebay_tracking_pushed_number AS tracking_number,
+              CASE
+                WHEN o.ebay_tracking_pushed_number IS NULL THEN NULL
+                WHEN o.ebay_tracking_pushed_number = o.converted_tracking_number THEN o.converted_tracking_carrier
+                WHEN o.ebay_tracking_pushed_number = o.amazon_tracking_number THEN o.amazon_tracking_carrier
+                ELSE NULL
+              END AS carrier,
               -- Never seller_id: since migration 108 it is eBay's opaque immutable
               -- user id, and this value reaches buyers through {{store_name}}.
               COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name,
@@ -258,18 +283,15 @@ export class BuyerMessageProcessor extends WorkerHost {
       return null;
     }
     const r = rows[0];
-    // Carrier is passed through raw. LocalTrackingConverter.convert() returns
-    // eBay-specific enum codes ('Amazon_Logistics', 'UPS', ...) which aren't
-    // useful for a buyer-facing {{carrier}} placeholder. {{carrier}} is a
-    // nice-to-have; not load-bearing.
     const recipientUsername = r.buyer_username?.trim() || null;
     return {
+      buyerName: greetingName(r.buyer_name),
       buyerUsername: recipientUsername ?? 'there',
       recipientUsername,
       itemTitle: r.item_title,
       orderId: r.order_id,
-      trackingNumber: r.tracking_number ?? undefined,
-      carrier: r.carrier ?? undefined,
+      trackingNumber: r.tracking_number?.trim() || undefined,
+      carrier: formatCarrierForBuyer(r.carrier),
       storeName: r.store_name || 'our store',
       ebayItemId: r.legacy_item_id ?? undefined,
     };
@@ -343,10 +365,15 @@ export class BuyerMessageProcessor extends WorkerHost {
   }): Promise<void> {
     const ref = args.versionHash ? `${args.templateRef}@${args.versionHash}` : args.templateRef;
     try {
+      // `$7` is used twice, so it carries an explicit cast both times: left
+      // bare, Postgres deduces the enum from the column and text from the
+      // comparison and refuses the statement — which is how this ledger stayed
+      // empty (and the "already sent?" guard blind) until 2026-10-02.
       await this.db.query(
         `INSERT INTO buyer_message_log
            (user_id, ebay_account_id, ebay_order_id, event_type, template_kind, template_ref, status, error, provider_message_id, sent_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, CASE WHEN $7='sent' THEN NOW() ELSE NULL END)`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7::buyer_message_status,$8,$9,
+                 CASE WHEN $7::buyer_message_status = 'sent' THEN NOW() ELSE NULL END)`,
         [
           args.userId,
           args.ebayAccountId,
@@ -360,8 +387,14 @@ export class BuyerMessageProcessor extends WorkerHost {
         ],
       );
     } catch (err) {
-      // logging is best-effort; concurrent sent unique-violation is expected and fine.
-      this.logger.debug(`log write skipped: ${(err as Error).message}`);
+      // Best-effort, but only a concurrent 'sent' (unique violation) is
+      // expected. Anything else means the idempotency ledger is not being
+      // written, and that must be visible.
+      if ((err as { code?: string }).code === '23505') {
+        this.logger.debug(`log write skipped: ${(err as Error).message}`);
+      } else {
+        this.logger.warn(`buyer_message_log write FAILED for ${args.ebayOrderId}/${args.event}: ${(err as Error).message}`);
+      }
     }
   }
 }

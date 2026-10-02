@@ -17,11 +17,12 @@ import {
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
 const SAMPLE_CONTEXT: Record<string, string> = {
+  buyer_name: 'John',
   buyer_username: 'jdoe',
   item_title: 'Red Widget',
   order_id: '12-0-12345',
-  tracking_number: '1Z999',
-  carrier: 'UPS',
+  tracking_number: 'AQUAA0000000000YQ',
+  carrier: 'Aquiline',
   store_name: 'AcmeShop',
   estimated_delivery: 'Tue',
 };
