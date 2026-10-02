@@ -62,18 +62,27 @@ export interface BuyerMessageTemplate {
 
 /** Placeholder values resolved from order/listing/product context. */
 export interface BuyerMessageContext {
+  /** The buyer's first name for the greeting ("John"); "there" when no name is held. */
+  buyerName: string;
+  /** eBay username. Still rendered for templates written before `{{buyer_name}}` existed. */
   buyerUsername: string;
   itemTitle: string;
   orderId: string;
+  /** The number eBay RECEIVED for this order — never the supplier's own number. */
   trackingNumber?: string;
+  /** The carrier that number was sent to eBay under, in buyer-readable form. */
   carrier?: string;
   storeName: string;
   estimatedDelivery?: string;
 }
 
-/** Placeholder tokens a user may insert into a custom template. */
+/**
+ * Placeholder tokens a user may insert into a custom template.
+ * `{{buyer_username}}` is deliberately not offered any more (eBay usernames
+ * read as noise in a greeting) but still renders in templates that carry it.
+ */
 export const BUYER_MESSAGE_PLACEHOLDERS = [
-  '{{buyer_username}}',
+  '{{buyer_name}}',
   '{{item_title}}',
   '{{order_id}}',
   '{{tracking_number}}',
