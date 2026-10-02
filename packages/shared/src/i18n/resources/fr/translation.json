@@ -827,10 +827,10 @@
       "showAllPlans": "Voir les {{count}} forfaits",
       "showFewerPlans": "Afficher moins de forfaits",
       "notIncluded": "Non inclus",
-      "upToListings": "Jusqu'à {{limit}} annonces actives",
+      "upToListings": "{{limit}} annonces actives · ajouts et retraits illimités",
       "unlimitedListings": "Annonces actives illimitées",
       "upToOrders": "Jusqu'à {{limit}} commandes automatiques / mois",
-      "unlimitedOrders": "Commandes automatiques illimitées",
+      "unlimitedOrders": "Commandes automatiques et suivi d'expédition illimités",
       "upToConversions": "{{limit}} conversions de suivi / mois",
       "unlimitedConversions": "Conversions de suivi illimitées",
       "upToBestSellers": "{{limit}} produits Meilleures ventes / mois",
@@ -840,7 +840,6 @@
         "groups": "Groupes de paramètres et 12 modèles d'annonces",
         "sync": "Contrôle des prix et du stock 4× par jour",
         "specifics": "Caractéristiques d'article eBay complètes",
-        "autoOrder": "Commandes et suivi automatiques",
         "actions": "Écran des actions en attente",
         "profit": "Rapports de profit réel",
         "multiStore": "Plusieurs boutiques eBay",
@@ -849,29 +848,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Jusqu'à 500 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "500 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "50 conversions de suivi / mois",
           "bestSellers": "2,500 produits Meilleures ventes / mois"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Jusqu'à 2,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "2,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "150 conversions de suivi / mois",
           "bestSellers": "7,500 produits Meilleures ventes / mois"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Jusqu'à 5,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "5,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "300 conversions de suivi / mois",
           "bestSellers": "15,000 produits Meilleures ventes / mois"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Jusqu'à 10,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "10,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "500 conversions de suivi / mois",
           "bestSellers": "25,000 produits Meilleures ventes / mois"
         }

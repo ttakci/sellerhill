@@ -15,6 +15,7 @@ Catalog values are database rows and are intentionally changeable; the current c
 | Plan | Active listings | Tracking conversions/month | Best Sellers products/month | Automatic orders | Monthly price |
 |---|---:|---:|---:|---:|---:|
 | Trial (30 days) | 50 | 20 | 500 | unlimited | free |
+| Mini (migration `137`) | 100 | 20 | 1,000 | unlimited | $19.99 |
 | Lite | 200 | 25 | 1,500 | unlimited | $24.99 |
 | Nano | 500 | 50 | 2,500 | unlimited | $29.99 |
 | Micro | 1,000 | 100 | 5,000 | unlimited | $34.99 |

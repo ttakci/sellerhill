@@ -827,10 +827,10 @@
       "showAllPlans": "Alle {{count}} Tarife ansehen",
       "showFewerPlans": "Weniger Tarife anzeigen",
       "notIncluded": "Nicht enthalten",
-      "upToListings": "Bis zu {{limit}} aktive Angebote",
+      "upToListings": "{{limit}} aktive Angebote · unbegrenzt hinzufügen und entfernen",
       "unlimitedListings": "Unbegrenzte aktive Angebote",
       "upToOrders": "Bis zu {{limit}} automatische Bestellungen / Monat",
-      "unlimitedOrders": "Unbegrenzte automatische Bestellungen",
+      "unlimitedOrders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
       "upToConversions": "{{limit}} Sendungsnummern-Umwandlungen / Monat",
       "unlimitedConversions": "Unbegrenzte Sendungsnummern-Umwandlungen",
       "upToBestSellers": "{{limit}} Bestseller-Produkte / Monat",
@@ -840,7 +840,6 @@
         "groups": "Einstellungsgruppen und 12 Angebotsvorlagen",
         "sync": "Preis- und Bestandsprüfungen 4× täglich",
         "specifics": "Vollständige eBay-Artikelmerkmale",
-        "autoOrder": "Automatische Bestellungen und Sendungsverfolgung",
         "actions": "Bildschirm für Offene Aufgaben",
         "profit": "Berichte zum echten Gewinn",
         "multiStore": "Mehrere eBay-Shops",
@@ -849,29 +848,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Bis zu 500 aktive Angebote",
-          "orders": "Unbegrenzte automatische Bestellungen",
+          "listings": "500 aktive Angebote · unbegrenzt hinzufügen und entfernen",
+          "orders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
           "conversions": "50 Sendungsnummern-Umwandlungen / Monat",
           "bestSellers": "2,500 Bestseller-Produkte / Monat"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Bis zu 2,000 aktive Angebote",
-          "orders": "Unbegrenzte automatische Bestellungen",
+          "listings": "2,000 aktive Angebote · unbegrenzt hinzufügen und entfernen",
+          "orders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
           "conversions": "150 Sendungsnummern-Umwandlungen / Monat",
           "bestSellers": "7,500 Bestseller-Produkte / Monat"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Bis zu 5,000 aktive Angebote",
-          "orders": "Unbegrenzte automatische Bestellungen",
+          "listings": "5,000 aktive Angebote · unbegrenzt hinzufügen und entfernen",
+          "orders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
           "conversions": "300 Sendungsnummern-Umwandlungen / Monat",
           "bestSellers": "15,000 Bestseller-Produkte / Monat"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Bis zu 10,000 aktive Angebote",
-          "orders": "Unbegrenzte automatische Bestellungen",
+          "listings": "10,000 aktive Angebote · unbegrenzt hinzufügen und entfernen",
+          "orders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
           "conversions": "500 Sendungsnummern-Umwandlungen / Monat",
           "bestSellers": "25,000 Bestseller-Produkte / Monat"
         }

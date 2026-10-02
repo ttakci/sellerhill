@@ -27,6 +27,12 @@
         "name": "免费试用",
         "description": "SellerHill 的限时试用。不可购买，注册时自动开始。"
       },
+      "unlimitedOrders": "不限自动订单和物流跟踪数量",
+      "activeListings": "{{limit}} 条在售商品刊登 · 不限次数添加和下架",
+      "mini": {
+        "name": "Mini",
+        "description": "适合从最初一百条刊登起步的卖家。"
+      },
       "lite": {
         "name": "Lite",
         "description": "适合刚起步、商品目录较小的卖家。"

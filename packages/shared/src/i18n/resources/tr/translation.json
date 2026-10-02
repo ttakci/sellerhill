@@ -839,10 +839,10 @@
       "showAllPlans": "{{count}} paketin tümünü gör",
       "showFewerPlans": "Daha az paket göster",
       "notIncluded": "Dâhil değil",
-      "upToListings": "{{limit}} aktif ilana kadar",
+      "upToListings": "{{limit}} aktif ilan · sınırsız ilan ekleme ve kaldırma",
       "unlimitedListings": "Sınırsız aktif ilan",
       "upToOrders": "Ayda {{limit}} otomatik siparişe kadar",
-      "unlimitedOrders": "Sınırsız otomatik sipariş",
+      "unlimitedOrders": "Sınırsız otomatik sipariş ve kargo takibi",
       "upToConversions": "Ayda {{limit}} takip numarası dönüştürme",
       "unlimitedConversions": "Sınırsız takip numarası dönüştürme",
       "upToBestSellers": "Ayda {{limit}} Çok Satanlar ürünü",
@@ -852,7 +852,6 @@
         "groups": "Ayar Grupları ve 12 ilan şablonu",
         "sync": "Günde 4 kez fiyat ve stok takibi",
         "specifics": "Eksiksiz eBay ürün özellikleri",
-        "autoOrder": "Otomatik sipariş ve kargo takibi",
         "actions": "Bekleyen Aksiyonlar ekranı",
         "profit": "Gerçek kâr raporlaması",
         "multiStore": "Birden fazla eBay mağazası",
@@ -861,29 +860,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "500 aktif ilana kadar",
-          "orders": "Sınırsız otomatik sipariş",
+          "listings": "500 aktif ilan · sınırsız ilan ekleme ve kaldırma",
+          "orders": "Sınırsız otomatik sipariş ve kargo takibi",
           "conversions": "Ayda 50 takip numarası dönüştürme",
           "bestSellers": "Ayda 2,500 Çok Satanlar ürünü"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "2,000 aktif ilana kadar",
-          "orders": "Sınırsız otomatik sipariş",
+          "listings": "2,000 aktif ilan · sınırsız ilan ekleme ve kaldırma",
+          "orders": "Sınırsız otomatik sipariş ve kargo takibi",
           "conversions": "Ayda 150 takip numarası dönüştürme",
           "bestSellers": "Ayda 7,500 Çok Satanlar ürünü"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "5,000 aktif ilana kadar",
-          "orders": "Sınırsız otomatik sipariş",
+          "listings": "5,000 aktif ilan · sınırsız ilan ekleme ve kaldırma",
+          "orders": "Sınırsız otomatik sipariş ve kargo takibi",
           "conversions": "Ayda 300 takip numarası dönüştürme",
           "bestSellers": "Ayda 15,000 Çok Satanlar ürünü"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "10,000 aktif ilana kadar",
-          "orders": "Sınırsız otomatik sipariş",
+          "listings": "10,000 aktif ilan · sınırsız ilan ekleme ve kaldırma",
+          "orders": "Sınırsız otomatik sipariş ve kargo takibi",
           "conversions": "Ayda 500 takip numarası dönüştürme",
           "bestSellers": "Ayda 25,000 Çok Satanlar ürünü"
         }

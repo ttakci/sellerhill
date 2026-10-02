@@ -27,6 +27,12 @@
         "name": "Essai gratuit",
         "description": "Un essai de SellerHill limité dans le temps. Non achetable — il démarre automatiquement à votre inscription."
       },
+      "unlimitedOrders": "Commandes automatiques et suivi d'expédition illimités",
+      "activeListings": "{{limit}} annonces actives · ajouts et retraits illimités",
+      "mini": {
+        "name": "Mini",
+        "description": "Pour les vendeurs qui démarrent avec leurs cent premières annonces."
+      },
       "lite": {
         "name": "Lite",
         "description": "Pour les vendeurs qui débutent avec un petit catalogue."

@@ -839,10 +839,10 @@
       "showAllPlans": "See all {{count}} plans",
       "showFewerPlans": "Show fewer plans",
       "notIncluded": "Not included",
-      "upToListings": "Up to {{limit}} active listings",
+      "upToListings": "{{limit}} active listings · add and remove without limit",
       "unlimitedListings": "Unlimited active listings",
       "upToOrders": "Up to {{limit}} automatic orders / month",
-      "unlimitedOrders": "Unlimited automatic orders",
+      "unlimitedOrders": "Unlimited automatic orders and shipment tracking",
       "upToConversions": "{{limit}} tracking conversions / month",
       "unlimitedConversions": "Unlimited tracking conversions",
       "upToBestSellers": "{{limit}} Best Sellers products / month",
@@ -852,7 +852,6 @@
         "groups": "Setting Groups & 12 listing templates",
         "sync": "Price & stock checks 4× a day",
         "specifics": "Complete eBay item specifics",
-        "autoOrder": "Automatic orders & tracking",
         "actions": "Pending Actions screen",
         "profit": "Real profit reporting",
         "multiStore": "Multiple eBay stores",
@@ -861,29 +860,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Up to 500 active listings",
-          "orders": "Unlimited automatic orders",
+          "listings": "500 active listings · add and remove without limit",
+          "orders": "Unlimited automatic orders and shipment tracking",
           "conversions": "50 tracking conversions / month",
           "bestSellers": "2,500 Best Sellers products / month"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Up to 2,000 active listings",
-          "orders": "Unlimited automatic orders",
+          "listings": "2,000 active listings · add and remove without limit",
+          "orders": "Unlimited automatic orders and shipment tracking",
           "conversions": "150 tracking conversions / month",
           "bestSellers": "7,500 Best Sellers products / month"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Up to 5,000 active listings",
-          "orders": "Unlimited automatic orders",
+          "listings": "5,000 active listings · add and remove without limit",
+          "orders": "Unlimited automatic orders and shipment tracking",
           "conversions": "300 tracking conversions / month",
           "bestSellers": "15,000 Best Sellers products / month"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Up to 10,000 active listings",
-          "orders": "Unlimited automatic orders",
+          "listings": "10,000 active listings · add and remove without limit",
+          "orders": "Unlimited automatic orders and shipment tracking",
           "conversions": "500 tracking conversions / month",
           "bestSellers": "25,000 Best Sellers products / month"
         }

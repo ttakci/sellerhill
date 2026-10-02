@@ -129,7 +129,7 @@ function PlanCardView({
       variant="section"
       header={{ title: t(nameKey), subtitle: t(descriptionKey) }}
       headerRight={
-        // The price is the number a seller compares across 12 cards, so it
+        // The price is the number a seller compares across 13 cards, so it
         // gets a colored badge instead of plain text — the same chip
         // treatment as the subscription status above, just for the figure
         // that matters most on THIS card.
@@ -139,15 +139,17 @@ function PlanCardView({
       }
     >
       <S.PlanFeatureList>
+        {/* Leads the card (operator request, 2026-10-02): unlimited automatic
+            orders and tracking is the promise a seller compares tools on. */}
         <S.PlanFeatureItem>
-          <Text variant="body-sm">
-            {t('billing:billing.limits.listings_per_month.label')}: {plan.listingsLimitDisplay}
+          <Text variant="body-sm" weight="semibold">
+            {plan.amazonOrdersLine}
           </Text>
         </S.PlanFeatureItem>
-        {/* Conversions sit second because they are the METERED, priced
-            dimension — the automatic-order figure below is a ceiling, not what
-            the tier is sold on. The card listed only listings and orders, so
-            the thing the price is actually based on was invisible. */}
+        <S.PlanFeatureItem>
+          <Text variant="body-sm">{plan.listingsLine}</Text>
+        </S.PlanFeatureItem>
+        {/* Conversions are the METERED, priced dimension the tier is sold on. */}
         <S.PlanFeatureItem>
           <Text variant="body-sm">
             {t('billing:billing.limits.tracking_conversions_per_month.label')}:{' '}
@@ -157,13 +159,6 @@ function PlanCardView({
         <S.PlanFeatureItem>
           <Text variant="body-sm">
             {t('billing:billing.limits.best_sellers_products_per_month.label')}: {plan.bestSellersLimitDisplay}
-          </Text>
-        </S.PlanFeatureItem>
-        {/* Unlimited on every plan — kept on the card because "unlimited" is
-            part of what the tier promises, not something to leave unsaid. */}
-        <S.PlanFeatureItem>
-          <Text variant="body-sm">
-            {t('billing:billing.limits.amazon_orders_per_month.label')}: {plan.amazonOrdersLimitDisplay}
           </Text>
         </S.PlanFeatureItem>
       </S.PlanFeatureList>

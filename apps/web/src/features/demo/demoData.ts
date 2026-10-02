@@ -2632,7 +2632,7 @@ function plan(
 }
 
 /*
- * Mirrors the real catalog (2026-09-29 prices): twelve monthly tiers, no
+ * Mirrors the real catalog (2026-09-29 prices, Mini added by migration 137): thirteen monthly tiers, no
  * annual interval, unlimited automatic orders everywhere, and a Best Sellers
  * browsing allowance per tier. The demo once showed the retired three-plan
  * catalog at its old prices, so a visitor was quoted figures the product no
@@ -2642,6 +2642,7 @@ function plan(
  * exactly as the live catalog's do, so the strings here are only fallbacks.
  */
 export const DEMO_BILLING_PLANS: BillingPlanWithPricingDto[] = [
+  plan('mini', 'Mini', 'For sellers taking their first steps with a hundred listings.', 19.99, 100, 20, 1_000, 0),
   plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 24.99, 200, 25, 1_500, 1),
   plan('nano', 'Nano', 'For testing the waters with a focused product set.', 29.99, 500, 50, 2_500, 2),
   plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 34.99, 1000, 100, 5_000, 3),
