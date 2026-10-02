@@ -77,6 +77,26 @@ def test_a_page_with_a_buy_box_is_never_flagged_as_having_none(name):
     assert signals.extract_commerce_signals(page(name), US)["noFeaturedOffer"] is False
 
 
+@pytest.mark.parametrize("name,expected", [
+    # Third-party seller, shipped by Amazon (FBA) — the current layout states
+    # it in #fulfillerInfoFeature_feature_div, which upstream never reads.
+    ("plain_in_stock", True), ("buybox_beyond_window", True), ("variations", True),
+    # Sold and shipped by Amazon itself.
+    ("limited_in_stock", True), ("only_left", True),
+    # No Buy Box / unavailable: the page names no shipper, so the answer is
+    # unknown — never "not Amazon".
+    ("no_featured_offer", None), ("unavailable", None),
+])
+def test_shipped_by_amazon_is_read_from_the_fulfiller_block(name, expected):
+    assert signals.extract_commerce_signals(page(name), US)["shippedByAmazon"] is expected
+
+
+def test_another_shipper_is_not_amazon():
+    html = ('<div id="fulfillerInfoFeature_feature_div"><span>Ships from</span>'
+            '<span>Acme Outlet</span></div>')
+    assert signals.extract_shipped_by_amazon(html, None) is False
+
+
 def test_gallery_reads_a_plain_array_initial_payload():
     # Media pages (Blu-ray/DVD/books) write ImageBlockATF's gallery as a plain
     # JS array — `'colorImages': { 'initial': [...] }` — instead of the

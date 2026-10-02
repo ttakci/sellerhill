@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Avtomatik alıcı mesajı şablonlarınıza baxın, onları redaktə edin və yaradın",
         "manageBlacklist": "Qara siyahını idarə et",
         "manageBlacklistSubtitle": "Elan başlıqlarında, təsvirlərdə və xüsusiyyətlərdə bloklanacaq açar sözlər",
-        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur."
+        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur.",
+        "listingRules": "Elan qaydaları",
+        "listingRulesSubtitle": "Brend qorunması, nələrin elan oluna biləcəyi və avtomatik təmizləmə"
       },
       "listingGroups": {
         "title": "Parametr qrupları",
@@ -422,7 +424,16 @@
           "add": "Açar sözləri əlavə et",
           "duplicate": "Bütün açar sözlər seçilmiş sahələri artıq əhatə edir",
           "empty": "Zəhmət olmasa ən azı bir açar söz daxil edin",
-          "typeRequired": "Ən azı bir sahə seçin"
+          "typeRequired": "Ən azı bir sahə seçin",
+          "actionLabel": "Açar söz tapıldıqda",
+          "action": {
+            "block": "Məhsulu elan etmə",
+            "remove": "Sözü sil və elan et"
+          },
+          "actionHint": {
+            "block": "Mətnində bu söz olan məhsul elan edilmir.",
+            "remove": "Söz başlıqdan, təsvirdən və ya xüsusiyyətlərdən silinir, məhsul isə onsuz elan edilir."
+          }
         },
         "list": {
           "empty": "Seçilmiş əhatə üçün qara siyahı açar sözü yoxdur",

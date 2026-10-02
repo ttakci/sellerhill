@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin ve oluşturun",
         "manageBlacklist": "Kara Listeyi Yönet",
         "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler",
-        "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır."
+        "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır.",
+        "listingRules": "Listeleme kuralları",
+        "listingRulesSubtitle": "Marka koruması, nelerin listeleneceği ve otomatik temizlik"
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
@@ -422,7 +424,16 @@
           "add": "Kelimeleri Ekle",
           "duplicate": "Tüm kelimeler seçili alanları zaten içeriyor",
           "empty": "Lütfen en az bir kelime girin",
-          "typeRequired": "En az bir alan seçin"
+          "typeRequired": "En az bir alan seçin",
+          "actionLabel": "Kelime bulunduğunda",
+          "action": {
+            "block": "Ürünü listeleme",
+            "remove": "Kelimeyi sil, listele"
+          },
+          "actionHint": {
+            "block": "Metninde bu kelime geçen ürün listelenmez.",
+            "remove": "Kelime başlıktan, açıklamadan ya da özelliklerden çıkarılır; ürün kelime olmadan listelenir."
+          }
         },
         "list": {
           "empty": "Seçili kapsam için blacklist kelimesi yok",

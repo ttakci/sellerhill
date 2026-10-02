@@ -218,6 +218,12 @@
         "title": "Otomasyon askıya alındı",
         "description": "Aboneliğiniz aktif olmadığı için yeni ilan açma, fiyat ve stok güncellemesi, otomatik satın alma ve kargo takip dönüşümü durdu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
         "action": "Paket seç"
+      },
+      "listing_not_selling": {
+        "title": "Satmayan ilanlar",
+        "description_one": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızdaki yerine değmiyorsa bitirin.",
+        "description_other": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızdaki yerine değmeyenleri bitirin.",
+        "action": "İlanları incele"
       }
     },
     "reasons": {

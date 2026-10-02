@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Vizualizați, editați și creați șabloanele de mesaje automate pentru cumpărători",
         "manageBlacklist": "Gestionează lista neagră",
         "manageBlacklistSubtitle": "Cuvinte cheie blocate în titlurile, descrierile și specificațiile anunțurilor",
-        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin."
+        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin.",
+        "listingRules": "Reguli pentru anunțuri",
+        "listingRulesSubtitle": "Protecția brandului, ce poate fi publicat și curățarea automată"
       },
       "listingGroups": {
         "title": "Grupuri de setări pentru anunțuri",
@@ -422,7 +424,16 @@
           "add": "Adaugă cuvinte cheie",
           "duplicate": "Toate cuvintele cheie includ deja câmpurile selectate",
           "empty": "Introduceți cel puțin un cuvânt cheie",
-          "typeRequired": "Selectați cel puțin un câmp"
+          "typeRequired": "Selectați cel puțin un câmp",
+          "actionLabel": "Când este găsit un cuvânt cheie",
+          "action": {
+            "block": "Nu publica produsul",
+            "remove": "Elimină cuvântul și publică"
+          },
+          "actionHint": {
+            "block": "Un produs al cărui text conține cuvântul nu este publicat.",
+            "remove": "Cuvântul este eliminat din titlu, descriere sau caracteristici, iar produsul este publicat fără el."
+          }
         },
         "list": {
           "empty": "Niciun cuvânt cheie în lista neagră pentru domeniul selectat",

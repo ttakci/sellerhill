@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "今日的 eBay API 额度已用完。此商品刊登已排队，将自动继续。",
         "blacklisted_keyword": "您的店铺设置黑名单拦截了此商品刊登（关键词：“{{keyword}}”）。请移除该关键词，或调整您的刊登模板。",
         "cancelled": "在处理此 ASIN 之前已取消。",
-        "unknown": "无法创建此商品刊登。"
-      }
+        "unknown": "无法创建此商品刊登。",
+        "blocked_by_rule": "已被您的某条刊登规则跳过。",
+        "blocked_by_rule_blocked_asin": "此 ASIN 在您的已屏蔽 ASIN 列表中。",
+        "blocked_by_rule_vero_brand": "VeRO 保护已跳过此商品（品牌：“{{keyword}}”）。已知该品牌会在 eBay 上举报商品刊登。",
+        "blocked_by_rule_price_below_min": "Amazon 价格 {{actual}} 低于您设置的最低价格 {{limit}}。",
+        "blocked_by_rule_price_above_max": "Amazon 价格 {{actual}} 高于您设置的最高价格 {{limit}}。",
+        "blocked_by_rule_not_shipped_by_amazon": "并非由 Amazon 自己发货。您的刊登规则只允许 Amazon 发货的商品。",
+        "blocked_by_rule_low_rating": "评分为 {{actual}}。您设置的下限是 {{limit}}。",
+        "blocked_by_rule_low_rating_none": "暂无评分。您设置的下限是 {{limit}}。",
+        "blocked_by_rule_low_review_count": "评分数：{{actual}}。您设置的下限是 {{limit}}。"
+      },
+      "scheduledUntil": "已安排。最后一批商品将于 {{date}} 开始。"
     },
     "filters": {
       "searchPlaceholder": "按标题或 ASIN 搜索…",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} 份草稿商品刊登已加入队列，在您发布之前不会上线",
       "queuedWithSkipped": "{{count}} 条商品刊登已加入处理队列（{{skipped}} 条因已在您的刊登中而被跳过）",
       "queuedDraftWithSkipped": "{{count}} 份草稿商品刊登已加入队列（{{skipped}} 份因已在您的刊登中而被跳过），在您发布之前不会上线",
-      "allSkippedDuplicates": "输入的 {{skipped}} 个 ASIN 均已在您的刊登中 — 未启动任何新任务"
+      "allSkippedDuplicates": "输入的 {{skipped}} 个 ASIN 均已在您的刊登中 — 未启动任何新任务",
+      "scheduled": "已安排 {{count}} 个商品。最后一批将于 {{date}} 开始。",
+      "scheduledWithSkipped": "已安排 {{count}} 个商品（跳过 {{skipped}} 个：已在您的商品刊登中）。最后一批将于 {{date}} 开始。"
     },
     "errors": {
       "createFailed": "创建商品刊登失败",
       "fetchPoliciesFailed": "获取 eBay 商业政策失败",
       "invalidAsins": "您输入的条目中有 {{count}} 个看起来不是有效的 ASIN（10 位字母数字字符），已被跳过。",
-      "loadFailed": "加载商品刊登失败，请重试。"
+      "loadFailed": "加载商品刊登失败，请重试。",
+      "scheduleTooLong": "按此速度，任务将超过 30 天。请提高每日商品数，或减少添加的 ASIN。"
     },
     "detail": {
       "breadcrumb": "商品刊登详情",
@@ -462,6 +475,15 @@
     },
     "products": {
       "searchPlaceholder": "按标题、ASIN 或品牌搜索…"
+    },
+    "schedule": {
+      "title": "分时段刊登",
+      "hint": "在您选定的时间段内，每天刊登固定数量的商品，而不是一次全部刊登。价格、库存和您的刊登规则会在每个商品轮到时进行检查。",
+      "perDay": "每日商品数",
+      "perDayError": "请输入 {{min}} 到 {{max}} 之间的整数。",
+      "startHour": "从",
+      "endHour": "到",
+      "estimate_other": "按此速度约需 {{count}} 天。"
     }
   }
 }

@@ -2,13 +2,17 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { forwardRef, Inject, Logger } from '@nestjs/common';
 import {
   AmazonMarketplace,
+  evaluateListingRules,
   extractCorrelationId,
   generateCorrelationId,
+  isAsinBlocked,
   isValidAsinShape,
   KeepaUsageSource,
   ListingFailureCode,
   ListingJobKind,
+  ListingRuleKind,
   ListingStatus,
+  normalizeListingRules,
   ProductDataProviderKind,
   SourceFetchOutcome,
   SourceStockStatus,
@@ -16,6 +20,8 @@ import {
   type ListingBatchQueueJobData,
   type ListingCreationData,
   type ListingFailureDetails,
+  type ListingRulesConfig,
+  type ListingRuleViolation,
   type ProductData,
 } from '@repo/shared';
 import { DelayedError, Job } from 'bullmq';
@@ -30,6 +36,8 @@ import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
+import { VeroService } from '../vero/vero.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
@@ -38,6 +46,7 @@ import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
 import { ListingImportService } from './listing-import.service';
+import { ListingPromotionService } from './listing-promotion.service';
 import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
@@ -71,6 +80,23 @@ export class NoBuyBoxError extends Error {
   override name = 'NoBuyBoxError';
   constructor(asin: string) {
     super(`no Buy Box for ${asin}`);
+  }
+}
+
+/**
+ * One of the seller's own listing rules refused the product (a blocked ASIN,
+ * VeRO protection, the price range, "shipped by Amazon only", a rating or
+ * review minimum). Terminal: the same product meets the same rule again.
+ */
+export class ListingRuleBlockedError extends Error {
+  override name = 'ListingRuleBlockedError';
+  constructor(
+    asin: string,
+    readonly violation: ListingRuleViolation,
+    /** The VeRO entry that matched — the only word of that list a seller ever sees. */
+    readonly matchedKeyword?: string,
+  ) {
+    super(`Listing rule ${violation.kind} refused ASIN ${asin}.`);
   }
 }
 
@@ -129,6 +155,9 @@ export class ListingProcessorService extends WorkerHost {
     private readonly databaseService: DatabaseService,
     private readonly ebayImages: EbayImageResolver,
     private readonly productSource: ProductSourceService,
+    private readonly storeSettingsService: StoreSettingsService,
+    private readonly veroService: VeroService,
+    private readonly promotion: ListingPromotionService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -227,6 +256,31 @@ export class ListingProcessorService extends WorkerHost {
     );
     await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
 
+    // A scheduled job reserved no plan slots when it was created; this group
+    // reserves its own now. First attempt only: a BullMQ retry of the same
+    // group already holds them, and counting them again could refuse a group
+    // over slots it is itself occupying. A refusal (plan full, or the account
+    // suspended since the job was scheduled) fails every item of the group
+    // with the quota reason — the same answer an immediate create gets.
+    if (job.data.reserveAtRun && job.attemptsMade === 0) {
+      try {
+        await this.quotaEnforcement.reserveForBulkCreate(
+          userId,
+          items.map((item) => item.listingJobItemId)
+        );
+      } catch (error: unknown) {
+        for (const item of items) {
+          await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, error);
+        }
+        return;
+      }
+    }
+
+    // The seller's listing rules for this store, resolved once per batch.
+    const listingRules = normalizeListingRules(
+      (await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId)).listingRules
+    );
+
     const policies = { paymentId: paymentPolicyId, shippingId: shippingPolicyId, returnId: returnPolicyId };
     const drafts: BulkListingDraft[] = [];
     const context = new Map<
@@ -259,6 +313,10 @@ export class ListingProcessorService extends WorkerHost {
       const uncached: string[] = [];
       for (const item of items) {
         if (!isValidAsinShape(item.asin) || uncached.includes(item.asin)) {
+          continue;
+        }
+        // The seller's own blocked list needs no product data to refuse.
+        if (isAsinBlocked(listingRules, item.asin)) {
           continue;
         }
         if (await this.listingsService.isAsinListed(userId, item.asin)) {
@@ -309,6 +367,9 @@ export class ListingProcessorService extends WorkerHost {
           await this.recordDuplicate(jobId, userId, item.asin, item.listingJobItemId);
           return;
         }
+        if (isAsinBlocked(listingRules, item.asin)) {
+          throw new ListingRuleBlockedError(item.asin, { kind: ListingRuleKind.BLOCKED_ASIN });
+        }
 
         const { productData, productId } = await this.resolveProductData(
           item.asin,
@@ -317,6 +378,11 @@ export class ListingProcessorService extends WorkerHost {
           prefetched,
           cacheMaxAgeMs
         );
+
+        // The seller's rules, before anything is spent on this product (no
+        // image upload, no LLM call, no eBay call). Drafts are judged too: a
+        // product the seller refuses to list is not worth preparing.
+        await this.assertListingRules(listingRules, productData);
 
         // Drafts may hold a zero-stock ASIN so the seller can prepare it and
         // publish once Amazon restocks; a live publish must never push qty 0.
@@ -527,11 +593,41 @@ export class ListingProcessorService extends WorkerHost {
       );
     }
 
+    // The listings are live; advertising them is a separate, fail-soft step
+    // (the store's own ad rate, and only if eBay lets the seller advertise).
+    await this.promotion.promoteNewListings(
+      userId,
+      accountId,
+      outcomes.filter((outcome) => outcome.ok && outcome.listingId).map((outcome) => outcome.listingId as string)
+    );
+
     const created = outcomes.filter((outcome) => outcome.ok).length;
     this.logger.log(
       `Batch for job ${jobId}: ${created}/${drafts.length} listing(s) published ` +
         `(publish=${Date.now() - publishStartedAt}ms)`
     );
+  }
+
+  /**
+   * Refuse a product one of the seller's listing rules rules out: the price
+   * range, "shipped by Amazon only", the rating / review minimums, and — while
+   * VeRO protection is on — a brand on the platform's VeRO list.
+   */
+  private async assertListingRules(rules: ListingRulesConfig, product: ProductData): Promise<void> {
+    const violation = evaluateListingRules(rules, {
+      asin: product.asin,
+      price: Number(product.price?.current) || 0,
+      sourceQuality: product.sourceQuality,
+    });
+    if (violation) {
+      throw new ListingRuleBlockedError(product.asin, violation);
+    }
+    if (rules.veroProtectionEnabled) {
+      const matched = await this.veroService.findMatch([product.brand, product.manufacturer]);
+      if (matched) {
+        throw new ListingRuleBlockedError(product.asin, { kind: ListingRuleKind.VERO_BRAND }, matched);
+      }
+    }
   }
 
   /**

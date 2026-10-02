@@ -1,6 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
+    normalizeListingSchedule,
+    planListingSchedule,
     type CreateListingsRequest,
     type ListingBatchQueueJobData,
     type ListingJobDto,
@@ -54,11 +56,27 @@ export class ListingQueueService {
     const job = await this.listingsService.createJob(userId, request);
     this.logger.log(`Created listing job ${job.id} for user ${userId} with ${asins.length} ASINs`);
 
+    // A schedule spreads the job over days. Planned from the items that
+    // survived createJob's filters, so a submission of 60 with 10 duplicates
+    // is laid out as 50. An unusable schedule degrades to "run now".
+    const schedule = normalizeListingSchedule(request.schedule);
+    const plan = schedule && job.items.length > 0 ? planListingSchedule(job.items.length, schedule, Date.now()) : null;
+    if (schedule && job.items.length > 0 && !plan) {
+      await this.listingsService.deleteUnstartedJob(userId, job.id).catch(() => undefined);
+      throw new BadRequestException('listings.errors.scheduleTooLong');
+    }
+
     // 2. Billing-quota gate: reserve slots for NON-DRAFT creates only. Drafts
     //    are excluded from quota (they reserve at publish time). Race-safe:
     //    reserveForBulkCreate takes a transaction-scoped advisory lock.
+    //
+    //    A SCHEDULED job reserves nothing here: its slots would sit reserved
+    //    for days, hiding room the seller could use in the meantime and
+    //    outliving a plan change. Each group reserves as it starts instead
+    //    (`reserveAtRun`), and a group that finds the plan full fails with the
+    //    same quota reason an immediate create would have been refused with.
     const asDraft = Boolean(request.asDraft);
-    if (!asDraft && job.items.length > 0) {
+    if (!asDraft && !plan && job.items.length > 0) {
       try {
         await this.quotaEnforcement.reserveForBulkCreate(userId, job.items.map((i) => i.id));
       } catch (error) {
@@ -116,7 +134,23 @@ export class ListingQueueService {
     // hold a 5-ASIN upload behind it on the shared listings queue.
     const queuedForUser = await this.listingsService.countQueuedItems(userId, job.id);
 
-    const jobs = chunkForBulk(job.items).map((chunk, index) => ({
+    // Immediate: chunks of 25, all runnable now. Scheduled: the plan's groups,
+    // each delayed to its slot (a delayed BullMQ job survives a restart).
+    const groups: Array<{ items: typeof job.items; delayMs: number }> = [];
+    if (plan) {
+      let cursor = 0;
+      for (const group of plan.groups) {
+        groups.push({ items: job.items.slice(cursor, cursor + group.count), delayMs: group.delayMs });
+        cursor += group.count;
+      }
+      await this.listingsService.setJobScheduledUntil(job.id, new Date(plan.endsAtMs));
+    } else {
+      for (const chunk of chunkForBulk(job.items)) {
+        groups.push({ items: chunk, delayMs: 0 });
+      }
+    }
+
+    const jobs = groups.map((group, index) => ({
       name: LISTING_BATCH_JOB,
       data: stampCurrentCorrelation({
         jobId: job.id,
@@ -127,9 +161,16 @@ export class ListingQueueService {
         shippingPolicyId: request.shippingPolicyId,
         returnPolicyId: request.returnPolicyId,
         asDraft,
-        items: chunk.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
+        ...(plan && !asDraft ? { reserveAtRun: true } : {}),
+        items: group.items.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
       } as ListingBatchQueueJobData),
-      opts: { ...opts, priority: fairBatchPriority(queuedForUser, index) },
+      opts: {
+        ...opts,
+        // A scheduled group is alone in its slot, so fairness has nothing to
+        // order; an immediate chunk keeps the per-seller priority.
+        priority: plan ? fairBatchPriority(0, 0) : fairBatchPriority(queuedForUser, index),
+        ...(group.delayMs > 0 ? { delay: group.delayMs } : {}),
+      },
     }));
 
     if (jobs.length > 0) {
@@ -143,7 +184,7 @@ export class ListingQueueService {
     // Strip the internal items field before returning the DTO.
     const { items: _items, ...dto } = job;
     void _items;
-    return dto;
+    return plan ? { ...dto, scheduledUntil: new Date(plan.endsAtMs).toISOString() } : dto;
   }
 
   /**

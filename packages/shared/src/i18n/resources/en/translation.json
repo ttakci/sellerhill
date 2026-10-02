@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "View, edit, and create your automated buyer message templates",
         "manageBlacklist": "Manage Blacklist",
         "manageBlacklistSubtitle": "Keywords to block from listing titles, descriptions, and specifics",
-        "infoMessage": "Message templates and blacklist rules are applied based on the scope (global or per-store) you choose in Store Settings."
+        "infoMessage": "Message templates and blacklist rules are applied based on the scope (global or per-store) you choose in Store Settings.",
+        "listingRules": "Listing rules",
+        "listingRulesSubtitle": "Brand protection, what may be listed, and automatic clean-up"
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
@@ -422,7 +424,16 @@
           "add": "Add Keywords",
           "duplicate": "All keywords already include the selected fields",
           "empty": "Please enter at least one keyword",
-          "typeRequired": "Select at least one field"
+          "typeRequired": "Select at least one field",
+          "actionLabel": "When a keyword is found",
+          "action": {
+            "block": "Don't list the product",
+            "remove": "Remove the word and list"
+          },
+          "actionHint": {
+            "block": "A product whose text contains the word is not listed.",
+            "remove": "The word is taken out of the title, description or features, and the product is listed without it."
+          }
         },
         "list": {
           "empty": "No blacklist keywords for the selected scope",

@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "A cota diária de uso da API do eBay acabou. Este anúncio está na fila e continuará automaticamente.",
         "blacklisted_keyword": "A lista de bloqueio das suas Configurações da loja impediu este anúncio (palavra-chave: \"{{keyword}}\"). Remova a palavra-chave ou ajuste o seu modelo de anúncio.",
         "cancelled": "Cancelado antes de este ASIN ser processado.",
-        "unknown": "Não foi possível criar o anúncio."
-      }
+        "unknown": "Não foi possível criar o anúncio.",
+        "blocked_by_rule": "Ignorado por uma das suas regras de anúncios.",
+        "blocked_by_rule_blocked_asin": "Este ASIN está na sua lista de ASINs bloqueados.",
+        "blocked_by_rule_vero_brand": "A proteção VeRO ignorou este produto (marca: \"{{keyword}}\"). Esta marca é conhecida por denunciar anúncios no eBay.",
+        "blocked_by_rule_price_below_min": "O preço na Amazon, {{actual}}, está abaixo do seu mínimo de {{limit}}.",
+        "blocked_by_rule_price_above_max": "O preço na Amazon, {{actual}}, está acima do seu máximo de {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "Não é enviado pela própria Amazon. Suas regras de anúncios permitem apenas produtos enviados pela Amazon.",
+        "blocked_by_rule_low_rating": "Avaliação: {{actual}}. Seu mínimo é {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Ainda sem avaliação. Seu mínimo é {{limit}}.",
+        "blocked_by_rule_low_review_count": "Número de avaliações: {{actual}}. Seu mínimo é {{limit}}."
+      },
+      "scheduledUntil": "Agendado. Os últimos produtos começam em {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Pesquisar por título ou ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} rascunhos de anúncios na fila — eles não serão publicados até que você os publique",
       "queuedWithSkipped": "{{count}} anúncios na fila para processamento ({{skipped}} ignorados — já estão nos seus anúncios)",
       "queuedDraftWithSkipped": "{{count}} rascunhos de anúncios na fila ({{skipped}} ignorados — já estão nos seus anúncios) — eles não serão publicados até que você os publique",
-      "allSkippedDuplicates": "Todos os {{skipped}} ASINs informados já estão nos seus anúncios — nenhuma tarefa nova foi iniciada"
+      "allSkippedDuplicates": "Todos os {{skipped}} ASINs informados já estão nos seus anúncios — nenhuma tarefa nova foi iniciada",
+      "scheduled": "{{count}} produtos agendados. Os últimos começam em {{date}}.",
+      "scheduledWithSkipped": "{{count}} produtos agendados ({{skipped}} ignorados — já estão nos seus anúncios). Os últimos começam em {{date}}."
     },
     "errors": {
       "createFailed": "Falha ao criar os anúncios",
       "fetchPoliciesFailed": "Falha ao buscar as políticas comerciais do eBay",
       "invalidAsins": "{{count}} das suas entradas não parecem ASINs válidos (10 caracteres alfanuméricos) e foram ignoradas.",
-      "loadFailed": "Falha ao carregar os anúncios. Tente novamente."
+      "loadFailed": "Falha ao carregar os anúncios. Tente novamente.",
+      "scheduleTooLong": "Nesse ritmo, a tarefa levaria mais de 30 dias. Aumente o número de produtos por dia ou adicione menos ASINs."
     },
     "detail": {
       "breadcrumb": "Detalhes do anúncio",
@@ -462,6 +475,17 @@
     },
     "products": {
       "searchPlaceholder": "Pesquisar por título, ASIN ou marca…"
+    },
+    "schedule": {
+      "title": "Distribuir ao longo do tempo",
+      "hint": "Anuncie um número definido de produtos por dia, dentro dos horários escolhidos, em vez de todos de uma vez. Preço, estoque e suas regras de anúncios são verificados quando chega a vez de cada produto.",
+      "perDay": "Produtos por dia",
+      "perDayError": "Digite um número inteiro entre {{min}} e {{max}}.",
+      "startHour": "De",
+      "endHour": "Até",
+      "estimate_one": "Cerca de {{count}} dia nesse ritmo.",
+      "estimate_many": "Cerca de {{count}} dias nesse ritmo.",
+      "estimate_other": "Cerca de {{count}} dias nesse ritmo."
     }
   }
 }

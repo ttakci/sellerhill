@@ -33,6 +33,8 @@ what could be obtained as real content; the "not obtainable" list is what could 
 | `sell-analytics-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/analytics/openapi/3/sell_analytics_v1_oas3.json` | 200, raw (2026-09-30) | **Sell Analytics API v1.3.2 OpenAPI.** `getTrafficReport` (scope `sell.analytics.readonly`): dimensions, the 13 metrics, the `filter` grammar and its limits. |
 | `sell-feed-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/feed/openapi/3/sell_feed_v1_oas3.json` | 200, raw (2026-09-30) | **Feed API v1.3.1 OpenAPI.** `createInventoryTask` — "Presently, only one feed type is available: LMS_ACTIVE_INVENTORY_REPORT". |
 | `trading/GetMyeBaySelling.txt`, `GetItem.txt`, `GetSellerList.txt`, `GetSellerEvents.txt` | `https://developer.ebay.com/devzone/xml/docs/reference/ebay/<Call>.html` | 200, text-extracted (2026-09-30) | **Trading API call reference, version 1477.** Input fields, every output field with its description, the detail-level tables and the per-seller short-duration limits. |
+| `sell-marketing-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/marketing/openapi/3/sell_marketing_v1_oas3.json` | 200, raw (2026-10-02) | **Marketing API v1.23.2 OpenAPI.** Promoted Listings campaigns and ads: `createCampaign` (201, id in the `Location` header), `getCampaignByName`, `bulkCreateAdsByListingId` (max 500 listings per call), every error id. Scope `sell.marketing`. |
+| `sell-account-v1-oas3.json` | `https://developer.ebay.com/api-docs/master/sell/account/openapi/3/sell_account_v1_oas3.json` | 200, raw (2026-10-02) | **Account API v1 OpenAPI.** `getAdvertisingEligibility` (`program_types` query, `X-EBAY-C-MARKETPLACE-ID` header required). |
 
 ## Not obtainable on 2026-09-29 (do not guess their content)
 
@@ -118,6 +120,19 @@ Every line is either quoted from a file in this folder or was observed in a real
 So a push subscription for cancellations, returns or inquiries needs a scope SellerHill does **not** request today (`sell.cancellation*`, `sell.return*`, `sell.inquiry*`): it would have to be enabled on the keyset first and every seller would have to reconnect. Polling needs neither. `createSubscription` itself needs `commerce.notification.subscription` and a body of `topicId`, `status` (ENABLED/DISABLED), `destinationId`, `payload` { `format`, `schemaVersion`, `deliveryProtocol` }.
 
 **Shared daily quotas that bound these** (production `getRateLimits`, 2026-09-30): `sell.fulfillment` 100,000 · `sell.fulfillment.refund` 100,000 · `post-order.return` 5,000 · `post-order.cancellation` 5,000 · `post-order.inquiry` 5,000 · `post-order.casemanagement` 5,000 · `commerce.notification` 10,000 · `payoutapi.sell.finances` 15,000 · Trading `GetOrders` 5,000.
+
+## Promoted Listings facts (2026-10-02)
+
+Everything `EbayPromotedListingsService` does is taken from `sell-marketing-v1-oas3.json` or from a live answer of the production keyset; nothing is assumed.
+
+- **Quota (live `getRateLimits`, 2026-10-02):** `sell.marketing` **10,000/day**, `sell.marketing.ads.campaign` **100,000/day**, `sell.marketing.promotions` 10,000/day. eBay does not say which method draws from which, so the app governs every Marketing call against the tighter `sell.marketing` figure (`EbayApiResource.MARKETING`).
+- **Scope:** `sell.marketing` is already in the consent the app requests; a live `getCampaigns` on the production store answered 200 (`campaigns: []`). No re-consent is needed.
+- **Eligibility (live, production store, 2026-10-02):** `GET /sell/account/v1/advertising_eligibility` answered `PROMOTED_LISTINGS_STANDARD` → `status: INELIGIBLE`, `reason: NOT_ENOUGH_ACTIVITY` (the same for `OFFSITE_ADS` and `PROMOTED_LISTINGS_ADVANCED`). `INELIGIBLE` is the only status value observed; the app treats exactly that value as "do not send" and leaves every other answer for eBay to judge.
+- **`bidPercentage`** (the ad rate): a string, "a single precision value" (4.1, 5.0, 5.5 valid; 0.01, 10.75, 99.99 not), "a minimum value of 2.0 and a maximum value of 100.0". Charged only "when an item sells through a Promoted Listings ad campaign".
+- **`createCampaign`:** `campaignName` unique per seller, max 80 characters; `startDate` in `yyyy-MM-ddThh:mm:ssZ` and not in the past (35026); `fundingStrategy.fundingModel` — the OAS names `COST_PER_SALE` as the Promoted Listings default; `marketplaceId` required (35041). Refusals that are about the SELLER, not the request: 35067 (terms not accepted), 35077 (seller level), 35078 ("must be in good standing with recent sales activity"). 35021 = the name already exists.
+- **`bulkCreateAdsByListingId`:** `{ requests: [{ listingId, bidPercentage }] }`, "a maximum of 500 listings per call", a campaign holds at most 50,000 items; answers 200 or 207 with `responses[]` (`listingId`, `statusCode`, `adId` only when created). 35036 = an ad for the listing already exists; 35035 / 35045 = the campaign ended / does not exist.
+- **Not obtainable:** the enum pages `pls:FundingModelEnum`, `pls:FundingModelTypeEnum` and `pls:CampaignStatusEnum` answered 403 from eBay's edge; the Account enum pages return a script shell with no values in it. The eligibility values above are therefore the live answer, not a documented list.
+- **Not exercised live:** `createCampaign` and `bulkCreateAdsByListingId` have never been called — the only production store is ineligible, and both are writes to a real seller's account.
 
 ## Listing, traffic, watch-count and sold-quantity facts (2026-09-30)
 

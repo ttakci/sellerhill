@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Veja, edite e crie seus modelos de mensagem automática ao comprador",
         "manageBlacklist": "Gerenciar lista de bloqueio",
         "manageBlacklistSubtitle": "Palavras-chave a bloquear em títulos, descrições e características dos anúncios",
-        "infoMessage": "Os modelos de mensagem e as regras da lista de bloqueio são aplicados conforme o escopo (global ou por loja) que você escolher em Configurações da loja."
+        "infoMessage": "Os modelos de mensagem e as regras da lista de bloqueio são aplicados conforme o escopo (global ou por loja) que você escolher em Configurações da loja.",
+        "listingRules": "Regras de anúncios",
+        "listingRulesSubtitle": "Proteção de marca, o que pode ser anunciado e limpeza automática"
       },
       "listingGroups": {
         "title": "Grupos de configurações de anúncios",
@@ -422,7 +424,16 @@
           "add": "Adicionar palavras-chave",
           "duplicate": "Todas as palavras-chave já incluem os campos selecionados",
           "empty": "Informe pelo menos uma palavra-chave",
-          "typeRequired": "Selecione pelo menos um campo"
+          "typeRequired": "Selecione pelo menos um campo",
+          "actionLabel": "Quando uma palavra-chave for encontrada",
+          "action": {
+            "block": "Não anunciar o produto",
+            "remove": "Remover a palavra e anunciar"
+          },
+          "actionHint": {
+            "block": "Um produto cujo texto contém a palavra não é anunciado.",
+            "remove": "A palavra é removida do título, da descrição ou das características, e o produto é anunciado sem ela."
+          }
         },
         "list": {
           "empty": "Nenhuma palavra-chave na lista de bloqueio para o escopo selecionado",

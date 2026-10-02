@@ -108,6 +108,26 @@ export const DraftCopy = styled.div`
   flex: 1;
 `;
 
+/**
+ * A scheduled add: the per-day count on its own row, the two hour selects
+ * side by side under it (three across truncated the count's label in every
+ * language with a longer word for it); stacked on a phone.
+ */
+export const ScheduleGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${tkn('spacing.md')};
+  width: 100%;
+
+  & > :first-of-type {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 export const PolicyGrid = styled.div`
   display: flex;
   flex-direction: column;

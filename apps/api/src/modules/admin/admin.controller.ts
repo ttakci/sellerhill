@@ -32,6 +32,9 @@
 //   PUT    /admin/listing-quality/defaults  — curate one aspect value (3rd write surface)
 //   DELETE /admin/listing-quality/defaults/:id — drop a curated value / retire a learned one
 //   GET    /admin/listing-quality/categories   — learned + pinned category mappings
+//   GET    /admin/vero                — the platform VeRO brand list (never shown to sellers)
+//   POST   /admin/vero                — add brand names to it
+//   DELETE /admin/vero/:id            — remove one
 //   GET    /admin/users               — per-user monitoring snapshot
 //   GET    /admin/settings            — runtime settings + provenance
 //   PUT    /admin/settings/:key       — set an operator override
@@ -62,6 +65,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
+  AddVeroKeywordsDto,
   PlatformSettingKey,
   QueueEventType,
   UpdatePlatformSettingDto,
@@ -70,6 +74,7 @@ import {
   UsageMetric,
   UserRole,
   VerifyScraperProxiesDto,
+  type AddVeroKeywordsResult,
   type AdminAspectDefaultDto,
   type AdminAspectDefaultsListDto,
   type AdminBillingMetricsDto,
@@ -81,6 +86,7 @@ import {
   type EbayBudgetOverviewDto,
   type ListingFailureCode,
   type AdminUsersListDto,
+  type AdminVeroKeywordListDto,
   type PlatformSettingsListDto,
   type ProviderCostSummaryDto,
   type ProxyVerifyResult,
@@ -100,6 +106,7 @@ import { PrivilegedSessionGuard } from '../auth/privileged-session.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { EmailService } from '../email/email.service';
+import { VeroService } from '../vero/vero.service';
 
 import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
@@ -120,6 +127,7 @@ export class AdminController {
     private readonly ebayBudgetOverview: EbayBudgetOverviewService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly emailService: EmailService,
+    private readonly veroService: VeroService,
     @InjectQueue('order-sync') private readonly orderSyncQueue: Queue,
     @InjectQueue('stock-sync') private readonly stockSyncQueue: Queue,
     @InjectQueue('auto-fulfill') private readonly autoFulfillQueue: Queue,
@@ -136,6 +144,7 @@ export class AdminController {
     @InjectQueue('billing-price-migration') private readonly billingPriceMigrationQueue: Queue,
     @InjectQueue('ebay-rate-limit-refresh') private readonly ebayRateLimitRefreshQueue: Queue,
     @InjectQueue('ebay-returns-sync') private readonly ebayReturnsSyncQueue: Queue,
+    @InjectQueue('listing-cleanup') private readonly listingCleanupQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -156,6 +165,7 @@ export class AdminController {
       { name: 'billing-price-migration', queue: this.billingPriceMigrationQueue },
       { name: 'ebay-rate-limit-refresh', queue: this.ebayRateLimitRefreshQueue },
       { name: 'ebay-returns-sync', queue: this.ebayReturnsSyncQueue },
+      { name: 'listing-cleanup', queue: this.listingCleanupQueue },
     ];
   }
 
@@ -399,6 +409,52 @@ export class AdminController {
   @ApiForbiddenResponse({ description: 'User is not an admin' })
   async removeAspectDefault(@Param('id') id: string): Promise<{ success: boolean }> {
     await this.adminListingQualityService.removeAspectDefault(id);
+    return { success: true };
+  }
+
+  @Get('vero')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'The platform VeRO brand list',
+    description:
+      'Brand names refused for every seller who keeps VeRO protection on. Operator-owned and never returned to a seller: a seller sees only the on/off switch and, on a refused product, the one brand that matched.',
+  })
+  @ApiOkResponse({ description: 'List returned' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async getVeroKeywords(
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ): Promise<AdminVeroKeywordListDto> {
+    return this.veroService.list({ search, page: Number(page) || undefined, limit: Number(limit) || undefined });
+  }
+
+  @Post('vero')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Add brand names to the VeRO list',
+    description:
+      'Shared platform data with no owning customer module, like the curated aspect defaults. Entries may be separated by commas or new lines; a name already on the list (whatever its casing) is skipped.',
+  })
+  @ApiOkResponse({ description: 'Brand names added' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async addVeroKeywords(
+    @Request() req: { user: { sub: string } },
+    @Body() dto: AddVeroKeywordsDto
+  ): Promise<AddVeroKeywordsResult> {
+    return this.veroService.add(dto.keywords, req.user.sub);
+  }
+
+  @Delete('vero/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Remove a brand name from the VeRO list' })
+  @ApiOkResponse({ description: 'Brand name removed' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async removeVeroKeyword(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.veroService.remove(id);
     return { success: true };
   }
 

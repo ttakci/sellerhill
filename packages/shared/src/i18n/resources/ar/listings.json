@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "تم استهلاك حصة eBay API لهذا اليوم. هذا الإدراج في قائمة الانتظار وسيتابع تلقائياً.",
         "blacklisted_keyword": "حجبت القائمة السوداء في إعدادات المتجر هذا الإدراج (الكلمة: \"{{keyword}}\"). أزل الكلمة أو عدّل قالب إدراجك.",
         "cancelled": "أُلغي قبل معالجة رقم ASIN هذا.",
-        "unknown": "تعذّر إنشاء الإدراج."
-      }
+        "unknown": "تعذّر إنشاء الإدراج.",
+        "blocked_by_rule": "تم تخطيه بسبب إحدى قواعد الإدراج لديك.",
+        "blocked_by_rule_blocked_asin": "هذا ASIN موجود في قائمة ASIN المحظورة لديك.",
+        "blocked_by_rule_vero_brand": "تخطّت حماية VeRO هذا المنتج (العلامة التجارية: \"{{keyword}}\"). هذه العلامة معروفة بالإبلاغ عن الإدراجات على eBay.",
+        "blocked_by_rule_price_below_min": "سعر Amazon {{actual}} أقل من الحد الأدنى الذي حددته ({{limit}}).",
+        "blocked_by_rule_price_above_max": "سعر Amazon {{actual}} أعلى من الحد الأقصى الذي حددته ({{limit}}).",
+        "blocked_by_rule_not_shipped_by_amazon": "لا تشحنه Amazon بنفسها. قواعد الإدراج لديك تسمح فقط بالمنتجات التي تشحنها Amazon.",
+        "blocked_by_rule_low_rating": "تقييمه {{actual}}. الحد الأدنى لديك {{limit}}.",
+        "blocked_by_rule_low_rating_none": "ليس له تقييم بعد. الحد الأدنى لديك {{limit}}.",
+        "blocked_by_rule_low_review_count": "عدد التقييمات: {{actual}}. الحد الأدنى لديك {{limit}}."
+      },
+      "scheduledUntil": "تمت الجدولة. تبدأ آخر المنتجات في {{date}}."
     },
     "filters": {
       "searchPlaceholder": "البحث بالعنوان أو ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار، ولن تُنشر إلى أن تنشرها بنفسك",
       "queuedWithSkipped": "تم وضع {{count}} إدراجاً في قائمة المعالجة (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)",
       "queuedDraftWithSkipped": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)، ولن تُنشر إلى أن تنشرها بنفسك",
-      "allSkippedDuplicates": "جميع {{skipped}} من رموز ASIN موجودة بالفعل في إدراجاتك — لم تبدأ أي عملية جديدة"
+      "allSkippedDuplicates": "جميع {{skipped}} من رموز ASIN موجودة بالفعل في إدراجاتك — لم تبدأ أي عملية جديدة",
+      "scheduled": "تمت جدولة {{count}} منتج. تبدأ آخر المنتجات في {{date}}.",
+      "scheduledWithSkipped": "تمت جدولة {{count}} منتج (تم تخطي {{skipped}} — موجودة بالفعل في إدراجاتك). تبدأ آخر المنتجات في {{date}}."
     },
     "errors": {
       "createFailed": "تعذّر إنشاء الإدراجات",
       "fetchPoliciesFailed": "تعذّر جلب سياسات أعمال eBay",
       "invalidAsins": "{{count}} من مدخلاتك لا تبدو أرقام ASIN صالحة (10 أحرف وأرقام) وتم تخطيها.",
-      "loadFailed": "تعذّر تحميل الإدراجات. يرجى المحاولة مرة أخرى."
+      "loadFailed": "تعذّر تحميل الإدراجات. يرجى المحاولة مرة أخرى.",
+      "scheduleTooLong": "بهذه الوتيرة ستستغرق المهمة أكثر من 30 يومًا. ارفع عدد المنتجات يوميًا أو أضف عددًا أقل من ASIN."
     },
     "detail": {
       "breadcrumb": "تفاصيل الإدراج",
@@ -462,6 +475,20 @@
     },
     "products": {
       "searchPlaceholder": "البحث بالعنوان أو ASIN أو العلامة التجارية…"
+    },
+    "schedule": {
+      "title": "التوزيع على مدى أيام",
+      "hint": "أدرج عددًا محددًا من المنتجات يوميًا، خلال الساعات التي تختارها، بدلًا من إدراجها دفعة واحدة. تُفحص الأسعار والمخزون وقواعد الإدراج عند حلول دور كل منتج.",
+      "perDay": "عدد المنتجات يوميًا",
+      "perDayError": "أدخل عددًا صحيحًا بين {{min}} و{{max}}.",
+      "startHour": "من",
+      "endHour": "إلى",
+      "estimate_zero": "حوالي {{count}} يوم بهذه الوتيرة.",
+      "estimate_one": "حوالي {{count}} يوم بهذه الوتيرة.",
+      "estimate_two": "حوالي {{count}} يومين بهذه الوتيرة.",
+      "estimate_few": "حوالي {{count}} أيام بهذه الوتيرة.",
+      "estimate_many": "حوالي {{count}} يومًا بهذه الوتيرة.",
+      "estimate_other": "حوالي {{count}} يوم بهذه الوتيرة."
     }
   }
 }

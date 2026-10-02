@@ -237,6 +237,13 @@
         "title": "L'automatisation est suspendue",
         "description": "Votre abonnement n'est plus actif : la création d'annonces, les mises à jour de prix et de stock, l'achat automatique et la conversion du suivi sont donc arrêtés. Choisissez un forfait pour reprendre — tout redémarre de lui-même.",
         "action": "Choisir un forfait"
+      },
+      "listing_not_selling": {
+        "title": "Annonces qui ne se vendent pas",
+        "description_one": "{{count}} annonce active n'a eu aucune vente dans la période que vous avez définie. Examinez-la et terminez-la si elle ne mérite pas sa place dans votre forfait.",
+        "description_many": "{{count}} annonces actives n'ont eu aucune vente dans la période que vous avez définie. Examinez-les et terminez celles qui ne méritent pas leur place dans votre forfait.",
+        "description_other": "{{count}} annonces actives n'ont eu aucune vente dans la période que vous avez définie. Examinez-les et terminez celles qui ne méritent pas leur place dans votre forfait.",
+        "action": "Examiner les annonces"
       }
     },
     "reasons": {

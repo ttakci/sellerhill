@@ -69,6 +69,7 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { BillingService } from '../billing/billing.service';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
+import { buildNotSellingSql } from '../listings/listing-cleanup.helpers';
 
 import {
   TRIAL_ENDING_NOTICE_DAYS,
@@ -703,6 +704,29 @@ export class ActionCenterService {
       [userId, ListingStatus.ACTIVE]
     );
 
+    /*
+     * Not selling, by the seller's own window. Counted only for stores that
+     * watch WITHOUT automatic ending: with auto-end on, the hourly clean-up
+     * ends these itself and there is nothing for the seller to do.
+     */
+    const notSelling = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM listings l
+        WHERE l.user_id = $1
+          AND l.status = $2
+          AND ${buildNotSellingSql('l')}
+          AND NOT COALESCE((
+            SELECT CASE
+                     WHEN s.listing_rules IS NOT NULL THEN (s.listing_rules->>'coldListingAutoEnd')::boolean
+                     ELSE (g.listing_rules->>'coldListingAutoEnd')::boolean
+                   END
+              FROM (SELECT 1) one
+              LEFT JOIN store_settings s ON s.user_id = l.user_id AND s.store_id = l.ebay_account_id
+              LEFT JOIN store_settings g ON g.user_id = l.user_id AND g.is_global = TRUE
+          ), FALSE)`,
+      [userId, ListingStatus.ACTIVE]
+    );
+
     return [
       {
         key: ActionCenterItemKey.LISTING_JOB_FAILURES,
@@ -734,6 +758,13 @@ export class ActionCenterService {
         severity: ActionCenterSeverity.WARNING,
         count: toCount(outOfStock[0]?.count),
         actionPath: '/listings/all?status=active&quantityMax=0',
+      },
+      {
+        key: ActionCenterItemKey.LISTING_NOT_SELLING,
+        group: ActionCenterGroup.LISTINGS,
+        severity: ActionCenterSeverity.INFO,
+        count: toCount(notSelling[0]?.count),
+        actionPath: '/listings/all?status=active&notSelling=true',
       },
       {
         key: ActionCenterItemKey.LISTING_DRAFTS_PENDING,

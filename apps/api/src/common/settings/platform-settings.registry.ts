@@ -136,6 +136,15 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'false',
   }),
   def({
+    key: PlatformSettingKey.LISTING_CLEANUP_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'LISTING_CLEANUP_ENABLED',
+    // On: each seller's own rule is off until they switch it on, so this only
+    // exists to stop every automatic ending at once.
+    defaultValue: 'true',
+  }),
+  def({
     key: PlatformSettingKey.EBAY_RETURN_SYNC_QUOTA_PERCENT,
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,

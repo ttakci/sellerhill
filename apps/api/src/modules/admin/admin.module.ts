@@ -18,6 +18,7 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { EmailModule } from '../email/email.module';
 import { ProductSourceModule } from '../listings/product-source.module';
+import { VeroModule } from '../vero/vero.module';
 
 import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
@@ -43,6 +44,9 @@ import { UsageEventsService } from './usage-events.service';
     // (which already imports this module the other way round). See
     // module-cycle.guard.spec.ts for why that direction must stay one-way.
     ProductSourceModule,
+    // The platform VeRO list — edited here, checked by the listings worker.
+    // Its own dependency-free module, for the same reason as the line above.
+    VeroModule,
     BullModule.registerQueue(
       { name: 'order-sync' },
       { name: 'stock-sync' },
@@ -60,6 +64,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'billing-price-migration' },
       { name: 'ebay-rate-limit-refresh' },
       { name: 'ebay-returns-sync' },
+      { name: 'listing-cleanup' },
     ),
   ],
   controllers: [AdminController],

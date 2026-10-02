@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import {
   AmazonMarketplace,
   ListingFailureCode,
@@ -49,10 +49,13 @@ import { EbayService } from '../ebay/ebay.service';
 import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
+import { buildNotSellingSql } from './listing-cleanup.helpers';
 import { classifyListingFailure } from './listing-failure';
+import { ListingPromotionService } from './listing-promotion.service';
 import { hasUncommittedRefreshCheck } from './listing-revision-check';
 import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
+import { readStoredSourceQuality } from './source-content-mapper';
 
 /** Row type for getListings / getListing queries (listings JOIN products) */
 interface ListingQueryRow {
@@ -245,7 +248,10 @@ export class ListingsService {
     private readonly strategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly platformSettings: PlatformSettingsService,
-    private readonly ebayImages: EbayImageResolver
+    private readonly ebayImages: EbayImageResolver,
+    // Optional so a spec can build the service without the advertising stack;
+    // Nest always supplies it.
+    @Optional() private readonly promotion?: ListingPromotionService
   ) {}
 
   /**
@@ -561,6 +567,12 @@ export class ListingsService {
       conditions.push(`(p.consecutive_failures >= $${paramIndex} OR p.source_removed_at IS NOT NULL)`);
       params.push(LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD);
       paramIndex++;
+    }
+
+    // Deep-link filter for the Action Center's LISTING_NOT_SELLING item — the
+    // same fragment its count uses.
+    if (query.notSelling) {
+      conditions.push(buildNotSellingSql('l'));
     }
 
     // Listings with ≥1 non-cancelled order in [soldFrom, soldTo] (soldTo inclusive as date)
@@ -1265,6 +1277,9 @@ export class ListingsService {
           : row.raw_provider_data
         : undefined,
     };
+    // Shipper / rating as read on the fetch that wrote this row, so the
+    // seller's listing rules judge a cached product like a freshly fetched one.
+    data.sourceQuality = readStoredSourceQuality(data.raw);
 
     return { id: row.id, data };
   }
@@ -1382,6 +1397,14 @@ export class ListingsService {
     );
   }
 
+  /** Record when a scheduled job's last group is due, so the jobs page can say so. */
+  async setJobScheduledUntil(jobId: string, scheduledUntil: Date): Promise<void> {
+    await this.databaseService.query(`UPDATE listing_jobs SET scheduled_until = $2::timestamptz WHERE id = $1`, [
+      jobId,
+      scheduledUntil.toISOString(),
+    ]);
+  }
+
   /**
    * How many DRAFT (still-queued) job items this user already has waiting,
    * excluding the job currently being enqueued. Feeds `fairBatchPriority` so a
@@ -1395,7 +1418,10 @@ export class ListingsService {
       `SELECT COUNT(*)::text AS count
          FROM listing_job_items i
          JOIN listing_jobs j ON j.id = i.job_id
-        WHERE j.user_id = $1 AND j.id <> $2 AND LOWER(i.status) = $3`,
+        WHERE j.user_id = $1 AND j.id <> $2 AND LOWER(i.status) = $3
+          -- A scheduled job's items wait on purpose, for days; counting them
+          -- would push the seller's next immediate upload to the back.
+          AND j.scheduled_until IS NULL`,
       [userId, excludeJobId, ListingStatus.DRAFT],
     );
     return Number(count);
@@ -1806,6 +1832,7 @@ export class ListingsService {
       kind: (entity.kind ?? ListingJobKind.CREATE) as ListingJobKind,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
+      ...(entity.scheduled_until ? { scheduledUntil: new Date(entity.scheduled_until).toISOString() } : {}),
     };
   }
 
@@ -2207,6 +2234,7 @@ export class ListingsService {
     }
 
     const answered = new Set<string>();
+    const publishedItemIds: string[] = [];
     for (const result of results) {
       const item = byKey.get(result.key);
       if (!item) {
@@ -2236,6 +2264,7 @@ export class ListingsService {
       try {
         await this.markDraftPublished(userId, item, result);
         outcomes.push({ listingId: item.listingId, ok: true });
+        publishedItemIds.push(result.listingId);
       } catch (error: unknown) {
         await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
         this.logger.error(
@@ -2255,6 +2284,9 @@ export class ListingsService {
       this.logger.error(`Failed to publish listing ${item.listingId}: ${error.message}`);
       outcomes.push({ listingId: item.listingId, ok: false, error });
     }
+
+    // Same fail-soft step a bulk create ends with: the store's ad rate, if any.
+    await this.promotion?.promoteNewListings(userId, accountId, publishedItemIds);
 
     return outcomes;
   }

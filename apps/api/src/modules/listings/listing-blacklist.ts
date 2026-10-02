@@ -56,15 +56,23 @@ export function containsBlacklistedKeyword(
   values: readonly string[],
   keyword: string
 ): boolean {
+  const pattern = buildKeywordPattern(keyword, 'iu');
+  return pattern !== null && values.some((value) => pattern.test(value));
+}
+
+/**
+ * The one whole-word pattern for a keyword — shared by the block check above,
+ * the keyword REMOVAL in `listing-content-rules.ts` and the platform VeRO
+ * check, so "matches" means the same thing wherever a keyword is compared.
+ * Null for an empty keyword.
+ */
+export function buildKeywordPattern(keyword: string, flags: string): RegExp | null {
   const trimmed = keyword.trim();
   if (!trimmed) {
-    return false;
+    return null;
   }
-
-  const pattern = new RegExp(
+  return new RegExp(
     `(?<!${WORD_CHARACTER_CLASS})${escapeRegExp(trimmed)}(?!${WORD_CHARACTER_CLASS})`,
-    'iu'
+    flags
   );
-
-  return values.some((value) => pattern.test(value));
 }

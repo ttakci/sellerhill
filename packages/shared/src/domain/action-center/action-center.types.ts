@@ -172,6 +172,12 @@ export enum ActionCenterItemKey {
   LISTING_SOURCE_UNAVAILABLE = 'listing_source_unavailable',
   /** Active listings pushed to quantity 0 — live, visible, and unbuyable. */
   LISTING_OUT_OF_STOCK = 'listing_out_of_stock',
+  /**
+   * Active listings with no sale inside the seller's own "not selling" window.
+   * Raised only while the seller watches for them WITHOUT automatic ending —
+   * with auto-end on the platform handles it and there is nothing to act on.
+   */
+  LISTING_NOT_SELLING = 'listing_not_selling',
 
   /** Active-listing slots at or near the plan limit. */
   PLAN_LISTING_QUOTA = 'plan_listing_quota',

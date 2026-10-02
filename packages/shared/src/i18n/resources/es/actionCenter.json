@@ -237,6 +237,13 @@
         "title": "La automatización está suspendida",
         "description": "Tu suscripción ya no está activa, por lo que se detuvieron las publicaciones nuevas, las actualizaciones de precio y stock, la compra automática y la conversión de seguimiento. Elige un plan para reanudar: todo se reinicia por sí solo.",
         "action": "Elegir un plan"
+      },
+      "listing_not_selling": {
+        "title": "Publicaciones que no se venden",
+        "description_one": "{{count}} publicación activa no tuvo ninguna venta dentro del período que definiste. Revísala y finalízala si no vale el lugar que ocupa en tu plan.",
+        "description_many": "{{count}} publicaciones activas no tuvieron ninguna venta dentro del período que definiste. Revísalas y finaliza las que no valen el lugar que ocupan en tu plan.",
+        "description_other": "{{count}} publicaciones activas no tuvieron ninguna venta dentro del período que definiste. Revísalas y finaliza las que no valen el lugar que ocupan en tu plan.",
+        "action": "Revisar publicaciones"
       }
     },
     "reasons": {

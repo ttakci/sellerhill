@@ -116,6 +116,65 @@
       "title": "Indirizzo del venditore",
       "description": "Pubblicato come posizione dell'articolo nelle tue inserzioni eBay. eBay mostra agli acquirenti solo la città, la regione e il paese.",
       "city": "Città"
+    },
+    "blacklistAction_remove": "Rimossa, non bloccata",
+    "listingRules": {
+      "title": "Regole delle inserzioni",
+      "subtitle": "Decidi cosa viene inserito prima che qualcosa venga inviato a eBay",
+      "off": "Nessun minimo",
+      "brand": {
+        "title": "Tutela del marchio",
+        "vero": "Protezione VeRO",
+        "veroHint": "Salta i prodotti di marchi noti per segnalare inserzioni tramite il programma VeRO di eBay. eBay rimuove un'inserzione segnalata e la conteggia a carico del tuo account.",
+        "veroOffWarning": "Con la protezione disattivata, i prodotti di marchi che segnalano inserzioni su eBay vengono inseriti come tutti gli altri. Una segnalazione VeRO può far limitare il tuo account eBay.",
+        "hideBrand": "Non inviare il marchio a eBay",
+        "hideBrandHint": "L'inserzione viene pubblicata come \"Senza marchio\": il marchio viene tolto dal titolo e dalle caratteristiche dell'articolo e non vengono inviati né codice a barre né numero di parte, perché il catalogo eBay rimetterebbe il marchio."
+      },
+      "filters": {
+        "title": "Cosa può essere inserito",
+        "minPrice": "Prezzo Amazon min.",
+        "maxPrice": "Prezzo Amazon max.",
+        "priceHint": "Lascia vuoto un campo per non avere limiti. Un prodotto con prezzo fuori dall'intervallo viene saltato e l'attività ne mostra il motivo.",
+        "priceError": "Il massimo non può essere inferiore al minimo.",
+        "amazonShippedOnly": "Solo prodotti spediti da Amazon stessa",
+        "amazonShippedOnlyHint": "Salta un'offerta che un altro venditore spedisce dal proprio stock. L'ordine automatico e il tracciamento funzionano meglio con i prodotti spediti da Amazon.",
+        "minRating": "Valutazione minima",
+        "ratingOption": "{{rating}} stelle e oltre",
+        "minReviewCount": "Numero minimo di valutazioni",
+        "ratingHint": "Un prodotto senza ancora valutazioni viene saltato quando è impostato un minimo."
+      },
+      "blockedAsins": {
+        "title": "ASIN bloccati",
+        "placeholder": "Un ASIN per riga, oppure separati da virgole",
+        "count": "ASIN validi in questo elenco: {{count}}"
+      },
+      "cleanup": {
+        "title": "Pulizia automatica",
+        "outOfStock": "Termina un'inserzione che resta esaurita",
+        "never": "Mai",
+        "afterDays_one": "Dopo {{count}} giorno",
+        "afterDays_many": "Dopo {{count}} giorni",
+        "afterDays_other": "Dopo {{count}} giorni",
+        "outOfStockHint": "Il conteggio riparte ogni volta che il prodotto torna disponibile. Un'inserzione che hai messo in pausa tu non viene mai terminata. Un'inserzione terminata libera il suo posto nel tuo piano e non viene reinserita automaticamente.",
+        "cold": "Tieni d'occhio le inserzioni che non vendono",
+        "coldHint": "Un'inserzione conta come non venduta quando non ha avuto vendite per il numero di giorni indicato sotto. Se non ha mai venduto, i giorni si contano dal giorno in cui è stata creata.",
+        "coldDays": "Giorni senza vendite",
+        "coldDaysError": "Inserisci un numero intero tra {{min}} e {{max}}.",
+        "coldMode": "Cosa farne",
+        "coldMode_flag": "Mostramele",
+        "coldMode_end": "Termina su eBay",
+        "coldEndWarning": "Le inserzioni vengono terminate su eBay senza chiederti prima conferma e non tornano da sole. Per controllarle prima di persona, scegli \"Mostramele\"."
+      },
+      "promoted": {
+        "title": "Promoted Listings (inserzioni promosse)",
+        "enable": "Promuovi le nuove inserzioni",
+        "enableHint": "Ogni inserzione pubblicata da qui viene aggiunta a una campagna su eBay con la tariffa pubblicitaria indicata sotto. eBay addebita la tariffa solo quando un articolo viene venduto tramite l'annuncio. Le inserzioni già attive non cambiano.",
+        "rate": "Tariffa pubblicitaria (%)",
+        "rateHint": "Il prezzo calcolato da SellerHill non include questa tariffa. Aggiungila alla commissione eBay del tuo gruppo di impostazioni delle inserzioni, così il tuo profitto resta come previsto.",
+        "rateError": "Inserisci una tariffa tra {{min}} e {{max}}.",
+        "ineligible": "eBay non consente ancora a questo negozio di usare Promoted Listings, quindi non verrà mostrato alcun annuncio finché la situazione non cambia. Le nuove inserzioni vengono pubblicate come sempre.",
+        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay non consente ancora a questo negozio di usare Promoted Listings: segnala un'attività di vendita recente insufficiente. Non verrà mostrato alcun annuncio finché la situazione non cambia. Le nuove inserzioni vengono pubblicate come sempre."
+      }
     }
   }
 }

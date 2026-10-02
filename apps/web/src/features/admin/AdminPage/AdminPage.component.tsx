@@ -20,6 +20,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AdminSettingsPanel } from '../components/AdminSettingsPanel';
+import { VeroKeywordsPanel } from '../components/VeroKeywordsPanel';
 
 import * as S from './AdminPage.style';
 import type { AdminPageComponentProps } from './AdminPage.types';
@@ -471,6 +472,8 @@ export const AdminPageComponent = ({
               ))}
             </S.ListPane>
           </S.Section>
+
+          <VeroKeywordsPanel skip={skip} />
         </S.Rows>
       )}
 

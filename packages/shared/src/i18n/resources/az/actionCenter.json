@@ -218,6 +218,12 @@
         "title": "Avtomatlaşdırma dayandırılıb",
         "description": "Abunəliyiniz artıq aktiv deyil, ona görə yeni elanlar, qiymət və stok yenilənmələri, avtomatik alış və izləmə çevirməsi dayanıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
         "action": "Plan seç"
+      },
+      "listing_not_selling": {
+        "title": "Satılmayan elanlar",
+        "description_one": "{{count}} aktiv elanın təyin etdiyiniz müddət ərzində heç satışı olmayıb. Onu nəzərdən keçirin və planınızdakı yerinə dəyməzsə, bitirin.",
+        "description_other": "{{count}} aktiv elanın təyin etdiyiniz müddət ərzində heç satışı olmayıb. Onları nəzərdən keçirin və planınızdakı yerinə dəyməyənləri bitirin.",
+        "action": "Elanlara bax"
       }
     },
     "reasons": {

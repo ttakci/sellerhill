@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Consultez, modifiez et créez vos modèles de messages automatisés aux acheteurs",
         "manageBlacklist": "Gérer la liste noire",
         "manageBlacklistSubtitle": "Mots-clés à bloquer dans les titres, descriptions et caractéristiques des annonces",
-        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique."
+        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique.",
+        "listingRules": "Règles d'annonces",
+        "listingRulesSubtitle": "Protection des marques, ce qui peut être mis en ligne et nettoyage automatique"
       },
       "listingGroups": {
         "title": "Groupes de paramètres d'annonces",
@@ -422,7 +424,16 @@
           "add": "Ajouter des mots-clés",
           "duplicate": "Tous les mots-clés incluent déjà les champs sélectionnés",
           "empty": "Veuillez saisir au moins un mot-clé",
-          "typeRequired": "Sélectionnez au moins un champ"
+          "typeRequired": "Sélectionnez au moins un champ",
+          "actionLabel": "Lorsqu'un mot-clé est trouvé",
+          "action": {
+            "block": "Ne pas mettre le produit en ligne",
+            "remove": "Supprimer le mot et mettre en ligne"
+          },
+          "actionHint": {
+            "block": "Un produit dont le texte contient ce mot n'est pas mis en ligne.",
+            "remove": "Le mot est retiré du titre, de la description ou des caractéristiques, et le produit est mis en ligne sans lui."
+          }
         },
         "list": {
           "empty": "Aucun mot-clé de liste noire pour la portée sélectionnée",

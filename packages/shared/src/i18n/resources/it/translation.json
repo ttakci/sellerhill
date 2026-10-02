@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Visualizza, modifica e crea i modelli dei messaggi automatici per gli acquirenti",
         "manageBlacklist": "Gestisci la lista nera",
         "manageBlacklistSubtitle": "Parole chiave da bloccare nei titoli, nelle descrizioni e nelle caratteristiche delle inserzioni",
-        "infoMessage": "I modelli di messaggio e le regole della lista nera vengono applicati in base all'ambito (globale o per singolo negozio) scelto in Impostazioni del negozio."
+        "infoMessage": "I modelli di messaggio e le regole della lista nera vengono applicati in base all'ambito (globale o per singolo negozio) scelto in Impostazioni del negozio.",
+        "listingRules": "Regole delle inserzioni",
+        "listingRulesSubtitle": "Tutela del marchio, cosa può essere inserito e pulizia automatica"
       },
       "listingGroups": {
         "title": "Gruppi di impostazioni delle inserzioni",
@@ -422,7 +424,16 @@
           "add": "Aggiungi parole chiave",
           "duplicate": "Tutte le parole chiave includono già i campi selezionati",
           "empty": "Inserisci almeno una parola chiave",
-          "typeRequired": "Seleziona almeno un campo"
+          "typeRequired": "Seleziona almeno un campo",
+          "actionLabel": "Quando viene trovata una parola chiave",
+          "action": {
+            "block": "Non inserire il prodotto",
+            "remove": "Rimuovi la parola e inserisci"
+          },
+          "actionHint": {
+            "block": "Un prodotto il cui testo contiene la parola non viene inserito.",
+            "remove": "La parola viene tolta da titolo, descrizione o caratteristiche e il prodotto viene inserito senza di essa."
+          }
         },
         "list": {
           "empty": "Nessuna parola chiave nella lista nera per l'ambito selezionato",

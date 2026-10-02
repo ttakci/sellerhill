@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Consulta, edita y crea tus plantillas de mensajes automáticos para compradores",
         "manageBlacklist": "Administrar lista negra",
         "manageBlacklistSubtitle": "Palabras clave que se bloquean en títulos, descripciones y características de las publicaciones",
-        "infoMessage": "Las plantillas de mensajes y las reglas de la lista negra se aplican según el alcance (global o por tienda) que elijas en los Ajustes de la tienda."
+        "infoMessage": "Las plantillas de mensajes y las reglas de la lista negra se aplican según el alcance (global o por tienda) que elijas en los Ajustes de la tienda.",
+        "listingRules": "Reglas de publicación",
+        "listingRulesSubtitle": "Protección de marcas, qué se puede publicar y limpieza automática"
       },
       "listingGroups": {
         "title": "Grupos de ajustes de publicación",
@@ -422,7 +424,16 @@
           "add": "Agregar palabras clave",
           "duplicate": "Todas las palabras clave ya incluyen los campos seleccionados",
           "empty": "Ingresa al menos una palabra clave",
-          "typeRequired": "Selecciona al menos un campo"
+          "typeRequired": "Selecciona al menos un campo",
+          "actionLabel": "Cuando se encuentra una palabra clave",
+          "action": {
+            "block": "No publicar el producto",
+            "remove": "Quitar la palabra y publicar"
+          },
+          "actionHint": {
+            "block": "Un producto cuyo texto contiene la palabra no se publica.",
+            "remove": "La palabra se quita del título, la descripción o las características, y el producto se publica sin ella."
+          }
         },
         "list": {
           "empty": "No hay palabras clave en la lista negra para el alcance seleccionado",

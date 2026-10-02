@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Se agotó la cuota diaria de la API de eBay. Esta publicación está en cola y continuará automáticamente.",
         "blacklisted_keyword": "La lista negra de tus Ajustes de la tienda bloqueó esta publicación (palabra clave: «{{keyword}}»). Elimina la palabra clave o ajusta tu plantilla de publicación.",
         "cancelled": "Cancelado antes de procesar este ASIN.",
-        "unknown": "No se pudo crear la publicación."
-      }
+        "unknown": "No se pudo crear la publicación.",
+        "blocked_by_rule": "Omitido por una de tus reglas de publicación.",
+        "blocked_by_rule_blocked_asin": "Este ASIN está en tu lista de ASIN bloqueados.",
+        "blocked_by_rule_vero_brand": "La protección VeRO omitió este producto (marca: «{{keyword}}»). Esta marca es conocida por denunciar publicaciones en eBay.",
+        "blocked_by_rule_price_below_min": "El precio de Amazon {{actual}} está por debajo de tu mínimo de {{limit}}.",
+        "blocked_by_rule_price_above_max": "El precio de Amazon {{actual}} está por encima de tu máximo de {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "No lo envía Amazon por sí mismo. Tus reglas de publicación solo permiten productos que envía Amazon.",
+        "blocked_by_rule_low_rating": "Calificación: {{actual}}. Tu mínimo es {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Aún sin calificación. Tu mínimo es {{limit}}.",
+        "blocked_by_rule_low_review_count": "Cantidad de calificaciones: {{actual}}. Tu mínimo es {{limit}}."
+      },
+      "scheduledUntil": "Programado. Los últimos productos empiezan el {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Buscar por título o ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} borradores de publicaciones en cola: no saldrán en vivo hasta que los publiques",
       "queuedWithSkipped": "{{count}} publicaciones en cola para procesarse ({{skipped}} omitidas — ya están en tus publicaciones)",
       "queuedDraftWithSkipped": "{{count}} borradores de publicaciones en cola ({{skipped}} omitidos — ya están en tus publicaciones): no saldrán en vivo hasta que los publiques",
-      "allSkippedDuplicates": "Los {{skipped}} ASIN introducidos ya están todos en tus publicaciones — no se inició ninguna tarea nueva"
+      "allSkippedDuplicates": "Los {{skipped}} ASIN introducidos ya están todos en tus publicaciones — no se inició ninguna tarea nueva",
+      "scheduled": "{{count}} productos programados. Los últimos empiezan el {{date}}.",
+      "scheduledWithSkipped": "{{count}} productos programados ({{skipped}} omitidos: ya están en tus publicaciones). Los últimos empiezan el {{date}}."
     },
     "errors": {
       "createFailed": "No se pudieron crear las publicaciones",
       "fetchPoliciesFailed": "No se pudieron obtener las políticas comerciales de eBay",
       "invalidAsins": "{{count}} de tus entradas no parecen ASIN válidos (10 caracteres alfanuméricos) y se omitieron.",
-      "loadFailed": "No se pudieron cargar las publicaciones. Inténtalo de nuevo."
+      "loadFailed": "No se pudieron cargar las publicaciones. Inténtalo de nuevo.",
+      "scheduleTooLong": "A este ritmo la tarea tardaría más de 30 días. Aumenta la cantidad de productos por día o agrega menos ASIN."
     },
     "detail": {
       "breadcrumb": "Detalle de la publicación",
@@ -462,6 +475,17 @@
     },
     "products": {
       "searchPlaceholder": "Buscar por título, ASIN o marca…"
+    },
+    "schedule": {
+      "title": "Distribuir en el tiempo",
+      "hint": "Publica una cantidad fija de productos por día, dentro de las horas que elijas, en lugar de todos a la vez. El precio, el stock y tus reglas de publicación se revisan cuando le toca a cada producto.",
+      "perDay": "Productos por día",
+      "perDayError": "Ingresa un número entero entre {{min}} y {{max}}.",
+      "startHour": "Desde",
+      "endHour": "Hasta",
+      "estimate_one": "Aproximadamente {{count}} día a este ritmo.",
+      "estimate_many": "Aproximadamente {{count}} días a este ritmo.",
+      "estimate_other": "Aproximadamente {{count}} días a este ritmo."
     }
   }
 }

@@ -114,7 +114,7 @@ export class ProductSourceService {
         out.set(asin, { kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
         continue;
       }
-      out.set(asin, { kind: 'product', product: mapScraperProduct(asin, r.content, observation.commerce, marketplace) });
+      out.set(asin, { kind: 'product', product: mapScraperProduct(asin, r.content, observation.commerce, marketplace, r.signals) });
     }
     return out;
   }

@@ -237,6 +237,13 @@
         "title": "A automação está suspensa",
         "description": "Sua assinatura não está mais ativa, então novos anúncios, atualizações de preço e estoque, compras automáticas e conversão de rastreio foram interrompidos. Escolha um plano para retomar — tudo recomeça sozinho.",
         "action": "Escolher um plano"
+      },
+      "listing_not_selling": {
+        "title": "Anúncios que não estão vendendo",
+        "description_one": "{{count}} anúncio ativo não teve nenhuma venda no período que você definiu. Revise-o e encerre-o se não valer a vaga no seu plano.",
+        "description_many": "{{count}} anúncios ativos não tiveram nenhuma venda no período que você definiu. Revise-os e encerre os que não valerem a vaga no seu plano.",
+        "description_other": "{{count}} anúncios ativos não tiveram nenhuma venda no período que você definiu. Revise-os e encerre os que não valerem a vaga no seu plano.",
+        "action": "Revisar anúncios"
       }
     },
     "reasons": {

@@ -10,14 +10,18 @@ import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-s
 import { LlmModule } from '../llm/llm.module';
 import { OrdersModule } from '../orders/orders.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
+import { VeroModule } from '../vero/vero.module';
 
 import { ContentGenerationService } from './content-generation.service';
 import { EbayFeedSyncProcessor, EBAY_FEED_SYNC_QUEUE } from './ebay-feed-sync.processor';
 import { EbayFeedSyncService } from './ebay-feed-sync.service';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
+import { LISTING_CLEANUP_QUEUE, ListingCleanupProcessor } from './listing-cleanup.processor';
+import { ListingCleanupService } from './listing-cleanup.service';
 import { ListingImportService } from './listing-import.service';
 import { ListingProcessorService } from './listing-processor.service';
+import { ListingPromotionService } from './listing-promotion.service';
 import { ListingQueueService } from './listing-queue.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsController } from './listings.controller';
@@ -42,6 +46,8 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     OrdersModule,
     LlmModule,
     StoreSettingsModule,
+    // The platform VeRO list the create worker checks a product's brand against.
+    VeroModule,
     // ScraperClient + ProductSourceService live in their own module — see
     // product-source.module.ts for why (AdminModule, which this module
     // already imports, needs them too in Task 12, and importing ListingsModule
@@ -51,7 +57,8 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
       { name: 'listings' },
       { name: 'stock-sync' },
       { name: 'keepa-refresh' },
-      { name: EBAY_FEED_SYNC_QUEUE }
+      { name: EBAY_FEED_SYNC_QUEUE },
+      { name: LISTING_CLEANUP_QUEUE }
     ),
   ],
   controllers: [ListingsController],
@@ -70,6 +77,9 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     StockSyncProcessorService,
     EbayFeedSyncService,
     EbayFeedSyncProcessor,
+    ListingCleanupService,
+    ListingCleanupProcessor,
+    ListingPromotionService,
   ],
   exports: [ListingsService, ListingQueueService],
 })

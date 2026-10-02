@@ -154,6 +154,35 @@ def _fragments(html):
     return "\n".join(parts)
 
 
+_TAGS = re.compile(r"<[^>]+>")
+_SHIPS_FROM = re.compile(r"(?:Ships|Dispatches) from\s+(\S+)", re.I)
+_FULFILLER_CHARS = 4000
+
+
+def extract_shipped_by_amazon(html, buybox):
+    """True when Amazon itself ships the Buy Box offer, False when another
+    shipper is named, None when the page does not say.
+
+    Upstream's `_buybox` reads the older `#tabular-buybox` / `#merchant-info`
+    layouts only. The current page states the shipper in
+    `#fulfillerInfoFeature_feature_div` ("Ships from Amazon"), which upstream
+    never looks at — every FBA offer came back as "not fulfilled by Amazon".
+    That block is read first, from a short slice with the tags removed."""
+    start = _id_tag_start(html, "fulfillerInfoFeature_feature_div")
+    if start != -1:
+        text = " ".join(html_lib.unescape(_TAGS.sub(" ", html[start:start + _FULFILLER_CHARS])).split())
+        m = _SHIPS_FROM.search(text)
+        if m:
+            return m.group(1).lower().startswith("amazon")
+    if not buybox:
+        return None
+    if buybox.get("is_fulfilled_by_amazon"):
+        return True
+    # Upstream names a shipper that is not Amazon; with no shipper named at
+    # all its False is "not found", not "another shipper".
+    return False if buybox.get("ships_from") else None
+
+
 def extract_commerce_signals(html, site):
     html = html or ""
     doc = P.soup(_fragments(html))
@@ -186,6 +215,10 @@ def extract_commerce_signals(html, site):
         "buyboxSellerId": seller.get("id"),
         "buyboxSellerName": seller.get("name"),
         "soldByAmazon": buybox.get("is_sold_by_amazon"),
+        # Amazon itself ships the offer ("Ships from Amazon" / FBA). None when
+        # the page carried no merchant block at all, so "not Amazon" is never
+        # inferred from a page that simply did not say.
+        "shippedByAmazon": extract_shipped_by_amazon(html, buybox),
         # No Buy Box: Amazon offers only "See All Buying Options". Keyed on the
         # button's element id, never on "No featured offers" text, which hidden
         # variation templates of buyable pages also carry. Only ever true when

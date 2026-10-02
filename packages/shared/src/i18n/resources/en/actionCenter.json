@@ -218,6 +218,12 @@
         "title": "Automation is suspended",
         "description": "Your subscription is no longer active, so new listings, price and stock updates, automatic purchasing and tracking conversion have stopped. Choose a plan to resume — everything restarts on its own.",
         "action": "Choose a plan"
+      },
+      "listing_not_selling": {
+        "title": "Listings that are not selling",
+        "description_one": "{{count}} active listing has had no sale within the window you set. Review it and end it if it is not worth its place in your plan.",
+        "description_other": "{{count}} active listings have had no sale within the window you set. Review them and end the ones that are not worth their place in your plan.",
+        "action": "Review listings"
       }
     },
     "reasons": {

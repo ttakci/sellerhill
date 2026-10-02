@@ -218,6 +218,12 @@
         "title": "Die Automatisierung ist ausgesetzt",
         "description": "Ihr Abonnement ist nicht mehr aktiv, daher sind neue Angebote, Preis- und Bestandsaktualisierungen, der automatische Einkauf und die Umwandlung von Sendungsnummern gestoppt. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
         "action": "Tarif wählen"
+      },
+      "listing_not_selling": {
+        "title": "Angebote, die sich nicht verkaufen",
+        "description_one": "{{count}} aktives Angebot hatte innerhalb des von Ihnen festgelegten Zeitraums keinen Verkauf. Prüfen Sie es und beenden Sie es, wenn es seinen Platz in Ihrem Tarif nicht wert ist.",
+        "description_other": "{{count}} aktive Angebote hatten innerhalb des von Ihnen festgelegten Zeitraums keinen Verkauf. Prüfen Sie sie und beenden Sie diejenigen, die ihren Platz in Ihrem Tarif nicht wert sind.",
+        "action": "Angebote prüfen"
       }
     },
     "reasons": {

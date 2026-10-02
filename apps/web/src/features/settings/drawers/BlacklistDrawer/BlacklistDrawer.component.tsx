@@ -1,4 +1,4 @@
-import { Button, Checkbox, ConfirmModal, Drawer, SearchField, Text, Textarea } from '@repo/ui';
+import { Button, Checkbox, ConfirmModal, Drawer, SearchField, SegmentedControl, Text, Textarea } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,6 +25,11 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   selectedTypes,
   typeOptions,
   onToggleType,
+  action,
+  actionOptions,
+  onActionChange,
+  actionLabel,
+  actionHint,
   onAdd,
   errorMessage,
   items,
@@ -83,6 +88,13 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
     >
       <BodyStack>
         <FormCard>
+          <Text variant="body-sm" weight="semibold">
+            {actionLabel}
+          </Text>
+          <SegmentedControl options={actionOptions} value={action} onChange={onActionChange} />
+          <Text variant="caption" color="text.tertiary">
+            {actionHint}
+          </Text>
           <Text variant="body-sm" weight="semibold">
             {typeLabel}
           </Text>
@@ -153,6 +165,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
                         key={item.keyword}
                         keyword={item.keyword}
                         types={item.types}
+                        action={item.action}
                         onRemove={() => onRemove(item.keyword)}
                         selectable
                         selected={selectedItems.includes(item.keyword)}

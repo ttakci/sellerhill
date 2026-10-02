@@ -237,6 +237,13 @@
         "title": "L'automazione è sospesa",
         "description": "Il tuo abbonamento non è più attivo, quindi nuove inserzioni, aggiornamenti di prezzo e stock, acquisti automatici e conversione del tracciamento si sono fermati. Scegli un piano per riprendere: tutto riparte da solo.",
         "action": "Scegli un piano"
+      },
+      "listing_not_selling": {
+        "title": "Inserzioni che non vendono",
+        "description_one": "{{count}} inserzione attiva non ha avuto vendite nel periodo che hai impostato. Controllala e terminala se non vale il posto che occupa nel tuo piano.",
+        "description_many": "{{count}} inserzioni attive non hanno avuto vendite nel periodo che hai impostato. Controllale e termina quelle che non valgono il posto che occupano nel tuo piano.",
+        "description_other": "{{count}} inserzioni attive non hanno avuto vendite nel periodo che hai impostato. Controllale e termina quelle che non valgono il posto che occupano nel tuo piano.",
+        "action": "Controlla le inserzioni"
       }
     },
     "reasons": {
