@@ -109,6 +109,12 @@
         "description_other": "{{count}} Bestellungen wurden in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebenen Amazon-Bestellungen sind noch offen. Auf diese Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellungen oder senden Sie die Artikel zurück, falls sie schon versandt wurden.",
         "action": "Bestellungen prüfen"
       },
+      "order_late_to_ship": {
+        "title": "Bestellungen nach Ablauf der eBay-Versandfrist",
+        "description_one": "Bei {{count}} Bestellung ist die eBay-Versandfrist abgelaufen, und eBay hat noch keinen Versand dafür. Ein verspäteter Versand wird Ihrem Verkäuferkonto angerechnet.",
+        "description_other": "Bei {{count}} Bestellungen ist die eBay-Versandfrist abgelaufen, und eBay hat noch keinen Versand dafür. Verspätete Sendungen werden Ihrem Verkäuferkonto angerechnet.",
+        "action": "Bestellungen prüfen"
+      },
       "return_seller_action_due": {
         "title": "Rückgaben warten auf Ihre Antwort",
         "description_one": "Bei {{count}} Rückgabe erwartet eBay einen nächsten Schritt von Ihnen. Antworten Sie bei eBay vor der Frist, die auf der Seite „Rückgaben“ angezeigt wird.",

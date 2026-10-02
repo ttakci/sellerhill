@@ -31,6 +31,10 @@ export interface OrdersAllPageProps {
   trackingState: string;
   onTrackingStateChange: (value: string | number) => void;
   trackingStateOptions: { value: string | number; label: string }[];
+  /** Conditions beside the stage: ship-by deadline close / missed, refunded. */
+  flag: string;
+  onFlagChange: (value: string | number) => void;
+  flagOptions: { value: string | number; label: string }[];
   // No date props: `dateFrom`/`dateTo` are read-only inbound state from the
   // dashboard's "view all" deep link (see useOrdersFilters), the list renders
   // no date inputs, and the component never read them — so declaring them here
@@ -41,6 +45,8 @@ export interface OrdersAllPageProps {
   isInitialLoading?: boolean;
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
+  /** Month + day only — for eBay's ship-by date on a card. */
+  formatDay: (value: string) => string;
   onOrderClick: (orderId: string) => void;
   /** Only set when the user arrived from the dashboard — `/orders` is itself the root of this section. */
   onBack?: () => void;

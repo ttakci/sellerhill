@@ -1,6 +1,7 @@
 import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
+import { orderFlagBadges } from './order-flags';
 import { orderStageShowsReason } from './order-stage';
 import type { OrderCardProps } from './OrderCard';
 
@@ -12,7 +13,8 @@ export const toOrderCardProps = (
   order: OrderDto,
   t: TFunction,
   formatCurrency: (value: number) => string,
-  formatDate: (value: string) => string
+  formatDate: (value: string) => string,
+  formatDay?: (value: string) => string
 ): Omit<OrderCardProps, 'onClick' | 'className'> => {
   const productTitle =
     order.product?.title && order.product.title.trim().length > 0
@@ -36,11 +38,17 @@ export const toOrderCardProps = (
     meta.push({ label: t('orders.table.asin'), value: order.product.asin, storeType: 'amazon' });
   }
 
+  // The seller's own note rides with the facts, cut to one line; the whole
+  // text is on the detail page.
+  if (order.sellerNote) {
+    meta.push({ label: t('orders.note.label'), value: order.sellerNote });
+  }
+
   const profitTone = order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
 
   // A card can carry both at once: an untracked order (no matched listing)
   // can never reach `linked`, so its profit is also always an estimate/unknown.
-  const statsBadges: OrderCardProps['statsBadges'] = [];
+  const statsBadges: OrderCardProps['statsBadges'] = [...orderFlagBadges(order, t, formatCurrency, formatDay)];
   if (!order.isTracked) {
     statsBadges.push({ label: t('orders.tracking.untracked'), variant: 'neutral' });
   }

@@ -63,4 +63,11 @@ export interface OrderDetailsPageProps {
   /** How many items the eBay order holds when it is more than one, else null. */
   multiItemCount: number | null;
   canCopyAddress: boolean;
+  /** The seller's own note: the draft in the field, and whether it differs from what is saved. */
+  noteDraft: string;
+  noteMaxLength: number;
+  isNoteDirty: boolean;
+  isSavingNote: boolean;
+  onNoteChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onSaveNote: () => void;
 }

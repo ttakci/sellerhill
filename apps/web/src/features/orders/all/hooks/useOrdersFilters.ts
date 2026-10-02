@@ -1,4 +1,4 @@
-import { ORDER_STAGE_TABS, OrderStage, OrderStageTab, type OrderFiltersDto } from '@repo/shared';
+import { ORDER_STAGE_TABS, OrderShipByState, OrderStage, OrderStageTab, type OrderFiltersDto } from '@repo/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -8,6 +8,19 @@ import { SELLER_VISIBLE_ORDER_STAGES } from '../../shared/order-stage';
 const isTab = (value: string): value is OrderStageTab => (Object.values(OrderStageTab) as string[]).includes(value);
 
 const isStage = (value: string): value is OrderStage => (Object.values(OrderStage) as string[]).includes(value);
+
+/**
+ * The flag filter (`?flag=`): conditions that sit BESIDE the stage — eBay's
+ * ship-by deadline and a refund — so an order can be "purchased" and "late"
+ * at once. One select, because a seller looks for one of them at a time.
+ */
+const FLAG_REFUNDED = 'refunded';
+
+const isShipByState = (value: string): value is OrderShipByState =>
+  (Object.values(OrderShipByState) as string[]).includes(value);
+
+const readFlag = (value: string | null): string =>
+  value && (isShipByState(value) || value === FLAG_REFUNDED) ? value : '';
 
 /**
  * The listing-link filter (`?tracking=`). The list opens on TRACKED orders —
@@ -45,11 +58,19 @@ export function useOrdersFilters() {
   const stageFromUrl = searchParams.get('stage') ?? '';
   const tabFromUrl = searchParams.get('tab') ?? '';
   const trackingFromUrl = readTracking(searchParams.get('tracking'));
+  const flagFromUrl = readFlag(searchParams.get('flag'));
   /** True when the URL already expresses an intent — a tab, a stage, or any
    *  deep-link filter (the dashboard's "view all" carries dates + tracking).
    *  Only a bare `/orders` may be opened on "Needs action" by the container. */
   const hasUrlSelection = Boolean(
-    stageFromUrl || tabFromUrl || dateFrom || dateTo || fromDashboard || storeFromUrl || searchParams.get('tracking')
+    stageFromUrl ||
+      tabFromUrl ||
+      flagFromUrl ||
+      dateFrom ||
+      dateTo ||
+      fromDashboard ||
+      storeFromUrl ||
+      searchParams.get('tracking')
   );
 
   const [page, setPage] = useState(1);
@@ -60,6 +81,7 @@ export function useOrdersFilters() {
   const [stage, setStage] = useState(isStage(stageFromUrl) ? stageFromUrl : '');
   const [tab, setTab] = useState<OrderStageTab>(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
   const [trackingState, setTrackingState] = useState(trackingFromUrl);
+  const [flag, setFlag] = useState(flagFromUrl);
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
@@ -84,6 +106,12 @@ export function useOrdersFilters() {
     setTrackingState(trackingFromUrl);
     setPage(1);
   }, [trackingFromUrl]);
+
+  // …and for the flag, which the Action Center's "late to ship" row carries.
+  useEffect(() => {
+    setFlag(flagFromUrl);
+    setPage(1);
+  }, [flagFromUrl]);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -116,12 +144,23 @@ export function useOrdersFilters() {
     [t]
   );
 
+  const flagOptions = useMemo(
+    () => [
+      { value: '', label: t('orders.filters.allFlags') },
+      { value: OrderShipByState.LATE, label: t('orders.flags.late') },
+      { value: OrderShipByState.DUE_SOON, label: t('orders.flags.dueSoon') },
+      { value: FLAG_REFUNDED, label: t('orders.flags.refunded') },
+    ],
+    [t]
+  );
+
   const hasActiveFilters = Boolean(
     search ||
       ebayAccountId ||
       dateFrom ||
       dateTo ||
       stage ||
+      flag ||
       tab !== OrderStageTab.ALL ||
       trackingState !== DEFAULT_TRACKING
   );
@@ -135,13 +174,22 @@ export function useOrdersFilters() {
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
       // The select narrows to one stage; otherwise the tab's group applies.
-      stages: stage ? [stage as OrderStage] : tab === OrderStageTab.ALL ? undefined : [...ORDER_STAGE_TABS[tab]],
+      // "Needs action" is not a group of stages — a late order in any open
+      // stage belongs to it — so it travels as its own flag.
+      stages: stage
+        ? [stage as OrderStage]
+        : tab === OrderStageTab.ALL || tab === OrderStageTab.ACTION
+          ? undefined
+          : [...ORDER_STAGE_TABS[tab]],
+      needsAction: !stage && tab === OrderStageTab.ACTION ? true : undefined,
+      shipBy: isShipByState(flag) ? flag : undefined,
+      hasRefund: flag === FLAG_REFUNDED ? true : undefined,
       isTracked:
         trackingState === TRACKING.TRACKED ? true : trackingState === TRACKING.UNTRACKED ? false : undefined,
       // No sortBy on purpose: the API then floats the stages that need the
       // seller to the top, then newest first.
     }),
-    [page, rowsPerPage, search, ebayAccountId, dateFrom, dateTo, stage, tab, trackingState]
+    [page, rowsPerPage, search, ebayAccountId, dateFrom, dateTo, stage, tab, trackingState, flag]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,6 +267,22 @@ export function useOrdersFilters() {
     [searchParams, setSearchParams]
   );
 
+  const handleFlagChange = useCallback(
+    (value: string | number) => {
+      const v = readFlag(String(value));
+      setFlag(v);
+      setPage(1);
+      const next = new URLSearchParams(searchParams);
+      if (v) {
+        next.set('flag', v);
+      } else {
+        next.delete('flag');
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
   // No date-range setters here on purpose: `dateFrom`/`dateTo` are read-only
   // inbound state, arriving from the dashboard's "view all" deep link. The list
   // has no date inputs of its own, and `handleClearFilters` already drops them.
@@ -230,6 +294,7 @@ export function useOrdersFilters() {
     setStage('');
     setTab(OrderStageTab.ALL);
     setTrackingState(DEFAULT_TRACKING);
+    setFlag('');
     setPage(1);
     const next = new URLSearchParams();
     if (fromDashboard) {
@@ -261,6 +326,9 @@ export function useOrdersFilters() {
     trackingState,
     trackingOptions,
     handleTrackingStateChange,
+    flag,
+    flagOptions,
+    handleFlagChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,

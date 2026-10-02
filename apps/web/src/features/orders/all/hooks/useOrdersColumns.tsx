@@ -1,8 +1,9 @@
 import { OrderStage, ProfitBasis, type OrderDto } from '@repo/shared';
-import { Badge, Text, type TableColumn } from '@repo/ui';
+import { Badge, Text, Tooltip, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { orderFlagBadges } from '../../shared/order-flags';
 import { orderStageShowsReason } from '../../shared/order-stage';
 import { OrderStageBadge } from '../../shared/OrderStageBadge';
 import * as S from '../OrdersAllPage.style';
@@ -24,7 +25,8 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 export function useOrdersColumns(
   formatCurrency: (value: number) => string,
   formatDate: (value: string) => string,
-  formatMargin: (order: OrderDto) => string | null
+  formatMargin: (order: OrderDto) => string | null,
+  formatDay: (value: string) => string
 ) {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -42,6 +44,14 @@ export function useOrdersColumns(
             <Text variant="caption" color="text.secondary" numeric>
               {formatDate(order.createdAt)}
             </Text>
+            {/* The seller's own note, one line; the full text on hover. */}
+            {order.sellerNote ? (
+              <Tooltip content={order.sellerNote} position="top" variant="dark">
+                <S.NoteLine variant="caption" color="text.secondary">
+                  {order.sellerNote}
+                </S.NoteLine>
+              </Tooltip>
+            ) : null}
           </S.OrderCell>
         ),
       },
@@ -115,9 +125,15 @@ export function useOrdersColumns(
             order.stage === OrderStage.SHIPPED
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
+          const flags = orderFlagBadges(order, t, formatCurrency, formatDay);
           return (
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
+              {flags.map((flag) => (
+                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="xs">
+                  {flag.label}
+                </Badge>
+              ))}
               {reasonLabel && (
                 <Text variant="caption" color="text.secondary">
                   {reasonLabel}
@@ -191,6 +207,6 @@ export function useOrdersColumns(
         },
       },
     ],
-    [t, formatCurrency, formatDate, formatMargin]
+    [t, formatCurrency, formatDate, formatMargin, formatDay]
   );
 }

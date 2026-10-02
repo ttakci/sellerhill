@@ -30,7 +30,8 @@
       "allTrackingStates": "Vinculados e não vinculados",
       "clearAll": "Limpar tudo",
       "resultCount": "{{count}} resultados",
-      "allStages": "Todos os status"
+      "allStages": "Todos os status",
+      "allFlags": "Prazo e reembolso"
     },
     "stats": {
       "totalSales": "Total de vendas",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "O limite de pedidos automáticos do seu plano neste período foi atingido.",
       "purchaseNotYetChecked": "O SellerHill ainda não verificou os pedidos desta conta Amazon desde a tentativa de compra. A verificação foi iniciada agora — tente novamente em alguns minutos.",
       "purchaseNotUnknown": "Este pedido não está aguardando uma confirmação de compra. Ele pode já estar vinculado ou em andamento. Atualize a página.",
-      "purchaseFoundOnAmazon": "O SellerHill encontrou um pedido na Amazon para este produto, feito por volta da tentativa de compra, mas não conseguiu associá-lo a esta venda com certeza. Abra seus pedidos na Amazon e vincule-o manualmente. Se esse pedido pertencer a outra venda, vincule-o primeiro a essa venda."
+      "purchaseFoundOnAmazon": "O SellerHill encontrou um pedido na Amazon para este produto, feito por volta da tentativa de compra, mas não conseguiu associá-lo a esta venda com certeza. Abra seus pedidos na Amazon e vincule-o manualmente. Se esse pedido pertencer a outra venda, vincule-o primeiro a essa venda.",
+      "noteTooLong": "A nota pode ter no máximo 1.000 caracteres.",
+      "noteInvalid": "Não foi possível salvar a nota."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Enviada ao comprador.",
         "message_failed": "Não foi possível enviar."
       }
+    },
+    "flags": {
+      "late": "Envio atrasado",
+      "dueSoon": "Prazo de envio próximo",
+      "dueSoonBy": "Enviar até {{date}}",
+      "refunded": "Reembolsado",
+      "refundedAmount": "Reembolsado: {{amount}}"
+    },
+    "note": {
+      "title": "Sua nota",
+      "label": "Nota",
+      "placeholder": "Escreva uma nota para você sobre este pedido",
+      "hint": "Só você vê esta nota. Ela nunca é enviada ao eBay, à Amazon ou ao comprador.",
+      "save": "Salvar nota"
     }
   }
 }

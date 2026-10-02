@@ -201,6 +201,22 @@ export const EstimateNote = styled(Text)`
 `;
 
 /** Timeline card body: the deadline / multi-item notices, then the steps. */
+export const NoteBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+/** The privacy line and Save on one row; Save drops under it on a phone. */
+export const NoteFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.sm')};
+`;
+
 export const TimelineBody = styled.div`
   display: flex;
   flex-direction: column;

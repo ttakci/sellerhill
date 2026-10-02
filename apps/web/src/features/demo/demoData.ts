@@ -43,6 +43,7 @@ import {
   OrderStage,
   OrderStatus,
   deriveOrderStage,
+  deriveShipByState,
   deriveReturnBucket,
   PolicyType,
   ProfitBasis,
@@ -849,6 +850,15 @@ const CITIES: [string, string, string, string][] = [
  * The dashboard totals below are summed from these rows rather than typed in,
  * so the demo can never show a headline the order list contradicts.
  */
+/** Days between a sale and eBay's ship-by date in the sample store. */
+const DEMO_HANDLING_DAYS = 4;
+
+/** The seller's own notes on two sample orders (fixture index → note). */
+const DEMO_ORDER_NOTES: Record<number, string> = {
+  0: 'Buyer asked for delivery before the weekend.',
+  3: 'Repeat buyer — third order this month.',
+};
+
 function buildOrders(): OrderDto[] {
   const rand = seeded(4211);
   const orders: OrderDto[] = [];
@@ -887,7 +897,7 @@ function buildOrders(): OrderDto[] {
     // conversion is HELD (raw numbers are never pushed). One inside the 12 h
     // grace (amber), one past it (red) so the demo shows both alarm colours.
     let shippedDetectedAt: string | null = null;
-    let isSimulated = false;
+    const isSimulated = false;
 
     if (i === 3) {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
@@ -931,13 +941,6 @@ function buildOrders(): OrderDto[] {
       costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
       fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
       status = OrderStatus.WAITING_SHIPMENT;
-    } else if (i === 26) {
-      // A dry run: the checkout walked to Place Order and stopped — nothing bought.
-      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
-      fulfillmentState = OrderFulfillmentState.SIMULATED;
-      autoFulfillStatus = AutoFulfillStatus.DRY_RUN;
-      status = OrderStatus.WAITING_SHIPMENT;
-      isSimulated = true;
     } else {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
       fulfillmentState = OrderFulfillmentState.PURCHASED;
@@ -995,10 +998,36 @@ function buildOrders(): OrderDto[] {
     const shippedDetectedAtResolved = isShippedOrder ? isoDaysAgo(daysAgo, i + 3) : shippedDetectedAt;
     const ebayTrackingPushedAt = isShippedOrder ? isoDaysAgo(daysAgo, i + 4) : null;
 
+    const createdAt = recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i);
+    const stage = deriveOrderStage({
+      status,
+      autoFulfillStatus,
+      amazonOrderId,
+      amazonCancelledAt,
+      shippedDetectedAt: shippedDetectedAtResolved,
+      ebayTrackingPushedAt,
+    });
+    // eBay's ship-by date: a few days after the sale. An open order older than
+    // that reads "late to ship" beside its stage, exactly as the API derives it.
+    // Only the last week's sales carry one — like a real store, whose older
+    // orders were read before the date was stored — so the sample is not a
+    // wall of late orders.
+    const shipByDate =
+      recent || daysAgo <= DEMO_HANDLING_DAYS + 1
+        ? new Date(new Date(createdAt).getTime() + DEMO_HANDLING_DAYS * 86_400_000).toISOString()
+        : null;
+    // One sale the seller partly refunded, and two carrying the seller's own note.
+    const ebayRefundedAmount = i === 7 ? round2(salePrice * 0.2) : null;
+
     orders.push({
       id: `demo-order-${i + 1}`,
       ebayOrderId: `12-${11000 + i * 13}-${40000 + i * 7}`,
-      createdAt: recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i),
+      createdAt,
+      shipByDate,
+      shipByState: deriveShipByState({ stage, shipByDate, now: new Date() }),
+      sellerNote: DEMO_ORDER_NOTES[i] ?? null,
+      ebayRefundedAmount,
+      ebayRefundedAt: ebayRefundedAmount !== null ? isoDaysAgo(Math.max(daysAgo - 1, 0), i) : null,
       isTracked: costCaptureStatus !== OrderCostCaptureStatus.UNTRACKED,
       buyerName,
       buyerPhone,
@@ -1014,14 +1043,7 @@ function buildOrders(): OrderDto[] {
       amazonCancelledAt,
       fulfillmentState,
       isSimulated,
-      stage: deriveOrderStage({
-        status,
-        autoFulfillStatus,
-        amazonOrderId,
-        amazonCancelledAt,
-        shippedDetectedAt: shippedDetectedAtResolved,
-        ebayTrackingPushedAt,
-      }),
+      stage,
       shippedDetectedAt: shippedDetectedAtResolved,
       ebayTrackingPushedAt,
       product: {

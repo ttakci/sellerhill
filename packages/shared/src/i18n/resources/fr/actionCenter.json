@@ -118,6 +118,13 @@
         "description_other": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles — annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
         "action": "Examiner les commandes"
       },
+      "order_late_to_ship": {
+        "title": "Commandes ayant dépassé la date limite d'expédition eBay",
+        "description_one": "{{count}} commande a dépassé la date limite d'expédition eBay et eBay n'a toujours aucune expédition pour elle. Une expédition tardive est comptée contre votre compte vendeur.",
+        "description_many": "{{count}} commandes ont dépassé la date limite d'expédition eBay et eBay n'a toujours aucune expédition pour elles. Les expéditions tardives sont comptées contre votre compte vendeur.",
+        "description_other": "{{count}} commandes ont dépassé la date limite d'expédition eBay et eBay n'a toujours aucune expédition pour elles. Les expéditions tardives sont comptées contre votre compte vendeur.",
+        "action": "Examiner les commandes"
+      },
       "return_seller_action_due": {
         "title": "Retours en attente de votre réponse",
         "description_one": "{{count}} retour comporte une étape qu'eBay attend de vous. Répondez sur eBay avant la date limite indiquée sur la page Retours.",

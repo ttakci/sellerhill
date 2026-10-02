@@ -6,7 +6,7 @@ import {
   EbayConversationDto,
   EbayConversationStatus,
   ListingStatus,
-  ACTIONABLE_ORDER_STAGES,
+  orderNeedsAction,
   OrderFulfillmentState,
   OrderStage,
   RETURN_TABS,
@@ -15,6 +15,7 @@ import {
   type ListingDto,
   type EbayReturnDto,
   type OrderDto,
+  type OrderStageCountsDto,
 } from '@repo/shared';
 
 import {
@@ -245,7 +246,8 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
       (o) =>
         (o.product?.title ?? '').toLowerCase().includes(search) ||
         o.ebayOrderId.toLowerCase().includes(search) ||
-        (o.buyerName ?? '').toLowerCase().includes(search)
+        (o.buyerName ?? '').toLowerCase().includes(search) ||
+        (o.sellerNote ?? '').toLowerCase().includes(search)
     );
   }
   if (params.status && params.status !== 'all') {
@@ -258,6 +260,16 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
   if (params.stage) {
     const wanted = new Set(params.stage.split(',').filter(Boolean));
     rows = rows.filter((o) => wanted.has(o.stage));
+  }
+  // The flags beside the stage, and the Needs-action tab that reads both.
+  if (params.needsAction === 'true') {
+    rows = rows.filter((o) => orderNeedsAction(o.stage, o.shipByState));
+  }
+  if (params.shipBy) {
+    rows = rows.filter((o) => String(o.shipByState ?? '') === params.shipBy);
+  }
+  if (params.refunded === 'true') {
+    rows = rows.filter((o) => (o.ebayRefundedAmount ?? 0) > 0);
   }
   if (params.autoFulfillNeedsAttention === 'true') {
     rows = rows.filter((o) => o.fulfillmentState === OrderFulfillmentState.ACTION_REQUIRED || o.amazonCancelledAt);
@@ -283,7 +295,7 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
 
   // Same default order as the API: what needs the seller first, then newest.
   if (!params.sortBy) {
-    const rank = (o: OrderDto) => (ACTIONABLE_ORDER_STAGES.includes(o.stage) ? 0 : 1);
+    const rank = (o: OrderDto) => (orderNeedsAction(o.stage, o.shipByState) ? 0 : 1);
     rows.sort((a, b) => rank(a) - rank(b) || b.createdAt.localeCompare(a.createdAt));
   }
 
@@ -291,12 +303,13 @@ function filterOrders(params: Record<string, string>): OrderDto[] {
 }
 
 /** Whole-store stage counts for the list page tabs (store / link filters only). */
-function countOrderStages(params: Record<string, string>): Record<OrderStage, number> {
+function countOrderStages(params: Record<string, string>): OrderStageCountsDto {
   const scoped = filterOrders({ ebayAccountId: params.ebayAccountId ?? '', tracked: params.tracked ?? '' });
-  const counts = Object.fromEntries(Object.values(OrderStage).map((s) => [s, 0])) as Record<OrderStage, number>;
+  const counts = Object.fromEntries(Object.values(OrderStage).map((s) => [s, 0])) as OrderStageCountsDto;
   for (const order of scoped) {
     counts[order.stage] += 1;
   }
+  counts.needsAction = scoped.filter((o) => orderNeedsAction(o.stage, o.shipByState)).length;
   return counts;
 }
 

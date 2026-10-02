@@ -118,6 +118,13 @@
         "description_other": "{{count}} pedidos fueron cancelados en eBay en los últimos {{days}} días, pero los pedidos de Amazon hechos para ellos siguen abiertos. Ya nadie espera esos artículos: cancela los pedidos de Amazon o devuelve los artículos si ya se enviaron.",
         "action": "Revisar pedidos"
       },
+      "order_late_to_ship": {
+        "title": "Pedidos que superaron la fecha límite de envío de eBay",
+        "description_one": "{{count}} pedido superó la fecha límite de envío de eBay y eBay aún no tiene ningún envío para él. Un envío tardío cuenta en contra de tu cuenta de vendedor.",
+        "description_many": "{{count}} pedidos superaron la fecha límite de envío de eBay y eBay aún no tiene ningún envío para ellos. Los envíos tardíos cuentan en contra de tu cuenta de vendedor.",
+        "description_other": "{{count}} pedidos superaron la fecha límite de envío de eBay y eBay aún no tiene ningún envío para ellos. Los envíos tardíos cuentan en contra de tu cuenta de vendedor.",
+        "action": "Revisar pedidos"
+      },
       "return_seller_action_due": {
         "title": "Devoluciones que esperan tu respuesta",
         "description_one": "{{count}} devolución tiene un paso que eBay espera de ti. Responde en eBay antes de la fecha límite que aparece en la página Devoluciones.",

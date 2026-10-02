@@ -22,14 +22,14 @@ describe('orders API — stage', () => {
     expect(body).toMatch(/buildOrderStageSql\('o'\)\} = ANY\(\$/);
   });
 
-  it('sorts actionable stages first when the caller did not choose a sort', () => {
-    expect(service).toMatch(/ACTIONABLE_ORDER_STAGES/);
+  it('sorts what needs the seller first when the caller did not choose a sort', () => {
+    expect(service).toMatch(/CASE WHEN \$\{buildNeedsActionSql\('o'\)\} THEN 0/);
     expect(service).toMatch(/THEN 0 ELSE 1 END, o\.order_date DESC/);
   });
 
   it('maps stage onto the DTO through deriveOrderStage with both 089 timestamps', () => {
     const map = service.slice(service.indexOf('private mapRowToDto('));
-    expect(map).toMatch(/stage: deriveOrderStage\(\{/);
+    expect(map).toMatch(/const stage = deriveOrderStage\(\{/);
     expect(map).toMatch(/shippedDetectedAt: row\.shipped_detected_at/);
     expect(map).toMatch(/ebayTrackingPushedAt: row\.ebay_tracking_pushed_at/);
   });
@@ -38,6 +38,22 @@ describe('orders API — stage', () => {
     const counts = service.slice(service.indexOf('async getStageCounts('));
     expect(counts).toMatch(/GROUP BY 1/);
     expect(counts).toMatch(/buildOrderStageSql\('o'\)/);
+  });
+
+  it('counts the Needs-action tab with the predicate the tab filters on', () => {
+    const counts = service.slice(service.indexOf('async getStageCounts('));
+    const body = counts.slice(0, counts.indexOf('\n  }\n'));
+    expect(body).toMatch(/buildNeedsActionSql\('o'\)/);
+    const findAll = service.slice(service.indexOf('async findAll('));
+    expect(findAll.slice(0, findAll.indexOf('\n  }\n'))).toMatch(/conditions\.push\(buildNeedsActionSql\('o'\)\)/);
+  });
+
+  it('drops unknown ship-by values instead of forwarding them', () => {
+    expect(controller).toMatch(/Object\.values\(OrderShipByState\)/);
+  });
+
+  it('never lets order sync write the seller note', () => {
+    expect(read('order-sync.service.ts')).not.toMatch(/seller_note/);
   });
 
   it('drops unknown stage values instead of forwarding them', () => {

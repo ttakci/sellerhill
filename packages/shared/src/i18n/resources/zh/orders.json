@@ -30,7 +30,8 @@
       "allTrackingStates": "已关联和未关联",
       "clearAll": "全部清除",
       "resultCount": "{{count}} 条结果",
-      "allStages": "全部状态"
+      "allStages": "全部状态",
+      "allFlags": "期限与退款"
     },
     "stats": {
       "totalSales": "总销售额",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。",
       "purchaseNotYetChecked": "自本次购买尝试以来，SellerHill 尚未检查该 Amazon 账户的订单。检查现已启动——请几分钟后重试。",
       "purchaseNotUnknown": "该订单并未在等待购买确认。它可能已被关联或正在处理中。请刷新页面。",
-      "purchaseFoundOnAmazon": "SellerHill 在 Amazon 上找到了一笔该商品的订单，下单时间与本次购买尝试相近，但无法确定它对应这笔销售。请打开您的 Amazon 订单并手动关联。如果该订单属于另一笔销售，请先将其关联到那笔销售。"
+      "purchaseFoundOnAmazon": "SellerHill 在 Amazon 上找到了一笔该商品的订单，下单时间与本次购买尝试相近，但无法确定它对应这笔销售。请打开您的 Amazon 订单并手动关联。如果该订单属于另一笔销售，请先将其关联到那笔销售。",
+      "noteTooLong": "备注最多 1,000 个字符。",
+      "noteInvalid": "备注无法保存。"
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "已发送给买家。",
         "message_failed": "发送失败。"
       }
+    },
+    "flags": {
+      "late": "发货已逾期",
+      "dueSoon": "发货期限临近",
+      "dueSoonBy": "{{date}} 前发货",
+      "refunded": "已退款",
+      "refundedAmount": "已退款：{{amount}}"
+    },
+    "note": {
+      "title": "您的备注",
+      "label": "备注",
+      "placeholder": "为自己写一条关于此订单的备注",
+      "hint": "此备注仅您可见，绝不会发送给 eBay、Amazon 或买家。",
+      "save": "保存备注"
     }
   }
 }

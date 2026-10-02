@@ -137,6 +137,12 @@ export enum ActionCenterItemKey {
    */
   ORDER_CANCELLED_AMAZON_OPEN = 'order_cancelled_amazon_open',
   /**
+   * eBay's ship-by date has passed and eBay still has no shipment for the
+   * order. A flag beside the stage (`OrderShipByState.LATE`), not a stage: the
+   * late order may be blocked, bought or waiting for the seller to buy it.
+   */
+  ORDER_LATE_TO_SHIP = 'order_late_to_ship',
+  /**
    * eBay reports a next action the seller is responsible for on a return
    * (`sellerResponseDue`), with the deadline in the breakdown.
    */

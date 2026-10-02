@@ -41,11 +41,15 @@ export function orderStagePresentation(
 }
 
 /**
- * Stages offered in the Status select and the legend. Every stage is reachable
- * since order sync reads eBay cancellations (2026-09-30), so this is the whole
- * list; the constant stays as the one place to hide a stage again.
+ * Stages offered in the Status select and the legend. "Test" is left out
+ * (operator decision, 2026-10-02): a dry run is an operator tool no seller
+ * can switch on, and a "Test" entry among the statuses read as if their orders
+ * could be tests. The stage itself stays — a dry-run row must never look
+ * purchased — it is just not something to filter by or explain.
  */
-export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER;
+export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER.filter(
+  (stage) => stage !== OrderStage.TEST_RUN
+);
 
 const STAGES_WITH_ACTION: readonly OrderStage[] = [...ACTIONABLE_ORDER_STAGES, OrderStage.TO_PURCHASE];
 

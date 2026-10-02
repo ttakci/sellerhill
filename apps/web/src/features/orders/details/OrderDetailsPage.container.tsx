@@ -1,4 +1,4 @@
-import { OrderStage } from '@repo/shared';
+import { ORDER_NOTE_MAX_LENGTH, OrderStage } from '@repo/shared';
 import {
   formatCurrency,
   formatDate,
@@ -8,11 +8,15 @@ import {
   useLoading,
   useUI,
 } from '@repo/ui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
+import {
+  useGetOrderByIdQuery,
+  useUpdateOrderAmazonDetailsMutation,
+  useUpdateOrderNoteMutation,
+} from '../api/orders.api';
 import {
   isShipByUrgent,
   orderStageHasAction,
@@ -56,7 +60,28 @@ export const OrderDetailsPageContainer: React.FC = () => {
   const [startAutoFulfill, { isLoading: isStartingAutoFulfill }] = useStartAutoFulfillMutation();
   const [confirmNotPurchased, { isLoading: isConfirmingNotPurchased }] = useConfirmNotPurchasedMutation();
 
+  const [updateNote, { isLoading: isSavingNote }] = useUpdateOrderNoteMutation();
+
   useLoading(isUpdating);
+
+  /*
+   * The seller's own note. The field is a draft; it adopts the saved text
+   * whenever that changes (first load, or the refetch after a save), and Save
+   * is offered only while the two differ.
+   */
+  const savedNote = order?.sellerNote ?? '';
+  const [noteDraft, setNoteDraft] = useState(savedNote);
+  const noteSource = `${order?.id ?? ''}:${savedNote}`;
+  const [noteSyncedFrom, setNoteSyncedFrom] = useState(noteSource);
+  if (noteSyncedFrom !== noteSource) {
+    setNoteSyncedFrom(noteSource);
+    setNoteDraft(savedNote);
+  }
+  const isNoteDirty = noteDraft.trim() !== savedNote;
+
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNoteDraft(e.target.value);
+  }, []);
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
@@ -370,6 +395,25 @@ export const OrderDetailsPageContainer: React.FC = () => {
     );
   }, [showMessage, closeMessage, runConfirmNotPurchased, t]);
 
+  const handleSaveNote = useCallback(() => {
+    if (!id || !isNoteDirty) {
+      return;
+    }
+    updateNote({ id, note: noteDraft.trim() || null })
+      .unwrap()
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t
+        );
+      });
+  }, [id, isNoteDirty, noteDraft, updateNote, showMessage, closeMessage, t]);
+
   /* eBay's ship-by date is shown while the seller still has something to do. */
   const shipBy = useMemo(() => {
     if (!order?.shipByDate || !orderStageHasDeadline(order.stage)) {
@@ -422,6 +466,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
         shipByLabel={shipBy.label}
         isShipByUrgent={shipBy.urgent}
         multiItemCount={multiItemCount}
+        noteDraft={noteDraft}
+        noteMaxLength={ORDER_NOTE_MAX_LENGTH}
+        isNoteDirty={isNoteDirty}
+        isSavingNote={isSavingNote}
+        onNoteChange={handleNoteChange}
+        onSaveNote={handleSaveNote}
       />
       {id && (
         <LinkAmazonModal

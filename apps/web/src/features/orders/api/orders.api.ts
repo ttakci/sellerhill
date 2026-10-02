@@ -50,6 +50,15 @@ export const ordersApi = baseApi.injectEndpoints({
           if (filters.isTracked !== undefined) {
             params.tracked = String(filters.isTracked);
           }
+          if (filters.shipBy) {
+            params.shipBy = filters.shipBy;
+          }
+          if (filters.hasRefund) {
+            params.refunded = 'true';
+          }
+          if (filters.needsAction) {
+            params.needsAction = 'true';
+          }
           if (filters.sortBy) {
             params.sortBy = filters.sortBy;
           }
@@ -98,6 +107,15 @@ export const ordersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'Orders', id }, 'Orders'],
     }),
+    /** The seller's own note; blank clears it. */
+    updateOrderNote: builder.mutation<{ sellerNote: string | null }, { id: string; note: string | null }>({
+      query: ({ id, note }) => ({
+        url: `/orders/${id}/note`,
+        method: 'PUT',
+        body: { note },
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'Orders', id }, 'Orders'],
+    }),
     triggerOrderSync: builder.mutation<OrderSyncResponseDto, void>({
       query: () => ({
         url: '/orders/sync',
@@ -114,5 +132,6 @@ export const {
   useGetOrderStatsQuery,
   useGetOrderByIdQuery,
   useUpdateOrderAmazonDetailsMutation,
+  useUpdateOrderNoteMutation,
   useTriggerOrderSyncMutation,
 } = ordersApi;

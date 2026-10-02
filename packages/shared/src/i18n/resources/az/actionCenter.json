@@ -109,6 +109,12 @@
         "description_other": "Son {{days}} gündə {{count}} sifariş eBay-də ləğv edildi, amma onlar üçün verilmiş Amazon sifarişləri hələ də açıqdır. Bu məhsulları artıq heç kim gözləmir — Amazon sifarişlərini ləğv edin, göndərilibsə, məhsulları geri qaytarın.",
         "action": "Sifarişlərə bax"
       },
+      "order_late_to_ship": {
+        "title": "eBay son göndərmə tarixi keçmiş sifarişlər",
+        "description_one": "{{count}} sifarişin eBay son göndərmə tarixi keçib və eBay-də hələ də göndərmə qeydi yoxdur. Gecikmiş göndərmə satıcı hesabınıza qüsur kimi yazılır.",
+        "description_other": "{{count}} sifarişin eBay son göndərmə tarixi keçib və eBay-də hələ də göndərmə qeydi yoxdur. Gecikmiş göndərmə satıcı hesabınıza qüsur kimi yazılır.",
+        "action": "Sifarişlərə bax"
+      },
       "return_seller_action_due": {
         "title": "Cavabınızı gözləyən qaytarmalar",
         "description_one": "{{count}} qaytarmada eBay-in sizdən gözlədiyi bir addım var. Qaytarmalar səhifəsində göstərilən son tarixdən əvvəl eBay-də cavab verin.",

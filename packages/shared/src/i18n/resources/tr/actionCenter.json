@@ -109,6 +109,12 @@
         "description_other": "Son {{days}} günde {{count}} sipariş eBay'de iptal edildi ama bu siparişler için verilen Amazon siparişleri hâlâ açık. Bu ürünleri artık bekleyen kimse yok; Amazon siparişlerini iptal edin, kargolandıysa ürünleri iade edin.",
         "action": "Siparişleri incele"
       },
+      "order_late_to_ship": {
+        "title": "eBay son gönderim tarihi geçen siparişler",
+        "description_one": "{{count}} siparişin eBay son gönderim tarihi geçti ve eBay'de hâlâ kargo kaydı yok. Geç kargo satıcı hesabınıza kusur olarak yansır.",
+        "description_other": "{{count}} siparişin eBay son gönderim tarihi geçti ve eBay'de hâlâ kargo kayıtları yok. Geç kargo satıcı hesabınıza kusur olarak yansır.",
+        "action": "Siparişleri incele"
+      },
       "return_seller_action_due": {
         "title": "Yanıtınızı bekleyen iadeler",
         "description_one": "{{count}} iadede eBay'in sizden beklediği bir adım var. İadeler sayfasında görünen son tarihten önce eBay üzerinden yanıt verin.",

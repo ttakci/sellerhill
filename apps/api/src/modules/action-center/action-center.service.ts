@@ -51,6 +51,7 @@ import {
   EBAY_MESSAGING_SCOPES,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingStatus,
+  OrderShipByState,
   OrderStage,
   OrderStatus,
   ReturnBucket,
@@ -59,6 +60,7 @@ import {
   SourceUnavailableReason,
   buildOrderStageSql,
   buildReturnBucketSql,
+  buildShipByStateSql,
   resolveReturnFreshnessHours,
   type ActionCenterItemDto,
   type ActionCenterSummaryDto,
@@ -469,6 +471,29 @@ export class ActionCenterService {
       count: toCount(cancelledOpen[0]?.count),
       context: { days: CANCELLED_AMAZON_OPEN_WINDOW_DAYS },
       actionPath: `/orders?stage=${OrderStage.CANCELLED}${allOrders}`,
+    });
+
+    /*
+     * eBay's ship-by date has passed and eBay has no shipment yet. Counted with
+     * the predicate the list's "late" filter uses, so the link lands on the
+     * same rows. TRACKED orders only, like the awaiting-purchase item: a sale
+     * another tool is fulfilling is not this platform's deadline to raise, and
+     * the link therefore lands on the list's default (tracked) view.
+     */
+    const late = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM orders o
+        WHERE o.user_id = $1
+          AND o.listing_id IS NOT NULL
+          AND ${buildShipByStateSql('o', OrderShipByState.LATE)}`,
+      [userId]
+    );
+    items.push({
+      key: ActionCenterItemKey.ORDER_LATE_TO_SHIP,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.CRITICAL,
+      count: toCount(late[0]?.count),
+      actionPath: `/orders?flag=${OrderShipByState.LATE}`,
     });
 
     return items;

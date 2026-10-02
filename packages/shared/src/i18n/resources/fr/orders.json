@@ -30,7 +30,8 @@
       "allTrackingStates": "Liées et non liées",
       "clearAll": "Tout effacer",
       "resultCount": "{{count}} résultats",
-      "allStages": "Tous les statuts"
+      "allStages": "Tous les statuts",
+      "allFlags": "Délai et remboursement"
     },
     "stats": {
       "totalSales": "Ventes totales",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période.",
       "purchaseNotYetChecked": "SellerHill n'a pas encore vérifié les commandes de ce compte Amazon depuis la tentative d'achat. La vérification vient d'être lancée — réessayez dans quelques minutes.",
       "purchaseNotUnknown": "Cette commande n'attend pas de confirmation d'achat. Elle est peut-être déjà associée ou en cours. Actualisez la page.",
-      "purchaseFoundOnAmazon": "SellerHill a trouvé une commande Amazon pour ce produit, passée vers le moment de la tentative d'achat, mais n'a pas pu la rattacher à cette vente avec certitude. Ouvrez vos commandes Amazon et associez-la à la main. Si cette commande correspond à une autre vente, associez-la d'abord à cette vente."
+      "purchaseFoundOnAmazon": "SellerHill a trouvé une commande Amazon pour ce produit, passée vers le moment de la tentative d'achat, mais n'a pas pu la rattacher à cette vente avec certitude. Ouvrez vos commandes Amazon et associez-la à la main. Si cette commande correspond à une autre vente, associez-la d'abord à cette vente.",
+      "noteTooLong": "La note peut contenir 1 000 caractères au maximum.",
+      "noteInvalid": "La note n'a pas pu être enregistrée."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Envoyé à l'acheteur.",
         "message_failed": "N'a pas pu être envoyé."
       }
+    },
+    "flags": {
+      "late": "Expédition en retard",
+      "dueSoon": "Délai d'expédition proche",
+      "dueSoonBy": "À expédier avant le {{date}}",
+      "refunded": "Remboursée",
+      "refundedAmount": "Remboursé : {{amount}}"
+    },
+    "note": {
+      "title": "Votre note",
+      "label": "Note",
+      "placeholder": "Écrivez une note pour vous-même sur cette commande",
+      "hint": "Vous seul voyez cette note. Elle n'est jamais envoyée à eBay, à Amazon ni à l'acheteur.",
+      "save": "Enregistrer la note"
     }
   }
 }

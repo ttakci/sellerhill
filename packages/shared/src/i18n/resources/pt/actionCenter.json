@@ -118,6 +118,13 @@
         "description_other": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens — cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
         "action": "Revisar pedidos"
       },
+      "order_late_to_ship": {
+        "title": "Pedidos que passaram do prazo de envio do eBay",
+        "description_one": "{{count}} pedido passou do prazo de envio do eBay e o eBay ainda não tem nenhum envio para ele. Um envio atrasado conta contra a sua conta de vendedor.",
+        "description_many": "{{count}} pedidos passaram do prazo de envio do eBay e o eBay ainda não tem nenhum envio para eles. Envios atrasados contam contra a sua conta de vendedor.",
+        "description_other": "{{count}} pedidos passaram do prazo de envio do eBay e o eBay ainda não tem nenhum envio para eles. Envios atrasados contam contra a sua conta de vendedor.",
+        "action": "Revisar pedidos"
+      },
       "return_seller_action_due": {
         "title": "Devoluções aguardando sua resposta",
         "description_one": "{{count}} devolução tem uma etapa que o eBay espera de você. Responda no eBay antes do prazo mostrado na página Devoluções.",

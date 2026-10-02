@@ -59,6 +59,8 @@ export class EbayAccountDeletionService {
                 buyer_email = NULL,
                 buyer_phone = NULL,
                 shipping_address = NULL,
+                -- Free text the seller wrote about this buyer's order.
+                seller_note = NULL,
                 buyer_data_erased_at = COALESCE(buyer_data_erased_at, CURRENT_TIMESTAMP),
                 updated_at = CURRENT_TIMESTAMP
           WHERE buyer_username = $1
@@ -66,6 +68,7 @@ export class EbayAccountDeletionService {
                  OR buyer_email IS NOT NULL
                  OR buyer_phone IS NOT NULL
                  OR shipping_address IS NOT NULL
+                 OR seller_note IS NOT NULL
                  OR buyer_data_erased_at IS NULL)
           RETURNING id`,
         [target.username],

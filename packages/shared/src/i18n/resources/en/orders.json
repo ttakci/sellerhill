@@ -30,7 +30,8 @@
       "allTrackingStates": "Linked and not linked",
       "clearAll": "Clear all",
       "resultCount": "{{count}} results",
-      "allStages": "All statuses"
+      "allStages": "All statuses",
+      "allFlags": "Deadline & refund"
     },
     "stats": {
       "totalSales": "Total Sales",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up.",
       "purchaseNotYetChecked": "SellerHill has not yet checked this Amazon account's orders since the purchase attempt. The check has now been started — try again in a few minutes.",
       "purchaseNotUnknown": "This order is not waiting for a purchase confirmation. It may already be linked or in progress. Refresh the page.",
-      "purchaseFoundOnAmazon": "SellerHill found an Amazon order for this product, placed around the time of the purchase attempt, but could not match it to this sale with certainty. Open your Amazon orders and link it by hand. If that order belongs to another sale, link it to that sale first."
+      "purchaseFoundOnAmazon": "SellerHill found an Amazon order for this product, placed around the time of the purchase attempt, but could not match it to this sale with certainty. Open your Amazon orders and link it by hand. If that order belongs to another sale, link it to that sale first.",
+      "noteTooLong": "The note can be at most 1,000 characters.",
+      "noteInvalid": "The note could not be saved."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Sent to the buyer.",
         "message_failed": "Could not be sent."
       }
+    },
+    "flags": {
+      "late": "Late to ship",
+      "dueSoon": "Ship-by date close",
+      "dueSoonBy": "Ship by {{date}}",
+      "refunded": "Refunded",
+      "refundedAmount": "Refunded: {{amount}}"
+    },
+    "note": {
+      "title": "Your note",
+      "label": "Note",
+      "placeholder": "Write a note for yourself about this order",
+      "hint": "Only you see this note. It is never sent to eBay, Amazon or the buyer.",
+      "save": "Save note"
     }
   }
 }
