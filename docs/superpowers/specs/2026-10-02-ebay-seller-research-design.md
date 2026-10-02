@@ -65,7 +65,7 @@ Routes (all `POST`, JSON, authenticated, 400 on bad body, same no-proxy rule: **
 |---|---|---|
 | `/v1/seller/resolve` | `{ input, proxies, perIpRequestsPerSecond }` | `{ outcome, username, storeName?, feedbackScore? }` — resolves a store URL/slug to the username (§6.1) |
 | `/v1/seller/listings` | `{ username, page, proxies, perIpRequestsPerSecond }` | `{ outcome, fetchedAt, total, hasNext, items: [{ itemId, title, priceText, price, currency, imageUrl, soldHint, condition, listingType }] }` — one `_ssn` search page, 240 per page, newest first |
-| `/v1/item` | `{ itemId, proxies, perIpRequestsPerSecond }` | `{ outcome, fetchedAt, item: { itemId, title, price, currency, imageUrl, soldTotal, soldLast24h?, listedAt?, quantityAvailable?, specifics: { upc?, ean?, isbn?, mpn?, brand?, model? }, purchaseHistory?: [{ date, quantity }] } }` |
+| `/v1/item` | `{ itemId, proxies, perIpRequestsPerSecond }` | `{ outcome, fetchedAt, item: { itemId, title, price, currency, imageUrl, soldTotal, soldLast24h?, listedAt?, quantityAvailable?, specifics: { upc?, ean?, isbn?, mpn?, brand?, model? } } }` — the purchase-history page is NOT read (it redirects to sign-in, spike 2026-10-02) |
 | `/v1/proxies/verify` | as the Amazon service | as the Amazon service |
 | `/health`, `/v1/stats` | — | as the Amazon service (+ `transport: "curl" \| "browser"`) |
 
@@ -85,17 +85,30 @@ Files: `seller-research.module.ts` (imports `AuthModule`, `BillingModule`, `Prod
 
 `SellerResearchPage/` (scan list + "new scan" form), `ScanDetailPage/` (the items table), both 4-file splits; `components/NewScanForm/`, `components/CandidateList/`; `hooks/useScanDetailUrlState.ts` (`?page=&sort=&match=`), `hooks/useScanSelection.ts` (the Best Sellers selection hook, keyed on ASIN); `api/sellerResearchApi.ts` (`injectEndpoints`, tag `SellerResearch`); `utils/scanPresentation.ts`. Nav item in the **Discover** group after Best Sellers (`routeMeta` entry, locale-less `/seller-research` redirect, demo fixtures). i18n namespace `sellerResearch` in all 16 locales.
 
-## 5. The eBay transport — decided by the spike, not by this document
+## 5. The eBay transport — what the spike found (2026-10-02, one fresh ISP IP: AS402236 Patriot Broadband, Los Angeles, never used for Amazon)
 
-eBay sits behind Akamai Bot Manager. On 2026-10-02 `curl_cffi` with current Chrome/Safari impersonation got a flat 403 from a residential IP for BOTH active and sold search; Firefox impersonation got the JS challenge; a CDP Chrome got the challenge and then the flat 403. So "curl behind a static ISP IP", which is enough for Amazon, is **not assumed** here. The spike (`scratchpad/ebay-spike/`, runs the moment `EBAY_PROBE_PROXY` exists; one fresh IP that has never served the Amazon pool) answers three questions, and each answer selects one of two transports already designed below. Nothing else in this spec changes with the answer.
+eBay sits behind Akamai Bot Manager. Measured, same IP, same minute:
 
-| Spike result | Transport | Consequence |
-|---|---|---|
-| Stealth Chromium reads the seller search anonymously **and** `curl_cffi` keeps working with the browser's cookies for ≥ 50 requests | **T1 "browser warms, curl works"**: the service keeps one Playwright Chromium per proxy IP, warms a session (home page → search), exports cookies + UA into the thread-local `curl_cffi` session, re-warms on the first `blocked`. Chromium runs only on warm-up. | Image gains `playwright` + Chromium (~400 MB, `SCRAPER_MEMORY_LIMIT` for this service 1.5 G). Per-page cost ≈ Amazon's. **Flat-rate proxy cost → scans can be priced generously.** |
-| Chromium reads it, curl is blocked on the first request | **T2 "browser only"**: every page is fetched by the headless browser (one page per worker thread, `page.goto` + `content()`), still through `pool.submit_call`, `threads_per_proxy` capped at 2. | ~3–5 s and ~150 MB per concurrent page. `maxItemsPerScan` default drops from 200 to 100 and `concurrency` to 1. Still flat-rate. |
-| Chromium itself is challenged/blocked from a clean ISP IP | **Stop and report.** The remaining options are a commercial unblocker (per-request money, which contradicts an "unlimited" pack and needs its own cost model) or the official Marketplace Insights application. Neither is designed here; the operator decides with the numbers in hand. | — |
+| Client | Result |
+|---|---|
+| `curl_cffi` chrome136 / safari18 (no cookies) | flat 403 "Error Page \| eBay" |
+| `curl_cffi` firefox135 | 200, JS challenge page |
+| Playwright **headless shell** + stealth | flat 403, even on the home page |
+| Playwright **`--headless=new`** (full Chromium, `channel: chromium`) + stealth, with and without window/GPU flags | flat 403 |
+| Playwright **headful** Chrome + stealth, first run | **passed**: seller search rendered 242 cards, "4,100,000+ results", seller header with feedback % and items sold |
+| `curl_cffi` chrome136 **with the headful session's cookies** | JS challenge on request 1 (the session held `bm_*` but no `_abck`) |
+| Playwright headful, second run 3 minutes later (6th session on that IP) | JS challenge |
+| `/bin/purchaseHistory?item=` in the passing headful session | redirect to sign-in (`sgfl=sm`) |
 
-`/v1/stats` reports `transport`, and the admin Overview shows it, so nobody has to remember which one shipped.
+Conclusions, each one a design input:
+
+1. **T1 ("browser warms, curl works") is dead.** The browser never earns a cookie curl can reuse. Deleted from this design.
+2. **Transport is T2, browser-only, and it must be a HEADFUL Chromium** — both headless flavours are denied before any challenge. On a server that means Chromium under **Xvfb** (`xvfb-run`), one browser per proxy IP, pages fetched sequentially per IP through `pool.submit_call`, `page.goto` + `content()`. **Still unverified: whether Chromium under Xvfb with SwiftShader (no real GPU, no real window manager) scores like the desktop Chrome that passed.** That is the one remaining spike, run inside a Docker image on the dev machine before any service code is written (step 3 of §13). If it fails, the service is not built and the operator chooses between a commercial unblocker (per-request money, incompatible with a 500-scan pack) and the Marketplace Insights application.
+3. **Pace is the second guard, not an optimisation.** Six sessions in four minutes moved a clean residential IP from "pass" to "challenge". Production pace is one page every 8–12 s per IP (`ebayScraper.perIpRequestsPerSecond` default **0.1**), one long-lived browser per IP (a fresh profile per request is itself a signal), and a challenge counts as `blocked` toward the pool's cooldown. Throughput: ~300–400 pages/hour/IP → a 100-item scan ≈ 15–20 min on one IP, 5–7 min on three; acceptable for a queued job, and the reason the scan page shows progress.
+4. **The exact "sold in the last X days" is not obtainable anonymously** (purchase history needs sign-in). The honest figures are the lifetime counter, the 24-hour counter when printed, the estimate from listing age, and the exact delta between two scans (§6.6).
+5. **Single-quantity sellers show no sales data at all.** eBay prints `N sold` only on multi-quantity listings; ThriftBooks (each book one unit) had no counter on any card. The sellers this feature exists for — Amazon→eBay arbitrage stores — list multi-quantity, so this is the right trade, but the UI says so on a scan whose items all lack a counter (`sellerResearch.states.noSalesCounters`).
+
+`/v1/stats` reports `transport: "browser"` and the admin Overview shows it beside the counts.
 
 ## 6. The scan, step by step
 
@@ -120,8 +133,8 @@ Then `INSERT seller_research_scans (status = queued)` and `queue.add('scan', { s
 2. `/v1/seller/listings` pages 1..`maxSearchPages` (default 2 → up to 480 listings), newest first (`_sop=10`). Stop early on `hasNext = false`. A `blocked` page: retry once after 20 s through the pool (a different IP if the list has several), then **fail the scan** with `errorKey = sellerResearch.errors.ebayBlocked` — never a partial result presented as the whole store (the feed-sync rule again). A `not_found` on page 1 → `sellerNotFound`.
 3. **Snapshot cache**: the raw listing pages of one username are cached in Redis for `sellerResearch.ebayCacheTtlMinutes` (default 360) keyed `seller-research:listings:{username}:{page}`; two SellerHill sellers scanning the same competitor within six hours cost eBay one read. Item pages are cached 24 h keyed by item id (`soldTotal` moves slowly; the cache stamps `fetchedAt`, shown as "as of").
 4. `selectItemsToOpen(listings, caps)` (pure): drop auction-format listings when `listingType = auction` (a sold counter does not exist for them), order by `soldHint` desc → newest first, take `maxItemsPerScan` (default 200). A listing whose card says `0 sold` (eBay prints the counter on multi-quantity listings) is never opened — its answer is already known. Listings with no counter on the card are opened because the item page may still print one.
-5. `/v1/item` for each selected listing through the pool at the eBay service's own rate (`ebayScraper.perIpRequestsPerSecond`, default 0.5 — half Amazon's; a listing page is heavier and eBay is twice as watchful). Per-item `blocked` → that item is kept with what the card said and `detail = unavailable`; a streak of 5 consecutive `blocked` fails the scan as `ebayBlocked`.
-6. Write `seller_research_items` rows (one bulk insert): title, price, currency, image, `sold_total`, `sold_last_24h`, `listed_at` (when the page prints it), `specifics` JSONB, `purchase_history` JSONB when the page served it (§6.6), `ebay_detail_status` (`found` / `unavailable` / `skipped`).
+5. `/v1/item` for each selected listing through the pool at the eBay service's own pace (`ebayScraper.perIpRequestsPerSecond`, default 0.1 — §5). Per-item `blocked` → that item is kept with what the card said and `detail = unavailable`; a streak of 5 consecutive `blocked` fails the scan as `ebayBlocked`.
+6. Write `seller_research_items` rows (one bulk insert): title, price, currency, image, `sold_total`, `sold_last_24h`, `listed_at` (when the page prints it), `specifics` JSONB, `sold_since_previous_scan` when `previous_scan_id` resolves (§6.6), `ebay_detail_status` (`found` / `unavailable` / `skipped`). The dummy card eBay prepends to every search page (item id `123456`, "Shop on eBay") is dropped by the parser.
 7. **The scan is counted now** (`counted_at = NOW()`, §9): the seller got the eBay answer; whatever Amazon does next, the value was delivered. A scan that fails before this point costs nothing.
 
 ### 6.4 Caps (platform settings, Scraper category, all panel-tunable)
@@ -130,16 +143,16 @@ Then `INSERT seller_research_scans (status = queued)` and `queue.add('scan', { s
 |---|---|---|---|
 | `sellerResearch.enabled` | true | — | 404 when off |
 | `sellerResearch.maxSearchPages` | 2 | 1–5 | eBay search pages per scan (240 listings each) |
-| `sellerResearch.maxItemsPerScan` | 200 (T2: 100) | 10–500 | item pages opened per scan |
+| `sellerResearch.maxItemsPerScan` | 100 | 10–500 | item pages opened per scan (browser-only transport, §5) |
 | `sellerResearch.amazonResultsMax` | 10 | 1–20 | upper bound on the seller's "results per item" |
 | `sellerResearch.dailyScanLimit` | 20 | 0–500 | hidden per-seller daily brake |
 | `sellerResearch.ebayCacheTtlMinutes` | 360 | 30–1440 | listing-page snapshot reuse |
 | `sellerResearch.rescanFreeHours` | 24 | 0–168 | a re-scan of the same username inside this window is not counted again |
 | `ebayScraper.proxies` | — (secret, write-only) | — | the eBay-only proxy list; **must be disjoint from `scraper.proxies`** — the save refuses an overlap (`admin.errors.setting.proxyOverlap`, pure `findProxyOverlap` by `host:port`) |
-| `ebayScraper.perIpRequestsPerSecond` | 0.5 | 0.1–5 | per-IP pace on the eBay service |
+| `ebayScraper.perIpRequestsPerSecond` | 0.1 | 0.05–1 | per-IP pace on the eBay service — one page every ~10 s; six sessions in four minutes already drew a challenge (§5) |
 | `retention.sellerResearchDays` | 90 | 7 floor | manifest entry; items cascade from scans |
 
-Worst case per scan at the defaults: 2 + 200 eBay pages + ≤ 200 Amazon searches ≈ 400 requests; on 3 eBay IPs at 0.5 rps ≈ 2.5 min eBay + Amazon on its own pool. The scan page shows progress (`itemsPlanned` / `itemsDone`, `candidatesDone`).
+Worst case per scan at the defaults: 2 + 100 eBay pages + ≤ 100 Amazon searches; on 3 eBay IPs at 0.1 page/s ≈ 6 min eBay + Amazon on its own pool. The scan page shows progress (`itemsPlanned` / `itemsDone`, `candidatesDone`).
 
 ### 6.5 Phase 2 — Amazon (`phase = amazon`)
 
@@ -155,15 +168,16 @@ The scan ends `completed` (`finished_at`), or `failed` with an `errorKey` when p
 
 ### 6.6 What "sold in the last X days" means, honestly
 
-The item page prints a lifetime `N sold` counter and sometimes `M sold in the last 24 hours`. The purchase-history page (`/bin/purchaseHistory?item=`) prints dated sales when eBay still serves it anonymously — the spike tells us. The data model therefore carries three fields and the UI labels each for what it is:
+The item page prints a lifetime `N sold` counter and sometimes `M sold in the last 24 hours`. The purchase-history page is behind sign-in (spike), so no page gives us dated sales. The data model carries these fields and the UI labels each for what it is:
 
 | Field | Source | Shown as |
 |---|---|---|
 | `sold_total` | item page counter | "N sold" |
-| `sold_in_window` | **exact** when `purchase_history` exists (count of dated rows inside the window); **null** otherwise | "N in last 30 days" or — |
+| `sold_last_24h` | item page, when printed | "M in the last 24 h" |
 | `sold_per_day` | `sold_total / max(1, days since listed_at)` when `listed_at` is known | "≈ N/day (estimated)" |
+| `sold_since_previous_scan` | `sold_total` now − `sold_total` on this user's previous scan of the same username (`previous_scan_id`), with that scan's date | "N since <date>" — **exact** |
 
-The window the seller picked filters on `sold_in_window` when it exists, otherwise on `sold_per_day × days ≥ 1`; the result table says which rule applied (`sellerResearch.items.windowRuleExact` / `…Estimated`). Copy never claims an exact sale count the page did not print. A **re-scan** of the same username later gives the true delta (`sold_total` now − then) — stored as `sold_since_previous_scan` on the newer scan's items, with the previous scan's date; this is how the 7/30-day figures become exact over time without any sampling job of ours.
+The window the seller picked filters on `sold_since_previous_scan` when a previous scan inside the window exists, otherwise on `sold_per_day × days ≥ 1`; the result table says which rule applied (`sellerResearch.items.windowRuleExact` / `…Estimated`). Copy never claims an exact sale count the page did not print. A second scan a week later is therefore how a seller gets a true 7-day figure — the page says so on a first scan ("Scan again in 7 days for exact weekly sales"). No sampling job of ours runs on its own.
 
 ## 7. Data model — migration `139_seller_research.sql`
 
@@ -194,9 +208,9 @@ CREATE TABLE seller_research_items (
   id UUID PK, scan_id UUID NOT NULL REFERENCES seller_research_scans ON DELETE CASCADE,
   ebay_item_id VARCHAR(30) NOT NULL, title TEXT NOT NULL, price NUMERIC(12,2), currency CHAR(3),
   image_url TEXT, listing_type VARCHAR(16), condition VARCHAR(40),
-  sold_total INT, sold_last_24h INT, sold_in_window INT, sold_per_day NUMERIC(10,3),
+  sold_total INT, sold_last_24h INT, sold_per_day NUMERIC(10,3),
   sold_since_previous_scan INT, listed_at TIMESTAMPTZ,
-  specifics JSONB NOT NULL DEFAULT '{}', purchase_history JSONB,
+  specifics JSONB NOT NULL DEFAULT '{}',
   ebay_detail_status VARCHAR(16) NOT NULL,       -- found | unavailable | skipped
   match_kind VARCHAR(16),                         -- barcode | keyword | NULL
   amazon_query TEXT, amazon_status VARCHAR(16),   -- found | empty | unavailable
@@ -223,7 +237,7 @@ Candidates live inline as JSONB: nothing joins on them, they are read only with 
 | POST | `/scans` | `{ sellerInput, windowDays: 7\|30\|90, resultsPerItem: 1..amazonResultsMax, minRating: 0..5 step .1, minReviews: ≥0, primeOnly }` | `201 ScanDto` or the §6.2 refusals |
 | GET | `/scans?page&limit` | — | `{ items: ScanDto[], total, page, limit, allowance: { used, limit, remaining, creditValue } }` |
 | GET | `/scans/:id` | — | `ScanDto` (status, phase, counters, errorKey, sellerUsername, windowRule) — polled every 3 s while `queued`/`running` |
-| GET | `/scans/:id/items?page&limit&sort=soldTotal\|soldInWindow\|price&match=all\|matched\|unmatched` | — | `{ items: ScanItemDto[], total, page, limit }` |
+| GET | `/scans/:id/items?page&limit&sort=soldTotal\|soldSincePrevious\|soldPerDay\|price&match=all\|matched\|unmatched` | — | `{ items: ScanItemDto[], total, page, limit }` |
 | DELETE | `/scans/:id` | — | 204; a running scan cannot be deleted (409) |
 
 DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.types.ts` (enums `SellerResearchScanStatus`, `SellerResearchScanPhase`, `SellerResearchMatchKind`, `SellerResearchErrorKey`, `SellerResearchWindowDays`, constants `SELLER_RESEARCH_WINDOWS = [7, 30, 90]`), Zod in `packages/shared/src/schemas/seller-research/`; the scraper wire contracts (`EbayResearchListingsRequest/Response`, `EbayResearchItemRequest/Response`, `ScraperSearchRequest/Response`) sit beside them — one place, as `best-sellers.types.ts` is for its service.
@@ -240,7 +254,7 @@ DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.t
 | Item | Proposal (2026-10-02) | Note |
 |---|---|---|
 | Free allowance | **3 scans / month on every plan, trial included** | AslScout trial: 5 scans once. A per-tier ladder (Mini 3 … Enterprise 50) is the other option; it matches the other meters but is more rows to explain |
-| Packs | 50 / $4.99 · 150 / $9.99 · **500** / $14.99 | AslScout: 40 / $9.99 · 120 / $16.99 · unlimited / $24.99 (subscriptions). **"Unlimited" cannot be a top-up**: credits are a quantity on one billing window. An unlimited tier would be a recurring add-on — a different Stripe object and a different local model, not in V1. Under T1/T2 the unit cost is time on a flat-rate IP, so a 500 pack is safe; under an unblocker it is not. |
+| Packs | 50 / $4.99 · 150 / $9.99 · **500** / $14.99 | AslScout: 40 / $9.99 · 120 / $16.99 · unlimited / $24.99 (subscriptions). **"Unlimited" cannot be a top-up**: credits are a quantity on one billing window. An unlimited tier would be a recurring add-on — a different Stripe object and a different local model, not in V1. With our own browsers on flat-rate IPs the unit cost is time, so a 500 pack is safe; under an unblocker it is not. |
 | Rescan | free inside 24 h | AslScout charges a rescan half price |
 
 ## 10. Web
@@ -259,17 +273,17 @@ DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.t
 | `seller-research-no-ebay-api.guard.spec.ts` | nothing under `modules/seller-research/` imports `EbayService`, `EbayFulfillmentService`, `EbayBulkService`, `EbayFeedService`, `EbayAnalyticsService` or mentions `api.ebay.com` / `apiz.ebay.com` / `/buy/browse/` |
 | `proxy-overlap.spec.ts` (+ a case in `platform-settings.helpers.spec.ts`) | saving `ebayScraper.proxies` with a `host:port` present in `scraper.proxies` is refused, and vice versa |
 | `scan-allowance.spec.ts`, `amazon-query.spec.ts`, `candidate-filter.spec.ts`, `scan-plan.spec.ts`, `seller-input.spec.ts` | the pure layer: counting window, rescan-free rule, GS1 → barcode query, noise stripping, 8-token cap, rating/review/Prime filters, sponsored dropped, `isExact` only on barcode, auction skipped, `0 sold` never opened, URL forms |
-| `seller-research.processor.spec.ts` (fakes) | blocked page 1 → `failed`/`ebayBlocked` with no rows; 5-block streak → failed; counted only after phase 1; Amazon unavailable → still `completed`; `previous_scan_id` + `sold_since_previous_scan` on a rescan |
+| `seller-research.processor.spec.ts` (fakes) | blocked page 1 → `failed`/`ebayBlocked` with no rows; 5-block streak → failed; counted only after phase 1; Amazon unavailable → still `completed`; `previous_scan_id` + `sold_since_previous_scan` on a rescan; the `123456` dummy card never becomes an item |
 | `billing` exhaustive maps | `LOCK_DISCRIMINATOR`, `describeAddonProduct`, `dimensions`, `USAGE_LIMIT_KEYS` each carry the new key (TypeScript forces the first; a spec asserts the rest) |
 | `scraper-egress.guard.spec.ts` (extended) | `SCRAPER_ALLOW_DIRECT` absent from both Coolify compose files for the new service too |
-| Python `tests/` in `services/ebay-scraper` | fixture parity for the two card markups, item page (sold counter, specifics, listed-at), purchase history, resolve page; `blocked` vs `not_found` classification (challenge/sign-in pages are never `not_found`); no-proxy → no HTTP; `test_shared_parity.py` |
+| Python `tests/` in `services/ebay-scraper` | fixture parity for the two card markups, item page (sold counter, specifics, listed-at), resolve page; `blocked` vs `not_found` classification (challenge/sign-in pages are never `not_found`); the dummy card dropped; no-proxy → no browser launch; `test_shared_parity.py` |
 | Python `tests/test_search.py` in `services/amazon-scraper` | `fetch_search` to_wire, sponsored dropped, no_proxy, blocked |
 
 ## 12. Operations
 
-- **Compose**: `ebay-scraper` service in all three compose files, on `ebay_research_net` (private, no published port, not on `coolify`), memory limit `EBAY_SCRAPER_MEMORY_LIMIT` (512 M under T-curl, 1.5 G with Chromium), non-root user, `depends_on: service_started` from `api` (same reasoning as the Amazon service: the api must boot without it). Env: `EBAY_SCRAPER_SERVICE_URL`, `EBAY_SCRAPER_SERVICE_SECRET` (a different secret from `SCRAPER_SERVICE_SECRET`).
+- **Compose**: `ebay-scraper` service in all three compose files, on `ebay_research_net` (private, no published port, not on `coolify`), image = `python:3.12-slim` + `playwright` + Chromium + **Xvfb** (`xvfb-run` wraps the server process; the browser is launched headful, §5), memory limit `EBAY_SCRAPER_MEMORY_LIMIT` 2 G (one resident Chromium per proxy IP), `shm_size: 1g` (Chromium's shared memory), non-root user, `depends_on: service_started` from `api` (same reasoning as the Amazon service: the api must boot without it). Env: `EBAY_SCRAPER_SERVICE_URL`, `EBAY_SCRAPER_SERVICE_SECRET` (a different secret from `SCRAPER_SERVICE_SECRET`).
 - **Admin**: `AdminWarningKind.EBAY_SCRAPER_NO_PROXIES` (critical while `sellerResearch.enabled`), `EBAY_SCRAPER_UNREACHABLE`, `EBAY_SCRAPER_BLOCK_RATE_HIGH` (same `scraper.blockRateWarnPercent` knob), `EBAY_SCRAPER_PROXY_OVERLAP` (critical — a list saved before the overlap check existed, or edited by hand). The Scraper settings category gets an **"eBay research"** block: proxies editor (the existing `ScraperProxiesEditor` with a `target` prop → `POST /v1/admin/settings/ebay-scraper/proxies/verify`), rps, the caps. The admin Overview card shows the eBay service's last-hour counts and `transport`.
-- **Queue**: `seller-research` in `ADMIN_QUEUE_NAMES`, `OBSERVED_QUEUE_NAMES`, the admin `BullModule.registerQueue` list and `admin.controller`'s `queues()` (the coverage guard spec fails otherwise). Concurrency `SELLER_RESEARCH_WORKER_CONCURRENCY` env, default 2 (T2: 1).
+- **Queue**: `seller-research` in `ADMIN_QUEUE_NAMES`, `OBSERVED_QUEUE_NAMES`, the admin `BullModule.registerQueue` list and `admin.controller`'s `queues()` (the coverage guard spec fails otherwise). Concurrency `SELLER_RESEARCH_WORKER_CONCURRENCY` env, default 1 — the eBay service's per-IP pace is the real limit, and two scans would only queue behind each other there.
 - **Action Center**: none. A failed scan is on its own page; nothing here waits on the seller.
 - **Legal posture, written down once**: this feature reads public listing pages the way a browser does, through infrastructure that shares nothing with the eBay API integration. It is a User Agreement §3 exposure the operator accepted on 2026-10-02 with the keyset kept out of it; it must stay out — see the no-ebay-api guard. Seller-facing copy says "publicly available listing data" (the competitor's wording) and nothing about eBay's permission.
 
@@ -277,7 +291,7 @@ DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.t
 
 1. Shared types + Zod + i18n skeleton (en/tr first, 14 agents for the rest at the end).
 2. `services/amazon-scraper`: `sellerhill/search.py` + `POST /v1/search` + tests. (Independent of eBay; unblocks phase 2.)
-3. Spike result → choose T1/T2 → `services/ebay-scraper` (egress/pool copies, selectors, three routes, fixtures from the spike's evidence, Dockerfile, compose).
+3. **Xvfb spike** (a throwaway Docker image: python + playwright + Chromium + Xvfb, the same probe through the eBay IP, run once the IP has cooled for a day) → only on a pass: `services/ebay-scraper` (egress/pool copies, headful browser worker, selectors, three routes, fixtures from the spike's evidence, Dockerfile, compose). On a fail: stop, report, operator chooses unblocker vs Marketplace Insights.
 4. Migration 139 + billing wiring (limit key, maps, catalog sync, summary dimension, retention manifest).
 5. API module: client, settings, pure helpers (TDD), service + gate, processor, controller, guard specs.
 6. Web: API slice, pages, hooks, demo fixtures, nav/route, i18n.
