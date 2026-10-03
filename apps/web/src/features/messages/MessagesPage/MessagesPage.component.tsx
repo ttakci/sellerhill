@@ -7,12 +7,11 @@
 
 import {
   Badge,
-  Button,
-  Dropdown,
   EmptyState,
   Icon,
   PageHeader,
   SegmentedControl,
+  Select,
   TabNav,
   TablePagination,
   Text,
@@ -54,22 +53,15 @@ export const MessagesPageComponent = ({
       backMobileOnly
       actions={
         showToolbar && storeSelector ? (
-          <Dropdown
-            align="right"
-            width="14rem"
-            items={storeSelector.items}
-            trigger={
-              <Button variant="secondary" size="small">
-                <Icon name="storefront" size={16} />
-                <S.StoreLabel>
-                  <Text variant="body-sm" weight="medium" truncate>
-                    {storeSelector.label}
-                  </Text>
-                </S.StoreLabel>
-                <Icon name="chevron-down" size={14} color="text.tertiary" />
-              </Button>
-            }
-          />
+          <S.StoreSelect>
+            <Select
+              value={storeSelector.value}
+              onChange={storeSelector.onChange}
+              options={storeSelector.options}
+              size="small"
+              fullWidth
+            />
+          </S.StoreSelect>
         ) : undefined
       }
     />

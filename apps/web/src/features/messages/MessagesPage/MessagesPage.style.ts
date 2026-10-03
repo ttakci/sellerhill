@@ -70,11 +70,10 @@ export const CompactFilters = styled.div`
   }
 `;
 
-/** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */
-export const StoreLabel = styled.span`
-  min-width: 0;
-  max-width: 12rem;
-  overflow: hidden;
+/** Sized slot for the store Select — same 11.5rem as the list pages' filter selects. */
+export const StoreSelect = styled.div`
+  width: 11.5rem;
+  flex-shrink: 0;
 `;
 
 /**

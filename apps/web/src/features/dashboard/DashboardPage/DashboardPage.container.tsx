@@ -4,7 +4,7 @@
  */
 
 import { DashboardPeriodKey, DashboardTab } from '@repo/shared';
-import { getLocaleConfig, useTheme, useUI, type DropdownItem } from '@repo/ui';
+import { getLocaleConfig, useTheme, useUI, type SelectOption } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -213,29 +213,23 @@ export const DashboardPageContainer = (): React.ReactElement => {
     }));
   }, [t, theme, dashboardData, periodDates]);
 
-  const storeItems = useMemo<DropdownItem[]>(
+  /* Same Select (size small) as the store filter on every list page — the
+     filter is a value, not a menu of actions. */
+  const storeOptions = useMemo<SelectOption[]>(
     () => [
-      {
-        label: t('dashboard.allStores'),
-        icon: storeId === ALL_STORES ? ('check' as const) : undefined,
-        onClick: () => setStoreId(ALL_STORES),
-      },
+      { value: ALL_STORES, label: t('dashboard.allStores') },
       ...ebayAccounts.map((account) => ({
+        value: account.id,
         label: account.storeName || account.ebayUsername || account.sellerId,
-        icon: storeId === account.id ? ('check' as const) : undefined,
-        onClick: () => setStoreId(account.id),
       })),
     ],
-    [t, ebayAccounts, storeId, setStoreId],
+    [t, ebayAccounts],
   );
 
-  const selectedStoreLabel = useMemo(() => {
-    if (storeId === ALL_STORES) {
-      return t('dashboard.allStores');
-    }
-    const account = ebayAccounts.find((entry) => entry.id === storeId);
-    return account?.storeName || account?.ebayUsername || account?.sellerId || t('dashboard.allStores');
-  }, [storeId, ebayAccounts, t]);
+  const handleStoreChange = useCallback(
+    (value: string | number) => setStoreId(String(value)),
+    [setStoreId],
+  );
 
   /* ─── errors ─── */
 
@@ -268,8 +262,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
-        storeSelectorLabel={selectedStoreLabel}
-        storeItems={storeItems}
+        storeId={storeId}
+        storeOptions={storeOptions}
+        onStoreChange={handleStoreChange}
         showStoreSelector={ebayAccounts.length > 0}
         cardsProps={{
           periods,
