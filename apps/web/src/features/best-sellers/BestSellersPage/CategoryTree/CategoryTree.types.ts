@@ -21,13 +21,17 @@ export interface BestSellersCategoryTreeRow {
   /** Whether it has a chevron at all (children exist, or were never fetched). */
   hasChildren: boolean;
   isExpanded: boolean;
+  /** Its sub-categories are on their way (a chevron fetch, or the list it opened). */
+  isLoading: boolean;
 }
 
 export interface CategoryTreeProps {
   rows: BestSellersCategoryTreeRow[];
   searchValue: string;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  /** The label: opens that category's list (its products count against the allowance). */
   onSelect: (path: string) => void;
+  /** The chevron: shows or hides the sub-categories only — no products are loaded. */
   onToggleExpand: (path: string) => void;
   /** True once the root departments have been fetched at least once. */
   hasDepartments: boolean;

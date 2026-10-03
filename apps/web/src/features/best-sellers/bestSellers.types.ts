@@ -66,7 +66,14 @@ export interface BestSellersCategoryTreeState {
   bucket: BestSellersCategoryTreeListTypeBucket;
   /** Whether a node's children are shown (open by default along the active chain). */
   isExpanded: (path: string) => boolean;
-  toggleExpanded: (path: string) => void;
+  /**
+   * The chevron: collapses an open node, opens one whose children are known,
+   * and otherwise fetches the node's sub-categories (no products, so nothing
+   * is taken from the allowance) and opens it when they arrive.
+   */
+  expandBranch: (path: string) => void;
+  /** True while a chevron is fetching that node's sub-categories. */
+  isBranchLoading: (path: string) => boolean;
 }
 
 /** What the page shows instead of (or around) the product grid. */

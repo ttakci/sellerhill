@@ -350,6 +350,62 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 0,
     max: 10000,
   }),
+  def({
+    // The platform's own crawl of the whole category tree (every list type),
+    // so any branch a seller expands answers from cache. Runs on the scraper's
+    // lowest lane — behind the price/stock refresh — and never without a proxy.
+    key: PlatformSettingKey.BEST_SELLERS_CRAWL_ENABLED,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'BEST_SELLERS_CRAWL_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    // Categories change over months, not hours. Must stay below the tree
+    // cache lifetime (14 days, TREE_CACHE_TTL_SECONDS) so a node is re-read
+    // before it expires.
+    key: PlatformSettingKey.BEST_SELLERS_CRAWL_INTERVAL_DAYS,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_CRAWL_INTERVAL_DAYS',
+    defaultValue: '7',
+    min: 1,
+    max: 13,
+  }),
+  def({
+    // One request per page. ~250k nodes over the five lists (sampled
+    // 2026-10-03) at 30/min is under six days — about a tenth of a
+    // five-proxy pool at 1 request/s per IP.
+    key: PlatformSettingKey.BEST_SELLERS_CRAWL_PAGES_PER_MINUTE,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_CRAWL_PAGES_PER_MINUTE',
+    defaultValue: '30',
+    min: 0,
+    max: 300,
+  }),
+  def({
+    // 2 = the root, the departments and their children (~900 Best Sellers
+    // lists), so the pages sellers pass through first open instantly.
+    key: PlatformSettingKey.BEST_SELLERS_PREWARM_DEPTH,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_PREWARM_DEPTH',
+    defaultValue: '2',
+    min: 0,
+    max: 4,
+  }),
+  def({
+    // About four requests a page; ~900 pages at 3/min fit one 6-hour list
+    // cache period with room to spare (~3% of a five-proxy pool).
+    key: PlatformSettingKey.BEST_SELLERS_PREWARM_PAGES_PER_MINUTE,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BEST_SELLERS_PREWARM_PAGES_PER_MINUTE',
+    defaultValue: '3',
+    min: 0,
+    max: 60,
+  }),
 
   // --- Amazon order sync + tracking ---
   def({

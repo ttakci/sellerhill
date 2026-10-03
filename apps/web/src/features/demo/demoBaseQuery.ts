@@ -481,9 +481,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
       ? (params.listType as BestSellersListType)
       : BestSellersListType.BEST_SELLERS;
     if (path === '/best-sellers/categories') {
-      // The department list alone: the root page's tree, without its products.
-      const root = buildDemoBestSellers(listType, '', 1);
-      return ok({ outcome: root.outcome, categories: root.list?.categories ?? [] });
+      // One node's tree (the department list at the root), without its products.
+      const node = buildDemoBestSellers(listType, params.category ?? '', 1);
+      return ok({ outcome: node.outcome, categories: node.list?.categories ?? [] });
     }
     const page = Math.max(1, Number(params.page) || 1);
     return ok(buildDemoBestSellers(listType, params.category ?? '', page));

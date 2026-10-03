@@ -44,6 +44,69 @@ function upsertNode(
   nodes[path] = { name, parent, children: nodes[path]?.children };
 }
 
+const hasLevels = (entries: readonly BestSellersCategoryDto[]): boolean =>
+  entries.length > 0 && entries.every((entry) => typeof entry.level === 'number');
+
+/**
+ * The structured reading, used when every entry carries its nesting `level`.
+ *
+ * Document order is NOT enough on a leaf: Amazon draws a category with no
+ * children among its SIBLINGS (the parent's children, the leaf in bold), so
+ * rows before the selected one are siblings, not ancestors. Each row's parent
+ * is the nearest earlier row one level up. Two groups are complete in an
+ * answer and may replace what the cache knew: the selected node's children
+ * (none on a leaf — which is how a leaf loses its chevron), and on a leaf its
+ * parent's children. A chain above shows only the next link, so it never
+ * overwrites a parent's child list.
+ */
+function mergeLeveledAnswer(
+  bucket: BestSellersCategoryTreeListTypeBucket,
+  category: string,
+  entries: readonly BestSellersCategoryDto[],
+): BestSellersCategoryTreeListTypeBucket {
+  const nodes = { ...bucket.nodes };
+  const keyOf = (entry: BestSellersCategoryDto): string | null =>
+    entry.isRoot ? null : entry.isSelected && category !== BEST_SELLERS_ROOT_CATEGORY ? category : (entry.path ?? null);
+
+  const rows: Array<{ key: string; name: string; parent: string | null }> = [];
+  const stack: Array<{ level: number; key: string | null }> = [];
+  entries.forEach((entry) => {
+    const level = entry.level ?? 0;
+    while (stack.length > 0 && stack[stack.length - 1].level >= level) {
+      stack.pop();
+    }
+    const parent = stack.length > 0 ? stack[stack.length - 1].key : null;
+    const key = keyOf(entry);
+    stack.push({ level, key });
+    if (key && !rows.some((row) => row.key === key)) {
+      rows.push({ key, name: entry.name, parent });
+    }
+  });
+
+  if (category === BEST_SELLERS_ROOT_CATEGORY) {
+    const departments = rows.filter((row) => row.parent === null);
+    if (departments.length === 0) {
+      return bucket;
+    }
+    departments.forEach((row) => upsertNode(nodes, row.key, row.name, null));
+    return { rootChildren: departments.map((row) => row.key), nodes };
+  }
+
+  const selected = rows.find((row) => row.key === category);
+  if (!selected) {
+    return bucket;
+  }
+  rows.forEach((row) => upsertNode(nodes, row.key, row.name, row.parent));
+  const childrenOf = (parent: string): string[] => rows.filter((row) => row.parent === parent).map((row) => row.key);
+
+  nodes[category] = { ...nodes[category], children: childrenOf(category) };
+  const siblings = selected.parent ? childrenOf(selected.parent) : [];
+  if (selected.parent && siblings.length > 1) {
+    nodes[selected.parent] = { ...nodes[selected.parent], children: siblings };
+  }
+  return { rootChildren: bucket.rootChildren, nodes };
+}
+
 /**
  * Folds one answer into the cache and returns the new cache. Returns the SAME
  * object when the answer carries nothing usable (no tree, or no selected
@@ -54,6 +117,11 @@ export function mergeCategoryAnswer(
   category: string,
   entries: readonly BestSellersCategoryDto[],
 ): BestSellersCategoryTreeListTypeBucket {
+  if (hasLevels(entries)) {
+    return mergeLeveledAnswer(bucket, category, entries);
+  }
+
+  // Flat reading — answers cached before the scraper sent `level`.
   const nodes = { ...bucket.nodes };
 
   if (category === BEST_SELLERS_ROOT_CATEGORY) {

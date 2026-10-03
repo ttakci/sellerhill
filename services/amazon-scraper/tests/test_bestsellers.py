@@ -45,7 +45,7 @@ def test_found_list_is_camel_cased_and_complete(monkeypatch):
     assert set(lst["pagination"]) == {"page", "itemsPerPage", "totalPages", "totalCount"}
     assert lst["pagination"] == {"page": 1, "itemsPerPage": 50, "totalPages": 2, "totalCount": 100}
     cats = lst["categories"]
-    assert cats and set(cats[0]) == {"name", "path", "link", "isSelected", "isRoot"}
+    assert cats and set(cats[0]) == {"name", "path", "link", "isSelected", "isRoot", "level"}
     assert cats[0]["name"] == "Any Department" and cats[0]["isRoot"] is True
     assert next(c for c in cats if c["isSelected"])["name"] == "Electronics"
     assert all(set(r) == {"name", "link"} for r in lst["relatedLists"])
@@ -133,3 +133,70 @@ def test_fetch_result_never_carries_the_proxy(monkeypatch):
         r = bestsellers.fetch_bestsellers("US", "best_sellers", "electronics", 1)
     dumped = json.dumps(r)
     assert "sensitive_user" not in dumped and "sensitive_pass" not in dumped
+
+
+SH_FX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+
+
+def sh_raw(name):
+    with gzip.open(os.path.join(SH_FX, f"{name}.html.gz"), "rt", encoding="utf-8") as f:
+        return f.read()
+
+
+def _tree_of(monkeypatch, page_html, category):
+    monkeypatch.setattr(fetch, "page", lambda *a, **k: page_html)
+    monkeypatch.setattr(fetch, "ajax", lambda *a, **k: "")
+    with egress.bind("http://u:p@127.0.0.1:1"):
+        r = bestsellers.fetch_bestsellers("US", "best_sellers", category, 1)
+    assert r["outcome"] == "found"
+    return [(c["level"], c["isSelected"], c["path"], c["name"]) for c in r["list"]["categories"]]
+
+
+def test_tree_rows_carry_their_nesting_level_on_a_middle_node(monkeypatch):
+    # Headphones (2026-10-03 capture): its chain above, itself, its children one level down.
+    tree = _tree_of(monkeypatch, sh_raw("bestsellers_mid_headphones"), "electronics/172541")
+    assert tree[:3] == [(0, False, None, "Any Department"), (1, False, "electronics", "Electronics"),
+                        (2, True, None, "Headphones")]
+    assert {(lvl, sel) for lvl, sel, _, _ in tree[3:]} == {(3, False)}
+    assert len(tree) == 7
+
+
+def test_a_leaf_is_shown_among_its_siblings_at_the_same_level(monkeypatch):
+    # Open-Ear Headphones has no children: Amazon lists the PARENT's children
+    # with the leaf in bold. Earbud / On-Ear come BEFORE the leaf but are its
+    # siblings, not ancestors — only the level says so.
+    tree = _tree_of(monkeypatch, sh_raw("bestsellers_leaf_open_ear"), "electronics/99530371011")
+    assert tree == [
+        (0, False, None, "Any Department"),
+        (1, False, "electronics", "Electronics"),
+        (2, False, "electronics/172541", "Headphones"),
+        (3, False, "electronics/12097478011", "Earbud Headphones"),
+        (3, False, "electronics/12097480011", "On-Ear Headphones"),
+        (3, True, None, "Open-Ear Headphones"),
+        (3, False, "electronics/12097479011", "Over-Ear Headphones"),
+    ]
+
+
+def test_a_page_without_a_tree_has_no_levels():
+    assert bestsellers.tree_levels("<html><body>nothing</body></html>") is None
+
+
+def test_tree_only_reads_one_page_and_sends_no_items(monkeypatch):
+    calls = {"page": 0, "ajax": 0}
+
+    def page(*a, **k):
+        calls["page"] += 1
+        return sh_raw("bestsellers_mid_headphones")
+
+    def ajax(*a, **k):
+        calls["ajax"] += 1
+        return ""
+
+    monkeypatch.setattr(fetch, "page", page)
+    monkeypatch.setattr(fetch, "ajax", ajax)
+    with egress.bind("http://u:p@127.0.0.1:1"):
+        r = bestsellers.fetch_bestsellers("US", "best_sellers", "electronics/172541", 1, tree_only=True)
+    assert r["outcome"] == "found"
+    assert calls == {"page": 1, "ajax": 0}
+    assert r["list"]["items"] == []
+    assert [c["level"] for c in r["list"]["categories"]] == [0, 1, 2, 3, 3, 3, 3]
