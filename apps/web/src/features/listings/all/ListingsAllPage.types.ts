@@ -7,8 +7,6 @@ export interface ListingsAllPageProps {
   listings: ListingDto[];
   /** UI locale for card price-stat separators (currency comes from each listing's own `currency`). */
   locale: string;
-  /** The store a listing belongs to — `null` with a single connected store. */
-  storeLabelFor: (ebayAccountId?: string | null) => string | null;
   onSelectionChange: (ids: string[]) => void;
   columns: TableColumn<ListingDto>[];
   selectedRows: ListingDto[];

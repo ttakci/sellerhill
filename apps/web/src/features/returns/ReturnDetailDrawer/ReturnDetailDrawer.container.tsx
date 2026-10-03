@@ -10,6 +10,7 @@ import { ReturnDetailDrawerComponent } from './ReturnDetailDrawer.component';
 import type { ReturnDetailDrawerProps } from './ReturnDetailDrawer.types';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
@@ -29,6 +30,10 @@ export const ReturnDetailDrawer: React.FC<ReturnDetailDrawerProps> = ({ returnId
     refetchOnMountOrArgChange: true,
   });
   const [actOnReturn, { isLoading: isActing }] = useActOnReturnMutation();
+
+  // A return of another store (a shared `?r=` link) makes that store active,
+  // keeping the drawer open.
+  useFollowRecordStore(data && data.id === returnId ? data.ebayAccountId : null);
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const accounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData?.items]);

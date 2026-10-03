@@ -16,7 +16,6 @@ import { useListingsFilters } from './hooks/useListingsFilters';
 import { ListingsAllPageComponent } from './ListingsAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { useLocale } from '@/utils/useLocale';
 
 export const ListingsAllPage: React.FC = () => {
@@ -65,8 +64,6 @@ export const ListingsAllPage: React.FC = () => {
     numericFilters,
     fromDashboard,
   } = useListingsFilters();
-
-  const storeLabelFor = useStoreLabel();
 
   const {
     data,
@@ -400,7 +397,6 @@ export const ListingsAllPage: React.FC = () => {
       <ListingsAllPageComponent
         listings={listings}
         locale={localeCfg.locale}
-        storeLabelFor={storeLabelFor}
         onSelectionChange={setSelectedListingIds}
         columns={filteredColumns}
         selectedRows={selectedRows}

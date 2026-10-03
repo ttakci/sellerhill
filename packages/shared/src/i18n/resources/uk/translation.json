@@ -42,8 +42,6 @@
     "noBrand": "Бренд не вказано",
     "amazonLink": "AMAZON",
     "unknownProduct": "Невідомий товар",
-    "store": "Магазин",
-    "storeNamed": "Магазин: {{name}}",
     "languageCode": "uk-UA",
     "select": "Обрати"
   },

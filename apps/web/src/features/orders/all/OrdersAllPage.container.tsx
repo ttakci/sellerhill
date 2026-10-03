@@ -18,7 +18,6 @@ import { OrdersAllPageComponent } from './OrdersAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
@@ -132,7 +131,6 @@ export const OrdersAllPageContainer: React.FC = () => {
       ),
     [localeCfg, ebayAccountsData, ebayAccountId]
   );
-  const storeLabelFor = useStoreLabel();
 
   /* Net margin on the sale, shown under the profit figure. Only on an order
      whose profit is known — an estimate carries its badge instead. */
@@ -160,7 +158,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay, storeLabelFor);
+  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
 
   const handleDownload = useCallback(() => {
     const headers = [
@@ -236,7 +234,6 @@ export const OrdersAllPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         formatDay={fmtDay}
-        storeLabelFor={storeLabelFor}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}
         onBack={fromDashboard ? () => localeNavigate('/dashboard') : undefined}
         onDownload={handleDownload}

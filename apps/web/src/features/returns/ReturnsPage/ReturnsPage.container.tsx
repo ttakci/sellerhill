@@ -13,7 +13,6 @@ import { ReturnsPageComponent } from './ReturnsPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
-import { resolveRecordStoreLabel } from '@/features/ebay/utils/storeLabel';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 
 const TAB_IDS: readonly ReturnTab[] = Object.values(ReturnTab);
@@ -110,7 +109,6 @@ export const ReturnsPageContainer: React.FC = () => {
           translate: (key, options) => t(key, options ?? {}),
           locale,
           currencyFor: (ebayAccountId) => resolveStoreCurrency(accounts, ebayAccountId),
-          storeLabelFor: (ebayAccountId) => resolveRecordStoreLabel(accounts, ebayAccountId),
         })
       ),
     [data?.items, accounts, locale, t]

@@ -49,7 +49,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   formatCurrency,
   formatDate,
   formatDay,
-  storeLabelFor,
   onOrderClick,
   onBack,
   onDownload,
@@ -57,7 +56,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   const { t } = useTranslation(['orders', 'translation']);
 
   const renderGridCard = (order: OrderDto) => {
-    const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay, storeLabelFor(order.ebayAccountId));
+    const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay);
     return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} hoverEffect={false} />;
   };
 

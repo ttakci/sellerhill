@@ -42,8 +42,6 @@
     "noBrand": "无品牌信息",
     "amazonLink": "AMAZON",
     "unknownProduct": "未知商品",
-    "store": "店铺",
-    "storeNamed": "店铺：{{name}}",
     "languageCode": "zh-CN",
     "select": "选择"
   },

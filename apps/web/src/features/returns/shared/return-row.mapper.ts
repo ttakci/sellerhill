@@ -22,7 +22,7 @@ const DEADLINE_FORMAT: Intl.DateTimeFormatOptions = {
  * marketplace currency of its store) — never the UI language.
  */
 export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): ReturnRowView {
-  const { translate, locale, currencyFor, storeLabelFor } = ctx;
+  const { translate, locale, currencyFor } = ctx;
   const currency = item.currency ?? currencyFor(item.ebayAccountId);
 
   // A closed return has nothing due, whatever the last `sellerResponseDue` said;
@@ -77,6 +77,5 @@ export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): Ret
     refundAmount: hasRefund ? formatCurrency(refundValue, locale, currency) : null,
     refundLabel: hasRefund ? translate(refunded ? 'returns.refund.refunded' : 'returns.refund.estimated') : null,
     openedAt: item.createdOnEbayAt ? formatDate(item.createdOnEbayAt, locale, OPENED_FORMAT) : null,
-    storeLabel: storeLabelFor ? storeLabelFor(item.ebayAccountId) : null,
   };
 }

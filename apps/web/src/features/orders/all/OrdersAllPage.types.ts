@@ -42,8 +42,6 @@ export interface OrdersAllPageProps {
   isInitialLoading?: boolean;
   /** Formats money in the order's OWN store currency (`ebayAccountId`), never a page-wide one. */
   formatCurrency: (value: number, ebayAccountId?: string | null) => string;
-  /** The store a row belongs to — `null` with a single connected store. */
-  storeLabelFor: (ebayAccountId?: string | null) => string | null;
   formatDate: (value: string) => string;
   /** Month + day only — for eBay's ship-by date on a card. */
   formatDay: (value: string) => string;

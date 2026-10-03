@@ -99,7 +99,6 @@ const Fact = ({ label, children }: { label: string; children: React.ReactNode })
 
 export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   order,
-  storeLabel,
   isLoading,
   isUpdating,
   formatCurrency,
@@ -222,11 +221,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </S.ProductTitle>
 
             <S.FactList>
-              {storeLabel ? (
-                <Fact label={t('translation:common.store')}>
-                  <Text variant="body-sm">{storeLabel}</Text>
-                </Fact>
-              ) : null}
               <Fact label={t('orders.table.buyer')}>
                 <Text variant="body-sm">{order.buyerName || '—'}</Text>
               </Fact>

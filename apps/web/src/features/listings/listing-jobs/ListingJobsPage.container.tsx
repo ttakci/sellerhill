@@ -20,7 +20,6 @@ import { resolveJobDateRange } from './utils/jobDateRange';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { useLocale } from '@/utils/useLocale';
 
 const jobPercent = (job: ListingJobDto): number =>
@@ -41,8 +40,6 @@ export const ListingJobsPageContainer: React.FC = () => {
   // The top bar's active store; a switch starts the list over on page 1.
   const { activeStoreId } = useActiveStore();
   const storeFilter = activeStoreId ?? '';
-  const storeLabelFor = useStoreLabel();
-  const jobStoreLabel = useCallback((job: ListingJobDto) => storeLabelFor(job.ebayAccountId), [storeLabelFor]);
 
   const [page, setPage] = useState(1);
   const [pageStore, setPageStore] = useState(storeFilter);
@@ -287,7 +284,6 @@ export const ListingJobsPageContainer: React.FC = () => {
         datePreset={datePreset}
         onDatePresetChange={handleDatePresetChange}
         datePresetOptions={datePresetOptions}
-        jobStoreLabel={jobStoreLabel}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         columns={columns}

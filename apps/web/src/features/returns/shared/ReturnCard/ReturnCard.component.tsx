@@ -62,16 +62,6 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
                 </Text>
               </S.IdRow>
             )}
-            {row.storeLabel && (
-              <S.IdRow>
-                <Text variant="caption" color="text.tertiary">
-                  {t('translation:common.store')}
-                </Text>
-                <Text variant="caption" color="text.secondary">
-                  {row.storeLabel}
-                </Text>
-              </S.IdRow>
-            )}
           </S.HeaderText>
         </S.HeaderBody>
       </S.Header>

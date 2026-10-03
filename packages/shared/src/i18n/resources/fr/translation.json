@@ -42,8 +42,6 @@
     "noBrand": "Aucune information de marque",
     "amazonLink": "AMAZON",
     "unknownProduct": "Produit inconnu",
-    "store": "Boutique",
-    "storeNamed": "Boutique : {{name}}",
     "languageCode": "fr-FR",
     "select": "Sélectionner"
   },

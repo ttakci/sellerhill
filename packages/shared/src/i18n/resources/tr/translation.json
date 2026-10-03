@@ -22,8 +22,6 @@
     "success": "Başarılı",
     "failed": "Hata",
     "unknownProduct": "Bilinmeyen Ürün",
-    "store": "Mağaza",
-    "storeNamed": "Mağaza: {{name}}",
     "views": {
       "label": "Görünüm",
       "grid": "Grid",

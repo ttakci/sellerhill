@@ -22,8 +22,6 @@ export interface JobItemFilterOption {
 export interface ListingJobDetailsPageComponentProps {
   jobId: string;
   job: ListingJobDto | undefined;
-  /** The store the job ran against — null with a single connected store. */
-  storeLabel: string | null;
   items: ListingJobItemDto[];
   isLoading: boolean;
   viewMode: ViewMode;

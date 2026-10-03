@@ -16,8 +16,6 @@ export interface ListingJobsPageComponentProps {
   datePreset: ListingJobDatePreset;
   onDatePresetChange: (value: string | number) => void;
   datePresetOptions: Array<{ value: ListingJobDatePreset; label: string }>;
-  /** The store a job ran against — null with a single connected store. */
-  jobStoreLabel: (job: ListingJobDto) => string | null;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   columns: TableColumn<ListingJobDto>[];

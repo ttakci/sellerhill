@@ -42,8 +42,6 @@
     "noBrand": "لا توجد معلومات عن العلامة التجارية",
     "amazonLink": "AMAZON",
     "unknownProduct": "منتج غير معروف",
-    "store": "المتجر",
-    "storeNamed": "المتجر: {{name}}",
     "languageCode": "ar-MA",
     "select": "اختيار"
   },

@@ -26,8 +26,7 @@ export function useOrdersColumns(
   formatCurrency: (value: number, ebayAccountId?: string | null) => string,
   formatDate: (value: string) => string,
   formatMargin: (order: OrderDto) => string | null,
-  formatDay: (value: string) => string,
-  storeLabelFor: (ebayAccountId?: string | null) => string | null
+  formatDay: (value: string) => string
 ) {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -45,12 +44,6 @@ export function useOrdersColumns(
             <Text variant="caption" color="text.secondary" numeric>
               {formatDate(order.createdAt)}
             </Text>
-            {/* Which store sold it — only rendered with more than one store. */}
-            {storeLabelFor(order.ebayAccountId) ? (
-              <Text variant="caption" color="text.secondary" truncate>
-                {t('translation:common.storeNamed', { name: storeLabelFor(order.ebayAccountId) })}
-              </Text>
-            ) : null}
             {/* The seller's own note, one line; the full text on hover. */}
             {order.sellerNote ? (
               <Tooltip content={order.sellerNote} position="top" variant="dark">
@@ -214,6 +207,6 @@ export function useOrdersColumns(
         },
       },
     ],
-    [t, formatCurrency, formatDate, formatMargin, formatDay, storeLabelFor]
+    [t, formatCurrency, formatDate, formatMargin, formatDay]
   );
 }
