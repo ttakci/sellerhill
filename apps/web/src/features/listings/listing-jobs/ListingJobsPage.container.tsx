@@ -19,7 +19,7 @@ import * as S from './ListingJobsPage.style';
 import { resolveJobDateRange } from './utils/jobDateRange';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-import { useStoreFilterOptions, useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useLocale } from '@/utils/useLocale';
 
 const jobPercent = (job: ListingJobDto): number =>
@@ -36,15 +36,17 @@ export const ListingJobsPageContainer: React.FC = () => {
    * initial state from those params, the link landed on every job ever run,
    * not the ones the item counted.
    */
-  const [searchParams, setSearchParams] = useSearchParams();
-  /* The store filter IS URL state (`?store=`), like the orders and listings
-     lists — a link from another page can land on one store's jobs. */
-  const storeFilter = searchParams.get('store') ?? '';
-  const { options: storeOptions, hasMultipleStores } = useStoreFilterOptions(t('listings.filters.allStores'));
-  const storeLabelFor = useStoreLabel();
-  const jobStoreLabel = useCallback((job: ListingJobDto) => storeLabelFor(job.ebayAccountId), [storeLabelFor]);
+  const [searchParams] = useSearchParams();
+  // The top bar's active store; a switch starts the list over on page 1.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
 
   const [page, setPage] = useState(1);
+  const [pageStore, setPageStore] = useState(storeFilter);
+  if (pageStore !== storeFilter) {
+    setPageStore(storeFilter);
+    setPage(1);
+  }
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
@@ -75,7 +77,7 @@ export const ListingJobsPageContainer: React.FC = () => {
       hasFailures: hasFailures || undefined,
       ebayAccountId: storeFilter || undefined,
     },
-    { pollingInterval: 5000, refetchOnMountOrArgChange: true }
+    { pollingInterval: 5000, refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
 
   /* Memoised: `?? []` would hand a fresh array to every consumer on each
@@ -129,7 +131,7 @@ export const ListingJobsPageContainer: React.FC = () => {
   );
 
   const hasActiveFilters = Boolean(
-    search.trim() || statusFilter || datePreset !== ListingJobDatePreset.ALL || hasFailures || storeFilter
+    search.trim() || statusFilter || datePreset !== ListingJobDatePreset.ALL || hasFailures
   );
 
   const columns: TableColumn<ListingJobDto>[] = useMemo(
@@ -212,32 +214,13 @@ export const ListingJobsPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handleStoreFilterChange = useCallback(
-    (value: string | number) => {
-      const next = new URLSearchParams(searchParams);
-      if (value) {
-        next.set('store', String(value));
-      } else {
-        next.delete('store');
-      }
-      setSearchParams(next, { replace: true });
-      setPage(1);
-    },
-    [searchParams, setSearchParams]
-  );
-
   const handleClearFilters = useCallback(() => {
-    if (searchParams.has('store')) {
-      const next = new URLSearchParams(searchParams);
-      next.delete('store');
-      setSearchParams(next, { replace: true });
-    }
     setSearch('');
     setStatusFilter('');
     setDatePreset(ListingJobDatePreset.ALL);
     setHasFailures(false);
     setPage(1);
-  }, [searchParams, setSearchParams]);
+  }, []);
 
   const handleJobClick = useCallback(
     (jobId: string) => {
@@ -301,11 +284,6 @@ export const ListingJobsPageContainer: React.FC = () => {
         datePreset={datePreset}
         onDatePresetChange={handleDatePresetChange}
         datePresetOptions={datePresetOptions}
-        storeFilter={storeFilter}
-        onStoreFilterChange={handleStoreFilterChange}
-        storeOptions={storeOptions}
-        showStoreFilter={hasMultipleStores}
-        jobStoreLabel={jobStoreLabel}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         columns={columns}

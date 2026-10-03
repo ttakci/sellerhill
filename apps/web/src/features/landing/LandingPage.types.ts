@@ -43,12 +43,27 @@ export interface LandingPricingPlan {
   isFeatured: boolean;
 }
 
+/**
+ * The free-trial strip above the pricing grid, pre-formatted. Every figure
+ * comes from the catalog's `trial` (length = the `billing.trialDays` setting,
+ * limits = the trial plan's rows) and falls back to the current trial when the
+ * catalog cannot be read.
+ */
+export interface LandingTrialOffer {
+  /** Headline, e.g. "Try free for 30 days". */
+  title: string;
+  /** What the trial includes, one short fact per chip. */
+  facts: string[];
+}
+
 export interface LandingPageProps {
   currentLocale: string;
   scrolled: boolean;
   mobileMenuOpen: boolean;
   /** Catalog-driven pricing plans (empty when the catalog call failed → use fallback). */
   pricingPlans: LandingPricingPlan[];
+  /** The free-trial strip over the pricing grid. */
+  trialOffer: LandingTrialOffer;
   /**
    * Pre-formatted "plans from $X" amount for the hero price badge — the catalog's
    * cheapest paid monthly tier, or the literal `$19.99` fallback when the catalog

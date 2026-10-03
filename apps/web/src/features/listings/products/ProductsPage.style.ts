@@ -14,15 +14,6 @@ export const FilterBar = styled.div`
   min-width: 0;
 `;
 
-export const SelectWrapper = styled.div`
-  width: 12rem;
-  flex-shrink: 0;
-
-  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
-    width: 100%;
-  }
-`;
-
 export const SearchWrapper = styled.div`
   min-width: 0;
   width: 20rem;

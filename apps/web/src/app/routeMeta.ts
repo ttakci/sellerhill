@@ -12,12 +12,14 @@ export type { NavSection, AppRouteMeta } from './routeMeta.types';
 export const APP_ROUTE_META: AppRouteMeta[] = [
   {
     path: '/dashboard',
+    storeScoped: true,
     match: 'exact',
     section: 'overview',
     breadcrumbs: [],
   },
   {
     path: '/actions',
+    storeScoped: true,
     match: 'exact',
     section: 'overview',
     breadcrumbs: [{ labelKey: 'actionCenter:actionCenter.menu', path: '/actions' }],
@@ -30,6 +32,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings',
+    storeScoped: true,
     match: 'exact',
     section: 'inventory',
     breadcrumbs: [
@@ -39,6 +42,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings/all',
+    storeScoped: true,
     match: 'exact',
     section: 'inventory',
     breadcrumbs: [
@@ -48,6 +52,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings/jobs',
+    storeScoped: true,
     match: 'prefix',
     section: 'inventory',
     breadcrumbs: [
@@ -57,6 +62,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings/revisions',
+    storeScoped: true,
     match: 'exact',
     section: 'inventory',
     breadcrumbs: [
@@ -66,6 +72,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings/products',
+    storeScoped: true,
     match: 'exact',
     section: 'inventory',
     breadcrumbs: [
@@ -75,6 +82,7 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/listings/',
+    storeScoped: true,
     match: 'prefix',
     section: 'inventory',
     breadcrumbs: [
@@ -84,12 +92,14 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/orders',
+    storeScoped: true,
     match: 'exact',
     section: 'sales',
     breadcrumbs: [{ labelKey: 'translation:menu.orders', path: '/orders' }],
   },
   {
     path: '/messages',
+    storeScoped: true,
     match: 'exact',
     section: 'sales',
     fitsViewport: true,
@@ -97,12 +107,14 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
   },
   {
     path: '/returns',
+    storeScoped: true,
     match: 'exact',
     section: 'sales',
     breadcrumbs: [{ labelKey: 'translation:menu.returns', path: '/returns' }],
   },
   {
     path: '/orders/',
+    storeScoped: true,
     match: 'prefix',
     section: 'sales',
     breadcrumbs: [

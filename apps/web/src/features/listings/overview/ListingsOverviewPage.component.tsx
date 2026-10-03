@@ -1,4 +1,4 @@
-import { PageHeader, QuickActionCard, Select, SettingsActionRow, SettingsCard } from '@repo/ui';
+import { PageHeader, QuickActionCard, SettingsActionRow, SettingsCard } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,10 +17,6 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
   onImportExisting,
   onViewDrafts,
   onListingClick,
-  storeFilter,
-  onStoreFilterChange,
-  storeOptions,
-  showStoreFilter,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -34,20 +30,6 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
       <PageHeader
         title={t('listings.overview.title')}
         subtitle={t('listings.overview.subtitle', { count: totalCount })}
-        actions={
-          showStoreFilter ? (
-            <S.StoreSelect>
-              <Select
-                value={storeFilter}
-                onChange={onStoreFilterChange}
-                options={storeOptions}
-                placeholder={t('listings.filters.allStores')}
-                size="small"
-                fullWidth
-              />
-            </S.StoreSelect>
-          ) : undefined
-        }
       />
 
       <S.TwoColumnLayout>

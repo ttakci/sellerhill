@@ -42,8 +42,6 @@
     "noBrand": "Brend məlumatı yoxdur",
     "amazonLink": "AMAZON",
     "unknownProduct": "Naməlum məhsul",
-    "store": "Mağaza",
-    "storeNamed": "Mağaza: {{name}}",
     "languageCode": "az-AZ",
     "select": "Seçin"
   },
@@ -172,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Dil seçin",
+    "selectStore": "Mağaza seçin",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Bildirişlər",
     "openMenu": "Menyunu aç",
     "collapseSidebar": "Yan paneli yığ",
@@ -839,7 +839,7 @@
       "billingNote": "İstənilən vaxt ləğv edin. Qiymətlərə tətbiq olunan yerlərdə yerli vergilər daxil deyil.",
       "perMonth": "/ay",
       "mostPopular": "Ən populyar",
-      "planCta": "Pulsuz başla",
+      "planCta": "Pulsuz sına",
       "showAllPlans": "Bütün {{count}} plana bax",
       "showFewerPlans": "Daha az plan göstər",
       "notIncluded": "Daxil deyil",
@@ -890,6 +890,17 @@
           "conversions": "Ayda 500 izləmə çevirməsi",
           "bestSellers": "Ayda 25,000 Ən Çox Satılanlar məhsulu"
         }
+      },
+      "trialPlanNote": "Pulsuz sınaq sınaq paketi ilə başlayır. İstədiyiniz an bu paketə keçə bilərsiniz.",
+      "trial": {
+        "title": "{{days}} gün pulsuz sınayın",
+        "listings": "{{limit}} aktiv elan",
+        "conversions": "{{limit}} izləmə çevirməsi",
+        "bestSellers": "{{limit}} Ən Çox Satılanlar məhsulu",
+        "orders": "{{limit}} avtomatik sifariş",
+        "unlimitedOrders": "Limitsiz avtomatik sifariş",
+        "noCard": "Kredit kartı tələb olunmur",
+        "cta": "Pulsuz sınağa başla"
       }
     },
     "faq": {

@@ -42,11 +42,9 @@ export interface DashboardFormatters {
 export interface DashboardUrlState {
   tab: DashboardTab;
   period: DashboardPeriodKey;
-  storeId: string;
   granularity: DashboardChartGranularity;
   setTab: (tab: DashboardTab) => void;
   setPeriod: (period: DashboardPeriodKey) => void;
-  setStoreId: (storeId: string) => void;
   setGranularity: (granularity: DashboardChartGranularity) => void;
 }
 

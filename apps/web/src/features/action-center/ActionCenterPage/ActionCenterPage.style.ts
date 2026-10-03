@@ -240,15 +240,6 @@ export const ItemAction = styled.span`
   transition: transform ${tkn('transitions.fast')};
 `;
 
-/** The mandatory store picker in the page header — same width as the inbox one. */
-export const StoreSelect = styled.div`
-  width: 13rem;
-  flex-shrink: 0;
-
-  @media (max-width: ${tkn('breakpoints.sm')}) {
-    width: 100%;
-  }
-`;
 
 /** The stores a connection item is about, as wrapping tags under its description. */
 export const StoreList = styled.ul`

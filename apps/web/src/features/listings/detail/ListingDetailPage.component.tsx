@@ -110,7 +110,6 @@ const Kpi = ({
 
 export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   listing,
-  storeLabel,
   isLoading,
   isSaving,
   isSavingOverrides,
@@ -327,16 +326,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                   </Text>
                 </S.IdItemLabel>
                 <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" plain />
-              </S.IdItem>
-            ) : null}
-            {storeLabel ? (
-              <S.IdItem>
-                <S.IdItemLabel>
-                  <Text variant="body-sm" color="text.secondary">
-                    {t('translation:common.store')}
-                  </Text>
-                </S.IdItemLabel>
-                <Text variant="body-sm">{storeLabel}</Text>
               </S.IdItem>
             ) : null}
             <S.IdItem>

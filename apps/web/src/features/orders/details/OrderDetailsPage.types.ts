@@ -4,8 +4,6 @@ import type { OrderTimelineRow } from '../shared/order-timeline.types';
 
 export interface OrderDetailsPageProps {
   order: OrderDto | undefined;
-  /** The store that sold it — null with a single connected store. */
-  storeLabel: string | null;
   isLoading: boolean;
   isUpdating: boolean;
   formatCurrency: (value: number) => string;

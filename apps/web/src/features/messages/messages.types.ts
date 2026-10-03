@@ -22,7 +22,7 @@ export interface MessagesActionsInput {
 
 /** The Messages page's URL-backed state (`?store=&type=&folder=&c=&page=`). */
 export interface MessagesUrlState {
-  /** `?store=` — the selected eBay account id; null means "resolve a default". */
+  /** The top bar's active store (`useActiveStore`); null while the stores load. */
   store: string | null;
   /** `?type=` — FROM_MEMBERS or FROM_EBAY; every Message API read needs one. */
   type: EbayConversationType;
@@ -39,7 +39,6 @@ export type MessagesUrlParam = 'store' | 'type' | 'folder' | 'c' | 'page';
 
 export interface UseMessagesUrlStateResult {
   state: MessagesUrlState;
-  setStore: (value: string | null) => void;
   setType: (value: EbayConversationType) => void;
   setFolder: (value: MessagesFolder) => void;
   /** Also sets type + folder in one write (the folder rail picks both at once). */

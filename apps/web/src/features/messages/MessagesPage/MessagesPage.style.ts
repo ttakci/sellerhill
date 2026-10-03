@@ -70,12 +70,6 @@ export const CompactFilters = styled.div`
   }
 `;
 
-/** Sized slot for the store Select — same 11.5rem as the list pages' filter selects. */
-export const StoreSelect = styled.div`
-  width: 11.5rem;
-  flex-shrink: 0;
-`;
-
 /**
  * The whole inbox — one Card. `grid-template-rows: minmax(0, 1fr)` (not the
  * implicit default) is load-bearing: it's what lets a grid item declare its

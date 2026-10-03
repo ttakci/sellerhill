@@ -34,24 +34,3 @@ export const Tabs = styled(TabNav)`
   flex: 1 1 auto;
   min-width: 0;
 `;
-
-/**
- * Fixed-width slot for the store Select (same 11.5rem as the list pages'
- * filter selects): the atom is `width: 100%`, so without a sized flex parent
- * it claimed the whole row and pushed itself below the tabs.
- */
-export const ToolbarRight = styled.div`
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  width: 11.5rem;
-  margin-left: auto;
-  padding-bottom: ${tkn('spacing.xs')};
-  align-self: center;
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    order: -1;
-    width: 100%;
-    margin-left: 0;
-  }
-`;

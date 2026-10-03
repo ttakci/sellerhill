@@ -18,7 +18,6 @@ import { OrdersAllPageComponent } from './OrdersAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
@@ -39,7 +38,6 @@ export const OrdersAllPageContainer: React.FC = () => {
     searchInput,
     handleSearchChange,
     ebayAccountId,
-    handleEbayAccountChange,
     tab,
     handleTabChange,
     hasUrlSelection,
@@ -60,19 +58,9 @@ export const OrdersAllPageContainer: React.FC = () => {
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
 
-  const storeOptions = useMemo(
-    () => [
-      { value: '', label: t('orders.filters.allStores') },
-      ...(ebayAccountsData?.items ?? []).map((acc) => ({
-        value: acc.id,
-        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
-      })),
-    ],
-    [ebayAccountsData?.items, t]
-  );
-
   const { data, isLoading, isFetching } = useGetOrdersQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
+    skip: !ebayAccountId,
   });
   const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const totalCount = data?.total ?? 0;
@@ -85,7 +73,7 @@ export const OrdersAllPageContainer: React.FC = () => {
       ebayAccountId: ebayAccountId || undefined,
       isTracked: serverQuery.isTracked,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !ebayAccountId }
   );
 
   const countFor = useCallback(
@@ -143,7 +131,6 @@ export const OrdersAllPageContainer: React.FC = () => {
       ),
     [localeCfg, ebayAccountsData, ebayAccountId]
   );
-  const storeLabelFor = useStoreLabel();
 
   /* Net margin on the sale, shown under the profit figure. Only on an order
      whose profit is known — an estimate carries its badge instead. */
@@ -171,7 +158,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay, storeLabelFor);
+  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
 
   const handleDownload = useCallback(() => {
     const headers = [
@@ -234,9 +221,6 @@ export const OrdersAllPageContainer: React.FC = () => {
         stage={stage}
         onStageChange={handleStageChange}
         stageOptions={stageOptions}
-        ebayAccountId={ebayAccountId}
-        onEbayAccountChange={handleEbayAccountChange}
-        storeOptions={storeOptions}
         trackingState={trackingState}
         onTrackingStateChange={handleTrackingStateChange}
         trackingStateOptions={trackingOptions}
@@ -250,7 +234,6 @@ export const OrdersAllPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         formatDay={fmtDay}
-        storeLabelFor={storeLabelFor}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}
         onBack={fromDashboard ? () => localeNavigate('/dashboard') : undefined}
         onDownload={handleDownload}

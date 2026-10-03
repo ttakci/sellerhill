@@ -42,8 +42,6 @@
     "noBrand": "Nessuna informazione sul marchio",
     "amazonLink": "AMAZON",
     "unknownProduct": "Prodotto sconosciuto",
-    "store": "Negozio",
-    "storeNamed": "Negozio: {{name}}",
     "languageCode": "it-IT",
     "select": "Seleziona"
   },
@@ -172,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Seleziona la lingua",
+    "selectStore": "Scegli negozio",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notifiche",
     "openMenu": "Apri il menu",
     "collapseSidebar": "Comprimi la barra laterale",
@@ -839,7 +839,7 @@
       "billingNote": "Annulli quando vuoi. I prezzi non includono le imposte locali, ove applicabili.",
       "perMonth": "/mese",
       "mostPopular": "Il più scelto",
-      "planCta": "Inizia gratis",
+      "planCta": "Prova gratis",
       "showAllPlans": "Vedi tutti i {{count}} piani",
       "showFewerPlans": "Mostra meno piani",
       "notIncluded": "Non incluso",
@@ -890,6 +890,17 @@
           "conversions": "500 conversioni di tracciamento / mese",
           "bestSellers": "25,000 prodotti Più venduti / mese"
         }
+      },
+      "trialPlanNote": "Ogni prova gratuita parte dal piano di prova. Passa a questo piano quando vuoi.",
+      "trial": {
+        "title": "Provalo gratis per {{days}} giorni",
+        "listings": "{{limit}} inserzioni attive",
+        "conversions": "{{limit}} conversioni di tracciamento",
+        "bestSellers": "{{limit}} prodotti Più venduti",
+        "orders": "{{limit}} ordini automatici",
+        "unlimitedOrders": "Ordini automatici illimitati",
+        "noCard": "Nessuna carta di credito richiesta",
+        "cta": "Inizia la prova gratuita"
       }
     },
     "faq": {

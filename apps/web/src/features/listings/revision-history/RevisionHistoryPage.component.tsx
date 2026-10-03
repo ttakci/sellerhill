@@ -1,4 +1,4 @@
-import { DataTable, EmptyState, Icon, PageHeader, SearchField, Select, Text, Tooltip, type TableColumn } from '@repo/ui';
+import { DataTable, EmptyState, Icon, PageHeader, SearchField, Text, Tooltip, type TableColumn } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -69,9 +69,6 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
   onViewModeChange,
   search,
   onSearchChange,
-  storeFilter,
-  onStoreFilterChange,
-  storeOptions,
   hasActiveFilters,
   onClearFilters,
   onRowClick,
@@ -280,16 +277,6 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
                   fullWidth
                 />
               </S.SearchWrapper>
-              <S.SelectWrapper>
-                <Select
-                  value={storeFilter}
-                  onChange={onStoreFilterChange}
-                  options={storeOptions}
-                  placeholder={t('listings.filters.allStores')}
-                  size="small"
-                  fullWidth
-                />
-              </S.SelectWrapper>
               <S.FilterActions>
                 <S.ResultCount variant="caption" weight="medium" color="text.secondary">
                   {t('listings.filters.resultCount', { count: pagination.count })}

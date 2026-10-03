@@ -13,6 +13,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import type { ReturnsUrlParam, UseReturnsUrlStateResult } from '../../returns.types';
 
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
+
 export const RETURNS_DEFAULT_PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 /** The URL carries strings; this is the tab value that is omitted from it. */
@@ -27,7 +29,9 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
   const tabParam = params.get('tab');
   const tab = isTab(tabParam) ? tabParam : ReturnTab.ALL;
   const page = Math.max(1, Math.floor(Number(params.get('page') ?? '1')) || 1);
-  const store = params.get('store') ?? '';
+  // The store is the top bar's active store (`?store=` mirrors it; a switch
+  // drops every other param, so the list starts over on page 1).
+  const store = useActiveStore().activeStoreId ?? '';
   const search = (params.get('q') ?? '').trim();
   // The open return. Not a filter: it does not touch the page or the tab.
   const selected = params.get('r') ?? '';
@@ -35,7 +39,7 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
   /* Captured once: only a bare `/returns` may be opened on "Needs action" by
      the container. Reading it live would bounce a seller back to that tab the
      moment they cleared their filters. */
-  const openedWithSelection = useRef(Boolean(tabParam || store || search || params.get('page'))).current;
+  const openedWithSelection = useRef(Boolean(tabParam || search || params.get('page'))).current;
 
   const [searchInput, setSearchInput] = useState(search);
   const [rowsPerPage, setRowsPerPageState] = useState(RETURNS_DEFAULT_PAGE_SIZE);
@@ -73,7 +77,6 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
 
   const setTab = useCallback((value: ReturnTab) => patch({ tab: value, page: null }), [patch]);
   const setPage = useCallback((value: number) => patch({ page: String(value) }), [patch]);
-  const setStore = useCallback((value: string) => patch({ store: value, page: null }), [patch]);
   const setSelected = useCallback((id: string | null) => patch({ r: id }), [patch]);
   const setRowsPerPage = useCallback(
     (rows: number) => {
@@ -84,7 +87,7 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
   );
   const clearFilters = useCallback(() => {
     setSearchInput('');
-    patch({ tab: null, store: null, q: null, page: null });
+    patch({ tab: null, q: null, page: null });
   }, [patch]);
 
   return useMemo(
@@ -92,11 +95,10 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
       state: { tab, page, store, search, selected },
       searchInput,
       rowsPerPage,
-      hasActiveFilters: Boolean(search || store || tab !== ReturnTab.ALL),
+      hasActiveFilters: Boolean(search || tab !== ReturnTab.ALL),
       openedWithSelection,
       setTab,
       setPage,
-      setStore,
       setSearchInput,
       setRowsPerPage,
       clearFilters,
@@ -114,7 +116,6 @@ export function useReturnsUrlState(): UseReturnsUrlStateResult {
       openedWithSelection,
       setTab,
       setPage,
-      setStore,
       setRowsPerPage,
       clearFilters,
     ]

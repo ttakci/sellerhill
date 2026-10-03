@@ -1,4 +1,4 @@
-import { Button, DataTable, EmptyState, InfoMessage, PageHeader, SearchField, Select, TabNav, Text } from '@repo/ui';
+import { Button, DataTable, EmptyState, InfoMessage, PageHeader, SearchField, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,9 +19,6 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   onTabChange,
   search,
   onSearchChange,
-  ebayAccountId,
-  onEbayAccountChange,
-  storeOptions,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -67,16 +64,6 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
               fullWidth
             />
           </S.SearchWrapper>
-          <S.SelectWrapper>
-            <Select
-              value={ebayAccountId}
-              onChange={onEbayAccountChange}
-              options={storeOptions}
-              placeholder={t('returns.filters.allStores')}
-              size="small"
-              fullWidth
-            />
-          </S.SelectWrapper>
           <S.FilterActions>
             <S.ResultCount variant="caption" weight="medium">
               {t('returns.filters.resultCount', { count: resultCount })}

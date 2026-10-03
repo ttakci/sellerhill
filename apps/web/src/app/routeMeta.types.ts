@@ -20,6 +20,13 @@ export interface AppRouteMeta {
    * height. Every other route keeps the content-high page.
    */
   fitsViewport?: boolean;
+  /**
+   * The page shows ONE eBay store's data — the active store chosen in the top
+   * bar (`ActiveStoreProvider`), mirrored in `?store=` so a link opens the same
+   * store. Store-independent pages (billing, settings, Best Sellers…) leave it
+   * unset and keep their URL untouched.
+   */
+  storeScoped?: boolean;
   /** Breadcrumb segments after home (label keys resolved via t) */
   breadcrumbs: Array<{
     labelKey: string;
