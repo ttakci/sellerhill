@@ -19,6 +19,13 @@ export const Toolbar = styled.div`
   gap: ${tkn('spacing.md')};
   flex-wrap: nowrap;
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  /* On a phone the fixed-width select would squeeze the rail into a column of
+     tabs; the select takes its own full-width row above the tabs instead. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    flex-wrap: wrap;
+    gap: ${tkn('spacing.sm')};
+  }
 `;
 
 
@@ -29,21 +36,22 @@ export const Tabs = styled(TabNav)`
 `;
 
 /**
- * Shrink-wraps the Dropdown: its own container is `width: 100%`, so without an
- * auto-width flex parent it claimed the whole row and pushed itself below the tabs.
+ * Fixed-width slot for the store Select (same 11.5rem as the list pages'
+ * filter selects): the atom is `width: 100%`, so without a sized flex parent
+ * it claimed the whole row and pushed itself below the tabs.
  */
 export const ToolbarRight = styled.div`
   display: flex;
   align-items: center;
   flex: 0 0 auto;
+  width: 11.5rem;
   margin-left: auto;
   padding-bottom: ${tkn('spacing.xs')};
   align-self: center;
-`;
 
-/** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */
-export const StoreLabel = styled.span`
-  min-width: 0;
-  max-width: 12rem;
-  overflow: hidden;
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    order: -1;
+    width: 100%;
+    margin-left: 0;
+  }
 `;

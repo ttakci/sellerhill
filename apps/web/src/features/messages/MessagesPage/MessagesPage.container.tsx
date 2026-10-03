@@ -8,7 +8,7 @@
  */
 
 import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder, type EbayAccountPublicDto } from '@repo/shared';
-import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type DropdownItem, type IconName } from '@repo/ui';
+import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type IconName, type SelectOption } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -380,12 +380,11 @@ export const MessagesPageContainer = (): React.ReactElement => {
     if (accounts.length < 2 || !activeAccount) {
       return null;
     }
-    const items: DropdownItem[] = accounts.map((account) => ({
+    const options: SelectOption[] = accounts.map((account) => ({
+      value: account.id,
       label: storeLabel(account),
-      icon: account.id === activeAccount.id ? ('check' as const) : undefined,
-      onClick: () => setStore(account.id),
     }));
-    return { label: storeLabel(activeAccount), items };
+    return { value: activeAccount.id, options, onChange: (value) => setStore(String(value)) };
   }, [accounts, activeAccount, setStore]);
 
   /* ─── mobile: list OR thread; the header's back arrow clears `?c=` ─── */

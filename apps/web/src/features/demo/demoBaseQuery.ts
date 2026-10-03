@@ -109,8 +109,17 @@ function parseRequest(args: string | FetchArgs): ParsedRequest {
   };
 }
 
+/**
+ * Every answer goes through a JSON round-trip, exactly what the real network
+ * does to a response. Some fixtures are typed against shared DTOs that declare
+ * `Date` fields (store settings, listing groups, templates); handed over as-is,
+ * those `Date` objects reached the Redux store and RTK's serializability check
+ * logged an error on every render. The round-trip turns them into the ISO
+ * strings the real API sends, and gives each query a fresh copy so a cached
+ * fixture is never frozen or shared between two cache entries.
+ */
 function ok<T>(data: T): { data: T } {
-  return { data };
+  return { data: data === undefined ? data : (JSON.parse(JSON.stringify(data)) as T) };
 }
 
 /**
