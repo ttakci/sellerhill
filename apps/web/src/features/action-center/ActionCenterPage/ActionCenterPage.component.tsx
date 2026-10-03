@@ -6,7 +6,7 @@
  * makes no decisions — it only lays them out.
  */
 
-import { EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
+import { Badge, EmptyState, Icon, PageHeader, Select, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,9 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   isInitialLoading,
   isEmpty,
   onItemAction,
+  selectedStore,
+  storeOptions,
+  onStoreChange,
 }) => {
   const { t } = useTranslation(['actionCenter', 'translation']);
 
@@ -61,6 +64,27 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
                 <Text variant="body-sm" color="text.secondary">
                   {item.description}
                 </Text>
+
+                {item.storeLabels.length > 0 && (
+                  <S.StoreList aria-label={t('actionCenter.storeFilter.storesLabel')}>
+                    {item.storeLabels.map((label) => (
+                      <S.StoreListItem key={label}>
+                        <Badge variant="neutral" size="xs">
+                          {label}
+                        </Badge>
+                      </S.StoreListItem>
+                    ))}
+                  </S.StoreList>
+                )}
+
+                {item.accountWideNote && (
+                  <S.AccountWideNote>
+                    <Icon name="info" size={12} color="text.tertiary" />
+                    <Text variant="caption" color="text.tertiary">
+                      {item.accountWideNote}
+                    </Text>
+                  </S.AccountWideNote>
+                )}
 
                 {item.chips.length > 0 && (
                   <S.ChipList>
@@ -116,6 +140,20 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
       <PageHeader
         title={t('actionCenter.title')}
         subtitle={t('actionCenter.subtitle')}
+        actions={
+          storeOptions.length > 0 ? (
+            <S.StoreSelect>
+              <Select
+                value={selectedStore}
+                onChange={onStoreChange}
+                options={storeOptions}
+                placeholder={t('actionCenter.storeFilter.label')}
+                size="small"
+                fullWidth
+              />
+            </S.StoreSelect>
+          ) : undefined
+        }
       />
 
       {/*

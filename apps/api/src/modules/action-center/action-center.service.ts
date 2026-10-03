@@ -62,6 +62,7 @@ import {
   buildShipByStateSql,
   resolveReturnFreshnessHours,
   type ActionCenterItemDto,
+  type ActionCenterStoreRefDto,
   type ActionCenterSummaryDto,
 } from '@repo/shared';
 
@@ -78,6 +79,7 @@ import {
   buildSetupItems,
   daysUntil,
   resolveQuotaSeverity,
+  scopeItemsToStore,
 } from './action-center.helpers';
 
 /**
@@ -127,6 +129,11 @@ function toCount(value: unknown): number {
   return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 0;
 }
 
+/** Store rows → the DTO's store references (labels already resolved in SQL). */
+function toStoreRefs(rows: readonly { id: string; label: string }[]): ActionCenterStoreRefDto[] {
+  return rows.map((row) => ({ id: row.id, label: row.label }));
+}
+
 interface CountRow {
   count: string;
 }
@@ -135,6 +142,27 @@ interface BreakdownRow {
   code: string | null;
   count: string;
 }
+
+interface StoreRow {
+  id: string;
+  label: string;
+}
+
+/**
+ * The store filter, as one SQL predicate over a row alias that carries
+ * `ebay_account_id`. The parameter is always bound — `NULL` when no store was
+ * asked for — so every probe's statement text is the same with and without a
+ * filter, and an unfiltered call keeps today's behaviour exactly.
+ *
+ * Both uses are cast to `uuid`: a parameter used twice must be typed on every
+ * use, or Postgres deduces two types for it.
+ */
+function storeScopeSql(alias: string, param: number): string {
+  return `AND ($${param}::uuid IS NULL OR ${alias}.ebay_account_id = $${param}::uuid)`;
+}
+
+/** The display label every store surface uses: store name → eBay username → eBay user id. */
+const STORE_LABEL_SQL = `COALESCE(NULLIF(a.store_name, ''), NULLIF(a.ebay_username, ''), a.seller_id)`;
 
 /**
  * Which pending-action item each plan limit produces.
@@ -163,17 +191,27 @@ export class ActionCenterService {
     private readonly returnSchedule: ReturnSweepScheduleService
   ) {}
 
-  async getSummary(userId: string): Promise<ActionCenterSummaryDto> {
+  /**
+   * `ebayAccountId` narrows every per-store probe (orders, returns, eBay
+   * connections, listings) to one store; absent, every store is counted — the
+   * sidebar badge's call. Every probe is already scoped by `user_id`, so a
+   * store id that is not this seller's simply matches no rows: there is no
+   * separate ownership check, and nothing about another seller's store can
+   * leak through the filter. Plan, setup and Amazon buyer-account items are
+   * account-wide and ignore it (`accountWide` on the DTO).
+   */
+  async getSummary(userId: string, ebayAccountId?: string | null): Promise<ActionCenterSummaryDto> {
+    const store = ebayAccountId ?? null;
     const probes = await Promise.all([
-      this.probe('orders', () => this.orderItems(userId)),
-      this.probe('returns', () => this.returnItems(userId)),
-      this.probe('connections', () => this.connectionItems(userId)),
-      this.probe('listings', () => this.listingItems(userId)),
+      this.probe('orders', () => this.orderItems(userId, store)),
+      this.probe('returns', () => this.returnItems(userId, store)),
+      this.probe('connections', () => this.connectionItems(userId, store)),
+      this.probe('listings', () => this.listingItems(userId, store)),
       this.probe('plan', () => this.planItems(userId)),
       this.probe('setup', () => this.setupItems(userId)),
     ]);
 
-    return buildActionCenterSummary(probes.flat(), new Date());
+    return buildActionCenterSummary(scopeItemsToStore(probes.flat(), store), new Date());
   }
 
   /**
@@ -198,7 +236,7 @@ export class ActionCenterService {
 
   // ---------------------------------------------------------------- orders
 
-  private async orderItems(userId: string): Promise<ActionCenterItemDto[]> {
+  private async orderItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
     const items: ActionCenterItemDto[] = [];
 
     /*
@@ -229,8 +267,9 @@ export class ActionCenterService {
       `SELECT COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
-          AND ${stage} = $2`,
-      [userId, OrderStage.AMAZON_CANCELLED]
+          AND ${stage} = $2
+          ${storeScopeSql('o', 3)}`,
+      [userId, OrderStage.AMAZON_CANCELLED, store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_AMAZON_CANCELLED,
@@ -250,8 +289,9 @@ export class ActionCenterService {
          FROM orders o
         WHERE o.user_id = $1
           AND ${stage} = $2
+          ${storeScopeSql('o', 3)}
         GROUP BY 1`,
-      [userId, OrderStage.PURCHASE_BLOCKED]
+      [userId, OrderStage.PURCHASE_BLOCKED, store]
     );
     const blockedTally: Record<string, number> = {};
     let blockedTotal = 0;
@@ -284,8 +324,9 @@ export class ActionCenterService {
       `SELECT COUNT(*) AS count
          FROM orders o
         WHERE o.user_id = $1
-          AND ${stage} = $2`,
-      [userId, OrderStage.PURCHASE_UNKNOWN]
+          AND ${stage} = $2
+          ${storeScopeSql('o', 3)}`,
+      [userId, OrderStage.PURCHASE_UNKNOWN, store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_PURCHASE_UNKNOWN,
@@ -317,8 +358,9 @@ export class ActionCenterService {
         WHERE o.user_id = $1
           AND ${stage} = $2
           AND o.listing_id IS NOT NULL
-          AND o.order_date < NOW() - ($3 || ' hours')::INTERVAL`,
-      [userId, OrderStage.TO_PURCHASE, String(AWAITING_PURCHASE_GRACE_HOURS)]
+          AND o.order_date < NOW() - ($3 || ' hours')::INTERVAL
+          ${storeScopeSql('o', 4)}`,
+      [userId, OrderStage.TO_PURCHASE, String(AWAITING_PURCHASE_GRACE_HOURS), store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_AWAITING_PURCHASE,
@@ -342,8 +384,9 @@ export class ActionCenterService {
         WHERE o.user_id = $1
           AND o.listing_id IS NULL
           AND o.status <> $2
-          AND o.order_date >= NOW() - ($3 || ' days')::INTERVAL`,
-      [userId, OrderStatus.CANCELLED, String(RECENT_WINDOW_DAYS)]
+          AND o.order_date >= NOW() - ($3 || ' days')::INTERVAL
+          ${storeScopeSql('o', 4)}`,
+      [userId, OrderStatus.CANCELLED, String(RECENT_WINDOW_DAYS), store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_UNTRACKED,
@@ -378,8 +421,9 @@ export class ActionCenterService {
         WHERE o.user_id = $1
           AND o.tracking_problem_code IS NOT NULL
           AND o.status <> $2
+          ${storeScopeSql('o', 3)}
         GROUP BY o.tracking_problem_code`,
-      [userId, OrderStatus.CANCELLED]
+      [userId, OrderStatus.CANCELLED, store]
     );
     const problemTally: Record<string, number> = {};
     let problemTotal = 0;
@@ -426,8 +470,9 @@ export class ActionCenterService {
           AND o.shipped_detected_at IS NOT NULL
           AND o.ebay_tracking_pushed_at IS NULL
           AND o.status <> $2
-          AND o.shipped_detected_at <= NOW() - ($3 || ' hours')::INTERVAL`,
-      [userId, OrderStatus.CANCELLED, String(HELD_GRACE_HOURS)]
+          AND o.shipped_detected_at <= NOW() - ($3 || ' hours')::INTERVAL
+          ${storeScopeSql('o', 4)}`,
+      [userId, OrderStatus.CANCELLED, String(HELD_GRACE_HOURS), store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
@@ -457,12 +502,14 @@ export class ActionCenterService {
           AND o.amazon_order_id IS NOT NULL
           AND o.amazon_order_id NOT LIKE $3
           AND o.amazon_cancelled_at IS NULL
-          AND COALESCE(o.ebay_cancelled_at, o.updated_at) >= NOW() - ($4 || ' days')::INTERVAL`,
+          AND COALESCE(o.ebay_cancelled_at, o.updated_at) >= NOW() - ($4 || ' days')::INTERVAL
+          ${storeScopeSql('o', 5)}`,
       [
         userId,
         OrderStage.CANCELLED,
         `${SIMULATED_AMAZON_ORDER_PREFIX}%`,
         String(CANCELLED_AMAZON_OPEN_WINDOW_DAYS),
+        store,
       ]
     );
     items.push({
@@ -486,8 +533,9 @@ export class ActionCenterService {
          FROM orders o
         WHERE o.user_id = $1
           AND o.listing_id IS NOT NULL
-          AND ${buildShipByStateSql('o', OrderShipByState.LATE)}`,
-      [userId]
+          AND ${buildShipByStateSql('o', OrderShipByState.LATE)}
+          ${storeScopeSql('o', 2)}`,
+      [userId, store]
     );
     items.push({
       key: ActionCenterItemKey.ORDER_LATE_TO_SHIP,
@@ -518,7 +566,7 @@ export class ActionCenterService {
    * store whose token broke, the sweep switched off) cannot hold this item
    * open. Same horizon the Returns page uses, from the same schedule service.
    */
-  private async returnItems(userId: string): Promise<ActionCenterItemDto[]> {
+  private async returnItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
     // The Returns page's own store-scoped bucket: a disconnected store's
     // return reads as UNCONFIRMED there and is therefore not counted here.
     const bucket = buildStoreScopedReturnBucketSql(
@@ -530,8 +578,9 @@ export class ActionCenterService {
          FROM ebay_returns r
         WHERE r.user_id = $1
           AND ${bucket} IN ($2, $3)
+          ${storeScopeSql('r', 4)}
         GROUP BY 1`,
-      [userId, ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE]
+      [userId, ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE, store]
     );
     let total = 0;
     let overdue = 0;
@@ -556,13 +605,21 @@ export class ActionCenterService {
 
   // ----------------------------------------------------------- connections
 
-  private async connectionItems(userId: string): Promise<ActionCenterItemDto[]> {
-    const ebay = await this.db.query<CountRow>(
-      `SELECT COUNT(*) AS count
-         FROM ebay_accounts
-        WHERE user_id = $1
-          AND status IN ($2, $3)`,
-      [userId, EbayAccountStatus.REVOKED, EbayAccountStatus.ERROR]
+  private async connectionItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
+    /*
+     * The two eBay items are about specific stores, so they read the stores
+     * themselves (id + display label) and count them: a seller with several
+     * stores is told WHICH one to reconnect, not just "1 store". A store filter
+     * narrows both to that one store.
+     */
+    const ebay = await this.db.query<StoreRow>(
+      `SELECT a.id, ${STORE_LABEL_SQL} AS label
+         FROM ebay_accounts a
+        WHERE a.user_id = $1
+          AND a.status IN ($2, $3)
+          AND ($4::uuid IS NULL OR a.id = $4::uuid)
+        ORDER BY label, a.id`,
+      [userId, EbayAccountStatus.REVOKED, EbayAccountStatus.ERROR, store]
     );
 
     /*
@@ -573,13 +630,15 @@ export class ActionCenterService {
      * required set means a store missing EITHER scope is still flagged, not
      * just one missing both.
      */
-    const messagingScope = await this.db.query<CountRow>(
-      `SELECT COUNT(*) AS count
-         FROM ebay_accounts
-        WHERE user_id = $1
-          AND status = $2
-          AND NOT (granted_scopes @> $3::text[])`,
-      [userId, EbayAccountStatus.ACTIVE, [...EBAY_MESSAGING_SCOPES]]
+    const messagingScope = await this.db.query<StoreRow>(
+      `SELECT a.id, ${STORE_LABEL_SQL} AS label
+         FROM ebay_accounts a
+        WHERE a.user_id = $1
+          AND a.status = $2
+          AND NOT (a.granted_scopes @> $3::text[])
+          AND ($4::uuid IS NULL OR a.id = $4::uuid)
+        ORDER BY label, a.id`,
+      [userId, EbayAccountStatus.ACTIVE, [...EBAY_MESSAGING_SCOPES], store]
     );
 
     /*
@@ -611,14 +670,16 @@ export class ActionCenterService {
         key: ActionCenterItemKey.EBAY_ACCOUNT_DISCONNECTED,
         group: ActionCenterGroup.CONNECTIONS,
         severity: ActionCenterSeverity.CRITICAL,
-        count: toCount(ebay[0]?.count),
+        count: ebay.length,
+        stores: toStoreRefs(ebay),
         actionPath: '/stores',
       },
       {
         key: ActionCenterItemKey.EBAY_ACCOUNT_MESSAGING_SCOPE_MISSING,
         group: ActionCenterGroup.CONNECTIONS,
         severity: ActionCenterSeverity.INFO,
-        count: toCount(messagingScope[0]?.count),
+        count: messagingScope.length,
+        stores: toStoreRefs(messagingScope),
         actionPath: '/stores',
       },
       {
@@ -634,7 +695,7 @@ export class ActionCenterService {
 
   // -------------------------------------------------------------- listings
 
-  private async listingItems(userId: string): Promise<ActionCenterItemDto[]> {
+  private async listingItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
     /*
      * Terminal listing-creation failures, by structured failure code. The raw
      * provider message is deliberately not read here — it names internal fields
@@ -648,8 +709,9 @@ export class ActionCenterService {
         WHERE j.user_id = $1
           AND LOWER(i.status) = 'error'
           AND i.updated_at >= NOW() - ($2 || ' days')::INTERVAL
+          ${storeScopeSql('j', 3)}
         GROUP BY 1`,
-      [userId, String(JOB_FAILURE_WINDOW_DAYS)]
+      [userId, String(JOB_FAILURE_WINDOW_DAYS), store]
     );
     const failureTally: Record<string, number> = {};
     let failureTotal = 0;
@@ -662,8 +724,12 @@ export class ActionCenterService {
     }
 
     const drafts = await this.db.query<CountRow>(
-      `SELECT COUNT(*) AS count FROM listings WHERE user_id = $1 AND status = $2`,
-      [userId, ListingStatus.DRAFT]
+      `SELECT COUNT(*) AS count
+         FROM listings l
+        WHERE l.user_id = $1
+          AND l.status = $2
+          ${storeScopeSql('l', 3)}`,
+      [userId, ListingStatus.DRAFT, store]
     );
 
     /*
@@ -686,8 +752,9 @@ export class ActionCenterService {
          JOIN products p ON p.id = l.product_id
         WHERE l.user_id = $1
           AND l.status = $2
-          AND (p.consecutive_failures >= $3 OR p.source_removed_at IS NOT NULL)`,
-      [userId, ListingStatus.ACTIVE, SOURCE_UNAVAILABLE_FAILURE_THRESHOLD]
+          AND (p.consecutive_failures >= $3 OR p.source_removed_at IS NOT NULL)
+          ${storeScopeSql('l', 4)}`,
+      [userId, ListingStatus.ACTIVE, SOURCE_UNAVAILABLE_FAILURE_THRESHOLD, store]
     );
 
     /*
@@ -697,11 +764,12 @@ export class ActionCenterService {
      */
     const outOfStock = await this.db.query<CountRow>(
       `SELECT COUNT(*) AS count
-         FROM listings
-        WHERE user_id = $1
-          AND status = $2
-          AND quantity <= 0`,
-      [userId, ListingStatus.ACTIVE]
+         FROM listings l
+        WHERE l.user_id = $1
+          AND l.status = $2
+          AND l.quantity <= 0
+          ${storeScopeSql('l', 3)}`,
+      [userId, ListingStatus.ACTIVE, store]
     );
 
     /*
@@ -723,8 +791,9 @@ export class ActionCenterService {
               FROM (SELECT 1) one
               LEFT JOIN store_settings s ON s.user_id = l.user_id AND s.store_id = l.ebay_account_id
               LEFT JOIN store_settings g ON g.user_id = l.user_id AND g.is_global = TRUE
-          ), FALSE)`,
-      [userId, ListingStatus.ACTIVE]
+          ), FALSE)
+          ${storeScopeSql('l', 3)}`,
+      [userId, ListingStatus.ACTIVE, store]
     );
 
     return [

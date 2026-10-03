@@ -1,5 +1,5 @@
 import type { ActionCenterGroupDto, ActionCenterItemDto, ActionCenterSeverity } from '@repo/shared';
-import type { TabNavItem } from '@repo/ui';
+import type { SelectOption, TabNavItem } from '@repo/ui';
 
 import type { ACTION_CENTER_FILTER_ALL } from '../actionCenterPresentation';
 
@@ -31,6 +31,10 @@ export interface ActionCenterItemView extends ActionCenterItemDto {
   description: string;
   actionLabel: string;
   chips: ActionCenterBreakdownChip[];
+  /** Labels of the stores a per-store connection item is about (empty otherwise). */
+  storeLabels: string[];
+  /** Caption for an account-wide item (plan, setup), shown in every store view; null otherwise. */
+  accountWideNote: string | null;
 }
 
 export interface ActionCenterGroupView extends Omit<ActionCenterGroupDto, 'items'> {
@@ -55,4 +59,9 @@ export interface ActionCenterPageComponentProps {
   /** True when the seller genuinely has nothing pending (not merely filtered out). */
   isEmpty: boolean;
   onItemAction: (item: ActionCenterItemView) => void;
+  /** The store the page shows. Mandatory: there is no all-stores view here. */
+  selectedStore: string;
+  /** One option per connected store, each label carrying that store's own item count. */
+  storeOptions: SelectOption[];
+  onStoreChange: (value: string | number) => void;
 }

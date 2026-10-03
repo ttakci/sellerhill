@@ -29,6 +29,12 @@
       "warning": "Uyarı",
       "info": "Öneriler"
     },
+    "storeFilter": {
+      "label": "Mağaza",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Tüm hesabınız için geçerli",
+      "storesLabel": "İlgili mağazalar"
+    },
     "summary": {
       "critical": "{{count}} kritik",
       "warning": "{{count}} uyarı",

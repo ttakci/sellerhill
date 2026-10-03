@@ -29,6 +29,12 @@
       "warning": "चेतावनी",
       "info": "सुझाव"
     },
+    "storeFilter": {
+      "label": "स्टोर",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "आपके पूरे खाते पर लागू होता है",
+      "storesLabel": "संबंधित स्टोर"
+    },
     "summary": {
       "critical": "{{count}} गंभीर",
       "warning": "{{count}} चेतावनी",

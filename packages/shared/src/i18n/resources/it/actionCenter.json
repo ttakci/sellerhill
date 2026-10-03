@@ -29,6 +29,12 @@
       "warning": "Avvisi",
       "info": "Suggerimenti"
     },
+    "storeFilter": {
+      "label": "Negozio",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Vale per tutto il tuo account",
+      "storesLabel": "Negozi interessati"
+    },
     "summary": {
       "critical": "{{count}} critici",
       "warning": "{{count}} avvisi",
