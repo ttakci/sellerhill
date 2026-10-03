@@ -404,13 +404,20 @@ export class OrderSyncService {
           // parcel landed. Unlike the purchase gate, an UNPAID order is still
           // messaged — eBay only surfaces orders that cleared checkout, and a
           // thank-you costs nothing if the payment later fails.
-          if (freshSale && !isOrderAlreadyFulfilled(entity.status) && entity.status !== OrderStatus.CANCELLED) {
+          // Only a sale SellerHill tracks (linked to one of the seller's
+          // listings) is messaged — the processor re-checks the same rule.
+          if (
+            freshSale &&
+            listingId &&
+            !isOrderAlreadyFulfilled(entity.status) &&
+            entity.status !== OrderStatus.CANCELLED
+          ) {
             await this.buyerMessages
               .enqueue({
                 ebayOrderId: entity.ebayOrderId,
                 userId: entity.userId,
                 ebayAccountId: entity.ebayAccountId,
-                storeId: null,
+                storeId: entity.ebayAccountId,
                 event: BuyerMessageEventType.ORDER_RECEIVED,
               })
               .catch((err: unknown) => {

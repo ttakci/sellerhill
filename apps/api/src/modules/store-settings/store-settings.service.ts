@@ -136,11 +136,16 @@ export class StoreSettingsService {
 
     // Focused drawers can create a store row before its location is configured.
     // Inherit ONLY the empty location fields — the store still owns every other
-    // override (A2, tax, blacklist, validation and buyer messaging). Listing
-    // rules follow the loss limit's rule instead: a store row that never saved
-    // any inherits the global ones, so a filter set for every store is not
-    // silently dropped by a row another drawer created.
-    return withRules(inheritMissingStoreLocation(storeSettings, globalSettings));
+    // override (A2, tax, blacklist, validation). Listing rules and buyer
+    // messaging follow the loss limit's rule instead: a store row that never
+    // saved any inherits the global ones, so a choice made for every store is
+    // not silently dropped by a row another drawer created (a NULL messaging
+    // config there used to switch messaging OFF for that store).
+    const resolved = inheritMissingStoreLocation(storeSettings, globalSettings);
+    return withRules({
+      ...resolved,
+      buyerMessaging: resolved.buyerMessaging ?? globalSettings.buyerMessaging,
+    });
   }
 
   /**
