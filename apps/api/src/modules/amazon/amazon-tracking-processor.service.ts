@@ -709,7 +709,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
           ebayOrderId: order.ebay_order_id,
           userId: order.user_id,
           ebayAccountId: order.ebay_account_id,
-          storeId: null,
+          // The order's own store: its settings outrank the global row.
+          storeId: order.ebay_account_id,
           event,
         },
         opts,

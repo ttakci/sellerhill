@@ -21,6 +21,7 @@ const ORDER_ROW = {
   carrier: null,
   store_name: 'My Store',
   legacy_item_id: '1234567890',
+  listing_id: 'listing-1',
 };
 
 const job = {
@@ -153,4 +154,26 @@ describe('BuyerMessageProcessor', () => {
       expect(row[7]).toBe('messaging_scope_missing');
     },
   );
+});
+
+describe('BuyerMessageProcessor — whose settings, which orders', () => {
+  it("resolves the messaging config with the order's own store when the job carries no storeId", async () => {
+    const { processor, messageService } = build(ORDER_ROW, [...EBAY_MESSAGING_SCOPES]);
+
+    await processor.process(job);
+
+    expect(messageService.isMessagingEnabled).toHaveBeenCalledWith('user-1', 'acc-1');
+    expect(messageService.resolveTemplate).toHaveBeenCalledWith('user-1', 'acc-1', 'order_received');
+  });
+
+  it('never messages the buyer of an order that is not linked to a SellerHill listing', async () => {
+    const { processor, db, provider } = build({ ...ORDER_ROW, listing_id: null }, [...EBAY_MESSAGING_SCOPES]);
+
+    await expect(processor.process(job)).resolves.toBeUndefined();
+
+    expect(provider.sendMessage).not.toHaveBeenCalled();
+    const row = loggedRow(db);
+    expect(row[6]).toBe('skipped');
+    expect(row[7]).toBe('order_untracked');
+  });
 });
