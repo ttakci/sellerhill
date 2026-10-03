@@ -41,6 +41,13 @@ describe('normalizeListingRules', () => {
     expect(normalizeListingRules({ veroProtectionEnabled: false }).veroProtectionEnabled).toBe(false);
   });
 
+  it('keeps the brand away from eBay unless the seller switches that off', () => {
+    expect(DEFAULT_LISTING_RULES.hideBrand).toBe(true);
+    expect(normalizeListingRules({ hideBrand: undefined }).hideBrand).toBe(true);
+    expect(normalizeListingRules({ hideBrand: 'yes' }).hideBrand).toBe(true);
+    expect(normalizeListingRules({ hideBrand: false }).hideBrand).toBe(false);
+  });
+
   it('turns out-of-range numbers off instead of storing them', () => {
     const out = normalizeListingRules({
       minSourcePrice: -5,

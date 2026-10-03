@@ -1,4 +1,4 @@
-import { TemplateType, type ListingSettingsGroup, type ProductData } from '@repo/shared';
+import { DEFAULT_LISTING_RULES, TemplateType, type ListingSettingsGroup, type ProductData } from '@repo/shared';
 
 import { ListingStrategyService } from './listing-strategy.service';
 
@@ -41,6 +41,9 @@ describe('ListingStrategyService — the description renders the listing title',
       fees: { ebayFeePercent: 13, fixedFeeAmount: 0.3 },
     }) as unknown as ListingSettingsGroup;
 
+  /** The seller chose to send the brand, so only the group's own rules strip it. */
+  const sendBrand = { amazonTaxRate: 0, listingRules: { ...DEFAULT_LISTING_RULES, hideBrand: false } };
+
   const buildService = (
     group: ListingSettingsGroup,
     contentGeneration: Partial<{
@@ -48,10 +51,11 @@ describe('ListingStrategyService — the description renders the listing title',
       rewriteTitle: (input: RewriteInput) => Promise<string>;
       rewriteDescription: (input: RewriteInput) => Promise<string>;
     }> = {},
+    settings: Record<string, unknown> = sendBrand,
   ): ListingStrategyService =>
     new ListingStrategyService(
       { getListingSettingsGroupById: jest.fn().mockResolvedValue(group) } as never,
-      { getResolvedSettings: jest.fn().mockResolvedValue({ amazonTaxRate: 0 }) } as never,
+      { getResolvedSettings: jest.fn().mockResolvedValue(settings) } as never,
       {
         isEnabled: jest.fn().mockResolvedValue(false),
         rewriteTitle: jest.fn(),
@@ -92,6 +96,15 @@ describe('ListingStrategyService — the description renders the listing title',
 
     expect(result.title).toBe(product.title);
     expect(result.description).toContain(product.title);
+  });
+
+  it('keeps the brand out of title and description by default', async () => {
+    // No saved listing rules: "don't send the brand to eBay" is on by default.
+    const group = buildGroup({});
+    const result = await buildService(group, {}, { amazonTaxRate: 0 }).prepareListingData('user-1', product, 'group-1');
+
+    expect(result.title).toBe('WH-1000XM5 Wireless Noise Canceling Headphones');
+    expect(result.description).not.toContain('Sony');
   });
 
   it('feeds the AI description the final title, not the raw one', async () => {
