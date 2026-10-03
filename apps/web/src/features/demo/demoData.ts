@@ -2443,6 +2443,7 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
   {
     id: 'demo-job-1',
     userId: DEMO_USER_ID,
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID,
     totalAsins: 6,
     processedCount: 4,
     successCount: 4,
@@ -2455,6 +2456,7 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
   {
     id: 'demo-job-2',
     userId: DEMO_USER_ID,
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID_2,
     totalAsins: 12,
     processedCount: 12,
     successCount: 10,
@@ -2467,6 +2469,7 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
   {
     id: 'demo-job-3',
     userId: DEMO_USER_ID,
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID,
     totalAsins: 40,
     processedCount: 40,
     successCount: 40,
@@ -2479,6 +2482,7 @@ export const DEMO_LISTING_JOBS: ListingJobDto[] = [
   {
     id: 'demo-job-4',
     userId: DEMO_USER_ID,
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID,
     totalAsins: 8,
     processedCount: 8,
     successCount: 8,

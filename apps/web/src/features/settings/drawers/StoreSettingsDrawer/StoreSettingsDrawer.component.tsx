@@ -224,6 +224,16 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               <Toggle checked={props.checkBlacklist} onChange={props.onToggleCheckBlacklist} />
             </ToggleRow>
             <InfoMessage>{t('translation:settingsHub.drawer.storeSettings.checkBlacklistDesc')}</InfoMessage>
+            <ToggleRow>
+              <Text variant="body-sm">{t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsins')}</Text>
+              <Toggle checked={props.allowCrossStoreAsins} onChange={props.onAllowCrossStoreAsinsChange} />
+            </ToggleRow>
+            <InfoMessage>{t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsinsDesc')}</InfoMessage>
+            {props.isAllowCrossStoreInherited && (
+              <Text variant="caption" color="text.secondary">
+                {t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsinsInherited')}
+              </Text>
+            )}
           </FormCard>
         )}
       </BodyStack>

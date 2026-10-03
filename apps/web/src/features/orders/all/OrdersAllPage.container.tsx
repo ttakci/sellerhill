@@ -18,6 +18,7 @@ import { OrdersAllPageComponent } from './OrdersAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
@@ -126,19 +127,23 @@ export const OrdersAllPageContainer: React.FC = () => {
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
-  /* Money renders in the connected eBay store's marketplace currency, never
-     the UI language — a filtered store narrows to its own currency, "all
-     stores" falls back to the first connected store. */
-  const currency = useMemo(
-    () => resolveStoreCurrency(ebayAccountsData?.items ?? [], ebayAccountId),
-    [ebayAccountsData, ebayAccountId]
-  );
-  /* Always two decimals: "$9,8" beside "$24,99" reads as a typo on a page
-     whose whole job is to be believed about money. */
+  /* Money renders in each ORDER's own store marketplace currency, never the
+     UI language and never one page-wide currency — under "all stores" a US
+     and a UK store sit in one list. A row with no store falls back to the
+     filtered store, then the first connected one. */
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, currency, 2),
-    [localeCfg, currency]
+    (value: number, rowEbayAccountId?: string | null) =>
+      /* Always two decimals: "$9,8" beside "$24,99" reads as a typo on a page
+         whose whole job is to be believed about money. */
+      formatCurrency(
+        value,
+        localeCfg.locale,
+        resolveStoreCurrency(ebayAccountsData?.items ?? [], rowEbayAccountId || ebayAccountId),
+        2
+      ),
+    [localeCfg, ebayAccountsData, ebayAccountId]
   );
+  const storeLabelFor = useStoreLabel();
 
   /* Net margin on the sale, shown under the profit figure. Only on an order
      whose profit is known — an estimate carries its badge instead. */
@@ -166,7 +171,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
+  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay, storeLabelFor);
 
   const handleDownload = useCallback(() => {
     const headers = [
@@ -245,6 +250,7 @@ export const OrdersAllPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         formatDay={fmtDay}
+        storeLabelFor={storeLabelFor}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}
         onBack={fromDashboard ? () => localeNavigate('/dashboard') : undefined}
         onDownload={handleDownload}

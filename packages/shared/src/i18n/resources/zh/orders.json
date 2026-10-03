@@ -275,6 +275,7 @@
       "orderNotTracked": "此订单未关联到您的任何商品刊登，因此转换后的物流单号永远无法发送到 eBay。请先把订单关联到对应的商品刊登。",
       "trackingAlreadyPushed": "eBay 已有此订单的原始物流单号且无法替换，因此现在转换不会改变买家看到的内容。",
       "listingOverPlanLimit": "此订单到达时，其商品刊登已超出您套餐的商品刊登上限。来自上限之外商品刊登的订单不会进行货件追踪，也不会转换物流单号。",
+      "storeNotConnected": "此订单的 eBay 店铺未连接。请重新连接店铺，然后转换跟踪号。",
       "autoFulfillNotRestartable": "无法再次启动此订单的自动购买。它可能已经购买或正在处理中，也可能会产生第二笔购买。请检查你的 Amazon 订单并手动关联该订单。",
       "autoFulfillNoAccount": "没有可用于自动下单的 Amazon 账户。请在设置中为某个 Amazon 账户开启自动下单并设置消费上限。",
       "autoFulfillOverCap": "这笔销售超过了你的 Amazon 账户的消费上限。请在 Amazon 账户设置中提高上限，或手动购买该商品。",

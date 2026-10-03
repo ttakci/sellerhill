@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { forwardRef, Inject, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
 import {
   AmazonMarketplace,
   evaluateListingRules,
@@ -42,6 +42,7 @@ import { VeroService } from '../vero/vero.service';
 import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
 import { isCreateCacheFresh } from './create-cache-freshness';
+import type { AsinStoreScope } from './cross-store-asin';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
@@ -254,7 +255,25 @@ export class ListingProcessorService extends WorkerHost {
     this.logger.log(
       `Processing batch of ${items.length} ASIN(s) for job ${jobId}${asDraft ? ' (drafts)' : ''}`
     );
-    await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
+    // The store can stop being usable between enqueue and run (disconnected,
+    // token revoked, scheduled days ago). Thrown bare, this check failed every
+    // attempt before any item was closed: the items stayed "Queued", the job
+    // sat at processing for ever and every reservation stayed held. A missing
+    // store is a terminal answer for the whole batch, so each item is closed
+    // with the account reason (EBAY_AUTH, not retryable) and its slot released.
+    // Anything else (a database hiccup) still goes back to BullMQ for a retry.
+    try {
+      await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
+    } catch (error: unknown) {
+      if (!(error instanceof NotFoundException)) {
+        throw error;
+      }
+      const unusable = new Error(`No active eBay account ${ebayAccountId} for this seller`);
+      for (const item of items) {
+        await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, unusable);
+      }
+      return;
+    }
 
     // A scheduled job reserved no plan slots when it was created; this group
     // reserves its own now. First attempt only: a BullMQ retry of the same
@@ -276,10 +295,16 @@ export class ListingProcessorService extends WorkerHost {
       }
     }
 
-    // The seller's listing rules for this store, resolved once per batch.
-    const listingRules = normalizeListingRules(
-      (await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId)).listingRules
-    );
+    // The seller's listing rules for this store, resolved once per batch, and
+    // whether this store may take ASINs already on the seller's other stores
+    // (`allowCrossStoreAsins`, cross-store-asin.ts) — the duplicate checks
+    // below read it, as `createJob`'s filter did.
+    const resolvedStoreSettings = await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId);
+    const listingRules = normalizeListingRules(resolvedStoreSettings.listingRules);
+    const asinStoreScope: AsinStoreScope = {
+      ebayAccountId,
+      allowCrossStore: resolvedStoreSettings.allowCrossStoreAsins === true,
+    };
 
     const policies = { paymentId: paymentPolicyId, shippingId: shippingPolicyId, returnId: returnPolicyId };
     const drafts: BulkListingDraft[] = [];
@@ -319,7 +344,7 @@ export class ListingProcessorService extends WorkerHost {
         if (isAsinBlocked(listingRules, item.asin)) {
           continue;
         }
-        if (await this.listingsService.isAsinListed(userId, item.asin)) {
+        if (await this.listingsService.isAsinListed(userId, item.asin, asinStoreScope)) {
           continue;
         }
         if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin), cacheMaxAgeMs)) {
@@ -363,7 +388,7 @@ export class ListingProcessorService extends WorkerHost {
 
     const prepareItem = async (item: { asin: string; listingJobItemId: string }): Promise<void> => {
       try {
-        if (await this.listingsService.isAsinListed(userId, item.asin)) {
+        if (await this.listingsService.isAsinListed(userId, item.asin, asinStoreScope)) {
           await this.recordDuplicate(jobId, userId, item.asin, item.listingJobItemId);
           return;
         }

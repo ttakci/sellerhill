@@ -23,10 +23,11 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
  * sort affordance that does nothing is worse than none.
  */
 export function useOrdersColumns(
-  formatCurrency: (value: number) => string,
+  formatCurrency: (value: number, ebayAccountId?: string | null) => string,
   formatDate: (value: string) => string,
   formatMargin: (order: OrderDto) => string | null,
-  formatDay: (value: string) => string
+  formatDay: (value: string) => string,
+  storeLabelFor: (ebayAccountId?: string | null) => string | null
 ) {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -44,6 +45,12 @@ export function useOrdersColumns(
             <Text variant="caption" color="text.secondary" numeric>
               {formatDate(order.createdAt)}
             </Text>
+            {/* Which store sold it — only rendered with more than one store. */}
+            {storeLabelFor(order.ebayAccountId) ? (
+              <Text variant="caption" color="text.secondary" truncate>
+                {t('translation:common.storeNamed', { name: storeLabelFor(order.ebayAccountId) })}
+              </Text>
+            ) : null}
             {/* The seller's own note, one line; the full text on hover. */}
             {order.sellerNote ? (
               <Tooltip content={order.sellerNote} position="top" variant="dark">
@@ -125,7 +132,7 @@ export function useOrdersColumns(
             order.stage === OrderStage.SHIPPED
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
-          const flags = orderFlagBadges(order, t, formatCurrency, formatDay);
+          const flags = orderFlagBadges(order, t, (value) => formatCurrency(value, order.ebayAccountId), formatDay);
           return (
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
@@ -160,7 +167,7 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" numeric>
-            {formatCurrency(order.salePrice)}
+            {formatCurrency(order.salePrice, order.ebayAccountId)}
           </Text>
         ),
       },
@@ -171,7 +178,7 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary" numeric>
-            {formatCurrency(order.purchasePrice)}
+            {formatCurrency(order.purchasePrice, order.ebayAccountId)}
           </Text>
         ),
       },
@@ -191,7 +198,7 @@ export function useOrdersColumns(
                 numeric
               >
                 {order.netProfit >= 0 ? '+' : ''}
-                {formatCurrency(order.netProfit)}
+                {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
               {order.profitBasis === ProfitBasis.ESTIMATED ? (
                 <Badge variant="warning" size="xs">
@@ -207,6 +214,6 @@ export function useOrdersColumns(
         },
       },
     ],
-    [t, formatCurrency, formatDate, formatMargin, formatDay]
+    [t, formatCurrency, formatDate, formatMargin, formatDay, storeLabelFor]
   );
 }

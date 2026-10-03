@@ -18,6 +18,14 @@ export const SummaryCard = styled(Card)`
    action lives in its own footer row below (see SummaryFooter) — pairing a
    destructive-ish action with a status badge at the same height read as
    mismatched, and it crowded the corner. */
+/** The job id, and under it the store the job ran against. */
+export const SummaryIdentity = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
 export const SummaryTop = styled.div`
   display: flex;
   align-items: flex-start;

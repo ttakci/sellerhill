@@ -37,6 +37,12 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 
 
 const DRAWER_PARAM = 'drawer';
+/**
+ * `?scope=<storeId|global>` — the store the store-settings drawers open on, so
+ * `?drawer=storeSettings&scope=<id>` lands on that store's settings. Absent
+ * means global.
+ */
+const SCOPE_PARAM = 'scope';
 
 /**
  * A refused eBay connect comes back from `/ebay/callback` as `?error=<i18n key>`
@@ -62,8 +68,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   /** Store awaiting disconnect confirmation; also drives the confirm dialog's open state. */
   const [pendingDisconnectId, setPendingDisconnectId] = useState<string | null>(null);
-  // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
-  const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
 
   const [disconnectEbayAccount, { isLoading: isDisconnecting, originalArgs: disconnectArgs }] =
     useDisconnectEbayAccountMutation();
@@ -71,6 +75,24 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const { data: user, error: userError } = useGetMeQuery();
   const { data: profile, error: profileError } = useGetProfileQuery();
   const { data: ebayData, error: ebayError } = useGetEbayAccountsQuery();
+
+  // Shared store-settings scope — hub + nested drawers stay in sync via the
+  // URL. A store id that is not one of the seller's stores reads as global
+  // (trusted until the account list has loaded, so a deep link is not lost).
+  const rawScope = searchParams.get(SCOPE_PARAM) || GLOBAL_SCOPE;
+  const storeScope =
+    rawScope === GLOBAL_SCOPE || !ebayData || ebayData.items.some((account) => account.id === rawScope)
+      ? rawScope
+      : GLOBAL_SCOPE;
+  const setStoreScope = (scope: string): void => {
+    const next = new URLSearchParams(searchParams);
+    if (scope && scope !== GLOBAL_SCOPE) {
+      next.set(SCOPE_PARAM, scope);
+    } else {
+      next.delete(SCOPE_PARAM);
+    }
+    setSearchParams(next, { replace: true });
+  };
   const {
     data: amazonData,
     error: amazonError,

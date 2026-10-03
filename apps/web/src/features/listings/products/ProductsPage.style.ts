@@ -8,9 +8,19 @@ export const FilterBar = styled.div`
   /* The controls sit on the page canvas — no card of their own, so the first
      row of data is the first surface on the page (see the orders list). */
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
+`;
+
+export const SelectWrapper = styled.div`
+  width: 12rem;
+  flex-shrink: 0;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    width: 100%;
+  }
 `;
 
 export const SearchWrapper = styled.div`

@@ -29,6 +29,12 @@
       "warning": "Avertissement",
       "info": "Suggestions"
     },
+    "storeFilter": {
+      "label": "Boutique",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "S'applique à tout votre compte",
+      "storesLabel": "Boutiques concernées"
+    },
     "summary": {
       "critical": "{{count}} critique(s)",
       "warning": "{{count}} avertissement(s)",

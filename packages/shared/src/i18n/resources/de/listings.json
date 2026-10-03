@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "Die eBay-Geschäftsrichtlinien konnten nicht abgerufen werden",
       "invalidAsins": "{{count}} Ihrer Einträge sehen nicht wie gültige ASINs aus (10 alphanumerische Zeichen) und wurden übersprungen.",
       "loadFailed": "Die Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
-      "scheduleTooLong": "Bei diesem Tempo würde der Auftrag mehr als 30 Tage dauern. Erhöhen Sie die Anzahl der Produkte pro Tag oder fügen Sie weniger ASINs hinzu."
+      "scheduleTooLong": "Bei diesem Tempo würde der Auftrag mehr als 30 Tage dauern. Erhöhen Sie die Anzahl der Produkte pro Tag oder fügen Sie weniger ASINs hinzu.",
+      "storeUnavailable": "Dieser eBay-Shop kann nicht verwendet werden: Er ist nicht mit Ihrem Konto verbunden oder die Verbindung wurde beendet. Wählen Sie einen anderen Shop oder verbinden Sie ihn erneut."
     },
     "detail": {
       "breadcrumb": "Angebotsdetails",

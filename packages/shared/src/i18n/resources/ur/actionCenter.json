@@ -29,6 +29,12 @@
       "warning": "انتباہ",
       "info": "تجاویز"
     },
+    "storeFilter": {
+      "label": "سٹور",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "آپ کے پورے اکاؤنٹ پر لاگو ہوتا ہے",
+      "storesLabel": "متعلقہ سٹورز"
+    },
     "summary": {
       "critical": "{{count}} نازک",
       "warning": "{{count}} انتباہ",

@@ -34,6 +34,7 @@ import {
 } from '@/features/amazon/api/amazon.api';
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { resolveRecordStoreLabel } from '@/features/ebay/utils/storeLabel';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
@@ -436,6 +437,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
     <>
       <OrderDetailsPageComponent
         order={order}
+        storeLabel={resolveRecordStoreLabel(ebayAccountsData?.items ?? [], order?.ebayAccountId)}
         isLoading={isLoading}
         isUpdating={isUpdating}
         formatCurrency={fmtCurrency}

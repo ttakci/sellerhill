@@ -43,6 +43,16 @@ export function useReturnsColumns() {
                 </Text>
               </S.InlineMeta>
             )}
+            {row.storeLabel && (
+              <S.InlineMeta>
+                <Text variant="caption" color="text.tertiary">
+                  {t('translation:common.store')}
+                </Text>
+                <Text variant="caption" color="text.secondary">
+                  {row.storeLabel}
+                </Text>
+              </S.InlineMeta>
+            )}
           </S.StackCell>
         ),
       },

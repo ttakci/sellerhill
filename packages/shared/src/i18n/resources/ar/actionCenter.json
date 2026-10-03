@@ -29,6 +29,12 @@
       "warning": "تحذير",
       "info": "اقتراحات"
     },
+    "storeFilter": {
+      "label": "المتجر",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "ينطبق على حسابك بالكامل",
+      "storesLabel": "المتاجر المعنية"
+    },
     "summary": {
       "critical": "{{count}} حرجة",
       "warning": "{{count}} تحذير",

@@ -52,6 +52,11 @@ export interface StoreSettingsDrawerComponentProps {
    */
   addressFieldErrors: { country: boolean; state: boolean; city: boolean; zipCode: boolean };
   checkBlacklist: boolean;
+  /** "Allow ASINs already listed on my other stores", as in force for the
+   *  scope (own ?? global ?? off). */
+  allowCrossStoreAsins: boolean;
+  /** A store scope that has not chosen yet and is following the global value. */
+  isAllowCrossStoreInherited: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
   /**
@@ -105,6 +110,7 @@ export interface StoreSettingsDrawerComponentProps {
   onCityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleCheckBlacklist: (checked: boolean) => void;
+  onAllowCrossStoreAsinsChange: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
   onLossLimitEnabledChange: (checked: boolean) => void;

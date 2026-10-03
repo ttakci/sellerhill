@@ -19,7 +19,11 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
-import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
+import {
+  EbayFulfillmentService,
+  EbayOrderNotVisibleError,
+  type EbayShippingFulfillment,
+} from '../orders/ebay-fulfillment.service';
 import { findFulfillmentForLineItem } from '../orders/existing-fulfillment';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -57,6 +61,9 @@ interface AmazonOrderRow {
   // Fixed at first ingest (migration 106): the listing was outside the plan's
   // listing limit, so this order gets no shipment tracking.
   listing_over_plan_limit: boolean;
+  // Set only when eBay holds the fulfillment (migration 089). A SHIPPED order
+  // with this NULL never got its tracking push and is pushed again.
+  ebay_tracking_pushed_at: Date | null;
 }
 
 interface EbayAccountRow {
@@ -67,13 +74,20 @@ interface EbayAccountRow {
 
 /** Result of attempting the shipped-transition eBay push. */
 interface ShippedPushResult {
-  /** True only when the eBay Fulfillment API call actually happened and
-   *  succeeded — never true for a deferral or a permanently-unpushable order. */
+  /** True when eBay holds the fulfillment after this call — posted now, or
+   *  found already there. Never true for a hold or a permanently-unpushable
+   *  order. */
   pushed: boolean;
-  /** Set only when the push was deferred (retryable conversion failure,
-   *  still inside the bounded window). Its presence — not `pushed` — is what
-   *  tells the caller to skip the status write and re-arm the scheduler. */
-  retryAt?: Date;
+  /** True only when THIS call posted the fulfillment (not when an existing
+   *  one was merely recorded). */
+  posted?: boolean;
+  /** Set when the push cannot be made YET and must be retried: a conversion
+   *  that did not produce a number, a store that is not active, an order the
+   *  store's token cannot see. Its presence — not `pushed` — tells the caller
+   *  to skip the status write (the order stays pre-ship, i.e. the
+   *  `tracking_held` stage) and re-arm the scheduler. `retryFast` picks the
+   *  hourly deferral cadence over the normal shipped one. */
+  held?: { retryFast: boolean };
 }
 
 @Processor('amazon-tracking', { concurrency: 2 })
@@ -123,6 +137,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
                 o.amazon_order_id, o.amazon_account_id, o.amazon_tracking_number,
                 o.amazon_tracking_carrier, o.listing_id, o.quantity,
                 o.shipped_detected_at, o.listing_over_plan_limit, o.ebay_line_item_id,
+                o.ebay_tracking_pushed_at,
                 l.ebay_item_id as listing_ebay_item_id
          FROM orders o
          LEFT JOIN listings l ON o.listing_id = l.id
@@ -242,32 +257,61 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       // to eBay. Compare against enum constants, not raw string literals.
       const applyStatus = this.shouldApplyStatus(previousStatus, normalizedStatus);
 
-      if (applyStatus && normalizedStatus === OrderStatus.SHIPPED) {
-        order.shipped_detected_at = await this.stampShippedDetected(orderId);
+      // When the eBay push runs on this tick:
+      //   - the shipped transition (pre-ship -> SHIPPED);
+      //   - a fast delivery that jumped past the shipped window between two
+      //     ticks (pre-ship -> COMPLETED) — eBay gets its fulfillment first;
+      //   - CATCH-UP: an order already SHIPPED locally that eBay never got
+      //     tracking for (`ebay_tracking_pushed_at` NULL). SHIPPED -> SHIPPED is
+      //     never a status change, so without this an order settled while its
+      //     store was not active, or held past the fast-retry window by older
+      //     code, was never pushed again — not even after a reconnect. Safe to
+      //     run on every tick: eBay is READ before it is written (an existing
+      //     fulfillment is recorded, never posted twice) and a conversion is
+      //     persisted (a re-run never buys a second number). An order whose
+      //     push is permanently impossible (store row gone, no linked listing)
+      //     costs one local SELECT per tick here and calls nothing external.
+      const isCatchUp = previousStatus === OrderStatus.SHIPPED && !order.ebay_tracking_pushed_at;
+      const pushDue =
+        (applyStatus && normalizedStatus === OrderStatus.SHIPPED) ||
+        (applyStatus && normalizedStatus === OrderStatus.COMPLETED && previousStatus !== OrderStatus.SHIPPED) ||
+        isCatchUp;
+      let pushRan = false;
+
+      if (pushDue) {
+        // The deferral clock starts at the first SHIPPED observation. A
+        // catch-up order is already past it; it is not re-stamped, so an order
+        // shipped before migration 089 (pushed, but never recorded) does not
+        // suddenly count as held while its fulfillment is read back.
+        if (!isCatchUp) {
+          order.shipped_detected_at = await this.stampShippedDetected(orderId);
+        }
         const result = await this.handleShipped(order, amazonStatus.trackingUrl, amazonStatus.trackingHtml);
-        if (result.retryAt) {
-          await this.deferShippedPush(orderId, amazonAccountId, previousStatus);
+        pushRan = true;
+        if (result.held) {
+          // A HOLD, never a settlement: no status write (the order stays in
+          // the `tracking_held` stage that `ORDER_TRACKING_CONVERSION_HELD`
+          // counts and links to), no delivered completion, scheduler re-armed.
+          await this.deferShippedPush(orderId, amazonAccountId, previousStatus, result.held.retryFast);
           return;
         }
         // Buyer auto-messaging "shipped" event only when the push actually
         // happened (fail-soft; env + per-user store config re-checked at
         // send time). A permanently-unpushable order (dead account, no
         // linked item) still advances status below, but we never told eBay
-        // it shipped, so telling the buyer would be dishonest too.
-        if (result.pushed) {
+        // it shipped, so telling the buyer would be dishonest too. On a
+        // fast delivery the "delivered" message below covers it; on a
+        // catch-up only a fulfillment posted NOW is news to the buyer — one
+        // found already on eBay (e.g. an order pushed before migration 089)
+        // was announced when it was posted.
+        const tellBuyer =
+          normalizedStatus !== OrderStatus.COMPLETED && (isCatchUp ? result.posted === true : result.pushed);
+        if (tellBuyer) {
           await this.enqueueBuyerMessage(order, BuyerMessageEventType.SHIPPED);
         }
-      } else if (applyStatus && normalizedStatus === OrderStatus.COMPLETED) {
-        // Fast deliveries can jump straight past the shipped window between
-        // two ticks — make sure eBay got its fulfillment before completing.
-        if (previousStatus !== OrderStatus.SHIPPED) {
-          order.shipped_detected_at = await this.stampShippedDetected(orderId);
-          const result = await this.handleShipped(order, amazonStatus.trackingUrl, amazonStatus.trackingHtml);
-          if (result.retryAt) {
-            await this.deferShippedPush(orderId, amazonAccountId, previousStatus);
-            return;
-          }
-        }
+      }
+
+      if (applyStatus && normalizedStatus === OrderStatus.COMPLETED) {
         this.logger.log(`Order ${order.id} delivered on Amazon, marking completed`);
         // Buyer auto-messaging "delivered" event + delayed "feedback_request".
         await this.enqueueBuyerMessage(order, BuyerMessageEventType.DELIVERED);
@@ -294,8 +338,10 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       // the conversion, so there is nothing to repeat here.
       //
       // It pushes NOTHING to eBay and changes NO status — it is a payload
-      // refresh on a shipment the provider already owns.
-      if (previousStatus === OrderStatus.SHIPPED) {
+      // refresh on a shipment the provider already owns. Skipped on a tick
+      // whose catch-up push already ran: a conversion made there uploaded the
+      // HTML itself, and the feed resumes on the next tick.
+      if (previousStatus === OrderStatus.SHIPPED && !pushRan) {
         await this.refreshTrackingHtml(order, amazonStatus.trackingUrl, amazonStatus.trackingHtml);
       }
 
@@ -404,9 +450,18 @@ export class AmazonTrackingProcessorService extends WorkerHost {
   }
 
   /**
-   * Skip the status write and re-arm the scheduler tighter than the normal
-   * pre-ship interval, so the bounded deferral window (see
-   * `tracking-deferral.ts`) gets several chances rather than one or two.
+   * Hold the eBay push: the caller skips the status write, and the scheduler
+   * is re-armed so a later tick retries.
+   *
+   *   - `retryFast` (a retryable conversion failure inside the bounded window,
+   *     see `tracking-deferral.ts`): hourly, so the window gets several
+   *     chances rather than one or two.
+   *   - otherwise (store not active, order not visible to the store, a
+   *     conversion held past the window): the normal SHIPPED cadence. Nothing
+   *     gives up — the order is still pushed once the cause clears — but a
+   *     cause that takes days (a reconnect) is not worth an hourly Playwright
+   *     scrape. The shipped interval is chosen explicitly because the order
+   *     stays pre-ship locally while held.
    *
    * This is a normal, expected wait — NOT a failure — so it returns rather
    * than throwing. Throwing here would fail the BullMQ job and pollute queue
@@ -416,16 +471,22 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     orderId: string,
     amazonAccountId: string,
     previousStatus: OrderStatus,
+    retryFast: boolean,
   ): Promise<void> {
-    this.logger.log(
-      `Order ${orderId}: deferring the eBay tracking push, retrying in ${DEFERRAL_RETRY_INTERVAL_HOURS}h`,
-    );
-    await this.trackingQueueService.scheduleOrderTracking(
-      orderId,
-      amazonAccountId,
-      previousStatus,
-      DEFERRAL_RETRY_INTERVAL_HOURS,
-    );
+    if (retryFast) {
+      this.logger.log(
+        `Order ${orderId}: deferring the eBay tracking push, retrying in ${DEFERRAL_RETRY_INTERVAL_HOURS}h`,
+      );
+      await this.trackingQueueService.scheduleOrderTracking(
+        orderId,
+        amazonAccountId,
+        previousStatus,
+        DEFERRAL_RETRY_INTERVAL_HOURS,
+      );
+      return;
+    }
+    this.logger.log(`Order ${orderId}: holding the eBay tracking push, retrying at the shipped cadence`);
+    await this.trackingQueueService.scheduleOrderTracking(orderId, amazonAccountId, OrderStatus.SHIPPED);
   }
 
   /** First-observation stamp for the deferral window (COALESCE — a retry on
@@ -447,13 +508,15 @@ export class AmazonTrackingProcessorService extends WorkerHost {
    * Push the shipped fulfillment (tracking number + carrier) to eBay.
    *
    * Three outcomes:
-   *   - Permanently-unpushable conditions (account gone / inactive / no
-   *     linked listing item) log and return `{ pushed: false }`, letting the
-   *     caller advance the local status — retrying changes nothing.
-   *   - A RETRYABLE conversion failure, still inside the bounded deferral
-   *     window, returns `{ pushed: false, retryAt }` WITHOUT calling eBay at
-   *     all. eBay's Fulfillment API has no update endpoint, so the first
-   *     push is the only chance to hand the buyer a converted number.
+   *   - Permanently-unpushable conditions (store row gone / no linked
+   *     listing item) log and return `{ pushed: false }`, letting the caller
+   *     advance the local status — retrying changes nothing.
+   *   - A push that cannot be made YET returns `{ pushed: false, held }`
+   *     WITHOUT posting to eBay: a store that is not active (checked before
+   *     any paid conversion — a reconnect makes it pushable again), an order
+   *     the store's token cannot see, or a conversion that produced no number
+   *     (`mayPushToEbay`). eBay's Fulfillment API has no update endpoint, so
+   *     the first push is the only chance to hand the buyer the right number.
    *   - Otherwise the eBay call is made. A FAILED eBay API call (401/5xx/
    *     network) PROPAGATES instead of being caught here — the caller then
    *     skips the status write, so the order is still pre-SHIPPED on the
@@ -474,6 +537,9 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       [order.ebay_account_id]
     );
 
+    // A missing row is permanent: disconnecting a store is a state change,
+    // never a delete (migration 105), so a row that is gone was really deleted
+    // and no reconnect can bring this order's store back.
     if (ebayAccounts.length === 0) {
       this.logger.error(`eBay account ${order.ebay_account_id} not found for order ${order.id}`);
       return { pushed: false };
@@ -481,9 +547,17 @@ export class AmazonTrackingProcessorService extends WorkerHost {
 
     const ebayAccount = ebayAccounts[0];
 
+    // A store that is not ACTIVE (disconnected, revoked) is NOT permanent: a
+    // reconnect reactivates the same row, and the buyer is still owed the
+    // tracking. Hold and retry at the shipped cadence. Checked before the
+    // token, the line item and above all the paid conversion — no number is
+    // bought for a push the store cannot receive.
     if (ebayAccount.status !== EbayAccountStatus.ACTIVE) {
-      this.logger.error(`eBay account ${ebayAccount.id} is not active`);
-      return { pushed: false };
+      this.logger.warn(
+        `Order ${order.id}: eBay store ${ebayAccount.id} is ${ebayAccount.status}, not active — ` +
+          `holding the tracking push until it is reconnected`
+      );
+      return { pushed: false, held: { retryFast: false } };
     }
 
     // A fulfillment needs a linked listing (the order is otherwise not ours to
@@ -512,10 +586,28 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     // same. If eBay already holds a fulfillment for the line item, record it
     // and stop: no conversion is bought and nothing is posted. A read that
     // fails throws (next tick retries) — "could not read" is not "none".
-    const existing = findFulfillmentForLineItem(
-      await this.ebayFulfillmentService.fetchShippingFulfillments(accessToken, order.ebay_order_id),
-      lineItemId
-    );
+    //
+    // An order eBay does not know under this store's token (filed under the
+    // wrong store) is HELD here, before the conversion: buying a number for a
+    // push that can never be made is pure spend.
+    let fulfillments: EbayShippingFulfillment[];
+    try {
+      fulfillments = await this.ebayFulfillmentService.fetchShippingFulfillments(
+        accessToken,
+        order.ebay_order_id,
+        ebayAccount.marketplace_id
+      );
+    } catch (err: unknown) {
+      if (err instanceof EbayOrderNotVisibleError) {
+        this.logger.error(
+          `Order ${order.id}: eBay order ${order.ebay_order_id} is not visible to store ${ebayAccount.id} — ` +
+            `holding the tracking push (no conversion, no push)`
+        );
+        return { pushed: false, held: { retryFast: false } };
+      }
+      throw err;
+    }
+    const existing = findFulfillmentForLineItem(fulfillments, lineItemId);
     if (existing) {
       await this.databaseService.query(
         `UPDATE orders SET
@@ -590,12 +682,10 @@ export class AmazonTrackingProcessorService extends WorkerHost {
           `(${conversion.outcome ?? 'unknown'}) — HOLDING the eBay push. The raw Amazon ` +
           `tracking number is never sent when a conversion was expected.`,
       );
-      return {
-        pushed: false,
-        retryAt: retryFast
-          ? new Date(Date.now() + DEFERRAL_RETRY_INTERVAL_HOURS * 3_600_000)
-          : undefined,
-      };
+      // Always a HOLD, inside the window or past it: the order stays pre-ship
+      // and is retried. (Past the window this used to settle the order as
+      // SHIPPED, and SHIPPED -> SHIPPED never re-ran the push — stranded.)
+      return { pushed: false, held: { retryFast } };
     }
 
     const { trackingNumber, shippingCarrierCode } = conversion;
@@ -629,7 +719,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     );
 
     this.logger.log(`eBay order ${order.ebay_order_id} marked as shipped`);
-    return { pushed: true };
+    return { pushed: true, posted: true };
   }
 
   /**

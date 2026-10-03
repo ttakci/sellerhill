@@ -1,7 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import {
   EbayListingApiModel,
+  ListingFailureCode,
   ListingJobKind,
   ListingJobStatus,
   ListingStatus,
@@ -19,7 +20,9 @@ import { stampCurrentCorrelation } from '../../common/observability/queue-correl
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 import { OrderSyncService } from '../orders/order-sync.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
 
+import { decideImportAsinConflict, findAsinStorePresence } from './cross-store-asin';
 import { fairBatchPriority } from './fair-priority';
 import { ListingProcessorService } from './listing-processor.service';
 
@@ -36,7 +39,10 @@ export class ListingImportService {
     private readonly listingProcessor: ListingProcessorService,
     @InjectQueue('listings') private readonly listingQueue: Queue,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly orderSync: OrderSyncService
+    private readonly orderSync: OrderSyncService,
+    // Optional so a spec can build the service without it; Nest always
+    // supplies it. Absent = the cross-store setting reads as off.
+    @Optional() private readonly storeSettings?: StoreSettingsService
   ) {}
 
   async buildTemplate(): Promise<Buffer> {
@@ -161,6 +167,15 @@ export class ListingImportService {
     if ((await this.database.query<{ id: string }>(`SELECT id FROM listings WHERE user_id=$1 AND ebay_item_id=$2`, [data.userId, data.ebayItemId]))[0]) {
       throw new BadRequestException('eBay listing is already tracked');
     }
+    // The cross-store ASIN rule (cross-store-asin.ts): an ASIN the seller
+    // already has ACTIVE/DRAFT on ANOTHER store is not imported onto this one
+    // unless this store's resolved `allowCrossStoreAsins` is on. Another item
+    // of the same ASIN on THIS store stays importable, as before. Settled as a
+    // terminal duplicate at once — a retry cannot change the answer.
+    if (await this.isCrossStoreConflict(data)) {
+      await this.recordCrossStoreDuplicate(data);
+      return;
+    }
     const { productData, productId } = await this.listingProcessor.resolveProductData(data.asin, data.userId);
     if (discovery.api_model === EbayListingApiModel.LEGACY) {
       await this.ebay.migrateLegacyListing(data.ebayAccountId, data.ebayItemId);
@@ -213,6 +228,45 @@ export class ListingImportService {
     // reservation is handed over to it (same release-on-success rule as the
     // create path — see QuotaEnforcementService.consumeForCreate).
     await this.quotaEnforcement.consumeForCreate(data.userId, data.listingJobItemId);
+    await this.updateJobCounts(data.jobId);
+  }
+
+  private async isCrossStoreConflict(data: ExistingListingImportQueueData): Promise<boolean> {
+    let allowCrossStore = false;
+    if (this.storeSettings) {
+      try {
+        allowCrossStore =
+          (await this.storeSettings.getResolvedSettings(data.userId, data.ebayAccountId)).allowCrossStoreAsins === true;
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Cross-store ASIN setting unreadable for store ${data.ebayAccountId}; treating as off: ${message}`);
+      }
+    }
+    const presence = await findAsinStorePresence(this.database, {
+      userId: data.userId,
+      asin: data.asin,
+      ebayAccountId: data.ebayAccountId,
+    });
+    return decideImportAsinConflict({ ...presence, allowCrossStore });
+  }
+
+  private async recordCrossStoreDuplicate(data: ExistingListingImportQueueData): Promise<void> {
+    this.logger.warn(
+      `Import of eBay item ${data.ebayItemId} skipped: ASIN ${data.asin} is already listed on another store of user ${data.userId}.`
+    );
+    await this.database.query(
+      `UPDATE listing_job_items
+          SET status=$1, error_message=$2, failure_code=$3, failure_details=$4::jsonb, updated_at=NOW()
+        WHERE id=$5`,
+      [
+        ListingStatus.ERROR,
+        'DUPLICATE_LISTING: This ASIN is already listed on another of your stores.',
+        ListingFailureCode.DUPLICATE_LISTING,
+        JSON.stringify({ retryable: false }),
+        data.listingJobItemId,
+      ]
+    );
+    await this.quotaEnforcement.releaseForCreate(data.userId, data.listingJobItemId);
     await this.updateJobCounts(data.jobId);
   }
 

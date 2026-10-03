@@ -29,6 +29,12 @@
       "warning": "Попередження",
       "info": "Рекомендації"
     },
+    "storeFilter": {
+      "label": "Магазин",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Стосується всього облікового запису",
+      "storesLabel": "Магазини, яких це стосується"
+    },
     "summary": {
       "critical": "Критичних: {{count}}",
       "warning": "Попереджень: {{count}}",
