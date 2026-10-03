@@ -1,4 +1,4 @@
-import { Dropdown, Icon } from '@repo/ui';
+import { Dropdown, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,10 +15,18 @@ export const StoreSwitcherComponent = ({
   if (!visible) {
     return null;
   }
+  const name = (
+    <S.Name>
+      <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
+        {activeLabel}
+      </Text>
+    </S.Name>
+  );
   if (!hasMenu) {
     return (
       <S.StaticLabel title={activeLabel}>
-        <S.Label>{activeLabel}</S.Label>
+        <Icon name="storefront" size={18} color="brand.primary" />
+        {name}
       </S.StaticLabel>
     );
   }
@@ -28,7 +36,8 @@ export const StoreSwitcherComponent = ({
       width="14rem"
       trigger={
         <S.Trigger aria-label={t('translation:header.selectStore')} title={activeLabel}>
-          <S.Label>{activeLabel}</S.Label>
+          <Icon name="storefront" size={18} color="brand.primary" />
+          {name}
           <Icon name="chevron-down" size={12} />
         </S.Trigger>
       }
