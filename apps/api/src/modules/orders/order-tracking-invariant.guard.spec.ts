@@ -132,9 +132,10 @@ describe('auto-fulfill order-state gate', () => {
   it('does not greet an already-shipped order with a thank-you message', () => {
     // Same returning-seller backlog, different damage: a real buyer receives a
     // "we're preparing your order" weeks after their parcel arrived.
-    // …nor a cancelled one, nor an order first seen long after it was placed.
-    expect(source).toContain(
-      'if (freshSale && !isOrderAlreadyFulfilled(entity.status) && entity.status !== OrderStatus.CANCELLED) {'
+    // …nor a cancelled one, nor an order first seen long after it was placed,
+    // nor a sale with no SellerHill listing behind it (operator, 2026-10-03).
+    expect(source).toMatch(
+      /freshSale &&\s+listingId &&\s+!isOrderAlreadyFulfilled\(entity\.status\) &&\s+entity\.status !== OrderStatus\.CANCELLED/
     );
   });
 
