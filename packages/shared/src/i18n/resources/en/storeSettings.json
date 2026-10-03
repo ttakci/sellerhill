@@ -127,7 +127,7 @@
         "veroHint": "Skips products from brands known to report listings through eBay's VeRO program. eBay removes a reported listing and counts it against your account.",
         "veroOffWarning": "With protection off, products from brands that report listings on eBay are listed like any other. A VeRO report can get your eBay account restricted.",
         "hideBrand": "Don't send the brand to eBay",
-        "hideBrandHint": "The listing is published as Unbranded: the brand is taken out of the title and the item specifics, and no barcode or part number is sent, because eBay's catalog would put the brand back."
+        "hideBrandHint": "The listing is published without a brand: the brand is taken out of the title and the item specifics, and no barcode or part number is sent, because eBay's catalog would put the brand back."
       },
       "filters": {
         "title": "What may be listed",

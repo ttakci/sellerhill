@@ -124,6 +124,29 @@ describe('AspectResolverService.resolve', () => {
     expect(resolution.aspects.Department).toBeDefined();
     expect(resolution.unresolvedRequired).toEqual([]);
   });
+
+  it('ignores a learned Brand, so a brandless product reads Does not apply', async () => {
+    // Learned Brand rows are old terminal fallbacks ("Unbranded"); a brand is
+    // per-product and must never be a category default.
+    const { service } = makeService([
+      {
+        aspect_key: 'brand',
+        aspect_name: 'Brand',
+        value: 'Unbranded',
+        source: 'learned',
+        is_override: false,
+        confidence: 90,
+        success_count: 40,
+      },
+    ]);
+
+    const resolution = await service.resolve({
+      ...request,
+      categoryAspects: [{ name: 'Brand', required: true, selectionOnly: false, multiValue: false, values: [] }],
+    });
+
+    expect(resolution.aspects.Brand).toEqual(['Does not apply']);
+  });
 });
 
 describe('AspectResolverService LLM layer', () => {
@@ -202,6 +225,14 @@ describe('AspectResolverService.recordPublishSuccess', () => {
           layer: AspectResolutionLayer.TERMINAL_FALLBACK,
           required: true,
           selectionOnly: true,
+        },
+        // A brand is per-product, never a category default.
+        {
+          aspectName: 'Brand',
+          value: 'Does not apply',
+          layer: AspectResolutionLayer.TERMINAL_FALLBACK,
+          required: true,
+          selectionOnly: false,
         },
         // Product data is per-product; it teaches nothing about the category.
         {

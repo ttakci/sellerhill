@@ -41,7 +41,7 @@ export interface ListingRulesConfig {
   /** Check the brand against the platform's VeRO list. On unless switched off. */
   veroProtectionEnabled: boolean;
   /**
-   * Send no brand to eBay: the listing carries eBay's own "Unbranded" value,
+   * Send no brand to eBay: the Brand aspect reads eBay's own "Does not apply",
    * the Brand / Manufacturer specifics are dropped and no UPC / EAN / MPN is
    * sent (a barcode would let eBay's catalog put the brand straight back).
    */

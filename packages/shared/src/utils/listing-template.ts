@@ -96,9 +96,13 @@ export type ListingTemplatePlaceholder = (typeof LISTING_TEMPLATE_PLACEHOLDERS)[
  * - `condition`/`quantity` are never passed by `processDescriptionTemplate`, so
  *   they always render empty.
  * - `asin` is a source-marketplace identifier and names the supplier.
+ * - `brand`/`manufacturer`: the description never shows the brand (see
+ *   `isBrandDetailRow`); eBay's item specifics carry it instead.
  */
 const UNSAFE_LISTING_TEMPLATE_PLACEHOLDERS: readonly ListingTemplatePlaceholder[] = [
   'asin',
+  'brand',
+  'manufacturer',
   'price',
   'currency',
   'condition',
@@ -205,15 +209,30 @@ const PRESENCE_FLAG_SET = '1';
 const PRESENCE_FLAG_UNSET = '';
 
 /**
+ * Spec names that never reach the description's details table (operator
+ * decision, 2026-10-03). The brand is either the supplier's — which the
+ * description must not advertise — or eBay's placeholder ("Unbranded"), which
+ * reads as filler to a buyer. eBay's own item specifics still carry Brand.
+ */
+const BRAND_DETAIL_KEY = /^(brand|brand name|manufacturer)$/i;
+
+/** True for a "Brand: …" style details row, which a template never shows. */
+export function isBrandDetailRow(row: string): boolean {
+  const colon = row.indexOf(':');
+  return colon > 0 && BRAND_DETAIL_KEY.test(row.slice(0, colon).trim());
+}
+
+/**
  * Build the canonical placeholder context from product-shaped data.
  * `product_details` is a "Key: Value" list built from specs — the shape the
- * seeded templates iterate over.
+ * seeded templates iterate over. Brand rows are left out (`isBrandDetailRow`).
  */
 export function buildListingTemplateContext(input: ListingTemplateInput): ListingTemplateContext {
   const features = (input.features ?? []).filter((f) => typeof f === 'string' && f.trim().length > 0);
   const productDetails = Object.entries(input.specs ?? {})
     .filter(([key, value]) => Boolean(key) && typeof value === 'string' && value.trim().length > 0)
-    .map(([key, value]) => `${key}: ${value}`);
+    .map(([key, value]) => `${key}: ${value}`)
+    .filter((row) => !isBrandDetailRow(row));
 
   return {
     title: input.title ?? '',

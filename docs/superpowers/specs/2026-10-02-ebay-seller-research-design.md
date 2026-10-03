@@ -190,7 +190,7 @@ The item page prints a lifetime `N sold` counter and sometimes `M sold in the la
 
 The window the seller picked filters on `sold_since_previous_scan` when a previous scan inside the window exists, otherwise on `sold_per_day × days ≥ 1`; the result table says which rule applied (`sellerResearch.items.windowRuleExact` / `…Estimated`). Copy never claims an exact sale count the page did not print. A second scan a week later is therefore how a seller gets a true 7-day figure — the page says so on a first scan ("Scan again in 7 days for exact weekly sales"). No sampling job of ours runs on its own.
 
-## 7. Data model — migration `139_seller_research.sql`
+## 7. Data model — migration `140_seller_research.sql` (139 was taken by the template fix, 2026-10-03)
 
 ```sql
 CREATE TYPE seller_research_scan_status AS ENUM ('queued','running','completed','failed');
@@ -303,7 +303,7 @@ DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.t
 1. Shared types + Zod + i18n skeleton (en/tr first, 14 agents for the rest at the end).
 2. `services/amazon-scraper`: `sellerhill/search.py` + `POST /v1/search` + tests. (Independent of eBay; unblocks phase 2.)
 3. **Xvfb spike** (a throwaway Docker image: python + playwright + Chromium + Xvfb, the same probe through the eBay IP, run once the IP has cooled for a day) → only on a pass: `services/ebay-scraper` (egress/pool copies, headful browser worker, selectors, three routes, fixtures from the spike's evidence, Dockerfile, compose). On a fail: stop, report, operator chooses unblocker vs Marketplace Insights.
-4. Migration 139 + billing wiring (limit key, maps, catalog sync, summary dimension, retention manifest).
+4. Migration 140 + billing wiring (limit key, maps, catalog sync, summary dimension, retention manifest).
 5. API module: client, settings, pure helpers (TDD), service + gate, processor, controller, guard specs.
 6. Web: API slice, pages, hooks, demo fixtures, nav/route, i18n.
 7. Admin: settings block, proxies editor target, warnings, overview card.

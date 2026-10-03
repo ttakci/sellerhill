@@ -12,8 +12,8 @@
  * Each template's sample product comes from migration 122, the same
  * `predefined_templates.sample_data` the in-app picker previews. Photos are the
  * CC0 / public-domain, unbranded images under `apps/web/public/template-samples/`
- * (see its CREDITS.md), served same-origin. Brand is `Unbranded`, and no
- * product, model or identifier may belong to a real brand.
+ * (see its CREDITS.md), served same-origin. No product, model or identifier may
+ * belong to a real brand, and the description shows no brand row at all.
  *
  * Also writes `apps/web/public/template-samples/catalog.json` (every template's
  * HTML + sample data), which the sign-up-free demo's template picker reads.
@@ -31,7 +31,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const { renderListingTemplate } = require(
+const { renderListingTemplate, isBrandDetailRow } = require(
   '../packages/shared/dist/cjs/utils/listing-template.cjs'
 );
 
@@ -47,7 +47,7 @@ if (fs.existsSync(CATALOG_MORE)) {
   sql += fs.readFileSync(CATALOG_MORE, 'utf8');
 }
 /** `replace(html_content, 'from', 'to') … WHERE slug = 'x'` patches from later migrations. */
-const HTML_FIX_MIGRATIONS = ['123_tech_gadgets_image_fit.sql'];
+const HTML_FIX_MIGRATIONS = ['123_tech_gadgets_image_fit.sql', '139_template_padding_and_no_brand_row.sql'];
 const HTML_FIXES = HTML_FIX_MIGRATIONS.flatMap((file) => {
   const src = fs.readFileSync(path.resolve(__dirname, '../apps/api/migrations', file), 'utf8');
   return [...src.matchAll(/replace\(html_content,\s*'([^']*)',\s*'([^']*)'\)[\s\S]*?WHERE slug = '([^']+)'/g)].map(
@@ -103,7 +103,14 @@ function templateSamples() {
     }
   }
   
-  return { ...samples1, ...samples2, ...samples3 };
+  // Migration 139 removes brand rows from every stored sample; mirror it.
+  const merged = { ...samples1, ...samples2, ...samples3 };
+  for (const sample of Object.values(merged)) {
+    if (!Array.isArray(sample.product_details)) continue;
+    sample.product_details = sample.product_details.filter((row) => !isBrandDetailRow(String(row)));
+    sample.has_details = sample.product_details.length > 0 ? '1' : '';
+  }
+  return merged;
 }
 const samples = templateSamples();
 

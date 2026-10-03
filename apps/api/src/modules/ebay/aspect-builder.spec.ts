@@ -48,8 +48,13 @@ describe('fallbackValueFor', () => {
     expect(fallbackValueFor(freeText('UPC', true), 'Some product')).toBe('Does not apply');
   });
 
-  it('falls back to Unbranded for Brand', () => {
-    expect(fallbackValueFor(freeText('Brand', true), 'Some product')).toBe('Unbranded');
+  it('falls back to Does not apply for Brand', () => {
+    expect(fallbackValueFor(freeText('Brand', true), 'Some product')).toBe('Does not apply');
+  });
+
+  it('prefers Does not apply over Unbranded on a selection-only Brand', () => {
+    const aspect = selection('Brand', ['Unbranded', 'Acme', 'Does Not Apply']);
+    expect(fallbackValueFor(aspect, 'Some product')).toBe('Does Not Apply');
   });
 
   it('picks an allowed value the title mentions for selection-only aspects', () => {
@@ -117,7 +122,7 @@ describe('buildAspects', () => {
 
     expect(Object.values(aspects).flat()).not.toContain('Unknown');
     expect(aspects.MPN).toEqual(['Does not apply']);
-    expect(aspects.Brand).toEqual(['Unbranded']);
+    expect(aspects.Brand).toEqual(['Does not apply']);
     // An empty required aspect is what killed listings: eBay refuses the
     // publish and no retry can derive the value.
     expect(aspects['Screen Size']).toEqual(['Does not apply']);
@@ -214,7 +219,7 @@ describe('buildAspects', () => {
 
   it('always emits Brand so listings are never brandless', () => {
     const aspects = buildAspects({ title: 'Generic thing', categoryAspects: [] });
-    expect(aspects.Brand).toEqual(['Unbranded']);
+    expect(aspects.Brand).toEqual(['Does not apply']);
   });
 
   it('emits product attributes the category never declared as custom specifics', () => {
