@@ -169,9 +169,9 @@ export class OrdersService {
         `(o.ebay_order_id ILIKE $${paramIndex}
           OR o.buyer_name ILIKE $${paramIndex}
           OR o.buyer_email ILIKE $${paramIndex}
-          OR l.title ILIKE ${paramIndex}
-          OR l.asin ILIKE ${paramIndex}
-          OR o.seller_note ILIKE ${paramIndex})`
+          OR l.title ILIKE $${paramIndex}
+          OR l.asin ILIKE $${paramIndex}
+          OR o.seller_note ILIKE $${paramIndex})`
       );
       params.push(`%${filters.search}%`);
       paramIndex++;
@@ -294,7 +294,7 @@ export class OrdersService {
        ${fromJoin}
        WHERE ${whereClause}
        ORDER BY ${orderBy}
-       LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`,
+       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]
     );
 

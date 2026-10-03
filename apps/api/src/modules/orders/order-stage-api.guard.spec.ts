@@ -22,6 +22,15 @@ describe('orders API — stage', () => {
     expect(body).toMatch(/buildOrderStageSql\('o'\)\} = ANY\(\$/);
   });
 
+  it('never interpolates a parameter index without its $ (a bare number is a literal, not a bind)', () => {
+    // `ILIKE ${paramIndex}` renders `ILIKE 3` and `LIMIT ${paramIndex}` renders
+    // `LIMIT 5`: the statement then references fewer binds than it is given and
+    // Postgres refuses every list read ("bind message supplies 5 parameters, but
+    // prepared statement requires 3") — shipped once, broke the orders page.
+    const bare = service.match(/(?<!\$)\$\{(?:paramIndex|limitIndex)[^}]*\}/g) ?? [];
+    expect(bare).toEqual([]);
+  });
+
   it('sorts what needs the seller first when the caller did not choose a sort', () => {
     expect(service).toMatch(/CASE WHEN \$\{buildNeedsActionSql\('o'\)\} THEN 0/);
     expect(service).toMatch(/THEN 0 ELSE 1 END, o\.order_date DESC/);
