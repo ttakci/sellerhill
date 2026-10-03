@@ -3,7 +3,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   ACTIONABLE_RETURN_BUCKETS,
-  buildReturnBucketSql,
   deriveReturnBucket,
   EbayReturnDto,
   PaginatedReturnsDto,
@@ -18,6 +17,11 @@ import {
 import { DatabaseService, QueryParam } from '../../common/database/database.service';
 
 import { RETURNS_DEFAULT_PAGE_SIZE, RETURNS_MAX_PAGE_SIZE } from './ebay-returns.constants';
+import {
+  buildReturnStoreActiveSql,
+  buildStoreScopedReturnBucketSql,
+  scopeReturnBucketToStore,
+} from './return-store-scope';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 interface ReturnListRow {
@@ -45,6 +49,8 @@ interface ReturnListRow {
   listing_title: string | null;
   listing_asin: string | null;
   product_image_urls: string[] | string | null;
+  /** `buildReturnStoreActiveSql` — the return's store is still ACTIVE. */
+  store_active: boolean | null;
 }
 
 interface BucketCountRow {
@@ -148,7 +154,7 @@ export class EbayReturnsService {
    */
   private async bucketContext(): Promise<{ bucketSql: string; freshnessHours: number }> {
     const freshnessHours = resolveReturnFreshnessHours((await this.schedule.resolve()).intervalHours);
-    return { bucketSql: buildReturnBucketSql('r', freshnessHours), freshnessHours };
+    return { bucketSql: buildStoreScopedReturnBucketSql('r', freshnessHours), freshnessHours };
   }
 
   async list(userId: string, query: ReturnsQueryDto = {}): Promise<PaginatedReturnsDto> {
@@ -201,7 +207,8 @@ export class EbayReturnsService {
               l.id AS listing_id,
               l.title AS listing_title,
               l.asin AS listing_asin,
-              p.image_urls AS product_image_urls
+              p.image_urls AS product_image_urls,
+              ${buildReturnStoreActiveSql('r')} AS store_active
          FROM ebay_returns r
        ${PRODUCT_JOINS}
         WHERE r.user_id = $1${filters}
@@ -231,7 +238,8 @@ export class EbayReturnsService {
               l.id AS listing_id,
               l.title AS listing_title,
               l.asin AS listing_asin,
-              p.image_urls AS product_image_urls
+              p.image_urls AS product_image_urls,
+              ${buildReturnStoreActiveSql('r')} AS store_active
          FROM ebay_returns r
        ${PRODUCT_JOINS}
         WHERE r.user_id = $1 AND r.id = $2::uuid`,
@@ -277,16 +285,19 @@ export class EbayReturnsService {
       orderId: row.order_id,
       ebayItemId: row.ebay_item_id,
       returnQuantity: row.return_quantity,
-      bucket: deriveReturnBucket(
-        {
-          state: row.state,
-          status: row.status,
-          sellerActivityDue: row.seller_activity_due,
-          sellerRespondBy: row.seller_respond_by,
-          lastSyncedAt: row.last_synced_at,
-        },
-        now,
-        freshnessHours
+      bucket: scopeReturnBucketToStore(
+        deriveReturnBucket(
+          {
+            state: row.state,
+            status: row.status,
+            sellerActivityDue: row.seller_activity_due,
+            sellerRespondBy: row.seller_respond_by,
+            lastSyncedAt: row.last_synced_at,
+          },
+          now,
+          freshnessHours
+        ),
+        row.store_active
       ),
       state: row.state,
       status: row.status,

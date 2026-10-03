@@ -596,7 +596,7 @@ export class AdminService {
     let uniqueRefreshedAsins = 0;
     try {
       const enforcementOnForRefresh = await this.platformSettings.getBoolean(PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED);
-      const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOnForRefresh);
+      const { entitlementJoin, planLimitFilter, storeActiveFilter } = buildRefreshEntitlementSql(enforcementOnForRefresh);
       const [lagRow] = await this.databaseService.query<{ lag_minutes: string | null; unique_asins: string }>(
         `SELECT EXTRACT(EPOCH FROM (NOW() - MIN(p.next_refresh_at) FILTER (WHERE p.next_refresh_at < NOW()))) / 60 AS lag_minutes,
                 COUNT(*)::text AS unique_asins
@@ -606,6 +606,7 @@ export class AdminService {
             ${entitlementJoin}
             WHERE l.product_id = p.id AND l.status = $1
               ${planLimitFilter}
+              ${storeActiveFilter}
           )`,
         [ListingStatus.ACTIVE]
       );

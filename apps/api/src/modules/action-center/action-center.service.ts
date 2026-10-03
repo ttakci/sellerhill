@@ -59,7 +59,6 @@ import {
   SIMULATED_AMAZON_ORDER_PREFIX,
   SourceUnavailableReason,
   buildOrderStageSql,
-  buildReturnBucketSql,
   buildShipByStateSql,
   resolveReturnFreshnessHours,
   type ActionCenterItemDto,
@@ -68,6 +67,7 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 import { BillingService } from '../billing/billing.service';
+import { buildStoreScopedReturnBucketSql } from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 import { buildNotSellingSql } from '../listings/listing-cleanup.helpers';
 
@@ -507,7 +507,7 @@ export class ActionCenterService {
    * (`sellerResponseDue`). Its own probe: the rows come from the return sweep,
    * and a problem there must not cost the order items.
    *
-   * Counted through `buildReturnBucketSql` — the expression the Returns page
+   * Counted through `buildStoreScopedReturnBucketSql` — the expression the Returns page
    * filters its "Needs action" tab on — so the count and the list agree.
    * CRITICAL once any deadline has passed: eBay documents the respond-by date
    * as the seller's due date, and past it the case is out of the seller's hands.
@@ -519,19 +519,19 @@ export class ActionCenterService {
    * open. Same horizon the Returns page uses, from the same schedule service.
    */
   private async returnItems(userId: string): Promise<ActionCenterItemDto[]> {
-    const bucket = buildReturnBucketSql(
+    // The Returns page's own store-scoped bucket: a disconnected store's
+    // return reads as UNCONFIRMED there and is therefore not counted here.
+    const bucket = buildStoreScopedReturnBucketSql(
       'r',
       resolveReturnFreshnessHours((await this.returnSchedule.resolve()).intervalHours)
     );
     const rows = await this.db.query<BreakdownRow>(
       `SELECT ${bucket} AS code, COUNT(*) AS count
          FROM ebay_returns r
-         JOIN ebay_accounts a ON a.id = r.ebay_account_id
         WHERE r.user_id = $1
-          AND a.status = $2
-          AND ${bucket} IN ($3, $4)
+          AND ${bucket} IN ($2, $3)
         GROUP BY 1`,
-      [userId, EbayAccountStatus.ACTIVE, ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE]
+      [userId, ReturnBucket.ACTION_OVERDUE, ReturnBucket.ACTION_DUE]
     );
     let total = 0;
     let overdue = 0;

@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "获取 eBay 商业政策失败",
       "invalidAsins": "您输入的条目中有 {{count}} 个看起来不是有效的 ASIN（10 位字母数字字符），已被跳过。",
       "loadFailed": "加载商品刊登失败，请重试。",
-      "scheduleTooLong": "按此速度，任务将超过 30 天。请提高每日商品数，或减少添加的 ASIN。"
+      "scheduleTooLong": "按此速度，任务将超过 30 天。请提高每日商品数，或减少添加的 ASIN。",
+      "storeUnavailable": "无法使用此 eBay 店铺：它未关联到你的账户，或其连接已结束。请选择其他店铺或重新连接该店铺。"
     },
     "detail": {
       "breadcrumb": "商品刊登详情",

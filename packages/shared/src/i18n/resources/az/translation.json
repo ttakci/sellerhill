@@ -42,6 +42,8 @@
     "noBrand": "Brend məlumatı yoxdur",
     "amazonLink": "AMAZON",
     "unknownProduct": "Naməlum məhsul",
+    "store": "Mağaza",
+    "storeNamed": "Mağaza: {{name}}",
     "languageCode": "az-AZ",
     "select": "Seçin"
   },
@@ -393,6 +395,9 @@
         "appliesTo": "Tətbiq olunur",
         "checkBlacklist": "Qara siyahı açar sözlərini yoxla",
         "checkBlacklistDesc": "Dərc etməzdən əvvəl elan başlıqlarını, təsvirlərini, xüsusiyyətlərini və brendi qara siyahınıza qarşı skan edin. Hər açar sözün öz sahə seçimi onun harada yoxlanılacağını müəyyən edir.",
+        "allowCrossStoreAsins": "Digər mağazalarımda olan ASIN-lər bu mağazaya da əlavə oluna bilsin",
+        "allowCrossStoreAsinsDesc": "Bütün mağazalar üçün açsanız, hər mağaza istənilən ASIN-i siyahıya sala bilər; bir mağaza üçün açsanız, yalnız həmin mağaza digər mağazalarınızda artıq olan ASIN-ləri əlavə edə bilər. Bu mağazada artıq olan ASIN həmişə ötürülür.",
+        "allowCrossStoreAsinsInherited": "Bu mağaza üçün seçim yadda saxlayana qədər bütün mağazaların ayarı keçərlidir.",
         "country": "Ölkə",
         "countryPlaceholder": "Ölkə seçin",
         "region": "Region",

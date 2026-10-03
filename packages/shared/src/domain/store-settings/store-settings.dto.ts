@@ -71,6 +71,11 @@ export interface SaveStoreSettingsRequest {
     // Owned by ListingRulesDrawer. Omitted = leave unchanged; an object
     // replaces the stored rules whole (it is normalized server-side).
     listingRules?: ListingRulesConfig;
+
+    // Allow ASINs already listed on the seller's other stores. Three states:
+    // omitted = leave unchanged, null = inherit (a store row follows the
+    // global value; global null = off), boolean = this row's own choice.
+    allowCrossStoreAsins?: boolean | null;
 }
 
 /**

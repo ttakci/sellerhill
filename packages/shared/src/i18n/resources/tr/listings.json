@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "eBay iş politikaları alınamadı",
       "invalidAsins": "Girdilerinizden {{count}} tanesi geçerli bir ASIN gibi görünmüyor (10 alfanümerik karakter) ve atlandı.",
       "loadFailed": "Listeler yüklenemedi. Lütfen tekrar deneyin.",
-      "scheduleTooLong": "Bu hızla iş 30 günden uzun sürer. Günlük ürün sayısını artırın ya da daha az ASIN ekleyin."
+      "scheduleTooLong": "Bu hızla iş 30 günden uzun sürer. Günlük ürün sayısını artırın ya da daha az ASIN ekleyin.",
+      "storeUnavailable": "Bu eBay mağazası kullanılamıyor: hesabınıza bağlı değil ya da bağlantısı sona ermiş. Başka bir mağaza seçin veya mağazayı yeniden bağlayın."
     },
     "detail": {
       "breadcrumb": "Liste Detayı",

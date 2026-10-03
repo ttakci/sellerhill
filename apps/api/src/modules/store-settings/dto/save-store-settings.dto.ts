@@ -235,4 +235,15 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsOptional()
   @IsObject()
   listingRules?: ListingRulesConfig;
+
+  @ApiPropertyOptional({
+    description:
+      'Allow ASINs already ACTIVE/DRAFT on the seller’s OTHER stores to be listed on this one. ' +
+      'Omitted = unchanged, null = inherit (a store row follows the global value; global null = off).',
+    nullable: true,
+  })
+  // `@IsOptional` skips both undefined (unchanged) and null (inherit).
+  @IsOptional()
+  @IsBoolean()
+  allowCrossStoreAsins?: boolean | null;
 }

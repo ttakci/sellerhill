@@ -181,6 +181,12 @@ export interface ListingJobDto {
   skippedDuplicateCount?: number;
   /** When the last group of a scheduled job is due to start (ISO). Absent on a job that runs at once. */
   scheduledUntil?: string;
+  /**
+   * The eBay store the job works on (`listing_jobs.ebay_account_id`). Null on
+   * a job written without one (a publish run spanning stores, or a row older
+   * than the column).
+   */
+  ebayAccountId: string | null;
 }
 
 /**
@@ -373,6 +379,8 @@ export interface ListingJobsQueryDto {
    * Deep-link target for the Action Center's `LISTING_JOB_FAILURES` item.
    */
   hasFailures?: boolean;
+  /** Only jobs of this eBay store (`listing_jobs.ebay_account_id`). A UUID; anything else is a 400. */
+  ebayAccountId?: string;
 }
 
 /**
@@ -495,6 +503,8 @@ export interface UserProductsQueryDto {
   limit?: number;
   /** Matches product title, ASIN or brand. */
   search?: string;
+  /** Only products with at least one of the seller's listings on this eBay store. A UUID; anything else is a 400. */
+  ebayAccountId?: string;
 }
 
 /** Paginated user-products response. */

@@ -194,7 +194,7 @@ describe('AmazonTrackingProcessorService — the eBay fulfillment is read before
 
     await h.process();
 
-    expect(h.fetchShippingFulfillments).toHaveBeenCalledWith('token', '03-15243-67997');
+    expect(h.fetchShippingFulfillments).toHaveBeenCalledWith('token', '03-15243-67997', 'EBAY_US');
     expect(h.createShippingFulfillment).toHaveBeenCalledTimes(1);
   });
 

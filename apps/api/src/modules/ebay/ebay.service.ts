@@ -898,37 +898,19 @@ export class EbayService implements OnModuleInit {
   }
 
   /**
-   * Get active eBay account ID for user (Public helper)
-   */
-  async getActiveAccountId(userId: string): Promise<string | null> {
-    const account = await this.getActiveAccount(userId);
-    return account ? account.id : null;
-  }
-
-  /**
-   * Get a fresh access token for a user's active eBay account (Public helper)
-   * Used by OrderSyncService and other services that need direct API access
-   */
-  async getActiveAccountAccessToken(userId: string): Promise<string | null> {
-    const account = await this.getActiveAccount(userId);
-    if (!account) {
-      return null;
-    }
-    return this.getAccessToken(account);
-  }
-
-  /**
    * Get a valid access token for a SPECIFIC eBay account (by id).
    * Used by BuyerMessagingProvider and other per-account callers.
    * Refreshes if expiring within 5 minutes (delegates to getAccessToken).
    */
   async getAccountAccessToken(accountId: string): Promise<string> {
+    // ACTIVE only: a disconnected/revoked store has NULLed tokens and must
+    // never be called through — every caller fails closed on the throw.
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE id = $1`,
-      [accountId],
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND status = $2`,
+      [accountId, EbayAccountStatus.ACTIVE],
     );
     if (!accounts[0]) {
-      throw new NotFoundException(`eBay account ${accountId} not found`);
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
     }
     return this.getAccessToken(accounts[0]);
   }
@@ -976,10 +958,10 @@ export class EbayService implements OnModuleInit {
    * The account a listing must be pushed through.
    *
    * `listings.ebay_account_id` is nullable on rows created before migration 030
-   * backfilled it, so this falls back to the user's active account — but unlike
-   * the old `getActiveAccount(userId)` path it is deterministic (oldest account
-   * first) instead of an unordered `LIMIT 1`, which could hand back a different
-   * store on each call and reprice a listing through the wrong token.
+   * backfilled it. Such a row is resolved ONLY when the seller has exactly one
+   * active store — with two or more there is no way to know which store the
+   * listing lives on, and pushing through the wrong token reprices, ends or
+   * publishes in another seller's store. Callers skip/refuse on `null`.
    */
   async resolveListingAccountId(userId: string, listingAccountId: string | null): Promise<string | null> {
     if (listingAccountId) {
@@ -989,10 +971,16 @@ export class EbayService implements OnModuleInit {
       `SELECT id FROM ebay_accounts
        WHERE user_id = $1 AND status = $2
        ORDER BY created_at ASC, id ASC
-       LIMIT 1`,
+       LIMIT 2`,
       [userId, EbayAccountStatus.ACTIVE]
     );
-    return accounts[0]?.id ?? null;
+    if (accounts.length !== 1) {
+      if (accounts.length > 1) {
+        this.logger.warn(`Listing of user ${userId} names no eBay store and the user has several; not guessing`);
+      }
+      return null;
+    }
+    return accounts[0].id;
   }
 
   private async getOwnedAccount(userId: string, accountId: string): Promise<EbayAccountEntity> {
@@ -1016,17 +1004,6 @@ export class EbayService implements OnModuleInit {
        WHERE user_id = $1 AND status = $2
        ORDER BY created_at ASC, id ASC
        LIMIT 1`,
-      [userId, EbayAccountStatus.ACTIVE]
-    );
-    return accounts[0] || null;
-  }
-
-  /**
-   * Get active eBay account for user
-   */
-  private async getActiveAccount(userId: string): Promise<EbayAccountEntity | null> {
-    const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = $2 LIMIT 1`,
       [userId, EbayAccountStatus.ACTIVE]
     );
     return accounts[0] || null;
@@ -1071,12 +1048,12 @@ export class EbayService implements OnModuleInit {
     apiModel: EbayListingApiModel;
   }>> {
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE id = $1`,
-      [accountId]
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND status = $2`,
+      [accountId, EbayAccountStatus.ACTIVE]
     );
     const account = accounts[0];
     if (!account) {
-      throw new NotFoundException(`eBay account ${accountId} not found`);
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
     }
     const accessToken = await this.getAccessToken(account);
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';

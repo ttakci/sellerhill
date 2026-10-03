@@ -1,7 +1,12 @@
 import { TrackingConversionProvider, TrackingConversionScope, type StoreSettingsResponse } from '@repo/shared';
 import { describe, expect, it } from 'vitest';
 
-import { buildInheritedStoreFields, resolveSeedMaxLoss, resolveStoreDraftSeed } from './storeDraftSeed';
+import {
+  buildInheritedStoreFields,
+  resolveSeedAllowCrossStore,
+  resolveSeedMaxLoss,
+  resolveStoreDraftSeed,
+} from './storeDraftSeed';
 import { GLOBAL_SCOPE } from './storeScope';
 
 const row = (overrides: Partial<StoreSettingsResponse>): StoreSettingsResponse =>
@@ -84,5 +89,28 @@ describe('buildInheritedStoreFields', () => {
       trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
       trackingConvertManualOrders: true,
     });
+  });
+});
+
+describe('resolveSeedAllowCrossStore', () => {
+  const globalOn = row({ id: 'global', isGlobal: true, allowCrossStoreAsins: true });
+
+  it('a store with no row of its own shows the global value and owns nothing', () => {
+    expect(resolveSeedAllowCrossStore([globalOn], 'store-a')).toEqual({ value: true, own: null });
+  });
+
+  it('a store row holding null still shows the inherited value', () => {
+    const store = row({ id: 's', storeId: 'store-a', allowCrossStoreAsins: null });
+    expect(resolveSeedAllowCrossStore([globalOn, store], 'store-a')).toEqual({ value: true, own: null });
+  });
+
+  it("a store's own choice wins over the global one", () => {
+    const store = row({ id: 's', storeId: 'store-a', allowCrossStoreAsins: false });
+    expect(resolveSeedAllowCrossStore([globalOn, store], 'store-a')).toEqual({ value: false, own: false });
+  });
+
+  it('nothing set anywhere reads as off', () => {
+    expect(resolveSeedAllowCrossStore([], 'store-a')).toEqual({ value: false, own: null });
+    expect(resolveSeedAllowCrossStore([], GLOBAL_SCOPE)).toEqual({ value: false, own: null });
   });
 });

@@ -149,15 +149,21 @@ describe('EbayNotificationService', () => {
   describe('recordDelivery', () => {
     const parsed = (over: Partial<Record<string, unknown>> = {}) => ({ notificationId: 'n1', topic: 'NEW_MESSAGE', eventDate: null, publishAttemptCount: 1, data: { messageId: 'm', conversationId: 'c', conversationType: 'FROM_MEMBERS', recipientUserName: 'seller-id', senderUserName: 'b', readStatus: false, ...over } });
     it('counts an unread message for the active store and inserts the event once', async () => {
-      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);       // account lookup
+      db.query.mockResolvedValueOnce([{ id: 'acc' }]);                          // account lookup
       db.query.mockResolvedValueOnce([{ counted: false }]);                       // same-conversation check
       db.query.mockResolvedValueOnce([{ id: 1 }]);                                // INSERT … RETURNING id
       await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: true, outcome: 'counted' });
-      expect(db.query).toHaveBeenCalledWith(expect.stringMatching(/seller_id = \$1 OR ebay_username = \$1/), ['seller-id']);
+      const lookup = (db.query.mock.calls as unknown[][])[0];
+      expect(lookup[0]).toMatch(/seller_id = \$1 OR LOWER\(ebay_username\) = LOWER\(\$1\)/);
+      expect(lookup[0]).toMatch(/status = 'active'/);
+      expect(lookup[0]).toMatch(/message_subscription_id IS NOT NULL/);
+      expect(lookup[0]).toMatch(/LIMIT 2/);
+      expect(lookup[0]).not.toMatch(/ORDER BY/);
+      expect(lookup[1]).toEqual(['seller-id']);
       expect(db.query).toHaveBeenCalledWith(expect.stringContaining('unread_message_count = unread_message_count + 1'), ['acc']);
     });
     it('counts a conversation once per sync window — a second message in it is stored, not counted', async () => {
-      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);
+      db.query.mockResolvedValueOnce([{ id: 'acc' }]);
       db.query.mockResolvedValueOnce([{ counted: true }]);
       db.query.mockResolvedValueOnce([{ id: 7 }]);
       await expect(svc.recordDelivery(parsed({ messageId: 'm2' }))).resolves.toEqual({ stored: true, outcome: 'counted_same_conversation' });
@@ -169,22 +175,32 @@ describe('EbayNotificationService', () => {
       expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());
     });
     it('a redelivered notification does not double-count', async () => {
-      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]);
+      db.query.mockResolvedValueOnce([{ id: 'acc' }]);
       db.query.mockResolvedValueOnce([{ counted: false }]);
       db.query.mockResolvedValueOnce([]);                                         // ON CONFLICT DO NOTHING → no row
       await expect(svc.recordDelivery(parsed({ publishAttemptCount: 2 }))).resolves.toEqual({ stored: false, outcome: 'duplicate' });
       expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());
     });
-    it('ignores a delivery for a disconnected store but still stores it', async () => {
-      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'disconnected' }]);
+    it('books an ambiguous recipient (two stores match) without counting and without an account id', async () => {
+      db.query.mockResolvedValueOnce([{ id: 'acc-a' }, { id: 'acc-b' }]);
       db.query.mockResolvedValueOnce([{ id: 2 }]);
-      await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: true, outcome: 'inactive_account' });
+      await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: true, outcome: 'ambiguous_account' });
+      const insert = (db.query.mock.calls as unknown[][])[1];
+      expect(insert[0]).toContain('INSERT INTO ebay_notification_events');
+      expect((insert[1] as unknown[])[2]).toBeNull();
+      expect((insert[1] as unknown[])[5]).toBe('ambiguous_account');
+      expect(db.query).toHaveBeenCalledTimes(2);
       expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());
+    });
+    it('a redelivered ambiguous notification is a duplicate', async () => {
+      db.query.mockResolvedValueOnce([{ id: 'acc-a' }, { id: 'acc-b' }]);
+      db.query.mockResolvedValueOnce([]);
+      await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: false, outcome: 'duplicate' });
     });
     it('stores an unknown recipient as no_account and an already-read message without counting', async () => {
       db.query.mockResolvedValueOnce([]); db.query.mockResolvedValueOnce([{ id: 3 }]);
       await expect(svc.recordDelivery(parsed())).resolves.toEqual({ stored: true, outcome: 'no_account' });
-      db.query.mockResolvedValueOnce([{ id: 'acc', status: 'active' }]); db.query.mockResolvedValueOnce([{ id: 4 }]);
+      db.query.mockResolvedValueOnce([{ id: 'acc' }]); db.query.mockResolvedValueOnce([{ id: 4 }]);
       await expect(svc.recordDelivery(parsed({ readStatus: true }))).resolves.toEqual({ stored: true, outcome: 'already_read' });
       expect(db.query).not.toHaveBeenCalledWith(expect.stringContaining('unread_message_count + 1'), expect.anything());
     });

@@ -22,6 +22,7 @@ import { buildMarginRangeDetails, summarizeMarginStrategy } from '../shared/marg
 import { ListingDetailPageComponent } from './ListingDetailPage.component';
 import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
 
+import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { getErrorI18nKey, isFetchBaseQueryError } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
@@ -85,6 +86,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   );
 
   const { data: listingSettingsGroups = [] } = useGetListingSettingsGroupsQuery();
+  const storeLabelFor = useStoreLabel();
   // The listing's own store's policies (ids are per store); a legacy row with
   // no store gets the API's deterministic default.
   const { data: policiesMap = [] } = useGetBusinessPoliciesQuery(listing?.ebayAccountId ?? undefined, {
@@ -690,6 +692,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   return (
     <ListingDetailPageComponent
       listing={listing}
+      storeLabel={storeLabelFor(listing?.ebayAccountId)}
       isLoading={isLoading}
       isSaving={isSaving}
       isSavingOverrides={isSavingOverrides}

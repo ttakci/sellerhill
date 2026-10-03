@@ -42,6 +42,8 @@
     "noBrand": "No Brand Info",
     "amazonLink": "AMAZON",
     "unknownProduct": "Unknown Product",
+    "store": "Store",
+    "storeNamed": "Store: {{name}}",
     "languageCode": "en-US",
     "select": "Select"
   },
@@ -393,6 +395,9 @@
         "appliesTo": "Applies to",
         "checkBlacklist": "Check blacklist keywords",
         "checkBlacklistDesc": "Scan listing titles, descriptions, specifics, and brand against your blacklist before publishing. Each keyword's own field selection controls where it's checked.",
+        "allowCrossStoreAsins": "Allow ASINs already listed on my other stores",
+        "allowCrossStoreAsinsDesc": "Set for all stores, every store may list any ASIN; set on one store, only that store may add ASINs your other stores already carry. An ASIN already on this store is always skipped.",
+        "allowCrossStoreAsinsInherited": "Following the all-stores setting until you save a choice for this store.",
         "country": "Country",
         "countryPlaceholder": "Select a country",
         "region": "Region",

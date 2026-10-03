@@ -515,7 +515,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   if (path === '/listings/products') {
     const search = params.search?.trim().toLowerCase();
     const rows = DEMO_LISTINGS.filter(
-      (l) => !search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search)
+      (l) =>
+        (!params.ebayAccountId || l.ebayAccountId === params.ebayAccountId) &&
+        (!search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search))
     ).map((l) => ({
       id: l.productId,
       asin: l.asin,
@@ -542,6 +544,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     }
     if (params.status && params.status !== 'all') {
       jobs = jobs.filter((j) => String(j.status) === params.status);
+    }
+    if (params.ebayAccountId) {
+      jobs = jobs.filter((j) => j.ebayAccountId === params.ebayAccountId);
     }
     return ok(paginate(jobs, params));
   }

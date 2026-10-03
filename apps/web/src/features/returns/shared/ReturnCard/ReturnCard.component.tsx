@@ -15,7 +15,7 @@ const EMPTY_VALUE = '—';
  * The whole card is the button; there is no "View order" footer.
  */
 export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, className }) => {
-  const { t } = useTranslation(['returns']);
+  const { t } = useTranslation(['returns', 'translation']);
   const clickable = Boolean(onOpen);
 
   return (
@@ -59,6 +59,16 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
                 </Text>
                 <Text variant="caption" color="text.secondary" numeric>
                   {row.ebayOrderId}
+                </Text>
+              </S.IdRow>
+            )}
+            {row.storeLabel && (
+              <S.IdRow>
+                <Text variant="caption" color="text.tertiary">
+                  {t('translation:common.store')}
+                </Text>
+                <Text variant="caption" color="text.secondary">
+                  {row.storeLabel}
                 </Text>
               </S.IdRow>
             )}

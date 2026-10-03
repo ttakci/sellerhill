@@ -42,6 +42,8 @@
     "noBrand": "无品牌信息",
     "amazonLink": "AMAZON",
     "unknownProduct": "未知商品",
+    "store": "店铺",
+    "storeNamed": "店铺：{{name}}",
     "languageCode": "zh-CN",
     "select": "选择"
   },
@@ -393,6 +395,9 @@
         "appliesTo": "适用于",
         "checkBlacklist": "检查黑名单关键词",
         "checkBlacklistDesc": "发布前，对照您的黑名单扫描刊登标题、描述、商品属性和品牌。每个关键词自身的字段选择决定其检查范围。",
+        "allowCrossStoreAsins": "允许添加我其他店铺中已有的 ASIN",
+        "allowCrossStoreAsinsDesc": "为所有店铺开启后，每个店铺都可以刊登任何 ASIN；只为某个店铺开启时，只有该店铺可以添加您其他店铺已有的 ASIN。本店铺已有的 ASIN 始终会被跳过。",
+        "allowCrossStoreAsinsInherited": "在您为此店铺保存选择之前，沿用所有店铺的设置。",
         "country": "国家/地区",
         "countryPlaceholder": "选择国家/地区",
         "region": "州/省",

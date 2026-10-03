@@ -275,6 +275,7 @@
       "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
       "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir.",
       "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz.",
+      "storeNotConnected": "Bu siparişin eBay mağazası bağlı değil. Mağazayı yeniden bağlayın, ardından takip numarasını dönüştürün.",
       "autoFulfillNotRestartable": "Bu siparişin otomatik satın alması yeniden başlatılamaz. Sipariş zaten alınmış ya da işlemde olabilir veya ikinci bir satın alma oluşabilir. Amazon siparişlerinizi kontrol edip siparişi elle bağlayın.",
       "autoFulfillNoAccount": "Otomatik sipariş için hazır bir Amazon hesabı yok. Ayarlar'da bir Amazon hesabı için otomatik siparişi açın ve harcama limiti girin.",
       "autoFulfillOverCap": "Bu satış Amazon hesabınızın harcama limitini aşıyor. Limiti Amazon hesabının ayarlarından yükseltin veya ürünü elle alın.",

@@ -25,6 +25,8 @@ export type NotificationDeliveryOutcomeKind =
   | 'counted_same_conversation'
   | 'duplicate'
   | 'no_account'
+  | 'ambiguous_account'
+  /** Historical rows only — a non-active store no longer matches (it books as `no_account`). */
   | 'inactive_account'
   | 'already_read'
   | 'ignored'
@@ -259,20 +261,29 @@ export class EbayNotificationService implements OnApplicationBootstrap {
       return stored ? { stored: true, outcome: 'ignored' } : { stored: false, outcome: 'duplicate' };
     }
 
-    // No status filter on purpose: a disconnected store still resolves, so the
-    // delivery is booked against it as `inactive_account` rather than lost.
-    const accounts = await this.db.query<{ id: string; status: EbayAccountStatus }>(
-      `SELECT id, status FROM ebay_accounts WHERE seller_id = $1 OR ebay_username = $1
-       ORDER BY (status = '${EbayAccountStatus.ACTIVE}') DESC LIMIT 1`,
+    // Only a store that is ACTIVE and actually subscribed can be the recipient:
+    // a disconnected row keeps its (changeable, non-unique) username, and
+    // another SellerHill account may hold a stale row under the same name.
+    // The username compare is case-insensitive (eBay's is). Two matches is an
+    // ambiguity we refuse to resolve by guessing — nothing is counted.
+    const accounts = await this.db.query<{ id: string }>(
+      `SELECT id FROM ebay_accounts
+        WHERE (seller_id = $1 OR LOWER(ebay_username) = LOWER($1))
+          AND status = '${EbayAccountStatus.ACTIVE}'
+          AND message_subscription_id IS NOT NULL
+        LIMIT 2`,
       [message.recipientUserName]
     );
-    const account = accounts[0] ?? null;
+    const account = accounts.length === 1 ? accounts[0] : null;
 
     let outcome: NotificationDeliveryOutcomeKind;
-    if (!account) {
+    if (accounts.length > 1) {
+      outcome = 'ambiguous_account';
+      this.logger.warn(
+        `NEW_MESSAGE ${parsed.notificationId} matches ${accounts.length}+ active stores (${accounts.map((a) => a.id).join(', ')}); not counted`
+      );
+    } else if (!account) {
       outcome = 'no_account';
-    } else if (account.status !== EbayAccountStatus.ACTIVE) {
-      outcome = 'inactive_account';
     } else if (message.readStatus) {
       outcome = 'already_read';
     } else if (await this.conversationAlreadyCounted(account.id, message.conversationId)) {

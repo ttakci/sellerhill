@@ -1,5 +1,6 @@
 import { ListingStatus, parseAsins } from '@repo/shared';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { AddListingsDrawer } from '../add-listings/drawer';
@@ -9,6 +10,7 @@ import { ExistingListingsImportDrawer } from '../import-existing';
 import { ListingsOverviewPageComponent } from './ListingsOverviewPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useStoreFilterOptions } from '@/features/ebay/hooks/useStoreLabel';
 import { useLocale } from '@/utils/useLocale';
 
 /** `?drawer=add` opens the create flow — the legacy `/listings/add` page redirects here. */
@@ -28,8 +30,25 @@ const IMPORT_DRAWER_PARAM = 'import';
 const ASINS_PARAM = 'asins';
 
 export const ListingsOverviewPageContainer: React.FC = () => {
+  const { t } = useTranslation(['listings', 'translation']);
   const { localeNavigate } = useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
+  /* `?store=` narrows the page to one store — the carousel, the counts, the
+     links onward and the store the Add Listings drawer opens on. */
+  const storeFilter = searchParams.get('store') ?? '';
+  const { options: storeOptions, hasMultipleStores } = useStoreFilterOptions(t('listings.filters.allStores'));
+  const storeQuery = storeFilter ? `store=${encodeURIComponent(storeFilter)}` : '';
+  const withStore = (path: string) => (storeQuery ? `${path}${path.includes('?') ? '&' : '?'}${storeQuery}` : path);
+
+  const handleStoreFilterChange = (value: string | number) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) {
+      next.set('store', String(value));
+    } else {
+      next.delete('store');
+    }
+    setSearchParams(next, { replace: true });
+  };
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(
     () => searchParams.get('drawer') === ADD_DRAWER_PARAM
   );
@@ -49,13 +68,14 @@ export const ListingsOverviewPageContainer: React.FC = () => {
       status: ListingStatus.ACTIVE,
       sortBy: 'createdAt',
       sortOrder: 'desc',
+      ebayAccountId: storeFilter || undefined,
     },
     { refetchOnMountOrArgChange: true }
   );
 
   // Lightweight draft count for other-actions context
   const { data: draftsData } = useGetListingsQuery(
-    { page: 1, limit: 1, status: ListingStatus.DRAFT },
+    { page: 1, limit: 1, status: ListingStatus.DRAFT, ebayAccountId: storeFilter || undefined },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -96,10 +116,10 @@ export const ListingsOverviewPageContainer: React.FC = () => {
 
   const handleAddSuccess = (result?: { asDraft: boolean }) => {
     if (result?.asDraft) {
-      localeNavigate(`/listings/all?status=${ListingStatus.DRAFT}`);
+      localeNavigate(withStore(`/listings/all?status=${ListingStatus.DRAFT}`));
       return;
     }
-    localeNavigate('/listings/jobs');
+    localeNavigate(withStore('/listings/jobs'));
   };
 
   return (
@@ -109,17 +129,22 @@ export const ListingsOverviewPageContainer: React.FC = () => {
         totalCount={total}
         draftCount={draftCount}
         onAddListing={handleAddListing}
-        onViewAll={() => localeNavigate('/listings/all')}
-        onViewJobs={() => localeNavigate('/listings/jobs')}
+        onViewAll={() => localeNavigate(withStore('/listings/all'))}
+        onViewJobs={() => localeNavigate(withStore('/listings/jobs'))}
         onImportExisting={() => setIsImportDrawerOpen(true)}
-        onViewDrafts={() => localeNavigate(`/listings/all?status=${ListingStatus.DRAFT}`)}
+        onViewDrafts={() => localeNavigate(withStore(`/listings/all?status=${ListingStatus.DRAFT}`))}
         onListingClick={(id) => localeNavigate(`/listings/${id}`)}
+        storeFilter={storeFilter}
+        onStoreFilterChange={handleStoreFilterChange}
+        storeOptions={storeOptions}
+        showStoreFilter={hasMultipleStores}
       />
       <AddListingsDrawer
         isOpen={isAddDrawerOpen}
         onClose={handleAddDrawerClose}
         onSuccess={handleAddSuccess}
         initialAsins={initialAsins}
+        initialEbayAccountId={storeFilter || undefined}
       />
       <ExistingListingsImportDrawer
         isOpen={isImportDrawerOpen}

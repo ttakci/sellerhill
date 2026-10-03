@@ -24,6 +24,7 @@ import { ListingCard } from '@/domain-ui';
 export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   listings,
   locale,
+  storeLabelFor,
   onSelectionChange,
   columns,
   selectedRows,
@@ -80,7 +81,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   const showListChrome = !isEmpty || hasActiveFilters;
 
   const renderGridCard = (listing: ListingDto) => {
-    const card = toListingCardProps(listing, t, locale);
+    const card = toListingCardProps(listing, t, locale, storeLabelFor(listing.ebayAccountId));
     return (
       <ListingCard
         key={listing.id}

@@ -1,11 +1,12 @@
 import { formatSourceStock, type ListingDto } from '@repo/shared';
-import { formatCurrency as formatCurrencyValue, type TableColumn } from '@repo/ui';
+import { formatCurrency as formatCurrencyValue, Text, type TableColumn } from '@repo/ui';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from '../ListingsAllPage.style';
 
 import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
+import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 
 /**
  * Column definitions for ListingsAll table view.
@@ -18,6 +19,7 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
  */
 export function useListingsColumns(locale: string) {
   const { t } = useTranslation(['listings', 'translation']);
+  const storeLabelFor = useStoreLabel();
   const formatCurrency = useCallback(
     (value: number, listing: ListingDto) => formatCurrencyValue(value, locale, listing.currency || 'USD'),
     [locale]
@@ -61,7 +63,22 @@ export function useListingsColumns(locale: string) {
               icon: 'tag',
             });
           }
-          return <ProductTableCell title={displayName} imageUrl={listing.imageUrls?.[0]} meta={meta} />;
+          // Which store the listing lives on — only with more than one store.
+          const storeLabel = storeLabelFor(listing.ebayAccountId);
+          return (
+            <ProductTableCell
+              title={displayName}
+              imageUrl={listing.imageUrls?.[0]}
+              meta={meta}
+              subtitle={
+                storeLabel ? (
+                  <Text variant="caption" color="text.secondary" truncate>
+                    {t('translation:common.storeNamed', { name: storeLabel })}
+                  </Text>
+                ) : undefined
+              }
+            />
+          );
         },
       },
       {
@@ -202,7 +219,7 @@ export function useListingsColumns(locale: string) {
         ),
       },
     ],
-    [t, formatCurrency]
+    [t, formatCurrency, storeLabelFor]
   );
 
   return { columnOptions, allColumns };

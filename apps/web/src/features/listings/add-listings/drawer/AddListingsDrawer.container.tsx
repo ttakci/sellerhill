@@ -91,10 +91,20 @@ const normalizePrefilledAsins = (raw: string | undefined): string =>
  * MOUNTS open, e.g. `/listings?drawer=add`) and for the reset on a later open
  * — the two used to differ, see the note at the open transition below.
  */
-const buildOpenValues = (initialAsins: string | undefined): CreateListingsFormData => ({
-  asins: normalizePrefilledAsins(initialAsins),
-  ...readPreferences(),
-});
+const buildOpenValues = (initialAsins: string | undefined, initialEbayAccountId?: string): CreateListingsFormData => {
+  const preferences = readPreferences();
+  // A page filtered to one store opens the drawer on that store. The stored
+  // policies belong to the stored store, so they are dropped when the store
+  // changes (ids are per store — eBay refuses another store's policy).
+  const storeChanged = Boolean(initialEbayAccountId) && initialEbayAccountId !== preferences.ebayAccountId;
+  return {
+    asins: normalizePrefilledAsins(initialAsins),
+    ...preferences,
+    ...(storeChanged
+      ? { ebayAccountId: initialEbayAccountId ?? '', paymentPolicyId: '', shippingPolicyId: '', returnPolicyId: '' }
+      : {}),
+  };
+};
 
 /**
  * i18n key for the post-submit success toast. The draft/live split only
@@ -115,7 +125,13 @@ const resolveQueuedMessageKey = (summary: ListingJobQueuedSummary, asDraft: bool
   }
 };
 
-export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess, initialAsins }) => {
+export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialAsins,
+  initialEbayAccountId,
+}) => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { locale } = getLocaleConfig(i18n.language);
   const { showMessage, closeMessage } = useUI();
@@ -164,7 +180,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
      * the saved selections — a seller who followed `/listings?drawer=add`
      * lost their remembered store/group/policies.
      */
-    defaultValues: isOpen ? buildOpenValues(initialAsins) : { ...EMPTY_PREFERENCES, asins: '' },
+    defaultValues: isOpen ? buildOpenValues(initialAsins, initialEbayAccountId) : { ...EMPTY_PREFERENCES, asins: '' },
   });
 
   const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
@@ -193,7 +209,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       setScheduleEnabled(false);
       setScheduleSubmitAttempted(false);
       clearErrors();
-      reset(buildOpenValues(initialAsins));
+      reset(buildOpenValues(initialAsins, initialEbayAccountId));
     }
   } else if (isOpen && initialAsins !== prevInitialAsins) {
     // A new hand-off while already open (another Best Sellers pick): only the

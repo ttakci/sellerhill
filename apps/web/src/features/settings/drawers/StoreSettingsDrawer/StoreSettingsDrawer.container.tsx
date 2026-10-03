@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getCountryOptions } from '../../utils/countryOptions';
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
-import { resolveSeedMaxLoss, resolveStoreDraftSeed } from '../storeDraftSeed';
+import { resolveSeedAllowCrossStore, resolveSeedMaxLoss, resolveStoreDraftSeed } from '../storeDraftSeed';
 import { buildScopeOptions, GLOBAL_SCOPE } from '../storeScope';
 
 import { StoreSettingsDrawerComponent } from './StoreSettingsDrawer.component';
@@ -64,6 +64,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // from the global values (see `resolveStoreDraftSeed`).
   const config = resolveStoreDraftSeed(storeConfigs, selectedScope);
   const seedMaxLoss = resolveSeedMaxLoss(storeConfigs, selectedScope);
+  const seedCrossStore = resolveSeedAllowCrossStore(storeConfigs, selectedScope);
 
   const { data: remoteBuyerMessaging } = useGetBuyerMessagingConfigQuery({ storeId });
   const { data: buyerMessageTemplatesData } = useGetBuyerMessageTemplatesQuery();
@@ -79,6 +80,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [zipCode, setZipCode] = useState(config?.zipCode ?? '');
   const [city, setCity] = useState(config?.shipFromCity ?? '');
   const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
+  // Shown: the value in force (own ?? global ?? off). Sent: only a choice made
+  // on THIS scope (`own`), so an untouched store keeps following the global
+  // row instead of being frozen at today's value.
+  const [allowCrossStoreAsins, setAllowCrossStoreAsins] = useState(seedCrossStore.value);
+  const [allowCrossStoreOwn, setAllowCrossStoreOwn] = useState<boolean | null>(seedCrossStore.own);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
   // The loss limit is stored as one nullable number (NULL = no limit, 0 = never
@@ -157,6 +163,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setZipCode(next?.zipCode ?? '');
       setCity(next?.shipFromCity ?? '');
       setCheckBlacklist(next?.checkBlacklist ?? true);
+      setAllowCrossStoreAsins(seedCrossStore.value);
+      setAllowCrossStoreOwn(seedCrossStore.own);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
       setLossLimitEnabled(seedMaxLoss !== null);
@@ -199,6 +207,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         // read by both the eBay inventory location and the provider profile.
         shipFromCity: city.trim(),
         checkBlacklist,
+        // Omitted (undefined) = leave unchanged / keep inheriting.
+        allowCrossStoreAsins: allowCrossStoreOwn ?? undefined,
         amazonTaxRate,
         autoFulfillEnabled,
         // Explicit null turns the limit off; the API reads an OMITTED field as
@@ -313,6 +323,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       isAddressComplete={isAddressComplete}
       addressFieldErrors={addressFieldErrors}
       checkBlacklist={checkBlacklist}
+      allowCrossStoreAsins={allowCrossStoreAsins}
+      isAllowCrossStoreInherited={!isGlobal && allowCrossStoreOwn === null}
+      onAllowCrossStoreAsinsChange={(checked) => {
+        setAllowCrossStoreAsins(checked);
+        setAllowCrossStoreOwn(checked);
+      }}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
       lossLimitEnabled={lossLimitEnabled}
