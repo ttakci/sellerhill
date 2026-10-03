@@ -1,4 +1,4 @@
-import { EBAY_NOT_APPLICABLE, EBAY_UNBRANDED } from '@repo/shared';
+import { EBAY_NOT_APPLICABLE } from '@repo/shared';
 
 import type { CategoryAspect } from './aspect-builder';
 
@@ -19,6 +19,13 @@ import type { CategoryAspect } from './aspect-builder';
 
 /** Values that honestly say "this attribute does not apply to this product". */
 const NON_VALUE_PATTERN = /^(does\s?not\s?apply|not\s?applicable|n\/?a|unspecified|unbranded|none)$/i;
+
+/**
+ * eBay's own non-value, preferred over every other one when a list offers it
+ * (operator decision, 2026-10-03: a missing brand reads "Does not apply", not
+ * "Unbranded", wherever the category lets us say so).
+ */
+const DOES_NOT_APPLY_PATTERN = /^(does\s?not\s?apply|not\s?applicable)$/i;
 
 /**
  * Values that are broad rather than wrong. Picking "Unisex Adult" for a jar of
@@ -106,13 +113,12 @@ export function pickPriorValue(aspect: CategoryAspect, text: string): string | n
  */
 export function pickTerminalValue(aspect: CategoryAspect): string {
   if (!aspect.selectionOnly || aspect.values.length === 0) {
-    if (normalizeName(aspect.name) === 'brand') {
-      return EBAY_UNBRANDED;
-    }
     return EBAY_NOT_APPLICABLE;
   }
 
-  const nonValue = aspect.values.find((value) => NON_VALUE_PATTERN.test(value.trim()));
+  const nonValue =
+    aspect.values.find((value) => DOES_NOT_APPLY_PATTERN.test(value.trim())) ??
+    aspect.values.find((value) => NON_VALUE_PATTERN.test(value.trim()));
   if (nonValue) {
     return nonValue;
   }

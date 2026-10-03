@@ -267,7 +267,6 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
             'IPX5 sweat and water resistant',
           ],
           product_details: [
-            'Brand: Unbranded',
             'Connectivity: Bluetooth 5.3',
             'Battery Life: 40 Hours',
             'Color: Black',

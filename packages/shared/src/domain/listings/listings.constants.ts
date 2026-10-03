@@ -37,4 +37,3 @@ export const EBAY_MAX_ITEM_SPECIFICS = 45;
  * is buyer-visible noise and hurts search placement.
  */
 export const EBAY_NOT_APPLICABLE = 'Does not apply';
-export const EBAY_UNBRANDED = 'Unbranded';

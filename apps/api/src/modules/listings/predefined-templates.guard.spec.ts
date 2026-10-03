@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { buildListingTemplateContext, renderListingTemplate } from '@repo/shared';
+import { buildListingTemplateContext, isBrandDetailRow, renderListingTemplate } from '@repo/shared';
 
 import { sanitizeListingHtml } from '../../common/utils/sanitize';
 
@@ -27,6 +27,8 @@ const CATALOG_SQL = path.join(__dirname, '../../../migrations/073_dropshipping_t
 const STRUCTURE_SQL = path.join(__dirname, '../../../migrations/070_predefined_templates_slug.sql');
 /** Migration 122 replaces every template's sample_data by slug; it wins over 073's seed. */
 const SAMPLES_SQL = path.join(__dirname, '../../../migrations/122_template_sample_products.sql');
+/** Migration 139 removes brand rows from the stored samples and pads General Store. */
+const BRAND_ROW_SQL = path.join(__dirname, '../../../migrations/139_template_padding_and_no_brand_row.sql');
 const SERVICE_TS = path.join(
   __dirname,
   '../listing-settings-groups/listing-settings-group.service.ts'
@@ -244,10 +246,31 @@ describe('predefined template catalog', () => {
     });
 
     it('is unbranded', () => {
+      // Migration 139 strips brand rows from the stored samples (a description
+      // never shows the brand); the rows 122 seeded must still name no real brand.
       const details = (sample.product_details ?? []) as string[];
-      expect(details).toContain('Brand: Unbranded');
+      for (const row of details.filter(isBrandDetailRow)) {
+        expect(row).toBe('Brand: Unbranded');
+      }
       expect(JSON.stringify(sample)).not.toMatch(/\b(MPN|UPC|EAN|Model Number)\b/);
     });
+  });
+
+  it('strips brand rows from every stored sample, and only brand rows', () => {
+    // The settings-drawer preview passes sample_data straight to the renderer,
+    // so brand rows have to leave the stored samples too (migration 139).
+    const sql = fs.readFileSync(BRAND_ROW_SQL, 'utf8');
+    expect(sql).toContain('(brand|brand name|manufacturer)');
+    expect(sql).toContain("'{has_details}'");
+    for (const key of ['Brand', 'brand name', 'MANUFACTURER']) {
+      expect(isBrandDetailRow(`${key}: X`)).toBe(true);
+    }
+  });
+
+  it('renders no brand from live product specs', () => {
+    for (const template of catalog) {
+      expect(renderListingTemplate(template.html, fullContext)).not.toContain('GuardBrand');
+    }
   });
 
   it('renders no images at all in minimal-mono', () => {
