@@ -1,17 +1,17 @@
 import styled from '@emotion/styled';
+import { tkn } from '@repo/ui';
 
-import { LanguageSelectTrigger, LanguageText } from '../AppLayout.style';
+import { HeaderProfileArea } from '../AppLayout.style';
 
-/** Same trigger as the language menu beside it, capped so a long store name truncates. */
-export const Trigger = styled(LanguageSelectTrigger)`
-  max-width: 12rem;
+/** Same block as the user's name beside it (padding, radius, hover), capped so a long store name truncates. */
+export const Trigger = styled(HeaderProfileArea)`
+  gap: ${tkn('spacing.xs')};
+  max-width: 13rem;
   min-width: 0;
 `;
 
 /** The single-store label: the trigger's look without the hover affordance. */
-export const StaticLabel = styled(LanguageSelectTrigger)`
-  max-width: 12rem;
-  min-width: 0;
+export const StaticLabel = styled(Trigger)`
   cursor: default;
 
   &:hover {
@@ -19,7 +19,13 @@ export const StaticLabel = styled(LanguageSelectTrigger)`
   }
 `;
 
-export const Label = styled(LanguageText)`
+export const Name = styled.div`
+  min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+
+  @media (max-width: 47.9375rem) {
+    /* 767px — only the icon on a phone */
+    display: none;
+  }
 `;
