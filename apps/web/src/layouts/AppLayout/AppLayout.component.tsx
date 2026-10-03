@@ -404,8 +404,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <StoreSwitcher />
-
                 <Dropdown
                   align="right"
                   width="8rem"
@@ -422,6 +420,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 />
 
                 <S.VerticalDivider />
+
+                <StoreSwitcher />
 
                 <Dropdown
                   align="right"
