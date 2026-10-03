@@ -77,8 +77,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     pollingInterval: 3000,
     skip: !jobId,
   });
-  // A job of another store makes that store active (top bar).
-  useFollowRecordStore(job?.ebayAccountId);
 
   const isLoading = (isJobLoading || isItemsLoading) && !job && items.length === 0;
 
