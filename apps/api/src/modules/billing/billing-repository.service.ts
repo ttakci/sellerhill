@@ -234,6 +234,29 @@ export class BillingRepositoryService {
     return plans.map((p) => expandPlan(p, prices, limits));
   }
 
+  /**
+   * The trial plan's limits, read by slug because the trial is
+   * `is_active = FALSE` and so never part of {@link loadCatalog}. Null when
+   * the trial plan row does not exist.
+   */
+  async loadTrialLimits(): Promise<Partial<Record<BillingLimitKey, number>> | null> {
+    const rows = await this.databaseService.query<{ limit_key: string | null; limit_value: number | string | null }>(
+      `SELECT l.limit_key, l.limit_value
+         FROM billing_plans p
+         LEFT JOIN billing_plan_limits l ON l.plan_id = p.id
+        WHERE p.slug = $1`,
+      [TRIAL_PLAN_SLUG],
+    );
+    if (rows.length === 0) {return null;}
+    const limits: Partial<Record<BillingLimitKey, number>> = {};
+    for (const row of rows) {
+      if (row.limit_key !== null && row.limit_value !== null) {
+        limits[row.limit_key as BillingLimitKey] = Number(row.limit_value);
+      }
+    }
+    return limits;
+  }
+
   async loadPlanWithPricing(
     planId: string,
     client?: PoolClient,

@@ -851,7 +851,7 @@
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
-      "planCta": "Ücretsiz başla",
+      "planCta": "Ücretsiz dene",
       "showAllPlans": "{{count}} paketin tümünü gör",
       "showFewerPlans": "Daha az paket göster",
       "notIncluded": "Dâhil değil",
@@ -902,6 +902,17 @@
           "conversions": "Ayda 500 takip numarası dönüştürme",
           "bestSellers": "Ayda 25,000 Çok Satanlar ürünü"
         }
+      },
+      "trialPlanNote": "Ücretsiz denemeler deneme paketiyle başlar. Bu pakete dilediğiniz an geçebilirsiniz.",
+      "trial": {
+        "title": "{{days}} gün ücretsiz deneyin",
+        "listings": "{{limit}} aktif ilan",
+        "conversions": "{{limit}} takip numarası dönüştürme",
+        "bestSellers": "{{limit}} Çok Satanlar ürünü",
+        "orders": "{{limit}} otomatik sipariş",
+        "unlimitedOrders": "Sınırsız otomatik sipariş",
+        "noCard": "Kredi kartı gerekmez",
+        "cta": "Ücretsiz denemeyi başlat"
       }
     },
     "faq": {

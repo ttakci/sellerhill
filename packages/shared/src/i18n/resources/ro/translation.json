@@ -839,7 +839,7 @@
       "billingNote": "Anulați oricând. Prețurile nu includ taxele locale, acolo unde se aplică.",
       "perMonth": "/lună",
       "mostPopular": "Cel mai popular",
-      "planCta": "Începeți gratuit",
+      "planCta": "Încercați gratuit",
       "showAllPlans": "Vezi toate cele {{count}} planuri",
       "showFewerPlans": "Arată mai puține planuri",
       "notIncluded": "Nu este inclus",
@@ -890,6 +890,17 @@
           "conversions": "500 de conversii de urmărire / lună",
           "bestSellers": "25,000 de produse Cele mai vândute / lună"
         }
+      },
+      "trialPlanNote": "Orice perioadă de încercare gratuită începe cu pachetul de încercare. Treceți la acest pachet oricând doriți.",
+      "trial": {
+        "title": "Încercare gratuită: {{days}} zile",
+        "listings": "Anunțuri active: {{limit}}",
+        "conversions": "Conversii de urmărire: {{limit}}",
+        "bestSellers": "Produse Cele mai vândute: {{limit}}",
+        "orders": "Comenzi automate: {{limit}}",
+        "unlimitedOrders": "Comenzi automate nelimitate",
+        "noCard": "Nu este necesar un card bancar",
+        "cta": "Începeți perioada gratuită"
       }
     },
     "faq": {

@@ -839,7 +839,7 @@
       "billingNote": "Cancele quando quiser. Os preços não incluem impostos locais, quando aplicáveis.",
       "perMonth": "/mês",
       "mostPopular": "Mais popular",
-      "planCta": "Começar grátis",
+      "planCta": "Testar grátis",
       "showAllPlans": "Ver todos os {{count}} planos",
       "showFewerPlans": "Mostrar menos planos",
       "notIncluded": "Não incluído",
@@ -890,6 +890,17 @@
           "conversions": "500 conversões de rastreio / mês",
           "bestSellers": "25,000 produtos de Mais vendidos / mês"
         }
+      },
+      "trialPlanNote": "Todo teste grátis começa no plano de teste. Mude para este plano quando quiser.",
+      "trial": {
+        "title": "Teste grátis por {{days}} dias",
+        "listings": "{{limit}} anúncios ativos",
+        "conversions": "{{limit}} conversões de rastreio",
+        "bestSellers": "{{limit}} produtos de Mais vendidos",
+        "orders": "{{limit}} pedidos automáticos",
+        "unlimitedOrders": "Pedidos automáticos ilimitados",
+        "noCard": "Não é necessário cartão de crédito",
+        "cta": "Começar teste grátis"
       }
     },
     "faq": {

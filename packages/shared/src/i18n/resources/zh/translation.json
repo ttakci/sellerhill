@@ -839,7 +839,7 @@
       "billingNote": "随时取消。价格不含适用的当地税费。",
       "perMonth": "/月",
       "mostPopular": "最受欢迎",
-      "planCta": "免费开始",
+      "planCta": "免费试用",
       "showAllPlans": "查看全部 {{count}} 个套餐",
       "showFewerPlans": "收起部分套餐",
       "notIncluded": "不包含",
@@ -890,6 +890,17 @@
           "conversions": "每月 500 次物流单号转换",
           "bestSellers": "每月 25,000 件热销榜商品"
         }
+      },
+      "trialPlanNote": "所有免费试用均从试用套餐开始，您可随时切换到此套餐。",
+      "trial": {
+        "title": "免费试用 {{days}} 天",
+        "listings": "{{limit}} 条在售商品刊登",
+        "conversions": "{{limit}} 次物流单号转换",
+        "bestSellers": "{{limit}} 件热销榜商品",
+        "orders": "{{limit}} 个自动订单",
+        "unlimitedOrders": "不限自动订单",
+        "noCard": "无需信用卡",
+        "cta": "开始免费试用"
       }
     },
     "faq": {

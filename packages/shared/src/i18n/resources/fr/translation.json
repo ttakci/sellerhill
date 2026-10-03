@@ -839,7 +839,7 @@
       "billingNote": "Résiliable à tout moment. Les prix s'entendent hors taxes locales le cas échéant.",
       "perMonth": "/mois",
       "mostPopular": "Le plus populaire",
-      "planCta": "Commencer gratuitement",
+      "planCta": "Essayer gratuitement",
       "showAllPlans": "Voir les {{count}} forfaits",
       "showFewerPlans": "Afficher moins de forfaits",
       "notIncluded": "Non inclus",
@@ -890,6 +890,17 @@
           "conversions": "500 conversions de suivi / mois",
           "bestSellers": "25,000 produits Meilleures ventes / mois"
         }
+      },
+      "trialPlanNote": "Chaque essai gratuit démarre avec l'offre d'essai. Passez à cette offre quand vous le souhaitez.",
+      "trial": {
+        "title": "Essayez gratuitement pendant {{days}} jours",
+        "listings": "{{limit}} annonces actives",
+        "conversions": "{{limit}} conversions de suivi",
+        "bestSellers": "{{limit}} produits Meilleures ventes",
+        "orders": "{{limit}} commandes automatiques",
+        "unlimitedOrders": "Commandes automatiques illimitées",
+        "noCard": "Sans carte bancaire",
+        "cta": "Démarrer l'essai gratuit"
       }
     },
     "faq": {
