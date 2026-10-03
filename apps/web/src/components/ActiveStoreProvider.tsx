@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { ActiveStoreProviderProps } from './ActiveStoreProvider.types';
 
 import { resolveRouteMeta } from '@/app/routeMeta';
-import { useGetMeQuery } from '@/features/auth/api/authApi';
-import { selectIsAuthenticated } from '@/features/auth/store/authSlice';
+import { selectCurrentUser, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { ActiveStoreContext } from '@/features/ebay/hooks/useActiveStore';
 import {
   nextSearchForActiveStore,
   readRememberedStore,
+  recordListPath,
   rememberStore,
   resolveActiveStoreId,
   searchForStoreSwitch,
@@ -31,15 +31,20 @@ import { stripLocaleFromPath } from '@/utils/locale';
  */
 export const ActiveStoreProvider = ({ children }: ActiveStoreProviderProps): React.ReactElement => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const { data: me } = useGetMeQuery(undefined, { skip: !isAuthenticated });
-  const userId = me?.id ?? null;
+  // The user the auth slice already holds (AuthBootstrap / login set it before
+  // the shell renders) — NOT `/auth/me`, which can answer after the store
+  // list and would let the first store overwrite the remembered choice.
+  const userId = useSelector(selectCurrentUser)?.id ?? null;
   const { data } = useGetEbayAccountsQuery(undefined, { skip: !isAuthenticated });
   const stores = useMemo(() => data?.items ?? [], [data?.items]);
   const storeIds = useMemo(() => stores.map((store) => store.id), [stores]);
 
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const storeScoped = resolveRouteMeta(stripLocaleFromPath(location.pathname))?.storeScoped ?? false;
+  const navigate = useNavigate();
+  const path = stripLocaleFromPath(location.pathname);
+  const routeMeta = resolveRouteMeta(path);
+  const storeScoped = routeMeta?.storeScoped ?? false;
   const [chosen, setChosen] = useState<string | null>(null);
 
   const activeStoreId = useMemo(
@@ -83,12 +88,21 @@ export const ActiveStoreProvider = ({ children }: ActiveStoreProviderProps): Rea
       }
       setChosen(storeId);
       rememberStore(userId, storeId);
-      if (storeScoped) {
-        const keepParams = options?.keepParams ?? false;
-        setSearchParams(searchForStoreSwitch(searchParams, storeId, keepParams), { replace: keepParams });
+      if (!storeScoped) {
+        return;
       }
+      const keepParams = options?.keepParams ?? false;
+      // A manual switch on a record page (an order, a listing, a job) goes to
+      // that list: the record belongs to the store just left.
+      const listPath = keepParams ? null : recordListPath(path, routeMeta?.path);
+      if (listPath) {
+        const localePrefix = location.pathname.slice(0, location.pathname.length - path.length);
+        void navigate(`${localePrefix}${listPath}?${new URLSearchParams({ store: storeId }).toString()}`);
+        return;
+      }
+      setSearchParams(searchForStoreSwitch(searchParams, storeId, keepParams), { replace: keepParams });
     },
-    [storeIds, userId, storeScoped, searchParams, setSearchParams]
+    [storeIds, userId, storeScoped, path, routeMeta?.path, location.pathname, navigate, searchParams, setSearchParams]
   );
 
   const value = useMemo(() => ({ activeStoreId, stores, setActiveStore }), [activeStoreId, stores, setActiveStore]);

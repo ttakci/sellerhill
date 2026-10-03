@@ -34,4 +34,19 @@ describe('useFollowRecordStore', () => {
     expect(setActiveStore).not.toHaveBeenCalled();
     expect(none.setActiveStore).not.toHaveBeenCalled();
   });
+  it('follows a record once: a later manual switch is not undone', () => {
+    const setActiveStore = vi.fn();
+    let value: ActiveStoreContextValue = { activeStoreId: 'a', stores: [], setActiveStore };
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ActiveStoreContext.Provider value={value}>{children}</ActiveStoreContext.Provider>
+    );
+    const { rerender } = renderHook(() => useFollowRecordStore('b'), { wrapper: Wrapper });
+    expect(setActiveStore).toHaveBeenCalledTimes(1);
+    // the follow landed on b, then the seller picked c while the record is still b
+    value = { activeStoreId: 'b', stores: [], setActiveStore };
+    rerender();
+    value = { activeStoreId: 'c', stores: [], setActiveStore };
+    rerender();
+    expect(setActiveStore).toHaveBeenCalledTimes(1);
+  });
 });

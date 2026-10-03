@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
-import { GLOBAL_SCOPE } from '../drawers/storeScope';
+import { GLOBAL_SCOPE, resolveSettingsScope } from '../drawers/storeScope';
 
 import { SettingsHubPageComponent } from './SettingsHubPage.component';
 import type { SettingsDrawerKey } from './SettingsHubPage.types';
@@ -26,6 +26,7 @@ import {
   useGetEbayAccountsQuery,
   useLazyGetEbayConnectUrlQuery,
 } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
 import {
   useGetListingSettingsGroupsQuery,
@@ -77,19 +78,20 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const { data: ebayData, error: ebayError } = useGetEbayAccountsQuery();
 
   // Shared store-settings scope — hub + nested drawers stay in sync via the
-  // URL. A store id that is not one of the seller's stores reads as global
-  // (trusted until the account list has loaded, so a deep link is not lost).
-  const rawScope = searchParams.get(SCOPE_PARAM) || GLOBAL_SCOPE;
-  const storeScope =
-    rawScope === GLOBAL_SCOPE || !ebayData || ebayData.items.some((account) => account.id === rawScope)
-      ? rawScope
-      : GLOBAL_SCOPE;
+  // URL. With no `?scope=` the drawers open on the top bar's ACTIVE store;
+  // "all stores" is an explicit `?scope=global` (`resolveSettingsScope`).
+  const { activeStoreId } = useActiveStore();
+  const storeScope = resolveSettingsScope(
+    searchParams.get(SCOPE_PARAM),
+    activeStoreId,
+    ebayData ? ebayData.items.map((account) => account.id) : null
+  );
   const setStoreScope = (scope: string): void => {
     const next = new URLSearchParams(searchParams);
-    if (scope && scope !== GLOBAL_SCOPE) {
-      next.set(SCOPE_PARAM, scope);
-    } else {
+    if (scope && scope === activeStoreId) {
       next.delete(SCOPE_PARAM);
+    } else {
+      next.set(SCOPE_PARAM, scope || GLOBAL_SCOPE);
     }
     setSearchParams(next, { replace: true });
   };

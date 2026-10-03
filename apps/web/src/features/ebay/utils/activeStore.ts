@@ -63,17 +63,47 @@ export const nextSearchForActiveStore = (
 };
 
 /**
- * The query string after the seller picks another store. A switch starts the
- * page over — page 1, no open record, no selection, no open drawer — so only
- * the store survives. Following a record's own store (a detail page opened
- * from another store) keeps the page's params, or the record would close.
+ * Params that belong to the store just left: the page number, the open
+ * record (return `r`, conversation `c`), an open drawer and a hand-off of
+ * ASINs. Everything else is the VIEW the seller is in (dashboard tab and
+ * period, the drafts view, the messages folder, list filters, a search) and
+ * survives a switch — comparing two stores' charts or drafts is the point of
+ * a switcher.
+ */
+const STORE_BOUND_PARAMS = ['page', 'r', 'c', 'drawer', 'asins'] as const;
+
+/**
+ * The query string after the seller picks another store: the view is kept,
+ * the store-bound params are dropped. Following a record's own store (a
+ * detail page opened from another store) keeps every param, or the record
+ * would close.
  */
 export const searchForStoreSwitch = (
   search: URLSearchParams,
   storeId: string,
   keepParams: boolean
 ): URLSearchParams => {
-  const next = keepParams ? new URLSearchParams(search) : new URLSearchParams();
+  const next = new URLSearchParams(search);
+  if (!keepParams) {
+    for (const param of STORE_BOUND_PARAMS) {
+      next.delete(param);
+    }
+  }
   next.set('store', storeId);
   return next;
+};
+
+/**
+ * On a record page (`/orders/123`, `/listings/abc`, `/listings/jobs/j1`) the
+ * list it belongs to; `null` on a list page. A manual switch on a record page
+ * goes to that list — the record belongs to the store just left, and staying
+ * would make the page switch straight back to the record's store.
+ * `metaPath` is the matched `AppRouteMeta.path` (a prefix entry may end in `/`).
+ */
+export const recordListPath = (path: string, metaPath: string | undefined): string | null => {
+  if (!metaPath) {
+    return null;
+  }
+  const listPath = metaPath.replace(/\/+$/, '') || '/';
+  return path !== listPath && path.startsWith(`${listPath}/`) ? listPath : null;
 };

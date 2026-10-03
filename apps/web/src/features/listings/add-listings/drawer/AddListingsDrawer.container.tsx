@@ -27,6 +27,7 @@ import type {
 } from './AddListingsDrawer.types';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
@@ -93,9 +94,9 @@ const normalizePrefilledAsins = (raw: string | undefined): string =>
  */
 const buildOpenValues = (initialAsins: string | undefined, initialEbayAccountId?: string): CreateListingsFormData => {
   const preferences = readPreferences();
-  // A page filtered to one store opens the drawer on that store. The stored
-  // policies belong to the stored store, so they are dropped when the store
-  // changes (ids are per store — eBay refuses another store's policy).
+  // The drawer adds to the ACTIVE store (top bar). The stored policies belong
+  // to the stored store, so they are dropped when the store differs (ids are
+  // per store — eBay refuses another store's policy).
   const storeChanged = Boolean(initialEbayAccountId) && initialEbayAccountId !== preferences.ebayAccountId;
   return {
     asins: normalizePrefilledAsins(initialAsins),
@@ -130,7 +131,6 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
   onClose,
   onSuccess,
   initialAsins,
-  initialEbayAccountId,
 }) => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { locale } = getLocaleConfig(i18n.language);
@@ -146,6 +146,8 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
   const [scheduleEndHour, setScheduleEndHour] = useState(String(DEFAULT_SCHEDULE_END_HOUR));
   const [scheduleSubmitAttempted, setScheduleSubmitAttempted] = useState(false);
   const lastSubmittedAsDraft = useRef(false);
+  const { activeStoreId } = useActiveStore();
+  const initialEbayAccountId = activeStoreId ?? undefined;
 
   const { data: ebayAccountsData, isLoading: isLoadingAccounts } = useGetEbayAccountsQuery();
   const ebayAccounts = useMemo(
@@ -184,6 +186,19 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
   });
 
   const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
+
+  // The top bar switched store while the drawer is open: the listings now go
+  // to the new store, and the old store's policy ids are dropped (eBay would
+  // refuse them).
+  React.useEffect(() => {
+    if (!isOpen || !activeStoreId || form.getValues('ebayAccountId') === activeStoreId) {
+      return;
+    }
+    form.setValue('ebayAccountId', activeStoreId);
+    form.setValue('paymentPolicyId', '');
+    form.setValue('shippingPolicyId', '');
+    form.setValue('returnPolicyId', '');
+  }, [isOpen, activeStoreId, form]);
 
   // Policies are per store: read the SELECTED store's, and nothing until one
   // is chosen (a job for store B must never carry store A's policy ids — eBay
@@ -457,7 +472,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
       isSubmitting={isSubmitting}
       isLoading={isLoading}
       form={form}
-      ebayAccounts={ebayAccounts}
+      storeLabel={ebayAccounts.find((account) => account.id === activeStoreId)?.name ?? ''}
       listingSettingsGroups={listingSettingsGroups}
       businessPolicies={businessPolicies}
       asinCount={asinCount}

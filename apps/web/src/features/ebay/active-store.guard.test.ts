@@ -36,3 +36,14 @@ describe('store-scoped pages follow the active store', () => {
     expect(read(reader)).toMatch(/useActiveStore\(/);
   });
 });
+
+describe('record pages follow their record’s store exactly once', () => {
+  it.each([
+    'features/orders/details/OrderDetailsPage.container.tsx',
+    'features/listings/detail/ListingDetailPage.container.tsx',
+    'features/listings/listing-jobs/details/ListingJobDetailsPage.container.tsx',
+    'features/returns/ReturnDetailDrawer/ReturnDetailDrawer.container.tsx',
+  ])('%s', (file) => {
+    expect(read(file).match(/useFollowRecordStore\(/g) ?? []).toHaveLength(1);
+  });
+});

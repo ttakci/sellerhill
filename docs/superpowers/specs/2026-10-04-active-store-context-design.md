@@ -23,7 +23,8 @@ Pages that do not depend on a store look exactly as they do today, and show no s
   2. The last store the seller selected, from `localStorage` under a per-user key. This is a per-viewer convenience: wrapped in try/catch and never required.
   3. The first connected store (oldest `created_at`).
 - **The URL is kept in step:** the provider writes `?store=` on store-scoped pages, so a copied link opens the same store.
-- **The active store becomes unusable** (disconnected, or the switcher list changes): fall back to the next connected store, with a short info toast.
+- **The active store becomes unusable** (disconnected, or the switcher list changes): fall back to the next connected store.
+- **No toast (as built, 2026-10-04):** the app mounts no toast provider, so the switcher's label is the signal that the store changed. The toasts named below were not built.
 - **A link that points at another store** (Action Center row, e-mail, shared link): opening it switches the active store to the target and shows a toast ("Switched to sipastan"). The page never renders a record under the wrong store.
 - **A detail page whose record belongs to another store:** for example an order of B opened while A is active. The page switches to B, with the same toast.
 - **One connected store:** the switcher renders the store name only, as a label with no menu.
