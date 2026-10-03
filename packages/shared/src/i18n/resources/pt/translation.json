@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Selecionar idioma",
+    "selectStore": "Escolher loja",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notificações",
     "openMenu": "Abrir menu",
     "collapseSidebar": "Recolher barra lateral",
@@ -393,6 +395,9 @@
         "appliesTo": "Aplica-se a",
         "checkBlacklist": "Verificar palavras-chave da lista de bloqueio",
         "checkBlacklistDesc": "Verifica títulos, descrições, características e marca dos anúncios na sua lista de bloqueio antes de publicar. A seleção de campos de cada palavra-chave define onde ela é verificada.",
+        "allowCrossStoreAsins": "Permitir ASINs que já estão nas minhas outras lojas",
+        "allowCrossStoreAsinsDesc": "Ativado para todas as lojas, qualquer loja pode anunciar qualquer ASIN; ativado em uma loja, só essa loja pode adicionar ASINs que suas outras lojas já têm. Um ASIN que já está nesta loja é sempre ignorado.",
+        "allowCrossStoreAsinsInherited": "Vale a configuração de todas as lojas até você salvar uma escolha para esta loja.",
         "country": "País",
         "countryPlaceholder": "Selecione um país",
         "region": "Região",
@@ -834,7 +839,7 @@
       "billingNote": "Cancele quando quiser. Os preços não incluem impostos locais, quando aplicáveis.",
       "perMonth": "/mês",
       "mostPopular": "Mais popular",
-      "planCta": "Começar grátis",
+      "planCta": "Testar grátis",
       "showAllPlans": "Ver todos os {{count}} planos",
       "showFewerPlans": "Mostrar menos planos",
       "notIncluded": "Não incluído",
@@ -885,6 +890,17 @@
           "conversions": "500 conversões de rastreio / mês",
           "bestSellers": "25,000 produtos de Mais vendidos / mês"
         }
+      },
+      "trialPlanNote": "Todo teste grátis começa no plano de teste. Mude para este plano quando quiser.",
+      "trial": {
+        "title": "Teste grátis por {{days}} dias",
+        "listings": "{{limit}} anúncios ativos",
+        "conversions": "{{limit}} conversões de rastreio",
+        "bestSellers": "{{limit}} produtos de Mais vendidos",
+        "orders": "{{limit}} pedidos automáticos",
+        "unlimitedOrders": "Pedidos automáticos ilimitados",
+        "noCard": "Não é necessário cartão de crédito",
+        "cta": "Começar teste grátis"
       }
     },
     "faq": {

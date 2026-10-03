@@ -29,6 +29,12 @@
       "warning": "Xəbərdarlıq",
       "info": "Təkliflər"
     },
+    "storeFilter": {
+      "label": "Mağaza",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Bütün hesabınıza aiddir",
+      "storesLabel": "Aid olan mağazalar"
+    },
     "summary": {
       "critical": "{{count}} kritik",
       "warning": "{{count}} xəbərdarlıq",

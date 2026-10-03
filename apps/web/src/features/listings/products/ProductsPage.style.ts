@@ -8,8 +8,9 @@ export const FilterBar = styled.div`
   /* The controls sit on the page canvas — no card of their own, so the first
      row of data is the first surface on the page (see the orders list). */
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 

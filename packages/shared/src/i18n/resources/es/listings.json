@@ -135,6 +135,7 @@
       "allStores": "Todas las tiendas",
       "advancedFilters": "Filtros avanzados",
       "clearAll": "Borrar todo",
+      "removeFilter": "Quitar filtro: {{label}}",
       "resultCount": "{{count}} resultados",
       "min": "Mín.",
       "max": "Máx.",
@@ -184,6 +185,7 @@
       "profitMargin": "Margen",
       "roi": "ROI",
       "stock": "Stock",
+      "stockEbayAmazon": "Stock (eBay/AMZ)",
       "sold": "Vendidos",
       "lastSale": "Última venta",
       "category": "Categoría",
@@ -255,6 +257,7 @@
       "importing": "Importando...",
       "addListing": "Agregar publicación",
       "addNewList": "Agregar nueva lista",
+      "addingToStore": "Agregando a {{store}}",
       "createListings": "Crear publicaciones",
       "export": "Exportar",
       "viewAll": "Ver todas",
@@ -303,6 +306,7 @@
       "actionTitle": "Importar publicaciones existentes de eBay",
       "actionSubtitle": "Asocia las publicaciones activas de la tienda a ASIN de Amazon con un libro de Excel.",
       "storeTitle": "Tienda de origen",
+      "importingTo": "Importando a {{store}}",
       "store": "Tienda de eBay",
       "fileTitle": "Subir las asociaciones de publicaciones",
       "fileHint": "Proporciona un ASIN de Amazon exacto y un ID de artículo de eBay para cada publicación. Las publicaciones heredadas elegibles se migran sin volver a crearse.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "No se pudieron obtener las políticas comerciales de eBay",
       "invalidAsins": "{{count}} de tus entradas no parecen ASIN válidos (10 caracteres alfanuméricos) y se omitieron.",
       "loadFailed": "No se pudieron cargar las publicaciones. Inténtalo de nuevo.",
-      "scheduleTooLong": "A este ritmo la tarea tardaría más de 30 días. Aumenta la cantidad de productos por día o agrega menos ASIN."
+      "scheduleTooLong": "A este ritmo la tarea tardaría más de 30 días. Aumenta la cantidad de productos por día o agrega menos ASIN.",
+      "storeUnavailable": "No se puede usar esta tienda de eBay: no está conectada a tu cuenta o su conexión terminó. Elige otra tienda o vuelve a conectarla."
     },
     "detail": {
       "breadcrumb": "Detalle de la publicación",

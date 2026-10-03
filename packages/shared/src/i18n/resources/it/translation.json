@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Seleziona la lingua",
+    "selectStore": "Scegli negozio",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notifiche",
     "openMenu": "Apri il menu",
     "collapseSidebar": "Comprimi la barra laterale",
@@ -393,6 +395,9 @@
         "appliesTo": "Si applica a",
         "checkBlacklist": "Controlla le parole chiave della lista nera",
         "checkBlacklistDesc": "Prima della pubblicazione, cerca nella lista nera nei titoli, nelle descrizioni, nelle caratteristiche e nel marchio delle inserzioni. La selezione dei campi di ogni parola chiave determina dove viene controllata.",
+        "allowCrossStoreAsins": "Consenti ASIN già presenti negli altri miei negozi",
+        "allowCrossStoreAsinsDesc": "Attivato per tutti i negozi, ogni negozio può pubblicare qualsiasi ASIN; attivato su un solo negozio, solo quel negozio può aggiungere ASIN già presenti negli altri tuoi negozi. Un ASIN già presente in questo negozio viene sempre saltato.",
+        "allowCrossStoreAsinsInherited": "Vale l'impostazione di tutti i negozi finché non salvi una scelta per questo negozio.",
         "country": "Paese",
         "countryPlaceholder": "Seleziona un paese",
         "region": "Regione",
@@ -834,7 +839,7 @@
       "billingNote": "Annulli quando vuoi. I prezzi non includono le imposte locali, ove applicabili.",
       "perMonth": "/mese",
       "mostPopular": "Il più scelto",
-      "planCta": "Inizia gratis",
+      "planCta": "Prova gratis",
       "showAllPlans": "Vedi tutti i {{count}} piani",
       "showFewerPlans": "Mostra meno piani",
       "notIncluded": "Non incluso",
@@ -885,6 +890,17 @@
           "conversions": "500 conversioni di tracciamento / mese",
           "bestSellers": "25,000 prodotti Più venduti / mese"
         }
+      },
+      "trialPlanNote": "Ogni prova gratuita parte dal piano di prova. Passa a questo piano quando vuoi.",
+      "trial": {
+        "title": "Provalo gratis per {{days}} giorni",
+        "listings": "{{limit}} inserzioni attive",
+        "conversions": "{{limit}} conversioni di tracciamento",
+        "bestSellers": "{{limit}} prodotti Più venduti",
+        "orders": "{{limit}} ordini automatici",
+        "unlimitedOrders": "Ordini automatici illimitati",
+        "noCard": "Nessuna carta di credito richiesta",
+        "cta": "Inizia la prova gratuita"
       }
     },
     "faq": {

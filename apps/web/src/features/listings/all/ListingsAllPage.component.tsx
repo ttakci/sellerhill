@@ -1,5 +1,6 @@
 import type { ListingDto } from '@repo/shared';
 import {
+  Badge,
   Button,
   DataTable,
   EmptyState,
@@ -48,9 +49,8 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   statusOptions,
   onTrackingStateChange,
   trackingOptions,
-  onEbayAccountChange,
-  storeOptions,
   numericFilters,
+  activeFilterChips,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -185,16 +185,6 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   fullWidth
                 />
               </S.SelectWrapper>
-              <S.SelectWrapper>
-                <Select
-                  value={filters.ebayAccountId}
-                  onChange={onEbayAccountChange}
-                  options={storeOptions}
-                  placeholder={t('listings.filters.allStores')}
-                  size="small"
-                  fullWidth
-                />
-              </S.SelectWrapper>
               <S.FilterActions>
                 <S.ResultCount variant="caption" weight="medium" color="text.secondary">
                   {t('listings.filters.resultCount', { count: resultCount })}
@@ -206,6 +196,28 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                 )}
               </S.FilterActions>
             </S.FilterBarRow>
+
+            {activeFilterChips.length > 0 && (
+              <S.ChipRow>
+                {activeFilterChips.map((chip) => (
+                  <Badge key={chip.key} variant="primary" size="md">
+                    <S.ChipInner>
+                      <Text variant="body-sm" weight="semibold" color="brand.primary">
+                        {chip.label}
+                      </Text>
+                      <S.ChipRemove
+                        type="button"
+                        variant="ghost"
+                        onClick={chip.onRemove}
+                        aria-label={t('listings.filters.removeFilter', { label: chip.label })}
+                      >
+                        <Icon name="x" size={14} color="brand.primary" />
+                      </S.ChipRemove>
+                    </S.ChipInner>
+                  </Badge>
+                ))}
+              </S.ChipRow>
+            )}
 
             <S.AdvancedDivider />
             <S.AdvancedHeaderRow>
@@ -261,7 +273,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
       )}
 
       <DataTable
-        gridMinItemWidth="24rem"
+        gridMinItemWidth="27rem"
         gridMaxColumns={2}
         columns={columns}
         data={listings}

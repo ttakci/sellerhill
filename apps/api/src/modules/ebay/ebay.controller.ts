@@ -172,10 +172,18 @@ export class EbayController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get eBay business policies',
-    description: 'Fetch payment, shipping, and return policies from eBay',
+    description: 'Fetch payment, shipping, and return policies of one eBay store',
   })
-  async getBusinessPolicies(@Request() req: { user: { sub: string } }) {
+  @ApiQuery({
+    name: 'ebayAccountId',
+    required: false,
+    description: 'The store whose policies to read (must belong to the caller). Omitted: the oldest active store.',
+  })
+  async getBusinessPolicies(
+    @Request() req: { user: { sub: string } },
+    @Query('ebayAccountId') ebayAccountId?: string
+  ) {
     const userId = req.user.sub;
-    return this.ebayService.getBusinessPolicies(userId);
+    return this.ebayService.getBusinessPolicies(userId, ebayAccountId?.trim() || undefined);
   }
 }

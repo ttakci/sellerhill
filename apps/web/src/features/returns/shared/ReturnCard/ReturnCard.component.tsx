@@ -15,7 +15,7 @@ const EMPTY_VALUE = '—';
  * The whole card is the button; there is no "View order" footer.
  */
 export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, className }) => {
-  const { t } = useTranslation(['returns']);
+  const { t } = useTranslation(['returns', 'translation']);
   const clickable = Boolean(onOpen);
 
   return (

@@ -1,6 +1,6 @@
 """Proxy pool: worker threads per proxy, each bound to its proxy for life (so
 upstream's thread-local curl sessions never change IP mid-session), a shared
-three-lane priority queue (interactive, then browse, then background), a
+four-lane priority queue (interactive, browse, background, crawl), a
 per-proxy
 token-bucket rate limit, cooldown after repeated blocks, and a deadline after
 which a task that has not resolved (queued OR in flight) resolves as blocked
@@ -34,7 +34,9 @@ _log = logging.getLogger(__name__)
 # interactive: a seller waiting on a create. browse: a seller waiting on a
 # Best Sellers page — behind creates, ahead of the background refresh, which
 # nobody is watching. background: the scheduled price/stock refresh.
-_LANE_PRIORITY = {"interactive": 0, "browse": 1, "background": 2}
+# crawl: the platform's own Best Sellers tree crawl and list pre-warm — it
+# only ever uses capacity the three lanes above leave idle.
+_LANE_PRIORITY = {"interactive": 0, "browse": 1, "background": 2, "crawl": 3}
 _OUTCOMES = ("found", "not_found", "blocked", "parse_failed", "no_proxy", "expired", "proxy_error")
 _STAT_KEYS = {"found": "found", "not_found": "notFound", "blocked": "blocked",
               "parse_failed": "parseFailed", "no_proxy": "noProxy",

@@ -158,7 +158,7 @@ export class RefreshProcessorService extends WorkerHost {
     const enforcementOn = await this.platformSettings.getBoolean(
       PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
     );
-    const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);
+    const { entitlementJoin, planLimitFilter, storeActiveFilter } = buildRefreshEntitlementSql(enforcementOn);
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (
@@ -170,6 +170,7 @@ export class RefreshProcessorService extends WorkerHost {
              ${entitlementJoin}
              WHERE l.product_id = p.id AND l.status = '${ListingStatus.ACTIVE}'
                ${planLimitFilter}
+               ${storeActiveFilter}
            )
          ORDER BY p.next_refresh_at ASC NULLS FIRST
          LIMIT $1

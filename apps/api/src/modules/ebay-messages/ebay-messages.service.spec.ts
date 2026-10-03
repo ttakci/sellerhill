@@ -395,9 +395,10 @@ describe('EbayMessagesService', () => {
     it('sums the stored counters with no eBay call while notifications are enabled', async () => {
       const { service, db, client, notifications } = build();
       notifications.isEnabled.mockReturnValue(true);
+      const recent = new Date(Date.now() - 60 * 60 * 1000);
       db.query.mockResolvedValue([
-        { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 2, unread_message_synced_at: null, message_subscription_id: 'sub-a' },
-        { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 5, unread_message_synced_at: null, message_subscription_id: 'sub-b' },
+        { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 2, unread_message_synced_at: recent, message_subscription_id: 'sub-a' },
+        { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 5, unread_message_synced_at: recent, message_subscription_id: 'sub-b' },
       ]);
 
       const result = await service.unreadCount(USER);
@@ -446,6 +447,42 @@ describe('EbayMessagesService', () => {
         total: 6,
         byAccount: [
           { ebayAccountId: ACCOUNT, unread: 2 },
+          { ebayAccountId: ACCOUNT_B, unread: 4 },
+        ],
+      });
+    });
+
+    it('recounts a SUBSCRIBED store once its counter is older than a day, so a missed webhook self-heals', async () => {
+      const { service, db, client, notifications } = build();
+      notifications.isEnabled.mockReturnValue(true);
+      const dayOld = new Date(Date.now() - 25 * 60 * 60 * 1000);
+      const hourOld = new Date(Date.now() - 60 * 60 * 1000);
+      db.query.mockImplementation((sql: string) => {
+        if (/WHERE user_id = \$1 AND status = \$2/.test(sql)) {
+          return Promise.resolve([
+            { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 9, unread_message_synced_at: dayOld, message_subscription_id: 'sub-a' },
+            { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 4, unread_message_synced_at: hourOld, message_subscription_id: 'sub-b' },
+          ]);
+        }
+        if (/WHERE id = \$1 AND user_id = \$2/.test(sql)) {
+          return Promise.resolve([accountRow()]);
+        }
+        return Promise.resolve([]);
+      });
+      client.getConversations
+        .mockResolvedValueOnce({ items: [], total: 1 })
+        .mockResolvedValueOnce({ items: [], total: 0 });
+
+      const result = await service.unreadCount(USER);
+
+      expect(client.getConversations).toHaveBeenCalledTimes(2);
+      for (const call of client.getConversations.mock.calls as unknown[][]) {
+        expect(call[2]).toBe(EbayCallPriority.BACKGROUND);
+      }
+      expect(result).toEqual({
+        total: 5,
+        byAccount: [
+          { ebayAccountId: ACCOUNT, unread: 1 },
           { ebayAccountId: ACCOUNT_B, unread: 4 },
         ],
       });

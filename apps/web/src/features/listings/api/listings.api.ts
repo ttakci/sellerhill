@@ -207,10 +207,13 @@ export const listingsApi = baseApi.injectEndpoints({
     }),
 
     /**
-     * Get eBay business policies
+     * The eBay business policies of ONE store. Policy ids belong to the store
+     * that owns them, so callers pass the store the listing is for; omitted,
+     * the API answers for the seller's oldest active store.
      */
-    getBusinessPolicies: builder.query<EbayBusinessPolicyDto[], void>({
-      query: () => '/ebay/business-policies',
+    getBusinessPolicies: builder.query<EbayBusinessPolicyDto[], string | undefined>({
+      query: (ebayAccountId) =>
+        ebayAccountId ? { url: '/ebay/business-policies', params: { ebayAccountId } } : '/ebay/business-policies',
       providesTags: ['EbayPolicies'],
     }),
 

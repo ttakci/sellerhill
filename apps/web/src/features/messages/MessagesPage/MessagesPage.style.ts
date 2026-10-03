@@ -70,13 +70,6 @@ export const CompactFilters = styled.div`
   }
 `;
 
-/** Long store names truncate instead of widening the toolbar; the trigger itself is the Button atom. */
-export const StoreLabel = styled.span`
-  min-width: 0;
-  max-width: 12rem;
-  overflow: hidden;
-`;
-
 /**
  * The whole inbox — one Card. `grid-template-rows: minmax(0, 1fr)` (not the
  * implicit default) is load-bearing: it's what lets a grid item declare its

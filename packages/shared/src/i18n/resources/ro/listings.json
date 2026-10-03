@@ -135,6 +135,7 @@
       "allStores": "Toate magazinele",
       "advancedFilters": "Filtre avansate",
       "clearAll": "Șterge tot",
+      "removeFilter": "Elimină filtrul: {{label}}",
       "resultCount": "Rezultate: {{count}}",
       "min": "Min",
       "max": "Max",
@@ -184,6 +185,7 @@
       "profitMargin": "Marjă",
       "roi": "ROI",
       "stock": "Stoc",
+      "stockEbayAmazon": "Stoc (eBay/AMZ)",
       "sold": "Vândute",
       "lastSale": "Ultima vânzare",
       "category": "Categorie",
@@ -255,6 +257,7 @@
       "importing": "Se importă...",
       "addListing": "Adaugă anunț",
       "addNewList": "Adaugă o listă nouă",
+      "addingToStore": "Se adaugă în {{store}}",
       "createListings": "Creează anunțuri",
       "export": "Exportă",
       "viewAll": "Vezi tot",
@@ -303,6 +306,7 @@
       "actionTitle": "Importă anunțuri eBay existente",
       "actionSubtitle": "Asociați anunțurile active din magazin cu ASIN-uri Amazon printr-un registru Excel.",
       "storeTitle": "Magazin sursă",
+      "importingTo": "Se importă în {{store}}",
       "store": "Magazin eBay",
       "fileTitle": "Încărcați asocierile anunțurilor",
       "fileHint": "Furnizați un ASIN Amazon exact și un ID de articol eBay pentru fiecare anunț. Anunțurile vechi eligibile sunt migrate fără a fi recreate.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Politicile de afaceri eBay nu au putut fi preluate",
       "invalidAsins": "{{count}} dintre intrările dvs. nu par ASIN-uri valide (10 caractere alfanumerice) și au fost omise.",
       "loadFailed": "Anunțurile nu au putut fi încărcate. Încercați din nou.",
-      "scheduleTooLong": "În acest ritm, sarcina ar dura mai mult de 30 de zile. Măriți numărul de produse pe zi sau adăugați mai puține ASIN-uri."
+      "scheduleTooLong": "În acest ritm, sarcina ar dura mai mult de 30 de zile. Măriți numărul de produse pe zi sau adăugați mai puține ASIN-uri.",
+      "storeUnavailable": "Acest magazin eBay nu poate fi folosit: nu este conectat la contul tău sau conexiunea s-a încheiat. Alege alt magazin sau reconectează-l."
     },
     "detail": {
       "breadcrumb": "Detaliile anunțului",

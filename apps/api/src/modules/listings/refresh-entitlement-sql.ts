@@ -21,11 +21,19 @@
 
 import { ENTITLED_SUBSCRIPTION_STATUSES } from '@repo/shared';
 
+import { buildListingStoreActiveSql } from '../../common/utils/listing-store-active-sql';
+
 export interface RefreshEntitlementSql {
   /** JOINs to append after `FROM listings l` (or any query aliasing a listing as `l`). Empty when enforcement is off. */
   entitlementJoin: string;
   /** `AND` clause restricting to listings not over the owner's plan limit. Empty when enforcement is off. */
   planLimitFilter: string;
+  /**
+   * `AND` clause: the listing's eBay store is connected. ALWAYS present —
+   * unlike the billing fragments it does not depend on enforcement: a
+   * disconnected store has no token to refresh for.
+   */
+  storeActiveFilter: string;
 }
 
 export function buildRefreshEntitlementSql(enforcementOn: boolean): RefreshEntitlementSql {
@@ -37,5 +45,6 @@ export function buildRefreshEntitlementSql(enforcementOn: boolean): RefreshEntit
                 AND bs.status IN (${entitledStatuses})`
       : '',
     planLimitFilter: enforcementOn ? 'AND l.over_plan_limit = FALSE' : '',
+    storeActiveFilter: `AND ${buildListingStoreActiveSql('l')}`,
   };
 }

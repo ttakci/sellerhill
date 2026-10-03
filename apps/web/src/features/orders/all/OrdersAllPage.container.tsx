@@ -38,7 +38,6 @@ export const OrdersAllPageContainer: React.FC = () => {
     searchInput,
     handleSearchChange,
     ebayAccountId,
-    handleEbayAccountChange,
     tab,
     handleTabChange,
     hasUrlSelection,
@@ -59,19 +58,9 @@ export const OrdersAllPageContainer: React.FC = () => {
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
 
-  const storeOptions = useMemo(
-    () => [
-      { value: '', label: t('orders.filters.allStores') },
-      ...(ebayAccountsData?.items ?? []).map((acc) => ({
-        value: acc.id,
-        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
-      })),
-    ],
-    [ebayAccountsData?.items, t]
-  );
-
   const { data, isLoading, isFetching } = useGetOrdersQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
+    skip: !ebayAccountId,
   });
   const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const totalCount = data?.total ?? 0;
@@ -84,7 +73,7 @@ export const OrdersAllPageContainer: React.FC = () => {
       ebayAccountId: ebayAccountId || undefined,
       isTracked: serverQuery.isTracked,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !ebayAccountId }
   );
 
   const countFor = useCallback(
@@ -126,18 +115,21 @@ export const OrdersAllPageContainer: React.FC = () => {
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
-  /* Money renders in the connected eBay store's marketplace currency, never
-     the UI language — a filtered store narrows to its own currency, "all
-     stores" falls back to the first connected store. */
-  const currency = useMemo(
-    () => resolveStoreCurrency(ebayAccountsData?.items ?? [], ebayAccountId),
-    [ebayAccountsData, ebayAccountId]
-  );
-  /* Always two decimals: "$9,8" beside "$24,99" reads as a typo on a page
-     whose whole job is to be believed about money. */
+  /* Money renders in each ORDER's own store marketplace currency, never the
+     UI language and never one page-wide currency — under "all stores" a US
+     and a UK store sit in one list. A row with no store falls back to the
+     filtered store, then the first connected one. */
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, currency, 2),
-    [localeCfg, currency]
+    (value: number, rowEbayAccountId?: string | null) =>
+      /* Always two decimals: "$9,8" beside "$24,99" reads as a typo on a page
+         whose whole job is to be believed about money. */
+      formatCurrency(
+        value,
+        localeCfg.locale,
+        resolveStoreCurrency(ebayAccountsData?.items ?? [], rowEbayAccountId || ebayAccountId),
+        2
+      ),
+    [localeCfg, ebayAccountsData, ebayAccountId]
   );
 
   /* Net margin on the sale, shown under the profit figure. Only on an order
@@ -229,9 +221,6 @@ export const OrdersAllPageContainer: React.FC = () => {
         stage={stage}
         onStageChange={handleStageChange}
         stageOptions={stageOptions}
-        ebayAccountId={ebayAccountId}
-        onEbayAccountChange={handleEbayAccountChange}
-        storeOptions={storeOptions}
         trackingState={trackingState}
         onTrackingStateChange={handleTrackingStateChange}
         trackingStateOptions={trackingOptions}

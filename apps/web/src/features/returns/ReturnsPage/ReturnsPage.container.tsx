@@ -37,7 +37,6 @@ export const ReturnsPageContainer: React.FC = () => {
     openedWithSelection,
     setTab,
     setPage,
-    setStore,
     setSearchInput,
     setRowsPerPage,
     clearFilters,
@@ -47,17 +46,6 @@ export const ReturnsPageContainer: React.FC = () => {
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const accounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData?.items]);
 
-  const storeOptions = useMemo(
-    () => [
-      { value: '', label: t('returns.filters.allStores') },
-      ...accounts.map((acc) => ({
-        value: acc.id,
-        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
-      })),
-    ],
-    [accounts, t]
-  );
-
   const { data, isLoading, isFetching } = useGetReturnsQuery(
     {
       page,
@@ -66,7 +54,7 @@ export const ReturnsPageContainer: React.FC = () => {
       ebayAccountId: store || undefined,
       search: search || undefined,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !store }
   );
   const totalCount = data?.total ?? 0;
 
@@ -75,7 +63,7 @@ export const ReturnsPageContainer: React.FC = () => {
      result count. */
   const { data: counts } = useGetReturnCountsQuery(
     { ebayAccountId: store || undefined },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !store }
   );
 
   const countFor = useCallback(
@@ -135,7 +123,6 @@ export const ReturnsPageContainer: React.FC = () => {
     [setSearchInput]
   );
 
-  const handleStoreChange = useCallback((value: string | number) => setStore(String(value)), [setStore]);
 
   /* Every row opens — a return filed against an order we do not hold still
      has a history, a deadline and actions of its own. */
@@ -172,9 +159,6 @@ export const ReturnsPageContainer: React.FC = () => {
         onTabChange={handleTabChange}
         search={searchInput}
         onSearchChange={handleSearchChange}
-        ebayAccountId={store}
-        onEbayAccountChange={handleStoreChange}
-        storeOptions={storeOptions}
         onClearFilters={clearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={totalCount}

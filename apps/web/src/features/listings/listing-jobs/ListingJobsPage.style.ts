@@ -142,6 +142,16 @@ export const ProgressCounts = styled.div`
   min-width: 0;
 `;
 
+/** The created date, and under it the store the job ran against. */
+export const ProgressMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+  text-align: right;
+`;
+
 /** Success / failed / remaining — label over value, under one hairline. */
 export const StatsGrid = styled.div`
   display: grid;

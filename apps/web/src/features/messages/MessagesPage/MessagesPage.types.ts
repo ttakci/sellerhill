@@ -1,5 +1,4 @@
 import type {
-  DropdownItem,
   IconName,
   SegmentedControlOption,
   TabNavItem,
@@ -37,11 +36,6 @@ export interface MessagesCompactFilters {
   onFolderChange: (value: string) => void;
 }
 
-export interface MessagesStoreSelector {
-  label: string;
-  items: DropdownItem[];
-}
-
 export type MessagesPagination = Pick<
   TablePaginationProps,
   'count' | 'page' | 'rowsPerPage' | 'onPageChange' | 'onRowsPerPageChange' | 'labelRowsPerPage' | 'labelInfo'
@@ -55,7 +49,6 @@ export interface MessagesPageComponentProps {
   backLabel: string;
   /** Hide the toolbar on a phone while the thread fills the screen. */
   showToolbar: boolean;
-  storeSelector: MessagesStoreSelector | null;
   /** False when the active store was connected before messaging existed. */
   messagingEnabled: boolean;
   onReconnect: () => void;

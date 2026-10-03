@@ -240,6 +240,29 @@ export const ItemAction = styled.span`
   transition: transform ${tkn('transitions.fast')};
 `;
 
+
+/** The stores a connection item is about, as wrapping tags under its description. */
+export const StoreList = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')};
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const StoreListItem = styled.li`
+  display: inline-flex;
+  min-width: 0;
+`;
+
+/** "Applies to your whole account" — shown on plan and setup items in every store view. */
+export const AccountWideNote = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+`;
+
 /** Empty and first-load states share one surface so they read as one screen. */
 export const StateCard = styled(Card)`
   display: flex;

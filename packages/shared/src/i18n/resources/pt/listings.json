@@ -135,6 +135,7 @@
       "allStores": "Todas as lojas",
       "advancedFilters": "Filtros avançados",
       "clearAll": "Limpar tudo",
+      "removeFilter": "Remover filtro: {{label}}",
       "resultCount": "{{count}} resultados",
       "min": "Mín.",
       "max": "Máx.",
@@ -184,6 +185,7 @@
       "profitMargin": "Margem",
       "roi": "ROI",
       "stock": "Estoque",
+      "stockEbayAmazon": "Estoque (eBay/AMZ)",
       "sold": "Vendidos",
       "lastSale": "Última venda",
       "category": "Categoria",
@@ -255,6 +257,7 @@
       "importing": "Importando...",
       "addListing": "Adicionar anúncio",
       "addNewList": "Adicionar nova lista",
+      "addingToStore": "Adicionando a {{store}}",
       "createListings": "Criar anúncios",
       "export": "Exportar",
       "viewAll": "Ver todos",
@@ -303,6 +306,7 @@
       "actionTitle": "Importar anúncios existentes do eBay",
       "actionSubtitle": "Associe os anúncios ativos da loja a ASINs da Amazon usando uma planilha do Excel.",
       "storeTitle": "Loja de origem",
+      "importingTo": "Importando para {{store}}",
       "store": "Loja eBay",
       "fileTitle": "Enviar correspondências de anúncios",
       "fileHint": "Informe o ASIN exato da Amazon e o ID do item do eBay para cada anúncio. Os anúncios legados elegíveis são migrados sem serem recriados.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Falha ao buscar as políticas comerciais do eBay",
       "invalidAsins": "{{count}} das suas entradas não parecem ASINs válidos (10 caracteres alfanuméricos) e foram ignoradas.",
       "loadFailed": "Falha ao carregar os anúncios. Tente novamente.",
-      "scheduleTooLong": "Nesse ritmo, a tarefa levaria mais de 30 dias. Aumente o número de produtos por dia ou adicione menos ASINs."
+      "scheduleTooLong": "Nesse ritmo, a tarefa levaria mais de 30 dias. Aumente o número de produtos por dia ou adicione menos ASINs.",
+      "storeUnavailable": "Esta loja do eBay não pode ser usada: ela não está conectada à sua conta ou a conexão foi encerrada. Escolha outra loja ou conecte-a novamente."
     },
     "detail": {
       "breadcrumb": "Detalhes do anúncio",

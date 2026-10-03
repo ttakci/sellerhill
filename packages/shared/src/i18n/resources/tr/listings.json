@@ -135,6 +135,7 @@
       "allStores": "Tüm mağazalar",
       "advancedFilters": "Gelişmiş Filtreler",
       "clearAll": "Tümünü Temizle",
+      "removeFilter": "Filtreyi kaldır: {{label}}",
       "resultCount": "{{count}} sonuç",
       "min": "Min",
       "max": "Maks",
@@ -184,6 +185,7 @@
       "profitMargin": "Marj",
       "roi": "ROI",
       "stock": "Stok",
+      "stockEbayAmazon": "Stok (eBay/AMZ)",
       "sold": "Satılan",
       "lastSale": "Son Satış",
       "category": "Kategori",
@@ -255,6 +257,7 @@
       "importing": "Listeler Oluşturuluyor...",
       "addListing": "Liste Ekle",
       "addNewList": "Yeni Liste Ekle",
+      "addingToStore": "{{store}} mağazasına ekleniyor",
       "createListings": "Liste Oluştur",
       "export": "Dışa Aktar",
       "viewAll": "Tümü",
@@ -303,6 +306,7 @@
       "actionTitle": "Mevcut eBay listelerini içe aktar",
       "actionSubtitle": "Mağazadaki aktif listeleri Excel ile Amazon ASIN’leriyle eşleştirin.",
       "storeTitle": "Kaynak mağaza",
+      "importingTo": "{{store}} mağazasına aktarılıyor",
       "store": "eBay mağazası",
       "fileTitle": "Liste eşleşmelerini yükle",
       "fileHint": "Her liste için tam Amazon ASIN’i ve eBay Item ID sağlayın. Uygun eski API listeleri yeniden oluşturulmadan taşınır.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "eBay iş politikaları alınamadı",
       "invalidAsins": "Girdilerinizden {{count}} tanesi geçerli bir ASIN gibi görünmüyor (10 alfanümerik karakter) ve atlandı.",
       "loadFailed": "Listeler yüklenemedi. Lütfen tekrar deneyin.",
-      "scheduleTooLong": "Bu hızla iş 30 günden uzun sürer. Günlük ürün sayısını artırın ya da daha az ASIN ekleyin."
+      "scheduleTooLong": "Bu hızla iş 30 günden uzun sürer. Günlük ürün sayısını artırın ya da daha az ASIN ekleyin.",
+      "storeUnavailable": "Bu eBay mağazası kullanılamıyor: hesabınıza bağlı değil ya da bağlantısı sona ermiş. Başka bir mağaza seçin veya mağazayı yeniden bağlayın."
     },
     "detail": {
       "breadcrumb": "Liste Detayı",

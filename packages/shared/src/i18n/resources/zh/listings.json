@@ -135,6 +135,7 @@
       "allStores": "所有店铺",
       "advancedFilters": "高级筛选",
       "clearAll": "全部清除",
+      "removeFilter": "移除筛选：{{label}}",
       "resultCount": "{{count}} 条结果",
       "min": "最小",
       "max": "最大",
@@ -184,6 +185,7 @@
       "profitMargin": "利润率",
       "roi": "ROI",
       "stock": "库存",
+      "stockEbayAmazon": "库存 (eBay/AMZ)",
       "sold": "已售",
       "lastSale": "最近售出",
       "category": "分类",
@@ -255,6 +257,7 @@
       "importing": "导入中…",
       "addListing": "添加商品刊登",
       "addNewList": "添加新列表",
+      "addingToStore": "正在添加到 {{store}}",
       "createListings": "创建商品刊登",
       "export": "导出",
       "viewAll": "查看全部",
@@ -303,6 +306,7 @@
       "actionTitle": "导入现有 eBay 商品刊登",
       "actionSubtitle": "使用 Excel 工作簿把店铺中的在售商品刊登与 Amazon ASIN 进行匹配。",
       "storeTitle": "来源店铺",
+      "importingTo": "正在导入到 {{store}}",
       "store": "eBay 店铺",
       "fileTitle": "上传商品刊登匹配表",
       "fileHint": "请为每条商品刊登提供准确的 Amazon ASIN 和 eBay Item ID。符合条件的旧版商品刊登会被迁移，而不会被重新创建。",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "获取 eBay 商业政策失败",
       "invalidAsins": "您输入的条目中有 {{count}} 个看起来不是有效的 ASIN（10 位字母数字字符），已被跳过。",
       "loadFailed": "加载商品刊登失败，请重试。",
-      "scheduleTooLong": "按此速度，任务将超过 30 天。请提高每日商品数，或减少添加的 ASIN。"
+      "scheduleTooLong": "按此速度，任务将超过 30 天。请提高每日商品数，或减少添加的 ASIN。",
+      "storeUnavailable": "无法使用此 eBay 店铺：它未关联到你的账户，或其连接已结束。请选择其他店铺或重新连接该店铺。"
     },
     "detail": {
       "breadcrumb": "商品刊登详情",

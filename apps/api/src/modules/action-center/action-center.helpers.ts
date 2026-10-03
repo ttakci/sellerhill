@@ -152,6 +152,63 @@ export function buildActionCenterSummary(
   };
 }
 
+/**
+ * App paths whose page reads `?store=<ebayAccountId>` as its store filter —
+ * checked against each page's URL-state hook (`useOrdersFilters`,
+ * `useListingsFilters`, `ListingsOverviewPage`, `ListingJobsPage`,
+ * `useReturnsUrlState`). A link to any other page is left as it is: appending
+ * a param the target never reads would only look like a filter.
+ */
+export const STORE_FILTERABLE_PATHS: readonly string[] = [
+  '/orders',
+  '/listings',
+  '/listings/all',
+  '/listings/jobs',
+  '/returns',
+];
+
+/**
+ * Conditions of the whole SellerHill account, not of one eBay store: billing,
+ * onboarding, and the Amazon buyer accounts (they buy for every store). They
+ * are reported identically with or without a store filter.
+ */
+export function isAccountWideItem(item: Pick<ActionCenterItemDto, 'group' | 'key'>): boolean {
+  return (
+    item.group === ActionCenterGroup.PLAN ||
+    item.group === ActionCenterGroup.SETUP ||
+    item.key === ActionCenterItemKey.AMAZON_ACCOUNT_NEEDS_ATTENTION
+  );
+}
+
+/** `path` with `store=<id>` appended, when the target page reads it. */
+export function withStoreParam(path: string | null, ebayAccountId: string | null | undefined): string | null {
+  if (!path || !ebayAccountId) {
+    return path;
+  }
+  const [pathname] = path.split('?');
+  if (!STORE_FILTERABLE_PATHS.includes(pathname)) {
+    return path;
+  }
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}store=${encodeURIComponent(ebayAccountId)}`;
+}
+
+/**
+ * Final pass over the probes' items: mark the account-wide ones, and — when a
+ * store filter is applied — carry the store on every per-store link, so the
+ * list behind a count is narrowed to the same store the count was.
+ */
+export function scopeItemsToStore(
+  items: readonly ActionCenterItemDto[],
+  ebayAccountId: string | null | undefined,
+): ActionCenterItemDto[] {
+  return items.map((item) =>
+    isAccountWideItem(item)
+      ? { ...item, accountWide: true }
+      : { ...item, actionPath: withStoreParam(item.actionPath, ebayAccountId) },
+  );
+}
+
 /** An empty snapshot — used when a user has nothing waiting, and on cold start. */
 export function emptyActionCenterSummary(generatedAt: Date): ActionCenterSummaryDto {
   return buildActionCenterSummary([], generatedAt);

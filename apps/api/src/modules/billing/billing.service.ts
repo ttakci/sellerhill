@@ -32,6 +32,7 @@ import {
   PlatformSettingKey,
   resolveEntitlementState,
   resolvePlanChangeDirection,
+  type BillingCatalogTrialDto,
   type BillingDetailsDto,
   type BillingInvoiceListDto,
   type BillingPlanChangePreviewDto,
@@ -99,16 +100,36 @@ export class BillingService {
    */
   async getCatalog(): Promise<BillingCatalogDto> {
     const config = this.getConfig();
-    const [plans, enforcementEnabled] = await Promise.all([
+    const [plans, enforcementEnabled, trial] = await Promise.all([
       this.repository.loadCatalog(),
       this.resolveEnforcementEnabled(),
+      this.resolveCatalogTrial(),
     ]);
     return {
       plans,
       currency: 'USD',
       enforcementEnabled,
       provider: config.provider,
+      trial,
     };
+  }
+
+  /**
+   * The trial as the landing advertises it. Fail-soft: the catalog is the
+   * landing's pricing source, and a trial lookup problem must not take the
+   * paid plans down with it.
+   */
+  private async resolveCatalogTrial(): Promise<BillingCatalogTrialDto | null> {
+    try {
+      const [limits, days] = await Promise.all([
+        this.repository.loadTrialLimits(),
+        this.platformSettings.getNumber(PlatformSettingKey.BILLING_TRIAL_DAYS),
+      ]);
+      return limits ? { days, limits } : null;
+    } catch (error) {
+      this.logger.warn(`Catalog trial lookup failed: ${(error as Error).message}`);
+      return null;
+    }
   }
 
   /**

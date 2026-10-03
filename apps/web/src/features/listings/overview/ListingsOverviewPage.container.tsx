@@ -9,6 +9,7 @@ import { ExistingListingsImportDrawer } from '../import-existing';
 import { ListingsOverviewPageComponent } from './ListingsOverviewPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useLocale } from '@/utils/useLocale';
 
 /** `?drawer=add` opens the create flow — the legacy `/listings/add` page redirects here. */
@@ -30,6 +31,10 @@ const ASINS_PARAM = 'asins';
 export const ListingsOverviewPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
+  /* The top bar's active store: the carousel, the counts and the links onward
+     all show it (the links need no `?store=` — the provider adds it). */
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(
     () => searchParams.get('drawer') === ADD_DRAWER_PARAM
   );
@@ -49,14 +54,15 @@ export const ListingsOverviewPageContainer: React.FC = () => {
       status: ListingStatus.ACTIVE,
       sortBy: 'createdAt',
       sortOrder: 'desc',
+      ebayAccountId: storeFilter || undefined,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
 
   // Lightweight draft count for other-actions context
   const { data: draftsData } = useGetListingsQuery(
-    { page: 1, limit: 1, status: ListingStatus.DRAFT },
-    { refetchOnMountOrArgChange: true }
+    { page: 1, limit: 1, status: ListingStatus.DRAFT, ebayAccountId: storeFilter || undefined },
+    { refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
 
   const listings = data?.items ?? [];

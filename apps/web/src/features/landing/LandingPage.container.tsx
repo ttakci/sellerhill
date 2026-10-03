@@ -5,6 +5,7 @@ import {
   BILLING_UNLIMITED,
   BillingInterval,
   BillingLimitKey,
+  type BillingCatalogTrialDto,
   type SupportedLocale,
 } from '@repo/shared';
 import { formatCurrency, lightTheme } from '@repo/ui';
@@ -13,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { LandingPageComponent } from './LandingPage.component';
-import type { LandingPricingPlan } from './LandingPage.types';
+import type { LandingPricingPlan, LandingTrialOffer } from './LandingPage.types';
 
 import { useGetBillingCatalogQuery } from '@/features/billing/api/billing.api';
 import { enterDemoMode } from '@/features/demo';
@@ -91,6 +92,42 @@ function formatAmazonOrdersLine(
     return t('translation:landing.pricing.notIncluded');
   }
   return t('translation:landing.pricing.upToOrders', { limit: new Intl.NumberFormat('en-US').format(limit) });
+}
+
+/**
+ * The trial the strip describes when the catalog cannot be read. It must equal
+ * the real trial (migration `125`: 50 listings, 20 conversions, 500 Best
+ * Sellers products, unlimited automatic orders; `billing.trialDays` default
+ * 30) for the same reason the `$19.99` hero fallback must equal the cheapest
+ * tier: a stale literal advertises a trial that does not exist.
+ */
+const FALLBACK_TRIAL: BillingCatalogTrialDto = {
+  days: 30,
+  limits: {
+    [BillingLimitKey.LISTINGS_PER_MONTH]: 50,
+    [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: 20,
+    [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: 500,
+    [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: BILLING_UNLIMITED,
+  },
+};
+
+/**
+ * One trial chip. A missing or disabled limit is left out rather than printed
+ * as "not included" — the strip says what the trial gives, not what it lacks.
+ */
+function formatTrialFact(
+  limit: number | undefined,
+  quotaKey: string,
+  unlimitedKey: string,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string | null {
+  if (limit === undefined || limit === BILLING_DISABLED || (limit <= 0 && limit !== BILLING_UNLIMITED)) {
+    return null;
+  }
+  if (limit === BILLING_UNLIMITED) {
+    return t(unlimitedKey);
+  }
+  return t(quotaKey, { limit: new Intl.NumberFormat('en-US').format(limit) });
 }
 
 /**
@@ -187,6 +224,41 @@ export const LandingPageContainer = (): React.ReactElement => {
     });
   }, [catalog, t]);
 
+  const trialOffer: LandingTrialOffer = useMemo(() => {
+    const trial = catalog?.trial ?? FALLBACK_TRIAL;
+    const facts = [
+      formatTrialFact(
+        trial.limits[BillingLimitKey.AMAZON_ORDERS_PER_MONTH],
+        'translation:landing.pricing.trial.orders',
+        'translation:landing.pricing.trial.unlimitedOrders',
+        t,
+      ),
+      formatTrialFact(
+        trial.limits[BillingLimitKey.LISTINGS_PER_MONTH],
+        'translation:landing.pricing.trial.listings',
+        'translation:landing.pricing.unlimitedListings',
+        t,
+      ),
+      formatTrialFact(
+        trial.limits[BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH],
+        'translation:landing.pricing.trial.conversions',
+        'translation:landing.pricing.unlimitedConversions',
+        t,
+      ),
+      formatTrialFact(
+        trial.limits[BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH],
+        'translation:landing.pricing.trial.bestSellers',
+        'translation:landing.pricing.unlimitedBestSellers',
+        t,
+      ),
+      t('translation:landing.pricing.trial.noCard'),
+    ].filter((fact): fact is string => fact !== null);
+    return {
+      title: t('translation:landing.pricing.trial.title', { days: trial.days }),
+      facts,
+    };
+  }, [catalog, t]);
+
   /**
    * The "plans from $X" figure on the hero price badge. Derived from the
    * catalog's cheapest paid monthly tier so it can never drift from the pricing
@@ -276,6 +348,7 @@ export const LandingPageContainer = (): React.ReactElement => {
         scrolled={scrolled}
         mobileMenuOpen={mobileMenuOpen}
         pricingPlans={pricingPlans}
+        trialOffer={trialOffer}
         startingPriceDisplay={startingPriceDisplay}
         pricingCatalogError={isCatalogError}
         onLocaleChange={handleLocaleChange}

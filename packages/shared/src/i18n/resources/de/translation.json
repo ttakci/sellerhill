@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Sprache auswählen",
+    "selectStore": "Shop auswählen",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Benachrichtigungen",
     "openMenu": "Menü öffnen",
     "collapseSidebar": "Seitenleiste einklappen",
@@ -393,6 +395,9 @@
         "appliesTo": "Gilt für",
         "checkBlacklist": "Sperrlisten-Schlüsselwörter prüfen",
         "checkBlacklistDesc": "Prüft Angebotstitel, Beschreibungen, Artikelmerkmale und Marke vor der Veröffentlichung anhand Ihrer Sperrliste. Die Feldauswahl jedes einzelnen Schlüsselworts bestimmt, wo geprüft wird.",
+        "allowCrossStoreAsins": "ASINs zulassen, die bereits in meinen anderen Shops gelistet sind",
+        "allowCrossStoreAsinsDesc": "Für alle Shops aktiviert, darf jeder Shop jede ASIN listen; für einen Shop aktiviert, darf nur dieser Shop ASINs hinzufügen, die Ihre anderen Shops bereits führen. Eine ASIN, die bereits in diesem Shop ist, wird immer übersprungen.",
+        "allowCrossStoreAsinsInherited": "Es gilt die Einstellung für alle Shops, bis Sie für diesen Shop eine Auswahl speichern.",
         "country": "Land",
         "countryPlaceholder": "Land auswählen",
         "region": "Region",
@@ -834,7 +839,7 @@
       "billingNote": "Jederzeit kündbar. Preise verstehen sich ohne lokale Steuern, sofern zutreffend.",
       "perMonth": "/Monat",
       "mostPopular": "Am beliebtesten",
-      "planCta": "Kostenlos starten",
+      "planCta": "Kostenlos testen",
       "showAllPlans": "Alle {{count}} Tarife ansehen",
       "showFewerPlans": "Weniger Tarife anzeigen",
       "notIncluded": "Nicht enthalten",
@@ -885,6 +890,17 @@
           "conversions": "500 Sendungsnummern-Umwandlungen / Monat",
           "bestSellers": "25,000 Bestseller-Produkte / Monat"
         }
+      },
+      "trialPlanNote": "Jeder kostenlose Test beginnt mit dem Testpaket. Sie können jederzeit zu diesem Paket wechseln.",
+      "trial": {
+        "title": "{{days}} Tage kostenlos testen",
+        "listings": "{{limit}} aktive Angebote",
+        "conversions": "{{limit}} Sendungsnummern-Umwandlungen",
+        "bestSellers": "{{limit}} Bestseller-Produkte",
+        "orders": "{{limit}} automatische Bestellungen",
+        "unlimitedOrders": "Unbegrenzte automatische Bestellungen",
+        "noCard": "Keine Kreditkarte erforderlich",
+        "cta": "Kostenlosen Test starten"
       }
     },
     "faq": {

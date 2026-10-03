@@ -5,12 +5,17 @@ import { ACTIONABLE_RETURN_BUCKETS, buildReturnBucketSql, ReturnBucket, ReturnTa
 import type { DatabaseService } from '../../common/database/database.service';
 
 import { EbayReturnsService } from './ebay-returns.service';
+import {
+  buildReturnStoreActiveSql,
+  buildStoreScopedReturnBucketSql,
+  scopeReturnBucketToStore,
+} from './return-store-scope';
 import type { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
 const ACCOUNT = '11111111-1111-4111-8111-11111111111a';
 // Sweep interval 6 h (the fake below) → the 24 h minimum freshness horizon.
-const BUCKET_SQL = buildReturnBucketSql('r', 24);
+const BUCKET_SQL = buildStoreScopedReturnBucketSql('r', 24);
 
 const dbRow = (over: Record<string, unknown> = {}): Record<string, unknown> => ({
   id: '22222222-2222-4222-8222-222222222222',
@@ -40,6 +45,7 @@ const dbRow = (over: Record<string, unknown> = {}): Record<string, unknown> => (
   listing_title: 'Steel water bottle',
   listing_asin: 'B0SH000001',
   product_image_urls: ['https://example.test/1.jpg', 'https://example.test/2.jpg'],
+  store_active: true,
   ...over,
 });
 
@@ -272,6 +278,48 @@ describe('EbayReturnsService.list', () => {
 
     expect(item.estimatedRefundAmount).toBe(0);
     expect(item.actualRefundAmount).toBeNull();
+  });
+});
+
+describe('store scope (one predicate for the Returns page and the Action Center)', () => {
+  it('a return of a disconnected store stays listed but its action reads as unconfirmed', async () => {
+    const { service, query } = build({
+      rows: [
+        dbRow({ store_active: false }),
+        dbRow({ store_active: false, seller_respond_by: new Date('2001-01-01T00:00:00.000Z') }),
+        dbRow({ store_active: false, state: 'CLOSED', status: 'CLOSED' }),
+        dbRow({ store_active: false, seller_activity_due: null, seller_respond_by: null }),
+      ],
+    });
+
+    const result = await service.list(USER);
+
+    expect(result.items.map((item) => item.bucket)).toEqual([
+      ReturnBucket.UNCONFIRMED,
+      ReturnBucket.UNCONFIRMED,
+      ReturnBucket.CLOSED,
+      ReturnBucket.IN_PROGRESS,
+    ]);
+    // Visible: no store filter in the WHERE, the store state is only selected.
+    expect(query.mock.calls[1][0]).toContain(`${buildReturnStoreActiveSql('r')} AS store_active`);
+    expect(query.mock.calls[1][0]).not.toMatch(/JOIN ebay_accounts/);
+  });
+
+  it('the SQL demotes only action buckets of a non-active store, over the shared bucket', () => {
+    const sql = buildStoreScopedReturnBucketSql('r', 24);
+    expect(sql).toContain(buildReturnBucketSql('r', 24));
+    expect(sql).toContain(`IN ('${ReturnBucket.ACTION_OVERDUE}', '${ReturnBucket.ACTION_DUE}')`);
+    expect(sql).toContain(`AND NOT ${buildReturnStoreActiveSql('r')} THEN '${ReturnBucket.UNCONFIRMED}'`);
+    expect(buildReturnStoreActiveSql('r')).toContain("ret_store.status = 'active'");
+    expect(() => buildReturnStoreActiveSql('r; DROP')).toThrow();
+  });
+
+  it('the TypeScript twin agrees', () => {
+    for (const bucket of Object.values(ReturnBucket)) {
+      const actionable = ACTIONABLE_RETURN_BUCKETS.includes(bucket);
+      expect(scopeReturnBucketToStore(bucket, true)).toBe(bucket);
+      expect(scopeReturnBucketToStore(bucket, false)).toBe(actionable ? ReturnBucket.UNCONFIRMED : bucket);
+    }
   });
 });
 

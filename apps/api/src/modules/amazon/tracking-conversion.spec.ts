@@ -2,11 +2,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AQUILINE_EBAY_CARRIER_CODE, AquilineProblemCode, ConversionOutcome } from '@repo/shared';
+import {
+  AQUILINE_EBAY_CARRIER_CODE,
+  AquilineProblemCode,
+  ConversionOutcome,
+  TrackingConversionProvider,
+  TrackingConversionScope,
+} from '@repo/shared';
 
 import type { DatabaseService } from '../../common/database/database.service';
 import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import type { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import type { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import type { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import type { AquilineProfileService } from './aquiline-profile.service';
@@ -17,6 +24,28 @@ import {
   shouldRefuseOnDemandConversion,
   TrackingConversionService,
 } from './tracking-conversion.service';
+
+/**
+ * Store settings are resolved through StoreSettingsService (Store > Global >
+ * Default), never re-implemented here. The fakes take the snake_case row shape
+ * the older harnesses already used and hand back the resolved DTO.
+ */
+function storeSettingsFrom(row: Record<string, unknown> | null): StoreSettingsService & {
+  getResolvedSettings: jest.Mock;
+} {
+  const getResolvedSettings = jest.fn().mockResolvedValue({
+    trackingConversionProvider:
+      row?.tracking_conversion_provider === 'local'
+        ? TrackingConversionProvider.LOCAL
+        : TrackingConversionProvider.API,
+    trackingConversionScope:
+      row?.tracking_conversion_scope === 'all'
+        ? TrackingConversionScope.ALL
+        : TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+    trackingConvertManualOrders: row?.tracking_convert_manual_orders !== false,
+  });
+  return { getResolvedSettings } as unknown as StoreSettingsService & { getResolvedSettings: jest.Mock };
+}
 
 describe('isRetryableConversionFailure', () => {
   it('retries a transport blip', () => {
@@ -201,7 +230,8 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
-      trackingQueue
+      trackingQueue,
+      storeSettingsFrom(settingsRow)
     );
 
     const result = await service.resolveForOrder({
@@ -266,7 +296,8 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
-      trackingQueue
+      trackingQueue,
+      storeSettingsFrom(null)
     );
     return { service, uploadTrackingHtml, queries, isSuspended, canConvertTracking };
   }
@@ -349,29 +380,23 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
 // Pre-flight for the first live conversion (2026-09-29). Two things that would
 // have silently broken it on the shipped transition.
 // ---------------------------------------------------------------------------
-describe('TrackingConversionService.resolveSettings reads the real store_settings column', () => {
-  // `store_settings` has `store_id` (the eBay account id — what every other
-  // getResolvedSettings caller passes), never `ebay_account_id`. The query
-  // threw on every call, was swallowed, and the seller's real scope/provider
-  // was replaced by the defaults.
+describe('TrackingConversionService.resolveSettings goes through StoreSettingsService', () => {
+  // It once re-implemented Store > Global in raw SQL — and filtered on a
+  // column that does not exist, so every call threw, was swallowed, and the
+  // seller's real provider/scope were replaced by the defaults. The one
+  // resolver every other store setting uses is now the only one.
   const src = fs.readFileSync(path.join(__dirname, 'tracking-conversion.service.ts'), 'utf8').replace(/\r\n/g, '\n');
   const fn = src.slice(src.indexOf('private async resolveSettings('));
   const body = fn.slice(0, fn.indexOf('\n  }\n'));
 
-  it('filters on store_id, not a column that does not exist', () => {
-    expect(body).toMatch(/store_id = \$2/);
-    // The ORDER row legitimately supplies `order.ebay_account_id` as the
-    // parameter; what must not appear is that name as a store_settings column.
-    expect(body).not.toMatch(/\(ebay_account_id = \$2|ebay_account_id IS NULL|BY ebay_account_id/);
-  });
-
-  it('prefers the per-store row over the global one', () => {
-    expect(body).toMatch(/ORDER BY[^\n]*store_id[^\n]*NULLS LAST/);
+  it('holds no SQL of its own', () => {
+    expect(body).toMatch(/storeSettings\.getResolvedSettings\(/);
+    expect(body).not.toMatch(/FROM store_settings/);
   });
 });
 
 describe('TrackingConversionService.resolveForOrder — unknown carrier under a scoped setting', () => {
-  function build(settingsRow: Record<string, unknown>) {
+  function build(settingsRow: Record<string, unknown>, storeSettings = storeSettingsFrom(settingsRow)) {
     const orderRow = {
       id: 'order-1',
       user_id: 'user-1',
@@ -438,9 +463,10 @@ describe('TrackingConversionService.resolveForOrder — unknown carrier under a 
         canConvertTracking: jest.fn().mockResolvedValue({ allowed: true, used: 0, limitValue: 700 }),
       } as unknown as QuotaEnforcementService,
       { ensureProfile: jest.fn().mockResolvedValue('sh-user-1-AMAZON_US') } as unknown as AquilineProfileService,
-      { triggerImmediateTracking: jest.fn() } as unknown as AmazonTrackingQueueService
+      { triggerImmediateTracking: jest.fn() } as unknown as AmazonTrackingQueueService,
+      storeSettings
     );
-    return { service, upsertOrders, assign };
+    return { service, upsertOrders, assign, storeSettings };
   }
 
   const scopedSettings = {
@@ -485,5 +511,77 @@ describe('TrackingConversionService.resolveForOrder — unknown carrier under a 
     expect(result.outcome).toBe(ConversionOutcome.CONVERTED);
     expect(result.trackingNumber).toBe('AQUAA1234567890YQ');
     expect(assign).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves the ORDER's own store (Store > Global) through StoreSettingsService", async () => {
+    const { service, storeSettings } = build(scopedSettings);
+    await service.resolveForOrder({ orderId: 'order-1', rawNumber: 'TBA123456789', rawCarrier: 'Amazon Logistics' });
+    expect(storeSettings.getResolvedSettings).toHaveBeenCalledWith('user-1', 'ebay-1');
+  });
+
+  it('honours a store that switched conversion off (local provider)', async () => {
+    const { service, assign } = build({ ...scopedSettings, tracking_conversion_provider: 'local' });
+    const result = await service.resolveForOrder({
+      orderId: 'order-1',
+      rawNumber: 'TBA123456789',
+      rawCarrier: 'Amazon Logistics',
+    });
+    expect(result.outcome).toBe(ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('converts when settings cannot be resolved — an unreadable setting never exposes the supplier', async () => {
+    const failing = storeSettingsFrom(scopedSettings);
+    failing.getResolvedSettings.mockRejectedValue(new Error('db down'));
+    const { service, assign } = build(scopedSettings, failing);
+    const result = await service.resolveForOrder({
+      orderId: 'order-1',
+      rawNumber: 'TBA123456789',
+      rawCarrier: 'Amazon Logistics',
+    });
+    expect(result.outcome).toBe(ConversionOutcome.CONVERTED);
+    expect(assign).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('TrackingConversionService.convertOnDemand — store not connected', () => {
+  it('refuses before the quota or the provider is touched', async () => {
+    const assign = jest.fn();
+    const canConvertTracking = jest.fn();
+    const dbService = {
+      query: jest.fn((sql: string): unknown[] => {
+        if (sql.includes('FROM orders o')) {
+          return [
+            {
+              id: 'order-1',
+              user_id: 'user-1',
+              ebay_account_id: 'acc-1',
+              converted_tracking_number: null,
+              ebay_tracking_pushed_number: null,
+              listing_over_plan_limit: false,
+            },
+          ];
+        }
+        if (sql.includes('FROM ebay_accounts WHERE id')) {
+          return [{ status: 'disconnected' }];
+        }
+        return [];
+      }),
+    } as unknown as DatabaseService;
+    const service = new TrackingConversionService(
+      dbService,
+      { getString: jest.fn(), getNumber: jest.fn() } as unknown as PlatformSettingsService,
+      { isConfigured: () => true, assign, upsertOrders: jest.fn(), uploadTrackingHtml: jest.fn() } as unknown as AquilineClient,
+      { isSuspended: jest.fn(), canConvertTracking } as unknown as QuotaEnforcementService,
+      { ensureProfile: jest.fn() } as unknown as AquilineProfileService,
+      { triggerImmediateTracking: jest.fn() } as unknown as AmazonTrackingQueueService,
+      storeSettingsFrom(null),
+    );
+
+    const result = await service.convertOnDemand('order-1');
+
+    expect(result).toEqual({ converted: false, trackingNumber: null, reasonKey: 'orders.errors.storeNotConnected' });
+    expect(assign).not.toHaveBeenCalled();
+    expect(canConvertTracking).not.toHaveBeenCalled();
   });
 });

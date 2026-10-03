@@ -42,6 +42,7 @@ export const ListingCard = ({
   selected,
   onSelectedChange,
   selectionAriaLabel,
+  detailLabel,
   ...rest
 }: ListingCardProps): React.ReactElement => {
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
@@ -119,21 +120,36 @@ export const ListingCard = ({
         </S.Body>
       </S.Top>
 
-      <S.StatsGrid>
-        {stats.map((stat) => (
-          <S.StatCell key={stat.label}>
-            <S.StatLabel variant="caption" color="text.secondary">
-              {stat.label}
-            </S.StatLabel>
-            <S.StatValueRow>
-              {stat.icon ? <Icon name={stat.icon} size={14} color={stat.iconColor} filled /> : null}
-              <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
-                {stat.value}
-              </S.StatValue>
-            </S.StatValueRow>
-          </S.StatCell>
-        ))}
-      </S.StatsGrid>
+      <S.Footer>
+        <S.StatsGrid>
+          {stats.map((stat) => (
+            <S.StatCell key={stat.label}>
+              <S.StatLabel variant="caption" color="text.secondary">
+                {stat.label}
+              </S.StatLabel>
+              <S.StatValueRow>
+                {stat.icon ? <Icon name={stat.icon} size={14} color={stat.iconColor} filled /> : null}
+                <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
+                  {stat.value}
+                </S.StatValue>
+                {stat.secondary ? (
+                  <Text variant="caption" color="text.secondary" numeric>
+                    {stat.secondary}
+                  </Text>
+                ) : null}
+              </S.StatValueRow>
+            </S.StatCell>
+          ))}
+        </S.StatsGrid>
+        {detailLabel && onClick ? (
+          <S.DetailHint>
+            <Text variant="caption" weight="semibold" color="brand.primary">
+              {detailLabel}
+            </Text>
+            <Icon name="chevron-right" size={16} color="brand.primary" />
+          </S.DetailHint>
+        ) : null}
+      </S.Footer>
     </S.Wrapper>
   );
 };

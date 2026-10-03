@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AmazonMarketplace, ListingStatus, type ListingSettingsGroup, type ProductData } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { buildListingStoreActiveSql } from '../../common/utils/listing-store-active-sql';
 import { EbayBulkService, type BulkPriceQuantityItem } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
@@ -131,7 +132,9 @@ export class ProductSyncService {
          -- keeps whatever they last had. The flag is only ever set while
          -- billing enforcement is on (ListingPlanLimitProcessor clears it
          -- otherwise), so this predicate needs no enforcement check of its own.
-         AND over_plan_limit = FALSE`,
+         AND over_plan_limit = FALSE
+         -- A disconnected store's listings are not pushed (no token).
+         AND ${buildListingStoreActiveSql('listings')}`,
       [productId, ListingStatus.ACTIVE]
     );
 
@@ -215,7 +218,8 @@ export class ProductSyncService {
 
     const byListingId = new Map(updates.map((update) => [update.listingId, update]));
 
-    await Promise.allSettled(
+    const accountIds = Array.from(byAccount.keys());
+    const settled = await Promise.allSettled(
       Array.from(byAccount.entries()).map(async ([accountId, accountUpdates]) => {
         const items: BulkPriceQuantityItem[] = accountUpdates.map((update) => ({
           listingId: update.listingId,
@@ -275,6 +279,15 @@ export class ProductSyncService {
         );
       })
     );
+    // A whole store's push failing (no usable token, eBay outage) used to vanish
+    // here without a trace while the unchanged-check revisions kept being
+    // written. Say so; the next refresh retries.
+    settled.forEach((outcome, index) => {
+      if (outcome.status === 'rejected') {
+        const reason = outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+        this.logger.warn(`Price/stock push for eBay account ${accountIds[index]} failed: ${reason}`);
+      }
+    });
   }
 
   // --------------------------------------------------------------- internals
@@ -551,6 +564,7 @@ export class ProductSyncService {
        WHERE l.product_id = ANY($1::uuid[])
          AND l.status = $2
          AND l.over_plan_limit = FALSE
+         AND ${buildListingStoreActiveSql('l')}
          AND l.price IS NOT NULL
          AND l.quantity IS NOT NULL
          AND NOT (l.id = ANY($3::uuid[]))`,

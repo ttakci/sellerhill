@@ -41,8 +41,20 @@ export function buildListCacheKeyParts(
   category: string,
   page: number,
 ): string[] {
-  const categorySegment = category === BEST_SELLERS_ROOT_CATEGORY ? ROOT_CATEGORY_KEY_SEGMENT : category.split('/').join('_');
-  return ['best-sellers', 'list', countryCode, listType, categorySegment, String(page)];
+  return ['best-sellers', 'list', countryCode, listType, categoryKeySegment(category), String(page)];
+}
+
+/**
+ * Parts of the tree cache key: one node's sidebar (its chain, itself, its
+ * children), with no page — the tree beside page 2 is the tree beside page 1.
+ * Kept apart from the list cache because it lives far longer.
+ */
+export function buildTreeCacheKeyParts(countryCode: string, listType: BestSellersListType, category: string): string[] {
+  return ['best-sellers', 'tree', countryCode, listType, categoryKeySegment(category)];
+}
+
+function categoryKeySegment(category: string): string {
+  return category === BEST_SELLERS_ROOT_CATEGORY ? ROOT_CATEGORY_KEY_SEGMENT : category.split('/').join('_');
 }
 
 /**

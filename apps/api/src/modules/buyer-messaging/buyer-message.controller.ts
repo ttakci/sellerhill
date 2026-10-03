@@ -58,18 +58,14 @@ export class BuyerMessagingSettingsController {
       enabled: dto.enabled,
       events: dto.events,
     });
-    const existing = await this.settings.getSettings(req.user.sub, storeId);
-
+    // ONLY the messaging config. Every other field omitted means "unchanged"
+    // (and, on a store's first row, "copy the global row"). This used to read
+    // the row and write it back whole, which dropped every blacklist keyword's
+    // `action` (a `remove` became `block`) and, racing the drawer's other save,
+    // could put back the auto-fulfill / tax / provider values just changed.
     const saved = await this.settings.saveSettings(req.user.sub, {
       isGlobal: !storeId,
       storeId,
-      country: existing.country,
-      state: existing.state,
-      zipCode: existing.zipCode,
-      blacklist: existing.blacklist.map(({ keyword, types }) => ({ keyword, types })),
-      amazonTaxRate: existing.amazonTaxRate,
-      autoFulfillEnabled: existing.autoFulfillEnabled,
-      trackingConversionProvider: existing.trackingConversionProvider,
       buyerMessaging,
     });
 

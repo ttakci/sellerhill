@@ -7,7 +7,7 @@ import { RevisionHistoryPageComponent } from './RevisionHistoryPage.component';
 import type { RevisionHistoryDrawerState, RevisionHistoryRow } from './RevisionHistoryPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useGetAllListingRevisionsQuery } from '@/features/listings/api/listings.api';
 import { useLocale } from '@/utils/useLocale';
 
@@ -27,20 +27,15 @@ export const RevisionHistoryPageContainer: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
-  const [storeFilter, setStoreFilter] = useState('');
+  // The top bar's active store; a switch starts the list over on page 1.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
+  const [pageStore, setPageStore] = useState(storeFilter);
+  if (pageStore !== storeFilter) {
+    setPageStore(storeFilter);
+    setPage(1);
+  }
   const [drawer, setDrawer] = useState<RevisionHistoryDrawerState>(EMPTY_DRAWER);
-
-  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
-  const storeOptions = useMemo(
-    () => [
-      { value: '', label: t('listings.filters.allStores') },
-      ...(ebayAccountsData?.items ?? []).map((acc) => ({
-        value: acc.id,
-        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
-      })),
-    ],
-    [ebayAccountsData?.items, t]
-  );
 
   const { data, isLoading } = useGetAllListingRevisionsQuery(
     {
@@ -49,7 +44,7 @@ export const RevisionHistoryPageContainer: React.FC = () => {
       search: search.trim() || undefined,
       ebayAccountId: storeFilter || undefined,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
 
   const items = useMemo(() => data?.items ?? [], [data]);
@@ -108,21 +103,15 @@ export const RevisionHistoryPageContainer: React.FC = () => {
     [items, formatRowDate, locale]
   );
 
-  const hasActiveFilters = Boolean(search.trim() || storeFilter);
+  const hasActiveFilters = Boolean(search.trim());
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     setPage(1);
   }, []);
 
-  const handleStoreFilterChange = useCallback((value: string | number) => {
-    setStoreFilter(String(value));
-    setPage(1);
-  }, []);
-
   const handleClearFilters = useCallback(() => {
     setSearch('');
-    setStoreFilter('');
     setPage(1);
   }, []);
 
@@ -161,9 +150,6 @@ export const RevisionHistoryPageContainer: React.FC = () => {
         onViewModeChange={setViewMode}
         search={search}
         onSearchChange={handleSearchChange}
-        storeFilter={storeFilter}
-        onStoreFilterChange={handleStoreFilterChange}
-        storeOptions={storeOptions}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         onRowClick={handleRowClick}

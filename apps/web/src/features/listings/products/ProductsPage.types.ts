@@ -10,6 +10,7 @@ export interface ProductsPageComponentProps {
   /** Server-side search over title / ASIN / brand. */
   search: string;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Clears the search AND the store filter — the filtered-empty state's action. */
   onClearSearch: () => void;
   /** Locale-aware money formatter (shared `formatCurrency`). */
   formatCurrency: (value: number) => string;

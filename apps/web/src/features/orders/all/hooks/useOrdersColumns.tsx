@@ -23,7 +23,7 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
  * sort affordance that does nothing is worse than none.
  */
 export function useOrdersColumns(
-  formatCurrency: (value: number) => string,
+  formatCurrency: (value: number, ebayAccountId?: string | null) => string,
   formatDate: (value: string) => string,
   formatMargin: (order: OrderDto) => string | null,
   formatDay: (value: string) => string
@@ -125,7 +125,7 @@ export function useOrdersColumns(
             order.stage === OrderStage.SHIPPED
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
-          const flags = orderFlagBadges(order, t, formatCurrency, formatDay);
+          const flags = orderFlagBadges(order, t, (value) => formatCurrency(value, order.ebayAccountId), formatDay);
           return (
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
@@ -160,7 +160,7 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" numeric>
-            {formatCurrency(order.salePrice)}
+            {formatCurrency(order.salePrice, order.ebayAccountId)}
           </Text>
         ),
       },
@@ -171,7 +171,7 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary" numeric>
-            {formatCurrency(order.purchasePrice)}
+            {formatCurrency(order.purchasePrice, order.ebayAccountId)}
           </Text>
         ),
       },
@@ -191,7 +191,7 @@ export function useOrdersColumns(
                 numeric
               >
                 {order.netProfit >= 0 ? '+' : ''}
-                {formatCurrency(order.netProfit)}
+                {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
               {order.profitBasis === ProfitBasis.ESTIMATED ? (
                 <Badge variant="warning" size="xs">

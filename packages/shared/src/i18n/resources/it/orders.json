@@ -275,6 +275,7 @@
       "orderNotTracked": "Questo ordine non è collegato a nessuna delle tue inserzioni, quindi un numero di tracciamento convertito non potrebbe mai essere inviato a eBay. Collega prima l'ordine alla sua inserzione.",
       "trackingAlreadyPushed": "eBay ha già il numero di tracciamento originale di questo ordine e non può essere sostituito, quindi convertirlo ora non cambierebbe ciò che vede l'acquirente.",
       "listingOverPlanLimit": "L'inserzione di questo ordine era oltre il limite di inserzioni del tuo piano quando l'ordine è arrivato. Gli ordini delle inserzioni oltre il limite non ricevono il tracciamento della spedizione né la conversione del tracciamento.",
+      "storeNotConnected": "Il negozio eBay di questo ordine non è collegato. Ricollega il negozio, poi converti il numero di tracciamento.",
       "autoFulfillNotRestartable": "L'acquisto automatico di questo ordine non può essere riavviato. Potrebbe essere già acquistato o in corso, oppure potrebbe partire un secondo acquisto. Controlla i tuoi ordini Amazon e collega l'ordine manualmente.",
       "autoFulfillNoAccount": "Nessun account Amazon è pronto per gli ordini automatici. Nelle impostazioni attiva gli ordini automatici su un account Amazon e imposta un limite di spesa.",
       "autoFulfillOverCap": "Questa vendita supera il limite di spesa del tuo account Amazon. Aumenta il limite nelle impostazioni dell'account Amazon o acquista l'articolo manualmente.",

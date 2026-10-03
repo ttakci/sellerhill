@@ -6,6 +6,7 @@ import { BillingModule } from '../billing/billing.module';
 import { BuyerMessagingModule } from '../buyer-messaging/buyer-messaging.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { OrdersModule } from '../orders/orders.module';
+import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonCheckoutService } from './amazon-checkout.service';
@@ -37,6 +38,10 @@ import { TrackingWebhookService } from './tracking-webhook.service';
     BuyerMessagingModule,
     EbayModule,
     OrdersModule,
+    // TrackingConversionService resolves provider/scope through
+    // StoreSettingsService. StoreSettingsModule imports only DatabaseModule,
+    // so this closes no cycle.
+    StoreSettingsModule,
     BullModule.registerQueue(
       { name: 'amazon-tracking' },
       { name: 'amazon-verify' },

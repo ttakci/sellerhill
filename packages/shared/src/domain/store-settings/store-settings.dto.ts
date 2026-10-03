@@ -10,7 +10,7 @@ import { BlacklistKeyword, StoreSettings } from './store-settings.types';
  * Several FOCUSED drawers write disjoint halves of one row: `StoreSettingsDrawer`
  * owns location/validation/tax/A2, `BlacklistDrawer` owns the blacklist. So an
  * OMITTED optional field means "leave unchanged" on UPDATE (and falls back to
- * the column default on INSERT) — never "erase". An empty string is treated the
+ * the GLOBAL row's value, then the column default, on INSERT) — never "erase". An empty string is treated the
  * same as omitted for the location fields, because `getSettings` synthesizes
  * `''` defaults when a row does not exist yet and callers echo those back.
  */
@@ -40,8 +40,9 @@ export interface SaveStoreSettingsRequest {
     // Owned by BlacklistDrawer. Omitted by the store-settings drawer.
     blacklist?: Omit<BlacklistKeyword, 'id'>[];
 
-    // Percent 0–100 used to estimate provisional order profit when real tax unknown.
-    amazonTaxRate: number;
+    // Percent 0–100: the estimated Amazon purchase tax (pricing + provisional
+    // profit). Omitted = unchanged, like every other optional field here.
+    amazonTaxRate?: number;
 
     // A2 master toggle (per-user global). When off, no eBay order is auto-purchased.
     // Optional on the request — service defaults to false. Response always carries it.
@@ -70,6 +71,11 @@ export interface SaveStoreSettingsRequest {
     // Owned by ListingRulesDrawer. Omitted = leave unchanged; an object
     // replaces the stored rules whole (it is normalized server-side).
     listingRules?: ListingRulesConfig;
+
+    // Allow ASINs already listed on the seller's other stores. Three states:
+    // omitted = leave unchanged, null = inherit (a store row follows the
+    // global value; global null = off), boolean = this row's own choice.
+    allowCrossStoreAsins?: boolean | null;
 }
 
 /**

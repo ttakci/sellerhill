@@ -145,6 +145,7 @@ export class AdminController {
     @InjectQueue('ebay-rate-limit-refresh') private readonly ebayRateLimitRefreshQueue: Queue,
     @InjectQueue('ebay-returns-sync') private readonly ebayReturnsSyncQueue: Queue,
     @InjectQueue('listing-cleanup') private readonly listingCleanupQueue: Queue,
+    @InjectQueue('best-sellers-crawl') private readonly bestSellersCrawlQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -166,6 +167,7 @@ export class AdminController {
       { name: 'ebay-rate-limit-refresh', queue: this.ebayRateLimitRefreshQueue },
       { name: 'ebay-returns-sync', queue: this.ebayReturnsSyncQueue },
       { name: 'listing-cleanup', queue: this.listingCleanupQueue },
+      { name: 'best-sellers-crawl', queue: this.bestSellersCrawlQueue },
     ];
   }
 

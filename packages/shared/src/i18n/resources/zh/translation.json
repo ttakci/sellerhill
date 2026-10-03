@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "选择语言",
+    "selectStore": "选择店铺",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "通知",
     "openMenu": "打开菜单",
     "collapseSidebar": "收起侧边栏",
@@ -393,6 +395,9 @@
         "appliesTo": "适用于",
         "checkBlacklist": "检查黑名单关键词",
         "checkBlacklistDesc": "发布前，对照您的黑名单扫描刊登标题、描述、商品属性和品牌。每个关键词自身的字段选择决定其检查范围。",
+        "allowCrossStoreAsins": "允许添加我其他店铺中已有的 ASIN",
+        "allowCrossStoreAsinsDesc": "为所有店铺开启后，每个店铺都可以刊登任何 ASIN；只为某个店铺开启时，只有该店铺可以添加您其他店铺已有的 ASIN。本店铺已有的 ASIN 始终会被跳过。",
+        "allowCrossStoreAsinsInherited": "在您为此店铺保存选择之前，沿用所有店铺的设置。",
         "country": "国家/地区",
         "countryPlaceholder": "选择国家/地区",
         "region": "州/省",
@@ -834,7 +839,7 @@
       "billingNote": "随时取消。价格不含适用的当地税费。",
       "perMonth": "/月",
       "mostPopular": "最受欢迎",
-      "planCta": "免费开始",
+      "planCta": "免费试用",
       "showAllPlans": "查看全部 {{count}} 个套餐",
       "showFewerPlans": "收起部分套餐",
       "notIncluded": "不包含",
@@ -885,6 +890,17 @@
           "conversions": "每月 500 次物流单号转换",
           "bestSellers": "每月 25,000 件热销榜商品"
         }
+      },
+      "trialPlanNote": "所有免费试用均从试用套餐开始，您可随时切换到此套餐。",
+      "trial": {
+        "title": "免费试用 {{days}} 天",
+        "listings": "{{limit}} 条在售商品刊登",
+        "conversions": "{{limit}} 次物流单号转换",
+        "bestSellers": "{{limit}} 件热销榜商品",
+        "orders": "{{limit}} 个自动订单",
+        "unlimitedOrders": "不限自动订单",
+        "noCard": "无需信用卡",
+        "cta": "开始免费试用"
       }
     },
     "faq": {

@@ -34,6 +34,7 @@ import {
   AutoFulfillStatus,
   buildAmazonProductUrl,
   ConversionOutcome,
+  EbayAccountStatus,
   isAquilineProblemCode,
   PlatformSettingKey,
   TrackingConversionProvider,
@@ -47,6 +48,7 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AQUILINE_PLAN_SNAPSHOT_INSERT_SQL, buildAquilinePlanSnapshotParams } from './aquiline-plan-snapshot.sql';
@@ -131,16 +133,15 @@ interface ConversionOrderRow {
 
 interface ResolvedSettingsRow {
   tracking_conversion_provider: string | null;
-  tracking_provider_profile_id: string | null;
   tracking_conversion_scope: string | null;
   tracking_convert_manual_orders: boolean | null;
 }
 
 /** Every field null/absent — resolution failed or no row exists. Callers fall
- *  back to the safe defaults (local provider, TB*-only scope). */
+ *  back to the safe defaults (Aquiline via `normalizeProvider`, TB*-only
+ *  scope, manual orders converted). */
 const EMPTY_SETTINGS: ResolvedSettingsRow = {
   tracking_conversion_provider: null,
-  tracking_provider_profile_id: null,
   tracking_conversion_scope: null,
   tracking_convert_manual_orders: null,
 };
@@ -156,7 +157,8 @@ export class TrackingConversionService {
     private readonly aquiline: AquilineClient,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly aquilineProfile: AquilineProfileService,
-    private readonly trackingQueue: AmazonTrackingQueueService
+    private readonly trackingQueue: AmazonTrackingQueueService,
+    private readonly storeSettings: StoreSettingsService
   ) {}
 
   /**
@@ -581,6 +583,19 @@ export class TrackingConversionService {
       };
     }
 
+    // A store that is not connected cannot receive the push, so a number bought
+    // now would sit unused until a reconnect (and be paid for regardless).
+    // Refused before the quota or the provider is touched.
+    if (order.ebay_account_id) {
+      const [store] = await this.databaseService.query<{ status: EbayAccountStatus }>(
+        `SELECT status FROM ebay_accounts WHERE id = $1`,
+        [order.ebay_account_id],
+      );
+      if (store?.status !== EbayAccountStatus.ACTIVE) {
+        return { converted: false, trackingNumber: null, reasonKey: 'orders.errors.storeNotConnected' };
+      }
+    }
+
     // eBay's Fulfillment API has no update endpoint (createShippingFulfillment
     // is POST-only), so once the raw Amazon number has been pushed the buyer's
     // tracking number can never be corrected. Buying a conversion now would be
@@ -858,29 +873,26 @@ export class TrackingConversionService {
   }
 
   /**
-   * Provider + profile for this order, using the same Store > Global > Default
-   * precedence as the rest of `store_settings`. Passing the order's eBay
-   * account (rather than always NULL) is what makes a per-store override real —
-   * the auto-fulfill gate had exactly this bug once.
+   * Provider, scope and manual-orders switch for this order, resolved by
+   * `StoreSettingsService.getResolvedSettings` — the ONE Store > Global >
+   * Default resolver every other store setting uses. Passing the order's own
+   * eBay account is what makes a per-store override real. This once
+   * re-implemented the precedence in raw SQL, filtered on a column that does
+   * not exist, threw on every call and silently fell back to the defaults.
+   *
+   * The provider still goes through `normalizeProvider` at the call site: no
+   * settings row resolves to AQUILINE, and a resolution failure returns
+   * `EMPTY_SETTINGS` (null → AQUILINE) — a setting we cannot read must never
+   * put the raw Amazon number in front of a buyer.
    */
   private async resolveSettings(order: ConversionOrderRow): Promise<ResolvedSettingsRow> {
     try {
-      const rows = await this.databaseService.query<ResolvedSettingsRow>(
-        // `store_settings.store_id` IS the eBay account id (what every
-        // `getResolvedSettings(userId, ebayAccountId)` caller passes). This
-        // once filtered on a column carrying the eBay-account name, which does
-        // not exist on this table: the query threw on every call, the catch
-        // below swallowed it, and the seller's real provider/scope were
-        // replaced by the defaults. `tracking-conversion.spec.ts` locks it.
-        `SELECT tracking_conversion_provider, tracking_provider_profile_id,
-                tracking_conversion_scope, tracking_convert_manual_orders
-         FROM store_settings
-         WHERE user_id = $1 AND (store_id = $2 OR is_global = TRUE)
-         ORDER BY store_id NULLS LAST
-         LIMIT 1`,
-        [order.user_id, order.ebay_account_id]
-      );
-      return rows[0] ?? EMPTY_SETTINGS;
+      const settings = await this.storeSettings.getResolvedSettings(order.user_id, order.ebay_account_id);
+      return {
+        tracking_conversion_provider: settings.trackingConversionProvider ?? null,
+        tracking_conversion_scope: settings.trackingConversionScope ?? null,
+        tracking_convert_manual_orders: settings.trackingConvertManualOrders ?? null,
+      };
     } catch (err) {
       // Settings resolution must never break the shipped push.
       this.logger.warn(

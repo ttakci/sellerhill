@@ -61,7 +61,13 @@ export function useListingsColumns(locale: string) {
               icon: 'tag',
             });
           }
-          return <ProductTableCell title={displayName} imageUrl={listing.imageUrls?.[0]} meta={meta} />;
+          return (
+            <ProductTableCell
+              title={displayName}
+              imageUrl={listing.imageUrls?.[0]}
+              meta={meta}
+            />
+          );
         },
       },
       {

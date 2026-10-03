@@ -275,6 +275,7 @@
       "orderNotTracked": "Cette commande n'est liée à aucune de vos annonces, un numéro de suivi converti ne pourrait donc jamais être envoyé à eBay. Liez d'abord la commande à son annonce.",
       "trackingAlreadyPushed": "eBay possède déjà le numéro de suivi d'origine de cette commande et il ne peut pas être remplacé ; convertir maintenant ne changerait donc pas ce que voit l'acheteur.",
       "listingOverPlanLimit": "L'annonce de cette commande était hors de la limite d'annonces de votre forfait lorsque la commande est arrivée. Les commandes issues d'annonces hors limite n'ont ni suivi d'expédition ni conversion du suivi.",
+      "storeNotConnected": "La boutique eBay de cette commande n'est pas connectée. Reconnectez la boutique, puis convertissez le numéro de suivi.",
       "autoFulfillNotRestartable": "L'achat automatique de cette commande ne peut pas être relancé. Elle est peut-être déjà achetée ou en cours, ou un second achat pourrait être passé. Vérifiez vos commandes Amazon et associez la commande manuellement.",
       "autoFulfillNoAccount": "Aucun compte Amazon n'est prêt pour les commandes automatiques. Dans les paramètres, activez les commandes automatiques sur un compte Amazon et définissez un plafond de dépenses.",
       "autoFulfillOverCap": "Cette vente dépasse le plafond de dépenses de votre compte Amazon. Augmentez le plafond dans les paramètres du compte Amazon ou achetez l'article manuellement.",

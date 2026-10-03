@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Dil seçin",
+    "selectStore": "Mağaza seçin",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Bildirişlər",
     "openMenu": "Menyunu aç",
     "collapseSidebar": "Yan paneli yığ",
@@ -393,6 +395,9 @@
         "appliesTo": "Tətbiq olunur",
         "checkBlacklist": "Qara siyahı açar sözlərini yoxla",
         "checkBlacklistDesc": "Dərc etməzdən əvvəl elan başlıqlarını, təsvirlərini, xüsusiyyətlərini və brendi qara siyahınıza qarşı skan edin. Hər açar sözün öz sahə seçimi onun harada yoxlanılacağını müəyyən edir.",
+        "allowCrossStoreAsins": "Digər mağazalarımda olan ASIN-lər bu mağazaya da əlavə oluna bilsin",
+        "allowCrossStoreAsinsDesc": "Bütün mağazalar üçün açsanız, hər mağaza istənilən ASIN-i siyahıya sala bilər; bir mağaza üçün açsanız, yalnız həmin mağaza digər mağazalarınızda artıq olan ASIN-ləri əlavə edə bilər. Bu mağazada artıq olan ASIN həmişə ötürülür.",
+        "allowCrossStoreAsinsInherited": "Bu mağaza üçün seçim yadda saxlayana qədər bütün mağazaların ayarı keçərlidir.",
         "country": "Ölkə",
         "countryPlaceholder": "Ölkə seçin",
         "region": "Region",
@@ -834,7 +839,7 @@
       "billingNote": "İstənilən vaxt ləğv edin. Qiymətlərə tətbiq olunan yerlərdə yerli vergilər daxil deyil.",
       "perMonth": "/ay",
       "mostPopular": "Ən populyar",
-      "planCta": "Pulsuz başla",
+      "planCta": "Pulsuz sına",
       "showAllPlans": "Bütün {{count}} plana bax",
       "showFewerPlans": "Daha az plan göstər",
       "notIncluded": "Daxil deyil",
@@ -885,6 +890,17 @@
           "conversions": "Ayda 500 izləmə çevirməsi",
           "bestSellers": "Ayda 25,000 Ən Çox Satılanlar məhsulu"
         }
+      },
+      "trialPlanNote": "Pulsuz sınaq sınaq paketi ilə başlayır. İstədiyiniz an bu paketə keçə bilərsiniz.",
+      "trial": {
+        "title": "{{days}} gün pulsuz sınayın",
+        "listings": "{{limit}} aktiv elan",
+        "conversions": "{{limit}} izləmə çevirməsi",
+        "bestSellers": "{{limit}} Ən Çox Satılanlar məhsulu",
+        "orders": "{{limit}} avtomatik sifariş",
+        "unlimitedOrders": "Limitsiz avtomatik sifariş",
+        "noCard": "Kredit kartı tələb olunmur",
+        "cta": "Pulsuz sınağa başla"
       }
     },
     "faq": {

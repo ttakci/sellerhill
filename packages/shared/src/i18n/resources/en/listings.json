@@ -135,6 +135,7 @@
       "allStores": "All Stores",
       "advancedFilters": "Advanced Filters",
       "clearAll": "Clear All",
+      "removeFilter": "Remove filter: {{label}}",
       "resultCount": "{{count}} results",
       "min": "Min",
       "max": "Max",
@@ -184,6 +185,7 @@
       "profitMargin": "Margin",
       "roi": "ROI",
       "stock": "Stock",
+      "stockEbayAmazon": "Stock (eBay/AMZ)",
       "sold": "Sold",
       "lastSale": "Last Sale",
       "category": "Category",
@@ -255,6 +257,7 @@
       "importing": "Importing...",
       "addListing": "Add Listing",
       "addNewList": "Add New List",
+      "addingToStore": "Adding to {{store}}",
       "createListings": "Create Listings",
       "export": "Export",
       "viewAll": "View All",
@@ -303,6 +306,7 @@
       "actionTitle": "Import existing eBay listings",
       "actionSubtitle": "Match active store listings to Amazon ASINs with an Excel workbook.",
       "storeTitle": "Source store",
+      "importingTo": "Importing into {{store}}",
       "store": "eBay store",
       "fileTitle": "Upload listing matches",
       "fileHint": "Provide an exact Amazon ASIN and eBay Item ID for every listing. Eligible legacy listings are migrated without being recreated.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Failed to fetch eBay business policies",
       "invalidAsins": "{{count}} of your entries don't look like valid ASINs (10 alphanumeric characters) and were skipped.",
       "loadFailed": "Failed to load listings. Please try again.",
-      "scheduleTooLong": "At this pace the job would take more than 30 days. Raise the number of products per day or add fewer ASINs."
+      "scheduleTooLong": "At this pace the job would take more than 30 days. Raise the number of products per day or add fewer ASINs.",
+      "storeUnavailable": "That eBay store can't be used: it isn't connected to your account or its connection has ended. Choose another store or reconnect it."
     },
     "detail": {
       "breadcrumb": "Listing detail",
