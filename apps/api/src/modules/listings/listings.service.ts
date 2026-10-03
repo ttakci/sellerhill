@@ -161,6 +161,7 @@ interface ProductPriceData {
 /** Row type for endListings query */
 interface EbayItemIdRow {
   ebay_item_id: string;
+  ebay_account_id: string | null;
 }
 
 /** Row type for deleteListings transaction query */
@@ -2096,7 +2097,12 @@ export class ListingsService {
     // refused here without spending a Media API upload on it.
     assertSourcePricePublishable(product.data);
 
-    const ebayAccountId = listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
+    // The draft's own store. A legacy draft with no store resolves to the
+    // seller's oldest active store (deterministic), never an arbitrary one.
+    const ebayAccountId = await this.ebayService.resolveListingAccountId(userId, listing.ebayAccountId ?? null);
+    if (!ebayAccountId) {
+      throw new BadRequestException('No active eBay store to publish this draft through');
+    }
 
     await attachEpsImages(this.ebayImages, product.id, ebayAccountId, product.data);
 
@@ -2164,7 +2170,7 @@ export class ListingsService {
         userId,
         listingData,
         listing.asin,
-        ebayAccountId ?? undefined
+        ebayAccountId
       );
 
       return {
@@ -2360,7 +2366,7 @@ export class ListingsService {
         // 1. Get listing from DB to get the eBay item ID
         const results = await this.databaseService.query<EbayItemIdRow>(
           `
-          SELECT ebay_item_id FROM listings
+          SELECT ebay_item_id, ebay_account_id FROM listings
           WHERE id = $1 AND user_id = $2
         `,
           [listingId, userId]
@@ -2372,8 +2378,13 @@ export class ListingsService {
 
         const ebayItemId = results[0].ebay_item_id;
 
-        // 2. Call eBay to end the item
-        await this.ebayService.withdrawOffer(userId, ebayItemId);
+        // 2. Call eBay to end the item — through the store the listing was
+        // published on (a legacy row with no store resolves deterministically).
+        const accountId = await this.ebayService.resolveListingAccountId(userId, results[0].ebay_account_id);
+        if (!accountId) {
+          throw new Error('No active eBay store to end this listing through');
+        }
+        await this.ebayService.withdrawOffer(userId, accountId, ebayItemId);
 
         // 3. Update status in DB
         await this.databaseService.query(

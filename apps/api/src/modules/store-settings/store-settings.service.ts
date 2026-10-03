@@ -177,8 +177,11 @@ export class StoreSettingsService {
 
     // A focused drawer omits fields it does not own. Empty location strings are
     // also omission: `getSettings` synthesizes '' when a row does not exist and
-    // older callers echo that DTO back. INSERT still satisfies the NOT NULL
-    // schema through COALESCE defaults below.
+    // older callers echo that DTO back. On INSERT an omitted field takes the
+    // GLOBAL row's value (a store's first row is a copy of "all stores"), then
+    // the schema default. It used to take the column default directly, so a
+    // blacklist save on a store with no row wrote auto-fulfill OFF and the
+    // tracking provider 'local' — the raw Amazon number went to eBay.
     const countryValue = country?.trim() ? country.trim() : null;
     const stateValue = state?.trim() ? state.trim() : null;
     const zipCodeValue = zipCode?.trim() ? zipCode.trim() : null;
@@ -234,7 +237,7 @@ export class StoreSettingsService {
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
             INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), COALESCE($7::numeric, 0), COALESCE($8, FALSE), COALESCE($9, 'aquiline'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -242,7 +245,7 @@ export class StoreSettingsService {
                 zip_code = COALESCE($4, store_settings.zip_code),
                 check_blacklist = COALESCE($5, store_settings.check_blacklist),
                 blacklist = COALESCE($6::jsonb, store_settings.blacklist),
-                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                amazon_tax_rate = COALESCE($7::numeric, store_settings.amazon_tax_rate),
                 auto_fulfill_enabled = COALESCE($8, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($9, store_settings.tracking_conversion_provider),
                 tracking_conversion_scope = COALESCE($12, store_settings.tracking_conversion_scope),
@@ -297,7 +300,18 @@ export class StoreSettingsService {
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
             INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19, $20::numeric, $22::jsonb)
+            SELECT $1, $2, FALSE,
+                   COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''),
+                   COALESCE($6::boolean, g.check_blacklist, TRUE),
+                   COALESCE($7::jsonb, g.blacklist, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb),
+                   COALESCE($8::numeric, g.amazon_tax_rate, 0),
+                   COALESCE($9::boolean, g.auto_fulfill_enabled, FALSE),
+                   COALESCE($10::varchar, g.tracking_conversion_provider, 'aquiline'),
+                   COALESCE($13::varchar, g.tracking_conversion_scope, 'amazon_logistics_only'),
+                   COALESCE($14::boolean, g.tracking_convert_manual_orders, TRUE),
+                   $11::jsonb, $15, $16, $17, $18, $19, $20::numeric, $22::jsonb
+              FROM (SELECT 1) AS seed
+              LEFT JOIN store_settings g ON g.user_id = $1 AND g.is_global = TRUE
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -305,7 +319,7 @@ export class StoreSettingsService {
                 zip_code = COALESCE($5, store_settings.zip_code),
                 check_blacklist = COALESCE($6, store_settings.check_blacklist),
                 blacklist = COALESCE($7::jsonb, store_settings.blacklist),
-                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                amazon_tax_rate = COALESCE($8::numeric, store_settings.amazon_tax_rate),
                 auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
                 tracking_conversion_scope = COALESCE($13, store_settings.tracking_conversion_scope),
