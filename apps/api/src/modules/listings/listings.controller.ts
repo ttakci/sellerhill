@@ -126,7 +126,8 @@ export class ListingsController {
     @Query('sourceStockMax') sourceStockMax?: string,
     @Query('soldFrom') soldFrom?: string,
     @Query('soldTo') soldTo?: string,
-    @Query('sourceUnavailable') sourceUnavailable?: string
+    @Query('sourceUnavailable') sourceUnavailable?: string,
+    @Query('notSelling') notSelling?: string
   ): Promise<PaginatedListingsDto> {
     const num = (v?: string): number | undefined =>
       v !== undefined && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : undefined;
@@ -164,6 +165,7 @@ export class ListingsController {
       soldFrom,
       soldTo,
       sourceUnavailable: sourceUnavailable === 'true',
+      notSelling: notSelling === 'true',
     };
 
     return this.listingsService.getListings(req.user.sub, query);

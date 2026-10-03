@@ -17,6 +17,8 @@ import {
   IsArray,
   ValidateNested,
   Min,
+  Max,
+  IsInt,
   IsIn,
   IsBoolean,
 } from 'class-validator';
@@ -71,6 +73,18 @@ class FeeConfigDto implements FeeConfig {
   @IsNumber()
   @Min(0)
   fixedFeeAmount!: number;
+
+  @ApiPropertyOptional({ description: 'Round every calculated price up to a fixed cents ending' })
+  @IsOptional()
+  @IsBoolean()
+  priceRoundingEnabled?: boolean;
+
+  @ApiPropertyOptional({ description: 'Cents the price must end in (0–99)', example: 99 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(99)
+  priceEndingCents?: number;
 }
 
 class TemplateConfigDto implements TemplateConfig {

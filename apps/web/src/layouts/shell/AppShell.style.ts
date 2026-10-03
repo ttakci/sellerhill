@@ -13,7 +13,11 @@ const SIDEBAR_WIDTH = '16rem'; /* 256px — "Bekleyen Aksiyonlar" + its count ba
  */
 export const LayoutWrapper = styled.div`
   display: flex;
+  /* 100vh on a phone is the viewport with the browser's address bar HIDDEN, so
+     the bottom of the shell sat under the toolbar. dvh follows the visible
+     area; the vh line stays as the fallback for browsers without it. */
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
   /* Its own stacking context, so the aurora lights can sit at z-index -1:
@@ -129,6 +133,7 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
     top: 0;
     left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : `-${SIDEBAR_WIDTH}`)};
     height: 100vh;
+    height: 100dvh;
     width: ${SIDEBAR_WIDTH};
     box-shadow: ${tkn('shadows.xl')};
   }
@@ -148,6 +153,7 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background: ${tkn('colors.surface.overlay')};
     z-index: ${tkn('zIndex.scrim')};
     animation: fadeIn 0.15s ease-out;
@@ -445,6 +451,9 @@ export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
 
 export const SidebarFooter = styled.div`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  /* Keeps the logout row above the phone's home indicator. */
+  padding-bottom: calc(${tkn('spacing.sm')} + env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
   border-top: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   box-sizing: border-box;
   position: relative;

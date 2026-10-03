@@ -3,7 +3,7 @@
  * Database-backed order management with real eBay order data
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   AutoFulfillBlockedReason,
   AutoFulfillStatus,
@@ -12,13 +12,16 @@ import {
   OrderCostCaptureStatus,
   OrderStage,
   OrderStatus,
-  ACTIONABLE_ORDER_STAGES,
+  ORDER_NOTE_MAX_LENGTH,
   buildFulfillmentStateSql,
+  buildNeedsActionSql,
   buildOrderStageSql,
+  buildShipByStateSql,
   buildOrderTimeline,
   canStartAutoFulfillManually,
   deriveFulfillmentState,
   deriveOrderStage,
+  deriveShipByState,
   isSimulatedAmazonOrderId,
   type BuyerMessageEventType,
   type OrderDto,
@@ -89,6 +92,8 @@ interface OrderRow {
   auto_fulfill_submitted_at?: Date | null;
   ebay_line_item_count?: number | null;
   ebay_ship_by_date?: Date | null;
+  /** The seller's own note (migration 136). */
+  seller_note?: string | null;
   shipping_address: {
     fullName?: string;
     street?: string;
@@ -164,8 +169,9 @@ export class OrdersService {
         `(o.ebay_order_id ILIKE $${paramIndex}
           OR o.buyer_name ILIKE $${paramIndex}
           OR o.buyer_email ILIKE $${paramIndex}
-          OR l.title ILIKE $${paramIndex}
-          OR l.asin ILIKE $${paramIndex})`
+          OR l.title ILIKE ${paramIndex}
+          OR l.asin ILIKE ${paramIndex}
+          OR o.seller_note ILIKE ${paramIndex})`
       );
       params.push(`%${filters.search}%`);
       paramIndex++;
@@ -222,6 +228,22 @@ export class OrdersService {
       paramIndex++;
     }
 
+    if (filters?.needsAction) {
+      // The Needs-action tab: an actionable stage OR a missed ship-by date.
+      conditions.push(buildNeedsActionSql('o'));
+    }
+
+    if (filters?.shipBy) {
+      // The controller only lets enum values through; the builder interpolates
+      // constants, never the value itself.
+      conditions.push(buildShipByStateSql('o', filters.shipBy));
+    }
+
+    if (filters?.hasRefund) {
+      // NULL = eBay reported no refund; 0 would be a refund of nothing.
+      conditions.push('o.ebay_refunded_amount > 0');
+    }
+
     if (filters?.isTracked !== undefined) {
       // Whether the order matched a SellerHill listing at all — independent of
       // `fulfillmentState`, which only describes automation on an order this
@@ -249,26 +271,18 @@ export class OrdersService {
     );
     const total = parseInt(countResult[0]?.count || '0', 10);
 
-    // "What needs me" floats to the top of the default view; an explicit
-    // sortBy from the caller is honoured as-is. The actionable list is bound
-    // as a parameter that the page query alone carries (it sits after the
-    // WHERE parameters, before LIMIT/OFFSET).
+    // "What needs me" floats to the top of the default view — an actionable
+    // stage or a missed ship-by date; an explicit sortBy from the caller is
+    // honoured as-is.
     // Cost, measured against the schema rather than assumed: the leading key is a
     // computed CASE, so this page sorts the seller's matching rows instead of
     // walking idx_orders_order_date. That index is GLOBAL (all sellers) and was
     // never the access path anyway — the WHERE starts at user_id — so the sort is
     // bounded by ONE seller's orders. Revisit with a stored stage column only if
     // a single seller reaches six figures of orders.
-    const pageParams: (string | number | boolean | null | string[])[] = [...params];
-    let orderBy = `o.${safeSortBy} ${safeSortOrder}`;
-    let limitIndex = paramIndex;
-    if (!filters?.sortBy) {
-      pageParams.push([...ACTIONABLE_ORDER_STAGES]);
-      orderBy = `CASE WHEN ${buildOrderStageSql(
-        'o'
-      )} = ANY($${limitIndex}::text[]) THEN 0 ELSE 1 END, o.order_date DESC`;
-      limitIndex++;
-    }
+    const orderBy = filters?.sortBy
+      ? `o.${safeSortBy} ${safeSortOrder}`
+      : `CASE WHEN ${buildNeedsActionSql('o')} THEN 0 ELSE 1 END, o.order_date DESC`;
 
     // Data query — enrich with listing + product (title, ASIN, eBay item, image)
     const results = await this.databaseService.query<OrderRow>(
@@ -280,8 +294,8 @@ export class OrdersService {
        ${fromJoin}
        WHERE ${whereClause}
        ORDER BY ${orderBy}
-       LIMIT $${limitIndex} OFFSET $${limitIndex + 1}`,
-      [...pageParams, limit, offset]
+       LIMIT ${paramIndex} OFFSET ${paramIndex + 1}`,
+      [...params, limit, offset]
     );
 
     return {
@@ -322,6 +336,17 @@ export class OrdersService {
         counts[row.stage as OrderStage] = Number(row.count);
       }
     }
+    // The Needs-action tab is not a sum of stages: a late order in any open
+    // stage belongs to it too, so it is counted by the predicate the tab
+    // filters on.
+    const action = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*) AS count
+         FROM orders o
+        WHERE ${conditions.join(' AND ')}
+          AND ${buildNeedsActionSql('o')}`,
+      params
+    );
+    counts.needsAction = Number(action[0]?.count ?? 0);
     return counts;
   }
 
@@ -530,6 +555,33 @@ export class OrdersService {
   }
 
   /**
+   * The seller's own note on an order. Private: nothing sends it anywhere and
+   * order sync never writes the column. Blank clears it.
+   */
+  async updateNote(userId: string, id: string, note: unknown): Promise<{ sellerNote: string | null }> {
+    if (note !== null && typeof note !== 'string') {
+      throw new BadRequestException('orders.errors.noteInvalid');
+    }
+    const trimmed = (note ?? '').trim();
+    if (trimmed.length > ORDER_NOTE_MAX_LENGTH) {
+      throw new BadRequestException('orders.errors.noteTooLong');
+    }
+    const value = trimmed.length > 0 ? trimmed : null;
+    const rows = await this.databaseService.query<{ id: string }>(
+      `UPDATE orders
+          SET seller_note = $1,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2 AND user_id = $3
+        RETURNING id`,
+      [value, id, userId]
+    );
+    if (rows.length === 0) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+    return { sellerNote: value };
+  }
+
+  /**
    * Trigger manual order sync for a user via queue and return fresh data
    */
   async triggerSync(
@@ -587,6 +639,15 @@ export class OrdersService {
       : undefined;
 
     const hasListing = !!row.listing_id;
+    const stage = deriveOrderStage({
+      status: row.status as OrderStatus,
+      autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : null,
+      amazonOrderId: row.amazon_order_id,
+      amazonCancelledAt: row.amazon_cancelled_at,
+      shippedDetectedAt: row.shipped_detected_at,
+      ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
+      autoFulfillSubmittedAt: row.auto_fulfill_submitted_at ?? null,
+    });
 
     return {
       id: row.id,
@@ -619,15 +680,7 @@ export class OrdersService {
         amazonCancelledAt: row.amazon_cancelled_at,
         isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
       }),
-      stage: deriveOrderStage({
-        status: row.status as OrderStatus,
-        autoFulfillStatus: row.auto_fulfill_status ? (row.auto_fulfill_status as AutoFulfillStatus) : null,
-        amazonOrderId: row.amazon_order_id,
-        amazonCancelledAt: row.amazon_cancelled_at,
-        shippedDetectedAt: row.shipped_detected_at,
-        ebayTrackingPushedAt: row.ebay_tracking_pushed_at,
-        autoFulfillSubmittedAt: row.auto_fulfill_submitted_at ?? null,
-      }),
+      stage,
       canStartAutoFulfill: canStartAutoFulfillManually({
         status: row.status as OrderStatus,
         isTracked: !!row.listing_id,
@@ -642,6 +695,8 @@ export class OrdersService {
       }),
       lineItemCount: row.ebay_line_item_count ?? null,
       shipByDate: row.ebay_ship_by_date ? row.ebay_ship_by_date.toISOString() : null,
+      shipByState: deriveShipByState({ stage, shipByDate: row.ebay_ship_by_date ?? null, now: new Date() }),
+      sellerNote: row.seller_note || null,
       shippedDetectedAt: row.shipped_detected_at ? row.shipped_detected_at.toISOString() : null,
       ebayTrackingPushedAt: row.ebay_tracking_pushed_at ? row.ebay_tracking_pushed_at.toISOString() : null,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,

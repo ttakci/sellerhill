@@ -75,6 +75,15 @@ const buildBreakdownRows = (
     });
   }
 
+  if (b.priceRoundingApplied && b.priceEndingCents !== null) {
+    rows.push({
+      label: t('listingSettingsGroup.calculator.breakdown.rounding', {
+        ending: `.${String(b.priceEndingCents).padStart(2, '0')}`,
+      }),
+      value: `+${formatCurrency(b.roundingAmount, 'en-US', 'USD', 2)}`,
+    });
+  }
+
   rows.push({
     label: t('listingSettingsGroup.calculator.resultLabel'),
     value: formatCurrency(b.finalPrice),
@@ -119,6 +128,9 @@ export const PriceCalculatorSection: React.FC<PriceCalculatorSectionProps> = ({ 
     const normalizedFees = {
       ebayFeePercent: Number(fees.ebayFeePercent),
       fixedFeeAmount: Number(fees.fixedFeeAmount),
+      priceRoundingEnabled: Boolean(fees.priceRoundingEnabled),
+      // An empty field must not coerce to 0 (a ".00" ending nobody chose).
+      priceEndingCents: String(fees.priceEndingCents ?? '').trim() === '' ? undefined : Number(fees.priceEndingCents),
     };
     const normalizedStrategy = (repricingStrategy ?? []).map((range) => ({
       ...range,

@@ -14,6 +14,15 @@ const blockNonNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
   }
 };
 
+/** Whole cents only — a decimal point has no meaning in a 0–99 ending. */
+const blockNonInteger = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === '.' || e.key === ',') {
+    e.preventDefault();
+    return;
+  }
+  blockNonNumeric(e);
+};
+
 export const ListingGroupDrawerComponent = ({
   isOpen,
   onClose,
@@ -26,6 +35,9 @@ export const ListingGroupDrawerComponent = ({
   fields,
   remove,
   onAddRange,
+  isPriceRoundingEnabled,
+  onPriceRoundingToggle,
+  priceRoundingExample,
   templateOptions,
   selectedTemplateValue,
   onTemplateChange,
@@ -241,6 +253,35 @@ export const ListingGroupDrawerComponent = ({
           <Text>{t('listingSettingsGroup.addRange')}</Text>
         </S.AddRangeButton>
       </S.AddRangeRow>
+      <S.FormCard>
+        <S.ContentToggleRow>
+          <S.ToggleTitleRow>
+            <Text variant="body-sm" weight="semibold">
+              {t('listingSettingsGroup.priceRounding.title')}
+            </Text>
+            <Tooltip content={t('listingSettingsGroup.priceRounding.info')} position="top" variant="dark">
+              <S.InfoButton type="button" variant="ghost" aria-label={t('listingSettingsGroup.priceRounding.info')}>
+                <Icon name="info" size={14} color="text.tertiary" />
+              </S.InfoButton>
+            </Tooltip>
+          </S.ToggleTitleRow>
+          <Toggle checked={isPriceRoundingEnabled} onChange={onPriceRoundingToggle} />
+        </S.ContentToggleRow>
+        {isPriceRoundingEnabled && (
+          <>
+            <ModernTextInput<ListingSettingsGroupFormData>
+              name="fees.priceEndingCents"
+              control={control}
+              label={t('listingSettingsGroup.priceRounding.endingLabel')}
+              type="number"
+              suffixText="¢"
+              fullWidth
+              onKeyDown={blockNonInteger}
+            />
+            <InfoMessage>{priceRoundingExample}</InfoMessage>
+          </>
+        )}
+      </S.FormCard>
       <PriceCalculatorSection control={control} />
     </S.BodyStack>
   );

@@ -92,6 +92,7 @@ export const baseApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: [
     'Auth',
+    'AdminVero',
     'Ebay',
     'Dashboard',
     'ActionCenter',

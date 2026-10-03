@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  BlacklistAction,
   BlacklistType,
   COUNTRY_CODES,
   TrackingConversionProvider,
@@ -7,6 +8,7 @@ import {
   normalizeCountryCode,
   type SaveStoreSettingsRequest,
   type BlacklistKeyword,
+  type ListingRulesConfig,
 } from '@repo/shared';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -20,6 +22,7 @@ import {
   ValidateNested,
   IsIn,
   IsNumber,
+  IsObject,
   Min,
   Max,
 } from 'class-validator';
@@ -40,6 +43,14 @@ class BlacklistKeywordDto implements Omit<BlacklistKeyword, 'id'> {
   @ArrayNotEmpty()
   @IsIn(Object.values(BlacklistType), { each: true })
   types!: BlacklistType[];
+
+  @ApiPropertyOptional({
+    description: "What a match does: 'block' refuses the listing (default), 'remove' strips the word and lists anyway.",
+    enum: BlacklistAction,
+  })
+  @IsOptional()
+  @IsIn(Object.values(BlacklistAction))
+  action?: BlacklistAction;
 }
 
 export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
@@ -213,4 +224,14 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsOptional()
   @IsString()
   shipFromCity?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Listing rules (VeRO protection, blocked ASINs, price range, shipped-by-Amazon only, rating / review ' +
+      'minimums, clean-up). Omitted means "leave unchanged"; an object replaces the stored rules and is ' +
+      'normalized server-side (`normalizeListingRules`), so out-of-range values fall back to "off".',
+  })
+  @IsOptional()
+  @IsObject()
+  listingRules?: ListingRulesConfig;
 }

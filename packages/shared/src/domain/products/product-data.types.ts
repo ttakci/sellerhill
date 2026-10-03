@@ -3,6 +3,8 @@
  * These types represent normalized product data regardless of source (ScraperAPI, etc.)
  */
 
+import type { SourceQuality } from '../store-settings/listing-rules';
+
 import type { SourceStockStatus } from './source-product.types';
 
 /**
@@ -79,6 +81,12 @@ export interface ProductData {
   maxOrderQuantity?: number | null;
   /** True when the source product page returned 404/"couldn't find that page". */
   sourceRemoved?: boolean;
+  /**
+   * Who ships the Buy Box offer and how the product is rated, read on a full
+   * (create) fetch. Absent when the provider never captured it — the seller's
+   * listing rules then pass instead of guessing.
+   */
+  sourceQuality?: SourceQuality;
   raw?: Record<string, unknown>; // Original provider response for debugging (ScraperAPI)
   rawKeepaData?: Record<string, unknown>; // Keepa API response for price/stock debugging
   updatedAt?: string;

@@ -30,7 +30,8 @@
       "allTrackingStates": "Collegati e non collegati",
       "clearAll": "Cancella tutto",
       "resultCount": "{{count}} risultati",
-      "allStages": "Tutti gli stati"
+      "allStages": "Tutti gli stati",
+      "allFlags": "Scadenza e rimborso"
     },
     "stats": {
       "totalSales": "Vendite totali",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Il limite di ordini automatici del tuo piano per questo periodo è esaurito.",
       "purchaseNotYetChecked": "SellerHill non ha ancora controllato gli ordini di questo account Amazon dal tentativo di acquisto. Il controllo è stato avviato ora: riprova tra qualche minuto.",
       "purchaseNotUnknown": "Questo ordine non è in attesa di una conferma d'acquisto. Potrebbe essere già collegato o in corso. Aggiorna la pagina.",
-      "purchaseFoundOnAmazon": "SellerHill ha trovato un ordine Amazon per questo prodotto, effettuato intorno al momento del tentativo di acquisto, ma non è riuscito ad abbinarlo con certezza a questa vendita. Apri i tuoi ordini Amazon e collegalo a mano. Se quell'ordine appartiene a un'altra vendita, collegalo prima a quella."
+      "purchaseFoundOnAmazon": "SellerHill ha trovato un ordine Amazon per questo prodotto, effettuato intorno al momento del tentativo di acquisto, ma non è riuscito ad abbinarlo con certezza a questa vendita. Apri i tuoi ordini Amazon e collegalo a mano. Se quell'ordine appartiene a un'altra vendita, collegalo prima a quella.",
+      "noteTooLong": "La nota può contenere al massimo 1.000 caratteri.",
+      "noteInvalid": "Impossibile salvare la nota."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Inviato all'acquirente.",
         "message_failed": "Invio non riuscito."
       }
+    },
+    "flags": {
+      "late": "Spedizione in ritardo",
+      "dueSoon": "Scadenza di spedizione vicina",
+      "dueSoonBy": "Spedire entro il {{date}}",
+      "refunded": "Rimborsato",
+      "refundedAmount": "Rimborsato: {{amount}}"
+    },
+    "note": {
+      "title": "La tua nota",
+      "label": "Nota",
+      "placeholder": "Scrivi una nota per te su questo ordine",
+      "hint": "Solo tu vedi questa nota. Non viene mai inviata a eBay, ad Amazon o all'acquirente.",
+      "save": "Salva nota"
     }
   }
 }

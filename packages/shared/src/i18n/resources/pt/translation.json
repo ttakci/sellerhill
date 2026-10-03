@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Veja, edite e crie seus modelos de mensagem automática ao comprador",
         "manageBlacklist": "Gerenciar lista de bloqueio",
         "manageBlacklistSubtitle": "Palavras-chave a bloquear em títulos, descrições e características dos anúncios",
-        "infoMessage": "Os modelos de mensagem e as regras da lista de bloqueio são aplicados conforme o escopo (global ou por loja) que você escolher em Configurações da loja."
+        "infoMessage": "Os modelos de mensagem e as regras da lista de bloqueio são aplicados conforme o escopo (global ou por loja) que você escolher em Configurações da loja.",
+        "listingRules": "Regras de anúncios",
+        "listingRulesSubtitle": "Proteção de marca, o que pode ser anunciado e limpeza automática"
       },
       "listingGroups": {
         "title": "Grupos de configurações de anúncios",
@@ -422,7 +424,16 @@
           "add": "Adicionar palavras-chave",
           "duplicate": "Todas as palavras-chave já incluem os campos selecionados",
           "empty": "Informe pelo menos uma palavra-chave",
-          "typeRequired": "Selecione pelo menos um campo"
+          "typeRequired": "Selecione pelo menos um campo",
+          "actionLabel": "Quando uma palavra-chave for encontrada",
+          "action": {
+            "block": "Não anunciar o produto",
+            "remove": "Remover a palavra e anunciar"
+          },
+          "actionHint": {
+            "block": "Um produto cujo texto contém a palavra não é anunciado.",
+            "remove": "A palavra é removida do título, da descrição ou das características, e o produto é anunciado sem ela."
+          }
         },
         "list": {
           "empty": "Nenhuma palavra-chave na lista de bloqueio para o escopo selecionado",
@@ -827,10 +838,10 @@
       "showAllPlans": "Ver todos os {{count}} planos",
       "showFewerPlans": "Mostrar menos planos",
       "notIncluded": "Não incluído",
-      "upToListings": "Até {{limit}} anúncios ativos",
+      "upToListings": "{{limit}} anúncios ativos · adicione e remova sem limite",
       "unlimitedListings": "Anúncios ativos ilimitados",
       "upToOrders": "Até {{limit}} pedidos automáticos / mês",
-      "unlimitedOrders": "Pedidos automáticos ilimitados",
+      "unlimitedOrders": "Pedidos automáticos e rastreio de envios ilimitados",
       "upToConversions": "{{limit}} conversões de rastreio / mês",
       "unlimitedConversions": "Conversões de rastreio ilimitadas",
       "upToBestSellers": "{{limit}} produtos de Mais vendidos / mês",
@@ -840,7 +851,6 @@
         "groups": "Grupos de configurações e 12 modelos de anúncios",
         "sync": "Verificações de preço e estoque 4× ao dia",
         "specifics": "Características do item do eBay completas",
-        "autoOrder": "Pedidos e rastreio automáticos",
         "actions": "Tela de Ações pendentes",
         "profit": "Relatório de lucro real",
         "multiStore": "Várias lojas eBay",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Até 500 anúncios ativos",
-          "orders": "Pedidos automáticos ilimitados",
+          "listings": "500 anúncios ativos · adicione e remova sem limite",
+          "orders": "Pedidos automáticos e rastreio de envios ilimitados",
           "conversions": "50 conversões de rastreio / mês",
           "bestSellers": "2,500 produtos de Mais vendidos / mês"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Até 2,000 anúncios ativos",
-          "orders": "Pedidos automáticos ilimitados",
+          "listings": "2,000 anúncios ativos · adicione e remova sem limite",
+          "orders": "Pedidos automáticos e rastreio de envios ilimitados",
           "conversions": "150 conversões de rastreio / mês",
           "bestSellers": "7,500 produtos de Mais vendidos / mês"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Até 5,000 anúncios ativos",
-          "orders": "Pedidos automáticos ilimitados",
+          "listings": "5,000 anúncios ativos · adicione e remova sem limite",
+          "orders": "Pedidos automáticos e rastreio de envios ilimitados",
           "conversions": "300 conversões de rastreio / mês",
           "bestSellers": "15,000 produtos de Mais vendidos / mês"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Até 10,000 anúncios ativos",
-          "orders": "Pedidos automáticos ilimitados",
+          "listings": "10,000 anúncios ativos · adicione e remova sem limite",
+          "orders": "Pedidos automáticos e rastreio de envios ilimitados",
           "conversions": "500 conversões de rastreio / mês",
           "bestSellers": "25,000 produtos de Mais vendidos / mês"
         }

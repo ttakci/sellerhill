@@ -139,6 +139,7 @@
       "maxFeePercent": "Haqq faizi 100%-i aşa bilməz",
       "minFeePercent": "Haqq faizi 0 və ya daha böyük olmalıdır",
       "minFixedFee": "Sabit haqq 0 və ya daha böyük olmalıdır",
+      "priceEndingRange": "0 ilə 99 arasında tam ədəd daxil edin",
       "invalidNumber": "Əvvəlində sıfır olmayan düzgün ədəd daxil edin (məsələn, 04 yox, 0.4)",
       "templateRequired": "Şablon məzmunu tələb olunur",
       "templateMinLength": "Şablon ən azı 10 simvol olmalıdır",
@@ -208,10 +209,18 @@
         "netTarget": "eBay haqlarından əvvəl hədəf",
         "ebayFee": "eBay haqqı ({{pct}})",
         "fixedFee": "Sabit haqq",
-        "floorApplied": "eBay-in $0.99 minimumundan aşağıdır, bu məbləğə qaldırıldı:"
+        "floorApplied": "eBay-in $0.99 minimumundan aşağıdır, bu məbləğə qaldırıldı:",
+        "rounding": "{{ending}} sonluğuna yuxarı yuvarlaqlaşdırıldı"
       }
     },
     "feesAndTaxes": "Haqlar və vergilər",
+    "priceRounding": {
+      "title": "Qiymətin sonunu yuvarlaqlaşdır",
+      "info": "Hesablanan hər qiymət bu sonluqla bitən növbəti məbləğə yuxarı yuvarlaqlaşdırılır, buna görə hədəf mənfəətiniz heç vaxt azalmır. Elanda əl ilə sabitlədiyiniz qiymət dəyişmir.",
+      "endingLabel": "Qiymətin sonu (sent, 0–99)",
+      "example": "Nümunə: {{from}} → {{to}} olur.",
+      "hint": "0 ilə 99 arasında tam ədəd daxil edin — 99 yazsanız, qiymətlər $24.99 kimi bitir."
+    },
     "amazonTaxRateNote": "Qiymət hesablamanız Amazon-dan alarkən ödədiyiniz təxmini vergini avtomatik nəzərə alır. Bu dərəcəni Mağaza parametrləri → Amazon satış vergisi dərəcəsi bölməsində təyin edin.",
     "stockControl": "Stok nəzarəti",
     "ebayStockQuantity": "eBay stoku",

@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Le quota d'API eBay du jour est épuisé. Cette annonce est en file d'attente et continuera automatiquement.",
         "blacklisted_keyword": "La liste noire de vos paramètres de boutique a bloqué cette annonce (mot-clé : « {{keyword}} »). Supprimez le mot-clé ou ajustez votre modèle d'annonce.",
         "cancelled": "Annulé avant le traitement de cet ASIN.",
-        "unknown": "L'annonce n'a pas pu être créée."
-      }
+        "unknown": "L'annonce n'a pas pu être créée.",
+        "blocked_by_rule": "Ignoré par l'une de vos règles d'annonces.",
+        "blocked_by_rule_blocked_asin": "Cet ASIN figure dans votre liste d'ASIN bloqués.",
+        "blocked_by_rule_vero_brand": "La protection VeRO a ignoré ce produit (marque : « {{keyword}} »). Cette marque est connue pour signaler des annonces sur eBay.",
+        "blocked_by_rule_price_below_min": "Le prix Amazon {{actual}} est inférieur à votre minimum de {{limit}}.",
+        "blocked_by_rule_price_above_max": "Le prix Amazon {{actual}} est supérieur à votre maximum de {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "Non expédié par Amazon lui-même. Vos règles d'annonces n'autorisent que les produits expédiés par Amazon.",
+        "blocked_by_rule_low_rating": "Noté {{actual}}. Votre minimum est {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Pas encore de note. Votre minimum est {{limit}}.",
+        "blocked_by_rule_low_review_count": "Nombre d'évaluations : {{actual}}. Votre minimum est {{limit}}."
+      },
+      "scheduledUntil": "Planifié. Les derniers produits démarrent le {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Rechercher par titre ou ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} annonces en brouillon mises en file d'attente — elles ne seront pas en ligne tant que vous ne les publierez pas",
       "queuedWithSkipped": "{{count}} annonces mises en file d'attente pour traitement ({{skipped}} ignorées — déjà présentes dans vos annonces)",
       "queuedDraftWithSkipped": "{{count}} annonces en brouillon mises en file d'attente ({{skipped}} ignorées — déjà présentes dans vos annonces) — elles ne seront pas en ligne tant que vous ne les publierez pas",
-      "allSkippedDuplicates": "Les {{skipped}} ASIN saisis sont déjà tous présents dans vos annonces — aucune nouvelle tâche n'a été lancée"
+      "allSkippedDuplicates": "Les {{skipped}} ASIN saisis sont déjà tous présents dans vos annonces — aucune nouvelle tâche n'a été lancée",
+      "scheduled": "{{count}} produits planifiés. Les derniers démarrent le {{date}}.",
+      "scheduledWithSkipped": "{{count}} produits planifiés ({{skipped}} ignorés — déjà dans vos annonces). Les derniers démarrent le {{date}}."
     },
     "errors": {
       "createFailed": "Échec de la création des annonces",
       "fetchPoliciesFailed": "Échec de la récupération des politiques commerciales eBay",
       "invalidAsins": "{{count}} de vos entrées ne ressemblent pas à des ASIN valides (10 caractères alphanumériques) et ont été ignorées.",
-      "loadFailed": "Échec du chargement des annonces. Veuillez réessayer."
+      "loadFailed": "Échec du chargement des annonces. Veuillez réessayer.",
+      "scheduleTooLong": "À ce rythme, la tâche durerait plus de 30 jours. Augmentez le nombre de produits par jour ou ajoutez moins d'ASIN."
     },
     "detail": {
       "breadcrumb": "Détail de l'annonce",
@@ -462,6 +475,17 @@
     },
     "products": {
       "searchPlaceholder": "Rechercher par titre, ASIN ou marque…"
+    },
+    "schedule": {
+      "title": "Étaler dans le temps",
+      "hint": "Mettez en ligne un nombre fixe de produits par jour, dans les heures que vous choisissez, plutôt que tous à la fois. Le prix, le stock et vos règles d'annonces sont vérifiés quand vient le tour de chaque produit.",
+      "perDay": "Produits par jour",
+      "perDayError": "Saisissez un nombre entier entre {{min}} et {{max}}.",
+      "startHour": "De",
+      "endHour": "Jusqu'à",
+      "estimate_one": "Environ {{count}} jour à ce rythme.",
+      "estimate_many": "Environ {{count}} jours à ce rythme.",
+      "estimate_other": "Environ {{count}} jours à ce rythme."
     }
   }
 }

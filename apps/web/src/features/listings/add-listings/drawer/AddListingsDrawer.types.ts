@@ -45,4 +45,27 @@ export interface AddListingsDrawerComponentProps {
   onBack: () => void;
   onSubmit: () => void;
   canProceed: boolean;
+  /** Spread the job over time instead of listing everything at once. */
+  schedule: AddListingsScheduleProps;
+}
+
+export interface AddListingsScheduleOption {
+  value: string;
+  label: string;
+}
+
+export interface AddListingsScheduleProps {
+  enabled: boolean;
+  onEnabledChange: (enabled: boolean) => void;
+  perDay: string;
+  onPerDayChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  perDayError?: string;
+  startHour: string;
+  endHour: string;
+  startHourOptions: AddListingsScheduleOption[];
+  endHourOptions: AddListingsScheduleOption[];
+  onStartHourChange: (value: string) => void;
+  onEndHourChange: (value: string) => void;
+  /** "About N days at this pace" — empty until there are ASINs to count. */
+  estimate: string;
 }

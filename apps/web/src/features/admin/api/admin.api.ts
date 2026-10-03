@@ -1,4 +1,6 @@
 import type {
+  AddVeroKeywordsRequest,
+  AddVeroKeywordsResult,
   AdminAspectDefaultDto,
   AdminAspectDefaultsListDto,
   AdminBillingMetricsDto,
@@ -9,6 +11,7 @@ import type {
   AdminOperationsSummaryDto,
   AdminOverviewDto,
   AdminUsersListDto,
+  AdminVeroKeywordListDto,
   PlatformSettingsListDto,
   ProviderCostSummaryDto,
   ProxyVerifyResult,
@@ -101,6 +104,28 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => '/admin/listing-quality/categories',
       providesTags: ['Admin'],
     }),
+    // The platform VeRO brand list. Its own tag: adding a brand must not
+    // refetch every other admin query on the page.
+    getAdminVeroKeywords: builder.query<AdminVeroKeywordListDto, { search?: string; page?: number; limit?: number }>({
+      query: ({ search, page, limit }) => {
+        const params = new URLSearchParams();
+        if (search) {
+          params.set('search', search);
+        }
+        params.set('page', String(page ?? 1));
+        params.set('limit', String(limit ?? 100));
+        return `/admin/vero?${params.toString()}`;
+      },
+      providesTags: ['AdminVero'],
+    }),
+    addAdminVeroKeywords: builder.mutation<AddVeroKeywordsResult, AddVeroKeywordsRequest>({
+      query: (body) => ({ url: '/admin/vero', method: 'POST', body }),
+      invalidatesTags: ['AdminVero'],
+    }),
+    removeAdminVeroKeyword: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({ url: `/admin/vero/${encodeURIComponent(id)}`, method: 'DELETE' }),
+      invalidatesTags: ['AdminVero'],
+    }),
     testAdminEmailSettings: builder.mutation<{ ok: boolean; error: string | null }, void>({
       query: () => ({ url: '/admin/settings/email/test', method: 'POST' }),
     }),
@@ -132,4 +157,7 @@ export const {
   useUpsertAdminAspectDefaultMutation,
   useRemoveAdminAspectDefaultMutation,
   useGetAdminCategoryMappingsQuery,
+  useGetAdminVeroKeywordsQuery,
+  useAddAdminVeroKeywordsMutation,
+  useRemoveAdminVeroKeywordMutation,
 } = adminApi;

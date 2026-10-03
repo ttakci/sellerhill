@@ -10,6 +10,8 @@ export interface ListingJobEntity {
   failed_count: number;
   status: string;
   kind: string;
+  /** When a scheduled job's last group is due (migration 138); NULL = runs at once. */
+  scheduled_until?: Date | null;
   created_at: Date;
   updated_at: Date;
 }

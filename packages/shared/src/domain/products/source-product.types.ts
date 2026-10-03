@@ -69,6 +69,8 @@ export interface ScraperSignals {
   buyboxSellerId: string | null;
   buyboxSellerName: string | null;
   soldByAmazon: boolean | null;
+  /** Amazon itself ships the Buy Box offer ("Ships from Amazon" / FBA). Optional: an older service image omits it. */
+  shippedByAmazon?: boolean | null;
   /** No Buy Box on the page (only "See All Buying Options"). Optional: an older service image omits it. */
   noFeaturedOffer?: boolean;
 }
@@ -90,6 +92,11 @@ export interface ScraperContent {
    * older service build omits it, and a non-variation page sends `{}`.
    */
   variationAttributes?: Record<string, string>;
+  /** Star rating and number of ratings on the page. Optional: an older service build omits them. */
+  rating?: number | null;
+  ratingCount?: number | null;
+  /** The Buy Box carries the Prime badge. */
+  isPrime?: boolean | null;
 }
 
 /** One ASIN's result from the scraper service. */

@@ -42,12 +42,16 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   trackingState,
   onTrackingStateChange,
   trackingStateOptions,
+  flag,
+  onFlagChange,
+  flagOptions,
   onClearFilters,
   hasActiveFilters,
   resultCount,
   isInitialLoading,
   formatCurrency,
   formatDate,
+  formatDay,
   onOrderClick,
   onBack,
   onDownload,
@@ -55,7 +59,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   const { t } = useTranslation(['orders', 'translation']);
 
   const renderGridCard = (order: OrderDto) => {
-    const card = toOrderCardProps(order, t, formatCurrency, formatDate);
+    const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay);
     return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} hoverEffect={false} />;
   };
 
@@ -124,6 +128,16 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onTrackingStateChange}
               options={trackingStateOptions}
               placeholder={t('orders.filters.allTrackingStates')}
+              size="small"
+              fullWidth
+            />
+          </S.SelectWrapper>
+          <S.SelectWrapper>
+            <Select
+              value={flag}
+              onChange={onFlagChange}
+              options={flagOptions}
+              placeholder={t('orders.filters.allFlags')}
               size="small"
               fullWidth
             />

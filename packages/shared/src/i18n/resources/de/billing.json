@@ -27,6 +27,12 @@
         "name": "Kostenlose Testphase",
         "description": "Eine zeitlich begrenzte Testphase von SellerHill. Nicht käuflich – sie startet automatisch bei der Registrierung."
       },
+      "unlimitedOrders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
+      "activeListings": "{{limit}} aktive Angebote · unbegrenzt hinzufügen und entfernen",
+      "mini": {
+        "name": "Mini",
+        "description": "Für Verkäufer, die mit den ersten hundert Angeboten starten."
+      },
       "lite": {
         "name": "Lite",
         "description": "Für Verkäufer, die mit einem kleinen Sortiment starten."

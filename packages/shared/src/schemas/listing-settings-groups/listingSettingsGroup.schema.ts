@@ -60,14 +60,32 @@ export const stockConfigSchema = (t: TFunction) =>
  * Fee Config Schema
  */
 export const feeConfigSchema = (t: TFunction) =>
-  z.object({
-    ebayFeePercent: formNumber(t, (n) =>
-      n
-        .min(0, t('listingSettingsGroup.validation.minFeePercent'))
-        .max(100, t('listingSettingsGroup.validation.maxFeePercent'))
-    ),
-    fixedFeeAmount: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.minFixedFee'))),
-  });
+  z
+    .object({
+      ebayFeePercent: formNumber(t, (n) =>
+        n
+          .min(0, t('listingSettingsGroup.validation.minFeePercent'))
+          .max(100, t('listingSettingsGroup.validation.maxFeePercent'))
+      ),
+      fixedFeeAmount: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.minFixedFee'))),
+      priceRoundingEnabled: z.boolean().optional().default(false),
+      // Cents, so "05" is a natural way to type a five-cent ending — the
+      // leading-zero guard of `formNumber` is deliberately not applied. An
+      // empty field becomes "not set" rather than coercing to 0.
+      priceEndingCents: z.preprocess(
+        (raw) => (raw === null || raw === undefined || (typeof raw === 'string' && raw.trim() === '') ? undefined : raw),
+        z.coerce
+          .number({ error: t('listingSettingsGroup.validation.priceEndingRange') })
+          .int(t('listingSettingsGroup.validation.priceEndingRange'))
+          .min(0, t('listingSettingsGroup.validation.priceEndingRange'))
+          .max(99, t('listingSettingsGroup.validation.priceEndingRange'))
+          .optional()
+      ),
+    })
+    .refine((data) => !data.priceRoundingEnabled || data.priceEndingCents !== undefined, {
+      message: t('listingSettingsGroup.validation.priceEndingRange'),
+      path: ['priceEndingCents'],
+    });
 
 /**
  * Template Config Schema

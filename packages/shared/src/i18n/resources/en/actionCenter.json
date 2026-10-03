@@ -109,6 +109,12 @@
         "description_other": "{{count}} orders were cancelled on eBay in the last {{days}} days, but the Amazon orders placed for them are still open. Nobody is waiting for those items any more — cancel the Amazon orders, or return the items if they have shipped.",
         "action": "Review orders"
       },
+      "order_late_to_ship": {
+        "title": "Orders past eBay's ship-by date",
+        "description_one": "{{count}} order has passed eBay's ship-by date and eBay still has no shipment for it. A late shipment counts against your seller account.",
+        "description_other": "{{count}} orders have passed eBay's ship-by date and eBay still has no shipment for them. Late shipments count against your seller account.",
+        "action": "Review orders"
+      },
       "return_seller_action_due": {
         "title": "Returns waiting for your response",
         "description_one": "{{count}} return has a next step that eBay expects from you. Respond on eBay before the deadline shown on the Returns page.",
@@ -212,6 +218,12 @@
         "title": "Automation is suspended",
         "description": "Your subscription is no longer active, so new listings, price and stock updates, automatic purchasing and tracking conversion have stopped. Choose a plan to resume — everything restarts on its own.",
         "action": "Choose a plan"
+      },
+      "listing_not_selling": {
+        "title": "Listings that are not selling",
+        "description_one": "{{count}} active listing has had no sale within the window you set. Review it and end it if it is not worth its place in your plan.",
+        "description_other": "{{count}} active listings have had no sale within the window you set. Review them and end the ones that are not worth their place in your plan.",
+        "action": "Review listings"
       }
     },
     "reasons": {

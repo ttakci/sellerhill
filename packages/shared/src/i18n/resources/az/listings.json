@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Bu günün eBay API limiti istifadə olunub. Bu elan növbədədir və avtomatik davam edəcək.",
         "blacklisted_keyword": "Mağaza parametrlərinizdəki qara siyahı bu elanı blokladı (açar söz: \"{{keyword}}\"). Açar sözü silin və ya elan şablonunuzu tənzimləyin.",
         "cancelled": "Bu ASIN emal olunmazdan əvvəl ləğv edildi.",
-        "unknown": "Elan yaradıla bilmədi."
-      }
+        "unknown": "Elan yaradıla bilmədi.",
+        "blocked_by_rule": "Elan qaydalarınızdan biri tərəfindən atlandı.",
+        "blocked_by_rule_blocked_asin": "Bu ASIN bloklanmış ASIN siyahınızdadır.",
+        "blocked_by_rule_vero_brand": "VeRO qorunması bu məhsulu atladı (brend: “{{keyword}}”). Bu brendin eBay-də elanlara şikayət etdiyi bilinir.",
+        "blocked_by_rule_price_below_min": "Amazon qiyməti {{actual}} təyin etdiyiniz minimum {{limit}} məbləğindən aşağıdır.",
+        "blocked_by_rule_price_above_max": "Amazon qiyməti {{actual}} təyin etdiyiniz maksimum {{limit}} məbləğindən yüksəkdir.",
+        "blocked_by_rule_not_shipped_by_amazon": "Amazon-un özü göndərmir. Elan qaydalarınız yalnız Amazon-un göndərdiyi məhsullara icazə verir.",
+        "blocked_by_rule_low_rating": "Reytinqi {{actual}}. Təyin etdiyiniz minimum {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Hələ reytinqi yoxdur. Təyin etdiyiniz minimum {{limit}}.",
+        "blocked_by_rule_low_review_count": "Qiymətləndirmə sayı: {{actual}}. Təyin etdiyiniz minimum {{limit}}."
+      },
+      "scheduledUntil": "Planlaşdırıldı. Son məhsullar {{date}} tarixində başlayır."
     },
     "filters": {
       "searchPlaceholder": "Başlıq və ya ASIN üzrə axtarın...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} qaralama elan növbəyə əlavə edildi — siz dərc etməyincə aktiv olmayacaq",
       "queuedWithSkipped": "{{count}} elan emal üçün növbəyə əlavə edildi ({{skipped}} elan artıq siyahınızda olduğu üçün keçildi)",
       "queuedDraftWithSkipped": "{{count}} qaralama elan növbəyə əlavə edildi ({{skipped}} elan artıq siyahınızda olduğu üçün keçildi) — siz dərc etməyincə aktiv olmayacaq",
-      "allSkippedDuplicates": "Daxil etdiyiniz {{skipped}} ASIN-in hamısı artıq siyahınızdadır — yeni proses başlanmadı"
+      "allSkippedDuplicates": "Daxil etdiyiniz {{skipped}} ASIN-in hamısı artıq siyahınızdadır — yeni proses başlanmadı",
+      "scheduled": "{{count}} məhsul planlaşdırıldı. Sonuncular {{date}} tarixində başlayır.",
+      "scheduledWithSkipped": "{{count}} məhsul planlaşdırıldı ({{skipped}} məhsul atlandı — artıq elanlarınızdadır). Sonuncular {{date}} tarixində başlayır."
     },
     "errors": {
       "createFailed": "Elanları yaratmaq alınmadı",
       "fetchPoliciesFailed": "eBay biznes siyasətlərini gətirmək alınmadı",
       "invalidAsins": "Daxil etdiyiniz {{count}} sətir düzgün ASIN-ə (10 hərf-rəqəm simvolu) oxşamır və keçildi.",
-      "loadFailed": "Elanları yükləmək alınmadı. Zəhmət olmasa yenidən cəhd edin."
+      "loadFailed": "Elanları yükləmək alınmadı. Zəhmət olmasa yenidən cəhd edin.",
+      "scheduleTooLong": "Bu templə iş 30 gündən çox çəkər. Gündəlik məhsul sayını artırın və ya daha az ASIN əlavə edin."
     },
     "detail": {
       "breadcrumb": "Elan təfərrüatları",
@@ -462,6 +475,16 @@
     },
     "products": {
       "searchPlaceholder": "Başlıq, ASIN və ya brend üzrə axtarın…"
+    },
+    "schedule": {
+      "title": "Zamana yay",
+      "hint": "Məhsulları birdən yox, seçdiyiniz saatlar daxilində gündə müəyyən sayda elan edin. Qiymət, stok və elan qaydalarınız hər məhsulun növbəsi çatanda yoxlanılır.",
+      "perDay": "Gündəlik məhsul sayı",
+      "perDayError": "{{min}} ilə {{max}} arasında tam ədəd daxil edin.",
+      "startHour": "Başlanğıc",
+      "endHour": "Bitmə",
+      "estimate_one": "Bu templə təxminən {{count}} gün çəkir.",
+      "estimate_other": "Bu templə təxminən {{count}} gün çəkir."
     }
   }
 }

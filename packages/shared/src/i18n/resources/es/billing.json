@@ -27,6 +27,12 @@
         "name": "Prueba gratuita",
         "description": "Una prueba de SellerHill por tiempo limitado. No se puede comprar: empieza automáticamente al registrarte."
       },
+      "unlimitedOrders": "Pedidos automáticos y seguimiento de envíos ilimitados",
+      "activeListings": "{{limit}} publicaciones activas · agrega y quita sin límite",
+      "mini": {
+        "name": "Mini",
+        "description": "Para vendedores que empiezan con sus primeras cien publicaciones."
+      },
       "lite": {
         "name": "Lite",
         "description": "Para vendedores que recién empiezan con un catálogo pequeño."

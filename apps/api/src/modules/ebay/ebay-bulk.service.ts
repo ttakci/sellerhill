@@ -9,6 +9,7 @@ import {
 } from '@repo/shared';
 import axios from 'axios';
 
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
 import { type AspectResolution, type CategoryAspect } from './aspect-builder';
@@ -610,6 +611,55 @@ export class EbayBulkService {
         `Could not refresh pre-existing offer ${offerId} for ${draft.sku}: ` +
           `${error instanceof Error ? error.message : String(error)}`
       );
+    }
+  }
+
+  /**
+   * End ONE live listing by withdrawing its offer (Inventory API
+   * `POST /offer/{offerId}/withdraw`).
+   *
+   * This is the route automatic clean-up takes, and the choice of API is the
+   * point: the seller-triggered "End listing" uses Trading `EndItem`, whose
+   * 5,000 calls a day are shared by every seller on the platform, so a nightly
+   * sweep through it could leave nobody able to end a listing by hand. The
+   * Inventory quota is 2,000,000 a day. It needs the offer id, which every
+   * listing created since migration 067 carries.
+   *
+   * Never throws for an eBay refusal — the caller decides from `errorIds`
+   * whether the listing was already gone. A spent budget DOES propagate
+   * (`EbayBudgetExhaustedError`), so a sweep stops instead of grinding on.
+   */
+  async withdrawOffer(
+    accountId: string,
+    offerId: string,
+    priority: EbayCallPriority = EbayCallPriority.BACKGROUND
+  ): Promise<{ ok: true } | { ok: false; errorIds: number[]; message: string }> {
+    const accessToken = await this.ebayService.getAccountAccessToken(accountId);
+    try {
+      await withEbayRateLimitRetry(
+        () =>
+          axios.post(
+            `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${encodeURIComponent(offerId)}/withdraw`,
+            undefined,
+            { headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
+          ),
+        { logger: this.logger, acquireBudget: this.chargeInventory(priority) }
+      );
+      return { ok: true };
+    } catch (error: unknown) {
+      if (error instanceof EbayBudgetExhaustedError) {
+        throw error;
+      }
+      const data = axios.isAxiosError(error)
+        ? (error.response?.data as { errors?: Array<{ errorId?: number; message?: string }> } | undefined)
+        : undefined;
+      const errorIds = (data?.errors ?? [])
+        .map((entry) => entry.errorId)
+        .filter((id): id is number => typeof id === 'number');
+      const message =
+        (data?.errors ?? []).map((entry) => entry.message).filter(Boolean).join(' | ') ||
+        (error instanceof Error ? error.message : String(error));
+      return { ok: false, errorIds, message };
     }
   }
 

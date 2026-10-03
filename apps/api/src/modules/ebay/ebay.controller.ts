@@ -20,11 +20,18 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsResponse } from '@repo/shared';
+import {
+  EbayCallPriority,
+  type CreateEbayConnectUrlResponse,
+  type EbayAdvertisingEligibilityDto,
+  type EbayMarketplaceId,
+  type GetEbayAccountsResponse,
+} from '@repo/shared';
 
 import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+import { EbayPromotedListingsService } from './ebay-promoted-listings.service';
 import { EbayService } from './ebay.service';
 
 @ApiTags('ebay')
@@ -34,7 +41,8 @@ export class EbayController {
 
   constructor(
     private readonly ebayService: EbayService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly promotedListings: EbayPromotedListingsService
   ) {}
 
   @Get('connect-url')
@@ -117,6 +125,26 @@ export class EbayController {
   async getAccounts(@Request() req: { user: { sub: string } }): Promise<GetEbayAccountsResponse> {
     const userId = req.user.sub;
     return this.ebayService.getAccountsByUserId(userId);
+  }
+
+  @Get('accounts/:accountId/advertising-eligibility')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "eBay's answer to whether a store may use Promoted Listings",
+    description:
+      'Passes through eBay getAdvertisingEligibility for the general strategy: the status and, when ineligible, ' +
+      "eBay's reason. Both null when eBay could not be asked — never an assumption either way.",
+  })
+  @ApiOkResponse({ description: 'Eligibility returned' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'Email not verified' })
+  async getAdvertisingEligibility(
+    @Request() req: { user: { sub: string } },
+    @Param('accountId') accountId: string
+  ): Promise<EbayAdvertisingEligibilityDto> {
+    await this.ebayService.assertAccountOwnership(req.user.sub, accountId);
+    return this.promotedListings.getEligibility(accountId, EbayCallPriority.INTERACTIVE);
   }
 
   @Post('accounts/:accountId/disconnect')

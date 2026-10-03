@@ -140,6 +140,7 @@
       "maxFeePercent": "Procentul comisionului nu poate depăși 100%",
       "minFeePercent": "Procentul comisionului trebuie să fie 0 sau mai mare",
       "minFixedFee": "Comisionul fix trebuie să fie 0 sau mai mare",
+      "priceEndingRange": "Introduceți un număr întreg de la 0 la 99",
       "invalidNumber": "Introduceți un număr valid, fără zero la început (de exemplu 0.4, nu 04)",
       "templateRequired": "Conținutul șablonului este obligatoriu",
       "templateMinLength": "Șablonul trebuie să aibă cel puțin 10 caractere",
@@ -209,10 +210,18 @@
         "netTarget": "Țintă înainte de comisioanele eBay",
         "ebayFee": "Comision eBay ({{pct}})",
         "fixedFee": "Comision fix",
-        "floorApplied": "Sub minimul eBay de $0.99, crescut la"
+        "floorApplied": "Sub minimul eBay de $0.99, crescut la",
+        "rounding": "Rotunjit în sus la {{ending}}"
       }
     },
     "feesAndTaxes": "Comisioane și taxe",
+    "priceRounding": {
+      "title": "Rotunjește finalul prețului",
+      "info": "Fiecare preț calculat este rotunjit în sus la următoarea sumă cu acest final, astfel încât profitul țintă nu scade niciodată. Un preț fixat manual pe o listare nu se modifică.",
+      "endingLabel": "Finalul prețului (cenți, 0–99)",
+      "example": "Exemplu: {{from}} devine {{to}}.",
+      "hint": "Introduceți un număr întreg de la 0 la 99 — cu 99 prețurile arată ca $24.99."
+    },
     "amazonTaxRateNote": "Calculul prețului dvs. ia în considerare automat taxa estimată pe care o plătiți la cumpărarea de pe Amazon. Setați această rată în Setări magazin → Rata taxei pe vânzări Amazon.",
     "stockControl": "Controlul stocului",
     "ebayStockQuantity": "Stoc eBay",

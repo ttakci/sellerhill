@@ -27,6 +27,12 @@
         "name": "Avaliação gratuita",
         "description": "Uma avaliação do SellerHill por tempo limitado. Não pode ser comprada — começa automaticamente quando você se cadastra."
       },
+      "unlimitedOrders": "Pedidos automáticos e rastreio de envios ilimitados",
+      "activeListings": "{{limit}} anúncios ativos · adicione e remova sem limite",
+      "mini": {
+        "name": "Mini",
+        "description": "Para vendedores que começam com os primeiros cem anúncios."
+      },
       "lite": {
         "name": "Lite",
         "description": "Para vendedores que estão começando com um catálogo pequeno."

@@ -31,7 +31,20 @@ export interface StockConfig {
 export interface FeeConfig {
   ebayFeePercent: number;
   fixedFeeAmount: number;
+  /**
+   * Price-ending rounding ("charm pricing"). Lives in the `fees` JSONB so a
+   * group saved before the feature simply reads as off.
+   */
+  priceRoundingEnabled?: boolean;
+  /**
+   * The cents every calculated price must end in (0–99; 99 → $x.99). The price
+   * is always rounded UP to the next amount with this ending, so the seller's
+   * target profit is never cut.
+   */
+  priceEndingCents?: number;
 }
+
+export const DEFAULT_PRICE_ENDING_CENTS = 99;
 
 /**
  * Template Configuration

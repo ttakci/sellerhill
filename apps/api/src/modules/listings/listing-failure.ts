@@ -1,4 +1,4 @@
-import { ListingFailureCode, type ListingFailureDetails } from '@repo/shared';
+import { ListingFailureCode, type ListingFailureDetails, type ListingRuleKind } from '@repo/shared';
 
 /**
  * Turn any create-path failure into a code the UI can act on.
@@ -193,6 +193,25 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   // nothing to price from or buy through. A retry cannot change that.
   if (name === 'NoBuyBoxError') {
     return { code: ListingFailureCode.NO_BUY_BOX, message: raw, details: { retryable: false } };
+  }
+  // One of the seller's own listing rules. Terminal, and reported with the
+  // rule and the figures behind it so the reason reads as their own setting.
+  if (name === 'ListingRuleBlockedError') {
+    const e = error as Error & {
+      violation?: { kind?: ListingRuleKind; actual?: number | null; limit?: number };
+      matchedKeyword?: string;
+    };
+    return {
+      code: ListingFailureCode.BLOCKED_BY_RULE,
+      message: raw,
+      details: {
+        retryable: false,
+        listingRule: e.violation?.kind,
+        ruleActual: e.violation?.actual,
+        ruleLimit: e.violation?.limit,
+        ...(e.matchedKeyword ? { blacklistedKeyword: e.matchedKeyword } : {}),
+      },
+    };
   }
   if (name === 'SourcePriceUnavailableError') {
     return { code: ListingFailureCode.SOURCE_PRICE_UNAVAILABLE, message: raw, details: { retryable: false } };

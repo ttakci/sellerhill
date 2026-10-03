@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Vizualizați, editați și creați șabloanele de mesaje automate pentru cumpărători",
         "manageBlacklist": "Gestionează lista neagră",
         "manageBlacklistSubtitle": "Cuvinte cheie blocate în titlurile, descrierile și specificațiile anunțurilor",
-        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin."
+        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin.",
+        "listingRules": "Reguli pentru anunțuri",
+        "listingRulesSubtitle": "Protecția brandului, ce poate fi publicat și curățarea automată"
       },
       "listingGroups": {
         "title": "Grupuri de setări pentru anunțuri",
@@ -422,7 +424,16 @@
           "add": "Adaugă cuvinte cheie",
           "duplicate": "Toate cuvintele cheie includ deja câmpurile selectate",
           "empty": "Introduceți cel puțin un cuvânt cheie",
-          "typeRequired": "Selectați cel puțin un câmp"
+          "typeRequired": "Selectați cel puțin un câmp",
+          "actionLabel": "Când este găsit un cuvânt cheie",
+          "action": {
+            "block": "Nu publica produsul",
+            "remove": "Elimină cuvântul și publică"
+          },
+          "actionHint": {
+            "block": "Un produs al cărui text conține cuvântul nu este publicat.",
+            "remove": "Cuvântul este eliminat din titlu, descriere sau caracteristici, iar produsul este publicat fără el."
+          }
         },
         "list": {
           "empty": "Niciun cuvânt cheie în lista neagră pentru domeniul selectat",
@@ -827,10 +838,10 @@
       "showAllPlans": "Vezi toate cele {{count}} planuri",
       "showFewerPlans": "Arată mai puține planuri",
       "notIncluded": "Nu este inclus",
-      "upToListings": "Până la {{limit}} anunțuri active",
+      "upToListings": "{{limit}} anunțuri active · adăugări și eliminări nelimitate",
       "unlimitedListings": "Anunțuri active nelimitate",
       "upToOrders": "Până la {{limit}} comenzi automate / lună",
-      "unlimitedOrders": "Comenzi automate nelimitate",
+      "unlimitedOrders": "Comenzi automate și urmărire a livrărilor nelimitate",
       "upToConversions": "{{limit}} conversii de urmărire / lună",
       "unlimitedConversions": "Conversii de urmărire nelimitate",
       "upToBestSellers": "{{limit}} de produse Cele mai vândute / lună",
@@ -840,7 +851,6 @@
         "groups": "Grupuri de setări și 12 șabloane de anunțuri",
         "sync": "Verificări de preț și stoc de 4× pe zi",
         "specifics": "Specificații complete ale articolului eBay",
-        "autoOrder": "Comenzi și urmărire automate",
         "actions": "Ecranul Acțiuni în așteptare",
         "profit": "Raportare a profitului real",
         "multiStore": "Mai multe magazine eBay",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Până la 500 de anunțuri active",
-          "orders": "Comenzi automate nelimitate",
+          "listings": "500 anunțuri active · adăugări și eliminări nelimitate",
+          "orders": "Comenzi automate și urmărire a livrărilor nelimitate",
           "conversions": "50 de conversii de urmărire / lună",
           "bestSellers": "2,500 de produse Cele mai vândute / lună"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Până la 2,000 de anunțuri active",
-          "orders": "Comenzi automate nelimitate",
+          "listings": "2,000 anunțuri active · adăugări și eliminări nelimitate",
+          "orders": "Comenzi automate și urmărire a livrărilor nelimitate",
           "conversions": "150 de conversii de urmărire / lună",
           "bestSellers": "7,500 de produse Cele mai vândute / lună"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Până la 5,000 de anunțuri active",
-          "orders": "Comenzi automate nelimitate",
+          "listings": "5,000 anunțuri active · adăugări și eliminări nelimitate",
+          "orders": "Comenzi automate și urmărire a livrărilor nelimitate",
           "conversions": "300 de conversii de urmărire / lună",
           "bestSellers": "15,000 de produse Cele mai vândute / lună"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Până la 10,000 de anunțuri active",
-          "orders": "Comenzi automate nelimitate",
+          "listings": "10,000 anunțuri active · adăugări și eliminări nelimitate",
+          "orders": "Comenzi automate și urmărire a livrărilor nelimitate",
           "conversions": "500 de conversii de urmărire / lună",
           "bestSellers": "25,000 de produse Cele mai vândute / lună"
         }

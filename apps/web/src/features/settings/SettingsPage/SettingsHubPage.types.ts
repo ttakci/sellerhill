@@ -20,6 +20,7 @@ export type SettingsDrawerKey =
   | 'amazonEdit'
   | 'storeSettings'
   | 'storeBlacklist'
+  | 'storeListingRules'
   | 'password'
   | 'listingGroupCreate'
   | 'listingGroupEdit'

@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Today's eBay API allowance is used up. This listing is queued and will continue automatically.",
         "blacklisted_keyword": "Your Store Settings blacklist blocked this listing (keyword: \"{{keyword}}\"). Remove the keyword or adjust your listing template.",
         "cancelled": "Cancelled before this ASIN was processed.",
-        "unknown": "The listing could not be created."
-      }
+        "unknown": "The listing could not be created.",
+        "blocked_by_rule": "Skipped by one of your listing rules.",
+        "blocked_by_rule_blocked_asin": "This ASIN is on your blocked ASIN list.",
+        "blocked_by_rule_vero_brand": "VeRO protection skipped this product (brand: \"{{keyword}}\"). This brand is known to report listings on eBay.",
+        "blocked_by_rule_price_below_min": "Amazon price {{actual}} is below your minimum of {{limit}}.",
+        "blocked_by_rule_price_above_max": "Amazon price {{actual}} is above your maximum of {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "Not shipped by Amazon itself. Your listing rules allow only products Amazon ships.",
+        "blocked_by_rule_low_rating": "Rated {{actual}}. Your minimum is {{limit}}.",
+        "blocked_by_rule_low_rating_none": "No rating yet. Your minimum is {{limit}}.",
+        "blocked_by_rule_low_review_count": "Number of ratings: {{actual}}. Your minimum is {{limit}}."
+      },
+      "scheduledUntil": "Scheduled. The last products start on {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Search by title or ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} draft listings queued — they will not go live until you publish them",
       "queuedWithSkipped": "{{count}} listings queued for processing ({{skipped}} skipped — already in your listings)",
       "queuedDraftWithSkipped": "{{count}} draft listings queued ({{skipped}} skipped — already in your listings) — they will not go live until you publish them",
-      "allSkippedDuplicates": "All {{skipped}} ASINs are already in your listings — nothing new was queued"
+      "allSkippedDuplicates": "All {{skipped}} ASINs are already in your listings — nothing new was queued",
+      "scheduled": "{{count}} products scheduled. The last ones start on {{date}}.",
+      "scheduledWithSkipped": "{{count}} products scheduled ({{skipped}} skipped — already in your listings). The last ones start on {{date}}."
     },
     "errors": {
       "createFailed": "Failed to create listings",
       "fetchPoliciesFailed": "Failed to fetch eBay business policies",
       "invalidAsins": "{{count}} of your entries don't look like valid ASINs (10 alphanumeric characters) and were skipped.",
-      "loadFailed": "Failed to load listings. Please try again."
+      "loadFailed": "Failed to load listings. Please try again.",
+      "scheduleTooLong": "At this pace the job would take more than 30 days. Raise the number of products per day or add fewer ASINs."
     },
     "detail": {
       "breadcrumb": "Listing detail",
@@ -462,6 +475,16 @@
     },
     "products": {
       "searchPlaceholder": "Search by title, ASIN or brand…"
+    },
+    "schedule": {
+      "title": "Spread over time",
+      "hint": "List a set number of products a day, inside the hours you choose, instead of all at once. Price, stock and your listing rules are checked when each product's turn comes.",
+      "perDay": "Products per day",
+      "perDayError": "Enter a whole number between {{min}} and {{max}}.",
+      "startHour": "From",
+      "endHour": "Until",
+      "estimate_one": "About {{count}} day at this pace.",
+      "estimate_other": "About {{count}} days at this pace."
     }
   }
 }

@@ -3,6 +3,7 @@ import {
   TrackingConversionProvider,
   TrackingConversionScope,
   createDefaultBlacklist,
+  normalizeListingRules,
   type BlacklistKeyword,
   type BuyerMessagingConfig,
   type SaveStoreSettingsRequest,
@@ -49,6 +50,8 @@ interface StoreSettingsEntity {
   ship_from_address_line1: string | null;
   ship_from_address_line2: string | null;
   ship_from_city: string | null;
+  // The seller's listing rules (migration 138). NULL = never saved.
+  listing_rules: unknown;
   created_at: Date;
   updated_at: Date;
 }
@@ -117,19 +120,27 @@ export class StoreSettingsService {
   async getResolvedSettings(userId: string, storeId: string | null): Promise<StoreSettingsResponse> {
     const globalSettings = await this.getSettings(userId);
 
+    const withRules = (settings: StoreSettingsResponse): StoreSettingsResponse => ({
+      ...settings,
+      listingRules: normalizeListingRules(settings.listingRules ?? globalSettings.listingRules),
+    });
+
     if (!storeId) {
-      return globalSettings;
+      return withRules(globalSettings);
     }
 
     const storeSettings = await this.getSettings(userId, storeId);
     if (!storeSettings.id) {
-      return globalSettings;
+      return withRules(globalSettings);
     }
 
     // Focused drawers can create a store row before its location is configured.
     // Inherit ONLY the empty location fields — the store still owns every other
-    // override (A2, tax, blacklist, validation and buyer messaging).
-    return inheritMissingStoreLocation(storeSettings, globalSettings);
+    // override (A2, tax, blacklist, validation and buyer messaging). Listing
+    // rules follow the loss limit's rule instead: a store row that never saved
+    // any inherits the global ones, so a filter set for every store is not
+    // silently dropped by a row another drawer created.
+    return withRules(inheritMissingStoreLocation(storeSettings, globalSettings));
   }
 
   /**
@@ -156,6 +167,7 @@ export class StoreSettingsService {
       shipFromAddressLine1,
       shipFromAddressLine2,
       shipFromCity,
+      listingRules,
     } = dto;
 
     // A focused drawer omits fields it does not own. Empty location strings are
@@ -204,14 +216,20 @@ export class StoreSettingsService {
     const shipFromAddressLine2Value = shipFromAddressLine2?.trim() ? shipFromAddressLine2.trim() : null;
     const shipFromCityValue = shipFromCity?.trim() ? shipFromCity.trim() : null;
 
+    // Omitted = leave unchanged (every other drawer omits it); an object
+    // replaces the stored rules whole, normalized so nothing malformed or out
+    // of bounds is ever stored.
+    const listingRulesProvided = listingRules !== undefined;
+    const listingRulesJson = listingRulesProvided ? JSON.stringify(normalizeListingRules(listingRules)) : null;
+
     let result: StoreSettingsEntity[];
 
     if (isGlobal) {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -237,6 +255,10 @@ export class StoreSettingsService {
                   WHEN $20::boolean THEN EXCLUDED.auto_fulfill_max_loss
                   ELSE store_settings.auto_fulfill_max_loss
                 END,
+                listing_rules = CASE
+                  WHEN $22::boolean THEN EXCLUDED.listing_rules
+                  ELSE store_settings.listing_rules
+                END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -261,14 +283,16 @@ export class StoreSettingsService {
           shipFromCityValue,
           maxLossValue,
           maxLossProvided,
+          listingRulesJson,
+          listingRulesProvided,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19, $20::numeric)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
+            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19, $20::numeric, $22::jsonb)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -293,6 +317,10 @@ export class StoreSettingsService {
                 auto_fulfill_max_loss = CASE
                   WHEN $21::boolean THEN EXCLUDED.auto_fulfill_max_loss
                   ELSE store_settings.auto_fulfill_max_loss
+                END,
+                listing_rules = CASE
+                  WHEN $23::boolean THEN EXCLUDED.listing_rules
+                  ELSE store_settings.listing_rules
                 END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
@@ -319,6 +347,8 @@ export class StoreSettingsService {
           shipFromCityValue,
           maxLossValue,
           maxLossProvided,
+          listingRulesJson,
+          listingRulesProvided,
         ]
       );
     }
@@ -378,6 +408,12 @@ export class StoreSettingsService {
       shipFromAddressLine1: entity.ship_from_address_line1 || undefined,
       shipFromAddressLine2: entity.ship_from_address_line2 || undefined,
       shipFromCity: entity.ship_from_city || undefined,
+      // NULL stays absent so the resolver can tell "never saved" (inherit the
+      // global row) from "saved with everything off".
+      listingRules:
+        entity.listing_rules && typeof entity.listing_rules === 'object'
+          ? normalizeListingRules(entity.listing_rules)
+          : undefined,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

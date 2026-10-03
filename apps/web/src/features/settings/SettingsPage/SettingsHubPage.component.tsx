@@ -14,6 +14,7 @@ import {
   AmazonAccountsAllDrawer,
   AmazonAccountsDrawer,
   BlacklistDrawer,
+  ListingRulesDrawer,
   BuyerMessageTemplateDrawer,
   BuyerMessageTemplatesAllDrawer,
   BuyerMessageTemplatesDrawer,
@@ -110,10 +111,12 @@ const StoreManagementSection = ({
   onOpenStoreSettings,
   onOpenMessageTemplates,
   onManageBlacklist,
+  onOpenListingRules,
 }: {
   onOpenStoreSettings: () => void;
   onOpenMessageTemplates: () => void;
   onManageBlacklist: () => void;
+  onOpenListingRules: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
@@ -134,6 +137,12 @@ const StoreManagementSection = ({
         label={t('translation:settingsHub.sections.storeManagement.manageBlacklist')}
         subtitle={t('translation:settingsHub.sections.storeManagement.manageBlacklistSubtitle')}
         onClick={onManageBlacklist}
+      />
+      <SettingsActionRow
+        icon="shield-check"
+        label={t('translation:settingsHub.sections.storeManagement.listingRules')}
+        subtitle={t('translation:settingsHub.sections.storeManagement.listingRulesSubtitle')}
+        onClick={onOpenListingRules}
       />
       <SettingsActionRow
         icon="sliders-horizontal"
@@ -253,6 +262,7 @@ export const SettingsHubPageComponent = ({
           onOpenStoreSettings={() => onOpenDrawer('storeSettings')}
           onOpenMessageTemplates={() => onOpenDrawer('buyerMessageTemplates')}
           onManageBlacklist={onManageBlacklist}
+          onOpenListingRules={() => onOpenDrawer('storeListingRules')}
         />
         <S.ColumnStack>
           <ListingGroupsSection onManage={onViewAllListingGroups} />
@@ -315,6 +325,14 @@ export const SettingsHubPageComponent = ({
         availableStores={availableStores}
         storeConfigs={storeConfigs}
         selectedScope={storeScope}
+      />
+      <ListingRulesDrawer
+        isOpen={activeDrawer === 'storeListingRules'}
+        onClose={onCloseDrawer}
+        availableStores={availableStores}
+        storeConfigs={storeConfigs}
+        selectedScope={storeScope}
+        onSelectScope={onSelectStoreScope}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
 

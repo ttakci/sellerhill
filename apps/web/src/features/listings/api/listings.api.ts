@@ -62,6 +62,9 @@ export function listingsQueryToParams(query: ListingsQueryDto = {}): Record<stri
   if (query.sourceUnavailable) {
     params.sourceUnavailable = 'true';
   }
+  if (query.notSelling) {
+    params.notSelling = 'true';
+  }
 
   return params;
 }

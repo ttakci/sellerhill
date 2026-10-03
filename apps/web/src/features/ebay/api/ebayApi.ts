@@ -6,7 +6,12 @@
  * - getAccounts: Get connected eBay accounts
  */
 
-import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsResponse } from '@repo/shared';
+import type {
+  CreateEbayConnectUrlResponse,
+  EbayAdvertisingEligibilityDto,
+  EbayMarketplaceId,
+  GetEbayAccountsResponse,
+} from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -45,7 +50,23 @@ export const ebayApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Ebay'],
     }),
+
+    /**
+     * eBay's own answer to whether a store may use Promoted Listings. Both
+     * fields are null when eBay could not be asked.
+     */
+    getEbayAdvertisingEligibility: builder.query<EbayAdvertisingEligibilityDto, string>({
+      query: (accountId) => ({
+        url: `/ebay/accounts/${accountId}/advertising-eligibility`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
-export const { useLazyGetEbayConnectUrlQuery, useGetEbayAccountsQuery, useDisconnectEbayAccountMutation } = ebayApi;
+export const {
+  useLazyGetEbayConnectUrlQuery,
+  useGetEbayAccountsQuery,
+  useDisconnectEbayAccountMutation,
+  useGetEbayAdvertisingEligibilityQuery,
+} = ebayApi;

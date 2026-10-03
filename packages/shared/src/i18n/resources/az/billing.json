@@ -27,6 +27,12 @@
         "name": "Pulsuz sınaq",
         "description": "SellerHill-in müddətlə məhdud sınağı. Satın alına bilməz — qeydiyyatdan keçdikdə avtomatik başlayır."
       },
+      "unlimitedOrders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
+      "activeListings": "{{limit}} aktiv elan · limitsiz elan əlavə etmə və silmə",
+      "mini": {
+        "name": "Mini",
+        "description": "İlk yüz elanı ilə işə başlayan satıcılar üçün."
+      },
       "lite": {
         "name": "Lite",
         "description": "Kiçik kataloqla təzəcə başlayan satıcılar üçün."

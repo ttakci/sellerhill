@@ -1,5 +1,17 @@
 import { ProfitBasis } from '@repo/shared';
-import { Badge, Button, CopyableText, EmptyState, Icon, IdBadge, InfoMessage, PageHeader, SettingsCard, Text } from '@repo/ui';
+import {
+  Badge,
+  Button,
+  CopyableText,
+  EmptyState,
+  Icon,
+  IdBadge,
+  InfoMessage,
+  PageHeader,
+  SettingsCard,
+  Text,
+  Textarea,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -115,6 +127,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   isShipByUrgent,
   multiItemCount,
   canCopyAddress,
+  noteDraft,
+  noteMaxLength,
+  isNoteDirty,
+  isSavingNote,
+  onNoteChange,
+  onSaveNote,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -308,6 +326,30 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           </S.TimelineBody>
         </SettingsCard>
       )}
+
+      {/* The seller's own note — theirs alone: nothing sends it to eBay,
+          Amazon or the buyer. */}
+      <SettingsCard variant="section" header={{ title: t('orders.note.title') }}>
+        <S.NoteBody>
+          <Textarea
+            value={noteDraft}
+            onChange={onNoteChange}
+            rows={3}
+            fullWidth
+            maxLength={noteMaxLength}
+            placeholder={t('orders.note.placeholder')}
+            aria-label={t('orders.note.title')}
+          />
+          <S.NoteFooter>
+            <Text variant="caption" color="text.secondary">
+              {t('orders.note.hint')}
+            </Text>
+            <Button variant="secondary" size="small" onClick={onSaveNote} isLoading={isSavingNote} disabled={!isNoteDirty}>
+              <Text variant="body-sm">{t('orders.note.save')}</Text>
+            </Button>
+          </S.NoteFooter>
+        </S.NoteBody>
+      </SettingsCard>
 
       <S.SectionGrid>
         {/* Customer */}

@@ -58,6 +58,13 @@ export enum EbayApiResource {
    * a return sweep costs one call per store, so its cadence is what spends it.
    */
   POST_ORDER_RETURN = 'post-order.return',
+  /**
+   * Marketing API — Promoted Listings campaigns and ads. eBay reports two
+   * resources for it (production `getRateLimits`, 2026-10-02): `sell.marketing`
+   * 10,000/day and `sell.marketing.ads.campaign` 100,000/day, and does not say
+   * which method draws from which. Governed against the TIGHTER one.
+   */
+  MARKETING = 'sell.marketing',
 }
 
 /**
@@ -129,4 +136,16 @@ export interface EbayBudgetOverviewDto {
   rows: EbayBudgetResourceRowDto[];
   /** Everything eBay reports that no governed resource uses — shown, never hidden. */
   unmapped: EbayRateLimitResourceDto[];
+}
+
+/**
+ * eBay's answer to "may this store use Promoted Listings (general strategy)?"
+ * — `getAdvertisingEligibility`, passed through as eBay sent it. Both null
+ * when the answer could not be read; never an assumption either way.
+ */
+export interface EbayAdvertisingEligibilityDto {
+  /** eBay's status string (`INELIGIBLE` observed live). */
+  status: string | null;
+  /** eBay's reason when ineligible (`NOT_ENOUGH_ACTIVITY` observed live). */
+  reason: string | null;
 }

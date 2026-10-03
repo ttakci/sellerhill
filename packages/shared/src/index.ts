@@ -30,7 +30,7 @@ export type {
   ListingTemplatePlaceholder,
   ListingTemplateValue,
 } from './utils/listing-template';
-export { applyEbayFees, calculateListingPrice } from './utils/listing-pricing';
+export { applyEbayFees, applyPriceEnding, calculateListingPrice, resolvePriceEndingCents } from './utils/listing-pricing';
 export type { ListingPriceBreakdown, ListingPriceMetrics } from './utils/listing-pricing';
 export {
   EBAY_EPS_IMAGE_BASE_URL,

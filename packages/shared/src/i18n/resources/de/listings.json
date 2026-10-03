@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Das heutige eBay-API-Kontingent ist aufgebraucht. Dieses Angebot ist eingereiht und wird automatisch fortgesetzt.",
         "blacklisted_keyword": "Die Sperrliste in Ihren Shop-Einstellungen hat dieses Angebot blockiert (Schlüsselwort: „{{keyword}}“). Entfernen Sie das Schlüsselwort oder passen Sie Ihre Angebotsvorlage an.",
         "cancelled": "Abgebrochen, bevor diese ASIN verarbeitet wurde.",
-        "unknown": "Das Angebot konnte nicht erstellt werden."
-      }
+        "unknown": "Das Angebot konnte nicht erstellt werden.",
+        "blocked_by_rule": "Durch eine Ihrer Angebotsregeln übersprungen.",
+        "blocked_by_rule_blocked_asin": "Diese ASIN steht auf Ihrer Liste gesperrter ASINs.",
+        "blocked_by_rule_vero_brand": "Der VeRO-Schutz hat dieses Produkt übersprungen (Marke: „{{keyword}}“). Diese Marke meldet bekanntermaßen Angebote auf eBay.",
+        "blocked_by_rule_price_below_min": "Der Amazon-Preis {{actual}} liegt unter Ihrem Minimum von {{limit}}.",
+        "blocked_by_rule_price_above_max": "Der Amazon-Preis {{actual}} liegt über Ihrem Maximum von {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "Wird nicht von Amazon selbst versendet. Ihre Angebotsregeln erlauben nur Produkte, die Amazon versendet.",
+        "blocked_by_rule_low_rating": "Bewertet mit {{actual}}. Ihr Minimum ist {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Noch keine Bewertung. Ihr Minimum ist {{limit}}.",
+        "blocked_by_rule_low_review_count": "Anzahl der Bewertungen: {{actual}}. Ihr Minimum ist {{limit}}."
+      },
+      "scheduledUntil": "Geplant. Die letzten Produkte starten am {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Nach Titel oder ASIN suchen ...",
@@ -356,13 +366,16 @@
       "queuedDraft": "{{count}} Entwurfsangebote eingereiht – sie gehen erst live, wenn Sie sie veröffentlichen",
       "queuedWithSkipped": "{{count}} Angebote zur Verarbeitung eingereiht ({{skipped}} übersprungen — bereits in Ihren Angeboten vorhanden)",
       "queuedDraftWithSkipped": "{{count}} Entwurfsangebote eingereiht ({{skipped}} übersprungen — bereits in Ihren Angeboten vorhanden) – sie gehen erst live, wenn Sie sie veröffentlichen",
-      "allSkippedDuplicates": "Alle {{skipped}} ASINs sind bereits in Ihren Angeboten vorhanden — es wurde nichts Neues eingereiht"
+      "allSkippedDuplicates": "Alle {{skipped}} ASINs sind bereits in Ihren Angeboten vorhanden — es wurde nichts Neues eingereiht",
+      "scheduled": "{{count}} Produkte geplant. Die letzten starten am {{date}}.",
+      "scheduledWithSkipped": "{{count}} Produkte geplant ({{skipped}} übersprungen – bereits in Ihren Angeboten). Die letzten starten am {{date}}."
     },
     "errors": {
       "createFailed": "Die Angebote konnten nicht erstellt werden",
       "fetchPoliciesFailed": "Die eBay-Geschäftsrichtlinien konnten nicht abgerufen werden",
       "invalidAsins": "{{count}} Ihrer Einträge sehen nicht wie gültige ASINs aus (10 alphanumerische Zeichen) und wurden übersprungen.",
-      "loadFailed": "Die Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut."
+      "loadFailed": "Die Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+      "scheduleTooLong": "Bei diesem Tempo würde der Auftrag mehr als 30 Tage dauern. Erhöhen Sie die Anzahl der Produkte pro Tag oder fügen Sie weniger ASINs hinzu."
     },
     "detail": {
       "breadcrumb": "Angebotsdetails",
@@ -462,6 +475,16 @@
     },
     "products": {
       "searchPlaceholder": "Nach Titel, ASIN oder Marke suchen …"
+    },
+    "schedule": {
+      "title": "Über die Zeit verteilen",
+      "hint": "Bieten Sie eine festgelegte Anzahl Produkte pro Tag innerhalb der von Ihnen gewählten Stunden an, statt alle auf einmal. Preis, Bestand und Ihre Angebotsregeln werden geprüft, wenn ein Produkt an der Reihe ist.",
+      "perDay": "Produkte pro Tag",
+      "perDayError": "Geben Sie eine ganze Zahl zwischen {{min}} und {{max}} ein.",
+      "startHour": "Von",
+      "endHour": "Bis",
+      "estimate_one": "Etwa {{count}} Tag bei diesem Tempo.",
+      "estimate_other": "Etwa {{count}} Tage bei diesem Tempo."
     }
   }
 }

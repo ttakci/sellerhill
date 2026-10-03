@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "查看、编辑和创建您的买家自动消息模板",
         "manageBlacklist": "管理黑名单",
         "manageBlacklistSubtitle": "在刊登标题、描述和商品属性中屏蔽的关键词",
-        "infoMessage": "消息模板和黑名单规则将按照您在店铺设置中选择的范围（全局或单个店铺）生效。"
+        "infoMessage": "消息模板和黑名单规则将按照您在店铺设置中选择的范围（全局或单个店铺）生效。",
+        "listingRules": "刊登规则",
+        "listingRulesSubtitle": "品牌保护、可刊登的商品以及自动清理"
       },
       "listingGroups": {
         "title": "刊登设置组",
@@ -422,7 +424,16 @@
           "add": "添加关键词",
           "duplicate": "所有关键词已包含所选字段",
           "empty": "请至少输入一个关键词",
-          "typeRequired": "请至少选择一个字段"
+          "typeRequired": "请至少选择一个字段",
+          "actionLabel": "发现关键词时",
+          "action": {
+            "block": "不刊登该商品",
+            "remove": "删除该词并刊登"
+          },
+          "actionHint": {
+            "block": "文本中含有该词的商品不会被刊登。",
+            "remove": "该词会从标题、描述或特点中删除，商品将在不含该词的情况下刊登。"
+          }
         },
         "list": {
           "empty": "所选范围内没有黑名单关键词",
@@ -827,10 +838,10 @@
       "showAllPlans": "查看全部 {{count}} 个套餐",
       "showFewerPlans": "收起部分套餐",
       "notIncluded": "不包含",
-      "upToListings": "最多 {{limit}} 条在售商品刊登",
+      "upToListings": "{{limit}} 条在售商品刊登 · 不限次数添加和下架",
       "unlimitedListings": "不限在售商品刊登数量",
       "upToOrders": "每月最多 {{limit}} 笔自动订单",
-      "unlimitedOrders": "不限自动订单数量",
+      "unlimitedOrders": "不限自动订单和物流跟踪数量",
       "upToConversions": "每月 {{limit}} 次物流单号转换",
       "unlimitedConversions": "不限物流单号转换次数",
       "upToBestSellers": "每月 {{limit}} 件热销榜商品",
@@ -840,7 +851,6 @@
         "groups": "设置组和 12 款刊登模板",
         "sync": "每天 4 次检查价格和库存",
         "specifics": "完整的 eBay 商品属性",
-        "autoOrder": "自动订单和物流单号处理",
         "actions": "待处理事项页面",
         "profit": "真实利润报表",
         "multiStore": "多个 eBay 店铺",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "最多 500 条在售商品刊登",
-          "orders": "不限自动订单数量",
+          "listings": "500 条在售商品刊登 · 不限次数添加和下架",
+          "orders": "不限自动订单和物流跟踪数量",
           "conversions": "每月 50 次物流单号转换",
           "bestSellers": "每月 2,500 件热销榜商品"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "最多 2,000 条在售商品刊登",
-          "orders": "不限自动订单数量",
+          "listings": "2,000 条在售商品刊登 · 不限次数添加和下架",
+          "orders": "不限自动订单和物流跟踪数量",
           "conversions": "每月 150 次物流单号转换",
           "bestSellers": "每月 7,500 件热销榜商品"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "最多 5,000 条在售商品刊登",
-          "orders": "不限自动订单数量",
+          "listings": "5,000 条在售商品刊登 · 不限次数添加和下架",
+          "orders": "不限自动订单和物流跟踪数量",
           "conversions": "每月 300 次物流单号转换",
           "bestSellers": "每月 15,000 件热销榜商品"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "最多 10,000 条在售商品刊登",
-          "orders": "不限自动订单数量",
+          "listings": "10,000 条在售商品刊登 · 不限次数添加和下架",
+          "orders": "不限自动订单和物流跟踪数量",
           "conversions": "每月 500 次物流单号转换",
           "bestSellers": "每月 25,000 件热销榜商品"
         }

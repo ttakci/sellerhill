@@ -30,7 +30,8 @@
       "allTrackingStates": "Bağlı ve bağlı olmayan",
       "clearAll": "Temizle",
       "resultCount": "{{count}} sonuç",
-      "allStages": "Tüm durumlar"
+      "allStages": "Tüm durumlar",
+      "allFlags": "Süre ve iade"
     },
     "stats": {
       "totalSales": "Toplam Satış",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Planınızın bu dönemki otomatik sipariş limiti doldu.",
       "purchaseNotYetChecked": "SellerHill, satın alma denemesinden sonra bu Amazon hesabının siparişlerini henüz kontrol etmedi. Kontrol şimdi başlatıldı; birkaç dakika sonra yeniden deneyin.",
       "purchaseNotUnknown": "Bu sipariş satın alma onayı beklemiyor. Zaten bağlanmış ya da işlemde olabilir. Sayfayı yenileyin.",
-      "purchaseFoundOnAmazon": "SellerHill, satın alma denemesiyle aynı zamanlarda bu ürün için verilmiş bir Amazon siparişi buldu ama onu bu satışla kesin olarak eşleştiremedi. Amazon siparişlerinizi açıp siparişi elle bağlayın. O sipariş başka bir satışa aitse önce o satışa bağlayın."
+      "purchaseFoundOnAmazon": "SellerHill, satın alma denemesiyle aynı zamanlarda bu ürün için verilmiş bir Amazon siparişi buldu ama onu bu satışla kesin olarak eşleştiremedi. Amazon siparişlerinizi açıp siparişi elle bağlayın. O sipariş başka bir satışa aitse önce o satışa bağlayın.",
+      "noteTooLong": "Not en fazla 1.000 karakter olabilir.",
+      "noteInvalid": "Not kaydedilemedi."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Alıcıya gönderildi.",
         "message_failed": "Gönderilemedi."
       }
+    },
+    "flags": {
+      "late": "Kargolama gecikti",
+      "dueSoon": "Süresi yaklaşıyor",
+      "dueSoonBy": "Son gönderim: {{date}}",
+      "refunded": "İade edildi",
+      "refundedAmount": "İade edildi: {{amount}}"
+    },
+    "note": {
+      "title": "Notunuz",
+      "label": "Not",
+      "placeholder": "Bu siparişle ilgili kendinize bir not yazın",
+      "hint": "Bu notu yalnızca siz görürsünüz. eBay'e, Amazon'a ya da alıcıya gönderilmez.",
+      "save": "Notu kaydet"
     }
   }
 }

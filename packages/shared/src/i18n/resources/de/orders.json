@@ -30,7 +30,8 @@
       "allTrackingStates": "Verknüpft und nicht verknüpft",
       "clearAll": "Alle zurücksetzen",
       "resultCount": "{{count}} Ergebnisse",
-      "allStages": "Alle Status"
+      "allStages": "Alle Status",
+      "allFlags": "Frist & Erstattung"
     },
     "stats": {
       "totalSales": "Gesamtumsatz",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Das Limit deines Tarifs für automatische Bestellungen ist für diesen Zeitraum aufgebraucht.",
       "purchaseNotYetChecked": "SellerHill hat die Bestellungen dieses Amazon-Kontos seit dem Kaufversuch noch nicht geprüft. Die Prüfung wurde jetzt gestartet — versuchen Sie es in ein paar Minuten erneut.",
       "purchaseNotUnknown": "Diese Bestellung wartet nicht auf eine Kaufbestätigung. Sie ist möglicherweise bereits verknüpft oder in Bearbeitung. Laden Sie die Seite neu.",
-      "purchaseFoundOnAmazon": "SellerHill hat eine Amazon-Bestellung für diesen Artikel gefunden, die etwa zum Zeitpunkt des Kaufversuchs aufgegeben wurde, konnte sie diesem Verkauf aber nicht sicher zuordnen. Öffnen Sie Ihre Amazon-Bestellungen und verknüpfen Sie sie manuell. Gehört die Bestellung zu einem anderen Verkauf, verknüpfen Sie sie zuerst mit diesem."
+      "purchaseFoundOnAmazon": "SellerHill hat eine Amazon-Bestellung für diesen Artikel gefunden, die etwa zum Zeitpunkt des Kaufversuchs aufgegeben wurde, konnte sie diesem Verkauf aber nicht sicher zuordnen. Öffnen Sie Ihre Amazon-Bestellungen und verknüpfen Sie sie manuell. Gehört die Bestellung zu einem anderen Verkauf, verknüpfen Sie sie zuerst mit diesem.",
+      "noteTooLong": "Die Notiz darf höchstens 1.000 Zeichen lang sein.",
+      "noteInvalid": "Die Notiz konnte nicht gespeichert werden."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "An den Käufer gesendet.",
         "message_failed": "Konnte nicht gesendet werden."
       }
+    },
+    "flags": {
+      "late": "Versand überfällig",
+      "dueSoon": "Versandfrist läuft ab",
+      "dueSoonBy": "Versand bis {{date}}",
+      "refunded": "Erstattet",
+      "refundedAmount": "Erstattet: {{amount}}"
+    },
+    "note": {
+      "title": "Ihre Notiz",
+      "label": "Notiz",
+      "placeholder": "Schreiben Sie sich eine Notiz zu dieser Bestellung",
+      "hint": "Nur Sie sehen diese Notiz. Sie wird nie an eBay, Amazon oder den Käufer gesendet.",
+      "save": "Notiz speichern"
     }
   }
 }

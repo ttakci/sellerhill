@@ -1,15 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  LISTING_SCHEDULE_MAX_PER_DAY,
+  LISTING_SCHEDULE_MIN_PER_DAY,
   ListingJobQueuedSummary,
   PolicyType,
   createListingsSchema,
+  estimateScheduleDays,
   isValidAsinShape,
   parseAsins,
   resolveListingJobQueuedSummary,
   type CreateListingsFormData,
   type CreateListingsRequest,
 } from '@repo/shared';
-import { useLoading, useUI } from '@repo/ui';
+import { formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +31,11 @@ import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-gr
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
 const PREFERENCES_STORAGE_KEY = 'sellerhill:add-listings-preferences:v1';
+
+/** A pace that looks like a person listing through a working day. */
+const DEFAULT_SCHEDULE_PER_DAY = 20;
+const DEFAULT_SCHEDULE_START_HOUR = 9;
+const DEFAULT_SCHEDULE_END_HOUR = 21;
 
 const EMPTY_PREFERENCES: AddListingsDrawerPreferences = {
   ebayAccountId: '',
@@ -108,10 +116,19 @@ const resolveQueuedMessageKey = (summary: ListingJobQueuedSummary, asDraft: bool
 };
 
 export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess, initialAsins }) => {
-  const { t } = useTranslation(['listings', 'translation']);
+  const { t, i18n } = useTranslation(['listings', 'translation']);
+  const { locale } = getLocaleConfig(i18n.language);
   const { showMessage, closeMessage } = useUI();
 
   const [currentStep, setCurrentStep] = useState<AddListingsDrawerStep>(0);
+  // Scheduling ("N a day between these hours"). Plain state rather than form
+  // fields: it is not part of the remembered preferences, and a new drawer
+  // session always starts with it off.
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [schedulePerDay, setSchedulePerDay] = useState(String(DEFAULT_SCHEDULE_PER_DAY));
+  const [scheduleStartHour, setScheduleStartHour] = useState(String(DEFAULT_SCHEDULE_START_HOUR));
+  const [scheduleEndHour, setScheduleEndHour] = useState(String(DEFAULT_SCHEDULE_END_HOUR));
+  const [scheduleSubmitAttempted, setScheduleSubmitAttempted] = useState(false);
   const lastSubmittedAsDraft = useRef(false);
 
   const { data: ebayAccountsData, isLoading: isLoadingAccounts } = useGetEbayAccountsQuery();
@@ -163,6 +180,8 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     setPrevInitialAsins(initialAsins);
     if (isOpen) {
       setCurrentStep(0);
+      setScheduleEnabled(false);
+      setScheduleSubmitAttempted(false);
       clearErrors();
       reset(buildOpenValues(initialAsins));
     }
@@ -180,12 +199,23 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       const summary = resolveListingJobQueuedSummary(submitData.totalAsins, skipped);
       resetMutation();
       onClose();
+      // A scheduled job says when it will be done instead of "queued": nothing
+      // is listed yet, and the seller should not go looking for it today.
+      const scheduled = Boolean(submitData.scheduledUntil) && submitData.totalAsins > 0;
       showMessage(
         {
           type: 'info',
           headerKey: 'translation:message.success.header',
-          descriptionKey: resolveQueuedMessageKey(summary, wasDraft),
-          descriptionParams: { count: submitData.totalAsins, skipped },
+          descriptionKey: scheduled
+            ? skipped > 0
+              ? 'listings:listings.success.scheduledWithSkipped'
+              : 'listings:listings.success.scheduled'
+            : resolveQueuedMessageKey(summary, wasDraft),
+          descriptionParams: {
+            count: submitData.totalAsins,
+            skipped,
+            date: submitData.scheduledUntil ? formatDate(submitData.scheduledUntil, locale) : '',
+          },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
             onClick: () => {
@@ -197,7 +227,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
         t
       );
     }
-  }, [isSuccess, submitData, showMessage, closeMessage, t, onClose, onSuccess, resetMutation]);
+  }, [isSuccess, submitData, showMessage, closeMessage, t, onClose, onSuccess, resetMutation, locale]);
 
   React.useEffect(() => {
     if (submitError) {
@@ -299,6 +329,18 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     return asinCount > 0;
   }, [currentStep, watchedValues, asinCount]);
 
+  const perDayNumber = Number(schedulePerDay);
+  const perDayInvalid = !(
+    Number.isInteger(perDayNumber) &&
+    perDayNumber >= LISTING_SCHEDULE_MIN_PER_DAY &&
+    perDayNumber <= LISTING_SCHEDULE_MAX_PER_DAY
+  );
+  const hourOptions = (from: number, to: number): Array<{ value: string; label: string }> =>
+    Array.from({ length: Math.max(0, to - from + 1) }, (_, index) => {
+      const hour = from + index;
+      return { value: String(hour), label: `${String(hour).padStart(2, '0')}:00` };
+    });
+
   const handleNext = () => {
     if (currentStep < 1 && canProceed) {
       setCurrentStep(1);
@@ -315,6 +357,16 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
 
   const submitAsins = (data: CreateListingsFormData, validAsins: string[]) => {
     lastSubmittedAsDraft.current = Boolean(data.asDraft);
+    const schedule =
+      scheduleEnabled && !perDayInvalid
+        ? {
+            perDay: perDayNumber,
+            startHour: Number(scheduleStartHour),
+            endHour: Number(scheduleEndHour),
+            // The browser reports minutes WEST of UTC; the schedule wants east.
+            utcOffsetMinutes: -new Date().getTimezoneOffset(),
+          }
+        : undefined;
     const cleanData: CreateListingsRequest = {
       asins: validAsins,
       ebayAccountId: data.ebayAccountId,
@@ -323,11 +375,18 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       shippingPolicyId: data.shippingPolicyId,
       returnPolicyId: data.returnPolicyId,
       asDraft: Boolean(data.asDraft),
+      ...(schedule ? { schedule } : {}),
     };
     void createListings(cleanData);
   };
 
   const handleSubmit = () => {
+    setScheduleSubmitAttempted(true);
+    if (scheduleEnabled && perDayInvalid) {
+      // The per-day field lives on the first step; take the seller back to it.
+      setCurrentStep(0);
+      return;
+    }
     void rhfSubmit((data: CreateListingsFormData) => {
       const parsed = parseAsins(data.asins);
       const validAsins = parsed.filter((asin) => isValidAsinShape(asin));
@@ -381,6 +440,38 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       onBack={handleBack}
       onSubmit={handleSubmit}
       canProceed={canProceed}
+      schedule={{
+        enabled: scheduleEnabled,
+        onEnabledChange: setScheduleEnabled,
+        perDay: schedulePerDay,
+        onPerDayChange: (e) => setSchedulePerDay(e.target.value),
+        perDayError:
+          scheduleSubmitAttempted && scheduleEnabled && perDayInvalid
+            ? t('listings:listings.schedule.perDayError', {
+                min: LISTING_SCHEDULE_MIN_PER_DAY,
+                max: LISTING_SCHEDULE_MAX_PER_DAY,
+              })
+            : undefined,
+        startHour: scheduleStartHour,
+        endHour: scheduleEndHour,
+        // The end must come after the start, so each select only offers what
+        // keeps the window at least an hour long.
+        startHourOptions: hourOptions(0, Number(scheduleEndHour) - 1),
+        endHourOptions: hourOptions(Number(scheduleStartHour) + 1, 24),
+        onStartHourChange: setScheduleStartHour,
+        onEndHourChange: setScheduleEndHour,
+        estimate:
+          scheduleEnabled && !perDayInvalid && asinCount > 0
+            ? t('listings:listings.schedule.estimate', {
+                count: estimateScheduleDays(asinCount, {
+                  perDay: perDayNumber,
+                  startHour: Number(scheduleStartHour),
+                  endHour: Number(scheduleEndHour),
+                  utcOffsetMinutes: 0,
+                }),
+              })
+            : '',
+      }}
     />
   );
 };

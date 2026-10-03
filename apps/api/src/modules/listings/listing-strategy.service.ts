@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
+  BlacklistAction,
   BlacklistType,
   DEFAULT_LISTING_TEMPLATE_HTML,
   EBAY_DESCRIPTION_MAX_LENGTH,
@@ -27,6 +28,7 @@ import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { ContentGenerationService } from './content-generation.service';
 import { containsBlacklistedKeyword } from './listing-blacklist';
+import { applyContentRules, stripContactDetails } from './listing-content-rules';
 import type { StrategyCommerce } from './listing-pricing.helpers';
 import {
   normalizeTitleWhitespace,
@@ -85,26 +87,42 @@ export class ListingStrategyService {
    */
   async prepareListingData(
     userId: string,
-    product: ProductData,
+    sourceProduct: ProductData,
     settingsGroupId: string,
     storeId: string | null = null,
     options?: { applyContentAi?: boolean; live?: boolean }
   ) {
     // Checked first, before the settings lookup and any LLM spend.
     if (options?.live) {
-      assertSourcePricePublishable(product);
+      assertSourcePricePublishable(sourceProduct);
     }
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 
-    let title = this.buildListingTitle(product, group);
+    // Everything below works on the LISTABLE copy: the seller's "remove this
+    // word" keywords are out, contact details are out, and — with the hide-
+    // brand rule — so are the brand, its specifics and the barcodes. Applied
+    // once, here, so the title, the template, the AI rewrite and what is sent
+    // to eBay can never disagree about what was removed.
+    const hideBrand = Boolean(storeSettings.listingRules?.hideBrand);
+    const product = applyContentRules(sourceProduct, {
+      blacklist: storeSettings.blacklist,
+      checkBlacklist: storeSettings.checkBlacklist,
+      hideBrand,
+    });
+    // Hiding the brand removes it from `product`, but the title still carries
+    // it as text — the title strip and the AI rewrite need the real name.
+    const brandForTitle = sourceProduct.brand;
+
+    let title = this.buildListingTitle(product, group, brandForTitle, hideBrand);
 
     const applyAi = Boolean(options?.applyContentAi);
     const wantAiTitle = applyAi && Boolean(group.content?.aiTitleEnabled);
     const wantAiDescription = applyAi && Boolean(group.content?.aiDescriptionEnabled);
     const aiAvailable =
       (wantAiTitle || wantAiDescription) && (await this.contentGeneration.isEnabled());
-    const stripBrand = Boolean(group.content?.stripBrandFromTitle);
+    const stripBrand = hideBrand || Boolean(group.content?.stripBrandFromTitle);
+    const aiProduct = hideBrand ? { ...product, brand: brandForTitle } : product;
 
     // The title is settled BEFORE the template renders. `{{title}}` used to be
     // fed `product.title` — the raw Amazon one — so the description showed a
@@ -118,7 +136,7 @@ export class ListingStrategyService {
       title = truncateTitleAtWordBoundary(
         normalizeTitleWhitespace(
           await this.contentGeneration.rewriteTitle({
-            product,
+            product: aiProduct,
             baseTitle: title,
             baseDescription: '',
             stripBrand,
@@ -132,12 +150,17 @@ export class ListingStrategyService {
 
     if (aiAvailable && wantAiDescription) {
       const aiDescription = await this.contentGeneration.rewriteDescription({
-        product,
+        product: aiProduct,
         baseTitle: title,
         baseDescription: description,
         stripBrand,
       });
-      description = truncateHtml(sanitizeListingHtml(aiDescription), EBAY_DESCRIPTION_MAX_LENGTH);
+      // Model output is untrusted for contact details too: it is written from
+      // the source copy and may repeat an address the clean-up took out.
+      description = truncateHtml(
+        stripContactDetails(sanitizeListingHtml(aiDescription)),
+        EBAY_DESCRIPTION_MAX_LENGTH
+      );
     }
 
     if (!aiAvailable && applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
@@ -147,7 +170,7 @@ export class ListingStrategyService {
     }
 
     // Validate listing against store settings (Blacklist, etc.) — after AI so blacklist still applies
-    this.validateListing(title, description, product, storeSettings);
+    this.validateListing(title, description, product, storeSettings, sourceProduct);
 
     const priceMetrics = this.calculatePrice(
       product.price.current,
@@ -253,12 +276,16 @@ export class ListingStrategyService {
    */
   private buildListingTitle(
     product: ProductData,
-    group: ListingSettingsGroup
+    group: ListingSettingsGroup,
+    brand: string | undefined = product.brand,
+    hideBrand = false
   ): string {
     let title = normalizeTitleWhitespace(product.title || '');
 
-    if (group.content?.stripBrandFromTitle && product.brand) {
-      title = stripBrandFromTitle(title, product.brand);
+    // The hide-brand store rule implies the title strip: a listing that sends
+    // no brand to eBay but opens its title with it has hidden nothing.
+    if ((hideBrand || group.content?.stripBrandFromTitle) && brand) {
+      title = stripBrandFromTitle(title, brand);
     }
 
     title = truncateTitleAtWordBoundary(title, EBAY_TITLE_MAX_LENGTH);
@@ -273,14 +300,20 @@ export class ListingStrategyService {
     title: string,
     description: string,
     product: ProductData,
-    settings: StoreSettingsResponse
+    settings: StoreSettingsResponse,
+    // The brand check reads the SOURCE product: with the hide-brand rule the
+    // listable copy has no brand left, and a blacklisted brand must still
+    // refuse the product it belongs to.
+    brandSource: Pick<ProductData, 'brand' | 'manufacturer'> = product
   ): void {
     const { checkBlacklist, blacklist } = settings;
 
     const validateBlacklist = (values: string[], type: BlacklistType): void => {
       for (const item of blacklist ?? []) {
         const keyword = item.keyword.trim();
-        if (!keyword || !item.types.includes(type)) {
+        // A `remove` keyword never refuses a listing: it was already stripped
+        // from the copy by `applyContentRules`.
+        if (!keyword || !item.types.includes(type) || item.action === BlacklistAction.REMOVE) {
           continue;
         }
 
@@ -318,7 +351,7 @@ export class ListingStrategyService {
       BlacklistType.FEATURE_SPECIFICATION
     );
     validateBlacklist(
-      [product.brand ?? '', product.manufacturer ?? ''],
+      [brandSource.brand ?? '', brandSource.manufacturer ?? ''],
       BlacklistType.BRAND_MANUFACTURER
     );
   }

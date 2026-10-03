@@ -118,6 +118,13 @@
         "description_other": "{{count}} ordini sono stati annullati su eBay negli ultimi {{days}} giorni, ma gli ordini Amazon effettuati per quegli ordini sono ancora aperti. Nessuno aspetta più quegli articoli: annulla gli ordini Amazon o restituisci gli articoli se sono già stati spediti.",
         "action": "Controlla gli ordini"
       },
+      "order_late_to_ship": {
+        "title": "Ordini oltre la data limite di spedizione eBay",
+        "description_one": "{{count}} ordine ha superato la data limite di spedizione eBay ed eBay non ha ancora alcuna spedizione. Una spedizione in ritardo pesa sul tuo account venditore.",
+        "description_many": "{{count}} ordini hanno superato la data limite di spedizione eBay ed eBay non ha ancora alcuna spedizione. Le spedizioni in ritardo pesano sul tuo account venditore.",
+        "description_other": "{{count}} ordini hanno superato la data limite di spedizione eBay ed eBay non ha ancora alcuna spedizione. Le spedizioni in ritardo pesano sul tuo account venditore.",
+        "action": "Controlla gli ordini"
+      },
       "return_seller_action_due": {
         "title": "Resi in attesa della tua risposta",
         "description_one": "{{count}} reso ha un passaggio che eBay si aspetta da te. Rispondi su eBay prima della scadenza indicata nella pagina Resi.",
@@ -230,6 +237,13 @@
         "title": "L'automazione è sospesa",
         "description": "Il tuo abbonamento non è più attivo, quindi nuove inserzioni, aggiornamenti di prezzo e stock, acquisti automatici e conversione del tracciamento si sono fermati. Scegli un piano per riprendere: tutto riparte da solo.",
         "action": "Scegli un piano"
+      },
+      "listing_not_selling": {
+        "title": "Inserzioni che non vendono",
+        "description_one": "{{count}} inserzione attiva non ha avuto vendite nel periodo che hai impostato. Controllala e terminala se non vale il posto che occupa nel tuo piano.",
+        "description_many": "{{count}} inserzioni attive non hanno avuto vendite nel periodo che hai impostato. Controllale e termina quelle che non valgono il posto che occupano nel tuo piano.",
+        "description_other": "{{count}} inserzioni attive non hanno avuto vendite nel periodo che hai impostato. Controllale e termina quelle che non valgono il posto che occupano nel tuo piano.",
+        "action": "Controlla le inserzioni"
       }
     },
     "reasons": {
