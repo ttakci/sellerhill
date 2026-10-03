@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "Selectați limba",
+    "selectStore": "Alege magazinul",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notificări",
     "openMenu": "Deschide meniul",
     "collapseSidebar": "Restrânge bara laterală",

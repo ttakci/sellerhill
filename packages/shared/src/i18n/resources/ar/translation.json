@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "اختيار اللغة",
+    "selectStore": "اختر المتجر",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "الإشعارات",
     "openMenu": "فتح القائمة",
     "collapseSidebar": "طي الشريط الجانبي",

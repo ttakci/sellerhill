@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "ভাষা নির্বাচন করুন",
+    "selectStore": "স্টোর বেছে নিন",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "বিজ্ঞপ্তি",
     "openMenu": "মেনু খুলুন",
     "collapseSidebar": "সাইডবার গুটান",

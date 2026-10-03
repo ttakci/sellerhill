@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "زبان منتخب کریں",
+    "selectStore": "اسٹور منتخب کریں",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "اطلاعات",
     "openMenu": "مینو کھولیں",
     "collapseSidebar": "سائیڈ بار سمیٹیں",

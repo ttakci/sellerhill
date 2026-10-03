@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "Оберіть мову",
+    "selectStore": "Вибрати магазин",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Сповіщення",
     "openMenu": "Відкрити меню",
     "collapseSidebar": "Згорнути бічну панель",

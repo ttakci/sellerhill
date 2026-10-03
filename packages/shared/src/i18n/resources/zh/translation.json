@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "选择语言",
+    "selectStore": "选择店铺",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "通知",
     "openMenu": "打开菜单",
     "collapseSidebar": "收起侧边栏",

@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "Select Language",
+    "selectStore": "Select store",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notifications",
     "openMenu": "Open menu",
     "collapseSidebar": "Collapse sidebar",

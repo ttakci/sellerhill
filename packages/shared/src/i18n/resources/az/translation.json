@@ -172,6 +172,8 @@
   },
   "header": {
     "selectLanguage": "Dil seçin",
+    "selectStore": "Mağaza seçin",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Bildirişlər",
     "openMenu": "Menyunu aç",
     "collapseSidebar": "Yan paneli yığ",

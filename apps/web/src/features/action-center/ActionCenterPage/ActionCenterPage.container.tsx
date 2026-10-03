@@ -20,7 +20,6 @@ import {
   ActionCenterSeverity,
   type ActionCenterGroupDto,
   type ActionCenterItemDto,
-  type ActionCenterSummaryDto,
 } from '@repo/shared';
 import type { SelectOption, TabNavItem } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,6 +28,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey, filterToIcon } from '../actionCenterPresentation';
 import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterByStoreQuery } from '../api/actionCenterApi';
+import { storeOwnItemCount } from '../utils/storeItemCount';
 
 import { ActionCenterPage as ActionCenterPageComponent } from './ActionCenterPage.component';
 import type { ActionCenterFilter, ActionCenterGroupView, ActionCenterItemView } from './ActionCenterPage.types';
@@ -55,12 +55,7 @@ export const ActionCenterPageContainer: React.FC = () => {
     pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
   });
 
-  /** Items that belong to the store itself — the number its picker option shows. */
-  const storeItemCount = useCallback(
-    (summary: ActionCenterSummaryDto | undefined) =>
-      (summary?.groups ?? []).flatMap((group) => group.items).filter((item) => !item.accountWide).length,
-    [],
-  );
+  const storeItemCount = storeOwnItemCount;
 
   const selectedStore = useMemo(() => {
     if (storeIds.includes(requestedStore)) {
