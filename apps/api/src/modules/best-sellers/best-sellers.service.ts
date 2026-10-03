@@ -190,6 +190,9 @@ export class BestSellersService {
    * miss: proxy capacity was spent.
    */
   async getCategories(userId: string, query: BestSellersCategoriesQueryDto): Promise<BestSellersCategoriesDto> {
+    // The tree-cache hit below returns before `resolveList`, so the feature
+    // switch is checked here too — a disabled feature answers 404 whatever is cached.
+    await this.assertEnabled();
     const target: ListTarget = {
       listType: query.listType ?? BestSellersListType.BEST_SELLERS,
       category: normalizeCategory(query.category ?? BEST_SELLERS_ROOT_CATEGORY),
@@ -221,9 +224,7 @@ export class BestSellersService {
    * allowance; the callers decide what, if anything, the seller sees.
    */
   private async resolveList(userId: string, target: ListTarget): Promise<ResolvedList> {
-    if (!(await this.platformSettings.getBoolean(PlatformSettingKey.BEST_SELLERS_ENABLED))) {
-      throw new NotFoundException(BestSellersErrorKey.DISABLED);
-    }
+    await this.assertEnabled();
 
     const { listType, category, page, marketplace } = target;
     if (!SUPPORTED_AMAZON_MARKETPLACES.includes(marketplace)) {
@@ -398,6 +399,13 @@ export class BestSellersService {
     }
     const rate = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS);
     return this.client.fetchBestSellers({ ...req, perIpRequestsPerSecond: rate });
+  }
+
+  /** The operator's switch (`bestSellers.enabled`): off answers 404 on every seller-facing read. */
+  private async assertEnabled(): Promise<void> {
+    if (!(await this.platformSettings.getBoolean(PlatformSettingKey.BEST_SELLERS_ENABLED))) {
+      throw new NotFoundException(BestSellersErrorKey.DISABLED);
+    }
   }
 
   /** One scraper call per cache key while it is in flight. */

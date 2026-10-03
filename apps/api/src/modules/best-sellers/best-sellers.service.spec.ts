@@ -6,6 +6,7 @@
 // everything, a billing failure serves the whole page, and a suspended seller
 // sees every row locked.
 
+import { NotFoundException } from '@nestjs/common';
 import {
   BestSellersListType,
   PlatformSettingKey,
@@ -160,7 +161,7 @@ function build(options: {
     quota as unknown as QuotaEnforcementService,
     ledger.repository as unknown as BillingRepositoryService,
   );
-  return { service, ledger, redis, client, quota };
+  return { service, ledger, redis, client, quota, platformSettings };
 }
 
 describe('BestSellersService — product allowance', () => {
@@ -399,6 +400,15 @@ describe('BestSellersService — expanding a branch without opening it', () => {
     expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
     expect(page.cachedAt).toBe('2026-10-03T10:00:00.000Z');
     expect(ledger.sum()).toBe(50);
+  });
+
+  it('a disabled feature answers 404 even when the tree is cached', async () => {
+    const { service, platformSettings } = build({ limit: 100, scraper: headphones() });
+    await service.getCategories(USER, { category: 'electronics/172541' });
+
+    platformSettings.getBoolean.mockImplementation(() => Promise.resolve(false));
+
+    await expect(service.getCategories(USER, { category: 'electronics/172541' })).rejects.toThrow(NotFoundException);
   });
 
   it('never stores an empty tree, which would read as a leaf for a week', async () => {
