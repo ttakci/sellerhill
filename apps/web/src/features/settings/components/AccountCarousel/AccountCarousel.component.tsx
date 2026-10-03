@@ -23,6 +23,7 @@ export const AccountCarouselComponent = <T,>({
   onNext,
   onPrev,
   onGoTo,
+  swipeHandlers,
 }: AccountCarouselComponentProps<T>): React.ReactElement | null => {
   const { t } = useTranslation(['translation']);
 
@@ -46,7 +47,7 @@ export const AccountCarouselComponent = <T,>({
       {isCarousel ? (
         <S.CarouselWrapper>
           <S.CarouselCardArea>
-            <S.CarouselViewport>
+            <S.CarouselViewport {...swipeHandlers}>
               {visibleItems.map((item, index) => (
                 <S.CarouselSlide
                   key={keyExtractor(item)}

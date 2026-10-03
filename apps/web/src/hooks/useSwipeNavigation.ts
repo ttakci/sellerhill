@@ -10,7 +10,8 @@ export interface SwipeNavigationHandlers {
 
 /**
  * Touch handlers that turn a horizontal swipe into prev/next (the carousels
- * on the dashboard and the listings overview — the arrows are hover-only and
+ * on the dashboard, the listings overview and the settings drawers'
+ * AccountCarousel — the arrows are hover-only and
  * the dots are tiny, so on a phone the only natural gesture was doing
  * nothing). A mostly-vertical drag is left to the page scroll: the swipe is
  * counted only when the horizontal travel beats both the threshold and the
