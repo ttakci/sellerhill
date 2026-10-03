@@ -1,3 +1,4 @@
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
@@ -106,7 +107,29 @@ export const ChevronSlot = styled.button<{ $isOpen: boolean }>`
   }
 `;
 
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
+/** A branch waiting on Amazon: a small ring in place of the chevron. */
+export const BranchSpinner = styled.span`
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: ${tkn('radius.full')};
+  border: 0.125rem solid ${tkn('colors.border.primary')};
+  border-top-color: ${tkn('colors.brand.primary')};
+  animation: ${spin} 0.8s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 2.4s;
+  }
+`;
+
 export const ChevronPlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;

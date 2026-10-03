@@ -73,6 +73,14 @@ export interface BestSellersCategoryDto {
   link: string | null;
   isSelected: boolean;
   isRoot: boolean;
+  /**
+   * Nesting level in Amazon's sidebar (0 = "Any Department", 1 = a
+   * department, …). On a LEAF category Amazon lists the leaf among its
+   * siblings, so document order alone cannot tell a sibling from an
+   * ancestor; the level can. Absent on answers cached before it existed —
+   * readers fall back to the flat reading.
+   */
+  level?: number | null;
 }
 
 export interface BestSellersRelatedListDto {
@@ -114,6 +122,8 @@ export interface ScraperBestSellersRequest {
   lane: ScraperLane;
   proxies: string[];
   perIpRequestsPerSecond: number;
+  /** Read the page for its category tree only: one request, no ACP hydration, `items` empty. */
+  treeOnly?: boolean;
 }
 
 export interface ScraperBestSellersResponse {
@@ -177,16 +187,19 @@ export interface BestSellersPageDto {
 /** `GET /v1/best-sellers/categories` query. */
 export interface BestSellersCategoriesQueryDto {
   listType?: BestSellersListType;
+  /** The node whose sub-categories are wanted; omitted or `''` = the department list. */
+  category?: string;
   marketplace?: AmazonMarketplace;
 }
 
 /**
- * `GET /v1/best-sellers/categories`: the department list of one list type,
- * with no products. The category tree otherwise gets its departments only
- * from the root list page, so a page opened straight into a department (deep
- * link, reload, back button) had none. It charges nothing against the product
- * allowance, which meters products seen, not the tree beside them.
- * `categories` is empty unless `outcome` is FOUND.
+ * `GET /v1/best-sellers/categories`: the category tree beside one node (the
+ * department list when no category is given), with no products. A chevron
+ * expands a branch with it without opening that branch's list, and a deep
+ * link uses it for the department level. It charges nothing against the
+ * product allowance, which meters products seen, not the tree beside them.
+ * Answered from a long-lived tree cache first (categories change far more
+ * slowly than rankings). `categories` is empty unless `outcome` is FOUND.
  */
 export interface BestSellersCategoriesDto {
   outcome: SourceFetchOutcome;

@@ -339,3 +339,77 @@ describe('BestSellersService — department list without products', () => {
     expect(client.fetchBestSellers).not.toHaveBeenCalled();
   });
 });
+
+describe('BestSellersService — expanding a branch without opening it', () => {
+  const HEADPHONES_TREE = [
+    { name: 'Any Department', path: null, link: null, isSelected: false, isRoot: true, level: 0 },
+    { name: 'Electronics', path: 'electronics', link: null, isSelected: false, isRoot: false, level: 1 },
+    { name: 'Headphones', path: null, link: null, isSelected: true, isRoot: false, level: 2 },
+    { name: 'Earbud Headphones', path: 'electronics/12097478011', link: null, isSelected: false, isRoot: false, level: 3 },
+  ];
+
+  function headphones(): ScraperBestSellersResponse {
+    return {
+      outcome: SourceFetchOutcome.FOUND,
+      fetchedAt: '2026-10-03T10:00:00.000Z',
+      list: { ...listOf(50), categories: HEADPHONES_TREE },
+    };
+  }
+
+  it('returns one node\'s tree and charges nothing against the allowance', async () => {
+    const { service, ledger, client } = build({ limit: 100, scraper: headphones() });
+
+    const result = await service.getCategories(USER, { category: 'Electronics/172541 ' });
+
+    expect(result).toEqual({ outcome: SourceFetchOutcome.FOUND, categories: HEADPHONES_TREE });
+    expect(client.fetchBestSellers).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'electronics/172541', page: 1 }),
+    );
+    expect(ledger.repository.recordBestSellersView).not.toHaveBeenCalled();
+  });
+
+  it('keeps the tree a week, so it outlives the list cache', async () => {
+    const { service, client, redis } = build({ limit: 100, scraper: headphones() });
+
+    await service.getCategories(USER, { category: 'electronics/172541' });
+    // The list cache expired; the tree cache did not.
+    [...redis.store.keys()].filter((k) => k.includes(':list:')).forEach((k) => redis.store.delete(k));
+    const again = await service.getCategories(USER, { category: 'electronics/172541' });
+
+    expect(again.categories).toEqual(HEADPHONES_TREE);
+    expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
+  });
+
+  it('a list opened with getPage fills the tree cache too', async () => {
+    const { service, client } = build({ limit: 100, scraper: headphones() });
+
+    await service.getPage(USER, { category: 'electronics/172541' });
+    const tree = await service.getCategories(USER, { category: 'electronics/172541' });
+
+    expect(tree.categories).toEqual(HEADPHONES_TREE);
+    expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
+  });
+
+  it('expanding first makes opening the same branch a cache hit', async () => {
+    const { service, client, ledger } = build({ limit: 100, scraper: headphones() });
+
+    await service.getCategories(USER, { category: 'electronics/172541' });
+    const page = await service.getPage(USER, { category: 'electronics/172541' });
+
+    expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
+    expect(page.cachedAt).toBe('2026-10-03T10:00:00.000Z');
+    expect(ledger.sum()).toBe(50);
+  });
+
+  it('never stores an empty tree, which would read as a leaf for a week', async () => {
+    const { service, client, redis } = build({
+      limit: 100,
+      scraper: { outcome: SourceFetchOutcome.FOUND, fetchedAt: '2026-10-03T10:00:00.000Z', list: listOf(50) },
+    });
+
+    await service.getCategories(USER, { category: 'electronics/1' });
+
+    expect([...redis.store.keys()].some((k) => k.includes(':tree:'))).toBe(false);
+    expect(client.fetchBestSellers).toHaveBeenCalledTimes(1);
+  });
+});

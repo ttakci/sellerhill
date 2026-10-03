@@ -65,12 +65,12 @@ export class BestSellersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'The department list of an Amazon Best Sellers list, without products',
+    summary: 'The category tree beside one Amazon Best Sellers node, without products',
     description:
-      'Categories of the root (all departments) page of one list type, read from the same shared cache ' +
-      'as `GET /best-sellers`. Shows no product, so it is NOT counted against the Best Sellers product ' +
-      'allowance; a cache miss still counts against the hidden daily fetch cap. `categories` is empty ' +
-      'unless `outcome` is `found`.',
+      'The sidebar of one node (`category`; omitted = all departments): its chain, itself and its children, ' +
+      'each with its nesting `level`. Read from a week-long shared tree cache, else the list cache, else one ' +
+      'live fetch. Shows no product, so it is NOT counted against the Best Sellers product allowance; a cache ' +
+      'miss still counts against the hidden daily fetch cap. `categories` is empty unless `outcome` is `found`.',
   })
   @ApiOkResponse({ description: 'Department list (empty on a non-found outcome)' })
   @ApiBadRequestResponse({ description: 'Invalid query, or a marketplace that is not enabled' })

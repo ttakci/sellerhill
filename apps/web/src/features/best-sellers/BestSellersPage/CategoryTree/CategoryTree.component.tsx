@@ -1,8 +1,9 @@
 /**
  * CategoryTree Component (Presentation)
  *
- * A two-level, cascading category picker: departments at the root, each with
- * a chevron that reveals its own sub-categories underneath it. Rendered both
+ * A cascading category picker of any depth. The label opens a category's
+ * list; the chevron only reveals its sub-categories (no products, so walking
+ * down to a deep branch costs nothing from the allowance). Rendered both
  * as the persistent desktop sidebar and inside the mobile Drawer — every
  * decision (which rows exist, which are open, which is active) is already
  * made by the container, so this file only lays the rows out.
@@ -46,6 +47,7 @@ export const CategoryTree: React.FC<CategoryTreeComponentProps> = ({
             tabIndex={0}
             aria-selected={row.isActive}
             aria-expanded={row.hasChildren ? row.isExpanded : undefined}
+            aria-busy={row.isLoading || undefined}
             $depth={row.depth}
             $active={row.isActive}
             onClick={() => onSelect(row.path)}
@@ -56,7 +58,11 @@ export const CategoryTree: React.FC<CategoryTreeComponentProps> = ({
               }
             }}
           >
-            {row.hasChildren ? (
+            {row.isLoading ? (
+              <S.ChevronPlaceholder aria-hidden="true">
+                <S.BranchSpinner />
+              </S.ChevronPlaceholder>
+            ) : row.hasChildren ? (
               <S.ChevronSlot
                 type="button"
                 $isOpen={row.isExpanded}

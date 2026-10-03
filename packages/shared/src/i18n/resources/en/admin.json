@@ -264,7 +264,12 @@
         "scraper.blockRateWarnPercent": "Block-rate warning (%)",
         "bestSellers.enabled": "Best Sellers browsing",
         "bestSellers.cacheTtlMinutes": "Best Sellers cache (minutes)",
-        "bestSellers.dailyFetchLimit": "Best Sellers anti-abuse fetch cap (per seller, per day)"
+        "bestSellers.dailyFetchLimit": "Best Sellers anti-abuse fetch cap (per seller, per day)",
+        "bestSellers.crawl.enabled": "Best Sellers category tree crawl",
+        "bestSellers.crawl.intervalDays": "Best Sellers tree re-crawl interval (days)",
+        "bestSellers.crawl.pagesPerMinute": "Best Sellers tree crawl speed (pages per minute)",
+        "bestSellers.prewarm.depth": "Best Sellers list pre-warm depth",
+        "bestSellers.prewarm.pagesPerMinute": "Best Sellers list pre-warm speed (pages per minute)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Master switch for the background Keepa refresh scheduler. Turning it off stops all background token spend immediately, with no restart needed.",
@@ -347,7 +352,12 @@
         "scraper.blockRateWarnPercent": "Admin warning when this share of scraper requests was blocked in the last hour.",
         "bestSellers.enabled": "Lets sellers browse Amazon's Best Sellers lists in the app. Off hides the page and refuses the endpoint; the lists are fetched through the scraper proxies, never the server's own IP.",
         "bestSellers.cacheTtlMinutes": "How long a fetched list page is served to every seller before it is fetched again. Longer saves proxy capacity; Amazon updates the lists about hourly.",
-        "bestSellers.dailyFetchLimit": "Platform anti-abuse cap, hidden from sellers: how many LIVE list fetches (cache misses) one seller may trigger per UTC day before the page answers 429. Cache hits are free. This is NOT the seller allowance — that is the plan's Best Sellers products per billing period, which locks rows instead of refusing. Keep it far above real use; 0 stops live fetches for everyone while cached pages keep serving."
+        "bestSellers.dailyFetchLimit": "Platform anti-abuse cap, hidden from sellers: how many LIVE list fetches (cache misses) one seller may trigger per UTC day before the page answers 429. Cache hits are free. This is NOT the seller allowance — that is the plan's Best Sellers products per billing period, which locks rows instead of refusing. Keep it far above real use; 0 stops live fetches for everyone while cached pages keep serving.",
+        "bestSellers.crawl.enabled": "Reads Amazon's whole category tree for all five lists in the background, so any branch a seller expands opens instantly. Runs only on capacity the price/stock refresh leaves idle, and never without a scraper proxy. Off stops the crawl; what is cached keeps serving.",
+        "bestSellers.crawl.intervalDays": "A category is read again once its stored copy is older than this, and a new pass over the tree starts no more often. Categories change over months; keep it below 14 days, the life of a stored copy.",
+        "bestSellers.crawl.pagesPerMinute": "Tree pages read per minute (one request each, no products). About 250,000 pages make up the five lists; 30 a minute finishes a pass in under six days. 0 pauses the crawl.",
+        "bestSellers.prewarm.depth": "Deepest level whose Best Sellers product list is fetched ahead of sellers, every list-cache period: 0 = the main page, 1 = departments, 2 = their sub-categories (about 900 lists).",
+        "bestSellers.prewarm.pagesPerMinute": "Product lists the pre-warm fetches per minute (about four requests each). 3 a minute covers depth 2 within one 6-hour cache period. 0 turns the pre-warm off."
       },
       "newValueLabel": "New value",
       "search": "Search settings (name or environment variable)",

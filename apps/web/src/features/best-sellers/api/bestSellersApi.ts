@@ -26,7 +26,7 @@ export const bestSellersApi = baseApi.injectEndpoints({
       providesTags: ['BestSellers'],
       keepUnusedDataFor: BEST_SELLERS_KEEP_UNUSED_SECONDS,
     }),
-    /** The root department list of one list type, with no products (not counted against the allowance). */
+    /** The tree beside one node (departments when no category), with no products (not counted against the allowance). */
     getBestSellersCategories: builder.query<BestSellersCategoriesDto, BestSellersCategoriesQueryDto>({
       query: (params) => ({ url: '/best-sellers/categories', method: 'GET', params }),
       providesTags: ['BestSellers'],
@@ -35,4 +35,5 @@ export const bestSellersApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBestSellersQuery, useGetBestSellersCategoriesQuery } = bestSellersApi;
+export const { useGetBestSellersQuery, useGetBestSellersCategoriesQuery, useLazyGetBestSellersCategoriesQuery } =
+  bestSellersApi;

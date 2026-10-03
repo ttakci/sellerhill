@@ -57,6 +57,7 @@ export const OBSERVED_QUEUE_NAMES = [
   'ebay-rate-limit-refresh',
   'ebay-returns-sync',
   'listing-cleanup',
+  'best-sellers-crawl',
 ] as const;
 
 /** A BullMQ QueueEvents job event payload (minimal shape we consume). */

@@ -94,6 +94,16 @@ export enum PlatformSettingKey {
   BEST_SELLERS_CACHE_TTL_MINUTES = 'bestSellers.cacheTtlMinutes',
   /** Per-seller ceiling on live (cache-miss) list fetches per UTC day. Cache hits are free. */
   BEST_SELLERS_DAILY_FETCH_LIMIT = 'bestSellers.dailyFetchLimit',
+  /** The platform's own crawl of the whole category tree (all list types) and the list pre-warm. */
+  BEST_SELLERS_CRAWL_ENABLED = 'bestSellers.crawl.enabled',
+  /** A tree node is re-read once it is older than this; a cycle starts no more often. */
+  BEST_SELLERS_CRAWL_INTERVAL_DAYS = 'bestSellers.crawl.intervalDays',
+  /** Tree pages (one request each) the crawl reads per minute, on the lowest scraper lane. 0 pauses it. */
+  BEST_SELLERS_CRAWL_PAGES_PER_MINUTE = 'bestSellers.crawl.pagesPerMinute',
+  /** Deepest tree level whose Best Sellers LIST (products) is pre-fetched every list-cache period (0 = the root only). */
+  BEST_SELLERS_PREWARM_DEPTH = 'bestSellers.prewarm.depth',
+  /** List pages (about four requests each) the pre-warm fetches per minute. 0 turns the pre-warm off. */
+  BEST_SELLERS_PREWARM_PAGES_PER_MINUTE = 'bestSellers.prewarm.pagesPerMinute',
 
   // --- eBay API call budget (quotas are per APPLICATION, shared by all users) ---
   // Per-resource ceilings are no longer typed in here — the governor takes
