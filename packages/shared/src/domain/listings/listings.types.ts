@@ -6,6 +6,7 @@ import type { ProductData, ProductIdentifiers } from '../products/product-data.t
 import type { SourceStockStatus } from '../products/source-product.types';
 
 import type { ListingFailureCode, ListingFailureDetails } from './listing-failure.types';
+import type { ListingSchedule } from './listing-schedule';
 
 /**
  * eBay Business Policy Type
@@ -25,6 +26,17 @@ export enum ListingStatus {
   INACTIVE = 'inactive',
   ERROR = 'error',
   RETRYING = 'retrying',
+}
+
+/**
+ * Why SellerHill ended a listing on its own (the seller's clean-up rules).
+ * Absent on a listing the seller ended, or one eBay reported gone.
+ */
+export enum ListingAutoEndReason {
+  /** Stayed at quantity 0 for the seller's configured number of days. */
+  OUT_OF_STOCK = 'out_of_stock',
+  /** No sale within the seller's configured window. */
+  NOT_SELLING = 'not_selling',
 }
 
 export enum ListingTrackingState {
@@ -167,6 +179,8 @@ export interface ListingJobDto {
    * (status polling, the jobs list) leaves it undefined.
    */
   skippedDuplicateCount?: number;
+  /** When the last group of a scheduled job is due to start (ISO). Absent on a job that runs at once. */
+  scheduledUntil?: string;
 }
 
 /**
@@ -208,6 +222,12 @@ export interface CreateListingsRequest {
    * without publishing to eBay. User can publish later from detail / drafts list.
    */
   asDraft?: boolean;
+  /**
+   * Spread the job over time instead of running it at once: at most `perDay`
+   * products a day, inside a daily window. Absent (or unusable) = run now.
+   * See `listing-schedule.ts`.
+   */
+  schedule?: ListingSchedule;
 }
 
 /**
@@ -280,6 +300,13 @@ export interface ListingsQueryDto {
    * item — not exposed as its own UI control, same as `soldFrom`/`soldTo`.
    */
   sourceUnavailable?: boolean;
+  /**
+   * Listings with no sale inside the seller's own "not selling" window
+   * (`ListingRulesConfig.coldListingDays`). Deep-link-only filter for the
+   * Action Center's `LISTING_NOT_SELLING` item; matches nothing while the
+   * seller is not watching.
+   */
+  notSelling?: boolean;
 }
 
 /**
@@ -528,6 +555,12 @@ export interface ListingBatchQueueJobData {
    * and content rules, with the write stage skipped.
    */
   asDraft: boolean;
+  /**
+   * A group of a SCHEDULED job: its plan slots were not reserved when the job
+   * was created (they would have sat reserved for days), so the worker
+   * reserves them as the group starts.
+   */
+  reserveAtRun?: boolean;
   items: Array<{ asin: string; listingJobItemId: string }>;
 }
 

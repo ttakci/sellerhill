@@ -201,6 +201,11 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 {formatJobDate(job.createdAt)}
               </Text>
             </S.ProgressRow>
+            {job.scheduledUntil && (
+              <Text variant="caption" color="text.secondary">
+                {t('listings.jobs.scheduledUntil', { date: formatJobDate(job.scheduledUntil) })}
+              </Text>
+            )}
 
             <S.StatsGrid>
               <S.StatCell>

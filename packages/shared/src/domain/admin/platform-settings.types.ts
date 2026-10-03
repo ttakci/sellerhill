@@ -153,6 +153,12 @@ export enum PlatformSettingKey {
    * so they are switched on only after the first real return has proven them.
    */
   EBAY_RETURNS_ACTIONS_ENABLED = 'ebay.returns.actionsEnabled',
+  /**
+   * Kill switch for the sellers' clean-up rules (end listings that stayed out
+   * of stock, or did not sell). Read on every tick; off stops every automatic
+   * ending at once and changes no seller's settings.
+   */
+  LISTING_CLEANUP_ENABLED = 'listing.cleanup.enabled',
 
   // --- Amazon order sync / tracking ---
   /**

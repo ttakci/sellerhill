@@ -116,6 +116,65 @@
       "title": "Adresse du vendeur",
       "description": "Publiée comme localisation de l'article sur vos annonces eBay. eBay n'affiche aux acheteurs que la ville, la région et le pays.",
       "city": "Ville"
+    },
+    "blacklistAction_remove": "Supprimé, non bloqué",
+    "listingRules": {
+      "title": "Règles d'annonces",
+      "subtitle": "Décidez ce qui est mis en ligne avant que quoi que ce soit ne soit envoyé à eBay",
+      "off": "Aucun minimum",
+      "brand": {
+        "title": "Protection des marques",
+        "vero": "Protection VeRO",
+        "veroHint": "Ignore les produits de marques connues pour signaler des annonces via le programme VeRO d'eBay. eBay supprime une annonce signalée et la compte à l'encontre de votre compte.",
+        "veroOffWarning": "Lorsque la protection est désactivée, les produits de marques qui signalent des annonces sur eBay sont mis en ligne comme les autres. Un signalement VeRO peut entraîner la restriction de votre compte eBay.",
+        "hideBrand": "Ne pas envoyer la marque à eBay",
+        "hideBrandHint": "L'annonce est publiée comme « Sans marque » : la marque est retirée du titre et des caractéristiques de l'article, et aucun code-barres ni numéro de pièce n'est envoyé, car le catalogue eBay remettrait la marque."
+      },
+      "filters": {
+        "title": "Ce qui peut être mis en ligne",
+        "minPrice": "Prix Amazon min.",
+        "maxPrice": "Prix Amazon max.",
+        "priceHint": "Laissez un champ vide pour ne fixer aucune limite. Un produit dont le prix est hors de la fourchette est ignoré, et la tâche en indique la raison.",
+        "priceError": "Le maximum ne doit pas être inférieur au minimum.",
+        "amazonShippedOnly": "Uniquement les produits expédiés par Amazon lui-même",
+        "amazonShippedOnlyHint": "Ignore une offre qu'un autre vendeur expédie depuis son propre stock. La commande automatique et le suivi fonctionnent mieux avec les produits expédiés par Amazon.",
+        "minRating": "Note minimale",
+        "ratingOption": "{{rating}} étoiles et plus",
+        "minReviewCount": "Nombre minimal d'évaluations",
+        "ratingHint": "Un produit sans aucune note est ignoré lorsqu'un minimum est défini."
+      },
+      "blockedAsins": {
+        "title": "ASIN bloqués",
+        "placeholder": "Un ASIN par ligne, ou séparés par des virgules",
+        "count": "ASIN valides dans cette liste : {{count}}"
+      },
+      "cleanup": {
+        "title": "Nettoyage automatique",
+        "outOfStock": "Terminer une annonce qui reste en rupture de stock",
+        "never": "Jamais",
+        "afterDays_one": "Après {{count}} jour",
+        "afterDays_many": "Après {{count}} jours",
+        "afterDays_other": "Après {{count}} jours",
+        "outOfStockHint": "Le décompte repart de zéro dès que le produit est de nouveau en stock. Une annonce que vous avez vous-même mise en pause n'est jamais terminée. Une annonce terminée libère sa place dans votre forfait et n'est pas remise en ligne automatiquement.",
+        "cold": "Surveiller les annonces qui ne se vendent pas",
+        "coldHint": "Une annonce est considérée comme ne se vendant pas lorsqu'elle n'a eu aucune vente pendant le nombre de jours indiqué ci-dessous. Si elle ne s'est jamais vendue, les jours sont comptés à partir de sa date de création.",
+        "coldDays": "Jours sans vente",
+        "coldDaysError": "Saisissez un nombre entier entre {{min}} et {{max}}.",
+        "coldMode": "Que faire de ces annonces",
+        "coldMode_flag": "Me les montrer",
+        "coldMode_end": "Les terminer sur eBay",
+        "coldEndWarning": "Les annonces sont terminées sur eBay sans vous demander d'abord, et elles ne reviennent pas d'elles-mêmes. Pour les examiner vous-même au préalable, choisissez « Me les montrer »."
+      },
+      "promoted": {
+        "title": "Promoted Listings (annonces sponsorisées)",
+        "enable": "Promouvoir les nouvelles annonces",
+        "enableHint": "Chaque annonce publiée à partir d'ici est ajoutée à une campagne sur eBay au taux publicitaire indiqué ci-dessous. eBay ne prélève ce taux que lorsqu'un article est vendu via la publicité. Les annonces déjà en ligne ne changent pas.",
+        "rate": "Taux publicitaire (%)",
+        "rateHint": "Le prix calculé par SellerHill n'inclut pas ce taux. Ajoutez-le aux frais eBay de votre groupe de paramètres d'annonces afin que votre bénéfice reste conforme à vos prévisions.",
+        "rateError": "Saisissez un taux compris entre {{min}} et {{max}}.",
+        "ineligible": "eBay n'autorise pas encore cette boutique à utiliser Promoted Listings : aucune publicité ne sera diffusée tant que cela ne change pas. Les nouvelles annonces sont toujours publiées comme d'habitude.",
+        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay n'autorise pas encore cette boutique à utiliser Promoted Listings : il signale une activité de vente récente insuffisante. Aucune publicité ne sera diffusée tant que cela ne change pas. Les nouvelles annonces sont toujours publiées comme d'habitude."
+      }
     }
   }
 }

@@ -137,6 +137,12 @@ export enum ActionCenterItemKey {
    */
   ORDER_CANCELLED_AMAZON_OPEN = 'order_cancelled_amazon_open',
   /**
+   * eBay's ship-by date has passed and eBay still has no shipment for the
+   * order. A flag beside the stage (`OrderShipByState.LATE`), not a stage: the
+   * late order may be blocked, bought or waiting for the seller to buy it.
+   */
+  ORDER_LATE_TO_SHIP = 'order_late_to_ship',
+  /**
    * eBay reports a next action the seller is responsible for on a return
    * (`sellerResponseDue`), with the deadline in the breakdown.
    */
@@ -166,6 +172,12 @@ export enum ActionCenterItemKey {
   LISTING_SOURCE_UNAVAILABLE = 'listing_source_unavailable',
   /** Active listings pushed to quantity 0 — live, visible, and unbuyable. */
   LISTING_OUT_OF_STOCK = 'listing_out_of_stock',
+  /**
+   * Active listings with no sale inside the seller's own "not selling" window.
+   * Raised only while the seller watches for them WITHOUT automatic ending —
+   * with auto-end on the platform handles it and there is nothing to act on.
+   */
+  LISTING_NOT_SELLING = 'listing_not_selling',
 
   /** Active-listing slots at or near the plan limit. */
   PLAN_LISTING_QUOTA = 'plan_listing_quota',

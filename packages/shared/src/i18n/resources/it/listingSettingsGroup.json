@@ -140,6 +140,7 @@
       "maxFeePercent": "La percentuale della commissione non può superare il 100%",
       "minFeePercent": "La percentuale della commissione deve essere 0 o maggiore",
       "minFixedFee": "La commissione fissa deve essere 0 o maggiore",
+      "priceEndingRange": "Inserisci un numero intero da 0 a 99",
       "invalidNumber": "Inserisci un numero valido senza zero iniziale (ad esempio 0.4, non 04)",
       "templateRequired": "Il contenuto del modello è obbligatorio",
       "templateMinLength": "Il modello deve contenere almeno 10 caratteri",
@@ -209,10 +210,18 @@
         "netTarget": "Obiettivo prima delle commissioni eBay",
         "ebayFee": "Commissione eBay ({{pct}})",
         "fixedFee": "Commissione fissa",
-        "floorApplied": "Sotto il minimo eBay di $0.99, portato a"
+        "floorApplied": "Sotto il minimo eBay di $0.99, portato a",
+        "rounding": "Arrotondato per eccesso a {{ending}}"
       }
     },
     "feesAndTaxes": "Commissioni e imposte",
+    "priceRounding": {
+      "title": "Arrotonda la parte finale del prezzo",
+      "info": "Ogni prezzo calcolato viene arrotondato per eccesso all’importo successivo con questa terminazione, quindi il profitto obiettivo non diminuisce mai. Un prezzo fissato manualmente su un’inserzione non cambia.",
+      "endingLabel": "Terminazione del prezzo (centesimi, 0–99)",
+      "example": "Esempio: {{from}} diventa {{to}}.",
+      "hint": "Inserisci un numero intero da 0 a 99 — con 99 i prezzi sono del tipo $24.99."
+    },
     "amazonTaxRateNote": "Il calcolo del prezzo tiene conto automaticamente delle imposte stimate che paghi acquistando da Amazon. Imposta questa aliquota in Impostazioni del negozio → Aliquota dell'imposta sulle vendite Amazon.",
     "stockControl": "Controllo dello stock",
     "ebayStockQuantity": "Stock eBay",

@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   OrderFulfillmentState,
+  OrderShipByState,
   OrderStage,
   type OrderDto,
   type OrderFiltersDto,
@@ -38,6 +39,9 @@ export class OrdersController {
     @Query('fulfillmentState') fulfillmentState?: string,
     @Query('stage') stage?: string,
     @Query('tracked') tracked?: string,
+    @Query('shipBy') shipBy?: string,
+    @Query('refunded') refunded?: string,
+    @Query('needsAction') needsAction?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
   ): Promise<{ orders: OrderDto[]; total: number }> {
@@ -54,6 +58,9 @@ export class OrdersController {
       .split(',')
       .map((s) => s.trim())
       .filter((s): s is OrderStage => (Object.values(OrderStage) as string[]).includes(s));
+    // Enum-checked for the same reason as the stage: the value selects a fixed
+    // SQL fragment and must never be forwarded raw.
+    const isKnownShipBy = (Object.values(OrderShipByState) as string[]).includes(shipBy ?? '');
     const filters: OrderFiltersDto = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -66,6 +73,9 @@ export class OrdersController {
       fulfillmentState: isKnownState ? (fulfillmentState as OrderFulfillmentState) : undefined,
       isTracked,
       stages: stages.length > 0 ? stages : undefined,
+      shipBy: isKnownShipBy ? (shipBy as OrderShipByState) : undefined,
+      hasRefund: refunded === 'true' ? true : undefined,
+      needsAction: needsAction === 'true' ? true : undefined,
       sortBy,
       sortOrder,
     };
@@ -103,6 +113,17 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Return order details.' })
   findOne(@Request() req: { user: { sub: string } }, @Param('id') id: string): Promise<OrderDto> {
     return this.ordersService.findOne(req.user.sub, id);
+  }
+
+  @Put(':id/note')
+  @ApiOperation({ summary: "Save the seller's own note on an order (blank clears it)" })
+  @ApiResponse({ status: 200, description: 'Note saved.' })
+  updateNote(
+    @Request() req: { user: { sub: string } },
+    @Param('id') id: string,
+    @Body() body: { note?: unknown }
+  ): Promise<{ sellerNote: string | null }> {
+    return this.ordersService.updateNote(req.user.sub, id, body?.note ?? null);
   }
 
   @Post(':id/amazon-details')

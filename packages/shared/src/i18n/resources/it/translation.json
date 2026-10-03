@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Visualizza, modifica e crea i modelli dei messaggi automatici per gli acquirenti",
         "manageBlacklist": "Gestisci la lista nera",
         "manageBlacklistSubtitle": "Parole chiave da bloccare nei titoli, nelle descrizioni e nelle caratteristiche delle inserzioni",
-        "infoMessage": "I modelli di messaggio e le regole della lista nera vengono applicati in base all'ambito (globale o per singolo negozio) scelto in Impostazioni del negozio."
+        "infoMessage": "I modelli di messaggio e le regole della lista nera vengono applicati in base all'ambito (globale o per singolo negozio) scelto in Impostazioni del negozio.",
+        "listingRules": "Regole delle inserzioni",
+        "listingRulesSubtitle": "Tutela del marchio, cosa può essere inserito e pulizia automatica"
       },
       "listingGroups": {
         "title": "Gruppi di impostazioni delle inserzioni",
@@ -422,7 +424,16 @@
           "add": "Aggiungi parole chiave",
           "duplicate": "Tutte le parole chiave includono già i campi selezionati",
           "empty": "Inserisci almeno una parola chiave",
-          "typeRequired": "Seleziona almeno un campo"
+          "typeRequired": "Seleziona almeno un campo",
+          "actionLabel": "Quando viene trovata una parola chiave",
+          "action": {
+            "block": "Non inserire il prodotto",
+            "remove": "Rimuovi la parola e inserisci"
+          },
+          "actionHint": {
+            "block": "Un prodotto il cui testo contiene la parola non viene inserito.",
+            "remove": "La parola viene tolta da titolo, descrizione o caratteristiche e il prodotto viene inserito senza di essa."
+          }
         },
         "list": {
           "empty": "Nessuna parola chiave nella lista nera per l'ambito selezionato",
@@ -827,10 +838,10 @@
       "showAllPlans": "Vedi tutti i {{count}} piani",
       "showFewerPlans": "Mostra meno piani",
       "notIncluded": "Non incluso",
-      "upToListings": "Fino a {{limit}} inserzioni attive",
+      "upToListings": "{{limit}} inserzioni attive · aggiunte e rimozioni illimitate",
       "unlimitedListings": "Inserzioni attive illimitate",
       "upToOrders": "Fino a {{limit}} ordini automatici / mese",
-      "unlimitedOrders": "Ordini automatici illimitati",
+      "unlimitedOrders": "Ordini automatici e tracciamento delle spedizioni illimitati",
       "upToConversions": "{{limit}} conversioni di tracciamento / mese",
       "unlimitedConversions": "Conversioni di tracciamento illimitate",
       "upToBestSellers": "{{limit}} prodotti Più venduti / mese",
@@ -840,7 +851,6 @@
         "groups": "Gruppi di impostazioni e 12 modelli di inserzione",
         "sync": "Controlli di prezzo e stock 4 volte al giorno",
         "specifics": "Caratteristiche dell'articolo eBay complete",
-        "autoOrder": "Ordini e tracciamento automatici",
         "actions": "Schermata Azioni in sospeso",
         "profit": "Report sul profitto reale",
         "multiStore": "Più negozi eBay",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Fino a 500 inserzioni attive",
-          "orders": "Ordini automatici illimitati",
+          "listings": "500 inserzioni attive · aggiunte e rimozioni illimitate",
+          "orders": "Ordini automatici e tracciamento delle spedizioni illimitati",
           "conversions": "50 conversioni di tracciamento / mese",
           "bestSellers": "2,500 prodotti Più venduti / mese"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Fino a 2,000 inserzioni attive",
-          "orders": "Ordini automatici illimitati",
+          "listings": "2,000 inserzioni attive · aggiunte e rimozioni illimitate",
+          "orders": "Ordini automatici e tracciamento delle spedizioni illimitati",
           "conversions": "150 conversioni di tracciamento / mese",
           "bestSellers": "7,500 prodotti Più venduti / mese"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Fino a 5,000 inserzioni attive",
-          "orders": "Ordini automatici illimitati",
+          "listings": "5,000 inserzioni attive · aggiunte e rimozioni illimitate",
+          "orders": "Ordini automatici e tracciamento delle spedizioni illimitati",
           "conversions": "300 conversioni di tracciamento / mese",
           "bestSellers": "15,000 prodotti Più venduti / mese"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Fino a 10,000 inserzioni attive",
-          "orders": "Ordini automatici illimitati",
+          "listings": "10,000 inserzioni attive · aggiunte e rimozioni illimitate",
+          "orders": "Ordini automatici e tracciamento delle spedizioni illimitati",
           "conversions": "500 conversioni di tracciamento / mese",
           "bestSellers": "25,000 prodotti Più venduti / mese"
         }

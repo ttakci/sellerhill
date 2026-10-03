@@ -30,7 +30,8 @@
       "allTrackingStates": "Asociate și neasociate",
       "clearAll": "Șterge tot",
       "resultCount": "Rezultate: {{count}}",
-      "allStages": "Toate stările"
+      "allStages": "Toate stările",
+      "allFlags": "Termen și rambursare"
     },
     "stats": {
       "totalSales": "Vânzări totale",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Limita de comenzi automate a planului tău pentru această perioadă s-a epuizat.",
       "purchaseNotYetChecked": "SellerHill nu a verificat încă comenzile acestui cont Amazon de la încercarea de cumpărare. Verificarea a fost pornită acum — încearcă din nou peste câteva minute.",
       "purchaseNotUnknown": "Această comandă nu așteaptă o confirmare de achiziție. Poate fi deja asociată sau în curs. Reîncarcă pagina.",
-      "purchaseFoundOnAmazon": "SellerHill a găsit o comandă Amazon pentru acest produs, plasată în jurul momentului încercării de cumpărare, dar nu a putut-o asocia cu certitudine acestei vânzări. Deschide comenzile tale Amazon și asociaz-o manual. Dacă acea comandă aparține altei vânzări, asociaz-o mai întâi acelei vânzări."
+      "purchaseFoundOnAmazon": "SellerHill a găsit o comandă Amazon pentru acest produs, plasată în jurul momentului încercării de cumpărare, dar nu a putut-o asocia cu certitudine acestei vânzări. Deschide comenzile tale Amazon și asociaz-o manual. Dacă acea comandă aparține altei vânzări, asociaz-o mai întâi acelei vânzări.",
+      "noteTooLong": "Nota poate avea cel mult 1.000 de caractere.",
+      "noteInvalid": "Nota nu a putut fi salvată."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Trimis cumpărătorului.",
         "message_failed": "Nu a putut fi trimis."
       }
+    },
+    "flags": {
+      "late": "Expediere întârziată",
+      "dueSoon": "Termen de expediere apropiat",
+      "dueSoonBy": "De expediat până la {{date}}",
+      "refunded": "Rambursat",
+      "refundedAmount": "Rambursat: {{amount}}"
+    },
+    "note": {
+      "title": "Nota dvs.",
+      "label": "Notă",
+      "placeholder": "Scrieți o notă pentru dvs. despre această comandă",
+      "hint": "Doar dvs. vedeți această notă. Nu este trimisă niciodată către eBay, Amazon sau cumpărător.",
+      "save": "Salvează nota"
     }
   }
 }

@@ -32,12 +32,13 @@ export interface BillingPlanCard {
   planId: string;
   slug: string;
   priceDisplay: string;
-  listingsLimitDisplay: string;
+  /** The card's lead line: "Unlimited automatic orders and shipment tracking" (a finite limit falls back to "label: N"). */
+  amazonOrdersLine: string;
+  /** "N active listings · add and remove without limit" — the limit is a level, so ending a listing frees its slot. */
+  listingsLine: string;
   trackingConversionsLimitDisplay: string;
   /** Best Sellers products the plan lets the seller view per billing period. */
   bestSellersLimitDisplay: string;
-  /** "Unlimited" on every plan since 2026-09-29 — still rendered so the card says so. */
-  amazonOrdersLimitDisplay: string;
   isCurrent: boolean;
 }
 

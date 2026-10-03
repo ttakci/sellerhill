@@ -35,7 +35,7 @@ export interface LandingPricingPlan {
   isHighlighted: boolean;
   /**
    * True for the handful of plans shown before the visitor expands the grid.
-   * The catalog has twelve tiers; showing all of them up front turns a
+   * The catalog has thirteen tiers; showing all of them up front turns a
    * comparison into a price list, so the page leads with one plan per band and
    * keeps the rest behind a "show all plans" control on the same page — /billing
    * sits behind auth, so it cannot serve as the "see everything" destination.
@@ -51,7 +51,7 @@ export interface LandingPageProps {
   pricingPlans: LandingPricingPlan[];
   /**
    * Pre-formatted "plans from $X" amount for the hero price badge — the catalog's
-   * cheapest paid monthly tier, or the literal `$24.99` fallback when the catalog
+   * cheapest paid monthly tier, or the literal `$19.99` fallback when the catalog
    * call failed.
    */
   startingPriceDisplay: string;

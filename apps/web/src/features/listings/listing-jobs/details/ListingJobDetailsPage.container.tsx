@@ -1,6 +1,7 @@
 import {
   ListingFailureCode,
   ListingJobStatus,
+  ListingRuleKind,
   ListingStatus,
   type ListingJobDto,
   type ListingJobItemDto,
@@ -9,6 +10,7 @@ import {
   IdBadge,
   StatusBadge,
   Text,
+  formatCurrency,
   formatDate,
   getLocaleConfig,
   type TableColumn,
@@ -34,7 +36,11 @@ const isFailedItem = (item: ListingJobItemDto): boolean => item.status === Listi
 
 /** The seller's own blacklist caused this failure — the one cause they can fix in Store Settings. */
 const isBlacklistedItem = (item: ListingJobItemDto): boolean =>
-  isFailedItem(item) && item.failureCode === ListingFailureCode.BLACKLISTED_KEYWORD;
+  isFailedItem(item) &&
+  (item.failureCode === ListingFailureCode.BLACKLISTED_KEYWORD ||
+    // A listing rule (blocked ASIN, VeRO protection, price range, rating…) is
+    // the same kind of refusal: the seller's own setting, not a failure.
+    item.failureCode === ListingFailureCode.BLOCKED_BY_RULE);
 
 const jobPercent = (job: ListingJobDto): number =>
   job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
@@ -127,6 +133,27 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       // written before this detail existed, and the true "Amazon has zero"
       // case, both fall back to the plain zero_stock key.
       const d = item.failureDetails;
+      // One of the seller's own listing rules: the message names the rule and,
+      // where there is one, the product's figure beside the seller's limit.
+      if (item.failureCode === ListingFailureCode.BLOCKED_BY_RULE) {
+        const rule = d?.listingRule;
+        const isPrice = rule === ListingRuleKind.PRICE_BELOW_MIN || rule === ListingRuleKind.PRICE_ABOVE_MAX;
+        const figure = (value: number | null | undefined): string => {
+          if (value === null || value === undefined) {
+            return '';
+          }
+          // Amazon-sourced money is USD (only Amazon US exists).
+          return isPrice ? formatCurrency(value, locale, 'USD', 2) : String(value);
+        };
+        const noRating = rule === ListingRuleKind.LOW_RATING && (d?.ruleActual === null || d?.ruleActual === undefined);
+        const rulePath = `listings.jobs.failure.blocked_by_rule_${rule ?? ''}${noRating ? '_none' : ''}`;
+        const ruleText = t(rulePath, {
+          keyword: d?.blacklistedKeyword ?? '',
+          actual: figure(d?.ruleActual),
+          limit: figure(d?.ruleLimit),
+        });
+        return ruleText === rulePath ? t('listings.jobs.failure.blocked_by_rule') : ruleText;
+      }
       const code =
         item.failureCode === ListingFailureCode.ZERO_STOCK && d?.amazonStock !== undefined && d.amazonStock > 0
           ? d.amazonStockAtLeast
@@ -142,7 +169,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       });
       return translated === path ? null : translated;
     },
-    [t]
+    [t, locale]
   );
 
   /**

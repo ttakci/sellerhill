@@ -118,6 +118,13 @@
         "description_other": "{{count}} de comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse — anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
         "action": "Verifică comenzile"
       },
+      "order_late_to_ship": {
+        "title": "Comenzi care au depășit termenul de expediere eBay",
+        "description_one": "{{count}} comandă a depășit termenul de expediere eBay, iar eBay încă nu are nicio expediere pentru ea. O expediere întârziată contează împotriva contului dvs. de vânzător.",
+        "description_few": "{{count}} comenzi au depășit termenul de expediere eBay, iar eBay încă nu are nicio expediere pentru ele. Expedierile întârziate contează împotriva contului dvs. de vânzător.",
+        "description_other": "{{count}} de comenzi au depășit termenul de expediere eBay, iar eBay încă nu are nicio expediere pentru ele. Expedierile întârziate contează împotriva contului dvs. de vânzător.",
+        "action": "Verifică comenzile"
+      },
       "return_seller_action_due": {
         "title": "Retururi care așteaptă răspunsul dvs.",
         "description_one": "{{count}} retur are un pas pe care eBay îl așteaptă de la dvs. Răspundeți pe eBay înainte de termenul afișat pe pagina Retururi.",
@@ -230,6 +237,13 @@
         "title": "Automatizarea este suspendată",
         "description": "Abonamentul dvs. nu mai este activ, deci anunțurile noi, actualizările de preț și stoc, achiziția automată și conversia numerelor de urmărire s-au oprit. Alegeți un plan pentru a relua — totul repornește de la sine.",
         "action": "Alege un plan"
+      },
+      "listing_not_selling": {
+        "title": "Anunțuri care nu se vând",
+        "description_one": "{{count}} anunț activ nu a avut nicio vânzare în intervalul setat de dvs. Verificați-l și încheiați-l dacă nu merită locul din plan.",
+        "description_few": "{{count}} anunțuri active nu au avut nicio vânzare în intervalul setat de dvs. Verificați-le și încheiați-le pe cele care nu merită locul din plan.",
+        "description_other": "{{count}} de anunțuri active nu au avut nicio vânzare în intervalul setat de dvs. Verificați-le și încheiați-le pe cele care nu merită locul din plan.",
+        "action": "Verifică anunțurile"
       }
     },
     "reasons": {

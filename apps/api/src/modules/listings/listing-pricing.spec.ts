@@ -1,4 +1,11 @@
-import { type FeeConfig, type PriceRange, applyEbayFees, calculateListingPrice } from '@repo/shared';
+import {
+  type FeeConfig,
+  type PriceRange,
+  applyEbayFees,
+  applyPriceEnding,
+  calculateListingPrice,
+  resolvePriceEndingCents,
+} from '@repo/shared';
 
 /**
  * The shared formula behind `ListingStrategyService.calculatePrice` (API) and
@@ -70,6 +77,71 @@ describe('calculateListingPrice', () => {
     const result = calculateListingPrice(20000, ranges, fees, 0);
     expect(result.breakdown.usedFallbackMargin).toBe(true);
     expect(result.breakdown.profitMarginPercent).toBe(20);
+  });
+});
+
+describe('price ending', () => {
+  const baseFees: FeeConfig = { ebayFeePercent: 13, fixedFeeAmount: 0.3 };
+  const ranges: PriceRange[] = [{ id: 'r1', minPrice: 0, maxPrice: 9999, profitMarginPercent: 20 }];
+
+  it('rounds up to the next amount with the ending, in either direction of the cents', () => {
+    expect(applyPriceEnding(27.93, 99)).toBe(27.99);
+    expect(applyPriceEnding(27.93, 49)).toBe(28.49); // .49 is below .93 → next dollar
+    expect(applyPriceEnding(27.31, 35)).toBe(27.35);
+    expect(applyPriceEnding(27.31, 0)).toBe(28);
+  });
+
+  it('leaves a price that already has the ending untouched', () => {
+    expect(applyPriceEnding(19.99, 99)).toBe(19.99);
+    expect(applyPriceEnding(1.1, 10)).toBe(1.1); // 1.1 * 100 is 110.00000000000001
+    expect(applyPriceEnding(20, 0)).toBe(20);
+  });
+
+  it('never lowers the price and adds less than a dollar, for every ending', () => {
+    for (let cents = 0; cents <= 99; cents++) {
+      for (const price of [0.99, 5.01, 12.5, 27.93, 99.99, 1234.56]) {
+        const rounded = applyPriceEnding(price, cents);
+        expect(rounded).toBeGreaterThanOrEqual(price);
+        expect(rounded - price).toBeLessThan(1);
+        expect(Math.round(rounded * 100) % 100).toBe(cents);
+      }
+    }
+  });
+
+  it('is off unless enabled with a usable ending', () => {
+    expect(resolvePriceEndingCents(baseFees)).toBeNull();
+    expect(resolvePriceEndingCents({ ...baseFees, priceEndingCents: 99 })).toBeNull();
+    expect(resolvePriceEndingCents({ ...baseFees, priceRoundingEnabled: true })).toBeNull();
+    expect(resolvePriceEndingCents({ ...baseFees, priceRoundingEnabled: true, priceEndingCents: 120 })).toBeNull();
+    expect(resolvePriceEndingCents({ ...baseFees, priceRoundingEnabled: true, priceEndingCents: 9.5 })).toBeNull();
+    expect(resolvePriceEndingCents({ ...baseFees, priceRoundingEnabled: true, priceEndingCents: 0 })).toBe(0);
+  });
+
+  it('changes nothing in the formula while off', () => {
+    const off = calculateListingPrice(20, ranges, baseFees, 0);
+    expect(off.finalPrice).toBeCloseTo(27.93, 2);
+    expect(off.breakdown.priceRoundingApplied).toBe(false);
+    expect(off.breakdown.roundingAmount).toBe(0);
+  });
+
+  it('applies the ending to the final price and counts the added cents as profit net of the eBay fee', () => {
+    const fees: FeeConfig = { ...baseFees, priceRoundingEnabled: true, priceEndingCents: 99 };
+    const off = calculateListingPrice(20, ranges, baseFees, 0);
+    const on = calculateListingPrice(20, ranges, fees, 0);
+    expect(on.finalPrice).toBe(27.99);
+    expect(on.breakdown.priceBeforeRounding).toBeCloseTo(27.93, 2);
+    expect(on.breakdown.roundingAmount).toBeCloseTo(0.06, 2);
+    expect(on.breakdown.priceRoundingApplied).toBe(true);
+    // 6 cents more revenue, 13% of it to eBay.
+    expect(on.estimatedProfit).toBeCloseTo(off.estimatedProfit + 0.06 * 0.87, 2);
+    expect(on.estimatedProfit).toBeGreaterThanOrEqual(off.estimatedProfit);
+  });
+
+  it('runs after the minimum-price floor and never undoes it', () => {
+    const cheap: PriceRange[] = [{ id: 'r1', minPrice: 0, maxPrice: 9999, fixedProfitAmount: 0 }];
+    const fees: FeeConfig = { ebayFeePercent: 0, fixedFeeAmount: 0, priceRoundingEnabled: true, priceEndingCents: 49 };
+    const result = calculateListingPrice(0.1, cheap, fees, 0);
+    expect(result.finalPrice).toBe(1.49);
   });
 });
 

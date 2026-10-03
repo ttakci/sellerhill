@@ -17,6 +17,7 @@ import { EbayFeedService } from './ebay-feed.service';
 import { EbayImageResolver } from './ebay-image-resolver.service';
 import { EbayMediaService } from './ebay-media.service';
 import { EbayOAuthService } from './ebay-oauth.service';
+import { EbayPromotedListingsService } from './ebay-promoted-listings.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
 import { EbayService } from './ebay.service';
@@ -48,6 +49,7 @@ import { EbayNotificationService } from './notifications/ebay-notification.servi
     EbayAccountDeletionService,
     EbayNotificationClient,
     EbayNotificationService,
+    EbayPromotedListingsService,
   ],
   exports: [
     EbayService,
@@ -60,6 +62,7 @@ import { EbayNotificationService } from './notifications/ebay-notification.servi
     AspectResolverService,
     EbayNotificationClient,
     EbayNotificationService,
+    EbayPromotedListingsService,
   ],
 })
 export class EbayModule {}

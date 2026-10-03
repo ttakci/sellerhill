@@ -48,6 +48,9 @@ export const OrdersAllPageContainer: React.FC = () => {
     trackingState,
     trackingOptions,
     handleTrackingStateChange,
+    flag,
+    flagOptions,
+    handleFlagChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,
@@ -85,8 +88,15 @@ export const OrdersAllPageContainer: React.FC = () => {
   );
 
   const countFor = useCallback(
-    (tabId: OrderStageTab): number =>
-      stageCounts ? ORDER_STAGE_TABS[tabId].reduce((sum, s) => sum + (stageCounts[s] ?? 0), 0) : 0,
+    (tabId: OrderStageTab): number => {
+      if (!stageCounts) {
+        return 0;
+      }
+      const stageSum = ORDER_STAGE_TABS[tabId].reduce((sum, s) => sum + (stageCounts[s] ?? 0), 0);
+      // "Needs action" also holds late orders of any open stage, so the API
+      // counts it with the predicate the tab filters on.
+      return tabId === OrderStageTab.ACTION ? (stageCounts.needsAction ?? stageSum) : stageSum;
+    },
     [stageCounts]
   );
 
@@ -150,7 +160,13 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin);
+  /* eBay's ship-by date is a day, not a moment — the list shows it short. */
+  const fmtDay = useCallback(
+    (value: string) => formatDate(value, localeCfg.locale, { month: 'short', day: 'numeric' }),
+    [localeCfg]
+  );
+
+  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
 
   const handleDownload = useCallback(() => {
     const headers = [
@@ -219,12 +235,16 @@ export const OrdersAllPageContainer: React.FC = () => {
         trackingState={trackingState}
         onTrackingStateChange={handleTrackingStateChange}
         trackingStateOptions={trackingOptions}
+        flag={flag}
+        onFlagChange={handleFlagChange}
+        flagOptions={flagOptions}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={totalCount}
         isInitialLoading={isLoading || isFetching}
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
+        formatDay={fmtDay}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}
         onBack={fromDashboard ? () => localeNavigate('/dashboard') : undefined}
         onDownload={handleDownload}

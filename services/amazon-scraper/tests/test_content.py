@@ -83,8 +83,13 @@ def test_build_content_carries_variation_attributes(monkeypatch):
     monkeypatch.setattr(content.P, "product_page", lambda html, site: {
         "title": "T",
         "variations": {"products": [{"asin": "A", "attributes": {"Color": "Black"}, "is_current": True}]},
+        "rating": {"average": 4.4, "count": 18632}, "is_prime": True,
     })
     monkeypatch.setattr(content, "extract_gallery", lambda html: [])
     out = content.build_content("<html/>", "US")
     assert out["variationAttributes"] == {"Color": "Black"}
+    # Reputation + Prime badge feed the seller's listing rules.
+    assert out["rating"] == 4.4
+    assert out["ratingCount"] == 18632
+    assert out["isPrime"] is True
     assert out["specs"] == {} and out["identifiers"] == {}

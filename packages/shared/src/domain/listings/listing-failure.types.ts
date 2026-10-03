@@ -1,3 +1,5 @@
+import type { ListingRuleKind } from '../store-settings/listing-rules';
+
 /**
  * Why a listing could not be created.
  *
@@ -81,6 +83,12 @@ export enum ListingFailureCode {
    */
   BLACKLISTED_KEYWORD = 'blacklisted_keyword',
   /**
+   * One of the seller's own listing rules refused the product: a blocked
+   * ASIN, VeRO protection, the price range, "shipped by Amazon only" or a
+   * rating / review minimum. Which one travels in `listingRule`.
+   */
+  BLOCKED_BY_RULE = 'blocked_by_rule',
+  /**
    * The seller stopped the job before this ASIN was reached.
    *
    * Not a defect in the product or in our pipeline — it never ran.
@@ -98,6 +106,12 @@ export interface ListingFailureDetails {
   ebayErrorIds?: number[];
   /** The Store Settings keyword that rejected the listing. */
   blacklistedKeyword?: string;
+  /** Which listing rule refused the product (`BLOCKED_BY_RULE`). */
+  listingRule?: ListingRuleKind;
+  /** The product's own figure for that rule (price, rating, rating count). */
+  ruleActual?: number | null;
+  /** The seller's limit it was compared with. */
+  ruleLimit?: number;
   /**
    * Trace id for this attempt, shown to the seller as a reference.
    *
@@ -152,6 +166,7 @@ export const RETRYABLE_LISTING_FAILURE_CODES: ReadonlyArray<ListingFailureCode> 
  */
 export const SELLER_CAUSED_LISTING_FAILURE_CODES: ReadonlyArray<ListingFailureCode> = [
   ListingFailureCode.BLACKLISTED_KEYWORD,
+  ListingFailureCode.BLOCKED_BY_RULE,
   ListingFailureCode.DUPLICATE_LISTING,
   ListingFailureCode.ZERO_STOCK,
   ListingFailureCode.QUOTA_EXHAUSTED,

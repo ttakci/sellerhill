@@ -30,7 +30,8 @@
       "allTrackingStates": "Bağlı və bağlı olmayan",
       "clearAll": "Hamısını təmizlə",
       "resultCount": "{{count}} nəticə",
-      "allStages": "Bütün statuslar"
+      "allStages": "Bütün statuslar",
+      "allFlags": "Müddət və geri ödəmə"
     },
     "stats": {
       "totalSales": "Ümumi satışlar",
@@ -281,7 +282,9 @@
       "autoFulfillQuotaExhausted": "Planınızın bu dövr üçün avtomatik sifariş limiti bitib.",
       "purchaseNotYetChecked": "SellerHill alış cəhdindən sonra bu Amazon hesabının sifarişlərini hələ yoxlamayıb. Yoxlama indi başladıldı — bir neçə dəqiqədən sonra yenidən cəhd edin.",
       "purchaseNotUnknown": "Bu sifariş alış təsdiqi gözləmir. Artıq bağlanmış və ya icrada ola bilər. Səhifəni yeniləyin.",
-      "purchaseFoundOnAmazon": "SellerHill bu məhsul üçün alış cəhdi ilə təxminən eyni vaxtda verilmiş bir Amazon sifarişi tapdı, lakin onu bu satışla dəqiq uyğunlaşdıra bilmədi. Amazon sifarişlərinizi açıb onu əl ilə bağlayın. Həmin sifariş başqa satışa aiddirsə, əvvəlcə onu o satışa bağlayın."
+      "purchaseFoundOnAmazon": "SellerHill bu məhsul üçün alış cəhdi ilə təxminən eyni vaxtda verilmiş bir Amazon sifarişi tapdı, lakin onu bu satışla dəqiq uyğunlaşdıra bilmədi. Amazon sifarişlərinizi açıb onu əl ilə bağlayın. Həmin sifariş başqa satışa aiddirsə, əvvəlcə onu o satışa bağlayın.",
+      "noteTooLong": "Qeyd ən çox 1000 simvol ola bilər.",
+      "noteInvalid": "Qeydi yadda saxlamaq mümkün olmadı."
     },
     "stage": {
       "amazon_cancelled": {
@@ -386,6 +389,20 @@
         "message_sent": "Alıcıya göndərildi.",
         "message_failed": "Göndərilə bilmədi."
       }
+    },
+    "flags": {
+      "late": "Göndərmə gecikib",
+      "dueSoon": "Göndərmə müddəti yaxınlaşır",
+      "dueSoonBy": "Son göndərmə: {{date}}",
+      "refunded": "Geri ödənilib",
+      "refundedAmount": "Geri ödənilib: {{amount}}"
+    },
+    "note": {
+      "title": "Qeydiniz",
+      "label": "Qeyd",
+      "placeholder": "Bu sifarişlə bağlı özünüz üçün qeyd yazın",
+      "hint": "Bu qeydi yalnız siz görürsünüz. eBay-ə, Amazon-a və ya alıcıya göndərilmir.",
+      "save": "Qeydi yadda saxla"
     }
   }
 }

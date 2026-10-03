@@ -66,6 +66,19 @@ export enum OrderStageTab {
   DONE = 'done',
 }
 
+/**
+ * eBay's ship-by deadline, as a flag BESIDE the stage (never a stage: an order
+ * is "purchased and late", "blocked and late"). Derived at read time from
+ * `orders.ebay_ship_by_date` — see `deriveShipByState`.
+ */
+export enum OrderShipByState {
+  DUE_SOON = 'due_soon',
+  LATE = 'late',
+}
+
+/** The seller's own note on an order is capped at this many characters. */
+export const ORDER_NOTE_MAX_LENGTH = 1000;
+
 export enum OrderStatus {
   COMPLETED = 'completed',
   SHIPPED = 'shipped',
@@ -396,6 +409,13 @@ export interface OrderDto {
   lineItemCount?: number | null;
   /** eBay's ship-by deadline for the (first) line item, or null. */
   shipByDate?: string | null;
+  /** Whether that deadline is close or missed while eBay still awaits a shipment. */
+  shipByState?: OrderShipByState | null;
+  /**
+   * The seller's own note. Private to the seller: never sent to eBay, Amazon
+   * or the buyer, and never written by order sync.
+   */
+  sellerNote?: string | null;
   /**
    * The step-by-step timeline (`buildOrderTimeline`). Present on the single
    * order read only — the list never renders it.
@@ -546,7 +566,15 @@ export interface OrderStatsDto {
 
 /** `GET /orders/stage-counts` — every stage is present, 0 when empty, so the
  *  tabs never render an undefined count. */
-export type OrderStageCountsDto = Record<OrderStage, number>;
+export type OrderStageCountsDto = Record<OrderStage, number> & {
+  /** Orders in an actionable stage OR past eBay's ship-by date — the Needs-action tab. */
+  needsAction?: number;
+};
+
+/** `PUT /orders/:id/note` — an empty or null note clears it. */
+export interface UpdateOrderNoteDto {
+  note: string | null;
+}
 
 /**
  * `POST /amazon/orders/:orderId/start-auto-fulfill` — the purchase was queued.
@@ -600,6 +628,15 @@ export interface OrderFiltersDto {
    * `fulfillmentState` alone cannot answer "is this even one of ours".
    */
   isTracked?: boolean;
+  /** Orders whose eBay ship-by date is close or missed (`?shipBy=late|due_soon`). */
+  shipBy?: OrderShipByState;
+  /** Orders eBay reports a refund on (`?refunded=true`). */
+  hasRefund?: boolean;
+  /**
+   * The Needs-action tab: an actionable stage OR a missed ship-by date
+   * (`buildNeedsActionSql`). Sent instead of `stages`.
+   */
+  needsAction?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

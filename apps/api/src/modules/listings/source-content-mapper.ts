@@ -6,7 +6,9 @@ import {
   type ProductData,
   type ProductIdentifiers,
   type ScraperContent,
+  type ScraperSignals,
   type SourceCommerce,
+  type SourceQuality,
 } from '@repo/shared';
 
 import { isValidGtin, normalizeGtin } from '../../common/utils/gtin';
@@ -195,12 +197,60 @@ export function mapScraperIdentifiers(raw: Record<string, string>, brand: string
   return ids;
 }
 
+/**
+ * Who ships the offer and how the product is rated — what the seller's listing
+ * rules judge. Undefined when the service build predates these fields (none of
+ * them is on the wire), so the rules pass instead of reading "absent" as
+ * "no ratings" or "not shipped by Amazon".
+ */
+export function mapSourceQuality(
+  content: Pick<ScraperContent, 'rating' | 'ratingCount' | 'isPrime'>,
+  signals: Pick<ScraperSignals, 'soldByAmazon' | 'shippedByAmazon'> | null | undefined,
+): SourceQuality | undefined {
+  const captured =
+    content.rating !== undefined || content.ratingCount !== undefined || signals?.shippedByAmazon !== undefined;
+  if (!captured) {
+    return undefined;
+  }
+  const number = (value: unknown): number | null =>
+    typeof value === 'number' && Number.isFinite(value) ? value : null;
+  const flag = (value: unknown): boolean | null => (typeof value === 'boolean' ? value : null);
+  return {
+    rating: number(content.rating),
+    ratingCount: number(content.ratingCount),
+    isPrime: flag(content.isPrime),
+    soldByAmazon: flag(signals?.soldByAmazon),
+    shippedByAmazon: flag(signals?.shippedByAmazon),
+  };
+}
+
+/** Read `sourceQuality` back from a stored `raw_provider_data` (a cache hit). */
+export function readStoredSourceQuality(raw: Record<string, unknown> | undefined | null): SourceQuality | undefined {
+  const quality = raw?.quality;
+  if (!quality || typeof quality !== 'object') {
+    return undefined;
+  }
+  const q = quality as Record<string, unknown>;
+  const number = (value: unknown): number | null =>
+    typeof value === 'number' && Number.isFinite(value) ? value : null;
+  const flag = (value: unknown): boolean | null => (typeof value === 'boolean' ? value : null);
+  return {
+    rating: number(q.rating),
+    ratingCount: number(q.ratingCount),
+    isPrime: flag(q.isPrime),
+    soldByAmazon: flag(q.soldByAmazon),
+    shippedByAmazon: flag(q.shippedByAmazon),
+  };
+}
+
 export function mapScraperProduct(
   asin: string,
   content: ScraperContent,
   commerce: SourceCommerce,
   marketplace: AmazonMarketplace,
+  signals?: ScraperSignals | null,
 ): ProductData {
+  const sourceQuality = mapSourceQuality(content, signals);
   const categories = (content.categories ?? []).map((c) => c.trim()).filter(Boolean);
   // Create path only: a brand-new product has no previous value to preserve,
   // so UNKNOWN is stored as out-of-stock 0 (the worker refuses to publish at
@@ -224,6 +274,14 @@ export function mapScraperProduct(
     stockStatus: unknown ? SourceStockStatus.OUT_OF_STOCK : commerce.stockStatus,
     maxOrderQuantity: commerce.maxOrderQuantity,
     sourceRemoved: commerce.removed,
-    raw: { provider: ProductDataProviderKind.SCRAPER, content, commerce } as unknown as Record<string, unknown>,
+    sourceQuality,
+    // `quality` rides in the stored raw payload so a cache hit can answer the
+    // listing rules without a column of its own (`readStoredSourceQuality`).
+    raw: {
+      provider: ProductDataProviderKind.SCRAPER,
+      content,
+      commerce,
+      ...(sourceQuality ? { quality: sourceQuality } : {}),
+    } as unknown as Record<string, unknown>,
   };
 }

@@ -1,2 +1,2 @@
 export { OrderCard } from './OrderCard.component';
-export type { OrderCardProps } from './OrderCard.types';
+export type { OrderCardProps, OrderCardStatBadge } from './OrderCard.types';

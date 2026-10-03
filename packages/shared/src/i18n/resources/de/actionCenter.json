@@ -109,6 +109,12 @@
         "description_other": "{{count}} Bestellungen wurden in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebenen Amazon-Bestellungen sind noch offen. Auf diese Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellungen oder senden Sie die Artikel zurück, falls sie schon versandt wurden.",
         "action": "Bestellungen prüfen"
       },
+      "order_late_to_ship": {
+        "title": "Bestellungen nach Ablauf der eBay-Versandfrist",
+        "description_one": "Bei {{count}} Bestellung ist die eBay-Versandfrist abgelaufen, und eBay hat noch keinen Versand dafür. Ein verspäteter Versand wird Ihrem Verkäuferkonto angerechnet.",
+        "description_other": "Bei {{count}} Bestellungen ist die eBay-Versandfrist abgelaufen, und eBay hat noch keinen Versand dafür. Verspätete Sendungen werden Ihrem Verkäuferkonto angerechnet.",
+        "action": "Bestellungen prüfen"
+      },
       "return_seller_action_due": {
         "title": "Rückgaben warten auf Ihre Antwort",
         "description_one": "Bei {{count}} Rückgabe erwartet eBay einen nächsten Schritt von Ihnen. Antworten Sie bei eBay vor der Frist, die auf der Seite „Rückgaben“ angezeigt wird.",
@@ -212,6 +218,12 @@
         "title": "Die Automatisierung ist ausgesetzt",
         "description": "Ihr Abonnement ist nicht mehr aktiv, daher sind neue Angebote, Preis- und Bestandsaktualisierungen, der automatische Einkauf und die Umwandlung von Sendungsnummern gestoppt. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
         "action": "Tarif wählen"
+      },
+      "listing_not_selling": {
+        "title": "Angebote, die sich nicht verkaufen",
+        "description_one": "{{count}} aktives Angebot hatte innerhalb des von Ihnen festgelegten Zeitraums keinen Verkauf. Prüfen Sie es und beenden Sie es, wenn es seinen Platz in Ihrem Tarif nicht wert ist.",
+        "description_other": "{{count}} aktive Angebote hatten innerhalb des von Ihnen festgelegten Zeitraums keinen Verkauf. Prüfen Sie sie und beenden Sie diejenigen, die ihren Platz in Ihrem Tarif nicht wert sind.",
+        "action": "Angebote prüfen"
       }
     },
     "reasons": {

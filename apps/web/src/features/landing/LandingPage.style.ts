@@ -2960,14 +2960,16 @@ export const PlanFeatures = styled.ul`
   flex: 1;
 `;
 
-export const PlanFeature = styled.li`
+/** `$strong` is the card's lead promise (unlimited automatic orders and tracking) — full ink, heavier weight. */
+export const PlanFeature = styled.li<{ $strong?: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   font-family: ${FONT_BODY};
   font-size: ${TYPE.body};
   line-height: 1.55;
-  color: ${tkn('colors.landing.heroTextMuted')};
+  font-weight: ${(p) => (p.$strong ? tkn('typography.fontWeight.bold')(p) : 'inherit')};
+  color: ${(p) => (p.$strong ? tkn('colors.landing.heroText')(p) : tkn('colors.landing.heroTextMuted')(p))};
 `;
 
 export const PlanCta = styled.button<{ $highlight?: boolean }>`

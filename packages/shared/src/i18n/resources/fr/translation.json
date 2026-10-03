@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Consultez, modifiez et créez vos modèles de messages automatisés aux acheteurs",
         "manageBlacklist": "Gérer la liste noire",
         "manageBlacklistSubtitle": "Mots-clés à bloquer dans les titres, descriptions et caractéristiques des annonces",
-        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique."
+        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique.",
+        "listingRules": "Règles d'annonces",
+        "listingRulesSubtitle": "Protection des marques, ce qui peut être mis en ligne et nettoyage automatique"
       },
       "listingGroups": {
         "title": "Groupes de paramètres d'annonces",
@@ -422,7 +424,16 @@
           "add": "Ajouter des mots-clés",
           "duplicate": "Tous les mots-clés incluent déjà les champs sélectionnés",
           "empty": "Veuillez saisir au moins un mot-clé",
-          "typeRequired": "Sélectionnez au moins un champ"
+          "typeRequired": "Sélectionnez au moins un champ",
+          "actionLabel": "Lorsqu'un mot-clé est trouvé",
+          "action": {
+            "block": "Ne pas mettre le produit en ligne",
+            "remove": "Supprimer le mot et mettre en ligne"
+          },
+          "actionHint": {
+            "block": "Un produit dont le texte contient ce mot n'est pas mis en ligne.",
+            "remove": "Le mot est retiré du titre, de la description ou des caractéristiques, et le produit est mis en ligne sans lui."
+          }
         },
         "list": {
           "empty": "Aucun mot-clé de liste noire pour la portée sélectionnée",
@@ -827,10 +838,10 @@
       "showAllPlans": "Voir les {{count}} forfaits",
       "showFewerPlans": "Afficher moins de forfaits",
       "notIncluded": "Non inclus",
-      "upToListings": "Jusqu'à {{limit}} annonces actives",
+      "upToListings": "{{limit}} annonces actives · ajouts et retraits illimités",
       "unlimitedListings": "Annonces actives illimitées",
       "upToOrders": "Jusqu'à {{limit}} commandes automatiques / mois",
-      "unlimitedOrders": "Commandes automatiques illimitées",
+      "unlimitedOrders": "Commandes automatiques et suivi d'expédition illimités",
       "upToConversions": "{{limit}} conversions de suivi / mois",
       "unlimitedConversions": "Conversions de suivi illimitées",
       "upToBestSellers": "{{limit}} produits Meilleures ventes / mois",
@@ -840,7 +851,6 @@
         "groups": "Groupes de paramètres et 12 modèles d'annonces",
         "sync": "Contrôle des prix et du stock 4× par jour",
         "specifics": "Caractéristiques d'article eBay complètes",
-        "autoOrder": "Commandes et suivi automatiques",
         "actions": "Écran des actions en attente",
         "profit": "Rapports de profit réel",
         "multiStore": "Plusieurs boutiques eBay",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "Jusqu'à 500 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "500 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "50 conversions de suivi / mois",
           "bestSellers": "2,500 produits Meilleures ventes / mois"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "Jusqu'à 2,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "2,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "150 conversions de suivi / mois",
           "bestSellers": "7,500 produits Meilleures ventes / mois"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "Jusqu'à 5,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "5,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "300 conversions de suivi / mois",
           "bestSellers": "15,000 produits Meilleures ventes / mois"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "Jusqu'à 10,000 annonces actives",
-          "orders": "Commandes automatiques illimitées",
+          "listings": "10,000 annonces actives · ajouts et retraits illimités",
+          "orders": "Commandes automatiques et suivi d'expédition illimités",
           "conversions": "500 conversions de suivi / mois",
           "bestSellers": "25,000 produits Meilleures ventes / mois"
         }

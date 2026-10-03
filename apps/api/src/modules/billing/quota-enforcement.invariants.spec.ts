@@ -66,7 +66,17 @@ describe('billing quota enforcement wiring invariants', () => {
     it('ListingQueueService reserves before enqueue and only for non-draft', () => {
       const src = read('../listings/listing-queue.service.ts');
       expect(src).toMatch(/reserveForBulkCreate/);
-      expect(src).toMatch(/if \(!asDraft && job\.items\.length > 0\)/);
+      // `!plan`: a SCHEDULED job reserves nothing up front (its slots would
+      // sit reserved for days) — each group reserves as it starts instead.
+      expect(src).toMatch(/if \(!asDraft && !plan && job\.items\.length > 0\)/);
+      expect(src).toMatch(/plan && !asDraft \? \{ reserveAtRun: true \}/);
+    });
+
+    it('a scheduled group reserves its own slots when it starts, on the first attempt only', () => {
+      const src = read('../listings/listing-processor.service.ts');
+      expect(src).toMatch(
+        /if \(job\.data\.reserveAtRun && job\.attemptsMade === 0\) \{\s*try \{\s*await this\.quotaEnforcement\.reserveForBulkCreate\(/
+      );
     });
 
     it('ListingProcessorService consumes on success and releases on terminal failure', () => {

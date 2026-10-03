@@ -114,8 +114,18 @@
         "provider_budget_exhausted": "Cota de astăzi pentru API-ul eBay a fost consumată. Acest anunț este în coadă și va continua automat.",
         "blacklisted_keyword": "Lista neagră din Setări magazin a blocat acest anunț (cuvânt cheie: „{{keyword}}”). Eliminați cuvântul cheie sau ajustați șablonul anunțului.",
         "cancelled": "Anulat înainte ca acest ASIN să fie procesat.",
-        "unknown": "Anunțul nu a putut fi creat."
-      }
+        "unknown": "Anunțul nu a putut fi creat.",
+        "blocked_by_rule": "Omis de una dintre regulile dvs. pentru anunțuri.",
+        "blocked_by_rule_blocked_asin": "Acest ASIN se află în lista dvs. de ASIN-uri blocate.",
+        "blocked_by_rule_vero_brand": "Protecția VeRO a omis acest produs (brand: „{{keyword}}”). Acest brand este cunoscut pentru că raportează anunțuri pe eBay.",
+        "blocked_by_rule_price_below_min": "Prețul Amazon {{actual}} este sub minimul dvs. de {{limit}}.",
+        "blocked_by_rule_price_above_max": "Prețul Amazon {{actual}} este peste maximul dvs. de {{limit}}.",
+        "blocked_by_rule_not_shipped_by_amazon": "Nu este expediat chiar de Amazon. Regulile dvs. pentru anunțuri permit doar produse expediate de Amazon.",
+        "blocked_by_rule_low_rating": "Evaluare: {{actual}}. Minimul dvs. este {{limit}}.",
+        "blocked_by_rule_low_rating_none": "Încă fără evaluare. Minimul dvs. este {{limit}}.",
+        "blocked_by_rule_low_review_count": "Număr de evaluări: {{actual}}. Minimul dvs. este {{limit}}."
+      },
+      "scheduledUntil": "Programat. Ultimele produse încep pe {{date}}."
     },
     "filters": {
       "searchPlaceholder": "Caută după titlu sau ASIN...",
@@ -356,13 +366,16 @@
       "queuedDraft": "Anunțuri ciornă puse în coadă: {{count}} — nu vor deveni active până nu le publicați",
       "queuedWithSkipped": "Anunțuri puse în coadă pentru procesare: {{count}} ({{skipped}} omise — deja prezente în anunțurile dvs.)",
       "queuedDraftWithSkipped": "Anunțuri ciornă puse în coadă: {{count}} ({{skipped}} omise — deja prezente în anunțurile dvs.) — nu vor deveni active până nu le publicați",
-      "allSkippedDuplicates": "Toate cele {{skipped}} coduri ASIN introduse sunt deja în anunțurile dvs. — nu a fost pornită nicio operație nouă"
+      "allSkippedDuplicates": "Toate cele {{skipped}} coduri ASIN introduse sunt deja în anunțurile dvs. — nu a fost pornită nicio operație nouă",
+      "scheduled": "{{count}} produse programate. Ultimele încep pe {{date}}.",
+      "scheduledWithSkipped": "{{count}} produse programate ({{skipped}} omise — se află deja în anunțurile dvs.). Ultimele încep pe {{date}}."
     },
     "errors": {
       "createFailed": "Anunțurile nu au putut fi create",
       "fetchPoliciesFailed": "Politicile de afaceri eBay nu au putut fi preluate",
       "invalidAsins": "{{count}} dintre intrările dvs. nu par ASIN-uri valide (10 caractere alfanumerice) și au fost omise.",
-      "loadFailed": "Anunțurile nu au putut fi încărcate. Încercați din nou."
+      "loadFailed": "Anunțurile nu au putut fi încărcate. Încercați din nou.",
+      "scheduleTooLong": "În acest ritm, sarcina ar dura mai mult de 30 de zile. Măriți numărul de produse pe zi sau adăugați mai puține ASIN-uri."
     },
     "detail": {
       "breadcrumb": "Detaliile anunțului",
@@ -462,6 +475,17 @@
     },
     "products": {
       "searchPlaceholder": "Caută după titlu, ASIN sau brand…"
+    },
+    "schedule": {
+      "title": "Eșalonat în timp",
+      "hint": "Publicați un număr stabilit de produse pe zi, în intervalul orar ales, în loc de toate deodată. Prețul, stocul și regulile dvs. pentru anunțuri sunt verificate când vine rândul fiecărui produs.",
+      "perDay": "Produse pe zi",
+      "perDayError": "Introduceți un număr întreg între {{min}} și {{max}}.",
+      "startHour": "De la",
+      "endHour": "Până la",
+      "estimate_one": "Aproximativ {{count}} zi în acest ritm.",
+      "estimate_few": "Aproximativ {{count}} zile în acest ritm.",
+      "estimate_other": "Aproximativ {{count}} de zile în acest ritm."
     }
   }
 }

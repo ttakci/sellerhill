@@ -14,6 +14,7 @@
 
 import {
   BILLING_MICROS_PER_UNIT,
+  BILLING_UNLIMITED,
   BillingInterval,
   BillingLimitKey,
   BillingSubscriptionStatus,
@@ -395,16 +396,33 @@ export const BillingPage: React.FC = () => {
       const priceDisplay = price
         ? formatPriceMicros(price.amountMicros, price.currency, localeCfg.locale, freeLabel)
         : '—';
+      const listingsLimit = planLimitValue({ plan }, BillingLimitKey.LISTINGS_PER_MONTH);
+      const listingsLimitDisplay = formatBillingLimit({
+        limit: listingsLimit,
+        unlimitedLabel,
+        disabledLabel,
+        locale: localeCfg.locale,
+      });
+      const amazonOrdersLimit = planLimitValue({ plan }, BillingLimitKey.AMAZON_ORDERS_PER_MONTH);
       return {
         planId: plan.id,
         slug: plan.slug,
         priceDisplay,
-        listingsLimitDisplay: formatBillingLimit({
-          limit: planLimitValue({ plan }, BillingLimitKey.LISTINGS_PER_MONTH),
-          unlimitedLabel,
-          disabledLabel,
-          locale: localeCfg.locale,
-        }),
+        // -1 on every plan since 2026-09-29. A finite value (the key is kept so
+        // the limit can be re-tightened) falls back to the plain "label: N".
+        amazonOrdersLine:
+          amazonOrdersLimit === BILLING_UNLIMITED
+            ? t('billing:billing.plans.unlimitedOrders')
+            : `${t('billing:billing.limits.amazon_orders_per_month.label')}: ${formatBillingLimit({
+                limit: amazonOrdersLimit,
+                unlimitedLabel,
+                disabledLabel,
+                locale: localeCfg.locale,
+              })}`,
+        listingsLine:
+          listingsLimit > 0
+            ? t('billing:billing.plans.activeListings', { limit: listingsLimitDisplay })
+            : `${t('billing:billing.limits.listings_per_month.label')}: ${listingsLimitDisplay}`,
         trackingConversionsLimitDisplay: formatBillingLimit({
           limit: planLimitValue({ plan }, BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH),
           unlimitedLabel,
@@ -413,13 +431,6 @@ export const BillingPage: React.FC = () => {
         }),
         bestSellersLimitDisplay: formatBillingLimit({
           limit: planLimitValue({ plan }, BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH),
-          unlimitedLabel,
-          disabledLabel,
-          locale: localeCfg.locale,
-        }),
-        // -1 on every plan since 2026-09-29; `formatBillingLimit` renders it as "Unlimited".
-        amazonOrdersLimitDisplay: formatBillingLimit({
-          limit: planLimitValue({ plan }, BillingLimitKey.AMAZON_ORDERS_PER_MONTH),
           unlimitedLabel,
           disabledLabel,
           locale: localeCfg.locale,

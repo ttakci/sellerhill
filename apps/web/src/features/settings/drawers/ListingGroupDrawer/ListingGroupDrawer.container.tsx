@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  DEFAULT_PRICE_ENDING_CENTS,
   TemplateType,
+  applyPriceEnding,
   buildListingTemplateSnippet,
   listingSettingsGroupSchema,
   renderListingTemplate,
@@ -8,7 +10,7 @@ import {
   type ListingTemplatePlaceholder,
   type PredefinedTemplateResponse,
 } from '@repo/shared';
-import { useLoading, useUI } from '@repo/ui';
+import { formatCurrency, useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFieldArray, useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -38,8 +40,11 @@ const CUSTOM_TEMPLATE_OPTION = '__custom__';
 const STEP_FIELDS: Partial<Record<number, FieldPath<ListingSettingsGroupFormData>[]>> = {
   0: ['name', 'stock.defaultQuantity', 'stock.stockBuffer'],
   1: ['fees.ebayFeePercent', 'fees.fixedFeeAmount'],
-  2: ['repricingStrategy'],
+  2: ['repricingStrategy', 'fees.priceRoundingEnabled', 'fees.priceEndingCents'],
 };
+
+/** An ordinary computed price used to show what the chosen ending does to it. */
+const PRICE_ROUNDING_SAMPLE = 27.31;
 
 export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, onClose, editingGroupId }) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
@@ -203,6 +208,33 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       maxPrice: 9999,
       profitMarginPercent: 15,
     });
+  };
+
+  // Price ending ("charm pricing")
+  const watchedFees = useWatch({ control, name: 'fees' });
+  const isPriceRoundingEnabled = Boolean(watchedFees?.priceRoundingEnabled);
+  const rawEnding = watchedFees?.priceEndingCents as unknown;
+  const endingCents = rawEnding === undefined || rawEnding === null || String(rawEnding).trim() === '' ? NaN : Number(rawEnding);
+  const isEndingValid = Number.isInteger(endingCents) && endingCents >= 0 && endingCents <= 99;
+  const priceRoundingExample = isEndingValid
+    ? t('listingSettingsGroup.priceRounding.example', {
+        from: formatCurrency(PRICE_ROUNDING_SAMPLE, 'en-US', 'USD', 2),
+        to: formatCurrency(applyPriceEnding(PRICE_ROUNDING_SAMPLE, endingCents), 'en-US', 'USD', 2),
+      })
+    : t('listingSettingsGroup.priceRounding.hint');
+
+  const handlePriceRoundingToggle = (enabled: boolean) => {
+    setValue('fees.priceRoundingEnabled', enabled, { shouldDirty: true });
+    // Turning it on with nothing typed yet starts at the common .99 ending.
+    if (enabled && !isEndingValid) {
+      setValue('fees.priceEndingCents', DEFAULT_PRICE_ENDING_CENTS, { shouldDirty: true });
+    }
+    // Turning it off hides the field, so an invalid leftover must not stay
+    // behind and fail the save on an input the seller can no longer see.
+    if (!enabled && !isEndingValid) {
+      setValue('fees.priceEndingCents', undefined, { shouldDirty: true });
+    }
+    clearErrors('fees.priceEndingCents');
   };
 
   // Preview Logic
@@ -401,6 +433,13 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
         if (ranges.length === 0) {
           return false;
         }
+        if (v.fees?.priceRoundingEnabled) {
+          const rawCents = v.fees.priceEndingCents as unknown;
+          const cents = rawCents === undefined || rawCents === null || String(rawCents).trim() === '' ? NaN : Number(rawCents);
+          if (!Number.isInteger(cents) || cents < 0 || cents > 99) {
+            return false;
+          }
+        }
         return ranges.every((r) => {
           const min = Number(r.minPrice);
           const max = Number(r.maxPrice);
@@ -494,6 +533,9 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       append={append}
       remove={remove}
       onAddRange={handleAddRange}
+      isPriceRoundingEnabled={isPriceRoundingEnabled}
+      onPriceRoundingToggle={handlePriceRoundingToggle}
+      priceRoundingExample={priceRoundingExample}
       templateOptions={templateOptions}
       selectedTemplateValue={selectedTemplateValue}
       onTemplateChange={handleTemplateChange}

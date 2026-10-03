@@ -138,6 +138,7 @@
       "maxFeePercent": "费率不得超过 100%",
       "minFeePercent": "费率必须大于或等于 0",
       "minFixedFee": "固定费用必须大于或等于 0",
+      "priceEndingRange": "请输入 0 到 99 之间的整数",
       "invalidNumber": "请输入有效的数字，不要以零开头（例如 0.4，而不是 04）",
       "templateRequired": "模板内容为必填项",
       "templateMinLength": "模板至少需要 10 个字符",
@@ -207,10 +208,18 @@
         "netTarget": "扣除 eBay 费用前的目标金额",
         "ebayFee": "eBay 费用（{{pct}}）",
         "fixedFee": "固定费用",
-        "floorApplied": "低于 eBay 最低价 $0.99，已提高至"
+        "floorApplied": "低于 eBay 最低价 $0.99，已提高至",
+        "rounding": "向上取整到 {{ending}}"
       }
     },
     "feesAndTaxes": "费用与税费",
+    "priceRounding": {
+      "title": "价格尾数取整",
+      "info": "每个计算出的价格都会向上取整到以该尾数结尾的下一个金额，因此您的目标利润不会减少。您在商品上手动固定的价格不会改变。",
+      "endingLabel": "价格尾数（美分，0–99）",
+      "example": "示例：{{from}} 变为 {{to}}。",
+      "hint": "请输入 0 到 99 之间的整数 — 输入 99 时价格形如 $24.99。"
+    },
     "amazonTaxRateNote": "您的价格计算会自动计入您从 Amazon 采购时所付的预估税费。请在“店铺设置 → Amazon 销售税率”中设置此税率。",
     "stockControl": "库存控制",
     "ebayStockQuantity": "eBay 库存",

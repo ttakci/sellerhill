@@ -285,7 +285,9 @@
         "manageMessageTemplatesSubtitle": "Avtomatik alıcı mesajı şablonlarınıza baxın, onları redaktə edin və yaradın",
         "manageBlacklist": "Qara siyahını idarə et",
         "manageBlacklistSubtitle": "Elan başlıqlarında, təsvirlərdə və xüsusiyyətlərdə bloklanacaq açar sözlər",
-        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur."
+        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur.",
+        "listingRules": "Elan qaydaları",
+        "listingRulesSubtitle": "Brend qorunması, nələrin elan oluna biləcəyi və avtomatik təmizləmə"
       },
       "listingGroups": {
         "title": "Parametr qrupları",
@@ -422,7 +424,16 @@
           "add": "Açar sözləri əlavə et",
           "duplicate": "Bütün açar sözlər seçilmiş sahələri artıq əhatə edir",
           "empty": "Zəhmət olmasa ən azı bir açar söz daxil edin",
-          "typeRequired": "Ən azı bir sahə seçin"
+          "typeRequired": "Ən azı bir sahə seçin",
+          "actionLabel": "Açar söz tapıldıqda",
+          "action": {
+            "block": "Məhsulu elan etmə",
+            "remove": "Sözü sil və elan et"
+          },
+          "actionHint": {
+            "block": "Mətnində bu söz olan məhsul elan edilmir.",
+            "remove": "Söz başlıqdan, təsvirdən və ya xüsusiyyətlərdən silinir, məhsul isə onsuz elan edilir."
+          }
         },
         "list": {
           "empty": "Seçilmiş əhatə üçün qara siyahı açar sözü yoxdur",
@@ -827,10 +838,10 @@
       "showAllPlans": "Bütün {{count}} plana bax",
       "showFewerPlans": "Daha az plan göstər",
       "notIncluded": "Daxil deyil",
-      "upToListings": "{{limit}} aktiv elana qədər",
+      "upToListings": "{{limit}} aktiv elan · limitsiz elan əlavə etmə və silmə",
       "unlimitedListings": "Limitsiz aktiv elan",
       "upToOrders": "Ayda {{limit}} avtomatik sifarişə qədər",
-      "unlimitedOrders": "Limitsiz avtomatik sifariş",
+      "unlimitedOrders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
       "upToConversions": "Ayda {{limit}} izləmə çevirməsi",
       "unlimitedConversions": "Limitsiz izləmə çevirməsi",
       "upToBestSellers": "Ayda {{limit}} Ən Çox Satılanlar məhsulu",
@@ -840,7 +851,6 @@
         "groups": "Parametr qrupları və 12 elan şablonu",
         "sync": "Gündə 4× qiymət və stok yoxlaması",
         "specifics": "Tam eBay məhsul xüsusiyyətləri",
-        "autoOrder": "Avtomatik sifarişlər və izləmə",
         "actions": "Gözləyən əməliyyatlar ekranı",
         "profit": "Real mənfəət hesabatı",
         "multiStore": "Bir neçə eBay mağazası",
@@ -849,29 +859,29 @@
       "catalogFallback": {
         "nano": {
           "price": "$29.99",
-          "listings": "500 aktiv elana qədər",
-          "orders": "Limitsiz avtomatik sifariş",
+          "listings": "500 aktiv elan · limitsiz elan əlavə etmə və silmə",
+          "orders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
           "conversions": "Ayda 50 izləmə çevirməsi",
           "bestSellers": "Ayda 2,500 Ən Çox Satılanlar məhsulu"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "2,000 aktiv elana qədər",
-          "orders": "Limitsiz avtomatik sifariş",
+          "listings": "2,000 aktiv elan · limitsiz elan əlavə etmə və silmə",
+          "orders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
           "conversions": "Ayda 150 izləmə çevirməsi",
           "bestSellers": "Ayda 7,500 Ən Çox Satılanlar məhsulu"
         },
         "growth": {
           "price": "$89.99",
-          "listings": "5,000 aktiv elana qədər",
-          "orders": "Limitsiz avtomatik sifariş",
+          "listings": "5,000 aktiv elan · limitsiz elan əlavə etmə və silmə",
+          "orders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
           "conversions": "Ayda 300 izləmə çevirməsi",
           "bestSellers": "Ayda 15,000 Ən Çox Satılanlar məhsulu"
         },
         "pro": {
           "price": "$164.99",
-          "listings": "10,000 aktiv elana qədər",
-          "orders": "Limitsiz avtomatik sifariş",
+          "listings": "10,000 aktiv elan · limitsiz elan əlavə etmə və silmə",
+          "orders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
           "conversions": "Ayda 500 izləmə çevirməsi",
           "bestSellers": "Ayda 25,000 Ən Çox Satılanlar məhsulu"
         }

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainer, tkn } from '@repo/ui';
+import { PageContainer, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -79,6 +79,15 @@ export const OrderCell = styled.div`
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
   /* An eBay order id never wraps — split across two lines it stops reading as one id. */
+  white-space: nowrap;
+`;
+
+/** The seller's note under the order number: one line, the rest on the tooltip. */
+export const NoteLine = styled(Text)`
+  display: block;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 `;
 

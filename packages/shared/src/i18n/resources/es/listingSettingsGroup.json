@@ -140,6 +140,7 @@
       "maxFeePercent": "El porcentaje de comisión no puede superar el 100%",
       "minFeePercent": "El porcentaje de comisión debe ser 0 o mayor",
       "minFixedFee": "La comisión fija debe ser 0 o mayor",
+      "priceEndingRange": "Ingresa un número entero de 0 a 99",
       "invalidNumber": "Ingresa un número válido sin cero inicial (por ejemplo 0.4, no 04)",
       "templateRequired": "El contenido de la plantilla es obligatorio",
       "templateMinLength": "La plantilla debe tener al menos 10 caracteres",
@@ -209,10 +210,18 @@
         "netTarget": "Objetivo antes de las comisiones de eBay",
         "ebayFee": "Comisión de eBay ({{pct}})",
         "fixedFee": "Comisión fija",
-        "floorApplied": "Por debajo del mínimo de $0.99 de eBay, se elevó a"
+        "floorApplied": "Por debajo del mínimo de $0.99 de eBay, se elevó a",
+        "rounding": "Redondeado hacia arriba a {{ending}}"
       }
     },
     "feesAndTaxes": "Comisiones e impuestos",
+    "priceRounding": {
+      "title": "Redondear la terminación del precio",
+      "info": "Cada precio calculado se redondea hacia arriba al siguiente importe con esta terminación, así que tu ganancia objetivo nunca se reduce. Un precio fijado manualmente en un anuncio no cambia.",
+      "endingLabel": "Terminación del precio (centavos, 0–99)",
+      "example": "Ejemplo: {{from}} pasa a {{to}}.",
+      "hint": "Ingresa un número entero de 0 a 99 — con 99 los precios quedan como $24.99."
+    },
     "amazonTaxRateNote": "El cálculo de tu precio tiene en cuenta automáticamente el impuesto estimado que pagas al comprar en Amazon. Define esta tasa en Ajustes de la tienda → Tasa de impuesto sobre las ventas de Amazon.",
     "stockControl": "Control de stock",
     "ebayStockQuantity": "Stock de eBay",

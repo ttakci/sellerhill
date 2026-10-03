@@ -242,6 +242,7 @@
         "ebay.returnSync.intervalHours": "İade taramaları arası saat (elle)",
         "ebay.returnSync.maxAccountsPerRun": "İade taraması başına mağaza",
         "ebay.returns.actionsEnabled": "Uygulama içi iade işlemleri",
+        "listing.cleanup.enabled": "Otomatik liste temizliği",
         "ebay.feedSync.intervalHours": "Mağaza taramaları arası saat",
         "ebay.feedSync.cron": "Mutabakat zamanlaması",
         "ebay.feedSync.captureOnly": "Mutabakat: yalnızca yakalama",
@@ -323,6 +324,7 @@
         "ebay.returnSync.intervalHours": "Yalnızca otomatik aralık kapalıyken ya da eBay henüz limit bildirmemişken kullanılır (varsayılan 6). eBay tüm satıcılar için günde toplam 5.000 iade çağrısına izin verir ve her tarama mağaza başına bir çağrıdır.",
         "ebay.returnSync.maxAccountsPerRun": "Bir çalıştırmanın okuyacağı en fazla mağaza (varsayılan 35). Yalnızca ani yükü sınırlar; hızı aralık belirler.",
         "ebay.returns.actionsEnabled": "Satıcıların İadeler sayfasından iadeyi onaylamasına, ürünü teslim alındı olarak işaretlemesine ve geri ödemeyi yapmasına izin verir. Bu eBay çağrıları gerçek para hareket ettirir ve Sandbox'ta denenemez: ilk gerçek iade SellerHill üzerinden sorunsuz tamamlandıktan sonra açın. Kapalı = her iade eBay'de yanıtlanır.",
+        "listing.cleanup.enabled": "Satıcıların kendi temizlik kurallarının ana anahtarı: satıcının seçtiği gün sayısı boyunca stoksuz kalan ya da satmayan listelerin bitirilmesi. Her satıcının kuralı, kendisi açana kadar kapalıdır. Buradan kapatmak, kimsenin ayarını değiştirmeden tüm otomatik bitirmeleri anında durdurur.",
         "ebay.feedSync.enabled": "eBay'e periyodik olarak hangi ilanların hâlâ var olduğunu sorar; eBay'de sonlanmış bir ilan burada canlı sayılmaya devam etmez. Varsayılan kapalı.",
         "ebay.feedSync.captureOnly": "Raporu indirir ve hiçbir şeyi değiştirmez — biçimi gerçek bir mağazada doğrulanabilsin diye diske yazılır. Rapor ayrıştırıcısı gelene kadar açık bırakın.",
         "ebay.feedSync.cron": "Ne sıklıkla yeni mağazaların ele alınacağı. Açılışta bir kez okunur.",
@@ -428,6 +430,22 @@
       "uncoded": "sınıflandırılmamış",
       "empty": "Başarısız listeleme yok",
       "emptyDescription": "Başarısız oluşturma denemeleri ham sağlayıcı hatasıyla burada listelenir."
+    },
+    "vero": {
+      "title": "VeRO marka listesi",
+      "hint": "VeRO korumasını açık tutan her satıcı için reddedilen marka adları. Yalnızca ürünün marka ve üretici alanında, tam kelime olarak eşleştirilir. Satıcılar bu listeyi görmez; yalnızca kendi ürünlerini durduran tek markayı görür.",
+      "addPlaceholder": "Marka adları; her satıra bir tane ya da virgülle ayırarak",
+      "add": "Listeye ekle",
+      "addResult": "Eklenen: {{added}}. Zaten listede olan ya da boş: {{skipped}}.",
+      "addFailed": "Marka adları eklenemedi. Tekrar deneyin.",
+      "searchPlaceholder": "Marka ara",
+      "total": "Listedeki marka sayısı: {{count}}",
+      "remove": "Kaldır",
+      "empty": "Liste boş; bu yüzden VeRO koruması şimdilik hiçbir şeyi reddetmiyor.",
+      "noResults": "Aramanızla eşleşen marka yok.",
+      "previous": "Önceki",
+      "next": "Sonraki",
+      "page": "Sayfa {{page}} / {{pageCount}}"
     }
   }
 }

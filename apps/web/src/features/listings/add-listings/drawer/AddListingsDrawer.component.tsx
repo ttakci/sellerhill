@@ -1,5 +1,5 @@
 import type { CreateListingsFormData } from '@repo/shared';
-import { Drawer, ModernSelect, Text, Toggle } from '@repo/ui';
+import { Drawer, ModernSelect, ModernTextInput, Text, Toggle } from '@repo/ui';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -29,6 +29,7 @@ export const AddListingsDrawerComponent = ({
   onBack,
   onSubmit,
   canProceed,
+  schedule,
 }: AddListingsDrawerComponentProps) => {
   const { t } = useTranslation(['listings', 'translation']);
   const { control } = form;
@@ -175,6 +176,66 @@ export const AddListingsDrawerComponent = ({
                   )}
                 />
               </S.DraftRow>
+            </S.SectionBlock>
+          </S.Card>
+
+          <S.Card>
+            <S.SectionBlock>
+              <S.DraftRow>
+                <S.DraftCopy>
+                  <Text variant="h5" weight="semibold" color="text.primary">
+                    {t('listings.schedule.title')}
+                  </Text>
+                  <Text variant="caption" color="text.secondary">
+                    {t('listings.schedule.hint')}
+                  </Text>
+                </S.DraftCopy>
+                <Toggle
+                  checked={schedule.enabled}
+                  onChange={schedule.onEnabledChange}
+                  disabled={isLoading || isSubmitting}
+                  ariaLabel={t('listings.schedule.title')}
+                />
+              </S.DraftRow>
+              {schedule.enabled && (
+                <>
+                  <S.ScheduleGrid>
+                    <ModernTextInput
+                      name="schedulePerDay"
+                      type="number"
+                      label={t('listings.schedule.perDay')}
+                      value={schedule.perDay}
+                      onChange={schedule.onPerDayChange}
+                      errorMessage={schedule.perDayError}
+                      isDisabled={isLoading || isSubmitting}
+                      fullWidth
+                    />
+                    <ModernSelect
+                      name="scheduleStartHour"
+                      label={t('listings.schedule.startHour')}
+                      options={schedule.startHourOptions}
+                      value={schedule.startHour}
+                      onChange={(value) => schedule.onStartHourChange(String(value))}
+                      isDisabled={isLoading || isSubmitting}
+                      fullWidth
+                    />
+                    <ModernSelect
+                      name="scheduleEndHour"
+                      label={t('listings.schedule.endHour')}
+                      options={schedule.endHourOptions}
+                      value={schedule.endHour}
+                      onChange={(value) => schedule.onEndHourChange(String(value))}
+                      isDisabled={isLoading || isSubmitting}
+                      fullWidth
+                    />
+                  </S.ScheduleGrid>
+                  {schedule.estimate && (
+                    <Text variant="caption" color="text.secondary">
+                      {schedule.estimate}
+                    </Text>
+                  )}
+                </>
+              )}
             </S.SectionBlock>
           </S.Card>
         </S.StepPanel>

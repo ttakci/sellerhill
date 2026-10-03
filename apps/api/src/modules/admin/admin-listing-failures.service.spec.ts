@@ -27,6 +27,9 @@ describe('SELLER_CAUSED_LISTING_FAILURE_CODES', () => {
     expect([...SELLER_CAUSED_LISTING_FAILURE_CODES].sort()).toEqual(
       [
         ListingFailureCode.BLACKLISTED_KEYWORD,
+        // The seller's own listing rules (blocked ASIN, VeRO protection, price
+        // range, rating…) — same class as their blacklist.
+        ListingFailureCode.BLOCKED_BY_RULE,
         ListingFailureCode.DUPLICATE_LISTING,
         ListingFailureCode.ZERO_STOCK,
         ListingFailureCode.QUOTA_EXHAUSTED,

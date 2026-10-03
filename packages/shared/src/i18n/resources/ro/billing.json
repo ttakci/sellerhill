@@ -27,6 +27,12 @@
         "name": "Încercare gratuită",
         "description": "O încercare limitată în timp a SellerHill. Nu poate fi achiziționată — începe automat la înregistrare."
       },
+      "unlimitedOrders": "Comenzi automate și urmărire a livrărilor nelimitate",
+      "activeListings": "{{limit}} anunțuri active · adăugări și eliminări nelimitate",
+      "mini": {
+        "name": "Mini",
+        "description": "Pentru vânzătorii care încep cu primele o sută de anunțuri."
+      },
       "lite": {
         "name": "Lite",
         "description": "Pentru vânzătorii care abia încep, cu un catalog mic."

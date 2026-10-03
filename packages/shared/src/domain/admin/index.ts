@@ -4,3 +4,4 @@ export * from './listing-failures.types';
 export * from './listing-quality.types';
 export * from './platform-settings.types';
 export * from './queue-observability.types';
+export * from './vero.types';

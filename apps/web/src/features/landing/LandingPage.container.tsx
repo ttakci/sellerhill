@@ -29,7 +29,11 @@ function formatLandingPrice(micros: number, currency: string, freeLabel: string)
   return formatCurrency(major, 'en-US', currency, major % 1 === 0 ? 0 : 2);
 }
 
-/** Format the listings limit line. -1 → unlimited, 0 → not included, N → "Up to N listings". */
+/**
+ * Format the listings limit line. -1 → unlimited, 0 → not included, N → "N active
+ * listings · add and remove without limit": the limit is a LEVEL, so ending a
+ * listing frees its slot and the copy says so.
+ */
 function formatListingsLine(
   limit: number,
   t: (key: string, params?: Record<string, string | number>) => string,
@@ -92,7 +96,7 @@ function formatAmazonOrdersLine(
 /**
  * The plans shown before the visitor expands the grid: the three cheapest paid
  * tiers, so the collapsed section reads as "here is where the ladder starts"
- * rather than the full twelve-row price list. The rest are one click away via
+ * rather than the full thirteen-row price list. The rest are one click away via
  * the expander. Derived from the catalog's own monthly prices (below), never a
  * hardcoded slug list, so a catalog re-price can never leave it stale.
  */
@@ -187,11 +191,11 @@ export const LandingPageContainer = (): React.ReactElement => {
    * The "plans from $X" figure on the hero price badge. Derived from the
    * catalog's cheapest paid monthly tier so it can never drift from the pricing
    * section further down the page; the literal fallback matches the real
-   * cheapest tier (Lite, $24.99 since 2026-09-29) the same way
+   * cheapest tier (Mini, $19.99 since migration 137) the same way
    * `landing.pricing.catalogFallback` has to stay aligned with the catalog.
    */
   const startingPriceDisplay = useMemo(() => {
-    const FALLBACK = '$24.99';
+    const FALLBACK = '$19.99';
     if (!catalog || catalog.plans.length === 0) {
       return FALLBACK;
     }

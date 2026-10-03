@@ -97,4 +97,9 @@ def build_content(html, site):
         "specs": {**extra, **(d.get("overview") or {}), **details},
         "identifiers": {**identifiers_from_specs(extra), **(d.get("identifiers") or {})},
         "variationAttributes": current_variation_attributes(d.get("variations")),
+        # Reputation + Prime badge, for the seller's listing rules (minimum
+        # rating / review count). None = the page shows no ratings yet.
+        "rating": (d.get("rating") or {}).get("average"),
+        "ratingCount": (d.get("rating") or {}).get("count"),
+        "isPrime": d.get("is_prime"),
     }

@@ -118,6 +118,13 @@
         "description_other": "{{count}} pedidos fueron cancelados en eBay en los últimos {{days}} días, pero los pedidos de Amazon hechos para ellos siguen abiertos. Ya nadie espera esos artículos: cancela los pedidos de Amazon o devuelve los artículos si ya se enviaron.",
         "action": "Revisar pedidos"
       },
+      "order_late_to_ship": {
+        "title": "Pedidos que superaron la fecha límite de envío de eBay",
+        "description_one": "{{count}} pedido superó la fecha límite de envío de eBay y eBay aún no tiene ningún envío para él. Un envío tardío cuenta en contra de tu cuenta de vendedor.",
+        "description_many": "{{count}} pedidos superaron la fecha límite de envío de eBay y eBay aún no tiene ningún envío para ellos. Los envíos tardíos cuentan en contra de tu cuenta de vendedor.",
+        "description_other": "{{count}} pedidos superaron la fecha límite de envío de eBay y eBay aún no tiene ningún envío para ellos. Los envíos tardíos cuentan en contra de tu cuenta de vendedor.",
+        "action": "Revisar pedidos"
+      },
       "return_seller_action_due": {
         "title": "Devoluciones que esperan tu respuesta",
         "description_one": "{{count}} devolución tiene un paso que eBay espera de ti. Responde en eBay antes de la fecha límite que aparece en la página Devoluciones.",
@@ -230,6 +237,13 @@
         "title": "La automatización está suspendida",
         "description": "Tu suscripción ya no está activa, por lo que se detuvieron las publicaciones nuevas, las actualizaciones de precio y stock, la compra automática y la conversión de seguimiento. Elige un plan para reanudar: todo se reinicia por sí solo.",
         "action": "Elegir un plan"
+      },
+      "listing_not_selling": {
+        "title": "Publicaciones que no se venden",
+        "description_one": "{{count}} publicación activa no tuvo ninguna venta dentro del período que definiste. Revísala y finalízala si no vale el lugar que ocupa en tu plan.",
+        "description_many": "{{count}} publicaciones activas no tuvieron ninguna venta dentro del período que definiste. Revísalas y finaliza las que no valen el lugar que ocupan en tu plan.",
+        "description_other": "{{count}} publicaciones activas no tuvieron ninguna venta dentro del período que definiste. Revísalas y finaliza las que no valen el lugar que ocupan en tu plan.",
+        "action": "Revisar publicaciones"
       }
     },
     "reasons": {

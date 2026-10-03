@@ -1,6 +1,8 @@
 import type { TrackingConversionProvider, TrackingConversionScope } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
+import type { ListingRulesConfig } from './listing-rules';
+
 /**
  * Steps of the store-settings drawer wizard. The BLACKLIST step here only
  * hosts the `checkBlacklist` master switch — keyword management itself is a
@@ -46,10 +48,24 @@ export function createDefaultBlacklist(): BlacklistKeyword[] {
     }));
 }
 
+/**
+ * What a matched keyword does. `BLOCK` (the default, and what every entry
+ * saved before this existed means) refuses the listing. `REMOVE` strips the
+ * word from the title / description / features it is scoped to and lists the
+ * product anyway — for words like "guarantee" that are a problem in the copy,
+ * not a reason to skip the product. Matching is whole-word either way.
+ */
+export enum BlacklistAction {
+    BLOCK = 'block',
+    REMOVE = 'remove',
+}
+
 export interface BlacklistKeyword {
     id: string;
     keyword: string;
     types: BlacklistType[];
+    /** Absent = BLOCK. */
+    action?: BlacklistAction;
 }
 
 /**
@@ -145,6 +161,13 @@ export interface StoreSettings {
     // `store_settings.buyer_messaging` JSONB). Nullable — null/undefined means
     // the feature is off (no automated buyer messages). See BuyerMessagingConfig.
     buyerMessaging?: BuyerMessagingConfig | null;
+
+    // What this seller refuses to list (VeRO protection, blocked ASINs, price
+    // range, Amazon-shipped only, rating / review minimums, clean-up rules).
+    // Absent on a row that never saved any — read it through
+    // `normalizeListingRules`; the RESOLVED settings always carry it, with a
+    // store row that has none inheriting the global row's.
+    listingRules?: ListingRulesConfig;
 
     createdAt: Date;
     updatedAt: Date;

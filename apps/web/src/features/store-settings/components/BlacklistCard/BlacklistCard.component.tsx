@@ -1,3 +1,4 @@
+import { BlacklistAction } from '@repo/shared';
 import { Badge, Card, Checkbox, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import { BlacklistCardProps } from './BlacklistCard.types';
 export const BlacklistCard: React.FC<BlacklistCardProps> = ({
   keyword,
   types,
+  action,
   onRemove,
   selectable = false,
   selected = false,
@@ -52,6 +54,11 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
         </S.CardHeader>
         <S.CardBody>
           <S.ScopeSection>
+            {action === BlacklistAction.REMOVE && (
+              <Badge variant="sky" size="xs">
+                {t('storeSettings:storeSettings.blacklistAction_remove')}
+              </Badge>
+            )}
             {types.map((type) => (
               <Badge key={type} variant="neutral" size="xs">
                 {t(`storeSettings:storeSettings.blacklistType_${type}`)}

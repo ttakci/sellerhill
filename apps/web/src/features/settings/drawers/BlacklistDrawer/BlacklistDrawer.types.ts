@@ -1,6 +1,11 @@
-import type { BlacklistType, StoreSettingsResponse } from '@repo/shared';
+import type { BlacklistAction, BlacklistType, StoreSettingsResponse } from '@repo/shared';
 
-export type BlacklistItem = { keyword: string; types: BlacklistType[] };
+export type BlacklistItem = { keyword: string; types: BlacklistType[]; action: BlacklistAction };
+
+export interface BlacklistActionOption {
+  value: BlacklistAction;
+  label: string;
+}
 
 export interface BlacklistTypeOption {
   value: BlacklistType;
@@ -27,6 +32,12 @@ export interface BlacklistDrawerComponentProps {
   selectedTypes: BlacklistType[];
   typeOptions: BlacklistTypeOption[];
   onToggleType: (value: BlacklistType) => void;
+  /** What a match does: refuse the listing, or strip the word and list anyway. */
+  action: BlacklistAction;
+  actionOptions: BlacklistActionOption[];
+  onActionChange: (value: string) => void;
+  actionLabel: string;
+  actionHint: string;
   onAdd: () => void;
   errorMessage: string | null;
   // list (filtered by search)

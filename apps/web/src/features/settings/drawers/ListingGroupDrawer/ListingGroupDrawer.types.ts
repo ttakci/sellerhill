@@ -24,6 +24,10 @@ export interface ListingGroupDrawerComponentProps {
   append: UseFieldArrayAppend<ListingSettingsGroupFormData, 'repricingStrategy'>;
   remove: UseFieldArrayRemove;
   onAddRange: () => void;
+  isPriceRoundingEnabled: boolean;
+  onPriceRoundingToggle: (enabled: boolean) => void;
+  /** Already-localized worked example for the current ending ("$27.31 → $27.99"). */
+  priceRoundingExample: string;
   templateOptions: Array<{ value: string; label: string }>;
   selectedTemplateValue: string;
   onTemplateChange: (value: string | number) => void;

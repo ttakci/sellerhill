@@ -1,4 +1,4 @@
-import { BlacklistType } from '@repo/shared';
+import { BlacklistAction, BlacklistType } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +15,17 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 const ALL_BLACKLIST_TYPES = Object.values(BlacklistType);
 
 /** Normalize a persisted blacklist entry into the local draft shape. */
-const toItems = (entries: Array<{ keyword: string; types: BlacklistType[] }> | undefined): BlacklistItem[] =>
-  (entries ?? []).map((b) => ({ keyword: b.keyword, types: [...b.types] }));
+const toItems = (
+  entries: Array<{ keyword: string; types: BlacklistType[]; action?: BlacklistAction }> | undefined,
+): BlacklistItem[] =>
+  // An entry saved before the action existed has none, and means "block".
+  (entries ?? []).map((b) => ({ keyword: b.keyword, types: [...b.types], action: b.action ?? BlacklistAction.BLOCK }));
+
+/** A removed word has no brand field to be removed from — the brand is not copy. */
+const REMOVABLE_TYPES = ALL_BLACKLIST_TYPES.filter((type) => type !== BlacklistType.BRAND_MANUFACTURER);
+
+const typesFor = (action: BlacklistAction): BlacklistType[] =>
+  (action === BlacklistAction.REMOVE ? REMOVABLE_TYPES : ALL_BLACKLIST_TYPES);
 
 export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   isOpen,
@@ -38,6 +47,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   const [blacklist, setBlacklist] = useState<BlacklistItem[]>(originalBlacklist);
   const [keywords, setKeywords] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<BlacklistType[]>(ALL_BLACKLIST_TYPES);
+  const [action, setAction] = useState<BlacklistAction>(BlacklistAction.BLOCK);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -54,6 +64,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       setBlacklist(originalBlacklist);
       setKeywords('');
       setSelectedTypes(ALL_BLACKLIST_TYPES);
+      setAction(BlacklistAction.BLOCK);
       setErrorMessage(null);
       setSearchValue('');
       setSelectedItems([]);
@@ -80,6 +91,14 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       current.includes(type) ? current.filter((item) => item !== type) : [...current, type]);
   }, []);
 
+  const handleActionChange = useCallback((value: string): void => {
+    const next = Object.values(BlacklistAction).find((item) => String(item) === value) ?? BlacklistAction.BLOCK;
+    setAction(next);
+    // Each action starts from every field it can apply to.
+    setSelectedTypes(typesFor(next));
+    setErrorMessage(null);
+  }, []);
+
   const handleAdd = useCallback(() => {
     const keywordList = keywords
       .split(/[\n,]/)
@@ -98,17 +117,25 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     const next = blacklist.map((item) => ({ ...item, types: [...item.types] }));
     for (const keyword of keywordList) {
       const existing = next.find((item) => item.keyword.toLowerCase() === keyword.toLowerCase());
-      if (existing) {
+      if (existing && existing.action === action) {
         existing.types = Array.from(new Set([...existing.types, ...selectedTypes]));
+      } else if (existing) {
+        // The same word with the other action: the newer choice replaces it —
+        // a word cannot both refuse a listing and be removed from it.
+        existing.action = action;
+        existing.types = [...selectedTypes];
       } else {
-        next.push({ keyword, types: [...selectedTypes] });
+        next.push({ keyword, types: [...selectedTypes], action });
       }
     }
 
     const changed = next.length !== blacklist.length
       || next.some((item) => {
         const old = blacklist.find((b) => b.keyword.toLowerCase() === item.keyword.toLowerCase());
-        return !old || old.types.length !== item.types.length || !old.types.every((type) => item.types.includes(type));
+        return !old
+          || old.action !== item.action
+          || old.types.length !== item.types.length
+          || !old.types.every((type) => item.types.includes(type));
       });
     if (!changed) {
       setErrorMessage(t('translation:settingsHub.drawer.blacklist.add.duplicate'));
@@ -118,7 +145,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     setErrorMessage(null);
     setBlacklist(next);
     setKeywords('');
-  }, [keywords, blacklist, selectedTypes, t]);
+  }, [keywords, blacklist, selectedTypes, action, t]);
 
   const handleRemove = useCallback((keyword: string): void => {
     setBlacklist((prev) => prev.filter((b) => b.keyword !== keyword));
@@ -151,7 +178,10 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     }
     return blacklist.some((b) => {
       const old = originalBlacklist.find((o) => o.keyword === b.keyword);
-      return !old || old.types.length !== b.types.length || !old.types.every((type) => b.types.includes(type));
+      return !old
+        || old.action !== b.action
+        || old.types.length !== b.types.length
+        || !old.types.every((type) => b.types.includes(type));
     });
   }, [blacklist, originalBlacklist]);
 
@@ -164,7 +194,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       isGlobal,
       storeId: isGlobal ? undefined : selectedScope,
       amazonTaxRate: config?.amazonTaxRate ?? 0,
-      blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types })),
+      blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types, action: b.action })),
     })
       .unwrap()
       .then(() => {
@@ -191,11 +221,19 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       keywords={keywords}
       onKeywordsChange={(e) => setKeywords(e.target.value)}
       selectedTypes={selectedTypes}
-      typeOptions={ALL_BLACKLIST_TYPES.map((value) => ({
+      typeOptions={typesFor(action).map((value) => ({
         value,
         label: t(`translation:settingsHub.drawer.blacklist.add.type.${value}`),
       }))}
       onToggleType={handleToggleType}
+      action={action}
+      actionOptions={[BlacklistAction.BLOCK, BlacklistAction.REMOVE].map((value) => ({
+        value,
+        label: t(`translation:settingsHub.drawer.blacklist.add.action.${value}`),
+      }))}
+      onActionChange={handleActionChange}
+      actionLabel={t('translation:settingsHub.drawer.blacklist.add.actionLabel')}
+      actionHint={t(`translation:settingsHub.drawer.blacklist.add.actionHint.${action}`)}
       onAdd={handleAdd}
       errorMessage={errorMessage}
       items={items}

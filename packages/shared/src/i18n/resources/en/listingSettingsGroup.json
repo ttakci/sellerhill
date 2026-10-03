@@ -139,6 +139,7 @@
       "maxFeePercent": "Fee percentage cannot exceed 100%",
       "minFeePercent": "Fee percentage must be 0 or greater",
       "minFixedFee": "Fixed fee must be 0 or greater",
+      "priceEndingRange": "Enter a whole number from 0 to 99",
       "invalidNumber": "Enter a valid number without a leading zero (for example 0.4, not 04)",
       "templateRequired": "Template content is required",
       "templateMinLength": "Template must be at least 10 characters",
@@ -208,10 +209,18 @@
         "netTarget": "Target before eBay fees",
         "ebayFee": "eBay fee ({{pct}})",
         "fixedFee": "Fixed fee",
-        "floorApplied": "Below eBay's $0.99 minimum, raised to"
+        "floorApplied": "Below eBay's $0.99 minimum, raised to",
+        "rounding": "Rounded up to {{ending}}"
       }
     },
     "feesAndTaxes": "Fees & Taxes",
+    "priceRounding": {
+      "title": "Round price ending",
+      "info": "Every calculated price is rounded up to the next amount with this ending, so your target profit is never reduced. A fixed price you set on a listing is not changed.",
+      "endingLabel": "Price ending (cents, 0–99)",
+      "example": "Example: {{from}} becomes {{to}}.",
+      "hint": "Enter a whole number from 0 to 99 — 99 gives prices like $24.99."
+    },
     "amazonTaxRateNote": "Your price calculation automatically accounts for the estimated tax you pay when buying from Amazon. Set this rate under Store Settings → Amazon Sales Tax Rate.",
     "stockControl": "Stock Control",
     "ebayStockQuantity": "eBay Stock",

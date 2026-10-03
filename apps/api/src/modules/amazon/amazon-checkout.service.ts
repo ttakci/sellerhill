@@ -137,6 +137,19 @@ const ADDRESS_STEP_READY_TIMEOUT_MS = 20_000;
 // helper throws a typed `AutoFulfillBlockedError` on its specific failure so
 // the runner can record a precise `blocked_reason` for the operator.
 // ---------------------------------------------------------------------------
+/**
+ * The review step's link to the gift-options page. Read from a captured review
+ * page (order 11-15241-61922, 2026-10-02) — the page BEHIND it has never been
+ * recorded, which is why marking an order as a gift is not built yet.
+ */
+const GIFT_OPTIONS_LINK = 'a[id^="checkout-item-block-gift-options-link-"]';
+/**
+ * The account's address book. NOT read from a capture — no saved page links to
+ * it — so it is used only to RECORD that page; nothing clicks anything on it.
+ */
+const ADDRESS_BOOK_PATH = '/a/addresses';
+const REFERENCE_CAPTURE_TIMEOUT_MS = 15_000;
+
 const CHECKOUT_SELECTORS = {
   // --- Product page (/dp/ASIN) ---
   unavailableText: [
@@ -572,10 +585,48 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           // order on Amazon instead of waiting for the 3-hourly tick.
           await this.scheduleReconciliation(amazonAccountId, ebayOrderId);
         }
+        if (err.reason === 'out_of_stock') {
+          await this.requestSourceRecheck(ebayOrderId);
+        }
         return; // deliberate stop — do NOT throw (no BullMQ retry)
       }
       // transport/infra — let BullMQ retry; processor marks `failed` on exhaustion.
       throw err;
+    }
+  }
+
+  /**
+   * Amazon would not sell the item to our buyer account: have the product
+   * re-read on the next refresh tick instead of at its scheduled time.
+   *
+   * The listing is deliberately NOT forced to 0 here. `products` is one row
+   * per ASIN shared by every seller, and "this account could not add it to the
+   * cart" is not proof the product is out of stock for everyone (a per-account
+   * purchase limit reads the same). Making the row due lets the refresh — the
+   * one authority on price and stock — observe the page within a minute or
+   * two: if it really is out of stock, every listing of the ASIN drops to 0
+   * through the normal fan-out; if it is not, nothing changes. Without this
+   * the listing kept selling a sold-out item for up to a whole refresh
+   * interval. NULL rather than NOW(): the claim orders by `next_refresh_at
+   * ASC NULLS FIRST`, so the row goes to the head of the queue instead of
+   * behind whatever backlog is already overdue. Best-effort: it must never
+   * turn a recorded block into a retry.
+   */
+  private async requestSourceRecheck(ebayOrderId: string): Promise<void> {
+    try {
+      await this.db.query(
+        `UPDATE products p
+            SET next_refresh_at = NULL
+           FROM orders o
+           JOIN listings l ON l.id = o.listing_id
+          WHERE o.ebay_order_id = $1
+            AND p.id = l.product_id`,
+        [ebayOrderId]
+      );
+    } catch (error: unknown) {
+      this.logger.warn(
+        `source recheck request failed for ${ebayOrderId}: ${error instanceof Error ? error.message : 'unknown'}`
+      );
     }
   }
 
@@ -894,6 +945,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // Dry-run MUST stop before any place-order click — no money leaves.
       if (dryRun) {
         await this.snap(page, ebayOrderId, 'dry_run_review');
+        // A dry run buys nothing, so it is the one place the gift-options page
+        // can be opened without any risk to a purchase.
+        await this.captureGiftOptionsPage(page, ebayOrderId, marketplace);
+        await this.captureReferencePage(page, ebayOrderId, 'address-book', ADDRESS_BOOK_PATH, marketplace);
         // Simulate the post-purchase bookkeeping so an operator can verify what a
         // real placement does to the order — costs, cost-capture status, net
         // profit, tracking — WITHOUT money leaving. The Amazon order id carries
@@ -984,6 +1039,8 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         // Proven but unnumbered: read the number from "Your Orders" soon.
         await this.scheduleReconciliation(amazonAccountId, ebayOrderId);
       }
+      // The order is placed and recorded; nothing here can change that.
+      await this.captureReferencePage(page, ebayOrderId, 'address-book', ADDRESS_BOOK_PATH, marketplace);
       this.logger.log(
         `placed ${ebayOrderId}: amazon=${placed.amazonOrderId} total=${(
           placed.purchasePrice +
@@ -2320,6 +2377,69 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     const base = this.minTimeMs;
     const jitter = Math.floor(Math.random() * 800);
     await new Promise((r) => setTimeout(r, base + jitter));
+  }
+
+  /**
+   * Save a page the checkout does NOT walk through, so a later step can be
+   * written against its real markup instead of a guess.
+   *
+   * Two features are waiting on exactly this: marking an order as a gift
+   * (the page behind the review step's "Add gift options" link) and removing
+   * the buyer's address from the account's address book after the order. The
+   * saved evidence held only the pages the flow visits — review, thank-you,
+   * order history — so neither page had ever been recorded.
+   *
+   * Opened in a SEPARATE tab of the same session and closed again; the
+   * checkout page itself is never navigated. Read-only (one GET), bounded,
+   * and it never throws: a capture must not be able to change the outcome of
+   * an order. Off with `AUTO_FULFILL_CAPTURE_REFERENCE_PAGES=false`.
+   */
+  private async captureReferencePage(
+    page: Page,
+    ebayOrderId: string,
+    stage: string,
+    pathOrUrl: string,
+    marketplace: AmazonMarketplace
+  ): Promise<void> {
+    if (process.env.AUTO_FULFILL_CAPTURE_REFERENCE_PAGES === 'false') {
+      return;
+    }
+    let tab: Page | null = null;
+    try {
+      const url = new URL(pathOrUrl, buildAmazonSiteUrl(marketplace)).toString();
+      tab = await page.context().newPage();
+      await tab.goto(url, { waitUntil: 'domcontentloaded', timeout: REFERENCE_CAPTURE_TIMEOUT_MS });
+      // The address book and the gift panel are filled in client-side.
+      await tab.waitForLoadState('networkidle', { timeout: REFERENCE_CAPTURE_TIMEOUT_MS }).catch(() => undefined);
+      await this.snap(tab, ebayOrderId, stage);
+    } catch (err) {
+      this.logger.warn(`reference capture ${stage} failed for ${ebayOrderId}: ${(err as Error).message}`);
+    } finally {
+      await tab?.close().catch(() => undefined);
+    }
+  }
+
+  /**
+   * The gift-options page, reached through the review step's own link
+   * (`a[id^="checkout-item-block-gift-options-link-"]`, read from a captured
+   * review page — order 11-15241-61922, 2026-10-02). Dry runs only: opening a
+   * second page of the checkout pipeline next to a live one, seconds before a
+   * real Place Order click, is not a risk worth taking for a capture.
+   */
+  private async captureGiftOptionsPage(page: Page, ebayOrderId: string, marketplace: AmazonMarketplace): Promise<void> {
+    try {
+      const href = await page
+        .locator(GIFT_OPTIONS_LINK)
+        .first()
+        .getAttribute('href', { timeout: 3_000 });
+      if (!href) {
+        this.logger.warn(`reference capture gift-options skipped for ${ebayOrderId}: no gift options link on the review page`);
+        return;
+      }
+      await this.captureReferencePage(page, ebayOrderId, 'gift-options-page', href, marketplace);
+    } catch (err) {
+      this.logger.warn(`reference capture gift-options failed for ${ebayOrderId}: ${(err as Error).message}`);
+    }
   }
 
   /**

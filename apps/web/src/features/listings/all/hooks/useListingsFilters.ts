@@ -88,6 +88,8 @@ export function useListingsFilters() {
    * no dedicated UI control, same treatment as `soldFrom`/`soldTo` above.
    */
   const sourceUnavailable = searchParams.get('sourceUnavailable') === 'true';
+  /** Deep-link filter for the Action Center's LISTING_NOT_SELLING item — same treatment. */
+  const notSelling = searchParams.get('notSelling') === 'true';
 
   const filters: ListingsFilterState = useMemo(
     () => ({
@@ -311,6 +313,7 @@ export function useListingsFilters() {
       soldFrom: soldFrom || undefined,
       soldTo: soldTo || undefined,
       sourceUnavailable: sourceUnavailable || undefined,
+      notSelling: notSelling || undefined,
     };
 
     const assignRange = (
@@ -338,7 +341,7 @@ export function useListingsFilters() {
     assignRange('sourceStockMin', 'sourceStockMax', filters.sourceStock);
 
     return q;
-  }, [page, rowsPerPage, filters, sortColumn, sortDirection, soldFrom, soldTo, hasSoldPeriod, sourceUnavailable]);
+  }, [page, rowsPerPage, filters, sortColumn, sortDirection, soldFrom, soldTo, hasSoldPeriod, sourceUnavailable, notSelling]);
 
   /** Operational statuses only — draft / error / retrying are job/pipeline states, not list UI. */
   const statusOptions = useMemo(

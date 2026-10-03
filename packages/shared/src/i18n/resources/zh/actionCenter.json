@@ -100,6 +100,11 @@
         "description_other": "最近 {{days}} 天内有 {{count}} 笔订单在 eBay 被取消，但为其下的 Amazon 订单仍未关闭。已经没有买家在等这些商品——请取消 Amazon 订单；如已发货，请办理退货。",
         "action": "查看订单"
       },
+      "order_late_to_ship": {
+        "title": "已超过 eBay 发货期限的订单",
+        "description_other": "{{count}} 个订单已超过 eBay 发货期限，而 eBay 仍没有其发货记录。延迟发货会计入您的卖家账户。",
+        "action": "查看订单"
+      },
       "return_seller_action_due": {
         "title": "等待您回复的退货",
         "description_other": "有 {{count}} 笔退货需要您完成 eBay 要求的下一步。请在“退货”页面显示的截止时间前到 eBay 处理。",
@@ -194,6 +199,11 @@
         "title": "自动化已暂停",
         "description": "您的订阅已不再有效，因此新的商品刊登、价格和库存更新、自动采购以及物流单号转换均已停止。选择一个套餐即可恢复，一切都会自动重新开始。",
         "action": "选择套餐"
+      },
+      "listing_not_selling": {
+        "title": "不出单的商品刊登",
+        "description_other": "有 {{count}} 条在售商品刊登在您设置的期限内没有任何销售。请检查，并结束那些不值得占用套餐名额的刊登。",
+        "action": "查看商品刊登"
       }
     },
     "reasons": {

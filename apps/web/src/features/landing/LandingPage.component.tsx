@@ -226,7 +226,6 @@ const INCLUDED_FEATURE_KEYS = [
   'groups',
   'sync',
   'specifics',
-  'autoOrder',
   'actions',
   'profit',
   'multiStore',
@@ -1069,6 +1068,10 @@ export const LandingPageComponent = ({
                       </S.PlanPrice>
                       <S.PlanDesc>{t(`billing:billing.plans.${plan.slug}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
+                        <S.PlanFeature $strong>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{plan.amazonOrdersDisplay}</span>
+                        </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.listingsDisplay}</span>
@@ -1080,10 +1083,6 @@ export const LandingPageComponent = ({
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.bestSellersDisplay}</span>
-                        </S.PlanFeature>
-                        <S.PlanFeature>
-                          <Icon name="check-circle" size={15} color="semantic.success" />
-                          <span>{plan.amazonOrdersDisplay}</span>
                         </S.PlanFeature>
                         {includedFeatures.map((feat) => (
                           <S.PlanFeature key={feat}>
@@ -1114,6 +1113,12 @@ export const LandingPageComponent = ({
                       </S.PlanPrice>
                       <S.PlanDesc>{t(`billing:billing.plans.${plan}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
+                        <S.PlanFeature $strong>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.orders`)}
+                          </span>
+                        </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>
@@ -1130,12 +1135,6 @@ export const LandingPageComponent = ({
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>
                             {t(`translation:landing.pricing.catalogFallback.${plan}.bestSellers`)}
-                          </span>
-                        </S.PlanFeature>
-                        <S.PlanFeature>
-                          <Icon name="check-circle" size={15} color="semantic.success" />
-                          <span>
-                            {t(`translation:landing.pricing.catalogFallback.${plan}.orders`)}
                           </span>
                         </S.PlanFeature>
                         {includedFeatures.map((feat) => (

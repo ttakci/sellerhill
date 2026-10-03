@@ -27,6 +27,12 @@
         "name": "Ücretsiz deneme",
         "description": "SellerHill'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
       },
+      "unlimitedOrders": "Sınırsız otomatik sipariş ve kargo takibi",
+      "activeListings": "{{limit}} aktif ilan · sınırsız ilan ekleme ve kaldırma",
+      "mini": {
+        "name": "Mini",
+        "description": "İlk yüz ilanıyla işe başlayan satıcılar için."
+      },
       "lite": {
         "name": "Lite",
         "description": "Küçük bir katalogla yeni başlayan satıcılar için."
