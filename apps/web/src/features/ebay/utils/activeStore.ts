@@ -43,3 +43,37 @@ export const rememberStore = (userId: string | null | undefined, storeId: string
     // Private window / blocked storage — the first store is the fallback.
   }
 };
+
+/**
+ * On a store-scoped page the URL mirrors the active store, so a copied link
+ * opens the same store. Returns the corrected params, or `null` when the URL
+ * is already right (or the page has no store, or none is known yet).
+ */
+export const nextSearchForActiveStore = (
+  search: URLSearchParams,
+  activeStoreId: string | null,
+  storeScoped: boolean
+): URLSearchParams | null => {
+  if (!storeScoped || !activeStoreId || search.get('store') === activeStoreId) {
+    return null;
+  }
+  const next = new URLSearchParams(search);
+  next.set('store', activeStoreId);
+  return next;
+};
+
+/**
+ * The query string after the seller picks another store. A switch starts the
+ * page over — page 1, no open record, no selection, no open drawer — so only
+ * the store survives. Following a record's own store (a detail page opened
+ * from another store) keeps the page's params, or the record would close.
+ */
+export const searchForStoreSwitch = (
+  search: URLSearchParams,
+  storeId: string,
+  keepParams: boolean
+): URLSearchParams => {
+  const next = keepParams ? new URLSearchParams(search) : new URLSearchParams();
+  next.set('store', storeId);
+  return next;
+};
