@@ -3,7 +3,7 @@
  */
 
 import type { DashboardTab } from '@repo/shared';
-import type { IconName, SelectOption } from '@repo/ui';
+import type { IconName } from '@repo/ui';
 
 import type { CardsPanelProps } from '../components/CardsPanel';
 import type { ChartPanelContainerProps } from '../components/ChartPanel/ChartPanel.types';
@@ -21,11 +21,6 @@ export interface DashboardPageComponentProps {
   tabs: DashboardTabItem[];
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
-  /** Store filter — hidden when the user has no connected eBay store. */
-  storeId: string;
-  storeOptions: SelectOption[];
-  onStoreChange: (value: string | number) => void;
-  showStoreSelector: boolean;
   cardsProps: CardsPanelProps;
   chartProps: ChartPanelContainerProps;
   pnlProps: PnlPanelContainerProps;

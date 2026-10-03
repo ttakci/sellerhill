@@ -25,9 +25,6 @@ export interface OrdersAllPageProps {
   stage: string;
   onStageChange: (value: string | number) => void;
   stageOptions: { value: string | number; label: string }[];
-  ebayAccountId: string;
-  onEbayAccountChange: (value: string | number) => void;
-  storeOptions: { value: string | number; label: string }[];
   trackingState: string;
   onTrackingStateChange: (value: string | number) => void;
   trackingStateOptions: { value: string | number; label: string }[];

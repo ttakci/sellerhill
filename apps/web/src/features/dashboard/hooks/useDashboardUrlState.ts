@@ -1,6 +1,6 @@
 /**
- * URL-backed dashboard state: active tab, selected period card, store filter
- * and chart granularity. Keeping it in the query string makes every dashboard
+ * URL-backed dashboard state: active tab, selected period card and chart
+ * granularity (the store is the top bar's active store, `useActiveStore`). Keeping it in the query string makes every dashboard
  * view shareable and survives a refresh.
  */
 
@@ -12,10 +12,7 @@ import type { DashboardUrlState } from '../dashboard.types';
 
 const PARAM_TAB = 'tab';
 const PARAM_PERIOD = 'period';
-const PARAM_STORE = 'store';
 const PARAM_GRANULARITY = 'granularity';
-
-export const ALL_STORES = 'all';
 
 const DEFAULT_TAB = DashboardTab.CARDS;
 const DEFAULT_PERIOD = DashboardPeriodKey.TODAY;
@@ -38,7 +35,6 @@ export function useDashboardUrlState(): DashboardUrlState {
     Object.values(DashboardChartGranularity),
     DEFAULT_GRANULARITY,
   );
-  const storeId = searchParams.get(PARAM_STORE) ?? ALL_STORES;
 
   const patch = useCallback(
     (param: string, value: string, defaultValue: string) => {
@@ -61,17 +57,13 @@ export function useDashboardUrlState(): DashboardUrlState {
     (value: DashboardPeriodKey) => patch(PARAM_PERIOD, value, DEFAULT_PERIOD),
     [patch],
   );
-  const setStoreId = useCallback(
-    (value: string) => patch(PARAM_STORE, value, ALL_STORES),
-    [patch],
-  );
   const setGranularity = useCallback(
     (value: DashboardChartGranularity) => patch(PARAM_GRANULARITY, value, DEFAULT_GRANULARITY),
     [patch],
   );
 
   return useMemo(
-    () => ({ tab, period, storeId, granularity, setTab, setPeriod, setStoreId, setGranularity }),
-    [tab, period, storeId, granularity, setTab, setPeriod, setStoreId, setGranularity],
+    () => ({ tab, period, granularity, setTab, setPeriod, setGranularity }),
+    [tab, period, granularity, setTab, setPeriod, setGranularity],
   );
 }

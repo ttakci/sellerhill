@@ -6,7 +6,7 @@
  * makes no decisions — it only lays them out.
  */
 
-import { Badge, EmptyState, Icon, PageHeader, Select, TabNav, Text } from '@repo/ui';
+import { Badge, EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,9 +23,6 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   isInitialLoading,
   isEmpty,
   onItemAction,
-  selectedStore,
-  storeOptions,
-  onStoreChange,
 }) => {
   const { t } = useTranslation(['actionCenter', 'translation']);
 
@@ -140,20 +137,6 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
       <PageHeader
         title={t('actionCenter.title')}
         subtitle={t('actionCenter.subtitle')}
-        actions={
-          storeOptions.length > 0 ? (
-            <S.StoreSelect>
-              <Select
-                value={selectedStore}
-                onChange={onStoreChange}
-                options={storeOptions}
-                placeholder={t('actionCenter.storeFilter.label')}
-                size="small"
-                fullWidth
-              />
-            </S.StoreSelect>
-          ) : undefined
-        }
       />
 
       {/*

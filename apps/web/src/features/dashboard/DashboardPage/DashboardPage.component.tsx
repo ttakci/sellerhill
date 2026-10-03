@@ -4,7 +4,7 @@
  */
 
 import { DashboardTab } from '@repo/shared';
-import { PageHeader, Select } from '@repo/ui';
+import { PageHeader } from '@repo/ui';
 import React from 'react';
 
 import { CardsPanel } from '../components/CardsPanel';
@@ -20,10 +20,6 @@ export const DashboardPageComponent = ({
   tabs,
   activeTab,
   onTabChange,
-  storeId,
-  storeOptions,
-  onStoreChange,
-  showStoreSelector,
   cardsProps,
   chartProps,
   pnlProps,
@@ -39,18 +35,6 @@ export const DashboardPageComponent = ({
         value={activeTab}
         onChange={(id) => onTabChange(id as DashboardTab)}
       />
-
-      {showStoreSelector && (
-        <S.ToolbarRight>
-          <Select
-            value={storeId}
-            onChange={onStoreChange}
-            options={storeOptions}
-            size="small"
-            fullWidth
-          />
-        </S.ToolbarRight>
-      )}
     </S.Toolbar>
 
     {activeTab === DashboardTab.CHART && <ChartPanel {...chartProps} />}

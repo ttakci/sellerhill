@@ -15,9 +15,6 @@ export interface ReturnsPageProps {
   onTabChange: (tabId: string) => void;
   search: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  ebayAccountId: string;
-  onEbayAccountChange: (value: string | number) => void;
-  storeOptions: { value: string | number; label: string }[];
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;

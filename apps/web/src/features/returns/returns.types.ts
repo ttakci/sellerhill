@@ -40,7 +40,7 @@ export type ReturnsUrlParam = 'tab' | 'page' | 'store' | 'q' | 'r';
 export interface ReturnsUrlState {
   tab: ReturnTab;
   page: number;
-  /** eBay account id, or '' for all stores. */
+  /** The active store (top bar), or '' while the stores load. */
   store: string;
   /** The applied (debounced) search term. */
   search: string;
@@ -58,7 +58,6 @@ export interface UseReturnsUrlStateResult {
   openedWithSelection: boolean;
   setTab: (tab: ReturnTab) => void;
   setPage: (page: number) => void;
-  setStore: (store: string) => void;
   setSearchInput: (value: string) => void;
   setRowsPerPage: (rows: number) => void;
   clearFilters: () => void;
