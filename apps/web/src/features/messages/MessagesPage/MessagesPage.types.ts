@@ -1,5 +1,5 @@
 import type {
-  DropdownItem,
+  SelectOption,
   IconName,
   SegmentedControlOption,
   TabNavItem,
@@ -38,8 +38,9 @@ export interface MessagesCompactFilters {
 }
 
 export interface MessagesStoreSelector {
-  label: string;
-  items: DropdownItem[];
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string | number) => void;
 }
 
 export type MessagesPagination = Pick<
