@@ -55,6 +55,8 @@ export const CarouselCardArea = styled.div`
 export const CarouselViewport = styled.div`
   position: relative;
   overflow: hidden;
+  /* The viewport takes the horizontal swipe; vertical panning stays the drawer's. */
+  touch-action: pan-y;
   min-width: 0;
 `;
 

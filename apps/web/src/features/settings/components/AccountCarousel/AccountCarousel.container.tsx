@@ -3,6 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { AccountCarouselComponent } from './AccountCarousel.component';
 import type { AccountCarouselProps } from './AccountCarousel.types';
 
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
+
 export const AccountCarousel = <T,>({
   items,
   keyExtractor,
@@ -21,6 +23,7 @@ export const AccountCarousel = <T,>({
     [visibleCount],
   );
   const prevSlide = useCallback(() => setCurrentSlide((prev) => Math.max(prev - 1, 0)), []);
+  const swipeHandlers = useSwipeNavigation(nextSlide, prevSlide);
 
   return (
     <AccountCarouselComponent
@@ -34,6 +37,7 @@ export const AccountCarousel = <T,>({
       onNext={nextSlide}
       onPrev={prevSlide}
       onGoTo={goToSlide}
+      swipeHandlers={swipeHandlers}
     />
   );
 };
