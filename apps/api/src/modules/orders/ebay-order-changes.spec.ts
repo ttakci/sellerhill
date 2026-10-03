@@ -324,7 +324,8 @@ describe('order change tracking — source guards', () => {
     // Exactly one insert-only gate is left: the sold counter.
     expect(sync.match(/if \(inserted && listingId && entity\.quantity > 0\)/g)).toHaveLength(1);
     expect(sync.match(/if \(freshSale && listingId && entity\.quantity > 0\)/g)).toHaveLength(2);
-    expect(sync).toMatch(/if \(freshSale && !isOrderAlreadyFulfilled\(entity\.status\)/);
+    // The thank-you also needs a SellerHill listing behind the sale.
+    expect(sync).toMatch(/freshSale &&\s+listingId &&\s+!isOrderAlreadyFulfilled\(entity\.status\)/);
   });
 
   it('a new row is inserted with its own starting automation status, never the column default', () => {

@@ -34,6 +34,7 @@ import {
 } from '@/features/amazon/api/amazon.api';
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
@@ -84,6 +85,9 @@ export const OrderDetailsPageContainer: React.FC = () => {
   }, []);
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
+
+  // An order of another store makes that store active (top bar).
+  useFollowRecordStore(order?.ebayAccountId);
 
   /* Money renders in the connected eBay store's marketplace currency this
      order belongs to, never the UI language. */

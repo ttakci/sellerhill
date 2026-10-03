@@ -178,9 +178,11 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
       <S.SummaryCard variant="elevated">
         <S.SummaryTop>
-          <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
-            {shortId}
-          </S.MonoId>
+          <S.SummaryIdentity>
+            <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
+              {shortId}
+            </S.MonoId>
+          </S.SummaryIdentity>
           {job ? (
             <StatusBadge status={String(job.status).toLowerCase()} size="sm">
               {jobStatusLabel(job.status)}

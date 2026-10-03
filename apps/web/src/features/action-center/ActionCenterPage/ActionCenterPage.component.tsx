@@ -6,7 +6,7 @@
  * makes no decisions — it only lays them out.
  */
 
-import { EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
+import { Badge, EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -61,6 +61,27 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
                 <Text variant="body-sm" color="text.secondary">
                   {item.description}
                 </Text>
+
+                {item.storeLabels.length > 0 && (
+                  <S.StoreList aria-label={t('actionCenter.storeFilter.storesLabel')}>
+                    {item.storeLabels.map((label) => (
+                      <S.StoreListItem key={label}>
+                        <Badge variant="neutral" size="xs">
+                          {label}
+                        </Badge>
+                      </S.StoreListItem>
+                    ))}
+                  </S.StoreList>
+                )}
+
+                {item.accountWideNote && (
+                  <S.AccountWideNote>
+                    <Icon name="info" size={12} color="text.tertiary" />
+                    <Text variant="caption" color="text.tertiary">
+                      {item.accountWideNote}
+                    </Text>
+                  </S.AccountWideNote>
+                )}
 
                 {item.chips.length > 0 && (
                   <S.ChipList>

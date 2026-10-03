@@ -11,6 +11,8 @@ export interface ListingCardStat {
   icon?: IconName;
   /** Theme color path for `icon`; also fills it (a star reads as a rating only when solid). */
   iconColor?: string;
+  /** Muted figure beside the value, e.g. the Amazon stock next to the eBay quantity: `1 (20+)`. */
+  secondary?: string;
 }
 
 /** Labeled meta row (Brand, ASIN, eBay ID, …). Optional storeType renders value as IdBadge link. */
@@ -60,6 +62,8 @@ export interface ListingCardProps {
   selected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
   selectionAriaLabel?: string;
+  /** Label for the "opens the detail page" hint at the end of the figures row; omit for no hint. */
+  detailLabel?: string;
   /** @deprecated The card has no "Details →" footer any more — the whole card is the button. Accepted and ignored. */
   showDetailAction?: boolean;
 }

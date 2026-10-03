@@ -208,13 +208,24 @@ export class OrderSyncService {
     // (`maybeEnqueueAutoFulfill` fires only on a genuine order insert, and a
     // blocked reason is treated as permanent), so restart it by hand here for
     // any order this user has parked at BLOCKED / subscription_suspended.
-    await this.resumeSuspendedAutoFulfill(userId);
+    await this.resumeSuspendedAutoFulfill(userId, ebayAccountId);
     await this.settleStaleRunningAutoFulfill(userId);
 
-    // Get fresh access token
-    const accessToken = await this.ebayService.getActiveAccountAccessToken(userId);
+    // THIS store's token. Every row written below is tagged with
+    // `ebayAccountId`, so reading eBay with any other store's token files that
+    // store's orders under this one (it did, with two stores, 2026-10-03:
+    // the old per-user "active account" token was an unordered LIMIT 1).
+    let accessToken: string;
+    try {
+      accessToken = await this.ebayService.getAccountAccessToken(ebayAccountId);
+    } catch (error: unknown) {
+      this.logger.warn(
+        `No access token for account ${ebayAccountId}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return 0;
+    }
     if (!accessToken) {
-      this.logger.warn(`No access token for user ${userId}`);
+      this.logger.warn(`No access token for account ${ebayAccountId}`);
       return 0;
     }
 
@@ -222,7 +233,7 @@ export class OrderSyncService {
     // re-sync below does see the order again once eBay modifies it, but it
     // deliberately starts automation only on a first insert, so this sweep is
     // still what releases a slow-paying order for purchase.
-    await this.releaseOrdersAwaitingPayment(userId, accessToken, marketplaceId);
+    await this.releaseOrdersAwaitingPayment(userId, ebayAccountId, accessToken, marketplaceId);
 
     // Every order MODIFIED since the last sync (or since the store was
     // connected, the first time). Filtering on the modification date is what
@@ -404,13 +415,20 @@ export class OrderSyncService {
           // parcel landed. Unlike the purchase gate, an UNPAID order is still
           // messaged — eBay only surfaces orders that cleared checkout, and a
           // thank-you costs nothing if the payment later fails.
-          if (freshSale && !isOrderAlreadyFulfilled(entity.status) && entity.status !== OrderStatus.CANCELLED) {
+          // Only a sale SellerHill tracks (linked to one of the seller's
+          // listings) is messaged — the processor re-checks the same rule.
+          if (
+            freshSale &&
+            listingId &&
+            !isOrderAlreadyFulfilled(entity.status) &&
+            entity.status !== OrderStatus.CANCELLED
+          ) {
             await this.buyerMessages
               .enqueue({
                 ebayOrderId: entity.ebayOrderId,
                 userId: entity.userId,
                 ebayAccountId: entity.ebayAccountId,
-                storeId: null,
+                storeId: entity.ebayAccountId,
                 event: BuyerMessageEventType.ORDER_RECEIVED,
               })
               .catch((err: unknown) => {
@@ -722,6 +740,7 @@ export class OrderSyncService {
       const rows = await this.databaseService.query<{
         id: string;
         user_id: string;
+        ebay_account_id: string | null;
         sale_total: string | number;
         ebay_earnings: string | number | null;
         purchase_price: string | number | null;
@@ -733,7 +752,7 @@ export class OrderSyncService {
         asin: string | null;
         fees: { ebayFeePercent?: number; fixedFeeAmount?: number } | null;
       }>(
-        `SELECT o.id, o.user_id, o.sale_total, o.ebay_earnings, o.purchase_price,
+        `SELECT o.id, o.user_id, o.ebay_account_id, o.sale_total, o.ebay_earnings, o.purchase_price,
                 o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
                 o.listing_id, o.quantity, p.asin,
                 lsg.fees
@@ -787,11 +806,12 @@ export class OrderSyncService {
       if (resolvedPurchase > 0) {
         const ebayEarnings = Number(o.ebay_earnings) || 0;
         if (status === OrderCostCaptureStatus.PROVISIONAL) {
-          // Resolve user's global tax rate (best-effort — settings must never
-          // break recompute; on failure fall back to 0% which equals gross).
+          // The ORDER's store's tax rate (Store > Global), the same one its
+          // price was built with (best-effort — settings must never break
+          // recompute; on failure fall back to 0% which equals gross).
           let amazonTaxRatePct = 0;
           try {
-            const settings = await this.storeSettingsService.getResolvedSettings(o.user_id, null);
+            const settings = await this.storeSettingsService.getResolvedSettings(o.user_id, o.ebay_account_id);
             amazonTaxRatePct = Number(settings.amazonTaxRate) || 0;
           } catch (settingsErr) {
             this.logger.warn(
@@ -1171,15 +1191,20 @@ export class OrderSyncService {
    */
   private async estimateAmazonCostForOrder(ebayOrderId: string, userId: string): Promise<number | null> {
     try {
-      const [row] = await this.databaseService.query<{ listing_id: string | null; quantity: number | null }>(
-        `SELECT listing_id, quantity FROM orders WHERE ebay_order_id = $1`,
+      const [row] = await this.databaseService.query<{
+        listing_id: string | null;
+        quantity: number | null;
+        ebay_account_id: string | null;
+      }>(
+        `SELECT listing_id, quantity, ebay_account_id FROM orders WHERE ebay_order_id = $1`,
         [ebayOrderId]
       );
       if (!row?.listing_id) {
         return null;
       }
       const product = await this.productsService.getProductPriceAndImageByListingId(row.listing_id);
-      const settings = await this.storeSettingsService.getResolvedSettings(userId, null);
+      // The order's store's tax rate, like the price the listing was built with.
+      const settings = await this.storeSettingsService.getResolvedSettings(userId, row.ebay_account_id);
       return estimateAmazonOrderCost({
         unitPrice: product?.purchasePrice ?? null,
         quantity: row.quantity,
@@ -1475,7 +1500,7 @@ export class OrderSyncService {
    * user with several eBay stores (one `syncOrdersForAccount` call each per
    * tick) does the work on the first pass and finds nothing on the rest.
    */
-  private async resumeSuspendedAutoFulfill(userId: string): Promise<void> {
+  private async resumeSuspendedAutoFulfill(userId: string, ebayAccountId: string): Promise<void> {
     try {
       // DUPLICATE-PURCHASE GUARD. This sweep is the ONLY mechanism in the
       // codebase that moves a `blocked` order back to `pending`
@@ -1502,7 +1527,8 @@ export class OrderSyncService {
             AND auto_fulfill_blocked_reason = $3
             AND amazon_order_id IS NULL
             AND auto_fulfill_submitted_at IS NULL
-            AND status NOT IN ($4, $5, $6)`,
+            AND status NOT IN ($4, $5, $6)
+            AND ebay_account_id = $7`,
         [
           userId,
           AutoFulfillStatus.BLOCKED,
@@ -1510,6 +1536,7 @@ export class OrderSyncService {
           OrderStatus.SHIPPED,
           OrderStatus.COMPLETED,
           OrderStatus.CANCELLED,
+          ebayAccountId,
         ]
       );
       const resumableIds = new Set(selectResumableOrders(rows).map((r) => r.ebay_order_id));
@@ -1591,6 +1618,7 @@ export class OrderSyncService {
    */
   private async releaseOrdersAwaitingPayment(
     userId: string,
+    ebayAccountId: string,
     accessToken: string,
     marketplaceId: EbayMarketplaceId
   ): Promise<void> {
@@ -1611,6 +1639,9 @@ export class OrderSyncService {
               auto_fulfill_attempted_at IS NULL
               OR auto_fulfill_attempted_at < NOW() - ($4 || ' hours')::INTERVAL
             )
+            -- Re-read with THIS store's token only (the caller's), never
+            -- another store's orders.
+            AND ebay_account_id = $6
           ORDER BY order_date DESC
           LIMIT $5`,
         [
@@ -1619,6 +1650,7 @@ export class OrderSyncService {
           AutoFulfillBlockedReason.ORDER_NOT_PAID,
           String(AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS),
           AWAITING_PAYMENT_RECHECK_LIMIT,
+          ebayAccountId,
         ]
       );
       if (rows.length === 0) {

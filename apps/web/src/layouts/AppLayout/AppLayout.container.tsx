@@ -14,14 +14,13 @@ import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
 import { resolveBreadcrumbs, resolveRouteMeta } from '@/app/routeMeta';
-import {
-  ACTION_CENTER_POLL_INTERVAL_MS,
-  useGetActionCenterQuery,
-} from '@/features/action-center';
+import { ACTION_CENTER_POLL_INTERVAL_MS } from '@/features/action-center';
+import { useGetActionCenterByStoreQuery } from '@/features/action-center/api/actionCenterApi';
 import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { useGetBillingSummaryQuery } from '@/features/billing/api/billing.api';
 import { buildBillingUsageRows } from '@/features/billing/utils/usageRows';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import {
   MESSAGES_UNREAD_POLL_INTERVAL_MS,
   useGetUnreadMessageCountQuery,
@@ -129,11 +128,18 @@ export const AppLayout: React.FC = () => {
    *
    * `skip` while unauthenticated — the shell renders a redirect below in that
    * case, and firing an authenticated request first would be a guaranteed 401.
+   *
+   * The badge counts the ACTIVE store (the top-bar switcher): every page the
+   * badge points at shows that store. Same args as the switcher's own call, so
+   * RTK shares one request per store.
    */
-  const { data: actionCenter } = useGetActionCenterQuery(undefined, {
-    skip: !isAuthenticated || isOperatorRole(user?.role),
+  const { activeStoreId, stores } = useActiveStore();
+  const storeIds = useMemo(() => stores.map((store) => store.id), [stores]);
+  const { data: actionCenterByStore } = useGetActionCenterByStoreQuery(storeIds, {
+    skip: !isAuthenticated || isOperatorRole(user?.role) || storeIds.length === 0,
     pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
   });
+  const actionCenter = activeStoreId ? actionCenterByStore?.[activeStoreId] : undefined;
 
   /*
    * Same reasoning as the Action Center badge above: polling lives here so
@@ -230,7 +236,9 @@ export const AppLayout: React.FC = () => {
       onLocaleNavigate={localeNavigate}
       pendingActionCount={actionCenter?.totalCount ?? 0}
       hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
-      unreadMessageCount={unreadMessages?.total ?? 0}
+      unreadMessageCount={
+        unreadMessages?.byAccount.find((row) => row.ebayAccountId === activeStoreId)?.unread ?? 0
+      }
       billingUsageRows={billingUsageRows}
       billingPlanName={billingPlanName}
       isProfileUsageOpen={isProfileUsageOpen}

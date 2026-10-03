@@ -56,6 +56,8 @@ export enum ScraperLane {
   BROWSE = 'browse',
   /** Scheduled price/stock refresh. */
   BACKGROUND = 'background',
+  /** The platform's own Best Sellers tree crawl and list pre-warm — only capacity every lane above leaves idle. */
+  CRAWL = 'crawl',
 }
 
 /** Price/stock/Buy Box signals extracted from an Amazon product page. */

@@ -29,6 +29,12 @@
       "warning": "警告",
       "info": "建议"
     },
+    "storeFilter": {
+      "label": "店铺",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "适用于您的整个账户",
+      "storesLabel": "相关店铺"
+    },
     "summary": {
       "critical": "{{count}} 项严重",
       "warning": "{{count}} 项警告",

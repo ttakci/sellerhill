@@ -135,6 +135,7 @@
       "allStores": "Tutti i negozi",
       "advancedFilters": "Filtri avanzati",
       "clearAll": "Cancella tutto",
+      "removeFilter": "Rimuovi filtro: {{label}}",
       "resultCount": "{{count}} risultati",
       "min": "Min",
       "max": "Max",
@@ -184,6 +185,7 @@
       "profitMargin": "Margine",
       "roi": "ROI",
       "stock": "Stock",
+      "stockEbayAmazon": "Stock (eBay/AMZ)",
       "sold": "Venduti",
       "lastSale": "Ultima vendita",
       "category": "Categoria",
@@ -255,6 +257,7 @@
       "importing": "Importazione...",
       "addListing": "Aggiungi un'inserzione",
       "addNewList": "Aggiungi un nuovo elenco",
+      "addingToStore": "Aggiunta a {{store}}",
       "createListings": "Crea le inserzioni",
       "export": "Esporta",
       "viewAll": "Vedi tutte",
@@ -303,6 +306,7 @@
       "actionTitle": "Importa le inserzioni eBay esistenti",
       "actionSubtitle": "Abbina le inserzioni attive del negozio agli ASIN Amazon con una cartella di lavoro Excel.",
       "storeTitle": "Negozio di origine",
+      "importingTo": "Importazione in {{store}}",
       "store": "Negozio eBay",
       "fileTitle": "Carica gli abbinamenti delle inserzioni",
       "fileHint": "Indica un ASIN Amazon e un ID articolo eBay esatti per ogni inserzione. Le inserzioni legacy idonee vengono migrate senza essere ricreate.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Impossibile recuperare le policy commerciali eBay",
       "invalidAsins": "{{count}} dei tuoi inserimenti non sembrano ASIN validi (10 caratteri alfanumerici) e sono stati saltati.",
       "loadFailed": "Impossibile caricare le inserzioni. Riprova.",
-      "scheduleTooLong": "A questo ritmo l'attività richiederebbe più di 30 giorni. Aumenta il numero di prodotti al giorno o aggiungi meno ASIN."
+      "scheduleTooLong": "A questo ritmo l'attività richiederebbe più di 30 giorni. Aumenta il numero di prodotti al giorno o aggiungi meno ASIN.",
+      "storeUnavailable": "Questo negozio eBay non può essere usato: non è collegato al tuo account oppure il collegamento è terminato. Scegli un altro negozio o ricollegalo."
     },
     "detail": {
       "breadcrumb": "Dettaglio dell'inserzione",

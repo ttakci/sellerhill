@@ -255,6 +255,7 @@ export const LandingPageComponent = ({
   scrolled,
   mobileMenuOpen,
   pricingPlans,
+  trialOffer,
   startingPriceDisplay,
   pricingCatalogError,
   onLocaleChange,
@@ -1053,6 +1054,23 @@ export const LandingPageComponent = ({
           <S.CatalogError>{t('translation:landing.pricing.catalogError')}</S.CatalogError>
         ) : null}
         <S.Reveal $visible={seen('pricing')} $delay={1}>
+          <S.TrialStrip>
+            <S.TrialStripBody>
+              <S.TrialStripTitle>{trialOffer.title}</S.TrialStripTitle>
+              <S.TrialFacts>
+                {trialOffer.facts.map((fact) => (
+                  <S.TrialFact key={fact}>
+                    <Icon name="check" size={14} color="landing.accentAmber" />
+                    <span>{fact}</span>
+                  </S.TrialFact>
+                ))}
+              </S.TrialFacts>
+            </S.TrialStripBody>
+            <S.PrimaryButton $accent type="button" onClick={onNavigateRegister}>
+              {t('translation:landing.pricing.trial.cta')}
+              <Icon name="arrow-right" size={16} />
+            </S.PrimaryButton>
+          </S.TrialStrip>
           <S.PricingGrid>
             {pricingPlans.length > 0
               ? visiblePlans.map((plan) => {
@@ -1094,6 +1112,7 @@ export const LandingPageComponent = ({
                       <S.PlanCta type="button" $highlight={plan.isHighlighted} onClick={onNavigateRegister}>
                         {t('translation:landing.pricing.planCta')}
                       </S.PlanCta>
+                      <S.PlanTrialNote>{t('translation:landing.pricing.trialPlanNote')}</S.PlanTrialNote>
                     </S.PricingCard>
                   );
                 })
@@ -1147,6 +1166,7 @@ export const LandingPageComponent = ({
                       <S.PlanCta type="button" $highlight={highlight} onClick={onNavigateRegister}>
                         {t('translation:landing.pricing.planCta')}
                       </S.PlanCta>
+                      <S.PlanTrialNote>{t('translation:landing.pricing.trialPlanNote')}</S.PlanTrialNote>
                     </S.PricingCard>
                   );
                 })}

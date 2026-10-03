@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainer, Text as UIText, tkn, type AppTheme } from '@repo/ui';
+import { IconButton, PageContainer, Text as UIText, tkn, type AppTheme } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -69,6 +69,29 @@ export const FilterActions = styled.div`
 
 export const ResultCount = styled(UIText)`
   white-space: nowrap;
+`;
+
+/** Applied filters, one removable chip each. */
+export const ChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+export const ChipInner = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+`;
+
+/** The chip's own remove control — an IconButton shrunk to the chip's line height. */
+export const ChipRemove = styled(IconButton)`
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 0;
+  padding: 0;
 `;
 
 export const AdvancedDivider = styled.div`

@@ -32,7 +32,8 @@ export interface AddListingsDrawerComponentProps {
   isSubmitting: boolean;
   isLoading: boolean;
   form: UseFormReturn<CreateListingsFormData>;
-  ebayAccounts: Array<{ id: string; name: string }>;
+  /** The active store's name — the listings go there (top-bar switcher). */
+  storeLabel: string;
   listingSettingsGroups: Array<{ id: string; name: string }>;
   businessPolicies: {
     payment: Array<{ id: string; name: string }>;

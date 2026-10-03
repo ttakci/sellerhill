@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
+import { buildInheritedStoreFields, resolveStoreDraftSeed } from '../storeDraftSeed';
 import { GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { BlacklistDrawerComponent } from './BlacklistDrawer.component';
@@ -41,7 +42,11 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   useLoading(isSaving);
 
   const config = resolveScopeConfig(storeConfigs, selectedScope);
-  const originalBlacklist = useMemo(() => toItems(config?.blacklist), [config]);
+  const globalConfig = resolveScopeConfig(storeConfigs, GLOBAL_SCOPE);
+  // A store with no row of its own runs on the global blacklist, so that is
+  // the list it starts from — not an empty one.
+  const seed = resolveStoreDraftSeed(storeConfigs, selectedScope);
+  const originalBlacklist = useMemo(() => toItems(seed?.blacklist), [seed]);
 
   // Draft state — add/remove mutate this; Save commits it.
   const [blacklist, setBlacklist] = useState<BlacklistItem[]>(originalBlacklist);
@@ -57,10 +62,17 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   // React-recommended render-time state adjustment.
   const [prevOpen, setPrevOpen] = useState(isOpen);
   const [prevScope, setPrevScope] = useState(selectedScope);
-  if (isOpen !== prevOpen || selectedScope !== prevScope) {
+  // Also re-seed once when the settings query resolves while the drawer is
+  // already open (null -> loaded only, so a post-save refetch never clobbers
+  // edits) — same rule as the store-settings drawer.
+  const [prevSeed, setPrevSeed] = useState(seed);
+  if (isOpen !== prevOpen || selectedScope !== prevScope || seed !== prevSeed) {
+    const seedArrived = !prevSeed && Boolean(seed);
+    const shouldReset = isOpen !== prevOpen || selectedScope !== prevScope || seedArrived;
     setPrevOpen(isOpen);
     setPrevScope(selectedScope);
-    if (isOpen) {
+    setPrevSeed(seed);
+    if (isOpen && shouldReset) {
       setBlacklist(originalBlacklist);
       setKeywords('');
       setSelectedTypes(ALL_BLACKLIST_TYPES);
@@ -193,7 +205,14 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     void saveSettings({
       isGlobal,
       storeId: isGlobal ? undefined : selectedScope,
-      amazonTaxRate: config?.amazonTaxRate ?? 0,
+      // An existing row keeps everything this drawer does not own (omitted =
+      // unchanged; the tax rate is required by the endpoint, so it is echoed).
+      // A store with no row yet is CREATED by this save, and on insert an
+      // omitted field takes the column default — so the new row is seeded from
+      // the global row instead, keeping the store on the settings it already used.
+      ...(config || isGlobal
+        ? { amazonTaxRate: config?.amazonTaxRate ?? 0 }
+        : buildInheritedStoreFields(globalConfig)),
       blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types, action: b.action })),
     })
       .unwrap()

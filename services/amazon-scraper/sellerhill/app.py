@@ -19,7 +19,7 @@ _ASIN = re.compile(r"^[A-Z0-9]{10}$")
 # Same rule as `isValidProxyUrl` in packages/shared (utils/proxy-url.ts).
 _PROXY = re.compile(r"^(http|https|socks5|socks5h)://[^\s]+:(\d{1,5})$")
 _MODES = {"full", "commerce"}
-_LANES = {"interactive", "browse", "background"}
+_LANES = {"interactive", "browse", "background", "crawl"}
 _BEST_SELLERS_MAX_PAGE = rankings.RANK_PAGES
 _BEST_SELLERS_CATEGORY_MAX_LENGTH = 120
 _MAX_VERIFY_PROXIES = 50
@@ -92,6 +92,8 @@ def _validate_best_sellers(body):
     rate = body.get("perIpRequestsPerSecond")
     if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0.1 <= rate <= 100:
         return "perIpRequestsPerSecond: 0.1..100", None
+    if "treeOnly" in body and not isinstance(body["treeOnly"], bool):
+        return "treeOnly: boolean", None
     return None, resolved
 
 
@@ -229,7 +231,9 @@ def create_app(fetch_one=default_fetch_one, threads_per_proxy=None):
             proxies = [None]  # developer machine only
         pool.ensure(proxies, rate)
         country, list_type, page = body["marketplace"], body["listType"], int(body["page"])
-        fut = pool.submit_call(lambda: fetch_bestsellers(country, list_type, category, page), body["lane"],
+        tree_only = body.get("treeOnly") is True
+        fut = pool.submit_call(lambda: fetch_bestsellers(country, list_type, category, page, tree_only=tree_only),
+                               body["lane"],
                                expired_result={"outcome": "blocked", "fetchedAt": None, "list": None})
         result = pool.wait(fut)
         # Only the wire keys leave; anything internal a fetcher added stays here.

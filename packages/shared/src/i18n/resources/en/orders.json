@@ -275,6 +275,7 @@
       "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
       "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees.",
       "listingOverPlanLimit": "This order's listing was outside your plan's listing limit when the order arrived. Orders from listings outside the limit get no shipment tracking or tracking conversion.",
+      "storeNotConnected": "This order's eBay store is not connected. Reconnect the store, then convert the tracking number.",
       "autoFulfillNotRestartable": "The automatic purchase for this order can't be started again. It may already be bought or in progress, or a second purchase could be placed. Check your Amazon orders and link the order by hand.",
       "autoFulfillNoAccount": "No Amazon account is ready for automatic orders. In Settings, turn on automatic orders for an Amazon account and set a spending cap.",
       "autoFulfillOverCap": "This sale is over your Amazon account's spending cap. Raise the cap in the Amazon account's settings, or buy the item by hand.",

@@ -12,7 +12,11 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 
-import { inheritMissingStoreLocation } from './store-settings.helpers';
+import {
+  inheritMissingStoreLocation,
+  mapTrackingConversionProvider,
+  resolveAllowCrossStoreAsins,
+} from './store-settings.helpers';
 
 /**
  * Store Settings Entity
@@ -52,6 +56,9 @@ interface StoreSettingsEntity {
   ship_from_city: string | null;
   // The seller's listing rules (migration 138). NULL = never saved.
   listing_rules: unknown;
+  // ASINs already on the seller's other stores may be listed here (migration
+  // 140). NULL = inherit: a store row follows the global row, global NULL = off.
+  allow_cross_store_asins: boolean | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -106,6 +113,7 @@ export class StoreSettingsService {
         trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
         trackingConvertManualOrders: true,
         buyerMessaging: null,
+        allowCrossStoreAsins: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -120,9 +128,15 @@ export class StoreSettingsService {
   async getResolvedSettings(userId: string, storeId: string | null): Promise<StoreSettingsResponse> {
     const globalSettings = await this.getSettings(userId);
 
+    // The resolved settings always carry a BOOLEAN `allowCrossStoreAsins`:
+    // the store's own value, else the global one, else off.
     const withRules = (settings: StoreSettingsResponse): StoreSettingsResponse => ({
       ...settings,
       listingRules: normalizeListingRules(settings.listingRules ?? globalSettings.listingRules),
+      allowCrossStoreAsins: resolveAllowCrossStoreAsins(
+        settings.allowCrossStoreAsins,
+        globalSettings.allowCrossStoreAsins,
+      ),
     });
 
     if (!storeId) {
@@ -136,11 +150,16 @@ export class StoreSettingsService {
 
     // Focused drawers can create a store row before its location is configured.
     // Inherit ONLY the empty location fields — the store still owns every other
-    // override (A2, tax, blacklist, validation and buyer messaging). Listing
-    // rules follow the loss limit's rule instead: a store row that never saved
-    // any inherits the global ones, so a filter set for every store is not
-    // silently dropped by a row another drawer created.
-    return withRules(inheritMissingStoreLocation(storeSettings, globalSettings));
+    // override (A2, tax, blacklist, validation). Listing rules and buyer
+    // messaging follow the loss limit's rule instead: a store row that never
+    // saved any inherits the global ones, so a choice made for every store is
+    // not silently dropped by a row another drawer created (a NULL messaging
+    // config there used to switch messaging OFF for that store).
+    const resolved = inheritMissingStoreLocation(storeSettings, globalSettings);
+    return withRules({
+      ...resolved,
+      buyerMessaging: resolved.buyerMessaging ?? globalSettings.buyerMessaging,
+    });
   }
 
   /**
@@ -168,12 +187,16 @@ export class StoreSettingsService {
       shipFromAddressLine2,
       shipFromCity,
       listingRules,
+      allowCrossStoreAsins,
     } = dto;
 
     // A focused drawer omits fields it does not own. Empty location strings are
     // also omission: `getSettings` synthesizes '' when a row does not exist and
-    // older callers echo that DTO back. INSERT still satisfies the NOT NULL
-    // schema through COALESCE defaults below.
+    // older callers echo that DTO back. On INSERT an omitted field takes the
+    // GLOBAL row's value (a store's first row is a copy of "all stores"), then
+    // the schema default. It used to take the column default directly, so a
+    // blacklist save on a store with no row wrote auto-fulfill OFF and the
+    // tracking provider 'local' — the raw Amazon number went to eBay.
     const countryValue = country?.trim() ? country.trim() : null;
     const stateValue = state?.trim() ? state.trim() : null;
     const zipCodeValue = zipCode?.trim() ? zipCode.trim() : null;
@@ -222,14 +245,21 @@ export class StoreSettingsService {
     const listingRulesProvided = listingRules !== undefined;
     const listingRulesJson = listingRulesProvided ? JSON.stringify(normalizeListingRules(listingRules)) : null;
 
+    // Three states again: omitted = unchanged, null = inherit (store follows
+    // global; global null = off), boolean = this row's own choice. A NEW store
+    // row is NOT seeded from global here — its NULL already means "follow the
+    // global row", and copying the value would freeze it.
+    const allowCrossStoreProvided = allowCrossStoreAsins !== undefined;
+    const allowCrossStoreValue = typeof allowCrossStoreAsins === 'boolean' ? allowCrossStoreAsins : null;
+
     let result: StoreSettingsEntity[];
 
     if (isGlobal) {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules, allow_cross_store_asins)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), COALESCE($7::numeric, 0), COALESCE($8, FALSE), COALESCE($9, 'aquiline'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb, $23::boolean)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -237,7 +267,7 @@ export class StoreSettingsService {
                 zip_code = COALESCE($4, store_settings.zip_code),
                 check_blacklist = COALESCE($5, store_settings.check_blacklist),
                 blacklist = COALESCE($6::jsonb, store_settings.blacklist),
-                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                amazon_tax_rate = COALESCE($7::numeric, store_settings.amazon_tax_rate),
                 auto_fulfill_enabled = COALESCE($8, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($9, store_settings.tracking_conversion_provider),
                 tracking_conversion_scope = COALESCE($12, store_settings.tracking_conversion_scope),
@@ -258,6 +288,10 @@ export class StoreSettingsService {
                 listing_rules = CASE
                   WHEN $22::boolean THEN EXCLUDED.listing_rules
                   ELSE store_settings.listing_rules
+                END,
+                allow_cross_store_asins = CASE
+                  WHEN $24::boolean THEN EXCLUDED.allow_cross_store_asins
+                  ELSE store_settings.allow_cross_store_asins
                 END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
@@ -285,14 +319,27 @@ export class StoreSettingsService {
           maxLossProvided,
           listingRulesJson,
           listingRulesProvided,
+          allowCrossStoreValue,
+          allowCrossStoreProvided,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19, $20::numeric, $22::jsonb)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules, allow_cross_store_asins)
+            SELECT $1, $2, FALSE,
+                   COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''),
+                   COALESCE($6::boolean, g.check_blacklist, TRUE),
+                   COALESCE($7::jsonb, g.blacklist, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb),
+                   COALESCE($8::numeric, g.amazon_tax_rate, 0),
+                   COALESCE($9::boolean, g.auto_fulfill_enabled, FALSE),
+                   COALESCE($10::varchar, g.tracking_conversion_provider, 'aquiline'),
+                   COALESCE($13::varchar, g.tracking_conversion_scope, 'amazon_logistics_only'),
+                   COALESCE($14::boolean, g.tracking_convert_manual_orders, TRUE),
+                   $11::jsonb, $15, $16, $17, $18, $19, $20::numeric, $22::jsonb, $24::boolean
+              FROM (SELECT 1) AS seed
+              LEFT JOIN store_settings g ON g.user_id = $1 AND g.is_global = TRUE
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -300,7 +347,7 @@ export class StoreSettingsService {
                 zip_code = COALESCE($5, store_settings.zip_code),
                 check_blacklist = COALESCE($6, store_settings.check_blacklist),
                 blacklist = COALESCE($7::jsonb, store_settings.blacklist),
-                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                amazon_tax_rate = COALESCE($8::numeric, store_settings.amazon_tax_rate),
                 auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
                 tracking_conversion_scope = COALESCE($13, store_settings.tracking_conversion_scope),
@@ -321,6 +368,10 @@ export class StoreSettingsService {
                 listing_rules = CASE
                   WHEN $23::boolean THEN EXCLUDED.listing_rules
                   ELSE store_settings.listing_rules
+                END,
+                allow_cross_store_asins = CASE
+                  WHEN $25::boolean THEN EXCLUDED.allow_cross_store_asins
+                  ELSE store_settings.allow_cross_store_asins
                 END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
@@ -349,6 +400,8 @@ export class StoreSettingsService {
           maxLossProvided,
           listingRulesJson,
           listingRulesProvided,
+          allowCrossStoreValue,
+          allowCrossStoreProvided,
         ]
       );
     }
@@ -387,15 +440,11 @@ export class StoreSettingsService {
       // Compare to the string literal `'api'` (not the enum) to avoid
       // `no-unsafe-enum-comparison` between the DB-side string and the enum,
       // mirroring the tracking processor's case-sensitive check.
-      // Accept BOTH external spellings. The DTO only ever writes 'api', but
-      // matching solely on it meant a row holding the canonical 'aquiline'
-      // would silently read back as LOCAL — i.e. conversion quietly off for a
-      // seller who had turned it on.
-      trackingConversionProvider:
-        entity.tracking_conversion_provider === 'api' ||
-        entity.tracking_conversion_provider === 'aquiline'
-          ? TrackingConversionProvider.API
-          : TrackingConversionProvider.LOCAL,
+      // Only an explicit 'local' switches conversion off. Conversion is the
+      // default (migration 112), so 'api', 'aquiline' and any unreadable value
+      // all read as ON — an unknown string must never quietly hand the raw
+      // Amazon number to eBay.
+      trackingConversionProvider: mapTrackingConversionProvider(entity.tracking_conversion_provider),
       trackingConversionScope:
         entity.tracking_conversion_scope === 'all'
           ? TrackingConversionScope.ALL
@@ -414,6 +463,8 @@ export class StoreSettingsService {
         entity.listing_rules && typeof entity.listing_rules === 'object'
           ? normalizeListingRules(entity.listing_rules)
           : undefined,
+      allowCrossStoreAsins:
+        typeof entity.allow_cross_store_asins === 'boolean' ? entity.allow_cross_store_asins : null,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

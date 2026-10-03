@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
-import { GLOBAL_SCOPE } from '../drawers/storeScope';
+import { GLOBAL_SCOPE, resolveSettingsScope } from '../drawers/storeScope';
 
 import { SettingsHubPageComponent } from './SettingsHubPage.component';
 import type { SettingsDrawerKey } from './SettingsHubPage.types';
@@ -26,6 +26,7 @@ import {
   useGetEbayAccountsQuery,
   useLazyGetEbayConnectUrlQuery,
 } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
 import {
   useGetListingSettingsGroupsQuery,
@@ -37,6 +38,12 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 
 
 const DRAWER_PARAM = 'drawer';
+/**
+ * `?scope=<storeId|global>` — the store the store-settings drawers open on, so
+ * `?drawer=storeSettings&scope=<id>` lands on that store's settings. Absent
+ * means global.
+ */
+const SCOPE_PARAM = 'scope';
 
 /**
  * A refused eBay connect comes back from `/ebay/callback` as `?error=<i18n key>`
@@ -62,8 +69,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   /** Store awaiting disconnect confirmation; also drives the confirm dialog's open state. */
   const [pendingDisconnectId, setPendingDisconnectId] = useState<string | null>(null);
-  // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
-  const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
 
   const [disconnectEbayAccount, { isLoading: isDisconnecting, originalArgs: disconnectArgs }] =
     useDisconnectEbayAccountMutation();
@@ -71,6 +76,25 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const { data: user, error: userError } = useGetMeQuery();
   const { data: profile, error: profileError } = useGetProfileQuery();
   const { data: ebayData, error: ebayError } = useGetEbayAccountsQuery();
+
+  // Shared store-settings scope — hub + nested drawers stay in sync via the
+  // URL. With no `?scope=` the drawers open on the top bar's ACTIVE store;
+  // "all stores" is an explicit `?scope=global` (`resolveSettingsScope`).
+  const { activeStoreId } = useActiveStore();
+  const storeScope = resolveSettingsScope(
+    searchParams.get(SCOPE_PARAM),
+    activeStoreId,
+    ebayData ? ebayData.items.map((account) => account.id) : null
+  );
+  const setStoreScope = (scope: string): void => {
+    const next = new URLSearchParams(searchParams);
+    if (scope && scope === activeStoreId) {
+      next.delete(SCOPE_PARAM);
+    } else {
+      next.set(SCOPE_PARAM, scope || GLOBAL_SCOPE);
+    }
+    setSearchParams(next, { replace: true });
+  };
   const {
     data: amazonData,
     error: amazonError,

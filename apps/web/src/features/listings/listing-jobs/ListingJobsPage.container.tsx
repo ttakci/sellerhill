@@ -19,6 +19,7 @@ import * as S from './ListingJobsPage.style';
 import { resolveJobDateRange } from './utils/jobDateRange';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useLocale } from '@/utils/useLocale';
 
 const jobPercent = (job: ListingJobDto): number =>
@@ -36,8 +37,16 @@ export const ListingJobsPageContainer: React.FC = () => {
    * not the ones the item counted.
    */
   const [searchParams] = useSearchParams();
+  // The top bar's active store; a switch starts the list over on page 1.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
 
   const [page, setPage] = useState(1);
+  const [pageStore, setPageStore] = useState(storeFilter);
+  if (pageStore !== storeFilter) {
+    setPageStore(storeFilter);
+    setPage(1);
+  }
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
@@ -66,8 +75,9 @@ export const ListingJobsPageContainer: React.FC = () => {
       dateFrom: dateRange.dateFrom,
       dateTo: dateRange.dateTo,
       hasFailures: hasFailures || undefined,
+      ebayAccountId: storeFilter || undefined,
     },
-    { pollingInterval: 5000, refetchOnMountOrArgChange: true }
+    { pollingInterval: 5000, refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
 
   /* Memoised: `?? []` would hand a fresh array to every consumer on each

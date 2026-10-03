@@ -219,8 +219,8 @@ describe('EbayReturnsSyncService', () => {
     expect(sql).toContain('ON CONFLICT (ebay_account_id, return_id) DO UPDATE');
     expect(sql).toContain('last_synced_at = NOW()');
     expect(sql).toContain('updated_at = NOW()');
-    // The order link is looked up for THIS seller only, and an existing link survives.
-    expect(sql).toContain('o.ebay_order_id = $4::text AND o.user_id = $1::uuid');
+    // The order link is looked up for THIS seller and store only, and an existing link survives.
+    expect(sql).toContain('o.ebay_order_id = $4::text AND o.user_id = $1::uuid AND o.ebay_account_id = $2::uuid');
     expect(sql).toContain('order_id = COALESCE(ebay_returns.order_id, EXCLUDED.order_id)');
     expect(sql).not.toContain('first_seen_at');
     expect(params).toEqual([

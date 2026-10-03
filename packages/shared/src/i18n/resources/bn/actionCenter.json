@@ -29,6 +29,12 @@
       "warning": "সতর্কতা",
       "info": "পরামর্শ"
     },
+    "storeFilter": {
+      "label": "স্টোর",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "আপনার পুরো অ্যাকাউন্টে প্রযোজ্য",
+      "storesLabel": "সংশ্লিষ্ট স্টোর"
+    },
     "summary": {
       "critical": "{{count}}টি জরুরি",
       "warning": "{{count}}টি সতর্কতা",

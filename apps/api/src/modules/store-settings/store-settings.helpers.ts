@@ -1,4 +1,4 @@
-import type { StoreSettingsResponse } from '@repo/shared';
+import { TrackingConversionProvider, type StoreSettingsResponse } from '@repo/shared';
 
 /**
  * Resolve the location fields independently from the rest of a store override.
@@ -28,4 +28,29 @@ export function inheritMissingStoreLocation(
     zipCode: storeSettings.zipCode.trim() || globalSettings.zipCode,
     shipFromCity: storeSettings.shipFromCity?.trim() || globalSettings.shipFromCity,
   };
+}
+
+/**
+ * Store > Global for "allow ASINs already on my other stores": the store's own
+ * value when it set one, else the global row's, else OFF (migration 140). A
+ * NULL on a store row means "follow the global row", never "off".
+ */
+export function resolveAllowCrossStoreAsins(
+  storeValue: boolean | null | undefined,
+  globalValue: boolean | null | undefined,
+): boolean {
+  return storeValue ?? globalValue ?? false;
+}
+
+/**
+ * Read a stored `tracking_conversion_provider`. Only an explicit `'local'`
+ * means "no conversion": conversion is the default (migration 112), and a
+ * blank, misspelt or unknown value must not quietly switch it off — that would
+ * push the raw Amazon tracking number to eBay. Case and whitespace are
+ * tolerated on older rows.
+ */
+export function mapTrackingConversionProvider(stored: string | null | undefined): TrackingConversionProvider {
+  return typeof stored === 'string' && stored.trim().toLowerCase() === 'local'
+    ? TrackingConversionProvider.LOCAL
+    : TrackingConversionProvider.API;
 }

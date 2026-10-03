@@ -275,6 +275,7 @@
       "orderNotTracked": "Diese Bestellung ist mit keinem Ihrer Angebote verknüpft, daher könnte eine umgewandelte Sendungsnummer nie an eBay gesendet werden. Verknüpfen Sie die Bestellung zuerst mit ihrem Angebot.",
       "trackingAlreadyPushed": "eBay hat die ursprüngliche Sendungsnummer für diese Bestellung bereits erhalten, und sie kann nicht ersetzt werden. Eine Umwandlung würde daher nichts an dem ändern, was der Käufer sieht.",
       "listingOverPlanLimit": "Das Angebot dieser Bestellung lag beim Eingang der Bestellung außerhalb des Angebotslimits Ihres Tarifs. Für Bestellungen aus Angeboten außerhalb des Limits gibt es weder Sendungsverfolgung noch Umwandlung von Sendungsnummern.",
+      "storeNotConnected": "Der eBay-Shop dieser Bestellung ist nicht verbunden. Verbinden Sie den Shop erneut und wandeln Sie dann die Sendungsnummer um.",
       "autoFulfillNotRestartable": "Der automatische Kauf für diese Bestellung kann nicht erneut gestartet werden. Sie ist vielleicht schon gekauft oder in Bearbeitung, oder es könnte ein zweiter Kauf entstehen. Prüfe deine Amazon-Bestellungen und verknüpfe die Bestellung manuell.",
       "autoFulfillNoAccount": "Kein Amazon-Konto ist für automatische Bestellungen bereit. Aktiviere in den Einstellungen automatische Bestellungen für ein Amazon-Konto und lege ein Ausgabelimit fest.",
       "autoFulfillOverCap": "Dieser Verkauf liegt über dem Ausgabelimit deines Amazon-Kontos. Erhöhe das Limit in den Einstellungen des Amazon-Kontos oder kaufe den Artikel manuell.",

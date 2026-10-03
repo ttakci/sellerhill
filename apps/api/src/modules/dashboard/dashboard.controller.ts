@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -8,10 +8,25 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { DashboardChartGranularity, type DashboardDataDto } from '@repo/shared';
+import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { DashboardService } from './dashboard.service';
+
+/**
+ * `?ebayAccountId=` is compared against a UUID column; a malformed value
+ * would surface as a Postgres cast error (500). Absent/blank = no filter.
+ */
+function parseStoreId(value: string | undefined): string | undefined {
+  if (value === undefined || value.trim() === '') {
+    return undefined;
+  }
+  if (!isUUID(value.trim())) {
+    throw new BadRequestException('ebayAccountId must be a UUID');
+  }
+  return value.trim();
+}
 
 @ApiTags('dashboard')
 @Controller({ path: 'dashboard', version: '1' })
@@ -50,6 +65,6 @@ export class DashboardController {
     )
       ? (chartGranularity as DashboardChartGranularity)
       : DashboardChartGranularity.MONTH;
-    return this.dashboardService.getDashboard(userId, granularity, ebayAccountId);
+    return this.dashboardService.getDashboard(userId, granularity, parseStoreId(ebayAccountId));
   }
 }

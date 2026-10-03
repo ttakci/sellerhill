@@ -275,6 +275,7 @@
       "orderNotTracked": "Această comandă nu este asociată unuia dintre anunțurile dvs., deci un număr de urmărire convertit nu ar putea fi trimis niciodată către eBay. Asociați mai întâi comanda cu anunțul ei.",
       "trackingAlreadyPushed": "eBay are deja numărul de urmărire original pentru această comandă și acesta nu poate fi înlocuit, deci conversia acum nu ar schimba ce vede cumpărătorul.",
       "listingOverPlanLimit": "Anunțul acestei comenzi se afla în afara limitei de anunțuri a planului dvs. când a sosit comanda. Comenzile din anunțurile aflate în afara limitei nu primesc urmărirea expedierii și nici conversia numărului de urmărire.",
+      "storeNotConnected": "Magazinul eBay al acestei comenzi nu este conectat. Reconectează magazinul, apoi convertește numărul de urmărire.",
       "autoFulfillNotRestartable": "Achiziția automată pentru această comandă nu poate fi pornită din nou. Poate fi deja cumpărată sau în curs, sau s-ar putea plasa o a doua achiziție. Verifică-ți comenzile Amazon și asociază comanda manual.",
       "autoFulfillNoAccount": "Niciun cont Amazon nu este pregătit pentru comenzi automate. În Setări, activează comenzile automate pentru un cont Amazon și setează o limită de cheltuieli.",
       "autoFulfillOverCap": "Această vânzare depășește limita de cheltuieli a contului tău Amazon. Mărește limita din setările contului Amazon sau cumpără produsul manual.",

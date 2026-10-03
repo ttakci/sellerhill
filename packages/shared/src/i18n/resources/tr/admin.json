@@ -264,7 +264,12 @@
         "scraper.blockRateWarnPercent": "Blok oranı uyarısı (%)",
         "bestSellers.enabled": "Çok Satanlar gezintisi",
         "bestSellers.cacheTtlMinutes": "Çok Satanlar önbelleği (dakika)",
-        "bestSellers.dailyFetchLimit": "Çok Satanlar kötüye kullanım çekim tavanı (satıcı başına, günlük)"
+        "bestSellers.dailyFetchLimit": "Çok Satanlar kötüye kullanım çekim tavanı (satıcı başına, günlük)",
+        "bestSellers.crawl.enabled": "Çok Satanlar kategori ağacı taraması",
+        "bestSellers.crawl.intervalDays": "Çok Satanlar ağacının yeniden tarama aralığı (gün)",
+        "bestSellers.crawl.pagesPerMinute": "Çok Satanlar ağaç tarama hızı (dakikada sayfa)",
+        "bestSellers.prewarm.depth": "Çok Satanlar listelerini önceden yükleme derinliği",
+        "bestSellers.prewarm.pagesPerMinute": "Çok Satanlar listelerini önceden yükleme hızı (dakikada sayfa)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka planda Keepa yenileme zamanlayıcısının ana anahtarı. Kapatıldığında arka plan token harcaması, yeniden başlatma gerekmeden anında durur.",
@@ -347,7 +352,12 @@
         "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar.",
         "bestSellers.enabled": "Satıcıların Amazon Çok Satanlar listelerine uygulama içinden göz atmasına izin verir. Kapalıyken sayfa gizlenir ve uç nokta isteği reddeder; listeler scraper proxy'leri üzerinden çekilir, sunucunun kendi IP'si asla kullanılmaz.",
         "bestSellers.cacheTtlMinutes": "Çekilen bir liste sayfasının yeniden çekilmeden önce tüm satıcılara ne kadar süre sunulacağı. Uzun süre proxy kapasitesinden tasarruf sağlar; Amazon listeleri yaklaşık saatte bir günceller.",
-        "bestSellers.dailyFetchLimit": "Satıcılardan gizli platform kötüye kullanım tavanı: bir satıcının UTC gününde sayfa 429 vermeden önce tetikleyebileceği CANLI liste çekimi (önbellek kaçırma) sayısı. Önbellekten gelen yanıtlar sayılmaz. Bu, satıcı hakkı DEĞİLDİR — satıcı hakkı paketin fatura dönemi başına Çok Satanlar ürün sayısıdır ve reddetmek yerine satırları kilitler. Gerçek kullanımın çok üzerinde tutun; 0 herkes için canlı çekimi durdurur, önbellekteki sayfalar sunulmaya devam eder."
+        "bestSellers.dailyFetchLimit": "Satıcılardan gizli platform kötüye kullanım tavanı: bir satıcının UTC gününde sayfa 429 vermeden önce tetikleyebileceği CANLI liste çekimi (önbellek kaçırma) sayısı. Önbellekten gelen yanıtlar sayılmaz. Bu, satıcı hakkı DEĞİLDİR — satıcı hakkı paketin fatura dönemi başına Çok Satanlar ürün sayısıdır ve reddetmek yerine satırları kilitler. Gerçek kullanımın çok üzerinde tutun; 0 herkes için canlı çekimi durdurur, önbellekteki sayfalar sunulmaya devam eder.",
+        "bestSellers.crawl.enabled": "Beş listenin tüm Amazon kategori ağacını arka planda okur; satıcı hangi dalı açarsa açsın anında gelir. Yalnızca fiyat/stok yenilemesinin boş bıraktığı kapasiteyi kullanır ve scraper proxy'si olmadan hiç çalışmaz. Kapatılırsa tarama durur, önbellekteki ağaç sunulmaya devam eder.",
+        "bestSellers.crawl.intervalDays": "Bir kategorinin saklanan kopyası bu süreden eskiyse yeniden okunur; ağacın baştan taranması da bundan sık başlamaz. Kategoriler aylar içinde değişir; saklanan kopyanın ömrü olan 14 günün altında tutun.",
+        "bestSellers.crawl.pagesPerMinute": "Dakikada okunan ağaç sayfası (her biri tek istek, ürünsüz). Beş liste yaklaşık 250.000 sayfadır; dakikada 30 ile bir tur altı günden kısa sürer. 0 taramayı duraklatır.",
+        "bestSellers.prewarm.depth": "Ürün listesi satıcılardan önce, her liste önbelleği süresinde çekilen en derin seviye: 0 = ana sayfa, 1 = departmanlar, 2 = alt kategorileri (yaklaşık 900 liste).",
+        "bestSellers.prewarm.pagesPerMinute": "Önceden yüklemenin dakikada çektiği ürün listesi (her biri yaklaşık dört istek). Dakikada 3, derinlik 2'yi 6 saatlik önbellek süresi içinde bitirir. 0 önceden yüklemeyi kapatır."
       },
       "newValueLabel": "Yeni değer",
       "search": "Ayar ara (ad veya ortam değişkeni)",

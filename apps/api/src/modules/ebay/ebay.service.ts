@@ -564,7 +564,7 @@ export class EbayService implements OnModuleInit {
     userId: string,
     listingData: ListingCreationData,
     asin: string,
-    ebayAccountId?: string
+    ebayAccountId: string
   ): Promise<{
     accountId: string;
     sku: string;
@@ -574,12 +574,9 @@ export class EbayService implements OnModuleInit {
     categoryAspects: CategoryAspect[];
     resolution: AspectResolution;
   }> {
-    const account = ebayAccountId
-      ? await this.getOwnedAccount(userId, ebayAccountId)
-      : await this.getActiveAccount(userId);
-    if (!account) {
-      throw new Error('No active eBay account found for user');
-    }
+    // The store is always named: a listing belongs to ONE store, and an
+    // arbitrary active account would publish it through another seller token.
+    const account = await this.getOwnedAccount(userId, ebayAccountId);
 
     const accessToken = await this.getAccessToken(account);
     const marketplaceId = account.marketplace_id;
@@ -901,144 +898,19 @@ export class EbayService implements OnModuleInit {
   }
 
   /**
-   * Update price and stock for an existing listing using REST API
-   */
-  async updatePriceAndStock(
-    userId: string,
-    sku: string,
-    price: number,
-    quantity: number,
-    ebayListingId: string // eBay Item ID
-  ): Promise<void> {
-    this.logger.log(`Updating price and stock for user ${userId}, SKU ${sku}, Listing ${ebayListingId}`);
-
-    const account = await this.getActiveAccount(userId);
-    if (!account) {
-      throw new Error('No active eBay account');
-    }
-
-    const accessToken = await this.getAccessToken(account);
-    const marketplaceId = account.marketplace_id as EbayMarketplaceId;
-    const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
-
-    // 1. Update Inventory Item (Quantity)
-    // We need to fetch current inventory item first or just do a partial PUT?
-    // eBay Inventory API PUT /inventory_item/{sku} requires full payload.
-    // However, we can use /bulk_update_price_quantity or just update the offer.
-
-    // For simplicity and following the existing pattern, let's update the offer price
-    // and inventory quantity separately.
-
-    // Update Price via Offer
-    // We need the offerId. We can find it by SKU or store it in DB.
-    // Since we don't store offerId, we'll fetch offers for the SKU.
-    const offersUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer?sku=${sku}`;
-    interface OffersData {
-      offers?: Array<Record<string, unknown>>;
-    }
-    const offersResponse = await this.withRateLimitRetry(() =>
-      axios.get<OffersData>(offersUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-    );
-
-    const offer = offersResponse.data?.offers?.find((o) => o.marketplaceId === marketplaceId);
-    if (!offer) {
-      this.logger.warn(`No offer found for SKU ${sku} on ${marketplaceId}. Cannot update price.`);
-    } else {
-      const updateOfferUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${String(
-        offer.offerId
-      )}`;
-      const payload: Record<string, unknown> = {
-        ...offer,
-        availableQuantity: quantity,
-        pricingSummary: {
-          price: {
-            currency: config.currency,
-            value: price.toFixed(2),
-          },
-        },
-      };
-      // Remove fields that shouldn't be in PUT
-      delete payload.offerId;
-      delete payload.listing;
-      delete payload.status;
-
-      await this.withRateLimitRetry(() =>
-        axios.put(updateOfferUrl, payload, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-            'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
-          },
-        })
-      );
-    }
-
-    // Update Quantity via Inventory Item
-    const inventoryUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/inventory_item/${sku}`;
-    // Fetch existing to get full data (required for PUT)
-    interface InventoryItemResponse {
-      availability?: {
-        shipToLocationAvailability?: { quantity?: number };
-      };
-    }
-    const invResponse = await this.withRateLimitRetry(() =>
-      axios.get<InventoryItemResponse>(inventoryUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-    );
-
-    const inventoryItem = invResponse.data;
-    if (inventoryItem?.availability?.shipToLocationAvailability) {
-      inventoryItem.availability.shipToLocationAvailability.quantity = quantity;
-    }
-
-    await this.withRateLimitRetry(() =>
-      axios.put(inventoryUrl, inventoryItem, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
-        },
-      })
-    );
-
-    this.logger.log(`Price and stock updated for eBay listing ${ebayListingId}`);
-  }
-
-  /**
-   * Get active eBay account ID for user (Public helper)
-   */
-  async getActiveAccountId(userId: string): Promise<string | null> {
-    const account = await this.getActiveAccount(userId);
-    return account ? account.id : null;
-  }
-
-  /**
-   * Get a fresh access token for a user's active eBay account (Public helper)
-   * Used by OrderSyncService and other services that need direct API access
-   */
-  async getActiveAccountAccessToken(userId: string): Promise<string | null> {
-    const account = await this.getActiveAccount(userId);
-    if (!account) {
-      return null;
-    }
-    return this.getAccessToken(account);
-  }
-
-  /**
    * Get a valid access token for a SPECIFIC eBay account (by id).
    * Used by BuyerMessagingProvider and other per-account callers.
    * Refreshes if expiring within 5 minutes (delegates to getAccessToken).
    */
   async getAccountAccessToken(accountId: string): Promise<string> {
+    // ACTIVE only: a disconnected/revoked store has NULLed tokens and must
+    // never be called through — every caller fails closed on the throw.
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE id = $1`,
-      [accountId],
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND status = $2`,
+      [accountId, EbayAccountStatus.ACTIVE],
     );
     if (!accounts[0]) {
-      throw new NotFoundException(`eBay account ${accountId} not found`);
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
     }
     return this.getAccessToken(accounts[0]);
   }
@@ -1086,10 +958,10 @@ export class EbayService implements OnModuleInit {
    * The account a listing must be pushed through.
    *
    * `listings.ebay_account_id` is nullable on rows created before migration 030
-   * backfilled it, so this falls back to the user's active account — but unlike
-   * the old `getActiveAccount(userId)` path it is deterministic (oldest account
-   * first) instead of an unordered `LIMIT 1`, which could hand back a different
-   * store on each call and reprice a listing through the wrong token.
+   * backfilled it. Such a row is resolved ONLY when the seller has exactly one
+   * active store — with two or more there is no way to know which store the
+   * listing lives on, and pushing through the wrong token reprices, ends or
+   * publishes in another seller's store. Callers skip/refuse on `null`.
    */
   async resolveListingAccountId(userId: string, listingAccountId: string | null): Promise<string | null> {
     if (listingAccountId) {
@@ -1099,10 +971,16 @@ export class EbayService implements OnModuleInit {
       `SELECT id FROM ebay_accounts
        WHERE user_id = $1 AND status = $2
        ORDER BY created_at ASC, id ASC
-       LIMIT 1`,
+       LIMIT 2`,
       [userId, EbayAccountStatus.ACTIVE]
     );
-    return accounts[0]?.id ?? null;
+    if (accounts.length !== 1) {
+      if (accounts.length > 1) {
+        this.logger.warn(`Listing of user ${userId} names no eBay store and the user has several; not guessing`);
+      }
+      return null;
+    }
+    return accounts[0].id;
   }
 
   private async getOwnedAccount(userId: string, accountId: string): Promise<EbayAccountEntity> {
@@ -1117,11 +995,15 @@ export class EbayService implements OnModuleInit {
   }
 
   /**
-   * Get active eBay account for user
+   * The user's oldest active store — the deterministic choice for a caller
+   * that names no store (same ordering as `resolveListingAccountId`).
    */
-  private async getActiveAccount(userId: string): Promise<EbayAccountEntity | null> {
+  private async getDefaultAccount(userId: string): Promise<EbayAccountEntity | null> {
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = $2 LIMIT 1`,
+      `SELECT * FROM ebay_accounts
+       WHERE user_id = $1 AND status = $2
+       ORDER BY created_at ASC, id ASC
+       LIMIT 1`,
       [userId, EbayAccountStatus.ACTIVE]
     );
     return accounts[0] || null;
@@ -1166,12 +1048,12 @@ export class EbayService implements OnModuleInit {
     apiModel: EbayListingApiModel;
   }>> {
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE id = $1`,
-      [accountId]
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND status = $2`,
+      [accountId, EbayAccountStatus.ACTIVE]
     );
     const account = accounts[0];
     if (!account) {
-      throw new NotFoundException(`eBay account ${accountId} not found`);
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
     }
     const accessToken = await this.getAccessToken(account);
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
@@ -1236,8 +1118,17 @@ export class EbayService implements OnModuleInit {
     }
   }
 
-  async getBusinessPolicies(userId: string) {
-    const account = await this.getActiveAccount(userId);
+  /**
+   * The business policies of ONE store. Policy ids belong to the eBay account
+   * that owns them, so a listing for store B must never carry store A's ids
+   * (eBay refuses the publish). With `ebayAccountId` the store is resolved
+   * with an ownership check; without it (an older client) the deterministic
+   * oldest active store is used, never an unordered `LIMIT 1`.
+   */
+  async getBusinessPolicies(userId: string, ebayAccountId?: string) {
+    const account = ebayAccountId
+      ? await this.getOwnedAccount(userId, ebayAccountId)
+      : await this.getDefaultAccount(userId);
     if (!account) {return [];}
     const accessToken = await this.getAccessToken(account);
     const marketplaceId = account.marketplace_id;
@@ -1261,14 +1152,12 @@ export class EbayService implements OnModuleInit {
   /**
    * Withdraw an offer on eBay (ends the active listing)
    */
-  async withdrawOffer(userId: string, ebayItemId: string): Promise<void> {
+  async withdrawOffer(userId: string, ebayAccountId: string, ebayItemId: string): Promise<void> {
     this.logger.log(`Withdrawing offer for listing ID: ${ebayItemId}`);
 
-    // 1. Get user's active eBay account
-    const account = await this.getActiveAccount(userId);
-    if (!account) {
-      throw new Error('No active eBay account found for user');
-    }
+    // 1. The listing's OWN store — ending an item of store B with store A's
+    // token fails on eBay (or, worse, names an item of the wrong seller).
+    const account = await this.getOwnedAccount(userId, ebayAccountId);
 
     // 2. Get fresh access token
     const accessToken = await this.getAccessToken(account);

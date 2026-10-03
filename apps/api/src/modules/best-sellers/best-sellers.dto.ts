@@ -42,11 +42,19 @@ export class BestSellersQueryDto implements SharedBestSellersQueryDto {
   marketplace?: AmazonMarketplace;
 }
 
-/** `GET /v1/best-sellers/categories` query: the root department list of one list type. */
+/** `GET /v1/best-sellers/categories` query: the tree beside one node (the department list when no category is given). */
 export class BestSellersCategoriesQueryDto implements SharedBestSellersCategoriesQueryDto {
   @IsOptional()
   @IsEnum(BestSellersListType)
   listType?: BestSellersListType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(BEST_SELLERS_CATEGORY_MAX_LENGTH)
+  @ValidateIf((o: BestSellersCategoriesQueryDto) => o.category !== undefined && o.category !== '')
+  @Matches(BEST_SELLERS_CATEGORY_REGEX)
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  category?: string;
 
   @IsOptional()
   @IsEnum(AmazonMarketplace)

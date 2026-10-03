@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Selectați limba",
+    "selectStore": "Alege magazinul",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notificări",
     "openMenu": "Deschide meniul",
     "collapseSidebar": "Restrânge bara laterală",
@@ -393,6 +395,9 @@
         "appliesTo": "Se aplică pentru",
         "checkBlacklist": "Verifică cuvintele cheie din lista neagră",
         "checkBlacklistDesc": "Scanează titlurile, descrierile, specificațiile și brandul anunțurilor în raport cu lista neagră înainte de publicare. Selecția de câmpuri a fiecărui cuvânt cheie stabilește unde este verificat.",
+        "allowCrossStoreAsins": "Permite ASIN-uri deja listate în celelalte magazine ale mele",
+        "allowCrossStoreAsinsDesc": "Activat pentru toate magazinele, orice magazin poate lista orice ASIN; activat pentru un singur magazin, doar acel magazin poate adăuga ASIN-uri pe care celelalte magazine le au deja. Un ASIN care este deja în acest magazin este întotdeauna omis.",
+        "allowCrossStoreAsinsInherited": "Se aplică setarea pentru toate magazinele până când salvezi o alegere pentru acest magazin.",
         "country": "Țară",
         "countryPlaceholder": "Selectați o țară",
         "region": "Regiune",
@@ -834,7 +839,7 @@
       "billingNote": "Anulați oricând. Prețurile nu includ taxele locale, acolo unde se aplică.",
       "perMonth": "/lună",
       "mostPopular": "Cel mai popular",
-      "planCta": "Începeți gratuit",
+      "planCta": "Încercați gratuit",
       "showAllPlans": "Vezi toate cele {{count}} planuri",
       "showFewerPlans": "Arată mai puține planuri",
       "notIncluded": "Nu este inclus",
@@ -885,6 +890,17 @@
           "conversions": "500 de conversii de urmărire / lună",
           "bestSellers": "25,000 de produse Cele mai vândute / lună"
         }
+      },
+      "trialPlanNote": "Orice perioadă de încercare gratuită începe cu pachetul de încercare. Treceți la acest pachet oricând doriți.",
+      "trial": {
+        "title": "Încercare gratuită: {{days}} zile",
+        "listings": "Anunțuri active: {{limit}}",
+        "conversions": "Conversii de urmărire: {{limit}}",
+        "bestSellers": "Produse Cele mai vândute: {{limit}}",
+        "orders": "Comenzi automate: {{limit}}",
+        "unlimitedOrders": "Comenzi automate nelimitate",
+        "noCard": "Nu este necesar un card bancar",
+        "cta": "Începeți perioada gratuită"
       }
     },
     "faq": {

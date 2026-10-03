@@ -5,6 +5,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { SELLER_VISIBLE_ORDER_STAGES } from '../../shared/order-stage';
 
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
+
 const isTab = (value: string): value is OrderStageTab => (Object.values(OrderStageTab) as string[]).includes(value);
 
 const isStage = (value: string): value is OrderStage => (Object.values(OrderStage) as string[]).includes(value);
@@ -54,7 +56,6 @@ export function useOrdersFilters() {
   const dateFrom = searchParams.get('dateFrom') ?? '';
   const dateTo = searchParams.get('dateTo') ?? '';
   const fromDashboard = searchParams.get('from') === 'dashboard';
-  const storeFromUrl = searchParams.get('store') ?? '';
   const stageFromUrl = searchParams.get('stage') ?? '';
   const tabFromUrl = searchParams.get('tab') ?? '';
   const trackingFromUrl = readTracking(searchParams.get('tracking'));
@@ -69,7 +70,6 @@ export function useOrdersFilters() {
       dateFrom ||
       dateTo ||
       fromDashboard ||
-      storeFromUrl ||
       searchParams.get('tracking')
   );
 
@@ -77,16 +77,20 @@ export function useOrdersFilters() {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
   const [stage, setStage] = useState(isStage(stageFromUrl) ? stageFromUrl : '');
   const [tab, setTab] = useState<OrderStageTab>(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
   const [trackingState, setTrackingState] = useState(trackingFromUrl);
   const [flag, setFlag] = useState(flagFromUrl);
 
-  // Sync store from URL (e.g. deep-link from dashboard)
-  useEffect(() => {
-    setEbayAccountId(storeFromUrl);
-  }, [storeFromUrl]);
+  // The store is the top bar's active store. A switch starts the list over
+  // (page 1) — adjusted during render, so no frame asks for page 4 of the new store.
+  const { activeStoreId } = useActiveStore();
+  const ebayAccountId = activeStoreId ?? '';
+  const [pageStore, setPageStore] = useState(ebayAccountId);
+  if (pageStore !== ebayAccountId) {
+    setPageStore(ebayAccountId);
+    setPage(1);
+  }
 
   // Same for the stage, so navigating between two Action Center rows
   // re-filters instead of keeping the first one's selection.
@@ -156,7 +160,6 @@ export function useOrdersFilters() {
 
   const hasActiveFilters = Boolean(
     search ||
-      ebayAccountId ||
       dateFrom ||
       dateTo ||
       stage ||
@@ -195,22 +198,6 @@ export function useOrdersFilters() {
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   }, []);
-
-  const handleEbayAccountChange = useCallback(
-    (value: string | number) => {
-      const v = String(value);
-      setEbayAccountId(v);
-      setPage(1);
-      const next = new URLSearchParams(searchParams);
-      if (v) {
-        next.set('store', v);
-      } else {
-        next.delete('store');
-      }
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
 
   const handleStageChange = useCallback(
     (value: string | number) => {
@@ -290,18 +277,21 @@ export function useOrdersFilters() {
   const handleClearFilters = useCallback(() => {
     setSearchInput('');
     setSearch('');
-    setEbayAccountId('');
     setStage('');
     setTab(OrderStageTab.ALL);
     setTrackingState(DEFAULT_TRACKING);
     setFlag('');
     setPage(1);
+    // Clearing filters never clears the store: it is the top bar's choice.
     const next = new URLSearchParams();
+    if (ebayAccountId) {
+      next.set('store', ebayAccountId);
+    }
     if (fromDashboard) {
       next.set('from', 'dashboard');
     }
     setSearchParams(next, { replace: true });
-  }, [fromDashboard, setSearchParams]);
+  }, [ebayAccountId, fromDashboard, setSearchParams]);
 
   const handleRowsPerPageChange = useCallback((rows: number) => {
     setRowsPerPage(rows);
@@ -316,7 +306,6 @@ export function useOrdersFilters() {
     searchInput,
     handleSearchChange,
     ebayAccountId,
-    handleEbayAccountChange,
     tab,
     handleTabChange,
     hasUrlSelection,

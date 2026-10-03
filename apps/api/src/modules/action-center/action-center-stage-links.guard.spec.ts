@@ -25,4 +25,31 @@ describe('Action Center order links', () => {
     expect(src).toMatch(/buildOrderStageSql\('o'\)/);
     expect(src).not.toMatch(/buildFulfillmentStateSql/);
   });
+
+  /*
+   * `?ebayAccountId=` (2026-10-04): a store-filtered page must count only that
+   * store, or "3 need you in store B" lands on store B's list of one. Every
+   * statement over a per-store table carries the store predicate, and the
+   * predicate types its parameter on every use.
+   */
+  const count = (re: RegExp) => (src.match(re) ?? []).length;
+
+  it('scopes every per-store count to the store filter', () => {
+    expect(count(/FROM orders o\b/g)).toBeGreaterThan(0);
+    expect(count(/storeScopeSql\('o', \d\)/g)).toBe(count(/FROM orders o\b/g));
+    expect(count(/storeScopeSql\('l', \d\)/g)).toBe(count(/FROM listings l\b/g));
+    expect(count(/storeScopeSql\('r', \d\)/g)).toBe(count(/FROM ebay_returns r\b/g));
+    expect(count(/storeScopeSql\('j', \d\)/g)).toBe(count(/JOIN listing_jobs j\b/g));
+    expect(count(/FROM ebay_accounts a\b/g)).toBe(count(/\(\$4::uuid IS NULL OR a\.id = \$4::uuid\)/g));
+  });
+
+  it('casts the store parameter on both of its uses', () => {
+    expect(src).toMatch(/\(\$\$\{param\}::uuid IS NULL OR \$\{alias\}\.ebay_account_id = \$\$\{param\}::uuid\)/);
+  });
+
+  it('carries the store on the links and leaves account-wide items unfiltered', () => {
+    expect(src).toMatch(/scopeItemsToStore\(probes\.flat\(\), store\)/);
+    expect(src).toMatch(/this\.planItems\(userId\)/);
+    expect(src).toMatch(/this\.setupItems\(userId\)/);
+  });
 });

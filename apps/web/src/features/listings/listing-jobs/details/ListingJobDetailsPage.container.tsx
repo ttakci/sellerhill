@@ -30,6 +30,7 @@ import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.componen
 import * as S from './ListingJobDetailsPage.style';
 import { JobItemFilter, type JobItemFilterOption } from './ListingJobDetailsPage.types';
 
+import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { useLocale } from '@/utils/useLocale';
 
 const isFailedItem = (item: ListingJobItemDto): boolean => item.status === ListingStatus.ERROR;
@@ -65,6 +66,8 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     pollingInterval: 3000,
     skip: !jobId,
   });
+  // A job of another store makes that store active (top bar).
+  useFollowRecordStore(job?.ebayAccountId);
 
   const {
     data: items = [],

@@ -9,6 +9,7 @@ import * as S from './ProductsPage.style';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { ProductTableCell } from '@/domain-ui';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 
 /* Amazon has no sandbox and no non-US site (see CLAUDE.md "Marketplace links
    are environment-scoped") — every product price here is sourced from
@@ -25,6 +26,14 @@ export const ProductsPageContainer: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState('');
+  // The top bar's active store; a switch starts the list over on page 1.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
+  const [pageStore, setPageStore] = useState(storeFilter);
+  if (pageStore !== storeFilter) {
+    setPageStore(storeFilter);
+    setPage(1);
+  }
 
   /*
    * Server-paginated. This used to fetch the user's entire distinct-product
@@ -34,7 +43,8 @@ export const ProductsPageContainer: React.FC = () => {
     page,
     limit: rowsPerPage,
     search: search.trim() || undefined,
-  });
+    ebayAccountId: storeFilter || undefined,
+  }, { skip: !storeFilter });
 
   const products = data?.items ?? [];
   const totalCount = data?.total ?? 0;

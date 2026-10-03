@@ -5,20 +5,31 @@
  * computed key (item copy is per-key, with `count` + `context` interpolation,
  * and breakdown chips resolve into other namespaces). The component receives
  * finished strings.
+ *
+ * The page shows the ACTIVE store (the top-bar switcher, `useActiveStore`).
+ * Every store's summary is fetched (`getActionCenterByStore`) — the same call
+ * the switcher makes for its per-store counts, so RTK shares it. Account-wide items
+ * (plan, setup, Amazon buyer accounts) appear in every store's view with a
+ * caption saying so, and are left out of the per-store count.
  */
 
-import { ActionCenterSeverity, type ActionCenterGroupDto, type ActionCenterItemDto } from '@repo/shared';
+import {
+  ActionCenterSeverity,
+  type ActionCenterGroupDto,
+  type ActionCenterItemDto,
+} from '@repo/shared';
 import type { TabNavItem } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey, filterToIcon } from '../actionCenterPresentation';
-import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterQuery } from '../api/actionCenterApi';
+import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterByStoreQuery } from '../api/actionCenterApi';
 
 import { ActionCenterPage as ActionCenterPageComponent } from './ActionCenterPage.component';
 import type { ActionCenterFilter, ActionCenterGroupView, ActionCenterItemView } from './ActionCenterPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useLocale } from '@/utils/useLocale';
 
 export const ActionCenterPageContainer: React.FC = () => {
@@ -26,9 +37,18 @@ export const ActionCenterPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
   const [filter, setFilter] = useState<ActionCenterFilter>(ACTION_CENTER_FILTER_ALL);
 
-  const { data, isLoading } = useGetActionCenterQuery(undefined, {
+  // The store chosen in the top bar. The page shows that store; the switcher
+  // shows every store's own count, so work elsewhere is never hidden.
+  const { activeStoreId, stores } = useActiveStore();
+  const storeIds = useMemo(() => stores.map((store) => store.id), [stores]);
+
+  const { data: byStore, isLoading: isSummaryLoading } = useGetActionCenterByStoreQuery(storeIds, {
+    skip: storeIds.length === 0,
     pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
   });
+
+  const data = activeStoreId ? byStore?.[activeStoreId] : undefined;
+  const isLoading = !activeStoreId || isSummaryLoading;
 
   /**
    * Resolve one item's copy.
@@ -54,6 +74,8 @@ export const ActionCenterPageContainer: React.FC = () => {
         description: t(`actionCenter.items.${item.key}.description`, interpolation),
         actionLabel: t(`actionCenter.items.${item.key}.action`),
         chips,
+        storeLabels: (item.stores ?? []).map((store) => store.label),
+        accountWideNote: item.accountWide ? t('actionCenter.storeFilter.accountWide') : null,
       };
     },
     [t],

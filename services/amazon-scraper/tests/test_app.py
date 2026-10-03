@@ -167,9 +167,9 @@ def bs_body(**over):
 
 
 def _fake_bestsellers(calls=None, outcome="found"):
-    def fetch_bestsellers(country, list_type, category, page):
+    def fetch_bestsellers(country, list_type, category, page, tree_only=False):
         if calls is not None:
-            calls.append((country, list_type, category, page))
+            calls.append((country, list_type, category, page, tree_only))
         lst = None
         if outcome == "found":
             lst = {"title": "Amazon Best Sellers", "category": category or None, "listType": list_type,
@@ -195,7 +195,7 @@ def test_best_sellers_503_until_secret_is_set(client, monkeypatch):
     {"listType": "bestsellers"}, {"listType": None}, {"page": 0}, {"page": 3}, {"page": "1"}, {"page": True},
     {"category": "Electronics Deals!"}, {"category": "e" * 121}, {"category": None}, {"proxies": "http://h:1"},
     {"lane": "x"}, {"perIpRequestsPerSecond": 0}, {"perIpRequestsPerSecond": 101}, {"marketplace": "XX"},
-    {"marketplace": None},
+    {"marketplace": None}, {"treeOnly": "yes"},
 ])
 def test_best_sellers_invalid_body_is_400_with_field_named(client, monkeypatch, bad):
     app, _ = client
@@ -244,7 +244,7 @@ def test_best_sellers_happy_path_returns_only_the_wire_keys(client, monkeypatch)
     assert set(res.json) == {"outcome", "fetchedAt", "list"}
     assert res.json["outcome"] == "found" and res.json["fetchedAt"] == "t"
     assert res.json["list"]["listType"] == "new_releases" and res.json["list"]["category"] == "electronics/172541"
-    assert calls == [("US", "new_releases", "electronics/172541", 2)]
+    assert calls == [("US", "new_releases", "electronics/172541", 2, False)]
     stats = app.get("/v1/stats", headers={"X-Scraper-Secret": "s3cret"}).json
     assert stats["window1h"]["found"] == 1 and stats["meanLatencyMs"] == 12
 
@@ -287,3 +287,12 @@ def test_best_sellers_never_logs_or_returns_credentials(client, monkeypatch, cap
         stats = app.get("/v1/stats", headers={"X-Scraper-Secret": "s3cret"}).json
     for text in (json.dumps(res.json), json.dumps(stats), caplog.text):
         assert "sensitive_user" not in text and "sensitive_pass" not in text
+
+
+def test_best_sellers_tree_only_on_the_crawl_lane_reaches_the_fetcher(client, monkeypatch):
+    app, _ = client
+    calls = []
+    monkeypatch.setattr(app_module, "fetch_bestsellers", _fake_bestsellers(calls))
+    res = app.post_json("/v1/best-sellers", bs_body(lane="crawl", treeOnly=True), headers={"X-Scraper-Secret": "s3cret"})
+    assert res.status_int == 200 and res.json["outcome"] == "found"
+    assert calls == [("US", "best_sellers", "electronics", 1, True)]

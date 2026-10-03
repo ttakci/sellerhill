@@ -135,6 +135,7 @@
       "allStores": "Toutes les boutiques",
       "advancedFilters": "Filtres avancés",
       "clearAll": "Tout effacer",
+      "removeFilter": "Retirer le filtre : {{label}}",
       "resultCount": "{{count}} résultats",
       "min": "Min",
       "max": "Max",
@@ -184,6 +185,7 @@
       "profitMargin": "Marge",
       "roi": "ROI",
       "stock": "Stock",
+      "stockEbayAmazon": "Stock (eBay/AMZ)",
       "sold": "Vendus",
       "lastSale": "Dernière vente",
       "category": "Catégorie",
@@ -255,6 +257,7 @@
       "importing": "Importation...",
       "addListing": "Ajouter une annonce",
       "addNewList": "Ajouter une nouvelle liste",
+      "addingToStore": "Ajout à {{store}}",
       "createListings": "Créer les annonces",
       "export": "Exporter",
       "viewAll": "Tout afficher",
@@ -303,6 +306,7 @@
       "actionTitle": "Importer des annonces eBay existantes",
       "actionSubtitle": "Associez les annonces actives de la boutique à des ASIN Amazon avec un classeur Excel.",
       "storeTitle": "Boutique source",
+      "importingTo": "Importation dans {{store}}",
       "store": "Boutique eBay",
       "fileTitle": "Importer les correspondances d'annonces",
       "fileHint": "Fournissez un ASIN Amazon et un ID d'article eBay exacts pour chaque annonce. Les annonces héritées éligibles sont migrées sans être recréées.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Échec de la récupération des politiques commerciales eBay",
       "invalidAsins": "{{count}} de vos entrées ne ressemblent pas à des ASIN valides (10 caractères alphanumériques) et ont été ignorées.",
       "loadFailed": "Échec du chargement des annonces. Veuillez réessayer.",
-      "scheduleTooLong": "À ce rythme, la tâche durerait plus de 30 jours. Augmentez le nombre de produits par jour ou ajoutez moins d'ASIN."
+      "scheduleTooLong": "À ce rythme, la tâche durerait plus de 30 jours. Augmentez le nombre de produits par jour ou ajoutez moins d'ASIN.",
+      "storeUnavailable": "Cette boutique eBay ne peut pas être utilisée : elle n'est pas connectée à votre compte ou sa connexion a pris fin. Choisissez une autre boutique ou reconnectez-la."
     },
     "detail": {
       "breadcrumb": "Détail de l'annonce",

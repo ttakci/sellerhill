@@ -20,9 +20,11 @@ import {
   type BestSellersBrowseAllowanceDto,
   type BestSellersCategoriesDto,
   type BestSellersCategoriesQueryDto,
+  type BestSellersCategoryDto,
   type BestSellersListDto,
   type BestSellersPageDto,
   type BestSellersQueryDto,
+  type ScraperBestSellersRequest,
   type ScraperBestSellersResponse,
 } from '@repo/shared';
 
@@ -36,6 +38,7 @@ import { ScraperClient, ScraperUnavailableError } from '../listings/scraper.clie
 import {
   buildAllowance,
   buildListCacheKeyParts,
+  buildTreeCacheKeyParts,
   buildViewKey,
   decideFetchAllowed,
   normalizeCategory,
@@ -54,7 +57,7 @@ interface CachedListPage {
 }
 
 /** Which list page to resolve. */
-interface ListTarget {
+export interface ListTarget {
   listType: BestSellersListType;
   category: string;
   page: number;
@@ -77,6 +80,16 @@ interface MeteredPage {
   lockedCount: number;
   allowance: BestSellersBrowseAllowanceDto;
 }
+
+/**
+ * How long one node's sub-category list is kept. Amazon reshuffles a ranking
+ * every hour but its category tree changes over months, so the tree outlives
+ * the list cache (`bestSellers.cacheTtlMinutes`, default 6 h) by far. The
+ * platform crawl (`BestSellersCrawlService`) re-reads every node once it is
+ * older than `bestSellers.crawl.intervalDays` (at most 13), so with the crawl
+ * on no node expires and every branch expands from cache.
+ */
+export const TREE_CACHE_TTL_SECONDS = 14 * 24 * 60 * 60;
 
 /** The per-seller miss counter outlives its UTC day by one more, so a slow midnight read still finds it. */
 const FETCH_COUNTER_TTL_SECONDS = 172_800;
@@ -161,29 +174,47 @@ export class BestSellersService {
   }
 
   /**
-   * The department list of one list type, WITHOUT its products.
+   * The category tree beside one node (the department list at the root),
+   * WITHOUT its products.
    *
-   * The seller-facing category tree is built one level at a time from list
-   * answers, and its root level only ever came from the root list page. A deep
-   * link, a reload or a back-navigation straight into a department therefore
-   * showed no departments at all. Fetching the root PAGE to recover them would
-   * charge up to 50 products of the seller's allowance for a list they never
-   * looked at, and the allowance meters products SEEN, not the tree beside
-   * them. So this reads the same shared root page (cache, else one live fetch
-   * that then serves everyone) and hands back only its categories. The hidden
-   * fetch cap still applies to a miss: proxy capacity was spent.
+   * The seller-facing tree is built one node at a time. Expanding a branch
+   * used to OPEN it — the only way to learn a node's children was to load its
+   * list, which charged up to 50 products of the seller's allowance for every
+   * level they passed on the way down. The allowance meters products SEEN,
+   * not the tree beside them, so a chevron asks here instead.
+   *
+   * Answered from the long-lived tree cache (`TREE_CACHE_TTL_SECONDS`), else
+   * from the shared list cache, else with one live fetch of that node's list
+   * page — which then also serves the list itself from cache, so opening the
+   * branch afterwards is instant. The hidden fetch cap still applies to a
+   * miss: proxy capacity was spent.
    */
   async getCategories(userId: string, query: BestSellersCategoriesQueryDto): Promise<BestSellersCategoriesDto> {
-    const resolved = await this.resolveList(userId, {
+    // The tree-cache hit below returns before `resolveList`, so the feature
+    // switch is checked here too — a disabled feature answers 404 whatever is cached.
+    await this.assertEnabled();
+    const target: ListTarget = {
       listType: query.listType ?? BestSellersListType.BEST_SELLERS,
-      category: BEST_SELLERS_ROOT_CATEGORY,
+      category: normalizeCategory(query.category ?? BEST_SELLERS_ROOT_CATEGORY),
       page: 1,
       marketplace: query.marketplace ?? AmazonMarketplace.AMAZON_US,
-    });
-    return {
-      outcome: resolved.outcome,
-      categories: resolved.outcome === SourceFetchOutcome.FOUND && resolved.list ? resolved.list.categories : [],
     };
+    const treeKey = this.treeCacheKey(target);
+    if (treeKey) {
+      const cachedTree = await this.readTree(treeKey);
+      if (cachedTree) {
+        return { outcome: SourceFetchOutcome.FOUND, categories: cachedTree };
+      }
+    }
+    const resolved = await this.resolveList(userId, target);
+    if (resolved.outcome !== SourceFetchOutcome.FOUND || !resolved.list) {
+      return { outcome: resolved.outcome, categories: [] };
+    }
+    // A list-cache hit from before the tree cache existed: keep its tree too.
+    if (treeKey && resolved.cachedAt !== null) {
+      await this.writeTree(treeKey, resolved.list.categories);
+    }
+    return { outcome: SourceFetchOutcome.FOUND, categories: resolved.list.categories };
   }
 
   /**
@@ -193,9 +224,7 @@ export class BestSellersService {
    * allowance; the callers decide what, if anything, the seller sees.
    */
   private async resolveList(userId: string, target: ListTarget): Promise<ResolvedList> {
-    if (!(await this.platformSettings.getBoolean(PlatformSettingKey.BEST_SELLERS_ENABLED))) {
-      throw new NotFoundException(BestSellersErrorKey.DISABLED);
-    }
+    await this.assertEnabled();
 
     const { listType, category, page, marketplace } = target;
     if (!SUPPORTED_AMAZON_MARKETPLACES.includes(marketplace)) {
@@ -249,18 +278,9 @@ export class BestSellersService {
 
     let response: ScraperBestSellersResponse;
     try {
-      response = await this.fetchDeduped(cacheKey, async () => {
-        const rate = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS);
-        return this.client.fetchBestSellers({
-          marketplace: countryCode,
-          listType,
-          category,
-          page,
-          lane: ScraperLane.BROWSE,
-          proxies,
-          perIpRequestsPerSecond: rate,
-        });
-      });
+      response = await this.fetchDeduped(cacheKey, () =>
+        this.scraperFetch({ marketplace: countryCode, listType, category, page, lane: ScraperLane.BROWSE, proxies }),
+      );
     } catch (error: unknown) {
       if (error instanceof ScraperUnavailableError) {
         await this.refund(counterKey);
@@ -271,12 +291,121 @@ export class BestSellersService {
 
     if (response.outcome === SourceFetchOutcome.FOUND && response.list) {
       await this.writeCache(cacheKey, { list: response.list, fetchedAt: response.fetchedAt });
+      const treeKey = this.treeCacheKey(target);
+      if (treeKey) {
+        await this.writeTree(treeKey, response.list.categories);
+      }
       return { outcome: SourceFetchOutcome.FOUND, list: response.list, cachedAt: null, fetchedAt: response.fetchedAt, viewKey };
     }
     // Any other outcome (blocked / parse_failed / not_found) is transient or
     // final for this request only: not cached, the seller may retry, and the
     // fetch charge stands because the proxy capacity was spent.
     return { outcome: response.outcome, list: null, cachedAt: null, fetchedAt: response.fetchedAt, viewKey };
+  }
+
+  /**
+   * For the platform crawl: a node's stored tree and its age, or null. The
+   * age is read off the remaining TTL, so no timestamp is stored beside it.
+   */
+  async readTreeForCrawl(
+    listType: BestSellersListType,
+    category: string,
+  ): Promise<{ categories: BestSellersCategoryDto[]; ageSeconds: number } | null> {
+    const key = this.treeCacheKey(crawlTarget(listType, category));
+    if (!key) {return null;}
+    const categories = await this.readTree(key);
+    if (!categories) {return null;}
+    try {
+      const ttl = await this.redis.command.ttl(key);
+      return { categories, ageSeconds: ttl > 0 ? Math.max(0, TREE_CACHE_TTL_SECONDS - ttl) : TREE_CACHE_TTL_SECONDS };
+    } catch {
+      return { categories, ageSeconds: TREE_CACHE_TTL_SECONDS };
+    }
+  }
+
+  /** For the list pre-warm: seconds the cached list page 1 still lives, null when it is not cached. */
+  async listCacheRemainingSeconds(listType: BestSellersListType, category: string): Promise<number | null> {
+    try {
+      const ttl = await this.redis.command.ttl(this.crawlListKey(crawlTarget(listType, category)));
+      return ttl > 0 ? ttl : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * The platform crawl's one fetch: on the scraper's lowest lane (behind the
+   * price/stock refresh), charged to NO seller — neither the product
+   * allowance nor the per-seller fetch cap. `treeOnly` reads the sidebar from
+   * a single request and stores only the tree; otherwise the whole list is
+   * fetched and stored as a seller's fetch would be (the pre-warm). Never
+   * throws for an unreachable scraper: that reads as BLOCKED, "try again later".
+   */
+  async crawlFetch(
+    listType: BestSellersListType,
+    category: string,
+    proxies: string[],
+    treeOnly: boolean,
+  ): Promise<{ outcome: SourceFetchOutcome; categories: BestSellersCategoryDto[] }> {
+    const target = crawlTarget(listType, category);
+    const cacheKey = this.crawlListKey(target);
+    let response: ScraperBestSellersResponse;
+    try {
+      response = await this.fetchDeduped(treeOnly ? `${cacheKey}:tree-only` : cacheKey, () =>
+        this.scraperFetch({
+          marketplace: AMAZON_MARKETPLACE_CONFIG[target.marketplace].countryCode,
+          listType,
+          category: target.category,
+          page: 1,
+          lane: ScraperLane.CRAWL,
+          proxies,
+          treeOnly,
+        }),
+      );
+    } catch (error: unknown) {
+      if (error instanceof ScraperUnavailableError) {
+        return { outcome: SourceFetchOutcome.BLOCKED, categories: [] };
+      }
+      throw error;
+    }
+    if (response.outcome !== SourceFetchOutcome.FOUND || !response.list) {
+      return { outcome: response.outcome, categories: [] };
+    }
+    if (!treeOnly) {
+      await this.writeCache(cacheKey, { list: response.list, fetchedAt: response.fetchedAt });
+    }
+    const treeKey = this.treeCacheKey(target);
+    if (treeKey) {
+      await this.writeTree(treeKey, response.list.categories);
+    }
+    return { outcome: SourceFetchOutcome.FOUND, categories: response.list.categories };
+  }
+
+  private crawlListKey(target: ListTarget): string {
+    const countryCode = AMAZON_MARKETPLACE_CONFIG[target.marketplace].countryCode;
+    return this.redis.keys.key(...buildListCacheKeyParts(countryCode, target.listType, target.category, 1));
+  }
+
+  /**
+   * The ONE place the scraper is called (`best-sellers-egress.guard.spec.ts`).
+   * An empty proxy list answers NO_PROXY with no HTTP call: the server's own
+   * IP never reaches Amazon, whichever caller forgot to check.
+   */
+  private async scraperFetch(
+    req: Omit<ScraperBestSellersRequest, 'perIpRequestsPerSecond'>,
+  ): Promise<ScraperBestSellersResponse> {
+    if (req.proxies.length === 0) {
+      return { outcome: SourceFetchOutcome.NO_PROXY, fetchedAt: null, list: null };
+    }
+    const rate = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS);
+    return this.client.fetchBestSellers({ ...req, perIpRequestsPerSecond: rate });
+  }
+
+  /** The operator's switch (`bestSellers.enabled`): off answers 404 on every seller-facing read. */
+  private async assertEnabled(): Promise<void> {
+    if (!(await this.platformSettings.getBoolean(PlatformSettingKey.BEST_SELLERS_ENABLED))) {
+      throw new NotFoundException(BestSellersErrorKey.DISABLED);
+    }
   }
 
   /** One scraper call per cache key while it is in flight. */
@@ -359,6 +488,38 @@ export class BestSellersService {
     }
   }
 
+  /** The tree cache key of a node, or null when the marketplace is not enabled (resolveList refuses it). */
+  private treeCacheKey(target: ListTarget): string | null {
+    if (!SUPPORTED_AMAZON_MARKETPLACES.includes(target.marketplace)) {return null;}
+    const countryCode = AMAZON_MARKETPLACE_CONFIG[target.marketplace].countryCode;
+    return this.redis.keys.key(...buildTreeCacheKeyParts(countryCode, target.listType, target.category));
+  }
+
+  private async readTree(key: string): Promise<BestSellersCategoryDto[] | null> {
+    try {
+      const raw = await this.redis.command.get(key);
+      if (!raw) {return null;}
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length > 0 ? (parsed as BestSellersCategoryDto[]) : null;
+    } catch (error: unknown) {
+      this.logger.warn(`Best Sellers tree cache read failed: ${describe(error)}`);
+      return null;
+    }
+  }
+
+  /** An empty tree is never stored: it would read as "this node has no children" for a week. */
+  private async writeTree(key: string, categories: BestSellersCategoryDto[]): Promise<void> {
+    if (categories.length === 0) {return;}
+    // The crawl stores ~250k of these: the Amazon URL per row (half the bytes)
+    // is dropped — the tree never renders it, and `path` rebuilds any link.
+    const compact = categories.map((entry) => ({ ...entry, link: null }));
+    try {
+      await this.redis.command.set(key, JSON.stringify(compact), 'EX', TREE_CACHE_TTL_SECONDS);
+    } catch (error: unknown) {
+      this.logger.warn(`Best Sellers tree cache write failed: ${describe(error)}`);
+    }
+  }
+
   private async readCounter(key: string): Promise<number> {
     try {
       const raw = await this.redis.command.get(key);
@@ -390,6 +551,11 @@ export class BestSellersService {
       this.logger.warn(`Best Sellers fetch counter refund failed: ${describe(error)}`);
     }
   }
+}
+
+/** The crawl only covers the one enabled storefront. */
+function crawlTarget(listType: BestSellersListType, category: string): ListTarget {
+  return { listType, category: normalizeCategory(category), page: 1, marketplace: AmazonMarketplace.AMAZON_US };
 }
 
 /** Error text for a log line — never includes a request body. */

@@ -135,6 +135,7 @@
       "allStores": "Alle Shops",
       "advancedFilters": "Erweiterte Filter",
       "clearAll": "Alle zurücksetzen",
+      "removeFilter": "Filter entfernen: {{label}}",
       "resultCount": "{{count}} Ergebnisse",
       "min": "Min.",
       "max": "Max.",
@@ -184,6 +185,7 @@
       "profitMargin": "Marge",
       "roi": "ROI",
       "stock": "Bestand",
+      "stockEbayAmazon": "Bestand (eBay/AMZ)",
       "sold": "Verkauft",
       "lastSale": "Letzter Verkauf",
       "category": "Kategorie",
@@ -255,6 +257,7 @@
       "importing": "Wird importiert ...",
       "addListing": "Angebot hinzufügen",
       "addNewList": "Neue Liste hinzufügen",
+      "addingToStore": "Wird zu {{store}} hinzugefügt",
       "createListings": "Angebote erstellen",
       "export": "Exportieren",
       "viewAll": "Alle anzeigen",
@@ -303,6 +306,7 @@
       "actionTitle": "Bestehende eBay-Angebote importieren",
       "actionSubtitle": "Ordnen Sie aktive Shop-Angebote mit einer Excel-Arbeitsmappe Amazon-ASINs zu.",
       "storeTitle": "Quell-Shop",
+      "importingTo": "Wird in {{store}} importiert",
       "store": "eBay-Shop",
       "fileTitle": "Angebotszuordnungen hochladen",
       "fileHint": "Geben Sie für jedes Angebot eine exakte Amazon-ASIN und die eBay-Artikelnummer an. Geeignete Legacy-Angebote werden migriert, ohne neu erstellt zu werden.",
@@ -375,7 +379,8 @@
       "fetchPoliciesFailed": "Die eBay-Geschäftsrichtlinien konnten nicht abgerufen werden",
       "invalidAsins": "{{count}} Ihrer Einträge sehen nicht wie gültige ASINs aus (10 alphanumerische Zeichen) und wurden übersprungen.",
       "loadFailed": "Die Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
-      "scheduleTooLong": "Bei diesem Tempo würde der Auftrag mehr als 30 Tage dauern. Erhöhen Sie die Anzahl der Produkte pro Tag oder fügen Sie weniger ASINs hinzu."
+      "scheduleTooLong": "Bei diesem Tempo würde der Auftrag mehr als 30 Tage dauern. Erhöhen Sie die Anzahl der Produkte pro Tag oder fügen Sie weniger ASINs hinzu.",
+      "storeUnavailable": "Dieser eBay-Shop kann nicht verwendet werden: Er ist nicht mit Ihrem Konto verbunden oder die Verbindung wurde beendet. Wählen Sie einen anderen Shop oder verbinden Sie ihn erneut."
     },
     "detail": {
       "breadcrumb": "Angebotsdetails",

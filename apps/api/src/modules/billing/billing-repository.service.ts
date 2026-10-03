@@ -28,6 +28,7 @@ import {
 import { PoolClient } from 'pg';
 
 import { DatabaseService, type QueryParam } from '../../common/database/database.service';
+import { buildListingStoreActiveSql } from '../../common/utils/listing-store-active-sql';
 
 import {
   buildSubscriptionUpsertSql,
@@ -231,6 +232,29 @@ export class BillingRepositoryService {
       this.findLimitsForPlans(planIds),
     ]);
     return plans.map((p) => expandPlan(p, prices, limits));
+  }
+
+  /**
+   * The trial plan's limits, read by slug because the trial is
+   * `is_active = FALSE` and so never part of {@link loadCatalog}. Null when
+   * the trial plan row does not exist.
+   */
+  async loadTrialLimits(): Promise<Partial<Record<BillingLimitKey, number>> | null> {
+    const rows = await this.databaseService.query<{ limit_key: string | null; limit_value: number | string | null }>(
+      `SELECT l.limit_key, l.limit_value
+         FROM billing_plans p
+         LEFT JOIN billing_plan_limits l ON l.plan_id = p.id
+        WHERE p.slug = $1`,
+      [TRIAL_PLAN_SLUG],
+    );
+    if (rows.length === 0) {return null;}
+    const limits: Partial<Record<BillingLimitKey, number>> = {};
+    for (const row of rows) {
+      if (row.limit_key !== null && row.limit_value !== null) {
+        limits[row.limit_key as BillingLimitKey] = Number(row.limit_value);
+      }
+    }
+    return limits;
   }
 
   async loadPlanWithPricing(
@@ -542,8 +566,10 @@ export class BillingRepositoryService {
    */
   async countActiveListings(userId: string, client?: PoolClient): Promise<number> {
     const rows = await this.run<{ cnt: string }>(
-      `SELECT COUNT(*)::text AS cnt FROM listings
-        WHERE user_id = $1 AND status = $2`,
+      `SELECT COUNT(*)::text AS cnt FROM listings l
+        WHERE l.user_id = $1 AND l.status = $2
+          -- A disconnected store's listings hold no plan slot.
+          AND ${buildListingStoreActiveSql('l')}`,
       [userId, ListingStatus.ACTIVE],
       client,
     );
@@ -564,7 +590,7 @@ export class BillingRepositoryService {
       flagged_count: string;
     }>(
       `SELECT user_id,
-              COUNT(*) FILTER (WHERE status = $1)::text AS active_count,
+              COUNT(*) FILTER (WHERE status = $1 AND ${buildListingStoreActiveSql('listings')})::text AS active_count,
               COUNT(*) FILTER (WHERE over_plan_limit)::text AS flagged_count
          FROM listings
         GROUP BY user_id
@@ -596,6 +622,9 @@ export class BillingRepositoryService {
                   ROW_NUMBER() OVER (ORDER BY created_at ASC NULLS FIRST, id ASC) AS rn
              FROM listings
             WHERE user_id = $1 AND status = $2
+              -- Ranked among the CONNECTED stores' listings only: a disconnected
+              -- store's older rows must not push the live store's newer ones out.
+              AND ${buildListingStoreActiveSql('listings')}
          )
          UPDATE listings l
             SET over_plan_limit = (r.rn > $3)
@@ -606,7 +635,8 @@ export class BillingRepositoryService {
       );
       const cleared = await client.query(
         `UPDATE listings SET over_plan_limit = FALSE
-          WHERE user_id = $1 AND status <> $2 AND over_plan_limit = TRUE`,
+          WHERE user_id = $1 AND over_plan_limit = TRUE
+            AND (status <> $2 OR NOT ${buildListingStoreActiveSql('listings')})`,
         [userId, ListingStatus.ACTIVE],
       );
       return (ranked.rowCount ?? 0) + (cleared.rowCount ?? 0);

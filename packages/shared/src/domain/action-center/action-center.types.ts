@@ -229,6 +229,17 @@ export interface ActionCenterBreakdownEntryDto {
   count: number;
 }
 
+/**
+ * One eBay store named on a per-store item (`EBAY_ACCOUNT_DISCONNECTED`,
+ * `EBAY_ACCOUNT_MESSAGING_SCOPE_MISSING`), so a seller with several stores
+ * reads WHICH store needs them. `label` is the store's display name
+ * (`store_name` → eBay username → eBay user id), never an enum.
+ */
+export interface ActionCenterStoreRefDto {
+  id: string;
+  label: string;
+}
+
 /** A single actionable condition, with everything the row needs to render. */
 export interface ActionCenterItemDto {
   key: ActionCenterItemKey;
@@ -249,6 +260,15 @@ export interface ActionCenterItemDto {
    * the fix is not a single destination.
    */
   actionPath: string | null;
+  /** The stores the condition is about, for a per-store connection item. */
+  stores?: ActionCenterStoreRefDto[];
+  /**
+   * True for a condition of the whole SellerHill account rather than of one
+   * eBay store (plan, onboarding, Amazon buyer accounts). It is reported the
+   * same with or without `?ebayAccountId=`, and the page says so while a store
+   * filter is applied.
+   */
+  accountWide?: boolean;
 }
 
 /** A page section — its severity is its worst item's. */
@@ -261,7 +281,10 @@ export interface ActionCenterGroupDto {
 }
 
 /**
- * `GET /v1/action-center`.
+ * `GET /v1/action-center`. Optional `?ebayAccountId=<uuid>` narrows every
+ * per-store probe (orders, returns, eBay connections, listings) to that store;
+ * blank means every store (the sidebar badge's call). Plan, setup and Amazon
+ * buyer-account items are account-wide and ignore it.
  *
  * The counts are counts of ITEMS (distinct conditions), not of underlying rows:
  * the sidebar badge should read "6 things need you", not "431 orders".

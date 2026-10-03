@@ -7,8 +7,6 @@
 
 import {
   Badge,
-  Button,
-  Dropdown,
   EmptyState,
   Icon,
   PageHeader,
@@ -31,7 +29,6 @@ export const MessagesPageComponent = ({
   onBack,
   backLabel,
   showToolbar,
-  storeSelector,
   messagingEnabled,
   onReconnect,
   isReconnecting,
@@ -52,26 +49,6 @@ export const MessagesPageComponent = ({
       onBack={onBack}
       backAriaLabel={backLabel}
       backMobileOnly
-      actions={
-        showToolbar && storeSelector ? (
-          <Dropdown
-            align="right"
-            width="14rem"
-            items={storeSelector.items}
-            trigger={
-              <Button variant="secondary" size="small">
-                <Icon name="storefront" size={16} />
-                <S.StoreLabel>
-                  <Text variant="body-sm" weight="medium" truncate>
-                    {storeSelector.label}
-                  </Text>
-                </S.StoreLabel>
-                <Icon name="chevron-down" size={14} color="text.tertiary" />
-              </Button>
-            }
-          />
-        ) : undefined
-      }
     />
 
     {/* Below `xl` the rail is hidden, so its stand-in sits in a row of its own;

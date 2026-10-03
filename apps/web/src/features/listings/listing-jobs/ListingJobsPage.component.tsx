@@ -81,9 +81,11 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                 </Text>
               </S.ProgressCounts>
             </S.ProgressMain>
-            <Text variant="caption" color="text.tertiary">
-              {formatJobDate(job.createdAt)}
-            </Text>
+            <S.ProgressMeta>
+              <Text variant="caption" color="text.tertiary">
+                {formatJobDate(job.createdAt)}
+              </Text>
+            </S.ProgressMeta>
           </S.ProgressRow>
         </S.JobCardBody>
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   OrderFulfillmentState,
@@ -11,10 +11,25 @@ import {
   UpdateOrderAmazonDetailsDto,
   type OrderSyncResponseDto,
 } from '@repo/shared';
+import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { OrdersService } from './orders.service';
+
+/**
+ * `?ebayAccountId=` is compared against a UUID column; a malformed value
+ * would surface as a Postgres cast error (500). Absent/blank = no filter.
+ */
+function parseStoreId(value: string | undefined): string | undefined {
+  if (value === undefined || value.trim() === '') {
+    return undefined;
+  }
+  if (!isUUID(value.trim())) {
+    throw new BadRequestException('ebayAccountId must be a UUID');
+  }
+  return value.trim();
+}
 
 @ApiTags('Orders')
 @ApiBearerAuth()
@@ -66,7 +81,7 @@ export class OrdersController {
       limit: limit ? parseInt(limit, 10) : undefined,
       status: status as OrderFiltersDto['status'],
       search,
-      ebayAccountId,
+      ebayAccountId: parseStoreId(ebayAccountId),
       dateFrom,
       dateTo,
       autoFulfillNeedsAttention: autoFulfillNeedsAttention === 'true' ? true : undefined,
@@ -91,7 +106,7 @@ export class OrdersController {
     @Query('tracked') tracked?: string
   ): Promise<OrderStageCountsDto> {
     const isTracked = tracked === 'true' ? true : tracked === 'false' ? false : undefined;
-    return this.ordersService.getStageCounts(req.user.sub, { ebayAccountId, isTracked });
+    return this.ordersService.getStageCounts(req.user.sub, { ebayAccountId: parseStoreId(ebayAccountId), isTracked });
   }
 
   @Get('stats')

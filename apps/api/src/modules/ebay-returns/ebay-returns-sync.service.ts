@@ -219,7 +219,7 @@ export class EbayReturnsSyncService {
    * name and the comment stay NULL, whatever eBay still returns.
    *
    * `order_id` links the return to the SellerHill order with that eBay order
-   * id, for the same seller only. It is NULL when we hold no such order, and
+   * id, for the same seller AND store only. It is NULL when we hold no such order, and
    * an existing link is never dropped by a later sweep (COALESCE).
    */
   /** Also called by `EbayReturnsActionsService` after an action, with the fresh detail read. */
@@ -235,7 +235,9 @@ export class EbayReturnsSyncService {
          escalation_case_id, created_on_ebay_at
        ) VALUES (
          $1::uuid, $2::uuid, $3::text, $4::text,
-         (SELECT o.id FROM orders o WHERE o.ebay_order_id = $4::text AND o.user_id = $1::uuid LIMIT 1),
+         (SELECT o.id FROM orders o
+           WHERE o.ebay_order_id = $4::text AND o.user_id = $1::uuid AND o.ebay_account_id = $2::uuid
+           LIMIT 1),
          $5::text, $6::text, $7::int,
          $8::text, $9::text, $10::text, $11::text, $12::text,
          $13::text, $14::text,

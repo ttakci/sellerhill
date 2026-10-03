@@ -1,5 +1,7 @@
 import type React from 'react';
 
+import type { SwipeNavigationHandlers } from '@/hooks/useSwipeNavigation';
+
 export interface AccountCarouselProps<T> {
   items: T[];
   keyExtractor: (item: T) => string;
@@ -15,4 +17,5 @@ export interface AccountCarouselComponentProps<T> extends Required<Pick<AccountC
   onNext: () => void;
   onPrev: () => void;
   onGoTo: (index: number) => void;
+  swipeHandlers: SwipeNavigationHandlers;
 }

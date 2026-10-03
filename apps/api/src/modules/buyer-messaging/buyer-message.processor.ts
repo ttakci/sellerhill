@@ -32,6 +32,8 @@ interface OrderCtx {
   carrier?: string;
   storeName: string;
   ebayItemId?: string;
+  /** False when the order is linked to no SellerHill listing — such a buyer is never messaged. */
+  tracked: boolean;
 }
 
 /**
@@ -56,11 +58,15 @@ export class BuyerMessageProcessor extends WorkerHost {
 
   async process(job: Job<BuyerMessageJobData>, token?: string): Promise<void> {
     const { ebayOrderId, userId, ebayAccountId, storeId, event } = job.data;
+    // Settings belong to the store the order was sold on (store_settings.store_id
+    // IS the eBay account id). Producers used to send storeId: null, which read
+    // the global row for every store and ignored a store's own messaging choice.
+    const settingsStoreId = storeId ?? ebayAccountId;
 
     // 0. Silent no-op for users who haven't opted in — avoids skipped-log spam
     //    (and the idempotency query) for the common case. The per-user/per-event
     //    store_settings config is the SOLE gate; there is no env master switch.
-    if (!(await this.messageService.isMessagingEnabled(userId, storeId))) {
+    if (!(await this.messageService.isMessagingEnabled(userId, settingsStoreId))) {
       return;
     }
 
@@ -85,7 +91,7 @@ export class BuyerMessageProcessor extends WorkerHost {
     }
 
     // 2. resolve template (null => disabled/unconfigured) — re-checks config at fire time.
-    const tpl = await this.messageService.resolveTemplate(userId, storeId, event);
+    const tpl = await this.messageService.resolveTemplate(userId, settingsStoreId, event);
     if (!tpl) {
       await this.recordLog({
         ebayOrderId,
@@ -129,6 +135,23 @@ export class BuyerMessageProcessor extends WorkerHost {
         status: 'skipped',
         templateKind: tpl.kind,
         templateRef: tpl.ref,
+      });
+      return;
+    }
+
+    // 3a. Only orders SellerHill tracks (linked to one of the seller's
+    //     listings) are messaged. A store connected with sales made through
+    //     another tool must not have its buyers messaged by us as well.
+    if (!ctx.tracked) {
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'skipped',
+        templateKind: tpl.kind,
+        templateRef: tpl.ref,
+        error: 'order_untracked',
       });
       return;
     }
@@ -255,6 +278,7 @@ export class BuyerMessageProcessor extends WorkerHost {
       carrier: string | null;
       store_name: string | null;
       legacy_item_id: string | null;
+      listing_id: string | null;
     }>(
       `SELECT o.buyer_username,
               COALESCE(NULLIF(o.buyer_name, ''), o.shipping_address->>'fullName') AS buyer_name,
@@ -270,7 +294,8 @@ export class BuyerMessageProcessor extends WorkerHost {
               -- Never seller_id: since migration 108 it is eBay's opaque immutable
               -- user id, and this value reaches buyers through {{store_name}}.
               COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name,
-              COALESCE(l.ebay_item_id, o.ebay_legacy_item_id) AS legacy_item_id
+              COALESCE(l.ebay_item_id, o.ebay_legacy_item_id) AS legacy_item_id,
+              o.listing_id
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
          LEFT JOIN products p ON p.id = l.product_id
@@ -294,6 +319,7 @@ export class BuyerMessageProcessor extends WorkerHost {
       carrier: formatCarrierForBuyer(r.carrier),
       storeName: r.store_name || 'our store',
       ebayItemId: r.legacy_item_id ?? undefined,
+      tracked: Boolean(r.listing_id),
     };
   }
 

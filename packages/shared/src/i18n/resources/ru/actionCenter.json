@@ -29,6 +29,12 @@
       "warning": "Внимание",
       "info": "Рекомендации"
     },
+    "storeFilter": {
+      "label": "Магазин",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Относится ко всему аккаунту",
+      "storesLabel": "Затронутые магазины"
+    },
     "summary": {
       "critical": "Критических: {{count}}",
       "warning": "Предупреждений: {{count}}",

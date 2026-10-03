@@ -27,6 +27,7 @@ import type {
 } from './AddListingsDrawer.types';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
@@ -91,10 +92,20 @@ const normalizePrefilledAsins = (raw: string | undefined): string =>
  * MOUNTS open, e.g. `/listings?drawer=add`) and for the reset on a later open
  * — the two used to differ, see the note at the open transition below.
  */
-const buildOpenValues = (initialAsins: string | undefined): CreateListingsFormData => ({
-  asins: normalizePrefilledAsins(initialAsins),
-  ...readPreferences(),
-});
+const buildOpenValues = (initialAsins: string | undefined, initialEbayAccountId?: string): CreateListingsFormData => {
+  const preferences = readPreferences();
+  // The drawer adds to the ACTIVE store (top bar). The stored policies belong
+  // to the stored store, so they are dropped when the store differs (ids are
+  // per store — eBay refuses another store's policy).
+  const storeChanged = Boolean(initialEbayAccountId) && initialEbayAccountId !== preferences.ebayAccountId;
+  return {
+    asins: normalizePrefilledAsins(initialAsins),
+    ...preferences,
+    ...(storeChanged
+      ? { ebayAccountId: initialEbayAccountId ?? '', paymentPolicyId: '', shippingPolicyId: '', returnPolicyId: '' }
+      : {}),
+  };
+};
 
 /**
  * i18n key for the post-submit success toast. The draft/live split only
@@ -115,7 +126,12 @@ const resolveQueuedMessageKey = (summary: ListingJobQueuedSummary, asDraft: bool
   }
 };
 
-export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess, initialAsins }) => {
+export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialAsins,
+}) => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { locale } = getLocaleConfig(i18n.language);
   const { showMessage, closeMessage } = useUI();
@@ -130,6 +146,8 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   const [scheduleEndHour, setScheduleEndHour] = useState(String(DEFAULT_SCHEDULE_END_HOUR));
   const [scheduleSubmitAttempted, setScheduleSubmitAttempted] = useState(false);
   const lastSubmittedAsDraft = useRef(false);
+  const { activeStoreId } = useActiveStore();
+  const initialEbayAccountId = activeStoreId ?? undefined;
 
   const { data: ebayAccountsData, isLoading: isLoadingAccounts } = useGetEbayAccountsQuery();
   const ebayAccounts = useMemo(
@@ -141,14 +159,12 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     [ebayAccountsData?.items]
   );
   const { data: listingSettingsGroups = [], isLoading: isLoadingSettings } = useGetListingSettingsGroupsQuery();
-  const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
 
   const [
     createListings,
     { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData, reset: resetMutation },
   ] = useCreateListingsMutation();
 
-  const isLoading = isLoadingAccounts || isLoadingSettings || isLoadingPolicies;
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
      to be folded in here, so the global overlay covered the whole app on
      first paint of this page instead of the page showing its own state. */
@@ -166,10 +182,35 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
      * the saved selections — a seller who followed `/listings?drawer=add`
      * lost their remembered store/group/policies.
      */
-    defaultValues: isOpen ? buildOpenValues(initialAsins) : { ...EMPTY_PREFERENCES, asins: '' },
+    defaultValues: isOpen ? buildOpenValues(initialAsins, initialEbayAccountId) : { ...EMPTY_PREFERENCES, asins: '' },
   });
 
   const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
+
+  // The top bar switched store while the drawer is open: the listings now go
+  // to the new store, and the old store's policy ids are dropped (eBay would
+  // refuse them).
+  React.useEffect(() => {
+    if (!isOpen || !activeStoreId || form.getValues('ebayAccountId') === activeStoreId) {
+      return;
+    }
+    form.setValue('ebayAccountId', activeStoreId);
+    form.setValue('paymentPolicyId', '');
+    form.setValue('shippingPolicyId', '');
+    form.setValue('returnPolicyId', '');
+  }, [isOpen, activeStoreId, form]);
+
+  // Policies are per store: read the SELECTED store's, and nothing until one
+  // is chosen (a job for store B must never carry store A's policy ids — eBay
+  // refuses the publish). `currentData`, not `data`, so a store switch never
+  // shows the previous store's policies while the new ones load; the
+  // preferences effect below then clears a selection the new store lacks.
+  const selectedEbayAccountId = useWatch({ control, name: 'ebayAccountId' });
+  const { currentData: policiesMap = [], isFetching: isFetchingPolicies } = useGetBusinessPoliciesQuery(
+    selectedEbayAccountId || undefined,
+    { skip: !selectedEbayAccountId }
+  );
+  const isLoading = isLoadingAccounts || isLoadingSettings || isFetchingPolicies;
 
   // Reset step + form when the drawer opens (the initial mount is covered by
   // `defaultValues` above, which is built from the same values).
@@ -183,7 +224,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       setScheduleEnabled(false);
       setScheduleSubmitAttempted(false);
       clearErrors();
-      reset(buildOpenValues(initialAsins));
+      reset(buildOpenValues(initialAsins, initialEbayAccountId));
     }
   } else if (isOpen && initialAsins !== prevInitialAsins) {
     // A new hand-off while already open (another Best Sellers pick): only the
@@ -431,7 +472,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       isSubmitting={isSubmitting}
       isLoading={isLoading}
       form={form}
-      ebayAccounts={ebayAccounts}
+      storeLabel={ebayAccounts.find((account) => account.id === activeStoreId)?.name ?? ''}
       listingSettingsGroups={listingSettingsGroups}
       businessPolicies={businessPolicies}
       asinCount={asinCount}

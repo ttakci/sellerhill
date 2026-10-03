@@ -170,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Dil Seçimi",
+    "selectStore": "Mağaza seç",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Bildirimler",
     "openMenu": "Menüyü aç",
     "collapseSidebar": "Kenar çubuğunu daralt",
@@ -393,6 +395,9 @@
         "appliesTo": "Uygulandığı yer",
         "checkBlacklist": "Kara liste kelimelerini kontrol et",
         "checkBlacklistDesc": "Yayınlamadan önce listing başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
+        "allowCrossStoreAsins": "Diğer mağazalarımdaki ASIN'ler bu mağazaya da eklenebilsin",
+        "allowCrossStoreAsinsDesc": "Tüm mağazalar için açarsanız her mağaza her ASIN'i listeleyebilir; tek bir mağazada açarsanız yalnızca o mağaza diğer mağazalarınızda zaten olan ASIN'leri ekleyebilir. Bu mağazada zaten olan bir ASIN her zaman atlanır.",
+        "allowCrossStoreAsinsInherited": "Bu mağaza için bir seçim kaydedene kadar tüm mağazaların ayarı geçerlidir.",
         "country": "Ülke",
         "countryPlaceholder": "Ülke seçin",
         "region": "Bölge",
@@ -846,7 +851,7 @@
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
-      "planCta": "Ücretsiz başla",
+      "planCta": "Ücretsiz dene",
       "showAllPlans": "{{count}} paketin tümünü gör",
       "showFewerPlans": "Daha az paket göster",
       "notIncluded": "Dâhil değil",
@@ -897,6 +902,17 @@
           "conversions": "Ayda 500 takip numarası dönüştürme",
           "bestSellers": "Ayda 25,000 Çok Satanlar ürünü"
         }
+      },
+      "trialPlanNote": "Ücretsiz denemeler deneme paketiyle başlar. Bu pakete dilediğiniz an geçebilirsiniz.",
+      "trial": {
+        "title": "{{days}} gün ücretsiz deneyin",
+        "listings": "{{limit}} aktif ilan",
+        "conversions": "{{limit}} takip numarası dönüştürme",
+        "bestSellers": "{{limit}} Çok Satanlar ürünü",
+        "orders": "{{limit}} otomatik sipariş",
+        "unlimitedOrders": "Sınırsız otomatik sipariş",
+        "noCard": "Kredi kartı gerekmez",
+        "cta": "Ücretsiz denemeyi başlat"
       }
     },
     "faq": {

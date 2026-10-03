@@ -67,6 +67,8 @@ function buildHarness(options: {
             listing_ebay_item_id: '99887766',
             ebay_line_item_id: '10-99887766-1',
             shipped_detected_at: new Date('2026-08-20T00:00:00Z'),
+            // eBay already holds this order's tracking — the feed is a refresh only.
+            ebay_tracking_pushed_at: new Date('2026-08-20T01:00:00Z'),
           },
         ];
       }

@@ -1,17 +1,21 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import {
+  ActionCenterItemKey,
+  ActionCenterSeverity,
   BEST_SELLERS_LIST_TYPE_ORDER,
   BestSellersListType,
   DashboardChartGranularity,
   EbayConversationDto,
   EbayConversationStatus,
   ListingStatus,
+  OrderCostCaptureStatus,
   orderNeedsAction,
   OrderFulfillmentState,
   OrderStage,
   RETURN_TABS,
   ReturnBucket,
   ReturnTab,
+  type ActionCenterSummaryDto,
   type ListingDto,
   type EbayReturnDto,
   type OrderDto,
@@ -38,6 +42,7 @@ import {
   DEMO_BUSINESS_POLICIES,
   DEMO_BUYER_MESSAGE_TEMPLATES,
   DEMO_CONVERSATIONS,
+  DEMO_EBAY_ACCOUNT_ID,
   DEMO_EBAY_ACCOUNTS,
   DEMO_LISTING_CATEGORIES,
   DEMO_LISTING_GROUPS,
@@ -109,8 +114,76 @@ function parseRequest(args: string | FetchArgs): ParsedRequest {
   };
 }
 
+/**
+ * Every answer goes through a JSON round-trip, exactly what the real network
+ * does to a response. Some fixtures are typed against shared DTOs that declare
+ * `Date` fields (store settings, listing groups, templates); handed over as-is,
+ * those `Date` objects reached the Redux store and RTK's serializability check
+ * logged an error on every render. The round-trip turns them into the ISO
+ * strings the real API sends, and gives each query a fresh copy so a cached
+ * fixture is never frozen or shared between two cache entries.
+ */
+/** Pages that read `?store=` — the API's `STORE_FILTERABLE_PATHS`. */
+const DEMO_STORE_FILTERABLE_PATHS = ['/orders', '/listings', '/listings/all', '/listings/jobs', '/returns'];
+
+/**
+ * The demo Action Center narrowed to one store, as `?ebayAccountId=` does on
+ * the API: each item is recounted over that store's own fixture rows (an item
+ * the fixtures cannot split, such as the job failures, belongs to the first
+ * store), and its link carries `store=`. A breakdown survives only when the
+ * count did not change, so the chips never add up to more than the item.
+ */
+function scopeDemoActionCenter(summary: ActionCenterSummaryDto, storeId: string): ActionCenterSummaryDto {
+  const orders = DEMO_ORDERS.filter((o) => o.ebayAccountId === storeId);
+  const listings = DEMO_LISTINGS.filter((l) => l.ebayAccountId === storeId);
+  const byStage = (stage: OrderStage) => orders.filter((o) => o.stage === stage).length;
+  const counters: Partial<Record<ActionCenterItemKey, () => number>> = {
+    [ActionCenterItemKey.ORDER_AMAZON_CANCELLED]: () => byStage(OrderStage.AMAZON_CANCELLED),
+    [ActionCenterItemKey.ORDER_FULFILLMENT_BLOCKED]: () => byStage(OrderStage.PURCHASE_BLOCKED),
+    [ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD]: () => byStage(OrderStage.TRACKING_HELD),
+    [ActionCenterItemKey.ORDER_UNTRACKED]: () =>
+      orders.filter((o) => o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED).length,
+    [ActionCenterItemKey.LISTING_OUT_OF_STOCK]: () =>
+      listings.filter((l) => l.status === ListingStatus.ACTIVE && l.quantity === 0).length,
+    [ActionCenterItemKey.LISTING_DRAFTS_PENDING]: () => listings.filter((l) => l.status === ListingStatus.DRAFT).length,
+  };
+  const withStore = (path: string | null) =>
+    path && DEMO_STORE_FILTERABLE_PATHS.includes(path.split('?')[0])
+      ? `${path}${path.includes('?') ? '&' : '?'}store=${encodeURIComponent(storeId)}`
+      : path;
+
+  const groups = summary.groups
+    .map((group) => {
+      const items = group.items
+        .map((item) => {
+          const counter = counters[item.key];
+          const count = counter ? counter() : storeId === DEMO_EBAY_ACCOUNT_ID ? item.count : 0;
+          return {
+            ...item,
+            count,
+            breakdown: count === item.count ? item.breakdown : undefined,
+            actionPath: withStore(item.actionPath),
+          };
+        })
+        .filter((item) => item.count > 0);
+      return { ...group, items, itemCount: items.length };
+    })
+    .filter((group) => group.itemCount > 0);
+
+  const all = groups.flatMap((group) => group.items);
+  const countBy = (severity: ActionCenterSeverity) => all.filter((item) => item.severity === severity).length;
+  return {
+    ...summary,
+    totalCount: all.length,
+    criticalCount: countBy(ActionCenterSeverity.CRITICAL),
+    warningCount: countBy(ActionCenterSeverity.WARNING),
+    infoCount: countBy(ActionCenterSeverity.INFO),
+    groups,
+  };
+}
+
 function ok<T>(data: T): { data: T } {
-  return { data };
+  return { data: data === undefined ? data : (JSON.parse(JSON.stringify(data)) as T) };
 }
 
 /**
@@ -454,7 +527,8 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   }
 
   if (path === '/action-center') {
-    return ok(buildDemoActionCenter());
+    const summary = buildDemoActionCenter();
+    return ok(params.ebayAccountId ? scopeDemoActionCenter(summary, params.ebayAccountId) : summary);
   }
 
   if (path === '/ebay/accounts') {
@@ -472,9 +546,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
       ? (params.listType as BestSellersListType)
       : BestSellersListType.BEST_SELLERS;
     if (path === '/best-sellers/categories') {
-      // The department list alone: the root page's tree, without its products.
-      const root = buildDemoBestSellers(listType, '', 1);
-      return ok({ outcome: root.outcome, categories: root.list?.categories ?? [] });
+      // One node's tree (the department list at the root), without its products.
+      const node = buildDemoBestSellers(listType, params.category ?? '', 1);
+      return ok({ outcome: node.outcome, categories: node.list?.categories ?? [] });
     }
     const page = Math.max(1, Number(params.page) || 1);
     return ok(buildDemoBestSellers(listType, params.category ?? '', page));
@@ -506,7 +580,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   if (path === '/listings/products') {
     const search = params.search?.trim().toLowerCase();
     const rows = DEMO_LISTINGS.filter(
-      (l) => !search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search)
+      (l) =>
+        (!params.ebayAccountId || l.ebayAccountId === params.ebayAccountId) &&
+        (!search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search))
     ).map((l) => ({
       id: l.productId,
       asin: l.asin,
@@ -533,6 +609,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     }
     if (params.status && params.status !== 'all') {
       jobs = jobs.filter((j) => String(j.status) === params.status);
+    }
+    if (params.ebayAccountId) {
+      jobs = jobs.filter((j) => j.ebayAccountId === params.ebayAccountId);
     }
     return ok(paginate(jobs, params));
   }

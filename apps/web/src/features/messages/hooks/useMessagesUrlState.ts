@@ -11,6 +11,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import type { MessagesUrlParam, UseMessagesUrlStateResult } from '../messages.types';
 
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
+
 /** Conversations per list page. eBay caps a Message API read at 50. */
 export const MESSAGES_PAGE_SIZE = 25;
 
@@ -48,7 +50,8 @@ export function useMessagesUrlState(): UseMessagesUrlStateResult {
   );
   const folder = parseEnum(params.get('folder'), Object.values(MessagesFolder), MessagesFolder.ALL);
   const page = Math.max(1, Number(params.get('page') ?? '1') || 1);
-  const store = params.get('store');
+  // The store is the top bar's active store; a switch there drops `c` and `page`.
+  const store = useActiveStore().activeStoreId;
   const conversationId = params.get('c');
 
   const patch = useCallback(
@@ -66,10 +69,6 @@ export function useMessagesUrlState(): UseMessagesUrlStateResult {
     [params, setParams],
   );
 
-  const setStore = useCallback(
-    (value: string | null) => patch({ store: value, c: null, page: null }),
-    [patch],
-  );
   const setType = useCallback(
     (value: EbayConversationType) => patch({ type: value, c: null, page: null }),
     [patch],
@@ -89,13 +88,12 @@ export function useMessagesUrlState(): UseMessagesUrlStateResult {
   return useMemo(
     () => ({
       state: { store, type, folder, conversationId, page },
-      setStore,
       setType,
       setFolder,
       setTypeAndFolder,
       openConversation,
       setPage,
     }),
-    [store, type, folder, conversationId, page, setStore, setType, setFolder, setTypeAndFolder, openConversation, setPage],
+    [store, type, folder, conversationId, page, setType, setFolder, setTypeAndFolder, openConversation, setPage],
   );
 }

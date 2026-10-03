@@ -31,6 +31,10 @@ export interface ActionCenterItemView extends ActionCenterItemDto {
   description: string;
   actionLabel: string;
   chips: ActionCenterBreakdownChip[];
+  /** Labels of the stores a per-store connection item is about (empty otherwise). */
+  storeLabels: string[];
+  /** Caption for an account-wide item (plan, setup), shown in every store view; null otherwise. */
+  accountWideNote: string | null;
 }
 
 export interface ActionCenterGroupView extends Omit<ActionCenterGroupDto, 'items'> {

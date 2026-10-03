@@ -282,6 +282,36 @@ def test_browse_lane_sits_between_interactive_and_background():
     pool.shutdown()
 
 
+
+def test_crawl_lane_only_runs_after_the_background_refresh():
+    # The platform's own Best Sellers crawl must never delay a price/stock refresh.
+    order = []
+    gate = threading.Event()
+
+    def slow(asin, marketplace, mode):
+        gate.wait(2)
+        order.append(asin)
+        return {"asin": asin, "outcome": "found"}
+
+    def call(name):
+        def fn():
+            gate.wait(2)
+            order.append(name)
+            return {"outcome": "found"}
+        return fn
+
+    pool = ProxyPool(slow, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://h:1"], rate=100)
+    first = pool.submit("BLOCKER000", "US", "commerce", "background")
+    time.sleep(0.1)
+    cr = pool.submit_call(call("CRAWL"), "crawl", _EXPIRED)
+    bg = pool.submit("BACKGROUND", "US", "commerce", "background")
+    gate.set()
+    for f in (first, cr, bg):
+        f.result(5)
+    assert order.index("BACKGROUND") < order.index("CRAWL")
+    pool.shutdown()
+
 def test_submit_call_expiry_returns_the_callers_shape():
     pool = ProxyPool(ok_fetch, threads_per_proxy=1, max_threads_per_proxy=1, task_timeout_seconds=0.1)
     fut = pool.submit_call(lambda: {"outcome": "found"}, "browse", _EXPIRED)  # no proxies: nobody takes it
