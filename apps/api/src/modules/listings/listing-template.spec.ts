@@ -4,6 +4,7 @@ import {
   LISTING_TEMPLATE_SAFE_PLACEHOLDERS,
   buildListingTemplateContext,
   buildListingTemplateSnippet,
+  isBrandDetailRow,
   renderListingTemplate,
 } from '@repo/shared';
 
@@ -41,6 +42,33 @@ describe('renderListingTemplate', () => {
   it('builds product_details from specs', () => {
     const html = renderListingTemplate('{{#product_details}}<li>{{.}}</li>{{/product_details}}', context);
     expect(html).toContain('<li>Flavor: Assorted</li>');
+  });
+
+  it('never shows the brand in product_details', () => {
+    const branded = buildListingTemplateContext({
+      title: 'T',
+      specs: { Brand: 'Unbranded', 'Brand Name': 'Acme', Manufacturer: 'Acme Inc', Color: 'Blue' },
+    });
+    expect(branded.product_details).toEqual(['Color: Blue']);
+    expect(context.product_details).toEqual(['Flavor: Assorted']);
+  });
+
+  it('drops has_details when the brand was the only spec', () => {
+    const onlyBrand = buildListingTemplateContext({ title: 'T', specs: { Brand: 'Unbranded' } });
+    expect(onlyBrand.product_details).toEqual([]);
+    expect(onlyBrand.has_details).toBe('');
+  });
+
+  it('does not offer brand or manufacturer as a placeholder', () => {
+    expect(LISTING_TEMPLATE_SAFE_PLACEHOLDERS).not.toContain('brand');
+    expect(LISTING_TEMPLATE_SAFE_PLACEHOLDERS).not.toContain('manufacturer');
+  });
+
+  it('recognises brand rows by their key only', () => {
+    expect(isBrandDetailRow('Brand: Unbranded')).toBe(true);
+    expect(isBrandDetailRow('manufacturer : X')).toBe(true);
+    expect(isBrandDetailRow('Material: Brand-new steel')).toBe(false);
+    expect(isBrandDetailRow('Brand')).toBe(false);
   });
 
   it('renders the first image for main_image', () => {

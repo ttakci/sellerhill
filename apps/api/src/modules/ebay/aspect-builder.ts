@@ -4,7 +4,6 @@ import {
   EBAY_ASPECT_VALUE_MAX_LENGTH,
   EBAY_MAX_ITEM_SPECIFICS,
   EBAY_NOT_APPLICABLE,
-  EBAY_UNBRANDED,
   type ProductIdentifiers,
 } from '@repo/shared';
 
@@ -29,7 +28,7 @@ import { pickPriorValue, pickTerminalValue } from './aspect-priors';
  *    value lists, max length, cardinality),
  * 3. derives a value from the title when nothing else is known, and
  * 4. only then falls back — to eBay's sanctioned "Does not apply" for identifier
- *    aspects and "Unbranded" for Brand, never to invented text.
+ *    aspects and for Brand, never to invented text.
  */
 
 /** Aspect metadata as returned by the Taxonomy API (subset we consume). */
@@ -233,16 +232,14 @@ export function fallbackValueFor(aspect: CategoryAspect, title: string): string 
     if (fromTitle) {
       return fromTitle;
     }
-    const notApplicable = aspect.values.find((allowed) =>
-      /^(does not apply|not applicable|n\/a|unbranded|unspecified|other)$/i.test(allowed.trim())
-    );
+    // eBay's own "Does not apply" first, then any other honest non-value.
+    const notApplicable =
+      aspect.values.find((allowed) => /^(does not apply|not applicable)$/i.test(allowed.trim())) ??
+      aspect.values.find((allowed) => /^(n\/a|unbranded|unspecified|other)$/i.test(allowed.trim()));
     return notApplicable ?? null;
   }
 
-  if (normalized === 'brand') {
-    return EBAY_UNBRANDED;
-  }
-  if (IDENTIFIER_ASPECTS.has(normalized)) {
+  if (normalized === 'brand' || IDENTIFIER_ASPECTS.has(normalized)) {
     return EBAY_NOT_APPLICABLE;
   }
   return null;
@@ -441,7 +438,7 @@ export function buildAspectResolution(input: AspectBuilderInput): AspectResoluti
   // category does not declare it.
   if (!Object.keys(aspects).some((name) => normalizeName(name) === 'brand')) {
     const brand = known.get('brand');
-    aspects.Brand = [(brand ?? EBAY_UNBRANDED).slice(0, EBAY_ASPECT_VALUE_MAX_LENGTH)];
+    aspects.Brand = [(brand ?? EBAY_NOT_APPLICABLE).slice(0, EBAY_ASPECT_VALUE_MAX_LENGTH)];
     consumed.add('brand');
   }
 

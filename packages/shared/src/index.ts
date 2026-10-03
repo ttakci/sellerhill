@@ -21,6 +21,7 @@ export {
   LISTING_TEMPLATE_SAFE_PLACEHOLDERS,
   buildListingTemplateContext,
   buildListingTemplateSnippet,
+  isBrandDetailRow,
   renderListingTemplate,
   stripUnresolvedPlaceholders,
 } from './utils/listing-template';

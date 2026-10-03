@@ -61,8 +61,16 @@ describe('pickTerminalValue — the guarantee', () => {
     expect(pickTerminalValue(freeText('Screen Size'))).toBe('Does not apply');
   });
 
-  it('uses Unbranded for a free-text Brand', () => {
-    expect(pickTerminalValue(freeText('Brand'))).toBe('Unbranded');
+  it('uses Does not apply for a free-text Brand', () => {
+    expect(pickTerminalValue(freeText('Brand'))).toBe('Does not apply');
+  });
+
+  it('prefers Does not apply over Unbranded when the list offers both', () => {
+    expect(pickTerminalValue(selection('Brand', ['Unbranded', 'Acme', 'Does Not Apply']))).toBe('Does Not Apply');
+  });
+
+  it('still uses Unbranded when it is the only non-value offered', () => {
+    expect(pickTerminalValue(selection('Brand', ['Acme', 'Unbranded']))).toBe('Unbranded');
   });
 
   it('is deterministic', () => {

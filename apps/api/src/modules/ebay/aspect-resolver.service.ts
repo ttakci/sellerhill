@@ -59,6 +59,9 @@ function normalizeName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/** Normalized key of the Brand aspect, which is never learned per category. */
+const BRAND_ASPECT_KEY = 'brand';
+
 @Injectable()
 export class AspectResolverService {
   private readonly logger = new Logger(AspectResolverService.name);
@@ -82,6 +85,12 @@ export class AspectResolverService {
     const hardOverrides: Record<string, ResolvedAspectOverride> = {};
 
     for (const row of stored) {
+      // A brand belongs to one product, never to a category: a learned Brand is
+      // only ever an old terminal fallback ("Unbranded") and would outrank
+      // today's "Does not apply". Curated brands stay — an operator chose them.
+      if (row.source !== AspectDefaultSource.CURATED && row.aspect_key === BRAND_ASPECT_KEY) {
+        continue;
+      }
       const aspect = request.categoryAspects.find((candidate) => normalizeName(candidate.name) === row.aspect_key);
       // A learned value can go stale when eBay retires an allowed value, so it
       // is revalidated against the CURRENT allowed list on every read.
@@ -205,7 +214,8 @@ export class AspectResolverService {
         decision.required &&
         // Product data is per-product, so it teaches nothing about the category.
         decision.layer !== AspectResolutionLayer.PRODUCT_DATA &&
-        decision.layer !== AspectResolutionLayer.CURATED
+        decision.layer !== AspectResolutionLayer.CURATED &&
+        normalizeName(decision.aspectName) !== BRAND_ASPECT_KEY
     );
 
     for (const decision of learnable) {

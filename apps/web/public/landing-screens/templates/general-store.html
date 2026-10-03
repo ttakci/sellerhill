@@ -41,8 +41,7 @@
     <h2>Specifications</h2>
     <table class="sh-gs-table">
       <tbody>
-        <tr><td>Brand: Unbranded</td></tr>
-<tr><td>Connectivity: Bluetooth 5.0</td></tr>
+        <tr><td>Connectivity: Bluetooth 5.0</td></tr>
 <tr><td>Battery Life: 6 Hours</td></tr>
 <tr><td>Mounting: Suction Cup</td></tr>
 <tr><td>Color: Pink</td></tr>
@@ -67,7 +66,7 @@
 .sh-gs-header h1 { font-size: 24px; color: #111; margin: 0 0 15px 0; }
 .sh-gs-badges { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
 .sh-gs-badge { background: #e11d48; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
-.sh-gs-main { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
+.sh-gs-main { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; padding: 0 24px; }
 .sh-gs-image { flex: 1 1 350px; text-align: center; }
 .sh-gs-image img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; }
 .sh-gs-content { flex: 1.2 1 350px; }
@@ -76,17 +75,19 @@
 .sh-gs-list { list-style-type: none; padding: 0; margin: 0; }
 .sh-gs-list li { margin-bottom: 10px; padding-left: 25px; position: relative; }
 .sh-gs-list li::before { content: "✅"; position: absolute; left: 0; top: 0; }
-.sh-gs-details { margin-bottom: 30px; }
+.sh-gs-details { margin-bottom: 30px; padding: 0 24px; }
 .sh-gs-details h2 { font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 8px; color: #e11d48; }
 .sh-gs-table { width: 100%; border-collapse: collapse; }
-.sh-gs-table td { padding: 10px; border-bottom: 1px solid #eee; }
-.sh-gs-footer { display: flex; flex-wrap: wrap; gap: 20px; background: #f8f9fa; padding: 20px; border-radius: 8px; }
+.sh-gs-table td { padding: 10px 0; border-bottom: 1px solid #eee; }
+.sh-gs-footer { display: flex; flex-wrap: wrap; gap: 20px; background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 0 24px 24px; }
 .sh-gs-trust-box { flex: 1 1 250px; }
 .sh-gs-trust-box h3 { font-size: 16px; color: #333; margin-top: 0; }
 .sh-gs-trust-box p { font-size: 14px; color: #555; margin: 0; }
 @media (max-width: 600px) {
   .sh-gs-main { flex-direction: column; }
   .sh-gs-badges { flex-direction: column; align-items: center; }
+  .sh-gs-main, .sh-gs-details { padding: 0 16px; }
+  .sh-gs-footer { margin: 0 16px 16px; }
 }
 </style>
 </body>
