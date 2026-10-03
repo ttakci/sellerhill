@@ -5,20 +5,37 @@
  * computed key (item copy is per-key, with `count` + `context` interpolation,
  * and breakdown chips resolve into other namespaces). The component receives
  * finished strings.
+ *
+ * The page is STORE-SPECIFIC and the store is mandatory, like the Messages
+ * inbox: `?store=` when it names a connected store, else the first store with
+ * waiting work, else the first store — written back to the URL once the
+ * counts are known. Every store's summary is fetched (`getActionCenterByStore`)
+ * so each option of the picker carries that store's own count and a store
+ * with waiting work is never hidden behind the selection. Account-wide items
+ * (plan, setup, Amazon buyer accounts) appear in every store's view with a
+ * caption saying so, and are left out of the per-store count.
  */
 
-import { ActionCenterSeverity, type ActionCenterGroupDto, type ActionCenterItemDto } from '@repo/shared';
-import type { TabNavItem } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ActionCenterSeverity,
+  type ActionCenterGroupDto,
+  type ActionCenterItemDto,
+  type ActionCenterSummaryDto,
+} from '@repo/shared';
+import type { SelectOption, TabNavItem } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey, filterToIcon } from '../actionCenterPresentation';
-import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterQuery } from '../api/actionCenterApi';
+import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterByStoreQuery } from '../api/actionCenterApi';
 
 import { ActionCenterPage as ActionCenterPageComponent } from './ActionCenterPage.component';
 import type { ActionCenterFilter, ActionCenterGroupView, ActionCenterItemView } from './ActionCenterPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { getStoreLabel } from '@/features/ebay/utils/storeLabel';
 import { useLocale } from '@/utils/useLocale';
 
 export const ActionCenterPageContainer: React.FC = () => {
@@ -26,9 +43,71 @@ export const ActionCenterPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
   const [filter, setFilter] = useState<ActionCenterFilter>(ACTION_CENTER_FILTER_ALL);
 
-  const { data, isLoading } = useGetActionCenterQuery(undefined, {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedStore = searchParams.get('store') ?? '';
+
+  const { data: accountsData, isLoading: isAccountsLoading } = useGetEbayAccountsQuery();
+  const accounts = useMemo(() => accountsData?.items ?? [], [accountsData?.items]);
+  const storeIds = useMemo(() => accounts.map((account) => account.id), [accounts]);
+
+  const { data: byStore, isLoading: isSummaryLoading } = useGetActionCenterByStoreQuery(storeIds, {
+    skip: storeIds.length === 0,
     pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
   });
+
+  /** Items that belong to the store itself — the number its picker option shows. */
+  const storeItemCount = useCallback(
+    (summary: ActionCenterSummaryDto | undefined) =>
+      (summary?.groups ?? []).flatMap((group) => group.items).filter((item) => !item.accountWide).length,
+    [],
+  );
+
+  const selectedStore = useMemo(() => {
+    if (storeIds.includes(requestedStore)) {
+      return requestedStore;
+    }
+    const withWork = storeIds.find((id) => storeItemCount(byStore?.[id]) > 0);
+    return withWork ?? storeIds[0] ?? '';
+  }, [byStore, requestedStore, storeIds, storeItemCount]);
+
+  /*
+   * Write the resolved default into the URL — once the counts are in, so the
+   * "first store with waiting work" rule has something to read. After that the
+   * URL names a valid store and the choice sticks across polls.
+   */
+  useEffect(() => {
+    if (!byStore || !selectedStore || selectedStore === requestedStore) {
+      return;
+    }
+    const next = new URLSearchParams(searchParams);
+    next.set('store', selectedStore);
+    setSearchParams(next, { replace: true });
+  }, [byStore, requestedStore, searchParams, selectedStore, setSearchParams]);
+
+  const handleStoreChange = useCallback(
+    (value: string | number) => {
+      const next = new URLSearchParams(searchParams);
+      next.set('store', String(value));
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const storeOptions = useMemo<SelectOption[]>(
+    () =>
+      accounts.map((account) => {
+        const label = getStoreLabel(account);
+        const count = storeItemCount(byStore?.[account.id]);
+        return {
+          value: account.id,
+          label: count > 0 ? t('actionCenter.storeFilter.optionWithCount', { store: label, count }) : label,
+        };
+      }),
+    [accounts, byStore, storeItemCount, t],
+  );
+
+  const data = selectedStore ? byStore?.[selectedStore] : undefined;
+  const isLoading = isAccountsLoading || isSummaryLoading;
 
   /**
    * Resolve one item's copy.
@@ -54,6 +133,8 @@ export const ActionCenterPageContainer: React.FC = () => {
         description: t(`actionCenter.items.${item.key}.description`, interpolation),
         actionLabel: t(`actionCenter.items.${item.key}.action`),
         chips,
+        storeLabels: (item.stores ?? []).map((store) => store.label),
+        accountWideNote: item.accountWide ? t('actionCenter.storeFilter.accountWide') : null,
       };
     },
     [t],
@@ -142,6 +223,9 @@ export const ActionCenterPageContainer: React.FC = () => {
         isInitialLoading={isLoading && !data}
         isEmpty={!isLoading && (data?.totalCount ?? 0) === 0}
         onItemAction={handleItemAction}
+        selectedStore={selectedStore}
+        storeOptions={storeOptions}
+        onStoreChange={handleStoreChange}
       />
     </EbayAccountGuard>
   );

@@ -1,6 +1,8 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+import { TrackingConversionProvider } from '@repo/shared';
+
 import { StoreSettingsService } from './store-settings.service';
 
 /**
@@ -96,5 +98,98 @@ describe('StoreSettingsService.saveSettings — a new store row starts as a copy
 
   it('an omitted tax rate leaves the stored one alone', () => {
     expect(SOURCE).not.toMatch(/amazon_tax_rate = EXCLUDED\.amazon_tax_rate/);
+  });
+});
+
+describe('StoreSettingsService.getResolvedSettings — allowCrossStoreAsins is Store > Global > off', () => {
+  function buildWith(globalValue: boolean | null, storeRow: Record<string, unknown> | null) {
+    const globalRow = row({ id: 'global', is_global: true, allow_cross_store_asins: globalValue });
+    const db = {
+      query: jest.fn((sql: string) => {
+        if (/is_global = TRUE/.test(sql)) {
+          return Promise.resolve([globalRow]);
+        }
+        if (/store_id = \$2/.test(sql)) {
+          return Promise.resolve(storeRow ? [storeRow] : []);
+        }
+        return Promise.resolve([]);
+      }),
+    };
+    return new StoreSettingsService(db as never);
+  }
+
+  it('a store row holding NULL inherits the global value (true and false)', async () => {
+    for (const globalValue of [true, false]) {
+      const resolved = await buildWith(
+        globalValue,
+        row({ id: 'store', store_id: 'acc-1', allow_cross_store_asins: null }),
+      ).getResolvedSettings('user-1', 'acc-1');
+      expect(resolved.allowCrossStoreAsins).toBe(globalValue);
+    }
+  });
+
+  it('a store with no row of its own follows the global value', async () => {
+    const resolved = await buildWith(true, null).getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.allowCrossStoreAsins).toBe(true);
+  });
+
+  it("a store's explicit false overrides a global true, and an explicit true a global NULL", async () => {
+    const off = await buildWith(true, row({ id: 'store', store_id: 'acc-1', allow_cross_store_asins: false }))
+      .getResolvedSettings('user-1', 'acc-1');
+    expect(off.allowCrossStoreAsins).toBe(false);
+    const on = await buildWith(null, row({ id: 'store', store_id: 'acc-1', allow_cross_store_asins: true }))
+      .getResolvedSettings('user-1', 'acc-1');
+    expect(on.allowCrossStoreAsins).toBe(true);
+  });
+
+  it('a global NULL (and no store value) means off', async () => {
+    const resolved = await buildWith(null, row({ id: 'store', store_id: 'acc-1', allow_cross_store_asins: null }))
+      .getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.allowCrossStoreAsins).toBe(false);
+    const global = await buildWith(null, null).getResolvedSettings('user-1', null);
+    expect(global.allowCrossStoreAsins).toBe(false);
+  });
+
+  it('the raw row keeps NULL so the drawer can show "inherited"', async () => {
+    const raw = await buildWith(true, row({ id: 'store', store_id: 'acc-1', allow_cross_store_asins: null }))
+      .getSettings('user-1', 'acc-1');
+    expect(raw.allowCrossStoreAsins).toBeNull();
+  });
+});
+
+describe('StoreSettingsService.saveSettings — allowCrossStoreAsins', () => {
+  const SOURCE = readFileSync(join(__dirname, 'store-settings.service.ts'), 'utf8');
+
+  it('omitted leaves the stored value alone; explicit null is written (inherit)', () => {
+    expect(SOURCE).toMatch(
+      /allow_cross_store_asins = CASE\s+WHEN \$24::boolean THEN EXCLUDED\.allow_cross_store_asins\s+ELSE store_settings\.allow_cross_store_asins/,
+    );
+    expect(SOURCE).toMatch(
+      /allow_cross_store_asins = CASE\s+WHEN \$25::boolean THEN EXCLUDED\.allow_cross_store_asins\s+ELSE store_settings\.allow_cross_store_asins/,
+    );
+  });
+
+  it('a new store row is NOT seeded from the global value (its NULL already means inherit)', () => {
+    expect(SOURCE).not.toMatch(/g\.allow_cross_store_asins/);
+  });
+});
+
+describe('StoreSettingsService mapping — tracking provider', () => {
+  async function providerFor(stored: unknown) {
+    const db = {
+      query: jest.fn(() => Promise.resolve([row({ id: 'global', is_global: true, tracking_conversion_provider: stored })])),
+    };
+    return (await new StoreSettingsService(db as never).getSettings('user-1')).trackingConversionProvider;
+  }
+
+  it("only an explicit 'local' switches conversion off", async () => {
+    expect(await providerFor('local')).toBe(TrackingConversionProvider.LOCAL);
+    expect(await providerFor(' LOCAL ')).toBe(TrackingConversionProvider.LOCAL);
+  });
+
+  it('aquiline, api and any unreadable value keep conversion on', async () => {
+    for (const stored of ['aquiline', 'api', 'AQUILINE', 'garbage', '', null]) {
+      expect(await providerFor(stored)).toBe(TrackingConversionProvider.API);
+    }
   });
 });

@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "No se pudieron obtener las políticas comerciales de eBay",
       "invalidAsins": "{{count}} de tus entradas no parecen ASIN válidos (10 caracteres alfanuméricos) y se omitieron.",
       "loadFailed": "No se pudieron cargar las publicaciones. Inténtalo de nuevo.",
-      "scheduleTooLong": "A este ritmo la tarea tardaría más de 30 días. Aumenta la cantidad de productos por día o agrega menos ASIN."
+      "scheduleTooLong": "A este ritmo la tarea tardaría más de 30 días. Aumenta la cantidad de productos por día o agrega menos ASIN.",
+      "storeUnavailable": "No se puede usar esta tienda de eBay: no está conectada a tu cuenta o su conexión terminó. Elige otra tienda o vuelve a conectarla."
     },
     "detail": {
       "breadcrumb": "Detalle de la publicación",

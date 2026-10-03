@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "Politicile de afaceri eBay nu au putut fi preluate",
       "invalidAsins": "{{count}} dintre intrările dvs. nu par ASIN-uri valide (10 caractere alfanumerice) și au fost omise.",
       "loadFailed": "Anunțurile nu au putut fi încărcate. Încercați din nou.",
-      "scheduleTooLong": "În acest ritm, sarcina ar dura mai mult de 30 de zile. Măriți numărul de produse pe zi sau adăugați mai puține ASIN-uri."
+      "scheduleTooLong": "În acest ritm, sarcina ar dura mai mult de 30 de zile. Măriți numărul de produse pe zi sau adăugați mai puține ASIN-uri.",
+      "storeUnavailable": "Acest magazin eBay nu poate fi folosit: nu este conectat la contul tău sau conexiunea s-a încheiat. Alege alt magazin sau reconectează-l."
     },
     "detail": {
       "breadcrumb": "Detaliile anunțului",

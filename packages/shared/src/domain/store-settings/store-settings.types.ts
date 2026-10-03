@@ -169,6 +169,14 @@ export interface StoreSettings {
     // store row that has none inheriting the global row's.
     listingRules?: ListingRulesConfig;
 
+    // May this store list an ASIN that is already ACTIVE/DRAFT on ANOTHER of
+    // the seller's stores (`store_settings.allow_cross_store_asins`, migration
+    // 140)? An ASIN already on the SAME store is always a duplicate. On a raw
+    // row: null = not set (a store row inherits the global value, a global
+    // null means off). The RESOLVED settings (`getResolvedSettings`) always
+    // carry a boolean: store ?? global ?? false.
+    allowCrossStoreAsins?: boolean | null;
+
     createdAt: Date;
     updatedAt: Date;
 }

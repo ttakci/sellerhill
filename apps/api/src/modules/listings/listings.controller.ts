@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ConflictException,
@@ -33,6 +34,7 @@ import {
   type UpdateListingRequest,
   isListingsStockPreset,
 } from '@repo/shared';
+import { isUUID } from 'class-validator';
 import type { Response } from 'express';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -47,6 +49,22 @@ const toPositiveInt = (value?: string): number | undefined =>
   value !== undefined && value !== '' && Number.isFinite(Number(value)) && Number(value) > 0
     ? Math.trunc(Number(value))
     : undefined;
+
+/**
+ * A store filter is compared against a uuid column, so anything that is not a
+ * UUID is refused here (400) instead of reaching Postgres as an "invalid input
+ * syntax for type uuid" 500. Blank means no filter.
+ */
+export function parseOptionalAccountId(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (!isUUID(trimmed)) {
+    throw new BadRequestException('ebayAccountId must be a UUID');
+  }
+  return trimmed;
+}
 
 /**
  * Billing refusals thrown by the quota gate, mapped to HTTP.
@@ -142,7 +160,7 @@ export class ListingsController {
           ? trackingState
           : undefined,
       stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
-      ebayAccountId,
+      ebayAccountId: parseOptionalAccountId(ebayAccountId),
       category,
       sortBy,
       sortOrder,
@@ -218,7 +236,7 @@ export class ListingsController {
           ? trackingState
           : undefined,
       stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
-      ebayAccountId,
+      ebayAccountId: parseOptionalAccountId(ebayAccountId),
       category,
       sortBy,
       sortOrder,
@@ -319,7 +337,8 @@ export class ListingsController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
-    @Query('hasFailures') hasFailures?: string
+    @Query('hasFailures') hasFailures?: string,
+    @Query('ebayAccountId') ebayAccountId?: string
   ): Promise<PaginatedListingJobsDto> {
     const userId = req.user.sub;
     return this.listingsService.getJobs(userId, {
@@ -330,6 +349,7 @@ export class ListingsController {
       dateFrom,
       dateTo,
       hasFailures: hasFailures === 'true',
+      ebayAccountId: parseOptionalAccountId(ebayAccountId),
     });
   }
 
@@ -342,13 +362,15 @@ export class ListingsController {
     @Request() req: { user: { sub: string } },
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('search') search?: string
+    @Query('search') search?: string,
+    @Query('ebayAccountId') ebayAccountId?: string
   ): Promise<PaginatedProductsDto> {
     const userId = req.user.sub;
     return this.listingsService.getUserProducts(userId, {
       page: toPositiveInt(page),
       limit: toPositiveInt(limit),
       search,
+      ebayAccountId: parseOptionalAccountId(ebayAccountId),
     });
   }
 

@@ -12,10 +12,14 @@ import type { OrderCardProps } from './OrderCard';
 export const toOrderCardProps = (
   order: OrderDto,
   t: TFunction,
-  formatCurrency: (value: number) => string,
+  formatCurrency: (value: number, ebayAccountId?: string | null) => string,
   formatDate: (value: string) => string,
-  formatDay?: (value: string) => string
+  formatDay?: (value: string) => string,
+  /** The order's store name — passed only when the seller has more than one store. */
+  storeLabel?: string | null
 ): Omit<OrderCardProps, 'onClick' | 'className'> => {
+  // Each order is money in its OWN store's currency, never a page-wide one.
+  const money = (value: number) => formatCurrency(value, order.ebayAccountId);
   const productTitle =
     order.product?.title && order.product.title.trim().length > 0
       ? order.product.title
@@ -29,6 +33,10 @@ export const toOrderCardProps = (
     { label: t('orders.table.buyer'), value: order.buyerName || '—' },
     { label: t('orders.table.date'), value: formatDate(order.createdAt) },
   ];
+
+  if (storeLabel) {
+    meta.push({ label: t('translation:common.store'), value: storeLabel });
+  }
 
   if (order.product?.quantity && order.product.quantity > 1) {
     meta.push({ label: t('orders.detail.quantity'), value: String(order.product.quantity) });
@@ -48,7 +56,7 @@ export const toOrderCardProps = (
 
   // A card can carry both at once: an untracked order (no matched listing)
   // can never reach `linked`, so its profit is also always an estimate/unknown.
-  const statsBadges: OrderCardProps['statsBadges'] = [...orderFlagBadges(order, t, formatCurrency, formatDay)];
+  const statsBadges: OrderCardProps['statsBadges'] = [...orderFlagBadges(order, t, money, formatDay)];
   if (!order.isTracked) {
     statsBadges.push({ label: t('orders.tracking.untracked'), variant: 'neutral' });
   }
@@ -77,15 +85,15 @@ export const toOrderCardProps = (
     stats: [
       {
         label: t('orders.table.salePrice'),
-        value: formatCurrency(order.salePrice),
+        value: money(order.salePrice),
       },
       {
         label: t('orders.table.purchasePrice'),
-        value: formatCurrency(order.purchasePrice),
+        value: money(order.purchasePrice),
       },
       {
         label: t('orders.table.netProfit'),
-        value: `${order.netProfit >= 0 ? '+' : ''}${formatCurrency(order.netProfit)}`,
+        value: `${order.netProfit >= 0 ? '+' : ''}${money(order.netProfit)}`,
         tone: profitTone,
       },
     ],

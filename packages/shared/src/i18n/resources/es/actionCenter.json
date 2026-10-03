@@ -29,6 +29,12 @@
       "warning": "Advertencia",
       "info": "Sugerencias"
     },
+    "storeFilter": {
+      "label": "Tienda",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Se aplica a toda tu cuenta",
+      "storesLabel": "Tiendas afectadas"
+    },
     "summary": {
       "critical": "{{count}} críticos",
       "warning": "{{count}} advertencias",

@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "Échec de la récupération des politiques commerciales eBay",
       "invalidAsins": "{{count}} de vos entrées ne ressemblent pas à des ASIN valides (10 caractères alphanumériques) et ont été ignorées.",
       "loadFailed": "Échec du chargement des annonces. Veuillez réessayer.",
-      "scheduleTooLong": "À ce rythme, la tâche durerait plus de 30 jours. Augmentez le nombre de produits par jour ou ajoutez moins d'ASIN."
+      "scheduleTooLong": "À ce rythme, la tâche durerait plus de 30 jours. Augmentez le nombre de produits par jour ou ajoutez moins d'ASIN.",
+      "storeUnavailable": "Cette boutique eBay ne peut pas être utilisée : elle n'est pas connectée à votre compte ou sa connexion a pris fin. Choisissez une autre boutique ou reconnectez-la."
     },
     "detail": {
       "breadcrumb": "Détail de l'annonce",

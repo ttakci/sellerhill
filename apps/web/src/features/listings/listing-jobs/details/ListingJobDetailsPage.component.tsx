@@ -35,6 +35,7 @@ const jobMetaRow = (label: string, value: React.ReactNode): React.ReactElement =
 export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageComponentProps> = ({
   jobId,
   job,
+  storeLabel,
   items,
   isLoading,
   viewMode,
@@ -178,9 +179,16 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
       <S.SummaryCard variant="elevated">
         <S.SummaryTop>
-          <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
-            {shortId}
-          </S.MonoId>
+          <S.SummaryIdentity>
+            <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
+              {shortId}
+            </S.MonoId>
+            {storeLabel ? (
+              <Text variant="caption" color="text.secondary">
+                {t('translation:common.storeNamed', { name: storeLabel })}
+              </Text>
+            ) : null}
+          </S.SummaryIdentity>
           {job ? (
             <StatusBadge status={String(job.status).toLowerCase()} size="sm">
               {jobStatusLabel(job.status)}

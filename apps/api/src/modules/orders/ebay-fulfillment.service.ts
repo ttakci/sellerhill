@@ -130,6 +130,20 @@ export interface EbayShippingFulfillment {
   shippedDate?: string;
 }
 
+/**
+ * eBay does not know this order under the token that asked: the fulfillments
+ * collection answered 404 AND `getOrder` with the same token answered 404.
+ * Typically an order filed under the wrong store. Distinct from "no
+ * fulfillment yet" — buying a paid tracking conversion for it would be spend
+ * on a push that can never be made — and distinct from a transport failure.
+ */
+export class EbayOrderNotVisibleError extends Error {
+  constructor(readonly ebayOrderId: string) {
+    super(`eBay order ${ebayOrderId} is not visible to this store's token`);
+    this.name = 'EbayOrderNotVisibleError';
+  }
+}
+
 /** eBay's documented page ceiling for getOrders ("If a requested limit is more than 200, the call fails"). */
 export const EBAY_GET_ORDERS_MAX_LIMIT = 200;
 
@@ -390,7 +404,11 @@ export class EbayFulfillmentService {
    * Metered like every other Fulfillment read. Throws on a transport failure:
    * "could not read" must never be taken for "nothing there".
    */
-  async fetchShippingFulfillments(accessToken: string, ebayOrderId: string): Promise<EbayShippingFulfillment[]> {
+  async fetchShippingFulfillments(
+    accessToken: string,
+    ebayOrderId: string,
+    marketplaceId: EbayMarketplaceId
+  ): Promise<EbayShippingFulfillment[]> {
     await this.ebayCallBudget.acquire(EbayApiResource.FULFILLMENT, EbayCallPriority.BACKGROUND);
 
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
@@ -405,17 +423,25 @@ export class EbayFulfillmentService {
       });
       return Array.isArray(response.data?.fulfillments) ? response.data.fulfillments : [];
     } catch (error: unknown) {
-      // A 404 on the fulfillment collection of an order we hold is read as "no
-      // fulfillment exists". The documented answer for that case is an empty
-      // list, and this has not been observed live — but treating a 404 as a
-      // failure would hold EVERY tracking push for ever if eBay answers that
-      // way, which is the worse mistake. Any other failure still throws.
+      // A 404 on the fulfillment collection is AMBIGUOUS. It may mean "no
+      // fulfillment yet" (the documented answer for that is an empty list, but
+      // treating a 404 as a failure would hold every push for ever if eBay
+      // answers that way), or that the order is not visible to this token at
+      // all — an order filed under the wrong store. Read as "none", the second
+      // case bought a paid conversion and then failed every push. So the order
+      // itself is read with the SAME token (one budget-governed getOrder):
+      // visible → none yet; not found → `EbayOrderNotVisibleError`, which the
+      // caller holds on. A failure of that read propagates like any other.
       const status =
         error instanceof Error && 'response' in error
           ? (error as { response?: { status?: number } }).response?.status
           : undefined;
       if (status === 404) {
-        this.logger.warn(`eBay answered 404 for the fulfillments of ${ebayOrderId}; read as none`);
+        const order = await this.fetchOrderById(accessToken, marketplaceId, ebayOrderId);
+        if (!order) {
+          throw new EbayOrderNotVisibleError(ebayOrderId);
+        }
+        this.logger.warn(`eBay answered 404 for the fulfillments of ${ebayOrderId} (order visible); read as none`);
         return [];
       }
       this.logger.error(

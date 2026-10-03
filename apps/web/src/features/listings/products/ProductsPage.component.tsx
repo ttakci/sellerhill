@@ -1,4 +1,4 @@
-import { DataTable, EmptyState, Icon, IdBadge, PageHeader, SearchField } from '@repo/ui';
+import { DataTable, EmptyState, Icon, IdBadge, PageHeader, SearchField, Select } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,10 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
   search,
   onSearchChange,
   onClearSearch,
+  storeFilter,
+  onStoreFilterChange,
+  storeOptions,
+  showStoreFilter,
   formatCurrency,
   pagination,
   columns,
@@ -65,6 +69,18 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
             fullWidth
           />
         </S.SearchWrapper>
+        {showStoreFilter && (
+          <S.SelectWrapper>
+            <Select
+              value={storeFilter}
+              onChange={onStoreFilterChange}
+              options={storeOptions}
+              placeholder={t('listings.filters.allStores')}
+              size="small"
+              fullWidth
+            />
+          </S.SelectWrapper>
+        )}
       </S.FilterBar>
 
       <DataTable
@@ -73,7 +89,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
         data={products}
         renderGridCard={renderGridCard}
         emptyContent={
-          search.trim() ? (
+          search.trim() || storeFilter ? (
             <EmptyState
               icon="search"
               title={t('listings.empty.filtersTitle')}

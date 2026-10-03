@@ -42,6 +42,8 @@
     "noBrand": "Aucune information de marque",
     "amazonLink": "AMAZON",
     "unknownProduct": "Produit inconnu",
+    "store": "Boutique",
+    "storeNamed": "Boutique : {{name}}",
     "languageCode": "fr-FR",
     "select": "Sélectionner"
   },
@@ -393,6 +395,9 @@
         "appliesTo": "S'applique à",
         "checkBlacklist": "Vérifier les mots-clés de la liste noire",
         "checkBlacklistDesc": "Analyse les titres, descriptions, caractéristiques et marques des annonces par rapport à votre liste noire avant publication. La sélection de champs propre à chaque mot-clé détermine où il est vérifié.",
+        "allowCrossStoreAsins": "Autoriser les ASIN déjà présents dans mes autres boutiques",
+        "allowCrossStoreAsinsDesc": "Activé pour toutes les boutiques, chaque boutique peut publier n'importe quel ASIN ; activé pour une seule boutique, seule celle-ci peut ajouter des ASIN que vos autres boutiques proposent déjà. Un ASIN déjà présent dans cette boutique est toujours ignoré.",
+        "allowCrossStoreAsinsInherited": "Le réglage de toutes les boutiques s'applique tant que vous n'avez pas enregistré de choix pour cette boutique.",
         "country": "Pays",
         "countryPlaceholder": "Sélectionnez un pays",
         "region": "Région",

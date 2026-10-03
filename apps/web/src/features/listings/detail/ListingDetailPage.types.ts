@@ -38,6 +38,8 @@ export interface ListingOverridesUiState {
 
 export interface ListingDetailPageProps {
   listing: ListingDto | undefined;
+  /** The store the listing lives on — null with a single connected store. */
+  storeLabel: string | null;
   isLoading: boolean;
   isSaving: boolean;
   isSavingOverrides: boolean;

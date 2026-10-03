@@ -37,6 +37,7 @@ import {
   type UserProductsQueryDto,
   type UpdateListingRequest,
 } from '@repo/shared';
+import { isUUID } from 'class-validator';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
@@ -45,9 +46,15 @@ import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
+import {
+  decideAsinDuplicate,
+  findAsinStorePresence,
+  type AsinStoreScope,
+} from './cross-store-asin';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { buildNotSellingSql } from './listing-cleanup.helpers';
 import { classifyListingFailure } from './listing-failure';
@@ -252,7 +259,10 @@ export class ListingsService {
     private readonly ebayImages: EbayImageResolver,
     // Optional so a spec can build the service without the advertising stack;
     // Nest always supplies it.
-    @Optional() private readonly promotion?: ListingPromotionService
+    @Optional() private readonly promotion?: ListingPromotionService,
+    // Optional for the same reason. Absent = "allow ASINs from my other
+    // stores" reads as off, which is the behaviour before the setting existed.
+    @Optional() private readonly storeSettings?: StoreSettingsService
   ) {}
 
   /**
@@ -628,17 +638,21 @@ export class ListingsService {
       [...params, limit, offset]
     );
 
+    // The category dropdown follows the same store as the list beside it — a
+    // store filter must not offer categories that exist only on another store.
+    const categoryStore = query.ebayAccountId?.trim();
     const categoryRows = await this.databaseService.query<{ category: string }>(
       `
       SELECT DISTINCT COALESCE(l.ebay_category_name, p.category) AS category
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
       WHERE l.user_id = $1
+        ${categoryStore ? 'AND l.ebay_account_id = $2' : ''}
         AND COALESCE(l.ebay_category_name, p.category) IS NOT NULL
         AND COALESCE(l.ebay_category_name, p.category) <> ''
       ORDER BY category ASC
       `,
-      [userId]
+      categoryStore ? [userId, categoryStore] : [userId]
     );
 
     return {
@@ -790,10 +804,44 @@ export class ListingsService {
   }
 
   /**
-   * Check if an ASIN is already active or draft for a user (blocks re-import).
-   * Inactive/error rows do not block creating a new listing.
+   * The target store and its resolved "allow ASINs already on my other
+   * stores" setting (Store > Global > off), read once per job or batch. A
+   * settings read that fails reads as off — the duplicate rule as it was
+   * before the setting existed.
    */
-  async isAsinListed(userId: string, asin: string): Promise<boolean> {
+  async resolveAsinStoreScope(userId: string, ebayAccountId: string): Promise<AsinStoreScope> {
+    let allowCrossStore = false;
+    if (this.storeSettings) {
+      try {
+        allowCrossStore =
+          (await this.storeSettings.getResolvedSettings(userId, ebayAccountId)).allowCrossStoreAsins === true;
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Cross-store ASIN setting unreadable for store ${ebayAccountId}; treating as off: ${message}`);
+      }
+    }
+    return { ebayAccountId, allowCrossStore };
+  }
+
+  /**
+   * Is this ASIN already active or draft for the user, so that listing it is a
+   * duplicate? Inactive/error rows never block.
+   *
+   * With a `store` scope the answer follows the cross-store rule
+   * (`cross-store-asin.ts`): on the target store → always a duplicate; only on
+   * the seller's other stores → a duplicate unless the store's resolved
+   * `allowCrossStoreAsins` is on. Without one, any store counts (the original
+   * behaviour, kept for callers that have no target store).
+   */
+  async isAsinListed(userId: string, asin: string, store?: AsinStoreScope): Promise<boolean> {
+    if (store) {
+      const presence = await findAsinStorePresence(this.databaseService, {
+        userId,
+        asin,
+        ebayAccountId: store.ebayAccountId,
+      });
+      return decideAsinDuplicate({ ...presence, allowCrossStore: store.allowCrossStore });
+    }
     const results = await this.databaseService.query(
       `
       SELECT id FROM listings 
@@ -828,6 +876,19 @@ export class ListingsService {
       conditions.push(
         `(p.title ILIKE $${params.length} OR p.asin ILIKE $${params.length} OR p.brand ILIKE $${params.length})`
       );
+    }
+    // A product belongs to a store when at least one of the seller's listings
+    // of it is on that store. EXISTS rather than a filter on the joined `l`
+    // keeps the DISTINCT page and the COUNT(DISTINCT p.id) total in step.
+    const ebayAccountId = query.ebayAccountId?.trim();
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+      conditions.push(`EXISTS (
+        SELECT 1 FROM listings ls
+         WHERE ls.product_id = p.id
+           AND ls.user_id = $1
+           AND ls.ebay_account_id = $${params.length}
+      )`);
     }
 
     const fromJoin = `
@@ -1106,6 +1167,10 @@ export class ListingsService {
       params.push(title.slice(0, 80));
     }
     if (body.listingSettingsGroupId !== undefined) {
+      // A null clears the group (unchanged behaviour); any id must be the seller's own.
+      if (body.listingSettingsGroupId !== null) {
+        await this.assertOwnSettingsGroup(userId, body.listingSettingsGroupId);
+      }
       sets.push(`listing_settings_group_id = $${i++}`);
       params.push(body.listingSettingsGroupId);
     }
@@ -1286,6 +1351,46 @@ export class ListingsService {
   }
 
   /**
+   * Refuse a create for a store the seller cannot publish through.
+   *
+   * `EbayService.assertAccountOwnership` requires the row to be the caller's
+   * AND `active`, so a disconnected or revoked store is refused here too. Its
+   * not-found answer becomes a 400 with a seller key; any other failure (a
+   * database hiccup) propagates as itself rather than being misreported as a
+   * missing store. A malformed id never reaches the uuid column.
+   */
+  async assertStoreUsable(userId: string, ebayAccountId: string | undefined): Promise<void> {
+    if (!ebayAccountId || !isUUID(ebayAccountId)) {
+      throw new BadRequestException('listings.errors.storeUnavailable');
+    }
+    try {
+      await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw new BadRequestException('listings.errors.storeUnavailable');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * A listing may only be moved into one of the seller's own settings groups.
+   * The group drives price and quantity on every refresh, so a foreign id
+   * would reprice this listing with someone else's strategy.
+   */
+  private async assertOwnSettingsGroup(userId: string, groupId: string): Promise<void> {
+    const rows = isUUID(groupId)
+      ? await this.databaseService.query<{ id: string }>(
+          `SELECT id FROM listing_settings_groups WHERE id = $1 AND user_id = $2`,
+          [groupId, userId]
+        )
+      : [];
+    if (rows.length === 0) {
+      throw new NotFoundException('Listing settings group not found');
+    }
+  }
+
+  /**
    * Create a new listing job
    */
   async createJob(
@@ -1293,6 +1398,13 @@ export class ListingsService {
     request: CreateListingsRequest
   ): Promise<ListingJobDto & { items: Array<{ id: string; asin: string }> }> {
     const { asins } = request;
+
+    // The store is checked before ANY row is written: a job for a store the
+    // seller does not own, or one that is disconnected/revoked, can never
+    // publish, and every batch of it used to throw before it could close its
+    // items — the job sat at "processing" for ever with every item "Queued"
+    // and every plan slot still reserved.
+    await this.assertStoreUsable(userId, request.ebayAccountId);
 
     // Defense-in-depth: the frontend already filters malformed identifiers
     // before calling this endpoint (see AddListingsDrawer.container.tsx), but
@@ -1316,9 +1428,12 @@ export class ListingsService {
     const uniqueAsins = [...new Set(shapedAsins)];
     const toProcess: string[] = [];
     let skippedDuplicateCount = 0;
+    // An ASIN on ANOTHER of the seller's stores is a duplicate only while this
+    // store's resolved `allowCrossStoreAsins` is off (cross-store-asin.ts).
+    const storeScope = await this.resolveAsinStoreScope(userId, request.ebayAccountId);
 
     for (const asin of uniqueAsins) {
-      const exists = await this.isAsinListed(userId, asin);
+      const exists = await this.isAsinListed(userId, asin, storeScope);
       if (!exists) {
         toProcess.push(asin);
       } else {
@@ -1502,6 +1617,12 @@ export class ListingsService {
     // would be invisible to a status filter but must still show up here.
     if (query.hasFailures) {
       conditions.push('failed_count > 0');
+    }
+
+    const ebayAccountId = query.ebayAccountId?.trim();
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+      conditions.push(`ebay_account_id = $${params.length}`);
     }
 
     const whereClause = `WHERE ${conditions.join(' AND ')}`;
@@ -1821,10 +1942,11 @@ export class ListingsService {
   /**
    * Map job entity to DTO
    */
-  private mapJobToDto(entity: ListingJobEntity): ListingJobDto {
+  private mapJobToDto(entity: ListingJobEntity & { ebay_account_id?: string | null }): ListingJobDto {
     return {
       id: entity.id,
       userId: entity.user_id,
+      ebayAccountId: entity.ebay_account_id ?? null,
       totalAsins: entity.total_asins,
       processedCount: entity.processed_count,
       successCount: entity.success_count,
@@ -2075,19 +2197,6 @@ export class ListingsService {
       throw new BadRequestException('Only draft listings can be published');
     }
 
-    // Block if another ACTIVE listing already exists for this ASIN
-    const activeDup = await this.databaseService.query(
-      `
-      SELECT id FROM listings
-      WHERE user_id = $1 AND asin = $2 AND status = '${ListingStatus.ACTIVE}' AND id <> $3
-      LIMIT 1
-    `,
-      [userId, listing.asin, listingId]
-    );
-    if (activeDup.length > 0) {
-      throw new BadRequestException('An active listing for this ASIN already exists');
-    }
-
     const product = await this.getProductByAsin(listing.asin);
     if (!product) {
       throw new BadRequestException('Product data missing for this draft — cannot publish');
@@ -2102,6 +2211,26 @@ export class ListingsService {
     const ebayAccountId = await this.ebayService.resolveListingAccountId(userId, listing.ebayAccountId ?? null);
     if (!ebayAccountId) {
       throw new BadRequestException('No active eBay store to publish this draft through');
+    }
+
+    // Block if another ACTIVE listing of this ASIN exists — on this store
+    // always, on the seller's other stores unless this store's resolved
+    // `allowCrossStoreAsins` is on (cross-store-asin.ts). Another DRAFT of the
+    // same ASIN does not block a publish.
+    const storeScope = await this.resolveAsinStoreScope(userId, ebayAccountId);
+    const presence = await findAsinStorePresence(this.databaseService, {
+      userId,
+      asin: listing.asin,
+      ebayAccountId,
+      statuses: [ListingStatus.ACTIVE],
+      excludeListingId: listingId,
+    });
+    if (decideAsinDuplicate({ ...presence, allowCrossStore: storeScope.allowCrossStore })) {
+      throw new BadRequestException(
+        presence.onTargetStore
+          ? 'An active listing for this ASIN already exists'
+          : 'An active listing for this ASIN already exists on another of your stores'
+      );
     }
 
     await attachEpsImages(this.ebayImages, product.id, ebayAccountId, product.data);

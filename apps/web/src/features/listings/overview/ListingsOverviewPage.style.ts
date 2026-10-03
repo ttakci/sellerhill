@@ -61,3 +61,9 @@ export const AddCardStack = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
 `;
+
+/** The store filter in the page header — same width as the inbox one. */
+export const StoreSelect = styled.div`
+  width: 11.5rem;
+  flex-shrink: 0;
+`;

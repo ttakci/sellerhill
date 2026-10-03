@@ -28,6 +28,7 @@ import {
 import { PoolClient } from 'pg';
 
 import { DatabaseService, type QueryParam } from '../../common/database/database.service';
+import { buildListingStoreActiveSql } from '../../common/utils/listing-store-active-sql';
 
 import {
   buildSubscriptionUpsertSql,
@@ -542,8 +543,10 @@ export class BillingRepositoryService {
    */
   async countActiveListings(userId: string, client?: PoolClient): Promise<number> {
     const rows = await this.run<{ cnt: string }>(
-      `SELECT COUNT(*)::text AS cnt FROM listings
-        WHERE user_id = $1 AND status = $2`,
+      `SELECT COUNT(*)::text AS cnt FROM listings l
+        WHERE l.user_id = $1 AND l.status = $2
+          -- A disconnected store's listings hold no plan slot.
+          AND ${buildListingStoreActiveSql('l')}`,
       [userId, ListingStatus.ACTIVE],
       client,
     );
@@ -564,7 +567,7 @@ export class BillingRepositoryService {
       flagged_count: string;
     }>(
       `SELECT user_id,
-              COUNT(*) FILTER (WHERE status = $1)::text AS active_count,
+              COUNT(*) FILTER (WHERE status = $1 AND ${buildListingStoreActiveSql('listings')})::text AS active_count,
               COUNT(*) FILTER (WHERE over_plan_limit)::text AS flagged_count
          FROM listings
         GROUP BY user_id
@@ -596,6 +599,9 @@ export class BillingRepositoryService {
                   ROW_NUMBER() OVER (ORDER BY created_at ASC NULLS FIRST, id ASC) AS rn
              FROM listings
             WHERE user_id = $1 AND status = $2
+              -- Ranked among the CONNECTED stores' listings only: a disconnected
+              -- store's older rows must not push the live store's newer ones out.
+              AND ${buildListingStoreActiveSql('listings')}
          )
          UPDATE listings l
             SET over_plan_limit = (r.rn > $3)
@@ -606,7 +612,8 @@ export class BillingRepositoryService {
       );
       const cleared = await client.query(
         `UPDATE listings SET over_plan_limit = FALSE
-          WHERE user_id = $1 AND status <> $2 AND over_plan_limit = TRUE`,
+          WHERE user_id = $1 AND over_plan_limit = TRUE
+            AND (status <> $2 OR NOT ${buildListingStoreActiveSql('listings')})`,
         [userId, ListingStatus.ACTIVE],
       );
       return (ranked.rowCount ?? 0) + (cleared.rowCount ?? 0);

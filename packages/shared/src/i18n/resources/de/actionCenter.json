@@ -29,6 +29,12 @@
       "warning": "Warnung",
       "info": "Empfehlungen"
     },
+    "storeFilter": {
+      "label": "Shop",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Gilt für Ihr gesamtes Konto",
+      "storesLabel": "Betroffene Shops"
+    },
     "summary": {
       "critical": "{{count}} kritisch",
       "warning": "{{count}} Warnung",

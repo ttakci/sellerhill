@@ -149,8 +149,8 @@ describe('entitlement enforcement invariants', () => {
       const rawBody = src.slice(start, end);
 
       const mutatedRawBody = rawBody.replace(
-        'const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);',
-        `const entitlementJoin = ''; const planLimitFilter = '';`
+        'const { entitlementJoin, planLimitFilter, storeActiveFilter } = buildRefreshEntitlementSql(enforcementOn);',
+        `const entitlementJoin = ''; const planLimitFilter = ''; const storeActiveFilter = '';`
       );
       // Sanity: the mutation actually landed, and it did NOT touch the
       // explanatory comment — i.e. this is a faithful reproduction of M1, not

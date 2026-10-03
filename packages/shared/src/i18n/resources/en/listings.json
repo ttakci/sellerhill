@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "Failed to fetch eBay business policies",
       "invalidAsins": "{{count}} of your entries don't look like valid ASINs (10 alphanumeric characters) and were skipped.",
       "loadFailed": "Failed to load listings. Please try again.",
-      "scheduleTooLong": "At this pace the job would take more than 30 days. Raise the number of products per day or add fewer ASINs."
+      "scheduleTooLong": "At this pace the job would take more than 30 days. Raise the number of products per day or add fewer ASINs.",
+      "storeUnavailable": "That eBay store can't be used: it isn't connected to your account or its connection has ended. Choose another store or reconnect it."
     },
     "detail": {
       "breadcrumb": "Listing detail",

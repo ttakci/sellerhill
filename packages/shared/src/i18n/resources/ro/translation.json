@@ -42,6 +42,8 @@
     "noBrand": "Fără informații despre brand",
     "amazonLink": "AMAZON",
     "unknownProduct": "Produs necunoscut",
+    "store": "Magazin",
+    "storeNamed": "Magazin: {{name}}",
     "languageCode": "ro-RO",
     "select": "Selectează"
   },
@@ -393,6 +395,9 @@
         "appliesTo": "Se aplică pentru",
         "checkBlacklist": "Verifică cuvintele cheie din lista neagră",
         "checkBlacklistDesc": "Scanează titlurile, descrierile, specificațiile și brandul anunțurilor în raport cu lista neagră înainte de publicare. Selecția de câmpuri a fiecărui cuvânt cheie stabilește unde este verificat.",
+        "allowCrossStoreAsins": "Permite ASIN-uri deja listate în celelalte magazine ale mele",
+        "allowCrossStoreAsinsDesc": "Activat pentru toate magazinele, orice magazin poate lista orice ASIN; activat pentru un singur magazin, doar acel magazin poate adăuga ASIN-uri pe care celelalte magazine le au deja. Un ASIN care este deja în acest magazin este întotdeauna omis.",
+        "allowCrossStoreAsinsInherited": "Se aplică setarea pentru toate magazinele până când salvezi o alegere pentru acest magazin.",
         "country": "Țară",
         "countryPlaceholder": "Selectați o țară",
         "region": "Regiune",

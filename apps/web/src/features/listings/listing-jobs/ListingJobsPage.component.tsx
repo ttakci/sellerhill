@@ -30,6 +30,11 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   datePreset,
   onDatePresetChange,
   datePresetOptions,
+  storeFilter,
+  onStoreFilterChange,
+  storeOptions,
+  showStoreFilter,
+  jobStoreLabel,
   hasActiveFilters,
   onClearFilters,
   columns,
@@ -51,6 +56,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
     const percent = formatPercent(job);
     const shortId = job.id.slice(0, 8);
     const remaining = Math.max(job.totalAsins - job.processedCount, 0);
+    const storeLabel = jobStoreLabel(job);
 
     return (
       /*
@@ -81,9 +87,16 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                 </Text>
               </S.ProgressCounts>
             </S.ProgressMain>
-            <Text variant="caption" color="text.tertiary">
-              {formatJobDate(job.createdAt)}
-            </Text>
+            <S.ProgressMeta>
+              <Text variant="caption" color="text.tertiary">
+                {formatJobDate(job.createdAt)}
+              </Text>
+              {storeLabel ? (
+                <Text variant="caption" color="text.secondary" truncate>
+                  {t('translation:common.storeNamed', { name: storeLabel })}
+                </Text>
+              ) : null}
+            </S.ProgressMeta>
           </S.ProgressRow>
         </S.JobCardBody>
 
@@ -188,6 +201,18 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   fullWidth
                 />
               </S.SelectWrapper>
+              {showStoreFilter && (
+                <S.SelectWrapper>
+                  <Select
+                    value={storeFilter}
+                    onChange={onStoreFilterChange}
+                    options={storeOptions}
+                    placeholder={t('listings.filters.allStores')}
+                    size="small"
+                    fullWidth
+                  />
+                </S.SelectWrapper>
+              )}
               <S.FilterActions>
                 <S.ResultCount variant="caption" weight="medium" color="text.secondary">
                   {t('listings.jobs.filters.resultCount', { count: pagination.count })}

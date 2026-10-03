@@ -57,7 +57,8 @@ export function resolveSeedMaxLoss(
  * store was already using. Without a global row the read-side defaults are
  * sent (the same values the API reports for a seller with no row).
  *
- * Location, buyer messaging, listing rules and the loss limit are deliberately
+ * Location, buyer messaging, listing rules, the loss limit and
+ * `allowCrossStoreAsins` are deliberately
  * NOT included: a store row that leaves them empty inherits the global ones at
  * read time, which keeps following later changes to the global row.
  */
@@ -80,4 +81,23 @@ export function buildInheritedStoreFields(
     trackingConversionScope: globalConfig?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
     trackingConvertManualOrders: globalConfig?.trackingConvertManualOrders ?? true,
   };
+}
+
+/**
+ * "Allow ASINs already listed on my other stores" for a scope.
+ *
+ * `own` is the value saved on the scope's OWN row (null = not set); `value` is
+ * what is in force: own ?? global ?? off — the server's resolution. A store
+ * that never chose shows the inherited value and keeps inheriting until the
+ * seller changes it (the drawer then sends `own` only, so an untouched store
+ * row is not frozen at today's global value).
+ */
+export function resolveSeedAllowCrossStore(
+  storeConfigs: StoreSettingsResponse[],
+  scope: string,
+): { value: boolean; own: boolean | null } {
+  const own = resolveScopeConfig(storeConfigs, scope)?.allowCrossStoreAsins ?? null;
+  const inherited =
+    scope === GLOBAL_SCOPE ? null : resolveScopeConfig(storeConfigs, GLOBAL_SCOPE)?.allowCrossStoreAsins ?? null;
+  return { value: own ?? inherited ?? false, own };
 }

@@ -29,6 +29,12 @@
       "warning": "Avertismente",
       "info": "Sugestii"
     },
+    "storeFilter": {
+      "label": "Magazin",
+      "optionWithCount": "{{store}} · {{count}}",
+      "accountWide": "Se aplică întregului cont",
+      "storesLabel": "Magazine vizate"
+    },
     "summary": {
       "critical": "{{count}} critice",
       "warning": "{{count}} avertismente",

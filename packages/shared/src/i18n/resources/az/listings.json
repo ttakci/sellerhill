@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "eBay biznes siyasətlərini gətirmək alınmadı",
       "invalidAsins": "Daxil etdiyiniz {{count}} sətir düzgün ASIN-ə (10 hərf-rəqəm simvolu) oxşamır və keçildi.",
       "loadFailed": "Elanları yükləmək alınmadı. Zəhmət olmasa yenidən cəhd edin.",
-      "scheduleTooLong": "Bu templə iş 30 gündən çox çəkər. Gündəlik məhsul sayını artırın və ya daha az ASIN əlavə edin."
+      "scheduleTooLong": "Bu templə iş 30 gündən çox çəkər. Gündəlik məhsul sayını artırın və ya daha az ASIN əlavə edin.",
+      "storeUnavailable": "Bu eBay mağazasından istifadə etmək olmur: hesabınıza qoşulmayıb və ya bağlantısı bitib. Başqa mağaza seçin və ya onu yenidən qoşun."
     },
     "detail": {
       "breadcrumb": "Elan təfərrüatları",

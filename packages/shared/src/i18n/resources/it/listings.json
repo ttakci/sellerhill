@@ -375,7 +375,8 @@
       "fetchPoliciesFailed": "Impossibile recuperare le policy commerciali eBay",
       "invalidAsins": "{{count}} dei tuoi inserimenti non sembrano ASIN validi (10 caratteri alfanumerici) e sono stati saltati.",
       "loadFailed": "Impossibile caricare le inserzioni. Riprova.",
-      "scheduleTooLong": "A questo ritmo l'attività richiederebbe più di 30 giorni. Aumenta il numero di prodotti al giorno o aggiungi meno ASIN."
+      "scheduleTooLong": "A questo ritmo l'attività richiederebbe più di 30 giorni. Aumenta il numero di prodotti al giorno o aggiungi meno ASIN.",
+      "storeUnavailable": "Questo negozio eBay non può essere usato: non è collegato al tuo account oppure il collegamento è terminato. Scegli un altro negozio o ricollegalo."
     },
     "detail": {
       "breadcrumb": "Dettaglio dell'inserzione",

@@ -86,6 +86,7 @@ export function useOrdersFilters() {
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
     setEbayAccountId(storeFromUrl);
+    setPage(1);
   }, [storeFromUrl]);
 
   // Same for the stage, so navigating between two Action Center rows

@@ -22,6 +22,8 @@
     "success": "Başarılı",
     "failed": "Hata",
     "unknownProduct": "Bilinmeyen Ürün",
+    "store": "Mağaza",
+    "storeNamed": "Mağaza: {{name}}",
     "views": {
       "label": "Görünüm",
       "grid": "Grid",
@@ -393,6 +395,9 @@
         "appliesTo": "Uygulandığı yer",
         "checkBlacklist": "Kara liste kelimelerini kontrol et",
         "checkBlacklistDesc": "Yayınlamadan önce listing başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
+        "allowCrossStoreAsins": "Diğer mağazalarımdaki ASIN'ler bu mağazaya da eklenebilsin",
+        "allowCrossStoreAsinsDesc": "Tüm mağazalar için açarsanız her mağaza her ASIN'i listeleyebilir; tek bir mağazada açarsanız yalnızca o mağaza diğer mağazalarınızda zaten olan ASIN'leri ekleyebilir. Bu mağazada zaten olan bir ASIN her zaman atlanır.",
+        "allowCrossStoreAsinsInherited": "Bu mağaza için bir seçim kaydedene kadar tüm mağazaların ayarı geçerlidir.",
         "country": "Ülke",
         "countryPlaceholder": "Ülke seçin",
         "region": "Bölge",

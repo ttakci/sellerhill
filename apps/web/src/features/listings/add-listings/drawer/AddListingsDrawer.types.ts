@@ -21,6 +21,12 @@ export interface AddListingsDrawerProps {
    * opens, including when it mounts already open from a deep link.
    */
   initialAsins?: string;
+  /**
+   * The store the opening page is filtered to (`?store=`). Preselected on
+   * open — still required and changeable — and outranks the remembered
+   * preference; an id that is not a connected store is dropped.
+   */
+  initialEbayAccountId?: string;
   /** Called after successful queue; `asDraft` reflects the submitted mode. */
   onSuccess: (result?: { asDraft: boolean }) => void;
 }

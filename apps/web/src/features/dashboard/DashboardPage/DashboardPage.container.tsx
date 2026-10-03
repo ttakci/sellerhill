@@ -23,7 +23,9 @@ import { useGetDashboardQuery } from '@/features/dashboard/api/dashboardApi';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingsQuery } from '@/features/listings/api/listings.api';
 import { useGetOrdersQuery } from '@/features/orders/api/orders.api';
-import { useGetStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
+import { resolveStoreDraftSeed } from '@/features/settings/drawers/storeDraftSeed';
+import { GLOBAL_SCOPE } from '@/features/settings/drawers/storeScope';
+import { useGetAllStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
@@ -61,8 +63,14 @@ export const DashboardPageContainer = (): React.ReactElement => {
     error: dashboardError,
   } = useGetDashboardQuery({ chartGranularity: granularity, ebayAccountId: storeFilter });
 
-  const { data: storeSettings } = useGetStoreSettingsQuery({ storeId: storeFilter });
-  const amazonTaxRate = storeSettings?.amazonTaxRate ?? 0;
+  /* The tax rate the estimate actually used: the selected store's own row
+     when it has one, else the global row (Store > Global) — never the
+     synthetic 0 a missing row reads as. */
+  const { data: storeConfigs } = useGetAllStoreSettingsQuery();
+  const amazonTaxRate = useMemo(
+    () => resolveStoreDraftSeed(storeConfigs ?? [], storeFilter ?? GLOBAL_SCOPE)?.amazonTaxRate ?? 0,
+    [storeConfigs, storeFilter]
+  );
 
   const { data: userData, error: userError } = useGetMeQuery();
 

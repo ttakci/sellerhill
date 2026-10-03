@@ -2,6 +2,7 @@ import { formatSourceStock, type ListingRevisionWithListingDto } from '@repo/sha
 import { formatCurrency, formatDate, getLocaleConfig, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import { RevisionHistoryPageComponent } from './RevisionHistoryPage.component';
 import type { RevisionHistoryDrawerState, RevisionHistoryRow } from './RevisionHistoryPage.types';
@@ -27,7 +28,22 @@ export const RevisionHistoryPageContainer: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
-  const [storeFilter, setStoreFilter] = useState('');
+  /* The store filter is URL state (`?store=`), like every other list page —
+     a link can land on one store's history and a refresh keeps it. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const storeFilter = searchParams.get('store') ?? '';
+  const setStoreFilter = useCallback(
+    (value: string) => {
+      const next = new URLSearchParams(searchParams);
+      if (value) {
+        next.set('store', value);
+      } else {
+        next.delete('store');
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
   const [drawer, setDrawer] = useState<RevisionHistoryDrawerState>(EMPTY_DRAWER);
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
@@ -115,16 +131,19 @@ export const RevisionHistoryPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handleStoreFilterChange = useCallback((value: string | number) => {
-    setStoreFilter(String(value));
-    setPage(1);
-  }, []);
+  const handleStoreFilterChange = useCallback(
+    (value: string | number) => {
+      setStoreFilter(String(value));
+      setPage(1);
+    },
+    [setStoreFilter]
+  );
 
   const handleClearFilters = useCallback(() => {
     setSearch('');
     setStoreFilter('');
     setPage(1);
-  }, []);
+  }, [setStoreFilter]);
 
   const handleRowClick = useCallback((row: RevisionHistoryRow) => {
     setDrawer({

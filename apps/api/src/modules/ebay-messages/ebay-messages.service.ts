@@ -41,6 +41,13 @@ export const MESSAGING_ERRORS = {
  */
 const UNREAD_STALE_MS = 15 * 60 * 1000;
 
+/**
+ * A SUBSCRIBED store's counter is kept by the webhook, but a delivery eBay
+ * dropped (or one we could not match) would leave it wrong for ever — so it is
+ * recounted too once it is older than a day.
+ */
+const SUBSCRIBED_UNREAD_STALE_MS = 24 * 60 * 60 * 1000;
+
 /** How eBay words a 403 that is about the token's grant rather than the request. */
 const SCOPE_ERROR_TEXT = /scope|permission|authoriz/i;
 
@@ -237,7 +244,8 @@ export class EbayMessagesService {
   /**
    * The sidebar badge. Read from the stored counters; only when nothing keeps a
    * store's counter current — the webhook is off, or that store has no
-   * NEW_MESSAGE subscription — is a stale counter recounted from eBay first.
+   * NEW_MESSAGE subscription — is a 15-minute-old counter recounted from eBay
+   * first; a subscribed store is recounted once its counter is a day old.
    * Best-effort and at BACKGROUND priority (the badge poll is not a seller
    * action); a failed recount keeps the stored value.
    */
@@ -254,7 +262,8 @@ export class EbayMessagesService {
     for (const row of rows) {
       let unread = Number(row.unread_message_count) || 0;
       const unsubscribed = webhookOff || !row.message_subscription_id;
-      if (unsubscribed && hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at)) {
+      const maxAgeMs = unsubscribed ? UNREAD_STALE_MS : SUBSCRIBED_UNREAD_STALE_MS;
+      if (hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at, maxAgeMs)) {
         try {
           unread = await this.refreshUnread(userId, row.id, EbayCallPriority.BACKGROUND);
         } catch (error: unknown) {
@@ -398,12 +407,12 @@ function firstImageUrl(raw: string[] | string | null): string | null {
   return typeof first === 'string' && first !== '' ? first : null;
 }
 
-function isStale(syncedAt: Date | null): boolean {
+function isStale(syncedAt: Date | null, maxAgeMs: number): boolean {
   if (!syncedAt) {
     return true;
   }
   const at = syncedAt instanceof Date ? syncedAt.getTime() : new Date(syncedAt).getTime();
-  return !Number.isFinite(at) || Date.now() - at > UNREAD_STALE_MS;
+  return !Number.isFinite(at) || Date.now() - at > maxAgeMs;
 }
 
 function errorText(error: unknown): string {
