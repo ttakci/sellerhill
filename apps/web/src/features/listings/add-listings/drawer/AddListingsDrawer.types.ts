@@ -21,12 +21,6 @@ export interface AddListingsDrawerProps {
    * opens, including when it mounts already open from a deep link.
    */
   initialAsins?: string;
-  /**
-   * The store the opening page is filtered to (`?store=`). Preselected on
-   * open — still required and changeable — and outranks the remembered
-   * preference; an id that is not a connected store is dropped.
-   */
-  initialEbayAccountId?: string;
   /** Called after successful queue; `asDraft` reflects the submitted mode. */
   onSuccess: (result?: { asDraft: boolean }) => void;
 }
@@ -38,7 +32,8 @@ export interface AddListingsDrawerComponentProps {
   isSubmitting: boolean;
   isLoading: boolean;
   form: UseFormReturn<CreateListingsFormData>;
-  ebayAccounts: Array<{ id: string; name: string }>;
+  /** The active store's name — the listings go there (top-bar switcher). */
+  storeLabel: string;
   listingSettingsGroups: Array<{ id: string; name: string }>;
   businessPolicies: {
     payment: Array<{ id: string; name: string }>;
