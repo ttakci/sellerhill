@@ -315,6 +315,7 @@ export const BestSellersPageContainer: React.FC = () => {
    * per-node answers — see `flattenCategoryTree`. The root row is added here
    * because it is not an Amazon node, only the "all categories" reset.
    */
+  const isListLoading = viewState === BestSellersViewState.LOADING;
   const categoryTreeRows = useMemo<BestSellersCategoryTreeRow[]>(() => {
     const query = categorySearch.trim().toLowerCase();
     const nodeRows = flattenCategoryTree({
@@ -332,6 +333,7 @@ export const BestSellersPageContainer: React.FC = () => {
       isActiveBranch: false,
       hasChildren: false,
       isExpanded: false,
+      isLoading: false,
     };
     return [
       root,
@@ -344,9 +346,13 @@ export const BestSellersPageContainer: React.FC = () => {
         isActiveBranch: row.isActiveBranch,
         hasChildren: row.hasChildren,
         isExpanded: row.isExpanded,
+        // The opened category learns its children from its own list answer.
+        isLoading:
+          categoryTree.isBranchLoading(row.path) ||
+          (isListLoading && row.isActive && categoryTree.bucket.nodes[row.path]?.children === undefined),
       })),
     ];
-  }, [categoryTree, categorySearch, category, t]);
+  }, [categoryTree, categorySearch, category, isListLoading, t]);
 
   /*
    * The Amazon-rendered breadcrumb marks the currently browsed node with
@@ -379,24 +385,18 @@ export const BestSellersPageContainer: React.FC = () => {
   );
 
   /*
-   * A category's sub-categories only exist once that category has been
-   * fetched — the API answers one level at a time. So opening a branch that was
-   * never visited IS a visit: the chevron navigates there (the list loads and
-   * the branch opens, since the active department is open by default). A
-   * pre-fetch that expanded without navigating would spend up to 50 products of
-   * the seller's allowance on a list they never looked at. Once the children
-   * are cached, the chevron is a plain expand/collapse toggle.
+   * The chevron never opens a list. A branch nobody has expanded yet asks the
+   * API for its tree alone (`/best-sellers/categories?category=`), which shows
+   * no product and so takes nothing from the allowance; the seller walks down
+   * to the branch they want and only the label they finally press loads
+   * products. The answer is cached for everyone for a week, and it also warms
+   * that branch's list, so opening it afterwards is instant.
    */
   const handleToggleCategoryExpand = useCallback(
     (path: string) => {
-      if (!categoryTree.isExpanded(path) && categoryTree.bucket.nodes[path]?.children === undefined) {
-        setCategory(path);
-        setIsCategoryDrawerOpen(false);
-        return;
-      }
-      categoryTree.toggleExpanded(path);
+      categoryTree.expandBranch(path);
     },
-    [categoryTree, setCategory],
+    [categoryTree],
   );
 
   const handleCategorySearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

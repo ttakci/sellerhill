@@ -132,3 +132,91 @@ describe('flattenCategoryTree', () => {
     expect(names(rows).sort()).toEqual(['0:Earbud Headphones', '0:Headphones', '0:Over-Ear Headphones']);
   });
 });
+
+/*
+ * The leveled reading. Both answers are amazon.com as captured 2026-10-03
+ * (services/amazon-scraper/tests/fixtures/bestsellers_{mid_headphones,leaf_open_ear}).
+ */
+const lv = (level: number, name: string, path: string | null, extra: Partial<BestSellersCategoryDto> = {}) =>
+  entry(name, path, { level, ...extra });
+
+const leveledRoot = [
+  lv(0, 'Any Department', null, { isRoot: true, isSelected: true }),
+  lv(1, 'Electronics', 'electronics'),
+  lv(1, 'Toys & Games', 'toys-and-games'),
+];
+
+const leveledHeadphones = [
+  lv(0, 'Any Department', null, { isRoot: true }),
+  lv(1, 'Electronics', 'electronics'),
+  lv(2, 'Headphones', null, { isSelected: true }),
+  lv(3, 'Earbud Headphones', 'electronics/12097478011'),
+  lv(3, 'On-Ear Headphones', 'electronics/12097480011'),
+  lv(3, 'Open-Ear Headphones', 'electronics/99530371011'),
+  lv(3, 'Over-Ear Headphones', 'electronics/12097479011'),
+];
+
+// A leaf: Amazon draws it among its siblings, two of them BEFORE it.
+const leveledOpenEarLeaf = [
+  lv(0, 'Any Department', null, { isRoot: true }),
+  lv(1, 'Electronics', 'electronics'),
+  lv(2, 'Headphones', 'electronics/172541'),
+  lv(3, 'Earbud Headphones', 'electronics/12097478011'),
+  lv(3, 'On-Ear Headphones', 'electronics/12097480011'),
+  lv(3, 'Open-Ear Headphones', null, { isSelected: true }),
+  lv(3, 'Over-Ear Headphones', 'electronics/12097479011'),
+];
+
+const SIBLINGS = ['electronics/12097478011', 'electronics/12097480011', 'electronics/99530371011', 'electronics/12097479011'];
+
+describe('mergeCategoryAnswer — leveled answers', () => {
+  it('a leaf opened straight away keeps its siblings under the parent, not in the chain', () => {
+    const bucket = mergeCategoryAnswer(EMPTY_CATEGORY_BUCKET, 'electronics/99530371011', leveledOpenEarLeaf);
+
+    expect(activeChain(bucket, 'electronics/99530371011')).toEqual([
+      'electronics',
+      'electronics/172541',
+      'electronics/99530371011',
+    ]);
+    expect(bucket.nodes['electronics/172541'].children).toEqual(SIBLINGS);
+    expect(bucket.nodes['electronics/12097478011'].parent).toBe('electronics/172541');
+    // A leaf knows it has no children, so it shows no chevron.
+    expect(bucket.nodes['electronics/99530371011'].children).toEqual([]);
+  });
+
+  it('the whole path stays expandable to the leaf: root → department → node → leaf', () => {
+    let bucket = mergeCategoryAnswer(EMPTY_CATEGORY_BUCKET, '', leveledRoot);
+    bucket = mergeCategoryAnswer(bucket, 'electronics/172541', leveledHeadphones);
+    bucket = mergeCategoryAnswer(bucket, 'electronics/99530371011', leveledOpenEarLeaf);
+
+    const rows = flattenCategoryTree({ bucket, category: 'electronics/99530371011', isExpanded: everyoneExpanded, query: '' });
+    expect(names(rows)).toEqual([
+      '0:Electronics',
+      '1:Headphones',
+      '2:Earbud Headphones',
+      '2:On-Ear Headphones',
+      '2:Open-Ear Headphones',
+      '2:Over-Ear Headphones',
+      '0:Toys & Games',
+    ]);
+    const leaf = rows.find((row) => row.path === 'electronics/99530371011');
+    expect(leaf?.hasChildren).toBe(false);
+    expect(leaf?.isActive).toBe(true);
+    // Siblings were never visited, so they still offer a chevron.
+    expect(rows.find((row) => row.path === 'electronics/12097478011')?.hasChildren).toBe(true);
+  });
+
+  it('a chain link above never overwrites the child list its own visit gave', () => {
+    let bucket = mergeCategoryAnswer(EMPTY_CATEGORY_BUCKET, '', leveledRoot);
+    bucket = mergeCategoryAnswer(bucket, 'electronics', [
+      lv(0, 'Any Department', null, { isRoot: true }),
+      lv(1, 'Electronics', null, { isSelected: true }),
+      lv(2, 'Headphones', 'electronics/172541'),
+      lv(2, 'Camera & Photo', 'electronics/502394'),
+    ]);
+    bucket = mergeCategoryAnswer(bucket, 'electronics/172541', leveledHeadphones);
+
+    expect(bucket.nodes.electronics.children).toEqual(['electronics/172541', 'electronics/502394']);
+    expect(bucket.nodes['electronics/172541'].children).toEqual(SIBLINGS);
+  });
+});

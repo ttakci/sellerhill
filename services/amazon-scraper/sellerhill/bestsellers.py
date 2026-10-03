@@ -13,11 +13,62 @@ import logging
 import time
 from datetime import datetime, timezone
 
-from amazon import fetch, rankings, refs
+from amazon import fetch, parsers, rankings, refs
+from amazon.shared import context
 
 from sellerhill import egress
 
 _log = logging.getLogger(__name__)
+
+# The sidebar tree is NESTED lists — one <ul> per level — but upstream
+# flattens it into document order and drops the nesting. On a leaf
+# category Amazon shows the leaf among its SIBLINGS (parent's children,
+# the leaf in bold), so "everything before the selected row is an
+# ancestor" stops being true there: a flat list cannot tell a sibling from
+# a grandparent. `level` (0 = "Any Department") keeps that structure.
+_TREE_ITEM_SELECTOR = "[class*=zg-browse-item], [class*=zg-root-browse-item]"
+_TREE_ANCHOR = "zg-browse-root"
+# The nav tree is a few KB; the slice only has to reach its end.
+_TREE_FRAGMENT_CHARS = 200_000
+
+
+def tree_levels(html_text):
+    """Nesting level of every tree row upstream keeps (same selector, same
+    "skip a row with no text" rule, same order), or None when the tree
+    cannot be found. Only the nav fragment is parsed, not the whole page."""
+    start = (html_text or "").find(_TREE_ANCHOR)
+    if start < 0:
+        return None
+    start = html_text.rfind("<ul", 0, start)
+    if start < 0:
+        return None
+    doc = parsers.soup(html_text[start:start + _TREE_FRAGMENT_CHARS])
+    rows = [li for li in doc.select(_TREE_ITEM_SELECTOR) if parsers.text(li)]
+    if not rows:
+        return None
+    depths = [sum(1 for parent in li.parents if parent.name == "ul") for li in rows]
+    top = min(depths)
+    return [depth - top for depth in depths]
+
+
+def _with_tree_levels(parse):
+    def bestsellers_page(html_text, site):
+        data = parse(html_text, site)
+        tree = data.get("tree") or []
+        levels = tree_levels(html_text)
+        # A count mismatch means the two selections disagree; no level is
+        # better than a wrong one (the API falls back to the flat reading).
+        if levels is not None and len(levels) == len(tree):
+            for row, level in zip(tree, levels):
+                row["level"] = level
+        return data
+    bestsellers_page.__wrapped__ = parse
+    return bestsellers_page
+
+
+# `rankings.bestsellers` looks the parser up on the module at call time.
+if not hasattr(parsers.bestsellers_page, "__wrapped__"):
+    parsers.bestsellers_page = _with_tree_levels(parsers.bestsellers_page)
 
 
 def _now():
@@ -47,8 +98,10 @@ def _item(raw):
 
 
 def _category(raw):
+    level = raw.get("level")
     return {"name": raw.get("name"), "path": raw.get("path"), "link": raw.get("link"),
-            "isSelected": bool(raw.get("is_selected")), "isRoot": bool(raw.get("is_root"))}
+            "isSelected": bool(raw.get("is_selected")), "isRoot": bool(raw.get("is_root")),
+            "level": level if isinstance(level, int) else None}
 
 
 def _related(raw):
@@ -77,15 +130,34 @@ def to_wire(raw):
     }
 
 
-def fetch_bestsellers(country, list_type, category, page):
+def _tree_page(category, list_type, country):
+    """The list page alone — no ACP hydration POSTs — read for its sidebar.
+    One request instead of up to four: the tree crawl wants the categories,
+    and the 30 server-rendered items are not a whole list, so none is sent."""
+    site, locale = context(country, None)
+    segment = rankings.LIST_TYPES[list_type]
+    path = f"/gp/{segment}/{category}/".replace("//", "/") if category else f"/gp/{segment}/"
+    html = fetch.page(site["country"], path, None, language=locale, label=f"{list_type} tree {category or 'root'}")
+    data = parsers.bestsellers_page(html, site)
+    return {"title": data.get("title"), "category": category or None, "list_type": list_type,
+            "link": site["base"] + path, "items": [], "categories": data.get("tree"),
+            "related_lists": data.get("tabs"),
+            "pagination": {"page": 1, "items_per_page": 0, "total_pages": 0, "total_count": 0}}
+
+
+def fetch_bestsellers(country, list_type, category, page, tree_only=False):
     """`{outcome, fetchedAt, list, netMs?}` for one list page. `category` is
     already validated by the route (`refs.resolve_bestseller_category`); it is
-    re-resolved here so a direct caller gets the same grammar."""
+    re-resolved here so a direct caller gets the same grammar. `tree_only`
+    reads the sidebar from one GET and returns no items."""
     base = {"outcome": None, "fetchedAt": _now(), "list": None}
     started = time.monotonic()
     try:
         resolved = refs.resolve_bestseller_category(category)
-        raw = rankings.bestsellers(resolved, list_type, country=country, page=page)
+        if tree_only:
+            raw = _tree_page(resolved, list_type, country)
+        else:
+            raw = rankings.bestsellers(resolved, list_type, country=country, page=page)
     except fetch.AmazonBlocked:  # subclass of AmazonUpstreamError: must come first
         return {**base, "outcome": "blocked"}
     except fetch.AmazonUpstreamError:
