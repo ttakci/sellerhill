@@ -52,7 +52,7 @@ describe('draft publish — non-positive source price', () => {
     const ebayImages = { resolve: jest.fn() };
     const service = new ListingsService(
       { query: jest.fn().mockResolvedValue([]) } as never,
-      { getActiveAccountId: jest.fn().mockResolvedValue('account-1') } as never,
+      { resolveListingAccountId: jest.fn().mockResolvedValue('account-1') } as never,
       {} as never,
       strategy,
       {} as never,

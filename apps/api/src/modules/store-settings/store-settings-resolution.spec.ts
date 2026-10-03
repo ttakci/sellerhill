@@ -1,3 +1,6 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import { StoreSettingsService } from './store-settings.service';
 
 /**
@@ -66,5 +69,32 @@ describe('StoreSettingsService.getResolvedSettings — buyer messaging', () => {
       row({ id: 'store', store_id: 'acc-1', buyer_messaging: STORE_MESSAGING_OFF }),
     ).getResolvedSettings('user-1', 'acc-1');
     expect(resolved.buyerMessaging?.enabled).toBe(false);
+  });
+});
+
+describe('StoreSettingsService.saveSettings — a new store row starts as a copy of "all stores"', () => {
+  const SOURCE = readFileSync(join(__dirname, 'store-settings.service.ts'), 'utf8');
+
+  it('seeds every field the caller did not send from the global row', () => {
+    expect(SOURCE).toMatch(/LEFT JOIN store_settings g ON g\.user_id = \$1 AND g\.is_global = TRUE/);
+    for (const column of [
+      'check_blacklist',
+      'blacklist',
+      'amazon_tax_rate',
+      'auto_fulfill_enabled',
+      'tracking_conversion_provider',
+      'tracking_conversion_scope',
+      'tracking_convert_manual_orders',
+    ]) {
+      expect(SOURCE).toMatch(new RegExp(String.raw`COALESCE\(\$\d+::\w+, g\.${column},`));
+    }
+  });
+
+  it("never falls back to the 'local' provider (that pushed the raw Amazon number to eBay)", () => {
+    expect(SOURCE).not.toMatch(/COALESCE\([^)]*'local'\)/);
+  });
+
+  it('an omitted tax rate leaves the stored one alone', () => {
+    expect(SOURCE).not.toMatch(/amazon_tax_rate = EXCLUDED\.amazon_tax_rate/);
   });
 });

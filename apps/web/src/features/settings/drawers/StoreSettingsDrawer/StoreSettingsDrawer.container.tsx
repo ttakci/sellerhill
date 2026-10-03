@@ -16,7 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 import { getCountryOptions } from '../../utils/countryOptions';
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
-import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
+import { resolveSeedMaxLoss, resolveStoreDraftSeed } from '../storeDraftSeed';
+import { buildScopeOptions, GLOBAL_SCOPE } from '../storeScope';
 
 import { StoreSettingsDrawerComponent } from './StoreSettingsDrawer.component';
 import type { StoreSettingsDrawerProps } from './StoreSettingsDrawer.types';
@@ -59,7 +60,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const { showMessage, closeMessage } = useUI();
   const countryOptions = useMemo(() => getCountryOptions(i18n.language), [i18n.language]);
   const storeId = selectedScope === GLOBAL_SCOPE ? undefined : selectedScope;
-  const config = resolveScopeConfig(storeConfigs, selectedScope);
+  // A store with no row of its own runs on the global row, so its form starts
+  // from the global values (see `resolveStoreDraftSeed`).
+  const config = resolveStoreDraftSeed(storeConfigs, selectedScope);
+  const seedMaxLoss = resolveSeedMaxLoss(storeConfigs, selectedScope);
 
   const { data: remoteBuyerMessaging } = useGetBuyerMessagingConfigQuery({ storeId });
   const { data: buyerMessageTemplatesData } = useGetBuyerMessageTemplatesQuery();
@@ -80,10 +84,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // The loss limit is stored as one nullable number (NULL = no limit, 0 = never
   // at a loss) but presented as a switch plus an amount, so "off" and "0" are
   // two visibly different choices.
-  const [lossLimitEnabled, setLossLimitEnabled] = useState(
-    config?.autoFulfillMaxLoss !== null && config?.autoFulfillMaxLoss !== undefined
-  );
-  const [lossLimitAmount, setLossLimitAmount] = useState(config?.autoFulfillMaxLoss ?? 0);
+  const [lossLimitEnabled, setLossLimitEnabled] = useState(seedMaxLoss !== null);
+  const [lossLimitAmount, setLossLimitAmount] = useState(seedMaxLoss ?? 0);
   // The provider is stored as an enum but presented as a single on/off choice:
   // `local` (send the Amazon number as-is) vs `aquiline` (convert it). Showing
   // the seller two vendor names would ask them to pick an implementation
@@ -148,7 +150,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
     setPrevBuyerMessageTemplates(buyerMessageTemplates);
 
     if (isOpen && (didOpen || scopeChanged || configArrived)) {
-      const next = resolveScopeConfig(storeConfigs, selectedScope);
+      const next = config;
       setStep(StoreSettingsDrawerStep.ADDRESS);
       setCountry(next?.country ?? '');
       setStateField(next?.state ?? '');
@@ -157,8 +159,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
-      setLossLimitEnabled(next?.autoFulfillMaxLoss !== null && next?.autoFulfillMaxLoss !== undefined);
-      setLossLimitAmount(next?.autoFulfillMaxLoss ?? 0);
+      setLossLimitEnabled(seedMaxLoss !== null);
+      setLossLimitAmount(seedMaxLoss ?? 0);
       setTrackingConversionEnabled(
         (next?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
           TrackingConversionProvider.LOCAL
@@ -180,9 +182,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
 
   const isGlobal = selectedScope === GLOBAL_SCOPE;
 
-  const save = (): void => {
-    void Promise.all([
-      saveSettings({
+  const save = async (): Promise<void> => {
+    try {
+      // Sequential, never in parallel: the settings save may CREATE the store
+      // row, and the buyer-messaging write must land on that row afterwards
+      // rather than racing it.
+      await saveSettings({
         isGlobal,
         storeId,
         country: country.trim(),
@@ -208,15 +213,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
           : TrackingConversionProvider.LOCAL,
         trackingConversionScope,
         trackingConvertManualOrders,
-      }).unwrap(),
-      updateBuyerMessaging({ config: buyerMessagingConfig, storeId }).unwrap(),
-    ])
-      .then(() => {
-        notifyDrawerDone({ onClose, showMessage, closeMessage, t });
-      })
-      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-        showMessage({ type: 'error', headerKey: 'translation:message.error.header', descriptionKey: getErrorI18nKey(error), primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage } }, t);
-      });
+      }).unwrap();
+      await updateBuyerMessaging({ config: buyerMessagingConfig, storeId }).unwrap();
+      notifyDrawerDone({ onClose, showMessage, closeMessage, t });
+    } catch (error) {
+      showMessage({ type: 'error', headerKey: 'translation:message.error.header', descriptionKey: getErrorI18nKey(error as Parameters<typeof getErrorI18nKey>[0]), primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage } }, t);
+    }
   };
 
   // All four are required by eBay, which refuses a STORE inventory location
@@ -245,7 +247,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       return;
     }
     if (step === StoreSettingsDrawerStep.BLACKLIST) {
-      save();
+      void save();
     } else {
       setStep((step + 1) as StoreSettingsDrawerStep);
     }
