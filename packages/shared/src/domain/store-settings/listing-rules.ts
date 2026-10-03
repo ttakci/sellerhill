@@ -44,6 +44,8 @@ export interface ListingRulesConfig {
    * Send no brand to eBay: the Brand aspect reads eBay's own "Does not apply",
    * the Brand / Manufacturer specifics are dropped and no UPC / EAN / MPN is
    * sent (a barcode would let eBay's catalog put the brand straight back).
+   * ON unless switched off (operator decision, 2026-10-03): a seller who wants
+   * the brand on eBay turns it off.
    */
   hideBrand: boolean;
   /** ASINs the seller never wants listed, uppercase. */
@@ -92,7 +94,7 @@ export const DEFAULT_COLD_LISTING_DAYS = 90;
 
 export const DEFAULT_LISTING_RULES: Readonly<ListingRulesConfig> = Object.freeze({
   veroProtectionEnabled: true,
-  hideBrand: false,
+  hideBrand: true,
   blockedAsins: [],
   minSourcePrice: null,
   maxSourcePrice: null,
@@ -149,7 +151,7 @@ export function normalizeListingRules(raw: unknown): ListingRulesConfig {
   const promotedAdRate = boundedNumber(source.promotedAdRate, PROMOTED_AD_RATE_MIN, PROMOTED_AD_RATE_MAX);
   return {
     veroProtectionEnabled: source.veroProtectionEnabled !== false,
-    hideBrand: source.hideBrand === true,
+    hideBrand: source.hideBrand !== false,
     blockedAsins: Array.isArray(source.blockedAsins) ? parseBlockedAsins(source.blockedAsins as string[]) : [],
     minSourcePrice: minSourcePrice !== null && minSourcePrice > 0 ? minSourcePrice : null,
     maxSourcePrice: maxSourcePrice !== null && maxSourcePrice > 0 ? maxSourcePrice : null,

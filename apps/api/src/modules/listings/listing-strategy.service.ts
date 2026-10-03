@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   BlacklistAction,
   BlacklistType,
+  DEFAULT_LISTING_RULES,
   DEFAULT_LISTING_TEMPLATE_HTML,
   EBAY_DESCRIPTION_MAX_LENGTH,
   EBAY_TITLE_MAX_LENGTH,
@@ -104,7 +105,7 @@ export class ListingStrategyService {
     // brand rule — so are the brand, its specifics and the barcodes. Applied
     // once, here, so the title, the template, the AI rewrite and what is sent
     // to eBay can never disagree about what was removed.
-    const hideBrand = Boolean(storeSettings.listingRules?.hideBrand);
+    const hideBrand = (storeSettings.listingRules ?? DEFAULT_LISTING_RULES).hideBrand;
     const product = applyContentRules(sourceProduct, {
       blacklist: storeSettings.blacklist,
       checkBlacklist: storeSettings.checkBlacklist,
