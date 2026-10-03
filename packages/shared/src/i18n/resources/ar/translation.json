@@ -42,8 +42,6 @@
     "noBrand": "لا توجد معلومات عن العلامة التجارية",
     "amazonLink": "AMAZON",
     "unknownProduct": "منتج غير معروف",
-    "store": "المتجر",
-    "storeNamed": "المتجر: {{name}}",
     "languageCode": "ar-MA",
     "select": "اختيار"
   },
@@ -172,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "اختيار اللغة",
+    "selectStore": "اختر المتجر",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "الإشعارات",
     "openMenu": "فتح القائمة",
     "collapseSidebar": "طي الشريط الجانبي",
@@ -839,7 +839,7 @@
       "billingNote": "يمكنك الإلغاء في أي وقت. الأسعار لا تشمل الضرائب المحلية حيثما كانت مطبقة.",
       "perMonth": "/شهر",
       "mostPopular": "الأكثر طلباً",
-      "planCta": "ابدأ مجاناً",
+      "planCta": "جرّب مجاناً",
       "showAllPlans": "عرض جميع الخطط ({{count}})",
       "showFewerPlans": "عرض خطط أقل",
       "notIncluded": "غير مشمول",
@@ -890,6 +890,17 @@
           "conversions": "500 تحويل لأرقام التتبع في الشهر",
           "bestSellers": "25,000 منتج من الأكثر مبيعًا في الشهر"
         }
+      },
+      "trialPlanNote": "تبدأ كل تجربة مجانية بباقة التجربة، ويمكنك الانتقال إلى هذه الباقة متى شئت.",
+      "trial": {
+        "title": "تجربة مجانية: {{days}} يومًا",
+        "listings": "إدراجات نشطة: {{limit}}",
+        "conversions": "تحويلات أرقام التتبع: {{limit}}",
+        "bestSellers": "منتجات الأكثر مبيعًا: {{limit}}",
+        "orders": "طلبات تلقائية: {{limit}}",
+        "unlimitedOrders": "طلبات تلقائية بلا حدود",
+        "noCard": "لا حاجة إلى بطاقة ائتمان",
+        "cta": "ابدأ التجربة المجانية"
       }
     },
     "faq": {

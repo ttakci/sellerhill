@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactElement, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 
+import { ActiveStoreProvider } from './components/ActiveStoreProvider';
 import { DemoBanner } from './features/demo';
 import LandingPage from './features/landing';
 import { AppLayout } from './layouts/AppLayout';
@@ -187,7 +188,13 @@ export function App() {
             }
           />
 
-          <Route element={<AppLayout />}>
+          <Route
+            element={
+              <ActiveStoreProvider>
+                <AppLayout />
+              </ActiveStoreProvider>
+            }
+          >
             <Route
               path="dashboard"
               element={

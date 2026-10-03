@@ -30,7 +30,7 @@ import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.componen
 import * as S from './ListingJobDetailsPage.style';
 import { JobItemFilter, type JobItemFilterOption } from './ListingJobDetailsPage.types';
 
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
+import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { useLocale } from '@/utils/useLocale';
 
 const isFailedItem = (item: ListingJobItemDto): boolean => item.status === ListingStatus.ERROR;
@@ -48,7 +48,6 @@ const jobPercent = (job: ListingJobDto): number =>
 
 export const ListingJobDetailsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
-  const storeLabelFor = useStoreLabel();
   const { jobId } = useParams<{ jobId: string }>();
   const { localeNavigate } = useLocale();
   const { locale } = getLocaleConfig(i18n.language);
@@ -67,6 +66,8 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     pollingInterval: 3000,
     skip: !jobId,
   });
+  // A job of another store makes that store active (top bar).
+  useFollowRecordStore(job?.ebayAccountId);
 
   const {
     data: items = [],
@@ -76,6 +77,8 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     pollingInterval: 3000,
     skip: !jobId,
   });
+  // A job of another store makes that store active (top bar).
+  useFollowRecordStore(job?.ebayAccountId);
 
   const isLoading = (isJobLoading || isItemsLoading) && !job && items.length === 0;
 
@@ -373,7 +376,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     <ListingJobDetailsPageComponent
       jobId={jobId}
       job={job}
-      storeLabel={storeLabelFor(job?.ebayAccountId)}
       items={items}
       paginatedItems={paginatedItems}
       isLoading={isLoading}

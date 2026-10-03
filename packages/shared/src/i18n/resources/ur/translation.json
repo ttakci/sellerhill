@@ -42,8 +42,6 @@
     "noBrand": "برانڈ کی معلومات نہیں",
     "amazonLink": "AMAZON",
     "unknownProduct": "نامعلوم پروڈکٹ",
-    "store": "اسٹور",
-    "storeNamed": "اسٹور: {{name}}",
     "languageCode": "ur-PK",
     "select": "منتخب کریں"
   },
@@ -172,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "زبان منتخب کریں",
+    "selectStore": "اسٹور منتخب کریں",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "اطلاعات",
     "openMenu": "مینو کھولیں",
     "collapseSidebar": "سائیڈ بار سمیٹیں",
@@ -839,7 +839,7 @@
       "billingNote": "جب چاہیں منسوخ کریں۔ جہاں لاگو ہو، قیمتوں میں مقامی ٹیکس شامل نہیں۔",
       "perMonth": "/ماہ",
       "mostPopular": "سب سے مقبول",
-      "planCta": "مفت شروع کریں",
+      "planCta": "مفت آزمائیں",
       "showAllPlans": "تمام {{count}} پلانز دیکھیں",
       "showFewerPlans": "کم پلانز دکھائیں",
       "notIncluded": "شامل نہیں",
@@ -890,6 +890,17 @@
           "conversions": "500 ٹریکنگ کنورژنز / ماہ",
           "bestSellers": "25,000 بیسٹ سیلرز مصنوعات / ماہ"
         }
+      },
+      "trialPlanNote": "ہر مفت ٹرائل ٹرائل پیکج سے شروع ہوتا ہے۔ آپ جب چاہیں اس پیکج پر منتقل ہو سکتے ہیں۔",
+      "trial": {
+        "title": "{{days}} دن مفت آزمائیں",
+        "listings": "{{limit}} فعال لسٹنگز",
+        "conversions": "{{limit}} ٹریکنگ کنورژنز",
+        "bestSellers": "{{limit}} بیسٹ سیلرز مصنوعات",
+        "orders": "{{limit}} خودکار آرڈرز",
+        "unlimitedOrders": "لامحدود خودکار آرڈرز",
+        "noCard": "کریڈٹ کارڈ کی ضرورت نہیں",
+        "cta": "مفت ٹرائل شروع کریں"
       }
     },
     "faq": {

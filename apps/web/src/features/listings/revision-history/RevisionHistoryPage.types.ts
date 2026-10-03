@@ -47,9 +47,6 @@ export interface RevisionHistoryPageComponentProps {
   onViewModeChange: (mode: ViewMode) => void;
   search: string;
   onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  storeFilter: string;
-  onStoreFilterChange: (value: string | number) => void;
-  storeOptions: { value: string; label: string }[];
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   onRowClick: (row: RevisionHistoryRow) => void;

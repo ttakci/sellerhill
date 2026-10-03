@@ -1,7 +1,6 @@
 import { formatCurrency, getLocaleConfig, IdBadge, useLoading } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 
 import { useGetUserProductsQuery } from '../api/listings.api';
 
@@ -10,7 +9,7 @@ import * as S from './ProductsPage.style';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { ProductTableCell } from '@/domain-ui';
-import { useStoreFilterOptions } from '@/features/ebay/hooks/useStoreLabel';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 
 /* Amazon has no sandbox and no non-US site (see CLAUDE.md "Marketplace links
    are environment-scoped") — every product price here is sourced from
@@ -27,10 +26,14 @@ export const ProductsPageContainer: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState('');
-  /* The store filter is URL state (`?store=`), like every other list page. */
-  const [searchParams, setSearchParams] = useSearchParams();
-  const storeFilter = searchParams.get('store') ?? '';
-  const { options: storeOptions, hasMultipleStores } = useStoreFilterOptions(t('listings.filters.allStores'));
+  // The top bar's active store; a switch starts the list over on page 1.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? '';
+  const [pageStore, setPageStore] = useState(storeFilter);
+  if (pageStore !== storeFilter) {
+    setPageStore(storeFilter);
+    setPage(1);
+  }
 
   /*
    * Server-paginated. This used to fetch the user's entire distinct-product
@@ -41,7 +44,7 @@ export const ProductsPageContainer: React.FC = () => {
     limit: rowsPerPage,
     search: search.trim() || undefined,
     ebayAccountId: storeFilter || undefined,
-  });
+  }, { skip: !storeFilter });
 
   const products = data?.items ?? [];
   const totalCount = data?.total ?? 0;
@@ -53,29 +56,10 @@ export const ProductsPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handleStoreFilterChange = useCallback(
-    (value: string | number) => {
-      const next = new URLSearchParams(searchParams);
-      if (value) {
-        next.set('store', String(value));
-      } else {
-        next.delete('store');
-      }
-      setSearchParams(next, { replace: true });
-      setPage(1);
-    },
-    [searchParams, setSearchParams]
-  );
-
   const handleClearSearch = useCallback(() => {
     setSearch('');
-    if (searchParams.has('store')) {
-      const next = new URLSearchParams(searchParams);
-      next.delete('store');
-      setSearchParams(next, { replace: true });
-    }
     setPage(1);
-  }, [searchParams, setSearchParams]);
+  }, []);
 
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
      to be folded in here, so the global overlay covered the whole app on
@@ -188,10 +172,6 @@ export const ProductsPageContainer: React.FC = () => {
       search={search}
       onSearchChange={handleSearchChange}
       onClearSearch={handleClearSearch}
-      storeFilter={storeFilter}
-      onStoreFilterChange={handleStoreFilterChange}
-      storeOptions={storeOptions}
-      showStoreFilter={hasMultipleStores}
       formatCurrency={fmtCurrency}
       columns={columns}
       pagination={{

@@ -17,10 +17,4 @@ export interface ListingsOverviewPageProps {
   onImportExisting: () => void;
   onViewDrafts: () => void;
   onListingClick: (listingId: string) => void;
-  /** eBay account id from `?store=`, or '' for all stores. */
-  storeFilter: string;
-  onStoreFilterChange: (value: string | number) => void;
-  storeOptions: Array<{ value: string; label: string }>;
-  /** Only with more than one connected store — a one-option filter is noise. */
-  showStoreFilter: boolean;
 }

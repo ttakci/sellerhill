@@ -7,8 +7,8 @@
  * prompt and costs no Message API call at all (every query is skipped).
  */
 
-import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder, type EbayAccountPublicDto } from '@repo/shared';
-import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type IconName, type SelectOption } from '@repo/ui';
+import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder } from '@repo/shared';
+import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type IconName } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,7 +19,7 @@ import { useMessagesInbox } from '../hooks/useMessagesInbox';
 import { MESSAGES_PAGE_SIZE, useMessagesUrlState } from '../hooks/useMessagesUrlState';
 
 import { MessagesPageComponent } from './MessagesPage.component';
-import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPagination, MessagesStoreSelector } from './MessagesPage.types';
+import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPagination } from './MessagesPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 
@@ -92,10 +92,6 @@ const avatarInitial = (name: string | null | undefined): string => {
 /** "Unread (12)" — the count is omitted at 0 so a clean inbox reads clean. */
 const withCount = (label: string, count: number): string => (count > 0 ? `${label} (${count})` : label);
 
-/** Same store label the dashboard filter shows. */
-const storeLabel = (account: EbayAccountPublicDto): string =>
-  account.storeName || account.ebayUsername || account.sellerId;
-
 export const MessagesPageContainer = (): React.ReactElement => {
   const { t, i18n } = useTranslation(['messages', 'translation']);
   const isMobile = useIsMobile();
@@ -105,12 +101,12 @@ export const MessagesPageContainer = (): React.ReactElement => {
    * that control. */
   const isRailVisible = useMediaQuery(`(min-width: ${theme.breakpoints.xl})`);
 
-  const { state, setStore, setType, setFolder, setTypeAndFolder, openConversation, setPage } =
+  const { state, setType, setFolder, setTypeAndFolder, openConversation, setPage } =
     useMessagesUrlState();
   const { type, folder, conversationId, page } = state;
 
   const inbox = useMessagesInbox(state);
-  const { accounts, conversations, activeAccount, activeConversation, threadMessages, isMine } = inbox;
+  const { conversations, activeAccount, activeConversation, threadMessages, isMine } = inbox;
 
   const pageIds = useMemo(
     () => conversations.map((conversation) => conversation.conversationId),
@@ -374,19 +370,6 @@ export const MessagesPageContainer = (): React.ReactElement => {
     [t, type, folder, setType, setFolder, unreadByType],
   );
 
-  /* ─── store filter — only worth showing with more than one store ─── */
-
-  const storeSelector = useMemo<MessagesStoreSelector | null>(() => {
-    if (accounts.length < 2 || !activeAccount) {
-      return null;
-    }
-    const options: SelectOption[] = accounts.map((account) => ({
-      value: account.id,
-      label: storeLabel(account),
-    }));
-    return { value: activeAccount.id, options, onChange: (value) => setStore(String(value)) };
-  }, [accounts, activeAccount, setStore]);
-
   /* ─── mobile: list OR thread; the header's back arrow clears `?c=` ─── */
 
   const threadOpenOnPhone = isMobile && !!conversationId;
@@ -394,12 +377,12 @@ export const MessagesPageContainer = (): React.ReactElement => {
 
   /**
    * The toolbar exists to carry the compact type/folder switch (below `xl`,
-   * where the rail is hidden) and the store switcher (2+ stores). With a
-   * single store at `xl`+ neither renders, and an unconditional `showToolbar`
-   * left a bordered, shadowed bar with nothing inside it.
+   * where the rail is hidden). At `xl`+ it has nothing to carry, and an
+   * unconditional `showToolbar` left a bordered, shadowed bar with nothing
+   * inside it. (The store is chosen in the top bar.)
    */
   const needsCompactFilters = inbox.messagingEnabled && !isRailVisible;
-  const showToolbar = !threadOpenOnPhone && (needsCompactFilters || !!storeSelector);
+  const showToolbar = !threadOpenOnPhone && needsCompactFilters;
 
   return (
     <EbayAccountGuard>
@@ -409,7 +392,6 @@ export const MessagesPageContainer = (): React.ReactElement => {
         onBack={threadOpenOnPhone ? handleBack : undefined}
         backLabel={t('messages.thread.backToList')}
         showToolbar={showToolbar}
-        storeSelector={storeSelector}
         messagingEnabled={inbox.messagingEnabled}
         onReconnect={actions.handleReconnect}
         isReconnecting={actions.isReconnecting}

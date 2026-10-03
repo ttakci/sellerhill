@@ -36,9 +36,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   stage,
   onStageChange,
   stageOptions,
-  ebayAccountId,
-  onEbayAccountChange,
-  storeOptions,
   trackingState,
   onTrackingStateChange,
   trackingStateOptions,
@@ -52,7 +49,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   formatCurrency,
   formatDate,
   formatDay,
-  storeLabelFor,
   onOrderClick,
   onBack,
   onDownload,
@@ -60,7 +56,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   const { t } = useTranslation(['orders', 'translation']);
 
   const renderGridCard = (order: OrderDto) => {
-    const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay, storeLabelFor(order.ebayAccountId));
+    const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay);
     return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} hoverEffect={false} />;
   };
 
@@ -109,16 +105,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onStageChange}
               options={stageOptions}
               placeholder={t('orders.filters.allStages')}
-              size="small"
-              fullWidth
-            />
-          </S.SelectWrapper>
-          <S.SelectWrapper>
-            <Select
-              value={ebayAccountId}
-              onChange={onEbayAccountChange}
-              options={storeOptions}
-              placeholder={t('orders.filters.allStores')}
               size="small"
               fullWidth
             />

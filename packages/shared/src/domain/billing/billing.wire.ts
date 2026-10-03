@@ -62,6 +62,21 @@ export interface BillingCatalogDto {
   /** The provider backing checkout, or 'local' when unconfigured. Exposed so
    *  the FE can hide the checkout button when no real provider is wired. */
   provider: BillingProvider;
+  /** The free trial every new account starts on. The trial plan is
+   *  `is_active = FALSE` (it is never purchasable), so it is not in `plans`;
+   *  the landing reads what it includes from here. Null when the trial plan
+   *  row is missing or could not be read — the catalog never fails over it. */
+  trial: BillingCatalogTrialDto | null;
+}
+
+/**
+ * The free trial as the public catalog describes it: its length (the
+ * `billing.trialDays` setting) and its limits, using the plan-limit sentinels
+ * (-1 = unlimited, 0 = disabled, N = quota).
+ */
+export interface BillingCatalogTrialDto {
+  days: number;
+  limits: Partial<Record<BillingLimitKey, number>>;
 }
 
 /**

@@ -17,9 +17,7 @@ import type { ListingCardProps } from '@/domain-ui';
 export const toListingCardProps = (
   listing: ListingDto,
   t: TFunction,
-  locale: string,
-  /** The listing's store name — passed only when the seller has more than one store. */
-  storeLabel?: string | null
+  locale: string
 ): Omit<ListingCardProps, 'orientation' | 'selectable' | 'selected' | 'onSelectedChange' | 'selectionAriaLabel'> => {
   const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
   const profit = listing.estimatedProfit ?? 0;
@@ -45,13 +43,6 @@ export const toListingCardProps = (
       label: t('listings.table.ebayId'),
       value: listing.ebayListingId,
       storeType: 'ebay',
-    });
-  }
-
-  if (storeLabel) {
-    meta.push({
-      label: t('translation:common.store'),
-      value: storeLabel,
     });
   }
 

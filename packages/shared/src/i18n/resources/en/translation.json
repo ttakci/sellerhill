@@ -42,8 +42,6 @@
     "noBrand": "No Brand Info",
     "amazonLink": "AMAZON",
     "unknownProduct": "Unknown Product",
-    "store": "Store",
-    "storeNamed": "Store: {{name}}",
     "languageCode": "en-US",
     "select": "Select"
   },
@@ -172,6 +170,8 @@
   },
   "header": {
     "selectLanguage": "Select Language",
+    "selectStore": "Select store",
+    "storeWithCount": "{{store}} · {{count}}",
     "notifications": "Notifications",
     "openMenu": "Open menu",
     "collapseSidebar": "Collapse sidebar",
@@ -851,7 +851,7 @@
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "mostPopular": "Most popular",
-      "planCta": "Start free",
+      "planCta": "Try free",
       "showAllPlans": "See all {{count}} plans",
       "showFewerPlans": "Show fewer plans",
       "notIncluded": "Not included",
@@ -902,6 +902,17 @@
           "conversions": "500 tracking conversions / month",
           "bestSellers": "25,000 Best Sellers products / month"
         }
+      },
+      "trialPlanNote": "Every free trial starts on the trial plan. Switch to this plan whenever you like.",
+      "trial": {
+        "title": "Try it free for {{days}} days",
+        "listings": "{{limit}} active listings",
+        "conversions": "{{limit}} tracking conversions",
+        "bestSellers": "{{limit}} Best Sellers products",
+        "orders": "{{limit}} automatic orders",
+        "unlimitedOrders": "Unlimited automatic orders",
+        "noCard": "No credit card required",
+        "cta": "Start free trial"
       }
     },
     "faq": {

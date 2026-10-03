@@ -2702,6 +2702,15 @@ export const DEMO_BILLING_CATALOG: BillingCatalogDto = {
   currency: 'USD',
   enforcementEnabled: true,
   provider: BillingProvider.STRIPE,
+  trial: {
+    days: 30,
+    limits: {
+      [BillingLimitKey.LISTINGS_PER_MONTH]: 50,
+      [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: -1,
+      [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: 20,
+      [BillingLimitKey.BEST_SELLERS_PRODUCTS_PER_MONTH]: 500,
+    },
+  },
 };
 
 /** The demo account is a paying Growth customer, mid-period. */

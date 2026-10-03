@@ -16,8 +16,6 @@ import { useListingsFilters } from './hooks/useListingsFilters';
 import { ListingsAllPageComponent } from './ListingsAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
-import { useStoreLabel } from '@/features/ebay/hooks/useStoreLabel';
 import { useLocale } from '@/utils/useLocale';
 
 export const ListingsAllPage: React.FC = () => {
@@ -59,7 +57,6 @@ export const ListingsAllPage: React.FC = () => {
     handleCategoryChange,
     handleStatusChange,
     handleTrackingStateChange,
-    handleEbayAccountChange,
     handleClearFilters,
     hasActiveFilters,
     statusOptions,
@@ -67,20 +64,6 @@ export const ListingsAllPage: React.FC = () => {
     numericFilters,
     fromDashboard,
   } = useListingsFilters();
-
-  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
-  const storeLabelFor = useStoreLabel();
-
-  const storeOptions = useMemo(
-    () => [
-      { value: '', label: t('listings.filters.allStores') },
-      ...(ebayAccountsData?.items ?? []).map((acc) => ({
-        value: acc.id,
-        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
-      })),
-    ],
-    [ebayAccountsData?.items, t]
-  );
 
   const {
     data,
@@ -90,6 +73,7 @@ export const ListingsAllPage: React.FC = () => {
     error: listingsError,
   } = useGetListingsQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
+    skip: !serverQuery.ebayAccountId,
   });
 
   // Support both paginated shape and accidental legacy array responses
@@ -413,7 +397,6 @@ export const ListingsAllPage: React.FC = () => {
       <ListingsAllPageComponent
         listings={listings}
         locale={localeCfg.locale}
-        storeLabelFor={storeLabelFor}
         onSelectionChange={setSelectedListingIds}
         columns={filteredColumns}
         selectedRows={selectedRows}
@@ -451,8 +434,6 @@ export const ListingsAllPage: React.FC = () => {
         statusOptions={statusOptions}
         onTrackingStateChange={handleTrackingStateChange}
         trackingOptions={trackingOptions}
-        onEbayAccountChange={handleEbayAccountChange}
-        storeOptions={storeOptions}
         numericFilters={numericFilters}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}

@@ -11,7 +11,6 @@ import {
   Icon,
   PageHeader,
   SegmentedControl,
-  Select,
   TabNav,
   TablePagination,
   Text,
@@ -30,7 +29,6 @@ export const MessagesPageComponent = ({
   onBack,
   backLabel,
   showToolbar,
-  storeSelector,
   messagingEnabled,
   onReconnect,
   isReconnecting,
@@ -51,19 +49,6 @@ export const MessagesPageComponent = ({
       onBack={onBack}
       backAriaLabel={backLabel}
       backMobileOnly
-      actions={
-        showToolbar && storeSelector ? (
-          <S.StoreSelect>
-            <Select
-              value={storeSelector.value}
-              onChange={storeSelector.onChange}
-              options={storeSelector.options}
-              size="small"
-              fullWidth
-            />
-          </S.StoreSelect>
-        ) : undefined
-      }
     />
 
     {/* Below `xl` the rail is hidden, so its stand-in sits in a row of its own;

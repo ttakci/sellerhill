@@ -2824,6 +2824,75 @@ export const DemoNote = styled.p`
  * Pricing
  * ========================================================================= */
 
+/**
+ * The free-trial strip over the plan cards. Navy + amber, the hero's own offer
+ * language, so the visitor reads it as the same "try it free" promise the
+ * hero made — and the plan cards below it as what comes after.
+ */
+export const TrialStrip = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.lg')};
+  margin-bottom: ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
+  border-radius: 1.4rem;
+  border: 1.5px solid ${tkn('colors.landing.accentAmber')};
+  background: ${tkn('colors.sidebar.background')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+
+  @media (max-width: 980px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: ${tkn('spacing.lg')};
+  }
+`;
+
+export const TrialStripBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  flex: 1;
+  min-width: 0;
+`;
+
+export const TrialStripTitle = styled.h3`
+  margin: 0;
+  font-family: ${FONT_HEADING};
+  font-size: ${TYPE.cardLg};
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: ${tkn('colors.sidebar.text')};
+`;
+
+export const TrialFacts = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const TrialFact = styled.li`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  line-height: 1.5;
+  color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+/** "Starts on the trial" — sits under every plan card's button. */
+export const PlanTrialNote = styled.p`
+  margin: 0;
+  text-align: center;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  line-height: 1.45;
+  color: ${tkn('colors.text.tertiary')};
+`;
+
 export const PricingGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));

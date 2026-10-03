@@ -14,9 +14,7 @@ export const toOrderCardProps = (
   t: TFunction,
   formatCurrency: (value: number, ebayAccountId?: string | null) => string,
   formatDate: (value: string) => string,
-  formatDay?: (value: string) => string,
-  /** The order's store name — passed only when the seller has more than one store. */
-  storeLabel?: string | null
+  formatDay?: (value: string) => string
 ): Omit<OrderCardProps, 'onClick' | 'className'> => {
   // Each order is money in its OWN store's currency, never a page-wide one.
   const money = (value: number) => formatCurrency(value, order.ebayAccountId);
@@ -33,10 +31,6 @@ export const toOrderCardProps = (
     { label: t('orders.table.buyer'), value: order.buyerName || '—' },
     { label: t('orders.table.date'), value: formatDate(order.createdAt) },
   ];
-
-  if (storeLabel) {
-    meta.push({ label: t('translation:common.store'), value: storeLabel });
-  }
 
   if (order.product?.quantity && order.product.quantity > 1) {
     meta.push({ label: t('orders.detail.quantity'), value: String(order.product.quantity) });

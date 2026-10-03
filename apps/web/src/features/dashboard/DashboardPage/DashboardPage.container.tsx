@@ -4,13 +4,13 @@
  */
 
 import { DashboardPeriodKey, DashboardTab } from '@repo/shared';
-import { getLocaleConfig, useTheme, useUI, type SelectOption } from '@repo/ui';
+import { getLocaleConfig, useTheme, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { PeriodCardLabels } from '../components/PeriodCard';
 import { useDashboardFormatters } from '../hooks/useDashboardFormatters';
-import { ALL_STORES, useDashboardUrlState } from '../hooks/useDashboardUrlState';
+import { useDashboardUrlState } from '../hooks/useDashboardUrlState';
 import { EMPTY_PERIOD_METRICS } from '../utils/emptyMetrics';
 import { getAllPeriodRanges } from '../utils/periodRanges';
 
@@ -21,6 +21,7 @@ import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetDashboardQuery } from '@/features/dashboard/api/dashboardApi';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import { useGetListingsQuery } from '@/features/listings/api/listings.api';
 import { useGetOrdersQuery } from '@/features/orders/api/orders.api';
 import { resolveStoreDraftSeed } from '@/features/settings/drawers/storeDraftSeed';
@@ -38,9 +39,11 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
   const { theme } = useTheme();
 
-  const { tab, period, storeId, granularity, setTab, setPeriod, setStoreId, setGranularity } =
-    useDashboardUrlState();
-  const storeFilter = storeId !== ALL_STORES ? storeId : undefined;
+  const { tab, period, granularity, setTab, setPeriod, setGranularity } = useDashboardUrlState();
+  // The store chosen in the top bar; every figure on the page is that store's.
+  const { activeStoreId } = useActiveStore();
+  const storeFilter = activeStoreId ?? undefined;
+  const noStore = !activeStoreId;
 
   const languageCode = (i18n.language || 'en').split('-')[0];
   const { locale } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
@@ -61,7 +64,10 @@ export const DashboardPageContainer = (): React.ReactElement => {
     data: dashboardData,
     isLoading: isDashboardLoading,
     error: dashboardError,
-  } = useGetDashboardQuery({ chartGranularity: granularity, ebayAccountId: storeFilter });
+  } = useGetDashboardQuery(
+    { chartGranularity: granularity, ebayAccountId: storeFilter },
+    { skip: noStore },
+  );
 
   /* The tax rate the estimate actually used: the selected store's own row
      when it has one, else the global row (Store > Global) — never the
@@ -85,7 +91,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
     sortBy: 'lastSale',
     sortOrder: 'desc',
     ebayAccountId: storeFilter,
-  });
+  }, { skip: noStore });
 
   // Tracked only — the dashboard describes the business SellerHill manages,
   // and the period cards are scoped the same way, so the carousel cannot show
@@ -99,7 +105,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
     sortOrder: 'desc',
     ebayAccountId: storeFilter,
     isTracked: true,
-  });
+  }, { skip: noStore });
 
   const listings = listingsPage?.items ?? [];
   const listingsTotal = listingsPage?.total ?? 0;
@@ -221,24 +227,6 @@ export const DashboardPageContainer = (): React.ReactElement => {
     }));
   }, [t, theme, dashboardData, periodDates]);
 
-  /* Same Select (size small) as the store filter on every list page — the
-     filter is a value, not a menu of actions. */
-  const storeOptions = useMemo<SelectOption[]>(
-    () => [
-      { value: ALL_STORES, label: t('dashboard.allStores') },
-      ...ebayAccounts.map((account) => ({
-        value: account.id,
-        label: account.storeName || account.ebayUsername || account.sellerId,
-      })),
-    ],
-    [t, ebayAccounts],
-  );
-
-  const handleStoreChange = useCallback(
-    (value: string | number) => setStoreId(String(value)),
-    [setStoreId],
-  );
-
   /* ─── errors ─── */
 
   useEffect(() => {
@@ -270,10 +258,6 @@ export const DashboardPageContainer = (): React.ReactElement => {
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
-        storeId={storeId}
-        storeOptions={storeOptions}
-        onStoreChange={handleStoreChange}
-        showStoreSelector={ebayAccounts.length > 0}
         cardsProps={{
           periods,
           selectedPeriod: period,

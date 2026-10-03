@@ -15,6 +15,7 @@ import { Outlet } from 'react-router-dom';
 
 import * as S from './AppLayout.style';
 import type { AppLayoutProps } from './AppLayout.types';
+import { StoreSwitcher } from './StoreSwitcher';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
@@ -403,6 +404,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
+                <StoreSwitcher />
+
                 <Dropdown
                   align="right"
                   width="8rem"
