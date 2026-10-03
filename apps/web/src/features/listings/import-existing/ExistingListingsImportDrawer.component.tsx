@@ -10,12 +10,10 @@ export const ExistingListingsImportDrawerComponent = (props: ExistingListingsImp
     <Select value={props.values[name] ?? ''} onChange={(value) => props.onValueChange(name, value)} options={options} label={label} fullWidth />
   );
   return (
-    <Drawer isOpen={props.isOpen} onClose={props.onClose} onBack={props.onBack} title={t('listings.existingImport.title')} size="lg"
+    <Drawer isOpen={props.isOpen} onClose={props.onClose} onBack={props.onBack} title={t('listings.existingImport.title')} subtitle={props.storeLabel ? t('listings.existingImport.importingTo', { store: props.storeLabel }) : undefined} size="lg"
       primaryAction={{ label: props.step === 0 ? t('translation:common.continue') : t('listings.existingImport.start'), onClick: props.step === 0 ? props.onNext : props.onSubmit, disabled: !props.canProceed || props.isLoading, isLoading: props.isLoading }}>
       <S.Stack>
         {props.step === 0 ? <>
-          <S.Panel padding="lg"><Text variant="h4" weight="semibold">{t('listings.existingImport.storeTitle')}</Text>
-            {select('ebayAccountId', t('listings.existingImport.store'), props.stores)}</S.Panel>
           <S.Panel padding="lg"><Text variant="h4" weight="semibold">{t('listings.listingSettings.title')}</Text>
             {select('listingSettingsGroupId', t('listings.listingSettings.strategyGroup'), props.groups.map((group) => ({ value: group.id, label: group.name })))}</S.Panel>
           <S.Panel padding="lg"><Text variant="h4" weight="semibold">{t('listings.businessPolicies.title')}</Text><S.Grid>

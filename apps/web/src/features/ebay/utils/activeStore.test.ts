@@ -6,6 +6,7 @@ import {
   readRememberedStore,
   rememberStore,
   resolveActiveStoreId,
+  recordListPath,
   searchForStoreSwitch,
 } from './activeStore';
 
@@ -62,12 +63,39 @@ describe('nextSearchForActiveStore', () => {
 });
 
 describe('searchForStoreSwitch', () => {
-  it('a switch starts the page over: only the store is kept', () => {
-    expect(searchForStoreSwitch(new URLSearchParams('store=a&page=4&r=9'), 'b', false).toString()).toBe('store=b');
+  it('a switch drops paging and the open record, drawer and hand-off', () => {
+    expect(searchForStoreSwitch(new URLSearchParams('store=a&page=4&r=9&c=7&drawer=add&asins=B0X'), 'b', false).toString()).toBe('store=b');
+  });
+  it('a switch keeps the view the seller is in (tab, period, folder, draft view, filters)', () => {
+    const next = searchForStoreSwitch(
+      new URLSearchParams('store=a&tab=chart&period=thisWeek&granularity=day&status=draft&type=FROM_EBAY&folder=unread&tracking=all&flag=late&stage=to_purchase&from=dashboard&q=mat&page=3'),
+      'b',
+      false
+    );
+    expect(Object.fromEntries(next)).toEqual({
+      store: 'b', tab: 'chart', period: 'thisWeek', granularity: 'day', status: 'draft', type: 'FROM_EBAY',
+      folder: 'unread', tracking: 'all', flag: 'late', stage: 'to_purchase', from: 'dashboard', q: 'mat',
+    });
   });
   it('following a record keeps the page’s own params', () => {
     const next = searchForStoreSwitch(new URLSearchParams('store=a&r=9'), 'b', true);
     expect(next.get('store')).toBe('b');
     expect(next.get('r')).toBe('9');
+  });
+});
+
+describe('recordListPath', () => {
+  it('a record page answers its list', () => {
+    expect(recordListPath('/orders/123', '/orders/')).toBe('/orders');
+    expect(recordListPath('/listings/abc', '/listings/')).toBe('/listings');
+    expect(recordListPath('/listings/jobs/j1', '/listings/jobs')).toBe('/listings/jobs');
+  });
+  it('a list page is not a record page', () => {
+    expect(recordListPath('/orders', '/orders')).toBeNull();
+    expect(recordListPath('/listings/jobs', '/listings/jobs')).toBeNull();
+    expect(recordListPath('/listings/all', '/listings/all')).toBeNull();
+  });
+  it('no route meta, no record page', () => {
+    expect(recordListPath('/orders/1', undefined)).toBeNull();
   });
 });

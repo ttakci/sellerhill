@@ -126,7 +126,6 @@ export const ListingsOverviewPageContainer: React.FC = () => {
         onClose={handleAddDrawerClose}
         onSuccess={handleAddSuccess}
         initialAsins={initialAsins}
-        initialEbayAccountId={storeFilter || undefined}
       />
       <ExistingListingsImportDrawer
         isOpen={isImportDrawerOpen}
