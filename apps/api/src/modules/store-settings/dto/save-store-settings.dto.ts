@@ -90,14 +90,15 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsString()
   zipCode?: string;
 
-  @ApiProperty({
-    description: 'Default Amazon tax rate (percent 0–100) used to estimate provisional order profit',
+  @ApiPropertyOptional({
+    description: 'Amazon purchase tax rate (percent 0–100). Omitted = unchanged.',
     example: 7,
   })
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(100)
-  amazonTaxRate!: number;
+  amazonTaxRate?: number;
 
   @ApiPropertyOptional({
     description: 'A2 master toggle. When off, no eBay order is auto-purchased on Amazon.',

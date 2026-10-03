@@ -141,14 +141,12 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     [ebayAccountsData?.items]
   );
   const { data: listingSettingsGroups = [], isLoading: isLoadingSettings } = useGetListingSettingsGroupsQuery();
-  const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
 
   const [
     createListings,
     { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData, reset: resetMutation },
   ] = useCreateListingsMutation();
 
-  const isLoading = isLoadingAccounts || isLoadingSettings || isLoadingPolicies;
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
      to be folded in here, so the global overlay covered the whole app on
      first paint of this page instead of the page showing its own state. */
@@ -170,6 +168,18 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   });
 
   const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
+
+  // Policies are per store: read the SELECTED store's, and nothing until one
+  // is chosen (a job for store B must never carry store A's policy ids — eBay
+  // refuses the publish). `currentData`, not `data`, so a store switch never
+  // shows the previous store's policies while the new ones load; the
+  // preferences effect below then clears a selection the new store lacks.
+  const selectedEbayAccountId = useWatch({ control, name: 'ebayAccountId' });
+  const { currentData: policiesMap = [], isFetching: isFetchingPolicies } = useGetBusinessPoliciesQuery(
+    selectedEbayAccountId || undefined,
+    { skip: !selectedEbayAccountId }
+  );
+  const isLoading = isLoadingAccounts || isLoadingSettings || isFetchingPolicies;
 
   // Reset step + form when the drawer opens (the initial mount is covered by
   // `defaultValues` above, which is built from the same values).

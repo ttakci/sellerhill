@@ -65,7 +65,7 @@ function harness(opts: {
       if (sql.includes('FROM orders') && sql.includes('WHERE id = $1 AND user_id = $2') && sql.trim().startsWith('SELECT')) {
         return Promise.resolve(opts.row ? [opts.row] : []);
       }
-      if (sql.includes('SELECT listing_id, quantity FROM orders')) {
+      if (sql.includes('SELECT listing_id, quantity, ebay_account_id FROM orders')) {
         return Promise.resolve([{ listing_id: opts.row?.listing_id ?? null, quantity: opts.quantity ?? 1 }]);
       }
       if (sql.includes('FROM amazon_accounts')) {

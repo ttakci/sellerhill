@@ -85,7 +85,11 @@ export const ListingDetailPageContainer: React.FC = () => {
   );
 
   const { data: listingSettingsGroups = [] } = useGetListingSettingsGroupsQuery();
-  const { data: policiesMap = [] } = useGetBusinessPoliciesQuery();
+  // The listing's own store's policies (ids are per store); a legacy row with
+  // no store gets the API's deterministic default.
+  const { data: policiesMap = [] } = useGetBusinessPoliciesQuery(listing?.ebayAccountId ?? undefined, {
+    skip: !listing,
+  });
 
   const [updateListing, { isLoading: isSaving }] = useUpdateListingMutation();
   const [endListings, { isLoading: isEnding }] = useEndListingsMutation();
