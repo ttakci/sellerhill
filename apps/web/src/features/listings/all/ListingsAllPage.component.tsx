@@ -1,5 +1,6 @@
 import type { ListingDto } from '@repo/shared';
 import {
+  Badge,
   Button,
   DataTable,
   EmptyState,
@@ -49,6 +50,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   onTrackingStateChange,
   trackingOptions,
   numericFilters,
+  activeFilterChips,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -195,6 +197,28 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
               </S.FilterActions>
             </S.FilterBarRow>
 
+            {activeFilterChips.length > 0 && (
+              <S.ChipRow>
+                {activeFilterChips.map((chip) => (
+                  <Badge key={chip.key} variant="primary" size="md">
+                    <S.ChipInner>
+                      <Text variant="body-sm" weight="semibold" color="brand.primary">
+                        {chip.label}
+                      </Text>
+                      <S.ChipRemove
+                        type="button"
+                        variant="ghost"
+                        onClick={chip.onRemove}
+                        aria-label={t('listings.filters.removeFilter', { label: chip.label })}
+                      >
+                        <Icon name="x" size={14} color="brand.primary" />
+                      </S.ChipRemove>
+                    </S.ChipInner>
+                  </Badge>
+                ))}
+              </S.ChipRow>
+            )}
+
             <S.AdvancedDivider />
             <S.AdvancedHeaderRow>
               <Button variant="text" size="small" onClick={onToggleAdvanced}>
@@ -249,7 +273,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
       )}
 
       <DataTable
-        gridMinItemWidth="24rem"
+        gridMinItemWidth="27rem"
         gridMaxColumns={2}
         columns={columns}
         data={listings}

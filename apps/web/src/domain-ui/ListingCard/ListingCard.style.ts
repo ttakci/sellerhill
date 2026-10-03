@@ -88,8 +88,8 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
   ${({ $orientation }) =>
     $orientation === 'horizontal'
       ? `
-        width: 6.5rem;
-        height: 6.5rem;
+        width: 9rem;
+        height: 9rem;
       `
       : `
         width: 100%;
@@ -110,8 +110,8 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
     ${({ $orientation }) =>
       $orientation === 'horizontal'
         ? `
-        width: 5rem;
-        height: 5rem;
+        width: 7rem;
+        height: 7rem;
       `
         : `
         height: 9rem;
@@ -195,14 +195,30 @@ export const MetaValueText = styled(Text)`
   white-space: nowrap;
 `;
 
-/** Price · profit · ROI · stock, under one hairline. */
+/** Price · profit · ROI · stock (and the detail hint), under one hairline. */
+export const Footer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
+  flex-shrink: 0;
+`;
+
 export const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.glass.tint')};
+  flex: 1;
+  min-width: 0;
+`;
+
+/** Tells the seller the whole card opens the detail page. */
+export const DetailHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
   flex-shrink: 0;
 `;
 

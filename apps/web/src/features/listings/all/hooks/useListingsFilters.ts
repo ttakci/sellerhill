@@ -384,6 +384,75 @@ export function useListingsFilters() {
     [filters, t, handleRangeChange]
   );
 
+  /**
+   * One removable chip per filter that is actually narrowing the list, so the
+   * seller can see (and drop) what is applied without opening the advanced
+   * section. Search stays in its own box; the default Active status and the
+   * dedicated draft view are not "filters".
+   */
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: string; label: string; onRemove: () => void }[] = [];
+
+    if (filters.category) {
+      chips.push({
+        key: 'category',
+        label: filters.category,
+        onRemove: () => handleCategoryChange(''),
+      });
+    }
+
+    if (String(filters.status) === String(ListingStatus.INACTIVE)) {
+      chips.push({
+        key: 'status',
+        label: t('listings.status.inactive'),
+        onRemove: () => handleStatusChange(''),
+      });
+    }
+
+    if (filters.trackingState) {
+      const option = trackingOptions.find((o) => String(o.value) === filters.trackingState);
+      chips.push({
+        key: 'tracking',
+        label: option ? option.label : filters.trackingState,
+        onRemove: () => handleTrackingStateChange(''),
+      });
+    }
+
+    numericFilters.forEach((field) => {
+      const { min, max } = field;
+      if (min === '' && max === '') {
+        return;
+      }
+      let range = `≤ ${max}`;
+      if (min !== '' && max !== '') {
+        range = `${min} – ${max}`;
+      } else if (min !== '') {
+        range = `≥ ${min}`;
+      }
+      const keys = RANGE_QUERY_KEYS[field.key as RangeKey];
+      chips.push({
+        key: field.key,
+        label: `${field.label} ${range}`,
+        onRemove: () =>
+          patchParams((next) => {
+            next.delete(String(keys.min));
+            next.delete(String(keys.max));
+          }, true),
+      });
+    });
+
+    return chips;
+  }, [
+    filters,
+    t,
+    trackingOptions,
+    numericFilters,
+    handleCategoryChange,
+    handleStatusChange,
+    handleTrackingStateChange,
+    patchParams,
+  ]);
+
   /** Local display filters with live search input (not yet debounced into URL). */
   const displayFilters: ListingsFilterState = useMemo(
     () => ({
@@ -414,6 +483,7 @@ export function useListingsFilters() {
     statusOptions,
     trackingOptions,
     numericFilters,
+    activeFilterChips,
     fromDashboard,
     hasSoldPeriod,
   };

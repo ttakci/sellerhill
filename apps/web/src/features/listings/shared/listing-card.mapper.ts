@@ -1,4 +1,4 @@
-import { ListingStatus, type ListingDto } from '@repo/shared';
+import { formatSourceStock, ListingStatus, type ListingDto } from '@repo/shared';
 import { formatCurrency } from '@repo/ui';
 import type { TFunction } from 'i18next';
 
@@ -86,10 +86,16 @@ export const toListingCardProps = (
         tone: roi >= 0 ? 'positive' : 'negative',
       },
       {
-        label: t('listings.table.stock'),
+        label: t('listings.table.stockEbayAmazon'),
         value: String(listing.quantity),
         tone: listing.quantity === 0 ? 'negative' : 'default',
+        // Amazon's own stock beside the eBay quantity; `20+` stays a lower bound.
+        secondary:
+          listing.sourceStock === null || listing.sourceStock === undefined
+            ? undefined
+            : `(${formatSourceStock(listing.sourceStock, listing.sourceStockStatus)})`,
       },
     ],
+    detailLabel: t('translation:common.details'),
   };
 };

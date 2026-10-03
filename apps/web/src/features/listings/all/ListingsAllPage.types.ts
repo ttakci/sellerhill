@@ -51,6 +51,8 @@ export interface ListingsAllPageProps {
      *  Amazon stock range treats an "at least" value as its lower bound. */
     note?: string;
   }[];
+  /** Removable chips for every filter currently narrowing the list. */
+  activeFilterChips: { key: string; label: string; onRemove: () => void }[];
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;

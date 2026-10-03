@@ -62,6 +62,7 @@ export const ListingsAllPage: React.FC = () => {
     statusOptions,
     trackingOptions,
     numericFilters,
+    activeFilterChips,
     fromDashboard,
   } = useListingsFilters();
 
@@ -435,6 +436,7 @@ export const ListingsAllPage: React.FC = () => {
         onTrackingStateChange={handleTrackingStateChange}
         trackingOptions={trackingOptions}
         numericFilters={numericFilters}
+        activeFilterChips={activeFilterChips}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={total}
