@@ -30,10 +30,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   datePreset,
   onDatePresetChange,
   datePresetOptions,
-  storeFilter,
-  onStoreFilterChange,
-  storeOptions,
-  showStoreFilter,
   jobStoreLabel,
   hasActiveFilters,
   onClearFilters,
@@ -201,18 +197,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   fullWidth
                 />
               </S.SelectWrapper>
-              {showStoreFilter && (
-                <S.SelectWrapper>
-                  <Select
-                    value={storeFilter}
-                    onChange={onStoreFilterChange}
-                    options={storeOptions}
-                    placeholder={t('listings.filters.allStores')}
-                    size="small"
-                    fullWidth
-                  />
-                </S.SelectWrapper>
-              )}
               <S.FilterActions>
                 <S.ResultCount variant="caption" weight="medium" color="text.secondary">
                   {t('listings.jobs.filters.resultCount', { count: pagination.count })}

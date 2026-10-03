@@ -49,8 +49,6 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   statusOptions,
   onTrackingStateChange,
   trackingOptions,
-  onEbayAccountChange,
-  storeOptions,
   numericFilters,
   onClearFilters,
   hasActiveFilters,
@@ -182,16 +180,6 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   onChange={onTrackingStateChange}
                   options={trackingOptions}
                   placeholder={t('listings.filters.allTrackingStates')}
-                  size="small"
-                  fullWidth
-                />
-              </S.SelectWrapper>
-              <S.SelectWrapper>
-                <Select
-                  value={filters.ebayAccountId}
-                  onChange={onEbayAccountChange}
-                  options={storeOptions}
-                  placeholder={t('listings.filters.allStores')}
                   size="small"
                   fullWidth
                 />

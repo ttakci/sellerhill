@@ -5,6 +5,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import type { ListingsFilterState } from '../../shared/listings-filter.types';
 
+import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
+
 export const DEFAULT_LISTINGS_FILTERS: ListingsFilterState = {
   search: '',
   category: '',
@@ -69,6 +71,7 @@ const parseNum = (v: string): number | undefined => {
 export function useListingsFilters() {
   const { t } = useTranslation(['listings', 'translation']);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { activeStoreId } = useActiveStore();
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Local search input (immediate) → debounced into URL
@@ -100,7 +103,8 @@ export function useListingsFilters() {
         searchParams.get('status') ??
         (searchParams.get('tracking') === 'untracked' || hasSoldPeriod ? '' : ListingStatus.ACTIVE),
       trackingState: searchParams.get('tracking') ?? '',
-      ebayAccountId: searchParams.get('store') ?? '',
+      // The top bar's active store — not a filter this page owns.
+      ebayAccountId: activeStoreId ?? '',
       price: readRange(searchParams, 'price'),
       purchasePrice: readRange(searchParams, 'purchasePrice'),
       estimatedProfit: readRange(searchParams, 'estimatedProfit'),
@@ -110,7 +114,7 @@ export function useListingsFilters() {
       quantity: readRange(searchParams, 'quantity'),
       sourceStock: readRange(searchParams, 'sourceStock'),
     }),
-    [searchParams, hasSoldPeriod]
+    [searchParams, hasSoldPeriod, activeStoreId]
   );
 
   // Keep local search box in sync when URL is cleared externally
@@ -233,20 +237,6 @@ export function useListingsFilters() {
     [patchParams]
   );
 
-  const handleEbayAccountChange = useCallback(
-    (value: string | number) => {
-      patchParams((next) => {
-        const v = String(value);
-        if (v) {
-          next.set('store', v);
-        } else {
-          next.delete('store');
-        }
-      }, true);
-    },
-    [patchParams]
-  );
-
   const handleRangeChange = useCallback(
     (field: RangeKey, bound: 'min' | 'max') => (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
@@ -264,8 +254,12 @@ export function useListingsFilters() {
 
   const handleClearFilters = useCallback(() => {
     setSearchInput('');
-    // Preserve draft-only view when clearing other filters
+    // Preserve draft-only view when clearing other filters; the store is the
+    // top bar's choice and is never cleared here.
     const next = new URLSearchParams();
+    if (activeStoreId) {
+      next.set('store', activeStoreId);
+    }
     if (String(filters.status) === String(ListingStatus.DRAFT)) {
       next.set('status', ListingStatus.DRAFT);
     }
@@ -280,7 +274,7 @@ export function useListingsFilters() {
       next.set('from', 'dashboard');
     }
     setSearchParams(next, { replace: true });
-  }, [setSearchParams, filters.status, soldFrom, soldTo, fromDashboard]);
+  }, [setSearchParams, filters.status, soldFrom, soldTo, fromDashboard, activeStoreId]);
 
   const hasActiveFilters = useMemo(() => {
     // Active is the default — not "active filter" for clear button
@@ -291,7 +285,7 @@ export function useListingsFilters() {
       String(filters.status) !== String(ListingStatus.ACTIVE) &&
       !isDraftView &&
       !hasSoldPeriod;
-    if (filters.search || filters.category || nonDefaultStatus || filters.trackingState || filters.ebayAccountId) {
+    if (filters.search || filters.category || nonDefaultStatus || filters.trackingState) {
       return true;
     }
     return RANGE_KEYS.some((k) => filters[k].min !== '' || filters[k].max !== '');
@@ -415,7 +409,6 @@ export function useListingsFilters() {
     handleCategoryChange,
     handleStatusChange,
     handleTrackingStateChange,
-    handleEbayAccountChange,
     handleClearFilters,
     hasActiveFilters,
     statusOptions,

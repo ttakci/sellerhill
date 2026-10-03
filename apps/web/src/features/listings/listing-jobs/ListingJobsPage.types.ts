@@ -16,12 +16,6 @@ export interface ListingJobsPageComponentProps {
   datePreset: ListingJobDatePreset;
   onDatePresetChange: (value: string | number) => void;
   datePresetOptions: Array<{ value: ListingJobDatePreset; label: string }>;
-  /** eBay account id from `?store=`, or '' for all stores. */
-  storeFilter: string;
-  onStoreFilterChange: (value: string | number) => void;
-  storeOptions: Array<{ value: string; label: string }>;
-  /** Only with more than one connected store — a one-option filter is noise. */
-  showStoreFilter: boolean;
   /** The store a job ran against — null with a single connected store. */
   jobStoreLabel: (job: ListingJobDto) => string | null;
   hasActiveFilters: boolean;

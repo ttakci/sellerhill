@@ -42,8 +42,6 @@ export interface ListingsAllPageProps {
   statusOptions: { value: string | number; label: string }[];
   onTrackingStateChange: (value: string | number) => void;
   trackingOptions: { value: string | number; label: string }[];
-  onEbayAccountChange: (value: string | number) => void;
-  storeOptions: { value: string | number; label: string }[];
   numericFilters: {
     key: string;
     label: string;

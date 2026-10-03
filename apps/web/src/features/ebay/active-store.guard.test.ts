@@ -19,6 +19,11 @@ const PAGES: Array<[string[], string]> = [
   [['features/orders/all/hooks/useOrdersFilters.ts', 'features/orders/all/OrdersAllPage.container.tsx'], 'features/orders/all/hooks/useOrdersFilters.ts'],
   [['features/returns/ReturnsPage/hooks/useReturnsUrlState.ts', 'features/returns/ReturnsPage/ReturnsPage.container.tsx'], 'features/returns/ReturnsPage/hooks/useReturnsUrlState.ts'],
   [['features/messages/hooks/useMessagesUrlState.ts', 'features/messages/MessagesPage/MessagesPage.container.tsx'], 'features/messages/hooks/useMessagesUrlState.ts'],
+  [['features/listings/overview/ListingsOverviewPage.container.tsx'], 'features/listings/overview/ListingsOverviewPage.container.tsx'],
+  [['features/listings/all/hooks/useListingsFilters.ts', 'features/listings/all/ListingsAllPage.container.tsx'], 'features/listings/all/hooks/useListingsFilters.ts'],
+  [['features/listings/listing-jobs/ListingJobsPage.container.tsx'], 'features/listings/listing-jobs/ListingJobsPage.container.tsx'],
+  [['features/listings/products/ProductsPage.container.tsx'], 'features/listings/products/ProductsPage.container.tsx'],
+  [['features/listings/revision-history/RevisionHistoryPage.container.tsx'], 'features/listings/revision-history/RevisionHistoryPage.container.tsx'],
 ];
 
 describe('store-scoped pages follow the active store', () => {
