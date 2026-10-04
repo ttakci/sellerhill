@@ -110,6 +110,51 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 100,
   }),
+  // --- Billing-activity capture (Finances API, 15,000 calls/day app-wide) ---
+  // On by default: it only ever reads stores whose consent granted
+  // sell.finances, and no consent asks for it until the switch above is on.
+  def({
+    key: PlatformSettingKey.EBAY_BILLING_SYNC_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_BILLING_SYNC_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BILLING_SYNC_CRON,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.STRING,
+    envVar: 'EBAY_BILLING_SYNC_CRON',
+    defaultValue: '*/10 * * * *',
+    requiresRestart: true,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BILLING_SYNC_INTERVAL_HOURS,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BILLING_SYNC_INTERVAL_HOURS',
+    defaultValue: '4',
+    min: 1,
+    max: 48,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BILLING_SYNC_MAX_ACCOUNTS_PER_RUN,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BILLING_SYNC_MAX_ACCOUNTS_PER_RUN',
+    defaultValue: '10',
+    min: 1,
+    max: 100,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BILLING_SYNC_WINDOW_DAYS,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BILLING_SYNC_WINDOW_DAYS',
+    defaultValue: '30',
+    min: 1,
+    max: 120,
+  }),
   // --- Periodic return sweep (Post-Order API, 5,000 calls/day app-wide) ---
   def({
     key: PlatformSettingKey.EBAY_RETURN_SYNC_ENABLED,

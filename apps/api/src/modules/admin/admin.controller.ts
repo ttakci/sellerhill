@@ -144,6 +144,7 @@ export class AdminController {
     @InjectQueue('billing-price-migration') private readonly billingPriceMigrationQueue: Queue,
     @InjectQueue('ebay-rate-limit-refresh') private readonly ebayRateLimitRefreshQueue: Queue,
     @InjectQueue('ebay-returns-sync') private readonly ebayReturnsSyncQueue: Queue,
+    @InjectQueue('ebay-billing-sync') private readonly ebayBillingSyncQueue: Queue,
     @InjectQueue('listing-cleanup') private readonly listingCleanupQueue: Queue,
     @InjectQueue('best-sellers-crawl') private readonly bestSellersCrawlQueue: Queue,
   ) {}
@@ -166,6 +167,7 @@ export class AdminController {
       { name: 'billing-price-migration', queue: this.billingPriceMigrationQueue },
       { name: 'ebay-rate-limit-refresh', queue: this.ebayRateLimitRefreshQueue },
       { name: 'ebay-returns-sync', queue: this.ebayReturnsSyncQueue },
+      { name: 'ebay-billing-sync', queue: this.ebayBillingSyncQueue },
       { name: 'listing-cleanup', queue: this.listingCleanupQueue },
       { name: 'best-sellers-crawl', queue: this.bestSellersCrawlQueue },
     ];
