@@ -46,12 +46,11 @@ export const toListingCardProps = (
     });
   }
 
-  if (typeof listing.soldCount === 'number' && listing.soldCount > 0) {
-    meta.push({
-      label: t('listings.table.sold'),
-      value: String(listing.soldCount),
-    });
-  }
+  // Always shown: a listing that has not sold yet reads 0, not a missing row.
+  meta.push({
+    label: t('listings.table.sold'),
+    value: String(listing.soldCount ?? 0),
+  });
 
   // Amazon's own stock beside the eBay quantity; `20+` stays a lower bound.
   const amazonStock =
@@ -61,21 +60,18 @@ export const toListingCardProps = (
   meta.push({
     label: t('listings.table.stockEbayAmazon'),
     value: `${listing.quantity} / ${amazonStock}`,
-    column: 'secondary',
   });
 
   const dateOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
   meta.push({
     label: t('listings.table.createdAt'),
     value: formatDate(listing.createdAt, locale, dateOptions),
-    column: 'secondary',
   });
   // The last time the Amazon source was read — a check counts even when nothing changed.
   if (listing.lastSyncedAt) {
     meta.push({
       label: t('listings.table.lastSynced'),
       value: formatDate(listing.lastSyncedAt, locale, { ...dateOptions, hour: '2-digit', minute: '2-digit' }),
-      column: 'secondary',
     });
   }
 
