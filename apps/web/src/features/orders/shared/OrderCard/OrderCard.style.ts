@@ -88,6 +88,11 @@ export const Body = styled.div`
   gap: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
+
+  /* A phone leaves no room for photo + facts side by side: stack them, photo first (as the listing card). */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    display: contents;
+  }
 `;
 
 export const Image = styled.div`
@@ -97,8 +102,8 @@ export const Image = styled.div`
   overflow: hidden;
   flex-shrink: 0;
   background: transparent;
-  width: 6.5rem;
-  height: 6.5rem;
+  width: 9rem;
+  height: 9rem;
 
   img {
     width: 100%;
@@ -111,8 +116,9 @@ export const Image = styled.div`
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 5rem;
-    height: 5rem;
+    order: -1;
+    width: 100%;
+    height: 10rem;
   }
 `;
 
@@ -122,6 +128,12 @@ export const Content = styled.div`
   gap: ${tkn('spacing.sm')};
   min-width: 0;
   flex: 1;
+  /* Breathing room from the photo, like the listing card. */
+  padding-inline-start: ${tkn('spacing.md')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding-inline-start: 0;
+  }
 `;
 
 /** One line, ellipsis — the full title is on the tooltip. */
@@ -171,6 +183,11 @@ export const MetaValue = styled.dd`
     max-width: 100%;
     overflow: hidden;
   }
+
+  /* Every value reads bold, including the ASIN / eBay ID badges (as on the listing card). */
+  && * {
+    font-weight: ${tkn('typography.fontWeight.bold')};
+  }
 `;
 
 /** Sale · cost · profit, under one hairline. */
@@ -181,6 +198,15 @@ export const MoneyRow = styled.div`
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   background: ${tkn('colors.glass.tint')};
+`;
+
+/** Tells the seller the whole card opens the order. */
+export const DetailHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-self: end;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StatCell = styled.div`

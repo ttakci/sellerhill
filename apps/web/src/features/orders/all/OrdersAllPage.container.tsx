@@ -52,6 +52,9 @@ export const OrdersAllPageContainer: React.FC = () => {
     handleFlagChange,
     handleClearFilters,
     hasActiveFilters,
+    sortOptions,
+    sort,
+    handleSortChange,
     serverQuery,
     fromDashboard,
   } = useOrdersFilters();
@@ -229,6 +232,9 @@ export const OrdersAllPageContainer: React.FC = () => {
         flagOptions={flagOptions}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
+        sortOptions={sortOptions}
+        sortValue={sort || 'order_date:desc'}
+        onSortChange={handleSortChange}
         resultCount={totalCount}
         isInitialLoading={isLoading || isFetching}
         formatCurrency={fmtCurrency}

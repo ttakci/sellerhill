@@ -15,6 +15,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   statsBadges,
   meta,
   stats,
+  detailLabel,
   onClick,
   className,
   hoverEffect = true,
@@ -35,7 +36,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         <S.BadgeRow>
           <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
           {statsBadges?.map((badge) => (
-            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
+            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm">
               {badge.label}
             </Badge>
           ))}
@@ -83,6 +84,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </S.StatValue>
         </S.StatCell>
       ))}
+      {detailLabel && onClick ? (
+        <S.DetailHint>
+          <Text variant="caption" weight="semibold" color="brand.primary">
+            {detailLabel}
+          </Text>
+          <Icon name="chevron-right" size={16} color="brand.primary" />
+        </S.DetailHint>
+      ) : null}
     </S.MoneyRow>
   </S.Wrapper>
 );

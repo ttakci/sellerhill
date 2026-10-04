@@ -3,17 +3,14 @@ import {
   Button,
   DataTable,
   EmptyState,
-  Icon,
-  IconButton,
   PageHeader,
   SearchField,
   Select,
   TabNav,
   Text,
-  ViewToggle,
 } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { toOrderCardProps } from '../shared/order-card.mapper';
 import { OrderCard } from '../shared/OrderCard';
@@ -44,6 +41,9 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   flagOptions,
   onClearFilters,
   hasActiveFilters,
+  sortOptions,
+  sortValue,
+  onSortChange,
   resultCount,
   isInitialLoading,
   formatCurrency,
@@ -53,7 +53,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   onBack,
   onDownload,
 }) => {
-  const { t } = useTranslation(['orders', 'translation']);
+  const { t } = useTranslation(['orders', 'listings', 'translation']);
 
   const renderGridCard = (order: OrderDto) => {
     const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay);
@@ -135,10 +135,6 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
                 <Text variant="body-sm">{t('orders.filters.clearAll')}</Text>
               </Button>
             )}
-            <ViewToggle viewMode={tableView} onViewModeChange={onTableViewChange} />
-            <IconButton variant="ghost" onClick={onDownload} title={t('orders.actions.export')}>
-              <Icon name="download" size={20} />
-            </IconButton>
           </S.FilterActions>
         </S.FilterRow>
       </S.Toolbar>
@@ -151,7 +147,19 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         renderGridCard={renderGridCard}
         viewMode={tableView}
         onViewModeChange={onTableViewChange}
-        hideViewToggle
+        onDownload={onDownload}
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        sortLabel={t('listings:listings.filters.sortLabel')}
+        resultLabel={
+          <Trans
+            i18nKey="listings.filters.resultListed"
+            ns="listings"
+            values={{ count: resultCount }}
+            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          />
+        }
         emptyContent={
           hasActiveFilters ? (
             <EmptyState

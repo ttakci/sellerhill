@@ -76,17 +76,6 @@ export function useOrdersColumns(
               title={order.product?.title || t('translation:common.unknownProduct')}
               imageUrl={order.product?.imageUrl}
               meta={meta}
-              subtitle={
-                // No matched listing — price/stock/auto-fulfill/tracking never
-                // run for this order, and cost_capture_status stays 'untracked'
-                // forever. Independent of the stage badge, which only describes
-                // automation on an order we already recognize.
-                !order.isTracked ? (
-                  <Badge variant="neutral" size="xs">
-                    {t('orders.tracking.untracked')}
-                  </Badge>
-                ) : undefined
-              }
             />
           );
         },
@@ -130,7 +119,7 @@ export function useOrdersColumns(
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
               {flags.map((flag) => (
-                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="xs">
+                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="sm">
                   {flag.label}
                 </Badge>
               ))}
@@ -194,7 +183,7 @@ export function useOrdersColumns(
                 {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
               {order.profitBasis === ProfitBasis.ESTIMATED ? (
-                <Badge variant="warning" size="xs">
+                <Badge variant="warning" size="sm">
                   {t('orders.estimateBadge')}
                 </Badge>
               ) : margin ? (

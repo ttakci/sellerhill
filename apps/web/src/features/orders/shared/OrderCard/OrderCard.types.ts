@@ -37,6 +37,8 @@ export interface OrderCardProps {
   statsBadges?: OrderCardStatBadge[];
   /** Labeled rows under title (order #, buyer, qty, ASIN, …) */
   meta: OrderCardMetaItem[];
+  /** Hint at the end of the figures row that the whole card opens the order. */
+  detailLabel?: string;
   /** Bottom strip: sale / cost / profit (or similar) */
   stats: OrderCardStat[];
   onClick?: () => void;

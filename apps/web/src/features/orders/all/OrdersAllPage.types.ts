@@ -38,6 +38,9 @@ export interface OrdersAllPageProps {
   // only made every render of this page a type error.
   onClearFilters: () => void;
   hasActiveFilters: boolean;
+  sortOptions: { value: string; label: string }[];
+  sortValue: string;
+  onSortChange: (value: string | number) => void;
   resultCount: number;
   isInitialLoading?: boolean;
   /** Formats money in the order's OWN store currency (`ebayAccountId`), never a page-wide one. */
