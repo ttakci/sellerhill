@@ -47,9 +47,31 @@ export function orderStagePresentation(
  * could be tests. The stage itself stays — a dry-run row must never look
  * purchased — it is just not something to filter by or explain.
  */
-export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = ORDER_STAGE_ORDER.filter(
-  (stage) => stage !== OrderStage.TEST_RUN
-);
+/**
+ * Listed in the order a sale travels (payment → buy → ship → deliver), then the
+ * two endings that stop it — NOT in the priority order the stage is derived in
+ * (`ORDER_STAGE_ORDER`, first match wins). The legend and the Status select
+ * read as the order's journey.
+ */
+const STAGES_IN_JOURNEY_ORDER: readonly OrderStage[] = [
+  OrderStage.AWAITING_PAYMENT,
+  OrderStage.TO_PURCHASE,
+  OrderStage.BUYING,
+  OrderStage.PURCHASE_BLOCKED,
+  OrderStage.PURCHASE_UNKNOWN,
+  OrderStage.PURCHASED,
+  OrderStage.TRACKING_HELD,
+  OrderStage.SHIPPED,
+  OrderStage.DELIVERED,
+  OrderStage.AMAZON_CANCELLED,
+  OrderStage.CANCELLED,
+];
+
+export const SELLER_VISIBLE_ORDER_STAGES: readonly OrderStage[] = [
+  ...STAGES_IN_JOURNEY_ORDER,
+  // Any stage added to the model later still shows up (at the end) until it is placed above.
+  ...ORDER_STAGE_ORDER.filter((stage) => stage !== OrderStage.TEST_RUN && !STAGES_IN_JOURNEY_ORDER.includes(stage)),
+];
 
 const STAGES_WITH_ACTION: readonly OrderStage[] = [...ACTIONABLE_ORDER_STAGES, OrderStage.TO_PURCHASE];
 
