@@ -176,6 +176,16 @@ describe('ad rate in the price (spec B5)', () => {
     const result = calculateListingPrice(10, strategy, { ebayFeePercent: 60, fixedFeeAmount: 0 } as FeeConfig, 0, 40);
     expect(Number.isFinite(result.finalPrice)).toBe(true);
     expect(result.finalPrice).toBeGreaterThan(0);
+    // The guard's own fallback: netTarget * 1.5 (no division by a non-positive divisor).
+    expect(result.finalPrice).toBeCloseTo(result.breakdown.netTarget * 1.5, 2);
+  });
+
+  it('the price-ending profit term deducts the ad rate too (x0.82, not x0.87)', () => {
+    const rounding = { ebayFeePercent: 13, fixedFeeAmount: 0.3, priceRoundingEnabled: true, priceEndingCents: 99 } as FeeConfig;
+    const base = calculateListingPrice(10, strategy, fees, 0, 5).estimatedProfit;
+    const rounded = calculateListingPrice(10, strategy, rounding, 0, 5);
+    expect(rounded.breakdown.roundingAmount).toBeGreaterThan(0.9);
+    expect(rounded.estimatedProfit).toBeCloseTo(base + rounded.breakdown.roundingAmount * 0.82, 2);
   });
 
   it('no ad rate is the old formula exactly', () => {
