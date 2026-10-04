@@ -12,8 +12,6 @@ export interface AppLayoutProps {
   pathWithoutLocale: string;
   /** The route fits the viewport and scrolls inside its own panes (see `AppRouteMeta.fitsViewport`). */
   fitsViewport: boolean;
-  /** True when the current route is the dedicated drafts view (`/listings/all?status=draft`). */
-  isDraftsActive: boolean;
   userName: string;
   loadingIsLoading: boolean;
   breadcrumbItems: BreadcrumbItem[];

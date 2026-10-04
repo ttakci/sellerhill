@@ -301,6 +301,9 @@ export interface ListingsQueryDto {
    */
   soldFrom?: string;
   soldTo?: string;
+  /** Listings created in [createdFrom, createdTo] (ISO dates, createdTo inclusive). */
+  createdFrom?: string;
+  createdTo?: string;
   /**
    * Active listings whose source product is quarantined
    * (`products.consecutive_failures >= LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD`).

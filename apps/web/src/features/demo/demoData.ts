@@ -913,6 +913,12 @@ function buildOrders(): OrderDto[] {
       autoFulfillStatus = AutoFulfillStatus.BLOCKED;
       autoFulfillBlockedReason = i === 7 ? AutoFulfillBlockedReason.CAP : AutoFulfillBlockedReason.OUT_OF_STOCK;
       status = OrderStatus.PENDING;
+    } else if (i === 11 || i === 16 || i === 26) {
+      // Sales of items that are not one of the seller's listings: SellerHill
+      // does not follow them, so they carry no stage — only the "not tracked" chip.
+      costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = i === 11 ? OrderStatus.SHIPPED : OrderStatus.WAITING_SHIPMENT;
     } else if (i % 9 === 5) {
       costCaptureStatus = OrderCostCaptureStatus.PENDING;
       fulfillmentState = OrderFulfillmentState.IN_PROGRESS;
@@ -923,10 +929,6 @@ function buildOrders(): OrderDto[] {
       fulfillmentState = OrderFulfillmentState.PURCHASED;
       autoFulfillStatus = AutoFulfillStatus.PLACED;
       status = OrderStatus.WAITING_SHIPMENT;
-    } else if (i === 11) {
-      costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
-      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
-      status = OrderStatus.SHIPPED;
     } else if (i === 13 || i === 17) {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
       fulfillmentState = OrderFulfillmentState.PURCHASED;
@@ -1014,8 +1016,12 @@ function buildOrders(): OrderDto[] {
     // Only the last week's sales carry one — like a real store, whose older
     // orders were read before the date was stored — so the sample is not a
     // wall of late orders.
+    // Order 7 is the showcase for a card with every chip at once (stage, late,
+    // refund, estimated, blocked reason): its ship-by date has already passed.
     const shipByDate =
-      recent || daysAgo <= DEMO_HANDLING_DAYS + 1
+      i === 7
+        ? new Date(Date.now() - 2 * 86_400_000).toISOString()
+        : recent || daysAgo <= DEMO_HANDLING_DAYS + 1
         ? new Date(new Date(createdAt).getTime() + DEMO_HANDLING_DAYS * 86_400_000).toISOString()
         : null;
     // One sale the seller partly refunded, and two carrying the seller's own note.

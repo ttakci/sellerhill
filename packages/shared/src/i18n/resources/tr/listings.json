@@ -140,6 +140,10 @@
       "min": "Min",
       "max": "Maks",
       "sourceStockNote": "20 üstü stok bilinmez; \"20+\" ürünler 20 sayılır.",
+      "resultListed": "<b>{{count}}</b> sonuç listelendi",
+      "sortLabel": "Sırala:",
+      "listedFrom": "Listeleme tarihi – başlangıç",
+      "listedTo": "Listeleme tarihi – bitiş",
       "fields": {
         "price": "Satış Fiyatı",
         "purchasePrice": "Alış Fiyatı",

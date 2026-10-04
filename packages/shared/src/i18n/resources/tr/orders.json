@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Tüm durumlar",
       "allStores": "Tüm mağazalar",
-      "allTrackingStates": "Bağlı ve bağlı olmayan",
+      "allTrackingStates": "Tümü",
       "clearAll": "Temizle",
       "resultCount": "{{count}} sonuç",
       "allStages": "Tüm durumlar",

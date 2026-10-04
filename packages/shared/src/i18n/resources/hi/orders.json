@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "सभी स्टेटस",
       "allStores": "सभी स्टोर",
-      "allTrackingStates": "लिंक और बिना लिंक",
+      "allTrackingStates": "सभी",
       "clearAll": "सभी हटाएँ",
       "resultCount": "{{count}} परिणाम",
       "allStages": "सभी स्टेटस",

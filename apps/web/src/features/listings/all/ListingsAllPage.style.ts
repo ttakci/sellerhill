@@ -198,6 +198,11 @@ export const CompactText = styled.div`
   white-space: nowrap;
 `;
 
+/** Category name: fills its (wider) column; the full path is on the tooltip. */
+export const CategoryText = styled(CompactText)`
+  max-width: 100%;
+`;
+
 /** Numeric / date cells — keep secondary columns tight */
 export const CompactMetric = styled.div`
   white-space: nowrap;

@@ -1,5 +1,5 @@
 import { formatSourceStock, type ListingDto } from '@repo/shared';
-import { formatCurrency as formatCurrencyValue, type TableColumn } from '@repo/ui';
+import { formatCurrency as formatCurrencyValue, type TableColumn, Tooltip } from '@repo/ui';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -74,10 +74,14 @@ export function useListingsColumns(locale: string) {
         key: 'category',
         sortable: true,
         header: t('listings.table.category'),
-        width: '7rem',
+        width: '11rem',
         render: (category) => {
           const str = String(category ?? '');
-          return <S.CompactText title={str}>{str || '—'}</S.CompactText>;
+          return (
+            <Tooltip content={str || '—'} position="top" variant="dark">
+              <S.CategoryText>{str || '—'}</S.CategoryText>
+            </Tooltip>
+          );
         },
       },
       {
@@ -92,24 +96,6 @@ export function useListingsColumns(locale: string) {
               {formatCurrency(listing.price, listing)}
             </S.MetricValue>
           </S.CompactMetric>
-        ),
-      },
-      {
-        key: 'createdAt',
-        sortable: true,
-        header: t('listings.table.added'),
-        width: '5.75rem',
-        render: (_value, listing) => (
-          <S.CompactText>{listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—'}</S.CompactText>
-        ),
-      },
-      {
-        key: 'lastSale',
-        sortable: true,
-        header: t('listings.table.lastSale'),
-        width: '5.75rem',
-        render: (_value, listing) => (
-          <S.CompactText>{listing.lastSaleAt ? new Date(listing.lastSaleAt).toLocaleDateString() : '—'}</S.CompactText>
         ),
       },
       {
@@ -146,7 +132,7 @@ export function useListingsColumns(locale: string) {
         key: 'roi',
         sortable: true,
         header: t('listings.table.roi'),
-        width: '4.5rem',
+        width: '5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
@@ -165,7 +151,7 @@ export function useListingsColumns(locale: string) {
         key: 'profitMargin',
         sortable: true,
         header: t('listings.table.profitMargin'),
-        width: '4.5rem',
+        width: '5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
@@ -174,11 +160,29 @@ export function useListingsColumns(locale: string) {
         ),
       },
       {
+        key: 'createdAt',
+        sortable: true,
+        header: t('listings.table.added'),
+        width: '7rem',
+        render: (_value, listing) => (
+          <S.CompactText>{listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—'}</S.CompactText>
+        ),
+      },
+      {
+        key: 'lastSale',
+        sortable: true,
+        header: t('listings.table.lastSale'),
+        width: '7rem',
+        render: (_value, listing) => (
+          <S.CompactText>{listing.lastSaleAt ? new Date(listing.lastSaleAt).toLocaleDateString() : '—'}</S.CompactText>
+        ),
+      },
+      {
         key: 'sold',
         sortable: true,
         header: t('listings.table.sold'),
         align: 'right',
-        width: '4.25rem',
+        width: '6rem',
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
             {listing.soldCount || 0}
@@ -189,7 +193,7 @@ export function useListingsColumns(locale: string) {
         key: 'quantity',
         sortable: true,
         header: t('listings.table.stock'),
-        width: '3.75rem',
+        width: '5.5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
@@ -199,7 +203,7 @@ export function useListingsColumns(locale: string) {
         key: 'sourceStock',
         sortable: true,
         header: t('listings.table.amazonStock'),
-        width: '4.25rem',
+        width: '6rem',
         align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.sourceStock === 0}>

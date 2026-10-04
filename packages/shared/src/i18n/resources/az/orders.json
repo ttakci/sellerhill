@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Bütün statuslar",
       "allStores": "Bütün mağazalar",
-      "allTrackingStates": "Bağlı və bağlı olmayan",
+      "allTrackingStates": "Hamısı",
       "clearAll": "Hamısını təmizlə",
       "resultCount": "{{count}} nəticə",
       "allStages": "Bütün statuslar",

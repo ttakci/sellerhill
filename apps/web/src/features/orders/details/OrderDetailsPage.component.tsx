@@ -258,7 +258,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 {t('orders.detail.netProfitResult')}
               </Text>
               {isEstimated && (
-                <Badge variant="warning" size="xs">
+                <Badge variant="warning" size="sm" solid>
                   {t('orders.estimateBadge')}
                 </Badge>
               )}

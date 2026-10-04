@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "تمام سٹیٹس",
       "allStores": "تمام سٹورز",
-      "allTrackingStates": "لنک شدہ اور غیر لنک شدہ",
+      "allTrackingStates": "سب",
       "clearAll": "سب صاف کریں",
       "resultCount": "{{count}} نتائج",
       "allStages": "تمام اسٹیٹس",

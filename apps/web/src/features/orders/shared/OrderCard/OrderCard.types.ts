@@ -31,12 +31,18 @@ export interface OrderCardProps {
   ebayOrderId: string;
   /** The seller-facing stage — one badge, same vocabulary as the list and the detail page. */
   stage: OrderStage;
+  /** False for an order SellerHill does not follow: only its chip shows, never a stage. */
+  showStage?: boolean;
   /** Drives the tracking-held alarm colour (amber → red after 12 h). */
   shippedDetectedAt?: string | null;
   /** Chips shown above the stats row (estimated profit, untracked, …) — a card can carry more than one at once. */
   statsBadges?: OrderCardStatBadge[];
   /** Labeled rows under title (order #, buyer, qty, ASIN, …) */
   meta: OrderCardMetaItem[];
+  /** Chip on its own line at the top-left of the figures row (the estimated-profit marker). */
+  footerBadge?: OrderCardStatBadge;
+  /** Hint at the end of the figures row that the whole card opens the order. */
+  detailLabel?: string;
   /** Bottom strip: sale / cost / profit (or similar) */
   stats: OrderCardStat[];
   onClick?: () => void;

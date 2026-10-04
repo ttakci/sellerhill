@@ -88,6 +88,11 @@ export const Body = styled.div`
   gap: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
+
+  /* A phone leaves no room for photo + facts side by side: stack them, photo first (as the listing card). */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    display: contents;
+  }
 `;
 
 export const Image = styled.div`
@@ -97,8 +102,8 @@ export const Image = styled.div`
   overflow: hidden;
   flex-shrink: 0;
   background: transparent;
-  width: 6.5rem;
-  height: 6.5rem;
+  width: 9rem;
+  height: 9rem;
 
   img {
     width: 100%;
@@ -111,8 +116,9 @@ export const Image = styled.div`
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 5rem;
-    height: 5rem;
+    order: -1;
+    width: 100%;
+    height: 10rem;
   }
 `;
 
@@ -122,6 +128,12 @@ export const Content = styled.div`
   gap: ${tkn('spacing.sm')};
   min-width: 0;
   flex: 1;
+  /* Breathing room from the photo, like the listing card. */
+  padding-inline-start: ${tkn('spacing.md')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding-inline-start: 0;
+  }
 `;
 
 /** One line, ellipsis — the full title is on the tooltip. */
@@ -133,15 +145,18 @@ export const Title = styled(Text)`
   min-width: 0;
 `;
 
-/** The stage badge and the chips that qualify it, pinned to the title row's right edge. */
+/** The stage badge and the chips that qualify it: the card's top row, left-aligned, wrapping. */
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
   gap: ${tkn('spacing.xs')};
-  margin-left: auto;
-  flex: 0 1 auto;
+  min-width: 0;
+
+  /* On a phone the photo comes second, right under the badges. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    order: -2;
+  }
 `;
 
 /** Label / value pairs, no icons — the label column is the only ornament. */
@@ -171,16 +186,42 @@ export const MetaValue = styled.dd`
     max-width: 100%;
     overflow: hidden;
   }
+
+  /* Every value reads bold, including the ASIN / eBay ID badges (as on the listing card). */
+  && * {
+    font-weight: ${tkn('typography.fontWeight.bold')};
+  }
 `;
 
-/** Sale · cost · profit, under one hairline. */
+/** The figures strip: an optional chip line on top, then the figures, under one hairline. */
+export const Footer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
+`;
+
+export const FooterBadgeRow = styled.div`
+  display: flex;
+  justify-content: flex-start;
+`;
+
+/** Sale · cost · profit · ROI. */
 export const MoneyRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.glass.tint')};
+`;
+
+/** Tells the seller the whole card opens the order. */
+export const DetailHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-self: end;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StatCell = styled.div`

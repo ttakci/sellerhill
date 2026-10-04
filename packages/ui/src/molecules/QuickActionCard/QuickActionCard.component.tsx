@@ -15,23 +15,31 @@ export const QuickActionCard = ({
   subtitle,
   onClick,
   variant = 'default',
+  icon,
   className,
 }: QuickActionCardProps): React.ReactElement => {
-  const isBrand = variant === 'brand';
+  const isSolid = variant === 'solid';
+  const isBrand = variant === 'brand' || isSolid;
+  const accentColor = isSolid ? 'text.inverse' : 'brand.primary';
   return (
     <S.Container $variant={variant} className={className} onClick={onClick} role="button" tabIndex={0}>
+      {icon && (
+        <S.IconTile $variant={variant}>
+          <Icon name={icon} size={22} color={accentColor} />
+        </S.IconTile>
+      )}
       <S.Content>
-        <Text variant="h3" weight={isBrand ? 'bold' : 'semibold'} color={isBrand ? 'brand.primary' : 'text.primary'}>
+        <Text variant="h3" weight={isBrand ? 'bold' : 'semibold'} color={isBrand ? accentColor : 'text.primary'}>
           {title}
         </Text>
         {subtitle && (
-          <Text variant="body-sm" color="text.secondary">
+          <Text variant="body-sm" color={isSolid ? 'text.inverse' : 'text.secondary'}>
             {subtitle}
           </Text>
         )}
       </S.Content>
       <S.ArrowCircle $variant={variant}>
-        <Icon name="arrow-right" size={18} color={isBrand ? 'brand.primary' : 'text.secondary'} />
+        <Icon name="arrow-right" size={18} color={isBrand ? accentColor : 'text.secondary'} />
       </S.ArrowCircle>
     </S.Container>
   );

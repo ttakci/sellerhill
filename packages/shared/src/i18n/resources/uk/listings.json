@@ -140,6 +140,10 @@
       "min": "Мін.",
       "max": "Макс.",
       "sourceStockNote": "Залишок понад 20 невідомий; «20+» рахується як 20.",
+      "resultListed": "Знайдено: <b>{{count}}</b>",
+      "sortLabel": "Сортування:",
+      "listedFrom": "Виставлено з",
+      "listedTo": "Виставлено по",
       "fields": {
         "price": "Ціна продажу",
         "purchasePrice": "Ціна закупівлі",

@@ -152,6 +152,8 @@ export type { TooltipPosition, TooltipProps, TooltipVariant } from './molecules/
 export { CopyableText } from './molecules/CopyableText';
 export type { CopyableTextProps } from './molecules/CopyableText';
 
+export { DatePicker } from './molecules/DatePicker';
+export type { DatePickerProps } from './molecules/DatePicker';
 export { Popover } from './molecules/Popover';
 export type { PopoverPosition, PopoverProps } from './molecules/Popover';
 

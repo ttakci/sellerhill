@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "All statuses",
       "allStores": "All stores",
-      "allTrackingStates": "Linked and not linked",
+      "allTrackingStates": "All",
       "clearAll": "Clear all",
       "resultCount": "{{count}} results",
       "allStages": "All statuses",

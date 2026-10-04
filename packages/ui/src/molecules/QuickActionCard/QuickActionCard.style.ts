@@ -13,8 +13,16 @@ import type { QuickActionCardVariant } from './QuickActionCard.types';
  * to match instead of shrinking.
  */
 export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  background-color: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+    $variant === 'solid' ? theme.colors.sidebar.background : theme.colors.surface.primary};
+  /* Same lights as the sidebar rail so the solid card reads as the same navy. */
+  background-image: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+    $variant === 'solid'
+      ? `radial-gradient(30rem 22rem at 0% 0%, ${theme.colors.sidebar.glow}, transparent 70%), radial-gradient(24rem 30rem at 100% 100%, ${theme.colors.sidebar.glowAlt}, transparent 70%)`
+      : 'none'};
+  border: 0.0625rem solid
+    ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+      $variant === 'solid' ? 'transparent' : theme.colors.border.primary}; /* 1px */
   border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
   padding: ${tkn('spacing.xl')};
@@ -52,6 +60,7 @@ export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
 
 /** Title + optional subtitle, left-aligned, stacked. */
 export const Content = styled.div`
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
@@ -69,7 +78,24 @@ export const ArrowCircle = styled.div<{ $variant: QuickActionCardVariant }>`
   flex-shrink: 0;
   transition: transform ${tkn('transitions.fast')};
   background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
-    $variant === 'brand' ? `${theme.colors.brand.primary}15` : theme.colors.background.tertiary};
+    $variant === 'solid'
+      ? `${theme.colors.text.inverse}33`
+      : $variant === 'brand'
+        ? `${theme.colors.brand.primary}15`
+        : theme.colors.background.tertiary};
   color: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
     $variant === 'brand' ? theme.colors.brand.primary : theme.colors.text.secondary};
+`;
+
+/** Leading icon tile, sized like the trailing arrow circle. */
+export const IconTile = styled.div<{ $variant: QuickActionCardVariant }>`
+  width: 3rem; /* 48px */
+  height: 3rem; /* 48px */
+  border-radius: ${tkn('radius.lg')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+    $variant === 'solid' ? `${theme.colors.text.inverse}33` : `${theme.colors.brand.primary}15`};
 `;

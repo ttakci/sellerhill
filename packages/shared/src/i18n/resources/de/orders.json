@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Alle Status",
       "allStores": "Alle Shops",
-      "allTrackingStates": "Verknüpft und nicht verknüpft",
+      "allTrackingStates": "Alle",
       "clearAll": "Alle zurücksetzen",
       "resultCount": "{{count}} Ergebnisse",
       "allStages": "Alle Status",

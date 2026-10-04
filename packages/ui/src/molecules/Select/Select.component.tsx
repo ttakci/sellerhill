@@ -13,6 +13,8 @@ export const ModernSelectStandalone = ({
   options: _options,
   placeholder,
   iconLeft,
+  trailingIcon,
+  valuePrefix,
   isDisabled,
   fullWidth = true,
   size = 'medium',
@@ -143,7 +145,7 @@ export const ModernSelectStandalone = ({
         )}
 
         <S.ValueDisplay $hasIconLeft={!!iconLeft} $hasLabel={!!label} $size={size}>
-          {selectedOption ? selectedOption.label : (!label ? placeholder : '')}
+          {selectedOption ? `${valuePrefix ? `${valuePrefix} ` : ''}${selectedOption.label}` : (!label ? placeholder : '')}
         </S.ValueDisplay>
 
         {label && (
@@ -160,7 +162,7 @@ export const ModernSelectStandalone = ({
         )}
 
         <S.DecorationWrapper $side="right" $size={size}>
-          <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={size === 'small' ? 16 : 20} />
+          <Icon name={trailingIcon ?? (isOpen ? 'chevron-up' : 'chevron-down')} size={size === 'small' ? 16 : 20} />
         </S.DecorationWrapper>
 
         {renderDropdown()}

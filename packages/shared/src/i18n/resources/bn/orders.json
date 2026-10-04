@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "সব স্ট্যাটাস",
       "allStores": "সব স্টোর",
-      "allTrackingStates": "যুক্ত ও যুক্ত নয়",
+      "allTrackingStates": "সব",
       "clearAll": "সব মুছুন",
       "resultCount": "{{count}}টি ফলাফল",
       "allStages": "সব স্ট্যাটাস",

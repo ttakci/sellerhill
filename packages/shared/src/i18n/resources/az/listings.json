@@ -140,6 +140,10 @@
       "min": "Min",
       "max": "Maks",
       "sourceStockNote": "20-dən yuxarı stok məlum deyil; \"20+\" 20 kimi hesablanır.",
+      "resultListed": "<b>{{count}}</b> nəticə göstərilir",
+      "sortLabel": "Sırala:",
+      "listedFrom": "Əlavə olunma: başlanğıc",
+      "listedTo": "Əlavə olunma: son",
       "fields": {
         "price": "Satış qiyməti",
         "purchasePrice": "Alış qiyməti",

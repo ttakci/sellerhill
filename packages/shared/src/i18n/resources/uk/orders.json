@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Усі статуси",
       "allStores": "Усі магазини",
-      "allTrackingStates": "Прив'язані та неприв'язані",
+      "allTrackingStates": "Усі",
       "clearAll": "Очистити все",
       "resultCount": "Результатів: {{count}}",
       "allStages": "Усі статуси",
