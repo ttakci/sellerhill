@@ -16,6 +16,8 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
   onViewAll,
   onDisconnect,
   disconnectingId,
+  onReconnect,
+  reconnectingId,
 }) => {
   const { t } = useTranslation(['ebay', 'translation']);
 
@@ -36,6 +38,8 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
               store={store}
               onDisconnect={onDisconnect}
               isDisconnecting={disconnectingId === store.id}
+              onReconnect={onReconnect}
+              isReconnecting={reconnectingId === store.id}
             />
           )}
           onViewAll={onViewAll}

@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "Verkäufer-ID",
         "connectedSince": "Verbunden seit",
+        "reconnect": {
+          "action": "Erneut verbinden",
+          "hint": "Melden Sie sich erneut bei eBay an, um die Berechtigungen dieses Shops zu erneuern. Shop, Bestellungen und Angebote bleiben unverändert – Sie müssen die Verbindung nicht erst trennen."
+        },
         "disconnect": {
           "action": "Trennen",
           "confirmDescription": "Wenn Sie die Verbindung trennen, werden für diesen Shop Bestellabgleich, automatischer Einkauf und Sendungsaktualisierungen gestoppt. Ihre bestehenden Bestellungen und Angebote bleiben erhalten, und beim erneuten Verbinden des Shops wird alles wiederhergestellt. Um den Zugriff auch auf eBay-Seite zu widerrufen, entfernen Sie SellerHill in den eBay-Einstellungen unter „Zugriff für Drittanbieter-Apps“.",

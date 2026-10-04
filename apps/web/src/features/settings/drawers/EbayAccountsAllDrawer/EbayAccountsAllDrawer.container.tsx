@@ -13,6 +13,8 @@ export const EbayAccountsAllDrawer: React.FC<EbayAccountsAllDrawerProps> = ({
   onClose,
   onBack,
   accounts,
+  onReconnect,
+  reconnectingId,
 }) => {
   const { t, i18n } = useTranslation(['ebay', 'translation']);
   const { locale } = getLocaleConfig(i18n.language);
@@ -25,6 +27,8 @@ export const EbayAccountsAllDrawer: React.FC<EbayAccountsAllDrawerProps> = ({
       onClose={onClose}
       onBack={onBack}
       stores={stores}
+      onReconnect={onReconnect}
+      reconnectingId={reconnectingId}
     />
   );
 };

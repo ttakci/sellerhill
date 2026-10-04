@@ -12,6 +12,8 @@ export const EbayAccountsAllDrawerComponent: React.FC<EbayAccountsAllDrawerCompo
   onClose,
   onBack,
   stores,
+  onReconnect,
+  reconnectingId,
 }) => {
   const { t } = useTranslation(['translation']);
 
@@ -28,7 +30,12 @@ export const EbayAccountsAllDrawerComponent: React.FC<EbayAccountsAllDrawerCompo
       {stores.length > 0 ? (
         <S.StoreList>
           {stores.map((store) => (
-            <EbayAccountCard key={store.id} store={store} />
+            <EbayAccountCard
+              key={store.id}
+              store={store}
+              onReconnect={onReconnect}
+              isReconnecting={reconnectingId === store.id}
+            />
           ))}
         </S.StoreList>
       ) : (

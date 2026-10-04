@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "Identifiant vendeur",
         "connectedSince": "Connecté depuis",
+        "reconnect": {
+          "action": "Reconnecter",
+          "hint": "Connectez-vous à nouveau à eBay pour renouveler les autorisations de cette boutique. La boutique, ses commandes et ses annonces restent inchangées : inutile de la déconnecter d'abord."
+        },
         "disconnect": {
           "action": "Déconnecter",
           "confirmDescription": "La déconnexion arrête la synchronisation des commandes, les achats automatiques et les mises à jour de suivi pour cette boutique. Vos commandes et annonces existantes sont conservées, et la reconnexion ultérieure de la boutique rétablit tout. Pour retirer également l'accès côté eBay, supprimez SellerHill dans les paramètres « Accès des applications tierces » d'eBay.",

@@ -25,4 +25,11 @@ export interface EbayAccountCardProps {
   onDisconnect?: (storeId: string) => void;
   /** Disables the action while a disconnect request for this store is running. */
   isDisconnecting?: boolean;
+  /**
+   * Re-runs eBay consent for this store in place (to grant newly requested
+   * scopes) without disconnecting it. Shown only for ACTIVE / REVOKED stores.
+   */
+  onReconnect?: (storeId: string) => void;
+  /** Disables the action while a reconnect redirect for this store is being prepared. */
+  isReconnecting?: boolean;
 }

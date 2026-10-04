@@ -7,6 +7,8 @@ export interface EbayAccountsAllDrawerProps {
   onClose: () => void;
   onBack: () => void;
   accounts: EbayAccountPublicDto[];
+  onReconnect?: (storeId: string) => void;
+  reconnectingId?: string | null;
 }
 
 export interface EbayAccountsAllDrawerComponentProps {
@@ -14,4 +16,6 @@ export interface EbayAccountsAllDrawerComponentProps {
   onClose: () => void;
   onBack: () => void;
   stores: EbayStoreCardView[];
+  onReconnect?: (storeId: string) => void;
+  reconnectingId?: string | null;
 }
