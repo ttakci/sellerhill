@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Ihre Vorlagen für automatische Käufernachrichten ansehen, bearbeiten und erstellen",
         "manageBlacklist": "Sperrliste verwalten",
         "manageBlacklistSubtitle": "Schlüsselwörter, die in Angebotstiteln, Beschreibungen und Artikelmerkmalen gesperrt werden",
-        "infoMessage": "Nachrichtenvorlagen und Sperrlistenregeln gelten je nach dem Geltungsbereich (global oder pro Shop), den Sie in den Shop-Einstellungen wählen.",
-        "listingRules": "Angebotsregeln",
-        "listingRulesSubtitle": "Markenschutz, was angeboten werden darf und automatische Bereinigung"
+        "infoMessage": "Nachrichtenvorlagen und Sperrlistenregeln gelten je nach dem Geltungsbereich (global oder pro Shop), den Sie in den Shop-Einstellungen wählen."
       },
       "listingGroups": {
         "title": "Einstellungsgruppen für Angebote",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} ausgewählt",
           "bulkDelete": "Auswahl löschen",
           "confirmBulkDeleteDescription": "{{count}} Sperrlisten-Schlüsselwort/-Schlüsselwörter löschen? Dies kann nicht rückgängig gemacht werden."
+        },
+        "blockedAsins": {
+          "title": "Gesperrte ASINs",
+          "hint": "Diese Produkte werden nie eingestellt. Ein Shop ohne eigene Liste verwendet die Liste für alle Shops.",
+          "placeholder": "Eine ASIN pro Zeile oder durch Kommas getrennt",
+          "count": "Gültige ASINs in dieser Liste: {{count}}",
+          "inherited": "Dieser Shop hat keine eigene Liste und verwendet die Liste für alle Shops. Wenn Sie sie hier bearbeiten, erhält dieser Shop eine eigene Liste."
         }
       },
       "listingGroup": {

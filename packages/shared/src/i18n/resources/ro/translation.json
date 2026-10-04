@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Vizualizați, editați și creați șabloanele de mesaje automate pentru cumpărători",
         "manageBlacklist": "Gestionează lista neagră",
         "manageBlacklistSubtitle": "Cuvinte cheie blocate în titlurile, descrierile și specificațiile anunțurilor",
-        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin.",
-        "listingRules": "Reguli pentru anunțuri",
-        "listingRulesSubtitle": "Protecția brandului, ce poate fi publicat și curățarea automată"
+        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin."
       },
       "listingGroups": {
         "title": "Grupuri de setări pentru anunțuri",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} selectate",
           "bulkDelete": "Șterge selecția",
           "confirmBulkDeleteDescription": "Ștergeți {{count}} cuvinte cheie din lista neagră? Această acțiune nu poate fi anulată."
+        },
+        "blockedAsins": {
+          "title": "ASIN-uri blocate",
+          "hint": "Aceste produse nu sunt listate niciodată. Un magazin fără listă proprie folosește lista pentru toate magazinele.",
+          "placeholder": "Un ASIN pe linie sau separate prin virgulă",
+          "count": "ASIN-uri valide în această listă: {{count}}",
+          "inherited": "Acest magazin nu are o listă proprie și folosește lista pentru toate magazinele. Dacă o modificați aici, magazinul va avea propria listă."
         }
       },
       "listingGroup": {

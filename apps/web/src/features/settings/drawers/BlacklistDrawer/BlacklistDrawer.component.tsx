@@ -1,4 +1,14 @@
-import { Button, Checkbox, ConfirmModal, Drawer, SearchField, SegmentedControl, Text, Textarea } from '@repo/ui';
+import {
+  Button,
+  Checkbox,
+  ConfirmModal,
+  Drawer,
+  InfoMessage,
+  SearchField,
+  SegmentedControl,
+  Text,
+  Textarea,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -64,6 +74,13 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   confirmDescription,
   confirmLabel,
   cancelLabel,
+  blockedAsinsText,
+  onBlockedAsinsChange,
+  blockedAsinsTitle,
+  blockedAsinsHint,
+  blockedAsinsPlaceholder,
+  blockedAsinsCountLabel,
+  blockedAsinsInheritedLabel,
 }) => {
   const { t } = useTranslation(['translation']);
 
@@ -185,6 +202,25 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
               {emptyMessage}
             </Text>
           )}
+        </FormCard>
+        <FormCard>
+          <Text variant="h5">{blockedAsinsTitle}</Text>
+          <Text variant="caption" color="text.tertiary">
+            {blockedAsinsHint}
+          </Text>
+          <Textarea
+            value={blockedAsinsText}
+            onChange={onBlockedAsinsChange}
+            placeholder={blockedAsinsPlaceholder}
+            fullWidth
+            rows={4}
+            mono
+            aria-label={blockedAsinsTitle}
+          />
+          <Text variant="caption" color="text.tertiary">
+            {blockedAsinsCountLabel}
+          </Text>
+          {blockedAsinsInheritedLabel && <InfoMessage>{blockedAsinsInheritedLabel}</InfoMessage>}
         </FormCard>
       </BodyStack>
 

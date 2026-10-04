@@ -1,4 +1,4 @@
-import { BlacklistAction, BlacklistType } from '@repo/shared';
+import { BlacklistAction, BlacklistType, parseBlockedAsins } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { BlacklistDrawerComponent } from './BlacklistDrawer.component';
 import type { BlacklistDrawerProps, BlacklistItem } from './BlacklistDrawer.types';
+import { blockedAsinsDraft, toSaveBlockedAsins } from './blockedAsinsDraft';
 
 import { useSaveStoreSettingsMutation } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
@@ -47,6 +48,11 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   // the list it starts from — not an empty one.
   const seed = resolveStoreDraftSeed(storeConfigs, selectedScope);
   const originalBlacklist = useMemo(() => toItems(seed?.blacklist), [seed]);
+  const isGlobalScope = selectedScope === GLOBAL_SCOPE;
+  const originalBlocked = useMemo(
+    () => blockedAsinsDraft(config?.blockedAsins, globalConfig?.blockedAsins, isGlobalScope),
+    [config, globalConfig, isGlobalScope],
+  );
 
   // Draft state — add/remove mutate this; Save commits it.
   const [blacklist, setBlacklist] = useState<BlacklistItem[]>(originalBlacklist);
@@ -57,6 +63,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   const [searchValue, setSearchValue] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [blockedText, setBlockedText] = useState(originalBlocked.text);
 
   // Reset draft + form when the drawer opens or the inherited scope changes.
   // React-recommended render-time state adjustment.
@@ -81,6 +88,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       setSearchValue('');
       setSelectedItems([]);
       setIsConfirmOpen(false);
+      setBlockedText(originalBlocked.text);
     }
   }
 
@@ -185,7 +193,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
 
   // Draft equality check (order-insensitive) — disables Save when nothing changed.
   const hasChanges = useMemo(() => {
-    if (blacklist.length !== originalBlacklist.length) {
+    if (blockedText !== originalBlocked.text || blacklist.length !== originalBlacklist.length) {
       return true;
     }
     return blacklist.some((b) => {
@@ -195,7 +203,9 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
         || old.types.length !== b.types.length
         || !old.types.every((type) => b.types.includes(type));
     });
-  }, [blacklist, originalBlacklist]);
+  }, [blacklist, originalBlacklist, blockedText, originalBlocked]);
+
+  const blockedCount = useMemo(() => parseBlockedAsins(blockedText).length, [blockedText]);
 
   const isSaveDisabled = isSaving || !hasChanges;
 
@@ -214,6 +224,8 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
         ? { amazonTaxRate: config?.amazonTaxRate ?? 0 }
         : buildInheritedStoreFields(globalConfig)),
       blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types, action: b.action })),
+      // Untouched = omitted, so a store on the global list keeps inheriting it.
+      blockedAsins: toSaveBlockedAsins(blockedText, originalBlocked),
     })
       .unwrap()
       .then(() => {
@@ -291,6 +303,17 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       })}
       confirmLabel={t('translation:common.delete')}
       cancelLabel={t('translation:common.cancel')}
+      blockedAsinsText={blockedText}
+      onBlockedAsinsChange={(e) => setBlockedText(e.target.value)}
+      blockedAsinsTitle={t('translation:settingsHub.drawer.blacklist.blockedAsins.title')}
+      blockedAsinsHint={t('translation:settingsHub.drawer.blacklist.blockedAsins.hint')}
+      blockedAsinsPlaceholder={t('translation:settingsHub.drawer.blacklist.blockedAsins.placeholder')}
+      blockedAsinsCountLabel={t('translation:settingsHub.drawer.blacklist.blockedAsins.count', { count: blockedCount })}
+      blockedAsinsInheritedLabel={
+        originalBlocked.inherited && blockedText === originalBlocked.text
+          ? t('translation:settingsHub.drawer.blacklist.blockedAsins.inherited')
+          : ''
+      }
     />
   );
 };

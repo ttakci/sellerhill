@@ -21,7 +21,6 @@ import { LISTING_CLEANUP_QUEUE, ListingCleanupProcessor } from './listing-cleanu
 import { ListingCleanupService } from './listing-cleanup.service';
 import { ListingImportService } from './listing-import.service';
 import { ListingProcessorService } from './listing-processor.service';
-import { ListingPromotionService } from './listing-promotion.service';
 import { ListingQueueService } from './listing-queue.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsController } from './listings.controller';
@@ -79,7 +78,6 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     EbayFeedSyncProcessor,
     ListingCleanupService,
     ListingCleanupProcessor,
-    ListingPromotionService,
   ],
   exports: [ListingsService, ListingQueueService],
 })

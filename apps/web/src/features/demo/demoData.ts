@@ -42,6 +42,7 @@ import {
   OrderFulfillmentState,
   OrderStage,
   OrderStatus,
+  DEFAULT_LISTING_RULES,
   deriveOrderStage,
   deriveShipByState,
   deriveReturnBucket,
@@ -81,6 +82,7 @@ import {
   type PeriodMetricsDto,
   type ProfileDto,
   type StoreSettingsResponse,
+  type ListingRulesConfig,
   type UserDto,
   type ListingRevisionDto,
   type ListingRevisionWithListingDto,
@@ -2213,6 +2215,8 @@ function storeSettings(id: string, storeId: string | undefined, isGlobal: boolea
     trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
     trackingConvertManualOrders: true,
     buyerMessaging: BUYER_MESSAGING,
+    // Store rows inherit the global list (NULL), as a real store with no list of its own does.
+    blockedAsins: isGlobal ? ['B0SH000001'] : null,
     createdAt: new Date(isoDaysAgo(ACCOUNT_AGE_DAYS - 1)),
     updatedAt: new Date(isoDaysAgo(6)),
   };
@@ -2303,7 +2307,8 @@ function group(
   defaultQuantity: number,
   stockBuffer: number,
   templateSlugId: string,
-  content: { strip: boolean; aiTitle: boolean; aiDesc: boolean }
+  content: { strip: boolean; aiTitle: boolean; aiDesc: boolean },
+  rules: Partial<ListingRulesConfig> = {}
 ): ListingSettingsGroupResponse {
   return {
     id,
@@ -2323,6 +2328,7 @@ function group(
       aiTitleEnabled: content.aiTitle,
       aiDescriptionEnabled: content.aiDesc,
     },
+    listingRules: { ...DEFAULT_LISTING_RULES, ...rules },
     createdAt: new Date(isoDaysAgo(ACCOUNT_AGE_DAYS - 4)),
     updatedAt: new Date(isoDaysAgo(11)),
     createdBy: DEMO_USER_ID,
@@ -2369,7 +2375,8 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
     4,
     3,
     'demo-tpl-ds-tech-gadgets',
-    { strip: true, aiTitle: true, aiDesc: false }
+    { strip: true, aiTitle: true, aiDesc: false },
+    { minRating: 4, outOfStockEndDays: 14 }
   ),
   group(
     'demo-group-4',

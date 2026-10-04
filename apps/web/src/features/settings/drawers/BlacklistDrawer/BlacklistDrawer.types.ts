@@ -77,4 +77,19 @@ export interface BlacklistDrawerComponentProps {
   confirmDescription: string;
   confirmLabel: string;
   cancelLabel: string;
+  // blocked ASINs (a second card)
+  blockedAsinsText: string;
+  onBlockedAsinsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  blockedAsinsTitle: string;
+  blockedAsinsHint: string;
+  blockedAsinsPlaceholder: string;
+  blockedAsinsCountLabel: string;
+  /** Shown when a store is running on the global list; empty otherwise. */
+  blockedAsinsInheritedLabel: string;
+}
+
+/** The blocked-ASIN card's starting text, and whether it is the global list shown to a store without its own. */
+export interface BlockedAsinsDraft {
+  text: string;
+  inherited: boolean;
 }

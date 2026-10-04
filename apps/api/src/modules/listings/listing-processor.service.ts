@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
 import {
   AmazonMarketplace,
   evaluateListingRules,
@@ -22,6 +22,7 @@ import {
   type ListingFailureDetails,
   type ListingRulesConfig,
   type ListingRuleViolation,
+  type ListingSettingsGroup,
   type ProductData,
 } from '@repo/shared';
 import { DelayedError, Job } from 'bullmq';
@@ -47,7 +48,6 @@ import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
 import { ListingImportService } from './listing-import.service';
-import { ListingPromotionService } from './listing-promotion.service';
 import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
@@ -158,7 +158,6 @@ export class ListingProcessorService extends WorkerHost {
     private readonly productSource: ProductSourceService,
     private readonly storeSettingsService: StoreSettingsService,
     private readonly veroService: VeroService,
-    private readonly promotion: ListingPromotionService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -295,12 +294,29 @@ export class ListingProcessorService extends WorkerHost {
       }
     }
 
-    // The seller's listing rules for this store, resolved once per batch, and
-    // whether this store may take ASINs already on the seller's other stores
-    // (`allowCrossStoreAsins`, cross-store-asin.ts) — the duplicate checks
-    // below read it, as `createJob`'s filter did.
+    // The listing rules belong to the settings group the job publishes with
+    // (read once per batch); the blocked-ASIN list and whether this store may
+    // take ASINs already on the seller's other stores (`allowCrossStoreAsins`,
+    // cross-store-asin.ts) belong to the store — the duplicate checks below
+    // read it, as `createJob`'s filter did.
     const resolvedStoreSettings = await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId);
-    const listingRules = normalizeListingRules(resolvedStoreSettings.listingRules);
+    // A group deleted while the job waited fails every item of the batch with
+    // that error — otherwise the items would never reach a terminal state and
+    // the job would sit at "processing" for ever. Anything else (a database
+    // hiccup) goes back to BullMQ for a retry, like the store check above.
+    let batchGroup: ListingSettingsGroup;
+    try {
+      batchGroup = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
+    } catch (error: unknown) {
+      if (!(error instanceof NotFoundException || error instanceof ForbiddenException)) {
+        throw error;
+      }
+      for (const item of items) {
+        await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, error);
+      }
+      return;
+    }
+    const listingRules = normalizeListingRules(batchGroup.listingRules);
     const asinStoreScope: AsinStoreScope = {
       ebayAccountId,
       allowCrossStore: resolvedStoreSettings.allowCrossStoreAsins === true,
@@ -341,7 +357,7 @@ export class ListingProcessorService extends WorkerHost {
           continue;
         }
         // The seller's own blocked list needs no product data to refuse.
-        if (isAsinBlocked(listingRules, item.asin)) {
+        if (isAsinBlocked(resolvedStoreSettings.blockedAsins ?? [], item.asin)) {
           continue;
         }
         if (await this.listingsService.isAsinListed(userId, item.asin, asinStoreScope)) {
@@ -392,7 +408,7 @@ export class ListingProcessorService extends WorkerHost {
           await this.recordDuplicate(jobId, userId, item.asin, item.listingJobItemId);
           return;
         }
-        if (isAsinBlocked(listingRules, item.asin)) {
+        if (isAsinBlocked(resolvedStoreSettings.blockedAsins ?? [], item.asin)) {
           throw new ListingRuleBlockedError(item.asin, { kind: ListingRuleKind.BLOCKED_ASIN });
         }
 
@@ -417,19 +433,18 @@ export class ListingProcessorService extends WorkerHost {
         // otherwise raise — and a refused item should spend no image upload
         // and no LLM call.
         if (!asDraft) {
-          const group = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
           const { quantity } = await this.listingStrategyService.computePricing(
             userId,
             productData,
             listingSettingsGroupId,
-            group
+            batchGroup
           );
           if (quantity === 0) {
             throw new ZeroStockError(
               item.asin,
               productData.stock ?? 0,
               productData.stockStatus === SourceStockStatus.AT_LEAST,
-              group.stock?.stockBuffer ?? 0
+              batchGroup.stock?.stockBuffer ?? 0
             );
           }
           // Then the price refusal — still before the EPS upload and the LLM
@@ -617,14 +632,6 @@ export class ListingProcessorService extends WorkerHost {
         new Error('eBay returned no result for this item in the bulk response.')
       );
     }
-
-    // The listings are live; advertising them is a separate, fail-soft step
-    // (the store's own ad rate, and only if eBay lets the seller advertise).
-    await this.promotion.promoteNewListings(
-      userId,
-      accountId,
-      outcomes.filter((outcome) => outcome.ok && outcome.listingId).map((outcome) => outcome.listingId as string)
-    );
 
     const created = outcomes.filter((outcome) => outcome.ok).length;
     this.logger.log(

@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "查看、编辑和创建您的买家自动消息模板",
         "manageBlacklist": "管理黑名单",
         "manageBlacklistSubtitle": "在刊登标题、描述和商品属性中屏蔽的关键词",
-        "infoMessage": "消息模板和黑名单规则将按照您在店铺设置中选择的范围（全局或单个店铺）生效。",
-        "listingRules": "刊登规则",
-        "listingRulesSubtitle": "品牌保护、可刊登的商品以及自动清理"
+        "infoMessage": "消息模板和黑名单规则将按照您在店铺设置中选择的范围（全局或单个店铺）生效。"
       },
       "listingGroups": {
         "title": "刊登设置组",
@@ -448,6 +446,13 @@
           "selectedCount": "已选 {{count}} 项",
           "bulkDelete": "删除所选",
           "confirmBulkDeleteDescription": "确定删除 {{count}} 个黑名单关键词吗？此操作无法撤销。"
+        },
+        "blockedAsins": {
+          "title": "已屏蔽的 ASIN",
+          "hint": "这些商品永远不会上架。没有自己列表的店铺使用所有店铺的列表。",
+          "placeholder": "每行一个 ASIN，或用逗号分隔",
+          "count": "此列表中的有效 ASIN：{{count}}",
+          "inherited": "此店铺没有自己的列表，正在使用所有店铺的列表。在此处编辑后，此店铺将拥有自己的列表。"
         }
       },
       "listingGroup": {

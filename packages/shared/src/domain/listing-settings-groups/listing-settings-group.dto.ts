@@ -1,3 +1,5 @@
+import type { ListingRulesConfig } from '../store-settings/listing-rules';
+
 import {
   FeeConfig,
   ListingContentConfig,
@@ -7,6 +9,7 @@ import {
   StockConfig,
   TemplateConfig,
 } from './listing-settings-group.types';
+
 
 /**
  * Request DTO for creating Listing Settings Group
@@ -19,6 +22,8 @@ export interface CreateListingSettingsGroupRequest {
   fees: FeeConfig;
   templates: TemplateConfig;
   content?: ListingContentConfig;
+  /** Normalized server-side; omitted = the defaults. */
+  listingRules?: ListingRulesConfig;
 }
 
 /**
@@ -32,6 +37,8 @@ export interface UpdateListingSettingsGroupRequest {
   fees?: FeeConfig;
   templates?: TemplateConfig;
   content?: ListingContentConfig;
+  /** Normalized server-side; omitted = unchanged. */
+  listingRules?: ListingRulesConfig;
 }
 
 /**

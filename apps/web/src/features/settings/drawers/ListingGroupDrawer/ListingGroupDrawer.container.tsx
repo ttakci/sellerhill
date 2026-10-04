@@ -1,6 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  DEFAULT_LISTING_RULES,
   DEFAULT_PRICE_ENDING_CENTS,
+  COLD_LISTING_MIN_DAYS,
+  LISTING_CLEANUP_MAX_DAYS,
   TemplateType,
   applyPriceEnding,
   buildListingTemplateSnippet,
@@ -18,7 +21,14 @@ import { useTranslation } from 'react-i18next';
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
 
 import { ListingGroupDrawerComponent } from './ListingGroupDrawer.component';
-import type { ListingGroupDrawerProps, ListingGroupDrawerStep } from './ListingGroupDrawer.types';
+import {
+  ColdListingMode,
+  ListingRulesDraftError,
+  type ListingGroupDrawerProps,
+  type ListingGroupDrawerStep,
+  type ListingRulesDraft,
+} from './ListingGroupDrawer.types';
+import { fromListingRulesDraft, listingRulesDraftError, toListingRulesDraft } from './listingRulesForm';
 
 import {
   useCreateListingSettingsGroupMutation,
@@ -42,6 +52,12 @@ const STEP_FIELDS: Partial<Record<number, FieldPath<ListingSettingsGroupFormData
   1: ['fees.ebayFeePercent', 'fees.fixedFeeAmount'],
   2: ['repricingStrategy', 'fees.priceRoundingEnabled', 'fees.priceEndingCents'],
 };
+
+/** The step that holds the listing rules, and the last one (the HTML template). */
+const RULES_STEP = 3;
+const LAST_STEP = 4;
+
+const OUT_OF_STOCK_CHOICES = ['3', '7', '14', '30', '60'];
 
 /** An ordinary computed price used to show what the chosen ending does to it. */
 const PRICE_ROUNDING_SAMPLE = 27.31;
@@ -146,6 +162,22 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       form.setValue('templates.predefinedTemplateId', templates[0].id);
     }
   }, [templates, isEdit, getValues, form]);
+
+  // The Rules step keeps its own draft (text fields, validated on Continue).
+  // It is re-seeded whenever the drawer opens or the edited group arrives —
+  // a render-time adjustment, so an effect never overwrites what was typed.
+  const [rulesDraft, setRulesDraft] = useState<ListingRulesDraft>(() => toListingRulesDraft(DEFAULT_LISTING_RULES));
+  const [rulesAttempted, setRulesAttempted] = useState(false);
+  const rulesKey = isOpen ? `${editingGroupId ?? 'new'}:${group ? String(group.updatedAt) : ''}` : 'closed';
+  const [prevRulesKey, setPrevRulesKey] = useState(rulesKey);
+  if (rulesKey !== prevRulesKey) {
+    setPrevRulesKey(rulesKey);
+    setRulesDraft(toListingRulesDraft((isEdit ? group?.listingRules : undefined) ?? DEFAULT_LISTING_RULES));
+    setRulesAttempted(false);
+  }
+  const rulesError = listingRulesDraftError(rulesDraft);
+  const rulesErrorText = (field: ListingRulesDraftError, text: string): string | undefined =>
+    rulesAttempted && rulesError === field ? text : undefined;
 
   // Reset step when drawer opens (React-recommended render-time state adjustment)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
@@ -447,7 +479,10 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
           return Number.isFinite(min) && Number.isFinite(max) && max > min && (hasMargin || hasFixed);
         });
       }
-      case 3: {
+      case RULES_STEP:
+        // Validated on Continue, so the seller sees which field to fix.
+        return true;
+      case LAST_STEP: {
         if (v.templates?.type === TemplateType.CUSTOM) {
           return Boolean(v.templates?.customTemplateHtml?.trim());
         }
@@ -462,7 +497,11 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   // accepts both). The schema can: on Continue, run it over THIS step's fields and
   // stay put with the error painted under the field if it refuses.
   const handleNext = async () => {
-    if (!canProceed || currentStep >= 3) {
+    if (!canProceed || currentStep >= LAST_STEP) {
+      return;
+    }
+    if (currentStep === RULES_STEP && rulesError !== null) {
+      setRulesAttempted(true);
       return;
     }
     const stepFields = STEP_FIELDS[currentStep];
@@ -488,11 +527,18 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   };
 
   const handleSubmit = () => {
+    // The stepper lets the seller jump past the Rules step, so it is checked again here.
+    if (rulesError !== null) {
+      setRulesAttempted(true);
+      setCurrentStep(RULES_STEP);
+      return;
+    }
     void rhfSubmit(
       (data: ListingSettingsGroupFormData) => {
         const cleanData = {
           ...data,
           repricingStrategy: data.repricingStrategy.map(({ id: _id, ...rest }) => rest),
+          listingRules: fromListingRulesDraft(rulesDraft),
         };
 
         if (isEdit && editingGroupId) {
@@ -550,6 +596,35 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       onBack={handleBack}
       onSubmit={handleSubmit}
       canProceed={canProceed}
+      rulesStep={{
+        draft: rulesDraft,
+        onChange: (changes) => setRulesDraft((current) => ({ ...current, ...changes })),
+        outOfStockOptions: [
+          { value: '', label: t('listingSettingsGroup.rules.cleanup.never') },
+          ...Array.from(new Set([...OUT_OF_STOCK_CHOICES, rulesDraft.outOfStockEndDays].filter(Boolean)))
+            .sort((a, b) => Number(a) - Number(b))
+            .map((value) => ({
+              value,
+              label: t('listingSettingsGroup.rules.cleanup.afterDays', { count: Number(value) }),
+            })),
+        ],
+        coldListingModeOptions: [ColdListingMode.FLAG, ColdListingMode.END].map((value) => ({
+          value,
+          label: t(`listingSettingsGroup.rules.cleanup.coldMode_${value}`),
+        })),
+        minRatingError: rulesErrorText(
+          ListingRulesDraftError.MIN_RATING,
+          t('listingSettingsGroup.rules.filters.minRatingError')
+        ),
+        priceError: rulesErrorText(ListingRulesDraftError.PRICE, t('listingSettingsGroup.rules.filters.priceError')),
+        coldListingDaysError: rulesErrorText(
+          ListingRulesDraftError.COLD_DAYS,
+          t('listingSettingsGroup.rules.cleanup.coldDaysError', {
+            min: COLD_LISTING_MIN_DAYS,
+            max: LISTING_CLEANUP_MAX_DAYS,
+          })
+        ),
+      }}
     />
   );
 };

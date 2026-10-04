@@ -58,7 +58,6 @@ import {
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { buildNotSellingSql } from './listing-cleanup.helpers';
 import { classifyListingFailure } from './listing-failure';
-import { ListingPromotionService } from './listing-promotion.service';
 import { hasUncommittedRefreshCheck } from './listing-revision-check';
 import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
@@ -258,10 +257,7 @@ export class ListingsService {
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly ebayImages: EbayImageResolver,
-    // Optional so a spec can build the service without the advertising stack;
-    // Nest always supplies it.
-    @Optional() private readonly promotion?: ListingPromotionService,
-    // Optional for the same reason. Absent = "allow ASINs from my other
+    // Optional so a spec can build the service without it. Absent = "allow ASINs from my other
     // stores" reads as off, which is the behaviour before the setting existed.
     @Optional() private readonly storeSettings?: StoreSettingsService
   ) {}
@@ -629,7 +625,6 @@ export class ListingsService {
              p.category as product_category,
              p.stock as source_stock,
              p.stock_status AS source_stock_status,
-        p.last_successful_refresh_at AS last_synced_at,
              p.last_successful_refresh_at AS last_synced_at,
              (p.source_removed_at IS NOT NULL) AS source_removed,
              p.brand,
@@ -953,6 +948,7 @@ export class ListingsService {
         p.category AS product_category,
         p.stock AS source_stock,
         p.stock_status AS source_stock_status,
+        p.last_successful_refresh_at AS last_synced_at,
         (p.source_removed_at IS NOT NULL) AS source_removed,
         p.brand,
         p.features,
@@ -2373,7 +2369,6 @@ export class ListingsService {
     }
 
     const answered = new Set<string>();
-    const publishedItemIds: string[] = [];
     for (const result of results) {
       const item = byKey.get(result.key);
       if (!item) {
@@ -2403,7 +2398,6 @@ export class ListingsService {
       try {
         await this.markDraftPublished(userId, item, result);
         outcomes.push({ listingId: item.listingId, ok: true });
-        publishedItemIds.push(result.listingId);
       } catch (error: unknown) {
         await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
         this.logger.error(
@@ -2423,9 +2417,6 @@ export class ListingsService {
       this.logger.error(`Failed to publish listing ${item.listingId}: ${error.message}`);
       outcomes.push({ listingId: item.listingId, ok: false, error });
     }
-
-    // Same fail-soft step a bulk create ends with: the store's ad rate, if any.
-    await this.promotion?.promoteNewListings(userId, accountId, publishedItemIds);
 
     return outcomes;
   }

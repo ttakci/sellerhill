@@ -115,62 +115,6 @@
       "description": "将作为商品所在地发布在您的 eBay 商品刊登上。eBay 只向买家显示城市、地区和国家/地区。",
       "city": "城市"
     },
-    "blacklistAction_remove": "删除，不拦截",
-    "listingRules": {
-      "title": "刊登规则",
-      "subtitle": "在向 eBay 发送任何内容之前，先决定刊登哪些商品",
-      "off": "无下限",
-      "brand": {
-        "title": "品牌保护",
-        "vero": "VeRO 保护",
-        "veroHint": "跳过已知会通过 eBay VeRO 计划举报商品刊登的品牌的商品。eBay 会删除被举报的刊登，并将其记入您账号的不良记录。",
-        "veroOffWarning": "关闭保护后，在 eBay 上举报商品刊登的品牌的商品会与其他商品一样被刊登。VeRO 举报可能导致您的 eBay 账号受到限制。",
-        "hideBrand": "不向 eBay 发送品牌",
-        "hideBrandHint": "商品刊登将以“无品牌”发布：品牌会从标题和商品属性中移除，也不会发送条形码和零件编号，因为 eBay 目录会把品牌重新加回去。"
-      },
-      "filters": {
-        "title": "可刊登的商品",
-        "minPrice": "Amazon 最低价格",
-        "maxPrice": "Amazon 最高价格",
-        "priceHint": "字段留空表示不设限。价格超出范围的商品会被跳过，任务中会显示原因。",
-        "priceError": "最高价格不能低于最低价格。",
-        "amazonShippedOnly": "仅限 Amazon 自己发货的商品",
-        "amazonShippedOnlyHint": "跳过由其他卖家用自己的库存发货的报价。自动下单和物流跟踪对 Amazon 发货的商品效果最好。",
-        "minRating": "最低评分",
-        "ratingOption": "{{rating}} 星及以上",
-        "minReviewCount": "最少评分数",
-        "ratingHint": "设置下限后，尚无评分的商品会被跳过。"
-      },
-      "blockedAsins": {
-        "title": "已屏蔽的 ASIN",
-        "placeholder": "每行一个 ASIN，或用逗号分隔",
-        "count": "此列表中的有效 ASIN：{{count}}"
-      },
-      "cleanup": {
-        "title": "自动清理",
-        "outOfStock": "结束持续缺货的商品刊登",
-        "never": "从不",
-        "afterDays_other": "{{count}} 天后",
-        "outOfStockHint": "商品恢复库存时，计数会重新开始。您自己暂停的商品刊登不会被结束。结束的商品刊登会释放您套餐中的名额，且不会自动重新刊登。",
-        "cold": "关注不出单的商品刊登",
-        "coldHint": "商品刊登在下方天数内没有任何销售，即视为不出单。如果从未售出，则从创建当天开始计算天数。",
-        "coldDays": "无销售天数",
-        "coldDaysError": "请输入 {{min}} 到 {{max}} 之间的整数。",
-        "coldMode": "如何处理",
-        "coldMode_flag": "显示给我",
-        "coldMode_end": "在 eBay 上结束",
-        "coldEndWarning": "商品刊登会在不事先询问您的情况下在 eBay 上结束，且不会自动恢复。如果想先自行检查，请选择“显示给我”。"
-      },
-      "promoted": {
-        "title": "Promoted Listings（推广刊登）",
-        "enable": "推广新刊登的商品",
-        "enableHint": "从这里发布的每个刊登都会按下方的广告费率加入 eBay 上的一个推广活动。只有商品通过广告售出时，eBay 才会收取该费率。已在线的刊登不会改变。",
-        "rate": "广告费率 (%)",
-        "rateHint": "SellerHill 计算的价格不包含此费率。请把它加到刊登设置组的 eBay 费用里，这样利润才能保持在你的预期。",
-        "rateError": "请输入 {{min}} 到 {{max}} 之间的费率。",
-        "ineligible": "eBay 目前不允许该店铺使用 Promoted Listings，因此在此情况改变之前不会投放任何广告。新刊登仍会照常发布。",
-        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay 目前不允许该店铺使用 Promoted Listings：它报告近期销售活跃度不足。在此情况改变之前不会投放任何广告。新刊登仍会照常发布。"
-      }
-    }
+    "blacklistAction_remove": "删除，不拦截"
   }
 }

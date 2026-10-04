@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "View, edit, and create your automated buyer message templates",
         "manageBlacklist": "Manage Blacklist",
         "manageBlacklistSubtitle": "Keywords to block from listing titles, descriptions, and specifics",
-        "infoMessage": "Message templates and blacklist rules are applied based on the scope (global or per-store) you choose in Store Settings.",
-        "listingRules": "Listing rules",
-        "listingRulesSubtitle": "Brand protection, what may be listed, and automatic clean-up"
+        "infoMessage": "Message templates and blacklist rules are applied based on the scope (global or per-store) you choose in Store Settings."
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} selected",
           "bulkDelete": "Delete selected",
           "confirmBulkDeleteDescription": "Delete {{count}} blacklist keyword(s)? This cannot be undone."
+        },
+        "blockedAsins": {
+          "title": "Blocked ASINs",
+          "hint": "These products are never listed. A store without its own list uses the list for all stores.",
+          "placeholder": "One ASIN per line, or separated by commas",
+          "count": "Valid ASINs in this list: {{count}}",
+          "inherited": "This store has no list of its own and uses the list for all stores. Editing it here gives this store its own list."
         }
       },
       "listingGroup": {

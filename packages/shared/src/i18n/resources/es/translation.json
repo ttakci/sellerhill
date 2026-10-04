@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Consulta, edita y crea tus plantillas de mensajes automáticos para compradores",
         "manageBlacklist": "Administrar lista negra",
         "manageBlacklistSubtitle": "Palabras clave que se bloquean en títulos, descripciones y características de las publicaciones",
-        "infoMessage": "Las plantillas de mensajes y las reglas de la lista negra se aplican según el alcance (global o por tienda) que elijas en los Ajustes de la tienda.",
-        "listingRules": "Reglas de publicación",
-        "listingRulesSubtitle": "Protección de marcas, qué se puede publicar y limpieza automática"
+        "infoMessage": "Las plantillas de mensajes y las reglas de la lista negra se aplican según el alcance (global o por tienda) que elijas en los Ajustes de la tienda."
       },
       "listingGroups": {
         "title": "Grupos de ajustes de publicación",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} seleccionadas",
           "bulkDelete": "Eliminar seleccionadas",
           "confirmBulkDeleteDescription": "¿Eliminar {{count}} palabra(s) clave de la lista negra? Esta acción no se puede deshacer."
+        },
+        "blockedAsins": {
+          "title": "ASIN bloqueados",
+          "hint": "Estos productos nunca se publican. Una tienda sin lista propia usa la lista de todas las tiendas.",
+          "placeholder": "Un ASIN por línea, o separados por comas",
+          "count": "ASIN válidos en esta lista: {{count}}",
+          "inherited": "Esta tienda no tiene lista propia y usa la lista de todas las tiendas. Si la editas aquí, esta tienda tendrá su propia lista."
         }
       },
       "listingGroup": {

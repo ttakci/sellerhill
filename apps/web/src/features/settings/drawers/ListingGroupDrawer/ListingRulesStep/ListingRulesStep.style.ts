@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
-export { BodyStack, FormCard } from '../shared/drawerSurfaces.style';
+export { BodyStack, FormCard } from '../../shared/drawerSurfaces.style';
 export {
   AutomationField as Field,
   FieldGroup,
   InfoButton,
   LabelWithInfo,
   ToggleRow,
-} from '../StoreSettingsDrawer/StoreSettingsDrawer.style';
+} from '../../StoreSettingsDrawer/StoreSettingsDrawer.style';
 
 /** Minimum and maximum price side by side; stacked on a phone. */
 export const PriceRow = styled.div`

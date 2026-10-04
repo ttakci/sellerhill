@@ -5,7 +5,7 @@
 
 Two independently shippable parts:
 
-- **Part A — Listing rules move into the Listing Settings Group.** Small; ships first.
+- **Part A — Listing rules move into the Listing Settings Group.** Small; ships first. **Built 2026-10-04** (migration 141; plan docs/superpowers/plans/2026-10-04-listing-rules-in-group.md).
 - **Part B — Ad Campaigns** (its own menu), **ad-aware pricing**, and **real ad fees in profit** via the Finances API.
 
 Each part gets its own implementation plan.

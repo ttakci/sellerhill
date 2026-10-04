@@ -8,12 +8,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayBulkService } from '../ebay/ebay-bulk.service';
 
 import { isEndedListingFailure } from './ended-listing';
-import {
-  buildCleanupCandidateSql,
-  cleanupSteps,
-  hasCleanupWork,
-  planListingCleanup,
-} from './listing-cleanup.helpers';
+import { buildCleanupCandidateSql } from './listing-cleanup.helpers';
 
 /** Listings ended in one tick, across every seller. A burst guard, not a quota. */
 const MAX_ENDED_PER_RUN = 200;
@@ -23,9 +18,10 @@ const MAX_ENDED_PER_STORE = 50;
 interface CleanupStoreRow {
   account_id: string;
   user_id: string;
-  store_rules: unknown;
-  global_rules: unknown;
 }
+
+/** The order the sweep runs a store's reasons in. */
+const CLEANUP_REASONS = [ListingAutoEndReason.OUT_OF_STOCK, ListingAutoEndReason.NOT_SELLING] as const;
 
 export interface ListingCleanupSummary {
   stores: number;
@@ -63,13 +59,17 @@ export class ListingCleanupService {
     }
 
     const stores = await this.databaseService.query<CleanupStoreRow>(
-      `SELECT a.id AS account_id, a.user_id,
-              s.listing_rules AS store_rules, g.listing_rules AS global_rules
+      // Only stores whose seller has a group with a clean-up rule on; the
+      // candidate queries then judge each listing by its own group.
+      `SELECT a.id AS account_id, a.user_id
          FROM ebay_accounts a
-         LEFT JOIN store_settings s ON s.user_id = a.user_id AND s.store_id = a.id
-         LEFT JOIN store_settings g ON g.user_id = a.user_id AND g.is_global = TRUE
         WHERE a.status = 'active'
-          AND (s.listing_rules IS NOT NULL OR g.listing_rules IS NOT NULL)
+          AND EXISTS (
+            SELECT 1 FROM listing_settings_groups gr
+             WHERE gr.user_id = a.user_id
+               AND (gr.listing_rules->>'outOfStockEndDays' IS NOT NULL
+                    OR (gr.listing_rules->>'coldListingAutoEnd')::boolean IS TRUE)
+          )
         ORDER BY a.id`
     );
 
@@ -77,10 +77,6 @@ export class ListingCleanupService {
     for (const store of stores) {
       if (summary.ended >= MAX_ENDED_PER_RUN) {
         break;
-      }
-      const plan = planListingCleanup(store.store_rules, store.global_rules);
-      if (!hasCleanupWork(plan)) {
-        continue;
       }
       // An unpaid account's automation is stopped everywhere else; ending its
       // listings while it cannot be refreshed would act on stale quantities.
@@ -94,11 +90,11 @@ export class ListingCleanupService {
       summary.stores += 1;
       let storeBudget = Math.min(MAX_ENDED_PER_STORE, MAX_ENDED_PER_RUN - summary.ended);
       try {
-        for (const step of cleanupSteps(plan)) {
+        for (const reason of CLEANUP_REASONS) {
           if (storeBudget <= 0) {
             break;
           }
-          const result = await this.endDueListings(store, step.reason, step.days, storeBudget);
+          const result = await this.endDueListings(store, reason, storeBudget);
           summary.ended += result.ended;
           summary.failed += result.failed;
           storeBudget -= result.ended + result.failed;
@@ -126,12 +122,11 @@ export class ListingCleanupService {
   private async endDueListings(
     store: CleanupStoreRow,
     reason: ListingAutoEndReason,
-    days: number,
     limit: number
   ): Promise<{ ended: number; failed: number }> {
     const candidates = await this.databaseService.query<{ id: string; ebay_offer_id: string }>(
       buildCleanupCandidateSql(reason),
-      [store.user_id, store.account_id, days, limit]
+      [store.user_id, store.account_id, limit]
     );
 
     let ended = 0;
