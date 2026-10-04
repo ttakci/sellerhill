@@ -255,6 +255,50 @@
         "manufacturer": "Fabricante",
         "category": "Categoría del producto"
       }
+    },
+    "rules": {
+      "title": "Reglas de publicación",
+      "subtitle": "Decide qué se publica antes de que se envíe algo a eBay",
+      "off": "Sin mínimo",
+      "brand": {
+        "title": "Protección de marcas",
+        "vero": "Protección VeRO",
+        "veroHint": "Omite productos de marcas conocidas por denunciar publicaciones a través del programa VeRO de eBay. eBay elimina una publicación denunciada y la cuenta en contra de tu cuenta.",
+        "veroOffWarning": "Con la protección desactivada, los productos de marcas que denuncian publicaciones en eBay se publican como cualquier otro. Una denuncia de VeRO puede hacer que tu cuenta de eBay quede restringida.",
+        "hideBrand": "No enviar la marca a eBay",
+        "hideBrandHint": "La publicación sale como «Sin marca»: la marca se quita del título y de las características del artículo, y no se envía código de barras ni número de pieza, porque el catálogo de eBay volvería a poner la marca."
+      },
+      "filters": {
+        "title": "Qué se puede publicar",
+        "minPrice": "Precio mín. en Amazon",
+        "maxPrice": "Precio máx. en Amazon",
+        "priceHint": "Deja un campo vacío si no quieres límite. Un producto con precio fuera del rango se omite, y la tarea muestra el motivo.",
+        "priceError": "El máximo no puede ser menor que el mínimo.",
+        "amazonShippedOnly": "Solo productos que Amazon envía por sí mismo",
+        "amazonShippedOnlyHint": "Omite una oferta que otro vendedor envía desde su propio stock. El pedido automático y el seguimiento funcionan mejor con productos que envía Amazon.",
+        "minRating": "Calificación mínima",
+        "minReviewCount": "Cantidad mínima de calificaciones",
+        "ratingHint": "Un producto que aún no tiene calificación se omite cuando hay un mínimo definido.",
+        "minRatingHint": "Entre 1.0 y 5.0, por ejemplo 4.5",
+        "minRatingError": "Ingresa una calificación entre 1.0 y 5.0."
+      },
+      "cleanup": {
+        "title": "Limpieza automática",
+        "outOfStock": "Finalizar una publicación que sigue sin stock",
+        "never": "Nunca",
+        "afterDays_one": "Después de {{count}} día",
+        "afterDays_many": "Después de {{count}} días",
+        "afterDays_other": "Después de {{count}} días",
+        "outOfStockHint": "La cuenta vuelve a empezar cada vez que el producto tiene stock de nuevo. Una publicación que pausaste tú nunca se finaliza. Una publicación finalizada libera su lugar en tu plan y no se vuelve a publicar automáticamente.",
+        "cold": "Vigilar las publicaciones que no se venden",
+        "coldHint": "Una publicación cuenta como que no se vende cuando no ha tenido ninguna venta durante la cantidad de días indicada abajo. Si nunca se vendió, los días se cuentan desde el día en que se creó.",
+        "coldDays": "Días sin ventas",
+        "coldDaysError": "Ingresa un número entero entre {{min}} y {{max}}.",
+        "coldMode": "Qué hacer con ellas",
+        "coldMode_flag": "Mostrármelas",
+        "coldMode_end": "Finalizarlas en eBay",
+        "coldEndWarning": "Las publicaciones se finalizan en eBay sin preguntarte antes y no vuelven por sí solas. Si prefieres revisarlas tú primero, elige «Mostrármelas»."
+      }
     }
   }
 }

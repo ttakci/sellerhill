@@ -254,6 +254,49 @@
         "manufacturer": "Üretici",
         "category": "Ürün kategorisi"
       }
+    },
+    "rules": {
+      "title": "Listeleme kuralları",
+      "subtitle": "eBay'e bir şey gönderilmeden önce neyin listeleneceğine karar verin",
+      "off": "Alt sınır yok",
+      "brand": {
+        "title": "Marka koruması",
+        "vero": "VeRO koruması",
+        "veroHint": "eBay'in VeRO programı üzerinden ilanları şikâyet ettiği bilinen markaların ürünlerini atlar. eBay şikâyet edilen ilanı kaldırır ve bunu hesabınızın aleyhine sayar.",
+        "veroOffWarning": "Koruma kapalıyken, eBay'de ilanları şikâyet eden markaların ürünleri de diğerleri gibi listelenir. Bir VeRO şikâyeti eBay hesabınızın kısıtlanmasına yol açabilir.",
+        "hideBrand": "Markayı eBay'e gönderme",
+        "hideBrandHint": "İlan Markasız olarak yayınlanır: marka başlıktan ve ürün özelliklerinden çıkarılır; barkod ve parça numarası da gönderilmez, çünkü eBay kataloğu markayı geri eklerdi."
+      },
+      "filters": {
+        "title": "Neler listelenebilir",
+        "minPrice": "En düşük Amazon fiyatı",
+        "maxPrice": "En yüksek Amazon fiyatı",
+        "priceHint": "Sınır istemiyorsanız alanı boş bırakın. Fiyatı aralığın dışında kalan ürün atlanır ve işte nedeni gösterilir.",
+        "priceError": "En yüksek fiyat, en düşük fiyattan küçük olamaz.",
+        "amazonShippedOnly": "Yalnızca Amazon'un kendi gönderdiği ürünler",
+        "amazonShippedOnlyHint": "Başka bir satıcının kendi stoğundan gönderdiği teklifleri atlar. Otomatik sipariş ve kargo takibi, Amazon'un gönderdiği ürünlerde en iyi çalışır.",
+        "minRating": "En düşük puan",
+        "minReviewCount": "En az değerlendirme sayısı",
+        "ratingHint": "Alt sınır belirlendiğinde, henüz puanı olmayan ürün atlanır.",
+        "minRatingHint": "1,0 ile 5,0 arası, örneğin 4,5",
+        "minRatingError": "1,0 ile 5,0 arasında bir puan girin."
+      },
+      "cleanup": {
+        "title": "Otomatik temizlik",
+        "outOfStock": "Stoksuz kalan ilanı bitir",
+        "never": "Hiçbir zaman",
+        "afterDays_one": "{{count}} gün sonra",
+        "afterDays_other": "{{count}} gün sonra",
+        "outOfStockHint": "Ürün yeniden stoğa girdiğinde sayım baştan başlar. Kendi duraklattığınız ilan asla bitirilmez. Bitirilen ilan planınızdaki yerini boşaltır ve otomatik olarak yeniden listelenmez.",
+        "cold": "Satmayan ilanları izle",
+        "coldHint": "Aşağıdaki gün sayısı boyunca hiç satış yapmayan ilan satmıyor sayılır. Hiç satmadıysa günler, ilanın oluşturulduğu günden itibaren sayılır.",
+        "coldDays": "Satışsız gün sayısı",
+        "coldDaysError": "{{min}} ile {{max}} arasında bir tam sayı girin.",
+        "coldMode": "Bunlara ne yapılsın",
+        "coldMode_flag": "Bana göster",
+        "coldMode_end": "eBay'de bitir",
+        "coldEndWarning": "İlanlar size sorulmadan eBay'de bitirilir ve kendiliğinden geri gelmez. Önce kendiniz incelemek isterseniz \"Bana göster\" seçeneğini seçin."
+      }
     }
   }
 }

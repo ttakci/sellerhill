@@ -116,63 +116,6 @@
       "description": "eBay elanlarınızda məhsulun yerləşdiyi məkan kimi dərc olunur. eBay alıcılara yalnız şəhəri, regionu və ölkəni göstərir.",
       "city": "Şəhər"
     },
-    "blacklistAction_remove": "Silinir, bloklanmır",
-    "listingRules": {
-      "title": "Elan qaydaları",
-      "subtitle": "eBay-ə nəsə göndərilməzdən əvvəl nələrin elan ediləcəyini müəyyən edin",
-      "off": "Minimum yoxdur",
-      "brand": {
-        "title": "Brend qorunması",
-        "vero": "VeRO qorunması",
-        "veroHint": "eBay-in VeRO proqramı vasitəsilə elanlara şikayət etdiyi bilinən brendlərin məhsullarını atlayır. eBay şikayət olunan elanı silir və bunu hesabınızın zərərinə sayır.",
-        "veroOffWarning": "Qorunma söndürülü olduqda, eBay-də elanlara şikayət edən brendlərin məhsulları digərləri kimi elan edilir. VeRO şikayəti eBay hesabınızın məhdudlaşdırılmasına səbəb ola bilər.",
-        "hideBrand": "Brendi eBay-ə göndərmə",
-        "hideBrandHint": "Elan Brendsiz kimi dərc olunur: brend başlıqdan və məhsul xüsusiyyətlərindən çıxarılır, ştrix-kod və hissə nömrəsi də göndərilmir, çünki eBay kataloqu brendi geri əlavə edərdi."
-      },
-      "filters": {
-        "title": "Nələr elan oluna bilər",
-        "minPrice": "Ən aşağı Amazon qiyməti",
-        "maxPrice": "Ən yüksək Amazon qiyməti",
-        "priceHint": "Limit istəmirsinizsə, sahəni boş buraxın. Qiyməti aralıqdan kənarda qalan məhsul atlanır və iş səbəbi göstərir.",
-        "priceError": "Maksimum minimumdan aşağı ola bilməz.",
-        "amazonShippedOnly": "Yalnız Amazon-un özünün göndərdiyi məhsullar",
-        "amazonShippedOnlyHint": "Başqa satıcının öz stokundan göndərdiyi təklifi atlayır. Avtomatik sifariş və izləmə Amazon-un göndərdiyi məhsullarla ən yaxşı işləyir.",
-        "minRating": "Minimum reytinq",
-        "ratingOption": "{{rating}} ulduz və yuxarı",
-        "minReviewCount": "Minimum qiymətləndirmə sayı",
-        "ratingHint": "Minimum təyin edildikdə, hələ reytinqi olmayan məhsul atlanır."
-      },
-      "blockedAsins": {
-        "title": "Bloklanmış ASIN-lər",
-        "placeholder": "Hər sətirdə bir ASIN və ya vergüllə ayrılmış",
-        "count": "Bu siyahıdakı etibarlı ASIN-lər: {{count}}"
-      },
-      "cleanup": {
-        "title": "Avtomatik təmizləmə",
-        "outOfStock": "Stoksuz qalan elanı bitir",
-        "never": "Heç vaxt",
-        "afterDays_one": "{{count}} gündən sonra",
-        "afterDays_other": "{{count}} gündən sonra",
-        "outOfStockHint": "Məhsul yenidən stoka düşdükdə say yenidən başlayır. Özünüzün dayandırdığınız elan heç vaxt bitirilmir. Bitirilən elan planınızdakı yerini boşaldır və avtomatik yenidən elan edilmir.",
-        "cold": "Satılmayan elanlara nəzarət et",
-        "coldHint": "Aşağıdakı gün sayı ərzində heç satışı olmayan elan satılmayan sayılır. Heç satılmayıbsa, günlər elanın yaradıldığı gündən hesablanır.",
-        "coldDays": "Satışsız gün sayı",
-        "coldDaysError": "{{min}} ilə {{max}} arasında tam ədəd daxil edin.",
-        "coldMode": "Onlarla nə edilsin",
-        "coldMode_flag": "Mənə göstər",
-        "coldMode_end": "eBay-də bitir",
-        "coldEndWarning": "Elanlar sizdən soruşulmadan eBay-də bitirilir və öz-özünə geri qayıtmır. Əvvəlcə özünüz nəzərdən keçirmək istəyirsinizsə, “Mənə göstər” seçimini edin."
-      },
-      "promoted": {
-        "title": "Promoted Listings (önə çıxarılan elanlar)",
-        "enable": "Yeni elanları önə çıxar",
-        "enableHint": "Buradan dərc olunan hər elan aşağıdakı reklam dərəcəsi ilə eBay-də bir kampaniyaya əlavə edilir. eBay bu dərəcəni yalnız məhsul reklam vasitəsilə satıldıqda tutur. Artıq yayımda olan elanlar dəyişmir.",
-        "rate": "Reklam dərəcəsi (%)",
-        "rateHint": "SellerHill-in hesabladığı qiymətə bu dərəcə daxil deyil. Mənfəətiniz planlaşdırdığınız kimi qalsın deyə dərəcəni elan parametr qrupunuzdakı eBay haqqına əlavə edin.",
-        "rateError": "{{min}} ilə {{max}} arasında dərəcə daxil edin.",
-        "ineligible": "eBay bu mağazaya hələlik Promoted Listings istifadə etməyə icazə vermir, bu dəyişənə qədər heç bir reklam işləməyəcək. Yeni elanlar yenə də həmişəki kimi dərc olunur.",
-        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay bu mağazaya hələlik Promoted Listings istifadə etməyə icazə vermir: son dövrdə satış fəaliyyətinin kifayət etmədiyini bildirir. Bu dəyişənə qədər heç bir reklam işləməyəcək. Yeni elanlar yenə də həmişəki kimi dərc olunur."
-      }
-    }
+    "blacklistAction_remove": "Silinir, bloklanmır"
   }
 }

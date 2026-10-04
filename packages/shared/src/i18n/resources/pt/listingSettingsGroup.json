@@ -255,6 +255,50 @@
         "manufacturer": "Fabricante",
         "category": "Categoria do produto"
       }
+    },
+    "rules": {
+      "title": "Regras de anúncios",
+      "subtitle": "Defina o que é anunciado antes de qualquer envio ao eBay",
+      "off": "Sem mínimo",
+      "brand": {
+        "title": "Proteção de marca",
+        "vero": "Proteção VeRO",
+        "veroHint": "Ignora produtos de marcas conhecidas por denunciar anúncios pelo programa VeRO do eBay. O eBay remove um anúncio denunciado e isso conta contra a sua conta.",
+        "veroOffWarning": "Com a proteção desativada, produtos de marcas que denunciam anúncios no eBay são anunciados como quaisquer outros. Uma denúncia VeRO pode levar à restrição da sua conta do eBay.",
+        "hideBrand": "Não enviar a marca ao eBay",
+        "hideBrandHint": "O anúncio é publicado como Sem marca: a marca é removida do título e das características, e nenhum código de barras ou número de peça é enviado, porque o catálogo do eBay colocaria a marca de volta."
+      },
+      "filters": {
+        "title": "O que pode ser anunciado",
+        "minPrice": "Preço mín. na Amazon",
+        "maxPrice": "Preço máx. na Amazon",
+        "priceHint": "Deixe um campo vazio para não ter limite. Um produto com preço fora do intervalo é ignorado, e a tarefa mostra o motivo.",
+        "priceError": "O máximo não pode ser menor que o mínimo.",
+        "amazonShippedOnly": "Somente produtos enviados pela própria Amazon",
+        "amazonShippedOnlyHint": "Ignora uma oferta enviada por outro vendedor a partir do estoque dele. Pedidos automáticos e rastreamento funcionam melhor com produtos enviados pela Amazon.",
+        "minRating": "Avaliação mínima",
+        "minReviewCount": "Número mínimo de avaliações",
+        "ratingHint": "Um produto ainda sem avaliação é ignorado quando um mínimo está definido.",
+        "minRatingHint": "Entre 1,0 e 5,0, por exemplo 4,5",
+        "minRatingError": "Informe uma avaliação entre 1,0 e 5,0."
+      },
+      "cleanup": {
+        "title": "Limpeza automática",
+        "outOfStock": "Encerrar um anúncio que continua sem estoque",
+        "never": "Nunca",
+        "afterDays_one": "Após {{count}} dia",
+        "afterDays_many": "Após {{count}} dias",
+        "afterDays_other": "Após {{count}} dias",
+        "outOfStockHint": "A contagem recomeça sempre que o produto volta ao estoque. Um anúncio que você mesmo pausou nunca é encerrado. Um anúncio encerrado libera a vaga no seu plano e não é anunciado de novo automaticamente.",
+        "cold": "Acompanhar anúncios que não vendem",
+        "coldHint": "Um anúncio é considerado sem vendas quando não teve nenhuma venda durante o número de dias abaixo. Se nunca vendeu, os dias são contados a partir do dia em que foi criado.",
+        "coldDays": "Dias sem venda",
+        "coldDaysError": "Digite um número inteiro entre {{min}} e {{max}}.",
+        "coldMode": "O que fazer com eles",
+        "coldMode_flag": "Mostrar para mim",
+        "coldMode_end": "Encerrar no eBay",
+        "coldEndWarning": "Os anúncios são encerrados no eBay sem perguntar antes e não voltam por conta própria. Para revisá-los primeiro, escolha \"Mostrar para mim\"."
+      }
     }
   }
 }

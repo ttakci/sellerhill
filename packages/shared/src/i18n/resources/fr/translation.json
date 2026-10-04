@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Consultez, modifiez et créez vos modèles de messages automatisés aux acheteurs",
         "manageBlacklist": "Gérer la liste noire",
         "manageBlacklistSubtitle": "Mots-clés à bloquer dans les titres, descriptions et caractéristiques des annonces",
-        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique.",
-        "listingRules": "Règles d'annonces",
-        "listingRulesSubtitle": "Protection des marques, ce qui peut être mis en ligne et nettoyage automatique"
+        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique."
       },
       "listingGroups": {
         "title": "Groupes de paramètres d'annonces",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} sélectionné(s)",
           "bulkDelete": "Supprimer la sélection",
           "confirmBulkDeleteDescription": "Supprimer {{count}} mot(s)-clé(s) de la liste noire ? Cette action est irréversible."
+        },
+        "blockedAsins": {
+          "title": "ASIN bloqués",
+          "hint": "Ces produits ne sont jamais mis en vente. Une boutique sans liste propre utilise la liste de toutes les boutiques.",
+          "placeholder": "Un ASIN par ligne, ou séparés par des virgules",
+          "count": "ASIN valides dans cette liste : {{count}}",
+          "inherited": "Cette boutique n'a pas de liste propre et utilise la liste de toutes les boutiques. La modifier ici crée une liste propre à cette boutique."
         }
       },
       "listingGroup": {

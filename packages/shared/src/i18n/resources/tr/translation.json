@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin ve oluşturun",
         "manageBlacklist": "Kara Listeyi Yönet",
         "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler",
-        "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır.",
-        "listingRules": "Listeleme kuralları",
-        "listingRulesSubtitle": "Marka koruması, nelerin listeleneceği ve otomatik temizlik"
+        "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır."
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} seçildi",
           "bulkDelete": "Seçilenleri sil",
           "confirmBulkDeleteDescription": "{{count}} kara liste kelimesi silinsin mi? Bu işlem geri alınamaz."
+        },
+        "blockedAsins": {
+          "title": "Engelli ASIN'ler",
+          "hint": "Bu ürünler hiç listelenmez. Kendi listesi olmayan mağaza, tüm mağazalar listesini kullanır.",
+          "placeholder": "Her satıra bir ASIN ya da virgülle ayırarak",
+          "count": "Bu listedeki geçerli ASIN sayısı: {{count}}",
+          "inherited": "Bu mağazanın kendi listesi yok, tüm mağazalar listesini kullanıyor. Burada düzenlerseniz bu mağazaya ait bir liste oluşur."
         }
       },
       "listingGroup": {

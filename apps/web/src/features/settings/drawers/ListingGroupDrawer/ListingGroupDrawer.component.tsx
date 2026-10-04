@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingGroupDrawer.style';
 import type { ListingGroupDrawerComponentProps, ListingGroupDrawerStep } from './ListingGroupDrawer.types';
+import { ListingRulesStep } from './ListingRulesStep';
 import { PriceCalculatorSection } from './PriceCalculatorSection';
 
 const blockNonNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -51,6 +52,7 @@ export const ListingGroupDrawerComponent = ({
   onBack,
   onSubmit,
   canProceed,
+  rulesStep,
 }: ListingGroupDrawerComponentProps) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { control, watch } = form;
@@ -60,6 +62,7 @@ export const ListingGroupDrawerComponent = ({
     t('listingSettingsGroup.generalSettings'),
     t('listingSettingsGroup.drawer.deductions'),
     t('listingSettingsGroup.pricingStrategy'),
+    t('listingSettingsGroup.rules.title'),
     t('listingSettingsGroup.htmlTemplate'),
   ];
 
@@ -377,7 +380,7 @@ export const ListingGroupDrawerComponent = ({
     </S.BodyStack>
   );
 
-  const isLastStep = currentStep === 3;
+  const isLastStep = currentStep === 4;
 
   const title = isEdit ? t('listingSettingsGroup.editGroup') : t('listingSettingsGroup.createNewGroup');
 
@@ -410,7 +413,10 @@ export const ListingGroupDrawerComponent = ({
       <S.StepPanel $active={currentStep === 0}>{renderGeneralStep()}</S.StepPanel>
       <S.StepPanel $active={currentStep === 1}>{renderDeductionsStep()}</S.StepPanel>
       <S.StepPanel $active={currentStep === 2}>{renderRepricingStep()}</S.StepPanel>
-      <S.StepPanel $active={currentStep === 3}>{renderTemplateStep()}</S.StepPanel>
+      <S.StepPanel $active={currentStep === 3}>
+        <ListingRulesStep {...rulesStep} />
+      </S.StepPanel>
+      <S.StepPanel $active={currentStep === 4}>{renderTemplateStep()}</S.StepPanel>
     </Drawer>
   );
 };

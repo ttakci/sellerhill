@@ -117,64 +117,6 @@
       "description": "Publicată ca locație a articolului în anunțurile dvs. eBay. eBay arată cumpărătorilor doar orașul, regiunea și țara.",
       "city": "Oraș"
     },
-    "blacklistAction_remove": "Eliminat, nu blocat",
-    "listingRules": {
-      "title": "Reguli pentru anunțuri",
-      "subtitle": "Decideți ce se publică înainte de a trimite ceva către eBay",
-      "off": "Fără minim",
-      "brand": {
-        "title": "Protecția brandului",
-        "vero": "Protecție VeRO",
-        "veroHint": "Omite produsele de la brandurile despre care se știe că raportează anunțuri prin programul VeRO al eBay. eBay elimină un anunț raportat și îl numără în dezavantajul contului dvs.",
-        "veroOffWarning": "Cu protecția dezactivată, produsele de la brandurile care raportează anunțuri pe eBay sunt publicate ca oricare altele. O raportare VeRO poate duce la restricționarea contului dvs. eBay.",
-        "hideBrand": "Nu trimite brandul către eBay",
-        "hideBrandHint": "Anunțul este publicat ca Fără brand: brandul este eliminat din titlu și din caracteristici, iar codul de bare și numărul piesei nu sunt trimise, deoarece catalogul eBay ar adăuga brandul la loc."
-      },
-      "filters": {
-        "title": "Ce poate fi publicat",
-        "minPrice": "Preț Amazon minim",
-        "maxPrice": "Preț Amazon maxim",
-        "priceHint": "Lăsați un câmp gol pentru a nu avea limită. Un produs cu prețul în afara intervalului este omis, iar sarcina arată motivul.",
-        "priceError": "Maximul nu poate fi mai mic decât minimul.",
-        "amazonShippedOnly": "Doar produsele pe care Amazon le expediază direct",
-        "amazonShippedOnlyHint": "Omite o ofertă expediată de alt vânzător din propriul stoc. Comanda automată și urmărirea funcționează cel mai bine cu produsele expediate de Amazon.",
-        "minRating": "Evaluare minimă",
-        "ratingOption": "{{rating}} stele sau mai mult",
-        "minReviewCount": "Număr minim de evaluări",
-        "ratingHint": "Un produs fără nicio evaluare este omis atunci când este setat un minim."
-      },
-      "blockedAsins": {
-        "title": "ASIN-uri blocate",
-        "placeholder": "Un ASIN pe linie sau separate prin virgulă",
-        "count": "ASIN-uri valide în această listă: {{count}}"
-      },
-      "cleanup": {
-        "title": "Curățare automată",
-        "outOfStock": "Încheie un anunț care rămâne fără stoc",
-        "never": "Niciodată",
-        "afterDays_one": "După {{count}} zi",
-        "afterDays_few": "După {{count}} zile",
-        "afterDays_other": "După {{count}} de zile",
-        "outOfStockHint": "Numărătoarea reîncepe de fiecare dată când produsul revine în stoc. Un anunț pe care l-ați pus singur în pauză nu este încheiat niciodată. Un anunț încheiat eliberează locul din plan și nu este republicat automat.",
-        "cold": "Urmărește anunțurile care nu se vând",
-        "coldHint": "Un anunț este considerat ca nevândut dacă nu a avut nicio vânzare timp de numărul de zile de mai jos. Dacă nu s-a vândut niciodată, zilele se numără de la data creării lui.",
-        "coldDays": "Zile fără vânzare",
-        "coldDaysError": "Introduceți un număr întreg între {{min}} și {{max}}.",
-        "coldMode": "Ce se face cu ele",
-        "coldMode_flag": "Arată-mi-le",
-        "coldMode_end": "Încheie-le pe eBay",
-        "coldEndWarning": "Anunțurile sunt încheiate pe eBay fără să fiți întrebat în prealabil și nu revin de la sine. Dacă doriți să le verificați mai întâi, alegeți „Arată-mi-le”."
-      },
-      "promoted": {
-        "title": "Promoted Listings (anunțuri promovate)",
-        "enable": "Promovează anunțurile noi",
-        "enableHint": "Fiecare anunț publicat de aici este adăugat într-o campanie pe eBay la tariful de reclamă de mai jos. eBay percepe tariful doar când un articol se vinde prin reclamă. Anunțurile deja active nu se schimbă.",
-        "rate": "Tarif de reclamă (%)",
-        "rateHint": "Prețul calculat de SellerHill nu include acest tarif. Adăugați-l la comisionul eBay din grupul de setări pentru anunțuri, ca profitul dvs. să rămână cel planificat.",
-        "rateError": "Introduceți un tarif între {{min}} și {{max}}.",
-        "ineligible": "eBay nu permite încă acestui magazin să folosească Promoted Listings, deci nicio reclamă nu va rula până se schimbă acest lucru. Anunțurile noi se publică în continuare ca de obicei.",
-        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay nu permite încă acestui magazin să folosească Promoted Listings: raportează activitate de vânzări recentă insuficientă. Nicio reclamă nu va rula până se schimbă acest lucru. Anunțurile noi se publică în continuare ca de obicei."
-      }
-    }
+    "blacklistAction_remove": "Eliminat, nu blocat"
   }
 }
