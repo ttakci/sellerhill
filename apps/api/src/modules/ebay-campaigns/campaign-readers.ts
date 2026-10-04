@@ -34,52 +34,94 @@ function str(value: unknown): string | null {
   return typeof value === 'string' && value !== '' ? value : null;
 }
 
+function pageTotal(value: unknown): number | null {
+  const total = num(value);
+  return total !== null && Number.isSafeInteger(total) && total >= 0 ? total : null;
+}
+
+function optionalBid(source: Obj): number | null | undefined {
+  if (!Object.prototype.hasOwnProperty.call(source, 'bidPercentage')) {
+    return null;
+  }
+  return num(source.bidPercentage) ?? undefined;
+}
+
 export function readCampaignsPage(body: unknown): { campaigns: ParsedCampaign[]; total: number | null } | null {
-  if (!isObj(body)) {
+  if (!isObj(body) || !Array.isArray(body.campaigns)) {
+    return null;
+  }
+  const total = pageTotal(body.total);
+  if (total === null) {
     return null;
   }
   const campaigns: ParsedCampaign[] = [];
-  for (const raw of Array.isArray(body.campaigns) ? body.campaigns : []) {
+  for (const raw of body.campaigns) {
     if (!isObj(raw)) {
-      continue;
+      return null;
     }
     const campaignId = str(raw.campaignId);
-    if (!campaignId) {
-      continue;
+    const name = str(raw.campaignName);
+    const status = str(raw.campaignStatus);
+    const funding = raw.fundingStrategy;
+    if (!campaignId || !name || !status || !isObj(funding) || !str(funding.fundingModel)) {
+      return null;
     }
-    const funding = isObj(raw.fundingStrategy) ? raw.fundingStrategy : {};
+    if (
+      (raw.campaignCriterion !== undefined && raw.campaignCriterion !== null && !isObj(raw.campaignCriterion)) ||
+      (funding.adRateStrategy !== undefined && funding.adRateStrategy !== null && !str(funding.adRateStrategy))
+    ) {
+      return null;
+    }
+    const bidPercentage = optionalBid(funding);
+    if (bidPercentage === undefined) {
+      return null;
+    }
+    const ruleBased = isObj(raw.campaignCriterion);
+    if (
+      status === 'RUNNING' && funding.fundingModel === 'COST_PER_SALE' &&
+      (funding.adRateStrategy === undefined || funding.adRateStrategy === 'FIXED') &&
+      !ruleBased && bidPercentage === null
+    ) {
+      return null;
+    }
     campaigns.push({
       campaignId,
-      name: str(raw.campaignName) ?? '',
-      status: str(raw.campaignStatus) ?? '',
+      name,
+      status,
       fundingModel: str(funding.fundingModel),
       adRateStrategy: str(funding.adRateStrategy),
-      bidPercentage: num(funding.bidPercentage),
-      ruleBased: isObj(raw.campaignCriterion),
+      bidPercentage,
+      ruleBased,
       startDate: str(raw.startDate),
       endDate: str(raw.endDate),
     });
   }
-  return { campaigns, total: num(body.total) };
+  return campaigns.length <= total ? { campaigns, total } : null;
 }
 
 export function readAdsPage(
   body: unknown
 ): { ads: Array<{ listingId: string; bidPercentage: number | null }>; total: number | null } | null {
-  if (!isObj(body)) {
+  if (!isObj(body) || !Array.isArray(body.ads)) {
+    return null;
+  }
+  const total = pageTotal(body.total);
+  if (total === null) {
     return null;
   }
   const ads: Array<{ listingId: string; bidPercentage: number | null }> = [];
-  for (const raw of Array.isArray(body.ads) ? body.ads : []) {
+  for (const raw of body.ads) {
     if (!isObj(raw)) {
-      continue;
+      return null;
     }
     const listingId = str(raw.listingId);
-    if (listingId) {
-      ads.push({ listingId, bidPercentage: num(raw.bidPercentage) });
+    const bidPercentage = optionalBid(raw);
+    if (!listingId || bidPercentage === undefined) {
+      return null;
     }
+    ads.push({ listingId, bidPercentage });
   }
-  return { ads, total: num(body.total) };
+  return ads.length <= total ? { ads, total } : null;
 }
 
 export function readBulkListingResponse(

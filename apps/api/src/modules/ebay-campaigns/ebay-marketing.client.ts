@@ -14,18 +14,49 @@ import {
   readEbayErrorIds,
 } from '../ebay/ebay-promoted.helpers';
 
+import { CAMPAIGN_PAGE_LIMIT } from './ebay-campaigns.constants';
+
 export type AccountContext = { accessToken: string; marketplaceId: string };
 
 const CAMPAIGN_START_LEAD_MS = 2 * 60 * 1000;
 const PATH = '/sell/marketing/v1/ad_campaign';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function matchesCreateRequest(
+  value: unknown,
+  request: { campaignName: string; startDate: string; marketplaceId: string; fundingStrategy: { fundingModel: string; adRateStrategy: string; bidPercentage: string } }
+): value is Record<string, unknown> & { campaignId: string } {
+  if (!isRecord(value) || !isRecord(value.fundingStrategy)) {
+    return false;
+  }
+  const funding = value.fundingStrategy;
+  return (
+    typeof value.campaignId === 'string' && value.campaignId !== '' &&
+    value.campaignName === request.campaignName &&
+    value.startDate === request.startDate &&
+    value.marketplaceId === request.marketplaceId &&
+    funding.fundingModel === request.fundingStrategy.fundingModel &&
+    funding.adRateStrategy === request.fundingStrategy.adRateStrategy &&
+    funding.bidPercentage === request.fundingStrategy.bidPercentage
+  );
+}
+
+function isAmbiguousCreateFailure(error: unknown): boolean {
+  return axios.isAxiosError(error) && (
+    !error.response || error.response.status === 429 || error.response.status >= 500
+  );
+}
 
 /**
  * Thin eBay Marketing API client (Promoted Listings, general strategy). No
  * service logic: every method is one documented call, budget-charged to the
  * `sell.marketing.ads.campaign` pool before each attempt.
  *
- * The writes are safe to retry: an ad that already exists answers 35036 and a
- * deleted one is simply gone.
+ * Campaign creation is sent once because an ambiguous 5xx or transport failure
+ * can mean eBay accepted the POST. Other calls use the shared retry policy.
  */
 @Injectable()
 export class EbayMarketingClient {
@@ -57,7 +88,7 @@ export class EbayMarketingClient {
 
   async getCampaigns(ctx: AccountContext, offset: number, priority: EbayCallPriority): Promise<unknown> {
     const response = await withEbayRateLimitRetry(
-      () => axios.get(this.base(), { params: { limit: 500, offset }, headers: this.headers(ctx) }),
+      () => axios.get(this.base(), { params: { limit: CAMPAIGN_PAGE_LIMIT, offset }, headers: this.headers(ctx) }),
       this.options(priority)
     );
     return response.data as unknown;
@@ -97,39 +128,26 @@ export class EbayMarketingClient {
     name: string,
     bid: string
   ): Promise<{ campaignId: string | null; nameTaken: boolean }> {
+    const request = {
+      campaignName: name,
+      startDate: formatCampaignDate(new Date(Date.now() + CAMPAIGN_START_LEAD_MS)),
+      marketplaceId: ctx.marketplaceId,
+      fundingStrategy: {
+        fundingModel: EBAY_FUNDING_MODEL_COST_PER_SALE,
+        adRateStrategy: 'FIXED',
+        bidPercentage: bid,
+      },
+    };
+    let postError: unknown;
     try {
       const response = await withEbayRateLimitRetry(
-        () =>
-          axios.post(
-            this.base(),
-            {
-              campaignName: name,
-              startDate: formatCampaignDate(new Date(Date.now() + CAMPAIGN_START_LEAD_MS)),
-              marketplaceId: ctx.marketplaceId,
-              fundingStrategy: {
-                fundingModel: EBAY_FUNDING_MODEL_COST_PER_SALE,
-                adRateStrategy: 'FIXED',
-                bidPercentage: bid,
-              },
-            },
-            { headers: this.headers(ctx, true) }
-          ),
-        this.options(EbayCallPriority.INTERACTIVE)
+        () => axios.post(this.base(), request, { headers: this.headers(ctx, true) }),
+        { ...this.options(EbayCallPriority.INTERACTIVE), maxAttempts: 1 }
       );
       const fromHeader = parseCampaignIdFromLocation((response.headers as Record<string, unknown> | undefined)?.location);
       if (fromHeader) {
         return { campaignId: fromHeader, nameTaken: false };
       }
-      const byName = await withEbayRateLimitRetry(
-        () =>
-          axios.get(`${this.base()}/get_campaign_by_name`, {
-            params: { campaign_name: name },
-            headers: this.headers(ctx),
-          }),
-        this.options(EbayCallPriority.INTERACTIVE)
-      );
-      const id = (byName.data as { campaignId?: unknown } | undefined)?.campaignId;
-      return { campaignId: typeof id === 'string' && id ? id : null, nameTaken: false };
     } catch (error: unknown) {
       if (
         axios.isAxiosError(error) &&
@@ -137,8 +155,35 @@ export class EbayMarketingClient {
       ) {
         return { campaignId: null, nameTaken: true };
       }
-      throw error;
+      if (!isAmbiguousCreateFailure(error)) {
+        throw error;
+      }
+      postError = error;
     }
+    try {
+      const byName = await withEbayRateLimitRetry(
+        () => axios.get(`${this.base()}/get_campaign_by_name`, {
+          params: { campaign_name: name },
+          headers: this.headers(ctx),
+        }),
+        this.options(EbayCallPriority.INTERACTIVE)
+      );
+      const campaign: unknown = byName.data;
+      if (matchesCreateRequest(campaign, request)) {
+        return { campaignId: campaign.campaignId, nameTaken: false };
+      }
+    } catch (error: unknown) {
+      if (error instanceof EbayBudgetExhaustedError) {
+        throw error;
+      }
+      if (!postError) {
+        throw error;
+      }
+    }
+    if (postError) {
+      throw postError;
+    }
+    throw new Error('eBay campaign create response could not be verified by name');
   }
 
   bulkCreateAds(ctx: AccountContext, campaignId: string, listingIds: string[], bid: string): Promise<unknown> {
@@ -181,7 +226,7 @@ export class EbayMarketingClient {
     );
   }
 
-  /** A 207 / 4xx still carries `responses[]`; hand that body back instead of throwing. */
+  /** Only documented per-item bulk responses can be handled by the caller. */
   private async bulk(ctx: AccountContext, campaignId: string, endpoint: string, body: unknown): Promise<unknown> {
     try {
       const response = await withEbayRateLimitRetry(
@@ -197,7 +242,8 @@ export class EbayMarketingClient {
         throw error;
       }
       const data: unknown = axios.isAxiosError(error) ? error.response?.data : undefined;
-      if (data !== undefined && data !== null && data !== '') {
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      if ((status === 400 || status === 207) && isRecord(data) && Array.isArray(data.responses) && !Array.isArray(data.errors)) {
         return data;
       }
       throw error;

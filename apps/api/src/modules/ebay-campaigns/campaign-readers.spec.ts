@@ -35,10 +35,23 @@ describe('readCampaignsPage', () => {
     });
     expect(page?.campaigns[1]).toMatchObject({ ruleBased: true, adRateStrategy: null, bidPercentage: null });
   });
-  it('drops a campaign without an id and refuses a non-object', () => {
-    expect(readCampaignsPage({ campaigns: [{ campaignName: 'x' }] })?.campaigns).toEqual([]);
+  it('rejects malformed pages and incomplete rate-critical campaigns', () => {
+    const valid = { campaignId: '1', campaignName: 'A', campaignStatus: 'RUNNING', fundingStrategy: { fundingModel: 'COST_PER_SALE', bidPercentage: '5.0' } };
+    expect(readCampaignsPage({ total: 1, campaigns: [{ campaignName: 'x' }] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [null] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, campaignStatus: null }] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, fundingStrategy: {} }] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, fundingStrategy: { fundingModel: 'COST_PER_SALE', bidPercentage: 'oops' } }] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, fundingStrategy: { fundingModel: 'COST_PER_SALE' } }] })).toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: 'bad' })).toBeNull();
+    expect(readCampaignsPage({ campaigns: [] })).toBeNull();
+    expect(readCampaignsPage({ errors: [{ errorId: 1 }] })).toBeNull();
     expect(readCampaignsPage(['x'])).toBeNull();
-    expect(readCampaignsPage({})).toEqual({ campaigns: [], total: null });
+    expect(readCampaignsPage({})).toBeNull();
+    expect(readCampaignsPage({ total: 0, campaigns: [] })).toEqual({ campaigns: [], total: 0 });
+    expect(readCampaignsPage({ total: 1, campaigns: [valid] })?.campaigns[0]).toMatchObject({ adRateStrategy: null, bidPercentage: 5 });
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, fundingStrategy: { fundingModel: 'COST_PER_CLICK' } }] })?.campaigns[0]).toMatchObject({ fundingModel: 'COST_PER_CLICK', bidPercentage: null });
+    expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, campaignCriterion: {}, fundingStrategy: { fundingModel: 'COST_PER_SALE' } }] })?.campaigns[0]).toMatchObject({ ruleBased: true, bidPercentage: null });
   });
 });
 
@@ -48,6 +61,17 @@ describe('readAdsPage', () => {
       total: 1,
       ads: [{ listingId: '318', bidPercentage: 7 }],
     });
+  });
+  it('rejects malformed pages and ads, while retaining an omitted bid for campaign fallback', () => {
+    expect(readAdsPage({ total: 0, ads: [] })).toEqual({ total: 0, ads: [] });
+    expect(readAdsPage({ total: 1, ads: [{ listingId: '318' }] })?.ads).toEqual([{ listingId: '318', bidPercentage: null }]);
+    expect(readAdsPage({ total: 1, ads: [{ adId: 'a' }] })).toBeNull();
+    expect(readAdsPage({ total: 1, ads: [{ listingId: '318', bidPercentage: 'bad' }] })).toBeNull();
+    expect(readAdsPage({ total: 1, ads: [null] })).toBeNull();
+    expect(readAdsPage({ total: 1, ads: 'bad' })).toBeNull();
+    expect(readAdsPage({ ads: [] })).toBeNull();
+    expect(readAdsPage({ errors: [{ errorId: 1 }] })).toBeNull();
+    expect(readAdsPage(null)).toBeNull();
   });
 });
 
@@ -67,5 +91,11 @@ describe('readBulkListingResponse', () => {
       { listingId: '2', ok: false, errorIds: [35036] },
       { listingId: '3', ok: false, errorIds: [] },
     ]);
+  });
+  it('does not treat missing or malformed response entries as success', () => {
+    expect(readBulkListingResponse({}, ['1'])).toEqual([{ listingId: '1', ok: false, errorIds: [] }]);
+    expect(readBulkListingResponse({ responses: 'bad' }, ['1'])).toEqual([{ listingId: '1', ok: false, errorIds: [] }]);
+    expect(readBulkListingResponse({ responses: [{ listingId: '1', statusCode: '200' }] }, ['1']))
+      .toEqual([{ listingId: '1', ok: true, errorIds: [] }]);
   });
 });

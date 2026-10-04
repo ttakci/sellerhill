@@ -1,5 +1,7 @@
-import { EbayApiResource, EbayCallPriority } from '@repo/shared';
+import { CampaignAction, EbayApiResource, EbayCallPriority } from '@repo/shared';
 import axios from 'axios';
+
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 
 import { EbayMarketingClient } from './ebay-marketing.client';
 
@@ -10,6 +12,17 @@ function build() {
   const config = { get: jest.fn().mockReturnValue('https://api.test') };
   const client = new EbayMarketingClient(config as never, { acquire } as never);
   return { client, acquire };
+}
+
+function axiosError(status: number, data: unknown) {
+  return Object.assign(new Error(`HTTP ${status}`), { isAxiosError: true, response: { status, data } });
+}
+
+function matchingCampaign(startDate: string) {
+  return {
+    campaignId: '9876', campaignName: 'N', marketplaceId: ctx.marketplaceId, startDate,
+    fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: 'FIXED', bidPercentage: '5.0' },
+  };
 }
 
 describe('EbayMarketingClient', () => {
@@ -36,19 +49,95 @@ describe('EbayMarketingClient', () => {
 
   it('createCampaign reports a taken name (35021)', async () => {
     const { client } = build();
-    const error = Object.assign(new Error('x'), {
-      isAxiosError: true,
-      response: { status: 409, data: { errors: [{ errorId: 35021 }] } },
-    });
-    jest.spyOn(axios, 'post').mockRejectedValue(error);
+    const post = jest.spyOn(axios, 'post').mockRejectedValue(axiosError(409, { errors: [{ errorId: 35021 }] }));
+    const get = jest.spyOn(axios, 'get');
     await expect(client.createCampaign(ctx, 'N', '5.0')).resolves.toEqual({ campaignId: null, nameTaken: true });
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(get).not.toHaveBeenCalled();
   });
 
-  it('a bulk 207 body inside an axios error is returned, not thrown', async () => {
+  it('resolves a successful create without Location using matching by-name attributes', async () => {
+    const { client } = build();
+    const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: {}, headers: {} });
+    const get = jest.spyOn(axios, 'get').mockImplementation(() => Promise.resolve({
+      data: matchingCampaign((post.mock.calls[0][1] as { startDate: string }).startDate),
+    }));
+    await expect(client.createCampaign(ctx, 'N', '5.0')).resolves.toEqual({ campaignId: '9876', nameTaken: false });
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect((get.mock.calls[0][1] as { params: unknown }).params).toEqual({ campaign_name: 'N' });
+  });
+
+  it('resolves an ambiguous create after one POST only when by-name matches the request', async () => {
+    const { client, acquire } = build();
+    const post = jest.spyOn(axios, 'post').mockRejectedValue(axiosError(500, { errors: [] }));
+    jest.spyOn(axios, 'get').mockImplementation(() => Promise.resolve({
+      data: matchingCampaign((post.mock.calls[0][1] as { startDate: string }).startDate),
+    }));
+    await expect(client.createCampaign(ctx, 'N', '5.0')).resolves.toEqual({ campaignId: '9876', nameTaken: false });
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(acquire).toHaveBeenCalledTimes(2);
+  });
+
+  it('never adopts an unrelated by-name campaign after an ambiguous create', async () => {
+    const { client } = build();
+    const error = axiosError(500, { errors: [] });
+    const post = jest.spyOn(axios, 'post').mockRejectedValue(error);
+    jest.spyOn(axios, 'get').mockImplementation(() => Promise.resolve({
+      data: {
+        ...matchingCampaign((post.mock.calls[0][1] as { startDate: string }).startDate),
+        fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: 'FIXED', bidPercentage: '7.0' },
+      },
+    }));
+    await expect(client.createCampaign(ctx, 'N', '5.0')).rejects.toBe(error);
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not adopt an unrelated campaign after a successful POST with no Location', async () => {
+    const { client } = build();
+    const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: {}, headers: {} });
+    jest.spyOn(axios, 'get').mockImplementation(() => Promise.resolve({
+      data: { ...matchingCampaign((post.mock.calls[0][1] as { startDate: string }).startDate), marketplaceId: 'EBAY_GB' },
+    }));
+    await expect(client.createCampaign(ctx, 'N', '5.0')).rejects.toThrow('could not be verified');
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns documented per-item 400 responses and a resolved 207 response', async () => {
     const { client } = build();
     const body = { responses: [{ listingId: '1', statusCode: 400 }] };
-    const error = Object.assign(new Error('x'), { isAxiosError: true, response: { status: 207, data: body } });
-    jest.spyOn(axios, 'post').mockRejectedValue(error);
+    const post = jest.spyOn(axios, 'post').mockRejectedValueOnce(axiosError(400, body)).mockResolvedValueOnce({ status: 207, data: body });
     await expect(client.bulkCreateAds(ctx, 'c1', ['1'], '5.0')).resolves.toEqual(body);
+    await expect(client.bulkCreateAds(ctx, 'c1', ['1'], '5.0')).resolves.toEqual(body);
+    expect(post).toHaveBeenCalledTimes(2);
+  });
+
+  it('rethrows request, auth, transport and budget failures', async () => {
+    const { client, acquire } = build();
+    const post = jest.spyOn(axios, 'post');
+    for (const error of [
+      axiosError(400, { errors: [{ errorId: 35035 }] }),
+      axiosError(401, { errors: [{ errorId: 1 }] }),
+      axiosError(401, { responses: [{ listingId: '1', statusCode: 401 }] }),
+      axiosError(403, { errors: [{ errorId: 1 }] }),
+      new Error('connection closed'),
+    ]) {
+      post.mockRejectedValueOnce(error);
+      await expect(client.bulkDeleteAds(ctx, 'c1', ['1'])).rejects.toBe(error);
+    }
+    const budgetError = new EbayBudgetExhaustedError('marketing', new Date('2026-10-05T00:00:00Z'));
+    acquire.mockRejectedValueOnce(budgetError);
+    await expect(client.bulkUpdateBids(ctx, 'c1', ['1'], '5.0')).rejects.toBe(budgetError);
+    expect(post).toHaveBeenCalledTimes(5);
+  });
+
+  it('sends the documented action URL and default rate body', async () => {
+    const { client } = build();
+    const post = jest.spyOn(axios, 'post').mockResolvedValue({ data: {} });
+    await client.updateDefaultRate(ctx, 'c/1', '5.0');
+    await client.campaignAction(ctx, 'c/1', CampaignAction.PAUSE);
+    expect(post.mock.calls[0][0]).toBe('https://api.test/sell/marketing/v1/ad_campaign/c%2F1/update_ad_rate_strategy');
+    expect(post.mock.calls[0][1]).toEqual({ adRateStrategy: 'FIXED', bidPercentage: '5.0' });
+    expect(post.mock.calls[1][0]).toBe('https://api.test/sell/marketing/v1/ad_campaign/c%2F1/pause');
   });
 });
