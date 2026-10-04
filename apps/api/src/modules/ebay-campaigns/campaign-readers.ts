@@ -79,7 +79,7 @@ export function readCampaignsPage(body: unknown): { campaigns: ParsedCampaign[];
     const ruleBased = isObj(raw.campaignCriterion);
     if (
       status === 'RUNNING' && funding.fundingModel === 'COST_PER_SALE' &&
-      (funding.adRateStrategy === undefined || funding.adRateStrategy === 'FIXED') &&
+      (str(funding.adRateStrategy) ?? 'FIXED') === 'FIXED' &&
       !ruleBased && bidPercentage === null
     ) {
       return null;

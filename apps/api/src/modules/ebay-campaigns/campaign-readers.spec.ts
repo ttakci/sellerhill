@@ -53,6 +53,21 @@ describe('readCampaignsPage', () => {
     expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, fundingStrategy: { fundingModel: 'COST_PER_CLICK' } }] })?.campaigns[0]).toMatchObject({ fundingModel: 'COST_PER_CLICK', bidPercentage: null });
     expect(readCampaignsPage({ total: 1, campaigns: [{ ...valid, campaignCriterion: {}, fundingStrategy: { fundingModel: 'COST_PER_SALE' } }] })?.campaigns[0]).toMatchObject({ ruleBased: true, bidPercentage: null });
   });
+
+  it('rejects a running CPS campaign with null strategy and no fallback bid', () => {
+    const campaign = {
+      campaignId: '1', campaignName: 'A', campaignStatus: 'RUNNING',
+      fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: null },
+    };
+    expect(readAdsPage({ total: 1, ads: [{ listingId: '318' }] })?.ads[0]).toEqual({
+      listingId: '318', bidPercentage: null,
+    });
+    expect(readCampaignsPage({ total: 1, campaigns: [campaign] })).toBeNull();
+    expect(readCampaignsPage({
+      total: 1,
+      campaigns: [{ ...campaign, fundingStrategy: { ...campaign.fundingStrategy, bidPercentage: '5.0' } }],
+    })?.campaigns[0]).toMatchObject({ adRateStrategy: null, bidPercentage: 5 });
+  });
 });
 
 describe('readAdsPage', () => {
