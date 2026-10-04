@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "Satıcı ID",
         "connectedSince": "Bağlanma Tarihi",
+        "reconnect": {
+          "action": "Yeniden bağla",
+          "hint": "Bu mağazanın izinlerini yenilemek için eBay'e yeniden giriş yapın. Mağaza, siparişleri ve ilanları olduğu gibi kalır; önce koparmanıza gerek yok."
+        },
         "disconnect": {
           "action": "Bağlantıyı Kes",
           "confirmDescription": "Bağlantıyı kestiğinizde bu mağaza için sipariş senkronizasyonu, otomatik satın alma ve kargo takibi güncellemeleri durur. Mevcut siparişleriniz ve ilanlarınız korunur; mağazayı tekrar bağladığınızda her şey geri gelir. eBay tarafındaki yetkiyi de kaldırmak isterseniz, eBay hesabınızdaki \"Üçüncü taraf uygulama erişimi\" ayarlarından SellerHill'i kaldırın.",

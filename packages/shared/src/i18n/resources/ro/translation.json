@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "ID vânzător",
         "connectedSince": "Conectat din",
+        "reconnect": {
+          "action": "Reconectează",
+          "hint": "Autentifică-te din nou în eBay pentru a reînnoi permisiunile acestui magazin. Magazinul, comenzile și anunțurile lui rămân neschimbate — nu e nevoie să îl deconectezi mai întâi."
+        },
         "disconnect": {
           "action": "Deconectează",
           "confirmDescription": "Deconectarea oprește sincronizarea comenzilor, achiziționarea automată și actualizările de urmărire pentru acest magazin. Comenzile și anunțurile existente sunt păstrate, iar reconectarea magazinului ulterior restabilește totul. Pentru a retrage accesul și din partea eBay, eliminați SellerHill din setările eBay „Third-party app access”.",

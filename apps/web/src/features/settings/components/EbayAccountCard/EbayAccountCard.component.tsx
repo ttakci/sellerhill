@@ -1,4 +1,5 @@
-import { Button, Icon, StatusBadge, Text } from '@repo/ui';
+import { EbayAccountStatus } from '@repo/shared';
+import { Button, Icon, StatusBadge, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,8 +13,16 @@ import { getEbayAccountStatusLabel } from '@/features/ebay/utils/ebayAccountStat
  * Amazon's credential-based accounts). The one action it carries is
  * disconnect, and only where a handler is supplied.
  */
-export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store, onDisconnect, isDisconnecting }) => {
+export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({
+  store,
+  onDisconnect,
+  isDisconnecting,
+  onReconnect,
+  isReconnecting,
+}) => {
   const { t } = useTranslation(['translation']);
+  const canReconnect =
+    Boolean(onReconnect) && (store.status === EbayAccountStatus.ACTIVE || store.status === EbayAccountStatus.REVOKED);
 
   return (
     <S.CardRoot variant="bordered" padding="none">
@@ -23,7 +32,9 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store, onDisco
             <Text variant="caption" color="text.tertiary">
               {t('translation:settingsHub.sections.ebay.sellerId')}: {store.sellerId}
             </Text>
-            <Text variant="body" weight="semibold">{store.displayName}</Text>
+            <Text variant="body" weight="semibold">
+              {store.displayName}
+            </Text>
           </S.StoreIdText>
           <StatusBadge status={store.status} size="sm">
             {getEbayAccountStatusLabel(store.status, t)}
@@ -45,18 +56,38 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store, onDisco
           </S.StoreMetaLine>
         </S.StoreMetaList>
 
-        {onDisconnect && (
+        {(onDisconnect || canReconnect) && (
           <S.StoreActions>
-            <Button
-              variant="danger-tint"
-              size="small"
-              onClick={() => onDisconnect(store.id)}
-              isLoading={isDisconnecting}
-            >
-              <Text variant="body-sm" weight="semibold">
-                {t('translation:settingsHub.sections.ebay.disconnect.action')}
-              </Text>
-            </Button>
+            {canReconnect && onReconnect && (
+              <Tooltip
+                content={t('translation:settingsHub.sections.ebay.reconnect.hint')}
+                position="top"
+                variant="dark"
+              >
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => onReconnect(store.id)}
+                  isLoading={isReconnecting}
+                >
+                  <Text variant="body-sm" weight="semibold">
+                    {t('translation:settingsHub.sections.ebay.reconnect.action')}
+                  </Text>
+                </Button>
+              </Tooltip>
+            )}
+            {onDisconnect && (
+              <Button
+                variant="danger-tint"
+                size="small"
+                onClick={() => onDisconnect(store.id)}
+                isLoading={isDisconnecting}
+              >
+                <Text variant="body-sm" weight="semibold">
+                  {t('translation:settingsHub.sections.ebay.disconnect.action')}
+                </Text>
+              </Button>
+            )}
           </S.StoreActions>
         )}
       </S.StoreMain>

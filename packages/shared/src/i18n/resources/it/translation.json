@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "ID venditore",
         "connectedSince": "Collegato dal",
+        "reconnect": {
+          "action": "Ricollega",
+          "hint": "Accedi di nuovo a eBay per rinnovare le autorizzazioni di questo negozio. Il negozio, i suoi ordini e le sue inserzioni restano invariati: non serve scollegarlo prima."
+        },
         "disconnect": {
           "action": "Scollega",
           "confirmDescription": "Scollegando il negozio si interrompono la sincronizzazione degli ordini, gli acquisti automatici e gli aggiornamenti di tracciamento. Gli ordini e le inserzioni esistenti vengono conservati e, ricollegando il negozio in seguito, tutto viene ripristinato. Per revocare l'accesso anche dal lato di eBay, rimuovi SellerHill dalle impostazioni «Accesso di app di terze parti» di eBay.",

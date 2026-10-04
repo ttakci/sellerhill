@@ -214,6 +214,8 @@ export const SettingsHubPageComponent = ({
   onCancelDisconnectEbay,
   pendingDisconnectId,
   disconnectingEbayId,
+  onReconnectEbay,
+  reconnectingEbayId,
   ebayMarketplaceOptions,
   selectedEbayMarketplace,
   onEbayMarketplaceChange,
@@ -269,6 +271,8 @@ export const SettingsHubPageComponent = ({
         onViewAll={() => onOpenDrawer('ebayAccountsAll')}
         onDisconnect={onRequestDisconnectEbay}
         disconnectingId={disconnectingEbayId}
+        onReconnect={onReconnectEbay}
+        reconnectingId={reconnectingEbayId}
         marketplaceOptions={ebayMarketplaceOptions}
         selectedMarketplace={selectedEbayMarketplace}
         onMarketplaceChange={onEbayMarketplaceChange}
@@ -278,6 +282,8 @@ export const SettingsHubPageComponent = ({
         onClose={onCloseDrawer}
         onBack={() => onOpenDrawer('ebayAccounts')}
         accounts={ebayAccounts}
+        onReconnect={onReconnectEbay}
+        reconnectingId={reconnectingEbayId}
       />
       <AmazonAccountDrawer
         isOpen={activeDrawer === 'amazonAdd' || activeDrawer === 'amazonEdit'}
