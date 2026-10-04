@@ -14,7 +14,7 @@ import type { QuickActionCardVariant } from './QuickActionCard.types';
  */
 export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
   background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
-    $variant === 'solid' ? theme.colors.brand.gradient : theme.colors.surface.primary};
+    $variant === 'solid' ? theme.colors.sidebar.background : theme.colors.surface.primary};
   border: 0.0625rem solid
     ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
       $variant === 'solid' ? 'transparent' : theme.colors.border.primary}; /* 1px */
