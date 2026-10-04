@@ -94,30 +94,26 @@ export const ListingCard = ({
           </S.Image>
 
           <S.Content>
-            {[meta.filter((item) => item.column !== 'secondary'), meta.filter((item) => item.column === 'secondary')]
-              .filter((column) => column.length > 0)
-              .map((column) => (
-                <S.MetaList key={column[0].label}>
-                  {column.map((item) => (
-                    <React.Fragment key={`${item.label}-${item.value}`}>
-                      <S.MetaLabel>
-                        <Text variant="caption" color="text.secondary">
-                          {item.label}
-                        </Text>
-                      </S.MetaLabel>
-                      <S.MetaValue>
-                        {item.storeType ? (
-                          <IdBadge id={item.value} storeType={item.storeType} size="sm" />
-                        ) : (
-                          <S.MetaValueText variant="body-sm" color="text.primary">
-                            {item.value}
-                          </S.MetaValueText>
-                        )}
-                      </S.MetaValue>
-                    </React.Fragment>
-                  ))}
-                </S.MetaList>
+            <S.MetaList>
+              {meta.map((item) => (
+                <React.Fragment key={`${item.label}-${item.value}`}>
+                  <S.MetaLabel>
+                    <Text variant="caption" color="text.secondary">
+                      {item.label}
+                    </Text>
+                  </S.MetaLabel>
+                  <S.MetaValue>
+                    {item.storeType ? (
+                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
+                    ) : (
+                      <S.MetaValueText variant="body-sm" weight="semibold" color="text.primary">
+                        {item.value}
+                      </S.MetaValueText>
+                    )}
+                  </S.MetaValue>
+                </React.Fragment>
               ))}
+            </S.MetaList>
           </S.Content>
         </S.Body>
       </S.Top>

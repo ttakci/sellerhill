@@ -17,11 +17,12 @@ const DEFAULT_REST_BASE = 'https://api.ebay.com';
 /**
  * eBay Finances API, read-only (`sell.finances` scope).
  *
- * The Finances API is served from `apiz.ebay.com` (the local OpenAPI's first
- * server, and the same host rule as the Identity API), so the usual REST base
- * is rewritten `api.` → `apiz.`. Every attempt is charged to the shared
- * `payoutapi.sell.finances` pool (15,000/day for the whole application) at
- * BACKGROUND priority. The body is returned as eBay sent it — nothing here
+ * Host: the local OpenAPI (`sell-finances-v1-oas3.json`) overrides `servers`
+ * for `/billing_activity` alone and names `https://api.ebay.com` — the other
+ * Finances paths are served from `apiz.ebay.com`, and this one answers 404
+ * there (production, 2026-10-04). So the usual REST base is used as is.
+ * Every attempt is charged to the shared `payoutapi.sell.finances` pool
+ * (15,000/day for the whole application) at BACKGROUND priority. The body is returned as eBay sent it — nothing here
  * interprets a billing line, and nothing is ever logged from it.
  */
 @Injectable()
@@ -53,7 +54,6 @@ export class FinancesClient {
   }
 
   private baseUrl(): string {
-    const rest = this.config.get<string>('EBAY_REST_API_URL') || DEFAULT_REST_BASE;
-    return rest.replace(/^(https?:\/\/)api\./, '$1apiz.');
+    return this.config.get<string>('EBAY_REST_API_URL') || DEFAULT_REST_BASE;
   }
 }
