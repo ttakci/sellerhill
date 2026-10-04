@@ -140,6 +140,10 @@
       "min": "最小",
       "max": "最大",
       "sourceStockNote": "无法得知高于 20 的库存；“20+”按 20 计算。",
+      "resultListed": "已列出 <b>{{count}}</b> 个结果",
+      "sortLabel": "排序：",
+      "listedFrom": "上架日期自",
+      "listedTo": "上架日期至",
       "fields": {
         "price": "售价",
         "purchasePrice": "进价",

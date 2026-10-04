@@ -88,6 +88,12 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       columnOptions={props.columnOptions}
       visibleColumnKeys={props.visibleColumnKeys}
       onToggleColumn={props.onToggleColumn}
+      onMoveColumn={props.onMoveColumn}
+      resultLabel={props.resultLabel}
+      sortOptions={props.sortOptions}
+      sortValue={props.sortValue}
+      onSortChange={props.onSortChange}
+      sortLabel={props.sortLabel}
       columnManagerLabel={props.columnManagerLabel}
       sortColumn={props.sortColumn}
       sortDirection={props.sortDirection}

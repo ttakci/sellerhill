@@ -33,12 +33,16 @@ export const ListingsAllPage: React.FC = () => {
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
   const [visibleColumnKeys, setVisibleColumnKeys] = useState<string[]>([
     'product',
+    'category',
     'prices',
-    'quantity',
-    'sold',
-    'lastSale',
+    'purchasePrice',
     'profit',
+    'roi',
+    'profitMargin',
     'createdAt',
+    'lastSale',
+    'sold',
+    'quantity',
   ]);
 
   const {
@@ -49,6 +53,7 @@ export const ListingsAllPage: React.FC = () => {
     sortColumn,
     sortDirection,
     handleSort,
+    handleSortChange,
     filters,
     serverQuery,
     advancedOpen,
@@ -62,6 +67,7 @@ export const ListingsAllPage: React.FC = () => {
     statusOptions,
     trackingOptions,
     numericFilters,
+    dateFilters,
     activeFilterChips,
     fromDashboard,
   } = useListingsFilters();
@@ -110,10 +116,57 @@ export const ListingsAllPage: React.FC = () => {
 
   const { columnOptions, allColumns } = useListingsColumns(localeCfg.locale);
 
-  const filteredColumns = useMemo(
-    () => allColumns.filter((col) => visibleColumnKeys.includes(col.key || '')),
-    [allColumns, visibleColumnKeys]
+  // Display order of the columns (the Customize popover moves them); keys the
+  // seller has not placed yet follow in their default order.
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const all = allColumns.map((col) => col.key || '');
+    return [...columnOrder.filter((k) => all.includes(k)), ...all.filter((k) => !columnOrder.includes(k))];
+  }, [allColumns, columnOrder]);
+
+  const orderedColumnOptions = useMemo(
+    () =>
+      orderedKeys
+        .map((key) => columnOptions.find((opt) => opt.key === key))
+        .filter((opt): opt is (typeof columnOptions)[number] => Boolean(opt)),
+    [orderedKeys, columnOptions]
   );
+
+  const filteredColumns = useMemo(
+    () =>
+      orderedKeys
+        .filter((key) => visibleColumnKeys.includes(key))
+        .map((key) => allColumns.find((col) => col.key === key))
+        .filter((col): col is (typeof allColumns)[number] => Boolean(col)),
+    [allColumns, orderedKeys, visibleColumnKeys]
+  );
+
+  const moveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys]
+  );
+
+  // One entry per sortable field and direction; labels reuse the column names.
+  const sortOptions = useMemo(
+    () =>
+      columnOptions
+        .filter((opt) => opt.key !== 'category')
+        .flatMap((opt) => [
+          { value: `${opt.key}:desc`, label: `${opt.label} ↓` },
+          { value: `${opt.key}:asc`, label: `${opt.label} ↑` },
+        ]),
+    [columnOptions]
+  );
+  const sortValue = `${serverQuery.sortBy ?? 'createdAt'}:${serverQuery.sortOrder ?? 'desc'}`;
 
   const selectedRows = useMemo(
     () => listings.filter((l) => selectedListingIds.includes(l.id)),
@@ -421,9 +474,13 @@ export const ListingsAllPage: React.FC = () => {
           labelRowsPerPage: t('translation:common.rowsPerPage'),
           labelInfo: t('translation:common.showing_info'),
         }}
-        columnOptions={columnOptions}
+        columnOptions={orderedColumnOptions}
         visibleColumnKeys={visibleColumnKeys}
         onToggleColumn={toggleColumn}
+        onMoveColumn={moveColumn}
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={handleSortChange}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={handleSort}
@@ -436,6 +493,7 @@ export const ListingsAllPage: React.FC = () => {
         onTrackingStateChange={handleTrackingStateChange}
         trackingOptions={trackingOptions}
         numericFilters={numericFilters}
+        dateFilters={dateFilters}
         activeFilterChips={activeFilterChips}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}

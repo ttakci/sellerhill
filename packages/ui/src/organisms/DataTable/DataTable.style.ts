@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 
+import { Text } from '../../atoms/Text';
 import { tkn } from '../../theme/tkn';
 
 export const DataTableContainer = styled.div`
@@ -26,8 +27,20 @@ export const ToolbarLeft = styled.div`
 
 export const ToolbarRight = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: ${tkn('spacing.xs')};
+`;
+
+/** Result summary left of the sort picker, e.g. "8 results". */
+export const ResultSummary = styled(Text)`
+  white-space: nowrap;
+  margin-right: ${tkn('spacing.sm')};
+`;
+
+export const SortWrapper = styled.div`
+  min-width: 12rem;
 `;
 
 export const BulkSelectWrapper = styled.div`
@@ -179,4 +192,18 @@ export const ColumnManagerContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
+`;
+
+/** One column in the manager: checkbox on the left, move buttons on the right. */
+export const ColumnRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const ColumnMoveButtons = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 `;

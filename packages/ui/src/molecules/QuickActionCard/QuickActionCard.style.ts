@@ -13,8 +13,13 @@ import type { QuickActionCardVariant } from './QuickActionCard.types';
  * to match instead of shrinking.
  */
 export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
-  background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+  background-color: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
     $variant === 'solid' ? theme.colors.sidebar.background : theme.colors.surface.primary};
+  /* Same lights as the sidebar rail so the solid card reads as the same navy. */
+  background-image: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
+    $variant === 'solid'
+      ? `radial-gradient(30rem 22rem at 0% 0%, ${theme.colors.sidebar.glow}, transparent 70%), radial-gradient(24rem 30rem at 100% 100%, ${theme.colors.sidebar.glowAlt}, transparent 70%)`
+      : 'none'};
   border: 0.0625rem solid
     ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
       $variant === 'solid' ? 'transparent' : theme.colors.border.primary}; /* 1px */

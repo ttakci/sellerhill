@@ -69,6 +69,17 @@ export interface DataTableProps<T> {
   visibleColumnKeys?: string[];
   /** Callback to toggle a column's visibility */
   onToggleColumn?: (key: string) => void;
+  /** Moves a column one place earlier (-1) or later (1) */
+  onMoveColumn?: (key: string, direction: -1 | 1) => void;
+  /** Already-translated result summary ("8 results"), shown left of the sort control. */
+  resultLabel?: React.ReactNode;
+  /** Sort picker options, one per field and direction. */
+  sortOptions?: { value: string; label: string }[];
+  /** Currently selected sort option value. */
+  sortValue?: string;
+  onSortChange?: (value: string | number) => void;
+  /** Accessible name for the sort picker (i18n). */
+  sortLabel?: string;
   /** Header label for column manager popover (i18n) */
   columnManagerLabel?: string;
 
@@ -129,6 +140,17 @@ export interface DataTableComponentProps<T> {
   columnOptions?: ColumnOption[];
   visibleColumnKeys?: string[];
   onToggleColumn?: (key: string) => void;
+  /** Moves a column one place earlier (-1) or later (1) */
+  onMoveColumn?: (key: string, direction: -1 | 1) => void;
+  /** Already-translated result summary ("8 results"), shown left of the sort control. */
+  resultLabel?: React.ReactNode;
+  /** Sort picker options, one per field and direction. */
+  sortOptions?: { value: string; label: string }[];
+  /** Currently selected sort option value. */
+  sortValue?: string;
+  onSortChange?: (value: string | number) => void;
+  /** Accessible name for the sort picker (i18n). */
+  sortLabel?: string;
   columnManagerLabel?: string;
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';

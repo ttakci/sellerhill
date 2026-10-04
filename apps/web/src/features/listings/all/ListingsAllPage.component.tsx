@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   DataTable,
+  DatePicker,
   EmptyState,
   Icon,
   PageHeader,
@@ -12,7 +13,7 @@ import {
   TextInput,
 } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 
 import { toListingCardProps } from '../shared/listing-card.mapper';
@@ -38,6 +39,10 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   columnOptions,
   visibleColumnKeys,
   onToggleColumn,
+  onMoveColumn,
+  sortOptions,
+  sortValue,
+  onSortChange,
   sortColumn,
   sortDirection,
   onSort,
@@ -50,6 +55,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   onTrackingStateChange,
   trackingOptions,
   numericFilters,
+  dateFilters,
   activeFilterChips,
   onClearFilters,
   hasActiveFilters,
@@ -186,9 +192,6 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                 />
               </S.SelectWrapper>
               <S.FilterActions>
-                <S.ResultCount variant="caption" weight="medium" color="text.secondary">
-                  {t('listings.filters.resultCount', { count: resultCount })}
-                </S.ResultCount>
                 {hasActiveFilters && (
                   <Button variant="text" size="small" onClick={onClearFilters}>
                     <Text variant="body">{t('listings.filters.clearAll')}</Text>
@@ -234,6 +237,28 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
 
             {advancedOpen && (
               <S.NumericFilterGrid>
+                <S.NumericFilterField>
+                  <S.NumericRangeRow>
+                    {dateFilters.map((field, index) => (
+                      <React.Fragment key={field.key}>
+                        {index > 0 && (
+                          <S.RangeSeparator variant="body" color="text.tertiary">
+                            –
+                          </S.RangeSeparator>
+                        )}
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          label={field.label}
+                          clearLabel={field.clearLabel}
+                          locale={locale}
+                          size="medium"
+                          fullWidth
+                        />
+                      </React.Fragment>
+                    ))}
+                  </S.NumericRangeRow>
+                </S.NumericFilterField>
                 {numericFilters.map((field) => (
                   <S.NumericFilterField key={field.key}>
                     <S.NumericRangeRow>
@@ -273,6 +298,18 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
       )}
 
       <DataTable
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        sortLabel={t('listings.filters.sortLabel')}
+        resultLabel={
+          <Trans
+            i18nKey="listings.filters.resultListed"
+            ns="listings"
+            values={{ count: resultCount }}
+            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          />
+        }
         gridMinItemWidth="27rem"
         gridMaxColumns={2}
         columns={columns}
@@ -291,6 +328,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
         columnOptions={isEmpty ? undefined : columnOptions}
         visibleColumnKeys={visibleColumnKeys}
         onToggleColumn={onToggleColumn}
+        onMoveColumn={onMoveColumn}
         columnManagerLabel={t('translation:common.actions.filter')}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

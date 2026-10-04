@@ -81,6 +81,11 @@ export const MetaRow = styled.div`
   & > a {
     font-size: ${tkn('typography.fontSize.xs')};
   }
+
+  /* Bold like the ASIN / eBay ID values on the grid card. */
+  && > a * {
+    font-weight: ${tkn('typography.fontWeight.bold')};
+  }
 `;
 
 /** Leading icon + label — mirrors the listing card's meta rows. */

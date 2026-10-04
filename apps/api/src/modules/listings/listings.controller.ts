@@ -144,6 +144,8 @@ export class ListingsController {
     @Query('sourceStockMax') sourceStockMax?: string,
     @Query('soldFrom') soldFrom?: string,
     @Query('soldTo') soldTo?: string,
+    @Query('createdFrom') createdFrom?: string,
+    @Query('createdTo') createdTo?: string,
     @Query('sourceUnavailable') sourceUnavailable?: string,
     @Query('notSelling') notSelling?: string
   ): Promise<PaginatedListingsDto> {
@@ -182,6 +184,8 @@ export class ListingsController {
       sourceStockMax: num(sourceStockMax),
       soldFrom,
       soldTo,
+      createdFrom,
+      createdTo,
       sourceUnavailable: sourceUnavailable === 'true',
       notSelling: notSelling === 'true',
     };
@@ -223,7 +227,9 @@ export class ListingsController {
     @Query('quantityMin') quantityMin?: string,
     @Query('quantityMax') quantityMax?: string,
     @Query('sourceStockMin') sourceStockMin?: string,
-    @Query('sourceStockMax') sourceStockMax?: string
+    @Query('sourceStockMax') sourceStockMax?: string,
+    @Query('createdFrom') createdFrom?: string,
+    @Query('createdTo') createdTo?: string
   ): Promise<string> {
     const num = (v?: string): number | undefined =>
       v !== undefined && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : undefined;
@@ -256,6 +262,8 @@ export class ListingsController {
       quantityMax: num(quantityMax),
       sourceStockMin: num(sourceStockMin),
       sourceStockMax: num(sourceStockMax),
+      createdFrom,
+      createdTo,
     };
 
     return this.listingsService.exportListingsCsv(req.user.sub, query);

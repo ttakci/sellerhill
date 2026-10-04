@@ -42,6 +42,18 @@ export const SelectionControl = styled.div`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
+  /* On a phone the photo leads the card, so the tick floats over its top-left corner. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    position: absolute;
+    top: ${tkn('spacing.lg')};
+    left: ${tkn('spacing.lg')};
+    z-index: 1;
+    padding: ${tkn('spacing.xs')};
+    border-radius: ${tkn('radius.sm')};
+    background: ${tkn('colors.surface.primary')};
+    box-shadow: ${tkn('shadows.sm')};
+  }
 `;
 
 /**
@@ -74,6 +86,12 @@ export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   gap: ${tkn('spacing.lg')};
   min-width: 0;
   flex: 1;
+
+  /* A phone leaves no room for photo + facts side by side (values truncated to "Unb…"): stack them, photo first. */
+  /* Its children become Top's own, so the photo can be ordered above the title row. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    display: contents;
+  }
 `;
 
 export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
@@ -110,8 +128,9 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
     ${({ $orientation }) =>
       $orientation === 'horizontal'
         ? `
-        width: 7rem;
-        height: 7rem;
+        order: -1;
+        width: 100%;
+        height: 10rem;
       `
         : `
         height: 9rem;
@@ -127,6 +146,10 @@ export const Content = styled.div`
   flex: 1;
   /* Breathing room from the photo. */
   padding-inline-start: ${tkn('spacing.md')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding-inline-start: 0;
+  }
 `;
 
 /** Block-level host for the tooltip, so the one-line title can shrink and truncate. */
