@@ -129,4 +129,16 @@ export const EBAY_OAUTH_CONSTANTS = {
   REFRESH_TOKEN_EXPIRES_IN: 47304000, // 18 months
 } as const;
 
+/**
+ * eBay Finances API scope (billing activity: the ad fee eBay actually
+ * charged). Requested only while `ebay.oauth.financesScopeEnabled` is on, so
+ * it is NOT in DEFAULT_SCOPES; a store gains it on its next consent.
+ */
+export const EBAY_FINANCES_SCOPE = 'https://api.ebay.com/oauth/api_scope/sell.finances';
+
+/** True when the store's recorded consent included {@link EBAY_FINANCES_SCOPE}. */
+export function hasFinancesScope(granted: readonly string[] | null | undefined): boolean {
+  return Boolean(granted?.includes(EBAY_FINANCES_SCOPE));
+}
+
 export type EbayOAuthConstantsType = typeof EBAY_OAUTH_CONSTANTS;

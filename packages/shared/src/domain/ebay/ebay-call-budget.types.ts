@@ -65,6 +65,12 @@ export enum EbayApiResource {
    * which method draws from which. Governed against the TIGHTER one.
    */
   MARKETING = 'sell.marketing',
+  /**
+   * Finances API (`billing_activity`: the fees eBay actually charged), eBay
+   * resource `payoutapi.sell.finances`, 15,000/day for the whole application —
+   * the reason the billing sweep visits each store only every 4 hours.
+   */
+  FINANCES = 'sell.finances',
 }
 
 /**

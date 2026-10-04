@@ -1,4 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+  Optional,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
@@ -7,6 +15,7 @@ import {
   EbayAccountStatus,
   EbayApiResource,
   EbayCallPriority,
+  PlatformSettingKey,
   SUPPORTED_EBAY_MARKETPLACES,
   buildStoreStreetLine,
   hasMessagingScopes,
@@ -22,6 +31,7 @@ import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
 import { BillingService } from '../billing/billing.service';
 
@@ -170,7 +180,10 @@ export class EbayService implements OnModuleInit {
     private readonly aspectResolver: AspectResolverService,
     private readonly billingService: BillingService,
     private readonly ebayCallBudget: EbayCallBudgetService,
-    private readonly notifications: EbayNotificationService
+    private readonly notifications: EbayNotificationService,
+    // Optional so a spec can build the service positionally; Nest always
+    // supplies it. Absent = the Finances scope is not asked for.
+    @Optional() private readonly platformSettings?: PlatformSettingsService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -232,7 +245,7 @@ export class EbayService implements OnModuleInit {
   /**
    * Generate eBay connect URL
    */
-  createConnectUrl(userId: string, marketplaceId?: EbayMarketplaceId): CreateEbayConnectUrlResponse {
+  async createConnectUrl(userId: string, marketplaceId?: EbayMarketplaceId): Promise<CreateEbayConnectUrlResponse> {
     const marketplace = marketplaceId || EBAY_MARKETPLACE.US;
     // Server-side gate mirroring the frontend picker's allowlist: only
     // marketplaces actually offered today (see SUPPORTED_EBAY_MARKETPLACES)
@@ -243,7 +256,11 @@ export class EbayService implements OnModuleInit {
     }
     this.logger.log(`Creating eBay connect URL for user ${userId}, marketplace: ${marketplace}`);
 
-    const { url, state } = this.oauthService.generateConsentUrl(marketplace, userId);
+    // Read per consent, so switching it off in the panel stops the next consent
+    // asking for sell.finances with no redeploy (spec Part C2).
+    const includeFinances =
+      (await this.platformSettings?.getBoolean(PlatformSettingKey.EBAY_OAUTH_FINANCES_SCOPE_ENABLED)) ?? false;
+    const { url, state } = this.oauthService.generateConsentUrl(marketplace, userId, includeFinances);
 
     return { url, state };
   }
@@ -265,7 +282,7 @@ export class EbayService implements OnModuleInit {
     this.logger.log('Handling eBay OAuth callback');
 
     // Validate and decode state
-    const { userId, marketplaceId } = this.oauthService.validateState(state);
+    const { userId, marketplaceId, includeFinances } = this.oauthService.validateState(state);
 
     // Exchange code for tokens
     const tokenResponse = await this.oauthService.exchangeCodeForTokens(code);
@@ -362,7 +379,7 @@ export class EbayService implements OnModuleInit {
           username,
           // A reconnect is a fresh consent, so it grants whatever the app
           // requests TODAY — which is how a pre-messaging store gains it.
-          [...this.oauthService.getScopes()],
+          [...this.oauthService.getScopes(includeFinances)],
         ]
       );
       this.logger.log(`eBay account reconnected: ${existing.id} for user: ${userId}`);
@@ -392,7 +409,7 @@ export class EbayService implements OnModuleInit {
         expiresAt.toISOString(),
         EBAY_ACCOUNT_STATUS.ACTIVE,
         username,
-        [...this.oauthService.getScopes()],
+        [...this.oauthService.getScopes(includeFinances)],
       ]
     );
 
