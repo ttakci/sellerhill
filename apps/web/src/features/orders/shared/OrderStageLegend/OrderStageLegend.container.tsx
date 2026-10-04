@@ -9,8 +9,7 @@ import type { OrderStageLegendRow } from './OrderStageLegend.types';
 export const OrderStageLegend: React.FC = () => {
   const { t } = useTranslation(['orders']);
   const [isOpen, setIsOpen] = useState(false);
-  const handleOpen = useCallback(() => setIsOpen(true), []);
-  const handleClose = useCallback(() => setIsOpen(false), []);
+  const handleToggle = useCallback(() => setIsOpen((open) => !open), []);
   const rows = useMemo<OrderStageLegendRow[]>(
     () =>
       SELLER_VISIBLE_ORDER_STAGES.map((stage) => ({
@@ -29,8 +28,7 @@ export const OrderStageLegend: React.FC = () => {
       columnMeaning={t('orders.stageLegend.columnMeaning')}
       columnAction={t('orders.stageLegend.columnAction')}
       isOpen={isOpen}
-      onOpen={handleOpen}
-      onClose={handleClose}
+      onToggle={handleToggle}
     />
   );
 };

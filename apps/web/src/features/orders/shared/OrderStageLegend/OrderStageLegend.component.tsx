@@ -1,4 +1,4 @@
-import { Icon, IconButton, Modal, Text } from '@repo/ui';
+import { Button, Icon, Text } from '@repo/ui';
 import React from 'react';
 
 import { OrderStageBadge } from '../OrderStageBadge';
@@ -7,10 +7,9 @@ import * as S from './OrderStageLegend.style';
 import type { OrderStageLegendViewProps } from './OrderStageLegend.types';
 
 /**
- * A Modal, not a Popover: the trigger sits at the far right of the tab row,
- * where a centred popover ran off the viewport, and the legend is a reading
- * surface (eleven rows of prose) that needs focus, a close control and the
- * design system's own phone layout.
+ * An in-page disclosure, like the listings' advanced filters: the toggle sits at
+ * the end of the tab row and the panel opens right under it, full width, so the
+ * eleven rows of prose read in place instead of behind a modal.
  */
 export const OrderStageLegendComponent: React.FC<OrderStageLegendViewProps> = ({
   rows,
@@ -20,34 +19,43 @@ export const OrderStageLegendComponent: React.FC<OrderStageLegendViewProps> = ({
   columnMeaning,
   columnAction,
   isOpen,
-  onOpen,
-  onClose,
+  onToggle,
 }) => (
   <>
-    <IconButton variant="ghost" aria-label={openLabel} title={openLabel} aria-expanded={isOpen} onClick={onOpen}>
-      <Icon name="info" size={16} />
-    </IconButton>
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size="lg">
-      <S.Grid>
-        <Text variant="caption" color="text.tertiary">
-          {columnStage}
-        </Text>
-        <S.HeaderCell variant="caption" color="text.tertiary">
-          {columnMeaning}
-        </S.HeaderCell>
-        <S.HeaderCell variant="caption" color="text.tertiary">
-          {columnAction}
-        </S.HeaderCell>
-        {rows.map((row) => (
-          <React.Fragment key={row.stage}>
-            <OrderStageBadge stage={row.stage} size="sm" withTooltip={false} />
-            <Text variant="body-sm">{row.meaning}</Text>
-            <Text variant="body-sm" color="text.secondary">
-              {row.action ?? '—'}
-            </Text>
-          </React.Fragment>
-        ))}
-      </S.Grid>
-    </Modal>
+    <Button variant="text" size="small" onClick={onToggle} aria-expanded={isOpen} aria-label={openLabel}>
+      <Icon name="info" size={16} color="brand.primary" />
+      <Text variant="body-sm" weight="semibold" color="brand.primary">
+        {title}
+      </Text>
+      <S.Chevron $isOpen={isOpen}>
+        <Icon name="chevron-down" size={16} color="brand.primary" />
+      </S.Chevron>
+    </Button>
+    {isOpen && (
+      <S.Panel>
+        <S.Grid>
+          <Text variant="caption" color="text.tertiary">
+            {columnStage}
+          </Text>
+          <S.HeaderCell variant="caption" color="text.tertiary">
+            {columnMeaning}
+          </S.HeaderCell>
+          <S.HeaderCell variant="caption" color="text.tertiary">
+            {columnAction}
+          </S.HeaderCell>
+          {rows.map((row) => (
+            <React.Fragment key={row.stage}>
+              <S.BadgeCell>
+                <OrderStageBadge stage={row.stage} size="sm" withTooltip={false} />
+              </S.BadgeCell>
+              <Text variant="body-sm">{row.meaning}</Text>
+              <Text variant="body-sm" color="text.secondary">
+                {row.action ?? '—'}
+              </Text>
+            </React.Fragment>
+          ))}
+        </S.Grid>
+      </S.Panel>
+    )}
   </>
 );

@@ -57,9 +57,6 @@ export const toOrderCardProps = (
   const statsBadges: OrderCardProps['statsBadges'] = order.isTracked
     ? [...orderFlagBadges(order, t, money, formatDay)]
     : [{ label: t('orders.tracking.untracked'), variant: 'neutral' }];
-  if (order.isTracked && order.profitBasis === ProfitBasis.ESTIMATED) {
-    statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
-  }
   // The reason is what makes "Purchase blocked" / "Purchase not confirmed"
   // actionable, and what explains a "To purchase" order automation left to the
   // seller — the table column shows it inline, so the card must too. Red only
@@ -77,6 +74,11 @@ export const toOrderCardProps = (
     ebayOrderId: order.ebayOrderId,
     stage: order.stage,
     showStage: order.isTracked,
+    // "Estimated" qualifies the money, so it leads the figures row, not the top row.
+    footerBadge:
+      order.isTracked && order.profitBasis === ProfitBasis.ESTIMATED
+        ? { label: t('orders.estimateBadge'), variant: 'warning' as const }
+        : undefined,
     shippedDetectedAt: order.shippedDetectedAt,
     statsBadges: statsBadges.length > 0 ? statsBadges : undefined,
     meta,

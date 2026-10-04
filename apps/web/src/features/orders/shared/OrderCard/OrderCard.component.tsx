@@ -17,6 +17,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   meta,
   stats,
   detailLabel,
+  footerBadge,
   onClick,
   className,
   hoverEffect = true,
@@ -75,7 +76,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       </S.Body>
     </S.Top>
 
-    <S.MoneyRow>
+    <S.Footer>
+      {footerBadge && (
+        <S.FooterBadgeRow>
+          <Badge variant={footerBadge.variant ?? 'warning'} size="sm">
+            {footerBadge.label}
+          </Badge>
+        </S.FooterBadgeRow>
+      )}
+      <S.MoneyRow>
       {stats.map((stat) => (
         <S.StatCell key={stat.label}>
           <Text variant="caption" color="text.secondary">
@@ -94,7 +103,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           <Icon name="chevron-right" size={16} color="brand.primary" />
         </S.DetailHint>
       ) : null}
-    </S.MoneyRow>
+      </S.MoneyRow>
+    </S.Footer>
   </S.Wrapper>
 );
 

@@ -20,6 +20,7 @@ export const Toolbar = styled.div`
 /** The counted stage tabs on the left, the legend trigger on the right. */
 export const TabsRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};

@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Toate stările",
       "allStores": "Toate magazinele",
-      "allTrackingStates": "Asociate și neasociate",
+      "allTrackingStates": "Toate",
       "clearAll": "Șterge tot",
       "resultCount": "Rezultate: {{count}}",
       "allStages": "Toate stările",

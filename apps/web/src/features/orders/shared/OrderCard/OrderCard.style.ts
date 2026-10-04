@@ -193,14 +193,26 @@ export const MetaValue = styled.dd`
   }
 `;
 
-/** Sale · cost · profit, under one hairline. */
+/** The figures strip: an optional chip line on top, then the figures, under one hairline. */
+export const Footer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
+`;
+
+export const FooterBadgeRow = styled.div`
+  display: flex;
+  justify-content: flex-start;
+`;
+
+/** Sale · cost · profit · ROI. */
 export const MoneyRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.glass.tint')};
 `;
 
 /** Tells the seller the whole card opens the order. */

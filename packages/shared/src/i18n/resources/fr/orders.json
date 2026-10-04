@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Tous les statuts",
       "allStores": "Toutes les boutiques",
-      "allTrackingStates": "Liées et non liées",
+      "allTrackingStates": "Tous",
       "clearAll": "Tout effacer",
       "resultCount": "{{count}} résultats",
       "allStages": "Tous les statuts",
