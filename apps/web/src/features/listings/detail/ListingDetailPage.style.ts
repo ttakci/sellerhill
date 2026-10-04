@@ -38,14 +38,14 @@ export const Hero = styled(Card)`
   padding: ${tkn('spacing.lg')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+    grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
     align-items: stretch;
     gap: ${tkn('spacing.xl')};
     padding: ${tkn('spacing.xl')};
   }
 
   @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+    grid-template-columns: minmax(20rem, 26rem) minmax(0, 1fr);
   }
 `;
 
@@ -92,11 +92,8 @@ export const GalleryMain = styled.div`
 
 export const ThumbRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: ${tkn('spacing.sm')};
-  overflow-x: auto;
-  padding-bottom: ${tkn('spacing.2xs')};
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 `;
 
 export const ThumbButton = styled.button<{ $active: boolean }>`
@@ -236,8 +233,10 @@ export const KpiStrip = styled.div`
   flex-wrap: wrap;
   row-gap: ${tkn('spacing.md')};
   margin-top: ${tkn('spacing.sm')};
-  padding-top: ${tkn('spacing.md')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')};
+  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.semanticTint.info')};
 
   /* From md up HeroInfo is card-height, so push the strip to the bottom. */
   @media (min-width: ${tkn('breakpoints.md')}) {
