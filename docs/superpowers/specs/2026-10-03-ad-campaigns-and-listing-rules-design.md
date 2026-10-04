@@ -247,7 +247,7 @@ Assumptions: 2,000 listings and 2 campaigns per store.
 
    No parser is written before its capture exists.
 1. **Part A** (independent, ships first).
-2. **C2 consent flag + billing capture-only sweep** — shipped early so the operator can reconnect sipastan and the capture can accumulate.
+2. **C2 consent flag + billing capture-only sweep** — **built 2026-10-04** (migration 142; plan docs/superpowers/plans/2026-10-04-finances-consent-and-billing-capture.md; the Action Center item moves to Part B) — shipped early so the operator can reconnect sipastan and the capture can accumulate.
 3. B2/B3 data + sync, then B5 pricing, then B4 writes, then B7 UI, then B6 metrics (capture → parser).
 4. C3/C4 parser and profit, after the capture.
 
