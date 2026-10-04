@@ -30,7 +30,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       <S.BadgeRow>
         {showStage && <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />}
         {statsBadges?.map((badge) => (
-          <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm">
+          <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm" solid>
             {badge.label}
           </Badge>
         ))}
@@ -79,7 +79,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     <S.Footer>
       {footerBadge && (
         <S.FooterBadgeRow>
-          <Badge variant={footerBadge.variant ?? 'warning'} size="sm">
+          <Badge variant={footerBadge.variant ?? 'warning'} size="sm" solid>
             {footerBadge.label}
           </Badge>
         </S.FooterBadgeRow>

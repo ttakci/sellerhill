@@ -81,7 +81,7 @@ export const ListingCard = ({
           </S.TitleSlot>
           {status ? (
             <S.BadgeRow>
-              <Badge variant={statusVariant} size="sm">
+              <Badge variant={statusVariant} size="sm" solid>
                 {status.label}
               </Badge>
             </S.BadgeRow>

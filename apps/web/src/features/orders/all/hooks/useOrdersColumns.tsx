@@ -120,7 +120,7 @@ export function useOrdersColumns(
           if (!order.isTracked) {
             return (
               <S.StageCell>
-                <Badge variant="neutral" size="sm">
+                <Badge variant="neutral" size="sm" solid>
                   {t('orders.tracking.untracked')}
                 </Badge>
               </S.StageCell>
@@ -130,7 +130,7 @@ export function useOrdersColumns(
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
               {flags.map((flag) => (
-                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="sm">
+                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="sm" solid>
                   {flag.label}
                 </Badge>
               ))}
@@ -201,7 +201,7 @@ export function useOrdersColumns(
                 {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
               {order.profitBasis === ProfitBasis.ESTIMATED ? (
-                <Badge variant="warning" size="sm">
+                <Badge variant="warning" size="sm" solid>
                   {t('orders.estimateBadge')}
                 </Badge>
               ) : margin ? (
