@@ -132,7 +132,7 @@ export function useListingsColumns(locale: string) {
         key: 'roi',
         sortable: true,
         header: t('listings.table.roi'),
-        width: '4.5rem',
+        width: '5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
@@ -151,7 +151,7 @@ export function useListingsColumns(locale: string) {
         key: 'profitMargin',
         sortable: true,
         header: t('listings.table.profitMargin'),
-        width: '4.5rem',
+        width: '5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
@@ -182,7 +182,7 @@ export function useListingsColumns(locale: string) {
         sortable: true,
         header: t('listings.table.sold'),
         align: 'right',
-        width: '4.25rem',
+        width: '6rem',
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
             {listing.soldCount || 0}
@@ -193,7 +193,7 @@ export function useListingsColumns(locale: string) {
         key: 'quantity',
         sortable: true,
         header: t('listings.table.stock'),
-        width: '3.75rem',
+        width: '5.5rem',
         align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
@@ -203,7 +203,7 @@ export function useListingsColumns(locale: string) {
         key: 'sourceStock',
         sortable: true,
         header: t('listings.table.amazonStock'),
-        width: '4.25rem',
+        width: '6rem',
         align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.sourceStock === 0}>

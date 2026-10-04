@@ -18,45 +18,43 @@ const config = new ConfigService({
 
 const scopesIn = (url: string): string[] => (new URL(url).searchParams.get('scope') ?? '').split(' ');
 
-describe('the finances scope is chosen per consent', () => {
+describe('sell.finances is part of every consent', () => {
   const oauth = new EbayOAuthService(config);
 
-  it('is not requested by default', () => {
-    expect(oauth.getScopes()).toEqual([...EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES]);
+  it('is a default scope', () => {
+    expect(EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES).toContain(EBAY_FINANCES_SCOPE);
+    expect(oauth.getScopes()).toContain(EBAY_FINANCES_SCOPE);
+  });
+
+  it('is in the consent URL', () => {
     const { url } = oauth.generateConsentUrl(EBAY_MARKETPLACE.US, 'user-1');
-    expect(scopesIn(url)).not.toContain(EBAY_FINANCES_SCOPE);
-  });
-
-  it('is requested, and remembered in the state, when asked for', () => {
-    const { url, state } = oauth.generateConsentUrl(EBAY_MARKETPLACE.US, 'user-1', true);
     expect(scopesIn(url)).toContain(EBAY_FINANCES_SCOPE);
-    expect(oauth.validateState(state)).toEqual({
-      userId: 'user-1',
-      marketplaceId: EBAY_MARKETPLACE.US,
-      includeFinances: true,
-    });
-    expect(oauth.getScopes(true)).toContain(EBAY_FINANCES_SCOPE);
   });
 
-  it('reads a state minted before this change as "no finances"', () => {
-    const legacy = Buffer.from(
-      JSON.stringify({ userId: 'user-1', marketplaceId: EBAY_MARKETPLACE.US, random: 'r', timestamp: Date.now() })
-    ).toString('base64url');
-    expect(oauth.validateState(legacy).includeFinances).toBe(false);
+  it('a state minted before this change (with or without `fin`) still validates', () => {
+    for (const extra of [{}, { fin: false }, { fin: true }]) {
+      const legacy = Buffer.from(
+        JSON.stringify({
+          userId: 'user-1',
+          marketplaceId: EBAY_MARKETPLACE.US,
+          random: 'r',
+          timestamp: Date.now(),
+          ...extra,
+        })
+      ).toString('base64url');
+      expect(oauth.validateState(legacy)).toEqual({ userId: 'user-1', marketplaceId: EBAY_MARKETPLACE.US });
+    }
   });
 
   it('hasFinancesScope reads granted_scopes', () => {
     expect(hasFinancesScope(null)).toBe(false);
-    expect(hasFinancesScope([...EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES])).toBe(false);
-    expect(hasFinancesScope([EBAY_FINANCES_SCOPE])).toBe(true);
+    expect(hasFinancesScope([...EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES])).toBe(true);
   });
 
-  it('the callback records what the consent asked for, not the current switch', () => {
-    const src = readFileSync(join(__dirname, 'ebay.service.ts'), 'utf8');
-    const start = src.indexOf('async handleCallback(');
-    const body = src.slice(start, src.indexOf('private async subscribeToMessages(', start));
-    expect(body).toMatch(/includeFinances\s*\}\s*=\s*this\.oauthService\.validateState\(state\)/);
-    expect(body).not.toMatch(/EBAY_OAUTH_FINANCES_SCOPE_ENABLED/);
-    expect(body.match(/this\.oauthService\.getScopes\(includeFinances\)/g)?.length).toBe(2);
+  it('no switch is read anywhere any more', () => {
+    for (const file of ['ebay.service.ts', 'ebay-oauth.service.ts']) {
+      const src = readFileSync(join(__dirname, file), 'utf8');
+      expect(src).not.toMatch(/FINANCES_SCOPE_ENABLED|includeFinances/);
+    }
   });
 });
