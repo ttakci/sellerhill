@@ -171,7 +171,7 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary" numeric>
-            {formatCurrency(order.purchasePrice, order.ebayAccountId)}
+            {order.isTracked ? formatCurrency(order.purchasePrice, order.ebayAccountId) : '—'}
           </Text>
         ),
       },
@@ -181,6 +181,13 @@ export function useOrdersColumns(
         width: '7.5rem',
         align: 'right',
         render: (_value, order) => {
+          if (!order.isTracked) {
+            return (
+              <Text variant="body-sm" color="text.tertiary">
+                —
+              </Text>
+            );
+          }
           const margin = formatMargin(order);
           return (
             <S.ProfitCell>

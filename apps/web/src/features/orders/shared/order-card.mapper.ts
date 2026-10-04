@@ -47,7 +47,7 @@ export const toOrderCardProps = (
     meta.push({ label: t('orders.note.label'), value: order.sellerNote });
   }
 
-  const roi = order.purchasePrice > 0 ? (order.netProfit / order.purchasePrice) * 100 : null;
+  const roi = order.isTracked && order.purchasePrice > 0 ? (order.netProfit / order.purchasePrice) * 100 : null;
   const profitTone = order.netProfit >= 0 ? 'positive' : 'negative';
 
   // Chips beside the stage: ship-by deadline, refund, estimated profit and, where it explains the stage, the
@@ -90,12 +90,13 @@ export const toOrderCardProps = (
       },
       {
         label: t('orders.table.purchasePrice'),
-        value: money(order.purchasePrice),
+        // No cost or profit exists for a sale SellerHill does not follow.
+        value: order.isTracked ? money(order.purchasePrice) : '—',
       },
       {
         label: t('orders.table.netProfit'),
-        value: `${order.netProfit >= 0 ? '+' : ''}${money(order.netProfit)}`,
-        tone: profitTone,
+        value: order.isTracked ? `${order.netProfit >= 0 ? '+' : ''}${money(order.netProfit)}` : '—',
+        tone: order.isTracked ? profitTone : 'default',
       },
       {
         label: t('listings:listings.table.roi'),
