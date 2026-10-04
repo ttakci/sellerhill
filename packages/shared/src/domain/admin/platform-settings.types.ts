@@ -118,6 +118,8 @@ export enum PlatformSettingKey {
    * deliberately rather than by deploying.
    */
   EBAY_FEED_SYNC_ENABLED = 'ebay.feedSync.enabled',
+  /** Ask stores for eBay's sell.finances scope on the consent screen (default off). */
+  EBAY_OAUTH_FINANCES_SCOPE_ENABLED = 'ebay.oauth.financesScopeEnabled',
   /**
    * Download the report and change NOTHING — write it verbatim to disk and log
    * its opening lines.
@@ -138,6 +140,12 @@ export enum PlatformSettingKey {
   // --- Periodic return sweep (eBay Post-Order API) ---
   /** Master switch for reading each store's returns from eBay. */
   EBAY_RETURN_SYNC_ENABLED = 'ebay.returnSync.enabled',
+  /** Billing-activity capture sweep (Finances API, capture-only; spec Part C3). */
+  EBAY_BILLING_SYNC_ENABLED = 'ebay.finances.billingSync.enabled',
+  EBAY_BILLING_SYNC_CRON = 'ebay.finances.billingSync.cron',
+  EBAY_BILLING_SYNC_INTERVAL_HOURS = 'ebay.finances.billingSync.intervalHours',
+  EBAY_BILLING_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.finances.billingSync.maxAccountsPerRun',
+  EBAY_BILLING_SYNC_WINDOW_DAYS = 'ebay.finances.billingSync.windowDays',
   EBAY_RETURN_SYNC_CRON = 'ebay.returnSync.cron',
   /**
    * Derive the sweep interval from the store count and eBay's daily limit

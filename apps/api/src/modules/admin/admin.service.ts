@@ -119,6 +119,7 @@ export const ADMIN_QUEUE_NAMES = [
   'data-retention',
   'ebay-rate-limit-refresh',
   'ebay-returns-sync',
+  'ebay-billing-sync',
   'listing-cleanup',
   'best-sellers-crawl',
 ] as const;
