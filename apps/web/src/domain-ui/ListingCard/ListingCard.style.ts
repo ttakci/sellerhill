@@ -190,7 +190,7 @@ export const MetaValue = styled.dd`
   }
 
   /* Every value reads bold, including the ASIN / eBay ID badges. */
-  * {
+  && * {
     font-weight: ${tkn('typography.fontWeight.semibold')};
   }
 `;
