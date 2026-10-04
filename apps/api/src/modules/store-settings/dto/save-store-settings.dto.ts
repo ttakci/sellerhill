@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BlacklistAction,
   BlacklistType,
@@ -11,6 +11,7 @@ import {
 } from '@repo/shared';
 import { Transform, Type } from 'class-transformer';
 import {
+  Allow,
   IsString,
   IsNotEmpty,
   IsOptional,
@@ -236,6 +237,16 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsArray()
   @IsString({ each: true })
   blockedAsins?: string[] | null;
+
+  /**
+   * Deprecated and IGNORED: listing rules moved to the listing settings group
+   * (migration 141). Declared only so a browser tab still on the old bundle
+   * saving from the removed drawer is not refused with a 400 by the pipe's
+   * `forbidNonWhitelisted`; the service never reads it.
+   */
+  @ApiHideProperty()
+  @Allow()
+  listingRules?: unknown;
 
   @ApiPropertyOptional({
     description:

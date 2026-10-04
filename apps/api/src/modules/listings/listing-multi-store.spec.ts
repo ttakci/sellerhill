@@ -78,7 +78,7 @@ describe('createJob — the store must be usable before anything is written', ()
 });
 
 describe('processListingBatch — a store that became unusable closes the batch', () => {
-  function buildProcessor(ownership: () => Promise<void>) {
+  function buildProcessor(ownership: () => Promise<void>, settingsGroup?: () => Promise<unknown>) {
     const listingsService = {
       isJobCancelled: jest.fn().mockResolvedValue(false),
       markJobProcessing: jest.fn().mockResolvedValue(undefined),
@@ -89,14 +89,15 @@ describe('processListingBatch — a store that became unusable closes the batch'
       releaseForCreate: jest.fn().mockResolvedValue(undefined),
       reserveForBulkCreate: jest.fn().mockResolvedValue(undefined),
     };
-    const storeSettings = { getResolvedSettings: jest.fn() };
+    const storeSettings = { getResolvedSettings: jest.fn().mockResolvedValue({}) };
+    const strategy = { getSettingsGroup: jest.fn(settingsGroup ?? (() => Promise.resolve({}))) };
     const processor = new ListingProcessorService(
       listingsService as never,
       {} as never,
       {} as never,
       ebayService as never,
       {} as never,
-      {} as never,
+      strategy as never,
       quota as never,
       {} as never,
       {} as never,
@@ -151,6 +152,28 @@ describe('processListingBatch — a store that became unusable closes the batch'
 
   it('a transient failure of the check still goes to BullMQ for a retry', async () => {
     const { run, listingsService } = buildProcessor(() => Promise.reject(new Error('connection reset')));
+
+    await expect(run()).rejects.toThrow('connection reset');
+    expect(listingsService.updateJobItemResult).not.toHaveBeenCalled();
+  });
+
+  it('a settings group deleted while the job waited closes every item', async () => {
+    const { run, listingsService, quota } = buildProcessor(
+      () => Promise.resolve(),
+      () => Promise.reject(new NotFoundException('Listing settings group not found'))
+    );
+
+    await expect(run()).resolves.toBeUndefined();
+    expect(listingsService.updateJobItemResult).toHaveBeenCalledTimes(2);
+    expect(quota.releaseForCreate).toHaveBeenCalledWith('user-1', 'item-1');
+    expect(quota.releaseForCreate).toHaveBeenCalledWith('user-1', 'item-2');
+  });
+
+  it('a transient failure reading the settings group goes to BullMQ for a retry', async () => {
+    const { run, listingsService } = buildProcessor(
+      () => Promise.resolve(),
+      () => Promise.reject(new Error('connection reset'))
+    );
 
     await expect(run()).rejects.toThrow('connection reset');
     expect(listingsService.updateJobItemResult).not.toHaveBeenCalled();

@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Logger, NotFoundException } from '@nestjs/common';
 import {
   AmazonMarketplace,
   evaluateListingRules,
@@ -302,11 +302,15 @@ export class ListingProcessorService extends WorkerHost {
     const resolvedStoreSettings = await this.storeSettingsService.getResolvedSettings(userId, ebayAccountId);
     // A group deleted while the job waited fails every item of the batch with
     // that error — otherwise the items would never reach a terminal state and
-    // the job would sit at "processing" for ever.
+    // the job would sit at "processing" for ever. Anything else (a database
+    // hiccup) goes back to BullMQ for a retry, like the store check above.
     let batchGroup: ListingSettingsGroup;
     try {
       batchGroup = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
     } catch (error: unknown) {
+      if (!(error instanceof NotFoundException || error instanceof ForbiddenException)) {
+        throw error;
+      }
       for (const item of items) {
         await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, error);
       }
