@@ -61,7 +61,13 @@ export const DropdownHeader = styled.div`
   margin-bottom: ${tkn('spacing.sm')};
 `;
 
-export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
+export const ItemLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+`;
+
+export const MenuItem = styled.button<{ $variant?: 'default' | 'danger'; $selected?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm-md')};
@@ -76,8 +82,12 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
   transition: all ${tkn('transitions.fast')};
   color: ${({ $variant, theme }) => ($variant === 'danger' ? theme.colors.semantic.error : theme.colors.text.primary)};
 
+  ${({ $selected, theme }) =>
+    $selected ? `background: ${theme.colors.brand.secondary}; color: ${theme.colors.brand.primary};` : ''}
+
   &:hover {
-    background: ${tkn('colors.background.tertiary')};
+    background: ${({ $selected, theme }) =>
+      $selected ? theme.colors.brand.secondary : theme.colors.background.tertiary};
     color: ${({ $variant, theme }) =>
       $variant === 'danger' ? theme.colors.semantic.error : theme.colors.brand.primary};
   }
@@ -150,7 +160,7 @@ export const BottomSheetItems = styled.div`
   padding: ${tkn('spacing.xs')};
 `;
 
-export const MobileMenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
+export const MobileMenuItem = styled.button<{ $variant?: 'default' | 'danger'; $selected?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm-md')};
@@ -165,6 +175,9 @@ export const MobileMenuItem = styled.button<{ $variant?: 'default' | 'danger' }>
   font-size: ${tkn('typography.fontSize.base')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${({ $variant, theme }) => ($variant === 'danger' ? theme.colors.semantic.error : theme.colors.text.primary)};
+
+  ${({ $selected, theme }) =>
+    $selected ? `background: ${theme.colors.brand.secondary}; color: ${theme.colors.brand.primary};` : ''}
 
   &:active {
     background: ${tkn('colors.background.tertiary')};

@@ -121,11 +121,15 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
 `;
 
 export const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  display: grid;
+  /* Two columns of facts; the second wraps under the first when the card is narrow. */
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  align-items: start;
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   min-width: 0;
   flex: 1;
+  /* Breathing room from the photo. */
+  padding-inline-start: ${tkn('spacing.sm')};
 `;
 
 /** Block-level host for the tooltip, so the one-line title can shrink and truncate. */
@@ -140,12 +144,12 @@ export const TitleSlot = styled.div`
   }
 `;
 
-/** One line, ellipsis — the full title is on the tooltip. */
+/** Two lines, ellipsis — the full title is on the tooltip. */
 export const Title = styled(Text)`
-  display: block;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
 `;
 

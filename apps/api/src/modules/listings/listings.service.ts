@@ -80,6 +80,7 @@ interface ListingQueryRow {
   quantity: number;
   source_stock: number | null;
   source_stock_status?: string | null;
+  last_synced_at?: Date | null;
   source_removed?: boolean | null;
   image_urls: string[] | null;
   ebay_item_id: string | null;
@@ -386,6 +387,7 @@ export class ListingsService {
       importedFromEbay: Boolean((row as ListingQueryRow & { imported_from_ebay?: boolean }).imported_from_ebay),
       ebayAccountId: row.ebay_account_id ?? undefined,
       lastSaleAt: row.last_sale_at ? row.last_sale_at.toISOString() : null,
+      lastSyncedAt: row.last_synced_at ? new Date(row.last_synced_at).toISOString() : null,
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
       paymentPolicyId: row.payment_policy_id || '',
@@ -627,6 +629,8 @@ export class ListingsService {
              p.category as product_category,
              p.stock as source_stock,
              p.stock_status AS source_stock_status,
+        p.last_successful_refresh_at AS last_synced_at,
+             p.last_successful_refresh_at AS last_synced_at,
              (p.source_removed_at IS NOT NULL) AS source_removed,
              p.brand,
              ea.marketplace_id AS ebay_marketplace_id,

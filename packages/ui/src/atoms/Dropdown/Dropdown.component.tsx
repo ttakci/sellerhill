@@ -35,9 +35,11 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
                 key={index}
                 onClick={() => onItemClick(item)}
                 $variant={item.variant}
+                $selected={item.selected}
               >
                 {item.icon && <Icon name={item.icon} size={20} />}
-                {item.label}
+                <S.ItemLabel>{item.label}</S.ItemLabel>
+                {item.selected && <Icon name="check" size={18} />}
               </S.MobileMenuItem>
             ))}
           </S.BottomSheetItems>
@@ -61,9 +63,11 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
               key={index}
               onClick={() => onItemClick(item)}
               $variant={item.variant}
+              $selected={item.selected}
             >
               {item.icon && <Icon name={item.icon} size={18} />}
-              {item.label}
+              <S.ItemLabel>{item.label}</S.ItemLabel>
+              {item.selected && <Icon name="check" size={18} />}
             </S.MenuItem>
           ))}
         </S.Menu>

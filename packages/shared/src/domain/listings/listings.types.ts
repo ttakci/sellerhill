@@ -125,6 +125,8 @@ export interface ListingDto {
   ebayAccountId?: string;
   /** Latest matched order date for this listing (from orders.listing_id). */
   lastSaleAt?: string | null;
+  /** When the Amazon source product was last read successfully (a check, whether or not anything changed). */
+  lastSyncedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   /** Per-listing overrides (easync-style) */

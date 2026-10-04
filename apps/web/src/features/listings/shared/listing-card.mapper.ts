@@ -1,5 +1,5 @@
 import { formatSourceStock, ListingStatus, type ListingDto } from '@repo/shared';
-import { formatCurrency } from '@repo/ui';
+import { formatCurrency, formatDate } from '@repo/ui';
 import type { TFunction } from 'i18next';
 
 import type { ListingCardProps } from '@/domain-ui';
@@ -53,6 +53,32 @@ export const toListingCardProps = (
     });
   }
 
+  // Amazon's own stock beside the eBay quantity; `20+` stays a lower bound.
+  const amazonStock =
+    listing.sourceStock === null || listing.sourceStock === undefined
+      ? '—'
+      : formatSourceStock(listing.sourceStock, listing.sourceStockStatus);
+  meta.push({
+    label: t('listings.table.stockEbayAmazon'),
+    value: `${listing.quantity} / ${amazonStock}`,
+    column: 'secondary',
+  });
+
+  const dateOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+  meta.push({
+    label: t('listings.table.createdAt'),
+    value: formatDate(listing.createdAt, locale, dateOptions),
+    column: 'secondary',
+  });
+  // The last time the Amazon source was read — a check counts even when nothing changed.
+  if (listing.lastSyncedAt) {
+    meta.push({
+      label: t('listings.table.lastSynced'),
+      value: formatDate(listing.lastSyncedAt, locale, { ...dateOptions, hour: '2-digit', minute: '2-digit' }),
+      column: 'secondary',
+    });
+  }
+
   const statusLabel =
     listing.status === ListingStatus.DRAFT
       ? t('listings.status.draft')
@@ -84,16 +110,6 @@ export const toListingCardProps = (
         label: t('listings.table.roi'),
         value: `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`,
         tone: roi >= 0 ? 'positive' : 'negative',
-      },
-      {
-        label: t('listings.table.stockEbayAmazon'),
-        value: String(listing.quantity),
-        tone: listing.quantity === 0 ? 'negative' : 'default',
-        // Amazon's own stock beside the eBay quantity; `20+` stays a lower bound.
-        secondary:
-          listing.sourceStock === null || listing.sourceStock === undefined
-            ? undefined
-            : `(${formatSourceStock(listing.sourceStock, listing.sourceStockStatus)})`,
       },
     ],
     detailLabel: t('translation:common.details'),
