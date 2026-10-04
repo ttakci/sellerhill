@@ -1,0 +1,33 @@
+import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
+import { DatabaseModule } from '../../common/database/database.module';
+import { BillingModule } from '../billing/billing.module';
+import { EbayModule } from '../ebay/ebay.module';
+import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
+
+import { CampaignAdStateRepository } from './campaign-ad-state.repository';
+import { EbayCampaignSyncProcessor } from './ebay-campaign-sync.processor';
+import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
+import { EBAY_CAMPAIGN_SYNC_QUEUE } from './ebay-campaigns.constants';
+import { EbayMarketingClient } from './ebay-marketing.client';
+
+@Module({
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    EbayModule,
+    BillingModule,
+    BullModule.registerQueue({ name: EBAY_CAMPAIGN_SYNC_QUEUE }, { name: 'stock-sync' }),
+  ],
+  providers: [
+    EbayMarketingClient,
+    CampaignAdStateRepository,
+    EbayCampaignSyncService,
+    EbayCampaignSyncProcessor,
+    StockSyncQueueService,
+  ],
+  exports: [EbayMarketingClient, CampaignAdStateRepository, EbayCampaignSyncService],
+})
+export class EbayCampaignsModule {}

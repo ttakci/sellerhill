@@ -140,6 +140,10 @@ export enum PlatformSettingKey {
   /** Master switch for reading each store's returns from eBay. */
   EBAY_RETURN_SYNC_ENABLED = 'ebay.returnSync.enabled',
   /** Billing-activity capture sweep (Finances API, capture-only; spec Part C3). */
+  EBAY_CAMPAIGN_SYNC_ENABLED = 'ebay.campaignSync.enabled',
+  EBAY_CAMPAIGN_SYNC_CRON = 'ebay.campaignSync.cron',
+  EBAY_CAMPAIGN_SYNC_INTERVAL_HOURS = 'ebay.campaignSync.intervalHours',
+  EBAY_CAMPAIGN_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.campaignSync.maxAccountsPerRun',
   EBAY_BILLING_SYNC_ENABLED = 'ebay.finances.billingSync.enabled',
   EBAY_BILLING_SYNC_CRON = 'ebay.finances.billingSync.cron',
   EBAY_BILLING_SYNC_INTERVAL_HOURS = 'ebay.finances.billingSync.intervalHours',

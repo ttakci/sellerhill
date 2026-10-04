@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import type { ProductData } from '@repo/shared';
+import type { ListingSettingsGroup, ProductData } from '@repo/shared';
 
+import { ListingStrategyService } from './listing-strategy.service';
 import { ProductSyncService } from './product-sync.service';
-
 
 describe('the fan-out prices each listing with its OWN applied ad rate', () => {
   const src = readFileSync(join(__dirname, 'product-sync.service.ts'), 'utf8');
@@ -45,7 +45,12 @@ describe('computePendingUpdates passes each listing its own ad rate (behaviour)'
       .fn()
       .mockResolvedValue({ price: 30, quantity: 3, purchasePrice: 20, estimatedProfit: 5, profitMargin: 16, roi: 25 });
     const service = new ProductSyncService(
-      { query: jest.fn().mockResolvedValueOnce([row('a', '5'), row('b', null)]).mockResolvedValue([]) } as never,
+      {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce([row('a', '5'), row('b', null)])
+          .mockResolvedValue([]),
+      } as never,
       { getSettingsGroup: jest.fn().mockResolvedValue({}), computePricing } as never,
       { resolveListingAccountId: jest.fn().mockResolvedValue('account-1') } as never,
       {} as never,
@@ -64,5 +69,60 @@ describe('computePendingUpdates passes each listing its own ad rate (behaviour)'
     const calls = computePricing.mock.calls as unknown[][];
     expect(calls[0][5]).toBe(5);
     expect(calls[1][5]).toBe(0);
+  });
+
+  it('changing seller A ad rate leaves seller B actual calculated price unchanged for a shared product', async () => {
+    const group = {
+      id: 'group-1',
+      repricingStrategy: [{ id: 'range', minPrice: 0, maxPrice: 100, profitMarginPercent: 20 }],
+      fees: { ebayFeePercent: 10, fixedFeeAmount: 0.3 },
+      stock: { defaultQuantity: 3, stockBuffer: 0 },
+    } as ListingSettingsGroup;
+    const strategy = new ListingStrategyService(
+      { getListingSettingsGroupById: jest.fn().mockResolvedValue(group) } as never,
+      {} as never,
+      {} as never
+    );
+    const pricing = jest.spyOn(strategy, 'computePricing');
+    const sellerA = { ...row('a', '5'), user_id: 'seller-A', ebay_account_id: 'store-A' };
+    const sellerB = { ...row('b', '0'), user_id: 'seller-B', ebay_account_id: 'store-B' };
+    const db = { query: jest.fn().mockResolvedValue([sellerA, sellerB]) };
+    const service = new ProductSyncService(
+      db as never,
+      strategy,
+      {
+        resolveListingAccountId: jest
+          .fn()
+          .mockImplementation((owner: string) => (owner === 'seller-A' ? 'store-A' : 'store-B')),
+      } as never,
+      {} as never,
+      {
+        getProductByAsin: jest
+          .fn()
+          .mockResolvedValue({
+            id: 'shared-product',
+            data: { asin: 'B0C1HJV7BJ', price: { current: 10, currency: 'USD' }, stock: 3 } as unknown as ProductData,
+          }),
+      } as never,
+      { getResolvedSettings: jest.fn().mockResolvedValue({ amazonTaxRate: 0 }) } as never
+    );
+    const before = await service.computePendingUpdates('shared-product', 'B0C1HJV7BJ');
+    sellerA.ad_rate_applied = '10';
+    const after = await service.computePendingUpdates('shared-product', 'B0C1HJV7BJ');
+    expect(before.map((u) => [u.userId, u.price])).toEqual([
+      ['seller-A', 14.47],
+      ['seller-B', 13.67],
+    ]);
+    expect(after.map((u) => [u.userId, u.price])).toEqual([
+      ['seller-A', 15.38],
+      ['seller-B', 13.67],
+    ]);
+    expect(pricing.mock.calls.map((c) => [c[0], c[5]])).toEqual([
+      ['seller-A', 5],
+      ['seller-B', 0],
+      ['seller-A', 10],
+      ['seller-B', 0],
+    ]);
+    expect(db.query.mock.calls.every((call: unknown[]) => (call[1] as unknown[])[0] === 'shared-product')).toBe(true);
   });
 });

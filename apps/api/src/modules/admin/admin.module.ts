@@ -65,6 +65,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'ebay-rate-limit-refresh' },
       { name: 'ebay-returns-sync' },
       { name: 'ebay-billing-sync' },
+      { name: 'ebay-campaign-sync' },
       { name: 'listing-cleanup' },
       { name: 'best-sellers-crawl' },
     ),
