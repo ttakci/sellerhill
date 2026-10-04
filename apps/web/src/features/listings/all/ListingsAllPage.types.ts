@@ -29,6 +29,10 @@ export interface ListingsAllPageProps {
   columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];
   visibleColumnKeys: string[];
   onToggleColumn: (key: string) => void;
+  onMoveColumn: (key: string, direction: -1 | 1) => void;
+  sortOptions: { value: string; label: string }[];
+  sortValue: string;
+  onSortChange: (value: string | number) => void;
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (column: string) => void;
@@ -50,6 +54,14 @@ export interface ListingsAllPageProps {
     /** Helper copy shown under the range inputs — e.g. explaining that the
      *  Amazon stock range treats an "at least" value as its lower bound. */
     note?: string;
+  }[];
+  /** Listing-date range inputs shown beside the numeric ranges. */
+  dateFilters: {
+    key: string;
+    label: string;
+    clearLabel: string;
+    value: string;
+    onChange: (value: string) => void;
   }[];
   /** Removable chips for every filter currently narrowing the list. */
   activeFilterChips: { key: string; label: string; onRemove: () => void }[];

@@ -86,6 +86,8 @@ export function useListingsFilters() {
   const soldTo = searchParams.get('soldTo') ?? '';
   const fromDashboard = searchParams.get('from') === 'dashboard';
   const hasSoldPeriod = Boolean(soldFrom || soldTo);
+  const createdFrom = searchParams.get('createdFrom') ?? '';
+  const createdTo = searchParams.get('createdTo') ?? '';
   /**
    * Deep-link filter for the Action Center's LISTING_SOURCE_UNAVAILABLE item —
    * no dedicated UI control, same treatment as `soldFrom`/`soldTo` above.
@@ -188,6 +190,18 @@ export function useListingsFilters() {
     [patchParams]
   );
 
+  /** Sort picker value is `<column>:<asc|desc>`. */
+  const handleSortChange = useCallback(
+    (value: string | number) => {
+      const [column, direction] = String(value).split(':');
+      patchParams((next) => {
+        next.set('sort', column);
+        next.set('dir', direction === 'asc' ? 'asc' : 'desc');
+      }, true);
+    },
+    [patchParams]
+  );
+
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   }, []);
@@ -285,11 +299,11 @@ export function useListingsFilters() {
       String(filters.status) !== String(ListingStatus.ACTIVE) &&
       !isDraftView &&
       !hasSoldPeriod;
-    if (filters.search || filters.category || nonDefaultStatus || filters.trackingState) {
+    if (filters.search || filters.category || nonDefaultStatus || filters.trackingState || createdFrom || createdTo) {
       return true;
     }
     return RANGE_KEYS.some((k) => filters[k].min !== '' || filters[k].max !== '');
-  }, [filters, hasSoldPeriod]);
+  }, [filters, hasSoldPeriod, createdFrom, createdTo]);
 
   /** Query sent to RTK / API (debounced search already in URL). */
   const serverQuery: ListingsQueryDto = useMemo(() => {
@@ -306,6 +320,8 @@ export function useListingsFilters() {
       sortOrder: sortColumn ? sortDirection : 'desc',
       soldFrom: soldFrom || undefined,
       soldTo: soldTo || undefined,
+      createdFrom: createdFrom || undefined,
+      createdTo: createdTo || undefined,
       sourceUnavailable: sourceUnavailable || undefined,
       notSelling: notSelling || undefined,
     };
@@ -335,7 +351,7 @@ export function useListingsFilters() {
     assignRange('sourceStockMin', 'sourceStockMax', filters.sourceStock);
 
     return q;
-  }, [page, rowsPerPage, filters, sortColumn, sortDirection, soldFrom, soldTo, hasSoldPeriod, sourceUnavailable, notSelling]);
+  }, [page, rowsPerPage, filters, sortColumn, sortDirection, soldFrom, soldTo, createdFrom, createdTo, hasSoldPeriod, sourceUnavailable, notSelling]);
 
   /** Operational statuses only — draft / error / retrying are job/pipeline states, not list UI. */
   const statusOptions = useMemo(
@@ -383,6 +399,35 @@ export function useListingsFilters() {
       })),
     [filters, t, handleRangeChange]
   );
+
+  /** Listing-date range inputs (ISO dates, `yyyy-mm-dd`, as a native date input yields). */
+  const dateFilters = useMemo(() => {
+    const setDate = (param: 'createdFrom' | 'createdTo') => (value: string) => {
+      patchParams((next) => {
+        if (value) {
+          next.set(param, value);
+        } else {
+          next.delete(param);
+        }
+      }, true);
+    };
+    return [
+      {
+        key: 'createdFrom' as const,
+        label: t('listings.filters.listedFrom'),
+        clearLabel: t('listings.filters.removeFilter', { label: t('listings.filters.listedFrom') }),
+        value: createdFrom,
+        onChange: setDate('createdFrom'),
+      },
+      {
+        key: 'createdTo' as const,
+        label: t('listings.filters.listedTo'),
+        clearLabel: t('listings.filters.removeFilter', { label: t('listings.filters.listedTo') }),
+        value: createdTo,
+        onChange: setDate('createdTo'),
+      },
+    ];
+  }, [t, createdFrom, createdTo, patchParams]);
 
   /**
    * One removable chip per filter that is actually narrowing the list, so the
@@ -441,9 +486,24 @@ export function useListingsFilters() {
       });
     });
 
+    dateFilters.forEach((field) => {
+      if (!field.value) {
+        return;
+      }
+      chips.push({
+        key: field.key,
+        label: `${field.label}: ${field.value}`,
+        onRemove: () =>
+          patchParams((next) => {
+            next.delete(field.key);
+          }, true),
+      });
+    });
+
     return chips;
   }, [
     filters,
+    dateFilters,
     t,
     trackingOptions,
     numericFilters,
@@ -470,6 +530,7 @@ export function useListingsFilters() {
     sortColumn,
     sortDirection,
     handleSort,
+    handleSortChange,
     filters: displayFilters,
     serverQuery,
     advancedOpen,
@@ -483,6 +544,7 @@ export function useListingsFilters() {
     statusOptions,
     trackingOptions,
     numericFilters,
+    dateFilters,
     activeFilterChips,
     fromDashboard,
     hasSoldPeriod,

@@ -140,6 +140,10 @@
       "min": "Min",
       "max": "Max",
       "sourceStockNote": "Stocul peste 20 nu este cunoscut; „20+” se numără ca 20.",
+      "resultListed": "<b>{{count}}</b> rezultate afișate",
+      "sortLabel": "Sortează:",
+      "listedFrom": "Listat de la",
+      "listedTo": "Listat până la",
       "fields": {
         "price": "Preț de vânzare",
         "purchasePrice": "Preț de achiziție",

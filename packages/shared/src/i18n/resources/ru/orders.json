@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "Все статусы",
       "allStores": "Все магазины",
-      "allTrackingStates": "Привязанные и непривязанные",
+      "allTrackingStates": "Все",
       "clearAll": "Сбросить всё",
       "resultCount": "Результатов: {{count}}",
       "allStages": "Все статусы",

@@ -81,7 +81,7 @@ export const ListingCard = ({
           </S.TitleSlot>
           {status ? (
             <S.BadgeRow>
-              <Badge variant={statusVariant} size="xs">
+              <Badge variant={statusVariant} size="sm" solid>
                 {status.label}
               </Badge>
             </S.BadgeRow>
@@ -104,9 +104,9 @@ export const ListingCard = ({
                   </S.MetaLabel>
                   <S.MetaValue>
                     {item.storeType ? (
-                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
+                      <IdBadge id={item.value} storeType={item.storeType} size="sm" plain onClick={(e) => e.stopPropagation()} />
                     ) : (
-                      <S.MetaValueText variant="body-sm" weight="semibold" color="text.primary">
+                      <S.MetaValueText variant="body-sm" weight="bold" color="text.primary">
                         {item.value}
                       </S.MetaValueText>
                     )}

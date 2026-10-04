@@ -27,6 +27,10 @@ export interface ListingPriceBreakdown {
   /** finalPrice × ebayFeePercent / 100 — what eBay keeps from the sale. */
   ebayFeeAmount: number;
   fixedFeeAmount: number;
+  /** The promoted-listing ad rate folded into the price (0 when the listing is in no campaign). */
+  adRatePercent: number;
+  /** price × adRatePercent / 100 — what the ad costs the seller per sale. */
+  adFeeAmount: number;
   /** The reverse-fee result before the $0.99 floor could apply. */
   priceBeforeFloor: number;
   minPriceFloorApplied: boolean;
@@ -68,13 +72,13 @@ export interface ListingPriceMetrics {
  * calculation, so that after eBay takes its cut the seller is left with
  * exactly `netTarget`.
  *
- * Formula: SalePrice = (NetTarget + FixedFee) / (1 - EbayFee% / 100)
+ * Formula: SalePrice = (NetTarget + FixedFee) / (1 - (EbayFee% + AdRate%) / 100)
  */
-export function applyEbayFees(netTarget: number, fees: FeeConfig): number {
+export function applyEbayFees(netTarget: number, fees: FeeConfig, adRatePct = 0): number {
   const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
   const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
 
-  const percentageDeduction = ebayFeePercent / 100;
+  const percentageDeduction = (ebayFeePercent + (Number(adRatePct) || 0)) / 100;
 
   // Guard against division by zero/negative if the fee is 100% or more.
   if (percentageDeduction >= 1) {
@@ -123,12 +127,16 @@ export function applyPriceEnding(price: number, endingCents: number): number {
  * @param amazonTaxRatePct Percentage tax paid AT PURCHASE on Amazon — a real
  * acquisition cost, so it raises the cost basis here (not just the post-sale
  * provisional profit estimate). 0 when unknown/not configured.
+ * @param adRatePct Promoted Listings ad rate the listing is currently
+ * advertised at; added to eBay's percentage in the reverse-fee divisor so the
+ * seller's profit is unchanged by the ad. 0 = not promoted (the old formula).
  */
 export function calculateListingPrice(
   amazonPrice: number,
   repricingStrategy: readonly PriceRange[],
   fees: FeeConfig,
-  amazonTaxRatePct: number
+  amazonTaxRatePct: number,
+  adRatePct = 0
 ): ListingPriceMetrics {
   const taxRatePct = Number(amazonTaxRatePct) || 0;
   const taxAmount = amazonPrice * (taxRatePct / 100);
@@ -163,7 +171,8 @@ export function calculateListingPrice(
 
   const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
   const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
-  const priceBeforeFloor = applyEbayFees(netTarget, fees);
+  const adRatePercent = Math.max(Number(adRatePct) || 0, 0);
+  const priceBeforeFloor = applyEbayFees(netTarget, fees, adRatePercent);
 
   // Enforce minimum price (eBay requirement: typically $0.99 for USD).
   const minPrice = 0.99;
@@ -178,12 +187,14 @@ export function calculateListingPrice(
   const roundingAmount = round2(finalPrice - priceBeforeRounding);
   const priceRoundingApplied = roundingAmount > 0;
 
-  const ebayFeeAmount = (priceRoundingApplied ? finalPrice : priceBeforeFloor) * (ebayFeePercent / 100);
+  const feeBase = priceRoundingApplied ? finalPrice : priceBeforeFloor;
+  const ebayFeeAmount = feeBase * (ebayFeePercent / 100);
+  const adFeeAmount = feeBase * (adRatePercent / 100);
 
   // Profit net of the TRUE cost (Amazon price + tax), so the tax markup
   // above is never counted as profit. The cents the ending rule added are
   // real extra revenue, less eBay's percentage on them.
-  const estimatedProfit = netTarget - trueCost + roundingAmount * Math.max(1 - ebayFeePercent / 100, 0);
+  const estimatedProfit = netTarget - trueCost + roundingAmount * Math.max(1 - (ebayFeePercent + adRatePercent) / 100, 0);
   const profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
   const roi = trueCost > 0 ? (estimatedProfit / trueCost) * 100 : 0;
 
@@ -206,6 +217,8 @@ export function calculateListingPrice(
       ebayFeePercent,
       ebayFeeAmount: round2(ebayFeeAmount),
       fixedFeeAmount,
+      adRatePercent,
+      adFeeAmount: round2(adFeeAmount),
       priceBeforeFloor: round2(priceBeforeFloor),
       minPriceFloorApplied,
       priceRoundingApplied,

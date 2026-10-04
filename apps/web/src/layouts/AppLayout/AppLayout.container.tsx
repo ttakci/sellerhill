@@ -1,7 +1,6 @@
 import {
   EntitlementState,
   isOperatorRole,
-  ListingStatus,
   type SupportedLocale,
 } from '@repo/shared';
 import { getLocaleConfig, SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
@@ -65,13 +64,6 @@ export const AppLayout: React.FC = () => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect */
     setMobileSidebarOpen(false);
   }, [location.pathname]);
-
-  // The dedicated drafts view shares its path with the ordinary listings list
-  // (`/listings/all`) and is distinguished only by its query string — so the
-  // sidebar's own `pathWithoutLocale` isn't enough to tell them apart.
-  const isDraftsActive =
-    pathWithoutLocale === '/listings/all' &&
-    new URLSearchParams(location.search).get('status') === ListingStatus.DRAFT;
 
   const handleToggleProfileUsage = useCallback(() => {
     setIsProfileUsageOpen((prev) => !prev);
@@ -222,7 +214,6 @@ export const AppLayout: React.FC = () => {
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       pathWithoutLocale={pathWithoutLocale}
       fitsViewport={fitsViewport}
-      isDraftsActive={isDraftsActive}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}
       breadcrumbItems={breadcrumbItems}

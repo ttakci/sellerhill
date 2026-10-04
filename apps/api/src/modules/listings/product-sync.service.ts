@@ -53,6 +53,8 @@ interface ListingRow extends ListingOverrideRow {
   ebay_account_id: string | null;
   sku: string | null;
   ebay_offer_id: string | null;
+  /** NUMERIC from pg arrives as a string. */
+  ad_rate_applied: string | number | null;
 }
 
 /**
@@ -120,7 +122,7 @@ export class ProductSyncService {
   ): Promise<PendingListingUpdate[]> {
     const listings = await this.databaseService.query<ListingRow>(
       `SELECT id, user_id, listing_settings_group_id, ebay_item_id, ebay_account_id,
-              sku, ebay_offer_id, price, quantity,
+              sku, ebay_offer_id, price, quantity, ad_rate_applied,
               COALESCE(disable_ordering, false) as disable_ordering,
               COALESCE(disable_repricing, false) as disable_repricing,
               COALESCE(lock_price, false) as lock_price,
@@ -334,7 +336,8 @@ export class ProductSyncService {
       product,
       listing.listing_settings_group_id,
       group,
-      amazonTaxRatePct
+      amazonTaxRatePct,
+      Number(listing.ad_rate_applied) || 0
     );
     const overridden = applyListingOverrides(strategy, listing);
     // Price unknown: only the quantity is ours to change. The price (and every

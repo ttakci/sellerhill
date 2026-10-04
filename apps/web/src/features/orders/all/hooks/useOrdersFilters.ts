@@ -81,6 +81,8 @@ export function useOrdersFilters() {
   const [tab, setTab] = useState<OrderStageTab>(isTab(tabFromUrl) ? tabFromUrl : OrderStageTab.ALL);
   const [trackingState, setTrackingState] = useState(trackingFromUrl);
   const [flag, setFlag] = useState(flagFromUrl);
+  // `<column>:<asc|desc>`; empty = the API's own order (needs-action first, then newest).
+  const [sort, setSort] = useState('');
 
   // The store is the top bar's active store. A switch starts the list over
   // (page 1) — adjusted during render, so no frame asks for page 4 of the new store.
@@ -158,6 +160,24 @@ export function useOrdersFilters() {
     [t]
   );
 
+  const sortOptions = useMemo(
+    () =>
+      [
+        { key: 'order_date', label: t('orders.table.date') },
+        { key: 'sale_total', label: t('orders.table.salePrice') },
+        { key: 'net_profit', label: t('orders.table.netProfit') },
+      ].flatMap(({ key, label }) => [
+        { value: `${key}:desc`, label: `${label} ↓` },
+        { value: `${key}:asc`, label: `${label} ↑` },
+      ]),
+    [t]
+  );
+
+  const handleSortChange = useCallback((value: string | number) => {
+    setSort(String(value));
+    setPage(1);
+  }, []);
+
   const hasActiveFilters = Boolean(
     search ||
       dateFrom ||
@@ -189,10 +209,12 @@ export function useOrdersFilters() {
       hasRefund: flag === FLAG_REFUNDED ? true : undefined,
       isTracked:
         trackingState === TRACKING.TRACKED ? true : trackingState === TRACKING.UNTRACKED ? false : undefined,
-      // No sortBy on purpose: the API then floats the stages that need the
-      // seller to the top, then newest first.
+      // Without a picked sort the API floats the stages that need the seller
+      // to the top, then newest first.
+      sortBy: sort ? sort.split(':')[0] : undefined,
+      sortOrder: sort ? (sort.split(':')[1] === 'asc' ? ('asc' as const) : ('desc' as const)) : undefined,
     }),
-    [page, rowsPerPage, search, ebayAccountId, dateFrom, dateTo, stage, tab, trackingState, flag]
+    [page, rowsPerPage, search, ebayAccountId, dateFrom, dateTo, stage, tab, trackingState, flag, sort]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -281,6 +303,7 @@ export function useOrdersFilters() {
     setTab(OrderStageTab.ALL);
     setTrackingState(DEFAULT_TRACKING);
     setFlag('');
+    setSort('');
     setPage(1);
     // Clearing filters never clears the store: it is the top bar's choice.
     const next = new URLSearchParams();
@@ -320,6 +343,9 @@ export function useOrdersFilters() {
     handleFlagChange,
     handleClearFilters,
     hasActiveFilters,
+    sortOptions,
+    sort,
+    handleSortChange,
     serverQuery,
     fromDashboard,
     dateFrom,

@@ -1,4 +1,4 @@
-import { ListingStatus, SUPPORTED_LOCALES } from '@repo/shared';
+import { SUPPORTED_LOCALES } from '@repo/shared';
 import {
   Breadcrumb,
   ConfirmModal,
@@ -31,7 +31,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   isLogoutConfirmOpen,
   pathWithoutLocale,
   fitsViewport,
-  isDraftsActive,
   userName,
   loadingIsLoading,
   breadcrumbItems,
@@ -225,7 +224,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={
-                  !isDraftsActive &&
                   (pathWithoutLocale === '/listings' ||
                     pathWithoutLocale === '/listings/all' ||
                     (pathWithoutLocale.startsWith('/listings/') &&
@@ -255,20 +253,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="clipboard-list" size={20} />
                   {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.listingJobs')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
-            <NavTooltip label={t('translation:menu.drafts')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={isDraftsActive}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate(`/listings/all?status=${ListingStatus.DRAFT}`)}
-                aria-label={t('translation:menu.drafts')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="file-text" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.drafts')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>

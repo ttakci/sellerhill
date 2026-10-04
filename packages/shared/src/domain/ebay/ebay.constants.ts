@@ -101,6 +101,9 @@ export const SUPPORTED_EBAY_MARKETPLACES: readonly EbayMarketplaceId[] = [
   EbayMarketplaceId.EBAY_US,
 ] as const;
 
+/** eBay Finances API scope (billing activity: the fees eBay actually charged, incl. Promoted Listings). Part of every consent since 2026-10-04 — eBay accepted it on both production stores; a store connected before that gains it on its next consent. */
+export const EBAY_FINANCES_SCOPE = 'https://api.ebay.com/oauth/api_scope/sell.finances';
+
 /**
  * eBay OAuth constants
  */
@@ -122,19 +125,13 @@ export const EBAY_OAUTH_CONSTANTS = {
     'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly',
     'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
     ...EBAY_MESSAGING_SCOPES,
+    EBAY_FINANCES_SCOPE,
   ],
   
   // Token expiration (in seconds)
   ACCESS_TOKEN_EXPIRES_IN: 7200, // 2 hours
   REFRESH_TOKEN_EXPIRES_IN: 47304000, // 18 months
 } as const;
-
-/**
- * eBay Finances API scope (billing activity: the ad fee eBay actually
- * charged). Requested only while `ebay.oauth.financesScopeEnabled` is on, so
- * it is NOT in DEFAULT_SCOPES; a store gains it on its next consent.
- */
-export const EBAY_FINANCES_SCOPE = 'https://api.ebay.com/oauth/api_scope/sell.finances';
 
 /** True when the store's recorded consent included {@link EBAY_FINANCES_SCOPE}. */
 export function hasFinancesScope(granted: readonly string[] | null | undefined): boolean {

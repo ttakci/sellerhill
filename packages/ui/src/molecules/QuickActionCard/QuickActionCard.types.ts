@@ -1,6 +1,8 @@
 import type React from 'react';
 
-export type QuickActionCardVariant = 'default' | 'brand';
+import type { IconName } from '../../atoms/Icon';
+
+export type QuickActionCardVariant = 'default' | 'brand' | 'solid';
 
 export interface QuickActionCardProps {
   /** Card title (primary line). */
@@ -9,7 +11,9 @@ export interface QuickActionCardProps {
   subtitle?: string;
   /** Click handler — the whole card is clickable. */
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-  /** `brand` renders the title + arrow accent in the brand color. */
+  /** `brand` renders the title + arrow accent in the brand color; `solid` fills the card with the brand gradient. */
   variant?: QuickActionCardVariant;
+  /** Optional leading icon (rendered in a tinted tile). */
+  icon?: IconName;
   className?: string;
 }

@@ -140,6 +140,10 @@
       "min": "Min",
       "max": "Max",
       "sourceStockNote": "Un stock supérieur à 20 n'est pas connu ; « 20+ » compte pour 20.",
+      "resultListed": "<b>{{count}}</b> résultats affichés",
+      "sortLabel": "Trier :",
+      "listedFrom": "Mise en ligne du",
+      "listedTo": "Mise en ligne au",
       "fields": {
         "price": "Prix de vente",
         "purchasePrice": "Prix d'achat",

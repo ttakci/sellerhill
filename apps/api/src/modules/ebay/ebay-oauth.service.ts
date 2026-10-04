@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EBAY_FINANCES_SCOPE, EBAY_MARKETPLACE, EBAY_OAUTH_CONSTANTS, type EbayMarketplaceId } from '@repo/shared';
+import { EBAY_MARKETPLACE, EBAY_OAUTH_CONSTANTS, type EbayMarketplaceId } from '@repo/shared';
 import axios from 'axios';
 
 interface EbayTokenResponse {
@@ -63,12 +63,8 @@ export class EbayOAuthService {
    * (`ebay_accounts.granted_scopes`) so a store connected before a new scope
    * was added can be told apart from one that has it.
    */
-  getScopes(includeFinances = false): readonly string[] {
-    // The Finances scope is asked for per consent (panel switch), so the list
-    // a store is recorded with is the list THAT consent showed.
-    return includeFinances
-      ? [...EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES, EBAY_FINANCES_SCOPE]
-      : EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
+  getScopes(): readonly string[] {
+    return EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
   }
 
   /**
@@ -76,16 +72,15 @@ export class EbayOAuthService {
    */
   generateConsentUrl(
     marketplaceId: EbayMarketplaceId = EBAY_MARKETPLACE.US,
-    userId: string,
-    includeFinances = false
+    userId: string
   ): { url: string; state: string } {
-    const state = this.generateState(userId, marketplaceId, includeFinances);
+    const state = this.generateState(userId, marketplaceId);
 
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.ruName || this.redirectUri,
       response_type: 'code',
-      scope: this.getScopes(includeFinances).join(' '),
+      scope: this.getScopes().join(' '),
       state,
     });
 
@@ -268,15 +263,12 @@ export class EbayOAuthService {
   /**
    * Generate secure state parameter for CSRF protection
    */
-  private generateState(userId: string, marketplaceId: EbayMarketplaceId, includeFinances: boolean): string {
+  private generateState(userId: string, marketplaceId: EbayMarketplaceId): string {
     const randomPart = randomBytes(16).toString('hex');
     // Encode userId in state for retrieval during callback
     const stateData = {
       userId,
       marketplaceId,
-      // Whether this consent asked for sell.finances — the callback records
-      // exactly that, whatever the switch says by the time eBay redirects back.
-      fin: includeFinances,
       random: randomPart,
       timestamp: Date.now(),
     };
@@ -311,7 +303,7 @@ export class EbayOAuthService {
   /**
    * Validate state parameter
    */
-  validateState(state: string): { userId: string; marketplaceId: EbayMarketplaceId; includeFinances: boolean } {
+  validateState(state: string): { userId: string; marketplaceId: EbayMarketplaceId } {
     const decoded = this.decodeState(state);
 
     // Check if state is not too old (15 minutes)
@@ -320,7 +312,7 @@ export class EbayOAuthService {
       throw new BadRequestException('ebay.errors.invalidState');
     }
 
-    // A state minted before the field existed reads as "no finances".
-    return { userId: decoded.userId, marketplaceId: decoded.marketplaceId, includeFinances: decoded.fin === true };
+    // An older state may carry a `fin` flag; it is ignored.
+    return { userId: decoded.userId, marketplaceId: decoded.marketplaceId };
   }
 }

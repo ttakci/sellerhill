@@ -11,16 +11,31 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   imageUrl,
   ebayOrderId,
   stage,
+  showStage = true,
   shippedDetectedAt,
   statsBadges,
   meta,
   stats,
+  detailLabel,
+  footerBadge,
   onClick,
   className,
   hoverEffect = true,
 }) => (
   <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId} $hoverEffect={hoverEffect}>
     <S.Top>
+      {/* The badges own the top row: the stage and every chip that qualifies it
+          (late, refund, estimated, blocked reason) read first — up to six side
+          by side, wrapping — and the title sits under them. */}
+      <S.BadgeRow>
+        {showStage && <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />}
+        {statsBadges?.map((badge) => (
+          <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm" solid>
+            {badge.label}
+          </Badge>
+        ))}
+      </S.BadgeRow>
+
       <S.TitleRow>
         <S.TitleSlot>
           <Tooltip content={productTitle} position="top" variant="dark">
@@ -29,17 +44,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </S.Title>
           </Tooltip>
         </S.TitleSlot>
-        {/* The stage and whatever qualifies it (estimated profit, blocked
-            reason, not linked) sit together opposite the title: one glance
-            says where the order stands and why. */}
-        <S.BadgeRow>
-          <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
-          {statsBadges?.map((badge) => (
-            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
-              {badge.label}
-            </Badge>
-          ))}
-        </S.BadgeRow>
       </S.TitleRow>
 
       <S.Body>
@@ -72,7 +76,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       </S.Body>
     </S.Top>
 
-    <S.MoneyRow>
+    <S.Footer>
+      {footerBadge && (
+        <S.FooterBadgeRow>
+          <Badge variant={footerBadge.variant ?? 'warning'} size="sm" solid>
+            {footerBadge.label}
+          </Badge>
+        </S.FooterBadgeRow>
+      )}
+      <S.MoneyRow>
       {stats.map((stat) => (
         <S.StatCell key={stat.label}>
           <Text variant="caption" color="text.secondary">
@@ -83,7 +95,16 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </S.StatValue>
         </S.StatCell>
       ))}
-    </S.MoneyRow>
+      {detailLabel && onClick ? (
+        <S.DetailHint>
+          <Text variant="caption" weight="semibold" color="brand.primary">
+            {detailLabel}
+          </Text>
+          <Icon name="chevron-right" size={16} color="brand.primary" />
+        </S.DetailHint>
+      ) : null}
+      </S.MoneyRow>
+    </S.Footer>
   </S.Wrapper>
 );
 

@@ -66,6 +66,12 @@ export enum EbayApiResource {
    */
   MARKETING = 'sell.marketing',
   /**
+   * Campaign and ad calls (`/sell/marketing/v1/ad_campaign/...`): measured
+   * 2026-10-03 — getCampaigns / getAds move `sell.marketing.ads.campaign`
+   * (100,000/day) and leave `sell.marketing` (10,000/day) untouched.
+   */
+  MARKETING_ADS = 'sell.marketing.ads.campaign',
+  /**
    * Finances API (`billing_activity`: the fees eBay actually charged), eBay
    * resource `payoutapi.sell.finances`, 15,000/day for the whole application —
    * the reason the billing sweep visits each store only every 4 hours.

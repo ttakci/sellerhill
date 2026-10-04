@@ -60,7 +60,8 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
         <S.AddColumn>
           <S.AddCardStack>
             <QuickActionCard
-              variant="brand"
+              variant="solid"
+              icon="plus"
               title={t('listings.addSection.title')}
               subtitle={t('listings.addSection.subtitle')}
               onClick={onAddListing}
@@ -72,6 +73,11 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
               }}
             >
               <SettingsActionRow
+                label={t('listings.otherActions.jobsTitle')}
+                subtitle={t('listings.otherActions.jobsSubtitle')}
+                onClick={onViewJobs}
+              />
+              <SettingsActionRow
                 label={t('listings.otherActions.draftsTitle')}
                 subtitle={draftsSubtitle}
                 onClick={onViewDrafts}
@@ -80,11 +86,6 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
                 label={t('listings.existingImport.actionTitle')}
                 subtitle={t('listings.existingImport.actionSubtitle')}
                 onClick={onImportExisting}
-              />
-              <SettingsActionRow
-                label={t('listings.otherActions.jobsTitle')}
-                subtitle={t('listings.otherActions.jobsSubtitle')}
-                onClick={onViewJobs}
               />
             </SettingsCard>
           </S.AddCardStack>

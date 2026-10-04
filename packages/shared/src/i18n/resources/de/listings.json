@@ -140,6 +140,10 @@
       "min": "Min.",
       "max": "Max.",
       "sourceStockNote": "Ein Bestand über 20 ist nicht bekannt; „20+“ zählt als 20.",
+      "resultListed": "<b>{{count}}</b> Ergebnisse aufgelistet",
+      "sortLabel": "Sortieren:",
+      "listedFrom": "Gelistet ab",
+      "listedTo": "Gelistet bis",
       "fields": {
         "price": "Verkaufspreis",
         "purchasePrice": "Einkaufspreis",

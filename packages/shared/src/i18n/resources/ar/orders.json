@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "جميع الحالات",
       "allStores": "جميع المتاجر",
-      "allTrackingStates": "المرتبطة وغير المرتبطة",
+      "allTrackingStates": "الكل",
       "clearAll": "مسح الكل",
       "resultCount": "{{count}} نتائج",
       "allStages": "كل الحالات",

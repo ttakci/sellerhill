@@ -20,5 +20,7 @@ export interface BadgeProps {
   variant?: BadgeVariant;
   size?: BadgeSize;
   isPill?: boolean;
+  /** Fills the badge with its variant's ink colour and sets white bold text — the order screens' badge style. */
+  solid?: boolean;
   className?: string;
 }

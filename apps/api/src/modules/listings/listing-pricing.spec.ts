@@ -151,3 +151,44 @@ describe('applyEbayFees', () => {
     expect(result).toBe(75); // netTarget * 1.5 fallback
   });
 });
+
+describe('ad rate in the price (spec B5)', () => {
+  const strategy = [{ id: 'r1', minPrice: 0, maxPrice: 1000, profitMarginPercent: 20, fixedProfitAmount: 0 }];
+  const fees = { ebayFeePercent: 13, fixedFeeAmount: 0.3 } as FeeConfig;
+
+  it('adds the ad rate to the reverse-fee divisor', () => {
+    const plain = calculateListingPrice(10, strategy, fees, 0);
+    const promoted = calculateListingPrice(10, strategy, fees, 0, 5);
+    // (12 + 0.3) / (1 - 0.18) = 15.00
+    expect(promoted.finalPrice).toBeCloseTo(15.0, 2);
+    expect(promoted.finalPrice).toBeGreaterThan(plain.finalPrice);
+    expect(promoted.breakdown.adRatePercent).toBe(5);
+    expect(promoted.breakdown.adFeeAmount).toBeCloseTo(0.75, 2);
+  });
+
+  it('keeps the seller profit the same as without an ad', () => {
+    expect(calculateListingPrice(10, strategy, fees, 0, 5).estimatedProfit).toBe(
+      calculateListingPrice(10, strategy, fees, 0).estimatedProfit
+    );
+  });
+
+  it('a fee + ad rate of 100% or more falls back like a fee alone does', () => {
+    const result = calculateListingPrice(10, strategy, { ebayFeePercent: 60, fixedFeeAmount: 0 } as FeeConfig, 0, 40);
+    expect(Number.isFinite(result.finalPrice)).toBe(true);
+    expect(result.finalPrice).toBeGreaterThan(0);
+    // The guard's own fallback: netTarget * 1.5 (no division by a non-positive divisor).
+    expect(result.finalPrice).toBeCloseTo(result.breakdown.netTarget * 1.5, 2);
+  });
+
+  it('the price-ending profit term deducts the ad rate too (x0.82, not x0.87)', () => {
+    const rounding = { ebayFeePercent: 13, fixedFeeAmount: 0.3, priceRoundingEnabled: true, priceEndingCents: 99 } as FeeConfig;
+    const base = calculateListingPrice(10, strategy, fees, 0, 5).estimatedProfit;
+    const rounded = calculateListingPrice(10, strategy, rounding, 0, 5);
+    expect(rounded.breakdown.roundingAmount).toBeGreaterThan(0.9);
+    expect(rounded.estimatedProfit).toBeCloseTo(base + rounded.breakdown.roundingAmount * 0.82, 2);
+  });
+
+  it('no ad rate is the old formula exactly', () => {
+    expect(calculateListingPrice(10, strategy, fees, 0, 0)).toEqual(calculateListingPrice(10, strategy, fees, 0));
+  });
+});

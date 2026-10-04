@@ -56,10 +56,10 @@ export class EbayController {
   @ApiOkResponse({ description: 'Consent URL generated successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   @ApiForbiddenResponse({ description: 'Email not verified' })
-  async getConnectUrl(
+  getConnectUrl(
     @Request() req: { user: { sub: string } },
     @Query('marketplaceId') marketplaceId?: EbayMarketplaceId
-  ): Promise<CreateEbayConnectUrlResponse> {
+  ): CreateEbayConnectUrlResponse {
     const userId = req.user.sub;
     return this.ebayService.createConnectUrl(userId, marketplaceId);
   }

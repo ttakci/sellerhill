@@ -249,12 +249,13 @@ export class ListingStrategyService {
     product: ProductData,
     settingsGroupId: string,
     group?: ListingSettingsGroup,
-    amazonTaxRatePct = 0
+    amazonTaxRatePct = 0,
+    adRatePct = 0
   ): Promise<StrategyCommerce> {
     const resolved =
       group ?? (await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId));
 
-    const priceMetrics = this.calculatePrice(product.price.current, resolved, amazonTaxRatePct);
+    const priceMetrics = this.calculatePrice(product.price.current, resolved, amazonTaxRatePct, adRatePct);
 
     return {
       price: priceMetrics.finalPrice,
@@ -483,13 +484,18 @@ export class ListingStrategyService {
    * resolves and caches it (see `computePricing`) — this method never reads
    * store settings itself.
    */
-  private calculatePrice(amazonPrice: number, group: ListingSettingsGroup, amazonTaxRatePct: number): ListingPriceMetrics {
+  private calculatePrice(
+    amazonPrice: number,
+    group: ListingSettingsGroup,
+    amazonTaxRatePct: number,
+    adRatePct = 0
+  ): ListingPriceMetrics {
     const hasRange = group.repricingStrategy.some((r) => amazonPrice >= r.minPrice && amazonPrice <= r.maxPrice);
     if (!hasRange) {
       this.logger.warn(
         `No price range found for price ${amazonPrice} in group ${group.id}. Using fallback calculation.`
       );
     }
-    return calculateListingPrice(amazonPrice, group.repricingStrategy, group.fees, amazonTaxRatePct);
+    return calculateListingPrice(amazonPrice, group.repricingStrategy, group.fees, amazonTaxRatePct, adRatePct);
   }
 }

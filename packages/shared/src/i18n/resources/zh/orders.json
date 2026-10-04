@@ -27,7 +27,7 @@
     "filters": {
       "allStatuses": "所有状态",
       "allStores": "所有店铺",
-      "allTrackingStates": "已关联和未关联",
+      "allTrackingStates": "全部",
       "clearAll": "全部清除",
       "resultCount": "{{count}} 条结果",
       "allStages": "全部状态",

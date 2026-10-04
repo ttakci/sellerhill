@@ -18,9 +18,8 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
  * rides under the profit, so the one figure that matters carries its own
  * context. Money columns are right-aligned with tabular numerals.
  *
- * `sortable` flags are deliberately absent: the page never wires `onSort`
- * (the API floats what needs the seller to the top, then newest first), and a
- * sort affordance that does nothing is worse than none.
+ * Sortable: order number (by date), sale and profit — the keys `OrdersAllPage.container`
+ * maps onto the API's `order_date` / `sale_total` / `net_profit`.
  */
 export function useOrdersColumns(
   formatCurrency: (value: number, ebayAccountId?: string | null) => string,
@@ -34,8 +33,9 @@ export function useOrdersColumns(
     () => [
       {
         key: 'ebayOrderId',
+        sortable: true,
         header: t('orders.table.orderNumber'),
-        width: '9.75rem',
+        width: '9rem',
         render: (_value, order) => (
           <S.OrderCell>
             <Text variant="body-sm" weight="semibold" numeric>
@@ -76,17 +76,6 @@ export function useOrdersColumns(
               title={order.product?.title || t('translation:common.unknownProduct')}
               imageUrl={order.product?.imageUrl}
               meta={meta}
-              subtitle={
-                // No matched listing — price/stock/auto-fulfill/tracking never
-                // run for this order, and cost_capture_status stays 'untracked'
-                // forever. Independent of the stage badge, which only describes
-                // automation on an order we already recognize.
-                !order.isTracked ? (
-                  <Badge variant="neutral" size="xs">
-                    {t('orders.tracking.untracked')}
-                  </Badge>
-                ) : undefined
-              }
             />
           );
         },
@@ -115,7 +104,7 @@ export function useOrdersColumns(
         // detail page's eBay card.
         key: 'stage',
         header: t('orders.stageLegend.columnStage'),
-        width: '11.5rem',
+        width: '15.5rem',
         render: (_value, order) => {
           const reasonLabel =
             orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
@@ -126,11 +115,22 @@ export function useOrdersColumns(
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
           const flags = orderFlagBadges(order, t, (value) => formatCurrency(value, order.ebayAccountId), formatDay);
+          // Not one of the seller's listings: SellerHill does not follow the sale, so
+          // no stage, deadline or reason applies — just the one chip.
+          if (!order.isTracked) {
+            return (
+              <S.StageCell>
+                <Badge variant="neutral" size="sm" solid>
+                  {t('orders.tracking.untracked')}
+                </Badge>
+              </S.StageCell>
+            );
+          }
           return (
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />
               {flags.map((flag) => (
-                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="xs">
+                <Badge key={flag.label} variant={flag.variant ?? 'warning'} size="sm" solid>
                   {flag.label}
                 </Badge>
               ))}
@@ -155,6 +155,7 @@ export function useOrdersColumns(
       },
       {
         key: 'salePrice',
+        sortable: true,
         header: t('orders.table.salePrice'),
         width: '6rem',
         align: 'right',
@@ -171,16 +172,24 @@ export function useOrdersColumns(
         align: 'right',
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary" numeric>
-            {formatCurrency(order.purchasePrice, order.ebayAccountId)}
+            {order.isTracked ? formatCurrency(order.purchasePrice, order.ebayAccountId) : '—'}
           </Text>
         ),
       },
       {
         key: 'netProfit',
+        sortable: true,
         header: t('orders.table.netProfit'),
         width: '7.5rem',
         align: 'right',
         render: (_value, order) => {
+          if (!order.isTracked) {
+            return (
+              <Text variant="body-sm" color="text.tertiary">
+                —
+              </Text>
+            );
+          }
           const margin = formatMargin(order);
           return (
             <S.ProfitCell>
@@ -194,7 +203,7 @@ export function useOrdersColumns(
                 {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
               {order.profitBasis === ProfitBasis.ESTIMATED ? (
-                <Badge variant="warning" size="xs">
+                <Badge variant="warning" size="sm" solid>
                   {t('orders.estimateBadge')}
                 </Badge>
               ) : margin ? (

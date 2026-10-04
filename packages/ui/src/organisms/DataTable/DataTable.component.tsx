@@ -6,6 +6,7 @@ import { Skeleton } from '../../atoms/Skeleton';
 import { Select } from '../../molecules/Select';
 import { Table } from '../../molecules/Table';
 import { TablePagination } from '../../molecules/Table/TablePagination.component';
+import { Tooltip } from '../../molecules/Tooltip';
 import { ViewToggle } from '../../molecules/ViewToggle/ViewToggle.component';
 
 import { ColumnManager } from './ColumnManager';
@@ -36,6 +37,13 @@ export const DataTableComponent = <T,>({
   columnOptions,
   visibleColumnKeys,
   onToggleColumn,
+  onMoveColumn,
+  resultLabel,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortLabel,
+  downloadLabel,
   columnManagerLabel,
   sortColumn,
   sortDirection,
@@ -53,7 +61,11 @@ export const DataTableComponent = <T,>({
 }: DataTableComponentProps<T>): React.ReactElement => {
   const hasBulkActions = bulkActions && bulkActions.length > 0 && data.length > 0;
   const showColumnManager = viewMode === 'table' && columnOptions && columnOptions.length > 0;
-  const hasToolbar = hasBulkActions || !hideViewToggle || onDownload || actions || showColumnManager || toolbarLeft;
+  const hasSort = Boolean(sortOptions && sortOptions.length > 0 && onSortChange);
+  const hasToolbar =
+    hasSort ||
+    Boolean(resultLabel) ||
+    hasBulkActions || !hideViewToggle || onDownload || actions || showColumnManager || toolbarLeft;
   const isEmpty = data.length === 0;
   const resolvedEmpty = emptyContent ?? emptyMessage ?? 'No data';
   // Skeleton only when there is genuinely nothing to show yet — a background
@@ -83,18 +95,39 @@ export const DataTableComponent = <T,>({
             {toolbarLeft}
           </S.ToolbarLeft>
           <S.ToolbarRight>
+            {resultLabel && (
+              <S.ResultSummary variant="body-sm" weight="medium" color="text.secondary">
+                {resultLabel}
+              </S.ResultSummary>
+            )}
+            {hasSort && (
+              <S.SortWrapper>
+                <Select
+                  size="small"
+                  trailingIcon="filter-list"
+                  valuePrefix={sortLabel}
+                  value={sortValue}
+                  options={sortOptions ?? []}
+                  onChange={onSortChange}
+                  fullWidth
+                />
+              </S.SortWrapper>
+            )}
             {showColumnManager && (
               <ColumnManager
                 columnOptions={columnOptions}
                 visibleColumnKeys={visibleColumnKeys || []}
                 onToggleColumn={onToggleColumn || (() => {})}
+                onMoveColumn={onMoveColumn}
                 label={columnManagerLabel}
               />
             )}
             {onDownload && (
-              <IconButton variant="ghost" onClick={onDownload} title="Export">
-                <Icon name="download" size={20} />
-              </IconButton>
+              <Tooltip content={downloadLabel || 'Export'} position="top" variant="dark">
+                <IconButton variant="ghost" onClick={onDownload} aria-label={downloadLabel || 'Export'}>
+                  <Icon name="download" size={20} />
+                </IconButton>
+              </Tooltip>
             )}
             {actions}
           </S.ToolbarRight>

@@ -12,7 +12,7 @@ export const OrderStageBadgeComponent: React.FC<OrderStageBadgeViewProps> = ({
   size,
 }) => {
   const badge = (
-    <Badge variant={variant} size={size}>
+    <Badge variant={variant} size={size} solid>
       <S.Inner>
         <Icon name={icon} size={size === 'md' ? 16 : 14} />
         {label}

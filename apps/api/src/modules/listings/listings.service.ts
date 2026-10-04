@@ -604,6 +604,18 @@ export class ListingsService {
       conditions.push(`EXISTS (SELECT 1 FROM orders o_sold WHERE ${soldConds.join(' AND ')})`);
     }
 
+    // Listing (creation) date range; createdTo is inclusive as a date.
+    if (query.createdFrom?.trim()) {
+      conditions.push(`l.created_at >= $${paramIndex}::date`);
+      params.push(query.createdFrom.trim());
+      paramIndex++;
+    }
+    if (query.createdTo?.trim()) {
+      conditions.push(`l.created_at < ($${paramIndex}::date + INTERVAL '1 day')`);
+      params.push(query.createdTo.trim());
+      paramIndex++;
+    }
+
     const whereClause = conditions.join(' AND ');
     const fromJoin = `
       FROM listings l

@@ -19,6 +19,10 @@ export interface SelectStandaloneComponentProps {
   options: SelectOption[];
   placeholder?: string;
   iconLeft?: IconName;
+  /** Replaces the chevron on the right edge. */
+  trailingIcon?: IconName;
+  /** Text shown before the selected label, e.g. "Sort:". */
+  valuePrefix?: string;
   isDisabled?: boolean;
   fullWidth?: boolean;
   size?: SelectSize;
@@ -53,6 +57,10 @@ export interface SelectProps<TFieldValues extends FieldValues = FieldValues> {
   onChange?: (value: string | number) => void;
   placeholder?: string;
   iconLeft?: IconName;
+  /** Replaces the chevron on the right edge. */
+  trailingIcon?: IconName;
+  /** Text shown before the selected label, e.g. "Sort:". */
+  valuePrefix?: string;
   isDisabled?: boolean;
   fullWidth?: boolean;
   isSearchable?: boolean;

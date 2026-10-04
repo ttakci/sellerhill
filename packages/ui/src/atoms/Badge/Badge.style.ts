@@ -12,7 +12,7 @@ import type { BadgeSize, BadgeVariant } from './Badge.types';
  * compatibility and ignored. The text gets real room on every size: a label
  * squeezed into a 10px capsule read as an afterthought beside 14px body text.
  */
-export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize; $isPill: boolean }>`
+export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize; $isPill: boolean; $solid: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -132,5 +132,34 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
       default:
         return '';
     }
+  }}
+
+  /* Solid: the variant's ink becomes the fill, text and border follow (white, bold). */
+  ${({ $variant, $solid, theme }: { $variant: BadgeVariant; $solid: boolean; theme: Theme }) => {
+    if (!$solid) {
+      return '';
+    }
+    const t = theme;
+    const ink: Record<string, string> = {
+      primary: t.colors.brand.primary,
+      secondary: t.colors.text.secondary,
+      success: t.colors.semantic.success,
+      warning: t.colors.semantic.warning,
+      error: t.colors.semantic.error,
+      info: t.colors.semantic.info,
+      neutral: t.colors.text.secondary,
+      teal: t.colors.badge.teal,
+      sky: t.colors.badge.sky,
+      orange: t.colors.badge.orange,
+      navy: t.colors.badge.navy,
+      solidNavy: t.colors.sidebar.background,
+      solidAmber: t.colors.semantic.warning,
+    };
+    return `
+      background: ${ink[$variant]};
+      color: ${t.colors.text.inverse};
+      border-color: ${ink[$variant]};
+      font-weight: ${t.typography.fontWeight.bold};
+    `;
   }}
 `;

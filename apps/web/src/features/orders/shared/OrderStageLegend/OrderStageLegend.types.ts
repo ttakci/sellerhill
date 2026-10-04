@@ -14,6 +14,5 @@ export interface OrderStageLegendViewProps {
   columnMeaning: string;
   columnAction: string;
   isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  onToggle: () => void;
 }

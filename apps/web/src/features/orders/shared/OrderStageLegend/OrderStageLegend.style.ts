@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { glassSurface, Text, tkn } from '@repo/ui';
 
 /** Stage · meaning · action. On a phone each row stacks, badge first. */
 export const Grid = styled.div`
@@ -24,4 +24,25 @@ export const HeaderCell = styled(Text)`
   @media (max-width: ${tkn('breakpoints.sm')}) {
     display: none;
   }
+`;
+
+/** The opened legend: a glass pane under the tab row, as wide as the row. */
+export const Panel = styled.div`
+  ${({ theme }) => glassSurface(theme)}
+  flex: 1 0 100%;
+  box-sizing: border-box;
+  padding: ${tkn('spacing.md+')};
+  border-radius: ${tkn('radius.lg')};
+`;
+
+/** Keeps the badge at its natural width instead of stretching across the grid cell. */
+export const BadgeCell = styled.div`
+  display: flex;
+  justify-content: flex-start;
+`;
+
+export const Chevron = styled.span<{ $isOpen: boolean }>`
+  display: inline-flex;
+  transition: transform ${tkn('transitions.fast')};
+  transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
 `;
