@@ -35,7 +35,7 @@ export function useOrdersColumns(
       {
         key: 'ebayOrderId',
         header: t('orders.table.orderNumber'),
-        width: '9.75rem',
+        width: '9rem',
         render: (_value, order) => (
           <S.OrderCell>
             <Text variant="body-sm" weight="semibold" numeric>
@@ -104,7 +104,7 @@ export function useOrdersColumns(
         // detail page's eBay card.
         key: 'stage',
         header: t('orders.stageLegend.columnStage'),
-        width: '11.5rem',
+        width: '15.5rem',
         render: (_value, order) => {
           const reasonLabel =
             orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason
