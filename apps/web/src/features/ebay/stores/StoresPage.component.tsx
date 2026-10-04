@@ -1,4 +1,5 @@
-import { Card, EmptyState, PageHeader, StatusBadge, Text } from '@repo/ui';
+import { EbayAccountStatus } from '@repo/shared';
+import { Button, Card, EmptyState, PageHeader, StatusBadge, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,6 +16,8 @@ export const StoresPageComponent = ({
   isLoading,
   isConnecting,
   onConnect,
+  onReconnect,
+  reconnectingId,
   marketplaceOptions,
   selectedMarketplace,
   onMarketplaceChange,
@@ -56,6 +59,22 @@ export const StoresPageComponent = ({
                   {getEbayMarketplaceLabel(t, account.marketplaceId)}
                 </Text>
               </S.StoreMeta>
+              {(account.status === EbayAccountStatus.ACTIVE || account.status === EbayAccountStatus.REVOKED) && (
+                <S.StoreActions>
+                  <Tooltip content={t('translation:settingsHub.sections.ebay.reconnect.hint')} position="top" variant="dark">
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => onReconnect(account)}
+                      isLoading={reconnectingId === account.id}
+                    >
+                      <Text variant="body-sm" weight="semibold">
+                        {t('translation:settingsHub.sections.ebay.reconnect.action')}
+                      </Text>
+                    </Button>
+                  </Tooltip>
+                </S.StoreActions>
+              )}
             </Card>
           ))}
         </S.StoresGrid>

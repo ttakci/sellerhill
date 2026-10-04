@@ -8,6 +8,10 @@ export interface StoresPageComponentProps {
   isLoading: boolean;
   isConnecting: boolean;
   onConnect: () => void;
+  /** Re-runs eBay consent for a store in place (no disconnect). */
+  onReconnect: (account: EbayAccountPublicDto) => void;
+  /** Store whose reconnect redirect is being prepared. */
+  reconnectingId: string | null;
   marketplaceOptions: EbayMarketplaceOption[];
   selectedMarketplace: EbayMarketplaceId;
   onMarketplaceChange: (value: EbayMarketplaceId) => void;

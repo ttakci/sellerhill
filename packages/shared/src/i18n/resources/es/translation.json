@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "ID de vendedor",
         "connectedSince": "Conectada desde",
+        "reconnect": {
+          "action": "Reconectar",
+          "hint": "Inicia sesión en eBay de nuevo para renovar los permisos de esta tienda. La tienda, sus pedidos y sus publicaciones se quedan como están; no necesitas desconectarla primero."
+        },
         "disconnect": {
           "action": "Desconectar",
           "confirmDescription": "Al desconectar, se detienen la sincronización de pedidos, las compras automáticas y las actualizaciones de seguimiento de esta tienda. Tus pedidos y publicaciones existentes se conservan, y al volver a conectar la tienda se restablece todo. Para retirar también el acceso desde eBay, elimina SellerHill en los ajustes de «Acceso de aplicaciones de terceros» de eBay.",

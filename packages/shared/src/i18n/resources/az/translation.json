@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "Satıcı ID-si",
         "connectedSince": "Qoşulma tarixi",
+        "reconnect": {
+          "action": "Yenidən qoş",
+          "hint": "Bu mağazanın icazələrini yeniləmək üçün eBay-ə yenidən daxil olun. Mağaza, sifarişləri və elanları olduğu kimi qalır — əvvəlcə ayırmağa ehtiyac yoxdur."
+        },
         "disconnect": {
           "action": "Bağlantını kəs",
           "confirmDescription": "Bağlantını kəsmək bu mağaza üçün sifariş sinxronizasiyasını, avtomatik alışı və izləmə yeniləmələrini dayandırır. Mövcud sifarişləriniz və elanlarınız saxlanılır, mağazanı sonradan yenidən qoşmaq hər şeyi bərpa edir. eBay tərəfində girişi də ləğv etmək üçün eBay-in \"Üçüncü tərəf tətbiq girişi\" parametrlərindən SellerHill-i silin.",

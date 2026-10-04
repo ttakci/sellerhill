@@ -83,6 +83,8 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   /** Store awaiting disconnect confirmation; also drives the confirm dialog's open state. */
   const [pendingDisconnectId, setPendingDisconnectId] = useState<string | null>(null);
+  /** Store whose reconnect redirect is being prepared. */
+  const [reconnectingEbayId, setReconnectingEbayId] = useState<string | null>(null);
 
   const [disconnectEbayAccount, { isLoading: isDisconnecting, originalArgs: disconnectArgs }] =
     useDisconnectEbayAccountMutation();
@@ -255,6 +257,39 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   };
 
 
+  // Re-consent an ACTIVE/REVOKED store in place: the backend treats a
+  // same-owner callback as a re-consent of the same row, so this is the plain
+  // connect flow with that store's own marketplace.
+  const handleReconnectEbay = (storeId: string): void => {
+    const account = ebayData?.items.find((item) => item.id === storeId);
+    if (!account) {
+      return;
+    }
+    setReconnectingEbayId(storeId);
+    void getConnectUrl({ marketplaceId: account.marketplaceId })
+      .unwrap()
+      .then((result) => {
+        // Demo mode answers with an empty URL: stay on the page.
+        if (!result.url) {
+          setReconnectingEbayId(null);
+          return;
+        }
+        window.location.href = result.url;
+      })
+      .catch((error: FetchBaseQueryError | SerializedError) => {
+        setReconnectingEbayId(null);
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t,
+        );
+      });
+  };
+
   // Disconnecting a store stops every automation behind it, so it is confirmed
   // first. The pending id doubles as the confirmation's open state — there is
   // no second boolean that could disagree with which store is being severed.
@@ -339,6 +374,8 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
         onCancelDisconnectEbay={handleCancelDisconnectEbay}
         pendingDisconnectId={pendingDisconnectId}
         disconnectingEbayId={isDisconnecting ? (disconnectArgs?.accountId ?? null) : null}
+        onReconnectEbay={handleReconnectEbay}
+        reconnectingEbayId={reconnectingEbayId}
         ebayMarketplaceOptions={getEbayMarketplaceOptions(t)}
         selectedEbayMarketplace={selectedEbayMarketplace}
         onEbayMarketplaceChange={setSelectedEbayMarketplace}

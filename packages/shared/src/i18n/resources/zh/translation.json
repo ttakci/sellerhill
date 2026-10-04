@@ -233,6 +233,10 @@
       "ebay": {
         "sellerId": "卖家 ID",
         "connectedSince": "连接时间",
+        "reconnect": {
+          "action": "重新连接",
+          "hint": "请重新登录 eBay 以更新此店铺的权限。店铺及其订单和商品刊登保持不变，无需先断开连接。"
+        },
         "disconnect": {
           "action": "断开连接",
           "confirmDescription": "断开连接后，将停止该店铺的订单同步、自动采购和物流单号更新。您现有的订单和商品刊登会保留，之后重新连接店铺即可恢复全部功能。如需同时在 eBay 一侧撤销授权，请在 eBay 的“第三方应用访问”设置中移除 SellerHill。",

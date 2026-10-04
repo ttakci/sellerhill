@@ -52,6 +52,10 @@ export interface SettingsHubPageComponentProps {
   pendingDisconnectId: string | null;
   /** Store whose disconnect request is in flight. */
   disconnectingEbayId: string | null;
+  /** Re-runs eBay consent for a store in place (no disconnect). */
+  onReconnectEbay: (storeId: string) => void;
+  /** Store whose reconnect redirect is being prepared. */
+  reconnectingEbayId: string | null;
   ebayMarketplaceOptions: EbayMarketplaceOption[];
   selectedEbayMarketplace: EbayMarketplaceId;
   onEbayMarketplaceChange: (value: EbayMarketplaceId) => void;

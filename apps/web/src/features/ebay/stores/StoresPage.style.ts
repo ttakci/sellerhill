@@ -40,3 +40,11 @@ export const StoreMeta = styled.div`
   padding-top: ${tkn('spacing.sm')};
   border-top: 1px solid ${tkn('colors.border.secondary')};
 `;
+
+export const StoreActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.md')};
+`;
