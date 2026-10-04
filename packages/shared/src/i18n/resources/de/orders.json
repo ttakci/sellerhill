@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Alle Bestellungen",
-      "subtitle": "{{count}} Ergebnisse",
+      "subtitle": "Verfolgen Sie jeden Verkauf vom Einkauf bis zur Zustellung: was zu kaufen ist, was unterwegs ist und was Ihre Aufmerksamkeit braucht.",
       "loadingTitle": "Bestellungen werden geladen",
       "loadingSubtitle": "Ihre neuesten eBay-Bestellungen werden abgerufen.",
       "filtersTitle": "Keine Bestellungen entsprechen Ihren Filtern",

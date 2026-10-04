@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Todos os pedidos",
-      "subtitle": "{{count}} resultados",
+      "subtitle": "Acompanhe cada venda da compra até a entrega: o que comprar, o que está a caminho e o que precisa de você.",
       "loadingTitle": "Carregando pedidos",
       "loadingSubtitle": "Buscando seus pedidos mais recentes do eBay.",
       "filtersTitle": "Nenhum pedido corresponde aos filtros",

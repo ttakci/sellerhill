@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Toutes les commandes",
-      "subtitle": "{{count}} résultats",
+      "subtitle": "Suivez chaque vente de l'achat à la livraison : ce qu'il faut acheter, ce qui est en route et ce qui a besoin de vous.",
       "loadingTitle": "Chargement des commandes",
       "loadingSubtitle": "Récupération de vos dernières commandes eBay.",
       "filtersTitle": "Aucune commande ne correspond à vos filtres",

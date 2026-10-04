@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Annonces actives",
-      "subtitle": "Vous avez actuellement {{count}} annonces actives en ligne dans votre boutique.",
+      "subtitle": "Recherchez, filtrez et triez toutes les annonces actives de votre boutique, et ouvrez-en une pour modifier son prix, son stock et son automatisation.",
       "emptyTitle": "Aucune annonce trouvée",
       "emptySubtitle": "Commencez par ajouter des produits Amazon à votre boutique eBay."
     },

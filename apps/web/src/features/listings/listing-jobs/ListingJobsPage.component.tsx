@@ -1,19 +1,21 @@
 import type { ListingJobDto } from '@repo/shared';
 import {
+  Badge,
   Button,
   DataTable,
   EmptyState,
+  Icon,
   PageHeader,
   SearchField,
   Select,
-  StatusBadge,
   Text,
 } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import * as S from './ListingJobsPage.style';
 import type { ListingJobsPageComponentProps } from './ListingJobsPage.types';
+import { jobStatusBadgeVariant } from './shared/job-status-badge';
 import { JobProgressRing } from './shared/JobProgressRing';
 
 export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> = ({
@@ -59,14 +61,17 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
        * card is the button — no "Details →" footer.
        */
       <S.JobCard key={job.id} variant="elevated" onClick={() => onJobClick(job.id)}>
+        {/* Same anatomy as the order card: the status badge owns the top row, the title under it. */}
         <S.JobCardHeader>
-          <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
+          <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
+            {statusLabel(job.status)}
+          </Badge>
+        </S.JobCardHeader>
+        <S.JobTitleRow>
+          <S.MonoId variant="body" weight="semibold" color="text.primary">
             {shortId}
           </S.MonoId>
-          <StatusBadge status={String(job.status).toLowerCase()} size="sm">
-            {statusLabel(job.status)}
-          </StatusBadge>
-        </S.JobCardHeader>
+        </S.JobTitleRow>
 
         <S.JobCardBody>
           <S.ProgressRow>
@@ -121,7 +126,13 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                 </S.StatValue>
               </S.StatCell>
             ) : null}
-          </S.StatsGrid>
+          <S.DetailHint>
+            <Text variant="caption" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <Icon name="chevron-right" size={16} color="brand.primary" />
+          </S.DetailHint>
+        </S.StatsGrid>
       </S.JobCard>
     );
   };
@@ -191,9 +202,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                 />
               </S.SelectWrapper>
               <S.FilterActions>
-                <S.ResultCount variant="caption" weight="medium" color="text.secondary">
-                  {t('listings.jobs.filters.resultCount', { count: pagination.count })}
-                </S.ResultCount>
                 {hasActiveFilters && (
                   <Button variant="text" size="small" onClick={onClearFilters}>
                     <Text variant="body">{t('listings.filters.clearAll')}</Text>
@@ -207,6 +215,15 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
 
       <DataTable
         gridMinItemWidth="20rem"
+        downloadLabel={t('listings.actions.export')}
+        resultLabel={
+          <Trans
+            i18nKey="listings.filters.resultListed"
+            ns="listings"
+            values={{ count: pagination.count }}
+            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          />
+        }
         columns={columns}
         data={jobs}
         renderGridCard={renderGridCard}

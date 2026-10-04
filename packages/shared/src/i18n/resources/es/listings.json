@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Publicaciones activas",
-      "subtitle": "Tienes {{count}} publicaciones activas en tu tienda.",
+      "subtitle": "Busque, filtre y ordene todos los anuncios activos de su tienda y abra uno para editar su precio, stock y automatización.",
       "emptyTitle": "No se encontraron publicaciones",
       "emptySubtitle": "Empieza agregando productos de Amazon a tu tienda de eBay."
     },

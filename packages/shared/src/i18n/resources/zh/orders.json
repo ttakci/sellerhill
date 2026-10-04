@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "全部订单",
-      "subtitle": "{{count}} 条结果",
+      "subtitle": "跟踪每笔订单从采购到送达的全过程：哪些需要采购、哪些在途、哪些需要您处理。",
       "loadingTitle": "正在加载订单",
       "loadingSubtitle": "正在获取您最新的 eBay 订单。",
       "filtersTitle": "没有符合筛选条件的订单",

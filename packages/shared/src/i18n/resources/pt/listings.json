@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Anúncios ativos",
-      "subtitle": "Você tem {{count}} anúncios ativos no ar na sua loja.",
+      "subtitle": "Pesquise, filtre e ordene todos os anúncios ativos da sua loja e abra um para editar preço, estoque e automação.",
       "emptyTitle": "Nenhum anúncio encontrado",
       "emptySubtitle": "Comece adicionando produtos da Amazon à sua loja eBay."
     },

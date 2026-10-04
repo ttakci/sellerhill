@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "在售商品刊登",
-      "subtitle": "您的店铺目前有 {{count}} 条在售商品刊登。",
+      "subtitle": "搜索、筛选并排序店铺中所有在售商品，打开任意一个即可修改价格、库存和自动化设置。",
       "emptyTitle": "未找到商品刊登",
       "emptySubtitle": "从把 Amazon 商品添加到您的 eBay 店铺开始。"
     },

@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Tutti gli ordini",
-      "subtitle": "{{count}} risultati",
+      "subtitle": "Segui ogni vendita dall'acquisto alla consegna: cosa acquistare, cosa è in viaggio e cosa richiede la tua attenzione.",
       "loadingTitle": "Caricamento degli ordini",
       "loadingSubtitle": "Recupero dei tuoi ultimi ordini eBay.",
       "filtersTitle": "Nessun ordine corrisponde ai filtri",

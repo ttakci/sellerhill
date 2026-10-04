@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Aktive Angebote",
-      "subtitle": "Sie haben derzeit {{count}} aktive Angebote in Ihrem Shop.",
+      "subtitle": "Durchsuchen, filtern und sortieren Sie alle aktiven Angebote Ihres Shops und öffnen Sie eines, um Preis, Bestand und Automatisierung zu bearbeiten.",
       "emptyTitle": "Keine Angebote gefunden",
       "emptySubtitle": "Beginnen Sie damit, Produkte von Amazon in Ihren eBay-Shop zu übernehmen."
     },

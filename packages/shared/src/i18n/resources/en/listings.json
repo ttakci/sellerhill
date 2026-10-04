@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Active Listings",
-      "subtitle": "You have {{count}} active listings currently live in your store.",
+      "subtitle": "Search, filter and sort every live listing in your store, and open one to edit its price, stock and automation.",
       "emptyTitle": "No Listings Found",
       "emptySubtitle": "Start by adding products from Amazon to your eBay store."
     },

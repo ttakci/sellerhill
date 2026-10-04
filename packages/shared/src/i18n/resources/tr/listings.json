@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Aktif Listeler",
-      "subtitle": "Şu anda mağazanızda yayında olan {{count}} aktif listeniz bulunuyor.",
+      "subtitle": "Mağazanızda yayındaki listeleri arayın, filtreleyin ve sıralayın; fiyat, stok ve otomasyonu düzenlemek için birine dokunun.",
       "emptyTitle": "Liste Bulunamadı",
       "emptySubtitle": "Amazon'dan eBay mağazanıza ürün ekleyerek başlayın."
     },

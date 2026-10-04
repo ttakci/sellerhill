@@ -1,7 +1,7 @@
 import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto } from '@repo/shared';
 import {
   ProgressBar,
-  StatusBadge,
+  Badge,
   Text,
   formatDate,
   getLocaleConfig,
@@ -16,6 +16,7 @@ import { useGetListingJobsQuery } from '../api/listings.api';
 
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
+import { jobStatusBadgeVariant } from './shared/job-status-badge';
 import { resolveJobDateRange } from './utils/jobDateRange';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
@@ -149,9 +150,9 @@ export const ListingJobsPageContainer: React.FC = () => {
         key: 'status',
         header: t('listings.jobs.table.status'),
         render: (_value, job) => (
-          <StatusBadge status={String(job.status).toLowerCase()} size="sm">
+          <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
             {statusLabel(job.status)}
-          </StatusBadge>
+          </Badge>
         ),
       },
       {

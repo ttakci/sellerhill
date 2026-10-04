@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Anunțuri active",
-      "subtitle": "Anunțuri active în prezent în magazinul dvs.: {{count}}.",
+      "subtitle": "Căutați, filtrați și sortați toate anunțurile active din magazin și deschideți unul pentru a-i modifica prețul, stocul și automatizarea.",
       "emptyTitle": "Niciun anunț găsit",
       "emptySubtitle": "Începeți prin a adăuga produse de pe Amazon în magazinul eBay."
     },

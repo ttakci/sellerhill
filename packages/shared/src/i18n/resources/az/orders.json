@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Bütün sifarişlər",
-      "subtitle": "{{count}} nəticə",
+      "subtitle": "Hər satışı alışdan çatdırılmaya qədər izləyin: nəyin alınacağını, nəyin yolda olduğunu və nəyin sizi gözlədiyini görün.",
       "loadingTitle": "Sifarişlər yüklənir",
       "loadingSubtitle": "Ən son eBay sifarişləriniz gətirilir.",
       "filtersTitle": "Filtrlərinizə uyğun sifariş yoxdur",

@@ -157,7 +157,7 @@
     },
     "overview": {
       "title": "Aktiv elanlar",
-      "subtitle": "Mağazanızda hazırda {{count}} aktiv elanınız var.",
+      "subtitle": "Mağazanızdakı bütün aktiv siyahıları axtarın, süzgəcdən keçirin və sıralayın; qiyməti, stoku və avtomatlaşdırmanı dəyişmək üçün birini açın.",
       "emptyTitle": "Elan tapılmadı",
       "emptySubtitle": "Amazon-dan eBay mağazanıza məhsul əlavə etməklə başlayın."
     },

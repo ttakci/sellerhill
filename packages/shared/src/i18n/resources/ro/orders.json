@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "Toate comenzile",
-      "subtitle": "Rezultate: {{count}}",
+      "subtitle": "Urmăriți fiecare vânzare de la cumpărare la livrare: ce trebuie cumpărat, ce este pe drum și ce are nevoie de dvs.",
       "loadingTitle": "Se încarcă comenzile",
       "loadingSubtitle": "Se preiau cele mai recente comenzi eBay.",
       "filtersTitle": "Nicio comandă nu corespunde filtrelor",

@@ -104,6 +104,22 @@ export const JobCardHeader = styled.div`
   padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
 `;
 
+export const JobTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 ${tkn('spacing.md+')};
+`;
+
+/** Tells the seller the whole card opens the job. */
+export const DetailHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: ${tkn('spacing.2xs')};
+`;
+
 export const JobCardBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -154,8 +170,8 @@ export const ProgressMeta = styled.div`
 
 /** Success / failed / remaining — label over value, under one hairline. */
 export const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  display: flex;
+  align-items: center;
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
@@ -164,6 +180,7 @@ export const StatsGrid = styled.div`
 `;
 
 export const StatCell = styled.div`
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};

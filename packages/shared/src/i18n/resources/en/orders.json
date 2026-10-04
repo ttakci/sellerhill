@@ -15,7 +15,7 @@
     },
     "all": {
       "title": "All orders",
-      "subtitle": "{{count}} results",
+      "subtitle": "Follow every sale from purchase to delivery: what to buy, what is on its way and what needs you.",
       "loadingTitle": "Loading orders",
       "loadingSubtitle": "Fetching your latest eBay orders.",
       "filtersTitle": "No orders match your filters",
