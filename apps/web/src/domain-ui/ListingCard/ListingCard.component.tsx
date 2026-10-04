@@ -104,7 +104,7 @@ export const ListingCard = ({
                   </S.MetaLabel>
                   <S.MetaValue>
                     {item.storeType ? (
-                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
+                      <IdBadge id={item.value} storeType={item.storeType} size="sm" plain />
                     ) : (
                       <S.MetaValueText variant="body-sm" weight="bold" color="text.primary">
                         {item.value}
