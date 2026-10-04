@@ -13,7 +13,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { buildBillingDateFilter, readBillingPage, summarizeFeeTypes } from './billing-capture.helpers';
-import { BILLING_MAX_PAGES, BILLING_PAGE_LIMIT } from './ebay-finances.constants';
+import { BILLING_KEEP_SWEEPS, BILLING_MAX_PAGES, BILLING_PAGE_LIMIT } from './ebay-finances.constants';
 import type { BillingPage, ClaimedBillingAccount } from './ebay-finances.types';
 import { FinancesClient } from './finances.client';
 
@@ -132,8 +132,20 @@ export class BillingCaptureService {
 
     const windowDays = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_BILLING_SYNC_WINDOW_DAYS);
     const filter = buildBillingDateFilter(new Date(), windowDays);
+    // One key for every file of this sweep, so a parser can tell a complete
+    // capture (it has a `-done.json`) from one that failed part-way.
+    const sweepTs = Date.now();
+    try {
+      await this.readPages(account.id, accessToken, filter, sweepTs);
+    } finally {
+      await this.pruneOldSweeps(account.id);
+    }
+  }
+
+  private async readPages(accountId: string, accessToken: string, filter: string, sweepTs: number): Promise<void> {
     const pages: BillingPage[] = [];
     let reachedCap = true;
+    let documented = true;
 
     for (let page = 0; page < BILLING_MAX_PAGES; page += 1) {
       const body = await this.finances.getBillingActivities(accessToken, {
@@ -141,14 +153,15 @@ export class BillingCaptureService {
         offset: page * BILLING_PAGE_LIMIT,
       });
       // Written before it is judged: an unexpected body is exactly the evidence wanted.
-      await this.writeCapture(account.id, page, body);
+      await this.writeCapture(accountId, `${sweepTs}-p${page}.json`, body);
 
       const facts = readBillingPage(body);
       if (!facts) {
         this.logger.warn(
-          `Billing capture for eBay account ${account.id}: page ${page} is not the documented object; stopped`
+          `Billing capture for eBay account ${accountId}: page ${page} is not the documented object; stopped`
         );
         reachedCap = false;
+        documented = false;
         break;
       }
       pages.push(facts);
@@ -165,25 +178,55 @@ export class BillingCaptureService {
 
     if (reachedCap) {
       this.logger.warn(
-        `Billing capture for eBay account ${account.id} stopped at ${BILLING_MAX_PAGES} pages; older activity is unread`
+        `Billing capture for eBay account ${accountId} stopped at ${BILLING_MAX_PAGES} pages; older activity is unread`
       );
     }
 
     const lines = pages.reduce((sum, page) => sum + page.count, 0);
     const total = pages.find((page) => page.total !== null)?.total ?? null;
+    const feeTypes = summarizeFeeTypes(pages);
+    if (documented) {
+      // Written last: its presence is what says the pages above are the whole read.
+      await this.writeCapture(accountId, `${sweepTs}-done.json`, { pages: pages.length, lines, total, reachedCap, feeTypes });
+    }
     this.logger.log(
-      `Billing capture for eBay account ${account.id}: ${pages.length} page(s), ${lines} line(s)` +
-        `${total === null ? '' : ` of ${total}`}, fee types: ${summarizeFeeTypes(pages)}`
+      `Billing capture for eBay account ${accountId}: ${pages.length} page(s), ${lines} line(s)` +
+        `${total === null ? '' : ` of ${total}`}, fee types: ${feeTypes}`
     );
   }
 
-  /** One file per page, verbatim JSON. The directory is the api_logs volume in both Coolify stacks. */
-  private async writeCapture(accountId: string, page: number, body: unknown): Promise<void> {
-    const dir = path.join(
+  /** Keep the newest BILLING_KEEP_SWEEPS sweeps of one store; never throws (housekeeping only). */
+  private async pruneOldSweeps(accountId: string): Promise<void> {
+    const dir = this.captureDir(accountId);
+    try {
+      const files = await fs.readdir(dir);
+      const sweeps = [...new Set(files.map((file) => file.split('-')[0]).filter((key) => /^\d+$/.test(key)))].sort(
+        (a, b) => Number(b) - Number(a)
+      );
+      const stale = new Set(sweeps.slice(BILLING_KEEP_SWEEPS));
+      for (const file of files) {
+        if (stale.has(file.split('-')[0])) {
+          await fs.rm(path.join(dir, file), { force: true });
+        }
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Billing capture could not prune old files for eBay account ${accountId}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+
+  private captureDir(accountId: string): string {
+    return path.join(
       process.env.EBAY_FINANCES_CAPTURE_DIR || path.join(process.cwd(), 'logs', 'ebay-finances-captures'),
       accountId
     );
+  }
+
+  /** Verbatim JSON. The directory is on the api_logs volume in both Coolify stacks. */
+  private async writeCapture(accountId: string, name: string, body: unknown): Promise<void> {
+    const dir = this.captureDir(accountId);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, `${Date.now()}-p${page}.json`), JSON.stringify(body ?? null));
+    await fs.writeFile(path.join(dir, name), JSON.stringify(body ?? null));
   }
 }

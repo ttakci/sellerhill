@@ -153,7 +153,7 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'EBAY_BILLING_SYNC_WINDOW_DAYS',
     defaultValue: '30',
     min: 1,
-    max: 120,
+    max: 119,
   }),
   // --- Periodic return sweep (Post-Order API, 5,000 calls/day app-wide) ---
   def({

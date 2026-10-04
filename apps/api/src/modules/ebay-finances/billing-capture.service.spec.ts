@@ -2,10 +2,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { EBAY_FINANCES_SCOPE } from '@repo/shared';
+import { EBAY_FINANCES_SCOPE, EbayApiResource } from '@repo/shared';
+
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 
 import { BillingCaptureService } from './billing-capture.service';
-import { BILLING_MAX_PAGES, BILLING_PAGE_LIMIT } from './ebay-finances.constants';
+import { BILLING_KEEP_SWEEPS, BILLING_MAX_PAGES, BILLING_PAGE_LIMIT } from './ebay-finances.constants';
 
 type Query = jest.Mock<Promise<unknown[]>, [string, unknown[]?]>;
 
@@ -96,9 +98,9 @@ describe('BillingCaptureService', () => {
     });
     await service.runSweep();
     expect(client.getBillingActivities.mock.calls.map((call) => call[1].offset)).toEqual([0, 200, 400]);
-    const files = filesOf('acc-1');
-    expect(files).toHaveLength(3);
-    const first = JSON.parse(fs.readFileSync(path.join(dir, 'acc-1', files.sort()[0]), 'utf8')) as { total: number };
+    const pageFiles = filesOf('acc-1').filter((file) => /-p\d+\.json$/.test(file)).sort();
+    expect(pageFiles).toHaveLength(3);
+    const first = JSON.parse(fs.readFileSync(path.join(dir, 'acc-1', pageFiles[0]), 'utf8')) as { total: number };
     expect(first.total).toBe(450);
   });
 
@@ -117,6 +119,71 @@ describe('BillingCaptureService', () => {
     expect(client.getBillingActivities).toHaveBeenCalledTimes(BILLING_MAX_PAGES);
   });
 
+  it('names every page of one sweep after the sweep, and marks a clean finish', async () => {
+    const { service } = build({
+      pages: (_account, offset) =>
+        Promise.resolve({
+          billingActivities: activities(offset === 0 ? BILLING_PAGE_LIMIT : 10),
+          total: BILLING_PAGE_LIMIT + 10,
+          next: offset === 0 ? 'https://next' : undefined,
+        }),
+    });
+    await service.runSweep();
+    const files = filesOf('acc-1').sort();
+    expect(files).toHaveLength(3);
+    const prefixes = new Set(files.map((file) => file.split('-')[0]));
+    expect(prefixes.size).toBe(1);
+    const done = files.find((file) => file.endsWith('-done.json'));
+    expect(done).toBeDefined();
+    expect(JSON.parse(fs.readFileSync(path.join(dir, 'acc-1', done as string), 'utf8'))).toMatchObject({
+      pages: 2,
+      lines: BILLING_PAGE_LIMIT + 10,
+      total: BILLING_PAGE_LIMIT + 10,
+      reachedCap: false,
+    });
+  });
+
+  it('a read that fails part-way leaves no done marker', async () => {
+    const { service } = build({
+      pages: (_account, offset) =>
+        offset === 0
+          ? Promise.resolve({ billingActivities: activities(BILLING_PAGE_LIMIT), total: 1000, next: 'https://next' })
+          : Promise.reject(new Error('connection reset')),
+    });
+    await service.runSweep();
+    const files = filesOf('acc-1');
+    expect(files).toHaveLength(1);
+    expect(files.some((file) => file.endsWith('-done.json'))).toBe(false);
+  });
+
+  it('keeps only the newest sweeps of a store on disk', async () => {
+    const now = jest.spyOn(Date, 'now');
+    try {
+      const { service } = build({ pages: () => Promise.resolve({ billingActivities: activities(1), total: 1 }) });
+      for (let i = 0; i < BILLING_KEEP_SWEEPS + 3; i += 1) {
+        now.mockReturnValue(1_700_000_000_000 + i * 1000);
+        await service.runSweep();
+      }
+      const prefixes = [...new Set(filesOf('acc-1').map((file) => file.split('-')[0]))].sort();
+      expect(prefixes).toHaveLength(BILLING_KEEP_SWEEPS);
+      expect(prefixes[0]).toBe(String(1_700_000_000_000 + 3 * 1000));
+    } finally {
+      now.mockRestore();
+    }
+  });
+
+  it('a spent daily budget stops the tick', async () => {
+    const { service, client } = build({
+      accounts: [
+        { id: 'acc-1', user_id: 'user-1' },
+        { id: 'acc-2', user_id: 'user-2' },
+      ],
+      pages: () => Promise.reject(new EbayBudgetExhaustedError(EbayApiResource.FINANCES, new Date(), 86_400)),
+    });
+    await service.runSweep();
+    expect(client.getBillingActivities).toHaveBeenCalledTimes(1);
+  });
+
   it('one store failing never stops the next', async () => {
     const { service, client } = build({
       accounts: [
@@ -130,6 +197,6 @@ describe('BillingCaptureService', () => {
     });
     await service.runSweep();
     expect(client.getBillingActivities).toHaveBeenCalledTimes(2);
-    expect(filesOf('acc-2')).toHaveLength(1);
+    expect(filesOf('acc-2').filter((file) => file.endsWith('-p0.json'))).toHaveLength(1);
   });
 });

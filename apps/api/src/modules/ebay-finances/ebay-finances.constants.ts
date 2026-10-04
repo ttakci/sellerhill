@@ -14,5 +14,15 @@ export const BILLING_PAGE_LIMIT = 200;
  * and a sweep that hits it says so in the log.
  */
 export const BILLING_MAX_PAGES = 10;
-/** eBay: "The starting date cannot be set back further than 120 days in the past." */
-export const BILLING_MAX_WINDOW_DAYS = 120;
+/**
+ * eBay: "The starting date cannot be set back further than 120 days in the
+ * past." A start computed here as now − 120 days is already a little older on
+ * eBay's clock, so the widest window actually asked for is a day less.
+ */
+export const BILLING_MAX_WINDOW_DAYS = 119;
+/**
+ * Sweeps kept on disk per store. Each sweep re-reads the same window, so older
+ * sweeps are near-duplicates; without pruning the directory grows for as long
+ * as the store stays connected (it sits on the persistent api_logs volume).
+ */
+export const BILLING_KEEP_SWEEPS = 3;

@@ -7,9 +7,13 @@ describe('billing capture helpers', () => {
     );
   });
 
-  it('never reaches back further than eBay allows, and never asks for less than a day', () => {
+  it("stays a day inside eBay's 120-day bound, and never asks for less than a day", () => {
+    // 120 days measured here is already older than 120 days on eBay's clock.
     expect(buildBillingDateFilter(new Date('2026-10-04T00:00:00Z'), 500)).toBe(
-      'transactionDate:[2026-06-06T00:00:00.000Z..2026-10-04T00:00:00.000Z]'
+      'transactionDate:[2026-06-07T00:00:00.000Z..2026-10-04T00:00:00.000Z]'
+    );
+    expect(buildBillingDateFilter(new Date('2026-10-04T00:00:00Z'), 120)).toBe(
+      'transactionDate:[2026-06-07T00:00:00.000Z..2026-10-04T00:00:00.000Z]'
     );
     expect(buildBillingDateFilter(new Date('2026-10-04T00:00:00Z'), 0)).toBe(
       'transactionDate:[2026-10-03T00:00:00.000Z..2026-10-04T00:00:00.000Z]'
