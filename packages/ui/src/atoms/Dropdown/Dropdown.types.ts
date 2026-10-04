@@ -7,6 +7,8 @@ export interface DropdownItem {
   onClick: () => void;
   icon?: IconName;
   variant?: 'default' | 'danger';
+  /** The current choice: tinted row with a trailing check; labels stay aligned with the other rows. */
+  selected?: boolean;
 }
 
 export interface DropdownProps {
