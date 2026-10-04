@@ -1,3 +1,5 @@
+import type { ListingRulesConfig } from '../store-settings/listing-rules';
+
 /**
  * Template Type
  */
@@ -96,6 +98,14 @@ export interface ListingSettingsGroup {
 
   /** Title/description content policy */
   content: ListingContentConfig;
+
+  /**
+   * What this group refuses to list and when it ends a listing (VeRO, hide
+   * brand, price range, Amazon-shipped, rating / review minimums, clean-up).
+   * Always normalized (`normalizeListingRules`): a group that never saved
+   * rules reads the defaults — VeRO on, brand hidden.
+   */
+  listingRules: ListingRulesConfig;
 
   // Audit
   createdAt: Date;

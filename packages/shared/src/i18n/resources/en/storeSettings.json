@@ -116,63 +116,6 @@
       "description": "Published as the item location on your eBay listings. eBay shows buyers only the city, region and country.",
       "city": "City"
     },
-    "blacklistAction_remove": "Removed, not blocked",
-    "listingRules": {
-      "title": "Listing rules",
-      "subtitle": "Decide what gets listed before anything is sent to eBay",
-      "off": "No minimum",
-      "brand": {
-        "title": "Brand protection",
-        "vero": "VeRO protection",
-        "veroHint": "Skips products from brands known to report listings through eBay's VeRO program. eBay removes a reported listing and counts it against your account.",
-        "veroOffWarning": "With protection off, products from brands that report listings on eBay are listed like any other. A VeRO report can get your eBay account restricted.",
-        "hideBrand": "Don't send the brand to eBay",
-        "hideBrandHint": "The listing is published without a brand: the brand is taken out of the title and the item specifics, and no barcode or part number is sent, because eBay's catalog would put the brand back."
-      },
-      "filters": {
-        "title": "What may be listed",
-        "minPrice": "Min. Amazon price",
-        "maxPrice": "Max. Amazon price",
-        "priceHint": "Leave a field empty for no limit. A product priced outside the range is skipped, and the job shows why.",
-        "priceError": "The maximum must not be lower than the minimum.",
-        "amazonShippedOnly": "Only products Amazon ships itself",
-        "amazonShippedOnlyHint": "Skips an offer that another seller ships from their own stock. Automatic ordering and tracking work best with products Amazon ships.",
-        "minRating": "Minimum rating",
-        "ratingOption": "{{rating}} stars and up",
-        "minReviewCount": "Minimum number of ratings",
-        "ratingHint": "A product with no rating yet is skipped when a minimum is set."
-      },
-      "blockedAsins": {
-        "title": "Blocked ASINs",
-        "placeholder": "One ASIN per line, or separated by commas",
-        "count": "Valid ASINs in this list: {{count}}"
-      },
-      "cleanup": {
-        "title": "Automatic clean-up",
-        "outOfStock": "End a listing that stays out of stock",
-        "never": "Never",
-        "afterDays_one": "After {{count}} day",
-        "afterDays_other": "After {{count}} days",
-        "outOfStockHint": "The count starts again whenever the product is back in stock. A listing you paused yourself is never ended. An ended listing frees its place in your plan and is not relisted automatically.",
-        "cold": "Watch for listings that don't sell",
-        "coldHint": "A listing counts as not selling when it has had no sale for the number of days below. If it never sold, the days are counted from the day it was created.",
-        "coldDays": "Days without a sale",
-        "coldDaysError": "Enter a whole number between {{min}} and {{max}}.",
-        "coldMode": "What to do with them",
-        "coldMode_flag": "Show them to me",
-        "coldMode_end": "End them on eBay",
-        "coldEndWarning": "Listings are ended on eBay without asking you first, and they do not come back on their own. To review them yourself first, choose \"Show them to me\"."
-      },
-      "promoted": {
-        "title": "Promoted Listings",
-        "enable": "Promote new listings",
-        "enableHint": "Every listing published from here is added to a campaign on eBay at the ad rate below. eBay charges the rate only when an item sells through the ad. Listings that are already live are not changed.",
-        "rate": "Ad rate (%)",
-        "rateHint": "The price SellerHill calculates does not include this rate. Add it to the eBay fee of your listing settings group so your profit stays as planned.",
-        "rateError": "Enter a rate between {{min}} and {{max}}.",
-        "ineligible": "eBay does not let this store use Promoted Listings yet, so no ad will run until that changes. New listings are still published as usual.",
-        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay does not let this store use Promoted Listings yet: it reports not enough recent sales activity. No ad will run until that changes. New listings are still published as usual."
-      }
-    }
+    "blacklistAction_remove": "Removed, not blocked"
   }
 }

@@ -38,6 +38,8 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 
 
 const DRAWER_PARAM = 'drawer';
+/** The listing-rules drawer this hub used to open; the rules now live in each listing settings group. */
+const LEGACY_LISTING_RULES_DRAWER = 'storeListingRules';
 /**
  * `?scope=<storeId|global>` — the store the store-settings drawers open on, so
  * `?drawer=storeSettings&scope=<id>` lands on that store's settings. Absent
@@ -61,6 +63,18 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
+
+  // An old link to the listing-rules drawer lands on the listing settings
+  // groups, where the rules moved (migration 141), instead of on nothing.
+  useEffect(() => {
+    if (searchParams.get(DRAWER_PARAM) !== LEGACY_LISTING_RULES_DRAWER) {
+      return;
+    }
+    const next = new URLSearchParams(searchParams);
+    const target: SettingsDrawerKey = 'listingGroupsAll';
+    next.set(DRAWER_PARAM, target);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [selectedEbayMarketplace, setSelectedEbayMarketplace] = useState<EbayMarketplaceId>(
     SUPPORTED_EBAY_MARKETPLACES[0]
   );

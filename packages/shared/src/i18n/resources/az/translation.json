@@ -287,9 +287,7 @@
         "manageMessageTemplatesSubtitle": "Avtomatik alıcı mesajı şablonlarınıza baxın, onları redaktə edin və yaradın",
         "manageBlacklist": "Qara siyahını idarə et",
         "manageBlacklistSubtitle": "Elan başlıqlarında, təsvirlərdə və xüsusiyyətlərdə bloklanacaq açar sözlər",
-        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur.",
-        "listingRules": "Elan qaydaları",
-        "listingRulesSubtitle": "Brend qorunması, nələrin elan oluna biləcəyi və avtomatik təmizləmə"
+        "infoMessage": "Mesaj şablonları və qara siyahı qaydaları Mağaza parametrlərində seçdiyiniz əhatəyə (ümumi və ya mağaza üzrə) əsasən tətbiq olunur."
       },
       "listingGroups": {
         "title": "Parametr qrupları",
@@ -448,6 +446,13 @@
           "selectedCount": "{{count}} seçilib",
           "bulkDelete": "Seçilmişləri sil",
           "confirmBulkDeleteDescription": "{{count}} qara siyahı açar sözü silinsin? Bu geri qaytarıla bilməz."
+        },
+        "blockedAsins": {
+          "title": "Bloklanmış ASIN-lər",
+          "hint": "Bu məhsullar heç vaxt listələnmir. Öz siyahısı olmayan mağaza bütün mağazalar üçün olan siyahını istifadə edir.",
+          "placeholder": "Hər sətirdə bir ASIN və ya vergüllə ayrılmış",
+          "count": "Bu siyahıdakı etibarlı ASIN-lər: {{count}}",
+          "inherited": "Bu mağazanın öz siyahısı yoxdur, bütün mağazalar üçün olan siyahını istifadə edir. Burada redaktə etsəniz, mağazanın öz siyahısı yaranacaq."
         }
       },
       "listingGroup": {

@@ -70,7 +70,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { BillingService } from '../billing/billing.service';
 import { buildStoreScopedReturnBucketSql } from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
-import { buildNotSellingSql } from '../listings/listing-cleanup.helpers';
+import { buildGroupRuleSql, buildNotSellingSql } from '../listings/listing-cleanup.helpers';
 
 import {
   TRIAL_ENDING_NOTICE_DAYS,
@@ -773,9 +773,9 @@ export class ActionCenterService {
     );
 
     /*
-     * Not selling, by the seller's own window. Counted only for stores that
-     * watch WITHOUT automatic ending: with auto-end on, the hourly clean-up
-     * ends these itself and there is nothing for the seller to do.
+     * Not selling, by the window of the listing's own settings group. Counted
+     * only for groups that watch WITHOUT automatic ending: with auto-end on,
+     * the hourly clean-up ends these itself and there is nothing to do.
      */
     const notSelling = await this.db.query<CountRow>(
       `SELECT COUNT(*) AS count
@@ -783,15 +783,7 @@ export class ActionCenterService {
         WHERE l.user_id = $1
           AND l.status = $2
           AND ${buildNotSellingSql('l')}
-          AND NOT COALESCE((
-            SELECT CASE
-                     WHEN s.listing_rules IS NOT NULL THEN (s.listing_rules->>'coldListingAutoEnd')::boolean
-                     ELSE (g.listing_rules->>'coldListingAutoEnd')::boolean
-                   END
-              FROM (SELECT 1) one
-              LEFT JOIN store_settings s ON s.user_id = l.user_id AND s.store_id = l.ebay_account_id
-              LEFT JOIN store_settings g ON g.user_id = l.user_id AND g.is_global = TRUE
-          ), FALSE)
+          AND NOT COALESCE(${buildGroupRuleSql('l', 'coldListingAutoEnd')}, FALSE)
           ${storeScopeSql('l', 3)}`,
       [userId, ListingStatus.ACTIVE, store]
     );

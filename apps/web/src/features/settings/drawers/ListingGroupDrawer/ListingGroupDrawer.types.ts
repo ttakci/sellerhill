@@ -2,7 +2,51 @@ import type { ListingSettingsGroupFormData, ListingTemplatePlaceholder } from '@
 import type React from 'react';
 import type { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 
-export type ListingGroupDrawerStep = 0 | 1 | 2 | 3;
+export type ListingGroupDrawerStep = 0 | 1 | 2 | 3 | 4;
+
+/** What to do with a listing that is not selling. */
+export enum ColdListingMode {
+  FLAG = 'flag',
+  END = 'end',
+}
+
+/** The Rules step's own state: every number field is the text the seller typed. */
+export interface ListingRulesDraft {
+  veroProtectionEnabled: boolean;
+  hideBrand: boolean;
+  minPrice: string;
+  maxPrice: string;
+  amazonShippedOnly: boolean;
+  minRating: string;
+  minReviewCount: string;
+  outOfStockEndDays: string;
+  coldListingEnabled: boolean;
+  coldListingDays: string;
+  coldListingMode: ColdListingMode;
+}
+
+/** The first field of the Rules step that refuses its value. */
+export enum ListingRulesDraftError {
+  MIN_RATING = 'minRating',
+  PRICE = 'price',
+  COLD_DAYS = 'coldDays',
+}
+
+export interface ListingRulesOption {
+  value: string;
+  label: string;
+}
+
+/** The Rules step (presentational; its draft lives in the drawer container). */
+export interface ListingRulesStepProps {
+  draft: ListingRulesDraft;
+  onChange: (changes: Partial<ListingRulesDraft>) => void;
+  outOfStockOptions: ListingRulesOption[];
+  coldListingModeOptions: ListingRulesOption[];
+  minRatingError?: string;
+  priceError?: string;
+  coldListingDaysError?: string;
+}
 
 export interface ListingGroupDrawerProps {
   isOpen: boolean;
@@ -41,4 +85,6 @@ export interface ListingGroupDrawerComponentProps {
   onBack: () => void;
   onSubmit: () => void;
   canProceed: boolean;
+  /** The Rules step (step 4 of 5). */
+  rulesStep: ListingRulesStepProps;
 }

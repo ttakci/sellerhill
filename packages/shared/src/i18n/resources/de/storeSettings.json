@@ -116,63 +116,6 @@
       "description": "Wird als Artikelstandort in Ihren eBay-Angeboten veröffentlicht. eBay zeigt Käufern nur Stadt, Region und Land an.",
       "city": "Stadt"
     },
-    "blacklistAction_remove": "Wird entfernt, nicht blockiert",
-    "listingRules": {
-      "title": "Angebotsregeln",
-      "subtitle": "Legen Sie fest, was angeboten wird, bevor etwas an eBay gesendet wird",
-      "off": "Keine Untergrenze",
-      "brand": {
-        "title": "Markenschutz",
-        "vero": "VeRO-Schutz",
-        "veroHint": "Überspringt Produkte von Marken, die bekanntermaßen Angebote über eBays VeRO-Programm melden. eBay entfernt ein gemeldetes Angebot und wertet es gegen Ihr Konto.",
-        "veroOffWarning": "Bei ausgeschaltetem Schutz werden Produkte von Marken, die auf eBay Angebote melden, wie alle anderen angeboten. Eine VeRO-Meldung kann dazu führen, dass Ihr eBay-Konto eingeschränkt wird.",
-        "hideBrand": "Marke nicht an eBay senden",
-        "hideBrandHint": "Das Angebot wird als „Ohne Marke“ veröffentlicht: Die Marke wird aus Titel und Artikelmerkmalen entfernt, und es werden weder Barcode noch Teilenummer gesendet, da der eBay-Katalog die Marke sonst wieder einfügen würde."
-      },
-      "filters": {
-        "title": "Was angeboten werden darf",
-        "minPrice": "Min. Amazon-Preis",
-        "maxPrice": "Max. Amazon-Preis",
-        "priceHint": "Lassen Sie ein Feld leer, wenn es keine Grenze geben soll. Ein Produkt außerhalb des Preisbereichs wird übersprungen, und der Auftrag zeigt den Grund.",
-        "priceError": "Das Maximum darf nicht niedriger als das Minimum sein.",
-        "amazonShippedOnly": "Nur Produkte, die Amazon selbst versendet",
-        "amazonShippedOnlyHint": "Überspringt ein Angebot, das ein anderer Verkäufer aus eigenem Bestand versendet. Automatische Bestellung und Sendungsverfolgung funktionieren am besten mit Produkten, die Amazon versendet.",
-        "minRating": "Mindestbewertung",
-        "ratingOption": "{{rating}} Sterne und mehr",
-        "minReviewCount": "Mindestanzahl an Bewertungen",
-        "ratingHint": "Ein Produkt ohne Bewertung wird übersprungen, wenn ein Minimum festgelegt ist."
-      },
-      "blockedAsins": {
-        "title": "Gesperrte ASINs",
-        "placeholder": "Eine ASIN pro Zeile oder durch Kommas getrennt",
-        "count": "Gültige ASINs in dieser Liste: {{count}}"
-      },
-      "cleanup": {
-        "title": "Automatische Bereinigung",
-        "outOfStock": "Angebot beenden, das nicht auf Lager bleibt",
-        "never": "Nie",
-        "afterDays_one": "Nach {{count}} Tag",
-        "afterDays_other": "Nach {{count}} Tagen",
-        "outOfStockHint": "Die Zählung beginnt neu, sobald das Produkt wieder auf Lager ist. Ein Angebot, das Sie selbst pausiert haben, wird nie beendet. Ein beendetes Angebot gibt seinen Platz in Ihrem Tarif frei und wird nicht automatisch neu eingestellt.",
-        "cold": "Nicht verkaufte Angebote im Blick behalten",
-        "coldHint": "Ein Angebot gilt als nicht verkauft, wenn es in der unten angegebenen Anzahl von Tagen keinen Verkauf hatte. Wurde es nie verkauft, werden die Tage ab dem Erstellungstag gezählt.",
-        "coldDays": "Tage ohne Verkauf",
-        "coldDaysError": "Geben Sie eine ganze Zahl zwischen {{min}} und {{max}} ein.",
-        "coldMode": "Was damit geschehen soll",
-        "coldMode_flag": "Mir anzeigen",
-        "coldMode_end": "Auf eBay beenden",
-        "coldEndWarning": "Angebote werden auf eBay beendet, ohne dass zuvor nachgefragt wird, und kommen nicht von selbst zurück. Wenn Sie sie zuerst selbst prüfen möchten, wählen Sie „Mir anzeigen“."
-      },
-      "promoted": {
-        "title": "Promoted Listings (beworbene Angebote)",
-        "enable": "Neue Angebote bewerben",
-        "enableHint": "Jedes von hier veröffentlichte Angebot wird mit dem unten eingestellten Werbesatz zu einer Kampagne bei eBay hinzugefügt. eBay berechnet den Satz nur, wenn ein Artikel über die Werbung verkauft wird. Bereits aktive Angebote bleiben unverändert.",
-        "rate": "Werbesatz (%)",
-        "rateHint": "Der von SellerHill berechnete Preis enthält diesen Satz nicht. Addieren Sie ihn zur eBay-Gebühr Ihrer Einstellungsgruppe für Angebote, damit Ihr Gewinn wie geplant bleibt.",
-        "rateError": "Geben Sie einen Satz zwischen {{min}} und {{max}} ein.",
-        "ineligible": "eBay erlaubt diesem Shop die Nutzung von Promoted Listings noch nicht, daher läuft keine Werbung, bis sich das ändert. Neue Angebote werden weiterhin wie gewohnt veröffentlicht.",
-        "ineligible_NOT_ENOUGH_ACTIVITY": "eBay erlaubt diesem Shop die Nutzung von Promoted Listings noch nicht: Es meldet zu wenig aktuelle Verkaufsaktivität. Bis sich das ändert, läuft keine Werbung. Neue Angebote werden weiterhin wie gewohnt veröffentlicht."
-      }
-    }
+    "blacklistAction_remove": "Wird entfernt, nicht blockiert"
   }
 }

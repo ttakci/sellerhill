@@ -4,8 +4,9 @@ import {
   evaluateListingRules,
   isAsinBlocked,
   normalizeListingRules,
+  normalizeMinRating,
   parseBlockedAsins,
-  resolveListingRules,
+  resolveBlockedAsins,
   type ListingRulesConfig,
   type SourceQuality,
 } from '@repo/shared';
@@ -76,20 +77,10 @@ describe('normalizeListingRules', () => {
     expect(normalizeListingRules({ coldListingDays: 90, coldListingAutoEnd: true }).coldListingAutoEnd).toBe(true);
   });
 
-  it('keeps a Promoted Listings ad rate only inside eBay bounds, at one decimal', () => {
-    expect(normalizeListingRules({}).promotedAdRate).toBeNull();
-    expect(normalizeListingRules({ promotedAdRate: 5.55 }).promotedAdRate).toBe(5.6);
-    expect(normalizeListingRules({ promotedAdRate: 2 }).promotedAdRate).toBe(2);
-    // eBay: "a minimum value of 2.0 and a maximum value of 100.0".
-    expect(normalizeListingRules({ promotedAdRate: 1.9 }).promotedAdRate).toBeNull();
-    expect(normalizeListingRules({ promotedAdRate: 100.1 }).promotedAdRate).toBeNull();
-    expect(normalizeListingRules({ promotedAdRate: '5' }).promotedAdRate).toBeNull();
-  });
-
-  it('cleans the blocked ASIN list', () => {
-    expect(normalizeListingRules({ blockedAsins: ['b000000001', 'B000000001', 'short', 42] }).blockedAsins).toEqual([
-      'B000000001',
-    ]);
+  it('no longer carries the ad rate or the blocked list (they live elsewhere since 2026-10-04)', () => {
+    const normalized = normalizeListingRules({ promotedAdRate: 5, blockedAsins: ['B000000001'] }) as unknown as Record<string, unknown>;
+    expect('promotedAdRate' in normalized).toBe(false);
+    expect('blockedAsins' in normalized).toBe(false);
   });
 });
 
@@ -103,10 +94,26 @@ describe('parseBlockedAsins', () => {
   });
 });
 
-describe('resolveListingRules', () => {
-  it('lets a store row with no rules inherit the global ones', () => {
-    expect(resolveListingRules(undefined, { amazonShippedOnly: true }).amazonShippedOnly).toBe(true);
-    expect(resolveListingRules({ amazonShippedOnly: false }, { amazonShippedOnly: true }).amazonShippedOnly).toBe(false);
+describe('normalizeMinRating', () => {
+  it.each([
+    [4.5, 4.5], ['4,5', 4.5], ['4.55', 4.6], [1, 1], [5, 5],
+    [0.9, null], [5.1, null], ['', null], ['abc', null], [null, null],
+  ])('%p → %p', (input, expected) => {
+    expect(normalizeMinRating(input)).toBe(expected);
+  });
+  it('normalizeListingRules uses it', () => {
+    expect(normalizeListingRules({ minRating: '3,5' }).minRating).toBe(3.5);
+  });
+});
+
+describe('resolveBlockedAsins', () => {
+  it('store list wins, an explicit empty store list blocks nothing', () => {
+    expect(resolveBlockedAsins(['B0AAAAAAAA'], ['B0BBBBBBBB'])).toEqual(['B0AAAAAAAA']);
+    expect(resolveBlockedAsins([], ['B0BBBBBBBB'])).toEqual([]);
+  });
+  it('a NULL store list inherits the global one; no list at all is none', () => {
+    expect(resolveBlockedAsins(null, ['B0BBBBBBBB'])).toEqual(['B0BBBBBBBB']);
+    expect(resolveBlockedAsins(null, null)).toEqual([]);
   });
 });
 
@@ -115,10 +122,9 @@ describe('evaluateListingRules', () => {
     expect(evaluateListingRules(rules(), subject())).toBeNull();
   });
 
-  it('refuses a blocked ASIN whatever its casing', () => {
-    const r = rules({ blockedAsins: ['B000000001'] });
-    expect(isAsinBlocked(r, 'b000000001')).toBe(true);
-    expect(evaluateListingRules(r, subject())?.kind).toBe(ListingRuleKind.BLOCKED_ASIN);
+  it('a blocked ASIN is matched whatever its casing (the worker checks the list itself)', () => {
+    expect(isAsinBlocked(['B000000001'], 'b000000001')).toBe(true);
+    expect(isAsinBlocked([], 'B000000001')).toBe(false);
   });
 
   it('applies the price range, and never to an unknown price', () => {

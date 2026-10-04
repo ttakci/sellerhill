@@ -31,18 +31,22 @@ describe('ListingStrategyService — the description renders the listing title',
     stock: 10,
   } as unknown as ProductData;
 
-  const buildGroup = (content: Record<string, boolean>): ListingSettingsGroup =>
+  /** The seller chose to send the brand, so only the group's own rules strip it. */
+  const sendBrand = { ...DEFAULT_LISTING_RULES, hideBrand: false };
+
+  const buildGroup = (
+    content: Record<string, boolean>,
+    listingRules: typeof DEFAULT_LISTING_RULES = sendBrand,
+  ): ListingSettingsGroup =>
     ({
       id: 'group-1',
+      listingRules,
       templates: { type: TemplateType.CUSTOM, customTemplateHtml: '<p class="t">{{title}}</p>' },
       content,
       stock: { defaultQuantity: 5, stockBuffer: 0 },
       repricingStrategy: [{ id: 'r1', minPrice: 0, maxPrice: 9999, profitMarginPercent: 20 }],
       fees: { ebayFeePercent: 13, fixedFeeAmount: 0.3 },
     }) as unknown as ListingSettingsGroup;
-
-  /** The seller chose to send the brand, so only the group's own rules strip it. */
-  const sendBrand = { amazonTaxRate: 0, listingRules: { ...DEFAULT_LISTING_RULES, hideBrand: false } };
 
   const buildService = (
     group: ListingSettingsGroup,
@@ -51,7 +55,7 @@ describe('ListingStrategyService — the description renders the listing title',
       rewriteTitle: (input: RewriteInput) => Promise<string>;
       rewriteDescription: (input: RewriteInput) => Promise<string>;
     }> = {},
-    settings: Record<string, unknown> = sendBrand,
+    settings: Record<string, unknown> = { amazonTaxRate: 0 },
   ): ListingStrategyService =>
     new ListingStrategyService(
       { getListingSettingsGroupById: jest.fn().mockResolvedValue(group) } as never,
@@ -100,7 +104,7 @@ describe('ListingStrategyService — the description renders the listing title',
 
   it('keeps the brand out of title and description by default', async () => {
     // No saved listing rules: "don't send the brand to eBay" is on by default.
-    const group = buildGroup({});
+    const group = buildGroup({}, DEFAULT_LISTING_RULES);
     const result = await buildService(group, {}, { amazonTaxRate: 0 }).prepareListingData('user-1', product, 'group-1');
 
     expect(result.title).toBe('WH-1000XM5 Wireless Noise Canceling Headphones');
