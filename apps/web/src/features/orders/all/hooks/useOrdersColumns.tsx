@@ -115,6 +115,17 @@ export function useOrdersColumns(
               ? order.convertedTrackingNumber || order.amazonTrackingNumber
               : undefined;
           const flags = orderFlagBadges(order, t, (value) => formatCurrency(value, order.ebayAccountId), formatDay);
+          // Not one of the seller's listings: SellerHill does not follow the sale, so
+          // no stage, deadline or reason applies — just the one chip.
+          if (!order.isTracked) {
+            return (
+              <S.StageCell>
+                <Badge variant="neutral" size="sm">
+                  {t('orders.tracking.untracked')}
+                </Badge>
+              </S.StageCell>
+            );
+          }
           return (
             <S.StageCell>
               <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" />

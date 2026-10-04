@@ -31,6 +31,8 @@ export interface OrderCardProps {
   ebayOrderId: string;
   /** The seller-facing stage — one badge, same vocabulary as the list and the detail page. */
   stage: OrderStage;
+  /** False for an order SellerHill does not follow: only its chip shows, never a stage. */
+  showStage?: boolean;
   /** Drives the tracking-held alarm colour (amber → red after 12 h). */
   shippedDetectedAt?: string | null;
   /** Chips shown above the stats row (estimated profit, untracked, …) — a card can carry more than one at once. */

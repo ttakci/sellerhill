@@ -913,6 +913,12 @@ function buildOrders(): OrderDto[] {
       autoFulfillStatus = AutoFulfillStatus.BLOCKED;
       autoFulfillBlockedReason = i === 7 ? AutoFulfillBlockedReason.CAP : AutoFulfillBlockedReason.OUT_OF_STOCK;
       status = OrderStatus.PENDING;
+    } else if (i === 11 || i === 16 || i === 26) {
+      // Sales of items that are not one of the seller's listings: SellerHill
+      // does not follow them, so they carry no stage — only the "not tracked" chip.
+      costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
+      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
+      status = i === 11 ? OrderStatus.SHIPPED : OrderStatus.WAITING_SHIPMENT;
     } else if (i % 9 === 5) {
       costCaptureStatus = OrderCostCaptureStatus.PENDING;
       fulfillmentState = OrderFulfillmentState.IN_PROGRESS;
@@ -923,10 +929,6 @@ function buildOrders(): OrderDto[] {
       fulfillmentState = OrderFulfillmentState.PURCHASED;
       autoFulfillStatus = AutoFulfillStatus.PLACED;
       status = OrderStatus.WAITING_SHIPMENT;
-    } else if (i === 11) {
-      costCaptureStatus = OrderCostCaptureStatus.UNTRACKED;
-      fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
-      status = OrderStatus.SHIPPED;
     } else if (i === 13 || i === 17) {
       costCaptureStatus = OrderCostCaptureStatus.LINKED;
       fulfillmentState = OrderFulfillmentState.PURCHASED;

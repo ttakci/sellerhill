@@ -52,15 +52,19 @@ export const toOrderCardProps = (
 
   // Chips beside the stage: ship-by deadline, refund, estimated profit and, where it explains the stage, the
   // automatic-purchase reason. There is no "untracked" chip: SellerHill does not follow those orders at all.
-  const statsBadges: OrderCardProps['statsBadges'] = [...orderFlagBadges(order, t, money, formatDay)];
-  if (order.profitBasis === ProfitBasis.ESTIMATED) {
+  // An order SellerHill does not follow (no matching listing) carries ONE chip and
+  // nothing else: no stage, no deadline, no estimate — none of them would mean anything.
+  const statsBadges: OrderCardProps['statsBadges'] = order.isTracked
+    ? [...orderFlagBadges(order, t, money, formatDay)]
+    : [{ label: t('orders.tracking.untracked'), variant: 'neutral' }];
+  if (order.isTracked && order.profitBasis === ProfitBasis.ESTIMATED) {
     statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
   }
   // The reason is what makes "Purchase blocked" / "Purchase not confirmed"
   // actionable, and what explains a "To purchase" order automation left to the
   // seller — the table column shows it inline, so the card must too. Red only
   // where the stage itself is red.
-  if (orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason) {
+  if (order.isTracked && orderStageShowsReason(order.stage) && order.autoFulfillBlockedReason) {
     statsBadges.push({
       label: t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`),
       variant: order.stage === OrderStage.TO_PURCHASE ? 'warning' : 'error',
@@ -72,6 +76,7 @@ export const toOrderCardProps = (
     imageUrl: order.product?.imageUrl,
     ebayOrderId: order.ebayOrderId,
     stage: order.stage,
+    showStage: order.isTracked,
     shippedDetectedAt: order.shippedDetectedAt,
     statsBadges: statsBadges.length > 0 ? statsBadges : undefined,
     meta,
