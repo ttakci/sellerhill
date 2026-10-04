@@ -133,7 +133,7 @@ export const Th = styled.th<{
 }>`
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   color: ${tkn('colors.text.secondary')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   font-size: ${tkn('typography.fontSize.xs')};
   text-transform: uppercase;
   letter-spacing: ${tkn('typography.letterSpacing.widest')};
