@@ -145,15 +145,18 @@ export const Title = styled(Text)`
   min-width: 0;
 `;
 
-/** The stage badge and the chips that qualify it, pinned to the title row's right edge. */
+/** The stage badge and the chips that qualify it: the card's top row, left-aligned, wrapping. */
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
   gap: ${tkn('spacing.xs')};
-  margin-left: auto;
-  flex: 0 1 auto;
+  min-width: 0;
+
+  /* On a phone the photo comes second, right under the badges. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    order: -2;
+  }
 `;
 
 /** Label / value pairs, no icons — the label column is the only ornament. */

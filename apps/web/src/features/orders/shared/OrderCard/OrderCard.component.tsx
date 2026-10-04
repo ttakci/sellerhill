@@ -22,6 +22,18 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 }) => (
   <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId} $hoverEffect={hoverEffect}>
     <S.Top>
+      {/* The badges own the top row: the stage and every chip that qualifies it
+          (late, refund, estimated, blocked reason) read first — up to six side
+          by side, wrapping — and the title sits under them. */}
+      <S.BadgeRow>
+        <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
+        {statsBadges?.map((badge) => (
+          <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm">
+            {badge.label}
+          </Badge>
+        ))}
+      </S.BadgeRow>
+
       <S.TitleRow>
         <S.TitleSlot>
           <Tooltip content={productTitle} position="top" variant="dark">
@@ -30,17 +42,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </S.Title>
           </Tooltip>
         </S.TitleSlot>
-        {/* The stage and whatever qualifies it (estimated profit, blocked
-            reason, not linked) sit together opposite the title: one glance
-            says where the order stands and why. */}
-        <S.BadgeRow>
-          <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />
-          {statsBadges?.map((badge) => (
-            <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm">
-              {badge.label}
-            </Badge>
-          ))}
-        </S.BadgeRow>
       </S.TitleRow>
 
       <S.Body>

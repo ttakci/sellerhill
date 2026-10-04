@@ -91,7 +91,7 @@ export const toOrderCardProps = (
         tone: profitTone,
       },
       {
-        label: t('orders.detail.roi'),
+        label: t('listings:listings.table.roi'),
         // Profit over what the order cost; unknown until a cost is captured.
         value: roi === null ? '—' : `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`,
         tone: roi === null ? 'default' : roi >= 0 ? 'positive' : 'negative',

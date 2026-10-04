@@ -1014,8 +1014,12 @@ function buildOrders(): OrderDto[] {
     // Only the last week's sales carry one — like a real store, whose older
     // orders were read before the date was stored — so the sample is not a
     // wall of late orders.
+    // Order 7 is the showcase for a card with every chip at once (stage, late,
+    // refund, estimated, blocked reason): its ship-by date has already passed.
     const shipByDate =
-      recent || daysAgo <= DEMO_HANDLING_DAYS + 1
+      i === 7
+        ? new Date(Date.now() - 2 * 86_400_000).toISOString()
+        : recent || daysAgo <= DEMO_HANDLING_DAYS + 1
         ? new Date(new Date(createdAt).getTime() + DEMO_HANDLING_DAYS * 86_400_000).toISOString()
         : null;
     // One sale the seller partly refunded, and two carrying the seller's own note.
