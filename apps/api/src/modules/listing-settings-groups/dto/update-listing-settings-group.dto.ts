@@ -5,10 +5,11 @@ import {
   type StockConfig,
   type FeeConfig,
   type TemplateConfig,
+  type ListingRulesConfig,
   TemplateType,
 } from '@repo/shared';
 import { Type } from 'class-transformer';
-import { IsString, IsOptional, IsNumber, IsArray, ValidateNested, Min, Max, IsInt, IsBoolean, IsIn, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray, ValidateNested, Min, Max, IsInt, IsBoolean, IsIn, IsNotEmpty, IsObject } from 'class-validator';
 
 class PriceRangeDto implements Omit<PriceRange, 'id'> {
   @ApiPropertyOptional({ description: 'Minimum price', example: 10.0 })
@@ -131,4 +132,9 @@ export class UpdateListingSettingsGroupDto implements UpdateListingSettingsGroup
   @ApiPropertyOptional({ description: 'Listing content policy' })
   @IsOptional()
   content?: UpdateListingSettingsGroupRequest['content'];
+
+  @ApiPropertyOptional({ description: 'What this group refuses to list and when it ends a listing (normalized server-side)' })
+  @IsOptional()
+  @IsObject()
+  listingRules?: ListingRulesConfig;
 }

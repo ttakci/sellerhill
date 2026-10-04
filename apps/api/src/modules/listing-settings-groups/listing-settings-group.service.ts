@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     DEFAULT_LISTING_CONTENT_CONFIG,
+    normalizeListingRules,
     type CreateListingSettingsGroupRequest,
     type FeeConfig,
     type ListingContentConfig,
@@ -27,6 +28,8 @@ interface ListingSettingsGroupEntity {
   fees: string; // JSON string in DB
   templates: string; // JSON string in DB
   content?: string | ListingContentConfig | null;
+  // ListingRulesConfig (migration 141); NULL on a row that never saved rules.
+  listing_rules?: unknown;
   created_at: Date;
   updated_at: Date;
   created_by: string;
@@ -119,12 +122,15 @@ export class ListingSettingsGroupService {
       ...DEFAULT_LISTING_CONTENT_CONFIG,
       ...(dto.content ?? {}),
     });
+    // Always written, so a new group starts with the explicit defaults.
+    const listingRulesJson = JSON.stringify(normalizeListingRules(dto.listingRules));
 
     const results = await this.databaseService.query<ListingSettingsGroupEntity>(`
       INSERT INTO listing_settings_groups (
-        user_id, name, description, repricing_strategy, stock, fees, templates, content, created_by, updated_by
+        user_id, name, description, repricing_strategy, stock, fees, templates, content, listing_rules,
+        created_by, updated_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `, [
       userId,
@@ -135,6 +141,7 @@ export class ListingSettingsGroupService {
       feesJson,
       templatesJson,
       contentJson,
+      listingRulesJson,
       userId,
       userId
     ]);
@@ -186,6 +193,11 @@ export class ListingSettingsGroupService {
     if (dto.content !== undefined) {
       updates.push(`content = $${paramIndex++}`);
       values.push(JSON.stringify({ ...DEFAULT_LISTING_CONTENT_CONFIG, ...dto.content }));
+    }
+
+    if (dto.listingRules !== undefined) {
+      updates.push(`listing_rules = $${paramIndex++}`);
+      values.push(JSON.stringify(normalizeListingRules(dto.listingRules)));
     }
 
     updates.push(`updated_by = $${paramIndex++}`);
@@ -318,6 +330,7 @@ export class ListingSettingsGroupService {
       fees,
       templates,
       content,
+      listingRules: normalizeListingRules(entity.listing_rules),
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
       createdBy: entity.created_by,

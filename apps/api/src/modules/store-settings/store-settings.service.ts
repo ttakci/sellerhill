@@ -3,7 +3,8 @@ import {
   TrackingConversionProvider,
   TrackingConversionScope,
   createDefaultBlacklist,
-  normalizeListingRules,
+  parseBlockedAsins,
+  resolveBlockedAsins,
   type BlacklistKeyword,
   type BuyerMessagingConfig,
   type SaveStoreSettingsRequest,
@@ -54,8 +55,9 @@ interface StoreSettingsEntity {
   ship_from_address_line1: string | null;
   ship_from_address_line2: string | null;
   ship_from_city: string | null;
-  // The seller's listing rules (migration 138). NULL = never saved.
-  listing_rules: unknown;
+  // ASINs never listed for this scope (migration 141). NULL = inherit: a store
+  // row follows the global row, a global NULL is none.
+  blocked_asins: unknown;
   // ASINs already on the seller's other stores may be listed here (migration
   // 140). NULL = inherit: a store row follows the global row, global NULL = off.
   allow_cross_store_asins: boolean | null;
@@ -128,11 +130,12 @@ export class StoreSettingsService {
   async getResolvedSettings(userId: string, storeId: string | null): Promise<StoreSettingsResponse> {
     const globalSettings = await this.getSettings(userId);
 
-    // The resolved settings always carry a BOOLEAN `allowCrossStoreAsins`:
-    // the store's own value, else the global one, else off.
+    // The resolved settings always carry the effective blocked-ASIN list and a
+    // BOOLEAN `allowCrossStoreAsins`: the store's own value, else the global
+    // one, else none / off.
     const withRules = (settings: StoreSettingsResponse): StoreSettingsResponse => ({
       ...settings,
-      listingRules: normalizeListingRules(settings.listingRules ?? globalSettings.listingRules),
+      blockedAsins: resolveBlockedAsins(settings.blockedAsins, globalSettings.blockedAsins),
       allowCrossStoreAsins: resolveAllowCrossStoreAsins(
         settings.allowCrossStoreAsins,
         globalSettings.allowCrossStoreAsins,
@@ -186,7 +189,7 @@ export class StoreSettingsService {
       shipFromAddressLine1,
       shipFromAddressLine2,
       shipFromCity,
-      listingRules,
+      blockedAsins,
       allowCrossStoreAsins,
     } = dto;
 
@@ -239,11 +242,12 @@ export class StoreSettingsService {
     const shipFromAddressLine2Value = shipFromAddressLine2?.trim() ? shipFromAddressLine2.trim() : null;
     const shipFromCityValue = shipFromCity?.trim() ? shipFromCity.trim() : null;
 
-    // Omitted = leave unchanged (every other drawer omits it); an object
-    // replaces the stored rules whole, normalized so nothing malformed or out
-    // of bounds is ever stored.
-    const listingRulesProvided = listingRules !== undefined;
-    const listingRulesJson = listingRulesProvided ? JSON.stringify(normalizeListingRules(listingRules)) : null;
+    // Three states: omitted = leave unchanged (every drawer but the blacklist
+    // omits it), null = inherit (a store row follows the global row), an array
+    // = this row's own list, cleaned so nothing malformed is ever stored. A NEW
+    // store row is not seeded from global — its NULL already inherits.
+    const blockedAsinsProvided = blockedAsins !== undefined;
+    const blockedAsinsJson = Array.isArray(blockedAsins) ? JSON.stringify(parseBlockedAsins(blockedAsins)) : null;
 
     // Three states again: omitted = unchanged, null = inherit (store follows
     // global; global null = off), boolean = this row's own choice. A NEW store
@@ -258,7 +262,7 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules, allow_cross_store_asins)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, blocked_asins, allow_cross_store_asins)
             VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), COALESCE($7::numeric, 0), COALESCE($8, FALSE), COALESCE($9, 'aquiline'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb, $23::boolean)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
@@ -285,9 +289,9 @@ export class StoreSettingsService {
                   WHEN $20::boolean THEN EXCLUDED.auto_fulfill_max_loss
                   ELSE store_settings.auto_fulfill_max_loss
                 END,
-                listing_rules = CASE
-                  WHEN $22::boolean THEN EXCLUDED.listing_rules
-                  ELSE store_settings.listing_rules
+                blocked_asins = CASE
+                  WHEN $22::boolean THEN EXCLUDED.blocked_asins
+                  ELSE store_settings.blocked_asins
                 END,
                 allow_cross_store_asins = CASE
                   WHEN $24::boolean THEN EXCLUDED.allow_cross_store_asins
@@ -317,8 +321,8 @@ export class StoreSettingsService {
           shipFromCityValue,
           maxLossValue,
           maxLossProvided,
-          listingRulesJson,
-          listingRulesProvided,
+          blockedAsinsJson,
+          blockedAsinsProvided,
           allowCrossStoreValue,
           allowCrossStoreProvided,
         ]
@@ -327,7 +331,7 @@ export class StoreSettingsService {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, listing_rules, allow_cross_store_asins)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, blocked_asins, allow_cross_store_asins)
             SELECT $1, $2, FALSE,
                    COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''),
                    COALESCE($6::boolean, g.check_blacklist, TRUE),
@@ -365,9 +369,9 @@ export class StoreSettingsService {
                   WHEN $21::boolean THEN EXCLUDED.auto_fulfill_max_loss
                   ELSE store_settings.auto_fulfill_max_loss
                 END,
-                listing_rules = CASE
-                  WHEN $23::boolean THEN EXCLUDED.listing_rules
-                  ELSE store_settings.listing_rules
+                blocked_asins = CASE
+                  WHEN $23::boolean THEN EXCLUDED.blocked_asins
+                  ELSE store_settings.blocked_asins
                 END,
                 allow_cross_store_asins = CASE
                   WHEN $25::boolean THEN EXCLUDED.allow_cross_store_asins
@@ -398,8 +402,8 @@ export class StoreSettingsService {
           shipFromCityValue,
           maxLossValue,
           maxLossProvided,
-          listingRulesJson,
-          listingRulesProvided,
+          blockedAsinsJson,
+          blockedAsinsProvided,
           allowCrossStoreValue,
           allowCrossStoreProvided,
         ]
@@ -457,12 +461,9 @@ export class StoreSettingsService {
       shipFromAddressLine1: entity.ship_from_address_line1 || undefined,
       shipFromAddressLine2: entity.ship_from_address_line2 || undefined,
       shipFromCity: entity.ship_from_city || undefined,
-      // NULL stays absent so the resolver can tell "never saved" (inherit the
-      // global row) from "saved with everything off".
-      listingRules:
-        entity.listing_rules && typeof entity.listing_rules === 'object'
-          ? normalizeListingRules(entity.listing_rules)
-          : undefined,
+      // NULL stays null so the resolver can tell "inherit the global row" from
+      // "this row's own (possibly empty) list".
+      blockedAsins: Array.isArray(entity.blocked_asins) ? parseBlockedAsins(entity.blocked_asins.map(String)) : null,
       allowCrossStoreAsins:
         typeof entity.allow_cross_store_asins === 'boolean' ? entity.allow_cross_store_asins : null,
       createdAt: entity.created_at,

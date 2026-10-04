@@ -1,6 +1,8 @@
 /**
  * Listing rules — what a seller refuses to list, decided BEFORE anything is
- * sent to eBay (`store_settings.listing_rules` JSONB, migration 138).
+ * sent to eBay. Since migration 141 they belong to a Listing Settings Group
+ * (`listing_settings_groups.listing_rules`); blocked ASINs are their own
+ * Store > Global list (`store_settings.blocked_asins`).
  *
  * Everything here is pure: the create worker resolves the rules once per batch
  * and calls `evaluateListingRules` per ASIN. A refusal is the seller's own
@@ -48,14 +50,12 @@ export interface ListingRulesConfig {
    * the brand on eBay turns it off.
    */
   hideBrand: boolean;
-  /** ASINs the seller never wants listed, uppercase. */
-  blockedAsins: string[];
   /** Amazon price bounds for a new listing; null = no bound. */
   minSourcePrice: number | null;
   maxSourcePrice: number | null;
   /** Only list offers Amazon itself ships. */
   amazonShippedOnly: boolean;
-  /** Minimum star rating (1–5); null = no minimum. */
+  /** Minimum star rating, 1.0–5.0 at one decimal, typed by the seller; null = no minimum. */
   minRating: number | null;
   /** Minimum number of ratings; null = no minimum. */
   minReviewCount: number | null;
@@ -72,16 +72,12 @@ export interface ListingRulesConfig {
   coldListingDays: number | null;
   /** End not-selling listings on eBay automatically instead of only flagging them. */
   coldListingAutoEnd: boolean;
-  /**
-   * Promoted Listings ad rate (percent of the sale price, eBay's
-   * `bidPercentage`) for every new listing; null = do not promote. eBay charges
-   * it only when an item sells through the ad — and only runs the ad at all
-   * for a seller it considers eligible.
-   */
-  promotedAdRate: number | null;
 }
 
-/** eBay: "a minimum value of 2.0 and a maximum value of 100.0", one decimal. */
+export const MIN_RATING_MIN = 1;
+export const MIN_RATING_MAX = 5;
+
+/** eBay's Promoted Listings `bidPercentage`: "a minimum value of 2.0 and a maximum value of 100.0", one decimal (Ad Campaigns, Part B). */
 export const PROMOTED_AD_RATE_MIN = 2;
 export const PROMOTED_AD_RATE_MAX = 100;
 export const DEFAULT_PROMOTED_AD_RATE = 5;
@@ -95,7 +91,6 @@ export const DEFAULT_COLD_LISTING_DAYS = 90;
 export const DEFAULT_LISTING_RULES: Readonly<ListingRulesConfig> = Object.freeze({
   veroProtectionEnabled: true,
   hideBrand: true,
-  blockedAsins: [],
   minSourcePrice: null,
   maxSourcePrice: null,
   amazonShippedOnly: false,
@@ -104,7 +99,6 @@ export const DEFAULT_LISTING_RULES: Readonly<ListingRulesConfig> = Object.freeze
   outOfStockEndDays: null,
   coldListingDays: null,
   coldListingAutoEnd: false,
-  promotedAdRate: null,
 });
 
 export const LISTING_RULES_MAX_BLOCKED_ASINS = 5000;
@@ -148,23 +142,19 @@ export function normalizeListingRules(raw: unknown): ListingRulesConfig {
   const minReviewCount = boundedNumber(source.minReviewCount, 1, 1_000_000);
   const outOfStockEndDays = boundedNumber(source.outOfStockEndDays, LISTING_CLEANUP_MIN_DAYS, LISTING_CLEANUP_MAX_DAYS);
   const coldListingDays = boundedNumber(source.coldListingDays, COLD_LISTING_MIN_DAYS, LISTING_CLEANUP_MAX_DAYS);
-  const promotedAdRate = boundedNumber(source.promotedAdRate, PROMOTED_AD_RATE_MIN, PROMOTED_AD_RATE_MAX);
   return {
     veroProtectionEnabled: source.veroProtectionEnabled !== false,
     hideBrand: source.hideBrand !== false,
-    blockedAsins: Array.isArray(source.blockedAsins) ? parseBlockedAsins(source.blockedAsins as string[]) : [],
     minSourcePrice: minSourcePrice !== null && minSourcePrice > 0 ? minSourcePrice : null,
     maxSourcePrice: maxSourcePrice !== null && maxSourcePrice > 0 ? maxSourcePrice : null,
     amazonShippedOnly: source.amazonShippedOnly === true,
-    minRating: boundedNumber(source.minRating, 1, 5),
+    minRating: normalizeMinRating(source.minRating),
     minReviewCount: minReviewCount !== null ? Math.floor(minReviewCount) : null,
     outOfStockEndDays: outOfStockEndDays !== null ? Math.floor(outOfStockEndDays) : null,
     coldListingDays: coldListingDays !== null ? Math.floor(coldListingDays) : null,
     // Ending automatically is meaningless (and dangerous to leave set) while
     // nothing is being watched.
     coldListingAutoEnd: coldListingDays !== null && source.coldListingAutoEnd === true,
-    // eBay accepts one decimal only (5.5, never 5.55).
-    promotedAdRate: promotedAdRate !== null ? Math.round(promotedAdRate * 10) / 10 : null,
   };
 }
 
@@ -184,8 +174,9 @@ export interface ListingRuleSubject {
 }
 
 /** True when the seller's own list names this ASIN. Needs no product data. */
-export function isAsinBlocked(rules: Pick<ListingRulesConfig, 'blockedAsins'>, asin: string): boolean {
-  return rules.blockedAsins.includes(asin.trim().toUpperCase());
+export function isAsinBlocked(blockedAsins: readonly string[], asin: string): boolean {
+  const wanted = asin.trim().toUpperCase();
+  return blockedAsins.some((entry) => entry.toUpperCase() === wanted);
 }
 
 /**
@@ -196,10 +187,6 @@ export function evaluateListingRules(
   rules: ListingRulesConfig,
   subject: ListingRuleSubject
 ): ListingRuleViolation | null {
-  if (isAsinBlocked(rules, subject.asin)) {
-    return { kind: ListingRuleKind.BLOCKED_ASIN };
-  }
-
   const price = Number(subject.price);
   if (Number.isFinite(price) && price > 0) {
     if (rules.minSourcePrice !== null && price < rules.minSourcePrice) {
@@ -233,10 +220,25 @@ export function evaluateListingRules(
 }
 
 /**
- * Store > Global, with the loss limit's inheritance rule: a store row that
- * never saved rules (a focused drawer created it) inherits the global ones
- * instead of silently dropping a filter set for every store.
+ * A minimum rating as the seller typed it: a number, or text where a comma is
+ * a decimal separator ("4,5"). One decimal (4.55 → 4.6); outside 1.0–5.0, or
+ * unreadable, is "no minimum".
  */
-export function resolveListingRules(storeRules: unknown, globalRules: unknown): ListingRulesConfig {
-  return normalizeListingRules(storeRules ?? globalRules);
+export function normalizeMinRating(value: unknown): number | null {
+  const parsed =
+    typeof value === 'number' ? value : typeof value === 'string' && value.trim() !== '' ? Number(value.trim().replace(',', '.')) : NaN;
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+  const rounded = Math.round(parsed * 10) / 10;
+  return rounded >= MIN_RATING_MIN && rounded <= MIN_RATING_MAX ? rounded : null;
+}
+
+/**
+ * Blocked ASINs, Store > Global: a store row's own list (even an empty one)
+ * wins; a store NULL inherits the global list; a global NULL is none.
+ */
+export function resolveBlockedAsins(storeList: unknown, globalList: unknown): string[] {
+  const chosen = Array.isArray(storeList) ? storeList : Array.isArray(globalList) ? globalList : [];
+  return parseBlockedAsins(chosen.map((entry) => String(entry)));
 }

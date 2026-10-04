@@ -1,7 +1,6 @@
 import type { TrackingConversionProvider, TrackingConversionScope } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
-import type { ListingRulesConfig } from './listing-rules';
 
 /**
  * Steps of the store-settings drawer wizard. The BLACKLIST step here only
@@ -162,12 +161,12 @@ export interface StoreSettings {
     // the feature is off (no automated buyer messages). See BuyerMessagingConfig.
     buyerMessaging?: BuyerMessagingConfig | null;
 
-    // What this seller refuses to list (VeRO protection, blocked ASINs, price
-    // range, Amazon-shipped only, rating / review minimums, clean-up rules).
-    // Absent on a row that never saved any — read it through
-    // `normalizeListingRules`; the RESOLVED settings always carry it, with a
-    // store row that has none inheriting the global row's.
-    listingRules?: ListingRulesConfig;
+    // ASINs never listed for this scope (`store_settings.blocked_asins`,
+    // migration 141; edited in the Blacklist drawer). A raw row carries
+    // `null` = inherit (a store row follows the global row, a global null is
+    // none); the RESOLVED settings always carry the effective list.
+    // (Listing rules moved to the Listing Settings Group.)
+    blockedAsins?: string[] | null;
 
     // May this store list an ASIN that is already ACTIVE/DRAFT on ANOTHER of
     // the seller's stores (`store_settings.allow_cross_store_asins`, migration

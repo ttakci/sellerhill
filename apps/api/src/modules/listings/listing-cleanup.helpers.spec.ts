@@ -5,42 +5,9 @@ import { ListingAutoEndReason } from '@repo/shared';
 
 import {
   buildCleanupCandidateSql,
+  buildGroupRuleSql,
   buildNotSellingSql,
-  cleanupSteps,
-  hasCleanupWork,
-  planListingCleanup,
 } from './listing-cleanup.helpers';
-
-describe('planListingCleanup', () => {
-  it('ends nothing by default', () => {
-    expect(hasCleanupWork(planListingCleanup(null, null))).toBe(false);
-    expect(hasCleanupWork(planListingCleanup({}, {}))).toBe(false);
-  });
-
-  it('watching for not-selling listings does not end them without the second switch', () => {
-    const plan = planListingCleanup(null, { coldListingDays: 90 });
-    expect(plan.notSellingEndDays).toBeNull();
-    expect(hasCleanupWork(plan)).toBe(false);
-  });
-
-  it('ends not-selling listings only with auto-end on', () => {
-    expect(planListingCleanup(null, { coldListingDays: 90, coldListingAutoEnd: true }).notSellingEndDays).toBe(90);
-  });
-
-  it('lets a store row with its own rules override the global ones, and one without inherit them', () => {
-    const global = { outOfStockEndDays: 30 };
-    expect(planListingCleanup(null, global).outOfStockEndDays).toBe(30);
-    expect(planListingCleanup({ outOfStockEndDays: 7 }, global).outOfStockEndDays).toBe(7);
-    // A store that saved rules with the clean-up off opted out.
-    expect(planListingCleanup({}, global).outOfStockEndDays).toBeNull();
-  });
-
-  it('runs the out-of-stock step before the not-selling one', () => {
-    expect(
-      cleanupSteps({ outOfStockEndDays: 10, notSellingEndDays: 60 }).map((step) => step.reason)
-    ).toEqual([ListingAutoEndReason.OUT_OF_STOCK, ListingAutoEndReason.NOT_SELLING]);
-  });
-});
 
 describe('clean-up candidate SQL', () => {
   const outOfStock = buildCleanupCandidateSql(ListingAutoEndReason.OUT_OF_STOCK);
@@ -52,7 +19,18 @@ describe('clean-up candidate SQL', () => {
     expect(sql).toContain('l.user_id = $1');
     expect(sql).toContain('l.ebay_account_id = $2');
     expect(sql).toContain('auto_end_failed_at');
-    expect(sql).toMatch(/LIMIT \$4::int/);
+    expect(sql).toMatch(/LIMIT \$3::int/);
+    expect(sql).not.toContain('$4');
+  });
+
+  it('reads the day count per listing from its settings group', () => {
+    expect(outOfStock).toContain('listing_settings_groups');
+    expect(outOfStock).toContain(`'outOfStockEndDays'`);
+    expect(notSelling).toContain(`'coldListingDays'`);
+  });
+
+  it("ends a not-selling listing only with the group's second switch on", () => {
+    expect(notSelling).toContain(`'coldListingAutoEnd'`);
   });
 
   it('never ends a listing the seller paused on purpose', () => {
@@ -61,8 +39,17 @@ describe('clean-up candidate SQL', () => {
   });
 
   it('counts a not-selling window from creation, and looks for any order inside it', () => {
-    expect(notSelling).toContain('l.created_at <= NOW() - make_interval(days => $3::int)');
-    expect(notSelling).toContain('o.order_date > NOW() - make_interval(days => $3::int)');
+    expect(notSelling).toMatch(/l\.created_at <= NOW\(\) - make_interval\(days =>/);
+    expect(notSelling).toMatch(/o\.order_date > NOW\(\) - make_interval\(days =>/);
+  });
+});
+
+describe('buildGroupRuleSql', () => {
+  it("reads one rule of the listing's own group, typed", () => {
+    expect(buildGroupRuleSql('l', 'outOfStockEndDays')).toBe(
+      `(SELECT (gr.listing_rules->>'outOfStockEndDays')::int FROM listing_settings_groups gr WHERE gr.id = l.listing_settings_group_id)`
+    );
+    expect(buildGroupRuleSql('x', 'coldListingAutoEnd')).toContain(`::boolean FROM listing_settings_groups gr WHERE gr.id = x.listing_settings_group_id`);
   });
 });
 
@@ -76,6 +63,12 @@ describe('the not-selling predicate has one definition', () => {
 
   it('matches nothing for a seller who is not watching', () => {
     expect(buildNotSellingSql('l')).toContain('r_ns.days IS NOT NULL');
+  });
+
+  it("reads the window from the listing's group, not from store settings", () => {
+    expect(buildNotSellingSql('l')).toContain(`'coldListingDays'`);
+    expect(buildNotSellingSql('l')).toContain('listing_settings_groups');
+    expect(buildNotSellingSql('l')).not.toContain('store_settings');
   });
 });
 

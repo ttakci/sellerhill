@@ -1,7 +1,6 @@
 import { TrackingConversionProvider, TrackingConversionScope } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
-import type { ListingRulesConfig } from './listing-rules';
 import { BlacklistKeyword, StoreSettings } from './store-settings.types';
 
 /**
@@ -68,9 +67,10 @@ export interface SaveStoreSettingsRequest {
     // Optional on the request — service defaults to disabled. Response always carries it.
     buyerMessaging?: BuyerMessagingConfig | null;
 
-    // Owned by ListingRulesDrawer. Omitted = leave unchanged; an object
-    // replaces the stored rules whole (it is normalized server-side).
-    listingRules?: ListingRulesConfig;
+    // Owned by the Blacklist drawer. Omitted = leave unchanged; null =
+    // inherit (store rows); an array replaces the stored list (cleaned
+    // server-side with `parseBlockedAsins`).
+    blockedAsins?: string[] | null;
 
     // Allow ASINs already listed on the seller's other stores. Three states:
     // omitted = leave unchanged, null = inherit (a store row follows the

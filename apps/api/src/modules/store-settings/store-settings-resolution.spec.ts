@@ -32,7 +32,7 @@ function row(overrides: Record<string, unknown>): Record<string, unknown> {
     tracking_conversion_scope: 'amazon_logistics_only',
     tracking_convert_manual_orders: true,
     buyer_messaging: null,
-    listing_rules: null,
+    blocked_asins: null,
     created_at: new Date(),
     updated_at: new Date(),
     ...overrides,
@@ -191,5 +191,59 @@ describe('StoreSettingsService mapping — tracking provider', () => {
     for (const stored of ['aquiline', 'api', 'AQUILINE', 'garbage', '', null]) {
       expect(await providerFor(stored)).toBe(TrackingConversionProvider.API);
     }
+  });
+});
+
+describe('StoreSettingsService — blocked ASINs are Store > Global', () => {
+  function buildWith(globalList: unknown, storeRow: Record<string, unknown> | null) {
+    const globalRow = row({ id: 'global', is_global: true, blocked_asins: globalList });
+    const db = {
+      query: jest.fn((sql: string) => {
+        if (/is_global = TRUE/.test(sql)) {
+          return Promise.resolve([globalRow]);
+        }
+        if (/store_id = \$2/.test(sql)) {
+          return Promise.resolve(storeRow ? [storeRow] : []);
+        }
+        return Promise.resolve([]);
+      }),
+    };
+    return new StoreSettingsService(db as never);
+  }
+
+  it('a store NULL inherits the global list', async () => {
+    const resolved = await buildWith(['B0GGGGGGGG'], row({ id: 'store', store_id: 'acc-1', blocked_asins: null }))
+      .getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.blockedAsins).toEqual(['B0GGGGGGGG']);
+  });
+
+  it('a store with no row of its own follows the global list', async () => {
+    const resolved = await buildWith(['B0GGGGGGGG'], null).getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.blockedAsins).toEqual(['B0GGGGGGGG']);
+  });
+
+  it("a store's explicit [] blocks nothing", async () => {
+    const resolved = await buildWith(['B0GGGGGGGG'], row({ id: 'store', store_id: 'acc-1', blocked_asins: [] }))
+      .getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.blockedAsins).toEqual([]);
+  });
+
+  it('a global NULL is no list at all', async () => {
+    const resolved = await buildWith(null, null).getResolvedSettings('user-1', 'acc-1');
+    expect(resolved.blockedAsins).toEqual([]);
+  });
+
+  it('the raw store row keeps NULL', async () => {
+    const raw = await buildWith(['B0GGGGGGGG'], row({ id: 'store', store_id: 'acc-1', blocked_asins: null }))
+      .getSettings('user-1', 'acc-1');
+    expect(raw.blockedAsins).toBeNull();
+  });
+
+  it('save writes blocked_asins with an omitted-means-unchanged flag and no longer writes listing_rules', () => {
+    const SOURCE = readFileSync(join(__dirname, 'store-settings.service.ts'), 'utf8');
+    expect(SOURCE).toMatch(/blocked_asins = CASE\s+WHEN \$22::boolean THEN EXCLUDED\.blocked_asins\s+ELSE store_settings\.blocked_asins/);
+    expect(SOURCE).toMatch(/blocked_asins = CASE\s+WHEN \$23::boolean THEN EXCLUDED\.blocked_asins\s+ELSE store_settings\.blocked_asins/);
+    expect(SOURCE).not.toMatch(/listing_rules/);
+    expect(SOURCE).not.toMatch(/g\.blocked_asins/);
   });
 });

@@ -1,4 +1,4 @@
-import { ListingFailureCode, TemplateType, type ListingSettingsGroup, type ProductData } from '@repo/shared';
+import { DEFAULT_LISTING_RULES, ListingFailureCode, TemplateType, type ListingSettingsGroup, type ProductData } from '@repo/shared';
 
 import { classifyListingFailure } from './listing-failure';
 import { ListingStrategyService, SourcePriceUnavailableError } from './listing-strategy.service';
@@ -30,6 +30,7 @@ describe('ListingStrategyService — non-positive source price', () => {
     id: 'group-1',
     templates: { type: TemplateType.CUSTOM, customTemplateHtml: '<p class="t">{{title}}</p>' },
     content: {},
+    listingRules: DEFAULT_LISTING_RULES,
     stock: { defaultQuantity: 5, stockBuffer: 0 },
     repricingStrategy: [{ id: 'r1', minPrice: 0, maxPrice: 9999, profitMarginPercent: 20 }],
     fees: { ebayFeePercent: 13, fixedFeeAmount: 0.3 },

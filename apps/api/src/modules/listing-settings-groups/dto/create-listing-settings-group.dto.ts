@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   type CreateListingSettingsGroupRequest,
   type ListingContentConfig,
+  type ListingRulesConfig,
   type PriceRange,
   type StockConfig,
   type FeeConfig,
@@ -21,6 +22,7 @@ import {
   IsInt,
   IsIn,
   IsBoolean,
+  IsObject,
 } from 'class-validator';
 
 class PriceRangeDto implements Omit<PriceRange, 'id'> {
@@ -163,4 +165,9 @@ export class CreateListingSettingsGroupDto implements CreateListingSettingsGroup
   @ValidateNested()
   @Type(() => ListingContentConfigDto)
   content?: ListingContentConfig;
+
+  @ApiPropertyOptional({ description: 'What this group refuses to list and when it ends a listing (normalized server-side; omitted = the defaults)' })
+  @IsOptional()
+  @IsObject()
+  listingRules?: ListingRulesConfig;
 }

@@ -103,7 +103,6 @@ describe('processListingBatch — a store that became unusable closes the batch'
       {} as never,
       storeSettings as never,
       {} as never,
-      {} as never,
       {} as never
     );
     const job = {

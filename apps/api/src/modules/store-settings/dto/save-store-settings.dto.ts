@@ -8,7 +8,6 @@ import {
   normalizeCountryCode,
   type SaveStoreSettingsRequest,
   type BlacklistKeyword,
-  type ListingRulesConfig,
 } from '@repo/shared';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -22,7 +21,6 @@ import {
   ValidateNested,
   IsIn,
   IsNumber,
-  IsObject,
   Min,
   Max,
 } from 'class-validator';
@@ -228,13 +226,16 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
 
   @ApiPropertyOptional({
     description:
-      'Listing rules (VeRO protection, blocked ASINs, price range, shipped-by-Amazon only, rating / review ' +
-      'minimums, clean-up). Omitted means "leave unchanged"; an object replaces the stored rules and is ' +
-      'normalized server-side (`normalizeListingRules`), so out-of-range values fall back to "off".',
+      'ASINs never listed for this scope. Omitted means "leave unchanged"; null = inherit (a store row ' +
+      'follows the global row); an array replaces the stored list (cleaned server-side).',
+    type: [String],
+    nullable: true,
   })
   @IsOptional()
-  @IsObject()
-  listingRules?: ListingRulesConfig;
+  @ValidateIf((_object, value) => value !== null)
+  @IsArray()
+  @IsString({ each: true })
+  blockedAsins?: string[] | null;
 
   @ApiPropertyOptional({
     description:
