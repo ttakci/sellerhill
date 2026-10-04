@@ -52,7 +52,7 @@ export const SelectionControl = styled.div`
 export const Top = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
@@ -71,7 +71,7 @@ export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
   flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column')};
   align-items: ${({ $orientation }) => ($orientation === 'horizontal' ? 'flex-start' : 'stretch')};
-  gap: ${tkn('spacing.md+')};
+  gap: ${tkn('spacing.lg')};
   min-width: 0;
   flex: 1;
 `;
@@ -121,15 +121,12 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
 `;
 
 export const Content = styled.div`
-  display: grid;
-  /* Two columns of facts; the second wraps under the first when the card is narrow. */
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  align-items: start;
-  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   flex: 1;
   /* Breathing room from the photo. */
-  padding-inline-start: ${tkn('spacing.sm')};
+  padding-inline-start: ${tkn('spacing.md')};
 `;
 
 /** Block-level host for the tooltip, so the one-line title can shrink and truncate. */
@@ -190,6 +187,11 @@ export const MetaValue = styled.dd`
   a {
     max-width: 100%;
     overflow: hidden;
+  }
+
+  /* Every value reads bold, including the ASIN / eBay ID badges. */
+  * {
+    font-weight: ${tkn('typography.fontWeight.semibold')};
   }
 `;
 
