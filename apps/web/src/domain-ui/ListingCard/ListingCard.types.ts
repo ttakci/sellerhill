@@ -20,6 +20,8 @@ export interface ListingCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
+  /** Put the row in the second column beside the first (stock, dates); wraps under it when narrow. */
+  column?: 'secondary';
   /** @deprecated Labels carry no icon any more (2026-10-01); accepted and ignored. */
   icon?: IconName;
 }
