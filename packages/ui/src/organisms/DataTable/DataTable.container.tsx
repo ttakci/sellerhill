@@ -94,6 +94,7 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       sortValue={props.sortValue}
       onSortChange={props.onSortChange}
       sortLabel={props.sortLabel}
+      downloadLabel={props.downloadLabel}
       columnManagerLabel={props.columnManagerLabel}
       sortColumn={props.sortColumn}
       sortDirection={props.sortDirection}

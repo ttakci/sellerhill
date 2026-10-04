@@ -6,6 +6,7 @@ import { Skeleton } from '../../atoms/Skeleton';
 import { Select } from '../../molecules/Select';
 import { Table } from '../../molecules/Table';
 import { TablePagination } from '../../molecules/Table/TablePagination.component';
+import { Tooltip } from '../../molecules/Tooltip';
 import { ViewToggle } from '../../molecules/ViewToggle/ViewToggle.component';
 
 import { ColumnManager } from './ColumnManager';
@@ -42,6 +43,7 @@ export const DataTableComponent = <T,>({
   sortValue,
   onSortChange,
   sortLabel,
+  downloadLabel,
   columnManagerLabel,
   sortColumn,
   sortDirection,
@@ -121,9 +123,11 @@ export const DataTableComponent = <T,>({
               />
             )}
             {onDownload && (
-              <IconButton variant="ghost" onClick={onDownload} title="Export">
-                <Icon name="download" size={20} />
-              </IconButton>
+              <Tooltip content={downloadLabel || 'Export'} position="top" variant="dark">
+                <IconButton variant="ghost" onClick={onDownload} aria-label={downloadLabel || 'Export'}>
+                  <Icon name="download" size={20} />
+                </IconButton>
+              </Tooltip>
             )}
             {actions}
           </S.ToolbarRight>

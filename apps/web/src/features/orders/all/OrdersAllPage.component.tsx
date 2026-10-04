@@ -22,6 +22,13 @@ import type { OrdersAllPageProps } from './OrdersAllPage.types';
 export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   orders,
   columns,
+  columnOptions,
+  visibleColumnKeys,
+  onToggleColumn,
+  onMoveColumn,
+  sortColumn,
+  sortDirection,
+  onSort,
   tableView,
   onTableViewChange,
   pagination,
@@ -143,6 +150,15 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         gridMinItemWidth="24rem"
         gridMaxColumns={3}
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={onToggleColumn}
+        onMoveColumn={onMoveColumn}
+        columnManagerLabel={t('listings:listings.table.columns')}
+        downloadLabel={t('orders.actions.export')}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={onSort}
         data={orders}
         renderGridCard={renderGridCard}
         viewMode={tableView}

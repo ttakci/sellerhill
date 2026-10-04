@@ -4,6 +4,7 @@ import { Checkbox } from '../../atoms/Checkbox';
 import { Icon } from '../../atoms/Icon';
 import { IconButton } from '../../atoms/IconButton';
 import { Popover } from '../../molecules/Popover';
+import { Tooltip } from '../../molecules/Tooltip';
 
 import { ColumnManagerContent, ColumnMoveButtons, ColumnRow } from './DataTable.style';
 import type { ColumnOption } from './DataTable.types';
@@ -24,9 +25,11 @@ export const ColumnManager: React.FC<ColumnManagerProps> = ({
   label = 'Columns',
 }) => {
   const trigger = (
-    <IconButton variant="ghost" title={label}>
-      <Icon name="view-list" size={20} />
-    </IconButton>
+    <Tooltip content={label} position="top" variant="dark">
+      <IconButton variant="ghost" aria-label={label}>
+        <Icon name="view-list" size={20} />
+      </IconButton>
+    </Tooltip>
   );
 
   const content = (

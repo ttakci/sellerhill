@@ -18,9 +18,8 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
  * rides under the profit, so the one figure that matters carries its own
  * context. Money columns are right-aligned with tabular numerals.
  *
- * `sortable` flags are deliberately absent: the page never wires `onSort`
- * (the API floats what needs the seller to the top, then newest first), and a
- * sort affordance that does nothing is worse than none.
+ * Sortable: order number (by date), sale and profit — the keys `OrdersAllPage.container`
+ * maps onto the API's `order_date` / `sale_total` / `net_profit`.
  */
 export function useOrdersColumns(
   formatCurrency: (value: number, ebayAccountId?: string | null) => string,
@@ -34,6 +33,7 @@ export function useOrdersColumns(
     () => [
       {
         key: 'ebayOrderId',
+        sortable: true,
         header: t('orders.table.orderNumber'),
         width: '9rem',
         render: (_value, order) => (
@@ -155,6 +155,7 @@ export function useOrdersColumns(
       },
       {
         key: 'salePrice',
+        sortable: true,
         header: t('orders.table.salePrice'),
         width: '6rem',
         align: 'right',
@@ -177,6 +178,7 @@ export function useOrdersColumns(
       },
       {
         key: 'netProfit',
+        sortable: true,
         header: t('orders.table.netProfit'),
         width: '7.5rem',
         align: 'right',

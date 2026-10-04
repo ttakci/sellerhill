@@ -80,6 +80,8 @@ export interface DataTableProps<T> {
   onSortChange?: (value: string | number) => void;
   /** Accessible name for the sort picker (i18n). */
   sortLabel?: string;
+  /** Tooltip / accessible name of the download button (already translated). */
+  downloadLabel?: string;
   /** Header label for column manager popover (i18n) */
   columnManagerLabel?: string;
 
@@ -151,6 +153,8 @@ export interface DataTableComponentProps<T> {
   onSortChange?: (value: string | number) => void;
   /** Accessible name for the sort picker (i18n). */
   sortLabel?: string;
+  /** Tooltip / accessible name of the download button (already translated). */
+  downloadLabel?: string;
   columnManagerLabel?: string;
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';

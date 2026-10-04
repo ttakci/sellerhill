@@ -4,6 +4,13 @@ import type { TabNavItem, TableColumn, ViewMode } from '@repo/ui';
 export interface OrdersAllPageProps {
   orders: OrderDto[];
   columns: TableColumn<OrderDto>[];
+  columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];
+  visibleColumnKeys: string[];
+  onToggleColumn: (key: string) => void;
+  onMoveColumn: (key: string, direction: -1 | 1) => void;
+  sortColumn?: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (column: string) => void;
   tableView: ViewMode;
   onTableViewChange: (mode: ViewMode) => void;
   pagination: {

@@ -161,7 +161,77 @@ export const OrdersAllPageContainer: React.FC = () => {
     [localeCfg]
   );
 
-  const columns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
+  const allColumns = useOrdersColumns(fmtCurrency, fmtDate, fmtMargin, fmtDay);
+
+  // Column manager: which columns show and in what order (not persisted). A
+  // hidden-list rather than a visible-list, so a column added later shows by default.
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const all = allColumns.map((col) => col.key || '');
+    return [...columnOrder.filter((k) => all.includes(k)), ...all.filter((k) => !columnOrder.includes(k))];
+  }, [allColumns, columnOrder]);
+  const columns = useMemo(
+    () =>
+      orderedKeys
+        .filter((key) => !hiddenColumnKeys.includes(key))
+        .map((key) => allColumns.find((col) => col.key === key))
+        .filter((col): col is (typeof allColumns)[number] => Boolean(col)),
+    [allColumns, orderedKeys, hiddenColumnKeys]
+  );
+  const columnOptions = useMemo(
+    () =>
+      orderedKeys.map((key) => {
+        const col = allColumns.find((c) => c.key === key);
+        return {
+          key,
+          label: typeof col?.header === 'string' ? col.header : key,
+          alwaysVisible: key === 'product',
+        };
+      }),
+    [orderedKeys, allColumns]
+  );
+  const visibleColumnKeys = useMemo(
+    () => orderedKeys.filter((key) => !hiddenColumnKeys.includes(key)),
+    [orderedKeys, hiddenColumnKeys]
+  );
+  const toggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  }, []);
+  const moveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys]
+  );
+
+  // Header clicks sort by the API's own columns: a click picks the column
+  // (newest/largest first), a second click flips the direction.
+  const sortByColumn: Record<string, string> = {
+    ebayOrderId: 'order_date',
+    salePrice: 'sale_total',
+    netProfit: 'net_profit',
+  };
+  const [activeSortBy, activeSortDir] = (sort || 'order_date:desc').split(':');
+  const sortColumn = Object.keys(sortByColumn).find((key) => sortByColumn[key] === activeSortBy);
+  const handleColumnSort = useCallback(
+    (columnKey: string) => {
+      const by = sortByColumn[columnKey];
+      if (!by) {
+        return;
+      }
+      handleSortChange(`${by}:${by === activeSortBy && activeSortDir === 'desc' ? 'asc' : 'desc'}`);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeSortBy, activeSortDir, handleSortChange]
+  );
 
   const handleDownload = useCallback(() => {
     const headers = [
@@ -205,6 +275,13 @@ export const OrdersAllPageContainer: React.FC = () => {
       <OrdersAllPageComponent
         orders={orders}
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={toggleColumn}
+        onMoveColumn={moveColumn}
+        sortColumn={sortColumn}
+        sortDirection={activeSortDir === 'asc' ? 'asc' : 'desc'}
+        onSort={handleColumnSort}
         tableView={tableView}
         onTableViewChange={setTableView}
         pagination={{
