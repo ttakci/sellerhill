@@ -60,6 +60,14 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 0,
     max: 50,
   }),
+  // --- eBay Finances consent (spec Part C2). Off: no consent asks for it. ---
+  def({
+    key: PlatformSettingKey.EBAY_OAUTH_FINANCES_SCOPE_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_OAUTH_FINANCES_SCOPE_ENABLED',
+    defaultValue: 'false',
+  }),
   def({
     key: PlatformSettingKey.EBAY_FEED_SYNC_ENABLED,
     category: PlatformSettingCategory.EBAY,

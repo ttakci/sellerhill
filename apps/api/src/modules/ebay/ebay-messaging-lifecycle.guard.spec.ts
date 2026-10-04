@@ -15,7 +15,7 @@ describe('eBay messaging lifecycle invariants', () => {
   });
 
   it('writes granted_scopes from the OAuth service, never a hardcoded list', () => {
-    expect(src.match(/this\.oauthService\.getScopes\(\)/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(src.match(/this\.oauthService\.getScopes\(/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
 
   it('subscribes the store to NEW_MESSAGE after the row is written, on both branches', () => {

@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EBAY_MARKETPLACE, EBAY_OAUTH_CONSTANTS, type EbayMarketplaceId } from '@repo/shared';
+import { EBAY_FINANCES_SCOPE, EBAY_MARKETPLACE, EBAY_OAUTH_CONSTANTS, type EbayMarketplaceId } from '@repo/shared';
 import axios from 'axios';
 
 interface EbayTokenResponse {
@@ -35,7 +35,6 @@ export class EbayOAuthService {
    * at the JWT-decode fallback value `'unknown'` for every connection).
    */
   private readonly identityApiBaseUrl: string;
-  private readonly scopes: readonly string[];
 
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.get<string>('EBAY_CLIENT_ID') || '';
@@ -43,7 +42,6 @@ export class EbayOAuthService {
     this.redirectUri = this.configService.get<string>('EBAY_REDIRECT_URI') || '';
     this.ruName = this.configService.get<string>('EBAY_RUNAME') || '';
     this.environment = this.configService.get<'sandbox' | 'production'>('EBAY_ENVIRONMENT') || 'sandbox';
-    this.scopes = EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
 
     this.authUrl = this.configService.get<string>('EBAY_AUTH_URL') || '';
     this.tokenUrl = this.configService.get<string>('EBAY_TOKEN_URL') || '';
@@ -65,8 +63,12 @@ export class EbayOAuthService {
    * (`ebay_accounts.granted_scopes`) so a store connected before a new scope
    * was added can be told apart from one that has it.
    */
-  getScopes(): readonly string[] {
-    return this.scopes;
+  getScopes(includeFinances = false): readonly string[] {
+    // The Finances scope is asked for per consent (panel switch), so the list
+    // a store is recorded with is the list THAT consent showed.
+    return includeFinances
+      ? [...EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES, EBAY_FINANCES_SCOPE]
+      : EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
   }
 
   /**
@@ -74,15 +76,16 @@ export class EbayOAuthService {
    */
   generateConsentUrl(
     marketplaceId: EbayMarketplaceId = EBAY_MARKETPLACE.US,
-    userId: string
+    userId: string,
+    includeFinances = false
   ): { url: string; state: string } {
-    const state = this.generateState(userId, marketplaceId);
+    const state = this.generateState(userId, marketplaceId, includeFinances);
 
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.ruName || this.redirectUri,
       response_type: 'code',
-      scope: this.scopes.join(' '),
+      scope: this.getScopes(includeFinances).join(' '),
       state,
     });
 
@@ -265,12 +268,15 @@ export class EbayOAuthService {
   /**
    * Generate secure state parameter for CSRF protection
    */
-  private generateState(userId: string, marketplaceId: EbayMarketplaceId): string {
+  private generateState(userId: string, marketplaceId: EbayMarketplaceId, includeFinances: boolean): string {
     const randomPart = randomBytes(16).toString('hex');
     // Encode userId in state for retrieval during callback
     const stateData = {
       userId,
       marketplaceId,
+      // Whether this consent asked for sell.finances — the callback records
+      // exactly that, whatever the switch says by the time eBay redirects back.
+      fin: includeFinances,
       random: randomPart,
       timestamp: Date.now(),
     };
@@ -280,12 +286,19 @@ export class EbayOAuthService {
   /**
    * Decode state parameter
    */
-  decodeState(state: string): { userId: string; marketplaceId: EbayMarketplaceId; random: string; timestamp: number } {
+  decodeState(state: string): {
+    userId: string;
+    marketplaceId: EbayMarketplaceId;
+    fin?: boolean;
+    random: string;
+    timestamp: number;
+  } {
     try {
       const decoded = Buffer.from(state, 'base64url').toString('utf-8');
       const parsed = JSON.parse(decoded) as {
         userId: string;
         marketplaceId: EbayMarketplaceId;
+        fin?: boolean;
         random: string;
         timestamp: number;
       };
@@ -298,7 +311,7 @@ export class EbayOAuthService {
   /**
    * Validate state parameter
    */
-  validateState(state: string): { userId: string; marketplaceId: EbayMarketplaceId } {
+  validateState(state: string): { userId: string; marketplaceId: EbayMarketplaceId; includeFinances: boolean } {
     const decoded = this.decodeState(state);
 
     // Check if state is not too old (15 minutes)
@@ -307,6 +320,7 @@ export class EbayOAuthService {
       throw new BadRequestException('ebay.errors.invalidState');
     }
 
-    return { userId: decoded.userId, marketplaceId: decoded.marketplaceId };
+    // A state minted before the field existed reads as "no finances".
+    return { userId: decoded.userId, marketplaceId: decoded.marketplaceId, includeFinances: decoded.fin === true };
   }
 }
