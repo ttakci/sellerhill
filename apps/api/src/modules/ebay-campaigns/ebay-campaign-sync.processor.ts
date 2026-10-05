@@ -8,6 +8,7 @@ import { Queue } from 'bullmq';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
+import { CampaignReportCaptureService } from './campaign-report-capture.service';
 import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
 import {
   DEFAULT_EBAY_CAMPAIGN_SYNC_CRON,
@@ -28,7 +29,8 @@ export class EbayCampaignSyncProcessor extends WorkerHost implements OnModuleIni
   constructor(
     @InjectQueue(EBAY_CAMPAIGN_SYNC_QUEUE) private readonly queue: Queue,
     private readonly sync: EbayCampaignSyncService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly reports: CampaignReportCaptureService
   ) {
     super();
   }
@@ -53,6 +55,7 @@ export class EbayCampaignSyncProcessor extends WorkerHost implements OnModuleIni
 
   async process(): Promise<void> {
     await this.sync.runSweep();
+    await this.reports.runSweep();
   }
 
   private async removeExistingTick(): Promise<void> {

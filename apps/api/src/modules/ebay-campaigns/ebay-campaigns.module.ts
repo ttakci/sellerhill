@@ -8,6 +8,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
 
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
+import { CampaignReportCaptureService } from './campaign-report-capture.service';
 import { EbayCampaignActionsService } from './ebay-campaign-actions.service';
 import { EbayCampaignSyncProcessor } from './ebay-campaign-sync.processor';
 import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
@@ -32,6 +33,7 @@ import { EbayMarketingClient } from './ebay-marketing.client';
     EbayCampaignsService,
     EbayCampaignActionsService,
     EbayCampaignSyncProcessor,
+    CampaignReportCaptureService,
     StockSyncQueueService,
   ],
   exports: [EbayMarketingClient, CampaignAdStateRepository, EbayCampaignSyncService],

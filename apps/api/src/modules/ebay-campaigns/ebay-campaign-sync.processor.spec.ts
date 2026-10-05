@@ -17,7 +17,8 @@ describe('campaign sync processor', () => {
     };
     const settings = { getString: jest.fn().mockResolvedValue('*/15 * * * *') };
     const sweep = { runSweep: jest.fn().mockResolvedValue(undefined) };
-    const processor = new EbayCampaignSyncProcessor(queue as never, sweep as never, settings as never);
+    const report = { runSweep: jest.fn().mockResolvedValue(undefined) };
+    const processor = new EbayCampaignSyncProcessor(queue as never, sweep as never, settings as never, report as never);
     await processor.onModuleInit();
     expect(order).toEqual(['remove', 'add']);
     expect(settings.getString).toHaveBeenCalledWith(PlatformSettingKey.EBAY_CAMPAIGN_SYNC_CRON);
@@ -30,5 +31,7 @@ describe('campaign sync processor', () => {
     });
     await processor.process();
     expect(sweep.runSweep).toHaveBeenCalledTimes(1);
+    expect(report.runSweep).toHaveBeenCalledTimes(1);
+    expect(sweep.runSweep.mock.invocationCallOrder[0]).toBeLessThan(report.runSweep.mock.invocationCallOrder[0]);
   });
 });

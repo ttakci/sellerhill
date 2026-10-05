@@ -140,4 +140,49 @@ describe('EbayMarketingClient', () => {
     expect(post.mock.calls[0][1]).toEqual({ adRateStrategy: 'FIXED', bidPercentage: '5.0' });
     expect(post.mock.calls[1][0]).toBe('https://api.test/sell/marketing/v1/ad_campaign/c%2F1/pause');
   });
+
+  it('creates a report task with the exact request and reads the id from a trusted Location without charging the ad budget', async () => {
+    const { client, acquire } = build();
+    const body = { reportType: 'CAMPAIGN_PERFORMANCE_REPORT', reportFormat: 'TSV_GZIP' };
+    // Axios' overloaded mock response is `any`; the call itself is asserted below.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const post = jest.spyOn(axios, 'post').mockResolvedValue({
+      headers: { location: 'https://api.test/sell/marketing/v1/ad_report_task/task%2F1' },
+    } as never);
+    await expect(client.createReportTask(ctx, body as never)).resolves.toBe('task/1');
+    // Jest asymmetric matcher is intentionally untyped here; the call shape is the assertion.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    expect(post).toHaveBeenCalledWith('https://api.test/sell/marketing/v1/ad_report_task', body, expect.objectContaining({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      headers: expect.objectContaining({ Authorization: 'Bearer tok' }), maxRedirects: 0,
+    }));
+    expect(acquire).not.toHaveBeenCalled();
+  });
+
+  it('rejects an untrusted report task Location before another request', async () => {
+    const { client, acquire } = build();
+    // Axios' overloaded mock response is `any`; the call itself is asserted below.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const post = jest.spyOn(axios, 'post').mockResolvedValue({ headers: { location: 'https://attacker.test/task/1' } });
+    const get = jest.spyOn(axios, 'get');
+    await expect(client.createReportTask(ctx, {} as never)).rejects.toThrow();
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(get).not.toHaveBeenCalled();
+    expect(acquire).not.toHaveBeenCalled();
+  });
+
+  it('polls and downloads only through configured report endpoints with exact bytes and no ad budget', async () => {
+    const { client, acquire } = build();
+    const bytes = Buffer.from([0x1f, 0x8b, 0, 255]);
+    const get = jest.spyOn(axios, 'get')
+      .mockResolvedValueOnce({ data: { reportTaskStatus: 'SUCCESS', reportId: 'r/1' } })
+      .mockResolvedValueOnce({ data: bytes });
+    const task = await client.getReportTask(ctx, 'task/1');
+    expect(task).toEqual({ reportTaskStatus: 'SUCCESS', reportId: 'r/1' });
+    await expect(client.downloadReport(ctx, 'r/1')).resolves.toEqual(bytes);
+    expect(get.mock.calls[0][0]).toBe('https://api.test/sell/marketing/v1/ad_report_task/task%2F1');
+    expect(get.mock.calls[1][0]).toBe('https://api.test/sell/marketing/v1/ad_report/r%2F1');
+    expect(get.mock.calls[1][1]).toEqual(expect.objectContaining({ responseType: 'arraybuffer', maxRedirects: 0 }));
+    expect(acquire).not.toHaveBeenCalled();
+  });
 });

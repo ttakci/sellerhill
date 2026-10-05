@@ -98,6 +98,14 @@ function assertMarketingCallsBudgeted(text: string): void {
         )
       );
     };
+    const reportCall = axiosCall.getText(file).includes('REPORT_TASK_PATH') || axiosCall.getText(file).includes('REPORT_PATH') || axiosCall.getText(file).includes('axios.post(endpoint');
+    if (reportCall) {
+      const reportOptions = options?.getText(file) ?? '';
+      if (!retry || !retry.arguments[0] || !retry.arguments[0].getFullText(file).includes(axiosCall.getText(file)) || reportOptions.includes('acquireBudget')) {
+        throw new Error(`Invalid capture-only report HTTP call: ${axiosCall.getText(file)}`);
+      }
+      continue;
+    }
     if (
       !retry ||
       !retry.arguments[0] ||
@@ -199,7 +207,7 @@ function assertWriteGates(text: string): void {
 }
 
 describe('campaign write boundaries', () => {
-  it('charges every Marketing HTTP call to MARKETING_ADS through its retry wrapper', () => {
+  it('charges campaign calls to MARKETING_ADS while capture-only report calls remain unbudgeted and retried', () => {
     const client = source('ebay-marketing.client.ts');
     expect(() => assertMarketingCallsBudgeted(client)).not.toThrow();
     const accountBudgetMutation = client.replace('EbayApiResource.MARKETING_ADS', 'EbayApiResource.ACCOUNT');
@@ -215,6 +223,12 @@ describe('campaign write boundaries', () => {
       '{ ...this.options(priority), maxAttempts: 1 }'
     );
     expect(() => assertMarketingCallsBudgeted(validRetryOverride)).not.toThrow();
+    const reportBudgetMutation = client.replace(
+      '{ logger: this.logger }\n    );',
+      '{ logger: this.logger, acquireBudget: () => this.budget.acquire(EbayApiResource.MARKETING_ADS, priority) }\n    );'
+    );
+    expect(reportBudgetMutation).not.toBe(client);
+    expect(() => assertMarketingCallsBudgeted(reportBudgetMutation)).toThrow(/capture-only report/);
   });
 
   it('gates every write before Marketing, validates direct rates first, and add validates its stored campaign rate', () => {

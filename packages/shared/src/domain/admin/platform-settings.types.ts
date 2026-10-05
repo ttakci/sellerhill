@@ -144,6 +144,8 @@ export enum PlatformSettingKey {
   EBAY_CAMPAIGN_SYNC_CRON = 'ebay.campaignSync.cron',
   EBAY_CAMPAIGN_SYNC_INTERVAL_HOURS = 'ebay.campaignSync.intervalHours',
   EBAY_CAMPAIGN_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.campaignSync.maxAccountsPerRun',
+  EBAY_CAMPAIGN_REPORTS_ENABLED = 'ebay.campaignReports.enabled',
+  EBAY_CAMPAIGN_REPORTS_CAPTURE_ONLY = 'ebay.campaignReports.captureOnly',
   EBAY_BILLING_SYNC_ENABLED = 'ebay.finances.billingSync.enabled',
   EBAY_BILLING_SYNC_CRON = 'ebay.finances.billingSync.cron',
   EBAY_BILLING_SYNC_INTERVAL_HOURS = 'ebay.finances.billingSync.intervalHours',

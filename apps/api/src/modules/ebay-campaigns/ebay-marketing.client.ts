@@ -18,6 +18,28 @@ import { CAMPAIGN_PAGE_LIMIT } from './ebay-campaigns.constants';
 
 export type AccountContext = { accessToken: string; marketplaceId: string };
 
+export interface CampaignReportRequest {
+  reportType: string;
+  reportFormat: string;
+  marketplaceId: string;
+  dateFrom: string;
+  dateTo: string;
+  fundingModels: string[];
+  campaignIds: string[];
+  dimensions: Array<{ dimensionKey: string; annotationKeys: string[] }>;
+  metricKeys: string[];
+}
+
+export interface CampaignReportTask {
+  reportTaskStatus?: string;
+  reportTaskStatusMessage?: string;
+  reportHref?: string;
+  reportId?: string;
+}
+
+const REPORT_TASK_PATH = '/sell/marketing/v1/ad_report_task';
+const REPORT_PATH = '/sell/marketing/v1/ad_report';
+
 const CAMPAIGN_START_LEAD_MS = 2 * 60 * 1000;
 const PATH = '/sell/marketing/v1/ad_campaign';
 
@@ -61,6 +83,64 @@ function isAmbiguousCreateFailure(error: unknown): boolean {
 @Injectable()
 export class EbayMarketingClient {
   private readonly logger = new Logger(EbayMarketingClient.name);
+
+  async createReportTask(ctx: AccountContext, request: CampaignReportRequest): Promise<string> {
+    const endpoint = this.reportUrl(REPORT_TASK_PATH);
+    const response = await withEbayRateLimitRetry(
+      () => axios.post(endpoint, request, { headers: this.headers(ctx, true), maxRedirects: 0 }),
+      { logger: this.logger }
+    );
+    const location = (response.headers as Record<string, unknown> | undefined)?.location;
+    return this.reportIdFromLocation(location, REPORT_TASK_PATH);
+  }
+
+  async getReportTask(ctx: AccountContext, taskId: string): Promise<CampaignReportTask> {
+    const response = await withEbayRateLimitRetry(
+      () => axios.get(`${this.reportUrl(REPORT_TASK_PATH)}/${encodeURIComponent(taskId)}`, {
+        headers: this.headers(ctx), maxRedirects: 0,
+      }),
+      { logger: this.logger }
+    );
+    return response.data as CampaignReportTask;
+  }
+
+  async downloadReport(ctx: AccountContext, reportId: string): Promise<Buffer> {
+    const response = await withEbayRateLimitRetry(
+      () => axios.get(`${this.reportUrl(REPORT_PATH)}/${encodeURIComponent(reportId)}`, {
+        headers: this.headers(ctx), responseType: 'arraybuffer', maxRedirects: 0, decompress: false,
+      }),
+      { logger: this.logger }
+    );
+    return Buffer.from(response.data as ArrayBuffer);
+  }
+
+  private reportUrl(endpoint: string): string {
+    return `${String(this.config.get('EBAY_REST_API_URL') ?? '').replace(/\/$/, '')}${endpoint}`;
+  }
+
+  private reportIdFromLocation(location: unknown, endpoint: string): string {
+    if (typeof location !== 'string' || !location) {
+      throw new Error('eBay report task response has no Location');
+    }
+    const configured = new URL(this.reportUrl(endpoint));
+    const received = new URL(location, configured);
+    const prefix = `${endpoint}/`;
+    if (
+      received.protocol !== configured.protocol || received.origin !== configured.origin ||
+      !received.pathname.startsWith(prefix) || received.search || received.hash
+    ) {
+      throw new Error('eBay report task Location is untrusted');
+    }
+    const encoded = received.pathname.slice(prefix.length);
+    if (!encoded || encoded.includes('/')) {
+      throw new Error('eBay report task Location has no valid task id');
+    }
+    const id = decodeURIComponent(encoded);
+    if (!id) {
+      throw new Error('eBay report task Location has no valid task id');
+    }
+    return id;
+  }
 
   constructor(
     private readonly config: ConfigService,

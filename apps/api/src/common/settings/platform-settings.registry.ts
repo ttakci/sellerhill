@@ -135,6 +135,20 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 100,
   }),
+  def({
+    key: PlatformSettingKey.EBAY_CAMPAIGN_REPORTS_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_CAMPAIGN_REPORTS_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_CAMPAIGN_REPORTS_CAPTURE_ONLY,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_CAMPAIGN_REPORTS_CAPTURE_ONLY',
+    defaultValue: 'true',
+  }),
   // --- Billing-activity capture (Finances API, 15,000 calls/day app-wide) ---
   // On by default: it only ever reads stores whose consent granted
   // sell.finances, and no consent asks for it until the switch above is on.
