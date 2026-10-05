@@ -38,6 +38,8 @@ export interface ListingJobDetailsPageComponentProps {
   sortDirection: 'asc' | 'desc';
   onSort: (column: string) => void;
   onBack: () => void;
+  /** Opens the normal listing detail when this job item produced a listing. */
+  onListingClick: (listingId: string) => void;
   /**
    * Cancel is offered only while the job can still be stopped. There is no
    * refresh action — the page polls every 3s, so a manual refresh only ever

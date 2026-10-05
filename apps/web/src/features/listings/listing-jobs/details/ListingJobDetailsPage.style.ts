@@ -1,25 +1,34 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
+import { PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
-export const SummaryCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 0;
-  box-sizing: border-box;
-  overflow: hidden;
+export const SummaryBar = styled.section`
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) auto minmax(13rem, 0.7fr) auto;
+  align-items: center;
+  gap: ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.lg')} 0;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   width: 100%;
-  max-width: 42rem;
+
+  @media (max-width: ${tkn('breakpoints.lg')}) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: ${tkn('spacing.lg')};
+  }
 `;
 
-export const SummaryMain = styled.div`
+export const SummaryIdentity = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.md+')};
   min-width: 0;
 `;
 
@@ -31,39 +40,36 @@ export const SummaryTop = styled.div`
   flex-wrap: wrap;
 `;
 
-export const SummaryBody = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.4fr);
-  align-items: end;
-  gap: ${tkn('spacing.xl')};
-  min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-`;
-
-export const SummaryFooter = styled.div`
+export const SummaryAction = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.glass.tint')};
+  justify-content: flex-end;
+
+  @media (max-width: ${tkn('breakpoints.lg')}) {
+    grid-column: 2;
+    grid-row: 2;
+  }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    align-items: stretch;
-    flex-direction: column;
+    grid-column: auto;
+    grid-row: auto;
+    justify-content: flex-start;
   }
 `;
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  grid-template-columns: repeat(3, minmax(4.5rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  flex: 1;
   min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.lg')}) {
+    grid-column: 1;
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-column: auto;
+  }
 `;
 
 export const StatCell = styled.div`
@@ -162,31 +168,6 @@ export const SelectWrapper = styled.div`
   @media (max-width: ${tkn('breakpoints.lg')}) {
     width: 100%;
   }
-`;
-
-export const ItemCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-`;
-
-export const ItemCardTop = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.md+')};
-  min-width: 0;
-  flex: 1;
-`;
-
-export const ItemCardHeader = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: ${tkn('spacing.sm')};
 `;
 
 export const EmptyWrap = styled.div`

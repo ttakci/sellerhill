@@ -1684,9 +1684,15 @@ export class ListingsService {
 
     const items = await this.databaseService.query<ListingJobItemEntity>(
       `
-      SELECT * FROM listing_job_items
-      WHERE job_id = $1
-      ORDER BY created_at ASC
+      SELECT
+        item.*,
+        product.title AS product_title,
+        product.image_urls AS product_image_urls
+      FROM listing_job_items item
+      LEFT JOIN listings listing ON listing.id = item.listing_id
+      LEFT JOIN products product ON product.id = COALESCE(item.product_id, listing.product_id)
+      WHERE item.job_id = $1
+      ORDER BY item.created_at ASC
     `,
       [jobId]
     );
@@ -1996,10 +2002,18 @@ export class ListingsService {
    * provider string.
    */
   private mapJobItemToDto(entity: ListingJobItemEntity): ListingJobItemDto {
+    const imageUrls = Array.isArray(entity.product_image_urls)
+      ? entity.product_image_urls
+      : entity.product_image_urls
+        ? (JSON.parse(String(entity.product_image_urls)) as string[])
+        : undefined;
+
     return {
       id: entity.id,
       jobId: entity.job_id,
       asin: entity.asin,
+      productTitle: entity.product_title || undefined,
+      imageUrls,
       productId: entity.product_id || undefined,
       listingId: entity.listing_id || undefined,
       status: entity.status as ListingStatus,

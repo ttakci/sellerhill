@@ -32,4 +32,7 @@ export interface ListingJobItemEntity {
   failure_details: Record<string, unknown> | string | null;
   created_at: Date;
   updated_at: Date;
+  /** Selected from the joined product row on the seller-facing job detail query. */
+  product_title?: string | null;
+  product_image_urls?: string[] | string | null;
 }

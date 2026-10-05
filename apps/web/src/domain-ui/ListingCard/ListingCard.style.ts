@@ -87,7 +87,7 @@ export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   min-width: 0;
   flex: 1;
 
-  /* A phone leaves no room for photo + facts side by side (values truncated to "Unb�"): stack them, photo first. */
+  /* A phone leaves no room for photo + facts side by side (values truncated to "Unb…"): stack them, photo first. */
   /* Its children become Top's own, so the photo can be ordered above the title row. */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     display: contents;
@@ -218,10 +218,11 @@ export const MetaValue = styled.dd`
   }
 `;
 
-export const MetaValueText = styled(Text)`
+export const MetaValueText = styled(Text)<{ $multiline: boolean }>`
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: ${({ $multiline }) => ($multiline ? 'clip' : 'ellipsis')};
+  white-space: ${({ $multiline }) => ($multiline ? 'normal' : 'nowrap')};
+  overflow-wrap: ${({ $multiline }) => ($multiline ? 'anywhere' : 'normal')};
 `;
 
 /** Price · profit · ROI · stock (and the detail hint), under one hairline. */

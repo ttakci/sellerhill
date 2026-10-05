@@ -46,7 +46,7 @@ export const ListingCard = ({
   ...rest
 }: ListingCardProps): React.ReactElement => {
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
-  const statusVariant = status?.tone === 'active' ? 'success' : 'neutral';
+  const statusVariant = status?.tone === 'active' ? 'success' : status?.tone === 'error' ? 'error' : 'neutral';
 
   return (
     <S.Wrapper
@@ -106,7 +106,12 @@ export const ListingCard = ({
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" plain onClick={(e) => e.stopPropagation()} />
                     ) : (
-                      <S.MetaValueText variant="body-sm" weight="bold" color="text.primary">
+                      <S.MetaValueText
+                        variant="body-sm"
+                        weight="bold"
+                        color={item.tone === 'negative' ? 'semantic.error' : 'text.primary'}
+                        $multiline={Boolean(item.multiline)}
+                      >
                         {item.value}
                       </S.MetaValueText>
                     )}

@@ -20,6 +20,10 @@ export interface ListingCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
+  /** Error results stay in the familiar card but their actionable reason is red. */
+  tone?: 'default' | 'negative';
+  /** Long result explanations wrap instead of being cut like identifiers. */
+  multiline?: boolean;
   /** Put the row in the second column beside the first (stock, dates); wraps under it when narrow. */
   column?: 'secondary';
   /** @deprecated Labels carry no icon any more (2026-10-01); accepted and ignored. */
@@ -36,7 +40,7 @@ export interface ListingCardBadge {
 
 export interface ListingCardStatus {
   label: string;
-  tone: 'active' | 'neutral';
+  tone: 'active' | 'neutral' | 'error';
 }
 
 export interface ListingCardProps {

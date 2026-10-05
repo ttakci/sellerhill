@@ -7,7 +7,6 @@ import {
   type ListingJobItemDto,
 } from '@repo/shared';
 import {
-  IdBadge,
   StatusBadge,
   Text,
   formatCurrency,
@@ -20,16 +19,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import {
-  useCancelListingJobMutation,
-  useGetJobItemsQuery,
-  useGetJobStatusQuery,
-} from '../../api/listings.api';
+import { useCancelListingJobMutation, useGetJobItemsQuery, useGetJobStatusQuery } from '../../api/listings.api';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
 import { JobItemFilter, type JobItemFilterOption } from './ListingJobDetailsPage.types';
 
+import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { useLocale } from '@/utils/useLocale';
 
@@ -46,8 +42,8 @@ const isBlacklistedItem = (item: ListingJobItemDto): boolean =>
 const jobPercent = (job: ListingJobDto): number =>
   job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
 
-type JobItemSortKey = 'asin' | 'status' | 'ebayItemId' | 'failureCode';
-const JOB_ITEM_SORT_KEYS: JobItemSortKey[] = ['asin', 'status', 'ebayItemId', 'failureCode'];
+type JobItemSortKey = 'product' | 'status' | 'failureCode' | 'updatedAt';
+const JOB_ITEM_SORT_KEYS: JobItemSortKey[] = ['product', 'status', 'failureCode', 'updatedAt'];
 
 export const ListingJobDetailsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
@@ -60,7 +56,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [itemSearch, setItemSearch] = useState('');
   const [itemFilter, setItemFilter] = useState<JobItemFilter>(JobItemFilter.ALL);
-  const [sortBy, setSortBy] = useState<JobItemSortKey>('asin');
+  const [sortBy, setSortBy] = useState<JobItemSortKey>('product');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const {
@@ -89,8 +85,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const [isCancelConfirmOpen, setCancelConfirmOpen] = useState(false);
 
   /** Only a job that is still working can be stopped. */
-  const canCancel =
-    job?.status === ListingJobStatus.PENDING || job?.status === ListingJobStatus.PROCESSING;
+  const canCancel = job?.status === ListingJobStatus.PENDING || job?.status === ListingJobStatus.PROCESSING;
 
   const jobStatusLabel = useCallback(
     (status: ListingJobStatus | string) => {
@@ -207,11 +202,23 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const allColumns: TableColumn<ListingJobItemDto>[] = useMemo(
     () => [
       {
-        key: 'asin',
+        key: 'product',
         sortable: true,
-        header: t('listings.jobs.items.asin'),
-        width: '10rem',
-        render: (_value, item) => <IdBadge id={item.asin} storeType="amazon" size="sm" />,
+        header: t('listings.table.product'),
+        width: '22rem',
+        render: (_value, item) => {
+          const meta: ProductTableCellMetaRow[] = [
+            { label: t('listings.jobs.items.asin'), id: item.asin, storeType: 'amazon' },
+          ];
+          if (item.ebayItemId) {
+            meta.push({
+              label: t('listings.jobs.items.ebayId'),
+              id: item.ebayItemId,
+              storeType: 'ebay',
+            });
+          }
+          return <ProductTableCell title={item.productTitle || item.asin} imageUrl={item.imageUrls?.[0]} meta={meta} />;
+        },
       },
       {
         key: 'status',
@@ -223,20 +230,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
             {itemStatusLabel(item.status)}
           </StatusBadge>
         ),
-      },
-      {
-        key: 'ebayItemId',
-        sortable: true,
-        header: t('listings.jobs.items.ebayId'),
-        width: '10rem',
-        render: (_value, item) =>
-          item.ebayItemId ? (
-            <IdBadge id={item.ebayItemId} storeType="ebay" size="sm" />
-          ) : (
-            <Text variant="body-sm" color="text.tertiary">
-              —
-            </Text>
-          ),
       },
       {
         key: 'failureCode',
@@ -267,13 +260,24 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
           );
         },
       },
+      {
+        key: 'updatedAt',
+        sortable: true,
+        header: t('listings.jobs.table.updatedAt'),
+        width: '10rem',
+        render: (_value, item) => (
+          <Text variant="body-sm" color="text.secondary">
+            {formatJobDate(item.updatedAt)}
+          </Text>
+        ),
+      },
       // No per-item retry action. eBay's quota is metered per application and
       // shared by every seller, and a terminally failed item has already
       // exhausted the retries that could work (429/5xx at the HTTP layer, and
       // the aspect self-heal). Offering the button would spend a common
       // resource on the attempt least likely to succeed.
     ],
-    [t, itemStatusLabel, failureLabel, failureReference]
+    [t, itemStatusLabel, failureLabel, failureReference, formatJobDate]
   );
 
   const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
@@ -297,7 +301,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         return {
           key,
           label: typeof column?.header === 'string' ? column.header : key,
-          alwaysVisible: key === 'asin',
+          alwaysVisible: key === 'product',
         };
       }),
     [allColumns, orderedKeys]
@@ -386,7 +390,11 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     const q = itemSearch.trim().toLowerCase();
     const searched = q
       ? byStatus.filter((item) => {
-          if (item.asin.toLowerCase().includes(q)) {
+          if (
+            item.asin.toLowerCase().includes(q) ||
+            item.productTitle?.toLowerCase().includes(q) ||
+            item.ebayItemId?.toLowerCase().includes(q)
+          ) {
             return true;
           }
           const reason = failureLabel(item);
@@ -394,6 +402,9 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         })
       : byStatus;
     const valueFor = (item: ListingJobItemDto): string => {
+      if (sortBy === 'product') {
+        return item.productTitle || item.asin;
+      }
       if (sortBy === 'failureCode') {
         return failureLabel(item) ?? '';
       }
@@ -454,6 +465,13 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     localeNavigate('/listings/jobs');
   }, [localeNavigate]);
 
+  const handleListingClick = useCallback(
+    (listingId: string) => {
+      localeNavigate(`/listings/${listingId}`);
+    },
+    [localeNavigate]
+  );
+
   const handleCancelConfirm = useCallback(async () => {
     if (!jobId) {
       return;
@@ -494,6 +512,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       sortDirection={sortDirection}
       onSort={handleColumnSort}
       onBack={handleBack}
+      onListingClick={handleListingClick}
       canCancel={canCancel}
       isCancelling={isCancelling}
       isCancelConfirmOpen={isCancelConfirmOpen}

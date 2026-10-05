@@ -2538,10 +2538,13 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
   return Array.from({ length: job.totalAsins }, (_, i) => {
     const processed = i < job.processedCount;
     const failed = processed && i >= job.successCount;
+    const product = PRODUCTS[i % PRODUCTS.length];
     return {
       id: `${jobId}-item-${i + 1}`,
       jobId,
       asin: JOB_ASINS[i % JOB_ASINS.length],
+      productTitle: product.title,
+      imageUrls: [demoProductImage(product.slug)],
       productId: `demo-product-${(i % 20) + 1}`,
       listingId: !processed || failed ? undefined : `demo-listing-${(i % 20) + 1}`,
       status: failed ? ListingStatus.ERROR : processed ? ListingStatus.ACTIVE : ListingStatus.DRAFT,

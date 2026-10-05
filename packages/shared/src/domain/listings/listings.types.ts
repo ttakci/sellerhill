@@ -198,6 +198,9 @@ export interface ListingJobItemDto {
   id: string;
   jobId: string;
   asin: string;
+  /** Product identity used by the same card/row anatomy as the listings screen. */
+  productTitle?: string;
+  imageUrls?: string[];
   productId?: string;
   listingId?: string;
   status: ListingStatus;
