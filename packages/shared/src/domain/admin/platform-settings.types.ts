@@ -118,7 +118,6 @@ export enum PlatformSettingKey {
    * deliberately rather than by deploying.
    */
   EBAY_FEED_SYNC_ENABLED = 'ebay.feedSync.enabled',
-  /** Ask stores for eBay's sell.finances scope on the consent screen (default off). */
   /**
    * Download the report and change NOTHING — write it verbatim to disk and log
    * its opening lines.

@@ -46,6 +46,17 @@ function optionalBid(source: Obj): number | null | undefined {
   return num(source.bidPercentage) ?? undefined;
 }
 
+function validRemoteBid(value: unknown): boolean {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value >= 2 && value <= 100 && Number.isInteger(value * 10);
+  }
+  if (typeof value !== 'string' || !/^(?:[2-9](?:\.\d)?|[1-9]\d(?:\.\d)?|100(?:\.0)?)$/.test(value.trim())) {
+    return false;
+  }
+  const rate = Number(value);
+  return rate >= 2 && rate <= 100;
+}
+
 export function readCampaignsPage(body: unknown): { campaigns: ParsedCampaign[]; total: number | null } | null {
   if (!isObj(body) || !Array.isArray(body.campaigns)) {
     return null;
@@ -80,7 +91,7 @@ export function readCampaignsPage(body: unknown): { campaigns: ParsedCampaign[];
     if (
       status === 'RUNNING' && funding.fundingModel === 'COST_PER_SALE' &&
       (str(funding.adRateStrategy) ?? 'FIXED') === 'FIXED' &&
-      !ruleBased && bidPercentage === null
+      !ruleBased && (bidPercentage === null || !validRemoteBid(funding.bidPercentage))
     ) {
       return null;
     }
@@ -100,7 +111,8 @@ export function readCampaignsPage(body: unknown): { campaigns: ParsedCampaign[];
 }
 
 export function readAdsPage(
-  body: unknown
+  body: unknown,
+  validateFixedBidPercentages = false
 ): { ads: Array<{ listingId: string; bidPercentage: number | null }>; total: number | null } | null {
   if (!isObj(body) || !Array.isArray(body.ads)) {
     return null;
@@ -116,7 +128,11 @@ export function readAdsPage(
     }
     const listingId = str(raw.listingId);
     const bidPercentage = optionalBid(raw);
-    if (!listingId || bidPercentage === undefined) {
+    if (
+      !listingId ||
+      bidPercentage === undefined ||
+      (validateFixedBidPercentages && bidPercentage !== null && !validRemoteBid(raw.bidPercentage))
+    ) {
       return null;
     }
     ads.push({ listingId, bidPercentage });
@@ -129,6 +145,7 @@ export function readBulkListingResponse(
   requested: readonly string[]
 ): Array<{ listingId: string; ok: boolean; errorIds: number[] }> {
   const answered = new Map<string, { ok: boolean; errorIds: number[] }>();
+  const duplicates = new Set<string>();
   const responses = isObj(body) && Array.isArray(body.responses) ? body.responses : [];
   for (const raw of responses) {
     if (!isObj(raw)) {
@@ -138,6 +155,9 @@ export function readBulkListingResponse(
     if (!listingId) {
       continue;
     }
+    if (answered.has(listingId)) {
+      duplicates.add(listingId);
+    }
     const status = num(raw.statusCode);
     const errors = Array.isArray(raw.errors) ? raw.errors : [];
     answered.set(listingId, {
@@ -145,5 +165,10 @@ export function readBulkListingResponse(
       errorIds: readEbayErrorIds({ errors }),
     });
   }
-  return requested.map((listingId) => ({ listingId, ...(answered.get(listingId) ?? { ok: false, errorIds: [] }) }));
+  return requested.map((listingId) => ({
+    listingId,
+    ...(duplicates.has(listingId)
+      ? { ok: false, errorIds: [] }
+      : (answered.get(listingId) ?? { ok: false, errorIds: [] })),
+  }));
 }

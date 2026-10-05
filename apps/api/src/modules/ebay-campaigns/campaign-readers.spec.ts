@@ -68,6 +68,33 @@ describe('readCampaignsPage', () => {
       campaigns: [{ ...campaign, fundingStrategy: { ...campaign.fundingStrategy, bidPercentage: '5.0' } }],
     })?.campaigns[0]).toMatchObject({ adRateStrategy: null, bidPercentage: 5 });
   });
+
+  it.each(['0', '101', '5.55'])(
+    'rejects an invalid rate-critical RUNNING fixed CPS bid: %s',
+    (bidPercentage) => {
+      const raw = {
+        campaignId: '1',
+        campaignName: 'A',
+        campaignStatus: 'RUNNING',
+        fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: 'FIXED', bidPercentage },
+      };
+      expect(readCampaignsPage({ total: 1, campaigns: [raw] })).toBeNull();
+    }
+  );
+
+  it('does not apply fixed-CPS bid validation to paused or dynamic read-only campaigns', () => {
+    const paused = {
+      campaignId: '1', campaignName: 'A', campaignStatus: 'PAUSED',
+      fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: 'FIXED', bidPercentage: '0' },
+    };
+    const dynamic = {
+      ...paused,
+      campaignStatus: 'RUNNING',
+      fundingStrategy: { fundingModel: 'COST_PER_SALE', adRateStrategy: 'DYNAMIC', bidPercentage: '101' },
+    };
+    expect(readCampaignsPage({ total: 1, campaigns: [paused] })).not.toBeNull();
+    expect(readCampaignsPage({ total: 1, campaigns: [dynamic] })).not.toBeNull();
+  });
 });
 
 describe('readAdsPage', () => {
@@ -88,6 +115,15 @@ describe('readAdsPage', () => {
     expect(readAdsPage({ errors: [{ errorId: 1 }] })).toBeNull();
     expect(readAdsPage(null)).toBeNull();
   });
+
+  it.each(['0', '101', '5.55'])(
+    'rejects an invalid per-listing bid only when fixed CPS rate is applied: %s',
+    (bidPercentage) => {
+      const body = { total: 1, ads: [{ listingId: '318', bidPercentage }] };
+      expect(readAdsPage(body, true)).toBeNull();
+      expect(readAdsPage(body)).not.toBeNull();
+    }
+  );
 });
 
 describe('readBulkListingResponse', () => {
@@ -112,5 +148,29 @@ describe('readBulkListingResponse', () => {
     expect(readBulkListingResponse({ responses: 'bad' }, ['1'])).toEqual([{ listingId: '1', ok: false, errorIds: [] }]);
     expect(readBulkListingResponse({ responses: [{ listingId: '1', statusCode: '200' }] }, ['1']))
       .toEqual([{ listingId: '1', ok: true, errorIds: [] }]);
+  });
+
+  it.each([
+    [
+      { listingId: '1', statusCode: 400, errors: [{ errorId: 35036 }] },
+      { listingId: '1', statusCode: 200 },
+    ],
+    [
+      { listingId: '1', statusCode: 200 },
+      { listingId: '1', statusCode: 400, errors: [{ errorId: 35036 }] },
+    ],
+  ])('marks duplicate listing responses as failed regardless of order: %j', (first, second) => {
+    expect(readBulkListingResponse({ responses: [first, second] }, ['1'])).toEqual([
+      { listingId: '1', ok: false, errorIds: [] },
+    ]);
+  });
+
+  it('preserves a unique successful response that has warnings', () => {
+    expect(
+      readBulkListingResponse(
+        { responses: [{ listingId: '1', statusCode: 200, warnings: [{ warningId: 'w1' }] }] },
+        ['1']
+      )
+    ).toEqual([{ listingId: '1', ok: true, errorIds: [] }]);
   });
 });

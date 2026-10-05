@@ -24,6 +24,81 @@ function textNodes(node: ts.Node, file: ts.SourceFile): string[] {
   return values.length ? values : [node.getText(file)];
 }
 
+function reportRequest(axiosCall: ts.CallExpression, file: ts.SourceFile): boolean {
+  let methodName: string | null = null;
+  let method: ts.MethodDeclaration | undefined;
+  for (let parent: ts.Node | undefined = axiosCall.parent; parent; parent = parent.parent) {
+    if (ts.isMethodDeclaration(parent) && ts.isIdentifier(parent.name)) {
+      methodName = parent.name.text;
+      method = parent;
+      break;
+    }
+  }
+  const httpMethod = ts.isPropertyAccessExpression(axiosCall.expression) ? axiosCall.expression.name.text : '';
+  const pathName =
+    methodName === 'createReportTask' || methodName === 'getReportTask'
+      ? 'REPORT_TASK_PATH'
+      : methodName === 'downloadReport'
+        ? 'REPORT_PATH'
+        : null;
+  if (
+    !pathName ||
+    (methodName === 'createReportTask' ? httpMethod !== 'post' : httpMethod !== 'get') ||
+    !axiosCall.arguments[0]
+  ) {
+    return false;
+  }
+  const hasExactReportUrl = (node: ts.Node): boolean => {
+    let exact = false;
+    walk(node, (child) => {
+      if (
+        ts.isCallExpression(child) &&
+        ts.isPropertyAccessExpression(child.expression) &&
+        child.expression.expression.getText(file) === 'this' &&
+        child.expression.name.text === 'reportUrl' &&
+        child.arguments.length === 1 &&
+        ts.isIdentifier(child.arguments[0]) &&
+        child.arguments[0].text === pathName
+      ) {
+        exact = true;
+      }
+    });
+    return exact;
+  };
+  if (methodName === 'createReportTask' && ts.isIdentifier(axiosCall.arguments[0])) {
+    let endpointBoundToReportTask = false;
+    if (method?.body) {
+      walk(method.body, (node) => {
+        if (
+          ts.isVariableDeclaration(node) &&
+          ts.isIdentifier(node.name) &&
+          ts.isIdentifier(axiosCall.arguments[0]) &&
+          node.name.text === axiosCall.arguments[0].text &&
+          node.initializer &&
+          hasExactReportUrl(node.initializer)
+        ) {
+          endpointBoundToReportTask = true;
+        }
+      });
+    }
+    return endpointBoundToReportTask;
+  }
+  return hasExactReportUrl(axiosCall.arguments[0]);
+}
+
+function containsNode(container: ts.Node | undefined, target: ts.Node): boolean {
+  if (!container) {
+    return false;
+  }
+  let found = false;
+  walk(container, (node) => {
+    if (node === target) {
+      found = true;
+    }
+  });
+  return found;
+}
+
 function assertMarketingCallsBudgeted(text: string): void {
   const file = ts.createSourceFile('ebay-marketing.client.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const axiosCalls: ts.CallExpression[] = [];
@@ -98,10 +173,10 @@ function assertMarketingCallsBudgeted(text: string): void {
         )
       );
     };
-    const reportCall = axiosCall.getText(file).includes('REPORT_TASK_PATH') || axiosCall.getText(file).includes('REPORT_PATH') || axiosCall.getText(file).includes('axios.post(endpoint');
+    const reportCall = reportRequest(axiosCall, file);
     if (reportCall) {
       const reportOptions = options?.getText(file) ?? '';
-      if (!retry || !retry.arguments[0] || !retry.arguments[0].getFullText(file).includes(axiosCall.getText(file)) || reportOptions.includes('acquireBudget')) {
+      if (!retry || !containsNode(retry.arguments[0], axiosCall) || reportOptions.includes('acquireBudget')) {
         throw new Error(`Invalid capture-only report HTTP call: ${axiosCall.getText(file)}`);
       }
       continue;
@@ -109,7 +184,7 @@ function assertMarketingCallsBudgeted(text: string): void {
     if (
       !retry ||
       !retry.arguments[0] ||
-      !retry.arguments[0].getFullText(file).includes(axiosCall.getText(file)) ||
+      !containsNode(retry.arguments[0], axiosCall) ||
       !validRetryOptions(options)
     ) {
       throw new Error(`Unbudgeted Marketing HTTP call or per-call budget override: ${axiosCall.getText(file)}`);
@@ -168,9 +243,35 @@ function assertWriteGates(text: string): void {
     }
   });
   for (const name of ['create', 'add', 'remove', 'rate', 'action']) {
-    const method = methods.get(name);
-    if (!method) {
+    const wrapper = methods.get(name);
+    const method = methods.get(`${name}Locked`);
+    if (!wrapper || !method) {
       throw new Error(`Missing write method: ${name}`);
+    }
+    const wrapperCalls: ts.CallExpression[] = [];
+    walk(wrapper.body!, (node) => {
+      if (ts.isCallExpression(node)) {
+        wrapperCalls.push(node);
+      }
+    });
+    const lockCall = wrapperCalls.find((call) => call.expression.getText(file) === 'this.accountLock.run');
+    const callback = lockCall?.arguments[1];
+    let delegatesToLockedMethod = false;
+    if (callback && (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))) {
+      walk(callback.body, (node) => {
+        if (
+          ts.isCallExpression(node) &&
+          ts.isPropertyAccessExpression(node.expression) &&
+          node.expression.expression.getText(file) === 'this' &&
+          node.expression.name.text === `${name}Locked`
+        ) {
+          delegatesToLockedMethod = true;
+        }
+      });
+    }
+    const expectedLockKey = name === 'action' ? 'accountId' : 'body.ebayAccountId';
+    if (!lockCall || lockCall.arguments[0]?.getText(file) !== expectedLockKey || !delegatesToLockedMethod) {
+      throw new Error(`Write method is not serialized through its account lock: ${name}`);
     }
     const calls: ts.CallExpression[] = [];
     walk(method.body!, (node) => {
@@ -187,7 +288,7 @@ function assertWriteGates(text: string): void {
     }
   }
   for (const name of ['create', 'rate']) {
-    const method = methods.get(name)!;
+    const method = methods.get(`${name}Locked`)!;
     const calls: ts.CallExpression[] = [];
     walk(method.body!, (node) => {
       if (ts.isCallExpression(node)) {
@@ -200,7 +301,7 @@ function assertWriteGates(text: string): void {
       throw new Error(`Direct rate is not validated before the write gate: ${name}`);
     }
   }
-  const addGate = methods.get('add')!.body!.getText(file).match(/this\.assertWritable\([\s\S]*?\)/)?.[0] ?? '';
+  const addGate = methods.get('addLocked')!.body!.getText(file).match(/this\.assertWritable\([\s\S]*?\)/)?.[0] ?? '';
   if (!/,\s*true\s*\)$/.test(addGate)) {
     throw new Error('Add does not validate its stored rate before eligibility');
   }
@@ -229,6 +330,12 @@ describe('campaign write boundaries', () => {
     );
     expect(reportBudgetMutation).not.toBe(client);
     expect(() => assertMarketingCallsBudgeted(reportBudgetMutation)).toThrow(/capture-only report/);
+    const commentBypass = client.replace(
+      'this.options(priority)',
+      '{ logger: this.logger } /* REPORT_PATH */'
+    );
+    expect(commentBypass).not.toBe(client);
+    expect(() => assertMarketingCallsBudgeted(commentBypass)).toThrow(/per-call budget override/);
   });
 
   it('gates every write before Marketing, validates direct rates first, and add validates its stored campaign rate', () => {

@@ -150,8 +150,8 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'true',
   }),
   // --- Billing-activity capture (Finances API, 15,000 calls/day app-wide) ---
-  // On by default: it only ever reads stores whose consent granted
-  // sell.finances, and no consent asks for it until the switch above is on.
+    // On by default; only accounts whose granted_scopes contains sell.finances
+    // are selected. OAuth DEFAULT_SCOPES already requests it; no consent toggle exists.
   def({
     key: PlatformSettingKey.EBAY_BILLING_SYNC_ENABLED,
     category: PlatformSettingCategory.EBAY,

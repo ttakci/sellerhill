@@ -8,6 +8,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
 
+import { CampaignAccountLockService } from './campaign-account-lock.service';
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
 import { type ParsedCampaign, readAdsPage, readCampaignsPage } from './campaign-readers';
 import { ADS_LISTING_IDS_MAX, CAMPAIGN_MAX_PAGES, CAMPAIGN_PAGE_LIMIT } from './ebay-campaigns.constants';
@@ -30,7 +31,8 @@ export class EbayCampaignSyncService {
     private readonly ebay: EbayService,
     private readonly marketing: EbayMarketingClient,
     private readonly repository: CampaignAdStateRepository,
-    private readonly stock: StockSyncQueueService
+    private readonly stock: StockSyncQueueService,
+    private readonly accountLock: CampaignAccountLockService
   ) {}
 
   async runSweep(): Promise<void> {
@@ -73,6 +75,13 @@ export class EbayCampaignSyncService {
   }
 
   async syncAccount(account: { id: string; user_id: string }, priority: EbayCallPriority): Promise<SyncOutcome> {
+    return this.accountLock.run(account.id, () => this.syncAccountLocked(account, priority));
+  }
+
+  private async syncAccountLocked(
+    account: { id: string; user_id: string },
+    priority: EbayCallPriority
+  ): Promise<SyncOutcome> {
     const delivered = await this.flushPendingRepricing(account.id);
     const ctx = await this.ebay.getAccountApiContext(account.id);
     const campaigns: Array<ParsedCampaign & { adCount: number | null }> = [];
@@ -125,11 +134,12 @@ export class EbayCampaignSyncService {
       await this.repository.upsertCampaigns(account.id, campaigns, false);
       return { campaigns: campaigns.length, complete: false, repricedProducts: delivered.length };
     }
-    const listings = await this.database.query<{ ebay_item_id: string }>(
-      'SELECT ebay_item_id FROM listings WHERE ebay_account_id = $1 AND status = $2 AND ebay_item_id IS NOT NULL',
+    const listings = await this.database.query<{ id: string; ebay_item_id: string }>(
+      'SELECT id, ebay_item_id FROM listings WHERE ebay_account_id = $1 AND status = $2 AND ebay_item_id IS NOT NULL',
       [account.id, ListingStatus.ACTIVE]
     );
     const ids = [...new Set(listings.map((l) => l.ebay_item_id))];
+    const activeListingIds = listings.map((listing) => listing.id);
     const map = new Map<string, { campaignId: string; rate: number | null }>();
     for (const campaign of campaigns) {
       // getAds for ENDED campaigns rejects with documented error 35035.
@@ -162,7 +172,10 @@ export class EbayCampaignSyncService {
               campaign.campaignId,
               { limit: CAMPAIGN_PAGE_LIMIT, listingIds: chunk },
               priority
-            )
+            ),
+            campaign.status === 'RUNNING' &&
+              (campaign.adRateStrategy ?? 'FIXED') === 'FIXED' &&
+              !campaign.ruleBased
           );
           if (
             !page ||
@@ -201,7 +214,7 @@ export class EbayCampaignSyncService {
     if (!complete) {
       return { campaigns: campaigns.length, complete: false, repricedProducts: delivered.length };
     }
-    await this.repository.writeAdState(account.id, map, true);
+    await this.repository.writeAdState(account.id, map, true, activeListingIds);
     const products = new Set([...delivered, ...(await this.flushPendingRepricing(account.id))]);
     return { campaigns: campaigns.length, complete, repricedProducts: products.size };
   }

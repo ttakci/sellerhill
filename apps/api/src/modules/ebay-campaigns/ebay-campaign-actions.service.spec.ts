@@ -1,5 +1,6 @@
 import { CampaignAction, CampaignAddOutcome } from '@repo/shared';
 
+import { TestCampaignAccountLock } from './campaign-account-lock.test-helper';
 import { EbayCampaignActionsService } from './ebay-campaign-actions.service';
 
 const accountId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -8,7 +9,7 @@ const listing1 = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 const listing2 = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const listing3 = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 
-function fixture() {
+function fixture(accountLock = new TestCampaignAccountLock(), lockedAccountId = accountId) {
   const queries: Array<{ sql: string; params: unknown[] }> = [];
   let campaign = {
     campaign_id: '100',
@@ -22,7 +23,7 @@ function fixture() {
     query: jest.fn((sql: string, params: unknown[] = []) => {
       queries.push({ sql, params });
       if (sql.includes('FROM ebay_accounts')) {
-        return [{ id: accountId, user_id: userId, status: 'active' }];
+        return [{ id: lockedAccountId, user_id: userId, status: 'active' }];
       }
       if (sql.includes('FROM ebay_campaigns')) {
         return [
@@ -87,10 +88,13 @@ function fixture() {
     quota as never,
     ebay as never,
     repository as never,
-    sync as never
+    sync as never,
+    accountLock as never
   );
   return {
     service,
+    accountLock,
+    lockedAccountId,
     database,
     client,
     eligibility,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { resolveAppliedAdRate } from '@repo/shared';
+import { ListingStatus, resolveAppliedAdRate } from '@repo/shared';
 import type { PoolClient } from 'pg';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -43,7 +43,8 @@ export class CampaignAdStateRepository {
   async writeAdState(
     accountId: string,
     ads: Map<string, { campaignId: string; rate: number | null }>,
-    clearOthers: boolean
+    clearOthers: boolean,
+    activeListingIds?: string[]
   ): Promise<string[]> {
     return this.database.transaction(async (client) => {
       // Serialize this store's interactive and background ad-state writes.
@@ -79,6 +80,7 @@ export class CampaignAdStateRepository {
         const { rows } = await client.query<{ product_id: string; changed: boolean }>(
           `WITH old AS MATERIALIZED (
              SELECT id, ad_rate_applied FROM listings WHERE ebay_account_id = $1 AND ebay_item_id = ANY($2::text[])
+               AND ($7::uuid[] IS NULL OR (id = ANY($7::uuid[]) AND status = $8))
            ), v AS (
              SELECT * FROM unnest($2::text[], $3::text[], $4::numeric[], $5::text[], $6::numeric[])
                AS v(item_id, campaign_id, rate, strategy, applied)
@@ -87,7 +89,16 @@ export class CampaignAdStateRepository {
              promoted_ad_strategy = v.strategy, promoted_synced_at = NOW(), ad_rate_applied = v.applied
            FROM v, old WHERE l.id = old.id AND l.ebay_account_id = $1 AND l.ebay_item_id = v.item_id
            RETURNING l.product_id, (old.ad_rate_applied IS DISTINCT FROM v.applied) AS changed`,
-          [accountId, ids, values.map((ad) => ad.campaignId), values.map((ad) => ad.rate), strategies, applied]
+          [
+            accountId,
+            ids,
+            values.map((ad) => ad.campaignId),
+            values.map((ad) => ad.rate),
+            strategies,
+            applied,
+            activeListingIds ?? null,
+            ListingStatus.ACTIVE,
+          ]
         );
         for (const row of rows) {
           if (row.changed) {
@@ -100,12 +111,13 @@ export class CampaignAdStateRepository {
           `WITH old AS MATERIALIZED (
              SELECT id, ad_rate_applied FROM listings WHERE ebay_account_id = $1
                AND promoted_campaign_id IS NOT NULL AND ebay_item_id <> ALL($2::text[])
+               AND ($3::uuid[] IS NULL OR (id = ANY($3::uuid[]) AND status = $4))
            )
            UPDATE listings l SET promoted_campaign_id = NULL, promoted_ad_rate = NULL,
              promoted_ad_strategy = NULL, promoted_synced_at = NULL, ad_rate_applied = 0
            FROM old WHERE l.id = old.id AND l.ebay_account_id = $1
            RETURNING l.product_id, (old.ad_rate_applied > 0) AS changed`,
-          [accountId, ids]
+          [accountId, ids, activeListingIds ?? null, ListingStatus.ACTIVE]
         );
         for (const row of rows) {
           if (row.changed) {

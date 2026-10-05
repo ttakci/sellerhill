@@ -157,7 +157,7 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
     };
     return `
       background: ${ink[$variant]};
-      color: ${t.colors.text.inverse};
+      color: ${$variant === 'solidNavy' ? t.colors.sidebar.text : t.colors.text.inverse};
       border-color: ${ink[$variant]};
       font-weight: ${t.typography.fontWeight.bold};
     `;

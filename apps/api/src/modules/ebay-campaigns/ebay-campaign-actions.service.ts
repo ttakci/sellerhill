@@ -26,6 +26,7 @@ import {
 } from '../ebay/ebay-promoted.helpers';
 import { EbayService } from '../ebay/ebay.service';
 
+import { CampaignAccountLockService } from './campaign-account-lock.service';
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
 import { readBulkListingResponse, readCampaignsPage, type ParsedCampaign } from './campaign-readers';
 import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
@@ -83,7 +84,8 @@ export class EbayCampaignActionsService {
     private readonly quota: QuotaEnforcementService,
     private readonly ebay: EbayService,
     private readonly repository: CampaignAdStateRepository,
-    private readonly sync: EbayCampaignSyncService
+    private readonly sync: EbayCampaignSyncService,
+    private readonly accountLock: CampaignAccountLockService
   ) {}
 
   private async assertWritable(
@@ -231,6 +233,10 @@ export class EbayCampaignActionsService {
   }
 
   async create(userId: string, body: CreateCampaignRequest): Promise<EbayCampaignDto> {
+    return this.accountLock.run(body.ebayAccountId, () => this.createLocked(userId, body));
+  }
+
+  private async createLocked(userId: string, body: CreateCampaignRequest): Promise<EbayCampaignDto> {
     const name = typeof body?.name === 'string' ? body.name.trim() : '';
     if (name.length < 1 || name.length > 80) {
       throw new CampaignActionError('campaigns.errors.invalidName', 400);
@@ -266,6 +272,14 @@ export class EbayCampaignActionsService {
   }
 
   async add(userId: string, campaignId: string, body: CampaignListingsRequest): Promise<CampaignWriteResultDto> {
+    return this.accountLock.run(body.ebayAccountId, () => this.addLocked(userId, campaignId, body));
+  }
+
+  private async addLocked(
+    userId: string,
+    campaignId: string,
+    body: CampaignListingsRequest
+  ): Promise<CampaignWriteResultDto> {
     this.validateListings(body?.listingIds);
     const { account, campaign } = await this.assertWritable(userId, body.ebayAccountId, campaignId, true);
     const rate = Number(campaign!.bid_percentage);
@@ -318,6 +332,14 @@ export class EbayCampaignActionsService {
   }
 
   async remove(userId: string, campaignId: string, body: CampaignListingsRequest): Promise<CampaignWriteResultDto> {
+    return this.accountLock.run(body.ebayAccountId, () => this.removeLocked(userId, campaignId, body));
+  }
+
+  private async removeLocked(
+    userId: string,
+    campaignId: string,
+    body: CampaignListingsRequest
+  ): Promise<CampaignWriteResultDto> {
     this.validateListings(body?.listingIds);
     const { account } = await this.assertWritable(userId, body.ebayAccountId, campaignId);
     const rows = await this.findListings(userId, account.id, body.listingIds, campaignId);
@@ -374,6 +396,14 @@ export class EbayCampaignActionsService {
   }
 
   async rate(userId: string, campaignId: string, body: CampaignRateRequest): Promise<CampaignWriteResultDto> {
+    return this.accountLock.run(body.ebayAccountId, () => this.rateLocked(userId, campaignId, body));
+  }
+
+  private async rateLocked(
+    userId: string,
+    campaignId: string,
+    body: CampaignRateRequest
+  ): Promise<CampaignWriteResultDto> {
     this.validateRate(body?.bidPercentage);
     if (body.listingIds !== undefined) {
       this.validateListings(body.listingIds);
@@ -450,6 +480,15 @@ export class EbayCampaignActionsService {
   }
 
   async action(
+    userId: string,
+    campaignId: string,
+    accountId: string,
+    action: CampaignAction
+  ): Promise<EbayCampaignDto> {
+    return this.accountLock.run(accountId, () => this.actionLocked(userId, campaignId, accountId, action));
+  }
+
+  private async actionLocked(
     userId: string,
     campaignId: string,
     accountId: string,

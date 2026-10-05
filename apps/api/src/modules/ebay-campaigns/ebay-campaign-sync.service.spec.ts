@@ -1,9 +1,11 @@
-import { EbayCallPriority } from '@repo/shared';
+import { EbayCallPriority, ListingStatus } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 
+import { TestCampaignAccountLock } from './campaign-account-lock.test-helper';
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
+import { EbayCampaignActionsService } from './ebay-campaign-actions.service';
 import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
 import { CAMPAIGN_MAX_PAGES, CAMPAIGN_PAGE_LIMIT } from './ebay-campaigns.constants';
 
@@ -17,7 +19,7 @@ const campaign = (id = 'c1', status = 'RUNNING', fundingModel = 'COST_PER_SALE')
 const page = (...campaigns: ReturnType<typeof campaign>[]) => ({ campaigns, total: campaigns.length });
 const ads = (listingId = '1', bidPercentage = '5.5') => ({ ads: [{ listingId, bidPercentage }], total: 1 });
 
-function setup() {
+function setup(accountLockOverride?: TestCampaignAccountLock) {
   const state = {
     pending: new Map<string, string>(),
     revision: 0,
@@ -49,8 +51,11 @@ function setup() {
       if (sql.includes('WITH due')) {
         return [account];
       }
-      if (sql.includes('SELECT ebay_item_id')) {
-        return [{ ebay_item_id: '1' }, { ebay_item_id: '2' }];
+      if (sql.includes('SELECT id, ebay_item_id')) {
+        return [
+          { id: 'listing-1', ebay_item_id: '1' },
+          { id: 'listing-2', ebay_item_id: '2' },
+        ];
       }
       if (sql.includes('SELECT campaign_id')) {
         return metadata.map((c) => ({
@@ -97,6 +102,7 @@ function setup() {
   };
   const stock = { enqueueProductStockSync: jest.fn().mockResolvedValue(undefined) };
   const repository = new CampaignAdStateRepository(db as never);
+  const accountLock = accountLockOverride ?? new TestCampaignAccountLock();
   const service = new EbayCampaignSyncService(
     db as never,
     settings as never,
@@ -104,7 +110,8 @@ function setup() {
     ebay as never,
     client as never,
     repository,
-    stock as never
+    stock as never,
+    accountLock as never
   );
   const queries = () => db.query.mock.calls.map(([sql, params]) => ({ sql, params }));
   const writes = () => queries().filter(({ sql }) => sql.includes('UPDATE listings'));
@@ -118,6 +125,7 @@ function setup() {
     stock,
     service,
     repository,
+    accountLock,
     state,
     transactionClient,
     queries,
@@ -127,6 +135,75 @@ function setup() {
 }
 
 describe('campaign sweep using the real ad-state repository', () => {
+  it('serializes a rate mutation behind an in-flight remote snapshot for the same account', async () => {
+    const accountLock = new TestCampaignAccountLock();
+    const f = setup(accountLock);
+    const events: string[] = [];
+    let releaseSnapshot!: () => void;
+    let signalSnapshot!: () => void;
+    const snapshotEntered = new Promise<void>((resolve) => {
+      signalSnapshot = resolve;
+    });
+    const snapshotGate = new Promise<void>((resolve) => {
+      releaseSnapshot = resolve;
+    });
+    f.client.getCampaigns.mockImplementation(async () => {
+      events.push('snapshot-start');
+      signalSnapshot();
+      await snapshotGate;
+      events.push('snapshot-end');
+      return page(campaign());
+    });
+    f.repository.writeAdState = jest.fn(() => {
+      events.push('sync-commit');
+      return Promise.resolve([]);
+    });
+    const syncPromise = f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    await snapshotEntered;
+
+    const actionDatabase = {
+      query: jest.fn((sql: string) => {
+        if (sql.includes('FROM ebay_accounts')) {
+          return [{ id: account.id, user_id: account.user_id, status: 'active' }];
+        }
+        if (sql.includes('FROM ebay_campaigns')) {
+          return [{
+            campaign_id: 'c1', name: 'c1', status: 'RUNNING', funding_model: 'COST_PER_SALE',
+            ad_rate_strategy: 'FIXED', bid_percentage: '5.5', rule_based: false,
+          }];
+        }
+        return [];
+      }),
+    };
+    const actionClient = {
+      updateDefaultRate: jest.fn(() => {
+        events.push('action-rate');
+        return Promise.resolve();
+      }),
+      bulkUpdateBids: jest.fn(),
+    };
+    const actionService = new EbayCampaignActionsService(
+      actionDatabase as never,
+      actionClient as never,
+      { getEligibility: jest.fn().mockResolvedValue({ status: 'ELIGIBLE' }) } as never,
+      { isSuspended: jest.fn().mockResolvedValue(false) } as never,
+      { getAccountApiContext: jest.fn().mockResolvedValue({}) } as never,
+      { writeAdState: jest.fn(), recordPendingReprices: jest.fn() } as never,
+      { flushPendingRepricing: jest.fn().mockResolvedValue([]) } as never,
+      accountLock as never
+    );
+    const ratePromise = actionService.rate(account.user_id, 'c1', {
+      ebayAccountId: account.id,
+      bidPercentage: 8,
+    });
+    expect(accountLock.queuedAccounts).toEqual([account.id, account.id]);
+    expect(actionClient.updateDefaultRate).not.toHaveBeenCalled();
+    releaseSnapshot();
+    await Promise.all([syncPromise, ratePromise]);
+
+    expect(events).toEqual(['snapshot-start', 'snapshot-end', 'sync-commit', 'action-rate']);
+  });
+
   it('ENDED skips documented 35035 getAds rejection, clears and reprices with complete coverage', async () => {
     const f = setup();
     f.client.getCampaigns.mockResolvedValue(page(campaign('c1', 'ENDED')));
@@ -343,7 +420,10 @@ describe('campaign sweep using the real ad-state repository', () => {
       repricedProducts: 1,
     });
     const set = f.writes().find(({ sql }) => sql.includes('unnest'))!;
-    expect(set.params).toEqual(['store-1', ['1', '2'], ['c1', 'c2'], [5.5, 7], ['FIXED', 'FIXED'], [5.5, 0]]);
+    expect(set.params).toEqual([
+      'store-1', ['1', '2'], ['c1', 'c2'], [5.5, 7], ['FIXED', 'FIXED'], [5.5, 0],
+      ['listing-1', 'listing-2'], ListingStatus.ACTIVE,
+    ]);
     expect(set.sql).toContain('old.ad_rate_applied IS DISTINCT FROM v.applied');
     expect(set.sql).toContain('l.ebay_account_id = $1');
     expect(f.writes().some(({ sql }) => sql.includes('<> ALL'))).toBe(true);
@@ -353,8 +433,8 @@ describe('campaign sweep using the real ad-state repository', () => {
     const f = setup();
     const defaultQuery = f.db.query.getMockImplementation()!;
     f.db.query.mockImplementation((sql: string, params?: unknown[]) => {
-      if (sql.includes('SELECT ebay_item_id')) {
-        return [{ ebay_item_id: '1' }];
+      if (sql.includes('SELECT id, ebay_item_id')) {
+        return [{ id: 'listing-1', ebay_item_id: '1' }];
       }
       if (sql.includes('SELECT campaign_id')) {
         return [
@@ -387,6 +467,13 @@ describe('campaign sweep using the real ad-state repository', () => {
       const clear = f.writes().find(({ sql }) => sql.includes('<> ALL'))!;
       expect(clear.sql).toContain('ad_rate_applied = 0');
       expect(clear.sql).toContain('old.ad_rate_applied > 0');
+      expect(clear.sql).toContain('id = ANY($3::uuid[]) AND status = $4');
+      expect(clear.params).toEqual([
+        'store-1',
+        status === 'PAUSED' ? ['1'] : [],
+        ['listing-1', 'listing-2'],
+        ListingStatus.ACTIVE,
+      ]);
       expect(f.stock.enqueueProductStockSync).toHaveBeenCalledWith('p1', 'campaign-store-1-1');
     }
   );
@@ -497,8 +584,36 @@ describe('campaign sweep using the real ad-state repository', () => {
     f.client.getCampaigns.mockResolvedValue(page());
     expect((await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).complete).toBe(true);
     expect(f.deletes()[0].params).toEqual(['store-1', []]);
-    expect(f.writes()[0].params).toEqual(['store-1', []]);
+    expect(f.writes()[0].params).toEqual([
+      'store-1', [], ['listing-1', 'listing-2'], ListingStatus.ACTIVE,
+    ]);
   });
+
+  it.each(['0', '101', '5.55'])(
+    'invalid remote campaign rate %s preserves prior applied listing rate',
+    async (bidPercentage) => {
+      const f = setup();
+      const row = campaign();
+      row.fundingStrategy.bidPercentage = bidPercentage;
+      f.client.getCampaigns.mockResolvedValue(page(row));
+      const result = await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+      expect(result.complete).toBe(false);
+      expect(f.state.appliedRate).toBe(5.5);
+      expect(f.writes()).toEqual([]);
+    }
+  );
+
+  it.each(['0', '101', '5.55'])(
+    'invalid remote per-ad rate %s preserves prior applied listing rate',
+    async (bidPercentage) => {
+      const f = setup();
+      f.client.getAds.mockResolvedValueOnce(ads()).mockResolvedValueOnce(ads('1', bidPercentage));
+      const result = await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+      expect(result.complete).toBe(false);
+      expect(f.state.appliedRate).toBe(5.5);
+      expect(f.writes()).toEqual([]);
+    }
+  );
   it('campaign pagination uses 500 offsets and requires exact exhaustion', async () => {
     const f = setup();
     const campaigns = Array.from({ length: 500 }, (_, i) => campaign(`c${i}`, 'ENDED'));
@@ -512,8 +627,8 @@ describe('campaign sweep using the real ad-state repository', () => {
   it('listing ids are deduplicated and chunked at 500', async () => {
     const f = setup();
     f.db.query.mockImplementation((sql: string) => {
-      if (sql.includes('SELECT ebay_item_id')) {
-        return [...Array.from({ length: 501 }, (_, i) => ({ ebay_item_id: String(i) })), { ebay_item_id: '1' }];
+      if (sql.includes('SELECT id, ebay_item_id')) {
+        return [...Array.from({ length: 501 }, (_, i) => ({ id: `listing-${i}`, ebay_item_id: String(i) })), { id: 'duplicate', ebay_item_id: '1' }];
       }
       return [];
     });
