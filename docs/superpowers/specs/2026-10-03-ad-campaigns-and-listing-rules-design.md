@@ -247,11 +247,11 @@ Assumptions: 2,000 listings and 2 campaigns per store.
 
    No parser is written before its capture exists.
 1. **Part A** (independent, ships first).
-2. **C2 consent flag + billing capture-only sweep** — **built 2026-10-04** (migration 142; plan docs/superpowers/plans/2026-10-04-finances-consent-and-billing-capture.md; the Action Center item moves to Part B) — shipped early so the operator can reconnect sipastan and the capture can accumulate.
-3. B2/B3 data + sync, then B5 pricing, then B4 writes, then B7 UI, then B6 metrics (capture → parser).
-4. C3/C4 parser and profit, after the capture.
+2. **C2 billing capture-only sweep** — built and deployed 2026-10-04 (migration 142; plan docs/superpowers/plans/2026-10-04-finances-consent-and-billing-capture.md). `sell.finances` is included in the normal OAuth scope set; the former consent switch was removed, and legacy `state=fin` remains accepted.
+3. **B2/B3 data + sync, B5 pricing, B4 writes, and B6 capture workflow** — implemented in development (migrations 143/144); **B7 UI and B6 parser remain pending**. The campaign performance report is captured only; parsing waits for an actual `.tsv.gz` file. Migration 144 has been locally verified, not applied in production. No Task 6–9 code has been deployed or merged to UAT/main. Existing legacy margin-override listings still receive no ad rate.
+4. C3/C4 parser and profit remain deferred until real billing captures and report-file evidence support them. Billing aggregation should use an incremental watermark with overlap; the operator measured about 27k billing lines over 30 days for `sipastan`.
 
-**Never exercised live yet, to be called out on ship:** `createCampaign`, `bulk_create_ads_by_listing_id`, `bulk_delete…`, `bulk_update…` against a real store (sipastan is eligible), the report task flow, the billing `feeType`.
+**Never exercised live for this implementation:** campaign mutation calls (`createCampaign`, `bulk_create_ads_by_listing_id`, `bulk_delete…`, `bulk_update…`) and the campaign report task flow. Tests use fakes; Task 8's synthetic bytes are not a real captured report. Billing `feeType` parsing is also deferred. No live eBay writes were made.
 
 ## Out of scope
 

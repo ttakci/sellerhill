@@ -11,31 +11,17 @@
 export const EBAY_FUNDING_MODEL_COST_PER_SALE = 'COST_PER_SALE';
 /** `SellerEligibilityResponse.programType` of the general strategy, as eBay answers it. */
 export const EBAY_PROGRAM_PROMOTED_LISTINGS_STANDARD = 'PROMOTED_LISTINGS_STANDARD';
-/** The one eligibility status observed live. Any other status is left for eBay to judge. */
-export const EBAY_ELIGIBILITY_INELIGIBLE = 'INELIGIBLE';
-
 /** "You can specify a maximum of 500 listings per call" (bulkCreateAdsByListingId). */
 export const EBAY_BULK_ADS_MAX_PER_CALL = 500;
 /** "Max length: 80 characters" (campaignName). */
 export const EBAY_CAMPAIGN_NAME_MAX_LENGTH = 80;
-export const PROMOTED_CAMPAIGN_NAME = 'SellerHill';
 
 /** "No campaign found with the name {campaign_name}." */
 export const EBAY_ERROR_CAMPAIGN_NAME_NOT_FOUND = 35046;
 /** "A campaign with the name of {campaignName} already exists." */
 export const EBAY_ERROR_CAMPAIGN_NAME_EXISTS = 35021;
-/** "The campaign with campaign id {campaign_id} has ended." */
-export const EBAY_ERROR_CAMPAIGN_ENDED = 35035;
-/** "No campaign found for campaign id {campaign_id}." */
-export const EBAY_ERROR_CAMPAIGN_NOT_FOUND = 35045;
 /** "An ad for listing ID {listingId} already exists." — the listing is promoted, which is the goal. */
 export const EBAY_ERROR_AD_ALREADY_EXISTS = 35036;
-/**
- * The seller, not the request, is what eBay refuses: terms not accepted
- * (35067), seller level (35077), not enough recent activity (35078). Retrying
- * cannot help until the seller's standing changes.
- */
-export const EBAY_SELLER_NOT_ELIGIBLE_ERROR_IDS: ReadonlySet<number> = new Set([35067, 35077, 35078]);
 
 /**
  * eBay's `bidPercentage`: a string, "a single precision value" (4.1, 5.0, 5.5 —
