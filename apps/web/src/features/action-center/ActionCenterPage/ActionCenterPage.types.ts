@@ -43,8 +43,17 @@ export interface ActionCenterGroupView extends Omit<ActionCenterGroupDto, 'items
   items: ActionCenterItemView[];
 }
 
+/** The unfiltered page totals used by the header and the counted filter rail. */
+export interface ActionCenterSummaryView {
+  total: number;
+  critical: number;
+  warning: number;
+  info: number;
+}
+
 export interface ActionCenterPageComponentProps {
   groups: ActionCenterGroupView[];
+  summary: ActionCenterSummaryView;
   filter: ActionCenterFilter;
   /**
    * Takes a raw string because it is wired straight to the shared `TabNav`

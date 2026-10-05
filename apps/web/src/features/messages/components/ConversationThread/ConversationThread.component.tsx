@@ -19,9 +19,11 @@ export const ConversationThread = ({
   hasConversation,
   isLoading,
   title,
+  subject,
   otherParty,
   avatarLabel,
   referenceId,
+  imageUrl,
   messages,
   actions,
   canReply,
@@ -54,14 +56,13 @@ export const ConversationThread = ({
           <Text variant="h4" weight="semibold" truncate>
             {title}
           </Text>
-          <S.HeaderMeta>
-            {otherParty && (
+          {otherParty && otherParty !== title && (
+            <S.HeaderMeta>
               <Text variant="body-sm" color="text.secondary" truncate>
                 {otherParty}
               </Text>
-            )}
-            {referenceId && <IdBadge id={referenceId} storeType="ebay" size="sm" />}
-          </S.HeaderMeta>
+            </S.HeaderMeta>
+          )}
         </S.HeaderText>
         {actions.length > 0 && (
           <S.HeaderActions>
@@ -80,6 +81,26 @@ export const ConversationThread = ({
           </S.HeaderActions>
         )}
       </S.Header>
+
+      {(subject || imageUrl || referenceId) && (
+        <S.ContextBar>
+          {imageUrl ? (
+            <S.ContextImage src={imageUrl} alt="" loading="lazy" />
+          ) : (
+            <S.ContextIcon>
+              <Icon name="storefront" size={20} />
+            </S.ContextIcon>
+          )}
+          <S.ContextText>
+            {subject && (
+              <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
+                {subject}
+              </Text>
+            )}
+            {referenceId && <IdBadge id={referenceId} storeType="ebay" size="sm" />}
+          </S.ContextText>
+        </S.ContextBar>
+      )}
 
       <S.Messages ref={scrollRef}>
         {isLoading && messages.length === 0 ? (

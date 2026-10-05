@@ -26,7 +26,12 @@ import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey, filterToIcon } from '../ac
 import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterByStoreQuery } from '../api/actionCenterApi';
 
 import { ActionCenterPage as ActionCenterPageComponent } from './ActionCenterPage.component';
-import type { ActionCenterFilter, ActionCenterGroupView, ActionCenterItemView } from './ActionCenterPage.types';
+import type {
+  ActionCenterFilter,
+  ActionCenterGroupView,
+  ActionCenterItemView,
+  ActionCenterSummaryView,
+} from './ActionCenterPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
@@ -100,45 +105,56 @@ export const ActionCenterPageContainer: React.FC = () => {
   const groups = useMemo<ActionCenterGroupView[]>(() => {
     const source = data?.groups ?? [];
     return source
-      .map((group) =>
-        filter === ACTION_CENTER_FILTER_ALL
-          ? group
-          : { ...group, items: group.items.filter((item) => item.severity === filter) },
-      )
+      .map((group) => {
+        const items =
+          filter === ACTION_CENTER_FILTER_ALL
+            ? group.items
+            : group.items.filter((item) => item.severity === filter);
+        return { ...group, items, itemCount: items.length };
+      })
       .filter((group) => group.items.length > 0)
       .map(toGroupView);
   }, [data?.groups, filter, toGroupView]);
 
-  /**
-   * Tab items for the shared `TabNav` rail (`underline` variant — the same rail
-   * the Dashboard section tabs use). Labels are the severity name only — the
-   * per-tab counts were dropped on request; each item card already carries its
-   * own count, and the sidebar badge carries the total.
-   */
+  const summary = useMemo<ActionCenterSummaryView>(
+    () => ({
+      total: data?.totalCount ?? 0,
+      critical: data?.criticalCount ?? 0,
+      warning: data?.warningCount ?? 0,
+      info: data?.infoCount ?? 0,
+    }),
+    [data?.criticalCount, data?.infoCount, data?.totalCount, data?.warningCount],
+  );
+
+  /** Counted compact filters mirror the at-a-glance severity summary above. */
   const filterOptions = useMemo<TabNavItem[]>(
     () => [
       {
         id: ACTION_CENTER_FILTER_ALL,
         label: t('actionCenter.filter.all'),
         icon: filterToIcon(ACTION_CENTER_FILTER_ALL),
+        count: summary.total,
       },
       {
         id: ActionCenterSeverity.CRITICAL,
         label: t('actionCenter.filter.critical'),
         icon: filterToIcon(ActionCenterSeverity.CRITICAL),
+        count: summary.critical,
       },
       {
         id: ActionCenterSeverity.WARNING,
         label: t('actionCenter.filter.warning'),
         icon: filterToIcon(ActionCenterSeverity.WARNING),
+        count: summary.warning,
       },
       {
         id: ActionCenterSeverity.INFO,
         label: t('actionCenter.filter.info'),
         icon: filterToIcon(ActionCenterSeverity.INFO),
+        count: summary.info,
       },
     ],
-    [t],
+    [summary, t],
   );
 
   const handleFilterChange = useCallback((value: string) => {
@@ -158,6 +174,7 @@ export const ActionCenterPageContainer: React.FC = () => {
     <EbayAccountGuard>
       <ActionCenterPageComponent
         groups={groups}
+        summary={summary}
         filter={filter}
         onFilterChange={handleFilterChange}
         filterOptions={filterOptions}

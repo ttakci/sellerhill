@@ -6,7 +6,8 @@
  * makes no decisions — it only lays them out.
  */
 
-import { Badge, EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
+import { ActionCenterSeverity } from '@repo/shared';
+import { Badge, EmptyState, Icon, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +18,7 @@ import type { ActionCenterGroupView, ActionCenterPageComponentProps } from './Ac
 
 export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   groups,
+  summary,
   filter,
   onFilterChange,
   filterOptions,
@@ -25,6 +27,16 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   onItemAction,
 }) => {
   const { t } = useTranslation(['actionCenter', 'translation']);
+
+  const severityLabel = (severity: ActionCenterSeverity): string => {
+    if (severity === ActionCenterSeverity.CRITICAL) {
+      return t('actionCenter.severity.critical');
+    }
+    if (severity === ActionCenterSeverity.WARNING) {
+      return t('actionCenter.severity.warning');
+    }
+    return t('actionCenter.severity.info');
+  };
 
   // Two independent columns (see GroupStack/GroupColumn) — even-indexed
   // groups left, odd-indexed groups right — so a tall card in one column
@@ -36,12 +48,28 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   const renderGroup = (group: ActionCenterGroupView) => (
     <S.GroupCard
       key={group.key}
+      $severity={group.severity}
       variant="section"
-      header={{
-        icon: groupToIcon(group.key),
-        title: group.title,
-        subtitle: group.subtitle,
-      }}
+      headerLeft={
+        <S.GroupHeading>
+          <S.GroupIcon $severity={group.severity}>
+            <Icon name={groupToIcon(group.key)} size={20} />
+          </S.GroupIcon>
+          <S.GroupHeadingCopy>
+            <Text variant="h4" weight="semibold" color="text.primary">
+              {group.title}
+            </Text>
+            <Text variant="body-sm" color="text.secondary">
+              {group.subtitle}
+            </Text>
+          </S.GroupHeadingCopy>
+        </S.GroupHeading>
+      }
+      headerRight={
+        <Badge variant={severityToBadgeVariant(group.severity)} size="xs" isPill>
+          {severityLabel(group.severity)} · {group.itemCount}
+        </Badge>
+      }
     >
       <S.ItemStack>
         {group.items.map((item) => {
@@ -110,9 +138,7 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
               {isClickable && (
                 <S.ItemFooter>
                   <S.ItemAction>
-                    <Text variant="body-sm" weight="semibold" color="brand.primary">
-                      {t('translation:common.details')}
-                    </Text>
+                    <span>{item.actionLabel}</span>
                     <Icon name="arrow-right" size={14} color="brand.primary" />
                   </S.ItemAction>
                 </S.ItemFooter>
@@ -137,6 +163,24 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
       <PageHeader
         title={t('actionCenter.title')}
         subtitle={t('actionCenter.subtitle')}
+        actions={
+          summary.total > 0 ? (
+            <S.SummaryList aria-label={t('actionCenter.filter.ariaLabel')}>
+              <S.SummaryItem $severity={ActionCenterSeverity.CRITICAL}>
+                <S.SummaryDot $severity={ActionCenterSeverity.CRITICAL} />
+                <span>{t('actionCenter.summary.critical', { count: summary.critical })}</span>
+              </S.SummaryItem>
+              <S.SummaryItem $severity={ActionCenterSeverity.WARNING}>
+                <S.SummaryDot $severity={ActionCenterSeverity.WARNING} />
+                <span>{t('actionCenter.summary.warning', { count: summary.warning })}</span>
+              </S.SummaryItem>
+              <S.SummaryItem $severity={ActionCenterSeverity.INFO}>
+                <S.SummaryDot $severity={ActionCenterSeverity.INFO} />
+                <span>{t('actionCenter.summary.info', { count: summary.info })}</span>
+              </S.SummaryItem>
+            </S.SummaryList>
+          ) : undefined
+        }
       />
 
       {/*
@@ -163,11 +207,12 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
       ) : (
         <>
           <S.Toolbar>
-            <TabNav
+            <S.FilterTabs
               items={filterOptions}
               value={filter}
               onChange={onFilterChange}
               ariaLabel={t('actionCenter.filter.ariaLabel')}
+              variant="pill"
             />
           </S.Toolbar>
 

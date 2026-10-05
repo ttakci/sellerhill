@@ -52,11 +52,15 @@ export const Row = styled.div<{ $active: boolean }>`
   background: ${({ $active, theme }) => ($active ? theme.colors.table.rowSelected : 'transparent')};
   box-shadow: ${({ $active, theme }) =>
     $active ? `inset 0.1875rem 0 0 ${theme.colors.table.rowSelectedAccent}` : 'none'};
-  transition: background ${tkn('transitions.fast')};
+  transition: all ${tkn('transitions.fast')};
 
   &:hover {
     background: ${({ $active, theme }) =>
       $active ? theme.colors.table.rowSelectedHover : theme.colors.table.rowHover};
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `;
 
@@ -101,8 +105,7 @@ export const Avatar = styled.div<{ $unread: boolean; $large?: boolean }>`
   height: ${({ $large }) => ($large ? '3.5rem' : '1.5rem')};
   border-radius: ${tkn('radius.full')};
   background: ${({ $unread, theme }) => ($unread ? theme.colors.brand.primary : theme.colors.brand.secondary)};
-  ${({ $large, theme }) =>
-    $large ? '' : `border: 0.125rem solid ${theme.colors.surface.primary};`}
+  ${({ $large, theme }) => ($large ? '' : `border: 0.125rem solid ${theme.colors.surface.primary};`)}
   box-sizing: border-box;
 `;
 

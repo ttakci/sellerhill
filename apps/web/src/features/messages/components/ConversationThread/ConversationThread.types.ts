@@ -39,11 +39,16 @@ export interface ConversationThreadProps {
   /** False while no conversation is selected — the pane shows its empty state. */
   hasConversation: boolean;
   isLoading: boolean;
+  /** Buyer/eBay account shown as the conversation heading. */
   title: string;
+  /** eBay subject or listing title shown in the contextual item strip. */
+  subject: string | null;
   otherParty: string | null;
   /** Single uppercase letter for the header avatar, resolved by the container. */
   avatarLabel: string;
   referenceId: string | null;
+  /** Listing thumbnail when the referenced item exists in the seller's catalog. */
+  imageUrl: string | null;
   messages: ThreadMessageView[];
   actions: ThreadActionView[];
   /** False for FROM_EBAY conversations, which eBay does not accept replies to. */

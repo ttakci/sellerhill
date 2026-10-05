@@ -7,7 +7,13 @@
  * prompt and costs no Message API call at all (every query is skipped).
  */
 
-import { EBAY_MESSAGE_MAX_LENGTH, EbayConversationStatus, EbayConversationType, EbayMessageMediaType, MessagesFolder } from '@repo/shared';
+import {
+  EBAY_MESSAGE_MAX_LENGTH,
+  EbayConversationStatus,
+  EbayConversationType,
+  EbayMessageMediaType,
+  MessagesFolder,
+} from '@repo/shared';
 import { formatDate, getLocaleConfig, useIsMobile, useLoading, useMediaQuery, useTheme, type IconName } from '@repo/ui';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +29,12 @@ import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPaginatio
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 
-const FOLDERS: MessagesFolder[] = [MessagesFolder.ALL, MessagesFolder.UNREAD, MessagesFolder.ARCHIVE, MessagesFolder.DELETED];
+const FOLDERS: MessagesFolder[] = [
+  MessagesFolder.ALL,
+  MessagesFolder.UNREAD,
+  MessagesFolder.ARCHIVE,
+  MessagesFolder.DELETED,
+];
 const TYPES: EbayConversationType[] = [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY];
 
 const FOLDER_ICON: Record<MessagesFolder, IconName> = {
@@ -101,17 +112,13 @@ export const MessagesPageContainer = (): React.ReactElement => {
    * that control. */
   const isRailVisible = useMediaQuery(`(min-width: ${theme.breakpoints.xl})`);
 
-  const { state, setType, setFolder, setTypeAndFolder, openConversation, setPage } =
-    useMessagesUrlState();
+  const { state, setType, setFolder, setTypeAndFolder, openConversation, setPage } = useMessagesUrlState();
   const { type, folder, conversationId, page } = state;
 
   const inbox = useMessagesInbox(state);
   const { conversations, activeAccount, activeConversation, threadMessages, isMine } = inbox;
 
-  const pageIds = useMemo(
-    () => conversations.map((conversation) => conversation.conversationId),
-    [conversations],
-  );
+  const pageIds = useMemo(() => conversations.map((conversation) => conversation.conversationId), [conversations]);
 
   const actions = useMessagesActions({
     ebayAccountId: inbox.ebayAccountId,
@@ -144,13 +151,13 @@ export const MessagesPageContainer = (): React.ReactElement => {
         ? formatDate(iso, locale, { day: undefined, month: undefined, hour: '2-digit', minute: '2-digit' })
         : formatDate(iso, locale);
     },
-    [locale],
+    [locale]
   );
 
   const formatMessageDate = useCallback(
     (iso: string): string =>
       Number.isNaN(Date.parse(iso)) ? '' : formatDate(iso, locale, { hour: '2-digit', minute: '2-digit' }),
-    [locale],
+    [locale]
   );
 
   /* ─── list ─── */
@@ -175,7 +182,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
           isActive: conversation.conversationId === conversationId,
         };
       }),
-    [conversations, conversationId, selectedSet, formatListDate],
+    [conversations, conversationId, selectedSet, formatListDate]
   );
 
   /* In the archive and deleted folders the counterpart of "archive" is "move back to the inbox". */
@@ -205,7 +212,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         onClick: () => confirmDelete(selectedIds),
       },
     ],
-    [t, selectedIds, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget],
+    [t, selectedIds, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]
   );
 
   const pagination = useMemo<MessagesPagination | null>(
@@ -222,7 +229,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
             labelInfo: t('translation:common.showing_info'),
           }
         : null,
-    [inbox.conversationsTotal, page, setPage, t],
+    [inbox.conversationsTotal, page, setPage, t]
   );
 
   /* ─── thread ─── */
@@ -251,16 +258,17 @@ export const MessagesPageContainer = (): React.ReactElement => {
             })),
         };
       }),
-    [threadMessages, isMine, t, formatMessageDate],
+    [threadMessages, isMine, t, formatMessageDate]
   );
 
   const otherParty =
     activeConversation?.otherPartyUsername ??
     threadMessages.find((message) => !isMine(message.senderUsername))?.senderUsername ??
     null;
-  const threadTitle =
-    inbox.thread?.title ?? activeConversation?.title ?? otherParty ?? t('messages.page.title');
+  const threadTitle = inbox.thread?.title ?? activeConversation?.title ?? otherParty ?? t('messages.page.title');
   const threadAvatarLabel = avatarInitial(otherParty ?? threadTitle);
+  const threadHeading = otherParty ?? threadTitle;
+  const threadSubject = otherParty && threadTitle !== otherParty ? threadTitle : null;
 
   const threadActions = useMemo<ThreadActionView[]>(() => {
     if (!conversationId) {
@@ -297,7 +305,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
       [EbayConversationType.FROM_MEMBERS]: inbox.unreadBreakdown?.members ?? 0,
       [EbayConversationType.FROM_EBAY]: inbox.unreadBreakdown?.ebay ?? 0,
     }),
-    [inbox.unreadBreakdown],
+    [inbox.unreadBreakdown]
   );
 
   /*
@@ -309,12 +317,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
    * split by type under their own headings.
    */
   const folderGroups = useMemo<MessagesFolderGroupView[]>(() => {
-    const item = (
-      groupType: EbayConversationType,
-      groupFolder: MessagesFolder,
-      label: string,
-      icon: IconName,
-    ) => ({
+    const item = (groupType: EbayConversationType, groupFolder: MessagesFolder, label: string, icon: IconName) => ({
       key: `${groupType}-${groupFolder}`,
       label,
       icon,
@@ -367,7 +370,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         }
       },
     }),
-    [t, type, folder, setType, setFolder, unreadByType],
+    [t, type, folder, setType, setFolder, unreadByType]
   );
 
   /* ─── mobile: list OR thread; the header's back arrow clears `?c=` ─── */
@@ -416,10 +419,12 @@ export const MessagesPageContainer = (): React.ReactElement => {
         threadProps={{
           hasConversation: !!conversationId,
           isLoading: inbox.isThreadLoading,
-          title: threadTitle,
+          title: threadHeading,
+          subject: threadSubject,
           otherParty,
           avatarLabel: threadAvatarLabel,
           referenceId: activeConversation?.referenceId ?? null,
+          imageUrl: activeConversation?.imageUrl ?? null,
           messages,
           actions: threadActions,
           canReply: type !== EbayConversationType.FROM_EBAY,

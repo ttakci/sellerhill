@@ -22,7 +22,7 @@ export const Header = styled.div`
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
-  background: ${tkn('colors.glass.tint')};
+  background: ${tkn('colors.surface.primary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
@@ -42,7 +42,7 @@ export const HeaderText = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  flex: 1 1 12rem;
+  flex: 1 1 8rem;
   min-width: 0;
 `;
 
@@ -61,14 +61,59 @@ export const HeaderActions = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
+/**
+ * eBay keeps the item being discussed visible above the transcript. This is
+ * an information strip rather than another card: it belongs to the thread
+ * chrome and does not compete with the actual messages.
+ */
+export const ContextBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm-md')};
+  min-width: 0;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  background: ${tkn('colors.glass.tint')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+export const ContextImage = styled.img`
+  display: block;
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+  background: transparent;
+  border-radius: ${tkn('radius.md')};
+`;
+
+export const ContextIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: ${tkn('colors.brand.primary')};
+  background: ${tkn('colors.brand.secondary')};
+  border-radius: ${tkn('radius.md')};
+`;
+
+export const ContextText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  flex: 1 1 auto;
+  min-width: 0;
+`;
+
 export const Messages = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm-md')};
+  gap: ${tkn('spacing.md')};
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
   background: ${tkn('colors.glass.tint')};
 `;
 
@@ -84,7 +129,7 @@ export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean }>`
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
   align-self: ${({ $mine }) => ($mine ? 'flex-end' : 'flex-start')};
-  max-width: ${({ $wide }) => ($wide ? '100%' : 'min(100%, 36rem)')};
+  max-width: ${({ $wide }) => ($wide ? '100%' : 'min(100%, 42rem)')};
   width: ${({ $wide }) => ($wide ? '100%' : 'auto')};
   min-width: 0;
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
@@ -92,7 +137,22 @@ export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean }>`
   border-bottom-right-radius: ${({ $mine, theme }) => ($mine ? theme.radius.sm : theme.radius.lg)};
   border-bottom-left-radius: ${({ $mine, theme }) => ($mine ? theme.radius.lg : theme.radius.sm)};
   background: ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelected : theme.colors.surface.primary)};
-  border: 0.0625rem solid ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelectedAccent : theme.colors.border.primary)};
+  border: 0.0625rem solid
+    ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelectedAccent : theme.colors.border.primary)};
+  box-shadow: ${({ $mine, theme }) => ($mine ? 'none' : theme.shadows.sm)};
+  transition: all ${tkn('transitions.fast')};
+
+  &:hover {
+    border-color: ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelectedAccent : theme.colors.border.focus)};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: ${tkn('spacing.sm-md')};
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 export const BubbleMeta = styled.div`

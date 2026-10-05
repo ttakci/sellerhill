@@ -40,6 +40,10 @@ export const Container = styled(PageContainer)`
      absorbs the rest. */
   flex: 1 1 0%;
   min-height: 0;
+  /* PageContainer reserves a generous scroll-end gutter for ordinary pages.
+     This route scrolls inside its panes, so that inherited space only steals
+     height from the inbox. */
+  padding-bottom: 0;
 `;
 
 /** Store filter row (and, below `xl`, the type/folder switches) — on the
@@ -87,6 +91,7 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   min-height: 12rem;
   padding: 0;
   overflow: hidden;
+  box-shadow: ${tkn('shadows.md')};
 
   & > [data-pane='list'] {
     display: ${({ $threadOpen }) => ($threadOpen ? 'none' : 'flex')};
@@ -110,7 +115,7 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   }
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
-    grid-template-columns: 11rem minmax(24rem, 28rem) minmax(0, 1fr);
+    grid-template-columns: minmax(11rem, 0.75fr) minmax(24rem, 1.8fr) minmax(28rem, 3fr);
 
     & > [data-pane='rail'] {
       display: flex;
@@ -161,11 +166,16 @@ export const RailItem = styled.button<{ $active: boolean }>`
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background ${tkn('transitions.fast')};
+  transition: all ${tkn('transitions.fast')};
 
   &:hover {
     background: ${({ $active, theme }) =>
       $active ? theme.colors.table.rowSelectedHover : theme.colors.table.rowHover};
+    transform: translateX(${tkn('spacing.2xs')});
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 
   &:focus-visible {

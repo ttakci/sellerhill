@@ -1,16 +1,149 @@
 import styled from '@emotion/styled';
-import { Badge, Card, PageContainer, SettingsCard, Text, tkn } from '@repo/ui';
+import { ActionCenterSeverity } from '@repo/shared';
+import {
+  type AppTheme,
+  Badge,
+  Card,
+  PageContainer,
+  SettingsCard,
+  TabNav,
+  Text,
+  tkn,
+} from '@repo/ui';
+
+const severityColor = (severity: ActionCenterSeverity, theme: AppTheme) => {
+  if (severity === ActionCenterSeverity.CRITICAL) {
+    return theme.colors.semantic.error;
+  }
+  if (severity === ActionCenterSeverity.WARNING) {
+    return theme.colors.semantic.warning;
+  }
+  return theme.colors.semantic.info;
+};
+
+const severityTint = (severity: ActionCenterSeverity, theme: AppTheme) => {
+  if (severity === ActionCenterSeverity.CRITICAL) {
+    return theme.colors.semanticTint.error;
+  }
+  if (severity === ActionCenterSeverity.WARNING) {
+    return theme.colors.semanticTint.warning;
+  }
+  return theme.colors.semanticTint.info;
+};
 
 export const Container = PageContainer;
 
-/**
- * Spacing wrapper for the severity filter rail. The rail itself is the shared
- * `TabNav` atom (`underline` variant — the same rail the Dashboard section tabs
- * use), which owns its own `nowrap` + horizontal-scroll behaviour and paints
- * its own bottom border; this wrapper only holds it off the group grid below.
- */
+/** Compact counted filters; the shared TabNav owns wrapping and keyboard focus. */
 export const Toolbar = styled.div`
-  margin-bottom: ${tkn('spacing.lg')};
+  display: flex;
+  align-items: center;
+  min-width: 0;
+`;
+
+/**
+ * Severity is the filter's information, so colour belongs here. Counts use a
+ * solid semantic badge with white bold numerals; the selected tab gets only a
+ * quiet tint, keeping the row useful without turning it into four CTA buttons.
+ */
+export const FilterTabs = styled(TabNav)`
+  gap: ${tkn('spacing.xs')};
+
+  > [role='tab'] {
+    border: 0.0625rem solid transparent;
+  }
+
+  > [role='tab'] > span:last-child {
+    color: ${tkn('colors.text.inverse')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
+    box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+  }
+
+  > [role='tab']:nth-of-type(1) > span:last-child {
+    background: ${tkn('colors.brand.primary')};
+  }
+
+  > [role='tab']:nth-of-type(2) {
+    color: ${tkn('colors.semantic.error')};
+
+    &[aria-selected='true'] {
+      background: ${tkn('colors.semanticTint.error')};
+      border-color: ${tkn('colors.semanticTintBorder.error')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.error')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(3) {
+    color: ${tkn('colors.semantic.warning')};
+
+    &[aria-selected='true'] {
+      background: ${tkn('colors.semanticTint.warning')};
+      border-color: ${tkn('colors.semanticTintBorder.warning')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.warning')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(4) {
+    color: ${tkn('colors.semantic.info')};
+
+    &[aria-selected='true'] {
+      background: ${tkn('colors.semanticTint.info')};
+      border-color: ${tkn('colors.semanticTintBorder.info')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.info')};
+    }
+  }
+`;
+
+export const SummaryList = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.xs+')};
+  border: 0.0625rem solid ${tkn('colors.glass.edge')};
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.glass.surfaceStrong')};
+  box-shadow: ${tkn('shadows.sm')};
+  white-space: nowrap;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 100%;
+    justify-content: space-between;
+    white-space: normal;
+  }
+`;
+
+export const SummaryItem = styled.span<{ $severity: ActionCenterSeverity }>`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  padding: 0 ${tkn('spacing.sm')};
+  color: ${tkn('colors.text.secondary')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-variant-numeric: tabular-nums;
+
+  & + & {
+    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: 0 ${tkn('spacing.xs')};
+  }
+`;
+
+export const SummaryDot = styled.span<{ $severity: ActionCenterSeverity }>`
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${({ $severity, theme }) => severityColor($severity, theme)};
 `;
 
 /**
@@ -47,62 +180,92 @@ export const GroupColumn = styled.div`
   min-width: 0;
 `;
 
-export const GroupCard = styled(SettingsCard)`
+export const GroupCard = styled(SettingsCard)<{ $severity: ActionCenterSeverity }>`
   height: auto;
+  border-left: 0.1875rem solid ${({ $severity, theme }) => severityColor($severity, theme)};
+  transition:
+    transform ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
+
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-0.125rem);
+      box-shadow: ${tkn('shadows.glassHover')};
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+`;
+
+export const GroupHeading = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
+export const GroupIcon = styled.div<{ $severity: ActionCenterSeverity }>`
+  width: ${tkn('controls.height.small')};
+  height: ${tkn('controls.height.small')};
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: ${tkn('radius.md')};
+  color: ${({ $severity, theme }) => severityColor($severity, theme)};
+  background: ${({ $severity, theme }) => severityTint($severity, theme)};
+`;
+
+export const GroupHeadingCopy = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
 `;
 
 export const ItemStack = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${tkn('spacing.sm')};
 `;
 
 /**
- * One pending action — a settings-hub row, not a card.
- *
- * Same shape as `SettingsActionRow`/`SettingsInfoRow`: a bottom divider only,
- * no box/border/background of its own; same vertical `spacing.md` padding
- * both of those use, kept unchanged so the row rhythm stays aligned with the
- * rest of the Settings surface. `ItemRowButton` (`.withComponent`, shares
- * this exact style) renders as a real `<button>` when the item has a
- * navigation target, so the whole row is the click/tap surface (matches
- * `SettingsActionRow`'s "full row is a button" pattern); plain `ItemRow`
- * stays a `div` for a row with nothing to act on.
- *
- * Column, not row: the body (title/description/chip list) stacks above a
- * right-aligned "Detay ->" footer — see `ItemFooter` — instead of a bare
- * arrow pinned to the vertical center of a multi-line row.
+ * One pending action on a quiet inset surface. A real button is used whenever
+ * the item has a destination, so the whole row remains the click/tap target.
  */
 export const ItemRow = styled.div`
   display: flex;
   flex-direction: column;
-  /* Bigger than ItemBody's own internal spacing.sm rhythm, and a step up from
-     spacing.md — the "Detay ->" footer needs clear air above it so it reads
-     as trailing the content, not as one more line of it. This gap only ever
-     separates ItemBody from ItemFooter (the row's only two children), so
-     raising it is exactly "more padding above the footer" without touching
-     any other rhythm on the row. */
-  gap: ${tkn('spacing.lg')};
-  /* A tick more than SettingsInfoRow/SettingsActionRow's plain spacing.md —
-     those rows are a single line; this one carries a title, a description
-     and a chip list, so the same padding read as rows glued together. The
-     extra padding is also what gives the card itself a bit more height. */
-  padding: ${tkn('spacing.md+')} 0;
-  border: none;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: transparent;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.surface.secondary')};
   width: 100%;
   text-align: left;
   color: inherit;
   font: inherit;
   cursor: default;
 
-  &:last-child {
-    border-bottom: none;
-  }
 `;
 
 export const ItemRowButton = styled(ItemRow.withComponent('button'))`
   cursor: pointer;
+  transition:
+    border-color ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')};
+
+  &:hover {
+    border-color: ${tkn('colors.semanticTintBorder.info')};
+    background: ${tkn('colors.semanticTint.info')};
+    transform: translateX(0.125rem);
+  }
 
   &:focus-visible {
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
@@ -118,6 +281,15 @@ export const ItemRowButton = styled(ItemRow.withComponent('button'))`
    */
   &:hover > :last-child {
     transform: translateX(0.125rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover,
+    &:hover > :last-child {
+      transform: none;
+    }
   }
 `;
 
@@ -225,19 +397,16 @@ export const ItemFooter = styled.div`
   justify-content: flex-end;
 `;
 
-/**
- * "Detay" label + arrow — the same trailing affordance the Settings
- * carousels' cards use. Animated via `ItemRowButton`'s own
- * `&:hover > :last-child` rule (a plain CSS combinator, not an Emotion
- * component selector — those need the babel plugin this monorepo doesn't
- * have and crash at runtime).
- */
+/** The item's real action label plus the app-wide trailing-arrow affordance. */
 export const ItemAction = styled.span`
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
   flex-shrink: 0;
   transition: transform ${tkn('transitions.fast')};
+  color: ${tkn('colors.brand.primary')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
 `;
 
 
