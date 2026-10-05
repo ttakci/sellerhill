@@ -39,17 +39,25 @@ export class EbayCampaignSyncService {
     }
     const interval = await this.settings.getNumber(PlatformSettingKey.EBAY_CAMPAIGN_SYNC_INTERVAL_HOURS);
     const max = await this.settings.getNumber(PlatformSettingKey.EBAY_CAMPAIGN_SYNC_MAX_ACCOUNTS_PER_RUN);
-    const accounts = await this.database.query<{ id: string; user_id: string }>(
+    const accounts = await this.database.query<{ id: string; user_id: string; sync_due: boolean }>(
       `WITH due AS (
-         SELECT id FROM ebay_accounts WHERE status = 'active'
-           AND (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL)
+         SELECT id, (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL) AS sync_due
+         FROM ebay_accounts WHERE status = 'active'
+           AND (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL
+             OR EXISTS (SELECT 1 FROM ebay_campaign_reprice_outbox pending WHERE pending.ebay_account_id = ebay_accounts.id))
          ORDER BY last_campaign_sync_at ASC NULLS FIRST, id ASC LIMIT $2 FOR UPDATE SKIP LOCKED
-       ) UPDATE ebay_accounts a SET last_campaign_sync_at = NOW() FROM due WHERE a.id = due.id RETURNING a.id, a.user_id`,
+       ) UPDATE ebay_accounts a
+         SET last_campaign_sync_at = CASE WHEN due.sync_due THEN NOW() ELSE a.last_campaign_sync_at END
+         FROM due WHERE a.id = due.id RETURNING a.id, a.user_id, due.sync_due`,
       [String(interval), max]
     );
     for (const account of accounts) {
       try {
         if (await this.quota.isSuspended(account.user_id)) {
+          continue;
+        }
+        if (account.sync_due === false) {
+          await this.flushPendingRepricing(account.id);
           continue;
         }
         await this.syncAccount(account, EbayCallPriority.BACKGROUND);
@@ -65,6 +73,7 @@ export class EbayCampaignSyncService {
   }
 
   async syncAccount(account: { id: string; user_id: string }, priority: EbayCallPriority): Promise<SyncOutcome> {
+    const delivered = await this.flushPendingRepricing(account.id);
     const ctx = await this.ebay.getAccountApiContext(account.id);
     const campaigns: Array<ParsedCampaign & { adCount: number | null }> = [];
     let complete = false;
@@ -114,7 +123,7 @@ export class EbayCampaignSyncService {
     }
     if (!complete) {
       await this.repository.upsertCampaigns(account.id, campaigns, false);
-      return { campaigns: campaigns.length, complete: false, repricedProducts: 0 };
+      return { campaigns: campaigns.length, complete: false, repricedProducts: delivered.length };
     }
     const listings = await this.database.query<{ ebay_item_id: string }>(
       'SELECT ebay_item_id FROM listings WHERE ebay_account_id = $1 AND status = $2 AND ebay_item_id IS NOT NULL',
@@ -123,7 +132,8 @@ export class EbayCampaignSyncService {
     const ids = [...new Set(listings.map((l) => l.ebay_item_id))];
     const map = new Map<string, { campaignId: string; rate: number | null }>();
     for (const campaign of campaigns) {
-      if (campaign.fundingModel !== 'COST_PER_SALE') {
+      // getAds for ENDED campaigns rejects with documented error 35035.
+      if (campaign.fundingModel !== 'COST_PER_SALE' || campaign.status === 'ENDED') {
         continue;
       }
       try {
@@ -139,7 +149,7 @@ export class EbayCampaignSyncService {
         }
         complete = false;
       }
-      if (campaign.ruleBased || campaign.status === 'ENDED') {
+      if (campaign.ruleBased) {
         continue;
       }
       let coveredAds = 0;
@@ -189,12 +199,22 @@ export class EbayCampaignSyncService {
     }
     await this.repository.upsertCampaigns(account.id, campaigns, complete);
     if (!complete) {
-      return { campaigns: campaigns.length, complete: false, repricedProducts: 0 };
+      return { campaigns: campaigns.length, complete: false, repricedProducts: delivered.length };
     }
-    const products = [...new Set(await this.repository.writeAdState(account.id, map, true))];
-    for (const product of products) {
-      await this.stock.enqueueProductStockSync(product);
+    await this.repository.writeAdState(account.id, map, true);
+    const products = new Set([...delivered, ...(await this.flushPendingRepricing(account.id))]);
+    return { campaigns: campaigns.length, complete, repricedProducts: products.size };
+  }
+
+  /** Public for Task 7: call only after committing listing writes + pending requests. */
+  async flushPendingRepricing(accountId: string): Promise<string[]> {
+    const delivered: string[] = [];
+    for (const pending of await this.repository.listPendingReprices(accountId)) {
+      // Stable for retries, unique for newer revisions even inside the 5s sale bucket.
+      await this.stock.enqueueProductStockSync(pending.productId, `campaign-${accountId}-${pending.revision}`);
+      await this.repository.acknowledgeReprice(accountId, pending.productId, pending.revision);
+      delivered.push(pending.productId);
     }
-    return { campaigns: campaigns.length, complete, repricedProducts: products.length };
+    return delivered;
   }
 }

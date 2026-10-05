@@ -24,21 +24,17 @@ export class StockSyncQueueService {
 
   constructor(@InjectQueue('stock-sync') private readonly stockSyncQueue: Queue) {}
 
-  async enqueueProductStockSync(productId: string): Promise<void> {
+  async enqueueProductStockSync(productId: string, deliveryId?: string): Promise<void> {
     const bucket = Math.floor(Date.now() / StockSyncQueueService.DEDUP_WINDOW_MS);
-    const jobId = `stock-sync:${productId}:${bucket}`;
+    const jobId = deliveryId ? `stock-sync-${productId}-${deliveryId}` : `stock-sync:${productId}:${bucket}`;
 
-    await this.stockSyncQueue.add(
-      'sync-product-stock',
-      stampCurrentCorrelation({ productId }),
-      {
-        jobId,
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 2000 },
-        removeOnComplete: { age: 300 },
-        removeOnFail: { age: 3600 },
-      }
-    );
+    await this.stockSyncQueue.add('sync-product-stock', stampCurrentCorrelation({ productId }), {
+      jobId,
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: { age: 300 },
+      removeOnFail: { age: 3600 },
+    });
     this.logger.debug(`Enqueued stock-sync for product ${productId} (jobId ${jobId})`);
   }
 }

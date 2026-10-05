@@ -1,5 +1,6 @@
 import { EbayCallPriority } from '@repo/shared';
 
+import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
@@ -17,9 +18,34 @@ const page = (...campaigns: ReturnType<typeof campaign>[]) => ({ campaigns, tota
 const ads = (listingId = '1', bidPercentage = '5.5') => ({ ads: [{ listingId, bidPercentage }], total: 1 });
 
 function setup() {
-  let campaignStatus = 'RUNNING';
+  const state = {
+    pending: new Map<string, string>(),
+    revision: 0,
+    appliedRate: 5.5,
+    changedRows: [{ product_id: 'p1', changed: true }],
+    inTransaction: false,
+  };
+  let metadata: Array<{ campaignId: string; status: string; fundingModel: string; adRateStrategy: string | null }> = [];
+  let snapshot: { pending: Map<string, string>; appliedRate: number } | undefined;
   const db = {
-    query: jest.fn((sql: string, _params?: unknown[]) => {
+    logger: { error: jest.fn() },
+    get transaction() {
+      return DatabaseService.prototype.transaction.bind(this as unknown as DatabaseService);
+    },
+    getClient: jest.fn(),
+    query: jest.fn((sql: string, params?: unknown[]): Array<Record<string, unknown>> => {
+      if (sql === 'BEGIN') {
+        state.inTransaction = true;
+        snapshot = { pending: new Map(state.pending), appliedRate: state.appliedRate };
+      }
+      if (sql === 'COMMIT') {
+        state.inTransaction = false;
+      }
+      if (sql === 'ROLLBACK') {
+        state.inTransaction = false;
+        state.pending = new Map(snapshot!.pending);
+        state.appliedRate = snapshot!.appliedRate;
+      }
       if (sql.includes('WITH due')) {
         return [account];
       }
@@ -27,20 +53,41 @@ function setup() {
         return [{ ebay_item_id: '1' }, { ebay_item_id: '2' }];
       }
       if (sql.includes('SELECT campaign_id')) {
-        return [
-          { campaign_id: 'c1', status: campaignStatus, funding_model: 'COST_PER_SALE', ad_rate_strategy: 'FIXED' },
-          { campaign_id: 'c2', status: 'PAUSED', funding_model: 'COST_PER_SALE', ad_rate_strategy: 'FIXED' },
-        ] as never;
+        return metadata.map((c) => ({
+          campaign_id: c.campaignId,
+          status: c.status,
+          funding_model: c.fundingModel,
+          ad_rate_strategy: c.adRateStrategy,
+        }));
       }
       if (sql.includes('INSERT INTO ebay_campaigns')) {
-        campaignStatus = (JSON.parse(String(_params?.[1])) as Array<{ status: string }>)[0].status;
+        metadata = JSON.parse(String(params?.[1])) as typeof metadata;
       }
       if (sql.includes('UPDATE listings')) {
-        return [{ product_id: 'p1', changed: true }];
+        state.appliedRate = sql.includes('unnest') ? Number((params?.[5] as number[])[0]) : 0;
+        return state.changedRows;
+      }
+      if (sql.includes('INSERT INTO ebay_campaign_reprice_outbox')) {
+        for (const id of params?.[1] as string[]) {
+          state.pending.set(id, String(++state.revision));
+        }
+      }
+      if (sql.includes('SELECT product_id, revision')) {
+        return [...state.pending].map(([product_id, revision]) => ({ product_id, revision }));
+      }
+      if (sql.includes('DELETE FROM ebay_campaign_reprice_outbox')) {
+        if (state.pending.get(String(params?.[1])) === params?.[2]) {
+          state.pending.delete(String(params?.[1]));
+        }
       }
       return [];
     }),
   };
+  const transactionClient = {
+    query: jest.fn((sql: string, params?: unknown[]) => Promise.resolve({ rows: db.query(sql, params) })),
+    release: jest.fn(),
+  };
+  db.getClient.mockResolvedValue(transactionClient);
   const settings = { getBoolean: jest.fn().mockResolvedValue(true), getNumber: jest.fn().mockResolvedValue(6) };
   const quota = { isSuspended: jest.fn().mockResolvedValue(false) };
   const ebay = { getAccountApiContext: jest.fn().mockResolvedValue({ accessToken: 'test', marketplaceId: 'EBAY_US' }) };
@@ -62,10 +109,204 @@ function setup() {
   const queries = () => db.query.mock.calls.map(([sql, params]) => ({ sql, params }));
   const writes = () => queries().filter(({ sql }) => sql.includes('UPDATE listings'));
   const deletes = () => queries().filter(({ sql }) => sql.includes('DELETE FROM ebay_campaigns'));
-  return { db, settings, quota, ebay, client, stock, service, queries, writes, deletes };
+  return {
+    db,
+    settings,
+    quota,
+    ebay,
+    client,
+    stock,
+    service,
+    repository,
+    state,
+    transactionClient,
+    queries,
+    writes,
+    deletes,
+  };
 }
 
 describe('campaign sweep using the real ad-state repository', () => {
+  it('ENDED skips documented 35035 getAds rejection, clears and reprices with complete coverage', async () => {
+    const f = setup();
+    f.client.getCampaigns.mockResolvedValue(page(campaign('c1', 'ENDED')));
+    f.client.getAds.mockRejectedValue({
+      response: { status: 400, data: { errors: [{ errorId: 35035, message: 'The campaign has ended.' }] } },
+    });
+    expect(await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).toEqual({
+      campaigns: 1,
+      complete: true,
+      repricedProducts: 1,
+    });
+    expect(f.client.getAds).not.toHaveBeenCalled();
+    expect(f.state.appliedRate).toBe(0);
+    expect(f.stock.enqueueProductStockSync).toHaveBeenCalledWith('p1', 'campaign-store-1-1');
+  });
+  it('failed first enqueue and subsequent unsent products survive until the next unchanged sweep', async () => {
+    const f = setup();
+    f.state.changedRows = [
+      { product_id: 'p1', changed: true },
+      { product_id: 'p2', changed: true },
+    ];
+    f.stock.enqueueProductStockSync.mockRejectedValueOnce(new Error('Redis unavailable'));
+    await expect(f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).rejects.toThrow('Redis unavailable');
+    expect([...f.state.pending.keys()]).toEqual(['p1', 'p2']);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([['p1', 'campaign-store-1-1']]);
+    f.state.changedRows = [
+      { product_id: 'p1', changed: false },
+      { product_id: 'p2', changed: false },
+    ];
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([
+      ['p1', 'campaign-store-1-1'],
+      ['p1', 'campaign-store-1-1'],
+      ['p2', 'campaign-store-1-2'],
+    ]);
+    expect(f.state.pending.size).toBe(0);
+  });
+  it('queue submission waits for commit; clear failure rolls back set and pending delivery atomically', async () => {
+    const f = setup();
+    const query = f.db.query.getMockImplementation()!;
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) => {
+      if (sql.includes('UPDATE listings') && sql.includes('<> ALL')) {
+        throw new Error('clear failed');
+      }
+      return query(sql, params);
+    });
+    f.client.getAds.mockResolvedValue(ads('1', '7.0'));
+    await expect(f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).rejects.toThrow('clear failed');
+    expect(f.state.appliedRate).toBe(5.5);
+    expect(f.state.pending.size).toBe(0);
+    expect(f.stock.enqueueProductStockSync).not.toHaveBeenCalled();
+    expect(f.queries().some(({ sql }) => sql === 'ROLLBACK')).toBe(true);
+    expect(f.queries().some(({ sql }) => sql === 'COMMIT')).toBe(false);
+    expect(f.transactionClient.release).toHaveBeenCalledTimes(1);
+  });
+  it('pending insert failure rolls back both listing writes and never submits a job', async () => {
+    const f = setup();
+    const query = f.db.query.getMockImplementation()!;
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) => {
+      if (sql.includes('INSERT INTO ebay_campaign_reprice_outbox')) {
+        throw new Error('outbox failed');
+      }
+      return query(sql, params);
+    });
+    await expect(f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).rejects.toThrow('outbox failed');
+    expect(f.state.appliedRate).toBe(5.5);
+    expect(f.stock.enqueueProductStockSync).not.toHaveBeenCalled();
+  });
+  it('successful enqueue occurs after COMMIT and before revision-specific acknowledgement', async () => {
+    const f = setup();
+    f.stock.enqueueProductStockSync.mockImplementation(() => {
+      expect(f.state.inTransaction).toBe(false);
+      expect(f.queries().some(({ sql }) => sql === 'COMMIT')).toBe(true);
+      expect(f.state.pending.get('p1')).toBe('1');
+    });
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    const ack = f.queries().find(({ sql }) => sql.includes('DELETE FROM ebay_campaign_reprice_outbox'))!;
+    expect(ack.sql).toContain('revision = $3');
+    expect(ack.params).toEqual(['store-1', 'p1', '1']);
+    const outbox = f.queries().find(({ sql }) => sql.includes('INSERT INTO ebay_campaign_reprice_outbox'))!;
+    expect(outbox.sql).toContain('revision = EXCLUDED.revision');
+  });
+  it('acknowledging an older delivery preserves a concurrent newer revision for redelivery', async () => {
+    const f = setup();
+    let concurrent = true;
+    f.stock.enqueueProductStockSync.mockImplementation(async () => {
+      if (concurrent) {
+        concurrent = false;
+        await f.repository.writeAdState(account.id, new Map([['1', { campaignId: 'c1', rate: 7 }]]), false);
+      }
+    });
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.state.pending.get('p1')).toBe('2');
+    f.state.changedRows = [];
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([
+      ['p1', 'campaign-store-1-1'],
+      ['p1', 'campaign-store-1-2'],
+    ]);
+    expect(f.state.pending.size).toBe(0);
+  });
+  it('old acknowledgement cannot consume a new row after another consumer deleted its revision', async () => {
+    const f = setup();
+    let concurrent = true;
+    f.stock.enqueueProductStockSync.mockImplementation(async () => {
+      if (concurrent) {
+        concurrent = false;
+        await f.repository.acknowledgeReprice(account.id, 'p1', '1');
+        expect(f.state.pending.size).toBe(0);
+        await f.repository.writeAdState(account.id, new Map([['1', { campaignId: 'c1', rate: 8 }]]), false);
+      }
+    });
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.state.pending.get('p1')).toBe('2');
+    f.state.changedRows = [];
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([
+      ['p1', 'campaign-store-1-1'],
+      ['p1', 'campaign-store-1-2'],
+    ]);
+  });
+  it('acknowledgement failure redelivers the same durable job identity next sweep', async () => {
+    const f = setup();
+    const query = f.db.query.getMockImplementation()!;
+    let rejectAck = true;
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) => {
+      if (rejectAck && sql.includes('DELETE FROM ebay_campaign_reprice_outbox')) {
+        rejectAck = false;
+        throw new Error('ack failed');
+      }
+      return query(sql, params);
+    });
+    await expect(f.service.syncAccount(account, EbayCallPriority.INTERACTIVE)).rejects.toThrow('ack failed');
+    expect(f.state.pending.get('p1')).toBe('1');
+    f.state.changedRows = [];
+    await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([
+      ['p1', 'campaign-store-1-1'],
+      ['p1', 'campaign-store-1-1'],
+    ]);
+    expect(f.state.pending.size).toBe(0);
+  });
+  it('pending-only claim delivers without remote reads or advancing the campaign sync watermark', async () => {
+    const f = setup();
+    const query = f.db.query.getMockImplementation()!;
+    f.state.pending.set('p1', '42');
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) =>
+      sql.includes('WITH due') ? [{ ...account, sync_due: false }] : query(sql, params)
+    );
+    await f.service.runSweep();
+    const claim = f.queries()[0];
+    expect(claim.sql).toContain('ebay_campaign_reprice_outbox');
+    expect(claim.sql).toContain('CASE WHEN due.sync_due THEN NOW() ELSE a.last_campaign_sync_at END');
+    expect(f.client.getCampaigns).not.toHaveBeenCalled();
+    expect(f.ebay.getAccountApiContext).not.toHaveBeenCalled();
+    expect(f.stock.enqueueProductStockSync).toHaveBeenCalledWith('p1', 'campaign-store-1-42');
+  });
+  it('a due account with pending delivery still performs its remote sweep', async () => {
+    const f = setup();
+    const query = f.db.query.getMockImplementation()!;
+    f.state.pending.set('p1', '42');
+    f.state.revision = 42;
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) =>
+      sql.includes('WITH due') ? [{ ...account, sync_due: true }] : query(sql, params)
+    );
+    await f.service.runSweep();
+    expect(f.client.getCampaigns).toHaveBeenCalledTimes(1);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([
+      ['p1', 'campaign-store-1-42'],
+      ['p1', 'campaign-store-1-43'],
+    ]);
+  });
+  it('suspended owners keep pending delivery without submitting jobs', async () => {
+    const f = setup();
+    f.state.pending.set('p1', '42');
+    f.quota.isSuspended.mockResolvedValue(true);
+    await f.service.runSweep();
+    expect(f.stock.enqueueProductStockSync).not.toHaveBeenCalled();
+    expect(f.state.pending.get('p1')).toBe('42');
+  });
   it('switched off performs no database or eBay call', async () => {
     const f = setup();
     f.settings.getBoolean.mockResolvedValue(false);
@@ -110,7 +351,8 @@ describe('campaign sweep using the real ad-state repository', () => {
   });
   it('deduplicates changed products and does not enqueue unchanged products', async () => {
     const f = setup();
-    f.db.query.mockImplementation((sql: string) => {
+    const defaultQuery = f.db.query.getMockImplementation()!;
+    f.db.query.mockImplementation((sql: string, params?: unknown[]) => {
       if (sql.includes('SELECT ebay_item_id')) {
         return [{ ebay_item_id: '1' }];
       }
@@ -126,10 +368,10 @@ describe('campaign sweep using the real ad-state repository', () => {
           { product_id: 'p2', changed: false },
         ] as never;
       }
-      return [];
+      return defaultQuery(sql, params);
     });
     await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
-    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([['p1']]);
+    expect(f.stock.enqueueProductStockSync.mock.calls).toEqual([['p1', 'campaign-store-1-1']]);
   });
   it.each(['PAUSED', 'ENDED'])(
     '%s complete sweep reduces applied rates to zero and enqueues repricing',
@@ -145,7 +387,7 @@ describe('campaign sweep using the real ad-state repository', () => {
       const clear = f.writes().find(({ sql }) => sql.includes('<> ALL'))!;
       expect(clear.sql).toContain('ad_rate_applied = 0');
       expect(clear.sql).toContain('old.ad_rate_applied > 0');
-      expect(f.stock.enqueueProductStockSync).toHaveBeenCalledWith('p1');
+      expect(f.stock.enqueueProductStockSync).toHaveBeenCalledWith('p1', 'campaign-store-1-1');
     }
   );
   it('one failed ad read preserves every listing even after a successful paused read', async () => {
@@ -307,7 +549,9 @@ describe('campaign sweep using the real ad-state repository', () => {
       f.client.getCampaigns.mockResolvedValue(page(c));
       f.client.getAds.mockResolvedValue({ total: 1, ads: [{ listingId: '1' }] });
       await f.service.syncAccount(account, EbayCallPriority.INTERACTIVE);
-      expect(f.writes().find(({ sql }) => sql.includes('unnest'))!.params?.[5]).toEqual([5.5]);
+      const set = f.writes().find(({ sql }) => sql.includes('unnest'))!;
+      expect(set.params?.[4]).toEqual(['FIXED']);
+      expect(set.params?.[5]).toEqual([5.5]);
     }
   );
   it('budget exhaustion in an ads read stops before the next store', async () => {
