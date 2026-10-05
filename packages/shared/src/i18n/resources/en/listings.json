@@ -39,6 +39,7 @@
         "actions": "Actions",
         "createdAt": "Created",
         "updatedAt": "Updated",
+        "scheduledUntil": "Last scheduled start",
         "total": "Total",
         "processed": "Processed"
       },

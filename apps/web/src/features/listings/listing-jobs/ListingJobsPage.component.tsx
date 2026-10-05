@@ -1,7 +1,8 @@
-import type { ListingJobDto } from '@repo/shared';
+import { ListingJobStatus, type ListingJobDto } from '@repo/shared';
 import {
   Badge,
   Button,
+  ConfirmModal,
   DataTable,
   EmptyState,
   Icon,
@@ -16,7 +17,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import * as S from './ListingJobsPage.style';
 import type { ListingJobsPageComponentProps } from './ListingJobsPage.types';
 import { jobStatusBadgeVariant } from './shared/job-status-badge';
-import { JobProgressRing } from './shared/JobProgressRing';
 
 export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> = ({
   jobs,
@@ -35,7 +35,22 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   hasActiveFilters,
   onClearFilters,
   columns,
+  columnOptions,
+  visibleColumnKeys,
+  onToggleColumn,
+  onMoveColumn,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortColumn,
+  sortDirection,
+  onSort,
   onJobClick,
+  cancellingJobId,
+  cancelTargetId,
+  onCancelRequest,
+  onCancelDismiss,
+  onCancelConfirm,
   onDownload,
   onBack,
   formatPercent,
@@ -51,87 +66,142 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
 
   const renderGridCard = (job: ListingJobDto) => {
     const percent = formatPercent(job);
-    const shortId = job.id.slice(0, 8);
     const remaining = Math.max(job.totalAsins - job.processedCount, 0);
+    const isProcessing = job.status === ListingJobStatus.PROCESSING;
+    const canCancel = job.status === ListingJobStatus.PENDING || isProcessing;
+    const progressTone =
+      job.successCount > 0
+        ? 'positive'
+        : job.status === ListingJobStatus.FAILED || (job.totalAsins > 0 && job.failedCount >= job.totalAsins)
+          ? 'negative'
+          : isProcessing
+            ? 'active'
+            : 'default';
 
     return (
-      /*
-       * Job id top-left / status badge top-right, the progress ring with the
-       * created date beside it, then the counts under a hairline. The whole
-       * card is the button — no "Details →" footer.
-       */
       <S.JobCard key={job.id} variant="elevated" onClick={() => onJobClick(job.id)}>
-        {/* Same anatomy as the order card: the status badge owns the top row, the title under it. */}
-        <S.JobCardHeader>
-          <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
-            {statusLabel(job.status)}
-          </Badge>
-        </S.JobCardHeader>
-        <S.JobTitleRow>
-          <S.MonoId variant="body" weight="semibold" color="text.primary">
-            {shortId}
-          </S.MonoId>
-        </S.JobTitleRow>
+        <S.JobCardTop>
+          <S.JobCardHeader>
+            <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
+              {statusLabel(job.status)}
+            </Badge>
+          </S.JobCardHeader>
 
-        <S.JobCardBody>
-          <S.ProgressRow>
-            <S.ProgressMain>
-              <JobProgressRing percent={percent} />
-              <S.ProgressCounts>
-                <Text variant="body" weight="semibold" numeric>
-                  {t('listings.jobs.card.progressCount', {
-                    processed: job.processedCount,
-                    total: job.totalAsins,
-                  })}
+          <S.JobCardBody>
+            <S.MetaList>
+              <S.MetaLabel>
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.jobs.table.id')}
                 </Text>
-              </S.ProgressCounts>
-            </S.ProgressMain>
-            <S.ProgressMeta>
-              <Text variant="caption" color="text.tertiary">
-                {formatJobDate(job.createdAt)}
-              </Text>
-            </S.ProgressMeta>
-          </S.ProgressRow>
-        </S.JobCardBody>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <S.MonoId variant="body-sm" weight="bold" color="text.primary">
+                  {job.id}
+                </S.MonoId>
+              </S.MetaValue>
+
+              <S.MetaLabel>
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.jobs.table.createdAt')}
+                </Text>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <Text variant="body-sm" weight="bold" color="text.primary">
+                  {formatJobDate(job.createdAt)}
+                </Text>
+              </S.MetaValue>
+
+              <S.MetaLabel>
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.jobs.table.processed')}
+                </Text>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <Text variant="body-sm" weight="bold" color="text.primary" numeric>
+                  {job.processedCount}
+                </Text>
+              </S.MetaValue>
+
+              <S.MetaLabel>
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.jobs.table.total')}
+                </Text>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <Text variant="body-sm" weight="bold" color="text.primary" numeric>
+                  {job.totalAsins}
+                </Text>
+              </S.MetaValue>
+            </S.MetaList>
+
+            <S.ProgressSignal
+              $tone={progressTone}
+              $active={isProcessing}
+              role="status"
+              aria-label={t('listings.jobs.card.progressLabel', { percent })}
+            >
+              <S.ProgressDot $tone={progressTone} $active={isProcessing} aria-hidden="true" />
+              <S.ProgressCopy>
+                <Text variant="caption" color="text.secondary">
+                  {t('listings.jobs.table.progress')}
+                </Text>
+                <S.ProgressValue variant="metric-lg" weight="bold" numeric $tone={progressTone}>
+                  %{percent}
+                </S.ProgressValue>
+              </S.ProgressCopy>
+            </S.ProgressSignal>
+          </S.JobCardBody>
+        </S.JobCardTop>
 
         <S.StatsGrid>
+          <S.StatCell>
+            <S.StatLabel variant="caption" color="text.secondary">
+              {t('listings.jobs.stats.success')}
+            </S.StatLabel>
+            <S.StatValue variant="body" weight="semibold" $tone="positive" numeric>
+              {job.successCount}
+            </S.StatValue>
+          </S.StatCell>
+          <S.StatCell>
+            <S.StatLabel variant="caption" color="text.secondary">
+              {t('listings.jobs.stats.failed')}
+            </S.StatLabel>
+            <S.StatValue variant="body" weight="semibold" $tone={job.failedCount > 0 ? 'negative' : 'default'} numeric>
+              {job.failedCount}
+            </S.StatValue>
+          </S.StatCell>
+          {remaining > 0 ? (
             <S.StatCell>
               <S.StatLabel variant="caption" color="text.secondary">
-                {t('listings.jobs.stats.success')}
+                {t('listings.jobs.stats.remaining')}
               </S.StatLabel>
-              <S.StatValue variant="body" weight="semibold" $tone="positive" numeric>
-                {job.successCount}
+              <S.StatValue variant="body" weight="semibold" numeric>
+                {remaining}
               </S.StatValue>
             </S.StatCell>
-            <S.StatCell>
-              <S.StatLabel variant="caption" color="text.secondary">
-                {t('listings.jobs.stats.failed')}
-              </S.StatLabel>
-              <S.StatValue
-                variant="body"
-                weight="semibold"
-                $tone={job.failedCount > 0 ? 'negative' : 'default'}
-                numeric
+          ) : null}
+          <S.FooterActions>
+            {canCancel ? (
+              <Button
+                variant="danger-tint"
+                size="small"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onCancelRequest(job.id);
+                }}
+                isLoading={cancellingJobId === job.id}
+                disabled={Boolean(cancellingJobId)}
               >
-                {job.failedCount}
-              </S.StatValue>
-            </S.StatCell>
-            {remaining > 0 ? (
-              <S.StatCell>
-                <S.StatLabel variant="caption" color="text.secondary">
-                  {t('listings.jobs.stats.remaining')}
-                </S.StatLabel>
-                <S.StatValue variant="body" weight="semibold" numeric>
-                  {remaining}
-                </S.StatValue>
-              </S.StatCell>
+                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+              </Button>
             ) : null}
-          <S.DetailHint>
-            <Text variant="caption" weight="semibold" color="brand.primary">
-              {t('translation:common.details')}
-            </Text>
-            <Icon name="chevron-right" size={16} color="brand.primary" />
-          </S.DetailHint>
+            <S.DetailHint>
+              <Text variant="caption" weight="semibold" color="brand.primary">
+                {t('translation:common.details')}
+              </Text>
+              <Icon name="chevron-right" size={16} color="brand.primary" />
+            </S.DetailHint>
+          </S.FooterActions>
         </S.StatsGrid>
       </S.JobCard>
     );
@@ -214,7 +284,8 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
       )}
 
       <DataTable
-        gridMinItemWidth="20rem"
+        gridMinItemWidth="24rem"
+        gridMaxColumns={3}
         downloadLabel={t('listings.actions.export')}
         resultLabel={
           <Trans
@@ -225,6 +296,18 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
           />
         }
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={onToggleColumn}
+        onMoveColumn={onMoveColumn}
+        columnManagerLabel={t('listings.table.columns')}
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        sortLabel={t('listings.filters.sortLabel')}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={onSort}
         data={jobs}
         renderGridCard={renderGridCard}
         viewMode={viewMode}
@@ -237,6 +320,23 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
         onDownload={isEmpty || isInitialLoading ? undefined : onDownload}
         pagination={pagination}
         onRowClick={(row) => onJobClick(row.id)}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(cancelTargetId)}
+        onClose={onCancelDismiss}
+        onConfirm={onCancelConfirm}
+        type="warning"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('listings.jobs.details.cancelConfirm')}
+        confirmLabel={t('listings.jobs.details.cancelConfirmAction')}
+        cancelLabel={t('translation:common.cancel')}
+        isLoading={Boolean(cancellingJobId)}
       />
     </S.Container>
   );

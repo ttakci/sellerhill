@@ -46,6 +46,9 @@ const isBlacklistedItem = (item: ListingJobItemDto): boolean =>
 const jobPercent = (job: ListingJobDto): number =>
   job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
 
+type JobItemSortKey = 'asin' | 'status' | 'ebayItemId' | 'failureCode';
+const JOB_ITEM_SORT_KEYS: JobItemSortKey[] = ['asin', 'status', 'ebayItemId', 'failureCode'];
+
 export const ListingJobDetailsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { jobId } = useParams<{ jobId: string }>();
@@ -57,6 +60,8 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [itemSearch, setItemSearch] = useState('');
   const [itemFilter, setItemFilter] = useState<JobItemFilter>(JobItemFilter.ALL);
+  const [sortBy, setSortBy] = useState<JobItemSortKey>('asin');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const {
     data: job,
@@ -199,16 +204,20 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     [locale]
   );
 
-  const columns: TableColumn<ListingJobItemDto>[] = useMemo(
+  const allColumns: TableColumn<ListingJobItemDto>[] = useMemo(
     () => [
       {
         key: 'asin',
+        sortable: true,
         header: t('listings.jobs.items.asin'),
+        width: '10rem',
         render: (_value, item) => <IdBadge id={item.asin} storeType="amazon" size="sm" />,
       },
       {
         key: 'status',
+        sortable: true,
         header: t('listings.jobs.items.status'),
+        width: '8rem',
         render: (_value, item) => (
           <StatusBadge status={String(item.status).toLowerCase()} size="sm">
             {itemStatusLabel(item.status)}
@@ -217,7 +226,9 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       },
       {
         key: 'ebayItemId',
+        sortable: true,
         header: t('listings.jobs.items.ebayId'),
+        width: '10rem',
         render: (_value, item) =>
           item.ebayItemId ? (
             <IdBadge id={item.ebayItemId} storeType="ebay" size="sm" />
@@ -229,6 +240,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       },
       {
         key: 'failureCode',
+        sortable: true,
         header: t('listings.jobs.items.reason'),
         render: (_value, item) => {
           // Sellers see the localized, actionable reason only. The provider's
@@ -262,6 +274,67 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       // resource on the attempt least likely to succeed.
     ],
     [t, itemStatusLabel, failureLabel, failureReference]
+  );
+
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const all = allColumns.map((column) => column.key);
+    return [...columnOrder.filter((key) => all.includes(key)), ...all.filter((key) => !columnOrder.includes(key))];
+  }, [allColumns, columnOrder]);
+  const columns = useMemo(
+    () =>
+      orderedKeys
+        .filter((key) => !hiddenColumnKeys.includes(key))
+        .map((key) => allColumns.find((column) => column.key === key))
+        .filter((column): column is TableColumn<ListingJobItemDto> => Boolean(column)),
+    [allColumns, hiddenColumnKeys, orderedKeys]
+  );
+  const columnOptions = useMemo(
+    () =>
+      orderedKeys.map((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        return {
+          key,
+          label: typeof column?.header === 'string' ? column.header : key,
+          alwaysVisible: key === 'asin',
+        };
+      }),
+    [allColumns, orderedKeys]
+  );
+  const visibleColumnKeys = useMemo(
+    () => orderedKeys.filter((key) => !hiddenColumnKeys.includes(key)),
+    [hiddenColumnKeys, orderedKeys]
+  );
+  const handleToggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((current) =>
+      current.includes(key) ? current.filter((columnKey) => columnKey !== key) : [...current, key]
+    );
+  }, []);
+  const handleMoveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys]
+  );
+  const sortOptions = useMemo(
+    () =>
+      JOB_ITEM_SORT_KEYS.flatMap((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        const label = typeof column?.header === 'string' ? column.header : key;
+        return [
+          { value: `${key}:asc`, label: `${label} ↑` },
+          { value: `${key}:desc`, label: `${label} ↓` },
+        ];
+      }),
+    [allColumns]
   );
 
   /** ASIN or the localized failure message — the two things a seller actually
@@ -311,17 +384,26 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       byStatus = items.filter((item) => isFailedItem(item) && !isBlacklistedItem(item));
     }
     const q = itemSearch.trim().toLowerCase();
-    if (!q) {
-      return byStatus;
-    }
-    return byStatus.filter((item) => {
-      if (item.asin.toLowerCase().includes(q)) {
-        return true;
+    const searched = q
+      ? byStatus.filter((item) => {
+          if (item.asin.toLowerCase().includes(q)) {
+            return true;
+          }
+          const reason = failureLabel(item);
+          return reason ? reason.toLowerCase().includes(q) : false;
+        })
+      : byStatus;
+    const valueFor = (item: ListingJobItemDto): string => {
+      if (sortBy === 'failureCode') {
+        return failureLabel(item) ?? '';
       }
-      const reason = failureLabel(item);
-      return reason ? reason.toLowerCase().includes(q) : false;
+      return String(item[sortBy] ?? '');
+    };
+    return [...searched].sort((left, right) => {
+      const comparison = valueFor(left).localeCompare(valueFor(right), locale, { numeric: true });
+      return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [items, itemFilter, itemSearch, failureLabel]);
+  }, [items, itemFilter, itemSearch, failureLabel, sortBy, sortDirection, locale]);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -346,6 +428,27 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     setItemFilter(JobItemFilter.ALL);
     setPage(1);
   }, []);
+
+  const handleSortChange = useCallback((value: string | number) => {
+    const [nextKey, nextDirection] = String(value).split(':');
+    if (!JOB_ITEM_SORT_KEYS.includes(nextKey as JobItemSortKey)) {
+      return;
+    }
+    setSortBy(nextKey as JobItemSortKey);
+    setSortDirection(nextDirection === 'desc' ? 'desc' : 'asc');
+    setPage(1);
+  }, []);
+  const handleColumnSort = useCallback(
+    (columnKey: string) => {
+      if (!JOB_ITEM_SORT_KEYS.includes(columnKey as JobItemSortKey)) {
+        return;
+      }
+      setSortBy(columnKey as JobItemSortKey);
+      setSortDirection((current) => (sortBy === columnKey && current === 'asc' ? 'desc' : 'asc'));
+      setPage(1);
+    },
+    [sortBy]
+  );
 
   const handleBack = useCallback(() => {
     localeNavigate('/listings/jobs');
@@ -380,6 +483,16 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       viewMode={viewMode}
       onViewModeChange={setViewMode}
       columns={columns}
+      columnOptions={columnOptions}
+      visibleColumnKeys={visibleColumnKeys}
+      onToggleColumn={handleToggleColumn}
+      onMoveColumn={handleMoveColumn}
+      sortOptions={sortOptions}
+      sortValue={`${sortBy}:${sortDirection}`}
+      onSortChange={handleSortChange}
+      sortColumn={sortBy}
+      sortDirection={sortDirection}
+      onSort={handleColumnSort}
       onBack={handleBack}
       canCancel={canCancel}
       isCancelling={isCancelling}

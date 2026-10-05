@@ -1638,6 +1638,14 @@ export class ListingsService {
     }
 
     const whereClause = `WHERE ${conditions.join(' AND ')}`;
+    const sortExpressions: Record<NonNullable<ListingJobsQueryDto['sortBy']>, string> = {
+      status: 'status',
+      progress: 'CASE WHEN total_asins > 0 THEN processed_count::numeric / total_asins ELSE 0 END',
+      stats: 'success_count',
+      createdAt: 'created_at',
+    };
+    const sortExpression = query.sortBy && sortExpressions[query.sortBy] ? sortExpressions[query.sortBy] : 'created_at';
+    const sortOrder = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
 
     const countResult = await this.databaseService.query<{ count: string }>(
       `SELECT COUNT(*)::text AS count FROM listing_jobs ${whereClause}`,
@@ -1649,7 +1657,7 @@ export class ListingsService {
       `
       SELECT * FROM listing_jobs
       ${whereClause}
-      ORDER BY created_at DESC, id ASC
+      ORDER BY ${sortExpression} ${sortOrder}, created_at DESC, id ASC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
       `,
       [...params, limit, offset]

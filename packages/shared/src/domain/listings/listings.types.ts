@@ -386,6 +386,9 @@ export interface ListingJobsQueryDto {
   hasFailures?: boolean;
   /** Only jobs of this eBay store (`listing_jobs.ebay_account_id`). A UUID; anything else is a 400. */
   ebayAccountId?: string;
+  /** Frontend column key; the API maps it to a fixed SQL expression. */
+  sortBy?: 'status' | 'progress' | 'stats' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**

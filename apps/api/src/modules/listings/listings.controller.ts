@@ -24,6 +24,7 @@ import {
   ListingDto,
   ListingJobDto,
   ListingJobItemDto,
+  type ListingJobsQueryDto,
   type ListingsQueryDto,
   type PaginatedListingJobsDto,
   type PaginatedListingRevisionsDto,
@@ -346,7 +347,9 @@ export class ListingsController {
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
     @Query('hasFailures') hasFailures?: string,
-    @Query('ebayAccountId') ebayAccountId?: string
+    @Query('ebayAccountId') ebayAccountId?: string,
+    @Query('sortBy') sortBy?: ListingJobsQueryDto['sortBy'],
+    @Query('sortOrder') sortOrder?: ListingJobsQueryDto['sortOrder']
   ): Promise<PaginatedListingJobsDto> {
     const userId = req.user.sub;
     return this.listingsService.getJobs(userId, {
@@ -358,6 +361,8 @@ export class ListingsController {
       dateTo,
       hasFailures: hasFailures === 'true',
       ebayAccountId: parseOptionalAccountId(ebayAccountId),
+      sortBy,
+      sortOrder,
     });
   }
 

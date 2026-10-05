@@ -39,6 +39,7 @@
         "actions": "İşlemler",
         "createdAt": "Oluşturulma",
         "updatedAt": "Güncellenme",
+        "scheduledUntil": "Son planlanan başlangıç",
         "total": "Toplam",
         "processed": "İşlenen"
       },

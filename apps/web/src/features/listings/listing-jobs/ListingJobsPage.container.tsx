@@ -1,18 +1,10 @@
-import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto } from '@repo/shared';
-import {
-  ProgressBar,
-  Badge,
-  Text,
-  formatDate,
-  getLocaleConfig,
-  type TableColumn,
-  type ViewMode,
-} from '@repo/ui';
+import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto, type ListingJobsQueryDto } from '@repo/shared';
+import { ProgressBar, Badge, Button, Text, formatDate, getLocaleConfig, type TableColumn, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
-import { useGetListingJobsQuery } from '../api/listings.api';
+import { useCancelListingJobMutation, useGetListingJobsQuery } from '../api/listings.api';
 
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
@@ -25,6 +17,8 @@ import { useLocale } from '@/utils/useLocale';
 
 const jobPercent = (job: ListingJobDto): number =>
   job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
+
+const JOB_SORT_KEYS: NonNullable<ListingJobsQueryDto['sortBy']>[] = ['status', 'progress', 'stats', 'createdAt'];
 
 export const ListingJobsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
@@ -57,6 +51,8 @@ export const ListingJobsPageContainer: React.FC = () => {
     return Object.values(ListingJobDatePreset).find((preset) => preset === raw) ?? ListingJobDatePreset.ALL;
   });
   const [hasFailures, setHasFailures] = useState(() => searchParams.get('hasFailures') === 'true');
+  const [sortBy, setSortBy] = useState<NonNullable<ListingJobsQueryDto['sortBy']>>('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // A discoverable dropdown, not a typed date guess — resolved to explicit
   // YYYY-MM-DD bounds once per render, not re-derived inside the query call.
@@ -67,7 +63,7 @@ export const ListingJobsPageContainer: React.FC = () => {
    * job table and filtering/slicing it here meant the payload grew for the life
    * of the account and every poll re-downloaded all of it.
    */
-  const { data, isLoading } = useGetListingJobsQuery(
+  const { data, isLoading, refetch } = useGetListingJobsQuery(
     {
       page,
       limit: rowsPerPage,
@@ -77,6 +73,8 @@ export const ListingJobsPageContainer: React.FC = () => {
       dateTo: dateRange.dateTo,
       hasFailures: hasFailures || undefined,
       ebayAccountId: storeFilter || undefined,
+      sortBy,
+      sortOrder: sortDirection,
     },
     { pollingInterval: 5000, refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
@@ -86,6 +84,8 @@ export const ListingJobsPageContainer: React.FC = () => {
   const jobs = useMemo(() => data?.items ?? [], [data]);
   const totalCount = data?.total ?? 0;
   const isInitialLoading = isLoading && jobs.length === 0;
+  const [cancelJob, { isLoading: isCancelling }] = useCancelListingJobMutation();
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
   const statusLabel = useCallback(
     (status: ListingJobStatus | string) => {
@@ -135,20 +135,23 @@ export const ListingJobsPageContainer: React.FC = () => {
     search.trim() || statusFilter || datePreset !== ListingJobDatePreset.ALL || hasFailures
   );
 
-  const columns: TableColumn<ListingJobDto>[] = useMemo(
+  const allColumns: TableColumn<ListingJobDto>[] = useMemo(
     () => [
       {
         key: 'id',
         header: t('listings.jobs.table.id'),
+        width: '8.5rem',
         render: (_value, job) => (
           <S.MonoId variant="body-sm" weight="semibold" color="text.primary">
-            {job.id.slice(0, 8)}…
+            {job.id}
           </S.MonoId>
         ),
       },
       {
         key: 'status',
+        sortable: true,
         header: t('listings.jobs.table.status'),
+        width: '7rem',
         render: (_value, job) => (
           <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
             {statusLabel(job.status)}
@@ -157,7 +160,9 @@ export const ListingJobsPageContainer: React.FC = () => {
       },
       {
         key: 'progress',
+        sortable: true,
         header: t('listings.jobs.table.progress'),
+        width: '9rem',
         render: (_value, job) => {
           const percent = jobPercent(job);
           return (
@@ -172,16 +177,19 @@ export const ListingJobsPageContainer: React.FC = () => {
       },
       {
         key: 'stats',
+        sortable: true,
         header: t('listings.jobs.table.stats'),
+        width: '13.5rem',
+        align: 'right',
         render: (_value, job) => (
           <S.TableStats>
-            <Text color="semantic.success" weight="semibold" variant="body-sm">
+            <Text color="semantic.success" weight="semibold" variant="body-sm" numeric>
               {job.successCount} {t('listings.jobs.stats.success')}
             </Text>
-            <Text color="semantic.error" weight="semibold" variant="body-sm">
+            <Text color="semantic.error" weight="semibold" variant="body-sm" numeric>
               {job.failedCount} {t('listings.jobs.stats.failed')}
             </Text>
-            <Text color="text.tertiary" variant="body-sm">
+            <Text color="text.tertiary" variant="body-sm" numeric>
               / {job.totalAsins}
             </Text>
           </S.TableStats>
@@ -189,15 +197,125 @@ export const ListingJobsPageContainer: React.FC = () => {
       },
       {
         key: 'createdAt',
+        sortable: true,
         header: t('listings.jobs.table.createdAt'),
+        width: '9.5rem',
         render: (_value, job) => (
           <Text variant="body-sm" color="text.secondary">
             {formatJobDate(job.createdAt)}
           </Text>
         ),
       },
+      {
+        key: 'actions',
+        header: t('listings.jobs.table.actions'),
+        width: '5.5rem',
+        align: 'right',
+        render: (_value, job) => {
+          const canCancel =
+            job.status === ListingJobStatus.PENDING || job.status === ListingJobStatus.PROCESSING;
+          return canCancel ? (
+            <Button
+              variant="danger-tint"
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation();
+                setCancelTargetId(job.id);
+              }}
+              isLoading={isCancelling && cancelTargetId === job.id}
+              disabled={isCancelling}
+            >
+              <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+            </Button>
+          ) : null;
+        },
+      },
     ],
-    [t, statusLabel, formatJobDate]
+    [t, statusLabel, formatJobDate, isCancelling, cancelTargetId]
+  );
+
+  // Match the listings/orders tables: sellers can hide and reorder columns,
+  // while the job identifier remains the stable anchor for every row.
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const all = allColumns.map((column) => column.key);
+    return [...columnOrder.filter((key) => all.includes(key)), ...all.filter((key) => !columnOrder.includes(key))];
+  }, [allColumns, columnOrder]);
+  const columns = useMemo(
+    () =>
+      orderedKeys
+        .filter((key) => !hiddenColumnKeys.includes(key))
+        .map((key) => allColumns.find((column) => column.key === key))
+        .filter((column): column is TableColumn<ListingJobDto> => Boolean(column)),
+    [allColumns, hiddenColumnKeys, orderedKeys]
+  );
+  const columnOptions = useMemo(
+    () =>
+      orderedKeys.map((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        return {
+          key,
+          label: typeof column?.header === 'string' ? column.header : key,
+          alwaysVisible: key === 'id' || key === 'actions',
+        };
+      }),
+    [allColumns, orderedKeys]
+  );
+  const visibleColumnKeys = useMemo(
+    () => orderedKeys.filter((key) => !hiddenColumnKeys.includes(key)),
+    [hiddenColumnKeys, orderedKeys]
+  );
+  const handleToggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((current) =>
+      current.includes(key) ? current.filter((columnKey) => columnKey !== key) : [...current, key]
+    );
+  }, []);
+  const handleMoveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys]
+  );
+
+  const sortOptions = useMemo(
+    () =>
+      JOB_SORT_KEYS.flatMap((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        const label = typeof column?.header === 'string' ? column.header : key;
+        return [
+          { value: `${key}:desc`, label: `${label} ↓` },
+          { value: `${key}:asc`, label: `${label} ↑` },
+        ];
+      }),
+    [allColumns]
+  );
+  const handleSortChange = useCallback((value: string | number) => {
+    const [nextKey, nextDirection] = String(value).split(':');
+    if (!JOB_SORT_KEYS.includes(nextKey as NonNullable<ListingJobsQueryDto['sortBy']>)) {
+      return;
+    }
+    setSortBy(nextKey as NonNullable<ListingJobsQueryDto['sortBy']>);
+    setSortDirection(nextDirection === 'asc' ? 'asc' : 'desc');
+    setPage(1);
+  }, []);
+  const handleColumnSort = useCallback(
+    (columnKey: string) => {
+      if (!JOB_SORT_KEYS.includes(columnKey as NonNullable<ListingJobsQueryDto['sortBy']>)) {
+        return;
+      }
+      setSortBy(columnKey as NonNullable<ListingJobsQueryDto['sortBy']>);
+      setSortDirection((current) => (sortBy === columnKey && current === 'desc' ? 'asc' : 'desc'));
+      setPage(1);
+    },
+    [sortBy]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +347,20 @@ export const ListingJobsPageContainer: React.FC = () => {
     },
     [localeNavigate]
   );
+
+  const handleCancelConfirm = useCallback(async () => {
+    if (!cancelTargetId) {
+      return;
+    }
+    try {
+      await cancelJob(cancelTargetId).unwrap();
+      setCancelTargetId(null);
+      await refetch();
+    } catch {
+      // The mutation error remains available to RTK Query; keep the dialog open
+      // so the seller can retry instead of silently losing the chosen job.
+    }
+  }, [cancelJob, cancelTargetId, refetch]);
 
   const handleBack = useCallback(() => {
     localeNavigate('/listings');
@@ -288,7 +420,22 @@ export const ListingJobsPageContainer: React.FC = () => {
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={handleToggleColumn}
+        onMoveColumn={handleMoveColumn}
+        sortOptions={sortOptions}
+        sortValue={`${sortBy}:${sortDirection}`}
+        onSortChange={handleSortChange}
+        sortColumn={sortBy}
+        sortDirection={sortDirection}
+        onSort={handleColumnSort}
         onJobClick={handleJobClick}
+        cancellingJobId={isCancelling ? cancelTargetId : null}
+        cancelTargetId={cancelTargetId}
+        onCancelRequest={setCancelTargetId}
+        onCancelDismiss={() => setCancelTargetId(null)}
+        onCancelConfirm={() => void handleCancelConfirm()}
         onDownload={handleDownload}
         onBack={handleBack}
         formatPercent={jobPercent}

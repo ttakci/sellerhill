@@ -27,6 +27,16 @@ export interface ListingJobDetailsPageComponentProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   columns: TableColumn<ListingJobItemDto>[];
+  columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];
+  visibleColumnKeys: string[];
+  onToggleColumn: (key: string) => void;
+  onMoveColumn: (key: string, direction: -1 | 1) => void;
+  sortOptions: { value: string; label: string }[];
+  sortValue: string;
+  onSortChange: (value: string | number) => void;
+  sortColumn: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (column: string) => void;
   onBack: () => void;
   /**
    * Cancel is offered only while the job can still be stopped. There is no
