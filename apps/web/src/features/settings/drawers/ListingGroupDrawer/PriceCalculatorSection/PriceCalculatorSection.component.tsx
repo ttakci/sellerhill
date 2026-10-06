@@ -19,8 +19,11 @@ const blockNonNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
 export const PriceCalculatorSectionComponent = ({
   amazonPriceInput,
   onAmazonPriceChange,
+  amazonPriceError,
+  adRateInput,
+  onAdRateChange,
+  adRateError,
   onCalculate,
-  isCalculateDisabled,
   breakdown,
 }: PriceCalculatorSectionComponentProps): React.ReactElement => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
@@ -37,21 +40,30 @@ export const PriceCalculatorSectionComponent = ({
         <ModernTextInput
           name="calculatorAmazonPrice"
           label={t('listingSettingsGroup.calculator.amazonPrice')}
+          ariaLabel={t('listingSettingsGroup.calculator.amazonPrice')}
           type="number"
           suffixText="$"
           size="small"
           value={amazonPriceInput}
           onChange={(e) => onAmazonPriceChange(e.target.value)}
           onKeyDown={blockNonNumeric}
+          errorMessage={amazonPriceError}
           fullWidth
         />
-        <S.CalculateButton
-          variant="secondary"
+        <ModernTextInput
+          name="calculatorAdRate"
+          label={t('listingSettingsGroup.calculator.adRate')}
+          ariaLabel={t('listingSettingsGroup.calculator.adRate')}
+          type="number"
+          suffixText="%"
           size="small"
-          type="button"
-          onClick={onCalculate}
-          disabled={isCalculateDisabled}
-        >
+          value={adRateInput}
+          onChange={(e) => onAdRateChange(e.target.value)}
+          onKeyDown={blockNonNumeric}
+          errorMessage={adRateError}
+          fullWidth
+        />
+        <S.CalculateButton variant="secondary" size="small" type="button" onClick={onCalculate}>
           <Text weight="semibold">{t('listingSettingsGroup.calculator.calculate')}</Text>
         </S.CalculateButton>
       </S.Row>

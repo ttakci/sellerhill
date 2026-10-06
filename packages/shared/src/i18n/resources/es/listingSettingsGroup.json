@@ -198,6 +198,10 @@
       "title": "Calculadora de precios",
       "subtitle": "Prueba estos ajustes: no se guarda nada, es solo una vista previa.",
       "amazonPrice": "Precio de compra en Amazon",
+      "adRate": "Simulación de tarifa publicitaria (%)",
+      "amazonPriceError": "Introduce un precio de compra en Amazon mayor que 0.",
+      "adRateError": "Introduce una tarifa publicitaria entre 0 y 100 con un decimal como máximo.",
+      "combinedRateError": "La comisión de eBay y la tarifa publicitaria juntas deben ser inferiores al 100 %.",
       "calculate": "Calcular",
       "resultLabel": "Precio de publicación en eBay",
       "breakdown": {
@@ -209,6 +213,7 @@
         "fixedProfit": "Ganancia fija",
         "netTarget": "Objetivo antes de las comisiones de eBay",
         "ebayFee": "Comisión de eBay ({{pct}})",
+        "adFee": "Tarifa publicitaria ({{pct}})",
         "fixedFee": "Comisión fija",
         "floorApplied": "Por debajo del mínimo de $0.99 de eBay, se elevó a",
         "rounding": "Redondeado hacia arriba a {{ending}}"

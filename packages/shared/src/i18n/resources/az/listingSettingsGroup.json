@@ -197,6 +197,10 @@
       "title": "Qiymət kalkulyatoru",
       "subtitle": "Bu parametrləri sınayın — yadda saxlanılmır, yalnız önizləmədir.",
       "amazonPrice": "Amazon alış qiyməti",
+      "adRate": "Reklam dərəcəsi sınağı (%)",
+      "amazonPriceError": "0-dan böyük Amazon alış qiyməti daxil edin.",
+      "adRateError": "0–100 arası, ən çox bir onluq rəqəmli reklam dərəcəsi daxil edin.",
+      "combinedRateError": "eBay haqqı ilə reklam dərəcəsinin cəmi 100%-dən az olmalıdır.",
       "calculate": "Hesabla",
       "resultLabel": "eBay elan qiyməti",
       "breakdown": {
@@ -208,6 +212,7 @@
         "fixedProfit": "Sabit mənfəət",
         "netTarget": "eBay haqlarından əvvəl hədəf",
         "ebayFee": "eBay haqqı ({{pct}})",
+        "adFee": "Reklam haqqı ({{pct}})",
         "fixedFee": "Sabit haqq",
         "floorApplied": "eBay-in $0.99 minimumundan aşağıdır, bu məbləğə qaldırıldı:",
         "rounding": "{{ending}} sonluğuna yuxarı yuvarlaqlaşdırıldı"

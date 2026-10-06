@@ -198,6 +198,10 @@
       "title": "Calculator de preț",
       "subtitle": "Testați aceste setări — nu se salvează, este doar o previzualizare.",
       "amazonPrice": "Prețul de achiziție Amazon",
+      "adRate": "Simulare rată publicitară (%)",
+      "amazonPriceError": "Introdu un preț de achiziție Amazon mai mare de 0.",
+      "adRateError": "Introdu o rată publicitară între 0 și 100, cu cel mult o zecimală.",
+      "combinedRateError": "Comisionul eBay și rata publicitară trebuie să însumeze sub 100%.",
       "calculate": "Calculează",
       "resultLabel": "Prețul de listare eBay",
       "breakdown": {
@@ -209,6 +213,7 @@
         "fixedProfit": "Profit fix",
         "netTarget": "Țintă înainte de comisioanele eBay",
         "ebayFee": "Comision eBay ({{pct}})",
+        "adFee": "Cost publicitar ({{pct}})",
         "fixedFee": "Comision fix",
         "floorApplied": "Sub minimul eBay de $0.99, crescut la",
         "rounding": "Rotunjit în sus la {{ending}}"

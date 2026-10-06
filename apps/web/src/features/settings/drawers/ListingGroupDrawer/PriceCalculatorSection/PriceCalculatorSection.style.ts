@@ -12,6 +12,11 @@ export const Row = styled.div`
     flex: 1;
     min-width: 0;
   }
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 /**
@@ -43,6 +48,8 @@ export const BreakdownRow = styled.div<{ $emphasis?: boolean }>`
   padding: ${({ $emphasis }) => ($emphasis ? tkn('spacing.md') : tkn('spacing.sm-md'))} ${tkn('spacing.lg')};
   ${({ $emphasis, theme }) =>
     $emphasis
-      ? `border-top: 0.0625rem solid ${tkn('colors.border.primary')({ theme })}; background: ${tkn('colors.surface.primary')({ theme })};`
+      ? `border-top: 0.0625rem solid ${tkn('colors.border.primary')({ theme })}; background: ${tkn(
+          'colors.surface.primary'
+        )({ theme })};`
       : ''}
 `;

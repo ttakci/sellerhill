@@ -196,6 +196,10 @@
       "title": "价格计算器",
       "subtitle": "测试这些设置，不会保存，仅供预览。",
       "amazonPrice": "Amazon 采购价",
+      "adRate": "广告费率试算 (%)",
+      "amazonPriceError": "请输入大于 0 的 Amazon 采购价。",
+      "adRateError": "请输入 0 至 100 之间的广告费率，最多保留一位小数。",
+      "combinedRateError": "eBay 费用与广告费率之和必须低于 100%。",
       "calculate": "计算",
       "resultLabel": "eBay 标价",
       "breakdown": {
@@ -207,6 +211,7 @@
         "fixedProfit": "固定利润",
         "netTarget": "扣除 eBay 费用前的目标金额",
         "ebayFee": "eBay 费用（{{pct}}）",
+        "adFee": "广告费 ({{pct}})",
         "fixedFee": "固定费用",
         "floorApplied": "低于 eBay 最低价 $0.99，已提高至",
         "rounding": "向上取整到 {{ending}}"

@@ -61,6 +61,13 @@ const buildBreakdownRows = (
     });
   }
 
+  if (b.adRatePercent > 0) {
+    rows.push({
+      label: t('listingSettingsGroup.calculator.breakdown.adFee', { pct: signedPercent('-', b.adRatePercent) }),
+      value: `-${formatCurrency(b.adFeeAmount)}`,
+    });
+  }
+
   if (b.fixedFeeAmount > 0) {
     rows.push({
       label: t('listingSettingsGroup.calculator.breakdown.fixedFee'),
@@ -102,6 +109,8 @@ const buildBreakdownRows = (
 export const PriceCalculatorSection: React.FC<PriceCalculatorSectionProps> = ({ control }) => {
   const { t } = useTranslation(['listingSettingsGroup']);
   const [amazonPriceInput, setAmazonPriceInput] = useState('');
+  const [adRateInput, setAdRateInput] = useState('0');
+  const [calculateAttempted, setCalculateAttempted] = useState(false);
   const [breakdown, setBreakdown] = useState<PriceBreakdownRow[]>([]);
 
   const repricingStrategy = useWatch({ control, name: 'repricingStrategy' });
@@ -116,9 +125,21 @@ export const PriceCalculatorSection: React.FC<PriceCalculatorSectionProps> = ({ 
     setBreakdown([]);
   };
 
+  const handleAdRateChange = (value: string): void => {
+    setAdRateInput(value);
+    setBreakdown([]);
+  };
+
+  const amazonPrice = Number(amazonPriceInput);
+  const validAmazonPrice = amazonPriceInput.trim() !== '' && Number.isFinite(amazonPrice) && amazonPrice > 0;
+  const validAdRate = /^(?:0|[1-9]\d?)(?:\.\d)?$|^100(?:\.0)?$/.test(adRateInput);
+  const adRatePct = Number(adRateInput);
+  const ebayFeePct = Number(fees?.ebayFeePercent);
+  const combinedRateTooHigh = validAdRate && Number.isFinite(ebayFeePct) && ebayFeePct + adRatePct >= 100;
+
   const handleCalculate = (): void => {
-    const amazonPrice = Number(amazonPriceInput);
-    if (!Number.isFinite(amazonPrice) || amazonPrice <= 0 || !fees) {
+    setCalculateAttempted(true);
+    if (!validAmazonPrice || !validAdRate || combinedRateTooHigh || !fees) {
       return;
     }
 
@@ -164,19 +185,29 @@ export const PriceCalculatorSection: React.FC<PriceCalculatorSectionProps> = ({ 
     }
 
     const amazonTaxRatePct = Number(globalSettings?.amazonTaxRate) || 0;
-    const result = calculateListingPrice(amazonPrice, normalizedStrategy, normalizedFees, amazonTaxRatePct);
+    const result = calculateListingPrice(amazonPrice, normalizedStrategy, normalizedFees, amazonTaxRatePct, adRatePct);
     setBreakdown(buildBreakdownRows(result.breakdown, t));
   };
-
-  const amazonPriceValue = Number(amazonPriceInput);
-  const isCalculateDisabled = !Number.isFinite(amazonPriceValue) || amazonPriceValue <= 0;
 
   return (
     <PriceCalculatorSectionComponent
       amazonPriceInput={amazonPriceInput}
       onAmazonPriceChange={handleAmazonPriceChange}
+      amazonPriceError={
+        calculateAttempted && !validAmazonPrice ? t('listingSettingsGroup.calculator.amazonPriceError') : undefined
+      }
+      adRateInput={adRateInput}
+      onAdRateChange={handleAdRateChange}
+      adRateError={
+        calculateAttempted && (!validAdRate || combinedRateTooHigh)
+          ? t(
+              combinedRateTooHigh
+                ? 'listingSettingsGroup.calculator.combinedRateError'
+                : 'listingSettingsGroup.calculator.adRateError'
+            )
+          : undefined
+      }
       onCalculate={handleCalculate}
-      isCalculateDisabled={isCalculateDisabled}
       breakdown={breakdown}
     />
   );

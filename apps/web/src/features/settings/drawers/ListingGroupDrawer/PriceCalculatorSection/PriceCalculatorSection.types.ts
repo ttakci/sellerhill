@@ -17,7 +17,10 @@ export interface PriceBreakdownRow {
 export interface PriceCalculatorSectionComponentProps {
   amazonPriceInput: string;
   onAmazonPriceChange: (value: string) => void;
+  amazonPriceError?: string;
+  adRateInput: string;
+  onAdRateChange: (value: string) => void;
+  adRateError?: string;
   onCalculate: () => void;
-  isCalculateDisabled: boolean;
   breakdown: PriceBreakdownRow[];
 }

@@ -197,6 +197,10 @@
       "title": "Fiyat hesaplayıcı",
       "subtitle": "Bu ayarları test edin — kaydedilmez, sadece önizlemedir.",
       "amazonPrice": "Amazon alış fiyatı",
+      "adRate": "Reklam oranı denemesi (%)",
+      "amazonPriceError": "0'dan büyük bir Amazon alış fiyatı girin.",
+      "adRateError": "0 ile 100 arasında, en fazla bir ondalıklı reklam oranı girin.",
+      "combinedRateError": "eBay ücreti ve reklam oranı toplamı %100'ün altında olmalı.",
       "calculate": "Hesapla",
       "resultLabel": "eBay liste fiyatı",
       "breakdown": {
@@ -208,6 +212,7 @@
         "fixedProfit": "Sabit kâr",
         "netTarget": "eBay ücretleri öncesi hedef",
         "ebayFee": "eBay ücreti ({{pct}})",
+        "adFee": "Reklam ücreti ({{pct}})",
         "fixedFee": "Sabit ücret",
         "floorApplied": "eBay'in $0.99 minimumunun altında, şuna yükseltildi",
         "rounding": "{{ending}} sonuna yukarı yuvarlandı"

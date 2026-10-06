@@ -197,6 +197,10 @@
       "title": "Price calculator",
       "subtitle": "Test these settings — not saved, just a preview.",
       "amazonPrice": "Amazon purchase price",
+      "adRate": "Ad rate what-if (%)",
+      "amazonPriceError": "Enter an Amazon purchase price greater than 0.",
+      "adRateError": "Enter an ad rate from 0 to 100 with at most one decimal place.",
+      "combinedRateError": "The eBay fee and ad rate together must be below 100%.",
       "calculate": "Calculate",
       "resultLabel": "eBay list price",
       "breakdown": {
@@ -208,6 +212,7 @@
         "fixedProfit": "Fixed profit",
         "netTarget": "Target before eBay fees",
         "ebayFee": "eBay fee ({{pct}})",
+        "adFee": "Ad fee ({{pct}})",
         "fixedFee": "Fixed fee",
         "floorApplied": "Below eBay's $0.99 minimum, raised to",
         "rounding": "Rounded up to {{ending}}"

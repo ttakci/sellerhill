@@ -201,6 +201,10 @@
       "title": "حاسبة الأسعار",
       "subtitle": "جرّب هذه الإعدادات، فهي غير محفوظة وللمعاينة فقط.",
       "amazonPrice": "سعر الشراء من Amazon",
+      "adRate": "تجربة معدل الإعلان (%)",
+      "amazonPriceError": "أدخل سعر شراء من Amazon أكبر من 0.",
+      "adRateError": "أدخل معدل إعلان من 0 إلى 100 بمنزلة عشرية واحدة على الأكثر.",
+      "combinedRateError": "يجب أن يكون مجموع رسوم eBay ومعدل الإعلان أقل من 100%.",
       "calculate": "احسب",
       "resultLabel": "سعر الإدراج على eBay",
       "breakdown": {
@@ -212,6 +216,7 @@
         "fixedProfit": "ربح ثابت",
         "netTarget": "المستهدف قبل رسوم eBay",
         "ebayFee": "رسوم eBay ({{pct}})",
+        "adFee": "رسوم الإعلان ({{pct}})",
         "fixedFee": "رسوم ثابتة",
         "floorApplied": "أقل من الحد الأدنى لدى eBay وهو 0.99 دولار، تم رفعه إلى",
         "rounding": "تم التقريب إلى الأعلى حتى {{ending}}"

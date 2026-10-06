@@ -198,6 +198,10 @@
       "title": "Calculateur de prix",
       "subtitle": "Testez ces paramètres — rien n'est enregistré, c'est un simple aperçu.",
       "amazonPrice": "Prix d'achat Amazon",
+      "adRate": "Simulation du taux publicitaire (%)",
+      "amazonPriceError": "Saisissez un prix d'achat Amazon supérieur à 0.",
+      "adRateError": "Saisissez un taux publicitaire de 0 à 100 avec une décimale au maximum.",
+      "combinedRateError": "Le total des frais eBay et du taux publicitaire doit rester inférieur à 100 %.",
       "calculate": "Calculer",
       "resultLabel": "Prix de vente eBay",
       "breakdown": {
@@ -209,6 +213,7 @@
         "fixedProfit": "Profit fixe",
         "netTarget": "Objectif avant frais eBay",
         "ebayFee": "Frais eBay ({{pct}})",
+        "adFee": "Frais publicitaires ({{pct}})",
         "fixedFee": "Frais fixes",
         "floorApplied": "Inférieur au minimum eBay de 0,99 $, relevé à",
         "rounding": "Arrondi au supérieur à {{ending}}"

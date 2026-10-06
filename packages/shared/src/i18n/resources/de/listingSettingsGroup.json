@@ -197,6 +197,10 @@
       "title": "Preisrechner",
       "subtitle": "Testen Sie diese Einstellungen – wird nicht gespeichert, nur eine Vorschau.",
       "amazonPrice": "Amazon-Einkaufspreis",
+      "adRate": "Anzeigenrate zum Testen (%)",
+      "amazonPriceError": "Gib einen Amazon-Einkaufspreis über 0 ein.",
+      "adRateError": "Gib eine Anzeigenrate von 0 bis 100 mit höchstens einer Dezimalstelle ein.",
+      "combinedRateError": "eBay-Gebühr und Anzeigenrate müssen zusammen unter 100 % liegen.",
       "calculate": "Berechnen",
       "resultLabel": "eBay-Angebotspreis",
       "breakdown": {
@@ -208,6 +212,7 @@
         "fixedProfit": "Fester Gewinn",
         "netTarget": "Zielwert vor eBay-Gebühren",
         "ebayFee": "eBay-Gebühr ({{pct}})",
+        "adFee": "Anzeigengebühr ({{pct}})",
         "fixedFee": "Feste Gebühr",
         "floorApplied": "Unter dem eBay-Minimum von 0,99 $, angehoben auf",
         "rounding": "Aufgerundet auf {{ending}}"

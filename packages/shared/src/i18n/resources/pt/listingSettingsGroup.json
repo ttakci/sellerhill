@@ -198,6 +198,10 @@
       "title": "Calculadora de preços",
       "subtitle": "Teste estas configurações — não é salvo, é apenas uma prévia.",
       "amazonPrice": "Preço de compra na Amazon",
+      "adRate": "Simulação da taxa de anúncio (%)",
+      "amazonPriceError": "Insira um preço de compra na Amazon maior que 0.",
+      "adRateError": "Insira uma taxa de anúncio de 0 a 100 com, no máximo, uma casa decimal.",
+      "combinedRateError": "A soma da taxa do eBay com a taxa de anúncio deve ser inferior a 100%.",
       "calculate": "Calcular",
       "resultLabel": "Preço de venda no eBay",
       "breakdown": {
@@ -209,6 +213,7 @@
         "fixedProfit": "Lucro fixo",
         "netTarget": "Meta antes das taxas do eBay",
         "ebayFee": "Taxa do eBay ({{pct}})",
+        "adFee": "Custo do anúncio ({{pct}})",
         "fixedFee": "Taxa fixa",
         "floorApplied": "Abaixo do mínimo de $0.99 do eBay, elevado para",
         "rounding": "Arredondado para cima até {{ending}}"
