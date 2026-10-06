@@ -1,3 +1,5 @@
+import type { EbayAdvertisingEligibilityDto } from '../ebay/ebay-call-budget.types';
+
 export enum EbayCampaignStatus {
   RUNNING = 'RUNNING',
   PAUSED = 'PAUSED',
@@ -68,6 +70,20 @@ export interface CampaignListingDto {
   adRate: number | null;
   appliedAdRate: number;
   priceLocked: boolean;
+  hasMarginOverride: boolean;
+}
+
+export interface EbayCampaignListDto {
+  campaigns: EbayCampaignDto[];
+  eligibility: EbayAdvertisingEligibilityDto;
+}
+
+export interface CampaignCandidatesDto {
+  items: CampaignListingDto[];
+  total: number;
+  page: number;
+  limit: number;
+  skippedInCampaign: number;
 }
 
 export interface EbayCampaignDetailDto {

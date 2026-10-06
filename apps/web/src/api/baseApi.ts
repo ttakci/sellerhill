@@ -102,6 +102,7 @@ export const baseApi = createApi({
     'PredefinedTemplates',
     'Profile',
     'Listings',
+    'Campaigns',
     'EbayPolicies',
     'Amazon',
     'Orders',

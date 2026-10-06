@@ -111,6 +111,13 @@ interface ListingQueryRow {
   quantity_override?: number | null;
   margin_percent_override?: string | null;
   margin_fixed_override?: string | null;
+  campaign_id?: string | null;
+  campaign_name?: string | null;
+  campaign_status?: string | null;
+  campaign_funding_model?: string | null;
+  campaign_ad_rate_strategy?: string | null;
+  promoted_ad_rate?: string | null;
+  ad_rate_applied?: string | null;
 }
 
 /** Row type for getUserProducts query */
@@ -404,6 +411,7 @@ export class ListingsService {
         row.margin_fixed_override !== undefined && row.margin_fixed_override !== null
           ? parseFloat(String(row.margin_fixed_override))
           : null,
+      adCampaign: null,
     };
   }
 
@@ -746,6 +754,7 @@ export class ListingsService {
         ebayAccountId: row.ebay_account_id,
         createdAt: row.discovered_at.toISOString(),
         updatedAt: row.last_seen_at.toISOString(),
+        adCampaign: null,
       })),
       total: Number(count[0]?.count ?? 0),
       page,
@@ -970,11 +979,17 @@ export class ListingsService {
         p.description AS product_description,
         g.name AS group_name,
         ea.marketplace_id AS ebay_marketplace_id,
+        c.campaign_id AS campaign_id,
+        c.name AS campaign_name,
+        c.status AS campaign_status,
+        c.funding_model AS campaign_funding_model,
+        c.ad_rate_strategy AS campaign_ad_rate_strategy,
         (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
       LEFT JOIN listing_settings_groups g ON l.listing_settings_group_id = g.id
       LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
+      LEFT JOIN ebay_campaigns c ON c.ebay_account_id = l.ebay_account_id AND c.campaign_id = l.promoted_campaign_id
       WHERE l.id = $1 AND l.user_id = $2
     `,
       [id, userId]
@@ -984,7 +999,21 @@ export class ListingsService {
       return null;
     }
 
-    return this.mapListingRow(results[0]);
+    const row = results[0];
+    return {
+      ...this.mapListingRow(row),
+      adCampaign: row.campaign_id === null || row.campaign_id === undefined ? null : {
+        campaignId: row.campaign_id,
+        name: row.campaign_name ?? '',
+        status: row.campaign_status ?? '',
+        fundingModel: row.campaign_funding_model ?? null,
+        adRateStrategy: row.campaign_ad_rate_strategy ?? null,
+        adRate: row.promoted_ad_rate === null || row.promoted_ad_rate === undefined
+          ? null
+          : Number(row.promoted_ad_rate),
+        appliedAdRate: Number(row.ad_rate_applied ?? 0),
+      },
+    };
   }
 
   /**

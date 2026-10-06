@@ -138,6 +138,16 @@ export interface ListingDto {
   quantityOverride?: number | null;
   marginPercentOverride?: number | null;
   marginFixedOverride?: number | null;
+  /** Campaign joined through this listing's own eBay store; present on detail reads. */
+  adCampaign?: {
+    campaignId: string;
+    name: string;
+    status: string;
+    fundingModel: string | null;
+    adRateStrategy: string | null;
+    adRate: number | null;
+    appliedAdRate: number;
+  } | null;
 }
 
 /**

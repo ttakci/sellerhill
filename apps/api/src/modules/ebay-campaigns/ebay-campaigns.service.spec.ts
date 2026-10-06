@@ -3,7 +3,7 @@ import { EbayCampaignsService } from './ebay-campaigns.service';
 const accountId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const userId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
-function fixture() {
+function fixture(fixedMargin = false) {
   const database = {
     query: jest.fn((sql: string, params: unknown[] = []) => {
       if (sql.includes('FROM ebay_accounts')) {
@@ -46,7 +46,9 @@ function fixture() {
             price: '14.49',
             promoted_ad_rate: '5.5',
             ad_rate_applied: '5.5',
-            lock_price: true,
+            lock_price: !fixedMargin,
+            margin_percent_override: fixedMargin ? null : '12.5',
+            margin_fixed_override: fixedMargin ? '3.00' : null,
           },
         ];
       }
@@ -139,6 +141,14 @@ describe('EbayCampaignsService', () => {
     const detail = await f.service.detail(userId, accountId, '100');
     expect(detail.campaign.bidPercentage).toBe(5);
     expect(detail.campaign.sellerHillListingCount).toBe(1);
-    expect(detail.listings[0]).toMatchObject({ price: 14.49, adRate: 5.5, appliedAdRate: 5.5, priceLocked: true });
+    expect(detail.listings[0]).toMatchObject({ price: 14.49, adRate: 5.5, appliedAdRate: 5.5, priceLocked: true, hasMarginOverride: true });
+    const sqls = f.database.query.mock.calls.map((args) => args[0]);
+    expect(sqls.some((sql) => sql.includes('l.margin_percent_override, l.margin_fixed_override'))).toBe(true);
+  });
+
+  it('reports a margin override independently of the price lock', async () => {
+    const f = fixture(true);
+    const detail = await f.service.detail(userId, accountId, '100');
+    expect(detail.listings[0]).toMatchObject({ priceLocked: false, hasMarginOverride: true, adRate: 5.5, appliedAdRate: 5.5 });
   });
 });

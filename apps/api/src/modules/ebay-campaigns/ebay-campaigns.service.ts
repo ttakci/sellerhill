@@ -5,9 +5,10 @@ import {
   ListingStatus,
   type CampaignCandidatesQuery,
   type CampaignListingDto,
-  type EbayAdvertisingEligibilityDto,
   type EbayCampaignDetailDto,
   type EbayCampaignDto,
+  type EbayCampaignListDto,
+  type CampaignCandidatesDto,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -45,6 +46,8 @@ interface ListingRow {
   promoted_ad_rate: string | null;
   ad_rate_applied: string;
   lock_price: boolean;
+  margin_percent_override: string | null;
+  margin_fixed_override: string | null;
 }
 
 @Injectable()
@@ -116,13 +119,14 @@ export class EbayCampaignsService {
       adRate: row.promoted_ad_rate === null ? null : Number(row.promoted_ad_rate),
       appliedAdRate: Number(row.ad_rate_applied),
       priceLocked: row.lock_price,
+      hasMarginOverride: row.margin_percent_override !== null || row.margin_fixed_override !== null,
     };
   }
 
   private async listings(accountId: string, campaignId: string): Promise<CampaignListingDto[]> {
     const rows = await this.database.query<ListingRow>(
       `SELECT l.id, l.ebay_item_id, l.title, p.image_urls->>0 AS image_url, l.price,
-         l.promoted_ad_rate, l.ad_rate_applied,
+         l.promoted_ad_rate, l.ad_rate_applied, l.margin_percent_override, l.margin_fixed_override,
          (l.lock_price OR l.disable_repricing OR l.price_override IS NOT NULL) AS lock_price
        FROM listings l LEFT JOIN products p ON p.id = l.product_id
        WHERE l.ebay_account_id = $1 AND l.promoted_campaign_id = $2 ORDER BY l.created_at DESC`,
@@ -134,7 +138,7 @@ export class EbayCampaignsService {
   async list(
     userId: string,
     accountId: string
-  ): Promise<{ campaigns: EbayCampaignDto[]; eligibility: EbayAdvertisingEligibilityDto }> {
+  ): Promise<EbayCampaignListDto> {
     await this.account(userId, accountId);
     const [rows, eligibility] = await Promise.all([
       this.campaignRows(accountId),
@@ -146,7 +150,7 @@ export class EbayCampaignsService {
   async candidates(
     userId: string,
     query: CampaignCandidatesQuery
-  ): Promise<{ items: CampaignListingDto[]; total: number; page: number; limit: number; skippedInCampaign: number }> {
+  ): Promise<CampaignCandidatesDto> {
     await this.account(userId, query.ebayAccountId);
     const page = query.page ?? 1;
     const limit = query.limit ?? 25;
@@ -164,7 +168,7 @@ export class EbayCampaignsService {
     );
     const rows = await this.database.query<ListingRow>(
       `SELECT l.id, l.ebay_item_id, l.title, p.image_urls->>0 AS image_url, l.price,
-         l.promoted_ad_rate, l.ad_rate_applied,
+         l.promoted_ad_rate, l.ad_rate_applied, l.margin_percent_override, l.margin_fixed_override,
          (l.lock_price OR l.disable_repricing OR l.price_override IS NOT NULL) AS lock_price
        FROM listings l LEFT JOIN products p ON p.id = l.product_id
        WHERE ${filter} AND l.promoted_campaign_id IS NULL
