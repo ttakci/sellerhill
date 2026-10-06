@@ -11,7 +11,8 @@
         "impressions": "Afișări",
         "quantitySold": "Cantitate vândută",
         "unavailable": "Indisponibil"
-      }
+      },
+      "period": "Ultimele 31 de zile"
     },
     "detail": {
       "title": "Detalii campanie",
@@ -32,7 +33,9 @@
       "dynamic": "Rată dinamică",
       "costPerSale": "Cost pe vânzare",
       "costPerClick": "Cost pe clic",
-      "ruleBased": "Campanie bazată pe reguli"
+      "ruleBased": "Campanie bazată pe reguli",
+      "rateType": "Tipul taxei",
+      "listingCounts": "Anunțuri SellerHill / eBay"
     },
     "actions": {
       "create": "Creează campanie",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Campaniile nu au putut fi încărcate",
-      "description": "Încearcă din nou să încarci campaniile acestui magazin."
+      "description": "Încearcă din nou să încarci campaniile acestui magazin.",
+      "storeUnavailable": "Acest magazin nu este disponibil.",
+      "suspended": "Acest magazin este suspendat.",
+      "notFound": "Campania nu a fost găsită.",
+      "ineligible": "Acest magazin nu este eligibil pentru publicitate.",
+      "readOnly": "Această campanie poate fi doar citită.",
+      "invalidRate": "Introduceți un procent publicitar între 2,0% și 100,0%, cu cel mult o zecimală.",
+      "ebayRejected": "eBay nu a putut finaliza această acțiune. Încercați din nou.",
+      "invalidName": "Introduceți un nume de campanie de 1–80 de caractere.",
+      "nameTaken": "Există deja o campanie cu acest nume."
     },
     "readOnly": {
       "title": "Campanie doar pentru citire",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Creează campanie",
       "name": "Numele campaniei",
-      "rate": "Rata publicitară (%)"
+      "rate": "Rata publicitară (%)",
+      "rateHint": "Introduceți un procent între 2,0% și 100,0%, cu cel mult o zecimală.",
+      "success": "Campanie creată."
     },
     "members": {
       "title": "Anunțurile campaniei",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Campanie publicitară"
+    },
+    "eligibility": {
+      "ineligible": "Publicitatea nu este disponibilă pentru acest magazin: {{reason}}",
+      "unavailable": "Eligibilitatea pentru publicitate nu este disponibilă. Crearea campaniilor este dezactivată."
     }
   }
 }

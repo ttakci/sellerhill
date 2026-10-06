@@ -11,7 +11,8 @@
         "impressions": "Göstərilmələr",
         "quantitySold": "Satılan say",
         "unavailable": "Mövcud deyil"
-      }
+      },
+      "period": "Son 31 gün"
     },
     "detail": {
       "title": "Kampaniya təfərrüatları",
@@ -32,7 +33,9 @@
       "dynamic": "Dinamik faiz",
       "costPerSale": "Satış başına xərc",
       "costPerClick": "Klik başına xərc",
-      "ruleBased": "Qayda əsaslı kampaniya"
+      "ruleBased": "Qayda əsaslı kampaniya",
+      "rateType": "Ödəniş növü",
+      "listingCounts": "SellerHill / eBay elanları"
     },
     "actions": {
       "create": "Kampaniya yarat",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Kampaniyalar yüklənmədi",
-      "description": "Bu mağazanın kampaniyalarını yükləmək üçün yenidən cəhd edin."
+      "description": "Bu mağazanın kampaniyalarını yükləmək üçün yenidən cəhd edin.",
+      "storeUnavailable": "Bu mağaza əlçatan deyil.",
+      "suspended": "Bu mağaza dayandırılıb.",
+      "notFound": "Kampaniya tapılmadı.",
+      "ineligible": "Bu mağaza reklam üçün uyğun deyil.",
+      "readOnly": "Bu kampaniya yalnız oxuna bilər.",
+      "invalidRate": "Ən çox bir onluq rəqəmlə 2,0%-dən 100,0%-ə qədər reklam faizi daxil edin.",
+      "ebayRejected": "eBay əməliyyatı tamamlaya bilmədi. Yenidən cəhd edin.",
+      "invalidName": "1–80 simvol uzunluğunda kampaniya adı daxil edin.",
+      "nameTaken": "Bu adda kampaniya artıq mövcuddur."
     },
     "readOnly": {
       "title": "Yalnız oxunan kampaniya",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Kampaniya yarat",
       "name": "Kampaniyanın adı",
-      "rate": "Reklam faizi (%)"
+      "rate": "Reklam faizi (%)",
+      "rateHint": "Ən çox bir onluq rəqəmlə 2,0%-dən 100,0%-ə qədər faiz daxil edin.",
+      "success": "Kampaniya yaradıldı."
     },
     "members": {
       "title": "Kampaniya elanları",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Reklam kampaniyası"
+    },
+    "eligibility": {
+      "ineligible": "Bu mağazada reklam mövcud deyil: {{reason}}",
+      "unavailable": "Reklam uyğunluğu məlumatı mövcud deyil. Kampaniya yaratmaq deaktivdir."
     }
   }
 }

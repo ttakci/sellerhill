@@ -11,7 +11,8 @@
         "impressions": "Gösterimler",
         "quantitySold": "Satılan adet",
         "unavailable": "Henüz mevcut değil"
-      }
+      },
+      "period": "Son 31 gün"
     },
     "detail": {
       "title": "Kampanya ayrıntıları",
@@ -32,7 +33,9 @@
       "dynamic": "Dinamik oran",
       "costPerSale": "Satış başına ücret",
       "costPerClick": "Tıklama başına ücret",
-      "ruleBased": "Kural tabanlı kampanya"
+      "ruleBased": "Kural tabanlı kampanya",
+      "rateType": "Ücret türü",
+      "listingCounts": "SellerHill / eBay ilanları"
     },
     "actions": {
       "create": "Kampanya oluştur",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Kampanyalar yüklenemedi",
-      "description": "Bu mağazanın kampanyalarını yüklemek için tekrar deneyin."
+      "description": "Bu mağazanın kampanyalarını yüklemek için tekrar deneyin.",
+      "storeUnavailable": "Bu mağazaya erişilemiyor.",
+      "suspended": "Bu mağaza askıya alındı.",
+      "notFound": "Kampanya bulunamadı.",
+      "ineligible": "Bu mağaza reklam için uygun değil.",
+      "readOnly": "Bu kampanya salt okunur.",
+      "invalidRate": "En fazla bir ondalık basamakla %2,0 ile %100,0 arasında bir reklam oranı girin.",
+      "ebayRejected": "eBay işlemi tamamlayamadı. Tekrar deneyin.",
+      "invalidName": "1–80 karakter uzunluğunda bir kampanya adı girin.",
+      "nameTaken": "Bu ada sahip bir kampanya zaten var."
     },
     "readOnly": {
       "title": "Salt okunur kampanya",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Kampanya oluştur",
       "name": "Kampanya adı",
-      "rate": "Reklam oranı (%)"
+      "rate": "Reklam oranı (%)",
+      "rateHint": "En fazla bir ondalık basamakla %2,0 ile %100,0 arasında bir oran girin.",
+      "success": "Kampanya oluşturuldu."
     },
     "members": {
       "title": "Kampanya ilanları",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Reklam kampanyası"
+    },
+    "eligibility": {
+      "ineligible": "Bu mağazada reklam kullanılamıyor: {{reason}}",
+      "unavailable": "Reklam uygunluğu bilgisi alınamadı. Kampanya oluşturma devre dışı."
     }
   }
 }

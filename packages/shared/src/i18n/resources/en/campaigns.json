@@ -11,7 +11,8 @@
         "impressions": "Impressions",
         "quantitySold": "Quantity sold",
         "unavailable": "Unavailable"
-      }
+      },
+      "period": "Last 31 days"
     },
     "detail": {
       "title": "Campaign details",
@@ -32,7 +33,9 @@
       "dynamic": "Dynamic rate",
       "costPerSale": "Cost per sale",
       "costPerClick": "Cost per click",
-      "ruleBased": "Rule-based campaign"
+      "ruleBased": "Rule-based campaign",
+      "rateType": "Rate type",
+      "listingCounts": "SellerHill / eBay listings"
     },
     "actions": {
       "create": "Create campaign",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Campaigns could not be loaded",
-      "description": "Try again to load this store’s campaigns."
+      "description": "Try again to load this store’s campaigns.",
+      "storeUnavailable": "This store is unavailable.",
+      "suspended": "This store is suspended.",
+      "notFound": "Campaign not found.",
+      "ineligible": "This store is not eligible for advertising.",
+      "readOnly": "This campaign is read-only.",
+      "invalidRate": "Enter an ad rate from 2.0% to 100.0%, with at most one decimal.",
+      "ebayRejected": "eBay could not complete this action. Try again.",
+      "invalidName": "Enter a campaign name of 1–80 characters.",
+      "nameTaken": "A campaign with this name already exists."
     },
     "readOnly": {
       "title": "Read-only campaign",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Create campaign",
       "name": "Campaign name",
-      "rate": "Ad rate (%)"
+      "rate": "Ad rate (%)",
+      "rateHint": "Enter a rate from 2.0% to 100.0%, with at most one decimal.",
+      "success": "Campaign created."
     },
     "members": {
       "title": "Campaign listings",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Ad campaign"
+    },
+    "eligibility": {
+      "ineligible": "Advertising is unavailable for this store: {{reason}}",
+      "unavailable": "Advertising eligibility is unavailable. Creating campaigns is disabled."
     }
   }
 }

@@ -11,7 +11,8 @@
         "impressions": "展示量",
         "quantitySold": "售出数量",
         "unavailable": "暂无数据"
-      }
+      },
+      "period": "最近31天"
     },
     "detail": {
       "title": "活动详情",
@@ -32,7 +33,9 @@
       "dynamic": "动态费率",
       "costPerSale": "按销售付费",
       "costPerClick": "按点击付费",
-      "ruleBased": "基于规则的活动"
+      "ruleBased": "基于规则的活动",
+      "rateType": "收费类型",
+      "listingCounts": "SellerHill / eBay 刊登数"
     },
     "actions": {
       "create": "创建活动",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "无法加载活动",
-      "description": "请重试加载此店铺的活动。"
+      "description": "请重试加载此店铺的活动。",
+      "storeUnavailable": "此店铺不可用。",
+      "suspended": "此店铺已被停用。",
+      "notFound": "未找到广告活动。",
+      "ineligible": "此店铺不符合广告资格。",
+      "readOnly": "此广告活动为只读。",
+      "invalidRate": "请输入2.0%至100.0%的广告费率，最多保留一位小数。",
+      "ebayRejected": "eBay 无法完成此操作。请重试。",
+      "invalidName": "请输入1至80个字符的广告活动名称。",
+      "nameTaken": "已存在同名广告活动。"
     },
     "readOnly": {
       "title": "只读活动",
@@ -63,7 +75,9 @@
     "create": {
       "title": "创建活动",
       "name": "活动名称",
-      "rate": "广告费率 (%)"
+      "rate": "广告费率 (%)",
+      "rateHint": "请输入2.0%至100.0%的费率，最多保留一位小数。",
+      "success": "广告活动已创建。"
     },
     "members": {
       "title": "活动刊登",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "广告活动"
+    },
+    "eligibility": {
+      "ineligible": "此店铺无法使用广告：{{reason}}",
+      "unavailable": "无法获取广告资格信息。已禁用创建广告活动。"
     }
   }
 }

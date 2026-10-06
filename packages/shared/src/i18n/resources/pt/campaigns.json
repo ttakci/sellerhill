@@ -11,7 +11,8 @@
         "impressions": "Impressões",
         "quantitySold": "Quantidade vendida",
         "unavailable": "Indisponível"
-      }
+      },
+      "period": "Últimos 31 dias"
     },
     "detail": {
       "title": "Detalhes da campanha",
@@ -32,7 +33,9 @@
       "dynamic": "Taxa dinâmica",
       "costPerSale": "Custo por venda",
       "costPerClick": "Custo por clique",
-      "ruleBased": "Campanha baseada em regras"
+      "ruleBased": "Campanha baseada em regras",
+      "rateType": "Tipo de tarifa",
+      "listingCounts": "Anúncios SellerHill / eBay"
     },
     "actions": {
       "create": "Criar campanha",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Não foi possível carregar as campanhas",
-      "description": "Tente carregar novamente as campanhas desta loja."
+      "description": "Tente carregar novamente as campanhas desta loja.",
+      "storeUnavailable": "Esta loja está indisponível.",
+      "suspended": "Esta loja está suspensa.",
+      "notFound": "Campanha não encontrada.",
+      "ineligible": "Esta loja não é elegível para publicidade.",
+      "readOnly": "Esta campanha é somente leitura.",
+      "invalidRate": "Insira uma taxa de publicidade de 2,0% a 100,0%, com no máximo uma casa decimal.",
+      "ebayRejected": "O eBay não conseguiu concluir esta ação. Tente novamente.",
+      "invalidName": "Insira um nome de campanha de 1 a 80 caracteres.",
+      "nameTaken": "Já existe uma campanha com este nome."
     },
     "readOnly": {
       "title": "Campanha somente leitura",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Criar campanha",
       "name": "Nome da campanha",
-      "rate": "Taxa publicitária (%)"
+      "rate": "Taxa publicitária (%)",
+      "rateHint": "Insira uma taxa de 2,0% a 100,0%, com no máximo uma casa decimal.",
+      "success": "Campanha criada."
     },
     "members": {
       "title": "Anúncios da campanha",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Campanha publicitária"
+    },
+    "eligibility": {
+      "ineligible": "A publicidade não está disponível para esta loja: {{reason}}",
+      "unavailable": "A elegibilidade para publicidade está indisponível. A criação de campanhas está desativada."
     }
   }
 }

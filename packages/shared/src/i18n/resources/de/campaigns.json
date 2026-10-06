@@ -11,7 +11,8 @@
         "impressions": "Impressionen",
         "quantitySold": "Verkaufte Stückzahl",
         "unavailable": "Nicht verfügbar"
-      }
+      },
+      "period": "Letzte 31 Tage"
     },
     "detail": {
       "title": "Kampagnendetails",
@@ -32,7 +33,9 @@
       "dynamic": "Dynamische Rate",
       "costPerSale": "Kosten pro Verkauf",
       "costPerClick": "Kosten pro Klick",
-      "ruleBased": "Regelbasierte Kampagne"
+      "ruleBased": "Regelbasierte Kampagne",
+      "rateType": "Gebührenmodell",
+      "listingCounts": "SellerHill- / eBay-Angebote"
     },
     "actions": {
       "create": "Kampagne erstellen",
@@ -54,7 +57,16 @@
     },
     "errors": {
       "load": "Kampagnen konnten nicht geladen werden",
-      "description": "Versuchen Sie erneut, die Kampagnen dieses Shops zu laden."
+      "description": "Versuchen Sie erneut, die Kampagnen dieses Shops zu laden.",
+      "storeUnavailable": "Dieser Shop ist nicht verfügbar.",
+      "suspended": "Dieser Shop wurde gesperrt.",
+      "notFound": "Kampagne nicht gefunden.",
+      "ineligible": "Dieser Shop ist nicht für Werbung berechtigt.",
+      "readOnly": "Diese Kampagne ist schreibgeschützt.",
+      "invalidRate": "Geben Sie einen Anzeigensatz von 2,0 % bis 100,0 % mit höchstens einer Dezimalstelle ein.",
+      "ebayRejected": "eBay konnte diese Aktion nicht abschließen. Versuchen Sie es erneut.",
+      "invalidName": "Geben Sie einen Kampagnennamen mit 1–80 Zeichen ein.",
+      "nameTaken": "Eine Kampagne mit diesem Namen existiert bereits."
     },
     "readOnly": {
       "title": "Schreibgeschützte Kampagne",
@@ -63,7 +75,9 @@
     "create": {
       "title": "Kampagne erstellen",
       "name": "Kampagnenname",
-      "rate": "Werberate (%)"
+      "rate": "Werberate (%)",
+      "rateHint": "Geben Sie einen Satz von 2,0 % bis 100,0 % mit höchstens einer Dezimalstelle ein.",
+      "success": "Kampagne erstellt."
     },
     "members": {
       "title": "Kampagnenangebote",
@@ -81,6 +95,10 @@
     },
     "listingContext": {
       "title": "Werbekampagne"
+    },
+    "eligibility": {
+      "ineligible": "Werbung ist für diesen Shop nicht verfügbar: {{reason}}",
+      "unavailable": "Die Werbeberechtigung ist nicht verfügbar. Kampagnen können nicht erstellt werden."
     }
   }
 }
