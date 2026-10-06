@@ -109,6 +109,8 @@
     "subtitle": "查看所有在售商品刊登的商品详情和 Amazon 数据。"
   },
   "menu": {
+    "marketing": "营销",
+    "campaigns": "广告活动",
     "overview": "概览",
     "dashboard": "仪表盘",
     "listings": "商品刊登",

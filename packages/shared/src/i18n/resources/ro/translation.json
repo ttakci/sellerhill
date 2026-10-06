@@ -109,6 +109,8 @@
     "subtitle": "Vizualizați detaliile produselor și datele Amazon pentru toate anunțurile dvs. active."
   },
   "menu": {
+    "marketing": "Marketing",
+    "campaigns": "Campanii publicitare",
     "overview": "Prezentare generală",
     "dashboard": "Panou de control",
     "listings": "Anunțuri",

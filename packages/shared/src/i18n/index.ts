@@ -3,6 +3,7 @@ import arAmazon from './resources/ar/amazon.json';
 import arAuth from './resources/ar/auth.json';
 import arBestSellers from './resources/ar/bestSellers.json';
 import arBilling from './resources/ar/billing.json';
+import arCampaigns from './resources/ar/campaigns.json';
 import arDashboard from './resources/ar/dashboard.json';
 import arEbay from './resources/ar/ebay.json';
 import arListings from './resources/ar/listings.json';
@@ -18,6 +19,7 @@ import azAmazon from './resources/az/amazon.json';
 import azAuth from './resources/az/auth.json';
 import azBestSellers from './resources/az/bestSellers.json';
 import azBilling from './resources/az/billing.json';
+import azCampaigns from './resources/az/campaigns.json';
 import azDashboard from './resources/az/dashboard.json';
 import azEbay from './resources/az/ebay.json';
 import azListings from './resources/az/listings.json';
@@ -33,6 +35,7 @@ import bnAmazon from './resources/bn/amazon.json';
 import bnAuth from './resources/bn/auth.json';
 import bnBestSellers from './resources/bn/bestSellers.json';
 import bnBilling from './resources/bn/billing.json';
+import bnCampaigns from './resources/bn/campaigns.json';
 import bnDashboard from './resources/bn/dashboard.json';
 import bnEbay from './resources/bn/ebay.json';
 import bnListings from './resources/bn/listings.json';
@@ -48,6 +51,7 @@ import deAmazon from './resources/de/amazon.json';
 import deAuth from './resources/de/auth.json';
 import deBestSellers from './resources/de/bestSellers.json';
 import deBilling from './resources/de/billing.json';
+import deCampaigns from './resources/de/campaigns.json';
 import deDashboard from './resources/de/dashboard.json';
 import deEbay from './resources/de/ebay.json';
 import deListings from './resources/de/listings.json';
@@ -64,6 +68,7 @@ import enAmazon from './resources/en/amazon.json';
 import enAuth from './resources/en/auth.json';
 import enBestSellers from './resources/en/bestSellers.json';
 import enBilling from './resources/en/billing.json';
+import enCampaigns from './resources/en/campaigns.json';
 import enDashboard from './resources/en/dashboard.json';
 import enEbay from './resources/en/ebay.json';
 import enLegal from './resources/en/legal.json';
@@ -80,6 +85,7 @@ import esAmazon from './resources/es/amazon.json';
 import esAuth from './resources/es/auth.json';
 import esBestSellers from './resources/es/bestSellers.json';
 import esBilling from './resources/es/billing.json';
+import esCampaigns from './resources/es/campaigns.json';
 import esDashboard from './resources/es/dashboard.json';
 import esEbay from './resources/es/ebay.json';
 import esListings from './resources/es/listings.json';
@@ -95,6 +101,7 @@ import frAmazon from './resources/fr/amazon.json';
 import frAuth from './resources/fr/auth.json';
 import frBestSellers from './resources/fr/bestSellers.json';
 import frBilling from './resources/fr/billing.json';
+import frCampaigns from './resources/fr/campaigns.json';
 import frDashboard from './resources/fr/dashboard.json';
 import frEbay from './resources/fr/ebay.json';
 import frListings from './resources/fr/listings.json';
@@ -110,6 +117,7 @@ import hiAmazon from './resources/hi/amazon.json';
 import hiAuth from './resources/hi/auth.json';
 import hiBestSellers from './resources/hi/bestSellers.json';
 import hiBilling from './resources/hi/billing.json';
+import hiCampaigns from './resources/hi/campaigns.json';
 import hiDashboard from './resources/hi/dashboard.json';
 import hiEbay from './resources/hi/ebay.json';
 import hiListings from './resources/hi/listings.json';
@@ -125,6 +133,7 @@ import itAmazon from './resources/it/amazon.json';
 import itAuth from './resources/it/auth.json';
 import itBestSellers from './resources/it/bestSellers.json';
 import itBilling from './resources/it/billing.json';
+import itCampaigns from './resources/it/campaigns.json';
 import itDashboard from './resources/it/dashboard.json';
 import itEbay from './resources/it/ebay.json';
 import itListings from './resources/it/listings.json';
@@ -140,6 +149,7 @@ import ptAmazon from './resources/pt/amazon.json';
 import ptAuth from './resources/pt/auth.json';
 import ptBestSellers from './resources/pt/bestSellers.json';
 import ptBilling from './resources/pt/billing.json';
+import ptCampaigns from './resources/pt/campaigns.json';
 import ptDashboard from './resources/pt/dashboard.json';
 import ptEbay from './resources/pt/ebay.json';
 import ptListings from './resources/pt/listings.json';
@@ -155,6 +165,7 @@ import roAmazon from './resources/ro/amazon.json';
 import roAuth from './resources/ro/auth.json';
 import roBestSellers from './resources/ro/bestSellers.json';
 import roBilling from './resources/ro/billing.json';
+import roCampaigns from './resources/ro/campaigns.json';
 import roDashboard from './resources/ro/dashboard.json';
 import roEbay from './resources/ro/ebay.json';
 import roListings from './resources/ro/listings.json';
@@ -170,6 +181,7 @@ import ruAmazon from './resources/ru/amazon.json';
 import ruAuth from './resources/ru/auth.json';
 import ruBestSellers from './resources/ru/bestSellers.json';
 import ruBilling from './resources/ru/billing.json';
+import ruCampaigns from './resources/ru/campaigns.json';
 import ruDashboard from './resources/ru/dashboard.json';
 import ruEbay from './resources/ru/ebay.json';
 import ruListings from './resources/ru/listings.json';
@@ -186,6 +198,7 @@ import trAmazon from './resources/tr/amazon.json';
 import trAuth from './resources/tr/auth.json';
 import trBestSellers from './resources/tr/bestSellers.json';
 import trBilling from './resources/tr/billing.json';
+import trCampaigns from './resources/tr/campaigns.json';
 import trDashboard from './resources/tr/dashboard.json';
 import trEbay from './resources/tr/ebay.json';
 import trLegal from './resources/tr/legal.json';
@@ -202,6 +215,7 @@ import ukAmazon from './resources/uk/amazon.json';
 import ukAuth from './resources/uk/auth.json';
 import ukBestSellers from './resources/uk/bestSellers.json';
 import ukBilling from './resources/uk/billing.json';
+import ukCampaigns from './resources/uk/campaigns.json';
 import ukDashboard from './resources/uk/dashboard.json';
 import ukEbay from './resources/uk/ebay.json';
 import ukListings from './resources/uk/listings.json';
@@ -217,6 +231,7 @@ import urAmazon from './resources/ur/amazon.json';
 import urAuth from './resources/ur/auth.json';
 import urBestSellers from './resources/ur/bestSellers.json';
 import urBilling from './resources/ur/billing.json';
+import urCampaigns from './resources/ur/campaigns.json';
 import urDashboard from './resources/ur/dashboard.json';
 import urEbay from './resources/ur/ebay.json';
 import urListings from './resources/ur/listings.json';
@@ -232,6 +247,7 @@ import zhAmazon from './resources/zh/amazon.json';
 import zhAuth from './resources/zh/auth.json';
 import zhBestSellers from './resources/zh/bestSellers.json';
 import zhBilling from './resources/zh/billing.json';
+import zhCampaigns from './resources/zh/campaigns.json';
 import zhDashboard from './resources/zh/dashboard.json';
 import zhEbay from './resources/zh/ebay.json';
 import zhListings from './resources/zh/listings.json';
@@ -250,6 +266,7 @@ export {
   enAuth,
   enBestSellers,
   enBilling,
+  enCampaigns,
   enDashboard,
   enEbay,
   enLegal,
@@ -267,6 +284,7 @@ export {
   trAuth,
   trBestSellers,
   trBilling,
+  trCampaigns,
   trDashboard,
   trEbay,
   trLegal,
@@ -283,6 +301,7 @@ export {
   ruAuth,
   ruBestSellers,
   ruBilling,
+  ruCampaigns,
   ruDashboard,
   ruEbay,
   ruListings,
@@ -298,6 +317,7 @@ export {
   hiAuth,
   hiBestSellers,
   hiBilling,
+  hiCampaigns,
   hiDashboard,
   hiEbay,
   hiListings,
@@ -313,6 +333,7 @@ export {
   urAuth,
   urBestSellers,
   urBilling,
+  urCampaigns,
   urDashboard,
   urEbay,
   urListings,
@@ -328,6 +349,7 @@ export {
   arAuth,
   arBestSellers,
   arBilling,
+  arCampaigns,
   arDashboard,
   arEbay,
   arListings,
@@ -343,6 +365,7 @@ export {
   azAuth,
   azBestSellers,
   azBilling,
+  azCampaigns,
   azDashboard,
   azEbay,
   azListings,
@@ -358,6 +381,7 @@ export {
   deAuth,
   deBestSellers,
   deBilling,
+  deCampaigns,
   deDashboard,
   deEbay,
   deListings,
@@ -373,6 +397,7 @@ export {
   frAuth,
   frBestSellers,
   frBilling,
+  frCampaigns,
   frDashboard,
   frEbay,
   frListings,
@@ -388,6 +413,7 @@ export {
   esAuth,
   esBestSellers,
   esBilling,
+  esCampaigns,
   esDashboard,
   esEbay,
   esListings,
@@ -403,6 +429,7 @@ export {
   itAuth,
   itBestSellers,
   itBilling,
+  itCampaigns,
   itDashboard,
   itEbay,
   itListings,
@@ -418,6 +445,7 @@ export {
   roAuth,
   roBestSellers,
   roBilling,
+  roCampaigns,
   roDashboard,
   roEbay,
   roListings,
@@ -433,6 +461,7 @@ export {
   ukAuth,
   ukBestSellers,
   ukBilling,
+  ukCampaigns,
   ukDashboard,
   ukEbay,
   ukListings,
@@ -448,6 +477,7 @@ export {
   zhAuth,
   zhBestSellers,
   zhBilling,
+  zhCampaigns,
   zhDashboard,
   zhEbay,
   zhListings,
@@ -463,6 +493,7 @@ export {
   ptAuth,
   ptBestSellers,
   ptBilling,
+  ptCampaigns,
   ptDashboard,
   ptEbay,
   ptListings,
@@ -489,6 +520,7 @@ export const i18nResources = {
     admin: enAdmin,
     amazon: enAmazon,
     billing: enBilling,
+    campaigns: enCampaigns,
     auth: enAuth,
     bestSellers: enBestSellers,
     dashboard: enDashboard,
@@ -508,6 +540,7 @@ export const i18nResources = {
     admin: trAdmin,
     amazon: trAmazon,
     billing: trBilling,
+    campaigns: trCampaigns,
     auth: trAuth,
     bestSellers: trBestSellers,
     dashboard: trDashboard,
@@ -526,6 +559,7 @@ export const i18nResources = {
     actionCenter: ruActionCenter,
     amazon: ruAmazon,
     billing: ruBilling,
+    campaigns: ruCampaigns,
     auth: ruAuth,
     bestSellers: ruBestSellers,
     dashboard: ruDashboard,
@@ -543,6 +577,7 @@ export const i18nResources = {
     actionCenter: hiActionCenter,
     amazon: hiAmazon,
     billing: hiBilling,
+    campaigns: hiCampaigns,
     auth: hiAuth,
     bestSellers: hiBestSellers,
     dashboard: hiDashboard,
@@ -560,6 +595,7 @@ export const i18nResources = {
     actionCenter: urActionCenter,
     amazon: urAmazon,
     billing: urBilling,
+    campaigns: urCampaigns,
     auth: urAuth,
     bestSellers: urBestSellers,
     dashboard: urDashboard,
@@ -577,6 +613,7 @@ export const i18nResources = {
     actionCenter: arActionCenter,
     amazon: arAmazon,
     billing: arBilling,
+    campaigns: arCampaigns,
     auth: arAuth,
     bestSellers: arBestSellers,
     dashboard: arDashboard,
@@ -594,6 +631,7 @@ export const i18nResources = {
     actionCenter: azActionCenter,
     amazon: azAmazon,
     billing: azBilling,
+    campaigns: azCampaigns,
     auth: azAuth,
     bestSellers: azBestSellers,
     dashboard: azDashboard,
@@ -611,6 +649,7 @@ export const i18nResources = {
     actionCenter: bnActionCenter,
     amazon: bnAmazon,
     billing: bnBilling,
+    campaigns: bnCampaigns,
     auth: bnAuth,
     bestSellers: bnBestSellers,
     dashboard: bnDashboard,
@@ -629,6 +668,7 @@ export const i18nResources = {
     auth: deAuth,
     bestSellers: deBestSellers,
     billing: deBilling,
+    campaigns: deCampaigns,
     dashboard: deDashboard,
     ebay: deEbay,
     listings: deListings,
@@ -646,6 +686,7 @@ export const i18nResources = {
     auth: frAuth,
     bestSellers: frBestSellers,
     billing: frBilling,
+    campaigns: frCampaigns,
     dashboard: frDashboard,
     ebay: frEbay,
     listings: frListings,
@@ -663,6 +704,7 @@ export const i18nResources = {
     auth: esAuth,
     bestSellers: esBestSellers,
     billing: esBilling,
+    campaigns: esCampaigns,
     dashboard: esDashboard,
     ebay: esEbay,
     listings: esListings,
@@ -680,6 +722,7 @@ export const i18nResources = {
     auth: itAuth,
     bestSellers: itBestSellers,
     billing: itBilling,
+    campaigns: itCampaigns,
     dashboard: itDashboard,
     ebay: itEbay,
     listings: itListings,
@@ -697,6 +740,7 @@ export const i18nResources = {
     auth: roAuth,
     bestSellers: roBestSellers,
     billing: roBilling,
+    campaigns: roCampaigns,
     dashboard: roDashboard,
     ebay: roEbay,
     listings: roListings,
@@ -714,6 +758,7 @@ export const i18nResources = {
     auth: ukAuth,
     bestSellers: ukBestSellers,
     billing: ukBilling,
+    campaigns: ukCampaigns,
     dashboard: ukDashboard,
     ebay: ukEbay,
     listings: ukListings,
@@ -731,6 +776,7 @@ export const i18nResources = {
     auth: zhAuth,
     bestSellers: zhBestSellers,
     billing: zhBilling,
+    campaigns: zhCampaigns,
     dashboard: zhDashboard,
     ebay: zhEbay,
     listings: zhListings,
@@ -748,6 +794,7 @@ export const i18nResources = {
     auth: ptAuth,
     bestSellers: ptBestSellers,
     billing: ptBilling,
+    campaigns: ptCampaigns,
     dashboard: ptDashboard,
     ebay: ptEbay,
     listings: ptListings,

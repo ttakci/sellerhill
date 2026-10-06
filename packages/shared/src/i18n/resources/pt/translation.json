@@ -109,6 +109,8 @@
     "subtitle": "Veja os detalhes dos produtos e os dados da Amazon de todos os seus anúncios ativos."
   },
   "menu": {
+    "marketing": "Marketing",
+    "campaigns": "Campanhas publicitárias",
     "overview": "Visão geral",
     "dashboard": "Painel",
     "listings": "Anúncios",

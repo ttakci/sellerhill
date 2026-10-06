@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Campañas publicitarias",
+      "subtitle": "Campañas de tu tienda eBay activa.",
+      "metrics": {
+        "sales": "Ventas",
+        "adFees": "Gastos publicitarios",
+        "roas": "Retorno publicitario",
+        "clicks": "Clics",
+        "impressions": "Impresiones",
+        "quantitySold": "Cantidad vendida",
+        "unavailable": "No disponible"
+      }
+    },
+    "detail": {
+      "title": "Detalles de la campaña",
+      "breadcrumb": "Detalles de la campaña",
+      "subtitle": "Anuncios de esta campaña."
+    },
+    "campaign": {
+      "name": "Nombre de la campaña",
+      "status": "Estado",
+      "strategy": "Estrategia",
+      "defaultRate": "Tarifa publicitaria predeterminada",
+      "listings": "Anuncios",
+      "outsideSellerHill": "Creada fuera de SellerHill",
+      "running": "En curso",
+      "paused": "En pausa",
+      "ended": "Finalizada",
+      "fixed": "Tarifa fija",
+      "dynamic": "Tarifa dinámica",
+      "costPerSale": "Coste por venta",
+      "costPerClick": "Coste por clic",
+      "ruleBased": "Campaña basada en reglas"
+    },
+    "actions": {
+      "create": "Crear campaña",
+      "addListings": "Añadir anuncios",
+      "removeListings": "Quitar anuncios",
+      "changeRate": "Cambiar tarifa",
+      "pause": "Pausar campaña",
+      "resume": "Reanudar campaña",
+      "end": "Finalizar campaña",
+      "back": "Volver a campañas",
+      "retry": "Reintentar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar"
+    },
+    "empty": {
+      "title": "Todavía no hay campañas",
+      "description": "Las campañas de tu tienda activa aparecerán aquí tras la sincronización.",
+      "noStore": "Selecciona una tienda eBay en la barra superior."
+    },
+    "errors": {
+      "load": "No se pudieron cargar las campañas",
+      "description": "Vuelve a intentar cargar las campañas de esta tienda."
+    },
+    "readOnly": {
+      "title": "Campaña de solo lectura",
+      "marginOverride": "Margen personalizado: la tarifa publicitaria no se aplica al precio de SellerHill."
+    },
+    "create": {
+      "title": "Crear campaña",
+      "name": "Nombre de la campaña",
+      "rate": "Tarifa publicitaria (%)"
+    },
+    "members": {
+      "title": "Anuncios de la campaña",
+      "search": "Buscar anuncios",
+      "priceLocked": "Precio bloqueado"
+    },
+    "add": {
+      "title": "Añadir anuncios"
+    },
+    "rate": {
+      "title": "Cambiar tarifa"
+    },
+    "lifecycle": {
+      "endConfirm": "¿Finalizar esta campaña? No se podrá reanudar."
+    },
+    "listingContext": {
+      "title": "Campaña publicitaria"
+    }
+  }
+}

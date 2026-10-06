@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "广告活动",
+      "subtitle": "当前 eBay 店铺的广告活动。",
+      "metrics": {
+        "sales": "销售额",
+        "adFees": "广告费用",
+        "roas": "广告投资回报率",
+        "clicks": "点击量",
+        "impressions": "展示量",
+        "quantitySold": "售出数量",
+        "unavailable": "暂无数据"
+      }
+    },
+    "detail": {
+      "title": "活动详情",
+      "breadcrumb": "活动详情",
+      "subtitle": "此活动中的刊登。"
+    },
+    "campaign": {
+      "name": "活动名称",
+      "status": "状态",
+      "strategy": "策略",
+      "defaultRate": "默认广告费率",
+      "listings": "刊登",
+      "outsideSellerHill": "在 SellerHill 外创建",
+      "running": "进行中",
+      "paused": "已暂停",
+      "ended": "已结束",
+      "fixed": "固定费率",
+      "dynamic": "动态费率",
+      "costPerSale": "按销售付费",
+      "costPerClick": "按点击付费",
+      "ruleBased": "基于规则的活动"
+    },
+    "actions": {
+      "create": "创建活动",
+      "addListings": "添加刊登",
+      "removeListings": "移除刊登",
+      "changeRate": "更改广告费率",
+      "pause": "暂停活动",
+      "resume": "恢复活动",
+      "end": "结束活动",
+      "back": "返回活动列表",
+      "retry": "重试",
+      "save": "保存更改",
+      "cancel": "取消"
+    },
+    "empty": {
+      "title": "暂无活动",
+      "description": "同步后，当前店铺的活动将显示在这里。",
+      "noStore": "请在顶部栏选择 eBay 店铺。"
+    },
+    "errors": {
+      "load": "无法加载活动",
+      "description": "请重试加载此店铺的活动。"
+    },
+    "readOnly": {
+      "title": "只读活动",
+      "marginOverride": "已自定义利润率：广告费率不计入 SellerHill 价格。"
+    },
+    "create": {
+      "title": "创建活动",
+      "name": "活动名称",
+      "rate": "广告费率 (%)"
+    },
+    "members": {
+      "title": "活动刊登",
+      "search": "搜索刊登",
+      "priceLocked": "价格已锁定"
+    },
+    "add": {
+      "title": "添加刊登"
+    },
+    "rate": {
+      "title": "更改广告费率"
+    },
+    "lifecycle": {
+      "endConfirm": "结束此活动？结束后无法恢复。"
+    },
+    "listingContext": {
+      "title": "广告活动"
+    }
+  }
+}

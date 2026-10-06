@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Campanii publicitare",
+      "subtitle": "Campaniile magazinului eBay activ.",
+      "metrics": {
+        "sales": "Vânzări",
+        "adFees": "Costuri publicitare",
+        "roas": "Rentabilitatea reclamelor",
+        "clicks": "Clicuri",
+        "impressions": "Afișări",
+        "quantitySold": "Cantitate vândută",
+        "unavailable": "Indisponibil"
+      }
+    },
+    "detail": {
+      "title": "Detalii campanie",
+      "breadcrumb": "Detalii campanie",
+      "subtitle": "Anunțurile din această campanie."
+    },
+    "campaign": {
+      "name": "Numele campaniei",
+      "status": "Stare",
+      "strategy": "Strategie",
+      "defaultRate": "Rata publicitară implicită",
+      "listings": "Anunțuri",
+      "outsideSellerHill": "Creată în afara SellerHill",
+      "running": "În desfășurare",
+      "paused": "În pauză",
+      "ended": "Încheiată",
+      "fixed": "Rată fixă",
+      "dynamic": "Rată dinamică",
+      "costPerSale": "Cost pe vânzare",
+      "costPerClick": "Cost pe clic",
+      "ruleBased": "Campanie bazată pe reguli"
+    },
+    "actions": {
+      "create": "Creează campanie",
+      "addListings": "Adaugă anunțuri",
+      "removeListings": "Elimină anunțuri",
+      "changeRate": "Modifică rata",
+      "pause": "Pune campania în pauză",
+      "resume": "Reia campania",
+      "end": "Încheie campania",
+      "back": "Înapoi la campanii",
+      "retry": "Încearcă din nou",
+      "save": "Salvează modificările",
+      "cancel": "Anulează"
+    },
+    "empty": {
+      "title": "Nicio campanie încă",
+      "description": "Campaniile magazinului activ vor apărea aici după sincronizare.",
+      "noStore": "Selectează un magazin eBay în bara de sus."
+    },
+    "errors": {
+      "load": "Campaniile nu au putut fi încărcate",
+      "description": "Încearcă din nou să încarci campaniile acestui magazin."
+    },
+    "readOnly": {
+      "title": "Campanie doar pentru citire",
+      "marginOverride": "Marjă personalizată: rata publicitară nu se aplică prețului SellerHill."
+    },
+    "create": {
+      "title": "Creează campanie",
+      "name": "Numele campaniei",
+      "rate": "Rata publicitară (%)"
+    },
+    "members": {
+      "title": "Anunțurile campaniei",
+      "search": "Caută anunțuri",
+      "priceLocked": "Preț blocat"
+    },
+    "add": {
+      "title": "Adaugă anunțuri"
+    },
+    "rate": {
+      "title": "Modifică rata"
+    },
+    "lifecycle": {
+      "endConfirm": "Închei această campanie? Nu va putea fi reluată."
+    },
+    "listingContext": {
+      "title": "Campanie publicitară"
+    }
+  }
+}

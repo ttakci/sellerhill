@@ -1,4 +1,4 @@
-export type NavSection = 'overview' | 'sales' | 'inventory' | 'discover' | 'configuration';
+export type NavSection = 'overview' | 'sales' | 'inventory' | 'marketing' | 'discover' | 'configuration';
 
 export interface AppRouteMeta {
   /** Path without locale prefix, e.g. `/listings/all` */
@@ -7,7 +7,7 @@ export interface AppRouteMeta {
   match?: 'exact' | 'prefix';
   /**
    * Which static sidebar group ("Genel Bakış" / "Satışlar" / "Envanter" /
-   * "Keşfet" / "Yapılandırma") the route belongs to. Documentary only — the
+   * "Pazarlama" / "Keşfet" / "Yapılandırma") the route belongs to. Documentary only — the
    * sidebar's item order is hand-authored in `AppLayout.component.tsx`, not
    * derived from this list.
    */

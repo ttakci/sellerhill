@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Campagnes publicitaires",
+      "subtitle": "Campagnes de votre boutique eBay active.",
+      "metrics": {
+        "sales": "Ventes",
+        "adFees": "Frais publicitaires",
+        "roas": "Retour publicitaire",
+        "clicks": "Clics",
+        "impressions": "Impressions",
+        "quantitySold": "Quantité vendue",
+        "unavailable": "Indisponible"
+      }
+    },
+    "detail": {
+      "title": "Détails de la campagne",
+      "breadcrumb": "Détails de la campagne",
+      "subtitle": "Annonces de cette campagne."
+    },
+    "campaign": {
+      "name": "Nom de la campagne",
+      "status": "Statut",
+      "strategy": "Stratégie",
+      "defaultRate": "Taux publicitaire par défaut",
+      "listings": "Annonces",
+      "outsideSellerHill": "Créée hors de SellerHill",
+      "running": "En cours",
+      "paused": "En pause",
+      "ended": "Terminée",
+      "fixed": "Taux fixe",
+      "dynamic": "Taux dynamique",
+      "costPerSale": "Coût par vente",
+      "costPerClick": "Coût par clic",
+      "ruleBased": "Campagne basée sur des règles"
+    },
+    "actions": {
+      "create": "Créer une campagne",
+      "addListings": "Ajouter des annonces",
+      "removeListings": "Retirer des annonces",
+      "changeRate": "Modifier le taux",
+      "pause": "Mettre en pause",
+      "resume": "Reprendre la campagne",
+      "end": "Terminer la campagne",
+      "back": "Retour aux campagnes",
+      "retry": "Réessayer",
+      "save": "Enregistrer les modifications",
+      "cancel": "Annuler"
+    },
+    "empty": {
+      "title": "Aucune campagne pour le moment",
+      "description": "Les campagnes de votre boutique active apparaîtront ici après synchronisation.",
+      "noStore": "Sélectionnez une boutique eBay dans la barre supérieure."
+    },
+    "errors": {
+      "load": "Impossible de charger les campagnes",
+      "description": "Réessayez de charger les campagnes de cette boutique."
+    },
+    "readOnly": {
+      "title": "Campagne en lecture seule",
+      "marginOverride": "Marge personnalisée : le taux publicitaire ne s’applique pas au prix SellerHill."
+    },
+    "create": {
+      "title": "Créer une campagne",
+      "name": "Nom de la campagne",
+      "rate": "Taux publicitaire (%)"
+    },
+    "members": {
+      "title": "Annonces de la campagne",
+      "search": "Rechercher des annonces",
+      "priceLocked": "Prix verrouillé"
+    },
+    "add": {
+      "title": "Ajouter des annonces"
+    },
+    "rate": {
+      "title": "Modifier le taux"
+    },
+    "lifecycle": {
+      "endConfirm": "Terminer cette campagne ? Elle ne pourra pas être reprise."
+    },
+    "listingContext": {
+      "title": "Campagne publicitaire"
+    }
+  }
+}

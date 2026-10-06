@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Werbekampagnen",
+      "subtitle": "Kampagnen Ihres aktiven eBay-Shops.",
+      "metrics": {
+        "sales": "Umsatz",
+        "adFees": "Werbekosten",
+        "roas": "Werberendite",
+        "clicks": "Klicks",
+        "impressions": "Impressionen",
+        "quantitySold": "Verkaufte Stückzahl",
+        "unavailable": "Nicht verfügbar"
+      }
+    },
+    "detail": {
+      "title": "Kampagnendetails",
+      "breadcrumb": "Kampagnendetails",
+      "subtitle": "Angebote in dieser Kampagne."
+    },
+    "campaign": {
+      "name": "Kampagnenname",
+      "status": "Status",
+      "strategy": "Strategie",
+      "defaultRate": "Standard-Werberate",
+      "listings": "Angebote",
+      "outsideSellerHill": "Außerhalb von SellerHill erstellt",
+      "running": "Aktiv",
+      "paused": "Pausiert",
+      "ended": "Beendet",
+      "fixed": "Feste Rate",
+      "dynamic": "Dynamische Rate",
+      "costPerSale": "Kosten pro Verkauf",
+      "costPerClick": "Kosten pro Klick",
+      "ruleBased": "Regelbasierte Kampagne"
+    },
+    "actions": {
+      "create": "Kampagne erstellen",
+      "addListings": "Angebote hinzufügen",
+      "removeListings": "Angebote entfernen",
+      "changeRate": "Werberate ändern",
+      "pause": "Kampagne pausieren",
+      "resume": "Kampagne fortsetzen",
+      "end": "Kampagne beenden",
+      "back": "Zurück zu Kampagnen",
+      "retry": "Erneut versuchen",
+      "save": "Änderungen speichern",
+      "cancel": "Abbrechen"
+    },
+    "empty": {
+      "title": "Noch keine Kampagnen",
+      "description": "Die Kampagnen Ihres aktiven Shops erscheinen hier nach der Synchronisierung.",
+      "noStore": "Wählen Sie oben einen eBay-Shop aus."
+    },
+    "errors": {
+      "load": "Kampagnen konnten nicht geladen werden",
+      "description": "Versuchen Sie erneut, die Kampagnen dieses Shops zu laden."
+    },
+    "readOnly": {
+      "title": "Schreibgeschützte Kampagne",
+      "marginOverride": "Individuelle Marge: Die Werberate wird nicht auf den SellerHill-Preis angewendet."
+    },
+    "create": {
+      "title": "Kampagne erstellen",
+      "name": "Kampagnenname",
+      "rate": "Werberate (%)"
+    },
+    "members": {
+      "title": "Kampagnenangebote",
+      "search": "Angebote suchen",
+      "priceLocked": "Preis gesperrt"
+    },
+    "add": {
+      "title": "Angebote hinzufügen"
+    },
+    "rate": {
+      "title": "Werberate ändern"
+    },
+    "lifecycle": {
+      "endConfirm": "Diese Kampagne beenden? Sie kann nicht fortgesetzt werden."
+    },
+    "listingContext": {
+      "title": "Werbekampagne"
+    }
+  }
+}

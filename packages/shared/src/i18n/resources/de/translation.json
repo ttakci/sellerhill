@@ -109,6 +109,8 @@
     "subtitle": "Sehen Sie sich Produktdetails und Amazon-Daten für alle Ihre aktiven Angebote an."
   },
   "menu": {
+    "marketing": "Marketing",
+    "campaigns": "Werbekampagnen",
     "overview": "Übersicht",
     "dashboard": "Dashboard",
     "listings": "Angebote",

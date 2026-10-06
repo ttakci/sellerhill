@@ -276,8 +276,29 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {!sidebarCollapsed && (
               <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
                 <Text variant="overline" color="sidebar.textMuted">
-                  {t('translation:menu.discover')}
+                  {t('translation:menu.marketing')}
                 </Text>
+              </S.NavLabelWrapper>
+            )}
+
+            <NavTooltip label={t('translation:menu.campaigns')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/campaigns' || pathWithoutLocale.startsWith('/campaigns/')}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/campaigns')}
+                aria-label={t('translation:menu.campaigns')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="chart-line" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.campaigns')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <S.NavDivider />
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">{t('translation:menu.discover')}</Text>
               </S.NavLabelWrapper>
             )}
 

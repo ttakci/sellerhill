@@ -109,6 +109,8 @@
     "subtitle": "View product details and Amazon data for all your active listings."
   },
   "menu": {
+    "marketing": "Marketing",
+    "campaigns": "Ad campaigns",
     "overview": "Overview",
     "dashboard": "Dashboard",
     "listings": "Listings",

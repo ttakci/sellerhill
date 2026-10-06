@@ -60,6 +60,12 @@ const TermsOfServicePage = lazy(() =>
 );
 
 // App shell pages
+const CampaignsPage = lazy(() =>
+  import('./features/campaigns').then((m) => ({ default: m.CampaignsPageContainer }))
+);
+const CampaignDetailPage = lazy(() =>
+  import('./features/campaigns').then((m) => ({ default: m.CampaignDetailPageContainer }))
+);
 const ActionCenterPage = lazy(() =>
   import('./features/action-center').then((m) => ({ default: m.ActionCenterPageContainer }))
 );
@@ -219,6 +225,8 @@ export function App() {
                 </Lazy>
               }
             />
+            <Route path="campaigns" element={<Lazy><CampaignsPage /></Lazy>} />
+            <Route path="campaigns/:campaignId" element={<Lazy><CampaignDetailPage /></Lazy>} />
             <Route
               path="stores"
               element={
@@ -406,6 +414,7 @@ export function App() {
         <Route path="/reset-password" element={<LocaleRedirect to="reset-password" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
+        <Route path="/campaigns" element={<LocaleRedirect to="campaigns" preserveQuery />} />
         <Route path="/best-sellers" element={<LocaleRedirect to="best-sellers" preserveQuery />} />
         <Route path="/messages" element={<LocaleRedirect to="messages" preserveQuery />} />
         <Route path="/returns" element={<LocaleRedirect to="returns" preserveQuery />} />

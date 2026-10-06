@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Campanhas publicitárias",
+      "subtitle": "Campanhas da sua loja eBay ativa.",
+      "metrics": {
+        "sales": "Vendas",
+        "adFees": "Custos publicitários",
+        "roas": "Retorno publicitário",
+        "clicks": "Cliques",
+        "impressions": "Impressões",
+        "quantitySold": "Quantidade vendida",
+        "unavailable": "Indisponível"
+      }
+    },
+    "detail": {
+      "title": "Detalhes da campanha",
+      "breadcrumb": "Detalhes da campanha",
+      "subtitle": "Anúncios desta campanha."
+    },
+    "campaign": {
+      "name": "Nome da campanha",
+      "status": "Estado",
+      "strategy": "Estratégia",
+      "defaultRate": "Taxa publicitária padrão",
+      "listings": "Anúncios",
+      "outsideSellerHill": "Criada fora do SellerHill",
+      "running": "Em execução",
+      "paused": "Em pausa",
+      "ended": "Terminada",
+      "fixed": "Taxa fixa",
+      "dynamic": "Taxa dinâmica",
+      "costPerSale": "Custo por venda",
+      "costPerClick": "Custo por clique",
+      "ruleBased": "Campanha baseada em regras"
+    },
+    "actions": {
+      "create": "Criar campanha",
+      "addListings": "Adicionar anúncios",
+      "removeListings": "Remover anúncios",
+      "changeRate": "Alterar taxa",
+      "pause": "Pausar campanha",
+      "resume": "Retomar campanha",
+      "end": "Terminar campanha",
+      "back": "Voltar às campanhas",
+      "retry": "Tentar novamente",
+      "save": "Salvar alterações",
+      "cancel": "Cancelar"
+    },
+    "empty": {
+      "title": "Ainda não há campanhas",
+      "description": "As campanhas da sua loja ativa aparecerão aqui após a sincronização.",
+      "noStore": "Selecione uma loja eBay na barra superior."
+    },
+    "errors": {
+      "load": "Não foi possível carregar as campanhas",
+      "description": "Tente carregar novamente as campanhas desta loja."
+    },
+    "readOnly": {
+      "title": "Campanha somente leitura",
+      "marginOverride": "Margem personalizada: a taxa publicitária não se aplica ao preço do SellerHill."
+    },
+    "create": {
+      "title": "Criar campanha",
+      "name": "Nome da campanha",
+      "rate": "Taxa publicitária (%)"
+    },
+    "members": {
+      "title": "Anúncios da campanha",
+      "search": "Pesquisar anúncios",
+      "priceLocked": "Preço bloqueado"
+    },
+    "add": {
+      "title": "Adicionar anúncios"
+    },
+    "rate": {
+      "title": "Alterar taxa"
+    },
+    "lifecycle": {
+      "endConfirm": "Terminar esta campanha? Não será possível retomá-la."
+    },
+    "listingContext": {
+      "title": "Campanha publicitária"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Ad campaigns",
+      "subtitle": "Campaigns for your active eBay store.",
+      "metrics": {
+        "sales": "Sales",
+        "adFees": "Ad fees",
+        "roas": "ROAS",
+        "clicks": "Clicks",
+        "impressions": "Impressions",
+        "quantitySold": "Quantity sold",
+        "unavailable": "Unavailable"
+      }
+    },
+    "detail": {
+      "title": "Campaign details",
+      "breadcrumb": "Campaign details",
+      "subtitle": "Listings in this campaign."
+    },
+    "campaign": {
+      "name": "Campaign name",
+      "status": "Status",
+      "strategy": "Strategy",
+      "defaultRate": "Default ad rate",
+      "listings": "Listings",
+      "outsideSellerHill": "Created outside SellerHill",
+      "running": "Running",
+      "paused": "Paused",
+      "ended": "Ended",
+      "fixed": "Fixed rate",
+      "dynamic": "Dynamic rate",
+      "costPerSale": "Cost per sale",
+      "costPerClick": "Cost per click",
+      "ruleBased": "Rule-based campaign"
+    },
+    "actions": {
+      "create": "Create campaign",
+      "addListings": "Add listings",
+      "removeListings": "Remove listings",
+      "changeRate": "Change ad rate",
+      "pause": "Pause campaign",
+      "resume": "Resume campaign",
+      "end": "End campaign",
+      "back": "Back to campaigns",
+      "retry": "Try again",
+      "save": "Save changes",
+      "cancel": "Cancel"
+    },
+    "empty": {
+      "title": "No campaigns yet",
+      "description": "Your active store’s campaigns will appear here after synchronization.",
+      "noStore": "Select an eBay store in the top bar."
+    },
+    "errors": {
+      "load": "Campaigns could not be loaded",
+      "description": "Try again to load this store’s campaigns."
+    },
+    "readOnly": {
+      "title": "Read-only campaign",
+      "marginOverride": "Margin override: ad rate is not applied to the SellerHill price."
+    },
+    "create": {
+      "title": "Create campaign",
+      "name": "Campaign name",
+      "rate": "Ad rate (%)"
+    },
+    "members": {
+      "title": "Campaign listings",
+      "search": "Search listings",
+      "priceLocked": "Price locked"
+    },
+    "add": {
+      "title": "Add listings"
+    },
+    "rate": {
+      "title": "Change ad rate"
+    },
+    "lifecycle": {
+      "endConfirm": "End this campaign? It cannot be resumed."
+    },
+    "listingContext": {
+      "title": "Ad campaign"
+    }
+  }
+}

@@ -11,6 +11,23 @@ export type { NavSection, AppRouteMeta } from './routeMeta.types';
  */
 export const APP_ROUTE_META: AppRouteMeta[] = [
   {
+    path: '/campaigns',
+    storeScoped: true,
+    match: 'exact',
+    section: 'marketing',
+    breadcrumbs: [{ labelKey: 'campaigns:campaigns.list.title', path: '/campaigns' }],
+  },
+  {
+    path: '/campaigns/',
+    storeScoped: true,
+    match: 'prefix',
+    section: 'marketing',
+    breadcrumbs: [
+      { labelKey: 'campaigns:campaigns.list.title', path: '/campaigns' },
+      { labelKey: 'campaigns:campaigns.detail.breadcrumb' },
+    ],
+  },
+  {
     path: '/dashboard',
     storeScoped: true,
     match: 'exact',

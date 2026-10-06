@@ -109,6 +109,8 @@
     "subtitle": "Consulta i dettagli dei prodotti e i dati Amazon di tutte le tue inserzioni attive."
   },
   "menu": {
+    "marketing": "Marketing",
+    "campaigns": "Campagne pubblicitarie",
     "overview": "Panoramica",
     "dashboard": "Pannello",
     "listings": "Inserzioni",

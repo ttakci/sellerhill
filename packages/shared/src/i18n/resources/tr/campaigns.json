@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Reklam kampanyaları",
+      "subtitle": "Seçili eBay mağazanızın kampanyaları.",
+      "metrics": {
+        "sales": "Satışlar",
+        "adFees": "Reklam ücretleri",
+        "roas": "Reklam getirisi",
+        "clicks": "Tıklamalar",
+        "impressions": "Gösterimler",
+        "quantitySold": "Satılan adet",
+        "unavailable": "Henüz mevcut değil"
+      }
+    },
+    "detail": {
+      "title": "Kampanya ayrıntıları",
+      "breadcrumb": "Kampanya ayrıntıları",
+      "subtitle": "Bu kampanyadaki ilanlar."
+    },
+    "campaign": {
+      "name": "Kampanya adı",
+      "status": "Durum",
+      "strategy": "Strateji",
+      "defaultRate": "Varsayılan reklam oranı",
+      "listings": "İlanlar",
+      "outsideSellerHill": "SellerHill dışında oluşturuldu",
+      "running": "Yayında",
+      "paused": "Duraklatıldı",
+      "ended": "Sona erdi",
+      "fixed": "Sabit oran",
+      "dynamic": "Dinamik oran",
+      "costPerSale": "Satış başına ücret",
+      "costPerClick": "Tıklama başına ücret",
+      "ruleBased": "Kural tabanlı kampanya"
+    },
+    "actions": {
+      "create": "Kampanya oluştur",
+      "addListings": "İlan ekle",
+      "removeListings": "İlanları çıkar",
+      "changeRate": "Reklam oranını değiştir",
+      "pause": "Kampanyayı duraklat",
+      "resume": "Kampanyayı sürdür",
+      "end": "Kampanyayı sonlandır",
+      "back": "Kampanyalara dön",
+      "retry": "Tekrar dene",
+      "save": "Değişiklikleri kaydet",
+      "cancel": "İptal"
+    },
+    "empty": {
+      "title": "Henüz kampanya yok",
+      "description": "Seçili mağazanızın kampanyaları eşitlemeden sonra burada görünür.",
+      "noStore": "Üst çubuktan bir eBay mağazası seçin."
+    },
+    "errors": {
+      "load": "Kampanyalar yüklenemedi",
+      "description": "Bu mağazanın kampanyalarını yüklemek için tekrar deneyin."
+    },
+    "readOnly": {
+      "title": "Salt okunur kampanya",
+      "marginOverride": "Kâr marjı özel olarak belirlendiği için reklam oranı SellerHill fiyatına uygulanmaz."
+    },
+    "create": {
+      "title": "Kampanya oluştur",
+      "name": "Kampanya adı",
+      "rate": "Reklam oranı (%)"
+    },
+    "members": {
+      "title": "Kampanya ilanları",
+      "search": "İlan ara",
+      "priceLocked": "Fiyat kilitli"
+    },
+    "add": {
+      "title": "İlan ekle"
+    },
+    "rate": {
+      "title": "Reklam oranını değiştir"
+    },
+    "lifecycle": {
+      "endConfirm": "Bu kampanya sonlandırılsın mı? Yeniden başlatılamaz."
+    },
+    "listingContext": {
+      "title": "Reklam kampanyası"
+    }
+  }
+}

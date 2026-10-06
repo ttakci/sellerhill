@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Campagne pubblicitarie",
+      "subtitle": "Campagne del tuo negozio eBay attivo.",
+      "metrics": {
+        "sales": "Vendite",
+        "adFees": "Costi pubblicitari",
+        "roas": "Rendimento pubblicitario",
+        "clicks": "Clic",
+        "impressions": "Impressioni",
+        "quantitySold": "Quantità venduta",
+        "unavailable": "Non disponibile"
+      }
+    },
+    "detail": {
+      "title": "Dettagli della campagna",
+      "breadcrumb": "Dettagli della campagna",
+      "subtitle": "Inserzioni di questa campagna."
+    },
+    "campaign": {
+      "name": "Nome della campagna",
+      "status": "Stato",
+      "strategy": "Strategia",
+      "defaultRate": "Tariffa pubblicitaria predefinita",
+      "listings": "Inserzioni",
+      "outsideSellerHill": "Creata fuori da SellerHill",
+      "running": "Attiva",
+      "paused": "In pausa",
+      "ended": "Terminata",
+      "fixed": "Tariffa fissa",
+      "dynamic": "Tariffa dinamica",
+      "costPerSale": "Costo per vendita",
+      "costPerClick": "Costo per clic",
+      "ruleBased": "Campagna basata su regole"
+    },
+    "actions": {
+      "create": "Crea campagna",
+      "addListings": "Aggiungi inserzioni",
+      "removeListings": "Rimuovi inserzioni",
+      "changeRate": "Modifica tariffa",
+      "pause": "Metti in pausa",
+      "resume": "Riprendi campagna",
+      "end": "Termina campagna",
+      "back": "Torna alle campagne",
+      "retry": "Riprova",
+      "save": "Salva modifiche",
+      "cancel": "Annulla"
+    },
+    "empty": {
+      "title": "Nessuna campagna per ora",
+      "description": "Le campagne del negozio attivo appariranno qui dopo la sincronizzazione.",
+      "noStore": "Seleziona un negozio eBay nella barra superiore."
+    },
+    "errors": {
+      "load": "Impossibile caricare le campagne",
+      "description": "Riprova a caricare le campagne di questo negozio."
+    },
+    "readOnly": {
+      "title": "Campagna in sola lettura",
+      "marginOverride": "Margine personalizzato: la tariffa pubblicitaria non si applica al prezzo SellerHill."
+    },
+    "create": {
+      "title": "Crea campagna",
+      "name": "Nome della campagna",
+      "rate": "Tariffa pubblicitaria (%)"
+    },
+    "members": {
+      "title": "Inserzioni della campagna",
+      "search": "Cerca inserzioni",
+      "priceLocked": "Prezzo bloccato"
+    },
+    "add": {
+      "title": "Aggiungi inserzioni"
+    },
+    "rate": {
+      "title": "Modifica tariffa"
+    },
+    "lifecycle": {
+      "endConfirm": "Terminare questa campagna? Non potrà essere ripresa."
+    },
+    "listingContext": {
+      "title": "Campagna pubblicitaria"
+    }
+  }
+}

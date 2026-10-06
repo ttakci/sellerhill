@@ -109,6 +109,8 @@
     "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
   },
   "menu": {
+    "marketing": "Pazarlama",
+    "campaigns": "Reklam kampanyaları",
     "overview": "Genel Bakış",
     "dashboard": "Panel",
     "listings": "Listeler",

@@ -1,0 +1,86 @@
+{
+  "campaigns": {
+    "list": {
+      "title": "Reklam kampaniyaları",
+      "subtitle": "Aktiv eBay mağazanızın kampaniyaları.",
+      "metrics": {
+        "sales": "Satışlar",
+        "adFees": "Reklam xərcləri",
+        "roas": "Reklam gəlirliliyi",
+        "clicks": "Kliklər",
+        "impressions": "Göstərilmələr",
+        "quantitySold": "Satılan say",
+        "unavailable": "Mövcud deyil"
+      }
+    },
+    "detail": {
+      "title": "Kampaniya təfərrüatları",
+      "breadcrumb": "Kampaniya təfərrüatları",
+      "subtitle": "Bu kampaniyadakı elanlar."
+    },
+    "campaign": {
+      "name": "Kampaniyanın adı",
+      "status": "Status",
+      "strategy": "Strategiya",
+      "defaultRate": "Standart reklam faizi",
+      "listings": "Elanlar",
+      "outsideSellerHill": "SellerHill xaricində yaradılıb",
+      "running": "Aktivdir",
+      "paused": "Dayandırılıb",
+      "ended": "Bitib",
+      "fixed": "Sabit faiz",
+      "dynamic": "Dinamik faiz",
+      "costPerSale": "Satış başına xərc",
+      "costPerClick": "Klik başına xərc",
+      "ruleBased": "Qayda əsaslı kampaniya"
+    },
+    "actions": {
+      "create": "Kampaniya yarat",
+      "addListings": "Elan əlavə et",
+      "removeListings": "Elanları çıxar",
+      "changeRate": "Reklam faizini dəyiş",
+      "pause": "Kampaniyanı dayandır",
+      "resume": "Kampaniyanı davam etdir",
+      "end": "Kampaniyanı bitir",
+      "back": "Kampaniyalara qayıt",
+      "retry": "Yenidən cəhd et",
+      "save": "Dəyişiklikləri saxla",
+      "cancel": "Ləğv et"
+    },
+    "empty": {
+      "title": "Hələ kampaniya yoxdur",
+      "description": "Aktiv mağazanızın kampaniyaları sinxronlaşdırmadan sonra burada görünəcək.",
+      "noStore": "Üst paneldən eBay mağazası seçin."
+    },
+    "errors": {
+      "load": "Kampaniyalar yüklənmədi",
+      "description": "Bu mağazanın kampaniyalarını yükləmək üçün yenidən cəhd edin."
+    },
+    "readOnly": {
+      "title": "Yalnız oxunan kampaniya",
+      "marginOverride": "Xüsusi mənfəət marjası: reklam faizi SellerHill qiymətinə tətbiq edilmir."
+    },
+    "create": {
+      "title": "Kampaniya yarat",
+      "name": "Kampaniyanın adı",
+      "rate": "Reklam faizi (%)"
+    },
+    "members": {
+      "title": "Kampaniya elanları",
+      "search": "Elan axtar",
+      "priceLocked": "Qiymət kilidlənib"
+    },
+    "add": {
+      "title": "Elan əlavə et"
+    },
+    "rate": {
+      "title": "Reklam faizini dəyiş"
+    },
+    "lifecycle": {
+      "endConfirm": "Bu kampaniya bitirilsin? Yenidən davam etdirilə bilməz."
+    },
+    "listingContext": {
+      "title": "Reklam kampaniyası"
+    }
+  }
+}
