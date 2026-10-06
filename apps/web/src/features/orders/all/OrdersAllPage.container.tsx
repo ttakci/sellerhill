@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 
 import { useGetOrderStageCountsQuery, useGetOrdersQuery } from '../api/orders.api';
-
+import { orderTabToIcon } from '../shared/order-tab-presentation';
 import { useOrdersColumns } from './hooks/useOrdersColumns';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { OrdersAllPageComponent } from './OrdersAllPage.component';
@@ -97,6 +97,7 @@ export const OrdersAllPageContainer: React.FC = () => {
       Object.values(OrderStageTab).map((tabId) => ({
         id: tabId,
         label: t(`orders.stageTabs.${tabId}`),
+        icon: orderTabToIcon(tabId),
         count: tabId === OrderStageTab.ALL ? undefined : countFor(tabId),
       })),
     [countFor, t]

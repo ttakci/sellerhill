@@ -414,6 +414,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   width="8rem"
                   trigger={
                     <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
+                      <Icon name="globe" size={18} color="brand.primary" />
                       <S.LanguageText>{t(`translation:languages.${i18nLanguage}`)}</S.LanguageText>
                       <Icon name="chevron-down" size={12} />
                     </S.LanguageSelectTrigger>
@@ -498,6 +499,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                           {userName}
                         </Text>
                       </S.HeaderProfileInfo>
+                      <Icon name="chevron-down" size={12} />
                     </S.HeaderProfileArea>
                   }
                   items={[

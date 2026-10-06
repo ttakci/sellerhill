@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainer, Text, tkn } from '@repo/ui';
+import { PageContainer, TabNav, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -56,6 +56,108 @@ export const SelectWrapper = styled.div`
 
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     width: 100%;
+  }
+`;
+
+/**
+ * Stage rail: underline variant with severity accent ONLY on the selected tab,
+ * mirroring `ActionCenterPage.style.ts:FilterTabs`. Inactive tabs inherit
+ * `TabNav` defaults (text.secondary, hover → brand.primary).
+ */
+export const StageTabs = styled(TabNav)`
+  > [role='tab']:nth-of-type(1)[aria-selected='true'] {
+    color: ${tkn('colors.brand.primary')};
+
+    &:hover {
+      color: ${tkn('colors.brand.primary')};
+    }
+
+    &::after {
+      background: ${tkn('colors.brand.primary')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.brand.primary')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(2)[aria-selected='true'] {
+    color: ${tkn('colors.semantic.error')};
+
+    &:hover {
+      color: ${tkn('colors.semantic.error')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.error')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.error')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(3)[aria-selected='true'] {
+    color: ${tkn('colors.semantic.warning')};
+
+    &:hover {
+      color: ${tkn('colors.semantic.warning')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.warning')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.warning')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(4)[aria-selected='true'] {
+    color: ${tkn('colors.semantic.info')};
+
+    &:hover {
+      color: ${tkn('colors.semantic.info')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.info')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.info')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
+  }
+
+  > [role='tab']:nth-of-type(5)[aria-selected='true'] {
+    color: ${tkn('colors.semantic.success')};
+
+    &:hover {
+      color: ${tkn('colors.semantic.success')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.success')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.semantic.success')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
   }
 `;
 

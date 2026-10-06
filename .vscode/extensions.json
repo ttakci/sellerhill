@@ -13,7 +13,8 @@
     "usernamehw.errorlens",
     "christian-kohler.path-intellisense",
     "csstools.postcss",
-    "mikestead.dotenv"
+    "mikestead.dotenv",
+    "saoudrizwan.claude-dev"
   ],
   "unwantedRecommendations": ["hookyqr.beautify", "ms-vscode.vscode-typescript-tslint-plugin"]
 }

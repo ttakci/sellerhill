@@ -366,17 +366,21 @@ export const NavBadge = styled.span<{ $urgent: boolean }>`
   align-items: center;
   justify-content: center;
   min-width: 1.25rem;
-  height: 1.25rem;
-  padding: 0 ${tkn('spacing.2xs+')};
-  border-radius: ${tkn('radius.full')};
+  padding: ${tkn('spacing.2xs+')} ${tkn('spacing.xs+')};
+  border-radius: ${tkn('radius.sm')};
+  border: 0.0625rem solid transparent;
+  box-sizing: border-box;
   flex-shrink: 0;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  letter-spacing: ${tkn('typography.letterSpacing.normal')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+  white-space: nowrap;
   color: ${({ theme, $urgent }) => ($urgent ? theme.colors.text.inverse : theme.colors.brand.primary)};
   background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : '#FFFFFF')};
+  border-color: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : theme.colors.brand.primary + '30')};
 `;
 
 /**
@@ -806,28 +810,23 @@ export const VerticalDivider = styled.div`
 export const LanguageSelectTrigger = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   cursor: pointer;
-  padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
-  border-radius: ${tkn('radius.sm')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
   transition: background ${tkn('transitions.fast')};
+  max-width: 15rem;
 
   &:hover {
-    background: ${tkn('colors.brand.secondary')};
-    & > span {
-      color: ${tkn('colors.brand.primary')};
-    }
-    & svg {
-      color: ${tkn('colors.brand.primary')};
-    }
+    background: ${tkn('colors.background.primary')};
   }
 `;
 
 export const LanguageText = styled.span`
   white-space: nowrap;
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.secondary')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
   transition: color ${tkn('transitions.fast')};
 `;
 

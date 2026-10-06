@@ -100,6 +100,14 @@ const variantStyles = {
     line-height: ${theme.typography.lineHeight.normal};
   `,
   /* ── KPI figures: lining, tabular numerals so columns of money align ── */
+  'metric-lg': (theme: Theme) => `
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: ${theme.typography.fontSize.xxxl};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: ${theme.typography.letterSpacing.tighter};
+    font-variant-numeric: tabular-nums;
+  `,
   metric: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xl};

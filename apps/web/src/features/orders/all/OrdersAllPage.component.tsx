@@ -1,14 +1,5 @@
 import type { OrderDto } from '@repo/shared';
-import {
-  Button,
-  DataTable,
-  EmptyState,
-  PageHeader,
-  SearchField,
-  Select,
-  TabNav,
-  Text,
-} from '@repo/ui';
+import { Button, DataTable, EmptyState, PageHeader, SearchField, Select, Text } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -86,7 +77,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         {/* One rail answers "what needs me / what is in flight / what is done";
             the legend beside it explains every badge the table can show. */}
         <S.TabsRow>
-          <TabNav
+          <S.StageTabs
             items={tabItems}
             value={tab}
             onChange={onTabChange}

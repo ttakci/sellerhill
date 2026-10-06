@@ -171,13 +171,14 @@ import {
 import React from 'react';
 
 import { GoogleIcon } from './google';
+import type { IconGlyphProps } from './icon-glyph.types';
 import { TriangleInfoIcon } from './triangle-info';
 import { ZorroIcon } from './zorro';
 
-type IconGlyph = React.FC<React.SVGProps<SVGSVGElement>>;
+type IconGlyph = React.FC<IconGlyphProps>;
 
 const lucide = (IconComp: LucideIcon): IconGlyph => {
-  const Wrapped = (props: React.SVGProps<SVGSVGElement>) => {
+  const Wrapped = (props: IconGlyphProps) => {
     const { stroke, strokeWidth, fill } = props;
     return React.createElement(IconComp, {
       size: 24,

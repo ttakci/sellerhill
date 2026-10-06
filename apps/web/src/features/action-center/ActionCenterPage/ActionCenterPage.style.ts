@@ -41,110 +41,90 @@ export const Toolbar = styled.div`
 `;
 
 /**
- * Severity is the filter's information, so colour belongs here. Counts use a
- * solid semantic badge with white bold numerals; the selected tab gets only a
- * quiet tint, keeping the row useful without turning it into four CTA buttons.
+ * Synthesis: underline rail like Orders (variant="underline" → bottom border +
+ * active ::after) with severity accent ONLY on the selected tab. Inactive
+ * tabs inherit TabNav's default (text.secondary, hover → brand.primary) like
+ * Orders — so only the active tab "yanar".
  */
 export const FilterTabs = styled(TabNav)`
-  gap: ${tkn('spacing.xs')};
+  > [role='tab']:nth-of-type(1)[aria-selected='true'] {
+    color: ${tkn('colors.brand.primary')};
 
-  > [role='tab'] {
-    border: 0.0625rem solid transparent;
+    &:hover {
+      color: ${tkn('colors.brand.primary')};
+    }
+
+    &::after {
+      background: ${tkn('colors.brand.primary')};
+    }
+
+    > span:last-child {
+      background: ${tkn('colors.brand.primary')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
+    }
   }
 
-  > [role='tab'] > span:last-child {
-    color: ${tkn('colors.text.inverse')};
-    font-weight: ${tkn('typography.fontWeight.bold')};
-    box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
-  }
-
-  > [role='tab']:nth-of-type(1) > span:last-child {
-    background: ${tkn('colors.brand.primary')};
-  }
-
-  > [role='tab']:nth-of-type(2) {
+  > [role='tab']:nth-of-type(2)[aria-selected='true'] {
     color: ${tkn('colors.semantic.error')};
 
-    &[aria-selected='true'] {
-      background: ${tkn('colors.semanticTint.error')};
-      border-color: ${tkn('colors.semanticTintBorder.error')};
+    &:hover {
+      color: ${tkn('colors.semantic.error')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.error')};
     }
 
     > span:last-child {
       background: ${tkn('colors.semantic.error')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
     }
   }
 
-  > [role='tab']:nth-of-type(3) {
+  > [role='tab']:nth-of-type(3)[aria-selected='true'] {
     color: ${tkn('colors.semantic.warning')};
 
-    &[aria-selected='true'] {
-      background: ${tkn('colors.semanticTint.warning')};
-      border-color: ${tkn('colors.semanticTintBorder.warning')};
+    &:hover {
+      color: ${tkn('colors.semantic.warning')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.warning')};
     }
 
     > span:last-child {
       background: ${tkn('colors.semantic.warning')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
     }
   }
 
-  > [role='tab']:nth-of-type(4) {
+  > [role='tab']:nth-of-type(4)[aria-selected='true'] {
     color: ${tkn('colors.semantic.info')};
 
-    &[aria-selected='true'] {
-      background: ${tkn('colors.semanticTint.info')};
-      border-color: ${tkn('colors.semanticTintBorder.info')};
+    &:hover {
+      color: ${tkn('colors.semantic.info')};
+    }
+
+    &::after {
+      background: ${tkn('colors.semantic.info')};
     }
 
     > span:last-child {
       background: ${tkn('colors.semantic.info')};
+      color: ${tkn('colors.text.inverse')};
+      font-weight: ${tkn('typography.fontWeight.bold')};
+      box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
     }
   }
 `;
 
-export const SummaryList = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.xs+')};
-  border: 0.0625rem solid ${tkn('colors.glass.edge')};
-  border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.glass.surfaceStrong')};
-  box-shadow: ${tkn('shadows.sm')};
-  white-space: nowrap;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 100%;
-    justify-content: space-between;
-    white-space: normal;
-  }
-`;
-
-export const SummaryItem = styled.span<{ $severity: ActionCenterSeverity }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  padding: 0 ${tkn('spacing.sm')};
-  color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-variant-numeric: tabular-nums;
-
-  & + & {
-    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
-  }
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    padding: 0 ${tkn('spacing.xs')};
-  }
-`;
-
-export const SummaryDot = styled.span<{ $severity: ActionCenterSeverity }>`
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: ${tkn('radius.full')};
-  background: ${({ $severity, theme }) => severityColor($severity, theme)};
-`;
 
 /**
  * Two independent flex columns, NOT a CSS grid. A grid aligns cards into

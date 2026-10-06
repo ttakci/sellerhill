@@ -137,6 +137,7 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                   trigger={
                     <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
                       <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
+                        <Icon name="globe" size={18} color="brand.primary" />
                         <S.LanguageText>{t(`translation:languages.${i18nLanguage}`)}</S.LanguageText>
                         <Icon name="chevron-down" size={12} />
                       </S.LanguageSelectTrigger>

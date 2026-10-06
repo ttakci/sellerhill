@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 
-export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'body' | 'body-sm' | 'body-xs' | 'caption' | 'overline' | 'mono' | 'metric' | 'metric-sm' | 'nav';
+export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'body' | 'body-sm' | 'body-xs' | 'caption' | 'overline' | 'mono' | 'metric-lg' | 'metric' | 'metric-sm' | 'nav';
 
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
@@ -46,7 +46,7 @@ export interface TextProps {
   /**
    * Lining, fixed-width numerals. Required for any figure rendered in a column
    * (money, counts, percentages) so digits stack instead of jittering.
-   * `metric` / `metric-sm` already enable this.
+   * Metric variants already enable this.
    */
   numeric?: boolean;
 

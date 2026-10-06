@@ -18,7 +18,7 @@ import type { ActionCenterGroupView, ActionCenterPageComponentProps } from './Ac
 
 export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
   groups,
-  summary,
+  summary: _summary,
   filter,
   onFilterChange,
   filterOptions,
@@ -66,7 +66,7 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
         </S.GroupHeading>
       }
       headerRight={
-        <Badge variant={severityToBadgeVariant(group.severity)} size="xs" isPill>
+        <Badge variant={severityToBadgeVariant(group.severity)} size="xs" isPill solid>
           {severityLabel(group.severity)} · {group.itemCount}
         </Badge>
       }
@@ -81,7 +81,7 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
                   <S.ItemTitle variant="body" weight="semibold" color="text.primary">
                     {item.title}
                   </S.ItemTitle>
-                  <S.CountBadge variant={severityToBadgeVariant(item.severity)} size="xs" isPill>
+                  <S.CountBadge variant={severityToBadgeVariant(item.severity)} size="xs" isPill solid>
                     {item.count}
                   </S.CountBadge>
                 </S.ItemTitleRow>
@@ -119,7 +119,7 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
                         <S.ChipLabel variant="body-sm" color="text.secondary">
                           {chip.label}
                         </S.ChipLabel>
-                        <S.ChipCount variant="neutral" size="xs" isPill>
+                        <S.ChipCount variant="neutral" size="xs" isPill solid>
                           {chip.count}
                         </S.ChipCount>
                       </S.ChipListItem>
@@ -158,30 +158,11 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
     </S.GroupCard>
   );
 
+  void _summary;
+
   return (
     <S.Container>
-      <PageHeader
-        title={t('actionCenter.title')}
-        subtitle={t('actionCenter.subtitle')}
-        actions={
-          summary.total > 0 ? (
-            <S.SummaryList aria-label={t('actionCenter.filter.ariaLabel')}>
-              <S.SummaryItem $severity={ActionCenterSeverity.CRITICAL}>
-                <S.SummaryDot $severity={ActionCenterSeverity.CRITICAL} />
-                <span>{t('actionCenter.summary.critical', { count: summary.critical })}</span>
-              </S.SummaryItem>
-              <S.SummaryItem $severity={ActionCenterSeverity.WARNING}>
-                <S.SummaryDot $severity={ActionCenterSeverity.WARNING} />
-                <span>{t('actionCenter.summary.warning', { count: summary.warning })}</span>
-              </S.SummaryItem>
-              <S.SummaryItem $severity={ActionCenterSeverity.INFO}>
-                <S.SummaryDot $severity={ActionCenterSeverity.INFO} />
-                <span>{t('actionCenter.summary.info', { count: summary.info })}</span>
-              </S.SummaryItem>
-            </S.SummaryList>
-          ) : undefined
-        }
-      />
+      <PageHeader title={t('actionCenter.title')} subtitle={t('actionCenter.subtitle')} />
 
       {/*
         The initial fetch renders this page's own state card, never the global
@@ -212,7 +193,7 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
               value={filter}
               onChange={onFilterChange}
               ariaLabel={t('actionCenter.filter.ariaLabel')}
-              variant="pill"
+              variant="underline"
             />
           </S.Toolbar>
 
