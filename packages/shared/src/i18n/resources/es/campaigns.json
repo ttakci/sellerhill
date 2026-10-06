@@ -17,7 +17,9 @@
     "detail": {
       "title": "Detalles de la campaña",
       "breadcrumb": "Detalles de la campaña",
-      "subtitle": "Anuncios de esta campaña."
+      "subtitle": "Anuncios de esta campaña.",
+      "metricsNote": "Las métricas no disponibles esperan los informes de eBay; la conciliación puede tardar unas 72 horas.",
+      "eligibilityUnavailable": "Se desconoce la elegibilidad publicitaria. Los cambios están desactivados."
     },
     "campaign": {
       "name": "Nombre de la campaña",
@@ -35,7 +37,9 @@
       "costPerClick": "Coste por clic",
       "ruleBased": "Campaña basada en reglas",
       "rateType": "Tipo de tarifa",
-      "listingCounts": "Anuncios de SellerHill / eBay"
+      "listingCounts": "Anuncios de SellerHill / eBay",
+      "startDate": "Fecha de inicio",
+      "adCount": "Número de anuncios de eBay"
     },
     "actions": {
       "create": "Crear campaña",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Campaña de solo lectura",
-      "marginOverride": "Margen personalizado: la tarifa publicitaria no se aplica al precio de SellerHill."
+      "marginOverride": "Margen personalizado: la tarifa publicitaria no se aplica al precio de SellerHill.",
+      "rule_based": "Las campañas basadas en reglas son de solo lectura.",
+      "cost_per_click": "Las campañas de coste por clic son de solo lectura.",
+      "dynamic_rate": "Las campañas de tasa dinámica son de solo lectura.",
+      "ended": "Las campañas finalizadas son de solo lectura.",
+      "unsupported": "Este tipo de campaña es de solo lectura."
     },
     "create": {
       "title": "Crear campaña",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Anuncios de la campaña",
       "search": "Buscar anuncios",
-      "priceLocked": "Precio bloqueado"
+      "priceLocked": "Precio bloqueado",
+      "product": "Producto",
+      "price": "Precio actual",
+      "rate": "Tasa publicitaria de eBay",
+      "actions": "Acciones",
+      "editRate": "Editar tasa: {{title}}",
+      "remove": "Quitar: {{title}}",
+      "empty": "No hay publicaciones en esta campaña",
+      "removed": "Publicaciones quitadas."
     },
     "add": {
-      "title": "Añadir anuncios"
+      "title": "Añadir anuncios",
+      "group": "Grupo de ajustes",
+      "groupHint": "El grupo llena esta selección una vez con publicaciones elegibles sin campaña. No crea una regla permanente.",
+      "groupsError": "No se pudieron cargar los grupos de ajustes.",
+      "groupError": "No se pudo cargar todo el grupo. Se conservó tu selección.",
+      "retryGroup": "Reintentar selección del grupo",
+      "filling": "Cargando todas las publicaciones elegibles del grupo…",
+      "skipped": "Ya en una campaña: {{count}}",
+      "selection": "Publicaciones seleccionadas: {{count}}",
+      "removeSelection": "Deseleccionar: {{title}}",
+      "allGroups": "Todos los grupos",
+      "empty": "No hay publicaciones elegibles",
+      "previous": "Página anterior",
+      "next": "Página siguiente",
+      "page": "Página {{page}} de {{total}}",
+      "selectRequired": "Selecciona al menos una publicación.",
+      "success": "Publicaciones añadidas."
     },
     "rate": {
-      "title": "Cambiar tarifa"
+      "title": "Cambiar tarifa",
+      "defaultTitle": "Cambiar tasa publicitaria predeterminada",
+      "retryMembers": "Reintentar publicaciones fallidas",
+      "success": "Tasa publicitaria actualizada."
     },
     "lifecycle": {
-      "endConfirm": "¿Finalizar esta campaña? No se podrá reanudar."
+      "endConfirm": "¿Finalizar esta campaña? No se podrá reanudar.",
+      "success": "Estado de campaña actualizado."
     },
     "listingContext": {
       "title": "Campaña publicitaria"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "La publicidad no está disponible para esta tienda: {{reason}}",
       "unavailable": "No se puede consultar la elegibilidad publicitaria. La creación de campañas está desactivada."
+    },
+    "results": {
+      "summary": "Cambios confirmados: {{changed}}. Ya en campaña: {{already}}. Sin confirmar o fallidos: {{failed}}.",
+      "retryHint": "Las publicaciones fallidas o sin confirmar se conservan para reintentar.",
+      "unconfirmed": "No se confirmó ninguna actualización. Actualiza los datos de la campaña para comprobar la tasa predeterminada."
     }
   }
 }

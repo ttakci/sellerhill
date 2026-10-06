@@ -17,7 +17,9 @@
     "detail": {
       "title": "Kampanya ayrıntıları",
       "breadcrumb": "Kampanya ayrıntıları",
-      "subtitle": "Bu kampanyadaki ilanlar."
+      "subtitle": "Bu kampanyadaki ilanlar.",
+      "metricsNote": "Henüz görünmeyen metrikler eBay raporlarını bekliyor; rakamların kesinleşmesi yaklaşık 72 saat sürebilir.",
+      "eligibilityUnavailable": "Reklam uygunluğu bilinmiyor. Kampanya değişiklikleri kapalı."
     },
     "campaign": {
       "name": "Kampanya adı",
@@ -35,7 +37,9 @@
       "costPerClick": "Tıklama başına ücret",
       "ruleBased": "Kural tabanlı kampanya",
       "rateType": "Ücret türü",
-      "listingCounts": "SellerHill / eBay ilanları"
+      "listingCounts": "SellerHill / eBay ilanları",
+      "startDate": "Başlangıç tarihi",
+      "adCount": "eBay reklam sayısı"
     },
     "actions": {
       "create": "Kampanya oluştur",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Salt okunur kampanya",
-      "marginOverride": "Kâr marjı özel olarak belirlendiği için reklam oranı SellerHill fiyatına uygulanmaz."
+      "marginOverride": "Kâr marjı özel olarak belirlendiği için reklam oranı SellerHill fiyatına uygulanmaz.",
+      "rule_based": "Kural tabanlı kampanyalar salt okunur.",
+      "cost_per_click": "Tıklama başına maliyet kampanyaları salt okunur.",
+      "dynamic_rate": "Dinamik oranlı kampanyalar salt okunur.",
+      "ended": "Bitmiş kampanyalar salt okunur.",
+      "unsupported": "Bu kampanya türü salt okunur."
     },
     "create": {
       "title": "Kampanya oluştur",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Kampanya ilanları",
       "search": "İlan ara",
-      "priceLocked": "Fiyat kilitli"
+      "priceLocked": "Fiyat kilitli",
+      "product": "Ürün",
+      "price": "Güncel fiyat",
+      "rate": "eBay reklam oranı",
+      "actions": "İşlemler",
+      "editRate": "Oranı düzenle: {{title}}",
+      "remove": "Kaldır: {{title}}",
+      "empty": "Bu kampanyada ilan yok",
+      "removed": "İlanlar kaldırıldı."
     },
     "add": {
-      "title": "İlan ekle"
+      "title": "İlan ekle",
+      "group": "Ayar grubu",
+      "groupHint": "Grup seçimi, hiçbir kampanyada olmayan uygun ilanlarla seçiminizi bir kez doldurur. Sürekli bir kural oluşturmaz.",
+      "groupsError": "Ayar grupları yüklenemedi.",
+      "groupError": "Grubun tamamı yüklenemedi. Seçiminiz korundu.",
+      "retryGroup": "Grup seçimini yeniden dene",
+      "filling": "Gruptaki tüm uygun ilanlar yükleniyor…",
+      "skipped": "Zaten bir kampanyada: {{count}}",
+      "selection": "Seçilen ilanlar: {{count}}",
+      "removeSelection": "Seçimden çıkar: {{title}}",
+      "allGroups": "Tüm gruplar",
+      "empty": "Uygun ilan yok",
+      "previous": "Önceki sayfa",
+      "next": "Sonraki sayfa",
+      "page": "Sayfa {{page}} / {{total}}",
+      "selectRequired": "En az bir ilan seçin.",
+      "success": "İlanlar eklendi."
     },
     "rate": {
-      "title": "Reklam oranını değiştir"
+      "title": "Reklam oranını değiştir",
+      "defaultTitle": "Varsayılan reklam oranını değiştir",
+      "retryMembers": "Başarısız ilanları yeniden dene",
+      "success": "Reklam oranı güncellendi."
     },
     "lifecycle": {
-      "endConfirm": "Bu kampanya sonlandırılsın mı? Yeniden başlatılamaz."
+      "endConfirm": "Bu kampanya sonlandırılsın mı? Yeniden başlatılamaz.",
+      "success": "Kampanya durumu güncellendi."
     },
     "listingContext": {
       "title": "Reklam kampanyası"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "Bu mağazada reklam kullanılamıyor: {{reason}}",
       "unavailable": "Reklam uygunluğu bilgisi alınamadı. Kampanya oluşturma devre dışı."
+    },
+    "results": {
+      "summary": "Onaylanan değişiklik: {{changed}}. Zaten kampanyada: {{already}}. Onaylanmayan veya başarısız: {{failed}}.",
+      "retryHint": "Başarısız veya onaylanmayan ilanlar yeniden denemek için korunur.",
+      "unconfirmed": "Hiçbir ilan güncellemesi onaylanmadı. Varsayılan oranı kontrol etmek için kampanya bilgilerini yenileyin."
     }
   }
 }

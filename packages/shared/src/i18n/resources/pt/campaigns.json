@@ -17,7 +17,9 @@
     "detail": {
       "title": "Detalhes da campanha",
       "breadcrumb": "Detalhes da campanha",
-      "subtitle": "Anúncios desta campanha."
+      "subtitle": "Anúncios desta campanha.",
+      "metricsNote": "As métricas indisponíveis aguardam os relatórios do eBay; a conciliação pode levar cerca de 72 horas.",
+      "eligibilityUnavailable": "A elegibilidade para publicidade é desconhecida. As alterações estão desativadas."
     },
     "campaign": {
       "name": "Nome da campanha",
@@ -35,7 +37,9 @@
       "costPerClick": "Custo por clique",
       "ruleBased": "Campanha baseada em regras",
       "rateType": "Tipo de tarifa",
-      "listingCounts": "Anúncios SellerHill / eBay"
+      "listingCounts": "Anúncios SellerHill / eBay",
+      "startDate": "Data de início",
+      "adCount": "Número de anúncios do eBay"
     },
     "actions": {
       "create": "Criar campanha",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Campanha somente leitura",
-      "marginOverride": "Margem personalizada: a taxa publicitária não se aplica ao preço do SellerHill."
+      "marginOverride": "Margem personalizada: a taxa publicitária não se aplica ao preço do SellerHill.",
+      "rule_based": "Campanhas baseadas em regras são somente leitura.",
+      "cost_per_click": "Campanhas de custo por clique são somente leitura.",
+      "dynamic_rate": "Campanhas de taxa dinâmica são somente leitura.",
+      "ended": "Campanhas encerradas são somente leitura.",
+      "unsupported": "Este tipo de campanha é somente leitura."
     },
     "create": {
       "title": "Criar campanha",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Anúncios da campanha",
       "search": "Pesquisar anúncios",
-      "priceLocked": "Preço bloqueado"
+      "priceLocked": "Preço bloqueado",
+      "product": "Produto",
+      "price": "Preço atual",
+      "rate": "Taxa publicitária do eBay",
+      "actions": "Ações",
+      "editRate": "Editar taxa: {{title}}",
+      "remove": "Remover: {{title}}",
+      "empty": "Nenhum anúncio nesta campanha",
+      "removed": "Anúncios removidos."
     },
     "add": {
-      "title": "Adicionar anúncios"
+      "title": "Adicionar anúncios",
+      "group": "Grupo de configurações",
+      "groupHint": "O grupo preenche a seleção uma vez com anúncios elegíveis sem campanha. Não cria uma regra permanente.",
+      "groupsError": "Não foi possível carregar os grupos de configurações.",
+      "groupError": "Não foi possível carregar todo o grupo. Sua seleção foi mantida.",
+      "retryGroup": "Tentar seleção do grupo novamente",
+      "filling": "Carregando todos os anúncios elegíveis do grupo…",
+      "skipped": "Já em uma campanha: {{count}}",
+      "selection": "Anúncios selecionados: {{count}}",
+      "removeSelection": "Desmarcar: {{title}}",
+      "allGroups": "Todos os grupos",
+      "empty": "Nenhum anúncio elegível",
+      "previous": "Página anterior",
+      "next": "Próxima página",
+      "page": "Página {{page}} de {{total}}",
+      "selectRequired": "Selecione pelo menos um anúncio.",
+      "success": "Anúncios adicionados."
     },
     "rate": {
-      "title": "Alterar taxa"
+      "title": "Alterar taxa",
+      "defaultTitle": "Alterar taxa publicitária padrão",
+      "retryMembers": "Tentar anúncios com falha novamente",
+      "success": "Taxa publicitária atualizada."
     },
     "lifecycle": {
-      "endConfirm": "Terminar esta campanha? Não será possível retomá-la."
+      "endConfirm": "Terminar esta campanha? Não será possível retomá-la.",
+      "success": "Status da campanha atualizado."
     },
     "listingContext": {
       "title": "Campanha publicitária"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "A publicidade não está disponível para esta loja: {{reason}}",
       "unavailable": "A elegibilidade para publicidade está indisponível. A criação de campanhas está desativada."
+    },
+    "results": {
+      "summary": "Alterações confirmadas: {{changed}}. Já na campanha: {{already}}. Não confirmadas ou com falha: {{failed}}.",
+      "retryHint": "Os anúncios com falha ou não confirmados continuam disponíveis para nova tentativa.",
+      "unconfirmed": "Nenhuma atualização confirmada. Atualize os dados da campanha para verificar a taxa padrão."
     }
   }
 }

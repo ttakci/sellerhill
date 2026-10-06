@@ -17,7 +17,9 @@
     "detail": {
       "title": "Dettagli della campagna",
       "breadcrumb": "Dettagli della campagna",
-      "subtitle": "Inserzioni di questa campagna."
+      "subtitle": "Inserzioni di questa campagna.",
+      "metricsNote": "Le metriche non disponibili attendono i rapporti eBay; la riconciliazione può richiedere circa 72 ore.",
+      "eligibilityUnavailable": "L’idoneità pubblicitaria è sconosciuta. Le modifiche sono disabilitate."
     },
     "campaign": {
       "name": "Nome della campagna",
@@ -35,7 +37,9 @@
       "costPerClick": "Costo per clic",
       "ruleBased": "Campagna basata su regole",
       "rateType": "Tipo di tariffa",
-      "listingCounts": "Inserzioni SellerHill / eBay"
+      "listingCounts": "Inserzioni SellerHill / eBay",
+      "startDate": "Data di inizio",
+      "adCount": "Numero di annunci eBay"
     },
     "actions": {
       "create": "Crea campagna",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Campagna in sola lettura",
-      "marginOverride": "Margine personalizzato: la tariffa pubblicitaria non si applica al prezzo SellerHill."
+      "marginOverride": "Margine personalizzato: la tariffa pubblicitaria non si applica al prezzo SellerHill.",
+      "rule_based": "Le campagne basate su regole sono di sola lettura.",
+      "cost_per_click": "Le campagne a costo per clic sono di sola lettura.",
+      "dynamic_rate": "Le campagne a tasso dinamico sono di sola lettura.",
+      "ended": "Le campagne terminate sono di sola lettura.",
+      "unsupported": "Questo tipo di campagna è di sola lettura."
     },
     "create": {
       "title": "Crea campagna",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Inserzioni della campagna",
       "search": "Cerca inserzioni",
-      "priceLocked": "Prezzo bloccato"
+      "priceLocked": "Prezzo bloccato",
+      "product": "Prodotto",
+      "price": "Prezzo attuale",
+      "rate": "Tasso pubblicitario eBay",
+      "actions": "Azioni",
+      "editRate": "Modifica tasso: {{title}}",
+      "remove": "Rimuovi: {{title}}",
+      "empty": "Nessuna inserzione in questa campagna",
+      "removed": "Inserzioni rimosse."
     },
     "add": {
-      "title": "Aggiungi inserzioni"
+      "title": "Aggiungi inserzioni",
+      "group": "Gruppo di impostazioni",
+      "groupHint": "Il gruppo riempie la selezione una sola volta con inserzioni idonee senza campagna. Non crea una regola permanente.",
+      "groupsError": "Impossibile caricare i gruppi di impostazioni.",
+      "groupError": "Impossibile caricare tutto il gruppo. La selezione è stata mantenuta.",
+      "retryGroup": "Riprova la selezione del gruppo",
+      "filling": "Caricamento di tutte le inserzioni idonee del gruppo…",
+      "skipped": "Già in una campagna: {{count}}",
+      "selection": "Inserzioni selezionate: {{count}}",
+      "removeSelection": "Deseleziona: {{title}}",
+      "allGroups": "Tutti i gruppi",
+      "empty": "Nessuna inserzione idonea",
+      "previous": "Pagina precedente",
+      "next": "Pagina successiva",
+      "page": "Pagina {{page}} di {{total}}",
+      "selectRequired": "Seleziona almeno un’inserzione.",
+      "success": "Inserzioni aggiunte."
     },
     "rate": {
-      "title": "Modifica tariffa"
+      "title": "Modifica tariffa",
+      "defaultTitle": "Modifica il tasso pubblicitario predefinito",
+      "retryMembers": "Riprova le inserzioni non riuscite",
+      "success": "Tasso pubblicitario aggiornato."
     },
     "lifecycle": {
-      "endConfirm": "Terminare questa campagna? Non potrà essere ripresa."
+      "endConfirm": "Terminare questa campagna? Non potrà essere ripresa.",
+      "success": "Stato della campagna aggiornato."
     },
     "listingContext": {
       "title": "Campagna pubblicitaria"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "La pubblicità non è disponibile per questo negozio: {{reason}}",
       "unavailable": "L’idoneità pubblicitaria non è disponibile. La creazione di campagne è disattivata."
+    },
+    "results": {
+      "summary": "Modifiche confermate: {{changed}}. Già nella campagna: {{already}}. Non confermate o non riuscite: {{failed}}.",
+      "retryHint": "Le inserzioni non riuscite o non confermate restano disponibili per riprovare.",
+      "unconfirmed": "Nessun aggiornamento confermato. Aggiorna i dettagli della campagna per verificare il tasso predefinito."
     }
   }
 }

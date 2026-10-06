@@ -17,7 +17,9 @@
     "detail": {
       "title": "Detalii campanie",
       "breadcrumb": "Detalii campanie",
-      "subtitle": "Anunțurile din această campanie."
+      "subtitle": "Anunțurile din această campanie.",
+      "metricsNote": "Valorile indisponibile așteaptă rapoartele eBay; reconcilierea poate dura aproximativ 72 de ore.",
+      "eligibilityUnavailable": "Eligibilitatea pentru publicitate nu este cunoscută. Modificările sunt dezactivate."
     },
     "campaign": {
       "name": "Numele campaniei",
@@ -35,7 +37,9 @@
       "costPerClick": "Cost pe clic",
       "ruleBased": "Campanie bazată pe reguli",
       "rateType": "Tipul taxei",
-      "listingCounts": "Anunțuri SellerHill / eBay"
+      "listingCounts": "Anunțuri SellerHill / eBay",
+      "startDate": "Data de început",
+      "adCount": "Număr de reclame eBay"
     },
     "actions": {
       "create": "Creează campanie",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Campanie doar pentru citire",
-      "marginOverride": "Marjă personalizată: rata publicitară nu se aplică prețului SellerHill."
+      "marginOverride": "Marjă personalizată: rata publicitară nu se aplică prețului SellerHill.",
+      "rule_based": "Campaniile bazate pe reguli pot fi doar citite.",
+      "cost_per_click": "Campaniile cu cost pe clic pot fi doar citite.",
+      "dynamic_rate": "Campaniile cu rată dinamică pot fi doar citite.",
+      "ended": "Campaniile încheiate pot fi doar citite.",
+      "unsupported": "Acest tip de campanie poate fi doar citit."
     },
     "create": {
       "title": "Creează campanie",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Anunțurile campaniei",
       "search": "Caută anunțuri",
-      "priceLocked": "Preț blocat"
+      "priceLocked": "Preț blocat",
+      "product": "Produs",
+      "price": "Preț actual",
+      "rate": "Rată publicitară eBay",
+      "actions": "Acțiuni",
+      "editRate": "Editează rata: {{title}}",
+      "remove": "Elimină: {{title}}",
+      "empty": "Nicio ofertă în această campanie",
+      "removed": "Oferte eliminate."
     },
     "add": {
-      "title": "Adaugă anunțuri"
+      "title": "Adaugă anunțuri",
+      "group": "Grup de setări",
+      "groupHint": "Grupul completează o singură dată selecția cu oferte eligibile fără campanie. Nu creează o regulă permanentă.",
+      "groupsError": "Grupurile de setări nu au putut fi încărcate.",
+      "groupError": "Întregul grup nu a putut fi încărcat. Selecția a fost păstrată.",
+      "retryGroup": "Reîncearcă selecția grupului",
+      "filling": "Se încarcă toate ofertele eligibile din grup…",
+      "skipped": "Deja într-o campanie: {{count}}",
+      "selection": "Oferte selectate: {{count}}",
+      "removeSelection": "Deselectează: {{title}}",
+      "allGroups": "Toate grupurile",
+      "empty": "Nicio ofertă eligibilă",
+      "previous": "Pagina anterioară",
+      "next": "Pagina următoare",
+      "page": "Pagina {{page}} din {{total}}",
+      "selectRequired": "Selectează cel puțin o ofertă.",
+      "success": "Oferte adăugate."
     },
     "rate": {
-      "title": "Modifică rata"
+      "title": "Modifică rata",
+      "defaultTitle": "Schimbă rata publicitară implicită",
+      "retryMembers": "Reîncearcă ofertele nereușite",
+      "success": "Rata publicitară a fost actualizată."
     },
     "lifecycle": {
-      "endConfirm": "Închei această campanie? Nu va putea fi reluată."
+      "endConfirm": "Închei această campanie? Nu va putea fi reluată.",
+      "success": "Starea campaniei a fost actualizată."
     },
     "listingContext": {
       "title": "Campanie publicitară"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "Publicitatea nu este disponibilă pentru acest magazin: {{reason}}",
       "unavailable": "Eligibilitatea pentru publicitate nu este disponibilă. Crearea campaniilor este dezactivată."
+    },
+    "results": {
+      "summary": "Modificări confirmate: {{changed}}. Deja în campanie: {{already}}. Neconfirmate sau nereușite: {{failed}}.",
+      "retryHint": "Ofertele nereușite sau neconfirmate rămân disponibile pentru reîncercare.",
+      "unconfirmed": "Nicio actualizare confirmată. Reîncarcă datele campaniei pentru a verifica rata implicită."
     }
   }
 }

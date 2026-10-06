@@ -17,7 +17,9 @@
     "detail": {
       "title": "Kampagnendetails",
       "breadcrumb": "Kampagnendetails",
-      "subtitle": "Angebote in dieser Kampagne."
+      "subtitle": "Angebote in dieser Kampagne.",
+      "metricsNote": "Nicht verfügbare Kennzahlen warten auf eBay-Berichte; der Abgleich kann etwa 72 Stunden dauern.",
+      "eligibilityUnavailable": "Die Werbeberechtigung ist unbekannt. Kampagnenänderungen sind deaktiviert."
     },
     "campaign": {
       "name": "Kampagnenname",
@@ -35,7 +37,9 @@
       "costPerClick": "Kosten pro Klick",
       "ruleBased": "Regelbasierte Kampagne",
       "rateType": "Gebührenmodell",
-      "listingCounts": "SellerHill- / eBay-Angebote"
+      "listingCounts": "SellerHill- / eBay-Angebote",
+      "startDate": "Startdatum",
+      "adCount": "Anzahl eBay-Anzeigen"
     },
     "actions": {
       "create": "Kampagne erstellen",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Schreibgeschützte Kampagne",
-      "marginOverride": "Individuelle Marge: Die Werberate wird nicht auf den SellerHill-Preis angewendet."
+      "marginOverride": "Individuelle Marge: Die Werberate wird nicht auf den SellerHill-Preis angewendet.",
+      "rule_based": "Regelbasierte Kampagnen sind schreibgeschützt.",
+      "cost_per_click": "Kampagnen mit Kosten pro Klick sind schreibgeschützt.",
+      "dynamic_rate": "Kampagnen mit dynamischem Satz sind schreibgeschützt.",
+      "ended": "Beendete Kampagnen sind schreibgeschützt.",
+      "unsupported": "Dieser Kampagnentyp ist schreibgeschützt."
     },
     "create": {
       "title": "Kampagne erstellen",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Kampagnenangebote",
       "search": "Angebote suchen",
-      "priceLocked": "Preis gesperrt"
+      "priceLocked": "Preis gesperrt",
+      "product": "Produkt",
+      "price": "Aktueller Preis",
+      "rate": "eBay-Anzeigensatz",
+      "actions": "Aktionen",
+      "editRate": "Satz bearbeiten: {{title}}",
+      "remove": "Entfernen: {{title}}",
+      "empty": "Keine Angebote in dieser Kampagne",
+      "removed": "Angebote entfernt."
     },
     "add": {
-      "title": "Angebote hinzufügen"
+      "title": "Angebote hinzufügen",
+      "group": "Einstellungsgruppe",
+      "groupHint": "Die Gruppe füllt diese Auswahl einmal mit geeigneten Angeboten ohne Kampagne. Es entsteht keine dauerhafte Regel.",
+      "groupsError": "Einstellungsgruppen konnten nicht geladen werden.",
+      "groupError": "Die gesamte Gruppe konnte nicht geladen werden. Ihre Auswahl bleibt erhalten.",
+      "retryGroup": "Gruppenauswahl erneut versuchen",
+      "filling": "Alle geeigneten Gruppenangebote werden geladen…",
+      "skipped": "Bereits in einer Kampagne: {{count}}",
+      "selection": "Ausgewählte Angebote: {{count}}",
+      "removeSelection": "Abwählen: {{title}}",
+      "allGroups": "Alle Gruppen",
+      "empty": "Keine geeigneten Angebote",
+      "previous": "Vorherige Seite",
+      "next": "Nächste Seite",
+      "page": "Seite {{page}} von {{total}}",
+      "selectRequired": "Wählen Sie mindestens ein Angebot.",
+      "success": "Angebote hinzugefügt."
     },
     "rate": {
-      "title": "Werberate ändern"
+      "title": "Werberate ändern",
+      "defaultTitle": "Standard-Anzeigensatz ändern",
+      "retryMembers": "Fehlgeschlagene Angebote erneut versuchen",
+      "success": "Anzeigensatz aktualisiert."
     },
     "lifecycle": {
-      "endConfirm": "Diese Kampagne beenden? Sie kann nicht fortgesetzt werden."
+      "endConfirm": "Diese Kampagne beenden? Sie kann nicht fortgesetzt werden.",
+      "success": "Kampagnenstatus aktualisiert."
     },
     "listingContext": {
       "title": "Werbekampagne"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "Werbung ist für diesen Shop nicht verfügbar: {{reason}}",
       "unavailable": "Die Werbeberechtigung ist nicht verfügbar. Kampagnen können nicht erstellt werden."
+    },
+    "results": {
+      "summary": "Bestätigte Änderungen: {{changed}}. Bereits in der Kampagne: {{already}}. Unbestätigt oder fehlgeschlagen: {{failed}}.",
+      "retryHint": "Fehlgeschlagene oder unbestätigte Angebote bleiben für einen erneuten Versuch erhalten.",
+      "unconfirmed": "Keine Angebotsänderungen bestätigt. Aktualisieren Sie die Kampagnendaten, um den Standardsatz zu prüfen."
     }
   }
 }

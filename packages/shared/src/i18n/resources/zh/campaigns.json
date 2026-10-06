@@ -17,7 +17,9 @@
     "detail": {
       "title": "活动详情",
       "breadcrumb": "活动详情",
-      "subtitle": "此活动中的刊登。"
+      "subtitle": "此活动中的刊登。",
+      "metricsNote": "暂无指标正在等待 eBay 报告；数据核对可能需要约 72 小时。",
+      "eligibilityUnavailable": "广告资格未知，已禁用广告活动更改。"
     },
     "campaign": {
       "name": "活动名称",
@@ -35,7 +37,9 @@
       "costPerClick": "按点击付费",
       "ruleBased": "基于规则的活动",
       "rateType": "收费类型",
-      "listingCounts": "SellerHill / eBay 刊登数"
+      "listingCounts": "SellerHill / eBay 刊登数",
+      "startDate": "开始日期",
+      "adCount": "eBay 广告数量"
     },
     "actions": {
       "create": "创建活动",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "只读活动",
-      "marginOverride": "已自定义利润率：广告费率不计入 SellerHill 价格。"
+      "marginOverride": "已自定义利润率：广告费率不计入 SellerHill 价格。",
+      "rule_based": "基于规则的广告活动为只读。",
+      "cost_per_click": "按点击付费的广告活动为只读。",
+      "dynamic_rate": "动态费率广告活动为只读。",
+      "ended": "已结束的广告活动为只读。",
+      "unsupported": "此广告活动类型为只读。"
     },
     "create": {
       "title": "创建活动",
@@ -82,16 +91,44 @@
     "members": {
       "title": "活动刊登",
       "search": "搜索刊登",
-      "priceLocked": "价格已锁定"
+      "priceLocked": "价格已锁定",
+      "product": "商品",
+      "price": "当前价格",
+      "rate": "eBay 广告费率",
+      "actions": "操作",
+      "editRate": "编辑费率：{{title}}",
+      "remove": "移除：{{title}}",
+      "empty": "此广告活动中没有刊登",
+      "removed": "已移除刊登。"
     },
     "add": {
-      "title": "添加刊登"
+      "title": "添加刊登",
+      "group": "设置组",
+      "groupHint": "选择设置组会一次性选择未加入任何广告活动的符合条件刊登，不会创建持续规则。",
+      "groupsError": "无法加载设置组。",
+      "groupError": "无法加载整个组，已保留您的选择。",
+      "retryGroup": "重试组选择",
+      "filling": "正在加载组内所有符合条件的刊登…",
+      "skipped": "已在广告活动中：{{count}}",
+      "selection": "已选刊登：{{count}}",
+      "removeSelection": "取消选择：{{title}}",
+      "allGroups": "所有组",
+      "empty": "没有符合条件的刊登",
+      "previous": "上一页",
+      "next": "下一页",
+      "page": "第 {{page}} 页，共 {{total}} 页",
+      "selectRequired": "请至少选择一个刊登。",
+      "success": "已添加刊登。"
     },
     "rate": {
-      "title": "更改广告费率"
+      "title": "更改广告费率",
+      "defaultTitle": "更改默认广告费率",
+      "retryMembers": "重试失败的刊登",
+      "success": "已更新广告费率。"
     },
     "lifecycle": {
-      "endConfirm": "结束此活动？结束后无法恢复。"
+      "endConfirm": "结束此活动？结束后无法恢复。",
+      "success": "已更新广告活动状态。"
     },
     "listingContext": {
       "title": "广告活动"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "此店铺无法使用广告：{{reason}}",
       "unavailable": "无法获取广告资格信息。已禁用创建广告活动。"
+    },
+    "results": {
+      "summary": "已确认更改：{{changed}}。已在广告活动中：{{already}}。未确认或失败：{{failed}}。",
+      "retryHint": "失败或未确认的刊登会保留以便重试。",
+      "unconfirmed": "未确认任何刊登更新。请刷新广告活动信息以检查默认费率。"
     }
   }
 }

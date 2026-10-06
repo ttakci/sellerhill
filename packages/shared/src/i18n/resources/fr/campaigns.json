@@ -17,7 +17,9 @@
     "detail": {
       "title": "Détails de la campagne",
       "breadcrumb": "Détails de la campagne",
-      "subtitle": "Annonces de cette campagne."
+      "subtitle": "Annonces de cette campagne.",
+      "metricsNote": "Les indicateurs indisponibles attendent les rapports eBay ; leur rapprochement peut prendre environ 72 heures.",
+      "eligibilityUnavailable": "L’éligibilité publicitaire est inconnue. Les modifications sont désactivées."
     },
     "campaign": {
       "name": "Nom de la campagne",
@@ -35,7 +37,9 @@
       "costPerClick": "Coût par clic",
       "ruleBased": "Campagne basée sur des règles",
       "rateType": "Type de frais",
-      "listingCounts": "Annonces SellerHill / eBay"
+      "listingCounts": "Annonces SellerHill / eBay",
+      "startDate": "Date de début",
+      "adCount": "Nombre d’annonces eBay"
     },
     "actions": {
       "create": "Créer une campagne",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Campagne en lecture seule",
-      "marginOverride": "Marge personnalisée : le taux publicitaire ne s’applique pas au prix SellerHill."
+      "marginOverride": "Marge personnalisée : le taux publicitaire ne s’applique pas au prix SellerHill.",
+      "rule_based": "Les campagnes basées sur des règles sont en lecture seule.",
+      "cost_per_click": "Les campagnes au coût par clic sont en lecture seule.",
+      "dynamic_rate": "Les campagnes à taux dynamique sont en lecture seule.",
+      "ended": "Les campagnes terminées sont en lecture seule.",
+      "unsupported": "Ce type de campagne est en lecture seule."
     },
     "create": {
       "title": "Créer une campagne",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Annonces de la campagne",
       "search": "Rechercher des annonces",
-      "priceLocked": "Prix verrouillé"
+      "priceLocked": "Prix verrouillé",
+      "product": "Produit",
+      "price": "Prix actuel",
+      "rate": "Taux publicitaire eBay",
+      "actions": "Actions",
+      "editRate": "Modifier le taux : {{title}}",
+      "remove": "Retirer : {{title}}",
+      "empty": "Aucune annonce dans cette campagne",
+      "removed": "Annonces retirées."
     },
     "add": {
-      "title": "Ajouter des annonces"
+      "title": "Ajouter des annonces",
+      "group": "Groupe de paramètres",
+      "groupHint": "Le groupe remplit une seule fois la sélection avec les annonces éligibles sans campagne. Aucune règle permanente n’est créée.",
+      "groupsError": "Impossible de charger les groupes de paramètres.",
+      "groupError": "Impossible de charger tout le groupe. Votre sélection est conservée.",
+      "retryGroup": "Réessayer la sélection du groupe",
+      "filling": "Chargement de toutes les annonces éligibles du groupe…",
+      "skipped": "Déjà dans une campagne : {{count}}",
+      "selection": "Annonces sélectionnées : {{count}}",
+      "removeSelection": "Désélectionner : {{title}}",
+      "allGroups": "Tous les groupes",
+      "empty": "Aucune annonce éligible",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {{page}} sur {{total}}",
+      "selectRequired": "Sélectionnez au moins une annonce.",
+      "success": "Annonces ajoutées."
     },
     "rate": {
-      "title": "Modifier le taux"
+      "title": "Modifier le taux",
+      "defaultTitle": "Modifier le taux publicitaire par défaut",
+      "retryMembers": "Réessayer les annonces en échec",
+      "success": "Taux publicitaire mis à jour."
     },
     "lifecycle": {
-      "endConfirm": "Terminer cette campagne ? Elle ne pourra pas être reprise."
+      "endConfirm": "Terminer cette campagne ? Elle ne pourra pas être reprise.",
+      "success": "Statut de campagne mis à jour."
     },
     "listingContext": {
       "title": "Campagne publicitaire"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "La publicité est indisponible pour cette boutique : {{reason}}",
       "unavailable": "L’éligibilité publicitaire est indisponible. La création de campagnes est désactivée."
+    },
+    "results": {
+      "summary": "Modifications confirmées : {{changed}}. Déjà dans la campagne : {{already}}. Non confirmées ou en échec : {{failed}}.",
+      "retryHint": "Les annonces en échec ou non confirmées restent disponibles pour réessayer.",
+      "unconfirmed": "Aucune mise à jour d’annonce confirmée. Actualisez les détails pour vérifier le taux par défaut."
     }
   }
 }

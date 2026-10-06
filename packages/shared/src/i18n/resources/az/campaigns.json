@@ -17,7 +17,9 @@
     "detail": {
       "title": "Kampaniya təfərrüatları",
       "breadcrumb": "Kampaniya təfərrüatları",
-      "subtitle": "Bu kampaniyadakı elanlar."
+      "subtitle": "Bu kampaniyadakı elanlar.",
+      "metricsNote": "Mövcud olmayan göstəricilər eBay hesabatlarını gözləyir; dəqiqləşmə təxminən 72 saat çəkə bilər.",
+      "eligibilityUnavailable": "Reklam uyğunluğu məlum deyil. Kampaniya dəyişiklikləri deaktivdir."
     },
     "campaign": {
       "name": "Kampaniyanın adı",
@@ -35,7 +37,9 @@
       "costPerClick": "Klik başına xərc",
       "ruleBased": "Qayda əsaslı kampaniya",
       "rateType": "Ödəniş növü",
-      "listingCounts": "SellerHill / eBay elanları"
+      "listingCounts": "SellerHill / eBay elanları",
+      "startDate": "Başlama tarixi",
+      "adCount": "eBay reklam sayı"
     },
     "actions": {
       "create": "Kampaniya yarat",
@@ -70,7 +74,12 @@
     },
     "readOnly": {
       "title": "Yalnız oxunan kampaniya",
-      "marginOverride": "Xüsusi mənfəət marjası: reklam faizi SellerHill qiymətinə tətbiq edilmir."
+      "marginOverride": "Xüsusi mənfəət marjası: reklam faizi SellerHill qiymətinə tətbiq edilmir.",
+      "rule_based": "Qayda əsaslı kampaniyalar yalnız oxunur.",
+      "cost_per_click": "Klik başına ödəniş kampaniyaları yalnız oxunur.",
+      "dynamic_rate": "Dinamik faizli kampaniyalar yalnız oxunur.",
+      "ended": "Bitmiş kampaniyalar yalnız oxunur.",
+      "unsupported": "Bu kampaniya növü yalnız oxunur."
     },
     "create": {
       "title": "Kampaniya yarat",
@@ -82,16 +91,44 @@
     "members": {
       "title": "Kampaniya elanları",
       "search": "Elan axtar",
-      "priceLocked": "Qiymət kilidlənib"
+      "priceLocked": "Qiymət kilidlənib",
+      "product": "Məhsul",
+      "price": "Cari qiymət",
+      "rate": "eBay reklam faizi",
+      "actions": "Əməliyyatlar",
+      "editRate": "Faizi dəyiş: {{title}}",
+      "remove": "Sil: {{title}}",
+      "empty": "Bu kampaniyada elan yoxdur",
+      "removed": "Elanlar silindi."
     },
     "add": {
-      "title": "Elan əlavə et"
+      "title": "Elan əlavə et",
+      "group": "Ayar qrupu",
+      "groupHint": "Qrup seçimi kampaniyada olmayan uyğun elanlarla seçimi bir dəfə doldurur. Davamlı qayda yaratmır.",
+      "groupsError": "Ayar qrupları yüklənmədi.",
+      "groupError": "Bütün qrup yüklənmədi. Seçiminiz saxlanıldı.",
+      "retryGroup": "Qrup seçimini yenidən yoxla",
+      "filling": "Qrupun bütün uyğun elanları yüklənir…",
+      "skipped": "Artıq kampaniyadadır: {{count}}",
+      "selection": "Seçilmiş elanlar: {{count}}",
+      "removeSelection": "Seçimdən çıxar: {{title}}",
+      "allGroups": "Bütün qruplar",
+      "empty": "Uyğun elan yoxdur",
+      "previous": "Əvvəlki səhifə",
+      "next": "Növbəti səhifə",
+      "page": "Səhifə {{page}} / {{total}}",
+      "selectRequired": "Ən azı bir elan seçin.",
+      "success": "Elanlar əlavə edildi."
     },
     "rate": {
-      "title": "Reklam faizini dəyiş"
+      "title": "Reklam faizini dəyiş",
+      "defaultTitle": "Standart reklam faizini dəyiş",
+      "retryMembers": "Uğursuz elanları yenidən yoxla",
+      "success": "Reklam faizi yeniləndi."
     },
     "lifecycle": {
-      "endConfirm": "Bu kampaniya bitirilsin? Yenidən davam etdirilə bilməz."
+      "endConfirm": "Bu kampaniya bitirilsin? Yenidən davam etdirilə bilməz.",
+      "success": "Kampaniya statusu yeniləndi."
     },
     "listingContext": {
       "title": "Reklam kampaniyası"
@@ -99,6 +136,11 @@
     "eligibility": {
       "ineligible": "Bu mağazada reklam mövcud deyil: {{reason}}",
       "unavailable": "Reklam uyğunluğu məlumatı mövcud deyil. Kampaniya yaratmaq deaktivdir."
+    },
+    "results": {
+      "summary": "Təsdiqlənmiş dəyişiklik: {{changed}}. Artıq kampaniyadadır: {{already}}. Təsdiqlənməmiş və ya uğursuz: {{failed}}.",
+      "retryHint": "Uğursuz və ya təsdiqlənməmiş elanlar təkrar cəhd üçün saxlanılır.",
+      "unconfirmed": "Heç bir elan yeniləməsi təsdiqlənmədi. Standart faizi yoxlamaq üçün kampaniya məlumatlarını yeniləyin."
     }
   }
 }

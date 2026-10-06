@@ -65,13 +65,17 @@ export const campaignsApi = baseApi.injectEndpoints({
     }),
     addCampaignListings: builder.mutation<CampaignWriteResultDto, CampaignListingsArg>({
       query: ({ campaignId, ...body }) => ({
-        url: `/campaigns/${campaignId}/listings/add`, method: 'POST', body,
+        url: `/campaigns/${campaignId}/listings/add`,
+        method: 'POST',
+        body,
       }),
       invalidatesTags: writeTags,
     }),
     removeCampaignListings: builder.mutation<CampaignWriteResultDto, CampaignListingsArg>({
       query: ({ campaignId, ...body }) => ({
-        url: `/campaigns/${campaignId}/listings/remove`, method: 'POST', body,
+        url: `/campaigns/${campaignId}/listings/remove`,
+        method: 'POST',
+        body,
       }),
       invalidatesTags: writeTags,
     }),
@@ -81,7 +85,9 @@ export const campaignsApi = baseApi.injectEndpoints({
     }),
     performCampaignAction: builder.mutation<EbayCampaignDto, CampaignActionArg>({
       query: ({ campaignId, action, ebayAccountId }) => ({
-        url: `/campaigns/${campaignId}/actions/${action}`, method: 'POST', body: { ebayAccountId },
+        url: `/campaigns/${campaignId}/actions/${action}`,
+        method: 'POST',
+        body: { ebayAccountId },
       }),
       invalidatesTags: writeTags,
     }),
@@ -92,6 +98,7 @@ export const {
   useGetCampaignsQuery,
   useGetCampaignQuery,
   useGetCampaignCandidatesQuery,
+  useLazyGetCampaignCandidatesQuery,
   useCreateCampaignMutation,
   useAddCampaignListingsMutation,
   useRemoveCampaignListingsMutation,
