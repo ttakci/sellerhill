@@ -1,6 +1,6 @@
 import type { UpdateProfileRequest } from '@repo/shared';
 import { isValidPhone, useUI, type CountryCode } from '@repo/ui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
@@ -9,6 +9,7 @@ import { ProfileDrawerComponent } from './ProfileDrawer.component';
 import type { ProfileDrawerProps } from './ProfileDrawer.types';
 
 import { useUpdateProfileMutation } from '@/features/profile/api/profileApi';
+import { getTimezoneOptions } from '@/features/profile/utils/timezoneOptions';
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, profile }) => {
   const { t, i18n } = useTranslation();
@@ -18,6 +19,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
   const [firstName, setFirstName] = useState(profile?.firstName ?? '');
   const [lastName, setLastName] = useState(profile?.lastName ?? '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phoneNumber ?? '');
+  const [timezone, setTimezone] = useState(profile?.timezone ?? '');
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const defaultCountry: CountryCode = i18n.language?.toLowerCase().startsWith('tr') ? 'TR' : 'US';
@@ -33,9 +35,11 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       setFirstName(profile?.firstName ?? '');
       setLastName(profile?.lastName ?? '');
       setPhoneNumber(profile?.phoneNumber ?? '');
+      setTimezone(profile?.timezone ?? '');
       setSubmitAttempted(false);
     }
   }
+  const timezoneOptions = useMemo(() => getTimezoneOptions(profile?.timezone), [profile?.timezone]);
 
   // Optional field: empty saves fine; a non-empty value must be a real number.
   const phoneInvalid = phoneNumber !== '' && !isValidPhone(phoneNumber);
@@ -49,7 +53,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       setSubmitAttempted(true);
       return;
     }
-    const payload: UpdateProfileRequest = { firstName, lastName, phoneNumber };
+    const payload: UpdateProfileRequest = {
+      firstName,
+      lastName,
+      phoneNumber,
+      ...(timezone ? { timezone } : {}),
+    };
     void updateProfile(payload)
       .unwrap()
       .then(() => {
@@ -65,7 +74,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
           t
         );
       });
-  }, [firstName, lastName, phoneNumber, updateProfile, onClose, showMessage, closeMessage, t]);
+  }, [firstName, lastName, phoneNumber, timezone, updateProfile, onClose, showMessage, closeMessage, t]);
 
   return (
     <ProfileDrawerComponent
@@ -78,6 +87,9 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       phoneError={phoneError}
       defaultCountry={defaultCountry}
       isSaving={isLoading}
+      timezone={timezone}
+      timezoneOptions={timezoneOptions}
+      onTimezoneChange={setTimezone}
       onFirstNameChange={(e) => setFirstName(e.target.value)}
       onLastNameChange={(e) => setLastName(e.target.value)}
       onPhoneNumberChange={(value) => setPhoneNumber(value)}

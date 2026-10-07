@@ -114,7 +114,7 @@ export const TimezoneContent = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-export const FooterActions =styled.div`
+export const FooterActions = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: ${tkn('spacing.md')};

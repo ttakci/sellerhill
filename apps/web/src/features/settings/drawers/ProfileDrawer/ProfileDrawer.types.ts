@@ -19,6 +19,9 @@ export interface ProfileDrawerComponentProps {
   phoneError?: string;
   defaultCountry: CountryCode;
   isSaving: boolean;
+  timezone: string;
+  timezoneOptions: { value: string; label: string }[];
+  onTimezoneChange: (value: string) => void;
   onFirstNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLastNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPhoneNumberChange: (value: string) => void;

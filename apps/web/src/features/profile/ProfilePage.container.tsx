@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateProfileSchema, type UpdateProfileFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -74,9 +74,16 @@ export const ProfilePageContainer = (): React.ReactElement => {
     [profile?.timezone, saveTimezone, showMessage, closeMessage, t]
   );
 
+  /* A time-zone save refetches the profile; that must not wipe unsaved form
+     edits, so the sync is skipped while the form is in edit mode. */
+  const isEditingRef = useRef(false);
+  useEffect(() => {
+    isEditingRef.current = isEditing;
+  }, [isEditing]);
+
   // Sync profile data to form when loaded
   useEffect(() => {
-    if (profile) {
+    if (profile && !isEditingRef.current) {
       reset({
         firstName: profile.firstName,
         lastName: profile.lastName,

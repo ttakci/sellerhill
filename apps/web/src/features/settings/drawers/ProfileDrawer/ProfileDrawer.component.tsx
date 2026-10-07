@@ -1,4 +1,4 @@
-import { Drawer, ModernTextInput, PhoneInput } from '@repo/ui';
+import { Drawer, ModernSelect, ModernTextInput, PhoneInput, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,6 +15,9 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
   phoneError,
   defaultCountry,
   isSaving,
+  timezone,
+  timezoneOptions,
+  onTimezoneChange,
   onFirstNameChange,
   onLastNameChange,
   onPhoneNumberChange,
@@ -67,6 +70,17 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
             searchPlaceholder={t('translation:settingsHub.drawer.profile.phoneCountrySearch')}
             noResultsMessage={t('translation:common.noResults')}
           />
+          <ModernSelect
+            label={t('profile:profile.timezone.label')}
+            options={timezoneOptions}
+            value={timezone}
+            onChange={(value) => onTimezoneChange(String(value))}
+            isSearchable
+            fullWidth
+          />
+          <Text variant="body-sm" color="text.secondary">
+            {t('profile:profile.timezone.help')}
+          </Text>
         </S.FormCard>
       </S.BodyStack>
     </Drawer>
