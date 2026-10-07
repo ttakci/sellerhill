@@ -95,11 +95,10 @@ export function campaignViews(
           : 'neutral',
     strategy: campaign.ruleBased
       ? t('campaigns.campaign.ruleBased')
-      : campaign.adRateStrategy === (EbayAdRateStrategy.FIXED as string)
-        ? t('campaigns.campaign.fixed')
-        : campaign.adRateStrategy === (EbayAdRateStrategy.DYNAMIC as string)
-          ? t('campaigns.campaign.dynamic')
-          : unavailable,
+      : campaign.adRateStrategy === (EbayAdRateStrategy.DYNAMIC as string)
+        ? t('campaigns.campaign.dynamic')
+        : // eBay omits the strategy for its FIXED default (resolveAppliedAdRate treats null as FIXED).
+          t('campaigns.campaign.fixed'),
     rateType:
       campaign.fundingModel === EbayCampaignFundingModel.COST_PER_SALE
         ? t('campaigns.campaign.costPerSale')

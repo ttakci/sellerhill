@@ -9,7 +9,7 @@ import 'reflect-metadata';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { buildAmazonProductUrl, buildEbayItemUrl, resolveEbayEnvironment } from '@repo/shared';
-import { MarketplaceProvider, ThemeProvider, UIProvider } from '@repo/ui';
+import { MarketplaceProvider, ThemeProvider, ToastProvider, UIProvider } from '@repo/ui';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -35,10 +35,12 @@ function RootProviders({ children }: { children: React.ReactNode }): React.React
         <ThemeProvider>
           <MarketplaceProvider buildEbayItemUrl={ebayItemUrl} buildAmazonProductUrl={buildAmazonProductUrl}>
             <UIProvider>
-              <AuthBootstrap>
-                {children}
-                <GlobalMessageModal />
-              </AuthBootstrap>
+              <ToastProvider>
+                <AuthBootstrap>
+                  {children}
+                  <GlobalMessageModal />
+                </AuthBootstrap>
+              </ToastProvider>
             </UIProvider>
           </MarketplaceProvider>
         </ThemeProvider>

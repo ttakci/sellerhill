@@ -411,7 +411,6 @@ export class ListingsService {
         row.margin_fixed_override !== undefined && row.margin_fixed_override !== null
           ? parseFloat(String(row.margin_fixed_override))
           : null,
-      adCampaign: null,
     };
   }
 
@@ -754,7 +753,6 @@ export class ListingsService {
         ebayAccountId: row.ebay_account_id,
         createdAt: row.discovered_at.toISOString(),
         updatedAt: row.last_seen_at.toISOString(),
-        adCampaign: null,
       })),
       total: Number(count[0]?.count ?? 0),
       page,

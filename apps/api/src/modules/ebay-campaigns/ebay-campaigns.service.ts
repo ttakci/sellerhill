@@ -155,7 +155,8 @@ export class EbayCampaignsService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 25;
     const group = query.listingSettingsGroupId ?? null;
-    const search = query.search?.trim() || null;
+    // `%` and `_` are ILIKE wildcards; Postgres's default escape is a backslash.
+    const search = query.search?.trim().replace(/[\\%_]/g, '\\$&') || null;
     const params = [userId, query.ebayAccountId, ListingStatus.ACTIVE, group, search];
     const filter = `l.user_id = $1 AND l.ebay_account_id = $2 AND l.status = $3 AND l.ebay_item_id IS NOT NULL
        AND ($4::uuid IS NULL OR l.listing_settings_group_id = $4::uuid)

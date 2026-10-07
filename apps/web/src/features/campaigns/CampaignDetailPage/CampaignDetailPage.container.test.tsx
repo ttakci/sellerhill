@@ -449,17 +449,14 @@ describe('campaign detail and writes', () => {
       { ebayAccountId: 'store-a', bidPercentage: 7, listingIds: ['two'] },
     ]);
   });
-  it('uses neutral feedback for a default rate response without member updates', async () => {
+  it('treats a resolved default rate response without member updates as success', async () => {
     reads([]);
     server.use(http.post('*/campaigns/123/rate', () => HttpResponse.json({ results: [] })));
     mount();
     const dialog = await openRate();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }));
-    await within(dialog).findByText(
-      'No listing updates were confirmed. Refresh the campaign facts to check the default rate.'
-    );
-    expect(success).not.toHaveBeenCalled();
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await waitFor(() => expect(success).toHaveBeenCalledWith('Ad rate updated.'));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
   it('validates rate on submit and retains localized server refusal', async () => {
     reads();
@@ -646,7 +643,7 @@ describe('campaign detail and writes', () => {
     expect(success).not.toHaveBeenCalled();
     expect(error).not.toHaveBeenCalled();
   });
-  it.each([true, false])('ignores rate %s after closing and reopening the same drawer', async (succeeded) => {
+  it.each([true, false])('keeps the rate drawer open while saving and reports the %s outcome', async (succeeded) => {
     reads();
     const pending = deferred();
     server.use(
@@ -662,11 +659,15 @@ describe('campaign detail and writes', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }));
     await waitPending();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close drawer' }));
-    await openRate('Edit rate: one');
-    await release(pending);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.queryByText('eBay could not complete this action. Try again.')).not.toBeInTheDocument();
-    expect(success).not.toHaveBeenCalled();
+    await release(pending);
+    if (succeeded) {
+      await waitFor(() => expect(success).toHaveBeenCalledWith('Ad rate updated.'));
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    } else {
+      await within(dialog).findByText('eBay could not complete this action. Try again.');
+      expect(success).not.toHaveBeenCalled();
+    }
     expect(error).not.toHaveBeenCalled();
   });
   it.each([true, false])(
@@ -696,10 +697,11 @@ describe('campaign detail and writes', () => {
     }
   );
 
-  it('keeps unknown campaign types readable with a reason and no writes', async () => {
-    reads([member('one')], { fundingModel: null });
+  it('keeps server read-only campaign types readable with the reason and no writes', async () => {
+    // The server folds an unknown funding model into `readOnlyReason` (campaignReadOnlyReason).
+    reads([member('one')], { fundingModel: null, readOnlyReason: CampaignReadOnlyReason.COST_PER_CLICK });
     mount();
-    await screen.findByText('This campaign type is read-only.');
+    await screen.findByText('Cost-per-click campaigns are read-only.');
     expect(screen.getByRole('button', { name: 'Remove: one' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Change default ad rate' })).toBeDisabled();
   });
@@ -733,7 +735,7 @@ describe('campaign detail and writes', () => {
     expect(requests.every((params) => params.get('ebayAccountId') === 'store-a')).toBe(true);
     expect(requests.some((params) => params.get('page') === '2')).toBe(true);
   });
-  it('does not let a pending group fill overwrite a manual selection change', async () => {
+  it('locks manual selection edits while a group fill is pending', async () => {
     reads();
     const pending = deferred();
     const started = vi.fn();
@@ -758,14 +760,71 @@ describe('campaign detail and writes', () => {
     const dialog = await openAdd();
     selectGroup('Group A');
     await waitFor(() => expect(started).toHaveBeenCalled());
-    fireEvent.click(await within(dialog).findByRole('checkbox', { name: 'candidate' }));
+    expect(await within(dialog).findByRole('checkbox', { name: 'candidate' })).toBeDisabled();
+    expect(within(dialog).getByRole('textbox', { name: 'Search listings' })).toBeDisabled();
     await act(async () => {
       pending.resolve();
       await pending.promise;
     });
-    expect(within(dialog).getByRole('button', { name: 'Deselect: candidate' })).toBeInTheDocument();
-    expect(within(dialog).queryByRole('button', { name: 'Deselect: late-group' })).not.toBeInTheDocument();
+    expect(await within(dialog).findByRole('button', { name: 'Deselect: late-group' })).toBeEnabled();
+    expect(within(dialog).getByRole('checkbox', { name: 'candidate' })).toBeEnabled();
   });
+  it('sends adds in chunks of 500 and keeps failed and unsent ids selected after a chunk error', async () => {
+    reads();
+    server.use(
+      http.get('*/campaigns/candidates', ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        if (params.get('limit') !== '100') {
+          return HttpResponse.json({
+            items: [member('candidate')],
+            total: 1,
+            page: 1,
+            limit: 25,
+            skippedInCampaign: 0,
+          });
+        }
+        const page = Number(params.get('page'));
+        return HttpResponse.json({
+          items: Array.from({ length: page === 6 ? 1 : 100 }, (_, index) =>
+            member(`group-${(page - 1) * 100 + index}`)
+          ),
+          total: 501,
+          page,
+          limit: 100,
+          skippedInCampaign: 0,
+        });
+      })
+    );
+    const bodies: Array<{ listingIds: string[] }> = [];
+    server.use(
+      http.post('*/campaigns/123/listings/add', async ({ request }) => {
+        const body = (await request.json()) as { listingIds: string[] };
+        bodies.push(body);
+        return bodies.length === 2
+          ? HttpResponse.json({ message: 'campaigns.errors.ebayRejected' }, { status: 409 })
+          : HttpResponse.json({
+              results: body.listingIds.map((listingId) => ({ listingId, outcome: CampaignAddOutcome.ADDED })),
+            });
+      })
+    );
+    mount();
+    const dialog = await openAdd();
+    selectGroup('Group A');
+    await within(dialog).findByText('Selected listings: 501');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add listings' }));
+    await within(dialog).findByText('eBay could not complete this action. Try again.');
+    expect(bodies.map((body) => body.listingIds.length)).toEqual([500, 1]);
+    expect(within(dialog).getByText('Selected listings: 1')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Deselect: group-500' })).toBeInTheDocument();
+    expect(success).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add listings' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(bodies.map((body) => body.listingIds)).toEqual([
+      Array.from({ length: 500 }, (_, index) => `group-${index}`),
+      ['group-500'],
+      ['group-500'],
+    ]);
+  }, 30000);
   it.each([true, false])(
     'ignores pending removal %s after A to B to A without clearing a newer selection',
     async (succeeded) => {

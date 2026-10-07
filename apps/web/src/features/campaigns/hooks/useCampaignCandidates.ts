@@ -1,6 +1,6 @@
 import { skipToken } from '@reduxjs/toolkit/query';
 import type { CampaignListingDto } from '@repo/shared';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetCampaignCandidatesQuery, useLazyGetCampaignCandidatesQuery } from '../api/campaigns.api';
@@ -30,6 +30,13 @@ export function useCampaignCandidates(storeId: string, campaignId: string, writa
         }
       : skipToken
   );
+  const pageCount = Math.max(1, Math.ceil((query.data?.total ?? 0) / 25));
+  useEffect(() => {
+    if (page >= pageCount) {
+      setPage(pageCount - 1);
+    }
+  }, [page, pageCount]);
+  useEffect(() => () => pending.current?.abort(), []);
   const cancelFill = () => {
     request.cancel();
     pending.current?.abort();
@@ -103,7 +110,8 @@ export function useCampaignCandidates(storeId: string, campaignId: string, writa
     filling,
     groupError,
     query,
-    skipped: groupSkipped ?? query.currentData?.skippedInCampaign ?? 0,
+    pageCount,
+    skipped: groupSkipped ?? query.currentData?.skippedInCampaign ?? null,
     onGroup: (value: string | number) => {
       void fillGroup(String(value));
     },
@@ -118,6 +126,10 @@ export function useCampaignCandidates(storeId: string, campaignId: string, writa
     },
     onPage: (value: number) => setPage(value),
     onSelection,
+    onAdded: (rows: CampaignListingDto[]) => {
+      onSelection(rows);
+      setGroupSkipped(null);
+    },
     onToggle: (member: CampaignListingDto, checked: boolean) =>
       onSelection(
         checked

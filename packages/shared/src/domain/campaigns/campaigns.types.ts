@@ -37,6 +37,8 @@ export enum CampaignAddOutcome {
 
 export const CAMPAIGN_BID_MIN = 2;
 export const CAMPAIGN_BID_MAX = 100;
+/** Most `listingIds` one add/remove/rate request may carry; the UI chunks larger selections. */
+export const CAMPAIGN_BULK_MAX = 500;
 export const CAMPAIGN_NAME_MAX_LENGTH = 80;
 
 export interface EbayCampaignDto {

@@ -6,6 +6,8 @@ import {
   ConfirmModal,
   DataTable,
   EmptyState,
+  Icon,
+  IconButton,
   InfoMessage,
   PageHeader,
   Text,
@@ -19,30 +21,32 @@ import { EditCampaignRateDrawerContainer } from '../drawers/EditCampaignRateDraw
 import * as S from './CampaignDetailPage.style';
 import type { CampaignDetailPageProps, CampaignMemberView } from './CampaignDetailPage.types';
 
+import { ProductTableCell } from '@/domain-ui';
+
 export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
-  const { t } = useTranslation(['campaigns', 'translation']);
+  const { t } = useTranslation(['campaigns', 'translation', 'listings']);
   const columns: TableColumn<CampaignMemberView>[] = [
     {
       key: 'title',
       header: t('campaigns.members.product'),
+      width: '20.5rem',
       render: (_value, member) => (
-        <S.Product>
-          {member.imageUrl && <S.Image src={member.imageUrl} alt="" />}
-          <S.Stack>
-            <Text variant="body-sm" weight="semibold">
-              {member.title}
-            </Text>
-            <Text variant="caption" muted>
-              {member.ebayItemId}
-            </Text>
-          </S.Stack>
-        </S.Product>
+        <ProductTableCell
+          title={member.title}
+          imageUrl={member.imageUrl ?? undefined}
+          meta={
+            member.ebayItemId
+              ? [{ label: t('listings:listings.table.ebayId'), id: member.ebayItemId, storeType: 'ebay' }]
+              : []
+          }
+        />
       ),
     },
     {
       key: 'price',
       header: t('campaigns.members.price'),
       align: 'right',
+      width: '7rem',
       render: (_value, member) => (
         <Text variant="body-sm" numeric>
           {member.priceText}
@@ -53,39 +57,44 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
       key: 'adRate',
       header: t('campaigns.members.rate'),
       align: 'right',
+      width: '12rem',
       render: (_value, member) => (
-        <S.Stack>
-          <Text variant="body-sm" numeric>
-            {member.rateText}
-          </Text>
-          {member.note && (
-            <Text variant="caption" muted>
-              {member.note}
+        <S.RateCell>
+          <S.Fact>
+            <Text variant="body-sm" numeric>
+              {member.rateText}
             </Text>
-          )}
-          <Button
-            variant="text"
-            size="small"
+            {member.note && (
+              <Text variant="caption" muted>
+                {member.note}
+              </Text>
+            )}
+          </S.Fact>
+          <IconButton
+            variant="ghost"
+            aria-label={t('campaigns.members.editRate', { title: member.title })}
             disabled={!props.writable || props.busy}
             onClick={() => props.onRateOpen(member)}
           >
-            <Text variant="body-sm">{t('campaigns.members.editRate', { title: member.title })}</Text>
-          </Button>
-        </S.Stack>
+            <Icon name="edit" size={16} color="brand.primary" />
+          </IconButton>
+        </S.RateCell>
       ),
     },
     {
       key: 'actions',
       header: t('campaigns.members.actions'),
+      align: 'right',
+      width: '5rem',
       render: (_value, member) => (
-        <Button
-          variant="text"
-          size="small"
+        <IconButton
+          variant="ghost"
+          aria-label={t('campaigns.members.remove', { title: member.title })}
           disabled={!props.writable || props.busy}
           onClick={() => props.onRemove([member])}
         >
-          <Text variant="body-sm">{t('campaigns.members.remove', { title: member.title })}</Text>
-        </Button>
+          <Icon name="trash" size={16} color="semantic.error" />
+        </IconButton>
       ),
     },
   ];

@@ -25,12 +25,15 @@ describe('campaign member rules', () => {
   it.each(Object.values(CampaignReadOnlyReason))('gates server read-only reason %s', (readOnlyReason) => {
     expect(canWriteCampaign({ ...writable, readOnlyReason }, 'ELIGIBLE')).toBe(false);
   });
-  it('requires known eligible fixed cost-per-sale running or paused campaigns', () => {
+  it('requires an eligible store and trusts the server read-only verdict', () => {
+    const paused = { ...writable, status: EbayCampaignStatus.PAUSED };
+    // eBay omits the strategy for its FIXED default; the server still reports no read-only reason.
+    const defaultStrategy = { ...writable, adRateStrategy: null };
     expect(canWriteCampaign(writable, 'ELIGIBLE')).toBe(true);
-    expect(canWriteCampaign({ ...writable, status: EbayCampaignStatus.PAUSED }, 'ELIGIBLE')).toBe(true);
+    expect(canWriteCampaign(paused, 'ELIGIBLE')).toBe(true);
+    expect(canWriteCampaign(defaultStrategy, 'ELIGIBLE')).toBe(true);
     expect(canWriteCampaign(writable, null)).toBe(false);
-    expect(canWriteCampaign({ ...writable, fundingModel: null }, 'ELIGIBLE')).toBe(false);
-    expect(canWriteCampaign({ ...writable, status: 'UNKNOWN' }, 'ELIGIBLE')).toBe(false);
+    expect(canWriteCampaign(writable, 'INELIGIBLE')).toBe(false);
   });
   it('distinguishes confirmed changes, already-present members, and missing/failed outcomes', () => {
     expect(

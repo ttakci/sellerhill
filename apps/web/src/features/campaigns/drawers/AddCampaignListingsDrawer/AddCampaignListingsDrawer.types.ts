@@ -17,7 +17,7 @@ export interface AddCampaignListingsDrawerComponentProps {
   search: string;
   items: Array<{ member: CampaignListingDto; checked: boolean }>;
   selected: CampaignListingDto[];
-  skipped: number;
+  skipped: number | null;
   pageLabel: string;
   previousDisabled: boolean;
   nextDisabled: boolean;

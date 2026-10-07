@@ -38,6 +38,10 @@ import {
   demoStoreSettingsFor,
   demoThread,
   DEMO_AMAZON_ACCOUNTS,
+  DEMO_CAMPAIGNS,
+  demoCampaignCandidates,
+  demoCampaignDetail,
+  demoListingCampaign,
   DEMO_BILLING_CATALOG,
   DEMO_BUSINESS_POLICIES,
   DEMO_BUYER_MESSAGE_TEMPLATES,
@@ -218,6 +222,19 @@ function demoWrite(path: string, body: unknown): { data: unknown } {
   if (path === '/ebay/messages/conversations/bulk-status') {
     const conversationIds = (body as { conversationIds?: string[] } | null)?.conversationIds ?? [];
     return ok({ succeeded: conversationIds, failed: [] });
+  }
+
+  // Campaign member writes report per-listing outcomes; echo every id as
+  // confirmed so the drawer's success path runs (the refetch restores fixtures).
+  if (/^\/campaigns\/\d+\/(listings\/(add|remove)|rate)$/.test(path)) {
+    const listingIds = (body as { listingIds?: string[] } | null)?.listingIds ?? [];
+    return ok({
+      campaignId: path.split('/')[2],
+      results: listingIds.map((listingId) => ({ listingId, outcome: 'added' })),
+    });
+  }
+  if (path === '/campaigns' || /^\/campaigns\/\d+\/actions\//.test(path)) {
+    return ok(DEMO_CAMPAIGNS[0]);
   }
 
   // Echo the request body so a container reading the "updated entity" back
@@ -630,12 +647,28 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   const listingDetail = /^\/listings\/(demo-listing-[\w-]+)$/.exec(path);
   if (listingDetail) {
     const found = DEMO_LISTINGS.find((l) => l.id === listingDetail[1]);
-    return found ? ok(found) : { error: { status: 404, data: { message: 'Not found' } } };
+    return found
+      ? ok({ ...found, adCampaign: demoListingCampaign(found.id) })
+      : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
   const listingRevisions = /^\/listings\/(demo-listing-[\w-]+)\/revisions$/.exec(path);
   if (listingRevisions) {
     return ok(paginate(demoListingRevisions(listingRevisions[1]), params));
+  }
+
+  /* ── Ad campaigns (store-scoped by `ebayAccountId`; only store 1 advertises) ── */
+  if (path === '/campaigns') {
+    const campaigns = DEMO_CAMPAIGNS.filter((c) => c.ebayAccountId === params.ebayAccountId);
+    return ok({ campaigns, eligibility: { status: 'ELIGIBLE', reason: null } });
+  }
+  if (path === '/campaigns/candidates') {
+    return ok(demoCampaignCandidates(params));
+  }
+  const campaignDetail = /^\/campaigns\/(\d+)$/.exec(path);
+  if (campaignDetail) {
+    const detail = demoCampaignDetail(campaignDetail[1]);
+    return detail ? ok(detail) : { error: { status: 404, data: { message: 'campaigns.errors.notFound' } } };
   }
 
   if (path === '/listings/revisions') {

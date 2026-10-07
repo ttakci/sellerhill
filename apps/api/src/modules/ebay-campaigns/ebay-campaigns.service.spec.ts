@@ -87,6 +87,15 @@ describe('EbayCampaignsService', () => {
     expect(sqls.filter((sql) => sql.includes('l.title ILIKE'))).toHaveLength(2);
   });
 
+  it('escapes ILIKE wildcards in the candidate search before binding', async () => {
+    const f = fixture();
+    await f.service.candidates(userId, { ebayAccountId: accountId, search: ' 50%_off\\ ' });
+    const bound = f.database.query.mock.calls
+      .filter((args) => String(args[0]).includes('ILIKE'))
+      .map((args) => (args[1] as unknown[])[4]);
+    expect(bound).toEqual(['50\\%\\_off\\\\', '50\\%\\_off\\\\']);
+  });
+
   it('coalesces concurrent interactive detail refreshes and caches for 60 seconds', async () => {
     const f = fixture();
     let release!: () => void;

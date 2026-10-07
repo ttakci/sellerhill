@@ -36,14 +36,12 @@ export const Fact = styled.div`
   gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
-export const Product = styled.div`
+/** Rate text (and its note) with the edit control beside it, right-aligned like the column. */
+export const RateCell = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
+  justify-content: flex-end;
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
-`;
-export const Image = styled.img`
-  width: ${tkn('spacing.xxxl')};
-  height: ${tkn('spacing.xxxl')};
-  object-fit: contain;
+  text-align: right;
 `;

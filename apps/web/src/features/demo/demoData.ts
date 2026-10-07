@@ -18,6 +18,7 @@ import {
   BuyerMessageStatus,
   BuyerMessageTemplateKind,
   buildOrderTimeline,
+  CampaignReadOnlyReason,
   DashboardChartGranularity,
   DashboardPeriodKey,
   EbayAccountStatus,
@@ -65,10 +66,14 @@ import {
   type BillingSummaryDto,
   type BuyerMessageTemplate,
   type BuyerMessagingConfig,
+  type CampaignCandidatesDto,
+  type CampaignListingDto,
   type DashboardChartPoint,
   type DashboardDataDto,
   type DashboardHistoryMonth,
   type EbayBusinessPolicyDto,
+  type EbayCampaignDetailDto,
+  type EbayCampaignDto,
   type EbayReturnDetailDto,
   type EbayReturnDto,
   type EbayReturnHistoryEntryDto,
@@ -2887,4 +2892,124 @@ export function buildDemoBillingDetails(): BillingDetailsDto {
  */
 export function buildDemoBillingInvoices(): BillingInvoiceListDto {
   return { items: [], hasMore: false, nextCursor: null };
+}
+
+/* ── Ad campaigns ─────────────────────────────────────────────────────── */
+
+const isoDaysBack = (days: number): string => new Date(Date.now() - days * 86_400_000).toISOString();
+
+/** Store-1 listings promoted through the SellerHill-created campaign below. */
+const DEMO_CAMPAIGN_MEMBER_IDS = ['demo-listing-2', 'demo-listing-3', 'demo-listing-6', 'demo-listing-7'];
+const DEMO_CAMPAIGN_RATE = 6.5;
+
+export const DEMO_CAMPAIGNS: EbayCampaignDto[] = [
+  {
+    id: 'demo-campaign-1',
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID,
+    campaignId: '10000000001',
+    name: 'Spring bestsellers',
+    status: 'RUNNING',
+    fundingModel: 'COST_PER_SALE',
+    adRateStrategy: 'FIXED',
+    bidPercentage: DEMO_CAMPAIGN_RATE,
+    ruleBased: false,
+    createdBySellerHill: true,
+    startDate: isoDaysBack(40),
+    endDate: null,
+    adCount: DEMO_CAMPAIGN_MEMBER_IDS.length,
+    sellerHillListingCount: DEMO_CAMPAIGN_MEMBER_IDS.length,
+    readOnlyReason: null,
+    syncedAt: isoDaysBack(0),
+    metrics: { clicks: 1284, impressions: 48210, sales: 2318.4, adFees: 150.7, roas: 15.38, quantitySold: 61 },
+    metricsFrom: isoDaysBack(31),
+    metricsTo: isoDaysBack(1),
+  },
+  {
+    id: 'demo-campaign-2',
+    ebayAccountId: DEMO_EBAY_ACCOUNT_ID,
+    campaignId: '10000000002',
+    name: 'Smart campaign (eBay)',
+    status: 'RUNNING',
+    fundingModel: 'COST_PER_SALE',
+    adRateStrategy: 'DYNAMIC',
+    bidPercentage: null,
+    ruleBased: false,
+    createdBySellerHill: false,
+    startDate: isoDaysBack(120),
+    endDate: null,
+    adCount: 37,
+    sellerHillListingCount: 0,
+    readOnlyReason: CampaignReadOnlyReason.DYNAMIC_RATE,
+    syncedAt: isoDaysBack(0),
+    metrics: null,
+    metricsFrom: null,
+    metricsTo: null,
+  },
+];
+
+function demoCampaignListing(listing: ListingDto): CampaignListingDto {
+  const hasMarginOverride =
+    (listing.marginPercentOverride ?? null) !== null || (listing.marginFixedOverride ?? null) !== null;
+  return {
+    listingId: listing.id,
+    ebayItemId: listing.ebayListingId ?? '',
+    title: listing.title,
+    imageUrl: listing.imageUrls[0] ?? null,
+    price: listing.price,
+    adRate: DEMO_CAMPAIGN_RATE,
+    appliedAdRate: hasMarginOverride ? 0 : DEMO_CAMPAIGN_RATE,
+    priceLocked: Boolean(listing.lockPrice) || (listing.priceOverride ?? null) !== null,
+    hasMarginOverride,
+  };
+}
+
+export function demoCampaignDetail(campaignId: string): EbayCampaignDetailDto | null {
+  const campaign = DEMO_CAMPAIGNS.find((c) => c.campaignId === campaignId);
+  if (!campaign) {
+    return null;
+  }
+  const listings = campaign.createdBySellerHill
+    ? DEMO_LISTINGS.filter((l) => DEMO_CAMPAIGN_MEMBER_IDS.includes(l.id)).map(demoCampaignListing)
+    : [];
+  return { campaign, listings, eligibility: { status: 'ELIGIBLE', reason: null } };
+}
+
+/** Active store-1 listings not yet in any campaign, as `GET /campaigns/candidates` answers. */
+export function demoCampaignCandidates(params: Record<string, string>): CampaignCandidatesDto {
+  const search = (params.search ?? '').trim().toLowerCase();
+  const eligible = DEMO_LISTINGS.filter(
+    (l) =>
+      l.ebayAccountId === DEMO_EBAY_ACCOUNT_ID &&
+      l.status === ListingStatus.ACTIVE &&
+      Boolean(l.ebayListingId) &&
+      (!params.listingSettingsGroupId || l.listingSettingsGroupId === params.listingSettingsGroupId) &&
+      (!search || l.title.toLowerCase().includes(search) || Boolean(l.ebayListingId?.includes(search)))
+  );
+  const free = eligible.filter((l) => !DEMO_CAMPAIGN_MEMBER_IDS.includes(l.id));
+  const page = Math.max(1, Number(params.page) || 1);
+  const limit = Math.max(1, Number(params.limit) || 25);
+  return {
+    items: free.slice((page - 1) * limit, page * limit).map(demoCampaignListing),
+    total: free.length,
+    page,
+    limit,
+    skippedInCampaign: eligible.length - free.length,
+  };
+}
+
+/** The `ListingDto.adCampaign` projection the real detail read joins in. */
+export function demoListingCampaign(listingId: string): ListingDto['adCampaign'] {
+  if (!DEMO_CAMPAIGN_MEMBER_IDS.includes(listingId)) {
+    return null;
+  }
+  const c = DEMO_CAMPAIGNS[0];
+  return {
+    campaignId: c.campaignId,
+    name: c.name,
+    status: c.status,
+    fundingModel: c.fundingModel,
+    adRateStrategy: c.adRateStrategy,
+    adRate: DEMO_CAMPAIGN_RATE,
+    appliedAdRate: DEMO_CAMPAIGN_RATE,
+  };
 }

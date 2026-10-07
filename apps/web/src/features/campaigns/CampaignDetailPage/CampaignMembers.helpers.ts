@@ -1,8 +1,5 @@
 import {
   CampaignAddOutcome,
-  EbayAdRateStrategy,
-  EbayCampaignFundingModel,
-  EbayCampaignStatus,
   type CampaignListingDto,
   type EbayCampaignDto,
   type CampaignWriteResultDto,
@@ -12,19 +9,13 @@ export function memberRateLabel(member: Pick<CampaignListingDto, 'hasMarginOverr
   return member.hasMarginOverride ? 'not-applied' : member.priceLocked ? 'price-locked' : null;
 }
 
-export function canWriteCampaign(
-  campaign: Pick<EbayCampaignDto, 'readOnlyReason' | 'ruleBased' | 'status' | 'fundingModel' | 'adRateStrategy'>,
-  eligibility: string | null
-) {
-  return (
-    eligibility === 'ELIGIBLE' &&
-    campaign.readOnlyReason === null &&
-    !campaign.ruleBased &&
-    campaign.fundingModel === EbayCampaignFundingModel.COST_PER_SALE &&
-    campaign.adRateStrategy === EbayAdRateStrategy.FIXED &&
-    (campaign.status === (EbayCampaignStatus.RUNNING as string) ||
-      campaign.status === (EbayCampaignStatus.PAUSED as string))
-  );
+/**
+ * The server's `readOnlyReason` already folds ended, cost-per-click, dynamic
+ * and rule-based campaigns (`campaignReadOnlyReason`); a null strategy is
+ * eBay's FIXED default, so no local strategy/status check is repeated here.
+ */
+export function canWriteCampaign(campaign: Pick<EbayCampaignDto, 'readOnlyReason'>, eligibility: string | null) {
+  return eligibility === 'ELIGIBLE' && campaign.readOnlyReason === null;
 }
 
 export function writeOutcome(ids: string[], response: Pick<CampaignWriteResultDto, 'results'> | undefined) {

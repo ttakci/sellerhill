@@ -2,7 +2,7 @@ import { ThemeProvider } from '@emotion/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { QueryStatus } from '@reduxjs/toolkit/query';
 import { type EbayCampaignDto, EbayCampaignStatus, i18nResources } from '@repo/shared';
-import { lightTheme } from '@repo/ui';
+import { lightTheme, ToastProvider } from '@repo/ui';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
@@ -85,7 +85,9 @@ function mount(path: string) {
   const tree = () => (
     <Provider store={store}>
       <ThemeProvider theme={lightTheme}>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </ThemeProvider>
     </Provider>
   );

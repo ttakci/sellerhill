@@ -51,11 +51,13 @@ export function AddCampaignListingsDrawerComponent(props: AddCampaignListingsDra
           onChange={props.onSearch}
           aria-label={t('campaigns.members.search')}
           placeholder={t('campaigns.members.search')}
-          disabled={props.isSaving || !props.writable}
+          disabled={props.isSaving || props.filling || !props.writable}
         />
-        <Text variant="body-sm" numeric>
-          {t('campaigns.add.skipped', { count: props.skipped })}
-        </Text>
+        {props.skipped !== null && (
+          <Text variant="body-sm" numeric>
+            {t('campaigns.add.skipped', { count: props.skipped })}
+          </Text>
+        )}
         <Text variant="h4" weight="semibold">
           {t('campaigns.add.selection', { count: props.selected.length })}
         </Text>
@@ -67,7 +69,12 @@ export function AddCampaignListingsDrawerComponent(props: AddCampaignListingsDra
         {props.selected.map((member) => (
           <S.Row key={member.listingId}>
             <Text variant="body-sm">{member.title}</Text>
-            <Button variant="text" size="small" disabled={props.isSaving} onClick={() => props.onToggle(member, false)}>
+            <Button
+              variant="text"
+              size="small"
+              disabled={props.isSaving || props.filling}
+              onClick={() => props.onToggle(member, false)}
+            >
               <Text variant="body-sm">{t('campaigns.add.removeSelection', { title: member.title })}</Text>
             </Button>
           </S.Row>
@@ -92,7 +99,7 @@ export function AddCampaignListingsDrawerComponent(props: AddCampaignListingsDra
               <Checkbox
                 checked={checked}
                 label={member.title}
-                disabled={props.isSaving || !props.writable}
+                disabled={props.isSaving || props.filling || !props.writable}
                 onChange={(value) => props.onToggle(member, value)}
               />
             </S.Row>

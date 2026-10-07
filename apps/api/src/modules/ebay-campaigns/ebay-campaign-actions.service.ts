@@ -30,6 +30,7 @@ import { CampaignAccountLockService } from './campaign-account-lock.service';
 import { CampaignAdStateRepository } from './campaign-ad-state.repository';
 import { readBulkListingResponse, readCampaignsPage, type ParsedCampaign } from './campaign-readers';
 import { EbayCampaignSyncService } from './ebay-campaign-sync.service';
+import { CAMPAIGN_BULK_MAX } from './ebay-campaigns.constants';
 import { EbayMarketingClient } from './ebay-marketing.client';
 
 export class CampaignActionError extends Error {
@@ -69,6 +70,7 @@ function validListingIds(value: unknown): value is string[] {
   return (
     Array.isArray(value) &&
     value.length > 0 &&
+    value.length <= CAMPAIGN_BULK_MAX &&
     value.every((id) => typeof id === 'string' && isUUID(id)) &&
     new Set(value).size === value.length
   );

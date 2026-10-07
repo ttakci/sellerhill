@@ -23,7 +23,7 @@ export function CampaignDetailPageContainer() {
   const query = useGetCampaignQuery(
     activeStoreId && campaignId ? { ebayAccountId: activeStoreId, campaignId } : skipToken
   );
-  const detail = activeStoreId ? query.currentData : undefined;
+  const detail = activeStoreId && query.currentData?.campaign && query.currentData.eligibility ? query.currentData : undefined;
   const writable = Boolean(detail && canWriteCampaign(detail.campaign, detail.eligibility.status));
   const actions = useCampaignDetailActions(activeStoreId, campaignId, detail, writable);
   const context = `${activeStoreId}:${campaignId}`;

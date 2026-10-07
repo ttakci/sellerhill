@@ -1,3 +1,4 @@
+import { CAMPAIGN_BULK_MAX, type CampaignWriteResultDto } from '@repo/shared';
 import { useToast } from '@repo/ui';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,23 +35,39 @@ export function AddCampaignListingsDrawerContainer({
     }
     const isCurrent = request.begin();
     const selected = candidates.selected;
+    const ids = selected.map((member) => member.listingId);
+    const results: CampaignWriteResultDto['results'] = [];
+    let failure: unknown = null;
     setSaving(true);
     setFeedback(null);
     try {
-      const result = await add({
-        ebayAccountId: storeId,
-        campaignId,
-        listingIds: selected.map((member) => member.listingId),
-      }).unwrap();
-      if (!isCurrent()) {
+      for (let i = 0; i < ids.length && failure === null; i += CAMPAIGN_BULK_MAX) {
+        try {
+          results.push(
+            ...(
+              await add({
+                ebayAccountId: storeId,
+                campaignId,
+                listingIds: ids.slice(i, i + CAMPAIGN_BULK_MAX),
+              }).unwrap()
+            ).results
+          );
+        } catch (error: unknown) {
+          failure = error;
+        }
+        if (!isCurrent()) {
+          return;
+        }
+      }
+      const outcome = writeOutcome(ids, { results });
+      if (results.length) {
+        candidates.onAdded(selected.filter((member) => outcome.failed.includes(member.listingId)));
+        setAttempted(false);
+      }
+      if (failure !== null) {
+        setFeedback(t(campaignErrorKey(failure)));
         return;
       }
-      const outcome = writeOutcome(
-        selected.map((member) => member.listingId),
-        result
-      );
-      candidates.onSelection(selected.filter((member) => outcome.failed.includes(member.listingId)));
-      setAttempted(false);
       setFeedback(
         t('campaigns.results.summary', {
           changed: outcome.changed.length,
@@ -62,17 +79,12 @@ export function AddCampaignListingsDrawerContainer({
         toast.success(t('campaigns.add.success'));
         onClose();
       }
-    } catch (failure: unknown) {
-      if (isCurrent()) {
-        setFeedback(t(campaignErrorKey(failure)));
-      }
     } finally {
       if (isCurrent()) {
         setSaving(false);
       }
     }
   };
-  const pageCount = Math.max(1, Math.ceil((candidates.query.currentData?.total ?? 0) / 25));
   return (
     <AddCampaignListingsDrawerComponent
       options={[
@@ -90,9 +102,9 @@ export function AddCampaignListingsDrawerContainer({
       }))}
       selected={candidates.selected}
       skipped={candidates.skipped}
-      pageLabel={t('campaigns.add.page', { page: candidates.page + 1, total: pageCount })}
+      pageLabel={t('campaigns.add.page', { page: candidates.page + 1, total: candidates.pageCount })}
       previousDisabled={candidates.page === 0 || isSaving}
-      nextDisabled={candidates.page + 1 >= pageCount || isSaving || candidates.query.isFetching}
+      nextDisabled={candidates.page + 1 >= candidates.pageCount || isSaving || candidates.query.isFetching}
       isLoading={!candidates.query.currentData && !candidates.query.error}
       candidatesError={Boolean(candidates.query.error)}
       isSaving={isSaving}
@@ -114,7 +126,11 @@ export function AddCampaignListingsDrawerContainer({
       onSubmit={() => {
         void onSubmit();
       }}
-      onClose={onClose}
+      onClose={() => {
+        if (!isSaving) {
+          onClose();
+        }
+      }}
     />
   );
 }
