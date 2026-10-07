@@ -131,7 +131,9 @@
       "success": "مہم کی حالت اپ ڈیٹ ہو گئی۔"
     },
     "listingContext": {
-      "title": "اشتہاری مہم"
+      "title": "اشتہاری مہم",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "قیمت اس مہم کی شرح کے مطابق نہیں بدلتی۔"
     },
     "eligibility": {
       "ineligible": "اس اسٹور کے لیے اشتہارات دستیاب نہیں ہیں: {{reason}}",

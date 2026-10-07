@@ -131,7 +131,9 @@
       "success": "Kampagnenstatus aktualisiert."
     },
     "listingContext": {
-      "title": "Werbekampagne"
+      "title": "Werbekampagne",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Der Preis folgt der Rate dieser Kampagne nicht."
     },
     "eligibility": {
       "ineligible": "Werbung ist für diesen Shop nicht verfügbar: {{reason}}",

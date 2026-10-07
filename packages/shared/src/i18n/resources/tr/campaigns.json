@@ -131,7 +131,9 @@
       "success": "Kampanya durumu güncellendi."
     },
     "listingContext": {
-      "title": "Reklam kampanyası"
+      "title": "Reklam kampanyası",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Fiyat bu kampanyanın oranını izlemiyor."
     },
     "eligibility": {
       "ineligible": "Bu mağazada reklam kullanılamıyor: {{reason}}",

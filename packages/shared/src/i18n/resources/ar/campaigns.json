@@ -131,7 +131,9 @@
       "success": "تم تحديث حالة الحملة."
     },
     "listingContext": {
-      "title": "حملة إعلانية"
+      "title": "حملة إعلانية",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "السعر لا يتبع نسبة هذه الحملة."
     },
     "eligibility": {
       "ineligible": "الإعلانات غير متاحة لهذا المتجر: {{reason}}",

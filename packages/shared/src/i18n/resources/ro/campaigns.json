@@ -131,7 +131,9 @@
       "success": "Starea campaniei a fost actualizată."
     },
     "listingContext": {
-      "title": "Campanie publicitară"
+      "title": "Campanie publicitară",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Prețul nu urmează rata acestei campanii."
     },
     "eligibility": {
       "ineligible": "Publicitatea nu este disponibilă pentru acest magazin: {{reason}}",

@@ -131,7 +131,9 @@
       "success": "Statut de campagne mis à jour."
     },
     "listingContext": {
-      "title": "Campagne publicitaire"
+      "title": "Campagne publicitaire",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Le prix ne suit pas le taux de cette campagne."
     },
     "eligibility": {
       "ineligible": "La publicité est indisponible pour cette boutique : {{reason}}",

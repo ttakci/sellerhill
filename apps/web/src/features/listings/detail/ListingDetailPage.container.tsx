@@ -336,6 +336,11 @@ export const ListingDetailPageContainer: React.FC = () => {
   );
   const sourceRemoved = listing?.sourceRemoved === true;
 
+  const handleOpenCampaign = (campaignId: string): void => {
+    const store = listing?.ebayAccountId ? `?${new URLSearchParams({ store: listing.ebayAccountId }).toString()}` : '';
+    localeNavigate(`/campaigns/${encodeURIComponent(campaignId)}${store}`);
+  };
+
   const handleBack = () => {
     // A draft was reached from the dedicated drafts view (`?status=draft`);
     // dropping back to the default "all" list loses that context.
@@ -733,6 +738,7 @@ export const ListingDetailPageContainer: React.FC = () => {
       formatDate={fmtDate}
       formatDateTime={fmtDateTime}
       onBack={handleBack}
+      onOpenCampaign={handleOpenCampaign}
       onSave={handleSave}
       onEnd={handleEnd}
       onDelete={handleDelete}

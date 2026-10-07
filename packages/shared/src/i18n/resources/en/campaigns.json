@@ -131,7 +131,9 @@
       "success": "Campaign status updated."
     },
     "listingContext": {
-      "title": "Ad campaign"
+      "title": "Ad campaign",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Price does not follow this campaign’s rate."
     },
     "eligibility": {
       "ineligible": "Advertising is unavailable for this store: {{reason}}",

@@ -131,7 +131,9 @@
       "success": "已更新广告活动状态。"
     },
     "listingContext": {
-      "title": "广告活动"
+      "title": "广告活动",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "价格不跟随此广告活动的费率。"
     },
     "eligibility": {
       "ineligible": "此店铺无法使用广告：{{reason}}",

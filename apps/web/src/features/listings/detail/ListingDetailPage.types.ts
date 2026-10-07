@@ -86,6 +86,8 @@ export interface ListingDetailPageProps {
   /** Date + clock time — used for record timestamps (created / updated). */
   formatDateTime: (value: string) => string;
   onBack: () => void;
+  /** Opens the listing's own-store campaign page (campaign pages read the `store` query). */
+  onOpenCampaign: (campaignId: string) => void;
   onSave: () => void;
   onEnd: () => void;
   onDelete: () => void;

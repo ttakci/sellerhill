@@ -131,7 +131,9 @@
       "success": "Estado de campaña actualizado."
     },
     "listingContext": {
-      "title": "Campaña publicitaria"
+      "title": "Campaña publicitaria",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "El precio no sigue la tarifa de esta campaña."
     },
     "eligibility": {
       "ineligible": "La publicidad no está disponible para esta tienda: {{reason}}",

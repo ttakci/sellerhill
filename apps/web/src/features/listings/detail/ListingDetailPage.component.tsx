@@ -25,6 +25,7 @@ import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { listingCampaignPresentation } from './campaign-presentation';
 import * as S from './ListingDetailPage.style';
 import type { AutomationRuleState, ListingDetailPageProps } from './ListingDetailPage.types';
 import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
@@ -148,6 +149,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   formatDate,
   formatDateTime,
   onBack,
+  onOpenCampaign,
   onSave,
   onEnd,
   onDelete,
@@ -162,7 +164,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   canPublish,
   statusLabel,
 }) => {
-  const { t } = useTranslation(['listings', 'translation']);
+  const { t, i18n } = useTranslation(['listings', 'translation', 'campaigns']);
   const { control } = form;
 
   /* Shared EmptyState for both states — they used to be a bespoke block whose
@@ -201,6 +203,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
      its edits take effect at publish. Hide the sync note entirely rather than
      reword it: a draft's whole job is to be configured before it goes live. */
   const isDraft = listing.status === ListingStatus.DRAFT;
+  const adCampaign = listingCampaignPresentation(listing);
   const images = listing.imageUrls?.length ? listing.imageUrls : [];
   const mainImage = images[selectedImageIndex] ?? images[0];
   const profit = listing.estimatedProfit ?? 0;
@@ -486,6 +489,29 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                 ) : null}
               </S.MarginValueRow>
             </Meta>
+            {adCampaign ? (
+              <Meta label={t('campaigns:campaigns.listingContext.title')}>
+                <Button variant="text" size="small" onClick={() => onOpenCampaign(adCampaign.campaignId)}>
+                  <Text variant="body" weight="semibold">
+                    {adCampaign.rate === null
+                      ? adCampaign.name
+                      : t('campaigns:campaigns.listingContext.value', {
+                          name: adCampaign.name,
+                          rate: new Intl.NumberFormat(i18n.language).format(adCampaign.rate),
+                        })}
+                  </Text>
+                </Button>
+                {adCampaign.note ? (
+                  <Text variant="caption" color="text.secondary">
+                    {t(
+                      adCampaign.note === 'margin-override'
+                        ? 'campaigns:campaigns.readOnly.marginOverride'
+                        : 'campaigns:campaigns.listingContext.notFollowed'
+                    )}
+                  </Text>
+                ) : null}
+              </Meta>
+            ) : null}
           </S.MetaList>
 
           {!isDraft ? (

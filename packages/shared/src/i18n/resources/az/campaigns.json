@@ -131,7 +131,9 @@
       "success": "Kampaniya statusu yeniləndi."
     },
     "listingContext": {
-      "title": "Reklam kampaniyası"
+      "title": "Reklam kampaniyası",
+      "value": "{{name}} · {{rate}}%",
+      "notFollowed": "Qiymət bu kampaniyanın faizini izləmir."
     },
     "eligibility": {
       "ineligible": "Bu mağazada reklam mövcud deyil: {{reason}}",
