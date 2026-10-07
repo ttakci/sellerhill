@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "No se puede mostrar ese rango de fechas."
+    },
     "title": "Panel",
     "subtitle": "Ventas, ganancias y rendimiento de las publicaciones",
     "greeting": "Hola, {{name}}",

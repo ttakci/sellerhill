@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Cette plage de dates ne peut pas être affichée."
+    },
     "title": "Tableau de bord",
     "subtitle": "Ventes, profit et performance des annonces",
     "greeting": "Bonjour, {{name}}",

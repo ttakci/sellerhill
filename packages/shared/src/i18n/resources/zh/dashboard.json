@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "无法显示该日期范围。"
+    },
     "title": "仪表盘",
     "subtitle": "销售、利润和商品刊登表现",
     "greeting": "您好，{{name}}",

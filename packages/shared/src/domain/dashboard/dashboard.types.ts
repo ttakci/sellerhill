@@ -4,19 +4,13 @@
  * + chart (day|week|month buckets) + P&L matrix.
  */
 
+import type { DashboardPeriodLabel, DashboardRangePreset } from './dashboard-range';
+
 /** Dashboard tab ids (URL `?tab=`). */
 export enum DashboardTab {
   CARDS = 'cards',
   CHART = 'chart',
   PNL = 'pnl',
-}
-
-/** Period card keys (URL `?period=`). */
-export enum DashboardPeriodKey {
-  TODAY = 'today',
-  THIS_WEEK = 'thisWeek',
-  THIS_MONTH = 'thisMonth',
-  THIS_YEAR = 'thisYear',
 }
 
 /** Chart bucket size (URL `?granularity=`, API `chartGranularity`). */
@@ -53,12 +47,6 @@ export enum DashboardValueFormat {
   NUMBER = 'number',
   PERCENT = 'percent',
 }
-
-/**
- * `DashboardHistoryMonth.key` of the month-to-date column.
- * Shared so the API writer and the FE label reader can never drift apart.
- */
-export const DASHBOARD_CURRENT_PERIOD_KEY = 'current';
 
 /** Metrics for a single time period (Sellerboard-style KPI card) */
 export interface PeriodMetricsDto {
@@ -118,11 +106,9 @@ export interface PeriodMetricsDto {
   refundRate: number;
 }
 
-export type DashboardMetricsDto = Record<DashboardPeriodKey, PeriodMetricsDto>;
-
 /** One bucket on the chart tab (day, week or month depending on granularity) */
 export interface DashboardChartPoint {
-  /** ISO date of bucket start, e.g. "2026-07-01" */
+  /** Bucket key — `YYYY-MM-DD`, or `YYYY-MM-DD HH` for hourly. */
   period: string;
   sales: number;
   units: number;
@@ -133,12 +119,14 @@ export interface DashboardChartPoint {
   refunds: number;
 }
 
-/** One column in the history / P&L matrix */
-export interface DashboardHistoryMonth {
-  /** "YYYY-MM" or "current" for MTD */
+/** One P&L column (was DashboardHistoryMonth): a day, week or month of the range. */
+export interface DashboardPnlColumn {
+  /** Bucket key (YYYY-MM-DD of the bucket start). */
   key: string;
   dateFrom: string;
   dateTo: string;
+  /** The column that contains today. */
+  isCurrent: boolean;
   sales: number;
   units: number;
   orders: number;
@@ -161,15 +149,37 @@ export interface DashboardHistoryMonth {
   roi: number;
 }
 
+export interface DashboardRangeDto {
+  preset: DashboardRangePreset | null;
+  from: string;
+  to: string;
+  /** Seller-local today (YYYY-MM-DD). */
+  today: string;
+  timezone: string;
+  chartGranularity: DashboardChartGranularity;
+  pnlGranularity: DashboardChartGranularity;
+}
+
+export interface DashboardPeriodDto {
+  from: string;
+  to: string;
+  label: DashboardPeriodLabel;
+  metrics: PeriodMetricsDto;
+}
+
 export interface DashboardDataDto {
-  metrics: DashboardMetricsDto;
+  range: DashboardRangeDto;
+  /** 4 cards, newest first. */
+  periods: DashboardPeriodDto[];
   chart: {
-    /** Echoes the requested bucket size so the FE can label the axis. */
     granularity: DashboardChartGranularity;
     points: DashboardChartPoint[];
     summary: PeriodMetricsDto;
   };
-  history: {
-    months: DashboardHistoryMonth[];
-  };
+  pnl: { granularity: DashboardChartGranularity; columns: DashboardPnlColumn[] };
+}
+
+export interface DashboardStoreMetrics {
+  ebayAccountId: string;
+  metrics: PeriodMetricsDto;
 }

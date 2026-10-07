@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "That date range can't be shown."
+    },
     "title": "Dashboard",
     "subtitle": "Sales, profit, and listing performance",
     "greeting": "Hello, {{name}}",

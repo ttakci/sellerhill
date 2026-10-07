@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Acest interval de date nu poate fi afișat."
+    },
     "title": "Panou de control",
     "subtitle": "Vânzări, profit și performanța anunțurilor",
     "greeting": "Bună, {{name}}",

@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Não é possível exibir esse período de datas."
+    },
     "title": "Painel",
     "subtitle": "Vendas, lucro e desempenho dos anúncios",
     "greeting": "Olá, {{name}}",

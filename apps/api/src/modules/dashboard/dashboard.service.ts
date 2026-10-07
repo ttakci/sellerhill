@@ -1,28 +1,40 @@
 /**
  * Dashboard Service
- * Sellerboard-style metrics: today / this week / this month / this year
- * + chart (day|week|month buckets) + P&L matrix (12 months).
+ * Range-driven metrics: four period cards (each with a comparison window), a chart
+ * and a P&L matrix, all over ONE seller-chosen date range.
+ *
+ * THE SELLER'S CALENDAR, NEVER THE DATABASE'S. "Today" comes from the seller's own
+ * time zone (`now() AT TIME ZONE $tz`), windows are local-midnight bounds
+ * (`buildLocalRangeSql`) and buckets are cut in that zone. The database's own calendar date is
+ * UTC on production, which put a late-evening Istanbul sale on the wrong day.
  *
  * Bucket keys are produced with `to_char(...)` (plain text) rather than a `date`
  * column: node-pg parses a `date` into a LOCAL-midnight Date, so building the key
- * with `toISOString()` silently shifted a day on any non-UTC server (e.g. UTC+3),
- * making every bucket miss and the chart render empty.
+ * with `toISOString()` silently shifted a day on any non-UTC server.
  */
 
 import { Injectable } from '@nestjs/common';
 import {
-  DASHBOARD_CURRENT_PERIOD_KEY,
   DashboardChartGranularity,
+  DashboardRangeError,
   OrderCostCaptureStatus,
   OrderStatus,
+  dashboardBucketKeys,
+  dashboardBucketWindows,
+  isIsoDate,
+  resolveDashboardRange,
   type DashboardChartPoint,
   type DashboardDataDto,
-  type DashboardHistoryMonth,
-  type DashboardMetricsDto,
+  type DashboardDateWindow,
+  type DashboardPnlColumn,
+  type DashboardRangeInput,
+  type DashboardStoreMetrics,
   type PeriodMetricsDto,
 } from '@repo/shared';
 
-import { DatabaseService } from '../../common/database/database.service';
+import { DatabaseService, type QueryParam } from '../../common/database/database.service';
+import { buildLocalRangeSql } from '../../common/timezone/local-day-sql';
+import { TimezoneService } from '../../common/timezone/timezone.service';
 
 /**
  * Raw aggregate shape produced by `periodSelect()`.
@@ -49,85 +61,240 @@ interface PeriodAggregateRow {
   amazon_tax: string | number;
 }
 
-interface MetricsQueryRow {
-  today: PeriodAggregateRow;
-  yesterday: PeriodAggregateRow;
-  this_week: PeriodAggregateRow;
-  last_week_span: PeriodAggregateRow;
-  this_month: PeriodAggregateRow;
-  same_period_last_month: PeriodAggregateRow;
-  this_year: PeriodAggregateRow;
-  same_period_last_year: PeriodAggregateRow;
+interface WindowAggregateRow extends PeriodAggregateRow {
+  idx: string | number;
 }
 
-/** One grouped bucket (chart point or P&L month) — aggregates plus its bucket key. */
+/** One grouped bucket (chart point or P&L column) — aggregates plus its bucket key. */
 interface BucketQueryRow extends PeriodAggregateRow {
   period: string;
 }
 
-/** SQL fragments per chart granularity — enum-validated, never user text. */
-const GRANULARITY_SQL: Record<
-  DashboardChartGranularity,
-  { trunc: string; since: string; buckets: number }
-> = {
-  [DashboardChartGranularity.HOUR]: {
-    trunc: "date_trunc('hour', order_date)",
-    since: 'CURRENT_DATE',
-    buckets: 24,
-  },
-  [DashboardChartGranularity.DAY]: {
-    trunc: "date_trunc('day', order_date)",
-    since: "CURRENT_DATE - INTERVAL '29 days'",
-    buckets: 30,
-  },
-  [DashboardChartGranularity.WEEK]: {
-    trunc: "date_trunc('week', order_date)",
-    since: "date_trunc('week', CURRENT_DATE) - INTERVAL '11 weeks'",
-    buckets: 12,
-  },
-  [DashboardChartGranularity.MONTH]: {
-    trunc: "date_trunc('month', order_date)",
-    since: "date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'",
-    buckets: 12,
-  },
-};
+interface StoreAggregateRow extends PeriodAggregateRow {
+  ebay_account_id: string | null;
+  is_total: number | string;
+}
 
-const HISTORY_MONTHS = 12;
+/** date_trunc unit + to_char format per granularity — enum-keyed, never user text. */
+const BUCKET_SQL: Record<DashboardChartGranularity, { unit: string; format: string }> = {
+  [DashboardChartGranularity.HOUR]: { unit: 'hour', format: 'YYYY-MM-DD HH24' },
+  [DashboardChartGranularity.DAY]: { unit: 'day', format: 'YYYY-MM-DD' },
+  [DashboardChartGranularity.WEEK]: { unit: 'week', format: 'YYYY-MM-DD' },
+  [DashboardChartGranularity.MONTH]: { unit: 'month', format: 'YYYY-MM-DD' },
+};
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly timezoneService: TimezoneService,
+  ) {}
 
   async getDashboard(
     userId: string,
-    granularity: DashboardChartGranularity,
+    input: DashboardRangeInput,
     ebayAccountId?: string,
   ): Promise<DashboardDataDto> {
-    // Buckets are zero-filled in JS but keyed by Postgres' calendar, so the anchor
-    // must come from the DB: an API process in UTC+3 talking to a UTC database
-    // would otherwise generate keys that never match and render an empty chart.
-    const anchor = await this.getAnchorDate();
+    const timezone = await this.timezoneService.getForUser(userId);
+    const today = await this.getLocalToday(timezone);
+    const resolved = resolveDashboardRange(input, today); // DashboardRangeError → 400 in the controller
+    const windows = resolved.periods.flatMap((p) => [{ from: p.from, to: p.to }, p.comparison]);
+    const samePnlBuckets = resolved.pnlGranularity === resolved.chartGranularity;
 
-    const [metrics, chart, history] = await Promise.all([
-      this.getMetrics(userId, ebayAccountId),
-      this.getChart(userId, granularity, anchor, ebayAccountId),
-      this.getHistory(userId, anchor, ebayAccountId),
+    const [aggregates, chartRows, pnlRows] = await Promise.all([
+      this.aggregateWindows(userId, windows, timezone, ebayAccountId),
+      this.aggregateBuckets(userId, resolved.range, resolved.chartGranularity, timezone, ebayAccountId),
+      samePnlBuckets
+        ? Promise.resolve(null)
+        : this.aggregateBuckets(userId, resolved.range, resolved.pnlGranularity, timezone, ebayAccountId),
     ]);
 
-    return { metrics, chart, history };
+    const periods = resolved.periods.map((p, k) => ({
+      from: p.from,
+      to: p.to,
+      label: p.label,
+      metrics: this.buildPeriod(aggregates[2 * k], aggregates[2 * k + 1]),
+    }));
+
+    const points: DashboardChartPoint[] = dashboardBucketKeys(
+      resolved.range,
+      resolved.chartGranularity,
+    ).map((key) => {
+      const agg = chartRows.get(key) ?? this.emptyAggregate();
+      return {
+        period: key,
+        sales: this.round(this.num(agg.sales)),
+        units: this.num(agg.units),
+        orders: this.num(agg.orders),
+        netProfit: this.round(this.num(agg.profit_confirmed)),
+        grossProfit: this.round(this.num(agg.gross_profit)),
+        refunds: this.num(agg.refunds),
+      };
+    });
+
+    const pnlSource = pnlRows ?? chartRows;
+    const columns: DashboardPnlColumn[] = dashboardBucketWindows(
+      resolved.range,
+      resolved.pnlGranularity,
+    )
+      .reverse()
+      .map((w) => this.toPnlColumn(w.key, w, pnlSource.get(w.key) ?? this.emptyAggregate(), today));
+
+    return {
+      range: {
+        preset: resolved.preset,
+        from: resolved.range.from,
+        to: resolved.range.to,
+        today,
+        timezone,
+        chartGranularity: resolved.chartGranularity,
+        pnlGranularity: resolved.pnlGranularity,
+      },
+      periods,
+      chart: { granularity: resolved.chartGranularity, points, summary: periods[0].metrics },
+      pnl: { granularity: resolved.pnlGranularity, columns },
+    };
   }
 
-  /** Postgres' `CURRENT_DATE` as a local Date — the calendar all buckets align to. */
-  private async getAnchorDate(): Promise<Date> {
-    const rows = await this.databaseService.query<{ today: string }>(
-      `SELECT to_char(CURRENT_DATE, 'YYYY-MM-DD') AS today`,
+  /* ─── the e-mail contract: same fragment, same numbers as the cards ─── */
+
+  async getRangeMetrics(
+    userId: string,
+    window: DashboardDateWindow,
+    timezone: string,
+    ebayAccountId?: string,
+  ): Promise<PeriodMetricsDto> {
+    this.assertWindow(window);
+    const [row] = await this.aggregateWindows(userId, [window], timezone, ebayAccountId);
+    return this.buildPeriod(row);
+  }
+
+  async getDayMetrics(
+    userId: string,
+    localDate: string,
+    timezone: string,
+    ebayAccountId?: string,
+  ): Promise<PeriodMetricsDto> {
+    return this.getRangeMetrics(userId, { from: localDate, to: localDate }, timezone, ebayAccountId);
+  }
+
+  async getRangeMetricsByStore(
+    userId: string,
+    window: DashboardDateWindow,
+    timezone: string,
+  ): Promise<{ total: PeriodMetricsDto; stores: DashboardStoreMetrics[] }> {
+    this.assertWindow(window);
+    const rows = await this.databaseService.query<StoreAggregateRow>(
+      `SELECT ebay_account_id, GROUPING(ebay_account_id) AS is_total, ${this.periodSelect()}
+       FROM orders
+       WHERE user_id = $1 AND ${buildLocalRangeSql('order_date', '$2', '$3', '$4')}
+       GROUP BY GROUPING SETS ((ebay_account_id), ())`,
+      [userId, window.from, window.to, timezone],
     );
-    const raw = rows[0]?.today;
-    if (!raw) {
-      return new Date();
+    const totalRow = rows.find((r) => this.num(r.is_total) === 1) ?? this.emptyAggregate();
+    const stores = rows
+      .filter((r) => this.num(r.is_total) === 0 && r.ebay_account_id)
+      .map((r) => ({ ebayAccountId: r.ebay_account_id as string, metrics: this.buildPeriod(r) }));
+    return { total: this.buildPeriod(totalRow), stores };
+  }
+
+  /* ─── queries ─── */
+
+  private assertWindow(window: DashboardDateWindow): void {
+    if (!isIsoDate(window.from) || !isIsoDate(window.to) || window.from > window.to) {
+      throw new DashboardRangeError(`invalid window ${window.from}..${window.to}`);
     }
-    const [year, month, day] = raw.split('-').map(Number);
-    return new Date(year, month - 1, day);
+  }
+
+  /** The seller's calendar today — never the database's calendar date (UTC on production). */
+  private async getLocalToday(timezone: string): Promise<string> {
+    const rows = await this.databaseService.query<{ today: string }>(
+      `SELECT to_char((now() AT TIME ZONE $1::text)::date, 'YYYY-MM-DD') AS today`,
+      [timezone],
+    );
+    return rows[0].today;
+  }
+
+  /** One aggregate per window, index-aligned with the input, in ONE statement. */
+  private async aggregateWindows(
+    userId: string,
+    windows: DashboardDateWindow[],
+    timezone: string,
+    ebayAccountId?: string,
+  ): Promise<PeriodAggregateRow[]> {
+    const params: QueryParam[] = [userId, windows.map((w) => w.from), windows.map((w) => w.to), timezone];
+    const store = ebayAccountId ? ' AND orders.ebay_account_id = $5' : '';
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+    }
+    const rows = await this.databaseService.query<WindowAggregateRow>(
+      `SELECT w.idx, ${this.periodSelect()}
+       FROM unnest($2::date[], $3::date[]) WITH ORDINALITY AS w(d_from, d_to, idx)
+       LEFT JOIN orders
+         ON orders.user_id = $1
+        AND ${buildLocalRangeSql('orders.order_date', 'w.d_from', 'w.d_to', '$4')}${store}
+       GROUP BY w.idx
+       ORDER BY w.idx`,
+      params,
+    );
+    const byIdx = new Map(rows.map((r) => [this.num(r.idx), r]));
+    return windows.map((_, i) => byIdx.get(i + 1) ?? this.emptyAggregate());
+  }
+
+  private async aggregateBuckets(
+    userId: string,
+    range: DashboardDateWindow,
+    granularity: DashboardChartGranularity,
+    timezone: string,
+    ebayAccountId?: string,
+  ): Promise<Map<string, PeriodAggregateRow>> {
+    const { unit, format } = BUCKET_SQL[granularity];
+    const params: QueryParam[] = [userId, range.from, range.to, timezone];
+    const store = ebayAccountId ? ' AND ebay_account_id = $5' : '';
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+    }
+    const rows = await this.databaseService.query<BucketQueryRow>(
+      `SELECT to_char(date_trunc('${unit}', order_date AT TIME ZONE $4::text), '${format}') AS period,
+              ${this.periodSelect()}
+       FROM orders
+       WHERE user_id = $1 AND ${buildLocalRangeSql('order_date', '$2', '$3', '$4')}${store}
+       GROUP BY 1`,
+      params,
+    );
+    return new Map(rows.map((r) => [r.period, r]));
+  }
+
+  private toPnlColumn(
+    key: string,
+    w: DashboardDateWindow,
+    agg: PeriodAggregateRow,
+    today: string,
+  ): DashboardPnlColumn {
+    const p = this.buildPeriod(agg);
+    return {
+      key,
+      dateFrom: w.from,
+      dateTo: w.to,
+      isCurrent: w.from <= today && today <= w.to,
+      sales: p.sales,
+      units: p.units,
+      orders: p.orders,
+      refunds: p.refunds,
+      adFee: p.adFees,
+      amazonShipping: p.amazonShipping,
+      amazonTax: p.amazonTax,
+      purchasePrice: p.costOfGoods,
+      transactionFee: p.transactionFees,
+      ebayEarnings: p.estimatedPayout,
+      grossProfit: p.grossProfit,
+      netProfit: p.netProfit,
+      profitConfirmed: p.profitConfirmed,
+      profitProvisional: p.profitProvisional,
+      estimatedPayout: p.estimatedPayout,
+      margin: p.margin,
+      roi: p.roi,
+    };
   }
 
   /* ─── shared helpers ─── */
@@ -147,43 +314,6 @@ export class DashboardService {
       return null;
     }
     return this.round(((current - previous) / previous) * 100, 1);
-  }
-
-  /** Local (server-timezone) YYYY-MM-DD — must match `to_char` output from Postgres. */
-  private toIsoDate(d: Date): string {
-    const pad = (n: number): string => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  }
-
-  /** Monday of the week containing `d` (matches Postgres ISO `date_trunc('week')`). */
-  private startOfIsoWeek(d: Date): Date {
-    const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = copy.getDay(); // 0 Sun … 6 Sat
-    copy.setDate(copy.getDate() + (day === 0 ? -6 : 1 - day));
-    return copy;
-  }
-
-  /** Oldest → newest bucket keys for the requested granularity, anchored on the DB date. */
-  private bucketKeys(granularity: DashboardChartGranularity, anchor: Date): string[] {
-    const { buckets } = GRANULARITY_SQL[granularity];
-    const keys: string[] = [];
-
-    for (let i = buckets - 1; i >= 0; i--) {
-      if (granularity === DashboardChartGranularity.DAY) {
-        const d = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - i);
-        keys.push(this.toIsoDate(d));
-        continue;
-      }
-      if (granularity === DashboardChartGranularity.WEEK) {
-        const monday = this.startOfIsoWeek(anchor);
-        monday.setDate(monday.getDate() - i * 7);
-        keys.push(this.toIsoDate(monday));
-        continue;
-      }
-      keys.push(this.toIsoDate(new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)));
-    }
-
-    return keys;
   }
 
   private emptyAggregate(): PeriodAggregateRow {
@@ -206,17 +336,6 @@ export class DashboardService {
       amazon_shipping: 0,
       amazon_tax: 0,
     };
-  }
-
-  private sumAggregates(rows: PeriodAggregateRow[]): PeriodAggregateRow {
-    const acc = this.emptyAggregate();
-    const keys = Object.keys(acc) as (keyof PeriodAggregateRow)[];
-    for (const row of rows) {
-      for (const key of keys) {
-        acc[key] = this.num(acc[key]) + this.num(row[key]);
-      }
-    }
-    return acc;
   }
 
   /**
@@ -308,234 +427,5 @@ export class DashboardService {
       COALESCE(SUM(COALESCE(amazon_shipping, 0)) FILTER (${live}), 0) AS amazon_shipping,
       COALESCE(SUM(COALESCE(amazon_tax, 0)) FILTER (${live}), 0) AS amazon_tax
     `;
-  }
-
-  private storeClause(ebayAccountId: string | undefined, paramIndex: number): string {
-    return ebayAccountId ? ` AND ebay_account_id = $${paramIndex}` : '';
-  }
-
-  /* ─── period cards ─── */
-
-  private async getMetrics(userId: string, ebayAccountId?: string): Promise<DashboardMetricsDto> {
-    const s = this.storeClause(ebayAccountId, 2);
-    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
-    const sel = this.periodSelect();
-
-    // Postgres date_trunc('week') is Monday-start (ISO).
-    const result = await this.databaseService.query<MetricsQueryRow>(
-      `WITH bounds AS (
-        SELECT
-          CURRENT_DATE AS today,
-          CURRENT_DATE - INTERVAL '1 day' AS yesterday,
-          date_trunc('week', CURRENT_DATE)::date AS week_start,
-          (date_trunc('week', CURRENT_DATE) - INTERVAL '1 week')::date AS last_week_start,
-          date_trunc('month', CURRENT_DATE)::date AS month_start,
-          (date_trunc('month', CURRENT_DATE) - INTERVAL '1 month')::date AS last_month_start,
-          date_trunc('year', CURRENT_DATE)::date AS year_start,
-          (date_trunc('year', CURRENT_DATE) - INTERVAL '1 year')::date AS last_year_start,
-          EXTRACT(DAY FROM CURRENT_DATE)::int AS day_of_month,
-          (CURRENT_DATE - date_trunc('week', CURRENT_DATE)::date)::int AS days_into_week,
-          (CURRENT_DATE - date_trunc('year', CURRENT_DATE)::date)::int AS days_into_year
-      ),
-      today AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.today AND order_date < b.today + INTERVAL '1 day'
-      ),
-      yesterday AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.yesterday AND order_date < b.today
-      ),
-      this_week AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.week_start
-      ),
-      last_week_span AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.last_week_start
-          AND order_date < b.last_week_start + (b.days_into_week + 1) * INTERVAL '1 day'
-      ),
-      this_month AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.month_start
-      ),
-      same_period_last_month AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.last_month_start
-          AND order_date < b.last_month_start + b.day_of_month * INTERVAL '1 day'
-      ),
-      this_year AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.year_start
-      ),
-      same_period_last_year AS (
-        SELECT ${sel}
-        FROM orders, bounds b
-        WHERE user_id = $1 ${s}
-          AND order_date >= b.last_year_start
-          AND order_date < b.last_year_start + (b.days_into_year + 1) * INTERVAL '1 day'
-      )
-      SELECT
-        to_jsonb(t) AS today,
-        to_jsonb(y) AS yesterday,
-        to_jsonb(w) AS this_week,
-        to_jsonb(lw) AS last_week_span,
-        to_jsonb(m) AS this_month,
-        to_jsonb(sm) AS same_period_last_month,
-        to_jsonb(ytd) AS this_year,
-        to_jsonb(ly) AS same_period_last_year
-      FROM today t, yesterday y, this_week w, last_week_span lw,
-           this_month m, same_period_last_month sm, this_year ytd, same_period_last_year ly`,
-      params,
-    );
-
-    const r = result[0];
-    if (!r) {
-      const empty = this.buildPeriod(this.emptyAggregate());
-      return { today: empty, thisWeek: empty, thisMonth: empty, thisYear: empty };
-    }
-
-    return {
-      today: this.buildPeriod(r.today, r.yesterday),
-      thisWeek: this.buildPeriod(r.this_week, r.last_week_span),
-      thisMonth: this.buildPeriod(r.this_month, r.same_period_last_month),
-      thisYear: this.buildPeriod(r.this_year, r.same_period_last_year),
-    };
-  }
-
-  /* ─── chart tab ─── */
-
-  private async getChart(
-    userId: string,
-    granularity: DashboardChartGranularity,
-    anchor: Date,
-    ebayAccountId?: string,
-  ): Promise<{
-    granularity: DashboardChartGranularity;
-    points: DashboardChartPoint[];
-    summary: PeriodMetricsDto;
-  }> {
-    const s = this.storeClause(ebayAccountId, 2);
-    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
-    const { trunc, since } = GRANULARITY_SQL[granularity];
-
-    const rows = await this.databaseService.query<BucketQueryRow>(
-      `SELECT
-         to_char(${trunc}, 'YYYY-MM-DD') AS period,
-         ${this.periodSelect()}
-       FROM orders
-       WHERE user_id = $1
-         AND order_date >= ${since}
-         ${s}
-       GROUP BY 1
-       ORDER BY 1 ASC`,
-      params,
-    );
-
-    const byBucket = new Map<string, PeriodAggregateRow>();
-    for (const row of rows) {
-      byBucket.set(row.period, row);
-    }
-
-    const points: DashboardChartPoint[] = [];
-    const filled: PeriodAggregateRow[] = [];
-
-    for (const key of this.bucketKeys(granularity, anchor)) {
-      const agg = byBucket.get(key) ?? this.emptyAggregate();
-      filled.push(agg);
-      points.push({
-        period: key,
-        sales: this.round(this.num(agg.sales)),
-        units: this.num(agg.units),
-        orders: this.num(agg.orders),
-        netProfit: this.round(this.num(agg.profit_confirmed)),
-        grossProfit: this.round(this.num(agg.gross_profit)),
-        refunds: this.num(agg.refunds),
-      });
-    }
-
-    return {
-      granularity,
-      points,
-      summary: this.buildPeriod(this.sumAggregates(filled)),
-    };
-  }
-
-  /* ─── P&L tab ─── */
-
-  private async getHistory(
-    userId: string,
-    anchor: Date,
-    ebayAccountId?: string,
-  ): Promise<{ months: DashboardHistoryMonth[] }> {
-    const s = this.storeClause(ebayAccountId, 2);
-    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
-
-    const rows = await this.databaseService.query<BucketQueryRow>(
-      `SELECT
-         to_char(date_trunc('month', order_date), 'YYYY-MM-DD') AS period,
-         ${this.periodSelect()}
-       FROM orders
-       WHERE user_id = $1
-         AND order_date >= date_trunc('month', CURRENT_DATE) - INTERVAL '${HISTORY_MONTHS - 1} months'
-         ${s}
-       GROUP BY 1
-       ORDER BY 1 DESC`,
-      params,
-    );
-
-    const byMonth = new Map<string, PeriodAggregateRow>();
-    for (const row of rows) {
-      byMonth.set(row.period, row);
-    }
-
-    // Newest first (current month first), missing months filled with zeros.
-    const months: DashboardHistoryMonth[] = [];
-
-    for (let i = 0; i < HISTORY_MONTHS; i++) {
-      const start = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
-      const dateFrom = this.toIsoDate(start);
-      const dateTo = this.toIsoDate(new Date(start.getFullYear(), start.getMonth() + 1, 0));
-      const agg = byMonth.get(dateFrom) ?? this.emptyAggregate();
-      const period = this.buildPeriod(agg);
-
-      months.push({
-        key: i === 0 ? DASHBOARD_CURRENT_PERIOD_KEY : dateFrom.slice(0, 7),
-        dateFrom,
-        dateTo,
-        sales: period.sales,
-        units: period.units,
-        orders: period.orders,
-        refunds: period.refunds,
-        adFee: period.adFees,
-        amazonShipping: period.amazonShipping,
-        amazonTax: period.amazonTax,
-        purchasePrice: period.costOfGoods,
-        transactionFee: period.transactionFees,
-        ebayEarnings: period.estimatedPayout,
-        grossProfit: period.grossProfit,
-        netProfit: period.netProfit,
-        profitConfirmed: period.profitConfirmed,
-        profitProvisional: period.profitProvisional,
-        estimatedPayout: period.estimatedPayout,
-        margin: period.margin,
-        roi: period.roi,
-      });
-    }
-
-    return { months };
   }
 }

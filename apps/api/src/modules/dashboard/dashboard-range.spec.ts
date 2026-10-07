@@ -54,6 +54,11 @@ describe('resolveDashboardRange — calendar presets', () => {
     expect(win(r.periods[0].comparison)).toBe('2026-02-01..2026-02-28');
   });
 
+  it('clamps when the offset would spill into the next month (03-30)', () => {
+    const r = resolveDashboardRange({ preset: P.THIS_MONTH }, '2026-03-30');
+    expect(win(r.periods[0].comparison)).toBe('2026-02-01..2026-02-28');
+  });
+
   it('thisYear compares the same days of last year; monthly chart', () => {
     const r = resolveDashboardRange({ preset: P.THIS_YEAR }, TODAY);
     expect(win(r.periods[0])).toBe('2026-01-01..2026-10-07');
@@ -106,6 +111,7 @@ describe('resolveDashboardRange — rolling presets and custom ranges', () => {
 
   it('refuses an unknown preset', () => {
     expect(() => resolveDashboardRange({ preset: 'nope' as P }, TODAY)).toThrow(DashboardRangeError);
+    expect(() => resolveDashboardRange({ preset: 'constructor' as P }, TODAY)).toThrow(DashboardRangeError);
   });
 });
 

@@ -231,7 +231,9 @@ export function resolveDashboardRange(input: DashboardRangeInput, today: string)
     throw new DashboardRangeError(`invalid today: ${today}`);
   }
   if ('preset' in input) {
-    const calendar = CALENDAR_PRESETS[input.preset];
+    const calendar = Object.prototype.hasOwnProperty.call(CALENDAR_PRESETS, input.preset)
+      ? CALENDAR_PRESETS[input.preset]
+      : undefined;
     if (calendar) {
       return finish(input.preset, calendarPeriods(input.preset, calendar.unit, calendar.offset, today));
     }

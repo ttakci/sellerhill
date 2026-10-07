@@ -7,12 +7,20 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { DashboardChartGranularity, type DashboardDataDto } from '@repo/shared';
+import {
+  DashboardRangeError,
+  DashboardRangePreset,
+  DEFAULT_DASHBOARD_RANGE_PRESET,
+  type DashboardDataDto,
+  type DashboardRangeInput,
+} from '@repo/shared';
 import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { DashboardService } from './dashboard.service';
+
+const INVALID_RANGE = 'dashboard.errors.invalidRange';
 
 /**
  * `?ebayAccountId=` is compared against a UUID column; a malformed value
@@ -28,6 +36,31 @@ function parseStoreId(value: string | undefined): string | undefined {
   return value.trim();
 }
 
+/** `?from=&to=` (both, a custom range) wins over `?range=` (a preset); neither → today. */
+function parseRangeInput(range?: string, from?: string, to?: string): DashboardRangeInput {
+  const f = from?.trim();
+  const t = to?.trim();
+  if (f || t) {
+    if (!f || !t) {
+      throw new BadRequestException(INVALID_RANGE);
+    }
+    return { from: f, to: t };
+  }
+  const preset = range?.trim();
+  if (!preset) {
+    return { preset: DEFAULT_DASHBOARD_RANGE_PRESET };
+  }
+  if (!(Object.values(DashboardRangePreset) as string[]).includes(preset)) {
+    throw new BadRequestException(INVALID_RANGE);
+  }
+  return { preset: preset as DashboardRangePreset };
+}
+
+/** The class can cross the CJS boundary as a different copy; fall back to the name. */
+function isRangeError(error: unknown): boolean {
+  return error instanceof DashboardRangeError || (error as Error | undefined)?.name === 'DashboardRangeError';
+}
+
 @ApiTags('dashboard')
 @Controller({ path: 'dashboard', version: '1' })
 export class DashboardController {
@@ -38,14 +71,16 @@ export class DashboardController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get dashboard data',
-    description: 'Period metrics, chart, history, and recent orders',
+    description: 'Period cards, chart and P&L columns for a preset or custom date range',
   })
   @ApiQuery({
-    name: 'chartGranularity',
+    name: 'range',
     required: false,
-    enum: DashboardChartGranularity,
-    description: 'Chart bucket size: day (30d), week (12w) or month (12m, default)',
+    enum: DashboardRangePreset,
+    description: 'Preset range (default: today). Ignored when from/to are given.',
   })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Custom range start, YYYY-MM-DD' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Custom range end, YYYY-MM-DD' })
   @ApiQuery({
     name: 'ebayAccountId',
     required: false,
@@ -56,15 +91,19 @@ export class DashboardController {
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   async getDashboard(
     @Request() req: { user: { sub: string } },
-    @Query('chartGranularity') chartGranularity?: string,
+    @Query('range') range?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
   ): Promise<DashboardDataDto> {
-    const userId = req.user.sub;
-    const granularity = Object.values(DashboardChartGranularity).includes(
-      chartGranularity as DashboardChartGranularity,
-    )
-      ? (chartGranularity as DashboardChartGranularity)
-      : DashboardChartGranularity.MONTH;
-    return this.dashboardService.getDashboard(userId, granularity, parseStoreId(ebayAccountId));
+    const input = parseRangeInput(range, from, to);
+    try {
+      return await this.dashboardService.getDashboard(req.user.sub, input, parseStoreId(ebayAccountId));
+    } catch (error) {
+      if (isRangeError(error)) {
+        throw new BadRequestException(INVALID_RANGE);
+      }
+      throw error;
+    }
   }
 }

@@ -46,9 +46,9 @@ describe('store filter validation (orders + dashboard)', () => {
   it('dashboard: refuses a malformed store id, forwards a valid one', async () => {
     const service = { getDashboard: jest.fn().mockResolvedValue({}) };
     const controller = new DashboardController(service as never);
-    await expect(controller.getDashboard(req, undefined, 'nope')).rejects.toThrow(BadRequestException);
+    await expect(controller.getDashboard(req, undefined, undefined, undefined, 'nope')).rejects.toThrow(BadRequestException);
     expect(service.getDashboard).not.toHaveBeenCalled();
-    await controller.getDashboard(req, undefined, STORE);
+    await controller.getDashboard(req, undefined, undefined, undefined, STORE);
     expect(service.getDashboard).toHaveBeenCalledWith('user-1', expect.anything(), STORE);
   });
 });

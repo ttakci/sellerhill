@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Bu tarix aralığı göstərilə bilmir."
+    },
     "title": "İdarə paneli",
     "subtitle": "Satışlar, mənfəət və elan göstəriciləri",
     "greeting": "Salam, {{name}}",

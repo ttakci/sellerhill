@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Bu tarih aralığı gösterilemiyor."
+    },
     "title": "Kontrol paneli",
     "subtitle": "Satış, kâr ve liste performansı",
     "greeting": "Merhaba, {{name}}",

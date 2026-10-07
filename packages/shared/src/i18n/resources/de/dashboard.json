@@ -1,5 +1,8 @@
 {
   "dashboard": {
+    "errors": {
+      "invalidRange": "Dieser Datumsbereich kann nicht angezeigt werden."
+    },
     "title": "Dashboard",
     "subtitle": "Umsatz, Gewinn und Leistung Ihrer Angebote",
     "greeting": "Hallo, {{name}}",
