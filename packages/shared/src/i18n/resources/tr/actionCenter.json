@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Bekleyen Aksiyonlar",
-    "subtitle": "Sizi bekleyen her şey, en acili en üstte.",
+    "subtitle": "Müdahalenizi bekleyen her şey, en acilden başlayarak. Bir maddeye dokunun, onu çözeceğiniz ekrana doğrudan gidin.",
     "menu": "Bekleyen Aksiyonlar",
     "refresh": "Yenile",
     "updatedAt": "Güncellendi: {{time}}",

@@ -7,7 +7,11 @@ import {
   EbayReturnActionResultDto,
   EbayReturnDetailDto,
   EbayReturnDto,
+  isReturnLabelCarrier,
   PlatformSettingKey,
+  RETURN_LABEL_MAX_BYTES,
+  RETURN_LABEL_MIME_TYPES,
+  ReturnLabelCarrier,
   resolveReturnActions,
   resolveReturnFreshnessHours,
   RETURN_ACTION_EBAY_OPTION,
@@ -23,7 +27,11 @@ import { EbayService } from '../ebay/ebay.service';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import { EbayReturnsService } from './ebay-returns.service';
 import { PostOrderClient, PostOrderRejectedError } from './post-order.client';
-import type { PostOrderIssueRefundRequest, PostOrderReturnDetail } from './post-order.types';
+import type {
+  PostOrderIssueRefundRequest,
+  PostOrderProvideLabelRequest,
+  PostOrderReturnDetail,
+} from './post-order.types';
 import { mapReturnDetail, type MappedReturnDetail } from './return-detail-mapper';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
@@ -31,7 +39,7 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 export class ReturnActionError extends Error {
   constructor(
     readonly key: ReturnActionErrorKey,
-    readonly status: 404 | 409 | 503
+    readonly status: 400 | 404 | 409 | 503
   ) {
     super(key);
     this.name = 'ReturnActionError';
@@ -47,6 +55,93 @@ export class ReturnActionError extends Error {
  */
 export const REFUND_FEE_TYPE_PURCHASE_PRICE = 'PURCHASE_PRICE';
 
+/** A label file as the controller received it (multipart `labelFile`). */
+export interface ReturnLabelFile {
+  buffer: Buffer;
+  mimeType: string;
+  size: number;
+}
+
+/** What a `provide_label` action carries; the other actions carry nothing. */
+export interface ReturnActionInput {
+  carrier?: string;
+  carrierName?: string;
+  trackingNumber?: string;
+  file?: ReturnLabelFile;
+}
+
+/** Longest carrier name / tracking number accepted — far above any real one. */
+const LABEL_TEXT_MAX = 100;
+
+const LABEL_FILE_EXTENSION: Readonly<Record<string, string>> = {
+  'application/pdf': 'pdf',
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/gif': 'gif',
+  'image/bmp': 'bmp',
+};
+
+/**
+ * Checks a `provide_label` input before any eBay call: a PDF or image no larger
+ * than RETURN_LABEL_MAX_BYTES, a carrier from eBay's list (a name for OTHER) and
+ * a tracking number — eBay's own form asks for "a return label and tracking
+ * details", and "If providing the tracking number, the shipping carrier must
+ * also be provided". Other actions take no input. Pure, so a test pins it.
+ */
+export function validateReturnActionInput(action: EbayReturnAction, input: ReturnActionInput): ReturnActionErrorKey | null {
+  if (action !== EbayReturnAction.PROVIDE_LABEL) {
+    return null;
+  }
+  const file = input.file;
+  if (!file || file.size === 0) {
+    return RETURN_ACTION_ERROR_KEY.LABEL_FILE_REQUIRED;
+  }
+  if (file.size > RETURN_LABEL_MAX_BYTES || !RETURN_LABEL_MIME_TYPES.includes(file.mimeType)) {
+    return RETURN_ACTION_ERROR_KEY.LABEL_FILE_INVALID;
+  }
+  const tracking = input.trackingNumber?.trim() ?? '';
+  const carrierName = input.carrierName?.trim() ?? '';
+  if (
+    !isReturnLabelCarrier(input.carrier) ||
+    (input.carrier === ReturnLabelCarrier.OTHER && (carrierName === '' || carrierName.length > LABEL_TEXT_MAX)) ||
+    tracking === '' ||
+    tracking.length > LABEL_TEXT_MAX
+  ) {
+    return RETURN_ACTION_ERROR_KEY.LABEL_DETAILS_REQUIRED;
+  }
+  return null;
+}
+
+/** The `add_shipping_label` body for an uploaded label. Assumes `validateReturnActionInput` passed. */
+export function buildUploadLabelBody(input: ReturnActionInput, fileId: string): PostOrderProvideLabelRequest {
+  const carrier = input.carrier as ReturnLabelCarrier;
+  return {
+    labelAction: 'UPLOAD_LABEL',
+    fileId,
+    carrierEnum: carrier,
+    ...(carrier === ReturnLabelCarrier.OTHER ? { carrierName: input.carrierName?.trim() ?? '' } : {}),
+    trackingNumber: input.trackingNumber?.trim() ?? '',
+  };
+}
+
+/**
+ * The `add_shipping_label` body for "I already gave the buyer a label":
+ * `MARK_AS_SENT`, with `forwardShippingLabelProvided` ("generally provided if the
+ * labelAction value is set to MARK_AS_SENT") and the moment it was confirmed.
+ */
+export function buildMarkLabelSentBody(now: Date): PostOrderProvideLabelRequest {
+  return {
+    labelAction: 'MARK_AS_SENT',
+    forwardShippingLabelProvided: true,
+    labelSentDate: { value: now.toISOString() },
+  };
+}
+
+/** The name the label file is uploaded under — ours, never the browser's (it may carry a buyer's name). */
+export function labelFileName(returnId: string, mimeType: string): string {
+  return `return-label-${returnId}.${LABEL_FILE_EXTENSION[mimeType] ?? 'pdf'}`;
+}
+
 interface ReturnRowWithAccount {
   id: string;
   return_id: string;
@@ -59,12 +154,15 @@ const DETAIL_CACHE_MS = 60_000;
 
 /**
  * The seller's own actions on a return — the detail pane's live read and the
- * three in-app actions. Every write goes through `act`, which in this order:
+ * in-app actions (approve, provide / confirm a label, mark received, refund).
+ * Every write goes through `act`, which in this order:
  *   1. checks the operator's switch (`ebay.returns.actionsEnabled`, off by default),
+ *      then the seller's own input (`validateReturnActionInput`, a 400),
  *   2. refuses a suspended account and a Sandbox deployment,
  *   3. reads the return LIVE from eBay and requires the matching
  *      `sellerAvailableOptions` entry — the stored row may be hours old,
- *   4. sends exactly one Post-Order call, never retried,
+ *   4. sends the Post-Order write once, never retried — one call, or two for an
+ *      uploaded label (`file/upload`, then `add_shipping_label` naming its fileId),
  *   5. writes an `audit_logs` row and re-reads the return into `ebay_returns`.
  * Nothing is inferred: an action eBay does not list is a 409, never a try.
  */
@@ -104,13 +202,23 @@ export class EbayReturnsActionsService {
     return this.toDetailDto(stored, live, actionsEnabled);
   }
 
-  async act(userId: string, id: string, action: EbayReturnAction): Promise<EbayReturnActionResultDto> {
+  async act(
+    userId: string,
+    id: string,
+    action: EbayReturnAction,
+    input: ReturnActionInput = {}
+  ): Promise<EbayReturnActionResultDto> {
     const row = await this.loadRow(userId, id);
     if (!row) {
       throw new ReturnActionError(RETURN_ACTION_ERROR_KEY.NOT_FOUND, 404);
     }
     if (!(await this.actionsEnabled())) {
       throw new ReturnActionError(RETURN_ACTION_ERROR_KEY.ACTIONS_DISABLED, 409);
+    }
+    // The seller's own input is checked before anything is spent on eBay.
+    const invalid = validateReturnActionInput(action, input);
+    if (invalid) {
+      throw new ReturnActionError(invalid, 400);
     }
     if (await this.quotaEnforcement.isSuspended(userId)) {
       throw new ReturnActionError(RETURN_ACTION_ERROR_KEY.SUSPENDED, 409);
@@ -129,6 +237,9 @@ export class EbayReturnsActionsService {
     const accessToken = await this.ebay.getAccountAccessToken(row.ebay_account_id);
     const marketplaceId = row.marketplace_id;
     let refundStatus: string | null = null;
+    // Set once eBay holds the uploaded label, so a refused add_shipping_label
+    // is audited with the file it left on the return.
+    let uploadedFileId: string | null = null;
     try {
       switch (action) {
         case EbayReturnAction.APPROVE: {
@@ -138,6 +249,29 @@ export class EbayReturnsActionsService {
           refundStatus = answer.refundStatus ?? null;
           break;
         }
+        case EbayReturnAction.PROVIDE_LABEL: {
+          const file = input.file as ReturnLabelFile;
+          uploadedFileId = await this.postOrder.uploadReturnFile(accessToken, marketplaceId, row.return_id, {
+            data: file.buffer.toString('base64'),
+            fileName: labelFileName(row.return_id, file.mimeType),
+            filePurpose: 'LABEL_RELATED',
+          });
+          await this.postOrder.addReturnShippingLabel(
+            accessToken,
+            marketplaceId,
+            row.return_id,
+            buildUploadLabelBody(input, uploadedFileId)
+          );
+          break;
+        }
+        case EbayReturnAction.MARK_LABEL_SENT:
+          await this.postOrder.addReturnShippingLabel(
+            accessToken,
+            marketplaceId,
+            row.return_id,
+            buildMarkLabelSentBody(new Date())
+          );
+          break;
         case EbayReturnAction.MARK_RECEIVED:
           await this.postOrder.markReturnReceived(accessToken, marketplaceId, row.return_id, {});
           break;
@@ -157,16 +291,17 @@ export class EbayReturnsActionsService {
         throw error;
       }
       if (error instanceof PostOrderRejectedError) {
-        await this.audit(userId, row, action, { outcome: 'rejected', httpStatus: error.status });
+        await this.audit(userId, row, action, { outcome: 'rejected', httpStatus: error.status, fileId: uploadedFileId });
         throw new ReturnActionError(RETURN_ACTION_ERROR_KEY.EBAY_REJECTED, 409);
       }
       this.logger.error(`Return action ${action} on ${id} failed: ${error instanceof Error ? error.message : String(error)}`);
-      await this.audit(userId, row, action, { outcome: 'failed' });
+      await this.audit(userId, row, action, { outcome: 'failed', fileId: uploadedFileId });
       throw new ReturnActionError(RETURN_ACTION_ERROR_KEY.UNAVAILABLE, 503);
     }
 
     await this.audit(userId, row, action, {
       outcome: 'sent',
+      fileId: uploadedFileId,
       refundStatus,
       amount: action === EbayReturnAction.ISSUE_REFUND ? live.row.estimatedRefundAmount : null,
       currency: action === EbayReturnAction.ISSUE_REFUND ? live.row.currency : null,

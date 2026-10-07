@@ -1,0 +1,59 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/ShippingCarrierEnum.html
+Fetched: 2026-10-07 (text-extracted)
+
+ShippingCarrierEnum
+This enumeration type lists the values that indicate the shipping carriers commonly used to ship an item in the US, UK, Germany, Canada, and Australia. This is not a full collection of shipping carriers used all over the world.
+Types that use ShippingCarrierEnum:
+ReturnRequestType,
+ShipmentTrackingType
+Calls that use one or more values of ShippingCarrierEnum:
+/post-order/v2/return POST,
+/post-order/v2/return/{returnId} GET
+Enumeration Values
+Value
+Description
+ AUSTRALIA_POST
+ This enumeration value indicates that the shipping carrier is Australia Post, a shipping carrier that is available in Australia.
+ BARTOLINI
+ This enumeration value indicates that the shipping carrier is Bartolini, a shipping carrier that is available in Italy.
+ CANADA_POST
+ This enumeration value indicates that the shipping carrier is Canada Post, a shipping carrier that is available in Canada.
+ COLISSIMO
+ This enumeration value indicates that the shipping carrier is Colissimo, a shipping carrier that is available in France.
+ COLLECT_PLUS
+ This enumeration value indicates that the shipping carrier is CollectPlus, a shipping carrier that is available in the UK.
+ CORREOS
+ This enumeration value indicates that the shipping carrier is Correos, a shipping carrier that is available in Spain.
+ DEUTSCHE_POST
+ This enumeration value indicates that the shipping carrier is Deutsche Post, a shipping carrier that is available in Germany.
+ DHL
+ This enumeration value indicates that the shipping carrier is DHL.
+ FEDEX
+ This enumeration value indicates that the shipping carrier is Federal Express, or 'FedEx'.
+ HERMES
+ This enumeration value indicates that the shipping carrier is Hermes, a shipping carrier that is available in Europe.
+ LA_POSTE
+ This enumeration value indicates that the shipping carrier is La Poste, a shipping carrier that is available in France.
+ MONDIAL_RELAY
+ This enumeration value indicates that the shipping carrier is Mondial Relay, a shipping carrier that is available in Western Europe.
+ MRW
+ This enumeration value indicates that the shipping carrier is MRW, a shipping carrier that is available in Spain.
+ NEXIVE
+ This enumeration value indicates that the shipping carrier is Nexive, a shipping carrier that is available in Italy.
+ OTHER
+ This enumeration value indicates that the shipping carrier cannot be determined.
+ PARCEL_FORCE
+ This enumeration value indicates that the shipping carrier is Parcelforce, a shipping carrier that is available in the UK.
+ POSTE
+ This enumeration value indicates that the shipping carrier is Poste, a shipping carrier that is available in France.
+ ROYAL_MAIL
+ This enumeration value indicates that the shipping carrier is Royal Mail, a shipping carrier that is available in the UK.
+ SEUR
+ This enumeration value indicates that the shipping carrier is Seur, a shipping carrier that is available in Spain.
+ UNKNOWN
+ This enumeration value indicates that the shipping carrier is not known.
+ UPS
+ This enumeration value indicates that the shipping carrier is United Parcel Service, or 'UPS'.
+ USPS
+ This enumeration value indicates that the shipping carrier is the United States Postal Service, or 'USPS'.
+  * See the Enumeration Index to see exact use of each enumeration value in the API.

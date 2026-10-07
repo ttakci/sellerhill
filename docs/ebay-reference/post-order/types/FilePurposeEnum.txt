@@ -1,0 +1,25 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/FilePurposeEnum.html
+Fetched: 2026-10-07 (text-extracted)
+
+FilePurposeEnum
+This enumerated type contains the list of purposes for which a file is uploaded and attached to a return request or draft.
+Types that use FilePurposeEnum:
+ReturnFileType,
+UploadFileRequest
+Calls that use one or more values of FilePurposeEnum:
+/post-order/v2/return POST,
+/post-order/v2/return/{returnId} GET,
+/post-order/v2/return/{returnId}/file/upload POST,
+/post-order/v2/return/{returnId}/files GET
+Enumeration Values
+Value
+Description
+ ITEM_RELATED
+ This enumeration value indicates that the file is intended to provide more information about the item. For example, in a case where the buyer and seller are in disagreement over the condition of the item, the buyer or seller may provide a photo of the item that visually shows the condition of the item.
+ LABEL_RELATED
+ This enumeration value indicates that the file is intended to provide more information about a shipping label or shipment tracking information. For example, in a case where the buyer and seller are in disagreement over whether shipment tracking information has been provided or not, the buyer or seller may provide a photo of the shipping label itself, or they may provide a file that proves a package has been shipped or delivered.
+ REFUND_RELATED
+ This enumeration value indicates that the file is intended to provide more information about a buyer refund. For example, in a case where the buyer is saying that they have not recieved their refund, the seller may provide a file that proves that a refund has been issued.
+ UNKNOWN
+ This enumeration value should not be used in a Submit/Upload File request, but it is possible that this value may get returned in a response if the purpose of the file is not known.
+  * See the Enumeration Index to see exact use of each enumeration value in the API.

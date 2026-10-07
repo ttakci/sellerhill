@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Gözləyən əməliyyatlar",
-    "subtitle": "Sizdən gözlənilən hər şey, ən təcili olanlar əvvəldə.",
+    "subtitle": "Müdaxilənizi gözləyən hər şey, ən təcilidən başlayaraq. Bir bəndi açın, onu həll edəcəyiniz ekrana birbaşa keçin.",
     "menu": "Gözləyən əməliyyatlar",
     "refresh": "Yenilə",
     "updatedAt": "Yenilənib: {{time}}",

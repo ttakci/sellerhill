@@ -24,11 +24,13 @@ import type {
   PostOrderIssueRefundRequest,
   PostOrderMarkReceivedRequest,
   PostOrderPaginationOutput,
+  PostOrderProvideLabelRequest,
   PostOrderRefundStatusResponse,
   PostOrderRejectCancelRequest,
   PostOrderReturnDetail,
   PostOrderReturnSearchResponse,
   PostOrderReturnSummary,
+  PostOrderUploadFileRequest,
   ReturnSearchParams,
 } from './post-order.types';
 
@@ -228,6 +230,50 @@ export class PostOrderClient {
   }
 
   /**
+   * "Upload the files relating to a return request" — here only the seller's
+   * own return label (`LABEL_RELATED`). Answers the `fileId` eBay assigned;
+   * a 2xx without one is a response error, never an empty id.
+   */
+  async uploadReturnFile(
+    accessToken: string,
+    marketplaceId: string,
+    returnId: string,
+    body: PostOrderUploadFileRequest
+  ): Promise<string> {
+    const data = await this.writeRaw(
+      EbayApiResource.POST_ORDER_RETURN,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/return/${encodeURIComponent(returnId)}/file/upload`,
+      body
+    );
+    const fileId = isRecord(data) && typeof data.fileId === 'string' ? data.fileId.trim() : '';
+    if (!fileId) {
+      throw new PostOrderResponseError('eBay accepted the label file but answered no fileId');
+    }
+    return fileId;
+  }
+
+  /**
+   * "Create or update a return shipping label provided by the seller" —
+   * the seller's uploaded label (`UPLOAD_LABEL`) or "already sent" (`MARK_AS_SENT`).
+   */
+  async addReturnShippingLabel(
+    accessToken: string,
+    marketplaceId: string,
+    returnId: string,
+    body: PostOrderProvideLabelRequest
+  ): Promise<void> {
+    await this.writeRaw(
+      EbayApiResource.POST_ORDER_RETURN,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/return/${encodeURIComponent(returnId)}/add_shipping_label`,
+      body
+    );
+  }
+
+  /**
    * The buyer cancellation requests of one store, newest first, first page
    * only (`limit=500`, the documented maximum). `role` is the caller's role,
    * `SELLER`, and `creation_date_range_to` is required — both measured on
@@ -335,14 +381,25 @@ export class PostOrderClient {
     path: string,
     body: unknown
   ): Promise<PostOrderRefundStatusResponse> {
+    const data = await this.writeRaw(resource, accessToken, marketplaceId, path, body);
+    return isRecord(data) && typeof data.refundStatus === 'string' ? { refundStatus: data.refundStatus } : {};
+  }
+
+  /** `write`, answering eBay's body as it came. */
+  private async writeRaw(
+    resource: EbayApiResource,
+    accessToken: string,
+    marketplaceId: string,
+    path: string,
+    body: unknown
+  ): Promise<unknown> {
     await this.charge(resource, EbayCallPriority.INTERACTIVE)();
     try {
       const response = await axios.post<unknown>(`${this.baseUrl()}${path}`, body, {
         headers: this.headers(accessToken, marketplaceId),
         timeout: REQUEST_TIMEOUT_MS,
       });
-      const data: unknown = response.data;
-      return isRecord(data) && typeof data.refundStatus === 'string' ? { refundStatus: data.refundStatus } : {};
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response && error.response.status >= 400 && error.response.status < 500) {
         const status = error.response.status;

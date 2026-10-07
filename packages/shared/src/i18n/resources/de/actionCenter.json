@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Offene Aufgaben",
-    "subtitle": "Alles, was auf Sie wartet – das Dringendste zuerst.",
+    "subtitle": "Alles, was auf Sie wartet, das Dringendste zuerst. Öffnen Sie einen Eintrag, um direkt dorthin zu gelangen, wo Sie ihn erledigen.",
     "menu": "Offene Aufgaben",
     "refresh": "Aktualisieren",
     "updatedAt": "Aktualisiert {{time}}",

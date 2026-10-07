@@ -66,11 +66,19 @@ export const returnsApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/returns/${encodeURIComponent(id)}/detail` }),
       providesTags: (_result, _error, id) => [{ type: 'Returns', id }, 'Returns'],
     }),
-    /** One of the three in-app actions. The API re-reads the return from eBay before sending anything. */
-    actOnReturn: builder.mutation<EbayReturnActionResultDto, { id: string; action: EbayReturnAction }>({
-      query: ({ id, action }) => ({
+    /**
+     * One in-app action. The API re-reads the return from eBay before sending
+     * anything. `provide_label` sends multipart form data (the label file plus
+     * carrier and tracking number); the others send no body.
+     */
+    actOnReturn: builder.mutation<
+      EbayReturnActionResultDto,
+      { id: string; action: EbayReturnAction; body?: FormData }
+    >({
+      query: ({ id, action, body }) => ({
         url: `/returns/${encodeURIComponent(id)}/actions/${action}`,
         method: 'POST',
+        ...(body ? { body } : {}),
       }),
       invalidatesTags: ['Returns'],
     }),

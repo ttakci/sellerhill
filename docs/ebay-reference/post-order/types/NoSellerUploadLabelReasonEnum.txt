@@ -1,0 +1,25 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/NoSellerUploadLabelReasonEnum.html
+Fetched: 2026-10-07 (text-extracted)
+
+NoSellerUploadLabelReasonEnum
+This enumerated type lists the possible values that a seller  can provide in the noLabelReason field of the POST /post-order/v2/return/{returnId}/add_shipping_label to indicate the reason why a shipping label is not being supplied to the buyer.
+Type that uses NoSellerUploadLabelReasonEnum:
+ProvideLabelRequest
+Call that uses one or more values of NoSellerUploadLabelReasonEnum:
+/post-order/v2/return/{returnId}/add_shipping_label POST
+Enumeration Values
+Value
+Description
+ ITEM_TOO_LARGE
+ This enumeration value is used in the noLabelReason field if the item is too large to be shipped using a return shipping label. Many shipping carriers have a weight limit.
+ OTHER
+ This enumeration value is used in the noLabelReason field if there is another reason why the seller is not providing a return shipping label to the buyer. If this value is used, it is good idea if the seller includes the comments container of the request to provide more details on the reason why no shipping label is being provided.
+ REIMBURSE
+ This enumeration value is used in the noLabelReason field if the seller will not provide a return shipping label to the buyer, but will reimburse the buyer for the return shipping cost.
+ RETURN_TO_INTL_LOCATION
+ This enumeration value is used in the noLabelReason field if a return shipping label is not being provided to the buyer because the return address is located in another country.
+ RETURN_TO_STORE
+ This enumeration value is used in the noLabelReason field if the seller is asking the buyer to return the item to the store. This value is applicable for In-Store Pickup and Click and Collect orders.
+ WORK_WITH_BUYER
+ This enumeration value is used in the noLabelReason field if the seller will work with the buyer to determine how return shipping costs will be handled.
+  * See the Enumeration Index to see exact use of each enumeration value in the API.

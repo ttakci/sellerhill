@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya pulu qaytarın (məhsulun geri göndərilməsi gözlənilmir)",
       "REMINDER_FOR_RMA": "RMA xatırlatması: eBay-də cavab verin",
       "REMINDER_SELLER_TO_RESPOND": "Qaytarma sorğusuna cavab verin",
-      "other": "eBay-də cavab verin",
       "SELLER_SEND_MESSAGE": "Alıcıya mesaj göndərin",
       "SELLER_ESCALATE": "eBay-ə yönləndirin",
-      "SELLER_OFFER_REPLACEMENT": "Əvəzedici təklif edin"
+      "SELLER_OFFER_REPLACEMENT": "Əvəzedici təklif edin",
+      "SUBMIT_FILE": "Qaytarmaya fayl əlavə edin",
+      "UPDATE_RETURN_ADDRESS": "Qaytarma ünvanını yeniləyin",
+      "other": "eBay-də cavab verin"
     },
     "dueBy": "Son tarix: {{date}}",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "Sifariş",
-    "viewOrder": "Sifarişə bax",
     "unknownProduct": "Naməlum məhsul",
     "empty": {
       "title": "Hələ qaytarma yoxdur",
@@ -98,10 +99,6 @@
       "loadFailed": "Bu qaytarma yüklənə bilmədi",
       "loadFailedDescription": "Bir az sonra yenidən cəhd edin və ya onu eBay-də açın.",
       "offline": "Hazırda eBay-ə çatmaq mümkün olmadı; bu, SellerHill-in bildiyi son vəziyyətdir. eBay yenidən cavab verəndə əməliyyatlar təklif olunacaq.",
-      "whatYouCanDo": "Nə edə bilərsiniz",
-      "nothingToDo": "Bu qaytarmada sizdən gözlənilən bir şey yoxdur.",
-      "openOnEbay": "eBay-də aç",
-      "alsoOnEbay": "eBay-də həmçinin: {{options}}",
       "buyer": "Alıcı",
       "quantity": "Miqdar",
       "returnType": "Qaytarma növü",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay hələ heç bir addım qeyd etməyib.",
       "partialRefundOffered": "{{amount}} məbləğində qismən geri ödəniş təklif edildi",
       "trackingNumber": "İzləmə {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "Qaytarma nömrəsi",
+      "actionsOff": "Tətbiqdaxili qaytarma əməliyyatları söndürülüb — eBay-də cavab verin."
     },
     "actions": {
-      "button": {
-        "approve": "Qaytarmanı təsdiqlə",
-        "mark_received": "Alındı kimi işarələ",
-        "issue_refund": "Geri ödəniş et"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "{{amount}} geri ödə"
-      },
-      "confirm": {
-        "approve": "Bu qaytarma sorğusu eBay-də təsdiqlənsin? Alıcıdan məhsulu geri göndərməsi istəniləcək.",
-        "mark_received": "eBay-ə qaytarılan məhsulun çatdığı bildirilsin? Bunu yalnız məhsul əlinizdə olanda edin.",
-        "issue_refund": "Alıcıya indi {{amount}} geri ödənilsin? eBay qəbul edən kimi pulu köçürür və bu, buradan geri alına bilməz."
-      },
       "done": {
         "approve": "Qaytarma eBay-də təsdiqləndi.",
         "mark_received": "Məhsul eBay-də alındı kimi işarələndi.",
-        "issue_refund": "Geri ödəniş eBay-də edildi."
+        "issue_refund": "Geri ödəniş eBay-də edildi.",
+        "provide_label": "Qaytarma etiketi eBay-də alıcıya göndərildi.",
+        "mark_label_sent": "eBay-ə alıcının artıq qaytarma etiketi olduğu bildirildi."
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay-ə çatmaq mümkün olmadı. Bir az sonra yenidən cəhd edin.",
       "sandbox": "Qaytarma əməliyyatları eBay sandbox mühitində mövcud deyil.",
       "refundAmountUnknown": "eBay bu qaytarma üçün geri ödəniş məbləği bildirməyib, ona görə geri ödəniş eBay-də edilməlidir.",
-      "notFound": "Bu qaytarma tapılmadı."
+      "notFound": "Bu qaytarma tapılmadı.",
+      "labelFileRequired": "Etiket faylını seçin.",
+      "labelFileInvalid": "Etiket ən çox 5 MB ölçüdə PDF və ya şəkil (PNG, JPG, GIF, BMP) olmalıdır.",
+      "labelDetailsRequired": "Kargo şirkətini seçin və etiketin izləmə nömrəsini yazın."
+    },
+    "form": {
+      "choose": "Nə edəcəyinizi seçin.",
+      "send": "Göndər",
+      "labelTitle": "Qaytarma etiketi",
+      "labelFile": "Etiket faylını seçin",
+      "labelFileHint": "PDF və ya şəkil (PNG, JPG, GIF, BMP), ən çox 5 MB",
+      "carrier": "Kargo şirkəti",
+      "carrierName": "Kargo şirkətinin adı",
+      "tracking": "İzləmə nömrəsi",
+      "carrierRequired": "Kargo şirkətini seçin.",
+      "carrierNameRequired": "Kargo şirkətinin adını yazın.",
+      "trackingRequired": "İzləmə nömrəsini yazın.",
+      "markLabelSentHint": "Alıcıya qaytarma etiketini artıq özünüz vermisinizsə, bunu seçin. eBay etiketin göndərildiyini qeyd edir.",
+      "refundHint": "eBay geri ödəməni qəbul etdiyi anda pul köçürülür və bunu buradan geri qaytarmaq olmur.",
+      "choice": {
+        "approve": "Qaytarmanı təsdiqlə",
+        "provide_label": "Etiket yüklə",
+        "mark_label_sent": "Etiketi artıq göndərdiyimi təsdiqlə",
+        "mark_received": "Məhsulu təhvil alındı kimi qeyd et",
+        "issue_refund": "Geri ödəmə et"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Geri ödəmə et ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Digər"
     }
   }
 }

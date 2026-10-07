@@ -60,10 +60,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Верните деньги покупателю (товар обратно не ожидается)",
       "REMINDER_FOR_RMA": "Напоминание об RMA: ответьте на eBay",
       "REMINDER_SELLER_TO_RESPOND": "Ответьте на запрос о возврате",
-      "other": "Ответьте на eBay",
       "SELLER_SEND_MESSAGE": "Написать покупателю",
       "SELLER_ESCALATE": "Передать на eBay",
-      "SELLER_OFFER_REPLACEMENT": "Предложить замену"
+      "SELLER_OFFER_REPLACEMENT": "Предложить замену",
+      "SUBMIT_FILE": "Добавьте файл к возврату",
+      "UPDATE_RETURN_ADDRESS": "Обновите адрес возврата",
+      "other": "Ответьте на eBay"
     },
     "dueBy": "до {{date}}",
     "reasonType": {
@@ -82,7 +84,6 @@
       "ebayId": "eBay"
     },
     "order": "Заказ",
-    "viewOrder": "Открыть заказ",
     "unknownProduct": "Неизвестный товар",
     "empty": {
       "title": "Возвратов пока нет",
@@ -100,10 +101,6 @@
       "loadFailed": "Не удалось загрузить этот возврат",
       "loadFailedDescription": "Повторите попытку через минуту или откройте его на eBay.",
       "offline": "eBay сейчас недоступен, показано последнее состояние, известное SellerHill. Действия появятся, когда eBay снова ответит.",
-      "whatYouCanDo": "Что вы можете сделать",
-      "nothingToDo": "По этому возврату от вас ничего не требуется.",
-      "openOnEbay": "Открыть на eBay",
-      "alsoOnEbay": "Также на eBay: {{options}}",
       "buyer": "Покупатель",
       "quantity": "Количество",
       "returnType": "Тип возврата",
@@ -120,26 +117,17 @@
       "journeyEmpty": "eBay пока не зафиксировал ни одного шага.",
       "partialRefundOffered": "Предложен частичный возврат {{amount}}",
       "trackingNumber": "Трек-номер {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "Номер возврата",
+      "actionsOff": "Действия с возвратами в приложении отключены — ответьте на eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Одобрить возврат",
-        "mark_received": "Отметить полученным",
-        "issue_refund": "Вернуть деньги"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Вернуть {{amount}}"
-      },
-      "confirm": {
-        "approve": "Одобрить этот запрос на возврат на eBay? Покупателю предложат отправить товар обратно.",
-        "mark_received": "Сообщить eBay, что возвращённый товар получен? Делайте это, только когда товар у вас на руках.",
-        "issue_refund": "Вернуть покупателю {{amount}} сейчас? eBay переведёт деньги сразу после подтверждения, отменить это отсюда нельзя."
-      },
       "done": {
         "approve": "Возврат одобрен на eBay.",
         "mark_received": "Товар отмечен полученным на eBay.",
-        "issue_refund": "Деньги возвращены на eBay."
+        "issue_refund": "Деньги возвращены на eBay.",
+        "provide_label": "Этикетка для возврата отправлена покупателю на eBay.",
+        "mark_label_sent": "eBay сообщено, что у покупателя уже есть этикетка для возврата."
       }
     },
     "history": {
@@ -199,7 +187,41 @@
       "unavailable": "Не удалось связаться с eBay. Повторите попытку через минуту.",
       "sandbox": "Действия с возвратами недоступны в песочнице eBay.",
       "refundAmountUnknown": "eBay не сообщил сумму возврата, поэтому вернуть деньги нужно на eBay.",
-      "notFound": "Этот возврат не найден."
+      "notFound": "Этот возврат не найден.",
+      "labelFileRequired": "Выберите файл этикетки.",
+      "labelFileInvalid": "Этикетка должна быть файлом PDF или изображением (PNG, JPG, GIF, BMP) не больше 5 МБ.",
+      "labelDetailsRequired": "Выберите перевозчика и введите трек-номер этикетки."
+    },
+    "form": {
+      "choose": "Выберите действие.",
+      "send": "Отправить",
+      "labelTitle": "Этикетка для возврата",
+      "labelFile": "Выберите файл этикетки",
+      "labelFileHint": "PDF или изображение (PNG, JPG, GIF, BMP), до 5 МБ",
+      "carrier": "Перевозчик",
+      "carrierName": "Название перевозчика",
+      "tracking": "Трек-номер",
+      "carrierRequired": "Выберите перевозчика.",
+      "carrierNameRequired": "Введите название перевозчика.",
+      "trackingRequired": "Введите трек-номер.",
+      "markLabelSentHint": "Выберите это, если вы уже сами передали покупателю этикетку для возврата. eBay отметит, что этикетка отправлена.",
+      "refundHint": "eBay переводит деньги сразу после принятия возврата средств, и отменить это отсюда нельзя.",
+      "choice": {
+        "approve": "Одобрить возврат",
+        "provide_label": "Загрузить этикетку",
+        "mark_label_sent": "Подтвердить, что этикетка уже отправлена",
+        "mark_received": "Отметить товар как полученный",
+        "issue_refund": "Вернуть деньги"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Вернуть деньги ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Другой"
     }
   }
 }

@@ -1,0 +1,28 @@
+Source: https://developer.ebay.com/Devzone/post-order/types/LabelActionEnum.html
+Fetched: 2026-10-07 (text-extracted)
+
+LabelActionEnum
+This enumerated type lists the actions that may be specified in the labelAction field in the request of the POST /post-order/v2/return/{returnId}/add_shipping_label method.
+Type that uses LabelActionEnum:
+ProvideLabelRequest
+Call that uses one or more values of LabelActionEnum:
+/post-order/v2/return/{returnId}/add_shipping_label POST
+Enumeration Values
+Value
+Description
+ AU_LABEL
+ This value is used if an Australian seller has created an eBay shipping label for the return shipment. Australian sellers are billed for eBay shipping labels on their monthly invoice.
+ EBAY_LABEL
+ This value is used if the seller has created an eBay shipping label for the return shipment.
+ MARK_AS_SENT
+ This value is used if the seller is using the POST /post-order/v2/return/{returnId}/add_shipping_label method to mark an eBay-generated label as being sent to the buyer.
+ NO_LABEL
+ This value is used if the seller is not providing an eBay shipping label to the buyer. If this value is used, the seller must also include the noLabelReason field and provide the reason why no label is being provided. 
+It could be the seller is providing their own shipping label to the buyer (and not an eBay shipping label). In the case where the seller provides their own label, they must populate the labelId field with the shipment tracking number of the shipping label they're supplying to the buyer.
+ PURCHASE_LABEL
+ This value is used if the seller has purchased their own (non-eBay) shipping label for the return shipment.
+ UNKNOWN
+ Indicates the label action is not known.
+ UPLOAD_LABEL
+ This value is used if the seller is providing their own shipping label to the buyer (and not an eBay shipping label).
+  * See the Enumeration Index to see exact use of each enumeration value in the API.

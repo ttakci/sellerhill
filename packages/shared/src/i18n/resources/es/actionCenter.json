@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Acciones pendientes",
-    "subtitle": "Todo lo que espera tu atención, lo más urgente primero.",
+    "subtitle": "Todo lo que te espera, lo más urgente primero. Abre un elemento para ir directo a la pantalla donde lo resuelves.",
     "menu": "Acciones pendientes",
     "refresh": "Actualizar",
     "updatedAt": "Actualizado {{time}}",

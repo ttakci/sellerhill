@@ -78,6 +78,10 @@ export enum EbayReturnSellerActivity {
   SELLER_SEND_MESSAGE = 'SELLER_SEND_MESSAGE',
   SELLER_ESCALATE = 'SELLER_ESCALATE',
   SELLER_OFFER_REPLACEMENT = 'SELLER_OFFER_REPLACEMENT',
+  /** Documented: "a file was associated with a return request". Listed live as a seller option. */
+  SUBMIT_FILE = 'SUBMIT_FILE',
+  /** Not on the ActivityOptionEnum page; listed live in sellerAvailableOptions (production, 2026-10-07). */
+  UPDATE_RETURN_ADDRESS = 'UPDATE_RETURN_ADDRESS',
 }
 
 /**
@@ -195,13 +199,47 @@ export type ReturnBucketCountsDto = Record<ReturnBucket, number>;
  * - approve        → `POST /post-order/v2/return/{returnId}/decide` with `APPROVE`
  * - mark_received  → `POST /post-order/v2/return/{returnId}/mark_as_received`
  * - issue_refund   → `POST /post-order/v2/return/{returnId}/issue_refund`
+ * - provide_label  → `POST …/file/upload` (`LABEL_RELATED`), then
+ *                    `POST …/add_shipping_label` with `labelAction: UPLOAD_LABEL`
+ *                    — the seller's own label, carrier and tracking number
+ * - mark_label_sent → `POST …/add_shipping_label` with `labelAction: MARK_AS_SENT`
+ *                    — "I already gave the buyer a label"
  * Offered only while eBay lists the matching option on the return
- * (`resolveReturnActions`) and the operator's switch is on.
+ * (`resolveReturnActions`) and the operator's switch is on. Buying an eBay
+ * label is NOT here: its call (`initiate_shipping_label`) has no page in the
+ * eBay reference we could obtain, and it spends the seller's money.
  */
 export enum EbayReturnAction {
   APPROVE = 'approve',
+  PROVIDE_LABEL = 'provide_label',
+  MARK_LABEL_SENT = 'mark_label_sent',
   MARK_RECEIVED = 'mark_received',
   ISSUE_REFUND = 'issue_refund',
+}
+
+/**
+ * The return carriers a seller can name on an uploaded label — eBay
+ * `ShippingCarrierEnum` values (docs/ebay-reference/post-order/types/
+ * ShippingCarrierEnum.txt), exactly the list eBay's own US "Upload your label"
+ * form offers (USPS, UPS, FedEx, Other — seen 2026-10-07; DHL is in the enum
+ * but not on that form). `OTHER` sends the carrier's name in `carrierName`.
+ */
+export enum ReturnLabelCarrier {
+  USPS = 'USPS',
+  UPS = 'UPS',
+  FEDEX = 'FEDEX',
+  OTHER = 'OTHER',
+}
+
+/**
+ * The fields of a `provide_label` action, sent as multipart form fields
+ * beside the label file (`labelFile`). The other actions send none.
+ */
+export interface EbayReturnLabelFieldsDto {
+  carrier?: ReturnLabelCarrier;
+  /** Required when `carrier` is OTHER. */
+  carrierName?: string;
+  trackingNumber?: string;
 }
 
 /** One entry of eBay's `responseHistory` — what happened to the return, by whom, when. */

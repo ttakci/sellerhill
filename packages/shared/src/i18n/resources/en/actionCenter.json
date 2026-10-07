@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Pending Actions",
-    "subtitle": "Everything waiting on you, most urgent first.",
+    "subtitle": "Everything that needs you, most urgent first. Open an item to go straight to the screen where you resolve it.",
     "menu": "Pending Actions",
     "refresh": "Refresh",
     "updatedAt": "Updated {{time}}",

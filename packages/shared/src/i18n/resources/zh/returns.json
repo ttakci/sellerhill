@@ -57,10 +57,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "向买家退款（买家无需寄回商品）",
       "REMINDER_FOR_RMA": "RMA 提醒：请在 eBay 上回复",
       "REMINDER_SELLER_TO_RESPOND": "回复退货请求",
-      "other": "请在 eBay 上回复",
       "SELLER_SEND_MESSAGE": "给买家发消息",
       "SELLER_ESCALATE": "升级至 eBay",
-      "SELLER_OFFER_REPLACEMENT": "提供替换品"
+      "SELLER_OFFER_REPLACEMENT": "提供替换品",
+      "SUBMIT_FILE": "为退货添加文件",
+      "UPDATE_RETURN_ADDRESS": "更新退货地址",
+      "other": "请在 eBay 上回复"
     },
     "dueBy": "截止 {{date}}",
     "reasonType": {
@@ -79,7 +81,6 @@
       "ebayId": "eBay"
     },
     "order": "订单",
-    "viewOrder": "查看订单",
     "unknownProduct": "未知商品",
     "empty": {
       "title": "暂无退货",
@@ -97,10 +98,6 @@
       "loadFailed": "无法加载此退货",
       "loadFailedDescription": "请稍后重试，或在 eBay 上打开。",
       "offline": "目前无法连接 eBay，这是 SellerHill 已知的最后状态。eBay 恢复响应后将再次提供操作。",
-      "whatYouCanDo": "您可以做什么",
-      "nothingToDo": "此退货没有需要您处理的事项。",
-      "openOnEbay": "在 eBay 上打开",
-      "alsoOnEbay": "eBay 上还可：{{options}}",
       "buyer": "买家",
       "quantity": "数量",
       "returnType": "退货类型",
@@ -117,26 +114,17 @@
       "journeyEmpty": "eBay 尚未记录任何步骤。",
       "partialRefundOffered": "已提出 {{amount}} 的部分退款",
       "trackingNumber": "物流单号 {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "退货编号",
+      "actionsOff": "应用内退货操作已关闭——请在 eBay 上答复。"
     },
     "actions": {
-      "button": {
-        "approve": "批准退货",
-        "mark_received": "标记为已收到",
-        "issue_refund": "发放退款"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "退款 {{amount}}"
-      },
-      "confirm": {
-        "approve": "在 eBay 上批准此退货申请？买家将被要求寄回商品。",
-        "mark_received": "告知 eBay 退回的商品已到达？请在商品到手后再操作。",
-        "issue_refund": "现在向买家退款 {{amount}}？eBay 一经接受即转账，且无法在这里撤销。"
-      },
       "done": {
         "approve": "退货已在 eBay 上批准。",
         "mark_received": "商品已在 eBay 上标记为已收到。",
-        "issue_refund": "退款已在 eBay 上发放。"
+        "issue_refund": "退款已在 eBay 上发放。",
+        "provide_label": "退货标签已在 eBay 上发送给买家。",
+        "mark_label_sent": "已告知 eBay 买家已有退货标签。"
       }
     },
     "history": {
@@ -196,7 +184,41 @@
       "unavailable": "无法连接 eBay，请稍后重试。",
       "sandbox": "eBay 沙盒环境不支持退货操作。",
       "refundAmountUnknown": "eBay 未提供此退货的退款金额，退款需在 eBay 上发放。",
-      "notFound": "未找到此退货。"
+      "notFound": "未找到此退货。",
+      "labelFileRequired": "请选择标签文件。",
+      "labelFileInvalid": "标签必须是不超过 5 MB 的 PDF 或图片（PNG、JPG、GIF、BMP）。",
+      "labelDetailsRequired": "请选择承运商并输入标签的追踪号码。"
+    },
+    "form": {
+      "choose": "请选择要执行的操作。",
+      "send": "发送",
+      "labelTitle": "退货标签",
+      "labelFile": "选择标签文件",
+      "labelFileHint": "PDF 或图片（PNG、JPG、GIF、BMP），最大 5 MB",
+      "carrier": "承运商",
+      "carrierName": "承运商名称",
+      "tracking": "追踪号码",
+      "carrierRequired": "请选择承运商。",
+      "carrierNameRequired": "请输入承运商名称。",
+      "trackingRequired": "请输入追踪号码。",
+      "markLabelSentHint": "如果您已自行向买家提供了退货标签，请选择此项。eBay 会记录标签已发送。",
+      "refundHint": "eBay 一旦接受退款便会立即转账，且无法在此撤销。",
+      "choice": {
+        "approve": "批准退货",
+        "provide_label": "上传标签",
+        "mark_label_sent": "确认已发送标签",
+        "mark_received": "将商品标记为已收到",
+        "issue_refund": "发送退款"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "发送退款（{{amount}}）"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "其他"
     }
   }
 }

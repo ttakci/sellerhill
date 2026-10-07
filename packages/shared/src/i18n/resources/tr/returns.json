@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Alıcıya geri ödeme yapın (ürünün geri gönderilmesi beklenmiyor)",
       "REMINDER_FOR_RMA": "RMA hatırlatması: eBay'de yanıtlayın",
       "REMINDER_SELLER_TO_RESPOND": "İade talebini yanıtlayın",
-      "other": "eBay'de yanıtlayın",
       "SELLER_SEND_MESSAGE": "Alıcıya mesaj gönderin",
       "SELLER_ESCALATE": "eBay'e taşıyın",
-      "SELLER_OFFER_REPLACEMENT": "Yenisiyle değişim önerin"
+      "SELLER_OFFER_REPLACEMENT": "Yenisiyle değişim önerin",
+      "SUBMIT_FILE": "İadeye dosya ekleyin",
+      "UPDATE_RETURN_ADDRESS": "İade adresini güncelleyin",
+      "other": "eBay'de yanıtlayın"
     },
     "dueBy": "Son tarih: {{date}}",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "Sipariş",
-    "viewOrder": "Siparişi görüntüle",
     "unknownProduct": "Bilinmeyen ürün",
     "empty": {
       "title": "Henüz iade yok",
@@ -98,10 +99,6 @@
       "loadFailed": "Bu iade yüklenemedi",
       "loadFailedDescription": "Biraz sonra tekrar deneyin ya da eBay'de açın.",
       "offline": "eBay'e şu an ulaşılamadı; gördüğünüz, SellerHill'in bildiği son durum. eBay yeniden yanıt verdiğinde işlemler sunulur.",
-      "whatYouCanDo": "Yapabilecekleriniz",
-      "nothingToDo": "Bu iadede sizden bekleyen bir şey yok.",
-      "openOnEbay": "eBay'de aç",
-      "alsoOnEbay": "eBay'de ayrıca: {{options}}",
       "buyer": "Alıcı",
       "quantity": "Adet",
       "returnType": "İade türü",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay henüz bir adım kaydetmedi.",
       "partialRefundOffered": "{{amount}} tutarında kısmi geri ödeme önerildi",
       "trackingNumber": "Takip {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "İade numarası",
+      "actionsOff": "Uygulama içi iade işlemleri kapalı — eBay üzerinden yanıtlayın."
     },
     "actions": {
-      "button": {
-        "approve": "İadeyi onayla",
-        "mark_received": "Teslim alındı işaretle",
-        "issue_refund": "Geri ödeme yap"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "{{amount}} geri öde"
-      },
-      "confirm": {
-        "approve": "Bu iade talebi eBay'de onaylansın mı? Alıcıdan ürünü geri göndermesi istenir.",
-        "mark_received": "eBay'e iade edilen ürünün ulaştığı bildirilsin mi? Bunu yalnızca ürün elinizdeyken yapın.",
-        "issue_refund": "Alıcıya şimdi {{amount}} geri ödensin mi? eBay kabul eder etmez parayı aktarır ve bu işlem buradan geri alınamaz."
-      },
       "done": {
         "approve": "İade eBay'de onaylandı.",
         "mark_received": "Ürün eBay'de teslim alındı olarak işaretlendi.",
-        "issue_refund": "Geri ödeme eBay'de yapıldı."
+        "issue_refund": "Geri ödeme eBay'de yapıldı.",
+        "provide_label": "İade etiketi eBay'de alıcıya gönderildi.",
+        "mark_label_sent": "eBay'e alıcının iade etiketinin zaten elinde olduğu bildirildi."
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
       "sandbox": "İade işlemleri eBay sandbox ortamında kullanılamaz.",
       "refundAmountUnknown": "eBay bu iade için geri ödeme tutarı bildirmedi; geri ödemenin eBay üzerinden yapılması gerekiyor.",
-      "notFound": "Bu iade bulunamadı."
+      "notFound": "Bu iade bulunamadı.",
+      "labelFileRequired": "Etiket dosyasını seçin.",
+      "labelFileInvalid": "Etiket en fazla 5 MB boyutunda bir PDF veya görsel (PNG, JPG, GIF, BMP) olmalı.",
+      "labelDetailsRequired": "Kargo firmasını seçin ve etiketin takip numarasını yazın."
+    },
+    "form": {
+      "choose": "Ne yapacağınızı seçin.",
+      "send": "Gönder",
+      "labelTitle": "İade etiketi",
+      "labelFile": "Etiket dosyasını seçin",
+      "labelFileHint": "PDF veya görsel (PNG, JPG, GIF, BMP), en fazla 5 MB",
+      "carrier": "Kargo firması",
+      "carrierName": "Kargo firmasının adı",
+      "tracking": "Takip numarası",
+      "carrierRequired": "Kargo firmasını seçin.",
+      "carrierNameRequired": "Kargo firmasının adını yazın.",
+      "trackingRequired": "Takip numarasını yazın.",
+      "markLabelSentHint": "Alıcıya iade etiketini zaten kendiniz verdiyseniz bunu seçin. eBay etiketin gönderildiğini kaydeder.",
+      "refundHint": "eBay geri ödemeyi kabul ettiği anda para aktarılır ve buradan geri alınamaz.",
+      "choice": {
+        "approve": "İadeyi onayla",
+        "provide_label": "Etiket yükle",
+        "mark_label_sent": "Etiketi zaten gönderdiğimi onayla",
+        "mark_received": "Ürünü teslim alındı olarak işaretle",
+        "issue_refund": "Geri ödeme yap"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Geri ödeme yap ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Diğer"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "待处理事项",
-    "subtitle": "所有等您处理的事项，最紧急的排在最前。",
+    "subtitle": "所有等待您处理的事项，最紧急的排在最前。打开任一事项，直接前往处理它的页面。",
     "menu": "待处理事项",
     "refresh": "刷新",
     "updatedAt": "更新于 {{time}}",

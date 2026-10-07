@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Dem Käufer den Betrag erstatten (der Artikel wird nicht zurückerwartet)",
       "REMINDER_FOR_RMA": "RMA-Erinnerung: bei eBay antworten",
       "REMINDER_SELLER_TO_RESPOND": "Auf die Rückgabeanfrage antworten",
-      "other": "Bei eBay antworten",
       "SELLER_SEND_MESSAGE": "Dem Käufer eine Nachricht senden",
       "SELLER_ESCALATE": "An eBay eskalieren",
-      "SELLER_OFFER_REPLACEMENT": "Ersatz anbieten"
+      "SELLER_OFFER_REPLACEMENT": "Ersatz anbieten",
+      "SUBMIT_FILE": "Eine Datei zur Rücknahme hinzufügen",
+      "UPDATE_RETURN_ADDRESS": "Die Rücksendeadresse ändern",
+      "other": "Bei eBay antworten"
     },
     "dueBy": "bis {{date}}",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "Bestellung",
-    "viewOrder": "Bestellung ansehen",
     "unknownProduct": "Unbekanntes Produkt",
     "empty": {
       "title": "Noch keine Rückgaben",
@@ -98,10 +99,6 @@
       "loadFailed": "Diese Rückgabe konnte nicht geladen werden",
       "loadFailedDescription": "Versuchen Sie es gleich noch einmal oder öffnen Sie sie bei eBay.",
       "offline": "eBay war gerade nicht erreichbar; dies ist der letzte Stand, den SellerHill kennt. Aktionen werden angeboten, sobald eBay wieder antwortet.",
-      "whatYouCanDo": "Was Sie tun können",
-      "nothingToDo": "Bei dieser Rückgabe wartet nichts auf Sie.",
-      "openOnEbay": "Bei eBay öffnen",
-      "alsoOnEbay": "Außerdem bei eBay: {{options}}",
       "buyer": "Käufer",
       "quantity": "Menge",
       "returnType": "Art der Rückgabe",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay hat noch keinen Schritt aufgezeichnet.",
       "partialRefundOffered": "Teilerstattung von {{amount}} angeboten",
       "trackingNumber": "Sendungsnummer {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "Rücknahme-ID",
+      "actionsOff": "In-App-Aktionen für Rücknahmen sind ausgeschaltet — antworten Sie auf eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Rückgabe genehmigen",
-        "mark_received": "Als erhalten markieren",
-        "issue_refund": "Erstatten"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "{{amount}} erstatten"
-      },
-      "confirm": {
-        "approve": "Diesen Rückgabeantrag bei eBay genehmigen? Der Käufer wird gebeten, den Artikel zurückzusenden.",
-        "mark_received": "eBay mitteilen, dass der zurückgesendete Artikel angekommen ist? Tun Sie das erst, wenn Sie ihn in der Hand haben.",
-        "issue_refund": "Dem Käufer jetzt {{amount}} erstatten? eBay überweist das Geld, sobald es dies annimmt; von hier aus lässt es sich nicht rückgängig machen."
-      },
       "done": {
         "approve": "Die Rückgabe wurde bei eBay genehmigt.",
         "mark_received": "Der Artikel wurde bei eBay als erhalten markiert.",
-        "issue_refund": "Die Erstattung wurde bei eBay veranlasst."
+        "issue_refund": "Die Erstattung wurde bei eBay veranlasst.",
+        "provide_label": "Das Rücksendeetikett wurde dem Käufer auf eBay gesendet.",
+        "mark_label_sent": "eBay wurde mitgeteilt, dass der Käufer bereits ein Rücksendeetikett hat."
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay war nicht erreichbar. Versuchen Sie es gleich noch einmal.",
       "sandbox": "Rückgabe-Aktionen sind in der eBay-Sandbox nicht verfügbar.",
       "refundAmountUnknown": "eBay hat für diese Rückgabe keinen Erstattungsbetrag gemeldet; die Erstattung muss bei eBay veranlasst werden.",
-      "notFound": "Diese Rückgabe wurde nicht gefunden."
+      "notFound": "Diese Rückgabe wurde nicht gefunden.",
+      "labelFileRequired": "Wählen Sie die Etikettdatei.",
+      "labelFileInvalid": "Das Etikett muss eine PDF-Datei oder ein Bild (PNG, JPG, GIF, BMP) von höchstens 5 MB sein.",
+      "labelDetailsRequired": "Wählen Sie den Versanddienst und geben Sie die Sendungsnummer des Etiketts ein."
+    },
+    "form": {
+      "choose": "Wählen Sie, was Sie tun möchten.",
+      "send": "Senden",
+      "labelTitle": "Rücksendeetikett",
+      "labelFile": "Etikettdatei auswählen",
+      "labelFileHint": "PDF oder Bild (PNG, JPG, GIF, BMP), bis 5 MB",
+      "carrier": "Versanddienst",
+      "carrierName": "Name des Versanddienstes",
+      "tracking": "Sendungsnummer",
+      "carrierRequired": "Wählen Sie den Versanddienst.",
+      "carrierNameRequired": "Geben Sie den Namen des Versanddienstes ein.",
+      "trackingRequired": "Geben Sie die Sendungsnummer ein.",
+      "markLabelSentHint": "Wählen Sie dies, wenn Sie dem Käufer bereits selbst ein Rücksendeetikett gegeben haben. eBay vermerkt, dass ein Etikett gesendet wurde.",
+      "refundHint": "eBay überweist das Geld, sobald es die Erstattung annimmt; das lässt sich hier nicht rückgängig machen.",
+      "choice": {
+        "approve": "Rücknahme genehmigen",
+        "provide_label": "Etikett hochladen",
+        "mark_label_sent": "Bestätigen, dass ein Etikett bereits gesendet wurde",
+        "mark_received": "Artikel als erhalten markieren",
+        "issue_refund": "Erstattung senden"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Erstattung senden ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Andere"
     }
   }
 }

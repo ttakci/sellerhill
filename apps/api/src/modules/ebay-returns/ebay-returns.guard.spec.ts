@@ -3,9 +3,10 @@
 // Source-grep invariants for the eBay returns module. Each one is a rule a
 // mocked unit test would keep passing after it was broken:
 //
-//   1. Exactly nine Post-Order calls exist, all documented locally, and the
-//      five WRITES (return decide / mark_as_received / issue_refund,
-//      cancellation approve / reject) live in the client alone, are sent once
+//   1. Exactly eleven Post-Order calls exist, all documented locally, and the
+//      seven WRITES (return decide / file upload / add_shipping_label /
+//      mark_as_received / issue_refund, cancellation approve / reject) live in
+//      the client alone, are sent once
 //      (never inside the retry wrapper), are charged to their own quota at
 //      INTERACTIVE, and are reached only through
 //      `EbayReturnsActionsService.act` / `EbayCancellationsActionsService.act`,
@@ -72,7 +73,7 @@ describe('ebay-returns module invariants', () => {
     );
   });
 
-  describe('the nine documented Post-Order calls, and no other', () => {
+  describe('the eleven documented Post-Order calls, and no other', () => {
     const WRITE_FILES = SOURCE_FILES.filter((file) => file !== 'post-order.client.ts');
 
     it.each(WRITE_FILES)('%s issues no HTTP call of its own', (file) => {
@@ -95,6 +96,8 @@ describe('ebay-returns module invariants', () => {
           '/post-order/v2/return/search',
           '/post-order/v2/return/${encodeURIComponent(returnId)}',
           '/post-order/v2/return/${encodeURIComponent(returnId)}/decide',
+          '/post-order/v2/return/${encodeURIComponent(returnId)}/file/upload',
+          '/post-order/v2/return/${encodeURIComponent(returnId)}/add_shipping_label',
           '/post-order/v2/return/${encodeURIComponent(returnId)}/mark_as_received',
           '/post-order/v2/return/${encodeURIComponent(returnId)}/issue_refund',
           '/post-order/v2/cancellation/search',
@@ -104,7 +107,7 @@ describe('ebay-returns module invariants', () => {
         ].sort()
       );
       const client = stripComments(source('post-order.client.ts'));
-      expect(client).not.toMatch(/escalate|send_message|add_shipping_label|file\/upload|mark_refund_sent|preference/);
+      expect(client).not.toMatch(/escalate|send_message|initiate_shipping_label|mark_refund_sent|preference/);
       // The cancellation pages this module does not implement.
       expect(client).not.toMatch(/cancellation\/check_eligibility|confirm|submit_cancel|create_cancel/);
     });
@@ -119,22 +122,24 @@ describe('ebay-returns module invariants', () => {
       expect(client).toMatch(
         /axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/cancellation\/\$\{encodeURIComponent\(cancelId\)\}`/
       );
-      // The one POST, in the private `write`, outside withEbayRateLimitRetry.
+      // The one POST, in the private `writeRaw`, outside withEbayRateLimitRetry.
       expect(client.match(/axios\.post</g)).toHaveLength(1);
-      const writeStart = client.indexOf('private async write(');
+      const writeStart = client.indexOf('private async writeRaw(');
       const postAt = client.indexOf('axios.post<', writeStart);
       expect(writeStart).toBeGreaterThan(-1);
       expect(postAt).toBeGreaterThan(writeStart);
       expect(client.slice(writeStart, postAt)).not.toContain('withEbayRateLimitRetry');
       // Charged before it goes out, at the seller's priority.
       expect(client.slice(writeStart, postAt)).toContain('await this.charge(resource, EbayCallPriority.INTERACTIVE)()');
-      // Each write names its own pool: the five calls into `write`, by resource.
-      const writes = [...client.matchAll(/this\.write\(\s*EbayApiResource\.(\w+),[^`]*`([^`]+)`/g)].map(
+      // Each write names its own pool: the seven calls into `write` / `writeRaw`, by resource.
+      const writes = [...client.matchAll(/this\.write(?:Raw)?\(\s*EbayApiResource\.(\w+),[^`]*`([^`]+)`/g)].map(
         (m) => `${m[1]} ${m[2]}`
       );
       expect(writes.sort()).toEqual(
         [
           'POST_ORDER_RETURN /post-order/v2/return/${encodeURIComponent(returnId)}/decide',
+          'POST_ORDER_RETURN /post-order/v2/return/${encodeURIComponent(returnId)}/file/upload',
+          'POST_ORDER_RETURN /post-order/v2/return/${encodeURIComponent(returnId)}/add_shipping_label',
           'POST_ORDER_RETURN /post-order/v2/return/${encodeURIComponent(returnId)}/mark_as_received',
           'POST_ORDER_RETURN /post-order/v2/return/${encodeURIComponent(returnId)}/issue_refund',
           'POST_ORDER_CANCELLATION /post-order/v2/cancellation/${encodeURIComponent(cancelId)}/approve',
@@ -161,7 +166,13 @@ describe('ebay-returns module invariants', () => {
         SOURCE_FILES.filter(
           (file) => file !== 'post-order.client.ts' && stripComments(source(file)).includes(`.${method}(`)
         );
-      for (const method of ['decideReturn', 'markReturnReceived', 'issueReturnRefund']) {
+      for (const method of [
+        'decideReturn',
+        'uploadReturnFile',
+        'addReturnShippingLabel',
+        'markReturnReceived',
+        'issueReturnRefund',
+      ]) {
         expect(callers(method)).toEqual(['ebay-returns-actions.service.ts']);
       }
       for (const method of ['approveCancellation', 'rejectCancellation']) {
@@ -207,12 +218,15 @@ describe('ebay-returns module invariants', () => {
       const act = code.slice(code.indexOf('async act('), code.indexOf('private assertOffered('));
       const order = [
         'this.actionsEnabled()',
+        'validateReturnActionInput(action, input)',
         'this.quotaEnforcement.isSuspended(userId)',
         'this.postOrder.isReturnSearchSupported()',
         'this.readLiveOrThrow(userId, id, true)',
         'this.assertOffered(live, action)',
         'this.ebay.getAccountAccessToken(',
         'this.postOrder.decideReturn(',
+        'this.postOrder.uploadReturnFile(',
+        'this.postOrder.addReturnShippingLabel(',
         'this.postOrder.markReturnReceived(',
         'this.postOrder.issueReturnRefund(',
         "outcome: 'sent'",
@@ -226,6 +240,9 @@ describe('ebay-returns module invariants', () => {
       // Approve sends the documented decision and nothing else.
       expect(act).toContain("decision: 'APPROVE'");
       expect(code).not.toMatch(/decision:\s*['"`](DECLINE|OFFER_PARTIAL_REFUND|PROVIDE_RMA)/);
+      // A label is the seller's own or "already sent" — never one eBay bills for.
+      expect(code.match(/labelAction: '\w+'/g)).toEqual(["labelAction: 'UPLOAD_LABEL'", "labelAction: 'MARK_AS_SENT'"]);
+      expect(code).not.toMatch(/EBAY_LABEL|PURCHASE_LABEL|AU_LABEL/);
     });
 
     it('refunds eBay’s own computed amount as one purchase-price line', () => {

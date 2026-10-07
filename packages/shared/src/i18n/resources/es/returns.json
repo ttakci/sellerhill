@@ -59,10 +59,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Reembolsa al comprador (no se espera que devuelva el artículo)",
       "REMINDER_FOR_RMA": "Recordatorio de RMA: responde en eBay",
       "REMINDER_SELLER_TO_RESPOND": "Responde a la solicitud de devolución",
-      "other": "Responde en eBay",
       "SELLER_SEND_MESSAGE": "Enviar un mensaje al comprador",
       "SELLER_ESCALATE": "Escalar a eBay",
-      "SELLER_OFFER_REPLACEMENT": "Ofrecer un reemplazo"
+      "SELLER_OFFER_REPLACEMENT": "Ofrecer un reemplazo",
+      "SUBMIT_FILE": "Añade un archivo a la devolución",
+      "UPDATE_RETURN_ADDRESS": "Actualiza la dirección de devolución",
+      "other": "Responde en eBay"
     },
     "dueBy": "antes del {{date}}",
     "reasonType": {
@@ -81,7 +83,6 @@
       "ebayId": "eBay"
     },
     "order": "Pedido",
-    "viewOrder": "Ver pedido",
     "unknownProduct": "Producto desconocido",
     "empty": {
       "title": "Aún no hay devoluciones",
@@ -99,10 +100,6 @@
       "loadFailed": "No se pudo cargar esta devolución",
       "loadFailedDescription": "Inténtalo de nuevo en un momento o ábrela en eBay.",
       "offline": "No se pudo contactar con eBay ahora mismo; este es el último estado que conoce SellerHill. Las acciones se ofrecerán cuando eBay vuelva a responder.",
-      "whatYouCanDo": "Qué puedes hacer",
-      "nothingToDo": "Nada está pendiente de ti en esta devolución.",
-      "openOnEbay": "Abrir en eBay",
-      "alsoOnEbay": "También en eBay: {{options}}",
       "buyer": "Comprador",
       "quantity": "Cantidad",
       "returnType": "Tipo de devolución",
@@ -119,26 +116,17 @@
       "journeyEmpty": "eBay aún no ha registrado ningún paso.",
       "partialRefundOffered": "Se ofreció un reembolso parcial de {{amount}}",
       "trackingNumber": "Seguimiento {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "ID de devolución",
+      "actionsOff": "Las acciones de devolución en la app están desactivadas: responde en eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Aprobar devolución",
-        "mark_received": "Marcar como recibido",
-        "issue_refund": "Emitir reembolso"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Reembolsar {{amount}}"
-      },
-      "confirm": {
-        "approve": "¿Aprobar esta solicitud de devolución en eBay? Se le pedirá al comprador que envíe el artículo de vuelta.",
-        "mark_received": "¿Indicar a eBay que el artículo devuelto ya llegó? Hazlo solo cuando lo tengas en tus manos.",
-        "issue_refund": "¿Reembolsar {{amount}} al comprador ahora? eBay mueve el dinero en cuanto lo acepta y no se puede deshacer desde aquí."
-      },
       "done": {
         "approve": "La devolución se aprobó en eBay.",
         "mark_received": "El artículo se marcó como recibido en eBay.",
-        "issue_refund": "El reembolso se emitió en eBay."
+        "issue_refund": "El reembolso se emitió en eBay.",
+        "provide_label": "La etiqueta de devolución se envió al comprador en eBay.",
+        "mark_label_sent": "Se informó a eBay de que el comprador ya tiene una etiqueta de devolución."
       }
     },
     "history": {
@@ -198,7 +186,41 @@
       "unavailable": "No se pudo contactar con eBay. Inténtalo de nuevo en un momento.",
       "sandbox": "Las acciones de devolución no están disponibles en el sandbox de eBay.",
       "refundAmountUnknown": "eBay no informó un monto de reembolso para esta devolución, así que el reembolso debe emitirse en eBay.",
-      "notFound": "No se encontró esta devolución."
+      "notFound": "No se encontró esta devolución.",
+      "labelFileRequired": "Elige el archivo de la etiqueta.",
+      "labelFileInvalid": "La etiqueta debe ser un PDF o una imagen (PNG, JPG, GIF, BMP) de 5 MB como máximo.",
+      "labelDetailsRequired": "Elige el transportista y escribe el número de seguimiento de la etiqueta."
+    },
+    "form": {
+      "choose": "Elige qué hacer.",
+      "send": "Enviar",
+      "labelTitle": "Etiqueta de devolución",
+      "labelFile": "Elige el archivo de la etiqueta",
+      "labelFileHint": "PDF o imagen (PNG, JPG, GIF, BMP), hasta 5 MB",
+      "carrier": "Transportista",
+      "carrierName": "Nombre del transportista",
+      "tracking": "Número de seguimiento",
+      "carrierRequired": "Elige el transportista.",
+      "carrierNameRequired": "Escribe el nombre del transportista.",
+      "trackingRequired": "Escribe el número de seguimiento.",
+      "markLabelSentHint": "Usa esto si ya le diste tú mismo al comprador una etiqueta de devolución. eBay registra que la etiqueta se envió.",
+      "refundHint": "eBay transfiere el dinero en cuanto acepta el reembolso, y no se puede deshacer desde aquí.",
+      "choice": {
+        "approve": "Aprobar la devolución",
+        "provide_label": "Subir una etiqueta",
+        "mark_label_sent": "Confirmar que ya enviaste una etiqueta",
+        "mark_received": "Marcar el artículo como recibido",
+        "issue_refund": "Enviar reembolso"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Enviar reembolso ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Otro"
     }
   }
 }

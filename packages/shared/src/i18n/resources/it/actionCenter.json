@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Azioni in sospeso",
-    "subtitle": "Tutto ciò che ti aspetta, dal più urgente.",
+    "subtitle": "Tutto ciò che ti aspetta, il più urgente per primo. Apri una voce per andare direttamente alla schermata in cui risolverla.",
     "menu": "Azioni in sospeso",
     "refresh": "Aggiorna",
     "updatedAt": "Aggiornato {{time}}",

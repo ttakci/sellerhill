@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Actions en attente",
-    "subtitle": "Tout ce qui attend votre intervention, les urgences en premier.",
+    "subtitle": "Tout ce qui vous attend, le plus urgent en premier. Ouvrez un élément pour aller directement à l'écran où le régler.",
     "menu": "Actions en attente",
     "refresh": "Actualiser",
     "updatedAt": "Mis à jour {{time}}",

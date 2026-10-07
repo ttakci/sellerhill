@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Acțiuni în așteptare",
-    "subtitle": "Tot ce vă așteaptă, cele mai urgente primele.",
+    "subtitle": "Tot ce te așteaptă, cel mai urgent primul. Deschide un element pentru a ajunge direct la ecranul unde îl rezolvi.",
     "menu": "Acțiuni în așteptare",
     "refresh": "Reîmprospătează",
     "updatedAt": "Actualizat {{time}}",

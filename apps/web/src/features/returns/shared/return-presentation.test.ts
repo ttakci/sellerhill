@@ -119,8 +119,7 @@ describe('returns i18n coverage', () => {
       expect(en.closeReason[reason as keyof typeof en.closeReason]).toBeTruthy();
     }
     for (const action of Object.values(EbayReturnAction)) {
-      expect(en.actions.button[action]).toBeTruthy();
-      expect(en.actions.confirm[action]).toBeTruthy();
+      expect(en.form.choice[action]).toBeTruthy();
       expect(en.actions.done[action]).toBeTruthy();
     }
   });

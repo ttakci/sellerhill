@@ -2,6 +2,7 @@
 
 import {
   BadRequestException,
+  Body,
   ConflictException,
   Controller,
   Get,
@@ -11,22 +12,27 @@ import {
   Query,
   Request,
   ServiceUnavailableException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   EbayReturnActionResultDto,
   EbayReturnDetailDto,
+  EbayReturnLabelFieldsDto,
   isEbayReturnAction,
   PaginatedReturnsDto,
   ReturnBucketCountsDto,
+  RETURN_LABEL_MAX_BYTES,
   ReturnTab,
 } from '@repo/shared';
 import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-import { EbayReturnsActionsService, ReturnActionError } from './ebay-returns-actions.service';
+import { EbayReturnsActionsService, ReturnActionError, type ReturnActionInput } from './ebay-returns-actions.service';
 import { EbayReturnsService } from './ebay-returns.service';
 
 type AuthedRequest = { user: { sub: string } };
@@ -70,6 +76,9 @@ function parseReturnId(value: string): string {
 /** A refused or failed action keeps its i18n key as the message and takes the status the service chose. */
 function rethrowReturnAction(error: unknown): never {
   if (error instanceof ReturnActionError) {
+    if (error.status === 400) {
+      throw new BadRequestException(error.key);
+    }
     if (error.status === 404) {
       throw new NotFoundException(error.key);
     }
@@ -79,6 +88,11 @@ function rethrowReturnAction(error: unknown): never {
     throw new ConflictException(error.key);
   }
   throw error;
+}
+
+/** A multipart text field, or undefined when absent / not a string. */
+function textField(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
 }
 
 /**
@@ -149,18 +163,36 @@ export class EbayReturnsController {
     }
   }
 
+  /**
+   * One in-app action. `provide_label` is multipart: the label file
+   * (`labelFile`) plus `carrier`, `carrierName`, `trackingNumber`; the other
+   * actions post an empty body. The service validates the input — multer only
+   * caps the size so a huge upload is cut off before it is buffered.
+   */
   @Post(':id/actions/:action')
-  @ApiOperation({ summary: 'Approve the return, mark the item received or issue the refund on eBay' })
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @ApiOperation({
+    summary: 'Approve the return, provide or confirm a return label, mark the item received or issue the refund on eBay',
+  })
+  @UseInterceptors(FileInterceptor('labelFile', { limits: { fileSize: RETURN_LABEL_MAX_BYTES + 1, files: 1 } }))
   async act(
     @Request() req: AuthedRequest,
     @Param('id') id: string,
-    @Param('action') action: string
+    @Param('action') action: string,
+    @UploadedFile() labelFile?: Express.Multer.File,
+    @Body() body?: EbayReturnLabelFieldsDto
   ): Promise<EbayReturnActionResultDto> {
     if (!isEbayReturnAction(action)) {
       throw new BadRequestException('unknown return action');
     }
+    const input: ReturnActionInput = {
+      carrier: textField(body?.carrier),
+      carrierName: textField(body?.carrierName),
+      trackingNumber: textField(body?.trackingNumber),
+      ...(labelFile ? { file: { buffer: labelFile.buffer, mimeType: labelFile.mimetype, size: labelFile.size } } : {}),
+    };
     try {
-      return await this.actions.act(req.user.sub, parseReturnId(id), action);
+      return await this.actions.act(req.user.sub, parseReturnId(id), action, input);
     } catch (error) {
       rethrowReturnAction(error);
     }

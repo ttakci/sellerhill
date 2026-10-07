@@ -1,6 +1,15 @@
-import { EbayReturnAction, PlatformSettingKey, ReturnBucket } from '@repo/shared';
+import { EbayReturnAction, PlatformSettingKey, ReturnBucket, ReturnLabelCarrier } from '@repo/shared';
 
-import { buildFullRefundBody, EbayReturnsActionsService, ReturnActionError } from './ebay-returns-actions.service';
+import {
+  buildFullRefundBody,
+  buildMarkLabelSentBody,
+  buildUploadLabelBody,
+  EbayReturnsActionsService,
+  labelFileName,
+  ReturnActionError,
+  validateReturnActionInput,
+  type ReturnActionInput,
+} from './ebay-returns-actions.service';
 import { PostOrderRejectedError } from './post-order.client';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
@@ -32,6 +41,8 @@ function build(options: { enabled?: boolean; suspended?: boolean; sandbox?: bool
     decideReturn: jest.fn(() => Promise.resolve({ refundStatus: 'PENDING' })),
     markReturnReceived: jest.fn(() => Promise.resolve()),
     issueReturnRefund: jest.fn(() => Promise.resolve({ refundStatus: 'SUCCESS' })),
+    uploadReturnFile: jest.fn(() => Promise.resolve('FILE-1')),
+    addReturnShippingLabel: jest.fn(() => Promise.resolve()),
   };
   const sync = { upsertReturn: jest.fn(() => Promise.resolve()) };
   const returns = {
@@ -147,6 +158,120 @@ describe('EbayReturnsActionsService.act', () => {
   it('is an instance of ReturnActionError on every refusal', async () => {
     const { service } = build({ enabled: false });
     await expect(service.act(USER, ID, EbayReturnAction.APPROVE)).rejects.toBeInstanceOf(ReturnActionError);
+  });
+});
+
+const PDF = { buffer: Buffer.from('%PDF-1.4 label'), mimeType: 'application/pdf', size: 14 };
+const LABEL: ReturnActionInput = { carrier: ReturnLabelCarrier.USPS, trackingNumber: ' 9400 1 ', file: PDF };
+
+describe('EbayReturnsActionsService.act — return labels', () => {
+  it('uploads the label file, then names it in add_shipping_label with the carrier and tracking number', async () => {
+    const { service, query, postOrder } = build({ live: detail(['SELLER_PROVIDE_LABEL']) });
+    await expect(service.act(USER, ID, EbayReturnAction.PROVIDE_LABEL, LABEL)).resolves.toEqual({
+      action: EbayReturnAction.PROVIDE_LABEL,
+      refundStatus: null,
+    });
+    expect(postOrder.uploadReturnFile).toHaveBeenCalledWith('tok', 'EBAY_US', '5000000001', {
+      data: PDF.buffer.toString('base64'),
+      fileName: 'return-label-5000000001.pdf',
+      filePurpose: 'LABEL_RELATED',
+    });
+    expect(postOrder.addReturnShippingLabel).toHaveBeenCalledWith('tok', 'EBAY_US', '5000000001', {
+      labelAction: 'UPLOAD_LABEL',
+      fileId: 'FILE-1',
+      carrierEnum: 'USPS',
+      trackingNumber: '9400 1',
+    });
+    expect(String(audits(query)[0][1]?.[2])).toContain('"fileId":"FILE-1"');
+  });
+
+  it('refuses an incomplete label with a 400, before reading eBay', async () => {
+    const { service, postOrder } = build({ live: detail(['SELLER_PROVIDE_LABEL']) });
+    await expect(
+      service.act(USER, ID, EbayReturnAction.PROVIDE_LABEL, { ...LABEL, trackingNumber: '' })
+    ).rejects.toMatchObject({ key: 'returns.errors.labelDetailsRequired', status: 400 });
+    expect(postOrder.getReturn).not.toHaveBeenCalled();
+    expect(postOrder.uploadReturnFile).not.toHaveBeenCalled();
+  });
+
+  it('refuses the label when eBay does not ask for one', async () => {
+    const { service, postOrder } = build({ live: detail(['SELLER_APPROVE_REQUEST']) });
+    await expect(service.act(USER, ID, EbayReturnAction.PROVIDE_LABEL, LABEL)).rejects.toMatchObject({
+      key: 'returns.errors.actionNotAvailable',
+    });
+    expect(postOrder.uploadReturnFile).not.toHaveBeenCalled();
+  });
+
+  it('audits the uploaded file when eBay refuses add_shipping_label', async () => {
+    const { service, query, postOrder } = build({ live: detail(['SELLER_PROVIDE_LABEL']) });
+    postOrder.addReturnShippingLabel.mockRejectedValueOnce(new PostOrderRejectedError('no', 400));
+    await expect(service.act(USER, ID, EbayReturnAction.PROVIDE_LABEL, LABEL)).rejects.toMatchObject({
+      key: 'returns.errors.ebayRejected',
+    });
+    const audit = String(audits(query)[0][1]?.[2]);
+    expect(audit).toContain('"outcome":"rejected"');
+    expect(audit).toContain('"fileId":"FILE-1"');
+  });
+
+  it('confirms a label already sent with MARK_AS_SENT and no file', async () => {
+    const { service, postOrder } = build({ live: detail(['SELLER_PROVIDE_LABEL']) });
+    await service.act(USER, ID, EbayReturnAction.MARK_LABEL_SENT);
+    expect(postOrder.uploadReturnFile).not.toHaveBeenCalled();
+    expect(postOrder.addReturnShippingLabel).toHaveBeenCalledWith(
+      'tok',
+      'EBAY_US',
+      '5000000001',
+      expect.objectContaining({ labelAction: 'MARK_AS_SENT', forwardShippingLabelProvided: true })
+    );
+  });
+});
+
+describe('validateReturnActionInput', () => {
+  it('asks nothing of the other actions', () => {
+    expect(validateReturnActionInput(EbayReturnAction.APPROVE, {})).toBeNull();
+    expect(validateReturnActionInput(EbayReturnAction.MARK_LABEL_SENT, {})).toBeNull();
+  });
+
+  it('needs a PDF or image file no larger than 5 MB', () => {
+    expect(validateReturnActionInput(EbayReturnAction.PROVIDE_LABEL, { ...LABEL, file: undefined })).toBe(
+      'returns.errors.labelFileRequired'
+    );
+    expect(
+      validateReturnActionInput(EbayReturnAction.PROVIDE_LABEL, { ...LABEL, file: { ...PDF, mimeType: 'text/plain' } })
+    ).toBe('returns.errors.labelFileInvalid');
+    expect(
+      validateReturnActionInput(EbayReturnAction.PROVIDE_LABEL, { ...LABEL, file: { ...PDF, size: 6 * 1024 * 1024 } })
+    ).toBe('returns.errors.labelFileInvalid');
+    expect(validateReturnActionInput(EbayReturnAction.PROVIDE_LABEL, LABEL)).toBeNull();
+  });
+
+  it('needs a known carrier, a name for OTHER, and a tracking number', () => {
+    const check = (over: Partial<ReturnActionInput>) =>
+      validateReturnActionInput(EbayReturnAction.PROVIDE_LABEL, { ...LABEL, ...over });
+    expect(check({ carrier: 'ROYAL' })).toBe('returns.errors.labelDetailsRequired');
+    expect(check({ carrier: ReturnLabelCarrier.OTHER })).toBe('returns.errors.labelDetailsRequired');
+    expect(check({ carrier: ReturnLabelCarrier.OTHER, carrierName: 'OnTrac' })).toBeNull();
+    expect(check({ trackingNumber: '   ' })).toBe('returns.errors.labelDetailsRequired');
+  });
+});
+
+describe('label bodies', () => {
+  it('sends the carrier name only for OTHER', () => {
+    expect(
+      buildUploadLabelBody({ carrier: ReturnLabelCarrier.OTHER, carrierName: ' OnTrac ', trackingNumber: 'X1' }, 'F')
+    ).toEqual({ labelAction: 'UPLOAD_LABEL', fileId: 'F', carrierEnum: 'OTHER', carrierName: 'OnTrac', trackingNumber: 'X1' });
+  });
+
+  it('stamps MARK_AS_SENT with the moment it was confirmed', () => {
+    expect(buildMarkLabelSentBody(new Date('2026-10-07T10:00:00.000Z'))).toEqual({
+      labelAction: 'MARK_AS_SENT',
+      forwardShippingLabelProvided: true,
+      labelSentDate: { value: '2026-10-07T10:00:00.000Z' },
+    });
+  });
+
+  it('names the uploaded file after the return, never after the browser’s file', () => {
+    expect(labelFileName('77', 'image/png')).toBe('return-label-77.png');
   });
 });
 

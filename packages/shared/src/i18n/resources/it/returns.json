@@ -59,10 +59,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rimborsa l'acquirente (non è prevista la restituzione dell'oggetto)",
       "REMINDER_FOR_RMA": "Promemoria RMA: rispondi su eBay",
       "REMINDER_SELLER_TO_RESPOND": "Rispondi alla richiesta di reso",
-      "other": "Rispondi su eBay",
       "SELLER_SEND_MESSAGE": "Invia un messaggio all'acquirente",
       "SELLER_ESCALATE": "Inoltra a eBay",
-      "SELLER_OFFER_REPLACEMENT": "Proponi una sostituzione"
+      "SELLER_OFFER_REPLACEMENT": "Proponi una sostituzione",
+      "SUBMIT_FILE": "Aggiungi un file al reso",
+      "UPDATE_RETURN_ADDRESS": "Aggiorna l'indirizzo di reso",
+      "other": "Rispondi su eBay"
     },
     "dueBy": "entro il {{date}}",
     "reasonType": {
@@ -81,7 +83,6 @@
       "ebayId": "eBay"
     },
     "order": "Ordine",
-    "viewOrder": "Vedi ordine",
     "unknownProduct": "Prodotto sconosciuto",
     "empty": {
       "title": "Ancora nessun reso",
@@ -99,10 +100,6 @@
       "loadFailed": "Impossibile caricare questo reso",
       "loadFailedDescription": "Riprova tra un istante o aprilo su eBay.",
       "offline": "eBay non è raggiungibile al momento; questo è l'ultimo stato noto a SellerHill. Le azioni saranno proposte quando eBay risponderà di nuovo.",
-      "whatYouCanDo": "Cosa puoi fare",
-      "nothingToDo": "Nulla è in attesa da parte tua su questo reso.",
-      "openOnEbay": "Apri su eBay",
-      "alsoOnEbay": "Anche su eBay: {{options}}",
       "buyer": "Acquirente",
       "quantity": "Quantità",
       "returnType": "Tipo di reso",
@@ -119,26 +116,17 @@
       "journeyEmpty": "eBay non ha ancora registrato alcun passaggio.",
       "partialRefundOffered": "Proposto un rimborso parziale di {{amount}}",
       "trackingNumber": "Tracciamento {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "ID reso",
+      "actionsOff": "Le azioni sui resi nell'app sono disattivate: rispondi su eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Approva reso",
-        "mark_received": "Segna come ricevuto",
-        "issue_refund": "Emetti rimborso"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Rimborsa {{amount}}"
-      },
-      "confirm": {
-        "approve": "Approvare questa richiesta di reso su eBay? All'acquirente verrà chiesto di rispedire l'articolo.",
-        "mark_received": "Comunicare a eBay che l'articolo reso è arrivato? Fallo solo quando lo hai in mano.",
-        "issue_refund": "Rimborsare {{amount}} all'acquirente adesso? eBay trasferisce il denaro non appena lo accetta e non è possibile annullarlo da qui."
-      },
       "done": {
         "approve": "Il reso è stato approvato su eBay.",
         "mark_received": "L'articolo è stato segnato come ricevuto su eBay.",
-        "issue_refund": "Il rimborso è stato emesso su eBay."
+        "issue_refund": "Il rimborso è stato emesso su eBay.",
+        "provide_label": "L'etichetta di reso è stata inviata all'acquirente su eBay.",
+        "mark_label_sent": "eBay è stato informato che l'acquirente ha già un'etichetta di reso."
       }
     },
     "history": {
@@ -198,7 +186,41 @@
       "unavailable": "eBay non è raggiungibile. Riprova tra un istante.",
       "sandbox": "Le azioni sui resi non sono disponibili nel sandbox di eBay.",
       "refundAmountUnknown": "eBay non ha indicato un importo di rimborso per questo reso, quindi il rimborso va emesso su eBay.",
-      "notFound": "Questo reso non è stato trovato."
+      "notFound": "Questo reso non è stato trovato.",
+      "labelFileRequired": "Scegli il file dell'etichetta.",
+      "labelFileInvalid": "L'etichetta deve essere un PDF o un'immagine (PNG, JPG, GIF, BMP) di massimo 5 MB.",
+      "labelDetailsRequired": "Scegli il corriere e inserisci il numero di tracciamento dell'etichetta."
+    },
+    "form": {
+      "choose": "Scegli cosa fare.",
+      "send": "Invia",
+      "labelTitle": "Etichetta di reso",
+      "labelFile": "Scegli il file dell'etichetta",
+      "labelFileHint": "PDF o immagine (PNG, JPG, GIF, BMP), fino a 5 MB",
+      "carrier": "Corriere",
+      "carrierName": "Nome del corriere",
+      "tracking": "Numero di tracciamento",
+      "carrierRequired": "Scegli il corriere.",
+      "carrierNameRequired": "Inserisci il nome del corriere.",
+      "trackingRequired": "Inserisci il numero di tracciamento.",
+      "markLabelSentHint": "Scegli questa opzione se hai già fornito tu all'acquirente un'etichetta di reso. eBay registra che l'etichetta è stata inviata.",
+      "refundHint": "eBay trasferisce il denaro appena accetta il rimborso, e non è possibile annullarlo da qui.",
+      "choice": {
+        "approve": "Approva il reso",
+        "provide_label": "Carica un'etichetta",
+        "mark_label_sent": "Conferma di aver già inviato un'etichetta",
+        "mark_received": "Segna l'articolo come ricevuto",
+        "issue_refund": "Invia rimborso"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Invia rimborso ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Altro"
     }
   }
 }

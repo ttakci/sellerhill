@@ -1,4 +1,4 @@
-import { EbayReturnAction, RETURN_ACTION_EBAY_OPTION, type EbayReturnDetailDto } from '@repo/shared';
+import { EbayReturnAction, type EbayReturnDetailDto } from '@repo/shared';
 import { formatCurrency, formatDate } from '@repo/ui';
 
 import type { ReturnDetailView, ReturnHistoryRowView, ReturnRowContext, ReturnShipmentRowView } from '../returns.types';
@@ -7,8 +7,7 @@ import {
   resolveCloseReasonKey,
   resolveHistoryActivityKey,
   resolveHistoryActor,
-  resolveReturnTypeKey,
-  resolveSellerActivityKey,
+  resolveReturnTypeKey,
 } from './return-presentation';
 import { toReturnRowView } from './return-row.mapper';
 
@@ -19,8 +18,6 @@ const WHEN_FORMAT: Intl.DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
 };
-
-const IN_APP_OPTIONS: readonly string[] = Object.values(RETURN_ACTION_EBAY_OPTION);
 
 /** eBay delivery statuses with a localized label; anything else prints nothing rather than a raw enum. */
 const DELIVERY_STATUSES: readonly string[] = ['DELIVERED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'NOT_SHIPPED', 'SHIPPED'];
@@ -37,17 +34,6 @@ export function toReturnDetailView(dto: EbayReturnDetailDto, ctx: ReturnRowConte
   const when = (value: string | null): string | null => (value ? formatDate(value, locale, WHEN_FORMAT) : null);
 
   const row = toReturnRowView(dto, ctx);
-
-  // What eBay lists that the app does not do itself — the seller does those on
-  // eBay. Localized with the same imperative wording the "what is due" column
-  // uses; an undocumented option reads as the generic "respond on eBay".
-  const optionsOnEbay = Array.from(
-    new Set(
-      dto.ebayOptions
-        .filter((option) => !IN_APP_OPTIONS.includes(option))
-        .map((option) => translate(`returns.activity.${resolveSellerActivityKey(option) ?? 'other'}`))
-    )
-  );
 
   const history: ReturnHistoryRowView[] = dto.history.map((entry, index) => ({
     id: `${entry.activity ?? 'step'}-${entry.at ?? index}`,
@@ -80,10 +66,10 @@ export function toReturnDetailView(dto: EbayReturnDetailDto, ctx: ReturnRowConte
   return {
     row,
     live: dto.live,
+    actionsEnabled: dto.actionsEnabled,
     actions: dto.availableActions,
     refundToIssue: dto.availableActions.includes(EbayReturnAction.ISSUE_REFUND) ? money(dto.estimatedRefundAmount) : null,
     ebayUrl: dto.ebayUrl,
-    optionsOnEbay,
     buyerLoginName: dto.buyerLoginName,
     quantity: dto.returnQuantity,
     returnTypeLabel: returnTypeKey ? translate(`returns.returnType.${returnTypeKey}`) : null,

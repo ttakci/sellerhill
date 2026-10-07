@@ -112,8 +112,6 @@ export interface ReturnDetailView {
   refundToIssue: string | null;
   /** The eBay page for the return, when eBay gave one. */
   ebayUrl: string | null;
-  /** What eBay lists that is NOT an in-app action (decline, message, label…), localized. */
-  optionsOnEbay: string[];
   buyerLoginName: string | null;
   quantity: number | null;
   returnTypeLabel: string | null;

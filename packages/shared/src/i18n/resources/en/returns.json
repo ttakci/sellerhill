@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Refund the buyer (the item is not expected back)",
       "REMINDER_FOR_RMA": "RMA reminder: respond on eBay",
       "REMINDER_SELLER_TO_RESPOND": "Respond to the return request",
-      "other": "Respond on eBay",
       "SELLER_SEND_MESSAGE": "Send the buyer a message",
       "SELLER_ESCALATE": "Escalate to eBay",
-      "SELLER_OFFER_REPLACEMENT": "Offer a replacement"
+      "SELLER_OFFER_REPLACEMENT": "Offer a replacement",
+      "SUBMIT_FILE": "Add a file to the return",
+      "UPDATE_RETURN_ADDRESS": "Update the return address",
+      "other": "Respond on eBay"
     },
     "dueBy": "by {{date}}",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "Order",
-    "viewOrder": "View order",
     "unknownProduct": "Unknown product",
     "empty": {
       "title": "No returns yet",
@@ -98,10 +99,6 @@
       "loadFailed": "This return could not be loaded",
       "loadFailedDescription": "Try again in a moment, or open it on eBay.",
       "offline": "eBay could not be reached just now, so this is the last state SellerHill saw. Actions are offered once eBay answers again.",
-      "whatYouCanDo": "What you can do",
-      "nothingToDo": "Nothing is waiting for you on this return.",
-      "openOnEbay": "Open on eBay",
-      "alsoOnEbay": "Also on eBay: {{options}}",
       "buyer": "Buyer",
       "quantity": "Quantity",
       "returnType": "Return type",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay has not recorded any step yet.",
       "partialRefundOffered": "Offered a partial refund of {{amount}}",
       "trackingNumber": "Tracking {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "Return ID",
+      "actionsOff": "In-app return actions are off — answer on eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Approve return",
-        "mark_received": "Mark as received",
-        "issue_refund": "Issue refund"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Refund {{amount}}"
-      },
-      "confirm": {
-        "approve": "Approve this return request on eBay? The buyer will be told to send the item back.",
-        "mark_received": "Tell eBay the returned item has arrived? Do this only once you have it in hand.",
-        "issue_refund": "Refund {{amount}} to the buyer now? eBay moves the money as soon as it accepts this, and it cannot be undone from here."
-      },
       "done": {
         "approve": "The return was approved on eBay.",
         "mark_received": "The item was marked as received on eBay.",
-        "issue_refund": "The refund was issued on eBay."
+        "issue_refund": "The refund was issued on eBay.",
+        "provide_label": "The return label was sent to the buyer on eBay.",
+        "mark_label_sent": "eBay was told the buyer already has a return label."
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay could not be reached. Try again in a moment.",
       "sandbox": "Return actions are not available on the eBay sandbox.",
       "refundAmountUnknown": "eBay did not report a refund amount for this return, so the refund has to be issued on eBay.",
-      "notFound": "This return was not found."
+      "notFound": "This return was not found.",
+      "labelFileRequired": "Choose the label file.",
+      "labelFileInvalid": "The label must be a PDF or an image (PNG, JPG, GIF, BMP) of at most 5 MB.",
+      "labelDetailsRequired": "Choose the carrier and enter the tracking number of the label."
+    },
+    "form": {
+      "choose": "Choose what to do.",
+      "send": "Send",
+      "labelTitle": "Return label",
+      "labelFile": "Choose the label file",
+      "labelFileHint": "PDF or image (PNG, JPG, GIF, BMP), up to 5 MB",
+      "carrier": "Carrier",
+      "carrierName": "Carrier name",
+      "tracking": "Tracking number",
+      "carrierRequired": "Choose the carrier.",
+      "carrierNameRequired": "Enter the carrier's name.",
+      "trackingRequired": "Enter the tracking number.",
+      "markLabelSentHint": "Use this when you have already given the buyer a return label yourself. eBay records that a label was sent.",
+      "refundHint": "eBay moves the money as soon as it accepts the refund, and it cannot be undone from here.",
+      "choice": {
+        "approve": "Approve the return",
+        "provide_label": "Upload a label",
+        "mark_label_sent": "Confirm you already sent a label",
+        "mark_received": "Mark the item as received",
+        "issue_refund": "Send refund"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Send refund ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Other"
     }
   }
 }

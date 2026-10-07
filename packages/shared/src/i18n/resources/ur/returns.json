@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "خریدار کو ریفنڈ کریں (آئٹم کی واپسی متوقع نہیں)",
       "REMINDER_FOR_RMA": "RMA یاد دہانی: eBay پر جواب دیں",
       "REMINDER_SELLER_TO_RESPOND": "ریٹرن کی درخواست کا جواب دیں",
-      "other": "eBay پر جواب دیں",
       "SELLER_SEND_MESSAGE": "خریدار کو پیغام بھیجیں",
       "SELLER_ESCALATE": "eBay کے حوالے کریں",
-      "SELLER_OFFER_REPLACEMENT": "متبادل پیش کریں"
+      "SELLER_OFFER_REPLACEMENT": "متبادل پیش کریں",
+      "SUBMIT_FILE": "واپسی میں فائل شامل کریں",
+      "UPDATE_RETURN_ADDRESS": "واپسی کا پتہ اپ ڈیٹ کریں",
+      "other": "eBay پر جواب دیں"
     },
     "dueBy": "{{date}} تک",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "آرڈر",
-    "viewOrder": "آرڈر دیکھیں",
     "unknownProduct": "نامعلوم پروڈکٹ",
     "empty": {
       "title": "ابھی کوئی ریٹرن نہیں",
@@ -98,10 +99,6 @@
       "loadFailed": "یہ ریٹرن لوڈ نہیں ہو سکا",
       "loadFailedDescription": "تھوڑی دیر بعد دوبارہ کوشش کریں یا اسے eBay پر کھولیں۔",
       "offline": "ابھی eBay سے رابطہ نہیں ہو سکا؛ یہ SellerHill کی معلوم آخری حالت ہے۔ eBay کے دوبارہ جواب دینے پر کارروائیاں پیش کی جائیں گی۔",
-      "whatYouCanDo": "آپ کیا کر سکتے ہیں",
-      "nothingToDo": "اس ریٹرن میں آپ سے کچھ درکار نہیں۔",
-      "openOnEbay": "eBay پر کھولیں",
-      "alsoOnEbay": "eBay پر یہ بھی: {{options}}",
       "buyer": "خریدار",
       "quantity": "تعداد",
       "returnType": "ریٹرن کی قسم",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay نے ابھی کوئی مرحلہ درج نہیں کیا۔",
       "partialRefundOffered": "{{amount}} کے جزوی ریفنڈ کی پیشکش کی گئی",
       "trackingNumber": "ٹریکنگ {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "واپسی نمبر",
+      "actionsOff": "ایپ کے اندر واپسی کی کارروائیاں بند ہیں — eBay پر جواب دیں۔"
     },
     "actions": {
-      "button": {
-        "approve": "ریٹرن منظور کریں",
-        "mark_received": "موصول ہونے کا نشان لگائیں",
-        "issue_refund": "ریفنڈ جاری کریں"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "{{amount}} ریفنڈ کریں"
-      },
-      "confirm": {
-        "approve": "یہ ریٹرن درخواست eBay پر منظور کریں؟ خریدار سے آئٹم واپس بھیجنے کو کہا جائے گا۔",
-        "mark_received": "eBay کو بتائیں کہ واپس کیا گیا آئٹم پہنچ گیا ہے؟ یہ تبھی کریں جب آئٹم آپ کے پاس ہو۔",
-        "issue_refund": "خریدار کو ابھی {{amount}} ریفنڈ کریں؟ eBay قبول کرتے ہی رقم منتقل کر دیتا ہے اور اسے یہاں سے واپس نہیں لیا جا سکتا۔"
-      },
       "done": {
         "approve": "ریٹرن eBay پر منظور ہو گیا۔",
         "mark_received": "آئٹم eBay پر موصول ہونے کے طور پر نشان زد ہو گیا۔",
-        "issue_refund": "ریفنڈ eBay پر جاری ہو گیا۔"
+        "issue_refund": "ریفنڈ eBay پر جاری ہو گیا۔",
+        "provide_label": "واپسی کا لیبل eBay پر خریدار کو بھیج دیا گیا۔",
+        "mark_label_sent": "eBay کو بتا دیا گیا کہ خریدار کے پاس واپسی کا لیبل پہلے سے موجود ہے۔"
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay سے رابطہ نہیں ہو سکا۔ تھوڑی دیر بعد دوبارہ کوشش کریں۔",
       "sandbox": "eBay سینڈ باکس میں ریٹرن کارروائیاں دستیاب نہیں ہیں۔",
       "refundAmountUnknown": "eBay نے اس ریٹرن کے لیے ریفنڈ کی رقم نہیں بتائی، اس لیے ریفنڈ eBay پر جاری کرنا ہوگا۔",
-      "notFound": "یہ ریٹرن نہیں ملا۔"
+      "notFound": "یہ ریٹرن نہیں ملا۔",
+      "labelFileRequired": "لیبل کی فائل منتخب کریں۔",
+      "labelFileInvalid": "لیبل زیادہ سے زیادہ 5 MB کی PDF یا تصویر (PNG، JPG، GIF، BMP) ہونا چاہیے۔",
+      "labelDetailsRequired": "کورئیر منتخب کریں اور لیبل کا ٹریکنگ نمبر لکھیں۔"
+    },
+    "form": {
+      "choose": "منتخب کریں کہ کیا کرنا ہے۔",
+      "send": "بھیجیں",
+      "labelTitle": "واپسی کا لیبل",
+      "labelFile": "لیبل کی فائل منتخب کریں",
+      "labelFileHint": "PDF یا تصویر (PNG، JPG، GIF، BMP)، زیادہ سے زیادہ 5 MB",
+      "carrier": "کورئیر",
+      "carrierName": "کورئیر کا نام",
+      "tracking": "ٹریکنگ نمبر",
+      "carrierRequired": "کورئیر منتخب کریں۔",
+      "carrierNameRequired": "کورئیر کا نام لکھیں۔",
+      "trackingRequired": "ٹریکنگ نمبر لکھیں۔",
+      "markLabelSentHint": "اگر آپ خریدار کو واپسی کا لیبل پہلے ہی خود دے چکے ہیں تو یہ منتخب کریں۔ eBay درج کر لیتا ہے کہ لیبل بھیج دیا گیا۔",
+      "refundHint": "eBay رقم کی واپسی قبول کرتے ہی رقم منتقل کر دیتا ہے، اور اسے یہاں سے واپس نہیں لیا جا سکتا۔",
+      "choice": {
+        "approve": "واپسی منظور کریں",
+        "provide_label": "لیبل اپ لوڈ کریں",
+        "mark_label_sent": "تصدیق کریں کہ آپ لیبل پہلے ہی بھیج چکے ہیں",
+        "mark_received": "آئٹم کو موصول شدہ نشان زد کریں",
+        "issue_refund": "رقم واپس کریں"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "رقم واپس کریں ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "دیگر"
     }
   }
 }

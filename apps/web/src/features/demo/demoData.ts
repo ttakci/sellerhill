@@ -31,6 +31,7 @@ import {
   EbayMessageDto,
   EbayReturnAction,
   EbayReturnReasonType,
+  resolveReturnActions,
   EbayReturnSellerActivity,
   EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
@@ -1191,12 +1192,12 @@ const RETURN_SEEDS: Array<{
 }> = [
   {
     // Deadline missed — the one row that must read red.
-    state: 'RETURN_REQUESTED',
-    status: 'RETURN_REQUESTED',
+    state: 'RETURN_LABEL_PENDING',
+    status: 'WAITING_FOR_RETURN_LABEL',
     reason: 'NOT_AS_DESCRIBED',
     reasonType: EbayReturnReasonType.SNAD,
     comment: 'The colour is much darker than in the photos. I would like to send it back.',
-    activity: EbayReturnSellerActivity.SELLER_APPROVE_REQUEST,
+    activity: EbayReturnSellerActivity.SELLER_PROVIDE_LABEL,
     respondInHours: -6,
     refunded: false,
     knownOrder: true,
@@ -1213,13 +1214,13 @@ const RETURN_SEEDS: Array<{
     knownOrder: true,
   },
   {
-    state: 'RETURN_REQUESTED',
-    status: 'RETURN_REQUESTED',
+    state: 'RETURN_LABEL_PENDING',
+    status: 'WAITING_FOR_RETURN_LABEL',
     reason: 'ARRIVED_DAMAGED',
     reasonType: EbayReturnReasonType.SNAD,
     comment:
       'The box arrived crushed and one corner of the item is cracked. I have photos of the packaging and of the damage if you need them before deciding.',
-    activity: EbayReturnSellerActivity.REMINDER_SELLER_TO_RESPOND,
+    activity: EbayReturnSellerActivity.SELLER_PROVIDE_LABEL,
     respondInHours: 52,
     refunded: false,
     knownOrder: true,
@@ -1227,8 +1228,8 @@ const RETURN_SEEDS: Array<{
   {
     // An activity value the page does not localize: it must read "Respond on
     // eBay", never the raw enum. eBay set no deadline on this one.
-    state: 'RETURN_REQUESTED',
-    status: 'RETURN_REQUESTED',
+    state: 'RETURN_LABEL_PENDING',
+    status: 'WAITING_FOR_RETURN_LABEL',
     reason: 'ORDERED_WRONG_ITEM',
     reasonType: EbayReturnReasonType.REMORSE,
     comment: 'I ordered the wrong size by mistake.',
@@ -1254,8 +1255,9 @@ const RETURN_SEEDS: Array<{
     reason: 'WRONG_SIZE',
     reasonType: EbayReturnReasonType.REMORSE,
     comment: 'Too small for what I needed.',
-    activity: null,
-    respondInHours: null,
+    // Approved and waiting for the seller's return label — eBay's "Provide a return shipping label" step.
+    activity: 'SELLER_PROVIDE_LABEL',
+    respondInHours: 60,
     refunded: false,
     knownOrder: true,
   },
@@ -1374,6 +1376,7 @@ export function demoReturnDetail(row: EbayReturnDto): EbayReturnDetailDto {
   const shipped = row.state === 'ITEM_SHIPPED' || row.state === 'ITEM_DELIVERED';
   const closed = row.state === 'CLOSED';
   const approved = !requested;
+  const labelPending = row.state === 'RETURN_LABEL_PENDING';
 
   const history: EbayReturnHistoryEntryDto[] = [
     {
@@ -1390,11 +1393,12 @@ export function demoReturnDetail(row: EbayReturnDto): EbayReturnDetailDto {
   ];
   if (approved) {
     history.push({
-      activity: 'SELLER_APPROVE_REQUEST',
-      author: 'demo-seller',
-      at: at(1),
+      // eBay's own return rule approves it, as on the production stores.
+      activity: 'EBAY_RULE_AUTO_APPROVE',
+      author: 'eBay',
+      at: at(0),
       fromState: 'RETURN_REQUESTED',
-      toState: 'ITEM_READY_TO_SHIP',
+      toState: labelPending ? 'RETURN_LABEL_PENDING' : 'ITEM_READY_TO_SHIP',
       notes: null,
       partialRefundAmount: null,
       trackingNumber: null,
@@ -1443,18 +1447,19 @@ export function demoReturnDetail(row: EbayReturnDto): EbayReturnDetailDto {
       ]
     : [];
 
+  const awaitingLabel = labelPending || row.sellerActivityDue === 'SELLER_PROVIDE_LABEL';
   const ebayOptions = closed
     ? []
     : requested
       ? ['SELLER_APPROVE_REQUEST', 'SELLER_DECLINE_REQUEST', 'SELLER_SEND_MESSAGE']
       : shipped
         ? ['SELLER_MARK_AS_RECEIVED', 'SELLER_ISSUE_REFUND', 'SELLER_SEND_MESSAGE']
-        : ['SELLER_SEND_MESSAGE'];
-  const availableActions: EbayReturnAction[] = requested
-    ? [EbayReturnAction.APPROVE]
-    : shipped
-      ? [EbayReturnAction.MARK_RECEIVED, EbayReturnAction.ISSUE_REFUND]
-      : [];
+        : awaitingLabel
+          ? // The options eBay listed live on a production return at this step (2026-10-07).
+            ['SELLER_PROVIDE_RMA', 'SELLER_ISSUE_REFUND', 'SELLER_PROVIDE_LABEL', 'UPDATE_RETURN_ADDRESS', 'SUBMIT_FILE']
+          : ['SELLER_SEND_MESSAGE'];
+  // The same rule the API applies to eBay's live option list.
+  const availableActions: EbayReturnAction[] = resolveReturnActions(ebayOptions, true);
 
   return {
     ...row,

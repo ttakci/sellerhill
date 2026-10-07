@@ -3,6 +3,8 @@ import { glassSurface, Text as UIText, tkn } from '@repo/ui';
 
 import type { ReturnHistoryActor } from '../returns.types';
 
+import { OrderCard } from '@/features/orders/shared/OrderCard';
+
 export const BodyStack = styled.div`
   display: flex;
   flex-direction: column;
@@ -21,14 +23,6 @@ export const Pane = styled.section`
   min-width: 0;
 `;
 
-export const PaneHead = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
 /** The status pane's headline: badge on top, then what is due and by when. */
 export const StatusStack = styled.div`
   display: flex;
@@ -37,54 +31,7 @@ export const StatusStack = styled.div`
   align-items: flex-start;
 `;
 
-export const ActionRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const Product = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${tkn('spacing.md')};
-  min-width: 0;
-`;
-
 /** Transparent shell, like the product cell — no grey plate. */
-export const Image = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-  width: 4.5rem;
-  height: 4.5rem;
-  background: transparent;
-  border-radius: ${tkn('radius.md')};
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-`;
-
-export const ProductText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  min-width: 0;
-  flex: 1 1 auto;
-`;
-
-export const Title = styled(UIText)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-`;
-
 /** Label / value rows, no icons (the card anatomy). */
 export const Facts = styled.dl`
   display: flex;
@@ -116,13 +63,6 @@ export const FactValue = styled.dd`
 `;
 
 /** Label + id badge under the product title. */
-export const MetaRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  min-width: 0;
-`;
-
 export const Comment = styled(UIText)`
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -207,4 +147,67 @@ export const Shipment = styled.div`
 
 export const EmptyWrap = styled.div`
   padding: ${tkn('spacing.lg')} 0;
+`;
+
+/** Status on the left, eBay's deadline pinned top-right. */
+export const StatusHead = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
+export const Deadline = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${tkn('spacing.2xs')};
+  flex-shrink: 0;
+`;
+
+/** The answer form under the request's facts, behind one hairline. */
+export const AnswerForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding-top: ${tkn('spacing.sm')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px hairline */
+`;
+
+/** Accept / Decline side by side, as on eBay's own form (cancellations). */
+export const RadioRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.md')};
+  /* Air above and below the choice, so the decline fields do not hug it. */
+  padding: ${tkn('spacing.sm')} 0;
+`;
+
+export const SendRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+/** The orders list's card, content-high here — in a list it stretches to its row (height: 100%). */
+export const OrderCardInDrawer = styled(OrderCard)`
+  && {
+    height: auto;
+    flex-shrink: 0;
+  }
+`;
+
+/** A return's choices, one per line like eBay's own option list. */
+export const RadioList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} 0;
+`;
+
+/** The label fields under the "upload a label" choice. */
+export const LabelFields = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
 `;

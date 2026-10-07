@@ -207,6 +207,39 @@ export interface PostOrderMarkReceivedRequest {
   comments?: PostOrderText;
 }
 
+/**
+ * `POST …/file/upload` — `UploadFileRequest`. `data` is the file, base64
+ * encoded once; `filePurpose` is `FilePurposeEnum` (`LABEL_RELATED` for a
+ * shipping label).
+ */
+export interface PostOrderUploadFileRequest {
+  data: string;
+  fileName: string;
+  filePurpose: 'LABEL_RELATED';
+}
+
+/** `UploadFileResponse` — `fileId` is what `add_shipping_label` names. */
+export interface PostOrderUploadFileResponse {
+  fileId?: string;
+}
+
+/**
+ * `POST …/add_shipping_label` — `ProvideLabelRequest`, only the fields sent.
+ * `labelAction` is `LabelActionEnum`: `UPLOAD_LABEL` ("the seller is providing
+ * their own shipping label … not an eBay shipping label") or `MARK_AS_SENT`.
+ * `carrierEnum` is `ShippingCarrierEnum`; "If providing the tracking number,
+ * the shipping carrier must also be provided through the carrierEnum field."
+ */
+export interface PostOrderProvideLabelRequest {
+  labelAction: 'UPLOAD_LABEL' | 'MARK_AS_SENT';
+  carrierEnum?: string;
+  carrierName?: string;
+  trackingNumber?: string;
+  fileId?: string;
+  forwardShippingLabelProvided?: boolean;
+  labelSentDate?: { value: string };
+}
+
 /** `refundStatus` in the decide / issue_refund answers (`Refund_MoneyMovementStatusEnum`). */
 export interface PostOrderRefundStatusResponse {
   refundStatus?: string;

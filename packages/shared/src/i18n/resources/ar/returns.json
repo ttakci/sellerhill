@@ -2,7 +2,6 @@
   "returns": {
     "title": "المرتجعات",
     "subtitle": "اطّلع على المرتجعات التي فتحها المشترون والخطوة التي ينتظرها eBay وموعدها النهائي. افتح مرتجعًا لاعتماده أو تأكيد استلامه أو رد المبلغ حيث يسمح eBay بذلك.",
-    "subtitle_one": "مرتجع واحد",
     "tabs": {
       "all": "الكل",
       "action": "تحتاج إجراء",
@@ -63,10 +62,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "أعد المبلغ إلى المشتري (لا يُنتظر إرجاع المنتج)",
       "REMINDER_FOR_RMA": "تذكير RMA: استجب على eBay",
       "REMINDER_SELLER_TO_RESPOND": "استجب لطلب الإرجاع",
-      "other": "استجب على eBay",
       "SELLER_SEND_MESSAGE": "إرسال رسالة إلى المشتري",
       "SELLER_ESCALATE": "تصعيد الأمر إلى eBay",
-      "SELLER_OFFER_REPLACEMENT": "عرض بديل"
+      "SELLER_OFFER_REPLACEMENT": "عرض بديل",
+      "SUBMIT_FILE": "أضف ملفًا إلى الإرجاع",
+      "UPDATE_RETURN_ADDRESS": "حدّث عنوان الإرجاع",
+      "other": "استجب على eBay"
     },
     "dueBy": "قبل {{date}}",
     "reasonType": {
@@ -85,7 +86,6 @@
       "ebayId": "eBay"
     },
     "order": "الطلب",
-    "viewOrder": "عرض الطلب",
     "unknownProduct": "منتج غير معروف",
     "empty": {
       "title": "لا توجد مرتجعات بعد",
@@ -103,10 +103,6 @@
       "loadFailed": "تعذّر تحميل طلب الإرجاع هذا",
       "loadFailedDescription": "حاول مجددًا بعد قليل أو افتحه على eBay.",
       "offline": "تعذّر الوصول إلى eBay الآن؛ هذه آخر حالة يعرفها SellerHill. ستُعرض الإجراءات عندما يستجيب eBay مجددًا.",
-      "whatYouCanDo": "ما يمكنك فعله",
-      "nothingToDo": "لا شيء مطلوب منك في طلب الإرجاع هذا.",
-      "openOnEbay": "فتح على eBay",
-      "alsoOnEbay": "أيضًا على eBay: {{options}}",
       "buyer": "المشتري",
       "quantity": "الكمية",
       "returnType": "نوع الإرجاع",
@@ -123,26 +119,17 @@
       "journeyEmpty": "لم يسجّل eBay أي خطوة بعد.",
       "partialRefundOffered": "عُرض رد جزئي بقيمة {{amount}}",
       "trackingNumber": "رقم التتبع {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "رقم الإرجاع",
+      "actionsOff": "إجراءات الإرجاع داخل التطبيق متوقفة — أجب على eBay."
     },
     "actions": {
-      "button": {
-        "approve": "الموافقة على الإرجاع",
-        "mark_received": "تعليم كمستلَم",
-        "issue_refund": "رد المبلغ"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "رد {{amount}}"
-      },
-      "confirm": {
-        "approve": "هل تريد الموافقة على طلب الإرجاع هذا على eBay؟ سيُطلب من المشتري إعادة المنتج.",
-        "mark_received": "هل تريد إبلاغ eBay بوصول المنتج المُعاد؟ افعل ذلك فقط بعد استلامه فعليًا.",
-        "issue_refund": "هل تريد رد {{amount}} إلى المشتري الآن؟ يحوّل eBay المبلغ فور قبوله، ولا يمكن التراجع عن ذلك من هنا."
-      },
       "done": {
         "approve": "تمت الموافقة على الإرجاع على eBay.",
         "mark_received": "تم تعليم المنتج كمستلَم على eBay.",
-        "issue_refund": "تم رد المبلغ على eBay."
+        "issue_refund": "تم رد المبلغ على eBay.",
+        "provide_label": "أُرسل ملصق الإرجاع إلى المشتري على eBay.",
+        "mark_label_sent": "أُبلغ eBay بأن لدى المشتري ملصق إرجاع بالفعل."
       }
     },
     "history": {
@@ -202,7 +189,41 @@
       "unavailable": "تعذّر الوصول إلى eBay. حاول مجددًا بعد قليل.",
       "sandbox": "إجراءات الإرجاع غير متاحة في بيئة eBay التجريبية.",
       "refundAmountUnknown": "لم يُبلغ eBay عن مبلغ الرد لطلب الإرجاع هذا، لذا يجب رد المبلغ على eBay.",
-      "notFound": "لم يُعثر على طلب الإرجاع هذا."
+      "notFound": "لم يُعثر على طلب الإرجاع هذا.",
+      "labelFileRequired": "اختر ملف الملصق.",
+      "labelFileInvalid": "يجب أن يكون الملصق ملف PDF أو صورة (PNG أو JPG أو GIF أو BMP) لا يتجاوز 5 ميغابايت.",
+      "labelDetailsRequired": "اختر شركة الشحن واكتب رقم تتبع الملصق."
+    },
+    "form": {
+      "choose": "اختر ما تريد فعله.",
+      "send": "إرسال",
+      "labelTitle": "ملصق الإرجاع",
+      "labelFile": "اختر ملف الملصق",
+      "labelFileHint": "PDF أو صورة (PNG أو JPG أو GIF أو BMP)، حتى 5 ميغابايت",
+      "carrier": "شركة الشحن",
+      "carrierName": "اسم شركة الشحن",
+      "tracking": "رقم التتبع",
+      "carrierRequired": "اختر شركة الشحن.",
+      "carrierNameRequired": "اكتب اسم شركة الشحن.",
+      "trackingRequired": "اكتب رقم التتبع.",
+      "markLabelSentHint": "اختر هذا إذا كنت قد أعطيت المشتري ملصق إرجاع بنفسك. يسجّل eBay أن الملصق أُرسل.",
+      "refundHint": "ينقل eBay المبلغ فور قبوله رد المبلغ، ولا يمكن التراجع عن ذلك من هنا.",
+      "choice": {
+        "approve": "الموافقة على الإرجاع",
+        "provide_label": "رفع ملصق",
+        "mark_label_sent": "تأكيد أنك أرسلت ملصقًا بالفعل",
+        "mark_received": "تعليم المنتج كمستلَم",
+        "issue_refund": "رد المبلغ"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "رد المبلغ ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "أخرى"
     }
   }
 }

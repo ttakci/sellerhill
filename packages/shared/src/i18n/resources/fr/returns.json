@@ -59,10 +59,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rembourser l'acheteur (le renvoi de l'article n'est pas attendu)",
       "REMINDER_FOR_RMA": "Rappel RMA : répondre sur eBay",
       "REMINDER_SELLER_TO_RESPOND": "Répondre à la demande de retour",
-      "other": "Répondre sur eBay",
       "SELLER_SEND_MESSAGE": "Envoyer un message à l'acheteur",
       "SELLER_ESCALATE": "Transmettre à eBay",
-      "SELLER_OFFER_REPLACEMENT": "Proposer un remplacement"
+      "SELLER_OFFER_REPLACEMENT": "Proposer un remplacement",
+      "SUBMIT_FILE": "Ajouter un fichier au retour",
+      "UPDATE_RETURN_ADDRESS": "Modifier l'adresse de retour",
+      "other": "Répondre sur eBay"
     },
     "dueBy": "avant le {{date}}",
     "reasonType": {
@@ -81,7 +83,6 @@
       "ebayId": "eBay"
     },
     "order": "Commande",
-    "viewOrder": "Voir la commande",
     "unknownProduct": "Produit inconnu",
     "empty": {
       "title": "Aucun retour pour le moment",
@@ -99,10 +100,6 @@
       "loadFailed": "Impossible de charger ce retour",
       "loadFailedDescription": "Réessayez dans un instant ou ouvrez-le sur eBay.",
       "offline": "eBay est injoignable pour le moment ; voici le dernier état connu de SellerHill. Les actions seront proposées dès qu'eBay répondra à nouveau.",
-      "whatYouCanDo": "Ce que vous pouvez faire",
-      "nothingToDo": "Rien n'est attendu de vous sur ce retour.",
-      "openOnEbay": "Ouvrir sur eBay",
-      "alsoOnEbay": "Également sur eBay : {{options}}",
       "buyer": "Acheteur",
       "quantity": "Quantité",
       "returnType": "Type de retour",
@@ -119,26 +116,17 @@
       "journeyEmpty": "eBay n'a encore enregistré aucune étape.",
       "partialRefundOffered": "Remboursement partiel de {{amount}} proposé",
       "trackingNumber": "Suivi {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "N° de retour",
+      "actionsOff": "Les actions de retour dans l'application sont désactivées — répondez sur eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Approuver le retour",
-        "mark_received": "Marquer comme reçu",
-        "issue_refund": "Rembourser"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Rembourser {{amount}}"
-      },
-      "confirm": {
-        "approve": "Approuver cette demande de retour sur eBay ? L'acheteur sera invité à renvoyer l'article.",
-        "mark_received": "Indiquer à eBay que l'article retourné est arrivé ? Ne le faites qu'une fois l'article en main.",
-        "issue_refund": "Rembourser {{amount}} à l'acheteur maintenant ? eBay transfère l'argent dès qu'il l'accepte, et cela ne peut pas être annulé d'ici."
-      },
       "done": {
         "approve": "Le retour a été approuvé sur eBay.",
         "mark_received": "L'article a été marqué comme reçu sur eBay.",
-        "issue_refund": "Le remboursement a été effectué sur eBay."
+        "issue_refund": "Le remboursement a été effectué sur eBay.",
+        "provide_label": "L'étiquette de retour a été envoyée à l'acheteur sur eBay.",
+        "mark_label_sent": "eBay a été informé que l'acheteur a déjà une étiquette de retour."
       }
     },
     "history": {
@@ -198,7 +186,41 @@
       "unavailable": "eBay est injoignable. Réessayez dans un instant.",
       "sandbox": "Les actions de retour ne sont pas disponibles sur le sandbox eBay.",
       "refundAmountUnknown": "eBay n'a pas communiqué de montant de remboursement pour ce retour ; le remboursement doit être effectué sur eBay.",
-      "notFound": "Ce retour est introuvable."
+      "notFound": "Ce retour est introuvable.",
+      "labelFileRequired": "Choisissez le fichier de l'étiquette.",
+      "labelFileInvalid": "L'étiquette doit être un PDF ou une image (PNG, JPG, GIF, BMP) de 5 Mo maximum.",
+      "labelDetailsRequired": "Choisissez le transporteur et saisissez le numéro de suivi de l'étiquette."
+    },
+    "form": {
+      "choose": "Choisissez une action.",
+      "send": "Envoyer",
+      "labelTitle": "Étiquette de retour",
+      "labelFile": "Choisir le fichier de l'étiquette",
+      "labelFileHint": "PDF ou image (PNG, JPG, GIF, BMP), 5 Mo maximum",
+      "carrier": "Transporteur",
+      "carrierName": "Nom du transporteur",
+      "tracking": "Numéro de suivi",
+      "carrierRequired": "Choisissez le transporteur.",
+      "carrierNameRequired": "Saisissez le nom du transporteur.",
+      "trackingRequired": "Saisissez le numéro de suivi.",
+      "markLabelSentHint": "Choisissez ceci si vous avez déjà remis vous-même une étiquette de retour à l'acheteur. eBay enregistre l'envoi de l'étiquette.",
+      "refundHint": "eBay transfère l'argent dès qu'il accepte le remboursement, et cela ne peut pas être annulé ici.",
+      "choice": {
+        "approve": "Accepter le retour",
+        "provide_label": "Téléverser une étiquette",
+        "mark_label_sent": "Confirmer que l'étiquette a déjà été envoyée",
+        "mark_received": "Marquer l'article comme reçu",
+        "issue_refund": "Envoyer le remboursement"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Envoyer le remboursement ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Autre"
     }
   }
 }

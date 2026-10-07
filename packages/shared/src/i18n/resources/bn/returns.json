@@ -58,10 +58,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "ক্রেতাকে ফেরত দিন (আইটেম ফেরত আসার কথা নয়)",
       "REMINDER_FOR_RMA": "RMA অনুস্মারক: eBay-তে উত্তর দিন",
       "REMINDER_SELLER_TO_RESPOND": "রিটার্ন অনুরোধের উত্তর দিন",
-      "other": "eBay-তে উত্তর দিন",
       "SELLER_SEND_MESSAGE": "ক্রেতাকে একটি বার্তা পাঠান",
       "SELLER_ESCALATE": "eBay-তে উত্থাপন করুন",
-      "SELLER_OFFER_REPLACEMENT": "প্রতিস্থাপনের প্রস্তাব দিন"
+      "SELLER_OFFER_REPLACEMENT": "প্রতিস্থাপনের প্রস্তাব দিন",
+      "SUBMIT_FILE": "রিটার্নে একটি ফাইল যোগ করুন",
+      "UPDATE_RETURN_ADDRESS": "রিটার্নের ঠিকানা হালনাগাদ করুন",
+      "other": "eBay-তে উত্তর দিন"
     },
     "dueBy": "{{date}}-এর মধ্যে",
     "reasonType": {
@@ -80,7 +82,6 @@
       "ebayId": "eBay"
     },
     "order": "অর্ডার",
-    "viewOrder": "অর্ডার দেখুন",
     "unknownProduct": "অজানা পণ্য",
     "empty": {
       "title": "এখনও কোনো রিটার্ন নেই",
@@ -98,10 +99,6 @@
       "loadFailed": "এই রিটার্ন লোড করা যায়নি",
       "loadFailedDescription": "একটু পরে আবার চেষ্টা করুন, বা eBay-তে খুলুন।",
       "offline": "eBay এখন পৌঁছানো যায়নি, তাই এটি SellerHill-এর শেষ দেখা অবস্থা। eBay আবার সাড়া দিলে পদক্ষেপ দেওয়া হবে।",
-      "whatYouCanDo": "আপনি যা করতে পারেন",
-      "nothingToDo": "এই রিটার্নে আপনার অপেক্ষায় কিছু নেই।",
-      "openOnEbay": "eBay-তে খুলুন",
-      "alsoOnEbay": "eBay-তেও: {{options}}",
       "buyer": "ক্রেতা",
       "quantity": "পরিমাণ",
       "returnType": "রিটার্নের ধরন",
@@ -118,26 +115,17 @@
       "journeyEmpty": "eBay এখনও কোনো ধাপ রেকর্ড করেনি।",
       "partialRefundOffered": "{{amount}} আংশিক রিফান্ডের প্রস্তাব",
       "trackingNumber": "ট্র্যাকিং {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "রিটার্ন আইডি",
+      "actionsOff": "অ্যাপের ভেতরে রিটার্নের কাজ বন্ধ আছে — eBay-এ উত্তর দিন।"
     },
     "actions": {
-      "button": {
-        "approve": "রিটার্ন অনুমোদন",
-        "mark_received": "প্রাপ্ত চিহ্নিত করুন",
-        "issue_refund": "রিফান্ড দিন"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "{{amount}} ফেরত দিন"
-      },
-      "confirm": {
-        "approve": "eBay-তে এই রিটার্ন অনুরোধ অনুমোদন করবেন? ক্রেতাকে আইটেমটি ফেরত পাঠাতে বলা হবে।",
-        "mark_received": "eBay-কে জানাবেন যে ফেরত আসা আইটেম পৌঁছেছে? আইটেমটি হাতে পেলেই এটি করুন।",
-        "issue_refund": "এখন ক্রেতাকে {{amount}} ফেরত দেবেন? eBay এটি গ্রহণ করার সাথে সাথে টাকা পাঠায়, এবং এখান থেকে তা আর ফেরানো যায় না।"
-      },
       "done": {
         "approve": "রিটার্নটি eBay-তে অনুমোদিত হয়েছে।",
         "mark_received": "আইটেমটি eBay-তে প্রাপ্ত হিসেবে চিহ্নিত হয়েছে।",
-        "issue_refund": "রিফান্ডটি eBay-তে দেওয়া হয়েছে।"
+        "issue_refund": "রিফান্ডটি eBay-তে দেওয়া হয়েছে।",
+        "provide_label": "রিটার্ন লেবেল eBay-এ ক্রেতাকে পাঠানো হয়েছে।",
+        "mark_label_sent": "eBay-কে জানানো হয়েছে যে ক্রেতার কাছে আগেই রিটার্ন লেবেল আছে।"
       }
     },
     "history": {
@@ -197,7 +185,41 @@
       "unavailable": "eBay পৌঁছানো যায়নি। একটু পরে আবার চেষ্টা করুন।",
       "sandbox": "eBay স্যান্ডবক্সে রিটার্ন পদক্ষেপ পাওয়া যায় না।",
       "refundAmountUnknown": "eBay এই রিটার্নের জন্য কোনো রিফান্ড পরিমাণ জানায়নি, তাই রিফান্ড eBay-তে দিতে হবে।",
-      "notFound": "এই রিটার্ন পাওয়া যায়নি।"
+      "notFound": "এই রিটার্ন পাওয়া যায়নি।",
+      "labelFileRequired": "লেবেল ফাইল বেছে নিন।",
+      "labelFileInvalid": "লেবেলটি সর্বোচ্চ 5 MB-এর PDF বা ছবি (PNG, JPG, GIF, BMP) হতে হবে।",
+      "labelDetailsRequired": "কুরিয়ার বেছে নিন এবং লেবেলের ট্র্যাকিং নম্বর লিখুন।"
+    },
+    "form": {
+      "choose": "কী করবেন বেছে নিন।",
+      "send": "পাঠান",
+      "labelTitle": "রিটার্ন লেবেল",
+      "labelFile": "লেবেল ফাইল বেছে নিন",
+      "labelFileHint": "PDF বা ছবি (PNG, JPG, GIF, BMP), সর্বোচ্চ 5 MB",
+      "carrier": "কুরিয়ার",
+      "carrierName": "কুরিয়ারের নাম",
+      "tracking": "ট্র্যাকিং নম্বর",
+      "carrierRequired": "কুরিয়ার বেছে নিন।",
+      "carrierNameRequired": "কুরিয়ারের নাম লিখুন।",
+      "trackingRequired": "ট্র্যাকিং নম্বর লিখুন।",
+      "markLabelSentHint": "ক্রেতাকে রিটার্ন লেবেল আগেই নিজে দিয়ে থাকলে এটি বেছে নিন। eBay রেকর্ড করে যে লেবেল পাঠানো হয়েছে।",
+      "refundHint": "eBay রিফান্ড গ্রহণ করামাত্র টাকা পাঠিয়ে দেয়, এবং এখান থেকে তা ফেরানো যায় না।",
+      "choice": {
+        "approve": "রিটার্ন অনুমোদন করুন",
+        "provide_label": "লেবেল আপলোড করুন",
+        "mark_label_sent": "নিশ্চিত করুন যে আপনি আগেই লেবেল পাঠিয়েছেন",
+        "mark_received": "পণ্যটি প্রাপ্ত হিসেবে চিহ্নিত করুন",
+        "issue_refund": "রিফান্ড পাঠান"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "রিফান্ড পাঠান ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "অন্যান্য"
     }
   }
 }

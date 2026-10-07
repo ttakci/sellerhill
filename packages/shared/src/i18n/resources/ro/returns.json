@@ -59,10 +59,12 @@
       "REMINDER_FOR_REFUND_NO_SHIPPING": "Rambursează cumpărătorul (nu se așteaptă returnarea produsului)",
       "REMINDER_FOR_RMA": "Memento RMA: răspunde pe eBay",
       "REMINDER_SELLER_TO_RESPOND": "Răspunde la cererea de retur",
-      "other": "Răspunde pe eBay",
       "SELLER_SEND_MESSAGE": "Trimite un mesaj cumpărătorului",
       "SELLER_ESCALATE": "Escaladează la eBay",
-      "SELLER_OFFER_REPLACEMENT": "Oferă un înlocuitor"
+      "SELLER_OFFER_REPLACEMENT": "Oferă un înlocuitor",
+      "SUBMIT_FILE": "Adaugă un fișier la returnare",
+      "UPDATE_RETURN_ADDRESS": "Actualizează adresa de returnare",
+      "other": "Răspunde pe eBay"
     },
     "dueBy": "până la {{date}}",
     "reasonType": {
@@ -81,7 +83,6 @@
       "ebayId": "eBay"
     },
     "order": "Comandă",
-    "viewOrder": "Vezi comanda",
     "unknownProduct": "Produs necunoscut",
     "empty": {
       "title": "Niciun retur încă",
@@ -99,10 +100,6 @@
       "loadFailed": "Acest retur nu a putut fi încărcat",
       "loadFailedDescription": "Încearcă din nou peste puțin timp sau deschide-l pe eBay.",
       "offline": "eBay nu a putut fi contactat acum; acesta este ultimul stadiu cunoscut de SellerHill. Acțiunile vor fi oferite când eBay răspunde din nou.",
-      "whatYouCanDo": "Ce poți face",
-      "nothingToDo": "Nimic nu așteaptă de la tine la acest retur.",
-      "openOnEbay": "Deschide pe eBay",
-      "alsoOnEbay": "Și pe eBay: {{options}}",
       "buyer": "Cumpărător",
       "quantity": "Cantitate",
       "returnType": "Tip de retur",
@@ -119,26 +116,17 @@
       "journeyEmpty": "eBay nu a înregistrat încă niciun pas.",
       "partialRefundOffered": "S-a oferit o rambursare parțială de {{amount}}",
       "trackingNumber": "Urmărire {{number}}",
-      "rma": "RMA {{rma}}"
+      "rma": "RMA {{rma}}",
+      "returnId": "ID returnare",
+      "actionsOff": "Acțiunile pentru returnări din aplicație sunt dezactivate — răspunde pe eBay."
     },
     "actions": {
-      "button": {
-        "approve": "Aprobă returul",
-        "mark_received": "Marchează ca primit",
-        "issue_refund": "Emite rambursarea"
-      },
-      "buttonWithAmount": {
-        "issue_refund": "Rambursează {{amount}}"
-      },
-      "confirm": {
-        "approve": "Aprobi această cerere de retur pe eBay? Cumpărătorului i se va cere să trimită articolul înapoi.",
-        "mark_received": "Îi comunici lui eBay că articolul returnat a ajuns? Fă asta doar când îl ai în mână.",
-        "issue_refund": "Rambursezi {{amount}} cumpărătorului acum? eBay mută banii imediat ce acceptă, iar acest lucru nu poate fi anulat de aici."
-      },
       "done": {
         "approve": "Returul a fost aprobat pe eBay.",
         "mark_received": "Articolul a fost marcat ca primit pe eBay.",
-        "issue_refund": "Rambursarea a fost emisă pe eBay."
+        "issue_refund": "Rambursarea a fost emisă pe eBay.",
+        "provide_label": "Eticheta de returnare a fost trimisă cumpărătorului pe eBay.",
+        "mark_label_sent": "eBay a fost anunțat că cumpărătorul are deja o etichetă de returnare."
       }
     },
     "history": {
@@ -198,7 +186,41 @@
       "unavailable": "eBay nu a putut fi contactat. Încearcă din nou peste puțin timp.",
       "sandbox": "Acțiunile pentru retururi nu sunt disponibile în sandbox-ul eBay.",
       "refundAmountUnknown": "eBay nu a raportat o sumă de rambursat pentru acest retur, așa că rambursarea trebuie emisă pe eBay.",
-      "notFound": "Acest retur nu a fost găsit."
+      "notFound": "Acest retur nu a fost găsit.",
+      "labelFileRequired": "Alege fișierul etichetei.",
+      "labelFileInvalid": "Eticheta trebuie să fie un PDF sau o imagine (PNG, JPG, GIF, BMP) de maximum 5 MB.",
+      "labelDetailsRequired": "Alege curierul și scrie numărul de urmărire al etichetei."
+    },
+    "form": {
+      "choose": "Alege ce faci.",
+      "send": "Trimite",
+      "labelTitle": "Etichetă de returnare",
+      "labelFile": "Alege fișierul etichetei",
+      "labelFileHint": "PDF sau imagine (PNG, JPG, GIF, BMP), maximum 5 MB",
+      "carrier": "Curier",
+      "carrierName": "Numele curierului",
+      "tracking": "Număr de urmărire",
+      "carrierRequired": "Alege curierul.",
+      "carrierNameRequired": "Scrie numele curierului.",
+      "trackingRequired": "Scrie numărul de urmărire.",
+      "markLabelSentHint": "Alege asta dacă i-ai dat deja cumpărătorului o etichetă de returnare. eBay înregistrează că eticheta a fost trimisă.",
+      "refundHint": "eBay transferă banii imediat ce acceptă rambursarea, iar asta nu poate fi anulat de aici.",
+      "choice": {
+        "approve": "Aprobă returnarea",
+        "provide_label": "Încarcă o etichetă",
+        "mark_label_sent": "Confirmă că ai trimis deja o etichetă",
+        "mark_received": "Marchează produsul ca primit",
+        "issue_refund": "Trimite rambursarea"
+      },
+      "choiceWithAmount": {
+        "issue_refund": "Trimite rambursarea ({{amount}})"
+      }
+    },
+    "carrier": {
+      "USPS": "USPS",
+      "UPS": "UPS",
+      "FEDEX": "FedEx",
+      "OTHER": "Altul"
     }
   }
 }
