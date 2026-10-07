@@ -25,6 +25,11 @@
     "deactivateAccount": "Hesabı Devre Dışı Bırak",
     "saveChanges": "Tüm Değişiklikleri Kaydet",
     "storeOwner": "Mağaza Sahibi",
+    "timezone": {
+      "title": "Saat dilimi",
+      "label": "Saat dilimi",
+      "help": "Panel ve günlük özet günleri bu saat dilimine göre sayar."
+    },
     "errors": {
       "invalidTimezone": "Bu saat dilimi tanınmıyor."
     }

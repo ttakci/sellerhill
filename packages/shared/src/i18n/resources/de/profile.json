@@ -25,6 +25,11 @@
     "deactivateAccount": "Konto deaktivieren",
     "saveChanges": "Alle Änderungen speichern",
     "storeOwner": "Shop-Inhaber",
+    "timezone": {
+      "title": "Zeitzone",
+      "label": "Zeitzone",
+      "help": "Dein Dashboard und die tägliche Zusammenfassung zählen Tage in dieser Zeitzone."
+    },
     "errors": {
       "invalidTimezone": "Diese Zeitzone wird nicht erkannt."
     }

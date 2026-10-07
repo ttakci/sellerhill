@@ -25,6 +25,11 @@
     "deactivateAccount": "Dezactivează contul",
     "saveChanges": "Salvează toate modificările",
     "storeOwner": "Proprietar de magazin",
+    "timezone": {
+      "title": "Fus orar",
+      "label": "Fus orar",
+      "help": "Tabloul de bord și rezumatul zilnic numără zilele în acest fus orar."
+    },
     "errors": {
       "invalidTimezone": "Acest fus orar nu este recunoscut."
     }

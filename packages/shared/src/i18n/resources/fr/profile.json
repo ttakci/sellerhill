@@ -25,6 +25,11 @@
     "deactivateAccount": "Désactiver le compte",
     "saveChanges": "Enregistrer toutes les modifications",
     "storeOwner": "Propriétaire de la boutique",
+    "timezone": {
+      "title": "Fuseau horaire",
+      "label": "Fuseau horaire",
+      "help": "Votre tableau de bord et le résumé quotidien comptent les jours dans ce fuseau horaire."
+    },
     "errors": {
       "invalidTimezone": "Ce fuseau horaire n'est pas reconnu."
     }

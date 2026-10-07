@@ -24,6 +24,7 @@ import {
   MESSAGES_UNREAD_POLL_INTERVAL_MS,
   useGetUnreadMessageCountQuery,
 } from '@/features/messages';
+import { useTimezoneAutoFill } from '@/features/profile/hooks/useTimezoneAutoFill';
 import { usePageVisible } from '@/hooks/usePageVisible';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
@@ -46,6 +47,7 @@ export const AppLayout: React.FC = () => {
 
   const { buildPath } = useLocale();
   const { data: user, isLoading: isUserLoading } = useGetMeQuery();
+  useTimezoneAutoFill(Boolean(user) && !isOperatorRole(user?.role));
   const { t, i18n } = useTranslation(['translation', 'listings', 'orders', 'billing']);
   const { loadingState } = useUI();
   const { localeNavigate, changeLocale } = useLocale();

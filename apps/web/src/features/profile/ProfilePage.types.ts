@@ -9,4 +9,7 @@ export interface ProfilePageComponentProps {
   isLoading: boolean;
   isEditing: boolean;
   onToggleEdit: () => void;
+  timezoneOptions: { value: string; label: string }[];
+  onTimezoneChange: (timezone: string) => void;
+  isTimezoneSaving: boolean;
 }

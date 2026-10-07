@@ -25,6 +25,11 @@
     "deactivateAccount": "停用账号",
     "saveChanges": "保存所有更改",
     "storeOwner": "店主",
+    "timezone": {
+      "title": "时区",
+      "label": "时区",
+      "help": "仪表盘和每日摘要按此时区计算日期。"
+    },
     "errors": {
       "invalidTimezone": "无法识别此时区。"
     }

@@ -25,6 +25,11 @@
     "deactivateAccount": "Desativar conta",
     "saveChanges": "Salvar todas as alterações",
     "storeOwner": "Proprietário da loja",
+    "timezone": {
+      "title": "Fuso horário",
+      "label": "Fuso horário",
+      "help": "Seu painel e o resumo diário contam os dias neste fuso horário."
+    },
     "errors": {
       "invalidTimezone": "Este fuso horário não é reconhecido."
     }

@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateProfileSchema, type UpdateProfileFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { useGetProfileQuery, useUpdateProfileMutation } from './api/profileApi';
 import { ProfilePageComponent } from './ProfilePage.component';
+import { getTimezoneOptions } from './utils/timezoneOptions';
 
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
@@ -44,6 +45,34 @@ export const ProfilePageContainer = (): React.ReactElement => {
      to be folded in here, so the global overlay covered the whole app on
      first paint of this page instead of the page showing its own state. */
   useLoading(isUpdating);
+
+  /* The time zone saves on change, independent of edit mode. Its own mutation
+     instance keeps its success/error state apart from the form's modals. */
+  const [saveTimezone, { isLoading: isTimezoneSaving }] = useUpdateProfileMutation();
+  useLoading(isTimezoneSaving);
+  const timezoneOptions = useMemo(() => getTimezoneOptions(profile?.timezone), [profile?.timezone]);
+
+  const handleTimezoneChange = useCallback(
+    (timezone: string) => {
+      if (!timezone || timezone === profile?.timezone) {
+        return;
+      }
+      saveTimezone({ timezone })
+        .unwrap()
+        .catch((err: unknown) => {
+          showMessage(
+            {
+              type: 'error',
+              headerKey: 'translation:message.error.header',
+              descriptionKey: getErrorI18nKey(err as Parameters<typeof getErrorI18nKey>[0]),
+              primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+            },
+            t
+          );
+        });
+    },
+    [profile?.timezone, saveTimezone, showMessage, closeMessage, t]
+  );
 
   // Sync profile data to form when loaded
   useEffect(() => {
@@ -144,6 +173,9 @@ export const ProfilePageContainer = (): React.ReactElement => {
       isLoading={isUpdating}
       isEditing={isEditing}
       onToggleEdit={handleToggleEdit}
+      timezoneOptions={timezoneOptions}
+      onTimezoneChange={handleTimezoneChange}
+      isTimezoneSaving={isTimezoneSaving}
     />
   );
 };

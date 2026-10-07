@@ -25,6 +25,11 @@
     "deactivateAccount": "Desactivar cuenta",
     "saveChanges": "Guardar todos los cambios",
     "storeOwner": "Propietario de la tienda",
+    "timezone": {
+      "title": "Zona horaria",
+      "label": "Zona horaria",
+      "help": "Tu panel y el resumen diario cuentan los días en esta zona horaria."
+    },
     "errors": {
       "invalidTimezone": "No se reconoce esta zona horaria."
     }

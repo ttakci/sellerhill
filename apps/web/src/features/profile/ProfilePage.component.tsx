@@ -1,4 +1,4 @@
-import { Button, Card, Icon, ModernTextInput, PageHeader, Text } from '@repo/ui';
+import { Button, Card, Icon, ModernSelect, ModernTextInput, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,9 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
   isLoading,
   isEditing,
   onToggleEdit,
+  timezoneOptions,
+  onTimezoneChange,
+  isTimezoneSaving,
 }) => {
   const { t } = useTranslation(['profile', 'translation']);
 
@@ -109,6 +112,29 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
             {renderField(t('profile.cityState'), profile.cityState, 'cityState')}
             {renderField(t('profile.postalCode'), profile.postalCode, 'postalCode')}
           </S.SectionContent>
+        </Card>
+
+        {/* Section 4: Time zone (saves on change, independent of edit mode) */}
+        <Card variant="default" padding="none">
+          <S.SectionTitleWrapper>
+            <Text variant="h4" weight="semibold">
+              {t('profile.timezone.title')}
+            </Text>
+          </S.SectionTitleWrapper>
+          <S.TimezoneContent>
+            <ModernSelect
+              label={t('profile.timezone.label')}
+              options={timezoneOptions}
+              value={profile.timezone ?? ''}
+              onChange={(value) => onTimezoneChange(String(value))}
+              isSearchable
+              fullWidth
+              isDisabled={isTimezoneSaving}
+            />
+            <Text variant="body-sm" color="text.secondary">
+              {t('profile.timezone.help')}
+            </Text>
+          </S.TimezoneContent>
         </Card>
 
         {/* Footer Actions */}

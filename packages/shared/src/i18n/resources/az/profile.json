@@ -25,6 +25,11 @@
     "deactivateAccount": "Hesabı deaktiv et",
     "saveChanges": "Bütün dəyişiklikləri yadda saxla",
     "storeOwner": "Mağaza sahibi",
+    "timezone": {
+      "title": "Saat qurşağı",
+      "label": "Saat qurşağı",
+      "help": "Panel və gündəlik xülasə günləri bu saat qurşağına görə hesablayır."
+    },
     "errors": {
       "invalidTimezone": "Bu saat qurşağı tanınmır."
     }

@@ -25,6 +25,11 @@
     "deactivateAccount": "Disattiva l'account",
     "saveChanges": "Salva tutte le modifiche",
     "storeOwner": "Titolare del negozio",
+    "timezone": {
+      "title": "Fuso orario",
+      "label": "Fuso orario",
+      "help": "La dashboard e il riepilogo giornaliero contano i giorni in questo fuso orario."
+    },
     "errors": {
       "invalidTimezone": "Questo fuso orario non è riconosciuto."
     }

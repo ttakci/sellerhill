@@ -17,7 +17,7 @@ export const profileApi = baseApi.injectEndpoints({
         method: 'PATCH',
         body,
       }),
-      invalidatesTags: ['Profile', 'Auth'],
+      invalidatesTags: ['Profile', 'Auth', 'Dashboard'],
     }),
   }),
 });

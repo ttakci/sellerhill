@@ -107,7 +107,14 @@ export const SectionContent = styled.div`
   }
 `;
 
-export const FooterActions = styled.div`
+export const TimezoneContent = styled.div`
+  padding: ${tkn('spacing.md+')};
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const FooterActions =styled.div`
   display: flex;
   justify-content: flex-end;
   gap: ${tkn('spacing.md')};
