@@ -38,6 +38,8 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { localDayEndExclusiveSql, localDayStartSql } from '../../common/timezone/local-day-sql';
+import { TimezoneService } from '../../common/timezone/timezone.service';
 import { cancellationColumnsSql, CancellationDtoRow, toCancellationDto } from '../ebay-returns/cancellation-dto';
 import { buildStoreScopedCancellationBucketSql } from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
@@ -152,7 +154,8 @@ export class OrdersService {
     private readonly orderSyncService: OrderSyncService,
     private readonly orderSyncQueueService: OrderSyncQueueService,
     private readonly returnSchedule: ReturnSweepScheduleService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly timezoneService: TimezoneService
   ) {}
 
   /**
@@ -229,17 +232,22 @@ export class OrdersService {
       paramIndex++;
     }
 
-    if (filters?.dateFrom) {
-      conditions.push(`o.order_date >= $${paramIndex}::date`);
-      params.push(filters.dateFrom);
+    if (filters?.dateFrom || filters?.dateTo) {
+      // The seller's calendar day: local midnight → next local midnight.
+      const tz = await this.timezoneService.getForUser(userId);
+      const tzParam = `$${paramIndex}`;
+      params.push(tz);
       paramIndex++;
-    }
-
-    if (filters?.dateTo) {
-      // Inclusive end date: treat as full calendar day
-      conditions.push(`o.order_date < ($${paramIndex}::date + INTERVAL '1 day')`);
-      params.push(filters.dateTo);
-      paramIndex++;
+      if (filters.dateFrom) {
+        conditions.push(`o.order_date >= ${localDayStartSql(`$${paramIndex}`, tzParam)}`);
+        params.push(filters.dateFrom);
+        paramIndex++;
+      }
+      if (filters.dateTo) {
+        conditions.push(`o.order_date < ${localDayEndExclusiveSql(`$${paramIndex}`, tzParam)}`);
+        params.push(filters.dateTo);
+        paramIndex++;
+      }
     }
 
     if (filters?.autoFulfillNeedsAttention) {

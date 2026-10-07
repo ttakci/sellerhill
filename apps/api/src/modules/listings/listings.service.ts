@@ -5,6 +5,7 @@ import {
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingJobKind,
   ListingJobStatus,
+  DEFAULT_USER_TIMEZONE,
   ListingStatus,
   ListingTrackingState,
   EbayCallPriority,
@@ -41,6 +42,8 @@ import { isUUID } from 'class-validator';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { localDayEndExclusiveSql, localDayStartSql } from '../../common/timezone/local-day-sql';
+import { TimezoneService } from '../../common/timezone/timezone.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
@@ -277,7 +280,9 @@ export class ListingsService {
     private readonly ebayImages: EbayImageResolver,
     // Optional so a spec can build the service without it. Absent = "allow ASINs from my other
     // stores" reads as off, which is the behaviour before the setting existed.
-    @Optional() private readonly storeSettings?: StoreSettingsService
+    @Optional() private readonly storeSettings?: StoreSettingsService,
+    // Optional for the same reason; absent = UTC days.
+    @Optional() private readonly timezoneService?: TimezoneService
   ) {}
 
   /**
@@ -609,13 +614,18 @@ export class ListingsService {
         'o_sold.user_id = l.user_id',
         `o_sold.status <> '${OrderStatus.CANCELLED}'`,
       ];
+      // The seller's calendar day: local midnight → next local midnight.
+      const tz = (await this.timezoneService?.getForUser(userId)) ?? DEFAULT_USER_TIMEZONE;
+      const tzParam = `$${paramIndex}`;
+      params.push(tz);
+      paramIndex++;
       if (query.soldFrom?.trim()) {
-        soldConds.push(`o_sold.order_date >= $${paramIndex}::date`);
+        soldConds.push(`o_sold.order_date >= ${localDayStartSql(`$${paramIndex}`, tzParam)}`);
         params.push(query.soldFrom.trim());
         paramIndex++;
       }
       if (query.soldTo?.trim()) {
-        soldConds.push(`o_sold.order_date < ($${paramIndex}::date + INTERVAL '1 day')`);
+        soldConds.push(`o_sold.order_date < ${localDayEndExclusiveSql(`$${paramIndex}`, tzParam)}`);
         params.push(query.soldTo.trim());
         paramIndex++;
       }
