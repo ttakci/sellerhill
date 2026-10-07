@@ -136,7 +136,7 @@
       "notFollowed": "O preço não segue a taxa desta campanha."
     },
     "eligibility": {
-      "ineligible": "A publicidade não está disponível para esta loja: {{reason}}",
+      "ineligible": "A publicidade não está disponível para esta loja.",
       "unavailable": "A elegibilidade para publicidade está indisponível. A criação de campanhas está desativada."
     },
     "results": {

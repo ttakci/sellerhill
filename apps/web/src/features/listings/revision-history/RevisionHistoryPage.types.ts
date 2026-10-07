@@ -33,6 +33,11 @@ export interface RevisionHistoryRow {
   newSourceStock: string | null;
   sourceStockChanged: boolean;
   sourceStockIncreased: boolean;
+  /** Amazon price at this check (USD), formatted; `null` on rows older than migration 146. */
+  previousSourcePrice: string | null;
+  newSourcePrice: string | null;
+  sourcePriceChanged: boolean;
+  sourcePriceIncreased: boolean;
 }
 
 /** State for the "all revisions of this listing" drawer, opened from a row. */
@@ -58,6 +63,17 @@ export interface RevisionHistoryPageComponentProps {
   drawer: RevisionHistoryDrawerState;
   onCloseDrawer: () => void;
   onViewListing: () => void;
+  /** Table columns in the seller's order; hidden ones left out. Same toolbar as the listings table. */
+  visibleColumnKeys: string[];
+  columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];
+  onToggleColumn: (key: string) => void;
+  onMoveColumn: (key: string, direction: -1 | 1) => void;
+  sortOptions: { value: string; label: string }[];
+  sortValue: string;
+  onSortChange: (value: string | number) => void;
+  sortColumn: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (columnKey: string) => void;
   pagination: {
     count: number;
     page: number;

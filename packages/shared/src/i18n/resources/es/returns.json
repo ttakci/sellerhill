@@ -1,11 +1,7 @@
 {
   "returns": {
     "title": "Devoluciones",
-    "subtitle_one": "{{count}} devolución",
-    "subtitle_many": "{{count}} devoluciones",
-    "subtitle_other": "{{count}} devoluciones",
-    "loading": "Cargando devoluciones…",
-    "notice": "Abre una devolución para ver su historial y qué espera eBay. Donde eBay lo permite, puedes aprobarla, marcarla como recibida o reembolsar desde aquí; todo lo demás se responde en eBay.",
+    "subtitle": "Consulta las devoluciones que abrieron los compradores, el paso que eBay espera y su fecha límite. Abre una para aprobarla, marcarla como recibida o reembolsarla cuando eBay lo permita.",
     "tabs": {
       "all": "Todas",
       "action": "Requieren acción",
@@ -29,7 +25,8 @@
       "due": "Acción pendiente",
       "reason": "Motivo",
       "refund": "Reembolso",
-      "opened": "Abierta"
+      "opened": "Abierta",
+      "deadline": "Fecha límite"
     },
     "bucket": {
       "unconfirmed": "Sin confirmar",

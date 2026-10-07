@@ -1,11 +1,7 @@
 {
   "returns": {
     "title": "Resi",
-    "subtitle_one": "{{count}} reso",
-    "subtitle_many": "{{count}} resi",
-    "subtitle_other": "{{count}} resi",
-    "loading": "Caricamento dei resi…",
-    "notice": "Apri un reso per vederne la cronologia e cosa attende eBay. Dove eBay lo consente, puoi approvarlo, segnarlo come ricevuto o rimborsare da qui; tutto il resto si risolve su eBay.",
+    "subtitle": "Consulta i resi aperti dagli acquirenti, il passaggio che eBay attende e la sua scadenza. Apri un reso per approvarlo, segnarlo come ricevuto o rimborsarlo quando eBay lo consente.",
     "tabs": {
       "all": "Tutti",
       "action": "Richiedono azione",
@@ -29,7 +25,8 @@
       "due": "Azione richiesta",
       "reason": "Motivo",
       "refund": "Rimborso",
-      "opened": "Aperto il"
+      "opened": "Aperto il",
+      "deadline": "Scadenza"
     },
     "bucket": {
       "unconfirmed": "Non confermato",

@@ -1,6 +1,6 @@
-import { Button, DataTable, EmptyState, InfoMessage, PageHeader, SearchField, TabNav, Text } from '@repo/ui';
+import { Button, DataTable, EmptyState, PageHeader, SearchField, TabNav, Text } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ReturnDetailDrawer } from '../ReturnDetailDrawer';
 import type { ReturnRowView } from '../returns.types';
@@ -12,8 +12,17 @@ import type { ReturnsPageProps } from './ReturnsPage.types';
 export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   rows,
   columns,
+  columnOptions,
+  visibleColumnKeys,
+  onToggleColumn,
+  onMoveColumn,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortColumn,
+  sortDirection,
+  onSort,
   pagination,
-  subtitle,
   tab,
   tabItems,
   onTabChange,
@@ -24,23 +33,19 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   resultCount,
   isInitialLoading,
   onRowOpen,
-  onCardKeyDown,
   selectedReturnId,
   onCloseDetail,
 }) => {
-  const { t } = useTranslation(['returns', 'translation']);
+  const { t } = useTranslation(['returns', 'listings', 'translation']);
 
   const renderGridCard = (row: ReturnRowView) => (
-    <ReturnCard key={row.id} row={row} onOpen={() => onRowOpen(row)} onKeyDown={(event) => onCardKeyDown(event, row)} />
+    <ReturnCard key={row.id} row={row} onOpen={() => onRowOpen(row)} />
   );
 
   return (
     <S.Container>
-      <PageHeader title={t('returns.title')} subtitle={subtitle} />
-
-      {/* Said once, plainly: open a return to see its history and act on it;
-          what the app cannot do itself is answered on eBay. */}
-      <InfoMessage>{t('returns.notice')}</InfoMessage>
+      {/* The subtitle says what this screen is for, like every list page. */}
+      <PageHeader title={t('returns.title')} subtitle={t('returns.subtitle')} />
 
       <S.TabsRow>
         <TabNav
@@ -65,9 +70,6 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
             />
           </S.SearchWrapper>
           <S.FilterActions>
-            <S.ResultCount variant="caption" weight="medium">
-              {t('returns.filters.resultCount', { count: resultCount })}
-            </S.ResultCount>
             {hasActiveFilters && (
               <Button variant="text" size="small" onClick={onClearFilters}>
                 <Text variant="body">{t('returns.filters.clear')}</Text>
@@ -78,9 +80,30 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
       </S.FilterBar>
 
       <DataTable
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        sortLabel={t('listings:listings.filters.sortLabel')}
+        resultLabel={
+          <Trans
+            i18nKey="listings.filters.resultListed"
+            ns="listings"
+            values={{ count: resultCount }}
+            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          />
+        }
         gridMinItemWidth="26rem"
         gridMaxColumns={2}
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={onToggleColumn}
+        onMoveColumn={onMoveColumn}
+        columnManagerLabel={t('listings:listings.table.columns')}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={onSort}
+        defaultViewMode="grid"
         data={rows}
         renderGridCard={renderGridCard}
         emptyContent={

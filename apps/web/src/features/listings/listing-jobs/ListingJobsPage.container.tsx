@@ -216,7 +216,7 @@ export const ListingJobsPageContainer: React.FC = () => {
             job.status === ListingJobStatus.PENDING || job.status === ListingJobStatus.PROCESSING;
           return canCancel ? (
             <Button
-              variant="danger-tint"
+              variant="danger"
               size="small"
               onClick={(event) => {
                 event.stopPropagation();

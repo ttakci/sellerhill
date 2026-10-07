@@ -136,7 +136,7 @@
       "notFollowed": "Der Preis folgt der Rate dieser Kampagne nicht."
     },
     "eligibility": {
-      "ineligible": "Werbung ist für diesen Shop nicht verfügbar: {{reason}}",
+      "ineligible": "Werbung ist für diesen Shop nicht verfügbar.",
       "unavailable": "Die Werbeberechtigung ist nicht verfügbar. Kampagnen können nicht erstellt werden."
     },
     "results": {

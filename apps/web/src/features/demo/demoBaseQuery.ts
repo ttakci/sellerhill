@@ -731,6 +731,8 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
         limit: Number(params.limit) || undefined,
         search: params.search,
         ebayAccountId: params.ebayAccountId,
+        sortBy: params.sortBy,
+        sortOrder: params.sortOrder,
       })
     );
   }

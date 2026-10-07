@@ -136,7 +136,7 @@
       "notFollowed": "Qiymət bu kampaniyanın faizini izləmir."
     },
     "eligibility": {
-      "ineligible": "Bu mağazada reklam mövcud deyil: {{reason}}",
+      "ineligible": "Bu mağazada reklam mövcud deyil.",
       "unavailable": "Reklam uyğunluğu məlumatı mövcud deyil. Kampaniya yaratmaq deaktivdir."
     },
     "results": {

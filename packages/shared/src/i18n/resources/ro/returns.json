@@ -1,11 +1,7 @@
 {
   "returns": {
     "title": "Retururi",
-    "subtitle_one": "{{count}} retur",
-    "subtitle_few": "{{count}} retururi",
-    "subtitle_other": "{{count}} de retururi",
-    "loading": "Se încarcă retururile…",
-    "notice": "Deschide un retur ca să vezi istoricul lui și ce așteaptă eBay. Acolo unde eBay permite, poți să-l aprobi, să-l marchezi ca primit sau să rambursezi de aici; tot restul se răspunde pe eBay.",
+    "subtitle": "Vezi returnările deschise de cumpărători, pasul pe care îl așteaptă eBay și termenul. Deschide o returnare pentru a o aproba, a o marca drept primită sau a rambursa, acolo unde eBay permite.",
     "tabs": {
       "all": "Toate",
       "action": "Necesită acțiune",
@@ -29,7 +25,8 @@
       "due": "Acțiune necesară",
       "reason": "Motiv",
       "refund": "Rambursare",
-      "opened": "Deschis la"
+      "opened": "Deschis la",
+      "deadline": "Termen"
     },
     "bucket": {
       "unconfirmed": "Neconfirmat",

@@ -1,11 +1,7 @@
 {
   "cancellations": {
     "title": "Anulări",
-    "subtitle_one": "{{count}} cerere de anulare",
-    "subtitle_few": "{{count}} cereri de anulare",
-    "subtitle_other": "{{count}} de cereri de anulare",
-    "loading": "Se încarcă cererile de anulare…",
-    "notice": "Deschide o cerere ca să vezi ce a cerut cumpărătorul și până când are nevoie eBay de răspunsul tău. O poți accepta sau refuza de aici.",
+    "subtitle": "Vezi cererile de anulare ale cumpărătorilor și până când așteaptă eBay răspunsul tău. Deschide o cerere pentru a o accepta sau a o refuza.",
     "tabs": {
       "all": "Toate",
       "action": "Necesită acțiune",
@@ -29,7 +25,8 @@
       "reason": "Motiv",
       "refund": "Rambursare către cumpărător",
       "requested": "Solicitată la",
-      "buyer": "Cumpărător"
+      "buyer": "Cumpărător",
+      "deadline": "Termen"
     },
     "order": "Comandă",
     "viewOrder": "Vezi comanda",
@@ -82,7 +79,9 @@
       "paymentStatus": "Starea plății",
       "closedAt": "Închisă",
       "journey": "Parcurs",
-      "journeyEmpty": "eBay nu a înregistrat încă niciun pas."
+      "journeyEmpty": "eBay nu a înregistrat încă niciun pas.",
+      "requestId": "ID cerere",
+      "orderNo": "Nr. comandă"
     },
     "actions": {
       "approve": "Aprobă",
@@ -126,6 +125,14 @@
       "buyerOther": "Cumpărătorul a actualizat cererea",
       "sellerOther": "Ai actualizat cererea",
       "ebayOther": "eBay a actualizat cererea"
+    },
+    "ebayId": "ID eBay",
+    "form": {
+      "shippingTitle": "Informații de expediere",
+      "shipDate": "Data expedierii (opțional)",
+      "tracking": "Număr de urmărire (opțional)",
+      "send": "Trimite",
+      "choose": "Alegeți acceptare sau refuz."
     }
   }
 }

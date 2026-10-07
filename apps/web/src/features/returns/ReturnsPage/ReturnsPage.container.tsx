@@ -1,6 +1,6 @@
-import { RETURN_TABS, ReturnTab } from '@repo/shared';
-import { getLocaleConfig, type TabNavItem } from '@repo/ui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { RETURN_TABS, ReturnTab, type ReturnsQueryDto } from '@repo/shared';
+import { getLocaleConfig, type TabNavItem, type TableColumn } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetReturnCountsQuery, useGetReturnsQuery } from '../api/returns.api';
@@ -18,6 +18,11 @@ import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 const TAB_IDS: readonly ReturnTab[] = Object.values(ReturnTab);
 
 const isTab = (value: string): value is ReturnTab => (TAB_IDS as readonly string[]).includes(value);
+
+type ReturnSortKey = NonNullable<ReturnsQueryDto['sortBy']>;
+/** The sortable columns — their keys are the API's `sortBy` values. */
+const RETURN_SORT_KEYS: ReturnSortKey[] = ['openedAt', 'dueBy', 'refund'];
+const isSortKey = (value: string): value is ReturnSortKey => (RETURN_SORT_KEYS as string[]).includes(value);
 
 /**
  * eBay returns — which ones need the seller, what exactly is due, and by when.
@@ -43,6 +48,10 @@ export const ReturnsPageContainer: React.FC = () => {
     setSelected,
   } = useReturnsUrlState();
 
+  // No pick = the API's own order (what needs the seller first); the picker then reads "Opened ↓".
+  const [sortBy, setSortBy] = useState<ReturnSortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const accounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData?.items]);
 
@@ -53,6 +62,8 @@ export const ReturnsPageContainer: React.FC = () => {
       tab,
       ebayAccountId: store || undefined,
       search: search || undefined,
+      sortBy: sortBy ?? undefined,
+      sortOrder: sortDirection,
     },
     { refetchOnMountOrArgChange: true, skip: !store }
   );
@@ -76,12 +87,11 @@ export const ReturnsPageContainer: React.FC = () => {
     () =>
       TAB_IDS.map((tabId) => ({
         id: tabId,
-        label:
-          tabId === ReturnTab.ALL
-            ? t(`returns.tabs.${tabId}`)
-            : t('returns.tabs.withCount', { label: t(`returns.tabs.${tabId}`), count: countFor(tabId) }),
+        label: t(`returns.tabs.${tabId}`),
+        // A count pill beside the label, as on the orders page — never baked into the label.
+        count: tabId === ReturnTab.ALL || !counts ? undefined : countFor(tabId),
       })),
-    [countFor, t]
+    [countFor, counts, t]
   );
 
   /* Open on "Needs action" when something is waiting and the URL chose
@@ -114,7 +124,93 @@ export const ReturnsPageContainer: React.FC = () => {
     [data?.items, accounts, locale, t]
   );
 
-  const columns = useReturnsColumns();
+  const allColumns = useReturnsColumns();
+
+  // Same column manager as the listings and orders tables: hide and reorder; the product stays.
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const keys = allColumns.map((column) => column.key);
+    return [...columnOrder.filter((key) => keys.includes(key)), ...keys.filter((key) => !columnOrder.includes(key))];
+  }, [allColumns, columnOrder]);
+  const columns = useMemo(
+    () =>
+      orderedKeys
+        .filter((key) => !hiddenColumnKeys.includes(key))
+        .map((key) => allColumns.find((column) => column.key === key))
+        .filter((column): column is TableColumn<ReturnRowView> => Boolean(column)),
+    [allColumns, hiddenColumnKeys, orderedKeys]
+  );
+  const columnOptions = useMemo(
+    () =>
+      orderedKeys.map((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        return {
+          key,
+          label: typeof column?.header === 'string' ? column.header : key,
+          alwaysVisible: key === 'product',
+        };
+      }),
+    [allColumns, orderedKeys]
+  );
+  const visibleColumnKeys = useMemo(
+    () => orderedKeys.filter((key) => !hiddenColumnKeys.includes(key)),
+    [hiddenColumnKeys, orderedKeys]
+  );
+  const handleToggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((current) =>
+      current.includes(key) ? current.filter((columnKey) => columnKey !== key) : [...current, key]
+    );
+  }, []);
+  const handleMoveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys]
+  );
+
+  const sortOptions = useMemo(
+    () =>
+      RETURN_SORT_KEYS.flatMap((key) => {
+        const column = allColumns.find((candidate) => candidate.key === key);
+        const label = typeof column?.header === 'string' ? column.header : key;
+        return [
+          { value: `${key}:desc`, label: `${label} ↓` },
+          { value: `${key}:asc`, label: `${label} ↑` },
+        ];
+      }),
+    [allColumns]
+  );
+  const handleSortChange = useCallback(
+    (value: string | number) => {
+      const [nextKey, nextDirection] = String(value).split(':');
+      if (!isSortKey(nextKey)) {
+        return;
+      }
+      setSortBy(nextKey);
+      setSortDirection(nextDirection === 'asc' ? 'asc' : 'desc');
+      setPage(1);
+    },
+    [setPage]
+  );
+  const handleColumnSort = useCallback(
+    (columnKey: string) => {
+      if (!isSortKey(columnKey)) {
+        return;
+      }
+      setSortBy(columnKey);
+      setSortDirection((current) => (sortBy === columnKey && current === 'desc' ? 'asc' : 'desc'));
+      setPage(1);
+    },
+    [setPage, sortBy]
+  );
 
   const handleTabChange = useCallback((tabId: string) => setTab(isTab(tabId) ? tabId : ReturnTab.ALL), [setTab]);
 
@@ -123,27 +219,26 @@ export const ReturnsPageContainer: React.FC = () => {
     [setSearchInput]
   );
 
-
   /* Every row opens — a return filed against an order we do not hold still
      has a history, a deadline and actions of its own. */
   const handleRowOpen = useCallback((row: ReturnRowView) => setSelected(row.id), [setSelected]);
   const handleCloseDetail = useCallback(() => setSelected(null), [setSelected]);
-
-  const handleCardKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>, row: ReturnRowView) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        handleRowOpen(row);
-      }
-    },
-    [handleRowOpen]
-  );
 
   return (
     <EbayAccountGuard>
       <ReturnsPageComponent
         rows={rows}
         columns={columns}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={handleToggleColumn}
+        onMoveColumn={handleMoveColumn}
+        sortOptions={sortOptions}
+        sortValue={sortBy ? `${sortBy}:${sortDirection}` : 'openedAt:desc'}
+        onSortChange={handleSortChange}
+        sortColumn={sortBy ?? undefined}
+        sortDirection={sortDirection}
+        onSort={handleColumnSort}
         pagination={{
           count: totalCount,
           page,
@@ -153,7 +248,6 @@ export const ReturnsPageContainer: React.FC = () => {
           labelRowsPerPage: t('translation:common.rowsPerPage'),
           labelInfo: t('translation:common.showing_info'),
         }}
-        subtitle={isLoading ? t('returns.loading') : t('returns.subtitle', { count: totalCount })}
         tab={tab}
         tabItems={tabItems}
         onTabChange={handleTabChange}
@@ -164,7 +258,6 @@ export const ReturnsPageContainer: React.FC = () => {
         resultCount={totalCount}
         isInitialLoading={isLoading || isFetching}
         onRowOpen={handleRowOpen}
-        onCardKeyDown={handleCardKeyDown}
         selectedReturnId={selected || null}
         onCloseDetail={handleCloseDetail}
       />

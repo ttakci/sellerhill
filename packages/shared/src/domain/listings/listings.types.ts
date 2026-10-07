@@ -453,6 +453,13 @@ export interface ListingRevisionDto {
   previousSourceStockStatus: SourceStockStatus | null;
   newSourceStock: number | null;
   newSourceStockStatus: SourceStockStatus | null;
+  /**
+   * The AMAZON (source) price at this check, before / after (migration 146).
+   * `previousPrice` / `newPrice` above are the listing's eBay SALE price.
+   * Both are `null` on rows written before the column existed.
+   */
+  previousSourcePrice: number | null;
+  newSourcePrice: number | null;
   recordedAt: string;
 }
 
@@ -514,6 +521,9 @@ export interface AllListingRevisionsQueryDto {
   search?: string;
   /** Scope to one connected eBay store. */
   ebayAccountId?: string;
+  /** Default `recordedAt` / `desc` (newest change first). */
+  sortBy?: 'recordedAt' | 'price' | 'product';
+  sortOrder?: 'asc' | 'desc';
 }
 
 /** Paginated response for `GET /listings/revisions`. */

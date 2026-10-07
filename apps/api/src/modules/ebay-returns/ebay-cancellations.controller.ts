@@ -2,6 +2,7 @@
 
 import {
   BadRequestException,
+  Body,
   ConflictException,
   Controller,
   Get,
@@ -17,6 +18,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
   CancellationBucketCountsDto,
   CancellationTab,
+  EbayCancellationActionRequestDto,
   EbayCancellationActionResultDto,
   EbayCancellationDetailDto,
   isEbayCancellationAction,
@@ -117,7 +119,9 @@ export class EbayCancellationsController {
     @Query('tab') tab?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
     @Query('search') search?: string,
-    @Query('orderId') orderId?: string
+    @Query('orderId') orderId?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string
   ): Promise<PaginatedCancellationsDto> {
     return this.actions.list(req.user.sub, {
       page: parsePositiveInt(page),
@@ -126,6 +130,8 @@ export class EbayCancellationsController {
       ebayAccountId: parseUuid(ebayAccountId, 'ebayAccountId'),
       search: typeof search === 'string' && search.trim() !== '' ? search.trim() : undefined,
       orderId: parseUuid(orderId, 'orderId'),
+      sortBy: sortBy === 'requestedAt' || sortBy === 'dueBy' || sortBy === 'refund' ? sortBy : undefined,
+      sortOrder: sortOrder === 'asc' ? 'asc' : 'desc',
     });
   }
 
@@ -144,13 +150,19 @@ export class EbayCancellationsController {
   async act(
     @Request() req: AuthedRequest,
     @Param('id') id: string,
-    @Param('action') action: string
+    @Param('action') action: string,
+    @Body() body?: EbayCancellationActionRequestDto
   ): Promise<EbayCancellationActionResultDto> {
     if (!isEbayCancellationAction(action)) {
       throw new BadRequestException('unknown cancellation action');
     }
+    // The decline form's two optional fields; anything else in the body is ignored.
+    const entered: EbayCancellationActionRequestDto = {
+      shipmentDate: typeof body?.shipmentDate === 'string' ? body.shipmentDate : undefined,
+      trackingNumber: typeof body?.trackingNumber === 'string' ? body.trackingNumber : undefined,
+    };
     try {
-      return await this.actions.act(req.user.sub, requireUuid(id), action);
+      return await this.actions.act(req.user.sub, requireUuid(id), action, entered);
     } catch (error) {
       rethrowCancellationAction(error);
     }

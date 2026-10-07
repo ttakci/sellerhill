@@ -457,13 +457,17 @@ export class ListingsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('search') search?: string,
-    @Query('ebayAccountId') ebayAccountId?: string
+    @Query('ebayAccountId') ebayAccountId?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string
   ): Promise<PaginatedListingRevisionsWithListingDto> {
     return this.listingsService.getAllListingRevisions(req.user.sub, {
       page: toPositiveInt(page),
       limit: toPositiveInt(limit),
       search,
       ebayAccountId,
+      sortBy: sortBy === 'price' || sortBy === 'product' ? sortBy : 'recordedAt',
+      sortOrder: sortOrder === 'asc' ? 'asc' : 'desc',
     });
   }
 

@@ -50,6 +50,15 @@ export interface ListingRevisionRow {
   sourceStockChanged: boolean;
   sourceStockIncreased: boolean;
   sourceStockDelta: string | null;
+  /**
+   * The Amazon price at this check (always USD — only Amazon US exists).
+   * `previousSourcePrice` is `null` on rows older than migration 146.
+   */
+  previousSourcePrice: string | null;
+  newSourcePrice: string | null;
+  sourcePriceChanged: boolean;
+  sourcePriceIncreased: boolean;
+  sourcePriceDelta: string | null;
 }
 
 export interface ListingRevisionsDrawerComponentProps {

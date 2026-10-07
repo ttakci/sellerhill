@@ -1,10 +1,7 @@
 {
   "returns": {
     "title": "Qaytarmalar",
-    "subtitle_one": "{{count}} qaytarma",
-    "subtitle_other": "{{count}} qaytarma",
-    "loading": "Qaytarmalar yüklənir…",
-    "notice": "Qaytarmanı açaraq onun tarixçəsini və eBay-in sizdən nə gözlədiyini görün. eBay icazə verdiyi yerlərdə onu buradan təsdiqləyə, alındı kimi işarələyə və ya geri ödəniş edə bilərsiniz; qalan hər şey eBay-də cavablandırılır.",
+    "subtitle": "Alıcıların açdığı qaytarmaları, eBay-in sizdən gözlədiyi addımı və son tarixini görün. Qaytarmanı açıb eBay icazə verdikdə təsdiqləyin, təhvil alındı kimi qeyd edin və ya pulu geri qaytarın.",
     "tabs": {
       "all": "Hamısı",
       "action": "Tədbir tələb edir",
@@ -27,7 +24,8 @@
       "due": "Sizdən gözlənilən",
       "reason": "Səbəb",
       "refund": "Geri ödəniş",
-      "opened": "Açılıb"
+      "opened": "Açılıb",
+      "deadline": "Son tarix"
     },
     "bucket": {
       "unconfirmed": "Təsdiqlənməyib",

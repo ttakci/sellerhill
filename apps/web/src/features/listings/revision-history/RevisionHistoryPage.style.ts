@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainer, Text as UIText, tkn } from '@repo/ui';
+import { PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -39,31 +39,6 @@ export const SearchWrapper = styled.div`
   }
 `;
 
-export const SelectWrapper = styled.div`
-  width: 12rem;
-  flex-shrink: 0;
-
-  @media (max-width: ${tkn('breakpoints.lg')}) {
-    width: 100%;
-  }
-`;
-
-export const FilterActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  margin-left: auto;
-  min-height: ${tkn('controls.height.medium')};
-
-  @media (max-width: ${tkn('breakpoints.lg')}) {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
-  }
-`;
-
-export const ResultCount = styled(UIText)``;
-
 export const Arrow = styled.span<{ $tone: 'up' | 'down' }>`
   display: inline-flex;
   align-items: center;
@@ -71,18 +46,12 @@ export const Arrow = styled.span<{ $tone: 'up' | 'down' }>`
   color: ${({ $tone, theme }) => ($tone === 'up' ? theme.colors.semantic.success : theme.colors.semantic.error)};
 `;
 
-/** Compact "previous → new" cell for table view. */
+/** Compact "previous → new" cell for table view, right-aligned like every figure column. */
 export const TableChange = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 
-/** Layout only — no font/color of its own, so the label text inherits the
- * table header cell's own uppercase/letter-spaced styling. */
-export const StockHeader = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.2xs')};
-`;

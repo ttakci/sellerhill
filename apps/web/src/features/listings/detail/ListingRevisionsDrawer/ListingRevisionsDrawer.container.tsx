@@ -9,6 +9,8 @@ import type { ListingRevisionRow, ListingRevisionsDrawerProps } from './ListingR
 import { useGetListingRevisionsQuery } from '@/features/listings/api/listings.api';
 
 const PAGE_SIZE = 20;
+/** Amazon-sourced money is always USD — only Amazon US exists. */
+const SOURCE_CURRENCY = 'USD';
 
 /** `+$7.31 (+2.4%)` — kept module-level so it is not a reactive dependency. */
 function formatPriceDelta(
@@ -115,6 +117,9 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
           revision.previousSourceStock !== null && revision.newSourceStock !== null
             ? revision.newSourceStock - revision.previousSourceStock
             : 0;
+        const prevSource = revision.previousSourcePrice;
+        const nextSource = revision.newSourcePrice;
+        const bothSource = prevSource !== null && nextSource !== null;
         return {
           id: revision.id,
           recordedAt: formatDate(revision.recordedAt, localeCfg.locale, {
@@ -150,6 +155,15 @@ export const ListingRevisionsDrawer: React.FC<ListingRevisionsDrawerProps> = ({
           sourceStockChanged: sourceDiff !== 0,
           sourceStockIncreased: sourceDiff > 0,
           sourceStockDelta: sourceDiff === 0 ? null : `${sourceDiff > 0 ? '+' : '-'}${Math.abs(sourceDiff)}`,
+          previousSourcePrice:
+            prevSource === null ? null : formatCurrency(prevSource, localeCfg.locale, SOURCE_CURRENCY, 2),
+          newSourcePrice:
+            nextSource === null ? null : formatCurrency(nextSource, localeCfg.locale, SOURCE_CURRENCY, 2),
+          sourcePriceChanged: bothSource && prevSource !== nextSource,
+          sourcePriceIncreased: bothSource && nextSource > prevSource,
+          sourcePriceDelta: bothSource
+            ? formatPriceDelta(prevSource, nextSource, localeCfg.locale, SOURCE_CURRENCY)
+            : null,
         };
       }),
     [accumulated, currency, localeCfg.locale]

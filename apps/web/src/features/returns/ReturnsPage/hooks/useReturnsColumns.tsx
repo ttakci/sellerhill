@@ -19,7 +19,7 @@ export function useReturnsColumns() {
       {
         key: 'product',
         header: t('returns.columns.product'),
-        width: '18rem',
+        width: '20.5rem',
         render: (_value, row) => (
           <ProductTableCell title={row.productTitle} imageUrl={row.imageUrl} meta={row.productMeta} />
         ),
@@ -27,7 +27,7 @@ export function useReturnsColumns() {
       {
         key: 'returnId',
         header: t('returns.columns.return'),
-        width: '10.5rem',
+        width: '9rem',
         render: (_value, row) => (
           <S.StackCell>
             <Text variant="body" weight="semibold" numeric>
@@ -49,14 +49,15 @@ export function useReturnsColumns() {
       {
         key: 'bucket',
         header: t('returns.columns.status'),
-        width: '10.5rem',
-        render: (_value, row) => <ReturnBucketBadge bucket={row.bucket} size="xs" />,
+        width: '9rem',
+        render: (_value, row) => <ReturnBucketBadge bucket={row.bucket} size="sm" />,
       },
       {
         // The answer the page exists for: what eBay expects next, and by when.
-        key: 'due',
+        key: 'dueBy',
+        sortable: true,
         header: t('returns.columns.due'),
-        width: '13rem',
+        width: '10.5rem',
         render: (_value, row) =>
           row.dueLabel ? (
             <S.StackCell>
@@ -78,7 +79,7 @@ export function useReturnsColumns() {
       {
         key: 'reason',
         header: t('returns.columns.reason'),
-        width: '13rem',
+        width: '10.5rem',
         render: (_value, row) => (
           <S.StackCell>
             <Text variant="body-sm" weight="medium">
@@ -96,8 +97,9 @@ export function useReturnsColumns() {
       },
       {
         key: 'refund',
+        sortable: true,
         header: t('returns.columns.refund'),
-        width: '7rem',
+        width: '6.5rem',
         align: 'right',
         render: (_value, row) =>
           row.refundAmount ? (
@@ -119,10 +121,11 @@ export function useReturnsColumns() {
       },
       {
         key: 'openedAt',
+        sortable: true,
         header: t('returns.columns.opened'),
-        width: '7.5rem',
+        width: '7rem',
         render: (_value, row) => (
-          <Text variant="body-sm" color="text.secondary" numeric>
+          <Text variant="body-sm" color="text.primary" numeric>
             {row.openedAt ?? EMPTY_VALUE}
           </Text>
         ),

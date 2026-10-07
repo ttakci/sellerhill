@@ -1,4 +1,8 @@
-import { formatSourceStock, type ListingRevisionWithListingDto } from '@repo/shared';
+import {
+  formatSourceStock,
+  type AllListingRevisionsQueryDto,
+  type ListingRevisionWithListingDto,
+} from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +16,21 @@ import { useGetAllListingRevisionsQuery } from '@/features/listings/api/listings
 import { useLocale } from '@/utils/useLocale';
 
 const EMPTY_DRAWER: RevisionHistoryDrawerState = { isOpen: false, listingId: null, currency: 'USD', subject: null };
+/** Amazon-sourced money is always USD — only Amazon US exists. */
+const SOURCE_CURRENCY = 'USD';
+
+type RevisionSortKey = NonNullable<AllListingRevisionsQueryDto['sortBy']>;
+const REVISION_SORT_KEYS: RevisionSortKey[] = ['recordedAt', 'product', 'price'];
+
+/** Table column keys + their header keys, in the default order (product first, date last). */
+const REVISION_COLUMNS: { key: string; labelKey: string }[] = [
+  { key: 'product', labelKey: 'listings.table.product' },
+  { key: 'sourcePrice', labelKey: 'listings.detail.revisions.sourcePriceChange' },
+  { key: 'price', labelKey: 'listings.detail.revisions.priceChange' },
+  { key: 'sourceStock', labelKey: 'listings.detail.revisions.sourceStockChange' },
+  { key: 'quantity', labelKey: 'listings.detail.revisions.quantityChange' },
+  { key: 'recordedAt', labelKey: 'listings.jobs.table.date' },
+];
 
 /**
  * Price/quantity change history across every listing the caller owns — the
@@ -36,6 +55,74 @@ export const RevisionHistoryPageContainer: React.FC = () => {
     setPage(1);
   }
   const [drawer, setDrawer] = useState<RevisionHistoryDrawerState>(EMPTY_DRAWER);
+  const [sortBy, setSortBy] = useState<RevisionSortKey>('recordedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Same column manager as the listings table: hide and reorder; the product stays.
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>(REVISION_COLUMNS.map((column) => column.key));
+  const columnOptions = useMemo(
+    () =>
+      columnOrder.map((key) => ({
+        key,
+        label: t(REVISION_COLUMNS.find((column) => column.key === key)?.labelKey ?? key),
+        alwaysVisible: key === 'product',
+      })),
+    [columnOrder, t]
+  );
+  const visibleColumnKeys = useMemo(
+    () => columnOrder.filter((key) => !hiddenColumnKeys.includes(key)),
+    [columnOrder, hiddenColumnKeys]
+  );
+  const handleToggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((current) =>
+      current.includes(key) ? current.filter((columnKey) => columnKey !== key) : [...current, key]
+    );
+  }, []);
+  const handleMoveColumn = useCallback((key: string, direction: -1 | 1) => {
+    setColumnOrder((current) => {
+      const index = current.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= current.length) {
+        return current;
+      }
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }, []);
+
+  const sortOptions = useMemo(
+    () =>
+      REVISION_SORT_KEYS.flatMap((key) => {
+        const label = t(REVISION_COLUMNS.find((column) => column.key === key)?.labelKey ?? key);
+        return [
+          { value: `${key}:desc`, label: `${label} ↓` },
+          { value: `${key}:asc`, label: `${label} ↑` },
+        ];
+      }),
+    [t]
+  );
+  const handleSortChange = useCallback((value: string | number) => {
+    const [nextKey, nextDirection] = String(value).split(':');
+    if (!REVISION_SORT_KEYS.includes(nextKey as RevisionSortKey)) {
+      return;
+    }
+    setSortBy(nextKey as RevisionSortKey);
+    setSortDirection(nextDirection === 'asc' ? 'asc' : 'desc');
+    setPage(1);
+  }, []);
+  const handleColumnSort = useCallback(
+    (columnKey: string) => {
+      if (!REVISION_SORT_KEYS.includes(columnKey as RevisionSortKey)) {
+        return;
+      }
+      setSortBy(columnKey as RevisionSortKey);
+      setSortDirection((current) => (sortBy === columnKey && current === 'desc' ? 'asc' : 'desc'));
+      setPage(1);
+    },
+    [sortBy]
+  );
 
   const { data, isLoading } = useGetAllListingRevisionsQuery(
     {
@@ -43,6 +130,8 @@ export const RevisionHistoryPageContainer: React.FC = () => {
       limit: rowsPerPage,
       search: search.trim() || undefined,
       ebayAccountId: storeFilter || undefined,
+      sortBy,
+      sortOrder: sortDirection,
     },
     { refetchOnMountOrArgChange: true, skip: !storeFilter }
   );
@@ -71,6 +160,9 @@ export const RevisionHistoryPageContainer: React.FC = () => {
           revision.previousSourceStock !== null && revision.newSourceStock !== null
             ? revision.newSourceStock - revision.previousSourceStock
             : 0;
+        const prevSource = revision.previousSourcePrice;
+        const nextSource = revision.newSourcePrice;
+        const bothSource = prevSource !== null && nextSource !== null;
         return {
           id: revision.id,
           listingId: revision.listingId,
@@ -101,6 +193,10 @@ export const RevisionHistoryPageContainer: React.FC = () => {
               : formatSourceStock(revision.newSourceStock, revision.newSourceStockStatus),
           sourceStockChanged: sourceDiff !== 0,
           sourceStockIncreased: sourceDiff > 0,
+          previousSourcePrice: prevSource === null ? null : formatCurrency(prevSource, locale, SOURCE_CURRENCY, 2),
+          newSourcePrice: nextSource === null ? null : formatCurrency(nextSource, locale, SOURCE_CURRENCY, 2),
+          sourcePriceChanged: bothSource && prevSource !== nextSource,
+          sourcePriceIncreased: bothSource && nextSource > prevSource,
         };
       }),
     [items, formatRowDate, locale]
@@ -160,6 +256,16 @@ export const RevisionHistoryPageContainer: React.FC = () => {
         drawer={drawer}
         onCloseDrawer={handleCloseDrawer}
         onViewListing={handleViewListing}
+        visibleColumnKeys={visibleColumnKeys}
+        columnOptions={columnOptions}
+        onToggleColumn={handleToggleColumn}
+        onMoveColumn={handleMoveColumn}
+        sortOptions={sortOptions}
+        sortValue={`${sortBy}:${sortDirection}`}
+        onSortChange={handleSortChange}
+        sortColumn={sortBy}
+        sortDirection={sortDirection}
+        onSort={handleColumnSort}
         pagination={{
           count: totalCount,
           page,

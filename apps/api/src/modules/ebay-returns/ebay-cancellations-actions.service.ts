@@ -4,6 +4,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   ACTIONABLE_CANCELLATION_BUCKETS,
   buildEbayCancellationUrl,
+  buildEbayOrderUrl,
+  type EbayCancellationActionRequestDto,
   CANCELLATION_ACTION_ERROR_KEY,
   CANCELLATION_TABS,
   CancellationActionErrorKey,
@@ -83,6 +85,13 @@ const CANCELLATION_BUCKETS = new Set<string>(Object.values(CancellationBucket));
  * No enum value decides anything: `CancelStateEnum` / `CancelStatusEnum` have
  * no page in the local reference.
  */
+/** Seller-picked list sorts → SQL column. Interpolated, so only these keys ever reach the statement. */
+const CANCELLATION_SORT_COLUMNS: Record<NonNullable<CancellationsQueryDto['sortBy']>, string> = {
+  requestedAt: 'c.requested_at',
+  dueBy: 'c.seller_respond_by',
+  refund: 'c.requested_refund_amount',
+};
+
 @Injectable()
 export class EbayCancellationsActionsService {
   private readonly logger = new Logger(EbayCancellationsActionsService.name);
@@ -156,9 +165,16 @@ export class EbayCancellationsActionsService {
          FROM ebay_cancellations c
        ${productJoinsSql('c')}
         WHERE ${where.join(' AND ')}
-        ORDER BY CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
+        ORDER BY ${
+          // A seller-picked sort replaces the default; the actionable-first CASE stays
+          // in the statement so its parameter is always referenced.
+          query.sortBy
+            ? `${CANCELLATION_SORT_COLUMNS[query.sortBy]} ${query.sortOrder === 'asc' ? 'ASC' : 'DESC'} NULLS LAST,
+                 CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,`
+            : `CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
                  c.seller_respond_by ASC NULLS LAST,
-                 c.requested_at DESC NULLS LAST,
+                 c.requested_at DESC NULLS LAST,`
+        }
                  c.id ASC
         LIMIT $${actionableIndex + 1} OFFSET $${actionableIndex + 2}`,
       [...params, [...ACTIONABLE_CANCELLATION_BUCKETS], limit, (page - 1) * limit]
@@ -218,10 +234,9 @@ export class EbayCancellationsActionsService {
     const stored = toCancellationDto(rows[0], actionsEnabled);
     // Post-Order has no Sandbox, so "supported" is exactly "production keys".
     const supported = this.postOrder.isReturnSearchSupported();
-    const ebayUrl = buildEbayCancellationUrl(
-      stored.cancelId,
-      supported ? EbayEnvironment.PRODUCTION : EbayEnvironment.SANDBOX
-    );
+    const environment = supported ? EbayEnvironment.PRODUCTION : EbayEnvironment.SANDBOX;
+    const ebayUrl = buildEbayCancellationUrl(stored.cancelId, environment);
+    const ebayOrderUrl = stored.legacyOrderId ? buildEbayOrderUrl(stored.legacyOrderId, environment) : null;
 
     let live: MappedCancellationDetail | null = null;
     if (supported) {
@@ -236,10 +251,15 @@ export class EbayCancellationsActionsService {
         );
       }
     }
-    return toCancellationDetailDto(stored, live, actionsEnabled, freshnessHours, ebayUrl);
+    return { ...toCancellationDetailDto(stored, live, actionsEnabled, freshnessHours, ebayUrl), ebayOrderUrl };
   }
 
-  async act(userId: string, id: string, action: EbayCancellationAction): Promise<EbayCancellationActionResultDto> {
+  async act(
+    userId: string,
+    id: string,
+    action: EbayCancellationAction,
+    entered: EbayCancellationActionRequestDto = {}
+  ): Promise<EbayCancellationActionResultDto> {
     const row = await this.loadRow(userId, id);
     if (!row) {
       throw new CancellationActionError(CANCELLATION_ACTION_ERROR_KEY.NOT_FOUND, 404);
@@ -263,7 +283,7 @@ export class EbayCancellationsActionsService {
     this.assertOffered(live.row);
 
     const accessToken = await this.ebay.getAccountAccessToken(row.ebay_account_id);
-    const rejectBody = buildRejectCancelBody(row);
+    const rejectBody = buildRejectCancelBody(row, entered);
     try {
       switch (action) {
         case EbayCancellationAction.APPROVE:
@@ -407,7 +427,7 @@ export function toCancellationDetailDto(
   actionsEnabled: boolean,
   freshnessHours: number,
   ebayUrl: string | null
-): EbayCancellationDetailDto {
+): Omit<EbayCancellationDetailDto, 'ebayOrderUrl'> {
   if (!live) {
     return {
       ...stored,
@@ -464,8 +484,28 @@ export function toCancellationDetailDto(
  * the reference requires when neither field is sent. Pure, so a test pins it.
  */
 export function buildRejectCancelBody(
-  row: Pick<CancellationRowWithAccount, 'ebay_tracking_pushed_number' | 'ebay_tracking_pushed_at'>
+  row: Pick<CancellationRowWithAccount, 'ebay_tracking_pushed_number' | 'ebay_tracking_pushed_at'>,
+  entered: EbayCancellationActionRequestDto = {},
+  now: Date = new Date()
 ): PostOrderRejectCancelRequest {
+  // What the seller typed on the decline form wins; each field is optional on eBay's side.
+  const enteredTracking = entered.trackingNumber?.trim().slice(0, 100);
+  // The form picks a DAY. eBay wants an ISO 8601 UTC instant ("2022-03-20T00:00:00.000Z"),
+  // so the day is sent at 12:00 UTC — the same calendar day from UTC-12 to UTC+11 — and
+  // never later than now, so "today" cannot become a shipment in the future.
+  const enteredDate = /^\d{4}-\d{2}-\d{2}$/.test(entered.shipmentDate ?? '')
+    ? new Date(`${entered.shipmentDate}T12:00:00.000Z`)
+    : null;
+  const validEnteredDate =
+    enteredDate && Number.isFinite(enteredDate.getTime())
+      ? new Date(Math.min(enteredDate.getTime(), now.getTime()))
+      : null;
+  if (enteredTracking || validEnteredDate) {
+    return {
+      ...(validEnteredDate ? { shipmentDate: { value: validEnteredDate.toISOString() } } : {}),
+      ...(enteredTracking ? { trackingNumber: enteredTracking } : {}),
+    };
+  }
   const tracking = row.ebay_tracking_pushed_number?.trim();
   const shippedAt = row.ebay_tracking_pushed_at ? new Date(row.ebay_tracking_pushed_at) : null;
   if (!tracking || !shippedAt || !Number.isFinite(shippedAt.getTime())) {

@@ -1,10 +1,7 @@
 {
   "cancellations": {
     "title": "İptaller",
-    "subtitle_one": "{{count}} iptal talebi",
-    "subtitle_other": "{{count}} iptal talebi",
-    "loading": "İptal talepleri yükleniyor…",
-    "notice": "Alıcının ne istediğini ve eBay'in yanıtınızı ne zamana kadar beklediğini görmek için bir talebi açın. Buradan kabul edebilir veya reddedebilirsiniz.",
+    "subtitle": "Alıcıların sipariş iptal taleplerini ve eBay'in yanıtınızı ne zamana kadar beklediğini görün. Bir talebi açıp kabul edin veya reddedin.",
     "tabs": {
       "all": "Tümü",
       "action": "Aksiyon gerekli",
@@ -27,7 +24,8 @@
       "reason": "Neden",
       "refund": "Alıcıya iade",
       "requested": "Talep tarihi",
-      "buyer": "Alıcı"
+      "buyer": "Alıcı",
+      "deadline": "Son tarih"
     },
     "order": "Sipariş",
     "viewOrder": "Siparişi görüntüle",
@@ -80,7 +78,9 @@
       "paymentStatus": "Ödeme durumu",
       "closedAt": "Kapandı",
       "journey": "Süreç",
-      "journeyEmpty": "eBay henüz bir adım kaydetmedi."
+      "journeyEmpty": "eBay henüz bir adım kaydetmedi.",
+      "requestId": "Talep ID",
+      "orderNo": "Sipariş No"
     },
     "actions": {
       "approve": "Onayla",
@@ -124,6 +124,14 @@
       "buyerOther": "Alıcı talebi güncelledi",
       "sellerOther": "Talebi güncellediniz",
       "ebayOther": "eBay talebi güncelledi"
+    },
+    "ebayId": "eBay ID",
+    "form": {
+      "shippingTitle": "Gönderim bilgisi",
+      "shipDate": "Gönderim tarihi (isteğe bağlı)",
+      "tracking": "Takip numarası (isteğe bağlı)",
+      "send": "Gönder",
+      "choose": "Onayla veya reddet seçin."
     }
   }
 }

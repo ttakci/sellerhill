@@ -38,7 +38,7 @@ describe('EbayCancellationsController query parsing', () => {
 
   it('forwards page, limit, store, trimmed search and order for the caller only', async () => {
     const { controller, actions } = build();
-    await controller.list(req, '2', '50', 'action', ` ${ACCOUNT} `, '  lamp ', ORDER);
+    await controller.list(req, '2', '50', 'action', ` ${ACCOUNT} `, '  lamp ', ORDER, 'dueBy', 'asc');
     expect(actions.list).toHaveBeenCalledWith(USER, {
       page: 2,
       limit: 50,
@@ -46,6 +46,8 @@ describe('EbayCancellationsController query parsing', () => {
       ebayAccountId: ACCOUNT,
       search: 'lamp',
       orderId: ORDER,
+      sortBy: 'dueBy',
+      sortOrder: 'asc',
     });
   });
 

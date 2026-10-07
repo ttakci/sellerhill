@@ -136,7 +136,7 @@
       "notFollowed": "Prețul nu urmează rata acestei campanii."
     },
     "eligibility": {
-      "ineligible": "Publicitatea nu este disponibilă pentru acest magazin: {{reason}}",
+      "ineligible": "Publicitatea nu este disponibilă pentru acest magazin.",
       "unavailable": "Eligibilitatea pentru publicitate nu este disponibilă. Crearea campaniilor este dezactivată."
     },
     "results": {

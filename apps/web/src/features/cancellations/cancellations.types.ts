@@ -33,6 +33,8 @@ export interface CancellationRowView {
   dueLabel: string | null;
   /** "by <date>", when eBay set a deadline. */
   dueBy: string | null;
+  /** The deadline alone, formatted — where the label ("Deadline") is printed beside it. */
+  dueDate: string | null;
   isOverdue: boolean;
   reasonLabel: string;
   /** eBay's own value, kept only when the page has no label for it. */
@@ -90,6 +92,8 @@ export interface CancellationDetailView {
   /** Answers eBay lists right now (and the operator's switch allows). */
   actions: EbayCancellationAction[];
   ebayUrl: string | null;
+  /** The order on eBay's Seller Hub; null when the request names no order. */
+  ebayOrderUrl: string | null;
   requestedRefund: string | null;
   actualRefund: string | null;
   amountOwed: string | null;

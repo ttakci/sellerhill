@@ -136,7 +136,7 @@
       "notFollowed": "Il prezzo non segue la tariffa di questa campagna."
     },
     "eligibility": {
-      "ineligible": "La pubblicità non è disponibile per questo negozio: {{reason}}",
+      "ineligible": "La pubblicità non è disponibile per questo negozio.",
       "unavailable": "L’idoneità pubblicitaria non è disponibile. La creazione di campagne è disattivata."
     },
     "results": {

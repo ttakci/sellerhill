@@ -1,6 +1,6 @@
-import { DataTable, EmptyState, Icon, PageHeader, SearchField, Text, Tooltip, type TableColumn } from '@repo/ui';
+import { DataTable, EmptyState, Icon, PageHeader, SearchField, Text, type TableColumn } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { toRevisionCardProps } from './revision-card.mapper';
 import * as S from './RevisionHistoryPage.style';
@@ -9,58 +9,49 @@ import type { RevisionHistoryPageComponentProps, RevisionHistoryRow } from './Re
 import { ListingCard, ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 import { ListingRevisionsDrawer } from '@/features/listings/detail/ListingRevisionsDrawer';
 
-/**
- * "Stock" header + an info tooltip — this is the quantity SENT TO eBay, not
- * the raw Amazon stock. Plain text (no `<Text>` wrapper) so it inherits the
- * `Th` cell's own uppercase/letter-spaced styling exactly like every other
- * column's bare-string header, instead of a `caption` variant that would
- * render at a visibly different size/weight next to its siblings.
- */
-/** Column label + the "what this number is" tooltip, for both stock columns. */
-const StockHeader = ({ labelKey, tooltipKey }: { labelKey: string; tooltipKey: string }): React.ReactElement => {
-  const { t } = useTranslation(['listings']);
-  return (
-    <S.StockHeader>
-      {t(labelKey)}
-      <Tooltip content={t(tooltipKey)} position="top" variant="dark">
-        <Icon name="info" size={12} color="text.tertiary" />
-      </Tooltip>
-    </S.StockHeader>
-  );
-};
-
-/** `previous → new` — muted when unchanged, tinted arrow when it moved. */
+/** `previous → new`, right-aligned like every money/count column — muted when unchanged, tinted arrow when it moved. */
 const ChangeCell = ({
   previous,
   next,
   changed,
   increased,
 }: {
-  previous: string;
-  next: string;
+  previous: string | null;
+  next: string | null;
   changed: boolean;
   increased: boolean;
-}): React.ReactElement => (
-  <S.TableChange>
-    {changed ? (
-      <>
-        <Text variant="body-sm" color="text.tertiary" numeric>
-          {previous}
+}): React.ReactElement => {
+  if (next === null) {
+    return (
+      <S.TableChange>
+        <Text variant="body-sm" color="text.tertiary">
+          —
         </Text>
-        <S.Arrow $tone={increased ? 'up' : 'down'}>
-          <Icon name={increased ? 'arrow-up-right' : 'arrow-down-right'} size={13} />
-        </S.Arrow>
-        <Text variant="body-sm" color="text.primary" weight="medium" numeric>
+      </S.TableChange>
+    );
+  }
+  return (
+    <S.TableChange>
+      {changed && previous !== null ? (
+        <>
+          <Text variant="body-sm" color="text.tertiary" numeric>
+            {previous}
+          </Text>
+          <S.Arrow $tone={increased ? 'up' : 'down'}>
+            <Icon name={increased ? 'arrow-up-right' : 'arrow-down-right'} size={13} />
+          </S.Arrow>
+          <Text variant="body-sm" color="text.primary" weight="bold" numeric>
+            {next}
+          </Text>
+        </>
+      ) : (
+        <Text variant="body-sm" color="text.primary" numeric>
           {next}
         </Text>
-      </>
-    ) : (
-      <Text variant="body-sm" color="text.secondary" numeric>
-        {next}
-      </Text>
-    )}
-  </S.TableChange>
-);
+      )}
+    </S.TableChange>
+  );
+};
 
 export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponentProps> = ({
   rows,
@@ -77,6 +68,16 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
   drawer,
   onCloseDrawer,
   onViewListing,
+  visibleColumnKeys,
+  columnOptions,
+  onToggleColumn,
+  onMoveColumn,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortColumn,
+  sortDirection,
+  onSort,
   pagination,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -85,20 +86,44 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
   const isFilterEmpty = !isInitialLoading && rows.length === 0 && hasActiveFilters;
   const showChrome = !isEmpty;
 
-  const columns: TableColumn<RevisionHistoryRow>[] = [
+  // Same shape as the listings table: a 20.5rem product cell (ASIN + eBay ID),
+  // then right-aligned figures of fixed width, the date last.
+  const allColumns: TableColumn<RevisionHistoryRow>[] = [
     {
       key: 'product',
+      sortable: true,
       header: t('listings.table.product'),
+      width: '20.5rem',
       render: (_value, row) => {
         const meta: ProductTableCellMetaRow[] = [
           { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon' },
         ];
+        if (row.ebayItemId) {
+          meta.push({ label: t('listings.table.ebayId'), id: row.ebayItemId, storeType: 'ebay' });
+        }
         return <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} />;
       },
     },
     {
+      key: 'sourcePrice',
+      header: t('listings.detail.revisions.sourcePriceChange'),
+      width: '9rem',
+      align: 'right',
+      render: (_value, row) => (
+        <ChangeCell
+          previous={row.previousSourcePrice}
+          next={row.newSourcePrice}
+          changed={row.sourcePriceChanged}
+          increased={row.sourcePriceIncreased}
+        />
+      ),
+    },
+    {
       key: 'price',
-      header: t('listings.table.price'),
+      sortable: true,
+      header: t('listings.detail.revisions.priceChange'),
+      width: '9rem',
+      align: 'right',
       render: (_value, row) => (
         <ChangeCell
           previous={row.previousPrice}
@@ -110,34 +135,23 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
     },
     {
       key: 'sourceStock',
-      header: (
-        <StockHeader
-          labelKey="listings.detail.revisions.sourceStockChange"
-          tooltipKey="listings.detail.revisions.sourceStockTooltip"
+      header: t('listings.detail.revisions.sourceStockChange'),
+      width: '7.5rem',
+      align: 'right',
+      render: (_value, row) => (
+        <ChangeCell
+          previous={row.previousSourceStock}
+          next={row.newSourceStock}
+          changed={row.sourceStockChanged}
+          increased={row.sourceStockIncreased}
         />
       ),
-      render: (_value, row) =>
-        row.newSourceStock === null ? (
-          <Text variant="body-sm" color="text.tertiary">
-            —
-          </Text>
-        ) : (
-          <ChangeCell
-            previous={row.previousSourceStock ?? row.newSourceStock}
-            next={row.newSourceStock}
-            changed={row.sourceStockChanged}
-            increased={row.sourceStockIncreased}
-          />
-        ),
     },
     {
       key: 'quantity',
-      header: (
-        <StockHeader
-          labelKey="listings.detail.revisions.quantityChange"
-          tooltipKey="listings.detail.revisions.quantityTooltip"
-        />
-      ),
+      header: t('listings.detail.revisions.quantityChange'),
+      width: '7rem',
+      align: 'right',
       render: (_value, row) => (
         <ChangeCell
           previous={row.previousQuantity}
@@ -149,14 +163,19 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
     },
     {
       key: 'recordedAt',
+      sortable: true,
       header: t('listings.jobs.table.date'),
+      width: '9.5rem',
       render: (_value, row) => (
-        <Text variant="body-sm" color="text.secondary" numeric>
+        <Text variant="body-sm" color="text.primary" numeric>
           {row.recordedAt}
         </Text>
       ),
     },
   ];
+  const columns = visibleColumnKeys
+    .map((key) => allColumns.find((column) => column.key === key))
+    .filter((column): column is TableColumn<RevisionHistoryRow> => Boolean(column));
 
   // Same card as the listings page; clicking it still opens the revisions drawer.
   const renderGridCard = (row: RevisionHistoryRow) => (
@@ -208,20 +227,35 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
                   fullWidth
                 />
               </S.SearchWrapper>
-              <S.FilterActions>
-                <S.ResultCount variant="caption" weight="medium" color="text.secondary">
-                  {t('listings.filters.resultCount', { count: pagination.count })}
-                </S.ResultCount>
-              </S.FilterActions>
             </S.FilterBarRow>
           </S.FilterBar>
         </S.FilterBarWrapper>
       )}
 
       <DataTable
+        sortOptions={sortOptions}
+        sortValue={sortValue}
+        onSortChange={onSortChange}
+        sortLabel={t('listings.filters.sortLabel')}
+        resultLabel={
+          <Trans
+            i18nKey="listings.filters.resultListed"
+            ns="listings"
+            values={{ count: pagination.count }}
+            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          />
+        }
         gridMinItemWidth="27rem"
         gridMaxColumns={2}
         columns={columns}
+        columnOptions={isEmpty ? undefined : columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={onToggleColumn}
+        onMoveColumn={onMoveColumn}
+        columnManagerLabel={t('listings.table.columns')}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={onSort}
         data={rows}
         renderGridCard={renderGridCard}
         viewMode={viewMode}

@@ -21,6 +21,11 @@ export interface IdBadgeProps {
    * and the hover-to-brand affordance are kept.
    */
   plain?: boolean;
+  /**
+   * Opens this URL instead of the store's item / product page — for an id that is not
+   * an item (an eBay order or cancellation request). The store logo still says where it goes.
+   */
+  href?: string;
 }
 
 export interface IdBadgeComponentProps {

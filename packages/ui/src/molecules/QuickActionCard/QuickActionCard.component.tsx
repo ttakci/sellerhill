@@ -21,11 +21,13 @@ export const QuickActionCard = ({
   const isSolid = variant === 'solid';
   const isBrand = variant === 'brand' || isSolid;
   const accentColor = isSolid ? 'text.inverse' : 'brand.primary';
+  // On the navy card the icon tile and arrow circle are pale blue, so their glyphs take the card's navy.
+  const glyphColor = isSolid ? 'sidebar.background' : accentColor;
   return (
     <S.Container $variant={variant} className={className} onClick={onClick} role="button" tabIndex={0}>
       {icon && (
         <S.IconTile $variant={variant}>
-          <Icon name={icon} size={22} color={accentColor} />
+          <Icon name={icon} size={22} color={glyphColor} />
         </S.IconTile>
       )}
       <S.Content>
@@ -39,7 +41,7 @@ export const QuickActionCard = ({
         )}
       </S.Content>
       <S.ArrowCircle $variant={variant}>
-        <Icon name="arrow-right" size={18} color={isBrand ? accentColor : 'text.secondary'} />
+        <Icon name="arrow-right" size={18} color={isBrand ? glyphColor : 'text.secondary'} />
       </S.ArrowCircle>
     </S.Container>
   );

@@ -97,6 +97,7 @@ import {
   type ListingRevisionDto,
   type ListingRevisionWithListingDto,
   buildEbayCancellationUrl,
+  buildEbayOrderUrl,
 } from '@repo/shared';
 
 /* =========================================================================
@@ -763,6 +764,9 @@ export function demoListingRevisions(listingId: string): ListingRevisionDto[] {
       previousSourceStockStatus,
       newSourceStock,
       newSourceStockStatus,
+      // The Amazon price behind each sale price (sale price ≈ cost × 1.35).
+      previousSourcePrice: round2(previousPrice / 1.35),
+      newSourcePrice: round2(newPrice / 1.35),
       recordedAt: isoHoursAgo(hoursAgo),
     });
 
@@ -789,6 +793,8 @@ export function demoAllListingRevisions(params: {
   limit?: number;
   search?: string;
   ebayAccountId?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }): { items: ListingRevisionWithListingDto[]; total: number; page: number; limit: number } {
   const storeByAccountId = new Map(DEMO_EBAY_ACCOUNTS.items.map((acc) => [acc.id, acc]));
 
@@ -822,7 +828,16 @@ export function demoAllListingRevisions(params: {
   if (params.ebayAccountId) {
     merged = merged.filter((r) => r.ebayAccountId === params.ebayAccountId);
   }
-  merged.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+  const direction = params.sortOrder === 'asc' ? 1 : -1;
+  merged.sort((a, b) => {
+    const diff =
+      params.sortBy === 'price'
+        ? a.newPrice - b.newPrice
+        : params.sortBy === 'product'
+          ? a.title.localeCompare(b.title)
+          : new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime();
+    return diff * direction;
+  });
 
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.max(1, params.limit ?? 20);
@@ -1523,7 +1538,12 @@ function buildCancellations(): EbayCancellationDto[] {
       actionsEnabled: true,
       availableActions: seed.closed || respondBy === null ? [] : [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT],
       product: order.product
-        ? { title: order.product.title, imageUrl: order.product.imageUrl ?? null, asin: order.product.asin ?? null }
+        ? {
+            title: order.product.title,
+            imageUrl: order.product.imageUrl ?? null,
+            asin: order.product.asin ?? null,
+            ebayItemId: order.product.ebayItemId ?? null,
+          }
         : null,
     };
   });
@@ -1559,6 +1579,7 @@ export function demoCancellationDetail(row: EbayCancellationDto): EbayCancellati
     amountToRecoup: closed || row.requestedRefundAmount === null ? null : round2(row.requestedRefundAmount * 0.83),
     paymentStatus: closed ? 'REFUNDED' : 'PAID',
     ebayUrl: buildEbayCancellationUrl(row.cancelId),
+    ebayOrderUrl: row.legacyOrderId ? buildEbayOrderUrl(row.legacyOrderId) : null,
   };
 }
 

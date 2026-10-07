@@ -1,11 +1,7 @@
 {
   "cancellations": {
     "title": "Annulations",
-    "subtitle_one": "{{count}} demande d’annulation",
-    "subtitle_many": "{{count}} demandes d’annulation",
-    "subtitle_other": "{{count}} demandes d’annulation",
-    "loading": "Chargement des demandes d’annulation…",
-    "notice": "Ouvrez une demande pour voir ce que l’acheteur a demandé et quand eBay attend votre réponse. Vous pouvez l’accepter ou la refuser ici.",
+    "subtitle": "Consultez les demandes d'annulation des acheteurs et la date à laquelle eBay attend votre réponse. Ouvrez une demande pour l'accepter ou la refuser.",
     "tabs": {
       "all": "Tous",
       "action": "Action requise",
@@ -29,7 +25,8 @@
       "reason": "Motif",
       "refund": "Remboursement à l’acheteur",
       "requested": "Demandée le",
-      "buyer": "Acheteur"
+      "buyer": "Acheteur",
+      "deadline": "Échéance"
     },
     "order": "Commande",
     "viewOrder": "Voir la commande",
@@ -82,7 +79,9 @@
       "paymentStatus": "Statut du paiement",
       "closedAt": "Clôturée",
       "journey": "Parcours",
-      "journeyEmpty": "eBay n'a encore enregistré aucune étape."
+      "journeyEmpty": "eBay n'a encore enregistré aucune étape.",
+      "requestId": "ID de la demande",
+      "orderNo": "N° de commande"
     },
     "actions": {
       "approve": "Approuver",
@@ -126,6 +125,14 @@
       "buyerOther": "L’acheteur a mis à jour la demande",
       "sellerOther": "Vous avez mis à jour la demande",
       "ebayOther": "eBay a mis à jour la demande"
+    },
+    "ebayId": "ID eBay",
+    "form": {
+      "shippingTitle": "Informations d'expédition",
+      "shipDate": "Date d'expédition (facultatif)",
+      "tracking": "Numéro de suivi (facultatif)",
+      "send": "Envoyer",
+      "choose": "Choisissez accepter ou refuser."
     }
   }
 }

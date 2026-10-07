@@ -1,5 +1,6 @@
 import type { OrderStage } from '@repo/shared';
 import type { BadgeVariant } from '@repo/ui';
+import type React from 'react';
 
 export type OrderCardStatTone = 'default' | 'positive' | 'negative';
 
@@ -18,6 +19,8 @@ export interface OrderCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
+  /** With `storeType`: open this URL instead of the item page (an eBay order, a cancellation request). */
+  href?: string;
 }
 
 /**
@@ -30,7 +33,9 @@ export interface OrderCardProps {
   imageUrl?: string;
   ebayOrderId: string;
   /** The seller-facing stage — one badge, same vocabulary as the list and the detail page. */
-  stage: OrderStage;
+  stage?: OrderStage;
+  /** A record of another kind (a return) puts its own status badge here instead of a stage. */
+  leadingBadge?: React.ReactNode;
   /** False for an order SellerHill does not follow: only its chip shows, never a stage. */
   showStage?: boolean;
   /** Drives the tracking-held alarm colour (amber → red after 12 h). */

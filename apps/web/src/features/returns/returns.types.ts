@@ -23,6 +23,8 @@ export interface ReturnRowView {
   dueLabel: string | null;
   /** "by <date>" for that action, when eBay set a deadline. */
   dueBy: string | null;
+  /** The deadline alone, formatted — the card's figures row labels it itself. */
+  dueDate: string | null;
   isOverdue: boolean;
   reasonLabel: string;
   /** The buyer's own words. */
@@ -30,6 +32,8 @@ export interface ReturnRowView {
   refundAmount: string | null;
   /** "Refunded" once a refund was issued, otherwise "Estimated". */
   refundLabel: string | null;
+  /** True once eBay reports the refund as issued (else the amount is eBay's estimate). */
+  isRefunded: boolean;
   openedAt: string | null;
 }
 
@@ -100,6 +104,8 @@ export interface ReturnDetailView {
   row: ReturnRowView;
   /** False = eBay could not be read; the drawer shows the stored row and offers no action. */
   live: boolean;
+  /** The operator's switch for in-app actions — off, the drawer says to answer on eBay. */
+  actionsEnabled: boolean;
   /** In-app actions eBay lists right now (and the operator's switch allows). */
   actions: EbayReturnAction[];
   /** The refund the "Issue refund" action would send, formatted — eBay's own estimate. */

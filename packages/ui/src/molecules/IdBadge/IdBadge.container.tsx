@@ -12,12 +12,13 @@ export const IdBadge = ({
   className,
   onClick,
   plain = false,
+  href,
 }: IdBadgeProps) => {
   // URL building is injected by the app: eBay item links are environment-scoped
   // (a sandbox item id does not resolve on ebay.com), and the design system
   // must not know about deployment environments.
   const { buildEbayItemUrl, buildAmazonProductUrl } = useMarketplaceContext();
-  const url = storeType === 'ebay' ? buildEbayItemUrl(id) : buildAmazonProductUrl(id);
+  const url = href ?? (storeType === 'ebay' ? buildEbayItemUrl(id) : buildAmazonProductUrl(id));
   const [isHovered, setIsHovered] = useState(false);
 
   return (

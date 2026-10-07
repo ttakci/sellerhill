@@ -185,7 +185,7 @@ describe('campaign list and create', () => {
     );
     mount();
     await screen.findByText('Summer campaign');
-    expect(screen.getByText(/NOT_ENOUGH_ACTIVITY/)).toBeInTheDocument();
+    expect(screen.getByText('Advertising is unavailable for this store.')).toBeInTheDocument();
     expect(screen.getByText('Read-only campaign')).toBeInTheDocument();
     expect(screen.getByText('Created outside SellerHill')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Campaign details' })).toBeEnabled();

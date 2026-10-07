@@ -127,7 +127,7 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
         props.detail && (
           <S.Stack>
             {props.writeReason && (
-              <InfoMessage type="warning">
+              <InfoMessage type="info">
                 <Text variant="body-sm">{props.writeReason}</Text>
               </InfoMessage>
             )}

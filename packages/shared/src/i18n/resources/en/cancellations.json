@@ -1,10 +1,7 @@
 {
   "cancellations": {
     "title": "Cancellations",
-    "subtitle_one": "{{count}} cancellation request",
-    "subtitle_other": "{{count}} cancellation requests",
-    "loading": "Loading cancellation requests…",
-    "notice": "Open a request to see what the buyer asked for and when eBay needs your answer. You can accept or decline it from here.",
+    "subtitle": "See buyers' requests to cancel an order and when eBay needs your answer. Open a request to accept or decline it.",
     "tabs": {
       "all": "All",
       "action": "Needs action",
@@ -27,7 +24,8 @@
       "reason": "Reason",
       "refund": "Refund to buyer",
       "requested": "Requested",
-      "buyer": "Buyer"
+      "buyer": "Buyer",
+      "deadline": "Deadline"
     },
     "order": "Order",
     "viewOrder": "View order",
@@ -80,7 +78,9 @@
       "paymentStatus": "Payment status",
       "closedAt": "Closed",
       "journey": "Journey",
-      "journeyEmpty": "eBay has not recorded any step yet."
+      "journeyEmpty": "eBay has not recorded any step yet.",
+      "requestId": "Request ID",
+      "orderNo": "Order No"
     },
     "actions": {
       "approve": "Accept",
@@ -124,6 +124,14 @@
       "buyerOther": "Buyer updated the request",
       "sellerOther": "You updated the request",
       "ebayOther": "eBay updated the request"
+    },
+    "ebayId": "eBay ID",
+    "form": {
+      "shippingTitle": "Shipping information",
+      "shipDate": "Shipped on (optional)",
+      "tracking": "Tracking number (optional)",
+      "send": "Send",
+      "choose": "Choose accept or decline."
     }
   }
 }

@@ -79,7 +79,7 @@ export const ArrowCircle = styled.div<{ $variant: QuickActionCardVariant }>`
   transition: transform ${tkn('transitions.fast')};
   background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
     $variant === 'solid'
-      ? `${theme.colors.text.inverse}33`
+      ? theme.colors.semanticTint.infoStrong
       : $variant === 'brand'
         ? `${theme.colors.brand.primary}15`
         : theme.colors.background.tertiary};
@@ -97,5 +97,5 @@ export const IconTile = styled.div<{ $variant: QuickActionCardVariant }>`
   justify-content: center;
   flex-shrink: 0;
   background: ${({ theme, $variant }: { theme: Theme; $variant: QuickActionCardVariant }) =>
-    $variant === 'solid' ? `${theme.colors.text.inverse}33` : `${theme.colors.brand.primary}15`};
+    $variant === 'solid' ? theme.colors.semanticTint.infoStrong : `${theme.colors.brand.primary}15`};
 `;

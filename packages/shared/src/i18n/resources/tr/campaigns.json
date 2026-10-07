@@ -136,7 +136,7 @@
       "notFollowed": "Fiyat bu kampanyanın oranını izlemiyor."
     },
     "eligibility": {
-      "ineligible": "Bu mağazada reklam kullanılamıyor: {{reason}}",
+      "ineligible": "Bu mağazada reklam kullanılamıyor.",
       "unavailable": "Reklam uygunluğu bilgisi alınamadı. Kampanya oluşturma devre dışı."
     },
     "results": {

@@ -39,6 +39,7 @@ export interface CancellationDtoRow {
   listing_id?: string | null;
   listing_title?: string | null;
   listing_asin?: string | null;
+  listing_ebay_item_id?: string | null;
   product_image_urls?: string[] | string | null;
 }
 
@@ -68,7 +69,7 @@ export function cancellationColumnsSql(alias: string, freshnessHours: number): s
 
 /** The product columns over `productJoinsSql` (order `o` → listing `l` → product `p`). */
 export const CANCELLATION_PRODUCT_COLUMNS_SQL =
-  'l.id AS listing_id, l.title AS listing_title, l.asin AS listing_asin, p.image_urls AS product_image_urls';
+  'l.id AS listing_id, l.title AS listing_title, l.asin AS listing_asin, l.ebay_item_id AS listing_ebay_item_id, p.image_urls AS product_image_urls';
 
 const BUCKETS: readonly string[] = Object.values(CancellationBucket);
 
@@ -113,6 +114,7 @@ export function toCancellationDto(row: CancellationDtoRow, actionsEnabled: boole
           title: row.listing_title ?? null,
           imageUrl: firstImageUrl(row.product_image_urls ?? null),
           asin: row.listing_asin ?? null,
+          ebayItemId: row.listing_ebay_item_id ?? null,
         }
       : null,
   };

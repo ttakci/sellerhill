@@ -1,10 +1,7 @@
 {
   "returns": {
     "title": "Rückgaben",
-    "subtitle_one": "{{count}} Rückgabe",
-    "subtitle_other": "{{count}} Rückgaben",
-    "loading": "Rückgaben werden geladen…",
-    "notice": "Öffnen Sie eine Rückgabe, um ihren Verlauf zu sehen und worauf eBay wartet. Wo eBay es zulässt, können Sie sie von hier aus genehmigen, als erhalten markieren oder erstatten; alles andere wird bei eBay beantwortet.",
+    "subtitle": "Sehen Sie die von Käufern eröffneten Rücknahmen, den Schritt, auf den eBay wartet, und die Frist. Öffnen Sie eine Rücknahme, um sie zu genehmigen, als erhalten zu markieren oder zu erstatten, soweit eBay es erlaubt.",
     "tabs": {
       "all": "Alle",
       "action": "Handlungsbedarf",
@@ -27,7 +24,8 @@
       "due": "Fällige Aktion",
       "reason": "Grund",
       "refund": "Erstattung",
-      "opened": "Eröffnet"
+      "opened": "Eröffnet",
+      "deadline": "Frist"
     },
     "bucket": {
       "unconfirmed": "Nicht bestätigt",

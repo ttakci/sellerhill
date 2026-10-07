@@ -1,9 +1,7 @@
 {
   "returns": {
     "title": "退货",
-    "subtitle_other": "{{count}} 笔退货",
-    "loading": "正在加载退货…",
-    "notice": "打开一条退货即可查看其历史记录以及 eBay 正在等待什么。在 eBay 允许的情况下，您可以在这里批准退货、标记为已收到或发放退款；其他操作均在 eBay 上完成。",
+    "subtitle": "查看买家发起的退货、eBay 等待您完成的步骤及其截止时间。打开退货，在 eBay 允许时批准、标记为已收到或退款。",
     "tabs": {
       "all": "全部",
       "action": "需要处理",
@@ -25,7 +23,8 @@
       "due": "待办事项",
       "reason": "原因",
       "refund": "退款",
-      "opened": "发起时间"
+      "opened": "发起时间",
+      "deadline": "截止时间"
     },
     "bucket": {
       "unconfirmed": "未确认",

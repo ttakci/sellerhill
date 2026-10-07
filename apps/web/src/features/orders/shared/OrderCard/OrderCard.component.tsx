@@ -11,6 +11,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   imageUrl,
   ebayOrderId,
   stage,
+  leadingBadge,
   showStage = true,
   shippedDetectedAt,
   statsBadges,
@@ -28,7 +29,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           (late, refund, estimated, blocked reason) read first — up to six side
           by side, wrapping — and the title sits under them. */}
       <S.BadgeRow>
-        {showStage && <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />}
+        {leadingBadge}
+        {showStage && stage && <OrderStageBadge stage={stage} shippedDetectedAt={shippedDetectedAt} size="sm" />}
         {statsBadges?.map((badge) => (
           <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="sm" solid>
             {badge.label}
@@ -61,7 +63,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
                   </S.MetaLabel>
                   <S.MetaValue>
                     {item.storeType ? (
-                      <IdBadge id={item.value} storeType={item.storeType} size="sm" plain />
+                      <IdBadge id={item.value} storeType={item.storeType} href={item.href} size="sm" plain />
                     ) : (
                       <Text variant="body-sm" color="text.primary" numeric>
                         {item.value}

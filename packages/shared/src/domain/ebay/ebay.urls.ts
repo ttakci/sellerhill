@@ -47,6 +47,20 @@ export function buildEbayCancellationUrl(
 }
 
 /**
+ * The seller's own order page on eBay's Seller Hub.
+ *
+ * UNVERIFIED: `/sh/ord/details?orderid=…` is Seller Hub's order-details path as
+ * seen in the browser, not a documented API; the Sandbox host is by analogy.
+ */
+export function buildEbayOrderUrl(
+  orderId: string,
+  environment: EbayEnvironment = EbayEnvironment.PRODUCTION
+): string {
+  const base = EBAY_SITE_URL[environment] ?? EBAY_SITE_URL[EbayEnvironment.PRODUCTION];
+  return `${base}/sh/ord/details?orderid=${encodeURIComponent(orderId)}`;
+}
+
+/**
  * Amazon storefront base URL for a marketplace (Amazon has no sandbox
  * counterpart — one storefront per marketplace, always live).
  */

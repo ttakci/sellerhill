@@ -1,10 +1,7 @@
 {
   "cancellations": {
     "title": "Ləğvlər",
-    "subtitle_one": "{{count}} ləğv sorğusu",
-    "subtitle_other": "{{count}} ləğv sorğusu",
-    "loading": "Ləğv sorğuları yüklənir…",
-    "notice": "Alıcının nə istədiyini və eBay-in cavabınızı nə vaxta qədər gözlədiyini görmək üçün sorğunu açın. Buradan qəbul edə və ya rədd edə bilərsiniz.",
+    "subtitle": "Alıcıların sifariş ləğvi sorğularını və eBay-in cavabınızı nə vaxta qədər gözlədiyini görün. Sorğunu açıb qəbul edin və ya rədd edin.",
     "tabs": {
       "all": "Hamısı",
       "action": "Tədbir tələb edir",
@@ -27,7 +24,8 @@
       "reason": "Səbəb",
       "refund": "Alıcıya geri ödəniş",
       "requested": "Sorğu tarixi",
-      "buyer": "Alıcı"
+      "buyer": "Alıcı",
+      "deadline": "Son tarix"
     },
     "order": "Sifariş",
     "viewOrder": "Sifarişə bax",
@@ -80,7 +78,9 @@
       "paymentStatus": "Ödəniş statusu",
       "closedAt": "Bağlanıb",
       "journey": "Gedişat",
-      "journeyEmpty": "eBay hələ heç bir addım qeyd etməyib."
+      "journeyEmpty": "eBay hələ heç bir addım qeyd etməyib.",
+      "requestId": "Sorğu ID",
+      "orderNo": "Sifariş No"
     },
     "actions": {
       "approve": "Təsdiqlə",
@@ -124,6 +124,14 @@
       "buyerOther": "Alıcı sorğunu yenilədi",
       "sellerOther": "Siz sorğunu yenilədiniz",
       "ebayOther": "eBay sorğunu yenilədi"
+    },
+    "ebayId": "eBay ID",
+    "form": {
+      "shippingTitle": "Göndərmə məlumatı",
+      "shipDate": "Göndərmə tarixi (istəyə bağlı)",
+      "tracking": "İzləmə nömrəsi (istəyə bağlı)",
+      "send": "Göndər",
+      "choose": "Təsdiq və ya rədd seçin."
     }
   }
 }

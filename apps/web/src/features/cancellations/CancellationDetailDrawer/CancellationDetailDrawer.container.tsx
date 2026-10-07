@@ -11,16 +11,39 @@ import type { CancellationDetailDrawerProps } from './CancellationDetailDrawer.t
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
-import { useGetOrderByIdQuery } from '@/features/orders/api/orders.api';
+import type { OrderCardProps } from '@/features/orders/shared/OrderCard';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
+const EMPTY_VALUE = '—';
+
+const ANSWERS: readonly string[] = Object.values(EbayCancellationAction);
+const isAnswer = (value: string): value is EbayCancellationAction => ANSWERS.includes(value);
+
+/** The answer form of one request — reset whenever another request is opened. */
+interface AnswerForm {
+  id: string | null;
+  choice: EbayCancellationAction | null;
+  shipDate: string;
+  tracking: string;
+  choiceMissing: boolean;
+}
+
+const emptyForm = (id: string | null): AnswerForm => ({
+  id,
+  choice: null,
+  shipDate: '',
+  tracking: '',
+  choiceMissing: false,
+});
+
 /**
- * The cancellation detail drawer. Reads the request live from eBay when it
- * opens (one Post-Order call, cached by the API) and sends the two answers
- * eBay still lists on it — each behind a confirm dialog, each re-checked by
- * the API against eBay before anything is written.
+ * The cancellation detail drawer. Reads the request live from eBay when it opens
+ * (one Post-Order call, cached by the API) and sends the answer the seller picks
+ * on eBay's own form — accept, or decline with the optional shipment date and
+ * tracking number. The API re-checks the request against eBay before writing; a
+ * decline sent with neither field falls back to the shipment already pushed to eBay.
  */
 export const CancellationDetailDrawer: React.FC<CancellationDetailDrawerProps> = ({ cancellationId, onClose }) => {
   const { t, i18n } = useTranslation(['cancellations', 'translation']);
@@ -53,49 +76,99 @@ export const CancellationDetailDrawer: React.FC<CancellationDetailDrawerProps> =
     [data, cancellationId, accounts, locale, t]
   );
 
-  /* The pending confirm is keyed by the request it was asked for, so a new
-     request (or a closed drawer) never inherits the previous one's dialog. */
-  const [pending, setPending] = useState<{ id: string; action: EbayCancellationAction } | null>(null);
-  const pendingAction = pending && pending.id === cancellationId ? pending.action : null;
-  const handleRequestAction = useCallback(
-    (action: EbayCancellationAction) => setPending(cancellationId ? { id: cancellationId, action } : null),
-    [cancellationId]
+  const [form, setForm] = useState<AnswerForm>(() => emptyForm(cancellationId));
+  if (form.id !== cancellationId) {
+    setForm(emptyForm(cancellationId));
+  }
+
+  const handleChoiceChange = useCallback(
+    (value: string) =>
+      setForm((current) => ({ ...current, choice: isAnswer(value) ? value : null, choiceMissing: false })),
+    []
   );
-  const handleCancelAction = useCallback(() => setPending(null), []);
+  const handleShipDateChange = useCallback((value: string) => setForm((current) => ({ ...current, shipDate: value })), []);
+  const handleTrackingChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      setForm((current) => ({ ...current, tracking: value }));
+    },
+    []
+  );
 
   const orderId = detail?.row.orderId ?? null;
 
-  /* A decline sends the shipment already pushed to eBay (number AND date — the
-     API sends it only when both exist), so the dialog says so only then. The
-     order is read only while that dialog is open. */
-  const { data: order, isLoading: isOrderLoading } = useGetOrderByIdQuery(orderId ?? '', {
-    skip: pendingAction !== EbayCancellationAction.REJECT || !orderId,
-  });
-  // The decline dialog must not be confirmable before the order answered —
-  // its copy would say "no tracking" while the API sends one.
-  const isConfirmBusy = isActing || (pendingAction === EbayCancellationAction.REJECT && !!orderId && isOrderLoading);
-  const declineTracking =
-    order?.ebayTrackingPushedNumber && order.ebayTrackingPushedAt ? order.ebayTrackingPushedNumber : null;
-
-  const confirmDescription = useMemo(() => {
-    if (!pendingAction) {
-      return '';
+  /* The order card's facts and figures — the same card the orders list draws. */
+  const orderMeta = useMemo<OrderCardProps['meta']>(() => {
+    if (!detail) {
+      return [];
     }
-    const withTracking = pendingAction === EbayCancellationAction.REJECT && declineTracking;
-    return t(`cancellations.confirm.${pendingAction}.${withTracking ? 'bodyWithTracking' : 'body'}`, {
-      tracking: declineTracking ?? '',
-    });
-  }, [pendingAction, declineTracking, t]);
+    const { row } = detail;
+    const facts: OrderCardProps['meta'] = [];
+    if (row.ebayOrderId) {
+      facts.push({
+        label: t('cancellations.detail.orderNo'),
+        value: row.ebayOrderId,
+        ...(detail.ebayOrderUrl ? { storeType: 'ebay' as const, href: detail.ebayOrderUrl } : {}),
+      });
+    }
+    if (row.buyerLoginName) {
+      facts.push({ label: t('cancellations.columns.buyer'), value: row.buyerLoginName });
+    }
+    if (row.requestedAt) {
+      facts.push({ label: t('cancellations.columns.requested'), value: row.requestedAt });
+    }
+    if (detail.closedAt) {
+      facts.push({ label: t('cancellations.detail.closedAt'), value: detail.closedAt });
+    }
+    if (detail.paymentStatus) {
+      facts.push({ label: t('cancellations.detail.paymentStatus'), value: detail.paymentStatus });
+    }
+    return [...facts, ...row.productMeta.map((m) => ({ label: m.label, value: m.id, storeType: m.storeType }))];
+  }, [detail, t]);
 
-  const handleConfirmAction = useCallback(() => {
-    if (!cancellationId || !pending || pending.id !== cancellationId) {
+  const orderStats = useMemo<OrderCardProps['stats']>(() => {
+    if (!detail) {
+      return [];
+    }
+    return [
+      { label: t('cancellations.detail.requestedRefund'), value: detail.requestedRefund ?? EMPTY_VALUE },
+      ...(detail.actualRefund ? [{ label: t('cancellations.detail.actualRefund'), value: detail.actualRefund }] : []),
+      ...(detail.amountOwed
+        ? [{ label: t('cancellations.detail.amountOwed'), value: detail.amountOwed, tone: 'negative' as const }]
+        : []),
+    ];
+  }, [detail, t]);
+
+  const handleOpenOrder = useCallback(() => {
+    if (orderId) {
+      localeNavigate(`/orders/${orderId}`);
+    }
+  }, [orderId, localeNavigate]);
+
+  const handleSend = useCallback(() => {
+    if (!cancellationId) {
       return;
     }
-    const action = pending.action;
-    actOnCancellation({ id: cancellationId, action, orderId })
+    if (!form.choice) {
+      setForm((current) => ({ ...current, choiceMissing: true }));
+      return;
+    }
+    const action = form.choice;
+    const tracking = form.tracking.trim();
+    const body =
+      action === EbayCancellationAction.REJECT
+        ? {
+            ...(form.shipDate ? { shipmentDate: form.shipDate } : {}),
+            ...(tracking ? { trackingNumber: tracking } : {}),
+          }
+        : undefined;
+    actOnCancellation({ id: cancellationId, action, orderId, body })
       .unwrap()
       .then(() => {
-        setPending(null);
+        // eBay holds the answer and the API has re-read the request: close the
+        // drawer, the list refetches the row with its new state.
+        setForm(emptyForm(cancellationId));
+        onClose();
         showMessage(
           {
             type: 'success',
@@ -107,7 +180,6 @@ export const CancellationDetailDrawer: React.FC<CancellationDetailDrawerProps> =
         );
       })
       .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-        setPending(null);
         // The API names WHY as an i18n key (`cancellations.errors.*`): the
         // switch is off, eBay no longer offers it, eBay refused the call…
         showMessage(
@@ -120,21 +192,7 @@ export const CancellationDetailDrawer: React.FC<CancellationDetailDrawerProps> =
           t
         );
       });
-  }, [cancellationId, pending, orderId, actOnCancellation, showMessage, closeMessage, t]);
-
-  const ebayUrl = detail?.ebayUrl ?? null;
-
-  const handleViewOrder = useCallback(() => {
-    if (orderId) {
-      localeNavigate(`/orders/${orderId}`);
-    }
-  }, [orderId, localeNavigate]);
-
-  const handleOpenOnEbay = useCallback(() => {
-    if (ebayUrl) {
-      window.open(ebayUrl, '_blank', 'noopener,noreferrer');
-    }
-  }, [ebayUrl]);
+  }, [cancellationId, form, orderId, actOnCancellation, onClose, showMessage, closeMessage, t]);
 
   return (
     <CancellationDetailDrawerComponent
@@ -143,14 +201,19 @@ export const CancellationDetailDrawer: React.FC<CancellationDetailDrawerProps> =
       isLoading={isLoading || (isFetching && !detail)}
       isError={isError}
       detail={detail}
-      onViewOrder={orderId ? handleViewOrder : undefined}
-      onOpenOnEbay={ebayUrl ? handleOpenOnEbay : undefined}
-      onRequestAction={handleRequestAction}
-      pendingAction={pendingAction}
-      confirmDescription={confirmDescription}
-      onConfirmAction={handleConfirmAction}
-      onCancelAction={handleCancelAction}
-      isActing={isConfirmBusy}
+      locale={locale}
+      choice={form.choice}
+      onChoiceChange={handleChoiceChange}
+      shipDate={form.shipDate}
+      onShipDateChange={handleShipDateChange}
+      tracking={form.tracking}
+      onTrackingChange={handleTrackingChange}
+      choiceMissing={form.choiceMissing}
+      onSend={handleSend}
+      isActing={isActing}
+      orderMeta={orderMeta}
+      orderStats={orderStats}
+      onOpenOrder={orderId ? handleOpenOrder : undefined}
     />
   );
 };

@@ -74,7 +74,7 @@ export function useCampaignDetailView(
     !detail || writable
       ? null
       : detail.eligibility.status === 'INELIGIBLE'
-        ? t('campaigns.eligibility.ineligible', { reason: detail.eligibility.reason || unavailable })
+        ? t('campaigns.eligibility.ineligible')
         : detail.eligibility.status !== 'ELIGIBLE'
           ? t('campaigns.detail.eligibilityUnavailable')
           : detail.campaign.readOnlyReason

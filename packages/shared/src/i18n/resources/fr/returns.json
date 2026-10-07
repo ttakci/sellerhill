@@ -1,11 +1,7 @@
 {
   "returns": {
     "title": "Retours",
-    "subtitle_one": "{{count}} retour",
-    "subtitle_many": "{{count}} retours",
-    "subtitle_other": "{{count}} retours",
-    "loading": "Chargement des retours…",
-    "notice": "Ouvrez un retour pour voir son historique et ce qu'eBay attend. Là où eBay l'autorise, vous pouvez l'approuver, le marquer comme reçu ou rembourser d'ici ; tout le reste se répond sur eBay.",
+    "subtitle": "Consultez les retours ouverts par les acheteurs, l'étape attendue par eBay et son échéance. Ouvrez un retour pour l'accepter, le marquer comme reçu ou le rembourser lorsque eBay le permet.",
     "tabs": {
       "all": "Tous",
       "action": "Action requise",
@@ -29,7 +25,8 @@
       "due": "Action attendue",
       "reason": "Motif",
       "refund": "Remboursement",
-      "opened": "Ouvert le"
+      "opened": "Ouvert le",
+      "deadline": "Échéance"
     },
     "bucket": {
       "unconfirmed": "Non confirmé",

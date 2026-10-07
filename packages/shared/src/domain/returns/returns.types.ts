@@ -175,6 +175,9 @@ export interface ReturnsQueryDto {
   ebayAccountId?: string;
   /** Matches the eBay return id, the eBay order id or the product title. */
   search?: string;
+  /** Omitted = the default order (what needs the seller first, soonest deadline first). */
+  sortBy?: 'openedAt' | 'dueBy' | 'refund';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface PaginatedReturnsDto {

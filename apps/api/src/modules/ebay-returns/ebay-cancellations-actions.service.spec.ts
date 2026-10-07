@@ -273,7 +273,12 @@ describe('EbayCancellationsActionsService.list', () => {
       page: 2,
       limit: 5,
     });
-    expect(page.items[0].product).toEqual({ title: 'Desk lamp', imageUrl: 'https://img.example/lamp.jpg', asin: 'B000000001' });
+    expect(page.items[0].product).toEqual({
+      title: 'Desk lamp',
+      imageUrl: 'https://img.example/lamp.jpg',
+      asin: 'B000000001',
+      ebayItemId: null,
+    });
     const [countSql, countParams] = query.mock.calls.find(([q]) => q.includes('COUNT(*)')) ?? [''];
     expect(countSql).toContain('LEFT JOIN listings l ON l.id = o.listing_id');
     expect(countSql).toContain('c.ebay_account_id = $3::uuid AND c.order_id = $4::uuid');
@@ -410,6 +415,30 @@ describe('buildRejectCancelBody', () => {
     expect(buildRejectCancelBody({ ebay_tracking_pushed_number: '  ', ebay_tracking_pushed_at: SHIPPED_AT })).toEqual({});
     expect(buildRejectCancelBody({ ebay_tracking_pushed_number: '1Z999', ebay_tracking_pushed_at: null })).toEqual({});
     expect(buildRejectCancelBody({ ebay_tracking_pushed_number: '1Z999', ebay_tracking_pushed_at: SHIPPED_AT })).toEqual({
+      shipmentDate: { value: SHIPPED_AT.toISOString() },
+      trackingNumber: '1Z999',
+    });
+  });
+
+  it('sends what the seller typed on the decline form before the pushed shipment', () => {
+    const pushed = { ebay_tracking_pushed_number: '1Z999', ebay_tracking_pushed_at: SHIPPED_AT };
+    const now = new Date('2026-10-07T09:30:00.000Z');
+    // eBay format (reference sample: 2022-03-20T00:00:00.000Z); the picked day at 12:00 UTC.
+    expect(buildRejectCancelBody(pushed, { shipmentDate: '2026-10-05', trackingNumber: ' AQUA123 ' }, now)).toEqual({
+      shipmentDate: { value: '2026-10-05T12:00:00.000Z' },
+      trackingNumber: 'AQUA123',
+    });
+    // Each field is optional on eBay's side, so one alone is sent alone.
+    expect(buildRejectCancelBody(pushed, { trackingNumber: 'AQUA123' })).toEqual({ trackingNumber: 'AQUA123' });
+    expect(buildRejectCancelBody(pushed, { shipmentDate: '2026-10-05' }, now)).toEqual({
+      shipmentDate: { value: '2026-10-05T12:00:00.000Z' },
+    });
+    // Today (or a future day) is never sent later than now.
+    expect(buildRejectCancelBody(pushed, { shipmentDate: '2026-10-07' }, now)).toEqual({
+      shipmentDate: { value: '2026-10-07T09:30:00.000Z' },
+    });
+    // A malformed date and a blank number count as not entered.
+    expect(buildRejectCancelBody(pushed, { shipmentDate: '05.10.2026', trackingNumber: '  ' })).toEqual({
       shipmentDate: { value: SHIPPED_AT.toISOString() },
       trackingNumber: '1Z999',
     });

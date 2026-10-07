@@ -13,6 +13,8 @@ export type { IconButtonProps, IconButtonVariant } from './atoms/IconButton';
 
 export { Checkbox } from './atoms/Checkbox';
 export type { CheckboxProps } from './atoms/Checkbox';
+export { Radio } from './atoms/Radio';
+export type { RadioProps } from './atoms/Radio';
 
 export { Toggle } from './atoms/Toggle';
 export type { ToggleProps } from './atoms/Toggle';

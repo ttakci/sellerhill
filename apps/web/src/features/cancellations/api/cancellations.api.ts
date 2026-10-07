@@ -12,6 +12,7 @@ import {
   type CancellationBucketCountsDto,
   type CancellationsQueryDto,
   type EbayCancellationAction,
+  type EbayCancellationActionRequestDto,
   type EbayCancellationActionResultDto,
   type EbayCancellationDetailDto,
   type PaginatedCancellationsDto,
@@ -41,6 +42,10 @@ export const cancellationsApi = baseApi.injectEndpoints({
           if (filters.search) {
             params.search = filters.search;
           }
+          if (filters.sortBy) {
+            params.sortBy = filters.sortBy;
+            params.sortOrder = filters.sortOrder ?? 'desc';
+          }
         }
         return { url: '/cancellations', params };
       },
@@ -68,11 +73,12 @@ export const cancellationsApi = baseApi.injectEndpoints({
      */
     actOnCancellation: builder.mutation<
       EbayCancellationActionResultDto,
-      { id: string; action: EbayCancellationAction; orderId?: string | null }
+      { id: string; action: EbayCancellationAction; orderId?: string | null; body?: EbayCancellationActionRequestDto }
     >({
-      query: ({ id, action }) => ({
+      query: ({ id, action, body }) => ({
         url: `/cancellations/${encodeURIComponent(id)}/actions/${action}`,
         method: 'POST',
+        body: body ?? {},
       }),
       invalidatesTags: (_result, _error, { id, orderId }) => [
         { type: 'Cancellations', id },

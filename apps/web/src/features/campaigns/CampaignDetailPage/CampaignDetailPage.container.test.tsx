@@ -306,7 +306,7 @@ describe('campaign detail and writes', () => {
     expect(screen.getByRole('button', { name: 'Add listings' })).toBeDisabled();
     expect(
       screen.getByText(
-        status ? /NOT_ENOUGH_ACTIVITY/ : 'Advertising eligibility is unavailable. Campaign changes are disabled.'
+        status ? 'Advertising is unavailable for this store.' : 'Advertising eligibility is unavailable. Campaign changes are disabled.'
       )
     ).toBeInTheDocument();
   });

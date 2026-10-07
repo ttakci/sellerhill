@@ -4,6 +4,8 @@ import type { RevisionHistoryRow } from './RevisionHistoryPage.types';
 
 import type { ListingCardProps, ListingCardStat } from '@/domain-ui';
 
+const EMPTY_VALUE = '—';
+
 const changeStat = (
   label: string,
   previous: string,
@@ -26,29 +28,32 @@ export const toRevisionCardProps = (
   row: RevisionHistoryRow,
   t: TFunction
 ): Omit<ListingCardProps, 'orientation' | 'onClick'> => {
+  // Our eBay sale price, the Amazon price behind it and the Amazon stock — each
+  // as `previous → new` when this revision moved it. A row older than the column
+  // that records it shows an em dash rather than dropping the cell.
   const stats: ListingCardStat[] = [
-    changeStat(t('listings.table.price'), row.previousPrice, row.newPrice, row.priceChanged, row.priceIncreased),
-  ];
-  if (row.newSourceStock !== null) {
-    stats.push(
-      changeStat(
-        t('listings.detail.revisions.sourceStockChange'),
-        row.previousSourceStock ?? row.newSourceStock,
-        row.newSourceStock,
-        row.sourceStockChanged,
-        row.sourceStockIncreased
-      )
-    );
-  }
-  stats.push(
     changeStat(
-      t('listings.detail.revisions.quantityChange'),
-      row.previousQuantity,
-      row.newQuantity,
-      row.quantityChanged,
-      row.quantityIncreased
-    )
-  );
+      t('listings.detail.revisions.priceChange'),
+      row.previousPrice,
+      row.newPrice,
+      row.priceChanged,
+      row.priceIncreased
+    ),
+    changeStat(
+      t('listings.detail.revisions.sourcePriceChange'),
+      row.previousSourcePrice ?? EMPTY_VALUE,
+      row.newSourcePrice ?? EMPTY_VALUE,
+      row.sourcePriceChanged,
+      row.sourcePriceIncreased
+    ),
+    changeStat(
+      t('listings.detail.revisions.sourceStockChange'),
+      row.previousSourceStock ?? EMPTY_VALUE,
+      row.newSourceStock ?? EMPTY_VALUE,
+      row.sourceStockChanged,
+      row.sourceStockIncreased
+    ),
+  ];
 
   return {
     title: row.title,

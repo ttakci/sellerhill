@@ -1,10 +1,7 @@
 {
   "cancellations": {
     "title": "Stornierungen",
-    "subtitle_one": "{{count}} Stornierungsanfrage",
-    "subtitle_other": "{{count}} Stornierungsanfragen",
-    "loading": "Stornierungsanfragen werden geladen…",
-    "notice": "Öffnen Sie eine Anfrage, um zu sehen, was der Käufer möchte und bis wann eBay Ihre Antwort braucht. Sie können sie hier annehmen oder ablehnen.",
+    "subtitle": "Sehen Sie die Stornierungsanfragen von Käufern und bis wann eBay Ihre Antwort braucht. Öffnen Sie eine Anfrage, um sie anzunehmen oder abzulehnen.",
     "tabs": {
       "all": "Alle",
       "action": "Handlungsbedarf",
@@ -27,7 +24,8 @@
       "reason": "Grund",
       "refund": "Erstattung an Käufer",
       "requested": "Angefragt am",
-      "buyer": "Käufer"
+      "buyer": "Käufer",
+      "deadline": "Frist"
     },
     "order": "Bestellung",
     "viewOrder": "Bestellung ansehen",
@@ -80,7 +78,9 @@
       "paymentStatus": "Zahlungsstatus",
       "closedAt": "Geschlossen",
       "journey": "Verlauf",
-      "journeyEmpty": "eBay hat noch keinen Schritt aufgezeichnet."
+      "journeyEmpty": "eBay hat noch keinen Schritt aufgezeichnet.",
+      "requestId": "Anfrage-ID",
+      "orderNo": "Bestellnr."
     },
     "actions": {
       "approve": "Genehmigen",
@@ -124,6 +124,14 @@
       "buyerOther": "Der Käufer hat die Anfrage aktualisiert",
       "sellerOther": "Sie haben die Anfrage aktualisiert",
       "ebayOther": "eBay hat die Anfrage aktualisiert"
+    },
+    "ebayId": "eBay-ID",
+    "form": {
+      "shippingTitle": "Versandinformationen",
+      "shipDate": "Versanddatum (optional)",
+      "tracking": "Sendungsnummer (optional)",
+      "send": "Senden",
+      "choose": "Wählen Sie Annehmen oder Ablehnen."
     }
   }
 }

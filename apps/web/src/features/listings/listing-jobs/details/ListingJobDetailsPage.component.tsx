@@ -1,7 +1,7 @@
 import { ListingJobStatus, ListingStatus, type ListingJobItemDto } from '@repo/shared';
 import { Badge, Button, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, Text } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { jobStatusBadgeVariant } from '../shared/job-status-badge';
 
@@ -231,7 +231,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
               </Badge>
               {canCancel ? (
                 <Button
-                  variant="danger-tint"
+                  variant="danger"
                   size="small"
                   onClick={onCancelRequest}
                   isLoading={isCancelling}
@@ -346,7 +346,14 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
-          resultLabel={t('listings.jobs.items.resultCount', { count: filteredItemCount })}
+          resultLabel={
+            <Trans
+              i18nKey="listings.filters.resultListed"
+              ns="listings"
+              values={{ count: filteredItemCount }}
+              components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+            />
+          }
           data={paginatedItems}
           renderGridCard={renderItemCard}
           viewMode={viewMode}

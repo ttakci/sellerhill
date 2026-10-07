@@ -153,7 +153,7 @@ export function CampaignsPageComponent({
       ) : (
         <S.Stack>
           {eligibilityMessage && (
-            <InfoMessage type="warning">
+            <InfoMessage type="info">
               <Text variant="body-sm">{eligibilityMessage}</Text>
             </InfoMessage>
           )}

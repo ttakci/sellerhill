@@ -139,6 +139,13 @@ const RETURN_BUCKETS = new Set<string>(Object.values(ReturnBucket));
  * Every statement is scoped `WHERE r.user_id = $1`
  * (`ebay-returns.guard.spec.ts` checks each one).
  */
+/** Seller-picked list sorts → SQL column. Interpolated, so only these keys ever reach the statement. */
+const RETURN_SORT_COLUMNS: Record<NonNullable<ReturnsQueryDto['sortBy']>, string> = {
+  openedAt: 'r.created_on_ebay_at',
+  dueBy: 'r.seller_respond_by',
+  refund: 'COALESCE(r.actual_refund_amount, r.estimated_refund_amount)',
+};
+
 @Injectable()
 export class EbayReturnsService {
   constructor(
@@ -213,9 +220,16 @@ export class EbayReturnsService {
          FROM ebay_returns r
        ${PRODUCT_JOINS}
         WHERE r.user_id = $1${filters}
-        ORDER BY CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
+        ORDER BY ${
+          // A seller-picked sort replaces the default; the actionable-first CASE stays
+          // in the statement so `$${actionableIndex}` is always referenced.
+          query.sortBy
+            ? `${RETURN_SORT_COLUMNS[query.sortBy]} ${query.sortOrder === 'asc' ? 'ASC' : 'DESC'} NULLS LAST,
+                 CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,`
+            : `CASE WHEN ${bucketSql} = ANY($${actionableIndex}::text[]) THEN 0 ELSE 1 END,
                  r.seller_respond_by ASC NULLS LAST,
-                 r.created_on_ebay_at DESC NULLS LAST,
+                 r.created_on_ebay_at DESC NULLS LAST,`
+        }
                  r.id ASC
         LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
       [...params, [...ACTIONABLE_RETURN_BUCKETS], limit, (page - 1) * limit]

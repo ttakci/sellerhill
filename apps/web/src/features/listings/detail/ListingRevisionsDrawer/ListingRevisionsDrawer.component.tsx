@@ -83,6 +83,16 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
       </S.DateRibbon>
       <S.CardBody>
         <S.ChangeStack>
+        {row.newSourcePrice !== null && (
+          <ChangeLine
+            label={t('listings.detail.revisions.sourcePriceChange')}
+            previous={row.previousSourcePrice ?? row.newSourcePrice}
+            next={row.newSourcePrice}
+            changed={row.sourcePriceChanged}
+            increased={row.sourcePriceIncreased}
+            delta={row.sourcePriceDelta}
+          />
+        )}
         <ChangeLine
           label={t('listings.detail.revisions.priceChange')}
           previous={row.previousPrice}

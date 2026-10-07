@@ -1,10 +1,7 @@
 {
   "returns": {
     "title": "Returns",
-    "subtitle_one": "{{count}} return",
-    "subtitle_other": "{{count}} returns",
-    "loading": "Loading returns…",
-    "notice": "Open a return to see its history and what eBay is waiting for. Where eBay allows it, you can approve it, mark it received or refund from here; everything else is answered on eBay.",
+    "subtitle": "See the returns buyers opened, the step eBay is waiting for and its deadline. Open one to approve it, mark it received or refund it where eBay allows.",
     "tabs": {
       "all": "All",
       "action": "Needs action",
@@ -27,7 +24,8 @@
       "due": "What is due",
       "reason": "Reason",
       "refund": "Refund",
-      "opened": "Opened"
+      "opened": "Opened",
+      "deadline": "Deadline"
     },
     "bucket": {
       "unconfirmed": "Not confirmed",

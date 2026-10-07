@@ -85,6 +85,20 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
             <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>
               {statusLabel(job.status)}
             </Badge>
+            {canCancel ? (
+              <Button
+                variant="danger"
+                size="small"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onCancelRequest(job.id);
+                }}
+                isLoading={cancellingJobId === job.id}
+                disabled={Boolean(cancellingJobId)}
+              >
+                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+              </Button>
+            ) : null}
           </S.JobCardHeader>
 
           <S.JobCardBody>
@@ -181,20 +195,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
             </S.StatCell>
           ) : null}
           <S.FooterActions>
-            {canCancel ? (
-              <Button
-                variant="danger-tint"
-                size="small"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onCancelRequest(job.id);
-                }}
-                isLoading={cancellingJobId === job.id}
-                disabled={Boolean(cancellingJobId)}
-              >
-                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-              </Button>
-            ) : null}
             <S.DetailHint>
               <Text variant="caption" weight="semibold" color="brand.primary">
                 {t('translation:common.details')}

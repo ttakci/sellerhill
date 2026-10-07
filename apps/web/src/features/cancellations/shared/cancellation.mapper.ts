@@ -40,10 +40,8 @@ export function toCancellationRowView(item: EbayCancellationDto, ctx: Cancellati
   // or unconfirmed one shows nothing due.
   const answerDue = item.bucket === CancellationBucket.ACTION_DUE || item.bucket === CancellationBucket.ACTION_OVERDUE;
   const dueLabel = answerDue ? translate('cancellations.answer') : null;
-  const dueBy =
-    answerDue && item.sellerRespondBy
-      ? translate('cancellations.dueBy', { date: formatDate(item.sellerRespondBy, locale, WHEN_FORMAT) })
-      : null;
+  const dueDate = answerDue && item.sellerRespondBy ? formatDate(item.sellerRespondBy, locale, WHEN_FORMAT) : null;
+  const dueBy = dueDate ? translate('cancellations.dueBy', { date: dueDate }) : null;
 
   const productMeta: ProductTableCellMetaRow[] = [];
   if (item.product?.asin) {
@@ -52,6 +50,14 @@ export function toCancellationRowView(item: EbayCancellationDto, ctx: Cancellati
       id: item.product.asin,
       storeType: 'amazon',
       icon: 'barcode',
+    });
+  }
+  if (item.product?.ebayItemId) {
+    productMeta.push({
+      label: translate('cancellations.ebayId'),
+      id: item.product.ebayItemId,
+      storeType: 'ebay',
+      icon: 'tag',
     });
   }
 
@@ -73,6 +79,7 @@ export function toCancellationRowView(item: EbayCancellationDto, ctx: Cancellati
     buyerLoginName: item.buyerLoginName,
     dueLabel,
     dueBy,
+    dueDate,
     isOverdue: item.bucket === CancellationBucket.ACTION_OVERDUE,
     reasonLabel: translate(`cancellations.reason.${reasonKey}`),
     reasonRaw: reasonKey === 'other' ? item.reason : null,
@@ -114,6 +121,7 @@ export function toCancellationDetailView(
     // A stored-only read offers nothing, whatever the stored row says.
     actions: dto.live ? dto.availableActions : [],
     ebayUrl: dto.ebayUrl,
+    ebayOrderUrl: dto.ebayOrderUrl,
     requestedRefund: money(dto.requestedRefundAmount),
     actualRefund: money(dto.actualRefundAmount),
     amountOwed: money(dto.amountToRecoup),

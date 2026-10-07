@@ -1,10 +1,7 @@
 {
   "returns": {
     "title": "İadeler",
-    "subtitle_one": "{{count}} iade",
-    "subtitle_other": "{{count}} iade",
-    "loading": "İadeler yükleniyor…",
-    "notice": "Bir iadeyi açınca geçmişini ve eBay'in sizden ne beklediğini görürsünüz. eBay izin verdiğinde onaylama, teslim alındı işaretleme ve geri ödemeyi buradan yapabilirsiniz; geri kalan her şey eBay üzerinden yanıtlanır.",
+    "subtitle": "Alıcıların açtığı iadeleri, eBay'in sizden beklediği adımı ve son tarihini görün. Bir iadeyi açıp eBay izin verdiğinde onaylayın, teslim alındı olarak işaretleyin veya geri ödeyin.",
     "tabs": {
       "all": "Tümü",
       "action": "Aksiyon gerekli",
@@ -27,7 +24,8 @@
       "due": "Sizden beklenen",
       "reason": "Neden",
       "refund": "Geri ödeme",
-      "opened": "Açılış"
+      "opened": "Açılış",
+      "deadline": "Son tarih"
     },
     "bucket": {
       "unconfirmed": "Doğrulanmadı",

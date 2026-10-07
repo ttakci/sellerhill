@@ -62,6 +62,8 @@ export interface EbayCancellationProductDto {
   title: string | null;
   imageUrl: string | null;
   asin: string | null;
+  /** The listing's eBay item id. */
+  ebayItemId: string | null;
 }
 
 export interface EbayCancellationDto {
@@ -110,6 +112,9 @@ export interface CancellationsQueryDto {
   search?: string;
   /** SellerHill order id — the requests filed against one order. */
   orderId?: string;
+  /** Omitted = the default order (requests awaiting an answer first, soonest deadline first). */
+  sortBy?: 'requestedAt' | 'dueBy' | 'refund';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type CancellationBucketCountsDto = Record<CancellationBucket, number>;
@@ -146,6 +151,8 @@ export interface EbayCancellationDetailDto extends EbayCancellationDto {
   paymentStatus: string | null;
   /** eBay's own page for the request (`buildEbayCancellationUrl`). */
   ebayUrl: string | null;
+  /** The order on eBay's Seller Hub (`buildEbayOrderUrl`); null when the request names no order. */
+  ebayOrderUrl: string | null;
 }
 
 /** `GET /v1/cancellations` — the seller's BUYER requests, those awaiting an answer first. */
@@ -158,6 +165,17 @@ export interface PaginatedCancellationsDto {
 
 export interface EbayCancellationActionResultDto {
   action: EbayCancellationAction;
+}
+
+/**
+ * Optional body of a REJECT: the shipment the seller enters on the decline form
+ * (eBay's own decline page asks for the same two fields). Both optional; when
+ * neither is sent the API falls back to the shipment already pushed to eBay.
+ */
+export interface EbayCancellationActionRequestDto {
+  /** `YYYY-MM-DD`, the day the order shipped. */
+  shipmentDate?: string;
+  trackingNumber?: string;
 }
 
 /** i18n keys the API answers a refused or failed action with (`message`), in the `cancellations` namespace. */

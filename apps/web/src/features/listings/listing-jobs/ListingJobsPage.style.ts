@@ -102,7 +102,7 @@ export const JobCardTop = styled.div`
 
 export const JobCardHeader = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;

@@ -228,7 +228,16 @@ interface RevisionRow {
   previous_source_stock_status: string | null;
   new_source_stock: number | null;
   new_source_stock_status: string | null;
+  previous_source_price: string | null;
+  new_source_price: string | null;
 }
+
+/** `GET /listings/revisions` sort keys → SQL column (never interpolate the raw query value). */
+const REVISION_SORT_COLUMNS: Record<string, string> = {
+  recordedAt: 'r.recorded_at',
+  price: 'r.new_price',
+  product: 'LOWER(p.title)',
+};
 
 const SOURCE_STOCK_STATUSES = new Set<string>(Object.values(SourceStockStatus));
 
@@ -248,6 +257,8 @@ function mapRevisionRow(row: RevisionRow): ListingRevisionDto {
     previousSourceStockStatus: asSourceStockStatus(row.previous_source_stock_status),
     newSourceStock: row.new_source_stock,
     newSourceStockStatus: asSourceStockStatus(row.new_source_stock_status),
+    previousSourcePrice: row.previous_source_price === null ? null : Number(row.previous_source_price),
+    newSourcePrice: row.new_source_price === null ? null : Number(row.new_source_price),
     recordedAt: row.recorded_at.toISOString(),
   };
 }
@@ -1041,7 +1052,8 @@ export class ListingsService {
 
     const results = await this.databaseService.query<RevisionRow>(
       `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
-              r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status
+              r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status,
+              r.previous_source_price, r.new_source_price
        FROM listing_revisions r
        JOIN listings l ON l.id = r.listing_id
        WHERE r.listing_id = $1 AND l.user_id = $2
@@ -1124,6 +1136,9 @@ export class ListingsService {
       conditions.push(`l.ebay_account_id::text = $${params.length}`);
     }
     const where = conditions.join(' AND ');
+    // Whitelisted — the column and direction are interpolated, never the raw query value.
+    const sortColumn = REVISION_SORT_COLUMNS[query.sortBy ?? 'recordedAt'] ?? REVISION_SORT_COLUMNS.recordedAt;
+    const orderBy = `${sortColumn} ${query.sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
 
     const countResult = await this.databaseService.query<{ count: string }>(
       `SELECT COUNT(*)::text AS count
@@ -1149,6 +1164,7 @@ export class ListingsService {
     }>(
       `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
               r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status,
+              r.previous_source_price, r.new_source_price,
               l.id AS listing_id, l.ebay_account_id, l.ebay_item_id, l.created_at AS listing_created_at,
               p.asin, p.title, p.image_urls, p.brand,
               ea.marketplace_id AS ebay_marketplace_id,
@@ -1158,7 +1174,7 @@ export class ListingsService {
        JOIN products p ON p.id = l.product_id
        LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
        WHERE ${where}
-       ORDER BY r.recorded_at DESC, r.id DESC
+       ORDER BY ${orderBy}, r.id DESC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset]
     );

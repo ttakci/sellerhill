@@ -116,13 +116,17 @@ export class EbayReturnsController {
   @ApiQuery({ name: 'tab', required: false, enum: ReturnTab })
   @ApiQuery({ name: 'ebayAccountId', required: false, description: 'eBay account id (UUID)' })
   @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'sortBy', required: false, enum: ['openedAt', 'dueBy', 'refund'] })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   list(
     @Request() req: AuthedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('tab') tab?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
-    @Query('search') search?: string
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string
   ): Promise<PaginatedReturnsDto> {
     return this.returns.list(req.user.sub, {
       page: parsePositiveInt(page),
@@ -130,6 +134,8 @@ export class EbayReturnsController {
       tab: parseTab(tab),
       ebayAccountId: parseAccountId(ebayAccountId),
       search: typeof search === 'string' && search.trim() !== '' ? search.trim() : undefined,
+      sortBy: sortBy === 'openedAt' || sortBy === 'dueBy' || sortBy === 'refund' ? sortBy : undefined,
+      sortOrder: sortOrder === 'asc' ? 'asc' : 'desc',
     });
   }
 

@@ -1,14 +1,7 @@
 {
   "cancellations": {
     "title": "الإلغاءات",
-    "subtitle_zero": "لا توجد طلبات إلغاء",
-    "subtitle_one": "طلب إلغاء واحد",
-    "subtitle_two": "طلبا إلغاء",
-    "subtitle_few": "{{count}} طلبات إلغاء",
-    "subtitle_many": "{{count}} طلب إلغاء",
-    "subtitle_other": "{{count}} طلب إلغاء",
-    "loading": "جارٍ تحميل طلبات الإلغاء…",
-    "notice": "افتح طلبًا لترى ما طلبه المشتري ومتى يحتاج eBay إلى ردك. يمكنك قبوله أو رفضه من هنا.",
+    "subtitle": "اطّلع على طلبات المشترين لإلغاء الطلبات والموعد الذي ينتظر فيه eBay ردّك. افتح طلبًا لقبوله أو رفضه.",
     "tabs": {
       "all": "الكل",
       "action": "تحتاج إجراء",
@@ -35,7 +28,8 @@
       "reason": "السبب",
       "refund": "المبلغ المسترد للمشتري",
       "requested": "تاريخ الطلب",
-      "buyer": "المشتري"
+      "buyer": "المشتري",
+      "deadline": "الموعد النهائي"
     },
     "order": "الطلب",
     "viewOrder": "عرض الطلب",
@@ -88,7 +82,9 @@
       "paymentStatus": "حالة الدفع",
       "closedAt": "مغلق",
       "journey": "مسار الطلب",
-      "journeyEmpty": "لم يسجّل eBay أي خطوة بعد."
+      "journeyEmpty": "لم يسجّل eBay أي خطوة بعد.",
+      "requestId": "معرّف الطلب",
+      "orderNo": "رقم الطلب"
     },
     "actions": {
       "approve": "موافقة",
@@ -132,6 +128,14 @@
       "buyerOther": "حدّث المشتري الطلب",
       "sellerOther": "حدّثت الطلب",
       "ebayOther": "حدّث eBay الطلب"
+    },
+    "ebayId": "معرّف eBay",
+    "form": {
+      "shippingTitle": "معلومات الشحن",
+      "shipDate": "تاريخ الشحن (اختياري)",
+      "tracking": "رقم التتبع (اختياري)",
+      "send": "إرسال",
+      "choose": "اختر القبول أو الرفض."
     }
   }
 }

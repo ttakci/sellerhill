@@ -1,9 +1,7 @@
 {
   "cancellations": {
     "title": "取消订单",
-    "subtitle_other": "{{count}} 个取消请求",
-    "loading": "正在加载取消请求…",
-    "notice": "打开一个请求，即可查看买家提出了什么，以及 eBay 需要您在何时之前答复。您可以直接在这里接受或拒绝。",
+    "subtitle": "查看买家的订单取消请求，以及 eBay 需要您在何时之前答复。打开请求即可接受或拒绝。",
     "tabs": {
       "all": "全部",
       "action": "需要处理",
@@ -25,7 +23,8 @@
       "reason": "原因",
       "refund": "退给买家的金额",
       "requested": "请求时间",
-      "buyer": "买家"
+      "buyer": "买家",
+      "deadline": "截止时间"
     },
     "order": "订单",
     "viewOrder": "查看订单",
@@ -78,7 +77,9 @@
       "paymentStatus": "付款状态",
       "closedAt": "已关闭",
       "journey": "处理过程",
-      "journeyEmpty": "eBay 尚未记录任何步骤。"
+      "journeyEmpty": "eBay 尚未记录任何步骤。",
+      "requestId": "请求 ID",
+      "orderNo": "订单号"
     },
     "actions": {
       "approve": "批准",
@@ -122,6 +123,14 @@
       "buyerOther": "买家更新了请求",
       "sellerOther": "您更新了请求",
       "ebayOther": "eBay 更新了请求"
+    },
+    "ebayId": "eBay ID",
+    "form": {
+      "shippingTitle": "发货信息",
+      "shipDate": "发货日期（可选）",
+      "tracking": "跟踪号（可选）",
+      "send": "发送",
+      "choose": "请选择接受或拒绝。"
     }
   }
 }

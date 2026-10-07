@@ -136,7 +136,7 @@
       "notFollowed": "Price does not follow this campaign’s rate."
     },
     "eligibility": {
-      "ineligible": "Advertising is unavailable for this store: {{reason}}",
+      "ineligible": "Advertising is unavailable for this store.",
       "unavailable": "Advertising eligibility is unavailable. Creating campaigns is disabled."
     },
     "results": {

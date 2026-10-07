@@ -46,9 +46,7 @@ export function CampaignsPageContainer() {
     !activeStoreId || !query.currentData || canCreate
       ? null
       : eligibility?.status === 'INELIGIBLE'
-        ? t('campaigns.eligibility.ineligible', {
-            reason: eligibility.reason || t('campaigns.list.metrics.unavailable'),
-          })
+        ? t('campaigns.eligibility.ineligible')
         : t('campaigns.eligibility.unavailable');
   const currency = resolveStoreCurrency(stores, activeStoreId);
   const numberLocale = getLocaleConfig(i18n.language).locale;

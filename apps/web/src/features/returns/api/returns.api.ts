@@ -41,6 +41,10 @@ export const returnsApi = baseApi.injectEndpoints({
           if (filters.search) {
             params.search = filters.search;
           }
+          if (filters.sortBy) {
+            params.sortBy = filters.sortBy;
+            params.sortOrder = filters.sortOrder ?? 'desc';
+          }
         }
         return { url: '/returns', params };
       },

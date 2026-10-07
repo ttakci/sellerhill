@@ -8,7 +8,7 @@ import {
   type ListingJobItemDto,
 } from '@repo/shared';
 import {
-  StatusBadge,
+  Badge,
   Text,
   formatCurrency,
   formatDate,
@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import { useListingsColumns } from '../../all/hooks/useListingsColumns';
 import { useCancelListingJobMutation, useGetJobItemsQuery, useGetJobStatusQuery } from '../../api/listings.api';
 import { toListingCardProps } from '../../shared/listing-card.mapper';
+import { jobItemStatusBadgeVariant } from '../shared/job-status-badge';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
@@ -280,9 +281,9 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         header: t('listings.jobs.items.status'),
         width: '8rem',
         render: (_value, item) => (
-          <StatusBadge status={String(item.status).toLowerCase()} size="sm">
+          <Badge variant={jobItemStatusBadgeVariant(String(item.status))} size="sm" solid>
             {itemStatusLabel(item.status)}
-          </StatusBadge>
+          </Badge>
         ),
       },
       ...LISTING_COLUMN_KEYS.map(fromListing),

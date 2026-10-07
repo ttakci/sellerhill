@@ -31,10 +31,8 @@ export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): Ret
   const showsDue = item.bucket !== ReturnBucket.CLOSED && item.bucket !== ReturnBucket.UNCONFIRMED;
   const activityKey = showsDue ? resolveSellerActivityKey(item.sellerActivityDue) : null;
   const dueLabel = activityKey ? translate(`returns.activity.${activityKey}`) : null;
-  const dueBy =
-    dueLabel && item.sellerRespondBy
-      ? translate('returns.dueBy', { date: formatDate(item.sellerRespondBy, locale, DEADLINE_FORMAT) })
-      : null;
+  const dueDate = dueLabel && item.sellerRespondBy ? formatDate(item.sellerRespondBy, locale, DEADLINE_FORMAT) : null;
+  const dueBy = dueDate ? translate('returns.dueBy', { date: dueDate }) : null;
 
   const refunded = item.actualRefundAmount !== null && item.actualRefundAmount !== undefined;
   const refundValue = refunded ? item.actualRefundAmount : item.estimatedRefundAmount;
@@ -71,11 +69,13 @@ export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): Ret
     productMeta,
     dueLabel,
     dueBy,
+    dueDate,
     isOverdue: item.bucket === ReturnBucket.ACTION_OVERDUE,
     reasonLabel: translate(`returns.reasonType.${resolveReasonTypeKey(item.reasonType)}`),
     buyerComment: item.buyerComment?.trim() || null,
     refundAmount: hasRefund ? formatCurrency(refundValue, locale, currency) : null,
     refundLabel: hasRefund ? translate(refunded ? 'returns.refund.refunded' : 'returns.refund.estimated') : null,
+    isRefunded: refunded,
     openedAt: item.createdOnEbayAt ? formatDate(item.createdOnEbayAt, locale, OPENED_FORMAT) : null,
   };
 }
