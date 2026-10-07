@@ -1,6 +1,10 @@
 import { CancellationBucket } from '@repo/shared';
 
-import type { CancellationBucketPresentation, CancellationHistoryActor } from '../cancellations.types';
+import type {
+  CancellationBucketPresentation,
+  CancellationHistoryActor,
+  CancellationUpcomingStep,
+} from '../cancellations.types';
 
 // Same colour-by-meaning convention as the return buckets: grey = not confirmed
 // recently, red = past eBay's deadline, amber = your turn, teal = you answered and
@@ -30,8 +34,42 @@ export function resolveCancellationReasonKey(reason: string | null | undefined):
   return reason && KNOWN_REASONS.includes(reason) ? reason : 'other';
 }
 
-/** Journey steps the page words itself (`CancelActivityTypeEnum` values from eBay's samples). */
-const KNOWN_ACTIVITIES: readonly string[] = ['SELLER_CREATE_CANCEL', 'SYSTEM_REFUND', 'SYSTEM_NOTIFY_REFUND_STATUS'];
+/**
+ * Journey steps the page words itself (`CancelActivityTypeEnum` values from
+ * eBay's samples, plus the two seen live on 2026-10-07: BUYER_CREATE_CANCEL,
+ * SELLER_APPROVE).
+ */
+const KNOWN_ACTIVITIES: readonly string[] = [
+  'BUYER_CREATE_CANCEL',
+  'SELLER_APPROVE',
+  'SELLER_CREATE_CANCEL',
+  'SYSTEM_REFUND',
+  'SYSTEM_NOTIFY_REFUND_STATUS',
+];
+
+/**
+ * The steps an OPEN buyer request still has ahead, after what eBay recorded
+ * (the live journey of 5456020649: buyer request → seller approve → eBay
+ * refund → closed). Before the seller answers: the answer, the refund, the
+ * close. After an approval: the refund (until eBay records one) and the close.
+ * After any other seller answer (a decline) no refund is coming: only the
+ * close. A closed request has nothing ahead.
+ */
+export function upcomingCancellationSteps(
+  history: ReadonlyArray<{ activity: string | null; party: string | null }>,
+  closed: boolean
+): CancellationUpcomingStep[] {
+  if (closed) {
+    return [];
+  }
+  const sellerSteps = history.filter((entry) => resolveHistoryActor(entry.party, entry.activity) === 'seller');
+  if (sellerSteps.length === 0) {
+    return ['answer', 'refund', 'close'];
+  }
+  const approved = sellerSteps.some((entry) => entry.activity === 'SELLER_APPROVE');
+  const refunded = history.some((entry) => entry.activity === 'SYSTEM_REFUND');
+  return approved && !refunded ? ['refund', 'close'] : ['close'];
+}
 
 /**
  * Who did a step: eBay's `activityParty` (`PartyEnum` BUYER / SELLER / UNKNOWN),

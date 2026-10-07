@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Der Käufer hat die Stornierung angefragt",
+      "SELLER_APPROVE": "Sie haben die Anfrage angenommen",
+      "pending": "Ausstehend",
+      "upcoming": {
+        "answer": "Ihre Antwort",
+        "refund": "eBay erstattet dem Käufer",
+        "close": "eBay schließt die Anfrage"
+      },
       "SELLER_CREATE_CANCEL": "Stornierung erstellt",
       "SYSTEM_REFUND": "Erstattung von eBay ausgeführt",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay hat den Erstattungsstatus aktualisiert",

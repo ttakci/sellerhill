@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "خریدار نے منسوخی کی درخواست کی",
+      "SELLER_APPROVE": "آپ نے درخواست قبول کی",
+      "pending": "منتظر",
+      "upcoming": {
+        "answer": "آپ کا جواب",
+        "refund": "eBay خریدار کو رقم واپس کرتا ہے",
+        "close": "eBay درخواست بند کرتا ہے"
+      },
       "SELLER_CREATE_CANCEL": "منسوخی بنائی گئی",
       "SYSTEM_REFUND": "eBay نے ریفنڈ جاری کیا",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay نے ریفنڈ کی حالت اپ ڈیٹ کی",

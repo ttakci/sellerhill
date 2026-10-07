@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "खरीदार ने रद्द करने का अनुरोध किया",
+      "SELLER_APPROVE": "आपने अनुरोध स्वीकार किया",
+      "pending": "प्रतीक्षा में",
+      "upcoming": {
+        "answer": "आपका जवाब",
+        "refund": "eBay खरीदार को रिफ़ंड करता है",
+        "close": "eBay अनुरोध बंद करता है"
+      },
       "SELLER_CREATE_CANCEL": "रद्दीकरण बनाया गया",
       "SYSTEM_REFUND": "eBay ने रिफ़ंड जारी किया",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay ने रिफ़ंड की स्थिति अपडेट की",

@@ -1572,9 +1572,14 @@ export function demoCancellationDetail(row: EbayCancellationDto): EbayCancellati
     { activity: 'BUYER_CREATE_CANCEL', party: 'BUYER', at: at(0), fromState: null, toState: 'CANCEL_REQUESTED' },
   ];
   if (closed) {
+    // The live sequence (5456020649, 2026-10-07): approve, eBay's refund 2 s later, closed 20 s after that —
+    // ending on the row's own close time (requested + 20 h, `buildCancellations`).
+    const second = 1 / 3600;
+    const answered = 20 - 20 * second;
     history.push(
-      { activity: 'SELLER_CREATE_CANCEL', party: 'SELLER', at: at(12), fromState: 'CANCEL_REQUESTED', toState: 'CANCEL_CLOSED' },
-      { activity: 'SYSTEM_REFUND', party: 'UNKNOWN', at: at(20), fromState: 'CANCEL_CLOSED', toState: 'CANCEL_CLOSED' }
+      { activity: 'SELLER_APPROVE', party: 'SELLER', at: at(answered), fromState: 'APPROVAL_PENDING', toState: 'REFUND_PENDING' },
+      { activity: 'SYSTEM_REFUND', party: 'SYSTEM', at: at(answered + 2 * second), fromState: 'REFUND_PENDING', toState: 'REFUND_INITIATED' },
+      { activity: 'SYSTEM_NOTIFY_REFUND_STATUS', party: 'SYSTEM', at: at(answered + 20 * second), fromState: 'REFUND_INITIATED', toState: 'CLOSED' }
     );
   }
 

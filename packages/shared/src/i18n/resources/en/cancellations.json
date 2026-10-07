@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "The buyer asked to cancel",
+      "SELLER_APPROVE": "You accepted the request",
+      "pending": "Waiting",
+      "upcoming": {
+        "answer": "Your answer",
+        "refund": "eBay refunds the buyer",
+        "close": "eBay closes the request"
+      },
       "SELLER_CREATE_CANCEL": "Cancellation created",
       "SYSTEM_REFUND": "Refund issued by eBay",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay updated the refund status",

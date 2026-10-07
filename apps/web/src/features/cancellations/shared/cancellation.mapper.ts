@@ -13,6 +13,7 @@ import {
   resolveCancellationReasonKey,
   resolveHistoryActivityKey,
   resolveHistoryActor,
+  upcomingCancellationSteps,
 } from './cancellation-presentation';
 
 import type { ProductTableCellMetaRow } from '@/domain-ui';
@@ -25,6 +26,8 @@ const WHEN_FORMAT: Intl.DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
 };
+/** Journey steps carry seconds: eBay's own steps often land seconds apart (approve → refund → close). */
+const STEP_FORMAT: Intl.DateTimeFormatOptions = { ...WHEN_FORMAT, second: '2-digit' };
 
 /**
  * EbayCancellationDto → the strings the page renders. Money uses the currency
@@ -104,15 +107,26 @@ export function toCancellationDetailView(
     value === null ? null : formatCurrency(value, locale, currency, 2);
   const when = (value: string | null): string | null => (value ? formatDate(value, locale, WHEN_FORMAT) : null);
 
-  const history: CancellationHistoryRowView[] = dto.history.map((entry, index) => {
+  const recorded: CancellationHistoryRowView[] = dto.history.map((entry, index) => {
     const actor = resolveHistoryActor(entry.party, entry.activity);
     return {
       id: `${index}-${entry.activity ?? 'step'}-${entry.at ?? ''}`,
       actor,
       label: translate(`cancellations.history.${resolveHistoryActivityKey(entry.activity, actor)}`),
-      at: when(entry.at),
+      at: entry.at ? formatDate(entry.at, locale, STEP_FORMAT) : null,
+      upcoming: false,
     };
   });
+  const ahead: CancellationHistoryRowView[] = upcomingCancellationSteps(dto.history, dto.closedAt !== null).map(
+    (step) => ({
+      id: `upcoming-${step}`,
+      actor: step === 'answer' ? 'seller' : 'ebay',
+      label: translate(`cancellations.history.upcoming.${step}`),
+      at: null,
+      upcoming: true,
+    })
+  );
+  const history = [...recorded, ...ahead];
 
   return {
     row: toCancellationRowView(dto, ctx),

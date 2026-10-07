@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "ক্রেতা বাতিলের অনুরোধ করেছেন",
+      "SELLER_APPROVE": "আপনি অনুরোধটি গ্রহণ করেছেন",
+      "pending": "অপেক্ষমাণ",
+      "upcoming": {
+        "answer": "আপনার উত্তর",
+        "refund": "eBay ক্রেতাকে অর্থ ফেরত দেয়",
+        "close": "eBay অনুরোধটি বন্ধ করে"
+      },
       "SELLER_CREATE_CANCEL": "বাতিল তৈরি হয়েছে",
       "SYSTEM_REFUND": "eBay ফেরত দিয়েছে",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay ফেরতের অবস্থা হালনাগাদ করেছে",
