@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "مدت گزر گئی",
         "action_due": "جواب باقی ہے",
+        "answered": "جواب دے دیا",
         "in_progress": "جاری",
         "closed": "بند",
         "unconfirmed": "حال ہی میں تصدیق نہیں ہوئی"

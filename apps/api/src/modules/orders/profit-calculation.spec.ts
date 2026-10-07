@@ -1,10 +1,11 @@
-import { OrderCostCaptureStatus, ProfitBasis } from '@repo/shared';
+import { AutoFulfillStatus, OrderCostCaptureStatus, OrderStatus, ProfitBasis } from '@repo/shared';
 
 import {
   computeNetProfit,
   deriveCostCaptureStatus,
   deriveProfitBasis,
   estimateProvisionalNetProfit,
+  isCancelledBeforePurchase,
 } from './profit-calculation';
 
 describe('computeNetProfit', () => {
@@ -82,5 +83,29 @@ describe('deriveProfitBasis', () => {
   });
   it("returns null for UNTRACKED", () => {
     expect(deriveProfitBasis(OrderCostCaptureStatus.UNTRACKED)).toBeNull();
+  });
+});
+
+describe('isCancelledBeforePurchase', () => {
+  const base = {
+    status: OrderStatus.CANCELLED,
+    amazonOrderId: null,
+    autoFulfillSubmittedAt: null,
+    autoFulfillStatus: AutoFulfillStatus.BLOCKED,
+  };
+
+  it('is true for a cancelled sale with no Amazon order, no click and no placement', () => {
+    expect(isCancelledBeforePurchase(base)).toBe(true);
+    expect(isCancelledBeforePurchase({ ...base, amazonOrderId: '' })).toBe(true);
+  });
+
+  it('is false once anything may have been bought', () => {
+    expect(isCancelledBeforePurchase({ ...base, amazonOrderId: '113-1234567-1234567' })).toBe(false);
+    expect(isCancelledBeforePurchase({ ...base, autoFulfillSubmittedAt: new Date() })).toBe(false);
+    expect(isCancelledBeforePurchase({ ...base, autoFulfillStatus: AutoFulfillStatus.PLACED })).toBe(false);
+  });
+
+  it('is false for a sale that is not cancelled', () => {
+    expect(isCancelledBeforePurchase({ ...base, status: OrderStatus.WAITING_SHIPMENT })).toBe(false);
   });
 });

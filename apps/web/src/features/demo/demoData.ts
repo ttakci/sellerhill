@@ -1540,6 +1540,8 @@ function buildCancellations(): EbayCancellationDto[] {
       requestedRefundAmount: refund,
       currency: DEMO_CURRENCY,
       lastSyncedAt: isoHoursAgo(1),
+      sellerAnswer: null,
+      sellerAnsweredAt: null,
       actionsEnabled: true,
       availableActions: seed.closed || respondBy === null ? [] : [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT],
       product: order.product

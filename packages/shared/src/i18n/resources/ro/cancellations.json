@@ -47,6 +47,7 @@
       "unconfirmed": "Neconfirmată recent",
       "action_overdue": "Întârziată",
       "action_due": "Răspuns scadent",
+      "answered": "Răspuns trimis",
       "in_progress": "În desfășurare",
       "closed": "Închisă"
     },
@@ -54,6 +55,7 @@
       "unconfirmed": "eBay nu a confirmat recent această cerere, deci termenul nu este afișat.",
       "action_overdue": "Cumpărătorul așteaptă — termenul eBay pentru răspunsul tău a expirat.",
       "action_due": "Cumpărătorul a cerut anularea. Acceptă sau refuză înainte de termenul eBay.",
+      "answered": "Ați răspuns la această solicitare. eBay o procesează — nu mai este nevoie de nimic din partea dvs.",
       "in_progress": "Momentan nu se așteaptă nimic de la tine.",
       "closed": "eBay a închis această cerere."
     },

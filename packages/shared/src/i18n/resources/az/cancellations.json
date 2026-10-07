@@ -46,6 +46,7 @@
       "unconfirmed": "Son vaxtlar təsdiqlənməyib",
       "action_overdue": "Gecikib",
       "action_due": "Cavab gözlənilir",
+      "answered": "Cavab verildi",
       "in_progress": "Davam edir",
       "closed": "Bağlanıb"
     },
@@ -53,6 +54,7 @@
       "unconfirmed": "eBay bu sorğunu son vaxtlar təsdiqləməyib, ona görə gözlənilən addım göstərilmir.",
       "action_overdue": "Alıcı gözləyir — eBay-in cavabınız üçün verdiyi müddət bitib.",
       "action_due": "Alıcı ləğv etməyi istədi. eBay-in son tarixindən əvvəl qəbul edin və ya rədd edin.",
+      "answered": "Bu sorğuya cavab verdiniz. eBay onu emal edir — sizdən başqa heç nə tələb olunmur.",
       "in_progress": "Hazırda sizdən gözlənilən bir şey yoxdur.",
       "closed": "eBay bu sorğunu bağladı."
     },

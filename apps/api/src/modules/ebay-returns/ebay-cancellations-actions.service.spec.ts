@@ -71,6 +71,8 @@ function build(
     tracking?: { number: string | null; at: Date | null };
     /** The stored row the detail reads; null = not the caller's. */
     stored?: Record<string, unknown> | null;
+    /** false = the row was already answered (the compare-and-set claims nothing). */
+    claimable?: boolean;
   } = {}
 ) {
   const order: string[] = [];
@@ -87,6 +89,14 @@ function build(
           ebay_tracking_pushed_at: options.tracking?.at ?? null,
         },
       ]);
+    }
+    if (sql.includes('SET seller_answered_at = NOW()')) {
+      order.push('claim');
+      return Promise.resolve(options.claimable === false ? [] : [{ id: ID }]);
+    }
+    if (sql.includes('SET seller_answered_at = NULL')) {
+      order.push('release');
+      return Promise.resolve([]);
     }
     if (sql.includes('LEFT JOIN listings l')) {
       const stored = options.stored === undefined ? storedRow() : options.stored;
@@ -148,7 +158,7 @@ describe('EbayCancellationsActionsService.act', () => {
     const { service, order } = build();
     await service.act(USER, ID, EbayCancellationAction.APPROVE);
     // The re-read after the write adds a second `live`.
-    expect(order).toEqual(['row', 'switch', 'suspended', 'sandbox', 'live', 'write', 'live']);
+    expect(order).toEqual(['row', 'switch', 'suspended', 'sandbox', 'live', 'claim', 'write', 'live']);
   });
 
   it('refuses everything while the operator switch is off, before touching eBay', async () => {
@@ -302,6 +312,7 @@ describe('EbayCancellationsActionsService.counts', () => {
       [CancellationBucket.UNCONFIRMED]: 0,
       [CancellationBucket.ACTION_OVERDUE]: 2,
       [CancellationBucket.ACTION_DUE]: 0,
+      [CancellationBucket.ANSWERED]: 0,
       [CancellationBucket.IN_PROGRESS]: 0,
       [CancellationBucket.CLOSED]: 7,
     });
@@ -441,6 +452,49 @@ describe('buildRejectCancelBody', () => {
     expect(buildRejectCancelBody(pushed, { shipmentDate: '05.10.2026', trackingNumber: '  ' })).toEqual({
       shipmentDate: { value: SHIPPED_AT.toISOString() },
       trackingNumber: '1Z999',
+    });
+  });
+});
+
+describe('EbayCancellationsActionsService — an answered request', () => {
+  it('refuses a second answer without calling eBay when the row is already claimed', async () => {
+    const { service, postOrder } = build({ claimable: false });
+    await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({
+      key: 'cancellations.errors.actionNotAvailable',
+      status: 409,
+    });
+    expect(postOrder.approveCancellation).not.toHaveBeenCalled();
+  });
+
+  it('refuses when eBay already shows a seller step, even with the due date still set', async () => {
+    const live = {
+      ...detail(),
+      activityHistories: [
+        { activityType: 'BUYER_CREATE_CANCEL', activityParty: 'BUYER' },
+        { activityType: 'SELLER_APPROVE', activityParty: 'SELLER' },
+      ],
+    };
+    const { service, postOrder, order } = build({ live });
+    await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({ status: 409 });
+    expect(postOrder.approveCancellation).not.toHaveBeenCalled();
+    expect(order).not.toContain('claim');
+  });
+
+  it('releases the claim when eBay refuses the answer, so the seller can answer again', async () => {
+    const { service, postOrder, order } = build();
+    postOrder.approveCancellation.mockImplementationOnce(() => Promise.reject(new PostOrderRejectedError('refused', 400)));
+    await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({ status: 409 });
+    expect(order.indexOf('release')).toBeGreaterThan(order.indexOf('claim'));
+  });
+
+  it('reads as ANSWERED with no action offered once the seller answered from SellerHill', async () => {
+    const { service } = build({
+      stored: storedRow({ seller_answered_at: new Date('2026-10-07T18:35:48.000Z'), seller_answer: 'approve' }),
+    });
+    await expect(service.detail(USER, ID)).resolves.toMatchObject({
+      bucket: CancellationBucket.ANSWERED,
+      sellerAnswer: EbayCancellationAction.APPROVE,
+      availableActions: [],
     });
   });
 });

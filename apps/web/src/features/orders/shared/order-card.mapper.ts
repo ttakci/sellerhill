@@ -74,8 +74,9 @@ export const toOrderCardProps = (
     stage: order.stage,
     showStage: order.isTracked,
     // "Estimated" qualifies the money, so it leads the figures row, not the top row.
+    // A cancelled sale is settled, not estimated.
     footerBadge:
-      order.isTracked && order.profitBasis === ProfitBasis.ESTIMATED
+      order.isTracked && order.profitBasis === ProfitBasis.ESTIMATED && order.stage !== OrderStage.CANCELLED
         ? { label: t('orders.estimateBadge'), variant: 'warning' as const }
         : undefined,
     shippedDetectedAt: order.shippedDetectedAt,

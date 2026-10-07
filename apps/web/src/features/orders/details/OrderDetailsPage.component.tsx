@@ -1,4 +1,4 @@
-import { CancellationBucket, ProfitBasis } from '@repo/shared';
+import { CancellationBucket, OrderStage, ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -29,10 +29,11 @@ const KNOWN_CANCEL_REASONS: readonly string[] = [
   'OUT_OF_STOCK_OR_CANNOT_FULFILL',
 ];
 
-/** Same colours as the returns bucket badge: red overdue, amber due, sky moving, green closed, grey unknown. */
-const CANCEL_BUCKET_VARIANT: Record<CancellationBucket, 'error' | 'warning' | 'sky' | 'success' | 'neutral'> = {
+/** Same colours as the cancellations page: red overdue, amber due, teal answered, sky moving, green closed, grey unknown. */
+const CANCEL_BUCKET_VARIANT: Record<CancellationBucket, 'error' | 'warning' | 'teal' | 'sky' | 'success' | 'neutral'> = {
   [CancellationBucket.ACTION_OVERDUE]: 'error',
   [CancellationBucket.ACTION_DUE]: 'warning',
+  [CancellationBucket.ANSWERED]: 'teal',
   [CancellationBucket.IN_PROGRESS]: 'sky',
   [CancellationBucket.CLOSED]: 'success',
   [CancellationBucket.UNCONFIRMED]: 'neutral',
@@ -188,7 +189,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const profitPositive = order.netProfit >= 0;
   const profitColor = profitPositive ? 'semantic.success' : 'semantic.error';
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
-  const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
+  // A cancelled sale is settled, not estimated.
+  const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED && order.stage !== OrderStage.CANCELLED;
 
   /*
    * `saleTax`/`saleTotal` are captured once at order-sync ingest from eBay's

@@ -3,11 +3,13 @@ import { CancellationBucket } from '@repo/shared';
 import type { CancellationBucketPresentation, CancellationHistoryActor } from '../cancellations.types';
 
 // Same colour-by-meaning convention as the return buckets: grey = not confirmed
-// recently, red = past eBay's deadline, amber = your turn, sky = moving, green = closed.
+// recently, red = past eBay's deadline, amber = your turn, teal = you answered and
+// eBay is processing it, sky = moving, green = closed.
 const PRESENTATION: Record<CancellationBucket, CancellationBucketPresentation> = {
   [CancellationBucket.UNCONFIRMED]: { variant: 'neutral', icon: 'help' },
   [CancellationBucket.ACTION_OVERDUE]: { variant: 'error', icon: 'alert-triangle' },
   [CancellationBucket.ACTION_DUE]: { variant: 'warning', icon: 'alert-circle' },
+  [CancellationBucket.ANSWERED]: { variant: 'teal', icon: 'check' },
   [CancellationBucket.IN_PROGRESS]: { variant: 'sky', icon: 'clock' },
   [CancellationBucket.CLOSED]: { variant: 'success', icon: 'check-circle' },
 };

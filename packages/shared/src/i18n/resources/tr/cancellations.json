@@ -46,6 +46,7 @@
       "unconfirmed": "Son zamanlarda doğrulanmadı",
       "action_overdue": "Süresi geçti",
       "action_due": "Yanıt bekleniyor",
+      "answered": "Yanıtlandı",
       "in_progress": "Devam ediyor",
       "closed": "Kapandı"
     },
@@ -53,6 +54,7 @@
       "unconfirmed": "eBay bu talebi son zamanlarda doğrulamadı, bu yüzden bekleyen işlem gösterilmiyor.",
       "action_overdue": "Alıcı bekliyor — eBay'in yanıtınız için verdiği süre doldu.",
       "action_due": "Alıcı iptal etmek istedi. eBay'in son tarihinden önce kabul edin veya reddedin.",
+      "answered": "Bu talebi yanıtladınız. eBay işliyor — sizden beklenen başka bir şey yok.",
       "in_progress": "Şu anda sizden beklenen bir şey yok.",
       "closed": "eBay bu talebi kapattı."
     },

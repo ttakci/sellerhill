@@ -47,6 +47,7 @@
       "unconfirmed": "Não confirmado recentemente",
       "action_overdue": "Atrasado",
       "action_due": "Resposta pendente",
+      "answered": "Respondida",
       "in_progress": "Em andamento",
       "closed": "Encerrado"
     },
@@ -54,6 +55,7 @@
       "unconfirmed": "O eBay não confirmou este pedido recentemente, por isso o prazo não é exibido.",
       "action_overdue": "O comprador está aguardando — o prazo do eBay para sua resposta terminou.",
       "action_due": "O comprador pediu para cancelar. Aceite ou recuse antes do prazo do eBay.",
+      "answered": "Você respondeu a esta solicitação. O eBay está processando — nada mais é necessário de você.",
       "in_progress": "No momento, nada é esperado de você.",
       "closed": "O eBay encerrou este pedido."
     },

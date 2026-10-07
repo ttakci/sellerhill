@@ -47,6 +47,7 @@
       "unconfirmed": "Non confermata di recente",
       "action_overdue": "Scaduta",
       "action_due": "Risposta in scadenza",
+      "answered": "Risposta inviata",
       "in_progress": "In corso",
       "closed": "Chiusa"
     },
@@ -54,6 +55,7 @@
       "unconfirmed": "eBay non ha confermato di recente questa richiesta, quindi la scadenza non viene mostrata.",
       "action_overdue": "L’acquirente aspetta: il termine di eBay per la tua risposta è scaduto.",
       "action_due": "L’acquirente ha chiesto l’annullamento. Accetta o rifiuta prima della scadenza di eBay.",
+      "answered": "Hai risposto a questa richiesta. eBay la sta elaborando: non devi fare altro.",
       "in_progress": "Al momento non ci si aspetta nulla da te.",
       "closed": "eBay ha chiuso questa richiesta."
     },

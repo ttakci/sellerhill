@@ -46,6 +46,7 @@
       "unconfirmed": "Not confirmed recently",
       "action_overdue": "Overdue",
       "action_due": "Answer due",
+      "answered": "Answered",
       "in_progress": "In progress",
       "closed": "Closed"
     },
@@ -53,6 +54,7 @@
       "unconfirmed": "eBay has not confirmed this request recently, so what is due is not shown.",
       "action_overdue": "The buyer is waiting — eBay's deadline for your answer has passed.",
       "action_due": "The buyer asked to cancel. Accept or decline before eBay's deadline.",
+      "answered": "You answered this request. eBay is processing it — nothing more is due from you.",
       "in_progress": "Nothing is due from you right now.",
       "closed": "eBay closed this request."
     },

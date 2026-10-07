@@ -45,6 +45,7 @@
       "unconfirmed": "近期未确认",
       "action_overdue": "已逾期",
       "action_due": "待回复",
+      "answered": "已答复",
       "in_progress": "进行中",
       "closed": "已关闭"
     },
@@ -52,6 +53,7 @@
       "unconfirmed": "eBay 近期未确认此请求，因此不显示截止时间。",
       "action_overdue": "买家正在等待——eBay 给您答复的期限已过。",
       "action_due": "买家申请取消订单。请在 eBay 的截止时间前接受或拒绝。",
+      "answered": "您已答复此请求。eBay 正在处理 — 您无需再做任何操作。",
       "in_progress": "目前无需您处理。",
       "closed": "eBay 已关闭此请求。"
     },

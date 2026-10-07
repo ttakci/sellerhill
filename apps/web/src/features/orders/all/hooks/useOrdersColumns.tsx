@@ -202,7 +202,7 @@ export function useOrdersColumns(
                 {order.netProfit >= 0 ? '+' : ''}
                 {formatCurrency(order.netProfit, order.ebayAccountId)}
               </Text>
-              {order.profitBasis === ProfitBasis.ESTIMATED ? (
+              {order.profitBasis === ProfitBasis.ESTIMATED && order.stage !== OrderStage.CANCELLED ? (
                 <Badge variant="warning" size="sm" solid>
                   {t('orders.estimateBadge')}
                 </Badge>

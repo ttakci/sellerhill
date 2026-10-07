@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "Gecikib",
         "action_due": "Cavab gözlənilir",
+        "answered": "Cavab verildi",
         "in_progress": "Davam edir",
         "closed": "Bağlanıb",
         "unconfirmed": "Son vaxtlar təsdiqlənməyib"

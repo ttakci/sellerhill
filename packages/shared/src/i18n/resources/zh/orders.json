@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "已逾期",
         "action_due": "待回复",
+        "answered": "已答复",
         "in_progress": "进行中",
         "closed": "已关闭",
         "unconfirmed": "近期未确认"

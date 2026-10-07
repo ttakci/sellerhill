@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "Întârziată",
         "action_due": "Răspuns scadent",
+        "answered": "Răspuns trimis",
         "in_progress": "În desfășurare",
         "closed": "Închisă",
         "unconfirmed": "Neconfirmată recent"

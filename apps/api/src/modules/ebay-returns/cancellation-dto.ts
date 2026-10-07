@@ -10,6 +10,7 @@ import {
   CancellationBucket,
   EbayCancellationAction,
   EbayCancellationDto,
+  isEbayCancellationAction,
 } from '@repo/shared';
 
 import { firstImageUrl } from './ebay-returns.service';
@@ -35,6 +36,8 @@ export interface CancellationDtoRow {
   requested_refund_amount: string | number | null;
   currency: string | null;
   last_synced_at: Date | string;
+  seller_answered_at: Date | string | null;
+  seller_answer: string | null;
   /** The linked order's listing / product (`cancellationProductColumnsSql`); absent where not joined. */
   listing_id?: string | null;
   listing_title?: string | null;
@@ -63,6 +66,8 @@ export function cancellationColumnsSql(alias: string, freshnessHours: number): s
     'requested_refund_amount',
     'currency',
     'last_synced_at',
+    'seller_answered_at',
+    'seller_answer',
   ].map((column) => `${alias}.${column}`);
   return `${columns.join(', ')}, ${buildStoreScopedCancellationBucketSql(alias, freshnessHours)} AS bucket`;
 }
@@ -103,6 +108,8 @@ export function toCancellationDto(row: CancellationDtoRow, actionsEnabled: boole
     requestedRefundAmount: amount !== null && Number.isFinite(amount) ? amount : null,
     currency: row.currency,
     lastSyncedAt: iso(row.last_synced_at) ?? new Date(0).toISOString(),
+    sellerAnswer: isEbayCancellationAction(row.seller_answer) ? row.seller_answer : null,
+    sellerAnsweredAt: iso(row.seller_answered_at),
     actionsEnabled,
     // Offered on the stored bucket; `act` re-checks against a LIVE read.
     availableActions:

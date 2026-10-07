@@ -1,4 +1,4 @@
-import { OrderCostCaptureStatus, ProfitBasis } from '@repo/shared';
+import { AutoFulfillStatus, OrderCostCaptureStatus, OrderStatus, ProfitBasis } from '@repo/shared';
 
 export interface NetProfitInput {
   ebayEarnings: number;
@@ -88,4 +88,29 @@ export function deriveProfitBasis(status: OrderCostCaptureStatus): ProfitBasis |
     default:
       return null;
   }
+}
+
+export interface CancelledBeforePurchaseInput {
+  status: string | null;
+  amazonOrderId: string | null;
+  /** `orders.auto_fulfill_submitted_at` — the Place Order click stamp. */
+  autoFulfillSubmittedAt: Date | string | null;
+  autoFulfillStatus: string | null;
+}
+
+/**
+ * eBay cancelled the sale and nothing was bought on Amazon for it: no Amazon
+ * order id, no Place Order click, not PLACED. Such an order cost nothing, so
+ * its profit is what eBay left the seller (`ebay_earnings`, usually 0 after
+ * the refund) — not that minus the product's estimated Amazon price, which
+ * showed a $10 loss on a cancelled $13 sale nobody bought (2026-10-07). A
+ * click stamp keeps the estimate: the purchase may have gone through.
+ */
+export function isCancelledBeforePurchase(input: CancelledBeforePurchaseInput): boolean {
+  return (
+    input.status === OrderStatus.CANCELLED &&
+    !input.amazonOrderId &&
+    !input.autoFulfillSubmittedAt &&
+    input.autoFulfillStatus !== AutoFulfillStatus.PLACED
+  );
 }

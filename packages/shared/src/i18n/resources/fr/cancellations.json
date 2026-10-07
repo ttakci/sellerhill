@@ -47,6 +47,7 @@
       "unconfirmed": "Non confirmée récemment",
       "action_overdue": "En retard",
       "action_due": "Réponse attendue",
+      "answered": "Répondu",
       "in_progress": "En cours",
       "closed": "Clôturée"
     },
@@ -54,6 +55,7 @@
       "unconfirmed": "eBay n’a pas confirmé cette demande récemment, l’échéance n’est donc pas affichée.",
       "action_overdue": "L’acheteur attend — le délai d’eBay pour votre réponse est dépassé.",
       "action_due": "L’acheteur a demandé l’annulation. Acceptez ou refusez avant l’échéance d’eBay.",
+      "answered": "Vous avez répondu à cette demande. eBay la traite — rien d’autre n’est attendu de vous.",
       "in_progress": "Rien n’est attendu de vous pour le moment.",
       "closed": "eBay a clos cette demande."
     },

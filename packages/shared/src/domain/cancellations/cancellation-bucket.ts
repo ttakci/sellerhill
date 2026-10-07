@@ -9,6 +9,10 @@
 //   - `sellerResponseDueDate` → "the time by which the seller is required to respond …
 //                                not returned if the order cancellation request does not
 //                                currently require a response from the seller"
+// plus OUR OWN ANSWER (`seller_answered_at`): eBay keeps returning
+// `sellerResponseDueDate` after the seller answered, while it processes the
+// answer (production 2026-10-07), so a request answered from SellerHill reads
+// as ANSWERED until eBay closes it — never "answer now" a second time;
 // plus FRESHNESS (ours): an open row no sweep has confirmed within the horizon
 // is UNCONFIRMED, never "answer now". The horizon is the returns' one
 // (`resolveReturnFreshnessHours`) fed with the cancellation sweep's interval.
@@ -29,6 +33,8 @@ export interface CancellationBucketInput {
   requestorType?: string | null;
   sellerRespondBy?: string | Date | null;
   closedAt?: string | Date | null;
+  /** `ebay_cancellations.seller_answered_at` — set once eBay accepted the answer SellerHill sent. */
+  sellerAnsweredAt?: string | Date | null;
   /** `ebay_cancellations.last_synced_at`. Omitted = not checked. */
   lastSyncedAt?: string | Date | null;
 }
@@ -57,6 +63,9 @@ export function deriveCancellationBucket(
       return CancellationBucket.UNCONFIRMED;
     }
   }
+  if (input.sellerAnsweredAt) {
+    return CancellationBucket.ANSWERED;
+  }
   if (input.requestorType === EBAY_CANCEL_REQUESTOR_BUYER && input.sellerRespondBy) {
     const deadline = new Date(input.sellerRespondBy).getTime();
     return Number.isFinite(deadline) && deadline < now.getTime()
@@ -79,6 +88,7 @@ export function buildCancellationBucketSql(
     WHEN ${alias}.closed_at IS NOT NULL THEN '${CancellationBucket.CLOSED}'
     WHEN ${alias}.state = '${EBAY_CANCEL_STATE_CLOSED}' THEN '${CancellationBucket.CLOSED}'
     WHEN ${alias}.last_synced_at < NOW() - INTERVAL '${hours} hours' THEN '${CancellationBucket.UNCONFIRMED}'
+    WHEN ${alias}.seller_answered_at IS NOT NULL THEN '${CancellationBucket.ANSWERED}'
     WHEN ${alias}.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}' AND ${alias}.seller_respond_by IS NOT NULL AND ${alias}.seller_respond_by < NOW() THEN '${CancellationBucket.ACTION_OVERDUE}'
     WHEN ${alias}.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}' AND ${alias}.seller_respond_by IS NOT NULL THEN '${CancellationBucket.ACTION_DUE}'
     ELSE '${CancellationBucket.IN_PROGRESS}'
@@ -95,6 +105,10 @@ export const ACTIONABLE_CANCELLATION_BUCKETS: readonly CancellationBucket[] = [
 export const CANCELLATION_TABS: Readonly<Record<CancellationTab, readonly CancellationBucket[]>> = {
   [CancellationTab.ALL]: Object.values(CancellationBucket),
   [CancellationTab.ACTION]: ACTIONABLE_CANCELLATION_BUCKETS,
-  [CancellationTab.IN_PROGRESS]: [CancellationBucket.IN_PROGRESS, CancellationBucket.UNCONFIRMED],
+  [CancellationTab.IN_PROGRESS]: [
+    CancellationBucket.ANSWERED,
+    CancellationBucket.IN_PROGRESS,
+    CancellationBucket.UNCONFIRMED,
+  ],
   [CancellationTab.CLOSED]: [CancellationBucket.CLOSED],
 };

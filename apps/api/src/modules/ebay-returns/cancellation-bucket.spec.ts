@@ -56,6 +56,16 @@ describe('deriveCancellationBucket', () => {
     expect(deriveCancellationBucket({}, NOW)).toBe(CancellationBucket.IN_PROGRESS);
   });
 
+  it('is ANSWERED once the seller answered from SellerHill, even with eBay still sending the due date', () => {
+    expect(deriveCancellationBucket({ ...open, sellerRespondBy: FUTURE, sellerAnsweredAt: PAST }, NOW)).toBe(
+      CancellationBucket.ANSWERED
+    );
+    // eBay's close still wins.
+    expect(deriveCancellationBucket({ ...open, sellerAnsweredAt: PAST, closedAt: PAST }, NOW)).toBe(
+      CancellationBucket.CLOSED
+    );
+  });
+
   it('is UNCONFIRMED when no sweep confirmed an open row within the horizon; a closed row stays closed', () => {
     expect(deriveCancellationBucket({ ...open, sellerRespondBy: PAST, lastSyncedAt: SEEN_LONG_AGO }, NOW)).toBe(
       CancellationBucket.UNCONFIRMED
@@ -83,6 +93,7 @@ interface Row {
   requestor_type: string | null;
   seller_respond_by: string | null;
   closed_at: string | null;
+  seller_answered_at: string | null;
   last_synced_at: string | null;
 }
 
@@ -93,9 +104,9 @@ function evaluateCondition(condition: string, row: Row, alias: string): boolean 
     if (equals) {
       return row[equals[1] as 'state' | 'requestor_type'] === equals[2];
     }
-    const notNull = term.match(new RegExp(`^${alias}\\.(closed_at|seller_respond_by) IS NOT NULL$`));
+    const notNull = term.match(new RegExp(`^${alias}\\.(closed_at|seller_respond_by|seller_answered_at) IS NOT NULL$`));
     if (notNull) {
-      return row[notNull[1] as 'closed_at' | 'seller_respond_by'] !== null;
+      return row[notNull[1] as 'closed_at' | 'seller_respond_by' | 'seller_answered_at'] !== null;
     }
     if (term === `${alias}.seller_respond_by < NOW()`) {
       return row.seller_respond_by !== null && new Date(row.seller_respond_by).getTime() < NOW.getTime();
@@ -153,6 +164,7 @@ describe('buildCancellationBucketSql', () => {
     expect(order).toEqual([
       CancellationBucket.CLOSED,
       CancellationBucket.UNCONFIRMED,
+      CancellationBucket.ANSWERED,
       CancellationBucket.ACTION_OVERDUE,
       CancellationBucket.ACTION_DUE,
       CancellationBucket.IN_PROGRESS,
@@ -177,31 +189,44 @@ describe('buildCancellationBucketSql', () => {
     const deadlines = [null, PAST, FUTURE];
     const closes = [null, PAST];
     const sightings = [null, SEEN_RECENTLY, SEEN_LONG_AGO];
+    const answers = [null, PAST];
     let compared = 0;
     for (const state of states) {
       for (const requestor of requestors) {
         for (const deadline of deadlines) {
           for (const closed of closes) {
             for (const seen of sightings) {
-              const row: Row = {
-                state,
-                requestor_type: requestor,
-                seller_respond_by: deadline,
-                closed_at: closed,
-                last_synced_at: seen,
-              };
-              const fromTs = deriveCancellationBucket(
-                { state, requestorType: requestor, sellerRespondBy: deadline, closedAt: closed, lastSyncedAt: seen },
-                NOW
-              );
-              expect({ row, bucket: evaluateSql(sql, row, 'c') }).toEqual({ row, bucket: fromTs });
-              compared += 1;
+              for (const answered of answers) {
+                const row: Row = {
+                  state,
+                  requestor_type: requestor,
+                  seller_respond_by: deadline,
+                  closed_at: closed,
+                  seller_answered_at: answered,
+                  last_synced_at: seen,
+                };
+                const fromTs = deriveCancellationBucket(
+                  {
+                    state,
+                    requestorType: requestor,
+                    sellerRespondBy: deadline,
+                    closedAt: closed,
+                    sellerAnsweredAt: answered,
+                    lastSyncedAt: seen,
+                  },
+                  NOW
+                );
+                expect({ row, bucket: evaluateSql(sql, row, 'c') }).toEqual({ row, bucket: fromTs });
+                compared += 1;
+              }
             }
           }
         }
       }
     }
-    expect(compared).toBe(states.length * requestors.length * deadlines.length * closes.length * sightings.length);
+    expect(compared).toBe(
+      states.length * requestors.length * deadlines.length * closes.length * sightings.length * answers.length
+    );
   });
 
   it('is store-scoped for seller-facing reads: an action on a store that is not active reads as unconfirmed', () => {

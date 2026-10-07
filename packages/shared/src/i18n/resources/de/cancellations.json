@@ -46,6 +46,7 @@
       "unconfirmed": "Zuletzt nicht bestätigt",
       "action_overdue": "Überfällig",
       "action_due": "Antwort fällig",
+      "answered": "Beantwortet",
       "in_progress": "In Bearbeitung",
       "closed": "Geschlossen"
     },
@@ -53,6 +54,7 @@
       "unconfirmed": "eBay hat diese Anfrage zuletzt nicht bestätigt, daher wird keine Frist angezeigt.",
       "action_overdue": "Der Käufer wartet — die Frist von eBay für Ihre Antwort ist abgelaufen.",
       "action_due": "Der Käufer möchte stornieren. Nehmen Sie an oder lehnen Sie ab, bevor die Frist von eBay endet.",
+      "answered": "Sie haben diese Anfrage beantwortet. eBay bearbeitet sie – Sie müssen nichts weiter tun.",
       "in_progress": "Im Moment ist von Ihnen nichts zu tun.",
       "closed": "eBay hat diese Anfrage geschlossen."
     },

@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "En retard",
         "action_due": "Réponse attendue",
+        "answered": "Répondu",
         "in_progress": "En cours",
         "closed": "Clôturée",
         "unconfirmed": "Non confirmée récemment"

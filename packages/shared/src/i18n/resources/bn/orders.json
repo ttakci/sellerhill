@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "সময় পেরিয়ে গেছে",
         "action_due": "উত্তর বাকি",
+        "answered": "উত্তর দেওয়া হয়েছে",
         "in_progress": "চলমান",
         "closed": "বন্ধ",
         "unconfirmed": "সম্প্রতি নিশ্চিত হয়নি"

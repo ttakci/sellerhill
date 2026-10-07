@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "متأخر",
         "action_due": "الرد مستحق",
+        "answered": "تم الرد",
         "in_progress": "قيد التنفيذ",
         "closed": "مغلق",
         "unconfirmed": "لم يتم تأكيده مؤخرًا"

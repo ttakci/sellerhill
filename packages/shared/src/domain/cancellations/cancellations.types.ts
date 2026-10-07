@@ -16,6 +16,12 @@ export enum CancellationBucket {
   ACTION_OVERDUE = 'action_overdue',
   /** A buyer's request eBay is waiting on the seller to answer (`sellerResponseDueDate`). */
   ACTION_DUE = 'action_due',
+  /**
+   * The seller answered from SellerHill (`seller_answered_at`) and eBay has not
+   * closed the request yet. eBay keeps sending `sellerResponseDueDate` while it
+   * processes the answer, so without this the request read as ACTION_DUE.
+   */
+  ANSWERED = 'answered',
   /** Open, nothing due from the seller right now. */
   IN_PROGRESS = 'in_progress',
   /** eBay closed the request (`cancelCloseDate`), whatever the outcome. */
@@ -40,6 +46,13 @@ export const EBAY_CANCEL_STATE_CLOSED = 'CLOSED';
 
 /** `requestorType` (`PartyEnum`, listed on the search page): the buyer opened the request. */
 export const EBAY_CANCEL_REQUESTOR_BUYER = 'BUYER';
+
+/**
+ * `activityParty` of a seller step in `activityHistories[]` (`PartyEnum`). A
+ * live request whose history already holds a SELLER step was answered — on
+ * SellerHill or on eBay's own site (observed 2026-10-07: `SELLER_APPROVE`).
+ */
+export const EBAY_CANCEL_PARTY_SELLER = 'SELLER';
 
 /**
  * The two answers SellerHill sends itself, each a documented Post-Order call:
@@ -95,6 +108,9 @@ export interface EbayCancellationDto {
   requestedRefundAmount: number | null;
   currency: string | null;
   lastSyncedAt: string;
+  /** The answer SellerHill sent and eBay accepted; null when the seller has not answered from SellerHill. */
+  sellerAnswer: EbayCancellationAction | null;
+  sellerAnsweredAt: string | null;
   /** Operator switch `ebay.cancellations.actionsEnabled` — the card hides the buttons when false. */
   actionsEnabled: boolean;
   /** Empty unless the bucket is action_due / action_overdue and `actionsEnabled`. */

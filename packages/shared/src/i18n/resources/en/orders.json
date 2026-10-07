@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "Overdue",
         "action_due": "Answer due",
+        "answered": "Answered",
         "in_progress": "In progress",
         "closed": "Closed",
         "unconfirmed": "Not confirmed recently"

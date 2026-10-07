@@ -47,6 +47,7 @@
       "unconfirmed": "Sin confirmar recientemente",
       "action_overdue": "Vencida",
       "action_due": "Respuesta pendiente",
+      "answered": "Respondida",
       "in_progress": "En curso",
       "closed": "Cerrada"
     },
@@ -54,6 +55,7 @@
       "unconfirmed": "eBay no ha confirmado esta solicitud recientemente, por eso no se muestra el plazo.",
       "action_overdue": "El comprador espera: el plazo de eBay para tu respuesta ha vencido.",
       "action_due": "El comprador pidió cancelar. Acepta o rechaza antes del plazo de eBay.",
+      "answered": "Respondiste esta solicitud. eBay la está procesando: no tienes que hacer nada más.",
       "in_progress": "Ahora mismo no se espera nada de ti.",
       "closed": "eBay cerró esta solicitud."
     },

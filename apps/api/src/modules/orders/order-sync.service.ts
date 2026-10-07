@@ -50,7 +50,12 @@ import {
   initialAutoFulfillStatus,
   mergeSyncedOrderStatus,
 } from './ebay-order-changes';
-import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
+import {
+  computeNetProfit,
+  deriveCostCaptureStatus,
+  estimateProvisionalNetProfit,
+  isCancelledBeforePurchase,
+} from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
 /**
@@ -751,9 +756,14 @@ export class OrderSyncService {
         quantity: number | null;
         asin: string | null;
         fees: { ebayFeePercent?: number; fixedFeeAmount?: number } | null;
+        status: string | null;
+        amazon_order_id: string | null;
+        auto_fulfill_submitted_at: Date | null;
+        auto_fulfill_status: string | null;
       }>(
         `SELECT o.id, o.user_id, o.ebay_account_id, o.sale_total, o.ebay_earnings, o.purchase_price,
                 o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
+                o.status, o.amazon_order_id, o.auto_fulfill_submitted_at, o.auto_fulfill_status,
                 o.listing_id, o.quantity, p.asin,
                 lsg.fees
          FROM orders o
@@ -785,10 +795,17 @@ export class OrderSyncService {
       });
 
       const purchasePrice = Number(o.purchase_price) || 0;
+      // eBay cancelled it and nothing was bought: no cost, the profit is what eBay left.
+      const noPurchase = isCancelledBeforePurchase({
+        status: o.status,
+        amazonOrderId: o.amazon_order_id,
+        autoFulfillSubmittedAt: o.auto_fulfill_submitted_at,
+        autoFulfillStatus: o.auto_fulfill_status,
+      });
 
       // Fallback: resolve purchase price from product if still unknown.
-      let resolvedPurchase = purchasePrice;
-      if (resolvedPurchase <= 0 && hasListingMatch) {
+      let resolvedPurchase = noPurchase ? 0 : purchasePrice;
+      if (!noPurchase && resolvedPurchase <= 0 && hasListingMatch) {
         const productData = await this.productsService.getProductPriceAndImageByListingId(o.listing_id as string);
         if (productData?.purchasePrice) {
           // The ORDER's product cost: unit price x quantity (see `toOrderCost`).
@@ -803,7 +820,9 @@ export class OrderSyncService {
       //   other tiers — unchanged fallback (computeNetProfit with whatever's on the row,
       //                 typically 0 for unlinked orders); null when purchase unknown.
       let finalNetProfit: number | null = null;
-      if (resolvedPurchase > 0) {
+      if (noPurchase) {
+        finalNetProfit = Math.round((Number(o.ebay_earnings) || 0) * 100) / 100;
+      } else if (resolvedPurchase > 0) {
         const ebayEarnings = Number(o.ebay_earnings) || 0;
         if (status === OrderCostCaptureStatus.PROVISIONAL) {
           // The ORDER's store's tax rate (Store > Global), the same one its
@@ -847,7 +866,7 @@ export class OrderSyncService {
            transaction_fee = $1,
            ad_fee = $2,
            net_profit = $3,
-           purchase_price = COALESCE(NULLIF($4::numeric, 0), purchase_price),
+           purchase_price = CASE WHEN $7::boolean THEN 0 ELSE COALESCE(NULLIF($4::numeric, 0), purchase_price) END,
            cost_capture_status = $5,
            updated_at = CURRENT_TIMESTAMP
          WHERE id = $6`,
@@ -858,6 +877,7 @@ export class OrderSyncService {
           resolvedPurchase,
           status,
           o.id,
+          noPurchase,
         ]
       );
     } catch (err) {

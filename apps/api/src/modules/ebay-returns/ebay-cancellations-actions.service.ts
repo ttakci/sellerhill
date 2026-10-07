@@ -14,11 +14,13 @@ import {
   CancellationsQueryDto,
   CancellationTab,
   deriveCancellationBucket,
+  EBAY_CANCEL_PARTY_SELLER,
   EBAY_CANCEL_REQUESTOR_BUYER,
   EbayCancellationAction,
   EbayCancellationActionResultDto,
   EbayCancellationDetailDto,
   EbayCancellationDto,
+  EbayCancellationHistoryEntryDto,
   EbayEnvironment,
   PaginatedCancellationsDto,
   PlatformSettingKey,
@@ -79,9 +81,14 @@ const CANCELLATION_BUCKETS = new Set<string>(Object.values(CancellationBucket));
  *   4. a LIVE `GET /post-order/v2/cancellation/{cancelId}` shows a BUYER
  *      request with no `cancelCloseDate` and a `sellerResponseDueDate` —
  *      documented as returned only while a seller response is required,
- *   5. exactly ONE write, never retried (approve cancels the order and eBay
+ *      and no SELLER step in its history (eBay keeps sending the due date
+ *      while it processes an answer — 2026-10-07),
+ *   5. the answer is claimed on the row (`seller_answered_at`, compare-and-set)
+ *      BEFORE the write, so a second click or a second tab is refused without
+ *      reaching eBay; released again when eBay refuses or the call fails,
+ *   6. exactly ONE write, never retried (approve cancels the order and eBay
  *      refunds the buyer — a replay is not harmless),
- *   6. an `EBAY_CANCELLATION_ACTION` audit row, then a re-read into the table.
+ *   7. an `EBAY_CANCELLATION_ACTION` audit row, then a re-read into the table.
  * No enum value decides anything: `CancelStateEnum` / `CancelStatusEnum` have
  * no page in the local reference.
  */
@@ -280,10 +287,13 @@ export class EbayCancellationsActionsService {
 
     // Fresh, never the cache: the live request decides whether the order is cancelled.
     const live = await this.readLiveOrThrow(row, marketplaceId);
-    this.assertOffered(live.row);
+    this.assertOffered(live);
 
     const accessToken = await this.ebay.getAccountAccessToken(row.ebay_account_id);
     const rejectBody = buildRejectCancelBody(row, entered);
+    if (!(await this.claimAnswer(row.id, action))) {
+      throw new CancellationActionError(CANCELLATION_ACTION_ERROR_KEY.NOT_OFFERED, 409);
+    }
     try {
       switch (action) {
         case EbayCancellationAction.APPROVE:
@@ -294,6 +304,7 @@ export class EbayCancellationsActionsService {
           break;
       }
     } catch (error) {
+      await this.releaseAnswer(row.id);
       if (error instanceof PostOrderRejectedError) {
         await this.audit(userId, row, action, { outcome: 'rejected', httpStatus: error.status });
         throw new CancellationActionError(CANCELLATION_ACTION_ERROR_KEY.EBAY_REJECTED, 409);
@@ -324,9 +335,35 @@ export class EbayCancellationsActionsService {
     return { action };
   }
 
-  private assertOffered(live: EbayCancellationRow): void {
-    if (!isCancellationAnswerable(live)) {
+  private assertOffered(live: MappedCancellationDetail): void {
+    if (!isCancellationAnswerable(live.row, live.history)) {
       throw new CancellationActionError(CANCELLATION_ACTION_ERROR_KEY.NOT_OFFERED, 409);
+    }
+  }
+
+  /** Compare-and-set: true only for the one caller that stamps an unanswered row. */
+  private async claimAnswer(id: string, action: EbayCancellationAction): Promise<boolean> {
+    const rows = await this.database.query<{ id: string }>(
+      `UPDATE ebay_cancellations
+          SET seller_answered_at = NOW(), seller_answer = $2
+        WHERE id = $1::uuid AND seller_answered_at IS NULL
+        RETURNING id`,
+      [id, action]
+    );
+    return rows.length > 0;
+  }
+
+  /** eBay refused the answer or the call failed: the seller may answer again. Never throws. */
+  private async releaseAnswer(id: string): Promise<void> {
+    try {
+      await this.database.query(
+        `UPDATE ebay_cancellations SET seller_answered_at = NULL, seller_answer = NULL WHERE id = $1::uuid`,
+        [id]
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Answer claim on cancellation ${id} not released: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -411,9 +448,21 @@ export class EbayCancellationsActionsService {
   }
 }
 
-/** A buyer's request, still open, that eBay says needs the seller's response. */
-export function isCancellationAnswerable(live: EbayCancellationRow): boolean {
-  return live.requestorType === EBAY_CANCEL_REQUESTOR_BUYER && live.closedAt === null && live.sellerRespondBy !== null;
+/**
+ * A buyer's request, still open, that eBay says needs the seller's response and
+ * that the seller has not answered yet — on SellerHill or on eBay's own site
+ * (a SELLER step in the live history).
+ */
+export function isCancellationAnswerable(
+  live: EbayCancellationRow,
+  history: readonly EbayCancellationHistoryEntryDto[] = []
+): boolean {
+  return (
+    live.requestorType === EBAY_CANCEL_REQUESTOR_BUYER &&
+    live.closedAt === null &&
+    live.sellerRespondBy !== null &&
+    !history.some((entry) => entry.party === EBAY_CANCEL_PARTY_SELLER)
+  );
 }
 
 /**
@@ -460,6 +509,7 @@ export function toCancellationDetailDto(
         requestorType: row.requestorType,
         sellerRespondBy: row.sellerRespondBy,
         closedAt: row.closedAt,
+        sellerAnsweredAt: stored.sellerAnsweredAt,
         lastSyncedAt: now,
       },
       now,
@@ -467,7 +517,8 @@ export function toCancellationDetailDto(
     ),
     lastSyncedAt: now.toISOString(),
     availableActions:
-      actionsEnabled && isCancellationAnswerable(row) ? [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT] : [],
+      actionsEnabled && stored.sellerAnsweredAt === null && isCancellationAnswerable(row, live.history)
+        ? [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT] : [],
     live: true,
     history: live.history,
     actualRefundAmount: live.actualRefundAmount,

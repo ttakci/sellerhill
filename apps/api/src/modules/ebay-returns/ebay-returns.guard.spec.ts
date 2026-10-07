@@ -189,8 +189,9 @@ describe('ebay-returns module invariants', () => {
         'this.quotaEnforcement.isSuspended(userId)',
         'this.postOrder.isReturnSearchSupported()',
         'this.readLiveOrThrow(row, marketplaceId)',
-        'this.assertOffered(live.row)',
+        'this.assertOffered(live)',
         'this.ebay.getAccountAccessToken(',
+        'this.claimAnswer(row.id, action)',
         'this.postOrder.approveCancellation(',
         'this.postOrder.rejectCancellation(',
         "outcome: 'sent'",
@@ -203,12 +204,22 @@ describe('ebay-returns module invariants', () => {
       expect(act).not.toMatch(/this\.readLive\([^)]*false\)/);
       // Offered only on a buyer's open request eBay says awaits the seller —
       // the same predicate refuses an answer and hides the drawer's buttons.
-      expect(code.slice(code.indexOf('private assertOffered('))).toContain('if (!isCancellationAnswerable(live))');
+      expect(code.slice(code.indexOf('private assertOffered('))).toContain(
+        'if (!isCancellationAnswerable(live.row, live.history))'
+      );
       const answerable = code.slice(code.indexOf('export function isCancellationAnswerable('));
       expect(answerable).toContain('live.requestorType === EBAY_CANCEL_REQUESTOR_BUYER');
       expect(answerable).toContain('live.closedAt === null');
       expect(answerable).toContain('live.sellerRespondBy !== null');
-      expect(code).toContain('actionsEnabled && isCancellationAnswerable(row)');
+      // eBay keeps the due date while it processes an answer: a SELLER step in the
+      // history, or our own claim, means answered (production, 2026-10-07).
+      expect(answerable).toContain('entry.party === EBAY_CANCEL_PARTY_SELLER');
+      expect(code).toContain('actionsEnabled && stored.sellerAnsweredAt === null && isCancellationAnswerable(row, live.history)');
+      // The claim is a compare-and-set taken before the write, released on eBay's refusal or a failed call.
+      expect(code).toContain('WHERE id = $1::uuid AND seller_answered_at IS NULL');
+      const failure = act.slice(act.indexOf('} catch (error) {'));
+      expect(failure.indexOf('this.releaseAnswer(row.id)')).toBeGreaterThan(-1);
+      expect(failure.indexOf('this.releaseAnswer(row.id)')).toBeLessThan(failure.indexOf('PostOrderRejectedError'));
       // No enum value of the pages the reference lacks decides anything.
       expect(code).not.toMatch(/CANCEL_PENDING|CANCEL_REQUESTED|cancelStatus ===|state ===/);
     });

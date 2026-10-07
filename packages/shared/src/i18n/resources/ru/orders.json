@@ -416,6 +416,7 @@
       "bucket": {
         "action_overdue": "Просрочен",
         "action_due": "Нужен ответ",
+        "answered": "Ответ отправлен",
         "in_progress": "В процессе",
         "closed": "Закрыт",
         "unconfirmed": "Давно не подтверждался"
