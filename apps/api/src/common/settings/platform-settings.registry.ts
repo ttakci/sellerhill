@@ -280,9 +280,11 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,
     envVar: 'EBAY_MESSAGES_UNREAD_RECOUNT_MINUTES',
-    // 3 calls per recount. 500 sellers active 8 h/day: 10 min = ~72k/day
-    // (5 min = ~144k) of the 500,000/day Message pool.
-    defaultValue: '10',
+    // 3 calls per recount. New messages from buyers reach the badge through the
+    // NEW_MESSAGE webhook at no cost, so this only catches what the webhook cannot
+    // see (a read on eBay's own site, eBay's own notices). 500 sellers active
+    // 8 h/day: 60 min = ~12k/day (10 min = ~72k) of the 500,000/day Message pool.
+    defaultValue: '60',
     min: 1,
     max: 1440,
   }),

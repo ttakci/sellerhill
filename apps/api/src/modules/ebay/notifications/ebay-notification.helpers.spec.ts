@@ -53,6 +53,27 @@ describe('parseNewMessageData', () => {
       readStatus: false,
     });
   });
+  // The contract names the fields `recipientUserName` / `senderUserName`, but production delivers
+  // `recipientUsername` / `senderUsername` (raw capture, budagan, 2026-10-07).
+  it('maps the field spelling production actually delivers', () => {
+    expect(
+      parseNewMessageData({
+        conversationId: '127871855009',
+        conversationType: 'FROM_MEMBERS',
+        messageId: '3541313209010',
+        senderUsername: 'buyer',
+        recipientUsername: 'budagan',
+        readStatus: false,
+      })
+    ).toEqual({
+      messageId: '3541313209010',
+      conversationId: '127871855009',
+      conversationType: EbayConversationType.FROM_MEMBERS,
+      recipientUserName: 'budagan',
+      senderUserName: 'buyer',
+      readStatus: false,
+    });
+  });
   it('rejects an unknown conversation type or missing recipient', () => {
     expect(
       parseNewMessageData({ messageId: 'm', conversationId: 'c', conversationType: 'FROM_MARS', recipientUserName: 's' })

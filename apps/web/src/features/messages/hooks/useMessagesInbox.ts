@@ -22,6 +22,7 @@ import type { MessagesUrlState } from '../messages.types';
 import { folderToStatus, isMergedFolder, MESSAGES_PAGE_SIZE, MESSAGES_THREAD_LIMIT } from './useMessagesUrlState';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { usePageVisible } from '@/hooks/usePageVisible';
 
 const EMPTY_ACCOUNTS: EbayAccountPublicDto[] = [];
 const EMPTY_CONVERSATIONS: EbayConversationDto[] = [];
@@ -100,11 +101,12 @@ export function useMessagesInbox(state: MessagesUrlState) {
   /* ─── unread per conversation type — counted live from eBay, which also
    * corrects the sidebar badge (the server stores the recount) ─── */
 
+  const pageVisible = usePageVisible();
   const { data: unreadBreakdown, refetch: refetchBreakdown } = useGetUnreadBreakdownQuery(
     { ebayAccountId },
     {
       skip: !ebayAccountId || !messagingEnabled,
-      pollingInterval: MESSAGES_BREAKDOWN_POLL_INTERVAL_MS,
+      pollingInterval: pageVisible ? MESSAGES_BREAKDOWN_POLL_INTERVAL_MS : 0,
       refetchOnMountOrArgChange: true,
     },
   );

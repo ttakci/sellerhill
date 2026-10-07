@@ -24,8 +24,9 @@ import { baseApi } from '@/api/baseApi';
 /**
  * How often the sidebar badge re-checks.
  *
- * Same cadence as the Action Center badge: the counter is OUR column, fed by
- * the webhook, so polling it costs eBay nothing.
+ * Same cadence as the Action Center badge. The counter is OUR column, fed by
+ * the webhook; only a counter older than `ebay.messages.unreadRecountMinutes`
+ * (default 60) makes the server recount from eBay. Paused while the tab is hidden.
  */
 export const MESSAGES_UNREAD_POLL_INTERVAL_MS = 120_000;
 
@@ -33,9 +34,9 @@ export const MESSAGES_UNREAD_POLL_INTERVAL_MS = 120_000;
  * How often an OPEN Messages page recounts its store's unread per type (3
  * Message API calls, 500,000/day pool). New messages arrive by webhook and a
  * return to the tab recounts at once, so this only catches a read on eBay's
- * site while the page sits open.
+ * site while the page sits open. Paused while the tab is hidden.
  */
-export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 600_000;
+export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 1_800_000;
 
 export interface ConversationsQueryArgs {
   ebayAccountId: string;

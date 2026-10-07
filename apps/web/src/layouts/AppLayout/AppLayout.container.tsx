@@ -4,7 +4,7 @@ import {
   type SupportedLocale,
 } from '@repo/shared';
 import { getLocaleConfig, SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -24,6 +24,7 @@ import {
   MESSAGES_UNREAD_POLL_INTERVAL_MS,
   useGetUnreadMessageCountQuery,
 } from '@/features/messages';
+import { usePageVisible } from '@/hooks/usePageVisible';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
 
@@ -136,12 +137,24 @@ export const AppLayout: React.FC = () => {
   /*
    * Same reasoning as the Action Center badge above: polling lives here so
    * the unread count keeps updating while the seller is anywhere in the app,
-   * not only on the Messages page itself.
+   * not only on the Messages page itself. A tab in the background stops polling:
+   * a stale badge triggers an eBay recount on the server, and those calls come
+   * from the Message pool every seller shares. Coming back reads it at once.
    */
-  const { data: unreadMessages } = useGetUnreadMessageCountQuery(undefined, {
-    skip: !isAuthenticated || isOperatorRole(user?.role),
-    pollingInterval: MESSAGES_UNREAD_POLL_INTERVAL_MS,
+  const pageVisible = usePageVisible();
+  const skipUnreadMessages = !isAuthenticated || isOperatorRole(user?.role);
+  const { data: unreadMessages, refetch: refetchUnreadMessages } = useGetUnreadMessageCountQuery(undefined, {
+    skip: skipUnreadMessages,
+    pollingInterval: pageVisible ? MESSAGES_UNREAD_POLL_INTERVAL_MS : 0,
   });
+  const wasPageVisible = useRef(pageVisible);
+  useEffect(() => {
+    // Only the hidden -> visible transition; the first render's fetch is the query's own.
+    if (pageVisible && !wasPageVisible.current && !skipUnreadMessages) {
+      void refetchUnreadMessages();
+    }
+    wasPageVisible.current = pageVisible;
+  }, [pageVisible, skipUnreadMessages, refetchUnreadMessages]);
 
   /*
    * Entitlement gate for the whole seller shell.

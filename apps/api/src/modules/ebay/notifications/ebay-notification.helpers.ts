@@ -41,7 +41,9 @@ export function parseNotificationEnvelope(body: unknown): ParsedEbayNotification
 export function parseNewMessageData(data: Record<string, unknown>): NewMessageData | null {
   const messageId = str(data.messageId);
   const conversationId = str(data.conversationId);
-  const recipientUserName = str(data.recipientUserName);
+  // Production sends `recipientUsername` / `senderUsername`; the topic contract spells them
+  // `recipientUserName` / `senderUserName`. Every delivery was ignored until 2026-10-07.
+  const recipientUserName = str(data.recipientUsername) ?? str(data.recipientUserName);
   const type = str(data.conversationType);
   if (!messageId || !conversationId || !recipientUserName || !type) {return null;}
   if (!(Object.values(EbayConversationType) as string[]).includes(type)) {return null;}
@@ -50,7 +52,7 @@ export function parseNewMessageData(data: Record<string, unknown>): NewMessageDa
     conversationId,
     conversationType: type as EbayConversationType,
     recipientUserName,
-    senderUserName: str(data.senderUserName),
+    senderUserName: str(data.senderUsername) ?? str(data.senderUserName),
     readStatus: data.readStatus === true,
   };
 }
