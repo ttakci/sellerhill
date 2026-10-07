@@ -24,6 +24,7 @@ export const DateRangePickerComponent = (props: DateRangePickerComponentProps): 
     canApply,
     isOpen,
     isMobile,
+    panelRoomPx,
     className,
     containerRef,
     panelRef,
@@ -117,7 +118,7 @@ export const DateRangePickerComponent = (props: DateRangePickerComponentProps): 
       </S.Trigger>
 
       {isOpen && !isMobile && (
-        <S.Panel ref={panelRef} role="dialog" aria-label={dialogLabel}>
+        <S.Panel ref={panelRef} role="dialog" aria-label={dialogLabel} $roomPx={panelRoomPx}>
           {body}
         </S.Panel>
       )}

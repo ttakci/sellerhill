@@ -6,7 +6,14 @@
  * are not here — the API derives them from the range.
  */
 
-import { DashboardRangePreset, DashboardTab, DEFAULT_DASHBOARD_RANGE_PRESET, isIsoDate, type DashboardRangeInput } from '@repo/shared';
+import {
+  DASHBOARD_CARD_COUNT,
+  DashboardRangePreset,
+  DashboardTab,
+  DEFAULT_DASHBOARD_RANGE_PRESET,
+  isIsoDate,
+  type DashboardRangeInput,
+} from '@repo/shared';
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -18,7 +25,6 @@ const PARAM_FROM = 'from';
 const PARAM_TO = 'to';
 const PARAM_CARD = 'card';
 const DEFAULT_TAB = DashboardTab.CARDS;
-const CARD_COUNT = 4;
 
 export function useDashboardUrlState(): DashboardUrlState {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,7 +47,7 @@ export function useDashboardUrlState(): DashboardUrlState {
   }, [rangeKey]);
 
   const rawCard = Number(searchParams.get(PARAM_CARD));
-  const card = Number.isInteger(rawCard) && rawCard > 0 && rawCard < CARD_COUNT ? rawCard : 0;
+  const card = Number.isInteger(rawCard) && rawCard > 0 && rawCard < DASHBOARD_CARD_COUNT ? rawCard : 0;
 
   const update = useCallback(
     (mutate: (next: URLSearchParams) => void) => {

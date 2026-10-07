@@ -37,12 +37,44 @@ export const DateRangePicker = ({
   const [draftEnd, setDraftEnd] = useState<string | null>(null);
   // Left month shown; desktop shows it and the next one, mobile one month.
   const [view, setView] = useState(() => viewOf(to));
+  /*
+   * Room for the desktop panel, in px: it hangs from the trigger's inline-end
+   * edge and grows toward the inline-start side, so it may be at most as wide
+   * as the distance from that edge to the far side of its scroll container
+   * (the style subtracts the page gutter). Measured on open and on resize.
+   */
+  const [panelRoomPx, setPanelRoomPx] = useState<number | null>(null);
+
+  const measurePanelRoom = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) {
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const rtl = window.getComputedStyle(el).direction === 'rtl';
+    // The far edge is the nearest scroll container's (the app's content pane,
+    // beside the sidebar), not the viewport's: past it the panel is clipped or
+    // drawn under the sidebar.
+    let bound = { left: 0, right: window.innerWidth };
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+      const style = window.getComputedStyle(node);
+      if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+        const box = node.getBoundingClientRect();
+        bound = { left: Math.max(0, box.left), right: Math.min(window.innerWidth, box.right) };
+        break;
+      }
+    }
+    setPanelRoomPx(Math.round(rtl ? bound.right - rect.left : rect.right - bound.left));
+  }, []);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < MOBILE_MAX_WIDTH_PX);
+    const check = () => {
+      setIsMobile(window.innerWidth < MOBILE_MAX_WIDTH_PX);
+      measurePanelRoom();
+    };
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
-  }, []);
+  }, [measurePanelRoom]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -115,6 +147,7 @@ export const DateRangePicker = ({
       const v = viewOf(to);
       const shown = isMobile ? new Date(v.year, v.month, 1) : new Date(v.year, v.month - 1, 1);
       setView({ year: shown.getFullYear(), month: shown.getMonth() });
+      measurePanelRoom();
     }
     setIsOpen((open) => !open);
   };
@@ -154,6 +187,7 @@ export const DateRangePicker = ({
       canApply={Boolean(draftStart && draftEnd)}
       isOpen={isOpen}
       isMobile={isMobile}
+      panelRoomPx={panelRoomPx}
       className={className}
       containerRef={containerRef}
       panelRef={panelRef}

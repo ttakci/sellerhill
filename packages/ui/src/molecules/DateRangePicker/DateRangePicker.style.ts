@@ -14,6 +14,9 @@ export const Trigger = styled.button<{ $isOpen: boolean }>`
   align-items: center;
   gap: ${tkn('spacing.xs')};
   box-sizing: border-box;
+  /* Fills the Container: natural width by default (the Container shrink-wraps),
+     full row when a caller stretches the Container through its className. */
+  width: 100%;
   height: ${controlHeight('small', false)};
   padding: 0 ${CONTROL_PADDING_X};
   background: ${tkn('colors.surface.primary')};
@@ -30,19 +33,29 @@ export const Trigger = styled.button<{ $isOpen: boolean }>`
 `;
 
 export const TriggerText = styled.span`
+  flex: 1 1 auto;
+  text-align: start;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
 `;
 
 /** Opens toward the left: the control sits at the rail's right end. */
-export const Panel = styled.div`
+export const Panel = styled.div<{ $roomPx: number | null }>`
   position: absolute;
   top: calc(100% + ${tkn('spacing.xs')});
   inset-inline-end: 0;
-  /* Never wider than the viewport: on a narrow desktop/tablet window the two
-     months wrap under each other (Months is flex-wrap) instead of clipping. */
-  max-width: calc(100vw - 2 * ${tkn('spacing.md')});
+  /* Its own content width (both months side by side) — not the trigger-sized
+     Container's, which would make the months wrap even on a wide screen. */
+  width: max-content;
+  /* …but never past the visible pane on the side it grows toward: the room
+     from the trigger's edge to the scroll container's edge (measured by the
+     container), less the page gutter. Only when that binds do the
+     months wrap under each other (Months is flex-wrap). */
+  max-width: ${({ $roomPx, theme }) =>
+    $roomPx === null
+      ? `calc(100vw - 2 * ${theme.spacing.md})`
+      : `calc(${$roomPx}px - ${theme.spacing.md})`};
   z-index: ${tkn('zIndex.dropdown')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};

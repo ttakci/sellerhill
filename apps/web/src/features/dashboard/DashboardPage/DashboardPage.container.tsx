@@ -211,9 +211,12 @@ export const DashboardPageContainer = (): React.ReactElement => {
     return periodsDto.map((p, index) => {
       const labelKey = periodLabelKey(p.label);
       // A card with no name is titled by its dates; its subline then carries
-      // the numeric form with the year instead of repeating the title.
+      // the numeric form with the year (or, for a single day — already
+      // numeric in the title — its weekday) instead of repeating the title.
       const shortRange = formatters.dateRange(p.from, p.to);
-      const dateRange = labelKey ? shortRange : formatters.numericDateRange(p.from, p.to);
+      const unnamedSubline =
+        p.from === p.to ? formatters.weekday(p.from) : formatters.numericDateRange(p.from, p.to);
+      const dateRange = labelKey ? shortRange : unnamedSubline;
       return {
         index,
         title: labelKey ? t(labelKey.key as 'dashboard.title', { count: labelKey.count }) : shortRange,

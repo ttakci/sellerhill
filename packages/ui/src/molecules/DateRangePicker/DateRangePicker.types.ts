@@ -59,6 +59,8 @@ export interface DateRangePickerComponentProps {
   canApply: boolean;
   isOpen: boolean;
   isMobile: boolean;
+  /** Width available to the desktop panel (px), or null before it is measured. */
+  panelRoomPx: number | null;
   className?: string;
   containerRef: React.RefObject<HTMLDivElement>;
   panelRef: React.RefObject<HTMLDivElement>;

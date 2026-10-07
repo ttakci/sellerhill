@@ -166,6 +166,26 @@ function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * 3600000).toISOString();
 }
 
+/**
+ * `hours` ago, but never before the start of TODAY's local calendar day: the
+ * dashboard counts orders by the seller's calendar day, so an order pinned
+ * "2 hours ago" at 00:30 would land on yesterday. When the clamp applies, the
+ * order is placed at `(slots - rank) / (slots + 1)` of the time elapsed today,
+ * which keeps the pinned orders in the same newest-first order (rank 0 newest)
+ * and strictly between midnight and now.
+ */
+function isoHoursAgoToday(hours: number, rank: number, slots: number): string {
+  const now = Date.now();
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  const wanted = now - hours * 3600000;
+  if (wanted >= midnight.getTime()) {
+    return new Date(wanted).toISOString();
+  }
+  const elapsed = now - midnight.getTime();
+  return new Date(midnight.getTime() + (elapsed * (slots - rank)) / (slots + 1)).toISOString();
+}
+
 interface DemoProduct {
   asin: string;
   title: string;
@@ -897,6 +917,9 @@ const DEMO_ORDER_NOTES: Record<number, string> = {
   3: 'Repeat buyer — third order this month.',
 };
 
+/** Orders pinned to today so the dashboard's "Today" card is never empty. */
+const RECENT_ORDER_COUNT = 3;
+
 function buildOrders(): OrderDto[] {
   const rand = seeded(4211);
   const orders: OrderDto[] = [];
@@ -906,13 +929,16 @@ function buildOrders(): OrderDto[] {
     const listingIndex = i % PRODUCTS.length;
     const quantity = rand() < 0.85 ? 1 : 2;
     /*
-     * The first three orders are pinned to the last few hours and fall through
-     * to the fully-captured branch below. Without that, whether the "Today"
-     * card shows a real profit depends on where the random dates happen to
-     * land — and a demo whose headline card reads $0 on arrival argues against
-     * the product on the one screen everyone looks at first.
+     * The first three orders are pinned to the last few hours — clamped into
+     * TODAY's local calendar day (`isoHoursAgoToday`), because the dashboard
+     * counts by calendar day — and fall through to the fully-captured branch
+     * below. Without that, whether the "Today" card shows a real profit
+     * depends on where the random dates happen to land (or, unclamped, on the
+     * time of day: at 00:30 "2 hours ago" is yesterday) — and a demo whose
+     * headline card reads $0 on arrival argues against the product on the one
+     * screen everyone looks at first.
      */
-    const recent = i < 3;
+    const recent = i < RECENT_ORDER_COUNT;
     const daysAgo = recent ? 0 : Math.floor(rand() * 27);
     const salePrice = round2(p.price * quantity);
     const saleShipping = rand() < 0.7 ? 0 : round2(3.99);
@@ -1038,7 +1064,7 @@ function buildOrders(): OrderDto[] {
     const shippedDetectedAtResolved = isShippedOrder ? isoDaysAgo(daysAgo, i + 3) : shippedDetectedAt;
     const ebayTrackingPushedAt = isShippedOrder ? isoDaysAgo(daysAgo, i + 4) : null;
 
-    const createdAt = recent ? isoHoursAgo(2 + i * 3) : isoDaysAgo(daysAgo, i);
+    const createdAt = recent ? isoHoursAgoToday(2 + i * 3, i, RECENT_ORDER_COUNT) : isoDaysAgo(daysAgo, i);
     const stage = deriveOrderStage({
       status,
       autoFulfillStatus,

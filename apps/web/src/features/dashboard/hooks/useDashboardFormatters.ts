@@ -125,6 +125,10 @@ export function useDashboardFormatters(languageCode: string, currency: string): 
       dateRange: (from, to) => (from === to ? numericDate(from) : span(from, to)),
       numericDateRange: (from, to) =>
         from === to ? numericDate(from) : `${numericDate(from)} – ${numericDate(to)}`,
+      weekday: (isoDate) => {
+        const date = parseBucket(isoDate);
+        return date ? date.toLocaleDateString(locale, { weekday: 'long' }) : isoDate;
+      },
     };
   }, [locale, currency]);
 }

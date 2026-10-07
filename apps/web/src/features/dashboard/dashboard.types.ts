@@ -48,6 +48,8 @@ export interface DashboardFormatters {
   dateRange: (from: string, to: string) => string;
   /** A window in all-numeric dates with the year: "15.09.2026 – 22.09.2026". */
   numericDateRange: (from: string, to: string) => string;
+  /** The weekday of a calendar date, e.g. "Wednesday". */
+  weekday: (isoDate: string) => string;
 }
 
 /** URL-backed dashboard state (tab, date range, selected card). */
