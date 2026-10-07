@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { glassSurface, tkn } from '@repo/ui';
+import { glassSurface, Text, tkn } from '@repo/ui';
 
 export const BodyStack = styled.div`
   display: flex;
@@ -26,7 +26,7 @@ export const Card = styled.div`
   overflow: hidden;
 `;
 
-/** Date ribbon — left-accented, timed feel. Sits full-bleed at card top. */
+/** Date ribbon — full-bleed at the card top. */
 export const DateRibbon = styled.div`
   display: flex;
   align-items: center;
@@ -34,18 +34,12 @@ export const DateRibbon = styled.div`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   background: ${tkn('colors.glass.tint')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-  border-left: 0.1875rem solid ${tkn('colors.brand.primary')};
 `;
 
 export const DateRibbonIcon = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.brand.secondary')};
-  color: ${tkn('colors.brand.primary')};
   flex-shrink: 0;
 `;
 
@@ -81,15 +75,14 @@ export const ChangeLabel = styled.span`
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.2xs')};
-  flex: 0 0 6.5rem;
+  flex: 0 0 8rem;
+  white-space: nowrap;
 `;
 
-/** Product identity + "go to listing" — shown only when the drawer is opened
- * from a cross-listing surface (the Revision History table), where the
- * drawer is otherwise the only place still showing which product is open. */
+/** Product identity (+ "go to listing" from the Revision History page). */
 export const Subject = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   padding-bottom: ${tkn('spacing.md')};
@@ -99,6 +92,59 @@ export const Subject = styled.div`
 export const SubjectCell = styled.div`
   min-width: 0;
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;
+
+export const SubjectImage = styled.div`
+  flex: 0 0 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${tkn('colors.text.tertiary')};
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+`;
+
+export const SubjectTitle = styled(Text)`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+/** The listing card's own label / value grid (ListingCard.style MetaList). */
+export const MetaList = styled.dl`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: ${tkn('spacing.md')};
+  row-gap: ${tkn('spacing.xs')};
+  align-items: baseline;
+  margin: 0;
+  min-width: 0;
+`;
+
+export const MetaLabel = styled.dt`
+  margin: 0;
+  white-space: nowrap;
+`;
+
+export const MetaValue = styled.dd`
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  && * {
+    font-weight: ${tkn('typography.fontWeight.bold')};
+  }
 `;
 
 export const ChangeValues = styled.div`
@@ -130,8 +176,8 @@ export const DeltaPill = styled.span<{ $tone: 'up' | 'down' }>`
   align-items: center;
   padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
   border-radius: ${tkn('radius.sm')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   font-variant-numeric: tabular-nums;
   color: ${({ $tone, theme }) =>
     $tone === 'up' ? theme.colors.semantic.success : theme.colors.semantic.error};

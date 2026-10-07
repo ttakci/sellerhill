@@ -2,10 +2,11 @@ import { DataTable, EmptyState, Icon, PageHeader, SearchField, Text, Tooltip, ty
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { toRevisionCardProps } from './revision-card.mapper';
 import * as S from './RevisionHistoryPage.style';
 import type { RevisionHistoryPageComponentProps, RevisionHistoryRow } from './RevisionHistoryPage.types';
 
-import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
+import { ListingCard, ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 import { ListingRevisionsDrawer } from '@/features/listings/detail/ListingRevisionsDrawer';
 
 /**
@@ -92,7 +93,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
         const meta: ProductTableCellMetaRow[] = [
           { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon' },
         ];
-        return <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} subtitle={row.storeName} />;
+        return <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} />;
       },
     },
     {
@@ -157,91 +158,10 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
     },
   ];
 
-  const renderGridCard = (row: RevisionHistoryRow) => {
-    const meta: ProductTableCellMetaRow[] = [
-      { label: t('listings.table.asin'), id: row.asin, storeType: 'amazon' },
-    ];
-    return (
-      <S.RevisionCard key={row.id} variant="elevated" onClick={() => onRowClick(row)}>
-        <S.RevisionCardTop>
-          <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} subtitle={row.storeName} />
-          <S.CardChanges>
-          <S.ChangeRow>
-            <S.ChangeLabel>
-              <Text variant="caption" color="text.tertiary">
-                {t('listings.table.price')}
-              </Text>
-            </S.ChangeLabel>
-            <S.ChangeValues>
-              <ChangeCell
-                previous={row.previousPrice}
-                next={row.newPrice}
-                changed={row.priceChanged}
-                increased={row.priceIncreased}
-              />
-            </S.ChangeValues>
-          </S.ChangeRow>
-          {row.newSourceStock !== null && (
-            <S.ChangeRow>
-              <S.ChangeLabel>
-                <S.CardLabelRow>
-                  <Text variant="caption" color="text.tertiary">
-                    {t('listings.detail.revisions.sourceStockChange')}
-                  </Text>
-                  <Tooltip content={t('listings.detail.revisions.sourceStockTooltip')} position="top" variant="dark">
-                    <Icon name="info" size={12} color="text.tertiary" />
-                  </Tooltip>
-                </S.CardLabelRow>
-              </S.ChangeLabel>
-              <S.ChangeValues>
-                <ChangeCell
-                  previous={row.previousSourceStock ?? row.newSourceStock}
-                  next={row.newSourceStock}
-                  changed={row.sourceStockChanged}
-                  increased={row.sourceStockIncreased}
-                />
-              </S.ChangeValues>
-            </S.ChangeRow>
-          )}
-          <S.ChangeRow>
-            <S.ChangeLabel>
-              <S.CardLabelRow>
-                <Text variant="caption" color="text.tertiary">
-                  {t('listings.detail.revisions.quantityChange')}
-                </Text>
-                <Tooltip content={t('listings.detail.revisions.quantityTooltip')} position="top" variant="dark">
-                  <Icon name="info" size={12} color="text.tertiary" />
-                </Tooltip>
-              </S.CardLabelRow>
-            </S.ChangeLabel>
-            <S.ChangeValues>
-              <ChangeCell
-                previous={row.previousQuantity}
-                next={row.newQuantity}
-                changed={row.quantityChanged}
-                increased={row.quantityIncreased}
-              />
-            </S.ChangeValues>
-          </S.ChangeRow>
-          </S.CardChanges>
-        </S.RevisionCardTop>
-        <S.RevisionCardFooter>
-          <S.FooterDate>
-            <Icon name="clock" size={13} color="text.tertiary" />
-            <Text variant="caption" color="text.tertiary" numeric>
-              {row.recordedAt}
-            </Text>
-          </S.FooterDate>
-          <S.DetailHint>
-            <Text variant="caption" weight="semibold" color="brand.primary">
-              {t('translation:common.details')}
-            </Text>
-            <Icon name="chevron-right" size={14} color="brand.primary" />
-          </S.DetailHint>
-        </S.RevisionCardFooter>
-      </S.RevisionCard>
-    );
-  };
+  // Same card as the listings page; clicking it still opens the revisions drawer.
+  const renderGridCard = (row: RevisionHistoryRow) => (
+    <ListingCard key={row.id} {...toRevisionCardProps(row, t)} orientation="horizontal" onClick={() => onRowClick(row)} />
+  );
 
   const emptyState = (() => {
     if (isFilterEmpty) {
@@ -299,7 +219,8 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
       )}
 
       <DataTable
-        gridMinItemWidth="20rem"
+        gridMinItemWidth="27rem"
+        gridMaxColumns={2}
         columns={columns}
         data={rows}
         renderGridCard={renderGridCard}

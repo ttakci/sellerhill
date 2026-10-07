@@ -493,6 +493,11 @@ export interface ListingRevisionWithListingDto extends ListingRevisionDto {
   asin: string;
   title: string;
   imageUrl?: string;
+  brand?: string;
+  /** The listing's eBay item id; absent on a draft. */
+  ebayItemId?: string;
+  /** When the listing itself was created (not the revision). */
+  listingCreatedAt: string;
   ebayAccountId?: string;
   /** Store label, when the listing belongs to a connected eBay account. */
   storeName?: string;

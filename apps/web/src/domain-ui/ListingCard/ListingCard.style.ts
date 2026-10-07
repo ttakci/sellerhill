@@ -65,7 +65,7 @@ export const SelectionControl = styled.div`
 export const Top = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
@@ -97,7 +97,7 @@ export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   display: flex;
   flex-direction: ${({ $orientation }) => ($orientation === 'horizontal' ? 'row' : 'column')};
   align-items: ${({ $orientation }) => ($orientation === 'horizontal' ? 'flex-start' : 'stretch')};
-  gap: ${tkn('spacing.lg')};
+  gap: ${tkn('spacing.md+')};
   min-width: 0;
   flex: 1;
 
@@ -156,6 +156,7 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
 export const Content = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
   flex: 1;
   /* Breathing room from the photo. */
@@ -178,12 +179,12 @@ export const TitleSlot = styled.div`
   }
 `;
 
-/** Two lines, ellipsis — the full title is on the tooltip. */
+/** One line, ellipsis — the full title is on the tooltip. */
 export const Title = styled(Text)`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 `;
 
@@ -193,7 +194,7 @@ export const MetaList = styled.dl`
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: ${tkn('spacing.md')};
   row-gap: ${tkn('spacing.xs')};
-  align-items: center;
+  align-items: baseline;
   margin: ${tkn('spacing.2xs')} 0 0;
   min-width: 0;
 `;
@@ -228,11 +229,12 @@ export const MetaValueText = styled(Text)<{ $multiline: boolean }>`
   overflow-wrap: ${({ $multiline }) => ($multiline ? 'anywhere' : 'normal')};
 `;
 
-/** Price · profit · ROI · stock (and the detail hint), under one hairline. */
+/** Same strip as OrderCard: figures + the detail hint in one grid, under one hairline. */
 export const Footer = styled.div`
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   background: ${tkn('colors.glass.tint')};
@@ -241,18 +243,17 @@ export const Footer = styled.div`
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  flex: 1;
-  min-width: 0;
 `;
 
 /** Tells the seller the whole card opens the detail page. */
 export const DetailHint = styled.span`
   display: inline-flex;
   align-items: center;
+  align-self: center;
+  justify-self: end;
   gap: ${tkn('spacing.2xs')};
-  flex-shrink: 0;
 `;
 
 export const StatCell = styled.div`

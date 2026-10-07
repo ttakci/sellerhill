@@ -98,5 +98,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "ponytail@ponytail": true
   }
 }

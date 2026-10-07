@@ -1,14 +1,9 @@
-/**
- * Identifies which product the drawer is showing. Omitted from the listing
- * detail page (the page itself already makes that obvious); set by the
- * cross-listing Revision History table, where the drawer is the only place
- * that still shows which product is open.
- */
+/** The product the drawer is showing — title, photo, ASIN and eBay ID, set by every caller. */
 export interface ListingRevisionsDrawerSubject {
   title: string;
   imageUrl?: string;
   asin: string;
-  storeName?: string;
+  ebayItemId?: string;
 }
 
 export interface ListingRevisionsDrawerProps {

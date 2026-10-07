@@ -831,6 +831,12 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         onClose={onCloseRevisions}
         listingId={listing.id}
         currency={listing.currency}
+        subject={{
+          title: listing.title,
+          imageUrl: listing.imageUrls?.[0],
+          asin: listing.asin,
+          ebayItemId: listing.ebayListingId ?? undefined,
+        }}
       />
     </S.Container>
   );

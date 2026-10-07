@@ -77,6 +77,9 @@ export const RevisionHistoryPageContainer: React.FC = () => {
           title: revision.title,
           imageUrl: revision.imageUrl,
           asin: revision.asin,
+          brand: revision.brand,
+          ebayItemId: revision.ebayItemId,
+          createdAt: formatDate(revision.listingCreatedAt, locale, { day: 'numeric', month: 'short', year: 'numeric' }),
           storeName: revision.storeName,
           currency: revision.currency,
           recordedAt: formatRowDate(revision.recordedAt),
@@ -120,7 +123,7 @@ export const RevisionHistoryPageContainer: React.FC = () => {
       isOpen: true,
       listingId: row.listingId,
       currency: row.currency,
-      subject: { title: row.title, imageUrl: row.imageUrl, asin: row.asin, storeName: row.storeName },
+      subject: { title: row.title, imageUrl: row.imageUrl, asin: row.asin, ebayItemId: row.ebayItemId },
     });
   }, []);
 

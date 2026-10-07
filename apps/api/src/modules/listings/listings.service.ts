@@ -1140,14 +1140,17 @@ export class ListingsService {
       asin: string;
       title: string;
       image_urls: string[] | string | null;
+      brand: string | null;
+      ebay_item_id: string | null;
+      listing_created_at: Date | string;
       ebay_account_id: string | null;
       ebay_marketplace_id: EbayMarketplaceId | null;
       store_name: string | null;
     }>(
       `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at,
               r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status,
-              l.id AS listing_id, l.ebay_account_id,
-              p.asin, p.title, p.image_urls,
+              l.id AS listing_id, l.ebay_account_id, l.ebay_item_id, l.created_at AS listing_created_at,
+              p.asin, p.title, p.image_urls, p.brand,
               ea.marketplace_id AS ebay_marketplace_id,
               COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name
        FROM listing_revisions r
@@ -1170,6 +1173,9 @@ export class ListingsService {
         asin: row.asin,
         title: row.title,
         imageUrl: imageUrls[0],
+        brand: row.brand || undefined,
+        ebayItemId: row.ebay_item_id || undefined,
+        listingCreatedAt: new Date(row.listing_created_at).toISOString(),
         ebayAccountId: row.ebay_account_id ?? undefined,
         storeName: row.store_name ?? undefined,
         currency:

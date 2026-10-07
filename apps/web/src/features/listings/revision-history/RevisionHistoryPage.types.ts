@@ -13,6 +13,10 @@ export interface RevisionHistoryRow {
   title: string;
   imageUrl?: string;
   asin: string;
+  brand?: string;
+  ebayItemId?: string;
+  /** The listing's own creation date, formatted. */
+  createdAt: string;
   storeName?: string;
   currency: string;
   recordedAt: string;

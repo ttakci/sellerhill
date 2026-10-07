@@ -7,7 +7,7 @@ import type { ListingCardProps } from '@/domain-ui';
 /**
  * Single source of truth: ListingDto → ListingCard props (minus orientation / selection).
  * Used by overview carousel and listings-all grid so both pages render the same card.
- * Status pill only for non-active (e.g. draft list).
+ * Status pill on every card (active / inactive / draft).
  *
  * `locale` controls only separators/ordering — currency always comes from the
  * listing's own resolved `currency` (its eBay store's marketplace), never the
@@ -66,31 +66,20 @@ export const toListingCardProps = (
     label: t('listings.table.createdAt'),
     value: formatDate(listing.createdAt, locale, dateOptions),
   });
-  // The last time the Amazon source was read — a check counts even when nothing changed.
-  if (listing.lastSyncedAt) {
-    meta.push({
-      label: t('listings.table.lastSynced'),
-      value: formatDate(listing.lastSyncedAt, locale, { ...dateOptions, hour: '2-digit', minute: '2-digit' }),
-    });
-  }
 
-  const statusLabel =
+  // Like the order card's stage badge, every listing card leads with its status.
+  const status: ListingCardProps['status'] =
     listing.status === ListingStatus.DRAFT
-      ? t('listings.status.draft')
+      ? { label: t('listings.status.draft'), tone: 'neutral' }
       : listing.status === ListingStatus.INACTIVE
-        ? t('listings.status.inactive')
-        : undefined;
+        ? { label: t('listings.status.inactive'), tone: 'neutral' }
+        : { label: t('listings.status.active'), tone: 'active' };
 
   return {
     title,
     imageUrl: listing.imageUrls?.[0],
     meta,
-    status: statusLabel
-      ? {
-          label: statusLabel,
-          tone: 'neutral' as const,
-        }
-      : undefined,
+    status,
     stats: [
       {
         label: t('listings.table.price'),

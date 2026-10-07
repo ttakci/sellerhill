@@ -138,8 +138,8 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
       </S.Toolbar>
 
       <DataTable
-        gridMinItemWidth="24rem"
-        gridMaxColumns={3}
+        gridMinItemWidth="27rem"
+        gridMaxColumns={2}
         columns={columns}
         columnOptions={columnOptions}
         visibleColumnKeys={visibleColumnKeys}

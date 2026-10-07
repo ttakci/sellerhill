@@ -11,6 +11,8 @@ export interface ListingCardStat {
   icon?: IconName;
   /** Theme color path for `icon`; also fills it (a star reads as a rating only when solid). */
   iconColor?: string;
+  /** Value before a change: renders `previous → value` with a muted previous figure (revision history). */
+  previous?: string;
   /** Muted figure beside the value, e.g. the Amazon stock next to the eBay quantity: `1 (20+)`. */
   secondary?: string;
 }

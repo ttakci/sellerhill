@@ -1,11 +1,10 @@
-import { Button, Drawer, EmptyState, Icon, IconButton, InfoMessage, Text, Tooltip } from '@repo/ui';
+import { Button, Drawer, EmptyState, Icon, IconButton, IdBadge, InfoMessage, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingRevisionsDrawer.style';
 import type { ListingRevisionRow, ListingRevisionsDrawerComponentProps } from './ListingRevisionsDrawer.types';
 
-import { ProductTableCell } from '@/domain-ui';
 
 const ChangeLine = ({
   label,
@@ -29,12 +28,12 @@ const ChangeLine = ({
   return (
     <S.ChangeRow>
       <S.ChangeLabel>
-        <Text variant="caption" color="text.tertiary">
+        <Text variant="body-sm" color="text.secondary">
           {label}
         </Text>
         {labelTooltip && (
           <Tooltip content={labelTooltip} position="top" variant="dark">
-            <Icon name="info" size={12} color="text.tertiary" />
+            <Icon name="info" size={12} color="text.secondary" />
           </Tooltip>
         )}
       </S.ChangeLabel>
@@ -47,12 +46,12 @@ const ChangeLine = ({
             <S.Arrow $tone={increased ? 'up' : 'down'}>
               <Icon name={increased ? 'arrow-up-right' : 'arrow-down-right'} size={14} />
             </S.Arrow>
-            <Text variant="body-sm" color="text.primary" weight="medium" numeric>
+            <Text variant="body-sm" color="text.primary" weight="bold" numeric>
               {next}
             </Text>
           </>
         ) : (
-          <Text variant="body-sm" color="text.secondary" numeric>
+          <Text variant="body-sm" color="text.primary" weight="bold" numeric>
             {next}
           </Text>
         )}
@@ -61,7 +60,7 @@ const ChangeLine = ({
         <S.DeltaPill $tone={increased ? 'up' : 'down'}>{delta}</S.DeltaPill>
       ) : (
         <S.MutedNote>
-          <Text variant="caption" color="text.tertiary">
+          <Text variant="body-sm" color="text.secondary">
             {t('listings.detail.revisions.unchanged')}
           </Text>
         </S.MutedNote>
@@ -76,9 +75,9 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
     <S.Card>
       <S.DateRibbon>
         <S.DateRibbonIcon>
-          <Icon name="clock" size={13} />
+          <Icon name="clock" size={14} color="text.primary" />
         </S.DateRibbonIcon>
-        <Text variant="caption" weight="semibold" color="text.secondary" numeric>
+        <Text variant="body-sm" weight="bold" color="text.primary" numeric>
           {row.recordedAt}
         </Text>
       </S.DateRibbon>
@@ -146,13 +145,36 @@ export const ListingRevisionsDrawerComponent = ({
       <S.BodyStack>
         {subject && (
           <S.Subject>
+            <S.SubjectImage>
+              {subject.imageUrl ? <img src={subject.imageUrl} alt={subject.title} /> : <Icon name="image" size={24} />}
+            </S.SubjectImage>
             <S.SubjectCell>
-              <ProductTableCell
-                title={subject.title}
-                imageUrl={subject.imageUrl}
-                meta={[{ label: t('listings.table.asin'), id: subject.asin, storeType: 'amazon' }]}
-                subtitle={subject.storeName}
-              />
+              <S.SubjectTitle variant="body-sm" weight="semibold" color="text.primary">
+                {subject.title}
+              </S.SubjectTitle>
+              {/* Same label / value pairs as the listing card: label normal, value bold. */}
+              <S.MetaList>
+                <S.MetaLabel>
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('listings.table.asin')}
+                  </Text>
+                </S.MetaLabel>
+                <S.MetaValue>
+                  <IdBadge id={subject.asin} storeType="amazon" size="sm" plain />
+                </S.MetaValue>
+                {subject.ebayItemId && (
+                  <>
+                    <S.MetaLabel>
+                      <Text variant="body-sm" color="text.secondary">
+                        {t('listings.table.ebayId')}
+                      </Text>
+                    </S.MetaLabel>
+                    <S.MetaValue>
+                      <IdBadge id={subject.ebayItemId} storeType="ebay" size="sm" plain />
+                    </S.MetaValue>
+                  </>
+                )}
+              </S.MetaList>
             </S.SubjectCell>
             {onViewListing && (
               <IconButton

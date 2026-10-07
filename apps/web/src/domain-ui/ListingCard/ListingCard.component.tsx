@@ -98,7 +98,7 @@ export const ListingCard = ({
               {meta.map((item) => (
                 <React.Fragment key={`${item.label}-${item.value}`}>
                   <S.MetaLabel>
-                    <Text variant="caption" color="text.secondary">
+                    <Text variant="body-sm" color="text.secondary">
                       {item.label}
                     </Text>
                   </S.MetaLabel>
@@ -132,6 +132,14 @@ export const ListingCard = ({
               </S.StatLabel>
               <S.StatValueRow>
                 {stat.icon ? <Icon name={stat.icon} size={14} color={stat.iconColor} filled /> : null}
+                {stat.previous ? (
+                  <>
+                    <Text variant="body-sm" color="text.tertiary" numeric>
+                      {stat.previous}
+                    </Text>
+                    <Icon name="arrow-right" size={13} color="text.tertiary" />
+                  </>
+                ) : null}
                 <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
                   {stat.value}
                 </S.StatValue>
@@ -143,15 +151,15 @@ export const ListingCard = ({
               </S.StatValueRow>
             </S.StatCell>
           ))}
+          {detailLabel && onClick ? (
+            <S.DetailHint>
+              <Text variant="caption" weight="semibold" color="brand.primary">
+                {detailLabel}
+              </Text>
+              <Icon name="chevron-right" size={16} color="brand.primary" />
+            </S.DetailHint>
+          ) : null}
         </S.StatsGrid>
-        {detailLabel && onClick ? (
-          <S.DetailHint>
-            <Text variant="caption" weight="semibold" color="brand.primary">
-              {detailLabel}
-            </Text>
-            <Icon name="chevron-right" size={16} color="brand.primary" />
-          </S.DetailHint>
-        ) : null}
       </S.Footer>
     </S.Wrapper>
   );
