@@ -1,69 +1,85 @@
 /**
- * URL-backed dashboard state: active tab, selected period card and chart
- * granularity (the store is the top bar's active store, `useActiveStore`). Keeping it in the query string makes every dashboard
- * view shareable and survives a refresh.
+ * URL-backed dashboard state: active tab, the date range (a preset or a
+ * custom from/to) and the selected period card (the store is the top bar's
+ * active store, `useActiveStore`). Keeping it in the query string makes every
+ * dashboard view shareable and survives a refresh. Chart and P&L bucket sizes
+ * are not here — the API derives them from the range.
  */
 
-import { DashboardChartGranularity, DashboardPeriodKey, DashboardTab } from '@repo/shared';
+import { DashboardRangePreset, DashboardTab, DEFAULT_DASHBOARD_RANGE_PRESET, isIsoDate, type DashboardRangeInput } from '@repo/shared';
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import type { DashboardUrlState } from '../dashboard.types';
 
 const PARAM_TAB = 'tab';
-const PARAM_PERIOD = 'period';
-const PARAM_GRANULARITY = 'granularity';
-
+const PARAM_RANGE = 'range';
+const PARAM_FROM = 'from';
+const PARAM_TO = 'to';
+const PARAM_CARD = 'card';
 const DEFAULT_TAB = DashboardTab.CARDS;
-const DEFAULT_PERIOD = DashboardPeriodKey.TODAY;
-const DEFAULT_GRANULARITY = DashboardChartGranularity.MONTH;
-
-const parseEnum = <T extends string>(raw: string | null, allowed: T[], fallback: T): T =>
-  allowed.includes(raw as T) ? (raw as T) : fallback;
+const CARD_COUNT = 4;
 
 export function useDashboardUrlState(): DashboardUrlState {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tab = parseEnum(searchParams.get(PARAM_TAB), Object.values(DashboardTab), DEFAULT_TAB);
-  const period = parseEnum(
-    searchParams.get(PARAM_PERIOD),
-    Object.values(DashboardPeriodKey),
-    DEFAULT_PERIOD,
-  );
-  const granularity = parseEnum(
-    searchParams.get(PARAM_GRANULARITY),
-    Object.values(DashboardChartGranularity),
-    DEFAULT_GRANULARITY,
-  );
+  const rawTab = searchParams.get(PARAM_TAB);
+  const tab = (Object.values(DashboardTab) as string[]).includes(rawTab ?? '') ? (rawTab as DashboardTab) : DEFAULT_TAB;
 
-  const patch = useCallback(
-    (param: string, value: string, defaultValue: string) => {
+  const from = searchParams.get(PARAM_FROM) ?? '';
+  const to = searchParams.get(PARAM_TO) ?? '';
+  const rawRange = searchParams.get(PARAM_RANGE) ?? '';
+  const rangeKey = isIsoDate(from) && isIsoDate(to) ? `c:${from}:${to}` : `p:${rawRange}`;
+  const range = useMemo<DashboardRangeInput>(() => {
+    if (rangeKey.startsWith('c:')) {
+      return { from, to };
+    }
+    return (Object.values(DashboardRangePreset) as string[]).includes(rawRange)
+      ? { preset: rawRange as DashboardRangePreset }
+      : { preset: DEFAULT_DASHBOARD_RANGE_PRESET };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeKey]);
+
+  const rawCard = Number(searchParams.get(PARAM_CARD));
+  const card = Number.isInteger(rawCard) && rawCard > 0 && rawCard < CARD_COUNT ? rawCard : 0;
+
+  const update = useCallback(
+    (mutate: (next: URLSearchParams) => void) => {
       const next = new URLSearchParams(searchParams);
-      if (value === defaultValue) {
-        next.delete(param);
-      } else {
-        next.set(param, value);
-      }
+      mutate(next);
       setSearchParams(next, { replace: true });
     },
     [searchParams, setSearchParams],
   );
 
   const setTab = useCallback(
-    (value: DashboardTab) => patch(PARAM_TAB, value, DEFAULT_TAB),
-    [patch],
-  );
-  const setPeriod = useCallback(
-    (value: DashboardPeriodKey) => patch(PARAM_PERIOD, value, DEFAULT_PERIOD),
-    [patch],
-  );
-  const setGranularity = useCallback(
-    (value: DashboardChartGranularity) => patch(PARAM_GRANULARITY, value, DEFAULT_GRANULARITY),
-    [patch],
+    (value: DashboardTab) => update((n) => (value === DEFAULT_TAB ? n.delete(PARAM_TAB) : n.set(PARAM_TAB, value))),
+    [update],
   );
 
-  return useMemo(
-    () => ({ tab, period, granularity, setTab, setPeriod, setGranularity }),
-    [tab, period, granularity, setTab, setPeriod, setGranularity],
+  const setRange = useCallback(
+    (value: DashboardRangeInput) =>
+      update((n) => {
+        n.delete(PARAM_CARD);
+        n.delete(PARAM_RANGE);
+        n.delete(PARAM_FROM);
+        n.delete(PARAM_TO);
+        if ('preset' in value) {
+          if (value.preset !== DEFAULT_DASHBOARD_RANGE_PRESET) {
+            n.set(PARAM_RANGE, value.preset);
+          }
+        } else {
+          n.set(PARAM_FROM, value.from);
+          n.set(PARAM_TO, value.to);
+        }
+      }),
+    [update],
   );
+
+  const setCard = useCallback(
+    (value: number) => update((n) => (value === 0 ? n.delete(PARAM_CARD) : n.set(PARAM_CARD, String(value)))),
+    [update],
+  );
+
+  return useMemo(() => ({ tab, range, card, setTab, setRange, setCard }), [tab, range, card, setTab, setRange, setCard]);
 }

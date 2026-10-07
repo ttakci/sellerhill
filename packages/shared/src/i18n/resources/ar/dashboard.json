@@ -15,10 +15,68 @@
       "chart": "الرسم البياني",
       "pnl": "الأرباح والخسائر"
     },
-    "today": "اليوم",
-    "thisWeek": "هذا الأسبوع",
-    "thisMonth": "هذا الشهر",
-    "thisYear": "هذه السنة",
+    "range": {
+      "title": "النطاق الزمني",
+      "custom": "نطاق مخصص",
+      "apply": "تطبيق",
+      "cancel": "إلغاء",
+      "preset": {
+        "today": "اليوم",
+        "yesterday": "أمس",
+        "last7Days": "آخر 7 أيام",
+        "last30Days": "آخر 30 يومًا",
+        "thisWeek": "هذا الأسبوع",
+        "lastWeek": "الأسبوع الماضي",
+        "thisMonth": "هذا الشهر",
+        "lastMonth": "الشهر الماضي",
+        "last3Months": "آخر 3 أشهر",
+        "thisYear": "هذه السنة",
+        "lastYear": "السنة الماضية",
+        "last12Months": "آخر 12 شهرًا"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "اليوم",
+        "previous": "أمس",
+        "ago_zero": "منذ {{count}} يوم",
+        "ago_one": "منذ يوم واحد",
+        "ago_two": "منذ يومين",
+        "ago_few": "منذ {{count}} أيام",
+        "ago_many": "منذ {{count}} يومًا",
+        "ago_other": "منذ {{count}} يوم"
+      },
+      "week": {
+        "current": "هذا الأسبوع",
+        "previous": "الأسبوع الماضي",
+        "ago_zero": "منذ {{count}} أسبوع",
+        "ago_one": "منذ أسبوع واحد",
+        "ago_two": "منذ أسبوعين",
+        "ago_few": "منذ {{count}} أسابيع",
+        "ago_many": "منذ {{count}} أسبوعًا",
+        "ago_other": "منذ {{count}} أسبوع"
+      },
+      "month": {
+        "current": "هذا الشهر",
+        "previous": "الشهر الماضي",
+        "ago_zero": "منذ {{count}} شهر",
+        "ago_one": "منذ شهر واحد",
+        "ago_two": "منذ شهرين",
+        "ago_few": "منذ {{count}} أشهر",
+        "ago_many": "منذ {{count}} شهرًا",
+        "ago_other": "منذ {{count}} شهر"
+      },
+      "year": {
+        "current": "هذه السنة",
+        "previous": "السنة الماضية",
+        "ago_zero": "منذ {{count}} سنة",
+        "ago_one": "منذ سنة واحدة",
+        "ago_two": "منذ سنتين",
+        "ago_few": "منذ {{count}} سنوات",
+        "ago_many": "منذ {{count}} سنةً",
+        "ago_other": "منذ {{count}} سنة"
+      }
+    },
     "metrics": {
       "sales": "المبيعات",
       "units": "الوحدات",
@@ -58,11 +116,6 @@
       "title": "الأداء",
       "subtitle": "صافي الربح مقابل حجم المبيعات",
       "summary": "ملخص الفترة",
-      "granularity": {
-        "day": "30 يوماً",
-        "week": "12 أسبوعاً",
-        "month": "12 شهراً"
-      },
       "series": {
         "netProfit": "صافي الربح",
         "sales": "المبيعات",
@@ -72,7 +125,7 @@
     },
     "pnl": {
       "title": "الأرباح والخسائر",
-      "subtitle": "تفصيل شهري لآخر 12 شهراً",
+      "subtitle": "تفصيل الفترة المحددة",
       "parameter": "المؤشر / الفترة",
       "currentPeriod": "الفترة الحالية",
       "heatmap": "خريطة حرارية",

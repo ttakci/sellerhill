@@ -1,18 +1,26 @@
 /**
  * DashboardPage Container
- * Resolves URL state, data, formatters and labels for all three tabs.
+ * Resolves URL state, data, formatters and labels for all three tabs. One date
+ * range drives the cards, the chart and the P&L; every window shown comes from
+ * the API, resolved on the seller's own calendar day.
  */
 
-import { DashboardPeriodKey, DashboardTab } from '@repo/shared';
-import { getLocaleConfig, useTheme, useUI } from '@repo/ui';
+import {
+  DashboardChartGranularity,
+  DashboardRangePreset,
+  DashboardTab,
+  DEFAULT_DASHBOARD_RANGE_PRESET,
+} from '@repo/shared';
+import { getLocaleConfig, useTheme, useUI, type DateRangePickerProps } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { PeriodCardEntry } from '../components/CardsPanel';
 import type { PeriodCardLabels } from '../components/PeriodCard';
 import { useDashboardFormatters } from '../hooks/useDashboardFormatters';
 import { useDashboardUrlState } from '../hooks/useDashboardUrlState';
 import { EMPTY_PERIOD_METRICS } from '../utils/emptyMetrics';
-import { getAllPeriodRanges } from '../utils/periodRanges';
+import { periodLabelKey } from '../utils/periodLabels';
 
 import { DashboardPageComponent } from './DashboardPage.component';
 import type { DashboardTabItem } from './DashboardPage.types';
@@ -39,7 +47,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
   const { theme } = useTheme();
 
-  const { tab, period, granularity, setTab, setPeriod, setGranularity } = useDashboardUrlState();
+  const { tab, range, card, setTab, setRange, setCard } = useDashboardUrlState();
   // The store chosen in the top bar; every figure on the page is that store's.
   const { activeStoreId } = useActiveStore();
   const storeFilter = activeStoreId ?? undefined;
@@ -64,10 +72,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
     data: dashboardData,
     isLoading: isDashboardLoading,
     error: dashboardError,
-  } = useGetDashboardQuery(
-    { chartGranularity: granularity, ebayAccountId: storeFilter },
-    { skip: noStore },
-  );
+  } = useGetDashboardQuery({ range, ebayAccountId: storeFilter }, { skip: noStore });
 
   /* The tax rate the estimate actually used: the selected store's own row
      when it has one, else the global row (Store > Global) — never the
@@ -80,18 +85,21 @@ export const DashboardPageContainer = (): React.ReactElement => {
 
   const { data: userData, error: userError } = useGetMeQuery();
 
-  const periodDates = useMemo(() => getAllPeriodRanges(locale), [locale]);
-  const activeRange = periodDates[period];
+  /* The selected card's window — the lists below show exactly what it counted. */
+  const periodsDto = useMemo(() => dashboardData?.periods ?? [], [dashboardData]);
+  const activeWindow = periodsDto[card] ?? periodsDto[0];
+  const carouselFrom = activeWindow?.from;
+  const carouselTo = activeWindow?.to;
 
   const { data: listingsPage } = useGetListingsQuery({
     page: 1,
     limit: CAROUSEL_LIMIT,
-    soldFrom: activeRange.from,
-    soldTo: activeRange.to,
+    soldFrom: carouselFrom,
+    soldTo: carouselTo,
     sortBy: 'lastSale',
     sortOrder: 'desc',
     ebayAccountId: storeFilter,
-  }, { skip: noStore });
+  }, { skip: noStore || !activeWindow });
 
   // Tracked only — the dashboard describes the business SellerHill manages,
   // and the period cards are scoped the same way, so the carousel cannot show
@@ -99,13 +107,13 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { data: ordersPage } = useGetOrdersQuery({
     page: 1,
     limit: CAROUSEL_LIMIT,
-    dateFrom: activeRange.from,
-    dateTo: activeRange.to,
+    dateFrom: carouselFrom,
+    dateTo: carouselTo,
     sortBy: 'order_date',
     sortOrder: 'desc',
     ebayAccountId: storeFilter,
     isTracked: true,
-  }, { skip: noStore });
+  }, { skip: noStore || !activeWindow });
 
   const listings = listingsPage?.items ?? [];
   const listingsTotal = listingsPage?.total ?? 0;
@@ -127,8 +135,8 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const buildRangeParams = useCallback(
     (fromKey: string, toKey: string): string => {
       const params = new URLSearchParams({
-        [fromKey]: activeRange.from,
-        [toKey]: activeRange.to,
+        [fromKey]: carouselFrom ?? '',
+        [toKey]: carouselTo ?? '',
         from: 'dashboard',
       });
       if (storeFilter) {
@@ -136,7 +144,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
       }
       return params.toString();
     },
-    [activeRange, storeFilter],
+    [carouselFrom, carouselTo, storeFilter],
   );
 
   const handleListingsViewAll = useCallback(
@@ -192,42 +200,81 @@ export const DashboardPageContainer = (): React.ReactElement => {
     [t, amazonTaxRate],
   );
 
-  const periods = useMemo(() => {
-    const config: { key: DashboardPeriodKey; title: string; gradient: string }[] = [
-      {
-        key: DashboardPeriodKey.TODAY,
-        title: t('dashboard.today'),
-        gradient: theme.colors.dashboard.periodTodayGradient,
-      },
-      {
-        key: DashboardPeriodKey.THIS_WEEK,
-        title: t('dashboard.thisWeek'),
-        gradient: theme.colors.dashboard.periodThisWeekGradient,
-      },
-      {
-        key: DashboardPeriodKey.THIS_MONTH,
-        title: t('dashboard.thisMonth'),
-        gradient: theme.colors.dashboard.periodThisMonthGradient,
-      },
-      {
-        key: DashboardPeriodKey.THIS_YEAR,
-        title: t('dashboard.thisYear'),
-        gradient: theme.colors.dashboard.periodThisYearGradient,
-      },
+  /* Four cards, newest first; the gradients keep their order whatever the range. */
+  const periods = useMemo<PeriodCardEntry[]>(() => {
+    const gradients = [
+      theme.colors.dashboard.periodTodayGradient,
+      theme.colors.dashboard.periodThisWeekGradient,
+      theme.colors.dashboard.periodThisMonthGradient,
+      theme.colors.dashboard.periodThisYearGradient,
     ];
+    return periodsDto.map((p, index) => {
+      const labelKey = periodLabelKey(p.label);
+      // A card with no name is titled by its dates; its subline then carries
+      // the numeric form with the year instead of repeating the title.
+      const shortRange = formatters.dateRange(p.from, p.to);
+      const dateRange = labelKey ? shortRange : formatters.numericDateRange(p.from, p.to);
+      return {
+        index,
+        title: labelKey ? t(labelKey.key as 'dashboard.title', { count: labelKey.count }) : shortRange,
+        dates: { from: p.from, to: p.to, dateRange },
+        metrics: p.metrics,
+        gradient: gradients[index % gradients.length],
+      };
+    });
+  }, [periodsDto, formatters, t, theme]);
 
-    if (!dashboardData) {
-      return [];
+  /* ─── date filter ─── */
+
+  const appliedRange = dashboardData?.range;
+
+  const rangePresets = useMemo(
+    () =>
+      Object.values(DashboardRangePreset).map((value) => ({
+        value,
+        label: t(`dashboard.range.preset.${value}` as 'dashboard.title'),
+      })),
+    [t],
+  );
+
+  const handlePresetSelect = useCallback(
+    (value: string) => setRange({ preset: value as DashboardRangePreset }),
+    [setRange],
+  );
+
+  const handleRangeApply = useCallback(
+    (from: string, to: string) => setRange({ from, to }),
+    [setRange],
+  );
+
+  // Rendered only once the API has answered: the calendar needs the seller's today.
+  const rangePickerProps = useMemo<DateRangePickerProps | null>(() => {
+    if (!appliedRange) {
+      return null;
     }
-
-    return config.map((entry) => ({
-      ...entry,
-      dates: periodDates[entry.key],
-      metrics: dashboardData.metrics[entry.key],
-    }));
-  }, [t, theme, dashboardData, periodDates]);
+    const name = appliedRange.preset
+      ? t(`dashboard.range.preset.${appliedRange.preset}` as 'dashboard.title')
+      : t('dashboard.range.custom');
+    return {
+      presets: rangePresets,
+      selectedPreset: 'preset' in range ? range.preset : null,
+      from: appliedRange.from,
+      to: appliedRange.to,
+      maxDate: appliedRange.today,
+      triggerLabel: `${name} · ${formatters.dateRange(appliedRange.from, appliedRange.to)}`,
+      customLabel: t('dashboard.range.custom'),
+      applyLabel: t('dashboard.range.apply'),
+      cancelLabel: t('dashboard.range.cancel'),
+      dialogLabel: t('dashboard.range.title'),
+      locale,
+      onPresetSelect: handlePresetSelect,
+      onRangeApply: handleRangeApply,
+    };
+  }, [appliedRange, range, rangePresets, formatters, locale, t, handlePresetSelect, handleRangeApply]);
 
   /* ─── errors ─── */
+
+  const isDefaultRange = 'preset' in range && range.preset === DEFAULT_DASHBOARD_RANGE_PRESET;
 
   useEffect(() => {
     const error = dashboardError || userError;
@@ -235,6 +282,13 @@ export const DashboardPageContainer = (): React.ReactElement => {
       return;
     }
     if ('status' in error && error.status === 401) {
+      return;
+    }
+    // A stale custom URL (e.g. a `to` that is now after the seller's today in
+    // their zone) must not leave the page stuck on an error: fall back to the
+    // default range instead.
+    if (dashboardError && 'status' in dashboardError && dashboardError.status === 400 && !isDefaultRange) {
+      setRange({ preset: DEFAULT_DASHBOARD_RANGE_PRESET });
       return;
     }
     showMessage(
@@ -246,7 +300,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
       },
       t,
     );
-  }, [dashboardError, userError, showMessage, closeMessage, t]);
+  }, [dashboardError, userError, isDefaultRange, setRange, showMessage, closeMessage, t]);
 
   return (
     <EbayAccountGuard>
@@ -258,10 +312,11 @@ export const DashboardPageContainer = (): React.ReactElement => {
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
+        rangePickerProps={rangePickerProps}
         cardsProps={{
           periods,
-          selectedPeriod: period,
-          onPeriodSelect: setPeriod,
+          selectedPeriod: card,
+          onPeriodSelect: setCard,
           formatters,
           cardLabels,
           isLoading: isDashboardLoading,
@@ -285,13 +340,14 @@ export const DashboardPageContainer = (): React.ReactElement => {
         chartProps={{
           points: dashboardData?.chart.points ?? [],
           summary: dashboardData?.chart.summary ?? EMPTY_PERIOD_METRICS,
-          granularity,
-          onGranularityChange: setGranularity,
+          granularity: dashboardData?.chart.granularity ?? DashboardChartGranularity.HOUR,
           formatters,
           isLoading: isDashboardLoading,
         }}
         pnlProps={{
-          months: dashboardData?.history.months ?? [],
+          columns: dashboardData?.pnl.columns ?? [],
+          granularity: dashboardData?.pnl.granularity ?? DashboardChartGranularity.DAY,
+          csvStamp: appliedRange?.to ?? '',
           formatters,
           isLoading: isDashboardLoading,
         }}

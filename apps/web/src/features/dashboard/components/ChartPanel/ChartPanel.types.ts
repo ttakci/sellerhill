@@ -15,8 +15,8 @@ import type { ChartSeriesConfig, DashboardFormatters } from '../../dashboard.typ
 export interface ChartPanelContainerProps {
   points: DashboardChartPoint[];
   summary: PeriodMetricsDto;
+  /** Bucket size the API chose for the range — drives tick formatting only. */
   granularity: DashboardChartGranularity;
-  onGranularityChange: (granularity: DashboardChartGranularity) => void;
   formatters: DashboardFormatters;
   isLoading: boolean;
 }
@@ -36,11 +36,6 @@ export interface ChartSummarySection {
   rows: ChartSummaryRow[];
 }
 
-export interface ChartGranularityOption {
-  label: string;
-  value: string;
-}
-
 export interface ChartPanelComponentProps {
   title: string;
   subtitle: string;
@@ -49,9 +44,6 @@ export interface ChartPanelComponentProps {
   data: DashboardChartPoint[];
   series: ChartSeriesConfig[];
   summarySections: ChartSummarySection[];
-  granularityOptions: ChartGranularityOption[];
-  granularityValue: string;
-  onGranularityChange: (value: string) => void;
   onToggleSeries: (id: DashboardChartSeries) => void;
   /** X-axis tick label for a bucket. */
   formatTick: (period: string) => string;

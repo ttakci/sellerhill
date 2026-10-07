@@ -64,7 +64,7 @@ export const DateRangePickerComponent = (props: DateRangePickerComponentProps): 
 
   const body = (
     <S.Body $mobile={isMobile}>
-      <S.Presets role="listbox" aria-label={dialogLabel}>
+      <S.Presets $mobile={isMobile} role="listbox" aria-label={dialogLabel}>
         {presets.map((preset) => (
           <S.PresetButton
             key={preset.value}

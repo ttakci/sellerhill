@@ -1,11 +1,12 @@
 /**
  * ChartPanel (Presentation)
  * Net-profit bars against sales/units/refunds lines, with toggleable legend
- * chips, a granularity switch and a Sellerboard-style P&L summary rail.
+ * chips and a Sellerboard-style P&L summary rail. The bucket size follows the
+ * page's date range (chosen by the API), so there is no switch here.
  */
 
 import { DashboardChartSeries } from '@repo/shared';
-import { Card, CardHeader, SegmentedControl, Text } from '@repo/ui';
+import { Card, CardHeader, Text } from '@repo/ui';
 import React from 'react';
 import {
   Bar,
@@ -49,9 +50,6 @@ export const ChartPanelComponent = ({
   data,
   series,
   summarySections,
-  granularityOptions,
-  granularityValue,
-  onGranularityChange,
   onToggleSeries,
   formatTick,
   formatAxisCurrency,
@@ -77,14 +75,6 @@ export const ChartPanelComponent = ({
           <Text variant="caption" color="text.tertiary">
             {subtitle}
           </Text>
-        }
-        actions={
-          <SegmentedControl
-            options={granularityOptions}
-            value={granularityValue}
-            onChange={onGranularityChange}
-            size="sm"
-          />
         }
       >
         <Text variant="h4" weight="semibold">

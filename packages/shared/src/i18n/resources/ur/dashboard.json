@@ -15,10 +15,52 @@
       "chart": "چارٹ",
       "pnl": "نفع و نقصان"
     },
-    "today": "آج",
-    "thisWeek": "اس ہفتے",
-    "thisMonth": "اس مہینے",
-    "thisYear": "اس سال",
+    "range": {
+      "title": "تاریخ کی مدت",
+      "custom": "اپنی مدت",
+      "apply": "لاگو کریں",
+      "cancel": "منسوخ کریں",
+      "preset": {
+        "today": "آج",
+        "yesterday": "کل",
+        "last7Days": "پچھلے 7 دن",
+        "last30Days": "پچھلے 30 دن",
+        "thisWeek": "اس ہفتے",
+        "lastWeek": "پچھلے ہفتے",
+        "thisMonth": "اس مہینے",
+        "lastMonth": "پچھلے مہینے",
+        "last3Months": "پچھلے 3 مہینے",
+        "thisYear": "اس سال",
+        "lastYear": "پچھلے سال",
+        "last12Months": "پچھلے 12 مہینے"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "آج",
+        "previous": "کل",
+        "ago_one": "{{count}} دن پہلے",
+        "ago_other": "{{count}} دن پہلے"
+      },
+      "week": {
+        "current": "اس ہفتے",
+        "previous": "پچھلے ہفتے",
+        "ago_one": "{{count}} ہفتہ پہلے",
+        "ago_other": "{{count}} ہفتے پہلے"
+      },
+      "month": {
+        "current": "اس مہینے",
+        "previous": "پچھلے مہینے",
+        "ago_one": "{{count}} مہینہ پہلے",
+        "ago_other": "{{count}} مہینے پہلے"
+      },
+      "year": {
+        "current": "اس سال",
+        "previous": "پچھلے سال",
+        "ago_one": "{{count}} سال پہلے",
+        "ago_other": "{{count}} سال پہلے"
+      }
+    },
     "metrics": {
       "sales": "سیلز",
       "units": "یونٹس",
@@ -58,11 +100,6 @@
       "title": "کارکردگی",
       "subtitle": "سیلز کے حجم کے مقابلے میں خالص منافع",
       "summary": "مدت کا خلاصہ",
-      "granularity": {
-        "day": "30 دن",
-        "week": "12 ہفتے",
-        "month": "12 مہینے"
-      },
       "series": {
         "netProfit": "خالص منافع",
         "sales": "سیلز",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "نفع و نقصان",
-      "subtitle": "پچھلے 12 مہینوں کی ماہانہ تفصیل",
+      "subtitle": "منتخب مدت کی تفصیل",
       "parameter": "میٹرک / مدت",
       "currentPeriod": "موجودہ مدت",
       "heatmap": "ہیٹ میپ",

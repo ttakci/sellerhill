@@ -46,13 +46,13 @@ export const CardsPanelComponent = ({
         ? SKELETON_KEYS.map((key) => <Skeleton key={key} height="19rem" radius="lg" />)
         : periods.map((entry) => (
             <PeriodCard
-              key={entry.key}
+              key={entry.index}
               title={entry.title}
               dateRange={entry.dates.dateRange}
               metrics={entry.metrics}
               headerGradient={entry.gradient}
-              isActive={selectedPeriod === entry.key}
-              onSelect={() => onPeriodSelect(entry.key)}
+              isActive={selectedPeriod === entry.index}
+              onSelect={() => onPeriodSelect(entry.index)}
               formatters={formatters}
               labels={cardLabels}
             />

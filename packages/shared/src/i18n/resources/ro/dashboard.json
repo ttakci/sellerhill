@@ -15,10 +15,56 @@
       "chart": "Grafic",
       "pnl": "P&L"
     },
-    "today": "Astăzi",
-    "thisWeek": "Săptămâna aceasta",
-    "thisMonth": "Luna aceasta",
-    "thisYear": "Anul acesta",
+    "range": {
+      "title": "Interval de date",
+      "custom": "Interval personalizat",
+      "apply": "Aplică",
+      "cancel": "Anulează",
+      "preset": {
+        "today": "Astăzi",
+        "yesterday": "Ieri",
+        "last7Days": "Ultimele 7 zile",
+        "last30Days": "Ultimele 30 de zile",
+        "thisWeek": "Săptămâna aceasta",
+        "lastWeek": "Săptămâna trecută",
+        "thisMonth": "Luna aceasta",
+        "lastMonth": "Luna trecută",
+        "last3Months": "Ultimele 3 luni",
+        "thisYear": "Anul acesta",
+        "lastYear": "Anul trecut",
+        "last12Months": "Ultimele 12 luni"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Astăzi",
+        "previous": "Ieri",
+        "ago_one": "Acum {{count}} zi",
+        "ago_few": "Acum {{count}} zile",
+        "ago_other": "Acum {{count}} de zile"
+      },
+      "week": {
+        "current": "Săptămâna aceasta",
+        "previous": "Săptămâna trecută",
+        "ago_one": "Acum {{count}} săptămână",
+        "ago_few": "Acum {{count}} săptămâni",
+        "ago_other": "Acum {{count}} de săptămâni"
+      },
+      "month": {
+        "current": "Luna aceasta",
+        "previous": "Luna trecută",
+        "ago_one": "Acum {{count}} lună",
+        "ago_few": "Acum {{count}} luni",
+        "ago_other": "Acum {{count}} de luni"
+      },
+      "year": {
+        "current": "Anul acesta",
+        "previous": "Anul trecut",
+        "ago_one": "Acum {{count}} an",
+        "ago_few": "Acum {{count}} ani",
+        "ago_other": "Acum {{count}} de ani"
+      }
+    },
     "metrics": {
       "sales": "Vânzări",
       "units": "Unități",
@@ -58,11 +104,6 @@
       "title": "Performanță",
       "subtitle": "Profitul net raportat la volumul vânzărilor",
       "summary": "Rezumatul perioadei",
-      "granularity": {
-        "day": "30 de zile",
-        "week": "12 săptămâni",
-        "month": "12 luni"
-      },
       "series": {
         "netProfit": "Profit net",
         "sales": "Vânzări",
@@ -72,7 +113,7 @@
     },
     "pnl": {
       "title": "Profit și pierdere",
-      "subtitle": "Detalierea lună de lună a ultimelor 12 luni",
+      "subtitle": "Detalierea perioadei selectate",
       "parameter": "Indicator / Perioadă",
       "currentPeriod": "Perioada curentă",
       "heatmap": "Hartă termică",

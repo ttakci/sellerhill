@@ -40,6 +40,9 @@ export const Panel = styled.div`
   position: absolute;
   top: calc(100% + ${tkn('spacing.xs')});
   inset-inline-end: 0;
+  /* Never wider than the viewport: on a narrow desktop/tablet window the two
+     months wrap under each other (Months is flex-wrap) instead of clipping. */
+  max-width: calc(100vw - 2 * ${tkn('spacing.md')});
   z-index: ${tkn('zIndex.dropdown')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
@@ -52,17 +55,20 @@ export const Body = styled.div<{ $mobile: boolean }>`
   flex-direction: ${({ $mobile }) => ($mobile ? 'column' : 'row')};
 `;
 
-export const Presets = styled.div`
+/**
+ * The divider follows the same `$mobile` flag as `Body`'s direction: beside the
+ * calendar it is a vertical rule, above it (stacked) a horizontal one. A media
+ * query here would disagree with the container's own phone threshold.
+ */
+export const Presets = styled.div<{ $mobile: boolean }>`
   display: flex;
   flex-direction: column;
   min-width: 12rem;
   padding: ${tkn('spacing.sm')};
-  border-inline-end: 0.0625rem solid ${tkn('colors.border.primary')};
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    border-inline-end: none;
-    border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
-  }
+  border-inline-end: ${({ $mobile, theme }) =>
+    $mobile ? 'none' : `0.0625rem solid ${theme.colors.border.primary}`};
+  border-bottom: ${({ $mobile, theme }) =>
+    $mobile ? `0.0625rem solid ${theme.colors.border.primary}` : 'none'};
 `;
 
 export const PresetButton = styled.button<{ $active: boolean }>`
@@ -105,6 +111,7 @@ export const Nav = styled.div`
 
 export const Months = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: ${tkn('spacing.lg')};
 `;
 

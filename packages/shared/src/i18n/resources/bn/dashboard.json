@@ -15,10 +15,52 @@
       "chart": "চার্ট",
       "pnl": "লাভ-ক্ষতি"
     },
-    "today": "আজ",
-    "thisWeek": "এই সপ্তাহ",
-    "thisMonth": "এই মাস",
-    "thisYear": "এই বছর",
+    "range": {
+      "title": "তারিখের সীমা",
+      "custom": "নিজের সীমা",
+      "apply": "প্রয়োগ করুন",
+      "cancel": "বাতিল",
+      "preset": {
+        "today": "আজ",
+        "yesterday": "গতকাল",
+        "last7Days": "গত 7 দিন",
+        "last30Days": "গত 30 দিন",
+        "thisWeek": "এই সপ্তাহ",
+        "lastWeek": "গত সপ্তাহ",
+        "thisMonth": "এই মাস",
+        "lastMonth": "গত মাস",
+        "last3Months": "গত 3 মাস",
+        "thisYear": "এই বছর",
+        "lastYear": "গত বছর",
+        "last12Months": "গত 12 মাস"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "আজ",
+        "previous": "গতকাল",
+        "ago_one": "{{count}} দিন আগে",
+        "ago_other": "{{count}} দিন আগে"
+      },
+      "week": {
+        "current": "এই সপ্তাহ",
+        "previous": "গত সপ্তাহ",
+        "ago_one": "{{count}} সপ্তাহ আগে",
+        "ago_other": "{{count}} সপ্তাহ আগে"
+      },
+      "month": {
+        "current": "এই মাস",
+        "previous": "গত মাস",
+        "ago_one": "{{count}} মাস আগে",
+        "ago_other": "{{count}} মাস আগে"
+      },
+      "year": {
+        "current": "এই বছর",
+        "previous": "গত বছর",
+        "ago_one": "{{count}} বছর আগে",
+        "ago_other": "{{count}} বছর আগে"
+      }
+    },
     "metrics": {
       "sales": "বিক্রয়",
       "units": "ইউনিট",
@@ -58,11 +100,6 @@
       "title": "পারফরম্যান্স",
       "subtitle": "বিক্রয়ের পরিমাণের বিপরীতে নিট মুনাফা",
       "summary": "সময়কালের সারসংক্ষেপ",
-      "granularity": {
-        "day": "30 দিন",
-        "week": "12 সপ্তাহ",
-        "month": "12 মাস"
-      },
       "series": {
         "netProfit": "নিট মুনাফা",
         "sales": "বিক্রয়",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "লাভ ও ক্ষতি",
-      "subtitle": "গত 12 মাসের মাসভিত্তিক বিভাজন",
+      "subtitle": "নির্বাচিত সময়কালের বিভাজন",
       "parameter": "মেট্রিক / সময়কাল",
       "currentPeriod": "বর্তমান সময়কাল",
       "heatmap": "হিট ম্যাপ",

@@ -15,10 +15,60 @@
       "chart": "График",
       "pnl": "P&L"
     },
-    "today": "Сегодня",
-    "thisWeek": "Эта неделя",
-    "thisMonth": "Этот месяц",
-    "thisYear": "Этот год",
+    "range": {
+      "title": "Период",
+      "custom": "Свой период",
+      "apply": "Применить",
+      "cancel": "Отмена",
+      "preset": {
+        "today": "Сегодня",
+        "yesterday": "Вчера",
+        "last7Days": "Последние 7 дней",
+        "last30Days": "Последние 30 дней",
+        "thisWeek": "Эта неделя",
+        "lastWeek": "Прошлая неделя",
+        "thisMonth": "Этот месяц",
+        "lastMonth": "Прошлый месяц",
+        "last3Months": "Последние 3 месяца",
+        "thisYear": "Этот год",
+        "lastYear": "Прошлый год",
+        "last12Months": "Последние 12 месяцев"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Сегодня",
+        "previous": "Вчера",
+        "ago_one": "{{count}} день назад",
+        "ago_few": "{{count}} дня назад",
+        "ago_many": "{{count}} дней назад",
+        "ago_other": "{{count}} дня назад"
+      },
+      "week": {
+        "current": "Эта неделя",
+        "previous": "Прошлая неделя",
+        "ago_one": "{{count}} неделю назад",
+        "ago_few": "{{count}} недели назад",
+        "ago_many": "{{count}} недель назад",
+        "ago_other": "{{count}} недели назад"
+      },
+      "month": {
+        "current": "Этот месяц",
+        "previous": "Прошлый месяц",
+        "ago_one": "{{count}} месяц назад",
+        "ago_few": "{{count}} месяца назад",
+        "ago_many": "{{count}} месяцев назад",
+        "ago_other": "{{count}} месяца назад"
+      },
+      "year": {
+        "current": "Этот год",
+        "previous": "Прошлый год",
+        "ago_one": "{{count}} год назад",
+        "ago_few": "{{count}} года назад",
+        "ago_many": "{{count}} лет назад",
+        "ago_other": "{{count}} года назад"
+      }
+    },
     "metrics": {
       "sales": "Продажи",
       "units": "Единиц",
@@ -58,11 +108,6 @@
       "title": "Эффективность",
       "subtitle": "Чистая прибыль и объём продаж",
       "summary": "Итоги периода",
-      "granularity": {
-        "day": "30 дней",
-        "week": "12 недель",
-        "month": "12 месяцев"
-      },
       "series": {
         "netProfit": "Чистая прибыль",
         "sales": "Продажи",
@@ -72,7 +117,7 @@
     },
     "pnl": {
       "title": "Прибыли и убытки",
-      "subtitle": "Разбивка по месяцам за последние 12 месяцев",
+      "subtitle": "Разбивка выбранного периода",
       "parameter": "Показатель / период",
       "currentPeriod": "Текущий период",
       "heatmap": "Тепловая карта",

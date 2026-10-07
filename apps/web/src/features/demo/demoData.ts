@@ -20,7 +20,9 @@ import {
   buildOrderTimeline,
   CampaignReadOnlyReason,
   DashboardChartGranularity,
-  DashboardPeriodKey,
+  dashboardBucketKeys,
+  dashboardBucketWindows,
+  DEFAULT_DASHBOARD_RANGE_PRESET,
   EbayAccountStatus,
   EbayCancellationAction,
   EbayConversationDto,
@@ -73,7 +75,9 @@ import {
   type CampaignListingDto,
   type DashboardChartPoint,
   type DashboardDataDto,
-  type DashboardHistoryMonth,
+  type DashboardDateWindow,
+  type DashboardPnlColumn,
+  type DashboardRangeInput,
   type EbayBusinessPolicyDto,
   type EbayCancellationDetailDto,
   type EbayCancellationDto,
@@ -91,6 +95,8 @@ import {
   type OrderDto,
   type OrderStatsDto,
   type PeriodMetricsDto,
+  type ResolvedDashboardRange,
+  resolveDashboardRange,
   type ProfileDto,
   type StoreSettingsResponse,
   type ListingRulesConfig,
@@ -1663,145 +1669,117 @@ function aggregate(orders: OrderDto[], trend: number | null, profitTrend: number
   return m;
 }
 
-/**
- * Scales the additive totals of a period and recomputes the ratios from the
- * scaled values, so margin/ROI stay meaningful instead of being multiplied.
- */
-function scaleMetrics(base: PeriodMetricsDto, factor: number): PeriodMetricsDto {
-  const s = (n: number): number => round2(n * factor);
-  const scaled: PeriodMetricsDto = {
-    ...base,
-    sales: s(base.sales),
-    orders: Math.round(base.orders * factor),
-    units: Math.round(base.units * factor),
-    refunds: Math.round(base.refunds * factor),
-    grossProfit: s(base.grossProfit),
-    estimatedPayout: s(base.estimatedPayout),
-    profitConfirmed: s(base.profitConfirmed),
-    profitProvisional: s(base.profitProvisional),
-    revenueUncosted: s(base.revenueUncosted),
-    ordersPendingCapture: Math.round(base.ordersPendingCapture * factor),
-    ordersCaptureFailed: Math.round(base.ordersCaptureFailed * factor),
-    ordersUntracked: Math.round(base.ordersUntracked * factor),
-    costOfGoods: s(base.costOfGoods),
-    transactionFees: s(base.transactionFees),
-    adFees: s(base.adFees),
-    amazonShipping: s(base.amazonShipping),
-    amazonTax: s(base.amazonTax),
-    netProfit: s(base.profitConfirmed),
-  };
-  scaled.margin = scaled.sales > 0 ? round2((scaled.netProfit / scaled.sales) * 100) : 0;
-  scaled.avgOrderValue = scaled.orders > 0 ? round2(scaled.sales / scaled.orders) : 0;
-  scaled.roi = scaled.costOfGoods > 0 ? round2((scaled.profitConfirmed / scaled.costOfGoods) * 100) : 0;
-  return scaled;
-}
-
 function ordersWithinDays(days: number): OrderDto[] {
   const cutoff = Date.now() - days * 86400000;
   return DEMO_ORDERS.filter((o) => new Date(o.createdAt).getTime() >= cutoff);
 }
 
-/** Scales a month's totals off the live 30-day window so history looks plausible. */
-function scaleMonth(
-  base: PeriodMetricsDto,
-  factor: number,
-  key: string,
-  from: string,
-  to: string
-): DashboardHistoryMonth {
-  const s = (n: number): number => round2(n * factor);
-  const profitConfirmed = s(base.profitConfirmed);
-  const purchasePrice = s(base.costOfGoods);
-  return {
-    key,
-    dateFrom: from,
-    dateTo: to,
-    sales: s(base.sales),
-    units: Math.round(base.units * factor),
-    orders: Math.round(base.orders * factor),
-    refunds: 0,
-    adFee: s(base.adFees),
-    amazonShipping: s(base.amazonShipping),
-    amazonTax: s(base.amazonTax),
-    purchasePrice,
-    transactionFee: s(base.transactionFees),
-    ebayEarnings: s(base.estimatedPayout),
-    grossProfit: s(base.grossProfit),
-    netProfit: profitConfirmed,
-    profitConfirmed,
-    profitProvisional: s(base.profitProvisional),
-    estimatedPayout: s(base.estimatedPayout),
-    margin: base.margin,
-    roi: purchasePrice > 0 ? round2((profitConfirmed / purchasePrice) * 100) : 0,
+/** The browser's local calendar date — the demo's stand-in for the seller's day. */
+const localIso = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const ordersIn = (w: DashboardDateWindow): OrderDto[] =>
+  DEMO_ORDERS.filter((o) => {
+    const day = localIso(new Date(o.createdAt));
+    return day >= w.from && day <= w.to;
+  });
+
+const trendOf = (cur: number, prev: number): number | null => (prev === 0 ? null : round2(((cur - prev) / prev) * 100));
+
+/**
+ * The dashboard for a range, resolved by the SAME pure resolver the API uses
+ * and aggregated from the sample order rows — so a long range shows real zeros
+ * before the sample begins rather than invented history.
+ */
+export function buildDemoDashboard(input: DashboardRangeInput): DashboardDataDto {
+  const today = localIso(new Date());
+  let resolved: ResolvedDashboardRange;
+  try {
+    resolved = resolveDashboardRange(input, today);
+  } catch {
+    resolved = resolveDashboardRange({ preset: DEFAULT_DASHBOARD_RANGE_PRESET }, today);
+  }
+  const periods = resolved.periods.map((p) => {
+    const current = aggregate(ordersIn(p), null, null);
+    const previous = aggregate(ordersIn(p.comparison), null, null);
+    return {
+      from: p.from,
+      to: p.to,
+      label: p.label,
+      metrics: {
+        ...current,
+        trend: trendOf(current.sales, previous.sales),
+        profitTrend: trendOf(current.profitConfirmed, previous.profitConfirmed),
+      },
+    };
+  });
+
+  const pointOf = (orders: OrderDto[], key: string): DashboardChartPoint => {
+    const m = aggregate(orders, null, null);
+    return {
+      period: key,
+      sales: m.sales,
+      units: m.units,
+      orders: m.orders,
+      netProfit: m.profitConfirmed,
+      grossProfit: m.grossProfit,
+      refunds: m.refunds,
+    };
   };
-}
+  const points: DashboardChartPoint[] =
+    resolved.chartGranularity === DashboardChartGranularity.HOUR
+      ? dashboardBucketKeys(resolved.range, DashboardChartGranularity.HOUR).map((key) => {
+          const [day, hour] = key.split(' ');
+          const orders = DEMO_ORDERS.filter((o) => {
+            const d = new Date(o.createdAt);
+            return localIso(d) === day && d.getHours() === Number(hour);
+          });
+          return pointOf(orders, key);
+        })
+      : dashboardBucketWindows(resolved.range, resolved.chartGranularity).map((w) => pointOf(ordersIn(w), w.key));
 
-export function buildDemoDashboard(granularity: DashboardChartGranularity): DashboardDataDto {
-  const today = aggregate(ordersWithinDays(1), 8.2, 6.4);
-  const week = aggregate(ordersWithinDays(7), 11.5, 9.1);
-  const month = aggregate(ordersWithinDays(31), 12.4, 14.7);
-  // A trading year is more than the 42 sample orders, so the year card scales
-  // the whole sample up. Ratios are recomputed rather than scaled — a margin
-  // multiplied by 8.5 would be nonsense.
-  const year = scaleMetrics(aggregate(DEMO_ORDERS, 41.3, 38.9), 8.5);
-
-  const rand = seeded(773);
-  const points: DashboardChartPoint[] = [];
-  const bucketCount = granularity === DashboardChartGranularity.DAY ? 30 : 12;
-
-  for (let i = bucketCount - 1; i >= 0; i -= 1) {
-    const d = new Date();
-    if (granularity === DashboardChartGranularity.DAY) {
-      d.setDate(d.getDate() - i);
-    } else if (granularity === DashboardChartGranularity.WEEK) {
-      d.setDate(d.getDate() - i * 7);
-    } else {
-      d.setMonth(d.getMonth() - i);
-      d.setDate(1);
-    }
-    const scale =
-      granularity === DashboardChartGranularity.DAY ? 1 : granularity === DashboardChartGranularity.WEEK ? 7 : 30;
-    const wobble = 0.65 + rand() * 0.7;
-    const sales = round2((month.sales / 31) * scale * wobble);
-    const netProfit = round2((month.profitConfirmed / 31) * scale * wobble);
-    points.push({
-      period: d.toISOString().slice(0, 10),
-      sales,
-      units: Math.max(1, Math.round((month.units / 31) * scale * wobble)),
-      orders: Math.max(1, Math.round((month.orders / 31) * scale * wobble)),
-      netProfit,
-      grossProfit: round2(netProfit * 1.18),
-      refunds: rand() < 0.12 ? 1 : 0,
+  const columns: DashboardPnlColumn[] = dashboardBucketWindows(resolved.range, resolved.pnlGranularity)
+    .reverse()
+    .map((w) => {
+      const m = aggregate(ordersIn(w), null, null);
+      return {
+        key: w.key,
+        dateFrom: w.from,
+        dateTo: w.to,
+        isCurrent: w.from <= today && today <= w.to,
+        sales: m.sales,
+        units: m.units,
+        orders: m.orders,
+        refunds: m.refunds,
+        adFee: m.adFees,
+        amazonShipping: m.amazonShipping,
+        amazonTax: m.amazonTax,
+        purchasePrice: m.costOfGoods,
+        transactionFee: m.transactionFees,
+        ebayEarnings: m.estimatedPayout,
+        grossProfit: m.grossProfit,
+        netProfit: m.netProfit,
+        profitConfirmed: m.profitConfirmed,
+        profitProvisional: m.profitProvisional,
+        estimatedPayout: m.estimatedPayout,
+        margin: m.margin,
+        roi: m.roi,
+      };
     });
-  }
-
-  const months: DashboardHistoryMonth[] = [];
-  for (let i = 11; i >= 0; i -= 1) {
-    const start = new Date();
-    start.setMonth(start.getMonth() - i, 1);
-    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-    const isCurrent = i === 0;
-    const factor = isCurrent ? 1 : 0.55 + (11 - i) * 0.045 + (i % 3) * 0.05;
-    months.push(
-      scaleMonth(
-        month,
-        factor,
-        isCurrent ? 'current' : `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`,
-        start.toISOString().slice(0, 10),
-        end.toISOString().slice(0, 10)
-      )
-    );
-  }
 
   return {
-    metrics: {
-      [DashboardPeriodKey.TODAY]: today,
-      [DashboardPeriodKey.THIS_WEEK]: week,
-      [DashboardPeriodKey.THIS_MONTH]: month,
-      [DashboardPeriodKey.THIS_YEAR]: year,
+    range: {
+      preset: resolved.preset,
+      from: resolved.range.from,
+      to: resolved.range.to,
+      today,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      chartGranularity: resolved.chartGranularity,
+      pnlGranularity: resolved.pnlGranularity,
     },
-    chart: { granularity, points, summary: month },
-    history: { months },
+    periods,
+    chart: { granularity: resolved.chartGranularity, points, summary: periods[0].metrics },
+    pnl: { granularity: resolved.pnlGranularity, columns },
   };
 }
 

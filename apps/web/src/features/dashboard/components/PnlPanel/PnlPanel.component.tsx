@@ -1,6 +1,6 @@
 /**
  * PnlPanel (Presentation)
- * Month-by-month P&L matrix: sticky metric column, grouped sections,
+ * P&L matrix (day, week or month columns of the selected range): sticky metric column, grouped sections,
  * emphasized totals and an optional heat map.
  */
 
@@ -64,10 +64,10 @@ export const PnlPanelComponent = ({
                   {parameterLabel}
                 </Text>
               </S.Th>
-              {columns.map((column, index) => (
-                <S.Th key={column} $current={index === 0}>
+              {columns.map((column) => (
+                <S.Th key={column.key} $current={column.isCurrent}>
                   <Text variant="body-sm" weight="semibold">
-                    {column}
+                    {column.label}
                   </Text>
                 </S.Th>
               ))}

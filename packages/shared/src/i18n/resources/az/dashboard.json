@@ -15,10 +15,52 @@
       "chart": "Qrafik",
       "pnl": "Mənfəət və zərər"
     },
-    "today": "Bu gün",
-    "thisWeek": "Bu həftə",
-    "thisMonth": "Bu ay",
-    "thisYear": "Bu il",
+    "range": {
+      "title": "Tarix aralığı",
+      "custom": "Xüsusi aralıq",
+      "apply": "Tətbiq et",
+      "cancel": "Ləğv et",
+      "preset": {
+        "today": "Bu gün",
+        "yesterday": "Dünən",
+        "last7Days": "Son 7 gün",
+        "last30Days": "Son 30 gün",
+        "thisWeek": "Bu həftə",
+        "lastWeek": "Keçən həftə",
+        "thisMonth": "Bu ay",
+        "lastMonth": "Keçən ay",
+        "last3Months": "Son 3 ay",
+        "thisYear": "Bu il",
+        "lastYear": "Keçən il",
+        "last12Months": "Son 12 ay"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Bu gün",
+        "previous": "Dünən",
+        "ago_one": "{{count}} gün əvvəl",
+        "ago_other": "{{count}} gün əvvəl"
+      },
+      "week": {
+        "current": "Bu həftə",
+        "previous": "Keçən həftə",
+        "ago_one": "{{count}} həftə əvvəl",
+        "ago_other": "{{count}} həftə əvvəl"
+      },
+      "month": {
+        "current": "Bu ay",
+        "previous": "Keçən ay",
+        "ago_one": "{{count}} ay əvvəl",
+        "ago_other": "{{count}} ay əvvəl"
+      },
+      "year": {
+        "current": "Bu il",
+        "previous": "Keçən il",
+        "ago_one": "{{count}} il əvvəl",
+        "ago_other": "{{count}} il əvvəl"
+      }
+    },
     "metrics": {
       "sales": "Satışlar",
       "units": "Ədəd",
@@ -58,11 +100,6 @@
       "title": "Göstəricilər",
       "subtitle": "Xalis mənfəət və satış həcmi",
       "summary": "Dövr üzrə xülasə",
-      "granularity": {
-        "day": "30 gün",
-        "week": "12 həftə",
-        "month": "12 ay"
-      },
       "series": {
         "netProfit": "Xalis mənfəət",
         "sales": "Satışlar",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "Mənfəət və zərər",
-      "subtitle": "Son 12 ayın aylar üzrə bölgüsü",
+      "subtitle": "Seçilmiş dövrün bölgüsü",
       "parameter": "Göstərici / Dövr",
       "currentPeriod": "Cari dövr",
       "heatmap": "İstilik xəritəsi",

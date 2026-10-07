@@ -15,10 +15,48 @@
       "chart": "图表",
       "pnl": "损益表"
     },
-    "today": "今天",
-    "thisWeek": "本周",
-    "thisMonth": "本月",
-    "thisYear": "今年",
+    "range": {
+      "title": "日期范围",
+      "custom": "自定义范围",
+      "apply": "应用",
+      "cancel": "取消",
+      "preset": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "last7Days": "最近 7 天",
+        "last30Days": "最近 30 天",
+        "thisWeek": "本周",
+        "lastWeek": "上周",
+        "thisMonth": "本月",
+        "lastMonth": "上月",
+        "last3Months": "最近 3 个月",
+        "thisYear": "今年",
+        "lastYear": "去年",
+        "last12Months": "最近 12 个月"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "今天",
+        "previous": "昨天",
+        "ago_other": "{{count}} 天前"
+      },
+      "week": {
+        "current": "本周",
+        "previous": "上周",
+        "ago_other": "{{count}} 周前"
+      },
+      "month": {
+        "current": "本月",
+        "previous": "上月",
+        "ago_other": "{{count}} 个月前"
+      },
+      "year": {
+        "current": "今年",
+        "previous": "去年",
+        "ago_other": "{{count}} 年前"
+      }
+    },
     "metrics": {
       "sales": "销售额",
       "units": "件数",
@@ -58,11 +96,6 @@
       "title": "表现",
       "subtitle": "净利润与销量对比",
       "summary": "周期汇总",
-      "granularity": {
-        "day": "30 天",
-        "week": "12 周",
-        "month": "12 个月"
-      },
       "series": {
         "netProfit": "净利润",
         "sales": "销售额",
@@ -72,7 +105,7 @@
     },
     "pnl": {
       "title": "损益表",
-      "subtitle": "最近 12 个月的逐月明细",
+      "subtitle": "所选时段的明细",
       "parameter": "指标 / 周期",
       "currentPeriod": "当前周期",
       "heatmap": "热力图",

@@ -15,10 +15,52 @@
       "chart": "Diagramm",
       "pnl": "GuV"
     },
-    "today": "Heute",
-    "thisWeek": "Diese Woche",
-    "thisMonth": "Dieser Monat",
-    "thisYear": "Dieses Jahr",
+    "range": {
+      "title": "Zeitraum",
+      "custom": "Eigener Zeitraum",
+      "apply": "Übernehmen",
+      "cancel": "Abbrechen",
+      "preset": {
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "last7Days": "Letzte 7 Tage",
+        "last30Days": "Letzte 30 Tage",
+        "thisWeek": "Diese Woche",
+        "lastWeek": "Letzte Woche",
+        "thisMonth": "Dieser Monat",
+        "lastMonth": "Letzter Monat",
+        "last3Months": "Letzte 3 Monate",
+        "thisYear": "Dieses Jahr",
+        "lastYear": "Letztes Jahr",
+        "last12Months": "Letzte 12 Monate"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Heute",
+        "previous": "Gestern",
+        "ago_one": "Vor {{count}} Tag",
+        "ago_other": "Vor {{count}} Tagen"
+      },
+      "week": {
+        "current": "Diese Woche",
+        "previous": "Letzte Woche",
+        "ago_one": "Vor {{count}} Woche",
+        "ago_other": "Vor {{count}} Wochen"
+      },
+      "month": {
+        "current": "Dieser Monat",
+        "previous": "Letzter Monat",
+        "ago_one": "Vor {{count}} Monat",
+        "ago_other": "Vor {{count}} Monaten"
+      },
+      "year": {
+        "current": "Dieses Jahr",
+        "previous": "Letztes Jahr",
+        "ago_one": "Vor {{count}} Jahr",
+        "ago_other": "Vor {{count}} Jahren"
+      }
+    },
     "metrics": {
       "sales": "Umsatz",
       "units": "Stückzahl",
@@ -58,11 +100,6 @@
       "title": "Leistung",
       "subtitle": "Nettogewinn im Verhältnis zum Verkaufsvolumen",
       "summary": "Zeitraumübersicht",
-      "granularity": {
-        "day": "30 Tage",
-        "week": "12 Wochen",
-        "month": "12 Monate"
-      },
       "series": {
         "netProfit": "Nettogewinn",
         "sales": "Umsatz",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "Gewinn und Verlust",
-      "subtitle": "Monatliche Aufschlüsselung der letzten 12 Monate",
+      "subtitle": "Aufschlüsselung des gewählten Zeitraums",
       "parameter": "Kennzahl / Zeitraum",
       "currentPeriod": "Aktueller Zeitraum",
       "heatmap": "Heatmap",

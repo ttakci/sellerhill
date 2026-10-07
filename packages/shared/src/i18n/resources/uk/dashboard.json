@@ -15,10 +15,60 @@
       "chart": "Графік",
       "pnl": "Прибутки та збитки"
     },
-    "today": "Сьогодні",
-    "thisWeek": "Цього тижня",
-    "thisMonth": "Цього місяця",
-    "thisYear": "Цього року",
+    "range": {
+      "title": "Період",
+      "custom": "Власний період",
+      "apply": "Застосувати",
+      "cancel": "Скасувати",
+      "preset": {
+        "today": "Сьогодні",
+        "yesterday": "Учора",
+        "last7Days": "Останні 7 днів",
+        "last30Days": "Останні 30 днів",
+        "thisWeek": "Цей тиждень",
+        "lastWeek": "Минулий тиждень",
+        "thisMonth": "Цей місяць",
+        "lastMonth": "Минулий місяць",
+        "last3Months": "Останні 3 місяці",
+        "thisYear": "Цей рік",
+        "lastYear": "Минулий рік",
+        "last12Months": "Останні 12 місяців"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Сьогодні",
+        "previous": "Учора",
+        "ago_one": "{{count}} день тому",
+        "ago_few": "{{count}} дні тому",
+        "ago_many": "{{count}} днів тому",
+        "ago_other": "{{count}} дня тому"
+      },
+      "week": {
+        "current": "Цей тиждень",
+        "previous": "Минулий тиждень",
+        "ago_one": "{{count}} тиждень тому",
+        "ago_few": "{{count}} тижні тому",
+        "ago_many": "{{count}} тижнів тому",
+        "ago_other": "{{count}} тижня тому"
+      },
+      "month": {
+        "current": "Цей місяць",
+        "previous": "Минулий місяць",
+        "ago_one": "{{count}} місяць тому",
+        "ago_few": "{{count}} місяці тому",
+        "ago_many": "{{count}} місяців тому",
+        "ago_other": "{{count}} місяця тому"
+      },
+      "year": {
+        "current": "Цей рік",
+        "previous": "Минулий рік",
+        "ago_one": "{{count}} рік тому",
+        "ago_few": "{{count}} роки тому",
+        "ago_many": "{{count}} років тому",
+        "ago_other": "{{count}} року тому"
+      }
+    },
     "metrics": {
       "sales": "Продажі",
       "units": "Одиниці",
@@ -58,11 +108,6 @@
       "title": "Результати",
       "subtitle": "Чистий прибуток порівняно з обсягом продажів",
       "summary": "Підсумок за період",
-      "granularity": {
-        "day": "30 днів",
-        "week": "12 тижнів",
-        "month": "12 місяців"
-      },
       "series": {
         "netProfit": "Чистий прибуток",
         "sales": "Продажі",
@@ -72,7 +117,7 @@
     },
     "pnl": {
       "title": "Прибутки та збитки",
-      "subtitle": "Розбивка за останні 12 місяців помісячно",
+      "subtitle": "Розбивка вибраного періоду",
       "parameter": "Показник / період",
       "currentPeriod": "Поточний період",
       "heatmap": "Теплова карта",

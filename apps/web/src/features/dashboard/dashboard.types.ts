@@ -6,19 +6,25 @@ import type {
   DashboardChartGranularity,
   DashboardChartPoint,
   DashboardChartSeries,
-  DashboardHistoryMonth,
-  DashboardPeriodKey,
+  DashboardPnlColumn,
   DashboardPnlGroup,
+  DashboardRangeInput,
   DashboardTab,
   DashboardValueFormat,
   PeriodMetricsDto,
 } from '@repo/shared';
 
-/** Resolved calendar range behind a period card. */
+/** Calendar window behind a period card, as the API resolved it. */
 export interface PeriodDateInfo {
   dateRange: string;
   from: string;
   to: string;
+}
+
+/** The i18n key that names a period card (`count` for "n days ago"). */
+export interface PeriodLabelKey {
+  key: string;
+  count?: number;
 }
 
 /** Locale-aware formatters resolved once in the page container. */
@@ -28,24 +34,31 @@ export interface DashboardFormatters {
   number: (value: number) => string;
   percent: (value: number) => string;
   date: (isoDate: string) => string;
-  /** Short month + year, e.g. "Dec 2029" — P&L column headers. */
+  /** Short month + year, e.g. "Dec 2029". */
   monthLabel: (isoDate: string) => string;
   /** Signed percentage badge text, or undefined when there is no comparable period. */
   trend: (trend: number | null | undefined) => string | undefined;
-  /** X-axis / column label for a chart bucket. */
-  bucketLabel: (isoDate: string, granularity: DashboardChartGranularity) => string;
+  /** X-axis label for a chart bucket (`YYYY-MM-DD`, or `YYYY-MM-DD HH` for hours). */
+  bucketLabel: (bucketKey: string, granularity: DashboardChartGranularity) => string;
   /** Full label used inside the chart tooltip. */
-  bucketLongLabel: (isoDate: string, granularity: DashboardChartGranularity) => string;
+  bucketLongLabel: (bucketKey: string, granularity: DashboardChartGranularity) => string;
+  /** P&L column header for a day, week or month column. */
+  pnlColumnLabel: (column: DashboardPnlColumn, granularity: DashboardChartGranularity) => string;
+  /** A window as text: one day → "07.10.2026", otherwise "01 Oct – 07 Oct". */
+  dateRange: (from: string, to: string) => string;
+  /** A window in all-numeric dates with the year: "15.09.2026 – 22.09.2026". */
+  numericDateRange: (from: string, to: string) => string;
 }
 
-/** URL-backed dashboard state (tab, period, store, chart granularity). */
+/** URL-backed dashboard state (tab, date range, selected card). */
 export interface DashboardUrlState {
   tab: DashboardTab;
-  period: DashboardPeriodKey;
-  granularity: DashboardChartGranularity;
+  range: DashboardRangeInput;
+  /** Index of the selected period card (0 = the range itself). */
+  card: number;
   setTab: (tab: DashboardTab) => void;
-  setPeriod: (period: DashboardPeriodKey) => void;
-  setGranularity: (granularity: DashboardChartGranularity) => void;
+  setRange: (range: DashboardRangeInput) => void;
+  setCard: (index: number) => void;
 }
 
 /** One row of the P&L matrix / chart summary panel. */
@@ -55,15 +68,15 @@ export interface DashboardMetricRow {
   /** i18n key (already namespaced) for the row label. */
   labelKey: string;
   format: DashboardValueFormat;
-  /** Field on a P&L month column. */
-  monthField: keyof DashboardHistoryMonth;
+  /** Field on a P&L column. */
+  monthField: keyof DashboardPnlColumn;
   /** Field on the chart summary aggregate. */
   summaryField: keyof PeriodMetricsDto;
   /** Totals get a heavier treatment (bold + separator). */
   emphasis?: boolean;
   /** Cost rows render as a negative outflow. */
   negative?: boolean;
-  /** Ratio that cannot be derived per month column — chart summary only. */
+  /** Ratio that cannot be derived per P&L column — chart summary only. */
   summaryOnly?: boolean;
 }
 

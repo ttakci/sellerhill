@@ -15,10 +15,56 @@
       "chart": "Graphique",
       "pnl": "Résultat"
     },
-    "today": "Aujourd'hui",
-    "thisWeek": "Cette semaine",
-    "thisMonth": "Ce mois-ci",
-    "thisYear": "Cette année",
+    "range": {
+      "title": "Période",
+      "custom": "Période personnalisée",
+      "apply": "Appliquer",
+      "cancel": "Annuler",
+      "preset": {
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "last7Days": "7 derniers jours",
+        "last30Days": "30 derniers jours",
+        "thisWeek": "Cette semaine",
+        "lastWeek": "Semaine dernière",
+        "thisMonth": "Ce mois-ci",
+        "lastMonth": "Mois dernier",
+        "last3Months": "3 derniers mois",
+        "thisYear": "Cette année",
+        "lastYear": "Année dernière",
+        "last12Months": "12 derniers mois"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Aujourd'hui",
+        "previous": "Hier",
+        "ago_one": "Il y a {{count}} jour",
+        "ago_many": "Il y a {{count}} jours",
+        "ago_other": "Il y a {{count}} jours"
+      },
+      "week": {
+        "current": "Cette semaine",
+        "previous": "Semaine dernière",
+        "ago_one": "Il y a {{count}} semaine",
+        "ago_many": "Il y a {{count}} semaines",
+        "ago_other": "Il y a {{count}} semaines"
+      },
+      "month": {
+        "current": "Ce mois-ci",
+        "previous": "Mois dernier",
+        "ago_one": "Il y a {{count}} mois",
+        "ago_many": "Il y a {{count}} mois",
+        "ago_other": "Il y a {{count}} mois"
+      },
+      "year": {
+        "current": "Cette année",
+        "previous": "Année dernière",
+        "ago_one": "Il y a {{count}} an",
+        "ago_many": "Il y a {{count}} ans",
+        "ago_other": "Il y a {{count}} ans"
+      }
+    },
     "metrics": {
       "sales": "Ventes",
       "units": "Unités",
@@ -58,11 +104,6 @@
       "title": "Performance",
       "subtitle": "Profit net par rapport au volume des ventes",
       "summary": "Résumé de la période",
-      "granularity": {
-        "day": "30 jours",
-        "week": "12 semaines",
-        "month": "12 mois"
-      },
       "series": {
         "netProfit": "Profit net",
         "sales": "Ventes",
@@ -72,7 +113,7 @@
     },
     "pnl": {
       "title": "Compte de résultat",
-      "subtitle": "Détail mois par mois des 12 derniers mois",
+      "subtitle": "Détail de la période sélectionnée",
       "parameter": "Indicateur / Période",
       "currentPeriod": "Période en cours",
       "heatmap": "Carte thermique",

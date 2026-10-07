@@ -15,10 +15,52 @@
       "chart": "Chart",
       "pnl": "P&L"
     },
-    "today": "Today",
-    "thisWeek": "This week",
-    "thisMonth": "This month",
-    "thisYear": "This year",
+    "range": {
+      "title": "Date range",
+      "custom": "Custom range",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "preset": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "thisWeek": "This week",
+        "lastWeek": "Last week",
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "last3Months": "Last 3 months",
+        "thisYear": "This year",
+        "lastYear": "Last year",
+        "last12Months": "Last 12 months"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Today",
+        "previous": "Yesterday",
+        "ago_one": "{{count}} day ago",
+        "ago_other": "{{count}} days ago"
+      },
+      "week": {
+        "current": "This week",
+        "previous": "Last week",
+        "ago_one": "{{count}} week ago",
+        "ago_other": "{{count}} weeks ago"
+      },
+      "month": {
+        "current": "This month",
+        "previous": "Last month",
+        "ago_one": "{{count}} month ago",
+        "ago_other": "{{count}} months ago"
+      },
+      "year": {
+        "current": "This year",
+        "previous": "Last year",
+        "ago_one": "{{count}} year ago",
+        "ago_other": "{{count}} years ago"
+      }
+    },
     "metrics": {
       "sales": "Sales",
       "units": "Units",
@@ -58,11 +100,6 @@
       "title": "Performance",
       "subtitle": "Net profit against sales volume",
       "summary": "Period summary",
-      "granularity": {
-        "day": "30 days",
-        "week": "12 weeks",
-        "month": "12 months"
-      },
       "series": {
         "netProfit": "Net profit",
         "sales": "Sales",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "Profit & loss",
-      "subtitle": "Month-by-month breakdown of the last 12 months",
+      "subtitle": "Breakdown of the selected period",
       "parameter": "Metric / Period",
       "currentPeriod": "Current period",
       "heatmap": "Heat map",

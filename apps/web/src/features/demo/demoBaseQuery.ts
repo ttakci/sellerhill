@@ -4,7 +4,8 @@ import {
   ActionCenterSeverity,
   BEST_SELLERS_LIST_TYPE_ORDER,
   BestSellersListType,
-  DashboardChartGranularity,
+  DashboardRangePreset,
+  DEFAULT_DASHBOARD_RANGE_PRESET,
   EbayConversationDto,
   EbayConversationStatus,
   ListingStatus,
@@ -24,6 +25,7 @@ import {
   type EbayReturnDto,
   type OrderDto,
   type OrderStageCountsDto,
+  type DashboardRangeInput,
 } from '@repo/shared';
 
 import {
@@ -592,8 +594,11 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   }
 
   if (path === '/dashboard') {
-    const granularity = (params.chartGranularity as DashboardChartGranularity) || DashboardChartGranularity.DAY;
-    return ok(buildDemoDashboard(granularity));
+    const input: DashboardRangeInput =
+      params.from && params.to
+        ? { from: String(params.from), to: String(params.to) }
+        : { preset: (params.range as DashboardRangePreset) || DEFAULT_DASHBOARD_RANGE_PRESET };
+    return ok(buildDemoDashboard(input));
   }
 
   if (path === '/action-center') {

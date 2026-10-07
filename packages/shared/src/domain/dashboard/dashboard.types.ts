@@ -1,7 +1,8 @@
 /**
  * Dashboard Domain Types
- * Sellerboard-style period-based metrics (today / this week / this month / this year)
- * + chart (day|week|month buckets) + P&L matrix.
+ * One date range (a preset or a custom from/to, on the seller's calendar day)
+ * drives four period cards, the chart (hour|day|week|month buckets) and the
+ * P&L matrix (day|week|month columns). See `dashboard-range.ts`.
  */
 
 import type { DashboardPeriodLabel, DashboardRangePreset } from './dashboard-range';
@@ -13,15 +14,18 @@ export enum DashboardTab {
   PNL = 'pnl',
 }
 
-/** Chart bucket size (URL `?granularity=`, API `chartGranularity`). */
+/**
+ * Chart / P&L bucket size. Derived from the range length by
+ * `dashboardGranularityFor` — never chosen by the seller.
+ */
 export enum DashboardChartGranularity {
-  /** One point per hour — ranges of up to 2 days. */
+  /** One point per hour — ranges of up to 2 days (chart only). */
   HOUR = 'hour',
-  /** One point per day. */
+  /** One point per day — ranges of up to 31 days. */
   DAY = 'day',
-  /** Last 12 ISO weeks, one point per week. */
+  /** One point per ISO week (Monday start) — ranges of up to 92 days. */
   WEEK = 'week',
-  /** Last 12 months, one point per month. */
+  /** One point per calendar month — longer ranges. */
   MONTH = 'month',
 }
 
@@ -106,7 +110,7 @@ export interface PeriodMetricsDto {
   refundRate: number;
 }
 
-/** One bucket on the chart tab (day, week or month depending on granularity) */
+/** One bucket on the chart tab (hour, day, week or month depending on granularity) */
 export interface DashboardChartPoint {
   /** Bucket key — `YYYY-MM-DD`, or `YYYY-MM-DD HH` for hourly. */
   period: string;

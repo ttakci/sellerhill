@@ -15,10 +15,52 @@
       "chart": "चार्ट",
       "pnl": "P&L"
     },
-    "today": "आज",
-    "thisWeek": "इस सप्ताह",
-    "thisMonth": "इस महीने",
-    "thisYear": "इस वर्ष",
+    "range": {
+      "title": "तारीख़ की अवधि",
+      "custom": "कस्टम अवधि",
+      "apply": "लागू करें",
+      "cancel": "रद्द करें",
+      "preset": {
+        "today": "आज",
+        "yesterday": "कल",
+        "last7Days": "पिछले 7 दिन",
+        "last30Days": "पिछले 30 दिन",
+        "thisWeek": "इस सप्ताह",
+        "lastWeek": "पिछले सप्ताह",
+        "thisMonth": "इस महीने",
+        "lastMonth": "पिछले महीने",
+        "last3Months": "पिछले 3 महीने",
+        "thisYear": "इस वर्ष",
+        "lastYear": "पिछले वर्ष",
+        "last12Months": "पिछले 12 महीने"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "आज",
+        "previous": "कल",
+        "ago_one": "{{count}} दिन पहले",
+        "ago_other": "{{count}} दिन पहले"
+      },
+      "week": {
+        "current": "इस सप्ताह",
+        "previous": "पिछले सप्ताह",
+        "ago_one": "{{count}} सप्ताह पहले",
+        "ago_other": "{{count}} सप्ताह पहले"
+      },
+      "month": {
+        "current": "इस महीने",
+        "previous": "पिछले महीने",
+        "ago_one": "{{count}} महीना पहले",
+        "ago_other": "{{count}} महीने पहले"
+      },
+      "year": {
+        "current": "इस वर्ष",
+        "previous": "पिछले वर्ष",
+        "ago_one": "{{count}} वर्ष पहले",
+        "ago_other": "{{count}} वर्ष पहले"
+      }
+    },
     "metrics": {
       "sales": "बिक्री",
       "units": "यूनिट",
@@ -58,11 +100,6 @@
       "title": "प्रदर्शन",
       "subtitle": "बिक्री की मात्रा के मुकाबले शुद्ध मुनाफ़ा",
       "summary": "अवधि का सारांश",
-      "granularity": {
-        "day": "30 दिन",
-        "week": "12 सप्ताह",
-        "month": "12 महीने"
-      },
       "series": {
         "netProfit": "शुद्ध मुनाफ़ा",
         "sales": "बिक्री",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "लाभ और हानि",
-      "subtitle": "पिछले 12 महीनों का महीने-दर-महीने ब्रेकडाउन",
+      "subtitle": "चुनी गई अवधि का ब्रेकडाउन",
       "parameter": "मेट्रिक / अवधि",
       "currentPeriod": "मौजूदा अवधि",
       "heatmap": "हीट मैप",

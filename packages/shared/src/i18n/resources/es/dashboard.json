@@ -15,10 +15,56 @@
       "chart": "Gráfico",
       "pnl": "Resultados"
     },
-    "today": "Hoy",
-    "thisWeek": "Esta semana",
-    "thisMonth": "Este mes",
-    "thisYear": "Este año",
+    "range": {
+      "title": "Rango de fechas",
+      "custom": "Rango personalizado",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "preset": {
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "last7Days": "Últimos 7 días",
+        "last30Days": "Últimos 30 días",
+        "thisWeek": "Esta semana",
+        "lastWeek": "Semana pasada",
+        "thisMonth": "Este mes",
+        "lastMonth": "Mes pasado",
+        "last3Months": "Últimos 3 meses",
+        "thisYear": "Este año",
+        "lastYear": "Año pasado",
+        "last12Months": "Últimos 12 meses"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Hoy",
+        "previous": "Ayer",
+        "ago_one": "Hace {{count}} día",
+        "ago_many": "Hace {{count}} días",
+        "ago_other": "Hace {{count}} días"
+      },
+      "week": {
+        "current": "Esta semana",
+        "previous": "Semana pasada",
+        "ago_one": "Hace {{count}} semana",
+        "ago_many": "Hace {{count}} semanas",
+        "ago_other": "Hace {{count}} semanas"
+      },
+      "month": {
+        "current": "Este mes",
+        "previous": "Mes pasado",
+        "ago_one": "Hace {{count}} mes",
+        "ago_many": "Hace {{count}} meses",
+        "ago_other": "Hace {{count}} meses"
+      },
+      "year": {
+        "current": "Este año",
+        "previous": "Año pasado",
+        "ago_one": "Hace {{count}} año",
+        "ago_many": "Hace {{count}} años",
+        "ago_other": "Hace {{count}} años"
+      }
+    },
     "metrics": {
       "sales": "Ventas",
       "units": "Unidades",
@@ -58,11 +104,6 @@
       "title": "Rendimiento",
       "subtitle": "Ganancia neta frente al volumen de ventas",
       "summary": "Resumen del periodo",
-      "granularity": {
-        "day": "30 días",
-        "week": "12 semanas",
-        "month": "12 meses"
-      },
       "series": {
         "netProfit": "Ganancia neta",
         "sales": "Ventas",
@@ -72,7 +113,7 @@
     },
     "pnl": {
       "title": "Estado de resultados",
-      "subtitle": "Desglose mes a mes de los últimos 12 meses",
+      "subtitle": "Desglose del periodo seleccionado",
       "parameter": "Métrica / Periodo",
       "currentPeriod": "Periodo actual",
       "heatmap": "Mapa de calor",

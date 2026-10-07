@@ -2,14 +2,15 @@
  * CardsPanel types
  */
 
-import type { DashboardPeriodKey, ListingDto, OrderDto, PeriodMetricsDto } from '@repo/shared';
+import type { ListingDto, OrderDto, PeriodMetricsDto } from '@repo/shared';
 
 import type { DashboardFormatters, PeriodDateInfo } from '../../dashboard.types';
 import type { PeriodCardLabels } from '../PeriodCard';
 
 /** One period card entry, fully resolved by the page container. */
 export interface PeriodCardEntry {
-  key: DashboardPeriodKey;
+  /** Position in the API's periods array (0 = the selected range itself). */
+  index: number;
   title: string;
   dates: PeriodDateInfo;
   metrics: PeriodMetricsDto;
@@ -18,8 +19,9 @@ export interface PeriodCardEntry {
 
 export interface CardsPanelProps {
   periods: PeriodCardEntry[];
-  selectedPeriod: DashboardPeriodKey;
-  onPeriodSelect: (period: DashboardPeriodKey) => void;
+  /** Index of the selected card. */
+  selectedPeriod: number;
+  onPeriodSelect: (index: number) => void;
   formatters: DashboardFormatters;
   cardLabels: PeriodCardLabels;
   isLoading: boolean;

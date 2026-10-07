@@ -1,6 +1,6 @@
 /**
  * DashboardPage (Presentation)
- * Page shell: header, tab rail, store filter and the active tab panel.
+ * Page shell: header, tab rail with the date filter, and the active tab panel.
  */
 
 import { DashboardTab } from '@repo/shared';
@@ -20,6 +20,7 @@ export const DashboardPageComponent = ({
   tabs,
   activeTab,
   onTabChange,
+  rangePickerProps,
   cardsProps,
   chartProps,
   pnlProps,
@@ -35,6 +36,7 @@ export const DashboardPageComponent = ({
         value={activeTab}
         onChange={(id) => onTabChange(id as DashboardTab)}
       />
+      {rangePickerProps && <S.RangePicker {...rangePickerProps} />}
     </S.Toolbar>
 
     {activeTab === DashboardTab.CHART && <ChartPanel {...chartProps} />}

@@ -15,10 +15,56 @@
       "chart": "Gráfico",
       "pnl": "DRE"
     },
-    "today": "Hoje",
-    "thisWeek": "Esta semana",
-    "thisMonth": "Este mês",
-    "thisYear": "Este ano",
+    "range": {
+      "title": "Período",
+      "custom": "Período personalizado",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "preset": {
+        "today": "Hoje",
+        "yesterday": "Ontem",
+        "last7Days": "Últimos 7 dias",
+        "last30Days": "Últimos 30 dias",
+        "thisWeek": "Esta semana",
+        "lastWeek": "Semana passada",
+        "thisMonth": "Este mês",
+        "lastMonth": "Mês passado",
+        "last3Months": "Últimos 3 meses",
+        "thisYear": "Este ano",
+        "lastYear": "Ano passado",
+        "last12Months": "Últimos 12 meses"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Hoje",
+        "previous": "Ontem",
+        "ago_one": "Há {{count}} dia",
+        "ago_many": "Há {{count}} dias",
+        "ago_other": "Há {{count}} dias"
+      },
+      "week": {
+        "current": "Esta semana",
+        "previous": "Semana passada",
+        "ago_one": "Há {{count}} semana",
+        "ago_many": "Há {{count}} semanas",
+        "ago_other": "Há {{count}} semanas"
+      },
+      "month": {
+        "current": "Este mês",
+        "previous": "Mês passado",
+        "ago_one": "Há {{count}} mês",
+        "ago_many": "Há {{count}} meses",
+        "ago_other": "Há {{count}} meses"
+      },
+      "year": {
+        "current": "Este ano",
+        "previous": "Ano passado",
+        "ago_one": "Há {{count}} ano",
+        "ago_many": "Há {{count}} anos",
+        "ago_other": "Há {{count}} anos"
+      }
+    },
     "metrics": {
       "sales": "Vendas",
       "units": "Unidades",
@@ -58,11 +104,6 @@
       "title": "Desempenho",
       "subtitle": "Lucro líquido em relação ao volume de vendas",
       "summary": "Resumo do período",
-      "granularity": {
-        "day": "30 dias",
-        "week": "12 semanas",
-        "month": "12 meses"
-      },
       "series": {
         "netProfit": "Lucro líquido",
         "sales": "Vendas",
@@ -72,7 +113,7 @@
     },
     "pnl": {
       "title": "Lucros e perdas",
-      "subtitle": "Detalhamento mês a mês dos últimos 12 meses",
+      "subtitle": "Detalhamento do período selecionado",
       "parameter": "Métrica / Período",
       "currentPeriod": "Período atual",
       "heatmap": "Mapa de calor",

@@ -4,11 +4,7 @@
  * from the canonical metric row definitions.
  */
 
-import {
-  DashboardChartGranularity,
-  DashboardChartSeries,
-  DashboardValueFormat,
-} from '@repo/shared';
+import { DashboardChartSeries, DashboardValueFormat } from '@repo/shared';
 import { useTheme } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +24,6 @@ export const ChartPanel = ({
   points,
   summary,
   granularity,
-  onGranularityChange,
   formatters,
   isLoading,
 }: ChartPanelContainerProps): React.ReactElement => {
@@ -55,15 +50,6 @@ export const ChartPanel = ({
         visible: !hiddenSeries.includes(id),
       })),
     [t, seriesColors, hiddenSeries],
-  );
-
-  const granularityOptions = useMemo(
-    () =>
-      Object.values(DashboardChartGranularity).map((value) => ({
-        value,
-        label: t(`dashboard.chart.granularity.${value}` as 'dashboard.chart.granularity.month'),
-      })),
-    [t],
   );
 
   const summarySections = useMemo<ChartSummarySection[]>(() => {
@@ -110,13 +96,6 @@ export const ChartPanel = ({
     );
   }, []);
 
-  const handleGranularityChange = useCallback(
-    (value: string) => {
-      onGranularityChange(value as DashboardChartGranularity);
-    },
-    [onGranularityChange],
-  );
-
   const formatTick = useCallback(
     (period: string) => formatters.bucketLabel(period, granularity),
     [formatters, granularity],
@@ -144,9 +123,6 @@ export const ChartPanel = ({
       data={points}
       series={series}
       summarySections={summarySections}
-      granularityOptions={granularityOptions}
-      granularityValue={granularity}
-      onGranularityChange={handleGranularityChange}
       onToggleSeries={handleToggleSeries}
       formatTick={formatTick}
       formatAxisCurrency={formatters.compactCurrency}

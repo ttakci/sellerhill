@@ -15,10 +15,56 @@
       "chart": "Grafico",
       "pnl": "Conto economico"
     },
-    "today": "Oggi",
-    "thisWeek": "Questa settimana",
-    "thisMonth": "Questo mese",
-    "thisYear": "Quest'anno",
+    "range": {
+      "title": "Intervallo di date",
+      "custom": "Intervallo personalizzato",
+      "apply": "Applica",
+      "cancel": "Annulla",
+      "preset": {
+        "today": "Oggi",
+        "yesterday": "Ieri",
+        "last7Days": "Ultimi 7 giorni",
+        "last30Days": "Ultimi 30 giorni",
+        "thisWeek": "Questa settimana",
+        "lastWeek": "Settimana scorsa",
+        "thisMonth": "Questo mese",
+        "lastMonth": "Mese scorso",
+        "last3Months": "Ultimi 3 mesi",
+        "thisYear": "Quest'anno",
+        "lastYear": "Anno scorso",
+        "last12Months": "Ultimi 12 mesi"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Oggi",
+        "previous": "Ieri",
+        "ago_one": "{{count}} giorno fa",
+        "ago_many": "{{count}} giorni fa",
+        "ago_other": "{{count}} giorni fa"
+      },
+      "week": {
+        "current": "Questa settimana",
+        "previous": "Settimana scorsa",
+        "ago_one": "{{count}} settimana fa",
+        "ago_many": "{{count}} settimane fa",
+        "ago_other": "{{count}} settimane fa"
+      },
+      "month": {
+        "current": "Questo mese",
+        "previous": "Mese scorso",
+        "ago_one": "{{count}} mese fa",
+        "ago_many": "{{count}} mesi fa",
+        "ago_other": "{{count}} mesi fa"
+      },
+      "year": {
+        "current": "Quest'anno",
+        "previous": "Anno scorso",
+        "ago_one": "{{count}} anno fa",
+        "ago_many": "{{count}} anni fa",
+        "ago_other": "{{count}} anni fa"
+      }
+    },
     "metrics": {
       "sales": "Vendite",
       "units": "Unità",
@@ -58,11 +104,6 @@
       "title": "Rendimento",
       "subtitle": "Profitto netto rispetto al volume di vendite",
       "summary": "Riepilogo del periodo",
-      "granularity": {
-        "day": "30 giorni",
-        "week": "12 settimane",
-        "month": "12 mesi"
-      },
       "series": {
         "netProfit": "Profitto netto",
         "sales": "Vendite",
@@ -72,7 +113,7 @@
     },
     "pnl": {
       "title": "Profitti e perdite",
-      "subtitle": "Dettaglio mese per mese degli ultimi 12 mesi",
+      "subtitle": "Dettaglio del periodo selezionato",
       "parameter": "Metrica / Periodo",
       "currentPeriod": "Periodo attuale",
       "heatmap": "Mappa di calore",

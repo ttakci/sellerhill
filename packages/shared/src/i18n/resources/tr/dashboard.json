@@ -15,10 +15,52 @@
       "chart": "Çizelge",
       "pnl": "K/Z"
     },
-    "today": "Bugün",
-    "thisWeek": "Bu hafta",
-    "thisMonth": "Bu ay",
-    "thisYear": "Bu yıl",
+    "range": {
+      "title": "Tarih aralığı",
+      "custom": "Özel aralık",
+      "apply": "Uygula",
+      "cancel": "Vazgeç",
+      "preset": {
+        "today": "Bugün",
+        "yesterday": "Dün",
+        "last7Days": "Son 7 gün",
+        "last30Days": "Son 30 gün",
+        "thisWeek": "Bu hafta",
+        "lastWeek": "Geçen hafta",
+        "thisMonth": "Bu ay",
+        "lastMonth": "Geçen ay",
+        "last3Months": "Son 3 ay",
+        "thisYear": "Bu yıl",
+        "lastYear": "Geçen yıl",
+        "last12Months": "Son 12 ay"
+      }
+    },
+    "periodLabel": {
+      "day": {
+        "current": "Bugün",
+        "previous": "Dün",
+        "ago_one": "{{count}} gün önce",
+        "ago_other": "{{count}} gün önce"
+      },
+      "week": {
+        "current": "Bu hafta",
+        "previous": "Geçen hafta",
+        "ago_one": "{{count}} hafta önce",
+        "ago_other": "{{count}} hafta önce"
+      },
+      "month": {
+        "current": "Bu ay",
+        "previous": "Geçen ay",
+        "ago_one": "{{count}} ay önce",
+        "ago_other": "{{count}} ay önce"
+      },
+      "year": {
+        "current": "Bu yıl",
+        "previous": "Geçen yıl",
+        "ago_one": "{{count}} yıl önce",
+        "ago_other": "{{count}} yıl önce"
+      }
+    },
     "metrics": {
       "sales": "Satışlar",
       "units": "Birimler",
@@ -58,11 +100,6 @@
       "title": "Performans",
       "subtitle": "Satış hacmine karşı net kâr",
       "summary": "Dönem özeti",
-      "granularity": {
-        "day": "30 gün",
-        "week": "12 hafta",
-        "month": "12 ay"
-      },
       "series": {
         "netProfit": "Net kâr",
         "sales": "Satışlar",
@@ -72,7 +109,7 @@
     },
     "pnl": {
       "title": "Kâr & zarar",
-      "subtitle": "Son 12 ayın ay ay dökümü",
+      "subtitle": "Seçili dönemin dökümü",
       "parameter": "Metrik / Dönem",
       "currentPeriod": "Güncel dönem",
       "heatmap": "Isı haritası",
