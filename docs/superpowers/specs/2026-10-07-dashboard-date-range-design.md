@@ -16,7 +16,7 @@ Success:
 
 - **`users.timezone TEXT NULL`** (IANA name), new migration (next free number at implementation time — `147` is taken by an uncommitted cancellations migration in the shared tree). NULL = UTC, today's behaviour.
 - **Auto-fill once, from the web.** After the session is established (`AuthBootstrap` / login / register / Google), if `user.timezone` is null the web sends `PATCH /profile` with `Intl.DateTimeFormat().resolvedOptions().timeZone`. This covers new and already-logged-in users alike; a set value is never overwritten automatically (a travelling seller's "yesterday" must stay stable). Editable on the profile page (searchable `Select`, `Intl.supportedValuesOf('timeZone')`).
-- **Validated against Postgres, not Node** — SQL is what consumes the name, and a name Node accepts but Postgres does not makes every query fail with 22023. `isValidTimezone` checks a set loaded once from `pg_timezone_names` (full names only; abbreviations such as `EST` are refused). Save refuses an unknown name (400 `profile.errors.invalidTimezone`); read-side, `UserTimezoneService.get(userId)` falls back to `UTC` for a stored value that has become invalid.
+- **Validated against Postgres, not Node** — SQL is what consumes the name, and a name Node accepts but Postgres does not makes every query fail with 22023. `isValidTimezone` checks a set loaded once from `pg_timezone_names`. Save refuses an unknown name (400 `profile.errors.invalidTimezone`); read-side, `UserTimezoneService.get(userId)` falls back to `UTC` for a stored value that has become invalid.
 - **Stays UTC**: eBay quota day, Best Sellers `viewed_on`, subscription/quota windows, retention — system counters, not the seller's day.
 
 ### SQL rule (load-bearing)
@@ -67,7 +67,7 @@ Response (`DashboardDataDto`, replaces the fixed `metrics` record):
            chartGranularity; pnlGranularity };
   periods: Array<{ from; to; label: DashboardPeriodLabel; metrics: PeriodMetricsDto }>; // 4, newest first
   chart: { granularity; points; summary };   // R only; summary trend = periods[0] trend
-  pnl:   { granularity; columns: Array<{ key; from; to; isCurrent; metrics }> }; // R, newest first; isCurrent = contains today
+  pnl:   { granularity; columns: DashboardPnlColumn[] }; // R, newest first; flat { key; dateFrom; dateTo; isCurrent; sales; units; ... } (metric fields sit on the column itself); isCurrent = contains today
 }
 ```
 
