@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { DatePickerComponent } from './DatePicker.component';
 import type { DatePickerDay, DatePickerProps } from './DatePicker.types';
-
-const pad = (n: number): string => String(n).padStart(2, '0');
-const toIso = (year: number, month: number, day: number): string => `${year}-${pad(month + 1)}-${pad(day)}`;
+import { buildMonthGrid, firstDayOfWeek, isoOf } from './monthGrid';
 
 /** Parses `yyyy-mm-dd`; anything else is "no date". */
 const parseIso = (value: string): { year: number; month: number; day: number } | null => {
@@ -13,24 +11,6 @@ const parseIso = (value: string): { year: number; month: number; day: number } |
     return null;
   }
   return { year: Number(match[1]), month: Number(match[2]) - 1, day: Number(match[3]) };
-};
-
-/** 0 = Sunday … 6 = Saturday. Uses the locale's own week start when the runtime exposes it. */
-const firstDayOfWeek = (locale: string): number => {
-  try {
-    const intlLocale = new Intl.Locale(locale) as Intl.Locale & {
-      weekInfo?: { firstDay: number };
-      getWeekInfo?: () => { firstDay: number };
-    };
-    const info = intlLocale.getWeekInfo?.() ?? intlLocale.weekInfo;
-    if (info) {
-      return info.firstDay % 7; // Intl: 1 = Monday … 7 = Sunday
-    }
-  } catch {
-    // fall through to the default below
-  }
-  const lower = locale.toLowerCase();
-  return lower === 'en' || lower.startsWith('en-us') ? 0 : 1;
 };
 
 export const DatePicker = ({
@@ -85,19 +65,12 @@ export const DatePicker = ({
 
   const days = useMemo<DatePickerDay[]>(() => {
     const now = new Date();
-    const todayIso = toIso(now.getFullYear(), now.getMonth(), now.getDate());
-    const lead = (new Date(view.year, view.month, 1).getDay() - weekStart + 7) % 7;
-    return Array.from({ length: 42 }, (_, i) => {
-      const date = new Date(view.year, view.month, 1 - lead + i);
-      const iso = toIso(date.getFullYear(), date.getMonth(), date.getDate());
-      return {
-        iso,
-        day: date.getDate(),
-        isCurrentMonth: date.getMonth() === view.month,
-        isSelected: iso === value,
-        isToday: iso === todayIso,
-      };
-    });
+    const todayIso = isoOf(now.getFullYear(), now.getMonth(), now.getDate());
+    return buildMonthGrid(view.year, view.month, weekStart).map((cell) => ({
+      ...cell,
+      isSelected: cell.iso === value,
+      isToday: cell.iso === todayIso,
+    }));
   }, [view, weekStart, value]);
 
   const displayValue = useMemo(

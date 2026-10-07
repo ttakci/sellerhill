@@ -155,7 +155,10 @@ export { CopyableText } from './molecules/CopyableText';
 export type { CopyableTextProps } from './molecules/CopyableText';
 
 export { DatePicker } from './molecules/DatePicker';
-export type { DatePickerProps } from './molecules/DatePicker';
+export type { DatePickerProps, MonthGridDay } from './molecules/DatePicker';
+export { buildMonthGrid, firstDayOfWeek, isoOf } from './molecules/DatePicker/monthGrid';
+export { DateRangePicker } from './molecules/DateRangePicker';
+export type { DateRangePickerPreset, DateRangePickerProps } from './molecules/DateRangePicker';
 export { Popover } from './molecules/Popover';
 export type { PopoverPosition, PopoverProps } from './molecules/Popover';
 

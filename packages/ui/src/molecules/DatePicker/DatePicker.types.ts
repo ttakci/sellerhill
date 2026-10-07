@@ -2,6 +2,13 @@ import type React from 'react';
 
 import type { ControlSize } from '../../styles/formControl.types';
 
+/** One cell of a six-week month grid. `iso` is `yyyy-mm-dd`. */
+export interface MonthGridDay {
+  iso: string;
+  day: number;
+  isCurrentMonth: boolean;
+}
+
 /** One cell of the month grid. `iso` is `yyyy-mm-dd`. */
 export interface DatePickerDay {
   iso: string;
