@@ -26,6 +26,7 @@ interface RequestConfig {
 }
 
 const FROM = '2026-07-02T09:00:00.000Z';
+const TO = '2026-09-30T09:00:00.000Z';
 
 describe('PostOrderClient.searchReturns', () => {
   const budget = { acquire: jest.fn<Promise<void>, unknown[]>() };
@@ -186,10 +187,10 @@ describe('PostOrderClient — cancellations', () => {
     budget.acquire.mockResolvedValue(undefined);
   });
 
-  it('searches BUYER requests (eBay defaults to SELLER), 500 a page, newest first, with the IAF token', async () => {
+  it('searches as the SELLER over a closed date range, 500 a page, newest first, with the IAF token', async () => {
     mockGet.mockResolvedValue({ status: 200, data: { cancellations: [], total: 0 } });
 
-    await client.searchCancellations('user-token', 'EBAY_US', { creationDateFrom: FROM });
+    await client.searchCancellations('user-token', 'EBAY_US', { creationDateFrom: FROM, creationDateTo: TO });
 
     const [url, cfg] = mockGet.mock.calls[0] as [string, RequestConfig];
     expect(url).toBe('https://api.ebay.com/post-order/v2/cancellation/search');
@@ -197,7 +198,8 @@ describe('PostOrderClient — cancellations', () => {
     expect(cfg.headers['X-EBAY-C-MARKETPLACE-ID']).toBe('EBAY_US');
     expect(cfg.params).toEqual({
       creation_date_range_from: FROM,
-      role: 'BUYER',
+      creation_date_range_to: TO,
+      role: 'SELLER',
       limit: 500,
       sort: '-CANCEL_REQUEST_DATE',
     });
@@ -209,15 +211,17 @@ describe('PostOrderClient — cancellations', () => {
       status: 200,
       data: { cancellations: [{ cancelId: '1' }, null, 'x'], paginationOutput: { totalEntries: 1 } },
     });
-    await expect(client.searchCancellations('t', 'EBAY_US', { creationDateFrom: FROM })).resolves.toEqual({
+    await expect(
+      client.searchCancellations('t', 'EBAY_US', { creationDateFrom: FROM, creationDateTo: TO })
+    ).resolves.toEqual({
       cancellations: [{ cancelId: '1' }],
       paginationOutput: { totalEntries: 1 },
     });
 
     mockGet.mockResolvedValueOnce({ status: 200, data: '<html>' });
-    await expect(client.searchCancellations('t', 'EBAY_US', { creationDateFrom: FROM })).rejects.toBeInstanceOf(
-      PostOrderResponseError
-    );
+    await expect(
+      client.searchCancellations('t', 'EBAY_US', { creationDateFrom: FROM, creationDateTo: TO })
+    ).rejects.toBeInstanceOf(PostOrderResponseError);
   });
 
   it('reads one request in full at interactive priority and unwraps `cancelDetail`', async () => {

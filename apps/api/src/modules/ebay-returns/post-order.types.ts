@@ -294,4 +294,6 @@ export interface PostOrderRejectCancelRequest {
 export interface CancellationSearchParams {
   /** ISO 8601; "Do not set the start date more than 18 months in the past." */
   creationDateFrom: string;
+  /** ISO 8601, the end of the window (now). Required in practice — see CANCELLATION_SEARCH_WINDOW_DAYS. */
+  creationDateTo: string;
 }

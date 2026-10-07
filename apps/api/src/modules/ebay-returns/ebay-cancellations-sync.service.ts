@@ -19,7 +19,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * Periodic read of each store's BUYER cancellation requests
- * (`GET /post-order/v2/cancellation/search?role=BUYER`) into
+ * (`GET /post-order/v2/cancellation/search?role=SELLER`) into
  * `ebay_cancellations`. A copy of the return sweep (`EbayReturnsSyncService`):
  * read only, eBay → table, nothing deleted or blanked on a failed read, the
  * claim stamps `last_cancellation_sync_at` in the same statement.
@@ -57,7 +57,9 @@ export class EbayCancellationsSyncService {
     // "This method is not supported in the Sandbox environment." Checked
     // before the claim, so a sandbox deployment stamps nothing.
     if (!this.postOrder.isReturnSearchSupported()) {
-      this.logger.debug('Cancellation sync skipped: eBay cancellation search is not supported in the Sandbox environment');
+      this.logger.debug(
+        'Cancellation sync skipped: eBay cancellation search is not supported in the Sandbox environment'
+      );
       return;
     }
 
@@ -134,8 +136,13 @@ export class EbayCancellationsSyncService {
       return;
     }
 
-    const creationDateFrom = new Date(Date.now() - CANCELLATION_SEARCH_WINDOW_DAYS * MS_PER_DAY).toISOString();
-    const result = await this.postOrder.searchCancellations(accessToken, account.marketplace_id, { creationDateFrom });
+    const now = Date.now();
+    const creationDateFrom = new Date(now - CANCELLATION_SEARCH_WINDOW_DAYS * MS_PER_DAY).toISOString();
+    const creationDateTo = new Date(now).toISOString();
+    const result = await this.postOrder.searchCancellations(accessToken, account.marketplace_id, {
+      creationDateFrom,
+      creationDateTo,
+    });
 
     const entries = result.cancellations ?? [];
     const totalEntries = result.paginationOutput?.totalEntries;
@@ -194,7 +201,10 @@ export class EbayCancellationsSyncService {
    * Also called by `EbayCancellationsActionsService` after an answer.
    */
   /** Resolves to whether the row is linked to one of our orders. */
-  async upsertCancellation(account: Pick<ClaimedAccount, 'id' | 'user_id'>, row: EbayCancellationRow): Promise<boolean> {
+  async upsertCancellation(
+    account: Pick<ClaimedAccount, 'id' | 'user_id'>,
+    row: EbayCancellationRow
+  ): Promise<boolean> {
     const rows = await this.database.query<{ order_id: string | null }>(
       `INSERT INTO ebay_cancellations (
          user_id, ebay_account_id, cancel_id, legacy_order_id, order_id,

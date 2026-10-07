@@ -16,8 +16,9 @@
 //      other eBay REST APIs use is rejected — every call would fail.
 //   3. Every seller-facing read is scoped to the calling user.
 //   4. The sweeps never delete rows and never rewrite `first_seen_at`.
-//   5. The cancellation search sends `role=BUYER` — eBay's default is SELLER,
-//      which would never return a buyer's request.
+//   5. The cancellation search sends `role=SELLER` (the caller's role — BUYER
+//      answered nothing on production) and a closed date range (`_to` missing
+//      is a 400).
 
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
@@ -111,7 +112,9 @@ describe('ebay-returns module invariants', () => {
     it('reads with GET and writes with ONE un-retried POST', () => {
       const client = stripComments(source('post-order.client.ts'));
       expect(client).toMatch(/axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/search`/);
-      expect(client).toMatch(/axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/\$\{encodeURIComponent\(returnId\)\}`/);
+      expect(client).toMatch(
+        /axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/return\/\$\{encodeURIComponent\(returnId\)\}`/
+      );
       expect(client).toMatch(/axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/cancellation\/search`/);
       expect(client).toMatch(
         /axios\.get<unknown>\(`\$\{this\.baseUrl\(\)\}\/post-order\/v2\/cancellation\/\$\{encodeURIComponent\(cancelId\)\}`/
@@ -155,7 +158,9 @@ describe('ebay-returns module invariants', () => {
 
     it('reaches each write only from its actions service', () => {
       const callers = (method: string): string[] =>
-        SOURCE_FILES.filter((file) => file !== 'post-order.client.ts' && stripComments(source(file)).includes(`.${method}(`));
+        SOURCE_FILES.filter(
+          (file) => file !== 'post-order.client.ts' && stripComments(source(file)).includes(`.${method}(`)
+        );
       for (const method of ['decideReturn', 'markReturnReceived', 'issueReturnRefund']) {
         expect(callers(method)).toEqual(['ebay-returns-actions.service.ts']);
       }
@@ -295,13 +300,14 @@ describe('ebay-returns module invariants', () => {
       expect(constants).toContain("export const RETURN_SEARCH_SORT = '-FILING_DATE';");
     });
 
-    it('asks the cancellation search for BUYER requests, 500 at a time, newest first', () => {
+    it('asks the cancellation search as the SELLER over a closed range, 500 at a time, newest first', () => {
       const code = stripComments(client);
       expect(code).toContain('role: CANCELLATION_SEARCH_ROLE');
+      expect(code).toContain('creation_date_range_to: params.creationDateTo');
       expect(code).toContain('limit: CANCELLATION_SEARCH_LIMIT');
       expect(code).toContain('sort: CANCELLATION_SEARCH_SORT');
       const constants = source('ebay-returns.constants.ts');
-      expect(constants).toContain("export const CANCELLATION_SEARCH_ROLE = 'BUYER';");
+      expect(constants).toContain("export const CANCELLATION_SEARCH_ROLE = 'SELLER';");
       expect(constants).toContain('export const CANCELLATION_SEARCH_LIMIT = 500;');
       expect(constants).toContain("export const CANCELLATION_SEARCH_SORT = '-CANCEL_REQUEST_DATE';");
     });

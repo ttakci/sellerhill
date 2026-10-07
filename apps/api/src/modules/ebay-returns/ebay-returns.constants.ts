@@ -41,17 +41,18 @@ export const CANCELLATION_SEARCH_LIMIT = 500;
 export const CANCELLATION_SEARCH_SORT = '-CANCEL_REQUEST_DATE';
 
 /**
- * `role` on the same call: "filter the order cancellation results based on who
- * inititated the order cancellation request … BUYER and SELLER … case-sensitive
- * … Default: SELLER". The DEFAULT is the seller's own requests, so a buyer's
- * request is only returned when `BUYER` is sent.
+ * `role` on the same call is the CALLER's role, not the requestor's — measured
+ * on production 2026-10-07 (budagan): `role=BUYER` answered 0 cancellations,
+ * `role=SELLER` answered the open buyer request (`requestorType: BUYER`, cancel
+ * 5456020649) beside the seller's own. Who asked is `requestorType` on each
+ * entry; the reads filter on it.
  */
-export const CANCELLATION_SEARCH_ROLE = 'BUYER';
+export const CANCELLATION_SEARCH_ROLE = 'SELLER';
 
 /**
- * `creation_date_range_from` without `_to`: "searches through all cancellation
- * requests created at or after the specified time, and searches forward 90
- * days from there" — the widest window that still reaches today.
+ * Window of the search, sent as `creation_date_range_from` AND `_to` (now).
+ * eBay's reference says `_to` may be omitted; production answers 400 errorId
+ * 10003 "Missing input creation_date_range_to" without it (2026-10-07).
  */
 export const CANCELLATION_SEARCH_WINDOW_DAYS = 90;
 

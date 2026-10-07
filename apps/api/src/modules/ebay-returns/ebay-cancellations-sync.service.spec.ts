@@ -46,9 +46,11 @@ const entry = (cancelId: string, over: Record<string, unknown> = {}): Record<str
   ...over,
 });
 
-function build(options: { enabled?: boolean; accounts?: ClaimedAccount[]; sandbox?: boolean; suspended?: boolean } = {}) {
+function build(
+  options: { enabled?: boolean; accounts?: ClaimedAccount[]; sandbox?: boolean; suspended?: boolean } = {}
+) {
   const query = jest.fn<Promise<unknown[]>, [string, unknown[]?]>((sql) =>
-    Promise.resolve(sql.includes('UPDATE ebay_accounts') ? (options.accounts ?? []) : [])
+    Promise.resolve(sql.includes('UPDATE ebay_accounts') ? options.accounts ?? [] : [])
   );
   const getBoolean = jest.fn<Promise<boolean>, [PlatformSettingKey]>(() => Promise.resolve(options.enabled ?? true));
   const getNumber = jest.fn<Promise<number>, [PlatformSettingKey]>(() => Promise.resolve(35));
@@ -58,7 +60,7 @@ function build(options: { enabled?: boolean; accounts?: ClaimedAccount[]; sandbo
   );
   const searchCancellations = jest.fn<
     Promise<PostOrderCancellationSearchResponse>,
-    [string, string, { creationDateFrom: string }]
+    [string, string, { creationDateFrom: string; creationDateTo: string }]
   >(() => Promise.resolve({ cancellations: [] }));
   const resolveCancellations = jest.fn(() =>
     Promise.resolve({ intervalHours: 6, source: 'auto', estimatedDailyCalls: 0 })
@@ -142,6 +144,7 @@ describe('EbayCancellationsSyncService', () => {
     expect(token).toBe(TOKEN_A);
     expect(marketplaceId).toBe('EBAY_US');
     expect(new Date(search.creationDateFrom).getTime()).toBeLessThanOrEqual(before - 90 * 24 * 3_600_000 + 1000);
+    expect(new Date(search.creationDateTo).getTime()).toBeGreaterThanOrEqual(before);
 
     expect(h.upserts()).toHaveLength(2);
     const [sql, params] = h.upserts()[0];
@@ -204,7 +207,9 @@ describe('EbayCancellationsSyncService', () => {
     const failing = build({ accounts: [accountA, accountB] });
     failing.searchCancellations.mockImplementation((token) =>
       token === TOKEN_A
-        ? Promise.reject(Object.assign(new Error('boom'), { response: { status: 500, data: { buyerLoginName: BUYER } } }))
+        ? Promise.reject(
+            Object.assign(new Error('boom'), { response: { status: 500, data: { buyerLoginName: BUYER } } })
+          )
         : Promise.resolve({ cancellations: [entry('5000000004')] })
     );
     await failing.service.sweep();

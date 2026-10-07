@@ -72,7 +72,7 @@ export class PostOrderRejectedError extends Error {
  * - `POST /post-order/v2/return/{returnId}/decide`           (APPROVE only)
  * - `POST /post-order/v2/return/{returnId}/mark_as_received`
  * - `POST /post-order/v2/return/{returnId}/issue_refund`
- * - `GET  /post-order/v2/cancellation/search?role=BUYER` — the sweep (BACKGROUND)
+ * - `GET  /post-order/v2/cancellation/search?role=SELLER` — the sweep (BACKGROUND)
  * - `GET  /post-order/v2/cancellation/{cancelId}`     — the live read before an answer (INTERACTIVE)
  * - `POST /post-order/v2/cancellation/{cancelId}/approve`    (no payload)
  * - `POST /post-order/v2/cancellation/{cancelId}/reject`     (`{}` or shipment date + tracking)
@@ -229,9 +229,9 @@ export class PostOrderClient {
 
   /**
    * The buyer cancellation requests of one store, newest first, first page
-   * only (`limit=500`, the documented maximum). `role=BUYER` is REQUIRED:
-   * eBay's default is SELLER, which would return only the seller's own
-   * cancellations and never a buyer's request. `offset` is documented here as
+   * only (`limit=500`, the documented maximum). `role` is the caller's role,
+   * `SELLER`, and `creation_date_range_to` is required — both measured on
+   * production (see the constants). `offset` is documented here as
    * plain "number of entries to skip" but is not sent — a store with more than
    * 500 buyer requests in 90 days is logged by the caller, not paged.
    */
@@ -246,6 +246,7 @@ export class PostOrderClient {
           headers: this.headers(accessToken, marketplaceId),
           params: {
             creation_date_range_from: params.creationDateFrom,
+            creation_date_range_to: params.creationDateTo,
             role: CANCELLATION_SEARCH_ROLE,
             limit: CANCELLATION_SEARCH_LIMIT,
             sort: CANCELLATION_SEARCH_SORT,
@@ -346,7 +347,10 @@ export class PostOrderClient {
       if (axios.isAxiosError(error) && error.response && error.response.status >= 400 && error.response.status < 500) {
         const status = error.response.status;
         this.logger.warn(
-          `eBay refused ${path.replace(/^(\/post-order\/v2\/\w+\/)[^/]+/, '$1{id}')} with HTTP ${status}: ${describeErrorBody(error.response.data)}`
+          `eBay refused ${path.replace(
+            /^(\/post-order\/v2\/\w+\/)[^/]+/,
+            '$1{id}'
+          )} with HTTP ${status}: ${describeErrorBody(error.response.data)}`
         );
         throw new PostOrderRejectedError(`eBay refused the Post-Order call with HTTP ${status}`, status);
       }
