@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   EBAY_BULK_CONVERSATIONS_MAX,
+  EBAY_CONVERSATIONS_MAX_LIMIT,
   EBAY_MESSAGE_MAX_LENGTH,
   EbayAccountStatus,
   EbayCallPriority,
@@ -103,18 +104,18 @@ export class EbayMessagesService {
   async listConversations(userId: string, q: EbayConversationsQuery): Promise<PaginatedConversationsDto> {
     const account = await this.loadAccount(userId, q.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(q.ebayAccountId);
-    const result = await this.call(account, () =>
-      this.client.getConversations(
-        token,
-        {
-          type: q.type,
-          ...(q.status ? { status: q.status } : {}),
-          limit: q.limit,
-          offset: (q.page - 1) * q.limit,
-        },
-        EbayCallPriority.INTERACTIVE
-      )
-    );
+    const offset = (q.page - 1) * q.limit;
+    const fetchType = (type: EbayConversationType, limit: number, from: number) =>
+      this.call(account, () =>
+        this.client.getConversations(
+          token,
+          { type, ...(q.status ? { status: q.status } : {}), limit, offset: from },
+          EbayCallPriority.INTERACTIVE
+        )
+      );
+    const result = q.type
+      ? await fetchType(q.type, q.limit, offset)
+      : await this.mergeTypes(fetchType, offset, q.limit);
     const images = await this.loadListingImages(
       q.ebayAccountId,
       result.items.map((item) => item.referenceId)
@@ -129,6 +130,37 @@ export class EbayMessagesService {
       page: q.page,
       limit: q.limit,
     };
+  }
+
+  /**
+   * Both conversation types as one list, newest first (eBay's Archive / Deleted
+   * folders are not split by type, but its API reads one type at a time): the
+   * first `offset + limit` of each type, merged, then the page cut out.
+   */
+  private async mergeTypes(
+    fetchType: (type: EbayConversationType, limit: number, from: number) => Promise<{ items: EbayConversationDto[]; total: number }>,
+    offset: number,
+    limit: number
+  ): Promise<{ items: EbayConversationDto[]; total: number }> {
+    const want = offset + limit;
+    const lists = await Promise.all(
+      [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY].map(async (type) => {
+        const items: EbayConversationDto[] = [];
+        let total = 0;
+        do {
+          const page = await fetchType(type, Math.min(EBAY_CONVERSATIONS_MAX_LIMIT, want - items.length), items.length);
+          items.push(...page.items);
+          total = page.total;
+          if (page.items.length === 0) {
+            break;
+          }
+        } while (items.length < Math.min(want, total));
+        return { items, total };
+      })
+    );
+    const latest = (c: EbayConversationDto): number => Date.parse(c.latestMessage?.createdAt || c.createdAt) || 0;
+    const merged = lists.flatMap((list) => list.items).sort((a, b) => latest(b) - latest(a));
+    return { items: merged.slice(offset, want), total: lists.reduce((sum, list) => sum + list.total, 0) };
   }
 
   /**

@@ -91,13 +91,15 @@ export const MessagesPageComponent = ({
       <S.Shell $threadOpen={threadOpen}>
         <S.RailPane data-pane="rail">
           {folderGroups.map((group) => (
-            <S.RailGroup key={group.key} aria-label={group.label}>
-              <S.RailGroupLabel>
-                <S.RailGroupDot $tone={group.key === 'deleted' || group.key === 'archive' ? 'amber' : 'brand'} aria-hidden />
-                <Text variant="overline" color="text.tertiary">
-                  {group.label}
-                </Text>
-              </S.RailGroupLabel>
+            <S.RailGroup key={group.key} aria-label={group.label || undefined}>
+              {!!group.label && (
+                <S.RailGroupLabel>
+                  <S.RailGroupDot $tone="brand" aria-hidden />
+                  <Text variant="overline" color="text.tertiary">
+                    {group.label}
+                  </Text>
+                </S.RailGroupLabel>
+              )}
               {group.items.map((item) => {
                 const isEbayItem = item.key.includes('FROM_EBAY');
                 const tone: 'brand' | 'amber' = isEbayItem ? 'amber' : 'brand';

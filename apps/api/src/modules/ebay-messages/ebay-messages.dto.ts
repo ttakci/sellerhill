@@ -47,9 +47,10 @@ export class EbayConversationsQueryDto implements EbayConversationsQuery {
   @IsUUID()
   ebayAccountId!: string;
 
-  @ApiProperty({ enum: EbayConversationType })
+  @ApiPropertyOptional({ enum: EbayConversationType, description: 'Omitted = both types merged' })
+  @IsOptional()
   @IsEnum(EbayConversationType)
-  type!: EbayConversationType;
+  type?: EbayConversationType;
 
   @ApiPropertyOptional({ enum: EbayConversationStatus })
   @IsOptional()

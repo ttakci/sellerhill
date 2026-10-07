@@ -95,6 +95,50 @@ describe('EbayMessageClient', () => {
     });
   });
 
+  it('sends ARCHIVED / DELETED for the archive and deleted folders and maps them back', async () => {
+    mockGet.mockResolvedValue({
+      status: 200,
+      data: { conversations: [{ ...rawConversation, conversationStatus: 'ARCHIVED' }], total: 1 },
+    });
+
+    const archived = await client.getConversations(
+      'tok',
+      { type: EbayConversationType.FROM_MEMBERS, status: EbayConversationStatus.ARCHIVE, limit: 25, offset: 0 },
+      EbayCallPriority.INTERACTIVE
+    );
+    await client.getConversations(
+      'tok',
+      { type: EbayConversationType.FROM_EBAY, status: EbayConversationStatus.DELETE, limit: 25, offset: 0 },
+      EbayCallPriority.INTERACTIVE
+    );
+
+    const statuses = mockGet.mock.calls.map((call) => (call[1] as { params: Record<string, unknown> }).params.conversation_status);
+    expect(statuses).toEqual(['ARCHIVED', 'DELETED']);
+    expect(archived.items[0].status).toBe(EbayConversationStatus.ARCHIVE);
+  });
+
+  it('counts unread FROM_EBAY from unreadCount across every page, because eBay ignores the UNREAD filter there', async () => {
+    const conv = (id: string, unreadCount: number) => ({ ...rawConversation, conversationId: id, conversationType: 'FROM_EBAY', unreadCount });
+    const firstPage = Array.from({ length: 50 }, (_, i) => conv(`a${i}`, i === 3 ? 1 : 0));
+    mockGet
+      .mockResolvedValueOnce({ status: 200, data: { conversations: firstPage, total: 52 } })
+      .mockResolvedValueOnce({ status: 200, data: { conversations: [conv('b0', 2), conv('b1', 0)], total: 52 } });
+
+    const result = await client.getConversations(
+      'tok',
+      { type: EbayConversationType.FROM_EBAY, status: EbayConversationStatus.UNREAD, limit: 25, offset: 0 },
+      EbayCallPriority.BACKGROUND
+    );
+
+    const params = mockGet.mock.calls.map((call) => (call[1] as { params: Record<string, unknown> }).params);
+    expect(params).toEqual([
+      { conversation_type: 'FROM_EBAY', limit: 50, offset: 0 },
+      { conversation_type: 'FROM_EBAY', limit: 50, offset: 50 },
+    ]);
+    expect(result.total).toBe(2);
+    expect(result.items.map((item) => item.conversationId)).toEqual(['a3', 'b0']);
+  });
+
   it('passes the reference and other-party filters and clamps limit to 50', async () => {
     mockGet.mockResolvedValue({ status: 200, data: {} });
     const result = await client.getConversations(

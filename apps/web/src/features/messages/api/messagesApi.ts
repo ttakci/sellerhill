@@ -37,7 +37,8 @@ export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 120_000;
 
 export interface ConversationsQueryArgs {
   ebayAccountId: string;
-  type: EbayConversationType;
+  /** Omitted = both types merged (Archive / Deleted). */
+  type?: EbayConversationType;
   status?: EbayConversationStatus;
   page: number;
   limit: number;

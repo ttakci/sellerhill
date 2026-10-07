@@ -406,13 +406,14 @@ function countOrderStages(params: Record<string, string>): OrderStageCountsDto {
 /* ── eBay Messages ────────────────────────────────────────────────────── */
 
 /**
- * Mirrors the real endpoint's own contract: `type` is required, and `status`
+ * Mirrors the real endpoint's own contract: `type` narrows to one type (omitted in Archive / Deleted), and `status`
  * carries the folder rail's meaning — `UNREAD` filters by unread count rather
  * than eBay's own `UNREAD` status, `ARCHIVE` matches the archived status, and
  * no `status` at all (the "All" folder) means the live `ACTIVE` set.
  */
 function filterConversations(params: Record<string, string>): EbayConversationDto[] {
-  let rows = DEMO_CONVERSATIONS.filter((conversation) => String(conversation.type) === params.type);
+  // No `type` = both types (the Archive / Deleted folders).
+  let rows = DEMO_CONVERSATIONS.filter((conversation) => !params.type || String(conversation.type) === params.type);
 
   if (params.status === String(EbayConversationStatus.UNREAD)) {
     rows = rows.filter((conversation) => conversation.unreadCount > 0);

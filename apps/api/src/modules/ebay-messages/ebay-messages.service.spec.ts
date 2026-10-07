@@ -155,6 +155,31 @@ describe('EbayMessagesService', () => {
       expect(result.items.map((i) => i.otherPartyUsername)).toEqual(['buyer_a', 'buyer_b', 'buyer_c', null]);
     });
 
+    it('merges both types newest first when no type is given (Archive / Deleted)', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      const at = (id: string, createdAt: string) =>
+        conversation({ conversationId: id, latestMessage: message({ createdAt }) });
+      client.getConversations.mockImplementation((_token: string, q: { type: EbayConversationType }) =>
+        Promise.resolve(
+          q.type === EbayConversationType.FROM_MEMBERS
+            ? { items: [at('m1', '2026-10-05T00:00:00Z'), at('m2', '2026-10-01T00:00:00Z')], total: 2 }
+            : { items: [at('e1', '2026-10-03T00:00:00Z')], total: 1 }
+        )
+      );
+
+      const result = await service.listConversations(USER, {
+        ebayAccountId: ACCOUNT,
+        status: EbayConversationStatus.ARCHIVE,
+        page: 1,
+        limit: 2,
+      });
+
+      expect(client.getConversations).toHaveBeenCalledTimes(2);
+      expect(result.items.map((i) => i.conversationId)).toEqual(['m1', 'e1']);
+      expect(result.total).toBe(3);
+    });
+
     it('attaches the first listing photo to a conversation about one of the store listings', async () => {
       const { service, db, client } = build();
       db.query.mockImplementation((sql: string) => {

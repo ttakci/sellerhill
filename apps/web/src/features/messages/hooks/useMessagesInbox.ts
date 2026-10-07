@@ -19,7 +19,7 @@ import {
 } from '../api/messagesApi';
 import type { MessagesUrlState } from '../messages.types';
 
-import { folderToStatus, MESSAGES_PAGE_SIZE, MESSAGES_THREAD_LIMIT } from './useMessagesUrlState';
+import { folderToStatus, isMergedFolder, MESSAGES_PAGE_SIZE, MESSAGES_THREAD_LIMIT } from './useMessagesUrlState';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 
@@ -51,21 +51,31 @@ export function useMessagesInbox(state: MessagesUrlState) {
   const ebayAccountId = activeAccount?.id ?? '';
   const messagingEnabled = activeAccount?.messagingEnabled ?? false;
 
-  const { data: conversationsPage, isFetching: isListFetching, isLoading: isListLoading } =
+  const merged = isMergedFolder(folder);
+  // `currentData`, not `data`: a folder whose read fails must not keep showing the previous folder's list.
+  const { currentData: conversationsPage, isFetching: isListFetching, isLoading: isListLoading } =
     useGetConversationsQuery(
-      { ebayAccountId, type, status: folderToStatus(folder), page, limit: MESSAGES_PAGE_SIZE },
+      { ebayAccountId, type: merged ? undefined : type, status: folderToStatus(folder), page, limit: MESSAGES_PAGE_SIZE },
       { skip: !activeAccount || !messagingEnabled },
     );
   const conversations = conversationsPage?.items ?? EMPTY_CONVERSATIONS;
 
-  const { data: thread, isFetching: isThreadFetching } = useGetConversationThreadQuery(
-    { conversationId: conversationId ?? '', ebayAccountId, type, page: 1, limit: MESSAGES_THREAD_LIMIT },
-    { skip: !conversationId || !activeAccount || !messagingEnabled },
-  );
-
   const activeConversation = useMemo(
     () => conversations.find((conversation) => conversation.conversationId === conversationId) ?? null,
     [conversations, conversationId],
+  );
+
+  /** Archive / Deleted mix both types, so a row's own type is what eBay needs there; elsewhere the folder's. */
+  const typeOf = useCallback(
+    (id: string | null) =>
+      (merged ? conversations.find((conversation) => conversation.conversationId === id)?.type : undefined) ?? type,
+    [merged, conversations, type],
+  );
+  const threadType = typeOf(conversationId);
+
+  const { data: thread, isFetching: isThreadFetching } = useGetConversationThreadQuery(
+    { conversationId: conversationId ?? '', ebayAccountId, type: threadType, page: 1, limit: MESSAGES_THREAD_LIMIT },
+    { skip: !conversationId || !activeAccount || !messagingEnabled },
   );
 
   /** The store's own identities, lower-cased — a message from any of them is "mine". */
@@ -111,13 +121,13 @@ export function useMessagesInbox(state: MessagesUrlState) {
       return;
     }
     markedRead.current.add(conversationId);
-    setConversationRead({ conversationId, ebayAccountId, type, read: true })
+    setConversationRead({ conversationId, ebayAccountId, type: threadType, read: true })
       .unwrap()
       .catch(() => {
         // Let a later open try again rather than leaving it stuck unread.
         markedRead.current.delete(conversationId);
       });
-  }, [conversationId, ebayAccountId, messagingEnabled, hasUnread, type, setConversationRead]);
+  }, [conversationId, ebayAccountId, messagingEnabled, hasUnread, threadType, setConversationRead]);
 
   /** Marked unread by the seller: the next open of these must mark them read again. */
   const forgetMarkedRead = useCallback((ids: string[]) => {
@@ -149,6 +159,8 @@ export function useMessagesInbox(state: MessagesUrlState) {
     threadMessages,
     isThreadLoading: isThreadFetching && !threadLoaded,
     activeConversation,
+    typeOf,
+    threadType,
     isMine,
     scrollRef,
     forgetMarkedRead,

@@ -88,7 +88,27 @@ function asConversationType(v: unknown, fallback: EbayConversationType): EbayCon
   return typeof v === 'string' && CONVERSATION_TYPES.has(v) ? (v as EbayConversationType) : fallback;
 }
 
+/**
+ * getConversations' `conversation_status` takes `ARCHIVED` / `DELETED`, not the
+ * documented `ARCHIVE` / `DELETE` (those answer 400 errorId 355001 — production,
+ * 2026-10-07). Read filters only; the update calls are left on the documented values.
+ */
+const READ_STATUS_TO_EBAY: Partial<Record<EbayConversationStatus, string>> = {
+  [EbayConversationStatus.ARCHIVE]: 'ARCHIVED',
+  [EbayConversationStatus.DELETE]: 'DELETED',
+};
+const READ_STATUS_FROM_EBAY: Record<string, EbayConversationStatus> = {
+  ARCHIVED: EbayConversationStatus.ARCHIVE,
+  DELETED: EbayConversationStatus.DELETE,
+};
+
+/** eBay ignores `conversation_status=UNREAD` on FROM_EBAY (returns every conversation), so unread is read from `unreadCount`. */
+const UNREAD_SCAN_MAX_PAGES = 20;
+
 function asConversationStatus(v: unknown): EbayConversationStatus {
+  if (typeof v === 'string' && READ_STATUS_FROM_EBAY[v]) {
+    return READ_STATUS_FROM_EBAY[v];
+  }
   return typeof v === 'string' && CONVERSATION_STATUSES.has(v) ? (v as EbayConversationStatus) : EbayConversationStatus.ACTIVE;
 }
 
@@ -183,13 +203,16 @@ export class EbayMessageClient {
     q: ConversationListQuery,
     priority: EbayCallPriority
   ): Promise<ConversationListResult> {
+    if (q.status === EbayConversationStatus.UNREAD && q.type === EbayConversationType.FROM_EBAY) {
+      return this.scanUnread(token, q, priority);
+    }
     const params: Record<string, string | number> = {
       conversation_type: q.type,
       limit: clampLimit(q.limit),
       offset: clampOffset(q.offset),
     };
     if (q.status) {
-      params.conversation_status = q.status;
+      params.conversation_status = READ_STATUS_TO_EBAY[q.status] ?? q.status;
     }
     if (q.referenceId) {
       params.reference_type = LISTING_REFERENCE_TYPE;
@@ -209,6 +232,35 @@ export class EbayMessageClient {
       .filter((c): c is EbayConversationDto => c !== null);
     const total = typeof data.total === 'number' && Number.isFinite(data.total) ? data.total : items.length;
     return { items, total };
+  }
+
+  /**
+   * Unread FROM_EBAY conversations: every active page read, those with
+   * `unreadCount > 0` kept, then paged locally. ~7 calls for 300 conversations
+   * on the 500,000/day Message pool.
+   * ponytail: capped at 20 pages (1,000 conversations); an older unread notice past that is not counted.
+   */
+  private async scanUnread(
+    token: string,
+    q: ConversationListQuery,
+    priority: EbayCallPriority
+  ): Promise<ConversationListResult> {
+    const unread: EbayConversationDto[] = [];
+    let offset = 0;
+    for (let pageIndex = 0; pageIndex < UNREAD_SCAN_MAX_PAGES; pageIndex++) {
+      const page = await this.getConversations(
+        token,
+        { type: q.type, limit: EBAY_CONVERSATIONS_MAX_LIMIT, offset },
+        priority
+      );
+      unread.push(...page.items.filter((item) => item.unreadCount > 0));
+      offset += page.items.length;
+      if (page.items.length === 0 || offset >= page.total) {
+        break;
+      }
+    }
+    const start = clampOffset(q.offset);
+    return { items: unread.slice(start, start + clampLimit(q.limit)), total: unread.length };
   }
 
   async getConversation(

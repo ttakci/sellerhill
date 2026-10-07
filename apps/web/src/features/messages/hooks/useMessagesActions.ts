@@ -3,8 +3,8 @@
  * archive / delete / mark read, the thread header's own actions, and the
  * reconnect redirect for a store connected before messaging existed.
  *
- * Every write carries the URL-state `type` (the folder being looked at),
- * never a row's own `type`.
+ * Every write carries `typeOf(id)`: the folder's type, or the row's own in
+ * Archive / Deleted, where both types share one list.
  */
 
 import { EBAY_BULK_CONVERSATIONS_MAX, EbayConversationStatus, type EbayConversationMutableStatus } from '@repo/shared';
@@ -33,7 +33,7 @@ const chunk = <T>(items: T[], size: number): T[][] => {
 export function useMessagesActions({
   ebayAccountId,
   marketplaceId,
-  type,
+  typeOf,
   conversationId,
   pageIds,
   scopeKey,
@@ -76,11 +76,11 @@ export function useMessagesActions({
       return;
     }
     // The draft is cleared only once eBay accepted the message.
-    replyToConversation({ conversationId, ebayAccountId, type, text })
+    replyToConversation({ conversationId, ebayAccountId, type: typeOf(conversationId), text })
       .unwrap()
       .then(() => setDraft(''))
       .catch((error: MessagesApiError) => showError(error));
-  }, [draft, conversationId, ebayAccountId, type, replyToConversation, showError]);
+  }, [draft, conversationId, ebayAccountId, typeOf, replyToConversation, showError]);
 
   /* ─── selection ─── */
 
@@ -118,9 +118,16 @@ export function useMessagesActions({
         return;
       }
       try {
+        // One bulk call carries one type, so a mixed Archive / Deleted selection is split by type.
+        const byType = new Map<ReturnType<typeof typeOf>, string[]>();
+        for (const id of ids) {
+          byType.set(typeOf(id), [...(byType.get(typeOf(id)) ?? []), id]);
+        }
         const results = await Promise.all(
-          chunk(ids, EBAY_BULK_CONVERSATIONS_MAX).map((conversationIds) =>
-            bulkConversationStatus({ ebayAccountId, type, conversationIds, status }).unwrap(),
+          [...byType].flatMap(([type, typeIds]) =>
+            chunk(typeIds, EBAY_BULK_CONVERSATIONS_MAX).map((conversationIds) =>
+              bulkConversationStatus({ ebayAccountId, type, conversationIds, status }).unwrap(),
+            ),
           ),
         );
         setSelected(new Set());
@@ -134,7 +141,7 @@ export function useMessagesActions({
         showError(error as MessagesApiError);
       }
     },
-    [ebayAccountId, type, conversationId, bulkConversationStatus, openConversation, showError],
+    [ebayAccountId, typeOf, conversationId, bulkConversationStatus, openConversation, showError],
   );
 
   const applyRead = useCallback(
@@ -144,7 +151,7 @@ export function useMessagesActions({
       }
       try {
         await Promise.all(
-          ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type, read }).unwrap()),
+          ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type: typeOf(id), read }).unwrap()),
         );
         setSelected(new Set());
         if (!read) {
@@ -160,7 +167,7 @@ export function useMessagesActions({
         showError(error as MessagesApiError);
       }
     },
-    [ebayAccountId, type, conversationId, setConversationRead, openConversation, onMarkedUnread, showError],
+    [ebayAccountId, typeOf, conversationId, setConversationRead, openConversation, onMarkedUnread, showError],
   );
 
   /** Deleting has no undo here, so it asks first. */

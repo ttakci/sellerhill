@@ -22,7 +22,7 @@ import type { ConversationBulkActionView, ConversationRowView } from '../compone
 import type { ThreadActionView, ThreadMessageView } from '../components/ConversationThread';
 import { useMessagesActions } from '../hooks/useMessagesActions';
 import { useMessagesInbox } from '../hooks/useMessagesInbox';
-import { MESSAGES_PAGE_SIZE, useMessagesUrlState } from '../hooks/useMessagesUrlState';
+import { isMergedFolder, MESSAGES_PAGE_SIZE, useMessagesUrlState } from '../hooks/useMessagesUrlState';
 
 import { MessagesPageComponent } from './MessagesPage.component';
 import type { MessagesCompactFilters, MessagesFolderGroupView, MessagesPagination } from './MessagesPage.types';
@@ -123,7 +123,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
   const actions = useMessagesActions({
     ebayAccountId: inbox.ebayAccountId,
     marketplaceId: activeAccount?.marketplaceId,
-    type,
+    typeOf: inbox.typeOf,
     conversationId,
     pageIds,
     scopeKey: `${inbox.ebayAccountId}|${type}|${folder}|${page}`,
@@ -180,14 +180,14 @@ export const MessagesPageContainer = (): React.ReactElement => {
           referenceId: conversation.referenceId,
           isSelected: selectedSet.has(conversation.conversationId),
           isActive: conversation.conversationId === conversationId,
-          tone: type === EbayConversationType.FROM_EBAY ? ('amber' as const) : ('brand' as const),
+          tone: conversation.type === EbayConversationType.FROM_EBAY ? ('amber' as const) : ('brand' as const),
         };
       }),
-    [conversations, conversationId, selectedSet, formatListDate, type]
+    [conversations, conversationId, selectedSet, formatListDate]
   );
 
   /* In the archive and deleted folders the counterpart of "archive" is "move back to the inbox". */
-  const inArchive = folder === MessagesFolder.ARCHIVE || folder === MessagesFolder.DELETED;
+  const inArchive = isMergedFolder(folder);
   const archiveTarget = inArchive ? EbayConversationStatus.ACTIVE : EbayConversationStatus.ARCHIVE;
   const archiveLabel = inArchive ? t('messages.actions.unarchive') : t('messages.actions.archive');
   const archiveIcon: IconName = inArchive ? 'inbox' : 'archive';
@@ -313,9 +313,8 @@ export const MessagesPageContainer = (): React.ReactElement => {
    * The rail mirrors eBay's own Messages page (operator request, 2026-10-01;
    * the competitor does the same): an Inbox group with "From members",
    * "Unread from members", "From eBay", "Unread from eBay" in eBay's order,
-   * then Archive and Deleted. eBay's API needs a conversation TYPE on every
-   * read, so there is no combined "all types" entry and Archive / Deleted are
-   * split by type under their own headings.
+   * then Archive and Deleted as single entries, as on eBay (2026-10-07) — the
+   * API reads one type at a time, so the server merges both for these two.
    */
   const folderGroups = useMemo<MessagesFolderGroupView[]>(() => {
     const item = (groupType: EbayConversationType, groupFolder: MessagesFolder, label: string, icon: IconName) => ({
@@ -323,11 +322,12 @@ export const MessagesPageContainer = (): React.ReactElement => {
       label,
       icon,
       count: groupFolder === MessagesFolder.UNREAD ? unreadByType[groupType] : 0,
-      isActive: type === groupType && folder === groupFolder,
+      isActive: folder === groupFolder && (isMergedFolder(groupFolder) || type === groupType),
       onSelect: () => setTypeAndFolder(groupType, groupFolder),
     });
-    const byType = (groupFolder: MessagesFolder) =>
-      TYPES.map((groupType) => item(groupType, groupFolder, t(TYPE_LABEL_KEY[groupType]), TYPE_ICON[groupType]));
+    const merged = (groupFolder: MessagesFolder) => [
+      { ...item(type, groupFolder, t(FOLDER_LABEL_KEY[groupFolder]), FOLDER_ICON[groupFolder]), key: groupFolder },
+    ];
     return [
       {
         key: 'inbox',
@@ -337,8 +337,8 @@ export const MessagesPageContainer = (): React.ReactElement => {
           item(groupType, MessagesFolder.UNREAD, t(UNREAD_LABEL_KEY[groupType]), FOLDER_ICON[MessagesFolder.UNREAD]),
         ]),
       },
-      { key: 'archive', label: t(FOLDER_LABEL_KEY[MessagesFolder.ARCHIVE]), items: byType(MessagesFolder.ARCHIVE) },
-      { key: 'deleted', label: t(FOLDER_LABEL_KEY[MessagesFolder.DELETED]), items: byType(MessagesFolder.DELETED) },
+      // No heading: eBay lists Archive and Deleted under the inbox, after a divider.
+      { key: 'other', label: '', items: [...merged(MessagesFolder.ARCHIVE), ...merged(MessagesFolder.DELETED)] },
     ];
   }, [t, type, folder, setTypeAndFolder, unreadByType]);
 
@@ -428,7 +428,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
           imageUrl: activeConversation?.imageUrl ?? null,
           messages,
           actions: threadActions,
-          canReply: type !== EbayConversationType.FROM_EBAY,
+          canReply: inbox.threadType !== EbayConversationType.FROM_EBAY,
           draft: actions.draft,
           onDraftChange: actions.setDraft,
           onSend: actions.handleSend,

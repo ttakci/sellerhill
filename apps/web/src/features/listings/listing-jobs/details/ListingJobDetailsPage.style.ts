@@ -4,10 +4,23 @@ import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
+type ProgressTone = 'default' | 'active' | 'positive' | 'negative';
+
 /* ── Summary — same quiet pane as JobCard / ListingCard ── */
-export const SummaryCard = styled(Card)`
+export const SummaryCard = styled(Card)<{ $tone: ProgressTone }>`
   padding: 0;
   overflow: hidden;
+  /* A faint wash of the job's state hue over the glass — lifts the page without a new surface. */
+  background-image: linear-gradient(
+    135deg,
+    ${({ $tone, theme }) => {
+      if ($tone === 'positive') {return theme.colors.semanticTint.success;}
+      if ($tone === 'negative') {return theme.colors.semanticTint.error;}
+      if ($tone === 'active') {return theme.colors.semanticTint.info;}
+      return theme.colors.semanticTint.neutral;
+    }} 0%,
+    transparent 65%
+  );
 `;
 
 export const SummaryTop = styled.div`
@@ -29,10 +42,11 @@ export const SummaryHeader = styled.div`
 
 export const SummaryBody = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.72fr);
-  align-items: end;
-  gap: ${tkn('spacing.lg')};
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(8.5rem, 0.72fr);
+  align-items: start;
+  gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   min-width: 0;
+  @media (max-width: ${tkn('breakpoints.lg')}) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     grid-template-columns: 1fr;
     align-items: stretch;
@@ -60,14 +74,13 @@ export const MonoId = styled(UIText)`
   display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-family: ${tkn('typography.fontFamily.mono')};
 `;
-type ProgressTone = 'default' | 'active' | 'positive' | 'negative';
 const progressPulse = keyframes`
   0%, 100% { opacity: 0.35; transform: scale(0.75); }
   50% { opacity: 1; transform: scale(1); }
 `;
 export const ProgressSignal = styled.div`
   display: flex; align-items: center; justify-content: flex-end; gap: ${tkn('spacing.sm')}; min-width: 0; align-self: center;
-  @media (max-width: ${tkn('breakpoints.smBelow')}) { justify-content: flex-start; align-self: stretch; }
+  @media (max-width: ${tkn('breakpoints.lg')}) { grid-column: 1 / -1; justify-content: flex-start; align-self: stretch; }
 `;
 export const ProgressDot = styled.span<{ $tone: ProgressTone; $active: boolean }>`
   width: ${tkn('spacing.sm')}; height: ${tkn('spacing.sm')}; flex: 0 0 auto; border-radius: ${tkn('radius.full')};
@@ -92,28 +105,12 @@ export const ProgressValue = styled(UIText)<{ $tone: ProgressTone }>`
     return theme.colors.text.primary;
   }};
 `;
-export const SummaryFooter = styled.div`
-  display: flex; align-items: center; gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  background: ${tkn('colors.glass.tint')}; flex-shrink: 0;
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start;
-  }
-`;
-export const StatCell = styled.div` flex: 1 1 0; display: flex; flex-direction: column; gap: ${tkn('spacing.2xs')}; min-width: 0; `;
-export const StatLabel = styled(UIText)` line-height: ${tkn('typography.lineHeight.tight')}; `;
 export const StatValue = styled(UIText)<{ $tone?: 'default' | 'positive' | 'negative' }>`
   color: ${({ $tone, theme }) => {
     if ($tone === 'positive') {return theme.colors.semantic.success;}
     if ($tone === 'negative') {return theme.colors.semantic.error;}
     return theme.colors.text.primary;
   }};
-  line-height: ${tkn('typography.lineHeight.tight')};
-`;
-export const FooterActions = styled.div`
-  display: inline-flex; align-items: center; justify-content: flex-end; gap: ${tkn('spacing.sm')}; flex: 0 0 auto; margin-left: auto;
-  @media (max-width: ${tkn('breakpoints.smBelow')}) { grid-column: 1 / -1; width: 100%; margin-left: 0; justify-content: flex-start; }
 `;
 export const ItemsSection = styled.div` display: flex; flex-direction: column; gap: ${tkn('spacing.md')}; min-width: 0; `;
 export const FilterBar = styled.div`

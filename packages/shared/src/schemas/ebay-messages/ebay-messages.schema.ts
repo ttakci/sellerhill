@@ -12,7 +12,8 @@ import {
 /** `GET .../conversations` query. `conversation_type` is required — see CLAUDE.md's eBay Messages constraints. */
 export const ebayConversationsQuerySchema = z.object({
   ebayAccountId: z.string().uuid(),
-  type: z.nativeEnum(EbayConversationType),
+  /** Omitted = both types merged (the Archive / Deleted folders, which eBay's own page does not split by type). */
+  type: z.nativeEnum(EbayConversationType).optional(),
   status: z.nativeEnum(EbayConversationStatus).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(EBAY_CONVERSATIONS_MAX_LIMIT).default(25),

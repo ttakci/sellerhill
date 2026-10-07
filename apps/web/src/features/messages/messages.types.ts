@@ -9,7 +9,8 @@ export type MessagesApiError = Parameters<typeof getErrorI18nKey>[0];
 export interface MessagesActionsInput {
   ebayAccountId: string;
   marketplaceId: EbayMarketplaceId | undefined;
-  type: EbayConversationType;
+  /** The conversation type eBay needs for an id — the folder's, or the row's own in Archive / Deleted. */
+  typeOf: (conversationId: string | null) => EbayConversationType;
   conversationId: string | null;
   /** Ids on the current list page — "select all" selects these. */
   pageIds: string[];

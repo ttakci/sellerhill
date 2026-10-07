@@ -40,6 +40,10 @@ export function folderToStatus(folder: MessagesFolder): EbayConversationStatus {
   return EbayConversationStatus.ACTIVE;
 }
 
+/** Archive and Deleted show both conversation types in one list, as eBay's own page does. */
+export const isMergedFolder = (folder: MessagesFolder): boolean =>
+  folder === MessagesFolder.ARCHIVE || folder === MessagesFolder.DELETED;
+
 export function useMessagesUrlState(): UseMessagesUrlStateResult {
   const [params, setParams] = useSearchParams();
 
