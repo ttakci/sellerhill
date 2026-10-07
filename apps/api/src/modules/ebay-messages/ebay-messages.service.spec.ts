@@ -431,6 +431,59 @@ describe('EbayMessagesService', () => {
       expect(result).toEqual({ succeeded: ids.slice(0, 9), failed: ['c9'] });
       expect(db.query.mock.calls.some(([sql]) => /UPDATE ebay_accounts/.test(sql as string))).toBe(false);
     });
+
+    const readInput = (conversationIds: string[]) => ({
+      ebayAccountId: ACCOUNT,
+      type: EbayConversationType.FROM_MEMBERS,
+      conversationIds,
+      status: EbayConversationStatus.READ as const,
+    });
+
+    it('marks read in ONE bulk call and retires the counted webhook events of what it read', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.bulkUpdateStatus.mockResolvedValue({ succeeded: ['c1', 'c2'], failed: [] });
+
+      const result = await service.bulkStatus(USER, readInput(['c1', 'c2']));
+
+      expect(client.bulkUpdateStatus).toHaveBeenCalledWith(
+        'tok',
+        EbayConversationType.FROM_MEMBERS,
+        ['c1', 'c2'],
+        EbayConversationStatus.READ,
+        EbayCallPriority.INTERACTIVE
+      );
+      expect(client.updateRead).not.toHaveBeenCalled();
+      expect(result).toEqual({ succeeded: ['c1', 'c2'], failed: [] });
+      const retire = db.query.mock.calls.find(([sql]) => /UPDATE ebay_notification_events/.test(sql as string)) as [string, unknown[]];
+      expect(retire[0]).toContain('conversation_id = ANY($2::text[])');
+      expect(retire[1]).toEqual([ACCOUNT, ['c1', 'c2']]);
+    });
+
+    it('marks read one by one only the ids eBay did not confirm in bulk', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.bulkUpdateStatus.mockResolvedValue({ succeeded: ['c1'], failed: ['c2'] });
+      client.updateRead.mockResolvedValue(undefined);
+
+      const result = await service.bulkStatus(USER, readInput(['c1', 'c2']));
+
+      expect(client.updateRead).toHaveBeenCalledTimes(1);
+      expect(client.updateRead).toHaveBeenCalledWith('tok', 'c2', EbayConversationType.FROM_MEMBERS, true, EbayCallPriority.INTERACTIVE);
+      expect(result).toEqual({ succeeded: ['c1', 'c2'], failed: [] });
+    });
+
+    it('falls back to one-by-one when eBay rejects a bulk READ outright', async () => {
+      const { service, db, client } = build();
+      answerAccount(db, accountRow());
+      client.bulkUpdateStatus.mockRejectedValue(new EbayMessageApiError(400, [355001], 'Invalid conversationStatus value.'));
+      client.updateRead.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new EbayMessageApiError(503, [], 'down'));
+
+      const result = await service.bulkStatus(USER, readInput(['c1', 'c2']));
+
+      expect(client.updateRead).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ succeeded: ['c1'], failed: ['c2'] });
+    });
   });
 
   describe('unreadCount', () => {

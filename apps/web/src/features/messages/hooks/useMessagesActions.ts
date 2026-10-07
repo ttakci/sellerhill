@@ -7,16 +7,12 @@
  * Archive / Deleted, where both types share one list.
  */
 
-import { EBAY_BULK_CONVERSATIONS_MAX, EbayConversationStatus, type EbayConversationMutableStatus } from '@repo/shared';
+import { EBAY_BULK_CONVERSATIONS_MAX, EbayConversationStatus, type EbayConversationBulkStatus } from '@repo/shared';
 import { useUI } from '@repo/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  useBulkConversationStatusMutation,
-  useReplyToConversationMutation,
-  useSetConversationReadMutation,
-} from '../api/messagesApi';
+import { useBulkConversationStatusMutation, useReplyToConversationMutation } from '../api/messagesApi';
 import type { MessagesActionsInput, MessagesApiError } from '../messages.types';
 
 import { useLazyGetEbayConnectUrlQuery } from '@/features/ebay/api/ebayApi';
@@ -44,7 +40,6 @@ export function useMessagesActions({
 
   const [replyToConversation, { isLoading: isReplying }] = useReplyToConversationMutation();
   const [bulkConversationStatus, { isLoading: isBulkUpdating }] = useBulkConversationStatusMutation();
-  const [setConversationRead, { isLoading: isSettingRead }] = useSetConversationReadMutation();
   const [getConnectUrl, { isLoading: isReconnecting }] = useLazyGetEbayConnectUrlQuery();
 
   const showError = useCallback(
@@ -112,7 +107,7 @@ export function useMessagesActions({
 
   /** eBay takes at most 10 ids per bulk call, so larger selections go in chunks. */
   const applyStatus = useCallback(
-    async (ids: string[], status: EbayConversationMutableStatus): Promise<void> => {
+    async (ids: string[], status: EbayConversationBulkStatus): Promise<void> => {
       if (!ebayAccountId || ids.length === 0) {
         return;
       }
@@ -130,7 +125,8 @@ export function useMessagesActions({
           ),
         );
         setSelected(new Set());
-        if (conversationId && ids.includes(conversationId)) {
+        // An archived/deleted thread leaves the folder; a thread just marked read stays open.
+        if (status !== EbayConversationStatus.READ && conversationId && ids.includes(conversationId)) {
           openConversation(null);
         }
         if (results.some((result) => result.failed.length > 0)) {
@@ -143,21 +139,10 @@ export function useMessagesActions({
     [ebayAccountId, typeOf, conversationId, bulkConversationStatus, openConversation, showError],
   );
 
+  /** Bulk READ: ten conversations per eBay call (the API falls back to one-by-one if eBay refuses). */
   const applyMarkRead = useCallback(
-    async (ids: string[]): Promise<void> => {
-      if (!ebayAccountId || ids.length === 0) {
-        return;
-      }
-      try {
-        await Promise.all(
-          ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type: typeOf(id), read: true }).unwrap()),
-        );
-        setSelected(new Set());
-      } catch (error) {
-        showError(error as MessagesApiError);
-      }
-    },
-    [ebayAccountId, typeOf, setConversationRead, showError],
+    (ids: string[]): Promise<void> => applyStatus(ids, EbayConversationStatus.READ),
+    [applyStatus],
   );
 
   /** Deleting has no undo here, so it asks first. */
@@ -200,7 +185,7 @@ export function useMessagesActions({
     setDraft,
     handleSend,
     isReplying,
-    isBulkUpdating: isBulkUpdating || isSettingRead,
+    isBulkUpdating,
     selectedIds,
     toggleOne,
     toggleAll,

@@ -269,18 +269,63 @@ export class EbayMessagesService {
   ): Promise<{ succeeded: string[]; failed: string[] }> {
     const account = await this.loadAccount(userId, input.ebayAccountId);
     const token = await this.ebayService.getAccountAccessToken(input.ebayAccountId);
+    const isRead = input.status === EbayConversationStatus.READ;
     const succeeded: string[] = [];
     const failed: string[] = [];
     for (let i = 0; i < input.conversationIds.length; i += EBAY_BULK_CONVERSATIONS_MAX) {
       const chunk = input.conversationIds.slice(i, i + EBAY_BULK_CONVERSATIONS_MAX);
-      const result = await this.call(account, () =>
-        this.client.bulkUpdateStatus(token, input.type, chunk, input.status, EbayCallPriority.INTERACTIVE)
-      );
+      let result: { succeeded: string[]; failed: string[] };
+      try {
+        result = await this.call(account, () =>
+          this.client.bulkUpdateStatus(token, input.type, chunk, input.status, EbayCallPriority.INTERACTIVE)
+        );
+      } catch (error: unknown) {
+        // Bulk READ is documented but unproven live: a refused bulk call costs what it always did.
+        if (!isRead || !(error instanceof Error) || error.message !== MESSAGING_ERRORS.REJECTED) {
+          throw error;
+        }
+        result = { succeeded: [], failed: chunk };
+      }
       succeeded.push(...result.succeeded);
-      failed.push(...result.failed);
+      if (isRead && result.failed.length > 0) {
+        const retried = await this.markReadOneByOne(account, token, input.type, result.failed);
+        succeeded.push(...retried.succeeded);
+        failed.push(...retried.failed);
+      } else {
+        failed.push(...result.failed);
+      }
     }
     this.breakdownCache.delete(input.ebayAccountId);
+    if (isRead && succeeded.length > 0) {
+      // Same counting window as setRead: the buyer's next reply must reach the badge again.
+      // The counter itself is corrected by the breakdown recount the page runs after this write.
+      await this.db.query(
+        "UPDATE ebay_notification_events SET outcome = 'counted_read' WHERE ebay_account_id = $1 AND conversation_id = ANY($2::text[]) AND outcome = 'counted'",
+        [input.ebayAccountId, succeeded]
+      );
+    }
     return { succeeded, failed };
+  }
+
+  /** The pre-bulk path: one update_conversation per id; one refusal never stops the rest. */
+  private async markReadOneByOne(
+    account: MessagingAccountRow,
+    token: string,
+    type: EbayConversationType,
+    ids: string[]
+  ): Promise<{ succeeded: string[]; failed: string[] }> {
+    const outcomes = await Promise.all(
+      ids.map((id) =>
+        this.call(account, () => this.client.updateRead(token, id, type, true, EbayCallPriority.INTERACTIVE)).then(
+          () => true,
+          () => false
+        )
+      )
+    );
+    return {
+      succeeded: ids.filter((_, index) => outcomes[index]),
+      failed: ids.filter((_, index) => !outcomes[index]),
+    };
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   EbayConversationStatus,
   EbayConversationType,
   type EbayBulkConversationStatus,
-  type EbayConversationMutableStatus,
+  type EbayConversationBulkStatus,
   type EbayConversationRead,
   type EbayConversationsQuery,
   type EbayReplyMessage,
@@ -34,10 +34,11 @@ import {
  * (`ebay.errors.messageTooLong`) rather than a generic validation error.
  */
 
-const MUTABLE_STATUSES: EbayConversationMutableStatus[] = [
+const BULK_STATUSES: EbayConversationBulkStatus[] = [
   EbayConversationStatus.ACTIVE,
   EbayConversationStatus.ARCHIVE,
   EbayConversationStatus.DELETE,
+  EbayConversationStatus.READ,
 ];
 
 const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
@@ -145,9 +146,9 @@ export class EbayBulkConversationStatusDto implements EbayBulkConversationStatus
   @IsNotEmpty({ each: true })
   conversationIds!: string[];
 
-  @ApiProperty({ enum: MUTABLE_STATUSES })
-  @IsIn(MUTABLE_STATUSES)
-  status!: EbayConversationMutableStatus;
+  @ApiProperty({ enum: BULK_STATUSES })
+  @IsIn(BULK_STATUSES)
+  status!: EbayConversationBulkStatus;
 }
 
 export class EbayRefreshUnreadDto {

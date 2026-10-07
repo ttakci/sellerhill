@@ -5,7 +5,7 @@ import {
   EbayApiResource,
   EbayCallPriority,
   EbayConversationDto,
-  EbayConversationMutableStatus,
+  EbayConversationBulkStatus,
   EbayConversationStatus,
   EbayConversationThreadDto,
   EbayConversationType,
@@ -351,7 +351,7 @@ export class EbayMessageClient {
     token: string,
     type: EbayConversationType,
     ids: string[],
-    status: EbayConversationMutableStatus,
+    status: EbayConversationBulkStatus,
     priority: EbayCallPriority
   ): Promise<{ succeeded: string[]; failed: string[] }> {
     const res = await this.request(

@@ -38,6 +38,14 @@ export type EbayConversationMutableStatus =
   | EbayConversationStatus.ARCHIVE
   | EbayConversationStatus.DELETE;
 
+/**
+ * What `bulk_update_conversation` may set: the mutable statuses plus READ
+ * (its `conversationStatus` takes ACTIVE/ARCHIVE/DELETE/READ/UNREAD —
+ * docs/ebay-reference/commerce-message-v1-oas3.json). Bulk READ marks up to
+ * ten conversations read in one call instead of one call each.
+ */
+export type EbayConversationBulkStatus = EbayConversationMutableStatus | EbayConversationStatus.READ;
+
 /** Media attachment kinds the Message API reports on a message. */
 export enum EbayMessageMediaType {
   IMAGE = 'IMAGE',

@@ -38,7 +38,12 @@ export const ebayBulkConversationStatusSchema = z.object({
   ebayAccountId: z.string().uuid(),
   type: z.nativeEnum(EbayConversationType),
   conversationIds: z.array(z.string().min(1)).min(1).max(EBAY_BULK_CONVERSATIONS_MAX),
-  status: z.enum([EbayConversationStatus.ACTIVE, EbayConversationStatus.ARCHIVE, EbayConversationStatus.DELETE]),
+  status: z.enum([
+    EbayConversationStatus.ACTIVE,
+    EbayConversationStatus.ARCHIVE,
+    EbayConversationStatus.DELETE,
+    EbayConversationStatus.READ,
+  ]),
 });
 
 export type EbayConversationsQuery = z.infer<typeof ebayConversationsQuerySchema>;
