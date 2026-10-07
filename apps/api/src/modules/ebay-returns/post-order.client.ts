@@ -8,13 +8,24 @@ import axios from 'axios';
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 import { withEbayRateLimitRetry } from '../ebay/ebay-http-retry';
 
-import { RETURN_SEARCH_LIMIT, RETURN_SEARCH_SORT } from './ebay-returns.constants';
+import {
+  CANCELLATION_SEARCH_LIMIT,
+  CANCELLATION_SEARCH_ROLE,
+  CANCELLATION_SEARCH_SORT,
+  RETURN_SEARCH_LIMIT,
+  RETURN_SEARCH_SORT,
+} from './ebay-returns.constants';
 import type {
+  CancellationSearchParams,
+  PostOrderCancellationDetail,
+  PostOrderCancellationSearchResponse,
+  PostOrderCancellationSummary,
   PostOrderDecideReturnRequest,
   PostOrderIssueRefundRequest,
   PostOrderMarkReceivedRequest,
   PostOrderPaginationOutput,
   PostOrderRefundStatusResponse,
+  PostOrderRejectCancelRequest,
   PostOrderReturnDetail,
   PostOrderReturnSearchResponse,
   PostOrderReturnSummary,
@@ -54,27 +65,31 @@ export class PostOrderRejectedError extends Error {
 }
 
 /**
- * eBay Post-Order API, for returns. Five calls, every one documented in
- * docs/ebay-reference/post-order/:
+ * eBay Post-Order API, for returns and buyer cancellation requests. Nine
+ * calls, every one documented in docs/ebay-reference/post-order/:
  * - `GET  /post-order/v2/return/search`               — the sweep (BACKGROUND)
  * - `GET  /post-order/v2/return/{returnId}`           — the detail pane (INTERACTIVE)
  * - `POST /post-order/v2/return/{returnId}/decide`           (APPROVE only)
  * - `POST /post-order/v2/return/{returnId}/mark_as_received`
  * - `POST /post-order/v2/return/{returnId}/issue_refund`
+ * - `GET  /post-order/v2/cancellation/search?role=BUYER` — the sweep (BACKGROUND)
+ * - `GET  /post-order/v2/cancellation/{cancelId}`     — the live read before an answer (INTERACTIVE)
+ * - `POST /post-order/v2/cancellation/{cancelId}/approve`    (no payload)
+ * - `POST /post-order/v2/cancellation/{cancelId}/reject`     (`{}` or shipment date + tracking)
  *
- * The three writes settle a buyer's claim or move real money on a real
- * seller's store, so they are reachable only through
- * `EbayReturnsActionsService` (operator switch, live option check, audit
- * row); `ebay-returns.guard.spec.ts` keeps every other path out of here.
- * A write is sent ONCE — never inside `withEbayRateLimitRetry`: a refund
- * replayed after a timeout eBay had in fact processed would be a second
- * refund.
+ * The five writes settle a buyer's claim, cancel a real order or move real
+ * money on a real seller's store, so they are reachable only through
+ * `EbayReturnsActionsService` / `EbayCancellationsActionsService` (operator
+ * switch, live check, audit row); `ebay-returns.guard.spec.ts` keeps every
+ * other path out of here. A write is sent ONCE — never inside
+ * `withEbayRateLimitRetry`: a refund replayed after a timeout eBay had in
+ * fact processed would be a second refund.
  *
- * Quota: `post-order.return` is 5,000 calls a day for the WHOLE application
- * (production `getRateLimits`, 2026-09-30), so every attempt is charged to
- * `EbayApiResource.POST_ORDER_RETURN` before it goes out — the sweep at
- * BACKGROUND priority, a seller's own read or action at INTERACTIVE.
- * `EbayBudgetExhaustedError` propagates to the caller.
+ * Quota: `post-order.return` and `post-order.cancellation` are 5,000 calls a
+ * day EACH for the WHOLE application (production `getRateLimits`,
+ * 2026-09-30), so every attempt is charged to its own resource before it goes
+ * out — a sweep at BACKGROUND priority, a seller's own read or action at
+ * INTERACTIVE. `EbayBudgetExhaustedError` propagates to the caller.
  */
 @Injectable()
 export class PostOrderClient {
@@ -117,7 +132,7 @@ export class PostOrderClient {
           },
           timeout: REQUEST_TIMEOUT_MS,
         }),
-      { logger: this.logger, acquireBudget: this.chargeReturn() }
+      { logger: this.logger, acquireBudget: this.charge(EbayApiResource.POST_ORDER_RETURN) }
     );
 
     const body: unknown = response.data;
@@ -152,7 +167,10 @@ export class PostOrderClient {
           params: { fieldgroups: 'FULL' },
           timeout: REQUEST_TIMEOUT_MS,
         }),
-      { logger: this.logger, acquireBudget: this.chargeReturn(EbayCallPriority.INTERACTIVE) }
+      {
+        logger: this.logger,
+        acquireBudget: this.charge(EbayApiResource.POST_ORDER_RETURN, EbayCallPriority.INTERACTIVE),
+      }
     );
     const body: unknown = response.data;
     if (!isRecord(body) || !isRecord(body.detail)) {
@@ -168,7 +186,13 @@ export class PostOrderClient {
     returnId: string,
     body: PostOrderDecideReturnRequest
   ): Promise<PostOrderRefundStatusResponse> {
-    return this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/decide`, body);
+    return this.write(
+      EbayApiResource.POST_ORDER_RETURN,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/return/${encodeURIComponent(returnId)}/decide`,
+      body
+    );
   }
 
   /** "This method can be used on behalf of a seller to mark a return item as received." No response payload. */
@@ -178,7 +202,13 @@ export class PostOrderClient {
     returnId: string,
     body: PostOrderMarkReceivedRequest
   ): Promise<void> {
-    await this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/mark_as_received`, body);
+    await this.write(
+      EbayApiResource.POST_ORDER_RETURN,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/return/${encodeURIComponent(returnId)}/mark_as_received`,
+      body
+    );
   }
 
   /** "Issue a refund for a returned item." */
@@ -188,7 +218,107 @@ export class PostOrderClient {
     returnId: string,
     body: PostOrderIssueRefundRequest
   ): Promise<PostOrderRefundStatusResponse> {
-    return this.write(accessToken, marketplaceId, `${encodeURIComponent(returnId)}/issue_refund`, body);
+    return this.write(
+      EbayApiResource.POST_ORDER_RETURN,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/return/${encodeURIComponent(returnId)}/issue_refund`,
+      body
+    );
+  }
+
+  /**
+   * The buyer cancellation requests of one store, newest first, first page
+   * only (`limit=500`, the documented maximum). `role=BUYER` is REQUIRED:
+   * eBay's default is SELLER, which would return only the seller's own
+   * cancellations and never a buyer's request. `offset` is documented here as
+   * plain "number of entries to skip" but is not sent — a store with more than
+   * 500 buyer requests in 90 days is logged by the caller, not paged.
+   */
+  async searchCancellations(
+    accessToken: string,
+    marketplaceId: string,
+    params: CancellationSearchParams
+  ): Promise<PostOrderCancellationSearchResponse> {
+    const response = await withEbayRateLimitRetry(
+      () =>
+        axios.get<unknown>(`${this.baseUrl()}/post-order/v2/cancellation/search`, {
+          headers: this.headers(accessToken, marketplaceId),
+          params: {
+            creation_date_range_from: params.creationDateFrom,
+            role: CANCELLATION_SEARCH_ROLE,
+            limit: CANCELLATION_SEARCH_LIMIT,
+            sort: CANCELLATION_SEARCH_SORT,
+          },
+          timeout: REQUEST_TIMEOUT_MS,
+        }),
+      { logger: this.logger, acquireBudget: this.charge(EbayApiResource.POST_ORDER_CANCELLATION) }
+    );
+
+    const body: unknown = response.data;
+    if (!isRecord(body)) {
+      throw new PostOrderResponseError('eBay cancellation search answered with a body that is not a JSON object');
+    }
+    // "This array is returned as empty if no order cancellation requests match the input criteria."
+    const cancellations = (Array.isArray(body.cancellations) ? body.cancellations : []).filter(
+      (entry): entry is PostOrderCancellationSummary => isRecord(entry)
+    );
+    const paginationOutput: PostOrderPaginationOutput | undefined = isRecord(body.paginationOutput)
+      ? body.paginationOutput
+      : undefined;
+    return { cancellations, paginationOutput };
+  }
+
+  /** One request in full (`fieldgroups=FULL`, the documented default → `cancelDetail`). */
+  async getCancellation(
+    accessToken: string,
+    marketplaceId: string,
+    cancelId: string
+  ): Promise<PostOrderCancellationDetail> {
+    const response = await withEbayRateLimitRetry(
+      () =>
+        axios.get<unknown>(`${this.baseUrl()}/post-order/v2/cancellation/${encodeURIComponent(cancelId)}`, {
+          headers: this.headers(accessToken, marketplaceId),
+          params: { fieldgroups: 'FULL' },
+          timeout: REQUEST_TIMEOUT_MS,
+        }),
+      {
+        logger: this.logger,
+        acquireBudget: this.charge(EbayApiResource.POST_ORDER_CANCELLATION, EbayCallPriority.INTERACTIVE),
+      }
+    );
+    const body: unknown = response.data;
+    if (!isRecord(body) || !isRecord(body.cancelDetail)) {
+      throw new PostOrderResponseError('eBay cancellation detail answered without a `cancelDetail` container');
+    }
+    return body.cancelDetail as PostOrderCancellationDetail;
+  }
+
+  /** "This method has no request or response payloads" — HTTP 200 means the order is cancelled. */
+  async approveCancellation(accessToken: string, marketplaceId: string, cancelId: string): Promise<void> {
+    await this.write(
+      EbayApiResource.POST_ORDER_CANCELLATION,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/cancellation/${encodeURIComponent(cancelId)}/approve`,
+      undefined
+    );
+  }
+
+  /** No response payload. The body is `{}` unless the order shipped (see `PostOrderRejectCancelRequest`). */
+  async rejectCancellation(
+    accessToken: string,
+    marketplaceId: string,
+    cancelId: string,
+    body: PostOrderRejectCancelRequest
+  ): Promise<void> {
+    await this.write(
+      EbayApiResource.POST_ORDER_CANCELLATION,
+      accessToken,
+      marketplaceId,
+      `/post-order/v2/cancellation/${encodeURIComponent(cancelId)}/reject`,
+      body
+    );
   }
 
   /**
@@ -198,14 +328,15 @@ export class PostOrderClient {
    * transport error it is.
    */
   private async write(
+    resource: EbayApiResource,
     accessToken: string,
     marketplaceId: string,
-    pathUnderReturn: string,
+    path: string,
     body: unknown
   ): Promise<PostOrderRefundStatusResponse> {
-    await this.chargeReturn(EbayCallPriority.INTERACTIVE)();
+    await this.charge(resource, EbayCallPriority.INTERACTIVE)();
     try {
-      const response = await axios.post<unknown>(`${this.baseUrl()}/post-order/v2/return/${pathUnderReturn}`, body, {
+      const response = await axios.post<unknown>(`${this.baseUrl()}${path}`, body, {
         headers: this.headers(accessToken, marketplaceId),
         timeout: REQUEST_TIMEOUT_MS,
       });
@@ -215,9 +346,9 @@ export class PostOrderClient {
       if (axios.isAxiosError(error) && error.response && error.response.status >= 400 && error.response.status < 500) {
         const status = error.response.status;
         this.logger.warn(
-          `eBay refused ${pathUnderReturn.replace(/^[^/]+/, '{returnId}')} with HTTP ${status}: ${describeErrorBody(error.response.data)}`
+          `eBay refused ${path.replace(/^(\/post-order\/v2\/\w+\/)[^/]+/, '$1{id}')} with HTTP ${status}: ${describeErrorBody(error.response.data)}`
         );
-        throw new PostOrderRejectedError(`eBay refused the return call with HTTP ${status}`, status);
+        throw new PostOrderRejectedError(`eBay refused the Post-Order call with HTTP ${status}`, status);
       }
       throw error;
     }
@@ -233,8 +364,8 @@ export class PostOrderClient {
   }
 
   /**
-   * eBay's reference for this call: "This method is not supported in the
-   * Sandbox environment." A deployment on sandbox keys (local dev, the test
+   * eBay's reference for this call — and for every cancellation call: "This
+   * method is not supported in the Sandbox environment." A deployment on sandbox keys (local dev, the test
    * stack) therefore has nothing to ask — the sweep checks this before it
    * claims a store, so no watermark is stamped and no call is spent.
    */
@@ -247,9 +378,12 @@ export class PostOrderClient {
     return this.config.get<string>('EBAY_REST_API_URL') || DEFAULT_REST_BASE;
   }
 
-  private chargeReturn(priority: EbayCallPriority = EbayCallPriority.BACKGROUND): () => Promise<void> {
+  private charge(
+    resource: EbayApiResource,
+    priority: EbayCallPriority = EbayCallPriority.BACKGROUND
+  ): () => Promise<void> {
     return async () => {
-      await this.budget.acquire(EbayApiResource.POST_ORDER_RETURN, priority);
+      await this.budget.acquire(resource, priority);
     };
   }
 }

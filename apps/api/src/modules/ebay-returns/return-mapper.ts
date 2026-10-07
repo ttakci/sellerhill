@@ -33,13 +33,13 @@ export interface EbayReturnRow {
   createdOnEbayAt: string | null;
 }
 
-type RawRecord = Record<string, unknown>;
+export type RawRecord = Record<string, unknown>;
 
-const asRecord = (value: unknown): RawRecord | null =>
+export const asRecord = (value: unknown): RawRecord | null =>
   typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as RawRecord) : null;
 
 /** A non-empty string, trimmed. An id eBay serialised as a number is kept as its digits. */
-function asText(value: unknown): string | null {
+export function asText(value: unknown): string | null {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return String(value);
   }
@@ -56,7 +56,7 @@ function asFreeText(value: unknown): string | null {
 }
 
 /** A finite number, given as a number or a numeric string. */
-function asNumber(value: unknown): number | null {
+export function asNumber(value: unknown): number | null {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null;
   }
@@ -77,7 +77,7 @@ function asQuantity(value: unknown): number | null {
 }
 
 /** eBay `DateTime.value` ("formatted as an ISO 8601 string") → normalised ISO, or null. */
-function asIsoDate(value: unknown): string | null {
+export function asIsoDate(value: unknown): string | null {
   if (typeof value !== 'string' || value.trim() === '') {
     return null;
   }
@@ -86,7 +86,7 @@ function asIsoDate(value: unknown): string | null {
 }
 
 /** eBay `Amount.currency`: "a three-letter ISO 4217 code". Anything else is not stored. */
-function asCurrency(value: unknown): string | null {
+export function asCurrency(value: unknown): string | null {
   if (typeof value !== 'string') {
     return null;
   }

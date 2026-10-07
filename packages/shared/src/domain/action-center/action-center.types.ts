@@ -147,6 +147,11 @@ export enum ActionCenterItemKey {
    * (`sellerResponseDue`), with the deadline in the breakdown.
    */
   RETURN_SELLER_ACTION_DUE = 'return_seller_action_due',
+  /**
+   * A buyer asked to cancel and eBay is waiting for the seller's answer
+   * (`sellerResponseDueDate` on a BUYER request), answered from the order page.
+   */
+  CANCEL_REQUEST_SELLER_ACTION_DUE = 'cancel_request_seller_action_due',
 
   /** An eBay store's OAuth grant is revoked/errored — sync and publishing stop. */
   EBAY_ACCOUNT_DISCONNECTED = 'ebay_account_disconnected',

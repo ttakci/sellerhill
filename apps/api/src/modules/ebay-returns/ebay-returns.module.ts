@@ -8,6 +8,9 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
 
+import { EbayCancellationsActionsService } from './ebay-cancellations-actions.service';
+import { EbayCancellationsSyncService } from './ebay-cancellations-sync.service';
+import { EbayCancellationsController } from './ebay-cancellations.controller';
 import { EbayReturnsActionsService } from './ebay-returns-actions.service';
 import { EbayReturnsSyncProcessor } from './ebay-returns-sync.processor';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
@@ -21,7 +24,10 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
  * eBay returns: the Post-Order client, the periodic sweep that copies each
  * store's returns into `ebay_returns`, the `returns` routes the seller's page
  * reads, and the three in-app actions (`EbayReturnsActionsService`, behind the
- * `ebay.returns.actionsEnabled` switch).
+ * `ebay.returns.actionsEnabled` switch). Buyer cancellation requests live here
+ * too — same API family, same tick: `EbayCancellationsSyncService`, the
+ * `cancellations` routes and the two answers (`EbayCancellationsActionsService`,
+ * behind `ebay.cancellations.actionsEnabled`).
  *
  * Imports only EbayModule (the per-store token) and BillingModule (the
  * suspension check) — EbayModule already imports BillingModule, and nothing
@@ -36,7 +42,7 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
     BillingModule,
     BullModule.registerQueue({ name: EBAY_RETURNS_SYNC_QUEUE }),
   ],
-  controllers: [EbayReturnsController],
+  controllers: [EbayReturnsController, EbayCancellationsController],
   providers: [
     PostOrderClient,
     ReturnSweepScheduleService,
@@ -44,9 +50,12 @@ import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
     EbayReturnsSyncProcessor,
     EbayReturnsService,
     EbayReturnsActionsService,
+    EbayCancellationsSyncService,
+    EbayCancellationsActionsService,
   ],
-  // The schedule is exported for the Action Center, which must call a return
-  // stale on the very interval the sweep refreshes it at.
+  // The schedule is exported for the Action Center and the orders list, which
+  // must call a return / a cancellation request stale on the very interval
+  // its sweep refreshes it at.
   exports: [EbayReturnsService, ReturnSweepScheduleService],
 })
 export class EbayReturnsModule {}

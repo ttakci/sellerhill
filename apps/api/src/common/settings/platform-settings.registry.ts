@@ -227,6 +227,23 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     // Off until the first real return has proven the write calls (no Sandbox).
     defaultValue: 'false',
   }),
+  // --- Buyer cancellation requests (Post-Order API, its own 5,000 calls/day) ---
+  def({
+    key: PlatformSettingKey.EBAY_CANCELLATION_SYNC_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_CANCELLATION_SYNC_ENABLED',
+    // Rides the return sweep's tick, cron and pacing settings.
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_CANCELLATIONS_ACTIONS_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_CANCELLATIONS_ACTIONS_ENABLED',
+    // Off until the first live buyer request has proven approve / reject (no Sandbox).
+    defaultValue: 'false',
+  }),
   def({
     key: PlatformSettingKey.LISTING_CLEANUP_ENABLED,
     category: PlatformSettingCategory.EBAY,

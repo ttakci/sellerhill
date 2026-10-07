@@ -41,4 +41,10 @@ describe('orders list: every OrderFiltersDto field reaches the request', () => {
     // `false` is a real filter (untracked orders) — a truthiness check drops it.
     expect(mapper).toMatch(/filters\.isTracked !== undefined/);
   });
+
+  it('sends cancelRequested under the name the controller reads (the Action Center link)', () => {
+    const controller = fs.readFileSync(path.join(__dirname, 'orders.controller.ts'), 'utf8');
+    expect(controller).toMatch(/@Query\('cancelRequested'\)/);
+    expect(mapper).toMatch(/params\.cancelRequested = 'true'/);
+  });
 });

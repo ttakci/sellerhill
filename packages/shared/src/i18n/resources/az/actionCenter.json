@@ -127,6 +127,12 @@
         "description_other": "{{count}} qaytarmada eBay-in sizdən gözlədiyi bir addım var. Qaytarmalar səhifəsində göstərilən son tarixlərdən əvvəl eBay-də cavab verin.",
         "action": "Qaytarmalara bax"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Alıcının ləğv sorğusu",
+        "description_one": "{{count}} alıcı sifarişi ləğv etməyi xahiş etdi — eBay-in son tarixindən əvvəl burada təsdiqləyin və ya rədd edin",
+        "description_other": "{{count}} alıcı sifarişləri ləğv etməyi xahiş etdi — eBay-in son tarixindən əvvəl burada təsdiqləyin və ya rədd edin",
+        "action": "Sorğulara bax"
+      },
       "ebay_account_disconnected": {
         "title": "eBay mağazası bağlantısını itirdi",
         "description_one": "{{count}} mağazanın avtorizasiyası artıq yoxdur. Yenidən qoşana qədər onun üçün sifariş sinxronizasiyası, qiymət yenilənməsi və dərc dayandırılıb.",

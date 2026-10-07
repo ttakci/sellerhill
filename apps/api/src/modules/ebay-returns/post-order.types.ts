@@ -211,3 +211,75 @@ export interface PostOrderMarkReceivedRequest {
 export interface PostOrderRefundStatusResponse {
   refundStatus?: string;
 }
+
+/* ── Cancellations (docs/ebay-reference/post-order/post-order_v2_cancellation_*.txt) ── */
+
+/**
+ * eBay `CancelSummary` — one `cancellations[]` entry of
+ * `GET /post-order/v2/cancellation/search`. `cancelState`, `cancelStatus`,
+ * `cancelReason` and `cancelCloseReason` are enums whose value pages are not
+ * in the local reference: strings, never switched on.
+ */
+export interface PostOrderCancellationSummary {
+  cancelId?: string;
+  legacyOrderId?: string;
+  marketplaceId?: string;
+  cancelState?: string;
+  cancelStatus?: string;
+  cancelReason?: string;
+  cancelCloseReason?: string;
+  /** `PartyEnum`: `BUYER` | `SELLER` | `UNKNOWN`. */
+  requestorType?: string;
+  buyerLoginName?: string;
+  sellerLoginName?: string;
+  cancelRequestDate?: PostOrderDateTime;
+  cancelCloseDate?: PostOrderDateTime;
+  sellerResponseDueDate?: PostOrderDateTime;
+  buyerResponseDueDate?: PostOrderDateTime;
+  requestRefundAmount?: PostOrderAmount;
+  /** `PaymentStatusEnum`. */
+  paymentStatus?: string;
+  /** `PartialOrderTypeEnum` — "should be FULL_ORDER". */
+  partialOrderType?: string;
+  shipmentDate?: PostOrderDateTime;
+}
+
+/** eBay `FindCancelResponse`. */
+export interface PostOrderCancellationSearchResponse {
+  cancellations?: PostOrderCancellationSummary[];
+  paginationOutput?: PostOrderPaginationOutput;
+  total?: number;
+}
+
+/** eBay `CancelActivityHistory` (fieldgroups=FULL). */
+export interface PostOrderCancelActivityHistory {
+  actionDate?: PostOrderDateTime;
+  activityParty?: string;
+  activityType?: string;
+  stateFrom?: string;
+  stateTo?: string;
+}
+
+/**
+ * eBay `CancelDetail` — the `cancelDetail` container of
+ * `GET /post-order/v2/cancellation/{cancelId}`: the summary's fields plus the
+ * history (`refundInfo` / `moneyMovementInfo` are not read).
+ */
+export interface PostOrderCancellationDetail extends PostOrderCancellationSummary {
+  activityHistories?: PostOrderCancelActivityHistory[];
+}
+
+/**
+ * `POST …/cancellation/{cancelId}/reject` — `RejectCancelRequest`. Both fields
+ * optional; "If you do not include either of these fields, you must submit a
+ * payload consisting of just the opening and closing braces ({ })."
+ */
+export interface PostOrderRejectCancelRequest {
+  shipmentDate?: { value: string };
+  trackingNumber?: string;
+}
+
+export interface CancellationSearchParams {
+  /** ISO 8601; "Do not set the start date more than 18 months in the past." */
+  creationDateFrom: string;
+}

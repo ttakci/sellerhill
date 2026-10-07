@@ -59,6 +59,12 @@ export enum EbayApiResource {
    */
   POST_ORDER_RETURN = 'post-order.return',
   /**
+   * Post-Order API cancellation calls (`/post-order/v2/cancellation/...`).
+   * 5,000/day for the whole application (production `getRateLimits`,
+   * 2026-09-30) — a pool of its own, separate from `post-order.return`.
+   */
+  POST_ORDER_CANCELLATION = 'post-order.cancellation',
+  /**
    * Marketing API — Promoted Listings campaigns and ads. eBay reports two
    * resources for it (production `getRateLimits`, 2026-10-02): `sell.marketing`
    * 10,000/day and `sell.marketing.ads.campaign` 100,000/day, and does not say

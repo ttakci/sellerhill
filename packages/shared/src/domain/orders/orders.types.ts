@@ -1,3 +1,5 @@
+import type { EbayCancellationDto } from '../cancellations/cancellations.types';
+
 /**
  * What the seller actually needs to know about an order, in ONE value.
  *
@@ -511,6 +513,12 @@ export interface OrderDto {
   ebayRefundedAmount?: number | null;
   /** The latest `refunds[].refundDate`, or null. */
   ebayRefundedAt?: string | null;
+  /**
+   * The newest buyer cancellation request eBay's Post-Order API reports for
+   * this order (`ebay_cancellations`, requestor BUYER), or null. Its bucket
+   * and `availableActions` decide whether the order page offers approve / reject.
+   */
+  cancellation?: EbayCancellationDto | null;
 
   // Shipping
   // Buyer ship-to address. `fullName`/`street2`/`phone` are optional because
@@ -637,6 +645,11 @@ export interface OrderFiltersDto {
    * (`buildNeedsActionSql`). Sent instead of `stages`.
    */
   needsAction?: boolean;
+  /**
+   * Orders with an open buyer cancellation request awaiting the seller
+   * (`?cancelRequested=true`, the Action Center's link).
+   */
+  cancelRequested?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

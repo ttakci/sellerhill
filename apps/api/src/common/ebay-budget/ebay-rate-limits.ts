@@ -105,6 +105,7 @@ export const RESOURCE_SOURCE: Record<EbayApiResource, ResourceSource> = {
   [EbayApiResource.MESSAGE]: { trading: false, name: 'commerce.message' },
   [EbayApiResource.NOTIFICATION]: { trading: false, name: 'commerce.notification' },
   [EbayApiResource.POST_ORDER_RETURN]: { trading: false, name: 'post-order.return' },
+  [EbayApiResource.POST_ORDER_CANCELLATION]: { trading: false, name: 'post-order.cancellation' },
   [EbayApiResource.MARKETING]: { trading: false, name: 'sell.marketing' },
   [EbayApiResource.MARKETING_ADS]: { trading: false, name: 'sell.marketing.ads.campaign' },
   [EbayApiResource.FINANCES]: { trading: false, name: 'payoutapi.sell.finances' },

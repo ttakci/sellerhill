@@ -39,6 +39,7 @@ describe('Action Center order links', () => {
     expect(count(/storeScopeSql\('o', \d\)/g)).toBe(count(/FROM orders o\b/g));
     expect(count(/storeScopeSql\('l', \d\)/g)).toBe(count(/FROM listings l\b/g));
     expect(count(/storeScopeSql\('r', \d\)/g)).toBe(count(/FROM ebay_returns r\b/g));
+    expect(count(/storeScopeSql\('c', \d\)/g)).toBe(count(/FROM ebay_cancellations c\b/g));
     expect(count(/storeScopeSql\('j', \d\)/g)).toBe(count(/JOIN listing_jobs j\b/g));
     expect(count(/FROM ebay_accounts a\b/g)).toBe(count(/\(\$4::uuid IS NULL OR a\.id = \$4::uuid\)/g));
   });

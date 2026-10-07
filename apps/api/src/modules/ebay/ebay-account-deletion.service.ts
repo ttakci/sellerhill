@@ -15,7 +15,8 @@
  * here, behind the same match.
  *
  * The same buyer can also appear on `ebay_returns` (login name + the comment
- * they wrote when opening a return); both are nulled there.
+ * they wrote when opening a return) and on `ebay_cancellations` (login name);
+ * those are nulled there, and the cancellation upsert honours the same marker.
  *
  * **An erasure is remembered, not just performed** (`buyer_data_erased_at`,
  * migration 130). Order sync re-reads an order whenever eBay modifies it and
@@ -37,6 +38,7 @@ import type { AccountDeletionTarget } from './ebay-account-deletion.helpers';
 export interface AccountDeletionResult {
   ordersAnonymized: number;
   returnsAnonymized: number;
+  cancellationsAnonymized: number;
 }
 
 @Injectable()
@@ -52,6 +54,7 @@ export class EbayAccountDeletionService {
     // we hold no data keyed by it).
     let ordersAnonymized = 0;
     let returnsAnonymized = 0;
+    let cancellationsAnonymized = 0;
     if (target.username) {
       const rows = await this.databaseService.query<{ id: string }>(
         `UPDATE orders
@@ -88,17 +91,29 @@ export class EbayAccountDeletionService {
         [target.username],
       );
       returnsAnonymized = returnRows.length;
+
+      // The buyer cancellation requests of the same buyer (migration 145).
+      const cancellationRows = await this.databaseService.query<{ id: string }>(
+        `UPDATE ebay_cancellations
+            SET buyer_login_name = NULL,
+                buyer_data_erased_at = COALESCE(buyer_data_erased_at, CURRENT_TIMESTAMP),
+                updated_at = CURRENT_TIMESTAMP
+          WHERE buyer_login_name = $1
+          RETURNING id`,
+        [target.username],
+      );
+      cancellationsAnonymized = cancellationRows.length;
     }
 
-    await this.writeAuditLog(target, ordersAnonymized, returnsAnonymized);
+    await this.writeAuditLog(target, ordersAnonymized, returnsAnonymized, cancellationsAnonymized);
 
     this.logger.log(
       `eBay account deletion processed: username=${target.username ?? '-'} ` +
         `userId=${target.userId ?? '-'} ordersAnonymized=${ordersAnonymized} ` +
-        `returnsAnonymized=${returnsAnonymized}`,
+        `returnsAnonymized=${returnsAnonymized} cancellationsAnonymized=${cancellationsAnonymized}`,
     );
 
-    return { ordersAnonymized, returnsAnonymized };
+    return { ordersAnonymized, returnsAnonymized, cancellationsAnonymized };
   }
 
   /**
@@ -113,6 +128,7 @@ export class EbayAccountDeletionService {
     target: AccountDeletionTarget,
     ordersAnonymized: number,
     returnsAnonymized: number,
+    cancellationsAnonymized: number,
   ): Promise<void> {
     try {
       await this.databaseService.query(
@@ -126,6 +142,7 @@ export class EbayAccountDeletionService {
             eiasToken: target.eiasToken,
             ordersAnonymized,
             returnsAnonymized,
+            cancellationsAnonymized,
             processedAt: new Date().toISOString(),
           }),
         ],

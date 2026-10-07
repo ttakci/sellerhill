@@ -8,6 +8,7 @@ import { Queue } from 'bullmq';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
+import { EbayCancellationsSyncService } from './ebay-cancellations-sync.service';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
 import {
   DEFAULT_EBAY_RETURNS_SYNC_CRON,
@@ -16,7 +17,9 @@ import {
 } from './ebay-returns.constants';
 
 /**
- * The tick behind the periodic return sweep.
+ * The tick behind the periodic return sweep — and, right after it, the buyer
+ * cancellation sweep (`EbayCancellationsSyncService`, its own quota pool and
+ * master switch, the same cron).
  *
  * Concurrency 1: the sweep is sequential and draws on a 5,000-calls-a-day
  * quota shared by every seller, so overlapping sweeps would only spend it
@@ -33,6 +36,7 @@ export class EbayReturnsSyncProcessor extends WorkerHost implements OnModuleInit
   constructor(
     @InjectQueue(EBAY_RETURNS_SYNC_QUEUE) private readonly queue: Queue,
     private readonly returnsSync: EbayReturnsSyncService,
+    private readonly cancellationsSync: EbayCancellationsSyncService,
     private readonly platformSettings: PlatformSettingsService
   ) {
     super();
@@ -58,7 +62,17 @@ export class EbayReturnsSyncProcessor extends WorkerHost implements OnModuleInit
   }
 
   async process(): Promise<void> {
-    await this.returnsSync.sweep();
+    // One tick, two sweeps: a failure in either is logged and never hides the other's.
+    for (const [name, sweep] of [
+      ['return', () => this.returnsSync.sweep()],
+      ['cancellation', () => this.cancellationsSync.sweep()],
+    ] as const) {
+      try {
+        await sweep();
+      } catch (err) {
+        this.logger.error(`eBay ${name} sweep failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
   private async removeExistingTick(): Promise<void> {

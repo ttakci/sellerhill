@@ -16,6 +16,9 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
+import { EbayCancellationsActionsService } from './ebay-cancellations-actions.service';
+import { EbayCancellationsSyncService } from './ebay-cancellations-sync.service';
+import { EbayCancellationsController } from './ebay-cancellations.controller';
 import { EbayReturnsActionsService } from './ebay-returns-actions.service';
 import { EbayReturnsSyncProcessor } from './ebay-returns-sync.processor';
 import { EbayReturnsSyncService } from './ebay-returns-sync.service';
@@ -72,10 +75,37 @@ describe('ebay-returns dependency injection metadata', () => {
     ]);
   });
 
-  it('EbayReturnsSyncProcessor resolves the sweep and the settings after its queue', () => {
+  it('EbayReturnsSyncProcessor resolves both sweeps and the settings after its queue', () => {
     const types = paramTypes(EbayReturnsSyncProcessor);
-    expect(types).toHaveLength(3);
+    expect(types).toHaveLength(4);
     // [0] is the BullMQ queue, injected by token.
-    expect(types.slice(1)).toEqual([EbayReturnsSyncService, PlatformSettingsService]);
+    expect(types.slice(1)).toEqual([EbayReturnsSyncService, EbayCancellationsSyncService, PlatformSettingsService]);
+  });
+
+  it('EbayCancellationsSyncService resolves every collaborator by class', () => {
+    expect(paramTypes(EbayCancellationsSyncService)).toEqual([
+      DatabaseService,
+      PlatformSettingsService,
+      QuotaEnforcementService,
+      EbayService,
+      PostOrderClient,
+      ReturnSweepScheduleService,
+    ]);
+  });
+
+  it('EbayCancellationsActionsService resolves its seven dependencies in order', () => {
+    expect(paramTypes(EbayCancellationsActionsService)).toEqual([
+      DatabaseService,
+      PlatformSettingsService,
+      QuotaEnforcementService,
+      EbayService,
+      PostOrderClient,
+      EbayCancellationsSyncService,
+      ReturnSweepScheduleService,
+    ]);
+  });
+
+  it('EbayCancellationsController resolves the actions service', () => {
+    expect(paramTypes(EbayCancellationsController)).toEqual([EbayCancellationsActionsService]);
   });
 });

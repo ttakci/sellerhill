@@ -27,7 +27,7 @@ export interface ClaimedAccount {
  * can carry a buyer's name and comment) and never the request (it carries the
  * seller's token) — only the HTTP status, or the error's own message.
  */
-function describeFailure(err: unknown): string {
+export function describeFailure(err: unknown): string {
   if (typeof err === 'object' && err !== null && 'response' in err) {
     const status = (err as { response?: { status?: unknown } }).response?.status;
     if (typeof status === 'number') {

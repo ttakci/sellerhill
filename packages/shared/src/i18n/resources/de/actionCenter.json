@@ -127,6 +127,12 @@
         "description_other": "Bei {{count}} Rückgaben erwartet eBay einen nächsten Schritt von Ihnen. Antworten Sie bei eBay vor den Fristen, die auf der Seite „Rückgaben“ angezeigt werden.",
         "action": "Rückgaben ansehen"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Stornierungsanfrage eines Käufers",
+        "description_one": "{{count}} Käufer möchte eine Bestellung stornieren — genehmigen oder lehnen Sie sie hier vor Ablauf der eBay-Frist ab",
+        "description_other": "{{count}} Käufer möchten Bestellungen stornieren — genehmigen oder lehnen Sie sie hier vor Ablauf der eBay-Frist ab",
+        "action": "Anfragen prüfen"
+      },
       "ebay_account_disconnected": {
         "title": "Ein eBay-Shop hat seine Verbindung verloren",
         "description_one": "{{count}} Shop ist nicht mehr autorisiert. Bestellabgleich, Preisanpassung und Veröffentlichung sind dafür gestoppt, bis Sie die Verbindung wiederherstellen.",

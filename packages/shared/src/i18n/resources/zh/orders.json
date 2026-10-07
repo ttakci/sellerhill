@@ -396,7 +396,59 @@
       "dueSoon": "发货期限临近",
       "dueSoonBy": "{{date}} 前发货",
       "refunded": "已退款",
-      "refundedAmount": "已退款：{{amount}}"
+      "refundedAmount": "已退款：{{amount}}",
+      "cancelRequested": "已请求取消"
+    },
+    "cancellation": {
+      "title": "取消请求",
+      "buyer": "买家",
+      "reason": "原因",
+      "requestedAt": "请求时间",
+      "respondBy": "回复截止",
+      "closedOn": "已关闭",
+      "closeReason": "关闭原因",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "买家要求取消",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "买家已取消或地址有问题",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "缺货或无法履行",
+        "other": "其他原因"
+      },
+      "bucket": {
+        "action_overdue": "已逾期",
+        "action_due": "待回复",
+        "in_progress": "进行中",
+        "closed": "已关闭",
+        "unconfirmed": "近期未确认"
+      },
+      "approve": "批准",
+      "reject": "拒绝",
+      "confirm": {
+        "approve": {
+          "title": "批准取消？",
+          "body": "订单将被取消，eBay 会向买家退款。此操作无法撤销。",
+          "confirm": "批准取消"
+        },
+        "reject": {
+          "title": "拒绝取消？",
+          "body": "将通知 eBay 您拒绝取消，订单必须发货。",
+          "bodyWithTracking": "将通知 eBay 您拒绝取消，并一并发送物流单号 {{tracking}}。订单必须发货。",
+          "confirm": "拒绝取消"
+        }
+      },
+      "done": {
+        "approve": "已批准取消，eBay 将向买家退款。",
+        "reject": "已拒绝取消。"
+      },
+      "actionsOff": "应用内取消操作已关闭——请在 eBay 上回复。",
+      "errors": {
+        "actionsDisabled": "此平台已关闭应用内取消操作。请在 eBay 上回复该请求。",
+        "actionNotAvailable": "eBay 不再为该请求提供此操作。请刷新并查看当前待处理事项。",
+        "suspended": "您的订阅已暂停，取消操作已停用。请在“账单”页面结清发票。",
+        "ebayRejected": "eBay 拒绝了此操作。请在 eBay 上打开该请求查看原因。",
+        "unavailable": "无法连接到 eBay，请稍后再试。",
+        "sandbox": "eBay 沙盒不支持取消操作。",
+        "notFound": "未找到此取消请求。"
+      }
     },
     "note": {
       "title": "您的备注",

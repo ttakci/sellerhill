@@ -176,6 +176,17 @@ export enum PlatformSettingKey {
    */
   EBAY_RETURNS_ACTIONS_ENABLED = 'ebay.returns.actionsEnabled',
   /**
+   * Master switch for reading each store's buyer cancellation requests
+   * (`post-order.cancellation`). The sweep shares the return sweep's cron,
+   * interval, quota share and burst settings — same knobs, its own pool.
+   */
+  EBAY_CANCELLATION_SYNC_ENABLED = 'ebay.cancellationSync.enabled',
+  /**
+   * In-app cancellation answers (approve / reject) — OFF by default, like the
+   * return actions: no Sandbox, and approving cancels a real order.
+   */
+  EBAY_CANCELLATIONS_ACTIONS_ENABLED = 'ebay.cancellations.actionsEnabled',
+  /**
    * Kill switch for the sellers' clean-up rules (end listings that stayed out
    * of stock, or did not sell). Read on every tick; off stops every automatic
    * ending at once and changes no seller's settings.

@@ -1,4 +1,4 @@
-import { ProfitBasis } from '@repo/shared';
+import { CancellationBucket, EbayCancellationAction, ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -21,6 +21,22 @@ import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 
 import * as S from './OrderDetailsPage.style';
 import type { OrderDetailsPageProps } from './OrderDetailsPage.types';
+
+/** eBay's documented cancel reasons; any other value is shown raw under the generic label. */
+const KNOWN_CANCEL_REASONS: readonly string[] = [
+  'BUYER_ASKED_CANCEL',
+  'BUYER_CANCEL_OR_ADDRESS_ISSUE',
+  'OUT_OF_STOCK_OR_CANNOT_FULFILL',
+];
+
+/** Same colours as the returns bucket badge: red overdue, amber due, sky moving, green closed, grey unknown. */
+const CANCEL_BUCKET_VARIANT: Record<CancellationBucket, 'error' | 'warning' | 'sky' | 'success' | 'neutral'> = {
+  [CancellationBucket.ACTION_OVERDUE]: 'error',
+  [CancellationBucket.ACTION_DUE]: 'warning',
+  [CancellationBucket.IN_PROGRESS]: 'sky',
+  [CancellationBucket.CLOSED]: 'success',
+  [CancellationBucket.UNCONFIRMED]: 'neutral',
+};
 
 /** Label on the left, value right-aligned. No icon: the label is the signpost. */
 const Meta = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
@@ -133,6 +149,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   isSavingNote,
   onNoteChange,
   onSaveNote,
+  isActingOnCancellation,
+  onCancellationAction,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -308,6 +326,108 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           )}
         </S.Ledger>
       </S.Hero>
+
+      {/* A buyer's cancellation request: what they asked, by when eBay needs the
+          answer, and the two answers the seller may give from here. */}
+      {order.cancellation && (
+        <SettingsCard variant="section" header={{ title: t('orders.cancellation.title') }}>
+          <S.SectionContent>
+            <S.MetaList>
+              <Meta label={t('orders.cancellation.buyer')}>
+                <Text variant="body-sm" weight="medium">
+                  {order.cancellation.buyerLoginName ?? '—'}
+                </Text>
+              </Meta>
+              <Meta label={t('orders.cancellation.reason')}>
+                {order.cancellation.reason && KNOWN_CANCEL_REASONS.includes(order.cancellation.reason) ? (
+                  <Text variant="body-sm" weight="medium">
+                    {t(`orders.cancellation.reasons.${order.cancellation.reason}`)}
+                  </Text>
+                ) : (
+                  <>
+                    <Text variant="body-sm" weight="medium">
+                      {t('orders.cancellation.reasons.other')}
+                    </Text>
+                    {order.cancellation.reason ? (
+                      <Text variant="caption" color="text.tertiary">
+                        {order.cancellation.reason}
+                      </Text>
+                    ) : null}
+                  </>
+                )}
+              </Meta>
+              {order.cancellation.requestedAt ? (
+                <Meta label={t('orders.cancellation.requestedAt')}>
+                  <Text variant="body-sm" weight="medium" numeric>
+                    {formatDate(order.cancellation.requestedAt)}
+                  </Text>
+                </Meta>
+              ) : null}
+              {order.cancellation.bucket !== CancellationBucket.CLOSED && order.cancellation.sellerRespondBy ? (
+                <Meta label={t('orders.cancellation.respondBy')}>
+                  <Text variant="body-sm" weight="medium" numeric>
+                    {formatDate(order.cancellation.sellerRespondBy)}
+                  </Text>
+                </Meta>
+              ) : null}
+              {order.cancellation.bucket === CancellationBucket.CLOSED ? (
+                <>
+                  {order.cancellation.closedAt ? (
+                    <Meta label={t('orders.cancellation.closedOn')}>
+                      <Text variant="body-sm" weight="medium" numeric>
+                        {formatDate(order.cancellation.closedAt)}
+                      </Text>
+                    </Meta>
+                  ) : null}
+                  {order.cancellation.closeReason ? (
+                    <Meta label={t('orders.cancellation.closeReason')}>
+                      <Text variant="body-sm" color="text.tertiary">
+                        {order.cancellation.closeReason}
+                      </Text>
+                    </Meta>
+                  ) : null}
+                </>
+              ) : null}
+              <Meta label={t('orders.detail.ebayStatus')}>
+                <Badge variant={CANCEL_BUCKET_VARIANT[order.cancellation.bucket]} size="xs" solid>
+                  {t(`orders.cancellation.bucket.${order.cancellation.bucket}`)}
+                </Badge>
+              </Meta>
+            </S.MetaList>
+            {order.cancellation.availableActions.length > 0 ? (
+              <S.SectionActions>
+                {order.cancellation.availableActions.includes(EbayCancellationAction.APPROVE) && (
+                  <Button
+                    variant="primary"
+                    size="small"
+                    fullWidth
+                    onClick={() => onCancellationAction(EbayCancellationAction.APPROVE)}
+                    isLoading={isActingOnCancellation}
+                  >
+                    <Text variant="body-sm">{t('orders.cancellation.approve')}</Text>
+                  </Button>
+                )}
+                {order.cancellation.availableActions.includes(EbayCancellationAction.REJECT) && (
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    fullWidth
+                    onClick={() => onCancellationAction(EbayCancellationAction.REJECT)}
+                    isLoading={isActingOnCancellation}
+                  >
+                    <Text variant="body-sm">{t('orders.cancellation.reject')}</Text>
+                  </Button>
+                )}
+              </S.SectionActions>
+            ) : null}
+            {!order.cancellation.actionsEnabled &&
+            (order.cancellation.bucket === CancellationBucket.ACTION_DUE ||
+              order.cancellation.bucket === CancellationBucket.ACTION_OVERDUE) ? (
+              <InfoMessage>{t('orders.cancellation.actionsOff')}</InfoMessage>
+            ) : null}
+          </S.SectionContent>
+        </SettingsCard>
+      )}
 
       {/* The order's path, step by step: what happened and when, where it is
           standing now, and what is still ahead. */}

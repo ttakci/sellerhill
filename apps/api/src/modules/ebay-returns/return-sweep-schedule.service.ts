@@ -28,12 +28,16 @@ const CACHE_TTL_MS = 60_000;
  *
  * Fail-soft: if the store count or the limit cannot be read, the manual
  * setting is used. A scheduling helper must never break a page load.
+ *
+ * `resolveCancellations()` is the same answer for the buyer-cancellation sweep:
+ * the same settings and store count, against `post-order.cancellation`'s own
+ * daily limit (a separate 5,000/day pool). Both sweeps run in one tick.
  */
 @Injectable()
 export class ReturnSweepScheduleService {
   private readonly logger = new Logger(ReturnSweepScheduleService.name);
-  private cached: { value: ResolvedReturnSweepInterval; at: number } | null = null;
-  private lastLogged: string | null = null;
+  private readonly cached = new Map<EbayApiResource, { value: ResolvedReturnSweepInterval; at: number }>();
+  private readonly lastLogged = new Map<EbayApiResource, string>();
 
   constructor(
     private readonly database: DatabaseService,
@@ -42,9 +46,19 @@ export class ReturnSweepScheduleService {
   ) {}
 
   async resolve(): Promise<ResolvedReturnSweepInterval> {
+    return this.resolveFor(EbayApiResource.POST_ORDER_RETURN);
+  }
+
+  /** The cancellation sweep's interval — the claim and the cancellation freshness horizon read it. */
+  async resolveCancellations(): Promise<ResolvedReturnSweepInterval> {
+    return this.resolveFor(EbayApiResource.POST_ORDER_CANCELLATION);
+  }
+
+  private async resolveFor(resource: EbayApiResource): Promise<ResolvedReturnSweepInterval> {
     const now = Date.now();
-    if (this.cached && now - this.cached.at < CACHE_TTL_MS) {
-      return this.cached.value;
+    const cached = this.cached.get(resource);
+    if (cached && now - cached.at < CACHE_TTL_MS) {
+      return cached.value;
     }
 
     const manualIntervalHours = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_HOURS);
@@ -54,7 +68,7 @@ export class ReturnSweepScheduleService {
         this.platformSettings.getBoolean(PlatformSettingKey.EBAY_RETURN_SYNC_INTERVAL_AUTO),
         this.platformSettings.getNumber(PlatformSettingKey.EBAY_RETURN_SYNC_QUOTA_PERCENT),
         this.countActiveStores(),
-        this.budget.backgroundDailyCeiling(EbayApiResource.POST_ORDER_RETURN),
+        this.budget.backgroundDailyCeiling(resource),
       ]);
       value = resolveReturnSweepInterval({
         autoEnabled,
@@ -65,7 +79,7 @@ export class ReturnSweepScheduleService {
       });
     } catch (err) {
       this.logger.warn(
-        `Return sweep interval could not be derived, using the manual value: ${
+        `${resource} sweep interval could not be derived, using the manual value: ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -78,8 +92,8 @@ export class ReturnSweepScheduleService {
       });
     }
 
-    this.cached = { value, at: now };
-    this.logChange(value);
+    this.cached.set(resource, { value, at: now });
+    this.logChange(resource, value);
     return value;
   }
 
@@ -92,14 +106,14 @@ export class ReturnSweepScheduleService {
   }
 
   /** One line when the pace changes — the operator's way to see what auto decided. */
-  private logChange(value: ResolvedReturnSweepInterval): void {
+  private logChange(resource: EbayApiResource, value: ResolvedReturnSweepInterval): void {
     const signature = `${value.intervalHours}|${value.source}`;
-    if (signature === this.lastLogged) {
+    if (signature === this.lastLogged.get(resource)) {
       return;
     }
-    this.lastLogged = signature;
+    this.lastLogged.set(resource, signature);
     this.logger.log(
-      `Return sweep interval: every ${value.intervalHours}h (${value.source}), ` +
+      `${resource} sweep interval: every ${value.intervalHours}h (${value.source}), ` +
         `about ${value.estimatedDailyCalls} eBay call(s) a day`
     );
   }

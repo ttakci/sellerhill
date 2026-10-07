@@ -46,6 +46,8 @@ import {
   AmazonAccountStatus,
   BillingLimitKey,
   BillingSubscriptionStatus,
+  CancellationBucket,
+  EBAY_CANCEL_REQUESTOR_BUYER,
   EntitlementState,
   EbayAccountStatus,
   EBAY_MESSAGING_SCOPES,
@@ -68,7 +70,10 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 import { BillingService } from '../billing/billing.service';
-import { buildStoreScopedReturnBucketSql } from '../ebay-returns/return-store-scope';
+import {
+  buildStoreScopedCancellationBucketSql,
+  buildStoreScopedReturnBucketSql,
+} from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 import { buildGroupRuleSql, buildNotSellingSql } from '../listings/listing-cleanup.helpers';
 
@@ -205,6 +210,7 @@ export class ActionCenterService {
     const probes = await Promise.all([
       this.probe('orders', () => this.orderItems(userId, store)),
       this.probe('returns', () => this.returnItems(userId, store)),
+      this.probe('cancellations', () => this.cancellationItems(userId, store)),
       this.probe('connections', () => this.connectionItems(userId, store)),
       this.probe('listings', () => this.listingItems(userId, store)),
       this.probe('plan', () => this.planItems(userId)),
@@ -599,6 +605,61 @@ export class ActionCenterService {
         count: total,
         context: { overdue },
         actionPath: `/returns?tab=${ReturnTab.ACTION}`,
+      },
+    ];
+  }
+
+  // --------------------------------------------------------- cancellations
+
+  /**
+   * Buyer cancellation requests eBay is waiting on the seller to answer
+   * (`sellerResponseDueDate` on a BUYER request). Its own probe, counted
+   * through the store-scoped cancellation bucket the order card reads, with
+   * the freshness horizon of the cancellation sweep's own interval. CRITICAL
+   * once a response date has passed. `count` covers only requests LINKED to
+   * an order — the link opens the orders list, and an item must never count
+   * something that list cannot show. `unlinked` carries the rest (the
+   * `legacyOrderId` = `ebay_order_id` equality is unverified; the sweep logs
+   * each unlinked BUYER request so the operator sees them until a web view
+   * for `GET /v1/cancellations` exists).
+   */
+  private async cancellationItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
+    const bucket = buildStoreScopedCancellationBucketSql(
+      'c',
+      resolveReturnFreshnessHours((await this.returnSchedule.resolveCancellations()).intervalHours)
+    );
+    const rows = await this.db.query<{ code: string | null; count: string; unlinked: string }>(
+      `SELECT ${bucket} AS code, COUNT(*) AS count, COUNT(*) FILTER (WHERE c.order_id IS NULL) AS unlinked
+         FROM ebay_cancellations c
+        WHERE c.user_id = $1
+          AND c.requestor_type = $5
+          AND ${bucket} IN ($2, $3)
+          ${storeScopeSql('c', 4)}
+        GROUP BY 1`,
+      [userId, CancellationBucket.ACTION_OVERDUE, CancellationBucket.ACTION_DUE, store, EBAY_CANCEL_REQUESTOR_BUYER]
+    );
+    let total = 0;
+    let overdue = 0;
+    let unlinked = 0;
+    for (const row of rows) {
+      const rowUnlinked = toCount(row.unlinked);
+      const count = toCount(row.count) - rowUnlinked;
+      total += count;
+      unlinked += rowUnlinked;
+      if (row.code === (CancellationBucket.ACTION_OVERDUE as string)) {
+        overdue += count;
+      }
+    }
+    return [
+      {
+        key: ActionCenterItemKey.CANCEL_REQUEST_SELLER_ACTION_DUE,
+        group: ActionCenterGroup.ORDERS,
+        severity: overdue > 0 ? ActionCenterSeverity.CRITICAL : ActionCenterSeverity.WARNING,
+        count: total,
+        context: { overdue, unlinked },
+        // The list opens on TRACKED orders by default; a request on an
+        // untracked sale is still an order the seller has to answer for.
+        actionPath: '/orders?cancelRequested=true&tracking=all',
       },
     ];
   }

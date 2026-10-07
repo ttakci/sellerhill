@@ -396,7 +396,59 @@
       "dueSoon": "Termen de expediere apropiat",
       "dueSoonBy": "De expediat până la {{date}}",
       "refunded": "Rambursat",
-      "refundedAmount": "Rambursat: {{amount}}"
+      "refundedAmount": "Rambursat: {{amount}}",
+      "cancelRequested": "Anulare solicitată"
+    },
+    "cancellation": {
+      "title": "Cerere de anulare",
+      "buyer": "Cumpărător",
+      "reason": "Motiv",
+      "requestedAt": "Solicitată la",
+      "respondBy": "Răspunde până la",
+      "closedOn": "Închisă",
+      "closeReason": "Motivul închiderii",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "Cumpărătorul a cerut anularea",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Cumpărătorul a anulat sau are o problemă de adresă",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Stoc epuizat sau nu poate fi onorată",
+        "other": "Alt motiv"
+      },
+      "bucket": {
+        "action_overdue": "Întârziată",
+        "action_due": "Răspuns scadent",
+        "in_progress": "În desfășurare",
+        "closed": "Închisă",
+        "unconfirmed": "Neconfirmată recent"
+      },
+      "approve": "Aprobă",
+      "reject": "Respinge",
+      "confirm": {
+        "approve": {
+          "title": "Aprobi anularea?",
+          "body": "Comanda este anulată, iar eBay rambursează cumpărătorul. Acțiunea nu poate fi anulată.",
+          "confirm": "Aprobă anularea"
+        },
+        "reject": {
+          "title": "Respingi anularea?",
+          "body": "eBay este informat că ai refuzat, iar comanda trebuie expediată.",
+          "bodyWithTracking": "eBay este informat că ai refuzat și se trimite și numărul de urmărire {{tracking}}. Comanda trebuie expediată.",
+          "confirm": "Respinge anularea"
+        }
+      },
+      "done": {
+        "approve": "Anulare aprobată. eBay va rambursa cumpărătorul.",
+        "reject": "Anulare respinsă."
+      },
+      "actionsOff": "Acțiunile de anulare din aplicație sunt oprite — răspunde pe eBay.",
+      "errors": {
+        "actionsDisabled": "Acțiunile de anulare din aplicație sunt oprite pe această platformă. Răspunde la cerere pe eBay.",
+        "actionNotAvailable": "eBay nu mai oferă această acțiune pentru cerere. Reîmprospătează și vezi ce așteaptă acum.",
+        "suspended": "Abonamentul tău este suspendat, deci acțiunile de anulare sunt oprite. Achită factura pe pagina Facturare.",
+        "ebayRejected": "eBay a refuzat această acțiune. Deschide cererea pe eBay ca să vezi motivul.",
+        "unavailable": "Nu s-a putut contacta eBay. Încearcă din nou peste puțin timp.",
+        "sandbox": "Acțiunile de anulare nu sunt disponibile în sandbox-ul eBay.",
+        "notFound": "Această cerere de anulare nu a fost găsită."
+      }
     },
     "note": {
       "title": "Nota dvs.",

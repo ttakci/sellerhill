@@ -396,7 +396,59 @@
       "dueSoon": "Scadenza di spedizione vicina",
       "dueSoonBy": "Spedire entro il {{date}}",
       "refunded": "Rimborsato",
-      "refundedAmount": "Rimborsato: {{amount}}"
+      "refundedAmount": "Rimborsato: {{amount}}",
+      "cancelRequested": "Annullamento richiesto"
+    },
+    "cancellation": {
+      "title": "Richiesta di annullamento",
+      "buyer": "Acquirente",
+      "reason": "Motivo",
+      "requestedAt": "Richiesta il",
+      "respondBy": "Rispondi entro",
+      "closedOn": "Chiusa",
+      "closeReason": "Motivo della chiusura",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "L'acquirente ha chiesto l'annullamento",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "L'acquirente ha annullato o problema di indirizzo",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Esaurito o impossibile da evadere",
+        "other": "Altro motivo"
+      },
+      "bucket": {
+        "action_overdue": "Scaduta",
+        "action_due": "Risposta in scadenza",
+        "in_progress": "In corso",
+        "closed": "Chiusa",
+        "unconfirmed": "Non confermata di recente"
+      },
+      "approve": "Approva",
+      "reject": "Rifiuta",
+      "confirm": {
+        "approve": {
+          "title": "Approvare l'annullamento?",
+          "body": "L'ordine viene annullato ed eBay rimborsa l'acquirente. L'azione non può essere annullata.",
+          "confirm": "Approva annullamento"
+        },
+        "reject": {
+          "title": "Rifiutare l'annullamento?",
+          "body": "eBay viene informato del tuo rifiuto e l'ordine deve essere spedito.",
+          "bodyWithTracking": "eBay viene informato del tuo rifiuto e viene inviato anche il numero di tracking {{tracking}}. L'ordine deve essere spedito.",
+          "confirm": "Rifiuta annullamento"
+        }
+      },
+      "done": {
+        "approve": "Annullamento approvato. eBay rimborserà l'acquirente.",
+        "reject": "Annullamento rifiutato."
+      },
+      "actionsOff": "Le azioni di annullamento nell'app sono disattivate: rispondi su eBay.",
+      "errors": {
+        "actionsDisabled": "Le azioni di annullamento nell'app sono disattivate su questa piattaforma. Rispondi alla richiesta su eBay.",
+        "actionNotAvailable": "eBay non offre più questa azione per la richiesta. Aggiorna e controlla cosa è in attesa ora.",
+        "suspended": "Il tuo abbonamento è sospeso, quindi le azioni di annullamento sono in pausa. Salda la fattura nella pagina Fatturazione.",
+        "ebayRejected": "eBay ha rifiutato questa azione. Apri la richiesta su eBay per vedere il motivo.",
+        "unavailable": "Impossibile raggiungere eBay. Riprova tra un attimo.",
+        "sandbox": "Le azioni di annullamento non sono disponibili nella sandbox di eBay.",
+        "notFound": "Questa richiesta di annullamento non è stata trovata."
+      }
     },
     "note": {
       "title": "La tua nota",

@@ -127,6 +127,12 @@
         "description_other": "{{count}} returns have a next step that eBay expects from you. Respond on eBay before the deadlines shown on the Returns page.",
         "action": "View returns"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Buyer cancellation request",
+        "description_one": "{{count}} buyer asked to cancel an order — approve or reject it here before eBay's deadline",
+        "description_other": "{{count}} buyers asked to cancel an order — approve or reject them here before eBay's deadline",
+        "action": "Review requests"
+      },
       "ebay_account_disconnected": {
         "title": "An eBay store lost its connection",
         "description_one": "{{count}} store is no longer authorized. Order sync, repricing and publishing are stopped for it until you reconnect.",

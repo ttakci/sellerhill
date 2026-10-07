@@ -6,9 +6,12 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   AutoFulfillBlockedReason,
+  ACTIONABLE_CANCELLATION_BUCKETS,
   AutoFulfillStatus,
   BuyerMessageStatus,
+  EBAY_CANCEL_REQUESTOR_BUYER,
   EbayAccountStatus,
+  PlatformSettingKey,
   OrderCostCaptureStatus,
   OrderStage,
   OrderStatus,
@@ -23,6 +26,7 @@ import {
   deriveOrderStage,
   deriveShipByState,
   isSimulatedAmazonOrderId,
+  resolveReturnFreshnessHours,
   type BuyerMessageEventType,
   type OrderDto,
   type OrderFiltersDto,
@@ -33,6 +37,10 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { cancellationColumnsSql, CancellationDtoRow, toCancellationDto } from '../ebay-returns/cancellation-dto';
+import { buildStoreScopedCancellationBucketSql } from '../ebay-returns/return-store-scope';
+import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 
 import { OrderSyncQueueService } from './order-sync-queue.service';
 import { OrderSyncService } from './order-sync.service';
@@ -113,6 +121,14 @@ interface OrderRow {
   listing_ebay_item_id?: string;
   listing_title?: string;
   product_image_urls?: string[] | string;
+  /** The newest BUYER cancellation request linked to the order (row_to_json), or null. */
+  cancellation?: CancellationDtoRow | null;
+}
+
+/** Per-request inputs of the cancellation part of an order DTO. */
+interface CancellationContext {
+  freshnessHours: number;
+  actionsEnabled: boolean;
 }
 
 /** Shape of a parsed shipping address */
@@ -134,8 +150,43 @@ export class OrdersService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly orderSyncService: OrderSyncService,
-    private readonly orderSyncQueueService: OrderSyncQueueService
+    private readonly orderSyncQueueService: OrderSyncQueueService,
+    private readonly returnSchedule: ReturnSweepScheduleService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
+
+  /**
+   * The cancellation sweep's freshness horizon and the operator switch, read
+   * once per request (both cached upstream).
+   */
+  private async cancellationContext(): Promise<CancellationContext> {
+    const [schedule, actionsEnabled] = await Promise.all([
+      this.returnSchedule.resolveCancellations(),
+      this.platformSettings.getBoolean(PlatformSettingKey.EBAY_CANCELLATIONS_ACTIONS_ENABLED),
+    ]);
+    return { freshnessHours: resolveReturnFreshnessHours(schedule.intervalHours), actionsEnabled };
+  }
+
+  /**
+   * LATERAL: the newest BUYER cancellation request linked to the order, as one
+   * JSON column with the store-scoped bucket (`OrderDto.cancellation`). The
+   * link is `legacyOrderId` = `ebay_order_id`, same seller and store — an
+   * assumption the first live request settles (CLAUDE.md, "eBay cancellation
+   * requests").
+   */
+  private cancellationJoinSql(freshnessHours: number): string {
+    return `LEFT JOIN LATERAL (
+        SELECT row_to_json(x) AS cancellation
+          FROM (SELECT ${cancellationColumnsSql('c', freshnessHours)}
+                  FROM ebay_cancellations c
+                 WHERE c.order_id = o.id
+                   AND c.ebay_account_id = o.ebay_account_id
+                   AND c.user_id = o.user_id
+                   AND c.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}'
+                 ORDER BY c.requested_at DESC NULLS LAST, c.first_seen_at DESC
+                 LIMIT 1) x
+      ) oc ON TRUE`;
+  }
 
   /**
    * Get all orders for a user with optional filters
@@ -146,6 +197,7 @@ export class OrdersService {
     const offset = (page - 1) * limit;
     const sortBy = filters?.sortBy || 'order_date';
     const sortOrder = filters?.sortOrder || 'desc';
+    const cancellation = await this.cancellationContext();
 
     // Build WHERE clause
     const conditions: string[] = ['o.user_id = $1'];
@@ -252,6 +304,20 @@ export class OrdersService {
       conditions.push(`o.listing_id IS ${filters.isTracked ? 'NOT NULL' : 'NULL'}`);
     }
 
+    if (filters?.cancelRequested) {
+      // An open BUYER request awaiting the seller's answer — the bucket the
+      // order card and the Action Center item read (`?cancelRequested=true`).
+      const bucket = buildStoreScopedCancellationBucketSql('c', cancellation.freshnessHours);
+      conditions.push(
+        `EXISTS (SELECT 1 FROM ebay_cancellations c
+                  WHERE c.order_id = o.id
+                    AND c.ebay_account_id = o.ebay_account_id
+                    AND c.user_id = o.user_id
+                    AND c.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}'
+                    AND (${bucket}) IN (${ACTIONABLE_CANCELLATION_BUCKETS.map((b) => `'${b}'`).join(', ')}))`
+      );
+    }
+
     const whereClause = conditions.join(' AND ');
     const fromJoin = `
       FROM orders o
@@ -290,8 +356,10 @@ export class OrdersService {
               l.asin as listing_asin,
               l.ebay_item_id as listing_ebay_item_id,
               l.title as listing_title,
-              p.image_urls as product_image_urls
+              p.image_urls as product_image_urls,
+              oc.cancellation
        ${fromJoin}
+       ${this.cancellationJoinSql(cancellation.freshnessHours)}
        WHERE ${whereClause}
        ORDER BY ${orderBy}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
@@ -299,7 +367,7 @@ export class OrdersService {
     );
 
     return {
-      orders: results.map((row) => this.mapRowToDto(row)),
+      orders: results.map((row) => this.mapRowToDto(row, cancellation)),
       total,
     };
   }
@@ -397,15 +465,18 @@ export class OrdersService {
    * Get a single order by ID with listing→product enrichment
    */
   async findOne(userId: string, id: string): Promise<OrderDto> {
+    const cancellation = await this.cancellationContext();
     const results = await this.databaseService.query<OrderRow>(
       `SELECT o.*,
               l.asin as listing_asin,
               l.ebay_item_id as listing_ebay_item_id,
               l.title as listing_title,
-              p.image_urls as product_image_urls
+              p.image_urls as product_image_urls,
+              oc.cancellation
        FROM orders o
        LEFT JOIN listings l ON o.listing_id = l.id
        LEFT JOIN products p ON l.product_id = p.id
+       ${this.cancellationJoinSql(cancellation.freshnessHours)}
        WHERE o.id = $1 AND o.user_id = $2`,
       [id, userId]
     );
@@ -415,7 +486,7 @@ export class OrdersService {
     }
 
     const row = results[0];
-    const dto = this.mapRowToDto(row);
+    const dto = this.mapRowToDto(row, cancellation);
     // The step-by-step timeline belongs to the detail page only: it needs the
     // buyer-message log, and the list never renders it.
     return {
@@ -631,7 +702,7 @@ export class OrdersService {
   /**
    * Map database row to OrderDto
    */
-  private mapRowToDto(row: OrderRow): OrderDto {
+  private mapRowToDto(row: OrderRow, cancellation?: CancellationContext): OrderDto {
     const shippingAddress = row.shipping_address
       ? typeof row.shipping_address === 'string'
         ? (JSON.parse(row.shipping_address) as ShippingAddressData)
@@ -739,6 +810,9 @@ export class OrdersService {
           ? parseFloat(row.ebay_refunded_amount)
           : null,
       ebayRefundedAt: row.ebay_refunded_at ? row.ebay_refunded_at.toISOString() : null,
+      // Only on the reads that joined it (list, detail); never invented.
+      cancellation:
+        cancellation && row.cancellation ? toCancellationDto(row.cancellation, cancellation.actionsEnabled) : null,
       details: {
         purchaseSummary: {
           subtotal: parseFloat(row.sale_price) || 0,

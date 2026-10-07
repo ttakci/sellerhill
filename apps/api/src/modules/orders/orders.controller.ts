@@ -57,6 +57,7 @@ export class OrdersController {
     @Query('shipBy') shipBy?: string,
     @Query('refunded') refunded?: string,
     @Query('needsAction') needsAction?: string,
+    @Query('cancelRequested') cancelRequested?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
   ): Promise<{ orders: OrderDto[]; total: number }> {
@@ -91,6 +92,7 @@ export class OrdersController {
       shipBy: isKnownShipBy ? (shipBy as OrderShipByState) : undefined,
       hasRefund: refunded === 'true' ? true : undefined,
       needsAction: needsAction === 'true' ? true : undefined,
+      cancelRequested: cancelRequested === 'true' ? true : undefined,
       sortBy,
       sortOrder,
     };

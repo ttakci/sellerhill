@@ -1,4 +1,6 @@
 import {
+  type EbayCancellationAction,
+  type EbayCancellationActionResultDto,
   type OrderDto,
   type OrderStatsDto,
   type OrderFiltersDto,
@@ -59,6 +61,9 @@ export const ordersApi = baseApi.injectEndpoints({
           if (filters.needsAction) {
             params.needsAction = 'true';
           }
+          if (filters.cancelRequested) {
+            params.cancelRequested = 'true';
+          }
           if (filters.sortBy) {
             params.sortBy = filters.sortBy;
           }
@@ -116,6 +121,14 @@ export const ordersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'Orders', id }, 'Orders'],
     }),
+    /** Approve / reject a buyer's cancellation request on eBay (one Post-Order write). */
+    actOnCancellation: builder.mutation<
+      EbayCancellationActionResultDto,
+      { id: string; action: EbayCancellationAction; orderId: string }
+    >({
+      query: ({ id, action }) => ({ url: `/cancellations/${id}/actions/${action}`, method: 'POST' }),
+      invalidatesTags: (_result, _error, { orderId }) => [{ type: 'Orders', id: orderId }, 'Orders'],
+    }),
     triggerOrderSync: builder.mutation<OrderSyncResponseDto, void>({
       query: () => ({
         url: '/orders/sync',
@@ -133,5 +146,6 @@ export const {
   useGetOrderByIdQuery,
   useUpdateOrderAmazonDetailsMutation,
   useUpdateOrderNoteMutation,
+  useActOnCancellationMutation,
   useTriggerOrderSyncMutation,
 } = ordersApi;

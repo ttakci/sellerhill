@@ -116,6 +116,11 @@
         "description_other": "有 {{count}} 笔退货需要您完成 eBay 要求的下一步。请在“退货”页面显示的截止时间前到 eBay 处理。",
         "action": "查看退货"
       },
+      "cancel_request_seller_action_due": {
+        "title": "买家取消请求",
+        "description_other": "有 {{count}} 位买家要求取消订单——请在 eBay 截止时间前在此批准或拒绝",
+        "action": "查看请求"
+      },
       "ebay_account_disconnected": {
         "title": "有 eBay 店铺失去了连接",
         "description_other": "有 {{count}} 个店铺已不再获得授权。在您重新连接之前，这些店铺的订单同步、调价和发布都已停止。",

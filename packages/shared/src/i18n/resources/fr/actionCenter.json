@@ -138,6 +138,12 @@
         "description_other": "{{count}} retours comportent une étape qu'eBay attend de vous. Répondez sur eBay avant les dates limites indiquées sur la page Retours.",
         "action": "Voir les retours"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Demande d'annulation d'un acheteur",
+        "description_one": "{{count}} acheteur a demandé l'annulation d'une commande — approuvez-la ou refusez-la ici avant l'échéance eBay",
+        "description_other": "{{count}} acheteurs ont demandé l'annulation de commandes — approuvez-les ou refusez-les ici avant l'échéance eBay",
+        "action": "Examiner les demandes"
+      },
       "ebay_account_disconnected": {
         "title": "Une boutique eBay a perdu sa connexion",
         "description_one": "{{count}} boutique n'est plus autorisée. La synchronisation des commandes, le repricing et la publication sont arrêtés pour elle jusqu'à la reconnexion.",

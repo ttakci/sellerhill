@@ -396,7 +396,59 @@
       "dueSoon": "Versandfrist läuft ab",
       "dueSoonBy": "Versand bis {{date}}",
       "refunded": "Erstattet",
-      "refundedAmount": "Erstattet: {{amount}}"
+      "refundedAmount": "Erstattet: {{amount}}",
+      "cancelRequested": "Stornierung angefragt"
+    },
+    "cancellation": {
+      "title": "Stornierungsanfrage",
+      "buyer": "Käufer",
+      "reason": "Grund",
+      "requestedAt": "Angefragt am",
+      "respondBy": "Antworten bis",
+      "closedOn": "Geschlossen",
+      "closeReason": "Schließungsgrund",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "Käufer möchte stornieren",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Käufer hat storniert oder Adressproblem",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Nicht auf Lager oder nicht lieferbar",
+        "other": "Anderer Grund"
+      },
+      "bucket": {
+        "action_overdue": "Überfällig",
+        "action_due": "Antwort fällig",
+        "in_progress": "In Bearbeitung",
+        "closed": "Geschlossen",
+        "unconfirmed": "Zuletzt nicht bestätigt"
+      },
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "confirm": {
+        "approve": {
+          "title": "Stornierung genehmigen?",
+          "body": "Die Bestellung wird storniert und eBay erstattet dem Käufer den Betrag. Das lässt sich nicht rückgängig machen.",
+          "confirm": "Stornierung genehmigen"
+        },
+        "reject": {
+          "title": "Stornierung ablehnen?",
+          "body": "eBay erfährt, dass Sie ablehnen, und die Bestellung muss versendet werden.",
+          "bodyWithTracking": "eBay erfährt, dass Sie ablehnen, und die Sendungsnummer {{tracking}} wird mitgeschickt. Die Bestellung muss versendet werden.",
+          "confirm": "Stornierung ablehnen"
+        }
+      },
+      "done": {
+        "approve": "Stornierung genehmigt. eBay erstattet dem Käufer den Betrag.",
+        "reject": "Stornierung abgelehnt."
+      },
+      "actionsOff": "Stornierungen in der App sind deaktiviert — antworten Sie auf eBay.",
+      "errors": {
+        "actionsDisabled": "Stornierungsaktionen in der App sind auf dieser Plattform deaktiviert. Beantworten Sie die Anfrage auf eBay.",
+        "actionNotAvailable": "eBay bietet diese Aktion für die Anfrage nicht mehr an. Aktualisieren Sie die Seite und prüfen Sie, was jetzt aussteht.",
+        "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Stornierungsaktionen pausiert. Begleichen Sie die Rechnung auf der Seite Abrechnung.",
+        "ebayRejected": "eBay hat diese Aktion abgelehnt. Öffnen Sie die Anfrage auf eBay, um den Grund zu sehen.",
+        "unavailable": "eBay ist nicht erreichbar. Versuchen Sie es gleich noch einmal.",
+        "sandbox": "Stornierungsaktionen sind in der eBay-Sandbox nicht verfügbar.",
+        "notFound": "Diese Stornierungsanfrage wurde nicht gefunden."
+      }
     },
     "note": {
       "title": "Ihre Notiz",

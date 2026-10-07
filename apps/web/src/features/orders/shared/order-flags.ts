@@ -1,4 +1,4 @@
-import { OrderShipByState, type OrderDto } from '@repo/shared';
+import { CancellationBucket, OrderShipByState, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
 import type { OrderCardStatBadge } from './OrderCard';
@@ -10,7 +10,7 @@ import type { OrderCardStatBadge } from './OrderCard';
  * the card and the table row can never show different chips for one order.
  */
 export function orderFlagBadges(
-  order: Pick<OrderDto, 'shipByState' | 'shipByDate' | 'ebayRefundedAmount'>,
+  order: Pick<OrderDto, 'shipByState' | 'shipByDate' | 'ebayRefundedAmount'> & Partial<Pick<OrderDto, 'cancellation'>>,
   t: TFunction,
   formatCurrency: (value: number) => string,
   formatDay?: (value: string) => string
@@ -26,6 +26,11 @@ export function orderFlagBadges(
           : t('orders.flags.dueSoon'),
       variant: 'warning',
     });
+  }
+  if (order.cancellation?.bucket === CancellationBucket.ACTION_OVERDUE) {
+    badges.push({ label: t('orders.flags.cancelRequested'), variant: 'error' });
+  } else if (order.cancellation?.bucket === CancellationBucket.ACTION_DUE) {
+    badges.push({ label: t('orders.flags.cancelRequested'), variant: 'warning' });
   }
   if (order.ebayRefundedAmount !== null && order.ebayRefundedAmount !== undefined && order.ebayRefundedAmount > 0) {
     badges.push({

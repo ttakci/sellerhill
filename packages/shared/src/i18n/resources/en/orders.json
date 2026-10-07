@@ -396,7 +396,59 @@
       "dueSoon": "Ship-by date close",
       "dueSoonBy": "Ship by {{date}}",
       "refunded": "Refunded",
-      "refundedAmount": "Refunded: {{amount}}"
+      "refundedAmount": "Refunded: {{amount}}",
+      "cancelRequested": "Cancellation requested"
+    },
+    "cancellation": {
+      "title": "Cancellation request",
+      "buyer": "Buyer",
+      "reason": "Reason",
+      "requestedAt": "Requested",
+      "respondBy": "Respond by",
+      "closedOn": "Closed",
+      "closeReason": "Close reason",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "Buyer asked to cancel",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Buyer cancelled or has an address problem",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfil",
+        "other": "Other reason"
+      },
+      "bucket": {
+        "action_overdue": "Overdue",
+        "action_due": "Answer due",
+        "in_progress": "In progress",
+        "closed": "Closed",
+        "unconfirmed": "Not confirmed recently"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirm": {
+        "approve": {
+          "title": "Approve the cancellation?",
+          "body": "The order is cancelled and eBay refunds the buyer. This cannot be undone.",
+          "confirm": "Approve cancellation"
+        },
+        "reject": {
+          "title": "Reject the cancellation?",
+          "body": "eBay is told you decline, and the order has to be shipped.",
+          "bodyWithTracking": "eBay is told you decline, and the tracking number {{tracking}} is sent along. The order has to be shipped.",
+          "confirm": "Reject cancellation"
+        }
+      },
+      "done": {
+        "approve": "Cancellation approved. eBay will refund the buyer.",
+        "reject": "Cancellation rejected."
+      },
+      "actionsOff": "In-app cancellation actions are off — answer on eBay.",
+      "errors": {
+        "actionsDisabled": "In-app cancellation actions are switched off on this platform. Answer the request on eBay.",
+        "actionNotAvailable": "eBay no longer offers this action on the request. Refresh and check what is waiting now.",
+        "suspended": "Your subscription is suspended, so cancellation actions are paused. Settle the invoice on the Billing page.",
+        "ebayRejected": "eBay refused this action. Open the request on eBay to see why.",
+        "unavailable": "eBay could not be reached. Try again in a moment.",
+        "sandbox": "Cancellation actions are not available on the eBay sandbox.",
+        "notFound": "This cancellation request was not found."
+      }
     },
     "note": {
       "title": "Your note",

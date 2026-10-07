@@ -1,9 +1,18 @@
 // apps/api/src/modules/ebay-returns/return-store-scope.ts
 //
 // The ONE store-scope rule for seller-facing return reads, shared by the
-// Returns page (`EbayReturnsService`) and the Action Center's return item.
+// Returns page (`EbayReturnsService`) and the Action Center's return item —
+// and the same rule for cancellation requests (orders, Action Center).
 
-import { ACTIONABLE_RETURN_BUCKETS, buildReturnBucketSql, EbayAccountStatus, ReturnBucket } from '@repo/shared';
+import {
+  ACTIONABLE_CANCELLATION_BUCKETS,
+  ACTIONABLE_RETURN_BUCKETS,
+  buildCancellationBucketSql,
+  buildReturnBucketSql,
+  CancellationBucket,
+  EbayAccountStatus,
+  ReturnBucket,
+} from '@repo/shared';
 
 const SQL_ALIAS = /^[a-z_][a-z0-9_]*$/;
 
@@ -33,4 +42,15 @@ export function buildStoreScopedReturnBucketSql(alias: string, freshnessHours: n
 /** TypeScript twin of the store scope in `buildStoreScopedReturnBucketSql`. */
 export function scopeReturnBucketToStore(bucket: ReturnBucket, storeActive: boolean | null | undefined): ReturnBucket {
   return storeActive !== true && ACTIONABLE_RETURN_BUCKETS.includes(bucket) ? ReturnBucket.UNCONFIRMED : bucket;
+}
+
+/**
+ * The cancellation twin of `buildStoreScopedReturnBucketSql`, over an
+ * `ebay_cancellations` alias: a disconnected store's open request cannot be
+ * answered from here, so its action bucket reads as UNCONFIRMED.
+ */
+export function buildStoreScopedCancellationBucketSql(alias: string, freshnessHours: number): string {
+  const bucket = buildCancellationBucketSql(alias, freshnessHours);
+  const actionable = ACTIONABLE_CANCELLATION_BUCKETS.map((b) => `'${b}'`).join(', ');
+  return `CASE WHEN (${bucket}) IN (${actionable}) AND NOT ${buildReturnStoreActiveSql(alias)} THEN '${CancellationBucket.UNCONFIRMED}' ELSE (${bucket}) END`;
 }

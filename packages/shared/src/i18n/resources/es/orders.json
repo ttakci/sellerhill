@@ -396,7 +396,59 @@
       "dueSoon": "Plazo de envío próximo",
       "dueSoonBy": "Enviar antes del {{date}}",
       "refunded": "Reembolsado",
-      "refundedAmount": "Reembolsado: {{amount}}"
+      "refundedAmount": "Reembolsado: {{amount}}",
+      "cancelRequested": "Cancelación solicitada"
+    },
+    "cancellation": {
+      "title": "Solicitud de cancelación",
+      "buyer": "Comprador",
+      "reason": "Motivo",
+      "requestedAt": "Solicitada el",
+      "respondBy": "Responder antes del",
+      "closedOn": "Cerrada",
+      "closeReason": "Motivo del cierre",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "El comprador pidió cancelar",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "El comprador canceló o hay un problema de dirección",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Sin stock o no se puede cumplir",
+        "other": "Otro motivo"
+      },
+      "bucket": {
+        "action_overdue": "Vencida",
+        "action_due": "Respuesta pendiente",
+        "in_progress": "En curso",
+        "closed": "Cerrada",
+        "unconfirmed": "Sin confirmar recientemente"
+      },
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "confirm": {
+        "approve": {
+          "title": "¿Aprobar la cancelación?",
+          "body": "El pedido se cancela y eBay reembolsa al comprador. No se puede deshacer.",
+          "confirm": "Aprobar cancelación"
+        },
+        "reject": {
+          "title": "¿Rechazar la cancelación?",
+          "body": "Se informa a eBay de que la rechazas y el pedido debe enviarse.",
+          "bodyWithTracking": "Se informa a eBay de que la rechazas y se envía también el número de seguimiento {{tracking}}. El pedido debe enviarse.",
+          "confirm": "Rechazar cancelación"
+        }
+      },
+      "done": {
+        "approve": "Cancelación aprobada. eBay reembolsará al comprador.",
+        "reject": "Cancelación rechazada."
+      },
+      "actionsOff": "Las acciones de cancelación en la app están desactivadas: responde en eBay.",
+      "errors": {
+        "actionsDisabled": "Las acciones de cancelación en la app están desactivadas en esta plataforma. Responde a la solicitud en eBay.",
+        "actionNotAvailable": "eBay ya no ofrece esta acción en la solicitud. Actualiza y revisa lo que está pendiente ahora.",
+        "suspended": "Tu suscripción está suspendida, por lo que las acciones de cancelación están en pausa. Salda la factura en la página de Facturación.",
+        "ebayRejected": "eBay rechazó esta acción. Abre la solicitud en eBay para ver el motivo.",
+        "unavailable": "No se pudo contactar con eBay. Inténtalo de nuevo en un momento.",
+        "sandbox": "Las acciones de cancelación no están disponibles en el sandbox de eBay.",
+        "notFound": "No se encontró esta solicitud de cancelación."
+      }
     },
     "note": {
       "title": "Tu nota",

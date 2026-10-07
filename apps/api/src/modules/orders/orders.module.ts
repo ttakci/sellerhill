@@ -5,6 +5,7 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { BillingModule } from '../billing/billing.module';
 import { BuyerMessagingModule } from '../buyer-messaging/buyer-messaging.module';
 import { EbayModule } from '../ebay/ebay.module';
+import { EbayReturnsModule } from '../ebay-returns/ebay-returns.module';
 import { ProductsModule } from '../products/products.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
@@ -24,6 +25,8 @@ import { StockSyncQueueService } from './stock-sync-queue.service';
     BillingModule,
     BuyerMessagingModule,
     EbayModule,
+    // The cancellation sweep's interval (freshness of OrderDto.cancellation).
+    EbayReturnsModule,
     ProductsModule,
     StoreSettingsModule,
     BullModule.registerQueue(

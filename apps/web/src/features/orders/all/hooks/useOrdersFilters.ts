@@ -17,12 +17,13 @@ const isStage = (value: string): value is OrderStage => (Object.values(OrderStag
  * at once. One select, because a seller looks for one of them at a time.
  */
 const FLAG_REFUNDED = 'refunded';
+const FLAG_CANCEL_REQUESTED = 'cancel_requested';
 
 const isShipByState = (value: string): value is OrderShipByState =>
   (Object.values(OrderShipByState) as string[]).includes(value);
 
 const readFlag = (value: string | null): string =>
-  value && (isShipByState(value) || value === FLAG_REFUNDED) ? value : '';
+  value && (isShipByState(value) || value === FLAG_REFUNDED || value === FLAG_CANCEL_REQUESTED) ? value : '';
 
 /**
  * The listing-link filter (`?tracking=`). The list opens on TRACKED orders —
@@ -59,7 +60,10 @@ export function useOrdersFilters() {
   const stageFromUrl = searchParams.get('stage') ?? '';
   const tabFromUrl = searchParams.get('tab') ?? '';
   const trackingFromUrl = readTracking(searchParams.get('tracking'));
-  const flagFromUrl = readFlag(searchParams.get('flag'));
+  // The Pending Actions link is `?cancelRequested=true`; it means the same as `?flag=cancel_requested`.
+  const flagFromUrl = readFlag(
+    searchParams.get('cancelRequested') === 'true' ? FLAG_CANCEL_REQUESTED : searchParams.get('flag')
+  );
   /** True when the URL already expresses an intent — a tab, a stage, or any
    *  deep-link filter (the dashboard's "view all" carries dates + tracking).
    *  Only a bare `/orders` may be opened on "Needs action" by the container. */
@@ -156,6 +160,7 @@ export function useOrdersFilters() {
       { value: OrderShipByState.LATE, label: t('orders.flags.late') },
       { value: OrderShipByState.DUE_SOON, label: t('orders.flags.dueSoon') },
       { value: FLAG_REFUNDED, label: t('orders.flags.refunded') },
+      { value: FLAG_CANCEL_REQUESTED, label: t('orders.flags.cancelRequested') },
     ],
     [t]
   );
@@ -207,6 +212,7 @@ export function useOrdersFilters() {
       needsAction: !stage && tab === OrderStageTab.ACTION ? true : undefined,
       shipBy: isShipByState(flag) ? flag : undefined,
       hasRefund: flag === FLAG_REFUNDED ? true : undefined,
+      cancelRequested: flag === FLAG_CANCEL_REQUESTED ? true : undefined,
       isTracked:
         trackingState === TRACKING.TRACKED ? true : trackingState === TRACKING.UNTRACKED ? false : undefined,
       // Without a picked sort the API floats the stages that need the seller
@@ -282,6 +288,7 @@ export function useOrdersFilters() {
       setFlag(v);
       setPage(1);
       const next = new URLSearchParams(searchParams);
+      next.delete('cancelRequested');
       if (v) {
         next.set('flag', v);
       } else {

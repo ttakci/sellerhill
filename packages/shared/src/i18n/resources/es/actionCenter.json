@@ -138,6 +138,12 @@
         "description_other": "{{count}} devoluciones tienen un paso que eBay espera de ti. Responde en eBay antes de las fechas límite que aparecen en la página Devoluciones.",
         "action": "Ver devoluciones"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Solicitud de cancelación del comprador",
+        "description_one": "{{count}} comprador pidió cancelar un pedido: apruébalo o recházalo aquí antes del plazo de eBay",
+        "description_other": "{{count}} compradores pidieron cancelar pedidos: apruébalos o recházalos aquí antes del plazo de eBay",
+        "action": "Revisar solicitudes"
+      },
       "ebay_account_disconnected": {
         "title": "Una tienda de eBay perdió su conexión",
         "description_one": "{{count}} tienda ya no está autorizada. La sincronización de pedidos, el repricing y la publicación están detenidos para ella hasta que vuelvas a conectarla.",

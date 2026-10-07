@@ -138,6 +138,12 @@
         "description_other": "{{count}} de retururi au un pas pe care eBay îl așteaptă de la dvs. Răspundeți pe eBay înainte de termenele afișate pe pagina Retururi.",
         "action": "Vezi retururile"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Cerere de anulare de la cumpărător",
+        "description_one": "{{count}} cumpărător a cerut anularea unei comenzi — aprobă-o sau respinge-o aici înainte de termenul eBay",
+        "description_other": "{{count}} cumpărători au cerut anularea unor comenzi — aprobă-le sau respinge-le aici înainte de termenul eBay",
+        "action": "Verifică cererile"
+      },
       "ebay_account_disconnected": {
         "title": "Un magazin eBay și-a pierdut conexiunea",
         "description_one": "{{count}} magazin nu mai este autorizat. Sincronizarea comenzilor, repretul și publicarea sunt oprite pentru el până la reconectare.",

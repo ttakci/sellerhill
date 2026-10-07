@@ -127,6 +127,12 @@
         "description_other": "{{count}} iadede eBay'in sizden beklediği bir adım var. İadeler sayfasında görünen son tarihlerden önce eBay üzerinden yanıt verin.",
         "action": "İadeleri görüntüle"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Alıcı iptal talebi",
+        "description_one": "{{count}} alıcı bir siparişi iptal etmek istedi — eBay'in son tarihinden önce buradan onaylayın veya reddedin",
+        "description_other": "{{count}} alıcı sipariş iptali istedi — eBay'in son tarihinden önce buradan onaylayın veya reddedin",
+        "action": "Talepleri incele"
+      },
       "ebay_account_disconnected": {
         "title": "Bir eBay mağazasının bağlantısı koptu",
         "description_one": "{{count}} mağazanın yetkisi düştü. Yeniden bağlayana kadar o mağazada sipariş senkronu, fiyatlama ve yayınlama durdu.",

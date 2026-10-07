@@ -138,6 +138,12 @@
         "description_other": "{{count}} resi hanno un passaggio che eBay si aspetta da te. Rispondi su eBay prima delle scadenze indicate nella pagina Resi.",
         "action": "Vedi i resi"
       },
+      "cancel_request_seller_action_due": {
+        "title": "Richiesta di annullamento dell'acquirente",
+        "description_one": "{{count}} acquirente ha chiesto di annullare un ordine: approvalo o rifiutalo qui prima della scadenza di eBay",
+        "description_other": "{{count}} acquirenti hanno chiesto di annullare ordini: approvali o rifiutali qui prima della scadenza di eBay",
+        "action": "Esamina le richieste"
+      },
       "ebay_account_disconnected": {
         "title": "Un negozio eBay ha perso la connessione",
         "description_one": "{{count}} negozio non è più autorizzato. Sincronizzazione degli ordini, riprezzamento e pubblicazione sono fermi per questo negozio finché non lo ricolleghi.",

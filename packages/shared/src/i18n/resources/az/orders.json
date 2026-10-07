@@ -396,7 +396,59 @@
       "dueSoon": "Göndərmə müddəti yaxınlaşır",
       "dueSoonBy": "Son göndərmə: {{date}}",
       "refunded": "Geri ödənilib",
-      "refundedAmount": "Geri ödənilib: {{amount}}"
+      "refundedAmount": "Geri ödənilib: {{amount}}",
+      "cancelRequested": "Ləğv sorğusu"
+    },
+    "cancellation": {
+      "title": "Ləğv sorğusu",
+      "buyer": "Alıcı",
+      "reason": "Səbəb",
+      "requestedAt": "Sorğu tarixi",
+      "respondBy": "Cavab müddəti",
+      "closedOn": "Bağlanıb",
+      "closeReason": "Bağlanma səbəbi",
+      "reasons": {
+        "BUYER_ASKED_CANCEL": "Alıcı ləğv etməyi xahiş etdi",
+        "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Alıcı ləğv etdi və ya ünvan problemi var",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Stokda yoxdur və ya yerinə yetirmək mümkün deyil",
+        "other": "Digər səbəb"
+      },
+      "bucket": {
+        "action_overdue": "Gecikib",
+        "action_due": "Cavab gözlənilir",
+        "in_progress": "Davam edir",
+        "closed": "Bağlanıb",
+        "unconfirmed": "Son vaxtlar təsdiqlənməyib"
+      },
+      "approve": "Təsdiqlə",
+      "reject": "Rədd et",
+      "confirm": {
+        "approve": {
+          "title": "Ləğv təsdiqlənsin?",
+          "body": "Sifariş ləğv edilir və eBay alıcıya geri ödəniş edir. Bunu geri qaytarmaq olmaz.",
+          "confirm": "Ləğvi təsdiqlə"
+        },
+        "reject": {
+          "title": "Ləğv rədd edilsin?",
+          "body": "eBay-ə imtina etdiyiniz bildirilir və sifariş göndərilməlidir.",
+          "bodyWithTracking": "eBay-ə imtina etdiyiniz bildirilir və {{tracking}} izləmə nömrəsi də göndərilir. Sifariş göndərilməlidir.",
+          "confirm": "Ləğvi rədd et"
+        }
+      },
+      "done": {
+        "approve": "Ləğv təsdiqləndi. eBay alıcıya geri ödəniş edəcək.",
+        "reject": "Ləğv rədd edildi."
+      },
+      "actionsOff": "Tətbiq daxilində ləğv əməliyyatları söndürülüb — cavabı eBay-də verin.",
+      "errors": {
+        "actionsDisabled": "Tətbiq daxilində ləğv əməliyyatları bu platformada söndürülüb. Sorğuya eBay-də cavab verin.",
+        "actionNotAvailable": "eBay artıq bu sorğuda bu əməliyyatı təklif etmir. Səhifəni yeniləyin və indi gözləyənləri yoxlayın.",
+        "suspended": "Abunəliyiniz dayandırılıb, buna görə ləğv əməliyyatları durdurulub. Hesab-fakturanı Ödəniş səhifəsində ödəyin.",
+        "ebayRejected": "eBay bu əməliyyatı rədd etdi. Səbəbi görmək üçün sorğunu eBay-də açın.",
+        "unavailable": "eBay-ə qoşulmaq mümkün olmadı. Bir azdan yenidən cəhd edin.",
+        "sandbox": "Ləğv əməliyyatları eBay sandbox mühitində əlçatan deyil.",
+        "notFound": "Bu ləğv sorğusu tapılmadı."
+      }
     },
     "note": {
       "title": "Qeydiniz",
