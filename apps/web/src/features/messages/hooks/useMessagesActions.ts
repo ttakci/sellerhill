@@ -38,7 +38,6 @@ export function useMessagesActions({
   pageIds,
   scopeKey,
   openConversation,
-  onMarkedUnread,
 }: MessagesActionsInput) {
   const { i18n } = useTranslation(['messages', 'translation']);
   const { showMessage, closeMessage } = useUI();
@@ -144,30 +143,21 @@ export function useMessagesActions({
     [ebayAccountId, typeOf, conversationId, bulkConversationStatus, openConversation, showError],
   );
 
-  const applyRead = useCallback(
-    async (ids: string[], read: boolean): Promise<void> => {
+  const applyMarkRead = useCallback(
+    async (ids: string[]): Promise<void> => {
       if (!ebayAccountId || ids.length === 0) {
         return;
       }
       try {
         await Promise.all(
-          ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type: typeOf(id), read }).unwrap()),
+          ids.map((id) => setConversationRead({ conversationId: id, ebayAccountId, type: typeOf(id), read: true }).unwrap()),
         );
         setSelected(new Set());
-        if (!read) {
-          // Reopening one of these must mark it read again.
-          onMarkedUnread(ids);
-        }
-        // Marking the open thread unread returns to the list — staying on it
-        // would leave a thread on screen that the inbox now calls unread.
-        if (!read && conversationId && ids.includes(conversationId)) {
-          openConversation(null);
-        }
       } catch (error) {
         showError(error as MessagesApiError);
       }
     },
-    [ebayAccountId, typeOf, conversationId, setConversationRead, openConversation, onMarkedUnread, showError],
+    [ebayAccountId, typeOf, setConversationRead, showError],
   );
 
   /** Deleting has no undo here, so it asks first. */
@@ -216,7 +206,7 @@ export function useMessagesActions({
     toggleAll,
     allSelected,
     applyStatus,
-    applyRead,
+    applyMarkRead,
     confirmDelete,
     handleReconnect,
     isReconnecting,

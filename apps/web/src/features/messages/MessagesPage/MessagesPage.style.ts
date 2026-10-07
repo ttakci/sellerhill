@@ -137,7 +137,8 @@ export const RailPane = styled.div`
   gap: ${tkn('spacing.md')};
   min-width: 0;
   min-height: 0;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  /* The folders start below the list header row's line, not flush with the card's top edge. */
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.sm')} ${tkn('spacing.md')};
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: ${tkn('colors.border.control')} transparent;

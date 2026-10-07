@@ -148,13 +148,6 @@ export function useMessagesInbox(state: MessagesUrlState) {
       });
   }, [conversationId, ebayAccountId, messagingEnabled, hasUnread, threadType, setConversationRead]);
 
-  /** Marked unread by the seller: the next open of these must mark them read again. */
-  const forgetMarkedRead = useCallback((ids: string[]) => {
-    for (const id of ids) {
-      markedRead.current.delete(id);
-    }
-  }, []);
-
   /* ─── keep the thread pinned to its newest message ─── */
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -182,6 +175,5 @@ export function useMessagesInbox(state: MessagesUrlState) {
     threadType,
     isMine,
     scrollRef,
-    forgetMarkedRead,
   };
 }

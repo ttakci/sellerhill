@@ -21,8 +21,11 @@ const REQUEST_TIMEOUT_MS = 20_000;
 const DEFAULT_REST_BASE = 'https://api.ebay.com';
 /** eBay's `reference_type` / `reference.referenceType` — the only kind we send is a listing. */
 const LISTING_REFERENCE_TYPE = 'LISTING';
-/** `bulk_update_conversation`'s per-entry success value. */
-const BULK_UPDATE_SUCCESSFUL = 'SUCCESSFUL';
+/**
+ * `bulk_update_conversation`'s per-entry success value — `conversationsResponse[].updateStatus`
+ * is "SUCCESS or FAILURE" (docs/ebay-reference/commerce-message-v1-oas3.json).
+ */
+const BULK_UPDATE_SUCCESS = 'SUCCESS';
 
 /** eBay answered a Message API call with an error — carries its numeric error ids. */
 export class EbayMessageApiError extends Error {
@@ -341,7 +344,8 @@ export class EbayMessageClient {
 
   /**
    * Sets one status on several conversations. Any id eBay did not report back
-   * as SUCCESSFUL counts as failed — an absent entry is never a success.
+   * as SUCCESS counts as failed — an absent entry is never a success, unless
+   * eBay's own `conversationsMetadata` says every requested update succeeded.
    */
   async bulkUpdateStatus(
     token: string,
@@ -363,15 +367,23 @@ export class EbayMessageClient {
     );
     const data = isRecord(res.data) ? res.data : {};
     const ok = new Set<string>();
-    for (const entry of Array.isArray(data.conversations) ? data.conversations : []) {
-      if (isRecord(entry) && entry.updateStatus === BULK_UPDATE_SUCCESSFUL && typeof entry.conversationId === 'string') {
+    for (const entry of Array.isArray(data.conversationsResponse) ? data.conversationsResponse : []) {
+      if (isRecord(entry) && entry.updateStatus === BULK_UPDATE_SUCCESS && typeof entry.conversationId === 'string') {
         ok.add(entry.conversationId);
       }
     }
-    return {
-      succeeded: ids.filter((id) => ok.has(id)),
-      failed: ids.filter((id) => !ok.has(id)),
-    };
+    const meta = isRecord(data.conversationsMetadata) ? data.conversationsMetadata : {};
+    if (ok.size === 0 && meta.updateFailureCount === 0 && meta.updateSuccessCount === ids.length) {
+      ids.forEach((id) => ok.add(id));
+    }
+    const failed = ids.filter((id) => !ok.has(id));
+    if (failed.length > 0) {
+      // Ids and counts only — never a body; the next failure is then readable from the log.
+      this.logger.warn(
+        `bulk_update_conversation ${status}: ${failed.length}/${ids.length} not confirmed (metadata ${JSON.stringify(meta)}, failed ${failed.join(',')})`
+      );
+    }
+    return { succeeded: ids.filter((id) => ok.has(id)), failed };
   }
 
   private base(): string {

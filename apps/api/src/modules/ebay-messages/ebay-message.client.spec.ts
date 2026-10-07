@@ -223,13 +223,16 @@ describe('EbayMessageClient', () => {
     expect(budget.acquire).toHaveBeenCalledWith(EbayApiResource.MESSAGE, EbayCallPriority.INTERACTIVE);
   });
 
+  // Response shape from eBay's commerce_message_v1_oas3.json (BulkUpdateConversationsResponse):
+  // `conversationsResponse[].updateStatus` is SUCCESS / FAILURE, plus `conversationsMetadata` counts.
   it('bulk-updates status and splits succeeded from failed', async () => {
     mockPost.mockResolvedValue({
       status: 200,
       data: {
-        conversations: [
-          { conversationId: 'c1', updateStatus: 'SUCCESSFUL' },
-          { conversationId: 'c2', updateStatus: 'FAILED' },
+        conversationsMetadata: { totalConversationsCount: 3, updateSuccessCount: 1, updateFailureCount: 1 },
+        conversationsResponse: [
+          { conversationId: 'c1', updateStatus: 'SUCCESS' },
+          { conversationId: 'c2', updateStatus: 'FAILURE' },
         ],
       },
     });
@@ -252,6 +255,21 @@ describe('EbayMessageClient', () => {
     // c3 was not reported back — counted as failed, never as success.
     expect(result).toEqual({ succeeded: ['c1'], failed: ['c2', 'c3'] });
     expect(budget.acquire).toHaveBeenCalledWith(EbayApiResource.MESSAGE, EbayCallPriority.INTERACTIVE);
+  });
+
+  it('reads an all-success bulk answer that carries only the metadata counts', async () => {
+    mockPost.mockResolvedValue({
+      status: 200,
+      data: { conversationsMetadata: { totalConversationsCount: 2, updateSuccessCount: 2, updateFailureCount: 0 } },
+    });
+    const result = await client.bulkUpdateStatus(
+      'tok',
+      EbayConversationType.FROM_MEMBERS,
+      ['c1', 'c2'],
+      EbayConversationStatus.DELETE,
+      EbayCallPriority.INTERACTIVE
+    );
+    expect(result).toEqual({ succeeded: ['c1', 'c2'], failed: [] });
   });
 
   it('turns an HTTP error into an EbayMessageApiError carrying the eBay ids', async () => {

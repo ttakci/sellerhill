@@ -128,9 +128,8 @@ export const MessagesPageContainer = (): React.ReactElement => {
     pageIds,
     scopeKey: `${inbox.ebayAccountId}|${type}|${folder}|${page}`,
     openConversation,
-    onMarkedUnread: inbox.forgetMarkedRead,
   });
-  const { selectedIds, applyRead, applyStatus, confirmDelete } = actions;
+  const { selectedIds, applyMarkRead, applyStatus, confirmDelete } = actions;
 
   /* Blocking mutations only — the initial list/thread fetch shows its own state. */
   useLoading(actions.isReplying || actions.isBulkUpdating);
@@ -198,7 +197,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         id: 'read',
         label: t('messages.actions.markRead'),
         icon: 'mail-open',
-        onClick: () => void applyRead(selectedIds, true),
+        onClick: () => void applyMarkRead(selectedIds),
       },
       {
         id: 'archive',
@@ -213,7 +212,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         onClick: () => confirmDelete(selectedIds),
       },
     ],
-    [t, selectedIds, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]
+    [t, selectedIds, applyMarkRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]
   );
 
   const pagination = useMemo<MessagesPagination | null>(
@@ -275,14 +274,10 @@ export const MessagesPageContainer = (): React.ReactElement => {
     if (!conversationId) {
       return [];
     }
+    // No "mark unread" (operator decision, 2026-10-07): eBay keeps a seller-marked
+    // thread out of its own UNREAD filter, so the action changed no folder or count.
     const ids = [conversationId];
     return [
-      {
-        id: 'unread',
-        label: t('messages.actions.markUnread'),
-        icon: 'mail',
-        onClick: () => void applyRead(ids, false),
-      },
       {
         id: 'archive',
         label: archiveLabel,
@@ -296,7 +291,7 @@ export const MessagesPageContainer = (): React.ReactElement => {
         onClick: () => confirmDelete(ids),
       },
     ];
-  }, [conversationId, t, applyRead, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]);
+  }, [conversationId, t, applyStatus, confirmDelete, archiveLabel, archiveIcon, archiveTarget]);
 
   /* ─── folders: the rail (≥ lg) and its compact stand-in (< lg) ─── */
 
@@ -330,8 +325,9 @@ export const MessagesPageContainer = (): React.ReactElement => {
     ];
     return [
       {
+        // No heading (operator request): the inbox rows start the rail, as on eBay.
         key: 'inbox',
-        label: t('messages.folders.inbox'),
+        label: '',
         items: TYPES.flatMap((groupType) => [
           item(groupType, MessagesFolder.ALL, t(TYPE_LABEL_KEY[groupType]), TYPE_ICON[groupType]),
           item(groupType, MessagesFolder.UNREAD, t(UNREAD_LABEL_KEY[groupType]), FOLDER_ICON[MessagesFolder.UNREAD]),
