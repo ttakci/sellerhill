@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "अकाउंट निष्क्रिय करें",
     "saveChanges": "सभी बदलाव सेव करें",
-    "storeOwner": "स्टोर मालिक"
+    "storeOwner": "स्टोर मालिक",
+    "errors": {
+      "invalidTimezone": "यह समय क्षेत्र पहचाना नहीं गया।"
+    }
   }
 }

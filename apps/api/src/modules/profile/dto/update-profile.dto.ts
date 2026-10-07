@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { type UpdateProfileRequest } from '@repo/shared';
-import { IsString, IsOptional, Matches, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, Matches, MaxLength, ValidateIf } from 'class-validator';
 
 export class UpdateProfileDto implements UpdateProfileRequest {
   @ApiPropertyOptional({ description: 'User first name', example: 'John' })
@@ -49,4 +49,10 @@ export class UpdateProfileDto implements UpdateProfileRequest {
   @IsOptional()
   @IsString()
   postalCode?: string;
+
+  @ApiPropertyOptional({ description: 'IANA time zone', example: 'Europe/Istanbul' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  timezone?: string;
 }

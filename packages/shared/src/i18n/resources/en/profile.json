@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "Deactivate Account",
     "saveChanges": "Save All Changes",
-    "storeOwner": "Store Owner"
+    "storeOwner": "Store Owner",
+    "errors": {
+      "invalidTimezone": "This time zone is not recognised."
+    }
   }
 }

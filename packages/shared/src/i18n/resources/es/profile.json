@@ -24,6 +24,9 @@
     "instagram": "URL de Instagram",
     "deactivateAccount": "Desactivar cuenta",
     "saveChanges": "Guardar todos los cambios",
-    "storeOwner": "Propietario de la tienda"
+    "storeOwner": "Propietario de la tienda",
+    "errors": {
+      "invalidTimezone": "No se reconoce esta zona horaria."
+    }
   }
 }

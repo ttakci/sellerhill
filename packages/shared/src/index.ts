@@ -11,6 +11,7 @@ export {
 export type { SupportedLocale } from './domain/common/common.constants';
 export { COUNTRY_CODES, isValidCountryCode, normalizeCountryCode } from './domain/common/country-codes';
 export type { CountryCode } from './domain/common/country-codes';
+export { DEFAULT_USER_TIMEZONE } from './domain/common/timezone';
 
 // Utilities
 export { generateRequestId, getRequestIdFromHeaders, isValidRequestId } from './utils/requestId';

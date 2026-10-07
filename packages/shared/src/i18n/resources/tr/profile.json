@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "Hesabı Devre Dışı Bırak",
     "saveChanges": "Tüm Değişiklikleri Kaydet",
-    "storeOwner": "Mağaza Sahibi"
+    "storeOwner": "Mağaza Sahibi",
+    "errors": {
+      "invalidTimezone": "Bu saat dilimi tanınmıyor."
+    }
   }
 }

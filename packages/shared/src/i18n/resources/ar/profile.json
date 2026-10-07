@@ -24,6 +24,9 @@
     "instagram": "رابط Instagram",
     "deactivateAccount": "تعطيل الحساب",
     "saveChanges": "حفظ جميع التغييرات",
-    "storeOwner": "صاحب المتجر"
+    "storeOwner": "صاحب المتجر",
+    "errors": {
+      "invalidTimezone": "المنطقة الزمنية هذه غير معروفة."
+    }
   }
 }

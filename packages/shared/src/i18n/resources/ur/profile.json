@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "اکاؤنٹ غیر فعال کریں",
     "saveChanges": "تمام تبدیلیاں محفوظ کریں",
-    "storeOwner": "سٹور کے مالک"
+    "storeOwner": "سٹور کے مالک",
+    "errors": {
+      "invalidTimezone": "یہ ٹائم زون پہچانا نہیں گیا۔"
+    }
   }
 }

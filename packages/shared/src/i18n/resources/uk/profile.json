@@ -24,6 +24,9 @@
     "instagram": "URL Instagram",
     "deactivateAccount": "Деактивувати акаунт",
     "saveChanges": "Зберегти всі зміни",
-    "storeOwner": "Власник магазину"
+    "storeOwner": "Власник магазину",
+    "errors": {
+      "invalidTimezone": "Цей часовий пояс не розпізнано."
+    }
   }
 }

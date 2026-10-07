@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "অ্যাকাউন্ট নিষ্ক্রিয় করুন",
     "saveChanges": "সব পরিবর্তন সংরক্ষণ করুন",
-    "storeOwner": "স্টোরের মালিক"
+    "storeOwner": "স্টোরের মালিক",
+    "errors": {
+      "invalidTimezone": "এই টাইম জোনটি চেনা যায়নি।"
+    }
   }
 }

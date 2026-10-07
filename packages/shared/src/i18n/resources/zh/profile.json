@@ -24,6 +24,9 @@
     "instagram": "Instagram URL",
     "deactivateAccount": "停用账号",
     "saveChanges": "保存所有更改",
-    "storeOwner": "店主"
+    "storeOwner": "店主",
+    "errors": {
+      "invalidTimezone": "无法识别此时区。"
+    }
   }
 }

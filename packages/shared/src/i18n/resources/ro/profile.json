@@ -24,6 +24,9 @@
     "instagram": "URL Instagram",
     "deactivateAccount": "Dezactivează contul",
     "saveChanges": "Salvează toate modificările",
-    "storeOwner": "Proprietar de magazin"
+    "storeOwner": "Proprietar de magazin",
+    "errors": {
+      "invalidTimezone": "Acest fus orar nu este recunoscut."
+    }
   }
 }

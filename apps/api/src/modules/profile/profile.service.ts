@@ -1,7 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UserStatus, type ProfileDto, type UpdateProfileRequest } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { TimezoneService } from '../../common/timezone/timezone.service';
 
 interface UserEntity {
   id: string;
@@ -15,6 +16,7 @@ interface UserEntity {
   country: string | null;
   city_state: string | null;
   postal_code: string | null;
+  timezone: string | null;
   email_verified: boolean;
   status: UserStatus;
   created_at: Date;
@@ -25,11 +27,14 @@ interface UserEntity {
 export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly timezoneService: TimezoneService
+  ) {}
 
   async getProfile(userId: string): Promise<ProfileDto> {
     const users = await this.databaseService.query<UserEntity>(
-      'SELECT id, first_name, last_name, email, phone_number, avatar_url, job_title, bio, country, city_state, postal_code, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, first_name, last_name, email, phone_number, avatar_url, job_title, bio, country, city_state, postal_code, timezone, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
       [userId]
     );
 
@@ -41,6 +46,10 @@ export class ProfileService {
   }
 
   async updateProfile(userId: string, request: UpdateProfileRequest): Promise<ProfileDto> {
+    if (request.timezone !== undefined && !(await this.timezoneService.isValid(request.timezone))) {
+      throw new BadRequestException('profile.errors.invalidTimezone');
+    }
+
     const updates: string[] = [];
     const values: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
@@ -54,7 +63,8 @@ export class ProfileService {
         bio: 'bio',
         country: 'country',
         cityState: 'city_state',
-        postalCode: 'postal_code'
+        postalCode: 'postal_code',
+        timezone: 'timezone'
     };
 
     Object.entries(request).forEach(([key, value]) => {
@@ -99,6 +109,7 @@ export class ProfileService {
       country: user.country || undefined,
       cityState: user.city_state || undefined,
       postalCode: user.postal_code || undefined,
+      timezone: user.timezone || undefined,
       emailVerified: user.email_verified,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),

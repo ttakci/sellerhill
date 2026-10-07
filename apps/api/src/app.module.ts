@@ -11,6 +11,7 @@ import { RequestIdMiddleware } from './common/middlewares/request-id.middleware'
 import { getBullRedisOptions } from './common/redis/redis.config';
 import { RedisModule } from './common/redis/redis.module';
 import { SettingsModule } from './common/settings/settings.module';
+import { TimezoneModule } from './common/timezone/timezone.module';
 import { HealthModule } from './health/health.module';
 import { ActionCenterModule } from './modules/action-center/action-center.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -49,6 +50,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     EbayBudgetModule,
     // Runtime platform settings (Global) — DB override -> env -> code default
     SettingsModule,
+    TimezoneModule,
     // Queue processing configuration
     BullModule.forRootAsync({
       inject: [ConfigService],

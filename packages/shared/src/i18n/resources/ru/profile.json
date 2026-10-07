@@ -24,6 +24,9 @@
     "instagram": "Ссылка на Instagram",
     "deactivateAccount": "Деактивировать аккаунт",
     "saveChanges": "Сохранить все изменения",
-    "storeOwner": "Владелец магазина"
+    "storeOwner": "Владелец магазина",
+    "errors": {
+      "invalidTimezone": "Этот часовой пояс не распознан."
+    }
   }
 }
