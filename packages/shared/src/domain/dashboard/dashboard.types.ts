@@ -21,7 +21,9 @@ export enum DashboardPeriodKey {
 
 /** Chart bucket size (URL `?granularity=`, API `chartGranularity`). */
 export enum DashboardChartGranularity {
-  /** Last 30 days, one point per day. */
+  /** One point per hour — ranges of up to 2 days. */
+  HOUR = 'hour',
+  /** One point per day. */
   DAY = 'day',
   /** Last 12 ISO weeks, one point per week. */
   WEEK = 'week',

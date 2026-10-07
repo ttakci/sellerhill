@@ -70,6 +70,11 @@ const GRANULARITY_SQL: Record<
   DashboardChartGranularity,
   { trunc: string; since: string; buckets: number }
 > = {
+  [DashboardChartGranularity.HOUR]: {
+    trunc: "date_trunc('hour', order_date)",
+    since: 'CURRENT_DATE',
+    buckets: 24,
+  },
   [DashboardChartGranularity.DAY]: {
     trunc: "date_trunc('day', order_date)",
     since: "CURRENT_DATE - INTERVAL '29 days'",
