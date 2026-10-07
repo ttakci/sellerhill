@@ -7,6 +7,7 @@ import { ListingStatus, PlatformSettingKey } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { SWEEP_DUE_SLACK_SQL } from '../../common/utils/sweep-claim-sql';
 import { EbayFeedService } from '../ebay/ebay-feed.service';
 
 import { decodeReportBody, parseActiveInventoryReportXml } from './feed-report-parser';
@@ -111,7 +112,7 @@ export class EbayFeedSyncService {
           WHERE status = 'active'
             AND (
               last_feed_sync_at IS NULL
-              OR last_feed_sync_at < NOW() - ($1 || ' hours')::INTERVAL
+              OR last_feed_sync_at < NOW() - ($1 || ' hours')::INTERVAL + ${SWEEP_DUE_SLACK_SQL}
             )
           ORDER BY last_feed_sync_at ASC NULLS FIRST, id ASC
           LIMIT $2

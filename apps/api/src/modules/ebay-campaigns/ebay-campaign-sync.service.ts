@@ -4,6 +4,7 @@ import { EbayCallPriority, ListingStatus, PlatformSettingKey } from '@repo/share
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { SWEEP_DUE_SLACK_SQL } from '../../common/utils/sweep-claim-sql';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
@@ -43,9 +44,9 @@ export class EbayCampaignSyncService {
     const max = await this.settings.getNumber(PlatformSettingKey.EBAY_CAMPAIGN_SYNC_MAX_ACCOUNTS_PER_RUN);
     const accounts = await this.database.query<{ id: string; user_id: string; sync_due: boolean }>(
       `WITH due AS (
-         SELECT id, (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL) AS sync_due
+         SELECT id, (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL + ${SWEEP_DUE_SLACK_SQL}) AS sync_due
          FROM ebay_accounts WHERE status = 'active'
-           AND (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL
+           AND (last_campaign_sync_at IS NULL OR last_campaign_sync_at < NOW() - ($1 || ' hours')::INTERVAL + ${SWEEP_DUE_SLACK_SQL}
              OR EXISTS (SELECT 1 FROM ebay_campaign_reprice_outbox pending WHERE pending.ebay_account_id = ebay_accounts.id))
          ORDER BY last_campaign_sync_at ASC NULLS FIRST, id ASC LIMIT $2 FOR UPDATE SKIP LOCKED
        ) UPDATE ebay_accounts a

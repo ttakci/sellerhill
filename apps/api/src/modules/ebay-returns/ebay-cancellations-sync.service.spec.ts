@@ -128,6 +128,8 @@ describe('EbayCancellationsSyncService', () => {
     expect(sql).toContain('o.ebay_account_id = ebay_accounts.id');
     // …bounded: at most one extra sweep an hour, and only while no stored request is linked to that order.
     expect(sql).toContain("last_cancellation_sync_at < NOW() - INTERVAL '1 hour'");
+    // A claim one tick late is a whole extra tick: the due test carries one minute of slack.
+    expect(sql).toContain("INTERVAL '1 minute'");
     expect(sql).toContain('NOT EXISTS (SELECT 1 FROM ebay_cancellations c WHERE c.order_id = o.id)');
     // The return sweep's burst guard, the cancellation interval.
     expect(params).toEqual(['6', 35]);

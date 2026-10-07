@@ -9,6 +9,7 @@ import { EBAY_FINANCES_SCOPE, PlatformSettingKey } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { SWEEP_DUE_SLACK_SQL } from '../../common/utils/sweep-claim-sql';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
@@ -102,7 +103,7 @@ export class BillingCaptureService {
             AND granted_scopes @> ARRAY[$3]::text[]
             AND (
               last_billing_sync_at IS NULL
-              OR last_billing_sync_at < NOW() - ($1 || ' hours')::INTERVAL
+              OR last_billing_sync_at < NOW() - ($1 || ' hours')::INTERVAL + ${SWEEP_DUE_SLACK_SQL}
             )
           ORDER BY last_billing_sync_at ASC NULLS FIRST, id ASC
           LIMIT $2

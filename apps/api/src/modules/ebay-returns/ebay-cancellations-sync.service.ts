@@ -6,6 +6,7 @@ import { EBAY_CANCEL_REQUESTOR_BUYER, PlatformSettingKey } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { SWEEP_DUE_SLACK_SQL } from '../../common/utils/sweep-claim-sql';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
@@ -90,7 +91,7 @@ export class EbayCancellationsSyncService {
           WHERE status = 'active'
             AND (
               last_cancellation_sync_at IS NULL
-              OR last_cancellation_sync_at < NOW() - ($1 || ' hours')::INTERVAL
+              OR last_cancellation_sync_at < NOW() - ($1 || ' hours')::INTERVAL + ${SWEEP_DUE_SLACK_SQL}
               OR (
                 -- Express lane: order sync saw a cancel state that is neither
                 -- "none" nor "cancelled" on an order no stored request is linked
@@ -98,7 +99,7 @@ export class EbayCancellationsSyncService {
                 -- writers bump orders.updated_at, and a state that lingers
                 -- (a rejected request, an id that never links) must not turn
                 -- every tick into a Post-Order call.
-                last_cancellation_sync_at < NOW() - INTERVAL '1 hour'
+                last_cancellation_sync_at < NOW() - INTERVAL '1 hour' + ${SWEEP_DUE_SLACK_SQL}
                 AND EXISTS (
                   SELECT 1 FROM orders o
                    WHERE o.ebay_account_id = ebay_accounts.id
