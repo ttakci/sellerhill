@@ -10,9 +10,9 @@ import type { ReturnCardProps } from './ReturnCard.types';
 const EMPTY_VALUE = '—';
 
 /**
- * Grid-view twin of a returns table row: the same facts in the same order —
- * which product, which return, why, then what is due and by when, how much.
- * The whole card is the button; there is no "View order" footer.
+ * Grid-view twin of a returns table row — same anatomy as ListingCard / OrderCard:
+ * badge (soluk değil, koyu zemin beyaz font) solda, resim solda, alanlar resmin
+ * sağında label + bold value.
  */
 export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, className }) => {
   const { t } = useTranslation(['returns', 'translation']);
@@ -28,7 +28,11 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
       tabIndex={clickable ? 0 : undefined}
       aria-label={clickable ? t('returns.detail.open') : undefined}
     >
-      <S.Header>
+      <S.Top>
+        <S.BadgeRow>
+          <ReturnBucketBadge bucket={row.bucket} size="sm" />
+        </S.BadgeRow>
+
         <S.TitleRow>
           <S.TitleSlot>
             <Tooltip content={row.productTitle} position="top" variant="dark">
@@ -37,52 +41,61 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, onKeyDown, 
               </S.Title>
             </Tooltip>
           </S.TitleSlot>
-          <S.BadgeSlot>
-            <ReturnBucketBadge bucket={row.bucket} size="sm" />
-          </S.BadgeSlot>
         </S.TitleRow>
-        <S.HeaderBody>
-          <S.Image>{row.imageUrl ? <img src={row.imageUrl} alt="" /> : <Icon name="image" size={28} />}</S.Image>
-          <S.HeaderText>
-            <S.IdRow>
-              <Text variant="caption" color="text.tertiary">
-                {t('returns.columns.return')}
-              </Text>
-              <Text variant="caption" weight="semibold" color="text.primary" numeric>
-                {row.returnId}
-              </Text>
-            </S.IdRow>
-            {row.ebayOrderId && (
-              <S.IdRow>
-                <Text variant="caption" color="text.tertiary">
-                  {t('returns.order')}
-                </Text>
-                <Text variant="caption" color="text.secondary" numeric>
-                  {row.ebayOrderId}
-                </Text>
-              </S.IdRow>
-            )}
-          </S.HeaderText>
-        </S.HeaderBody>
-      </S.Header>
 
-      <S.Reason>
-        <S.IdRow>
-          <Text variant="caption" color="text.tertiary">
-            {t('returns.columns.reason')}
-          </Text>
-          <Text variant="caption" weight="semibold" color="text.primary">
-            {row.reasonLabel}
-          </Text>
-        </S.IdRow>
-        {row.buyerComment && (
-          <Tooltip content={row.buyerComment} position="top" variant="dark">
-            <S.Comment variant="body-sm" color="text.secondary">
-              {row.buyerComment}
-            </S.Comment>
-          </Tooltip>
-        )}
-      </S.Reason>
+        <S.Body>
+          <S.Image>{row.imageUrl ? <img src={row.imageUrl} alt="" /> : <Icon name="image" size={28} />}</S.Image>
+
+          <S.Content>
+            <S.MetaList>
+              <S.MetaLabel>
+                <Text variant="caption" color="text.secondary">
+                  {t('returns.columns.return')}
+                </Text>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <Text variant="body-sm" weight="bold" color="text.primary" numeric>
+                  {row.returnId}
+                </Text>
+              </S.MetaValue>
+
+              {row.ebayOrderId && (
+                <>
+                  <S.MetaLabel>
+                    <Text variant="caption" color="text.secondary">
+                      {t('returns.order')}
+                    </Text>
+                  </S.MetaLabel>
+                  <S.MetaValue>
+                    <Text variant="body-sm" weight="bold" color="text.primary" numeric>
+                      {row.ebayOrderId}
+                    </Text>
+                  </S.MetaValue>
+                </>
+              )}
+
+              <S.MetaLabel>
+                <Text variant="caption" color="text.secondary">
+                  {t('returns.columns.reason')}
+                </Text>
+              </S.MetaLabel>
+              <S.MetaValue>
+                <Text variant="body-sm" weight="bold" color="text.primary">
+                  {row.reasonLabel}
+                </Text>
+              </S.MetaValue>
+            </S.MetaList>
+
+            {row.buyerComment && (
+              <Tooltip content={row.buyerComment} position="top" variant="dark">
+                <S.Comment variant="body-sm" color="text.secondary">
+                  {row.buyerComment}
+                </S.Comment>
+              </Tooltip>
+            )}
+          </S.Content>
+        </S.Body>
+      </S.Top>
 
       <S.Facts>
         <S.Fact $wide>

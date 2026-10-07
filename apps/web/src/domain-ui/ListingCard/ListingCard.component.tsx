@@ -57,6 +57,13 @@ export const ListingCard = ({
       variant="elevated"
     >
       <S.Top $orientation={orientation}>
+        {status ? (
+          <S.BadgeRow>
+            <Badge variant={statusVariant} size="sm" solid>
+              {status.label}
+            </Badge>
+          </S.BadgeRow>
+        ) : null}
         <S.TitleRow>
           {selectable && (
             <S.SelectionControl
@@ -79,13 +86,6 @@ export const ListingCard = ({
               </S.Title>
             </Tooltip>
           </S.TitleSlot>
-          {status ? (
-            <S.BadgeRow>
-              <Badge variant={statusVariant} size="sm" solid>
-                {status.label}
-              </Badge>
-            </S.BadgeRow>
-          ) : null}
         </S.TitleRow>
 
         <S.Body $orientation={orientation}>

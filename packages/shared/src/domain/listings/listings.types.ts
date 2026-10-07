@@ -226,6 +226,12 @@ export interface ListingJobItemDto {
    */
   failureCode?: ListingFailureCode;
   failureDetails?: ListingFailureDetails;
+  /**
+   * When the item completed, the listing it became — the same record the
+   * listings screen renders, so a completed job card IS a listing card.
+   * Absent on failed / queued items.
+   */
+  listing?: ListingDto | null;
 }
 
 /**

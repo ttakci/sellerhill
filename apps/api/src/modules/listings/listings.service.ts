@@ -1726,7 +1726,44 @@ export class ListingsService {
       [jobId]
     );
 
-    return items.map((item) => this.mapJobItemToDto(item));
+    // A completed item IS a listing: attach the same record the listings screen
+    // renders (one batched query, scoped to the owner) so its card can match.
+    const listingIds = items.filter((r) => r.listing_id).map((r) => r.listing_id as string);
+    const listingMap = new Map<string, ListingDto>();
+    if (listingIds.length > 0) {
+      const rows = await this.databaseService.query<ListingQueryRow>(
+        `
+        SELECT
+          l.*,
+          p.image_urls,
+          p.category AS product_category,
+          p.stock AS source_stock,
+          p.stock_status AS source_stock_status,
+          p.last_successful_refresh_at AS last_synced_at,
+          (p.source_removed_at IS NOT NULL) AS source_removed,
+          p.brand,
+          p.features,
+          p.specs,
+          p.identifiers,
+          p.raw_keepa_data,
+          p.description AS product_description,
+          lsg.name AS group_name,
+          ea.marketplace_id AS ebay_marketplace_id,
+          (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
+        FROM listings l
+        LEFT JOIN products p ON l.product_id = p.id
+        LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
+        LEFT JOIN listing_settings_groups lsg ON lsg.id = l.listing_settings_group_id
+        WHERE l.id = ANY($1::uuid[]) AND l.user_id = $2
+        `,
+        [listingIds, userId]
+      );
+      for (const row of rows) {
+        listingMap.set(row.id, this.mapListingRow(row));
+      }
+    }
+
+    return items.map((item) => this.mapJobItemToDto(item, listingMap.get(item.listing_id ?? '') ?? null));
   }
 
   async findOrCreateProduct(
@@ -2030,7 +2067,7 @@ export class ListingsService {
    * back to the generic "could not be created" copy rather than leaking the
    * provider string.
    */
-  private mapJobItemToDto(entity: ListingJobItemEntity): ListingJobItemDto {
+  private mapJobItemToDto(entity: ListingJobItemEntity, listing: ListingDto | null = null): ListingJobItemDto {
     const imageUrls = Array.isArray(entity.product_image_urls)
       ? entity.product_image_urls
       : entity.product_image_urls
@@ -2052,6 +2089,7 @@ export class ListingsService {
       failureDetails: entity.failure_details
         ? parseJsonColumn<ListingFailureDetails>(entity.failure_details, {})
         : undefined,
+      listing,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };

@@ -64,30 +64,65 @@ export const FilterActions = styled.div`
 
 export const ResultCount = styled(UIText)``;
 
-/** One revision per card — product identity on top, price/qty change below. */
+/** Revision card — quiet frosted pane, harmonized with ListingCard / OrderCard / JobCard.
+ *  Photo + facts above a hairline, the figures+date under it on glass.tint. */
 export const RevisionCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  gap: 0;
+  padding: 0;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  overflow: hidden;
   cursor: pointer;
   transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
+    box-shadow ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.md')};
-    border-color: ${tkn('colors.brand.primary')};
+    box-shadow: ${tkn('shadows.glassHover')};
+    transform: translateY(-0.125rem);
   }
 
   &:focus-visible {
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
     outline-offset: 0.125rem;
   }
+`;
+
+export const RevisionCardTop = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm-md')};
+  padding: ${tkn('spacing.md+')};
+  min-width: 0;
+  flex: 1;
+`;
+
+export const RevisionCardFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
+  flex-shrink: 0;
+`;
+
+export const FooterDate = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+export const DetailHint = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+  flex-shrink: 0;
 `;
 
 export const CardChanges = styled.div`
@@ -125,7 +160,13 @@ export const Arrow = styled.span<{ $tone: 'up' | 'down' }>`
 
 export const CardFooter = styled.div`
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
+  flex-shrink: 0;
 `;
 
 /** Compact "previous → new" cell for table view. */

@@ -55,7 +55,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
 
   const renderGridCard = (order: OrderDto) => {
     const card = toOrderCardProps(order, t, formatCurrency, formatDate, formatDay);
-    return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} hoverEffect={false} />;
+    return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} />;
   };
 
   return (

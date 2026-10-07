@@ -180,9 +180,10 @@ export const MessagesPageContainer = (): React.ReactElement => {
           referenceId: conversation.referenceId,
           isSelected: selectedSet.has(conversation.conversationId),
           isActive: conversation.conversationId === conversationId,
+          tone: type === EbayConversationType.FROM_EBAY ? ('amber' as const) : ('brand' as const),
         };
       }),
-    [conversations, conversationId, selectedSet, formatListDate]
+    [conversations, conversationId, selectedSet, formatListDate, type]
   );
 
   /* In the archive and deleted folders the counterpart of "archive" is "move back to the inbox". */

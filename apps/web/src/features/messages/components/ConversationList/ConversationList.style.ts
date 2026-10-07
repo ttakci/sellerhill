@@ -4,8 +4,32 @@
  * like a selected table row everywhere else in the app.
  */
 
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
+
+const rowIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const dotPulse = keyframes`
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.65;
+  }
+`;
 
 export const Wrapper = styled.div`
   display: flex;
@@ -25,6 +49,7 @@ export const ListHeader = styled.div`
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
   background: ${tkn('colors.glass.tint')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  backdrop-filter: blur(8px);
 `;
 
 export const BulkActions = styled.div`
@@ -41,26 +66,71 @@ export const Rows = styled.div`
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: ${tkn('colors.border.control')} transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${tkn('colors.border.control')};
+    border-radius: ${tkn('radius.full')};
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${tkn('colors.brand.primary')};
+  }
 `;
 
-export const Row = styled.div<{ $active: boolean }>`
+export const Row = styled.div<{ $active: boolean; $unread?: boolean; $tone?: 'brand' | 'amber'; $index?: number }>`
   display: flex;
   align-items: flex-start;
   gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-  background: ${({ $active, theme }) => ($active ? theme.colors.table.rowSelected : 'transparent')};
+  border-left: 0.1875rem solid transparent;
+  background: ${({ $active, $unread, theme }) => {
+    if ($active) {
+      return theme.colors.table.rowSelected;
+    }
+    if ($unread) {
+      return theme.mode === 'dark' ? `${theme.colors.brand.primary}14` : `${theme.colors.brand.primary}0b`;
+    }
+    return 'transparent';
+  }};
+  border-left-color: ${({ $active, $unread, $tone, theme }) => {
+    if ($active) {
+      return $tone === 'amber' ? theme.colors.semantic.warning : theme.colors.table.rowSelectedAccent;
+    }
+    if ($unread) {
+      return $tone === 'amber' ? theme.colors.semantic.warning : theme.colors.brand.primary;
+    }
+    return 'transparent';
+  }};
   box-shadow: ${({ $active, theme }) =>
     $active ? `inset 0.1875rem 0 0 ${theme.colors.table.rowSelectedAccent}` : 'none'};
-  transition: all ${tkn('transitions.fast')};
+  transition:
+    background ${tkn('transitions.fast')},
+    border-color ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')};
+  animation: ${rowIn} 220ms ease both;
+  /* stylelint-disable-next-line property-no-unknown */
+  animation-delay: ${({ $index }) => `${Math.min($index ?? 0, 8) * 22}ms`};
 
   &:hover {
     background: ${({ $active, theme }) =>
       $active ? theme.colors.table.rowSelectedHover : theme.colors.table.rowHover};
+    transform: translateX(0.0625rem);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    animation: none;
     transition: none;
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    animation-delay: 0ms;
   }
 `;
 
@@ -94,9 +164,11 @@ export const ThumbImage = styled.img`
   object-fit: contain;
   background: transparent;
   border-radius: ${tkn('radius.md')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  box-shadow: ${tkn('shadows.sm')};
 `;
 
-export const Avatar = styled.div<{ $unread: boolean; $large?: boolean }>`
+export const Avatar = styled.div<{ $unread: boolean; $large?: boolean; $tone?: 'brand' | 'amber' }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,9 +176,15 @@ export const Avatar = styled.div<{ $unread: boolean; $large?: boolean }>`
   width: ${({ $large }) => ($large ? '3.5rem' : '1.5rem')};
   height: ${({ $large }) => ($large ? '3.5rem' : '1.5rem')};
   border-radius: ${tkn('radius.full')};
-  background: ${({ $unread, theme }) => ($unread ? theme.colors.brand.primary : theme.colors.brand.secondary)};
+  background: ${({ $unread, $tone, theme }) => {
+    if ($unread) {
+      return $tone === 'amber' ? theme.colors.semantic.warning : theme.colors.brand.primary;
+    }
+    return theme.colors.brand.secondary;
+  }};
   ${({ $large, theme }) => ($large ? '' : `border: 0.125rem solid ${theme.colors.surface.primary};`)}
   box-sizing: border-box;
+  box-shadow: ${({ $unread, theme }) => ($unread ? `0 2px 8px ${theme.colors.glass.glowBlue}` : 'none')};
 `;
 
 export const AvatarBadge = styled.div`
@@ -116,12 +194,19 @@ export const AvatarBadge = styled.div`
 `;
 
 /** Marks an unread conversation next to the sender's name. */
-export const UnreadDot = styled.span`
+export const UnreadDot = styled.span<{ $tone?: 'brand' | 'amber' }>`
   flex: 0 0 auto;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.brand.primary')};
+  background: ${({ $tone, theme }) => ($tone === 'amber' ? theme.colors.semantic.warning : theme.colors.brand.primary)};
+  box-shadow: 0 0 0 0.1875rem
+    ${({ $tone }) => ($tone === 'amber' ? 'rgba(217, 119, 6, 0.18)' : 'rgba(37, 99, 235, 0.18)')};
+  animation: ${dotPulse} 1.8s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export const RowMain = styled.div`

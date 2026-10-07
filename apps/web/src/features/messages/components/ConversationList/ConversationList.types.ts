@@ -15,6 +15,8 @@ export interface ConversationRowView {
   referenceId: string | null;
   isSelected: boolean;
   isActive: boolean;
+  /** Controls the accent/badge tone: members = brand blue, eBay = warning amber. */
+  tone?: 'brand' | 'amber';
 }
 
 /** One button in the bulk bar (shown while rows are selected). */

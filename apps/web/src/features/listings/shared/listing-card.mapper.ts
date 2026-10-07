@@ -21,7 +21,6 @@ export const toListingCardProps = (
 ): Omit<ListingCardProps, 'orientation' | 'selectable' | 'selected' | 'onSelectedChange' | 'selectionAriaLabel'> => {
   const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
   const profit = listing.estimatedProfit ?? 0;
-  const roi = listing.roi ?? 0;
 
   const meta: NonNullable<ListingCardProps['meta']> = [];
 
@@ -98,14 +97,13 @@ export const toListingCardProps = (
         value: formatCurrency(listing.price, locale, listing.currency || 'USD', 2),
       },
       {
+        label: t('listings.table.purchasePrice'),
+        value: formatCurrency(listing.purchasePrice ?? 0, locale, listing.currency || 'USD', 2),
+      },
+      {
         label: t('listings.table.estimatedProfit'),
         value: `${profit >= 0 ? '+' : ''}${formatCurrency(profit, locale, listing.currency || 'USD', 2)}`,
         tone: profit >= 0 ? 'positive' : 'negative',
-      },
-      {
-        label: t('listings.table.roi'),
-        value: `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`,
-        tone: roi >= 0 ? 'positive' : 'negative',
       },
     ],
     detailLabel: t('translation:common.details'),

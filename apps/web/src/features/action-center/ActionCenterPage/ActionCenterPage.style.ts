@@ -163,24 +163,6 @@ export const GroupColumn = styled.div`
 export const GroupCard = styled(SettingsCard)<{ $severity: ActionCenterSeverity }>`
   height: auto;
   border-left: 0.1875rem solid ${({ $severity, theme }) => severityColor($severity, theme)};
-  transition:
-    transform ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
-
-  @media (hover: hover) {
-    &:hover {
-      transform: translateY(-0.125rem);
-      box-shadow: ${tkn('shadows.glassHover')};
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-
-    &:hover {
-      transform: none;
-    }
-  }
 `;
 
 export const GroupHeading = styled.div`

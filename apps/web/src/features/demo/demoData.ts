@@ -2539,16 +2539,20 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
     const processed = i < job.processedCount;
     const failed = processed && i >= job.successCount;
     const product = PRODUCTS[i % PRODUCTS.length];
+    // A completed item IS a listing — the same sample listing the Listings
+    // screen shows for this product, so the two cards match.
+    const listing = !processed || failed ? null : (DEMO_LISTINGS[i % PRODUCTS.length] ?? null);
     return {
       id: `${jobId}-item-${i + 1}`,
       jobId,
-      asin: JOB_ASINS[i % JOB_ASINS.length],
+      asin: listing?.asin ?? JOB_ASINS[i % JOB_ASINS.length],
       productTitle: product.title,
       imageUrls: [demoProductImage(product.slug)],
-      productId: `demo-product-${(i % 20) + 1}`,
-      listingId: !processed || failed ? undefined : `demo-listing-${(i % 20) + 1}`,
+      productId: `demo-product-${(i % PRODUCTS.length) + 1}`,
+      listingId: listing?.id,
       status: failed ? ListingStatus.ERROR : processed ? ListingStatus.ACTIVE : ListingStatus.DRAFT,
-      ebayItemId: !processed || failed ? undefined : `1${(255000000000 + i * 137).toString()}`,
+      ebayItemId: listing?.ebayListingId,
+      listing,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
       failureCode: failed ? JOB_FAILURE_ROTATION[i % JOB_FAILURE_ROTATION.length] : undefined,

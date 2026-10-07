@@ -1,5 +1,9 @@
-import type { ListingJobDto, ListingJobItemDto, ListingJobStatus, ListingStatus } from '@repo/shared';
+import type { ListingDto, ListingJobDto, ListingJobItemDto, ListingJobStatus, ListingStatus } from '@repo/shared';
 import type { TableColumn, ViewMode } from '@repo/ui';
+
+import type { toListingCardProps } from '../../shared/listing-card.mapper';
+
+export type ListingCardContentProps = ReturnType<typeof toListingCardProps>;
 
 /**
  * Which job items the list shows. `FAILED` is every item that ended in
@@ -62,6 +66,12 @@ export interface ListingJobDetailsPageComponentProps {
   itemFailureLabel: (item: ListingJobItemDto) => string | null;
   /** Correlation id for the failed attempt, quoted when opening a support case. */
   itemFailureReference: (item: ListingJobItemDto) => string | null;
+  /**
+   * Card props for an item that became a listing — the SAME mapper the
+   * listings screen uses, so a completed job card is byte-identical to the
+   * card the seller will find under Listings.
+   */
+  listingCardProps: (listing: ListingDto) => ListingCardContentProps;
   pagination: {
     count: number;
     page: number;

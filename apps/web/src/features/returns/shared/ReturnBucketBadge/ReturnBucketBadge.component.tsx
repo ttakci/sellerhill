@@ -12,7 +12,7 @@ export const ReturnBucketBadgeComponent: React.FC<ReturnBucketBadgeViewProps> = 
   size,
 }) => {
   const badge = (
-    <Badge variant={variant} size={size} isPill>
+    <Badge variant={variant} size={size} solid>
       <S.Inner>
         <Icon name={icon} size={size === 'md' ? 16 : 12} />
         {label}

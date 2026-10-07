@@ -163,8 +163,9 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
     ];
     return (
       <S.RevisionCard key={row.id} variant="elevated" onClick={() => onRowClick(row)}>
-        <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} subtitle={row.storeName} />
-        <S.CardChanges>
+        <S.RevisionCardTop>
+          <ProductTableCell title={row.title} imageUrl={row.imageUrl} meta={meta} subtitle={row.storeName} />
+          <S.CardChanges>
           <S.ChangeRow>
             <S.ChangeLabel>
               <Text variant="caption" color="text.tertiary">
@@ -222,12 +223,22 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
               />
             </S.ChangeValues>
           </S.ChangeRow>
-        </S.CardChanges>
-        <S.CardFooter>
-          <Text variant="caption" color="text.tertiary" numeric>
-            {row.recordedAt}
-          </Text>
-        </S.CardFooter>
+          </S.CardChanges>
+        </S.RevisionCardTop>
+        <S.RevisionCardFooter>
+          <S.FooterDate>
+            <Icon name="clock" size={13} color="text.tertiary" />
+            <Text variant="caption" color="text.tertiary" numeric>
+              {row.recordedAt}
+            </Text>
+          </S.FooterDate>
+          <S.DetailHint>
+            <Text variant="caption" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <Icon name="chevron-right" size={14} color="brand.primary" />
+          </S.DetailHint>
+        </S.RevisionCardFooter>
       </S.RevisionCard>
     );
   };

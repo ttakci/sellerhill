@@ -20,9 +20,40 @@ export const Card = styled.div`
   ${({ theme }) => glassSurface(theme)}
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xs')};
+  padding: 0;
   border-radius: ${tkn('radius.lg')};
+  overflow: hidden;
+`;
+
+/** Date ribbon — left-accented, timed feel. Sits full-bleed at card top. */
+export const DateRibbon = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  background: ${tkn('colors.glass.tint')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  border-left: 0.1875rem solid ${tkn('colors.brand.primary')};
+`;
+
+export const DateRibbonIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.secondary')};
+  color: ${tkn('colors.brand.primary')};
+  flex-shrink: 0;
+`;
+
+export const CardBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
 `;
 
 export const CardHead = styled.div`
@@ -31,13 +62,11 @@ export const CardHead = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
-/** Divides the timestamp header from the change rows below it. */
+/** Change rows — no extra divider, DateRibbon already separates. */
 export const ChangeStack = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
-  padding-top: ${tkn('spacing.sm')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
 /** label | previous → next | delta pill — collapses to two lines on a phone. */

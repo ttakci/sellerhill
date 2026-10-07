@@ -56,7 +56,7 @@
       "buyer": "Alıcı",
       "status": "Durum",
       "salePrice": "Satış",
-      "purchasePrice": "Maliyet",
+      "purchasePrice": "Alış",
       "netProfit": "Kâr",
       "asin": "ASIN",
       "ebayId": "eBay"

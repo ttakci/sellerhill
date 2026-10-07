@@ -31,51 +31,27 @@ export const Wrapper = styled(Card)<{ $clickable: boolean }>`
     `}
 `;
 
-/** Title row (title left, bucket badge right), then the photo on the left with the ids beside it — the OrderCard anatomy. */
-export const Header = styled.div`
+/** Top pane — same anatomy as ListingCard / OrderCard: badge -> title -> photo + facts. */
+export const Top = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-  padding: ${tkn('spacing.md+')} ${tkn('spacing.md+')} 0;
-`;
-
-export const HeaderBody = styled.div`
-  display: flex;
-  align-items: flex-start;
   gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md+')};
   min-width: 0;
-`;
-
-/** Transparent shell — same treatment as the product cell and the order card (no grey plate). */
-export const Image = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-  width: 4.5rem;
-  height: 4.5rem;
-  background: transparent;
-  border-radius: ${tkn('radius.md')};
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  svg {
-    color: ${tkn('colors.text.disabled')};
-  }
-`;
-
-export const HeaderText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
   flex: 1;
+`;
+
+/** Badge row — left-aligned, wrapping (solid koyu zemin / beyaz font). */
+export const BadgeRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    order: -2;
+  }
 `;
 
 export const TitleRow = styled.div`
@@ -86,7 +62,7 @@ export const TitleRow = styled.div`
   min-width: 0;
 `;
 
-/** Block host for the tooltip so the one-line title can shrink and truncate. */
+/** Block host for the tooltip so the title can shrink and truncate. */
 export const TitleSlot = styled.div`
   display: flex;
   flex: 1 1 12rem;
@@ -98,35 +74,117 @@ export const TitleSlot = styled.div`
   }
 `;
 
-/** One line, ellipsis — the full title is on the tooltip. */
+/** Two lines, ellipsis — the full title is on the tooltip. */
 export const Title = styled(Text)`
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+`;
+
+export const Body = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+  flex: 1;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    display: contents;
+  }
+`;
+
+/** Transparent shell — same treatment as the product cell and the order card (no grey plate). */
+export const Image = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: transparent;
+  border-radius: ${tkn('radius.sm')};
+  width: 9rem;
+  height: 9rem;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  svg {
+    color: ${tkn('colors.text.disabled')};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    order: -1;
+    width: 100%;
+    height: 10rem;
+  }
+`;
+
+export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+  flex: 1;
+  padding-inline-start: ${tkn('spacing.md')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding-inline-start: 0;
+  }
+`;
+
+/** Label / value pairs, no icons — the label column is the only ornament. */
+export const MetaList = styled.dl`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: ${tkn('spacing.md')};
+  row-gap: ${tkn('spacing.xs')};
+  align-items: baseline;
+  margin: ${tkn('spacing.2xs')} 0 0;
+  min-width: 0;
+`;
+
+export const MetaLabel = styled.dt`
+  margin: 0;
   white-space: nowrap;
+`;
+
+export const MetaValue = styled.dd`
+  margin: 0;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
+  white-space: nowrap;
+
+  a {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Every value reads bold, including badges. */
+  && * {
+    font-weight: ${tkn('typography.fontWeight.bold')};
+  }
 `;
 
-/** The bucket badge, pinned to the title row's right edge. */
-export const BadgeSlot = styled.div`
-  display: flex;
-  margin-left: auto;
-  flex: 0 0 auto;
-`;
-
-/** Muted label + value on one line (return id, order id, reason). */
-export const IdRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  min-width: 0;
+/** The buyer's own words — two lines, the full text on the tooltip. */
+export const Comment = styled(Text)`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  margin-top: ${tkn('spacing.xs')};
 `;
 
 /** Due · refund · opened, under one hairline at the foot of the card. */
 export const Facts = styled.div`
   display: grid;
-  /* Reflows to two rows before a value truncates — never a fixed repeat(3, 1fr). */
   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
@@ -140,28 +198,9 @@ export const Fact = styled.div<{ $wide?: boolean }>`
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
-  /* "What is due" is a sentence, not a figure: it takes the whole first row. */
   grid-column: ${({ $wide }) => ($wide ? '1 / -1' : 'auto')};
 `;
 
 export const FactLabel = styled(Text)`
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
-
-export const Reason = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-  min-width: 0;
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')} ${tkn('spacing.md+')};
-`;
-
-/** The buyer's own words — two lines, the full text on the tooltip. */
-export const Comment = styled(Text)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-`;
-

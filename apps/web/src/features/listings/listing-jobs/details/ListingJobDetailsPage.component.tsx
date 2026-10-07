@@ -1,15 +1,5 @@
 import { ListingJobStatus, ListingStatus, type ListingJobItemDto } from '@repo/shared';
-import {
-  Button,
-  ConfirmModal,
-  DataTable,
-  EmptyState,
-  PageHeader,
-  SearchField,
-  Select,
-  StatusBadge,
-  Text,
-} from '@repo/ui';
+import { Button, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -62,6 +52,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   itemStatusLabel,
   itemFailureLabel,
   itemFailureReference,
+  listingCardProps,
   pagination,
   paginatedItems,
   itemSearch,
@@ -111,6 +102,21 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
   const renderItemCard = (item: ListingJobItemDto) => {
     const listingId = item.listingId;
+
+    // A completed item IS a listing — render the exact card the Listings
+    // screen renders for it, with the job outcome as its top-left badge.
+    if (item.listing) {
+      return (
+        <ListingCard
+          key={item.id}
+          {...listingCardProps(item.listing)}
+          status={{ label: itemStatusLabel(item.status), tone: 'active' }}
+          orientation="horizontal"
+          onClick={() => onListingClick(item.listing?.id ?? listingId ?? '')}
+        />
+      );
+    }
+
     const reason = itemFailureLabel(item);
     const reference = itemFailureReference(item);
     const meta: ListingCardMetaItem[] = [
@@ -215,53 +221,56 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
       />
 
       {job ? (
-        <S.SummaryBar>
-          <S.SummaryIdentity>
-            <S.SummaryTop>
+        <S.SummaryCard variant="elevated">
+          <S.SummaryTop>
+            <S.SummaryHeader>
               <StatusBadge status={String(job.status).toLowerCase()} size="sm">
                 {jobStatusLabel(job.status)}
               </StatusBadge>
-            </S.SummaryTop>
-            <S.MetaList>
-              {jobMetaRow(
-                t('listings.jobs.details.jobId'),
-                <S.MonoId variant="body-sm" weight="bold" color="text.primary">
-                  {jobId}
-                </S.MonoId>
-              )}
-              {jobMetaRow(
-                t('listings.jobs.table.createdAt'),
-                <Text variant="body-sm" weight="bold" color="text.primary">
-                  {formatJobDate(job.createdAt)}
-                </Text>
-              )}
-              {job.scheduledUntil
-                ? jobMetaRow(
-                    t('listings.jobs.table.scheduledUntil'),
-                    <Text variant="body-sm" weight="bold">
-                      {formatJobDate(job.scheduledUntil)}
-                    </Text>
-                  )
-                : null}
-            </S.MetaList>
-          </S.SummaryIdentity>
-
-          <S.ProgressSignal role="status" aria-label={t('listings.jobs.card.progressLabel', { percent })}>
-            <S.ProgressDot $tone={progressTone} $active={isProcessing} aria-hidden="true" />
-            <S.ProgressCopy>
-              <Text variant="caption" color="text.secondary">
-                {t('listings.jobs.table.progress')}
-              </Text>
-              <S.ProgressValue variant="metric-lg" weight="bold" numeric $tone={progressTone}>
-                %{percent}
-              </S.ProgressValue>
-              <Text variant="caption" color="text.secondary" numeric>
-                {job.processedCount} / {job.totalAsins}
-              </Text>
-            </S.ProgressCopy>
-          </S.ProgressSignal>
-
-          <S.StatsGrid>
+            </S.SummaryHeader>
+            <S.SummaryBody>
+              <S.MetaList>
+                {jobMetaRow(
+                  t('listings.jobs.details.jobId'),
+                  <S.MonoId variant="body-sm" weight="bold" color="text.primary">
+                    {jobId}
+                  </S.MonoId>
+                )}
+                {jobMetaRow(
+                  t('listings.jobs.table.createdAt'),
+                  <Text variant="body-sm" weight="bold" color="text.primary">
+                    {formatJobDate(job.createdAt)}
+                  </Text>
+                )}
+                {job.scheduledUntil
+                  ? jobMetaRow(
+                      t('listings.jobs.table.scheduledUntil'),
+                      <Text variant="body-sm" weight="bold">
+                        {formatJobDate(job.scheduledUntil)}
+                      </Text>
+                    )
+                  : null}
+                {jobMetaRow(
+                  t('listings.jobs.table.processed'),
+                  <Text variant="body-sm" weight="bold" color="text.primary" numeric>
+                    {job.processedCount} / {job.totalAsins}
+                  </Text>
+                )}
+              </S.MetaList>
+              <S.ProgressSignal role="status" aria-label={t('listings.jobs.card.progressLabel', { percent })}>
+                <S.ProgressDot $tone={progressTone} $active={isProcessing} aria-hidden="true" />
+                <S.ProgressCopy>
+                  <Text variant="caption" color="text.secondary">
+                    {t('listings.jobs.table.progress')}
+                  </Text>
+                  <S.ProgressValue variant="metric-lg" weight="bold" numeric $tone={progressTone}>
+                    %{percent}
+                  </S.ProgressValue>
+                </S.ProgressCopy>
+              </S.ProgressSignal>
+            </S.SummaryBody>
+          </S.SummaryTop>
+          <S.SummaryFooter>
             <S.StatCell>
               <S.StatLabel variant="caption" color="text.secondary">
                 {t('listings.jobs.stats.success')}
@@ -286,22 +295,21 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 {Math.max(job.totalAsins - job.processedCount, 0)}
               </S.StatValue>
             </S.StatCell>
-          </S.StatsGrid>
-
-          {canCancel ? (
-            <S.SummaryAction>
-              <Button
-                variant="danger-tint"
-                size="small"
-                onClick={onCancelRequest}
-                isLoading={isCancelling}
-                disabled={isCancelling}
-              >
-                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-              </Button>
-            </S.SummaryAction>
-          ) : null}
-        </S.SummaryBar>
+            {canCancel ? (
+              <S.FooterActions>
+                <Button
+                  variant="danger-tint"
+                  size="small"
+                  onClick={onCancelRequest}
+                  isLoading={isCancelling}
+                  disabled={isCancelling}
+                >
+                  <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+                </Button>
+              </S.FooterActions>
+            ) : null}
+          </S.SummaryFooter>
+        </S.SummaryCard>
       ) : null}
 
       <S.ItemsSection>

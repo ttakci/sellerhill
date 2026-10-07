@@ -3,6 +3,7 @@ import {
   ListingJobStatus,
   ListingRuleKind,
   ListingStatus,
+  type ListingDto,
   type ListingJobDto,
   type ListingJobItemDto,
 } from '@repo/shared';
@@ -19,7 +20,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { useListingsColumns } from '../../all/hooks/useListingsColumns';
 import { useCancelListingJobMutation, useGetJobItemsQuery, useGetJobStatusQuery } from '../../api/listings.api';
+import { toListingCardProps } from '../../shared/listing-card.mapper';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
@@ -45,11 +48,30 @@ const jobPercent = (job: ListingJobDto): number =>
 type JobItemSortKey = 'product' | 'status' | 'failureCode' | 'updatedAt';
 const JOB_ITEM_SORT_KEYS: JobItemSortKey[] = ['product', 'status', 'failureCode', 'updatedAt'];
 
+/**
+ * The listings-table columns a job table carries, in the listings table's own
+ * order — a completed row reads exactly like that listing's row under Listings.
+ */
+const LISTING_COLUMN_KEYS = [
+  'category',
+  'prices',
+  'purchasePrice',
+  'profit',
+  'roi',
+  'profitMargin',
+  'sold',
+  'quantity',
+  'sourceStock',
+];
+/** Secondary listing figures start hidden so the reason column keeps its room; the column manager restores them. */
+const DEFAULT_HIDDEN_COLUMN_KEYS = ['category', 'roi', 'profitMargin', 'sourceStock'];
+
 export const ListingJobDetailsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { jobId } = useParams<{ jobId: string }>();
   const { localeNavigate } = useLocale();
   const { locale } = getLocaleConfig(i18n.language);
+  const { allColumns: listingColumns } = useListingsColumns(locale);
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [page, setPage] = useState(1);
@@ -199,14 +221,45 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     [locale]
   );
 
-  const allColumns: TableColumn<ListingJobItemDto>[] = useMemo(
-    () => [
+  const allColumns: TableColumn<ListingJobItemDto>[] = useMemo(() => {
+    const dash = (
+      <Text variant="body-sm" color="text.tertiary">
+        —
+      </Text>
+    );
+    const listingColumn = (key: string) => listingColumns.find((column) => column.key === key);
+    /**
+     * A listings-table column, re-pointed at the listing a job item became.
+     * Failed / queued items have no listing, so they read "—" — never a fake 0.
+     * Not sortable here: the job sort runs over job-item fields only.
+     */
+    const fromListing = (key: string): TableColumn<ListingJobItemDto> | null => {
+      const column = listingColumn(key);
+      if (!column) {
+        return null;
+      }
+      return {
+        ...column,
+        sortable: false,
+        render: (_value, item, index) =>
+          item.listing && column.render
+            ? column.render((item.listing as unknown as Record<string, unknown>)[key], item.listing, index)
+            : dash,
+      };
+    };
+    const productListingColumn = listingColumn('product');
+
+    const columns: (TableColumn<ListingJobItemDto> | null)[] = [
       {
         key: 'product',
         sortable: true,
         header: t('listings.table.product'),
-        width: '22rem',
-        render: (_value, item) => {
+        width: '20.5rem',
+        render: (_value, item, index) => {
+          // Same cell as the listings table once the item became a listing.
+          if (item.listing && productListingColumn?.render) {
+            return productListingColumn.render(item.listing.title, item.listing, index);
+          }
           const meta: ProductTableCellMetaRow[] = [
             { label: t('listings.jobs.items.asin'), id: item.asin, storeType: 'amazon' },
           ];
@@ -215,6 +268,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
               label: t('listings.jobs.items.ebayId'),
               id: item.ebayItemId,
               storeType: 'ebay',
+              icon: 'tag',
             });
           }
           return <ProductTableCell title={item.productTitle || item.asin} imageUrl={item.imageUrls?.[0]} meta={meta} />;
@@ -231,10 +285,12 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
           </StatusBadge>
         ),
       },
+      ...LISTING_COLUMN_KEYS.map(fromListing),
       {
         key: 'failureCode',
         sortable: true,
         header: t('listings.jobs.items.reason'),
+        width: '18rem',
         render: (_value, item) => {
           // Sellers see the localized, actionable reason only. The provider's
           // raw text (eBay error ids, SKUs, internal field names) is operator
@@ -242,15 +298,13 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
           const reason = failureLabel(item);
           const reference = failureReference(item);
           if (!reason) {
-            return (
-              <Text variant="body-sm" color="text.tertiary">
-                —
-              </Text>
-            );
+            return dash;
           }
           return (
             <S.FailureCell>
-              <Text variant="body-sm">{reason}</Text>
+              <Text variant="body-sm" color="semantic.error">
+                {reason}
+              </Text>
               {reference ? (
                 <Text variant="caption" color="text.tertiary">
                   {t('listings.jobs.items.reference')}: {reference}
@@ -276,11 +330,13 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       // exhausted the retries that could work (429/5xx at the HTTP layer, and
       // the aspect self-heal). Offering the button would spend a common
       // resource on the attempt least likely to succeed.
-    ],
-    [t, itemStatusLabel, failureLabel, failureReference, formatJobDate]
-  );
+    ];
+    return columns.filter((column): column is TableColumn<ListingJobItemDto> => Boolean(column));
+  }, [t, listingColumns, itemStatusLabel, failureLabel, failureReference, formatJobDate]);
 
-  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const listingCardProps = useCallback((listing: ListingDto) => toListingCardProps(listing, t, locale), [t, locale]);
+
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>(DEFAULT_HIDDEN_COLUMN_KEYS);
   const [columnOrder, setColumnOrder] = useState<string[]>([]);
   const orderedKeys = useMemo(() => {
     const all = allColumns.map((column) => column.key);
@@ -525,6 +581,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       itemStatusLabel={itemStatusLabel}
       itemFailureLabel={failureLabel}
       itemFailureReference={failureReference}
+      listingCardProps={listingCardProps}
       itemSearch={itemSearch}
       onItemSearchChange={handleItemSearchChange}
       onClearItemSearch={handleClearItemSearch}

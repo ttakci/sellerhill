@@ -22,8 +22,9 @@ export const Header = styled.div`
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm-md')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
+  background: ${tkn('colors.glass.surface')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  backdrop-filter: blur(8px);
 `;
 
 /** Same disc language as the list row avatar, one size up for the header. */
@@ -35,7 +36,9 @@ export const HeaderAvatar = styled.div`
   width: 2.75rem;
   height: 2.75rem;
   border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.brand.secondary')};
+  background: ${tkn('colors.brand.gradient')};
+  color: ${tkn('colors.text.inverse')};
+  box-shadow: 0 2px 10px ${tkn('colors.glass.glowBlue')};
 `;
 
 export const HeaderText = styled.div`
@@ -72,7 +75,7 @@ export const ContextBar = styled.div`
   gap: ${tkn('spacing.sm-md')};
   min-width: 0;
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  background: ${tkn('colors.glass.tint')};
+  background: ${tkn('colors.glass.panelCanvas')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
@@ -114,7 +117,22 @@ export const Messages = styled.div`
   min-height: 0;
   overflow-y: auto;
   padding: ${tkn('spacing.lg')};
-  background: ${tkn('colors.glass.tint')};
+  background: ${tkn('colors.glass.panelCanvas')};
+  scrollbar-width: thin;
+  scrollbar-color: ${tkn('colors.border.control')} transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${tkn('colors.border.control')};
+    border-radius: ${tkn('radius.full')};
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${tkn('colors.brand.primary')};
+  }
 `;
 
 /**
@@ -124,7 +142,7 @@ export const Messages = styled.div`
  * squeezed into a narrow column with dead space around it. Those get the
  * full row width instead, like an e-mail client would give them.
  */
-export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean }>`
+export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean; $tone?: 'brand' | 'amber' }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
@@ -136,14 +154,49 @@ export const Bubble = styled.div<{ $mine: boolean; $wide?: boolean }>`
   border-radius: ${tkn('radius.lg')};
   border-bottom-right-radius: ${({ $mine, theme }) => ($mine ? theme.radius.sm : theme.radius.lg)};
   border-bottom-left-radius: ${({ $mine, theme }) => ($mine ? theme.radius.lg : theme.radius.sm)};
-  background: ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelected : theme.colors.surface.primary)};
+  background: ${({ $mine, $tone, theme }) => {
+    if ($mine) {
+      return theme.colors.brand.secondary;
+    }
+    if ($tone === 'amber') {
+      return theme.colors.semanticTint.warning;
+    }
+    return theme.colors.surface.primary;
+  }};
   border: 0.0625rem solid
-    ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelectedAccent : theme.colors.border.primary)};
-  box-shadow: ${({ $mine, theme }) => ($mine ? 'none' : theme.shadows.sm)};
+    ${({ $mine, $tone, theme }) => {
+      if ($mine) {
+        return `${theme.colors.brand.primary}22`;
+      }
+      if ($tone === 'amber') {
+        return theme.colors.semanticTintBorder.warning;
+      }
+      return theme.colors.border.primary;
+    }};
+  border-left: 0.1875rem solid
+    ${({ $mine, $tone, theme }) => {
+      if ($tone === 'amber' && !$mine) {
+        return theme.colors.semantic.warning;
+      }
+      if ($mine) {
+        return theme.colors.brand.primary;
+      }
+      return 'transparent';
+    }};
+  box-shadow: ${({ $mine, theme }) => ($mine ? `0 2px 12px ${theme.colors.glass.glowBlue}` : theme.shadows.sm)};
   transition: all ${tkn('transitions.fast')};
 
   &:hover {
-    border-color: ${({ $mine, theme }) => ($mine ? theme.colors.table.rowSelectedAccent : theme.colors.border.focus)};
+    border-color: ${({ $mine, $tone, theme }) => {
+      if ($mine) {
+        return theme.colors.brand.primary;
+      }
+      if ($tone === 'amber') {
+        return theme.colors.semantic.warning;
+      }
+      return theme.colors.border.focus;
+    }};
+    transform: translateY(-1px);
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
@@ -208,6 +261,12 @@ export const Composer = styled.div`
   margin-top: auto;
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+  background: ${tkn('colors.glass.surface')};
+  backdrop-filter: blur(8px);
+
+  &:focus-within {
+    box-shadow: 0 0 0 0.1875rem ${tkn('colors.brand.secondary')};
+  }
 `;
 
 export const StateSlot = styled.div`

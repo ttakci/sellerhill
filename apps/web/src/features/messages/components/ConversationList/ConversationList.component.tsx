@@ -60,8 +60,17 @@ export const ConversationList = ({
       </S.ListHeader>
 
       <S.Rows>
-        {rows.map((row) => (
-          <S.Row key={row.id} $active={row.isActive}>
+        {rows.map((row, index) => {
+          const tone: 'brand' | 'amber' = (row.tone as 'brand' | 'amber') ?? 'brand';
+          const unread = row.unreadCount > 0;
+          return (
+          <S.Row
+            key={row.id}
+            $active={row.isActive}
+            $unread={unread}
+            $tone={tone}
+            $index={index}
+          >
             <S.RowCheck>
               <Checkbox
                 checked={row.isSelected}
@@ -74,16 +83,16 @@ export const ConversationList = ({
                 <>
                   <S.ThumbImage src={row.imageUrl} alt="" loading="lazy" />
                   <S.AvatarBadge>
-                    <S.Avatar $unread={row.unreadCount > 0}>
-                      <Text variant="caption" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
+                    <S.Avatar $unread={unread} $tone={tone}>
+                      <Text variant="caption" weight="semibold" color={unread ? 'text.inverse' : 'brand.primary'}>
                         {row.avatarLabel}
                       </Text>
                     </S.Avatar>
                   </S.AvatarBadge>
                 </>
               ) : (
-                <S.Avatar $unread={row.unreadCount > 0} $large>
-                  <Text variant="body" weight="semibold" color={row.unreadCount > 0 ? 'text.inverse' : 'brand.primary'}>
+                <S.Avatar $unread={unread} $tone={tone} $large>
+                  <Text variant="body" weight="semibold" color={unread ? 'text.inverse' : 'brand.primary'}>
                     {row.avatarLabel}
                   </Text>
                 </S.Avatar>
@@ -92,18 +101,18 @@ export const ConversationList = ({
             <S.RowMain>
               <S.RowButton type="button" onClick={() => onOpen(row.id)} aria-current={row.isActive || undefined}>
                 <S.NameLine>
-                  {row.unreadCount > 0 && <S.UnreadDot aria-hidden />}
+                  {unread && <S.UnreadDot aria-hidden $tone={tone} />}
                   <S.NameText>
                     <Text
                       variant="body"
-                      weight={row.unreadCount > 0 ? 'semibold' : 'medium'}
-                      color={row.unreadCount > 0 ? 'text.primary' : 'text.secondary'}
+                      weight={unread ? 'semibold' : 'medium'}
+                      color={unread ? 'text.primary' : 'text.secondary'}
                       truncate
                     >
                       {row.otherParty}
                     </Text>
                   </S.NameText>
-                  <Text variant="caption" color={row.unreadCount > 0 ? 'brand.primary' : 'text.tertiary'} numeric>
+                  <Text variant="caption" color={unread ? (tone === 'amber' ? 'semantic.warning' : 'brand.primary') : 'text.tertiary'} numeric>
                     {row.date}
                   </Text>
                 </S.NameLine>
@@ -111,25 +120,25 @@ export const ConversationList = ({
                   <S.RowLine>
                     <Text
                       variant="body-sm"
-                      weight={row.unreadCount > 0 ? 'semibold' : 'regular'}
-                      color={row.unreadCount > 0 ? 'text.primary' : 'text.secondary'}
+                      weight={unread ? 'semibold' : 'regular'}
+                      color={unread ? 'text.primary' : 'text.secondary'}
                       truncate
                     >
                       {row.title}
                     </Text>
-                    {row.unreadCount > 0 && (
-                      <Badge variant="primary" size="xs" isPill>
+                    {unread && (
+                      <Badge variant={tone === 'amber' ? 'warning' : 'primary'} size="xs" isPill>
                         {row.unreadCount}
                       </Badge>
                     )}
                   </S.RowLine>
                 )}
                 <S.RowLine>
-                  <Text variant="body-sm" color={row.unreadCount > 0 ? 'text.secondary' : 'text.tertiary'} truncate>
+                  <Text variant="body-sm" color={unread ? 'text.secondary' : 'text.tertiary'} truncate>
                     {row.snippet}
                   </Text>
-                  {!row.title && row.unreadCount > 0 && (
-                    <Badge variant="primary" size="xs" isPill>
+                  {!row.title && unread && (
+                    <Badge variant={tone === 'amber' ? 'warning' : 'primary'} size="xs" isPill>
                       {row.unreadCount}
                     </Badge>
                   )}
@@ -142,7 +151,8 @@ export const ConversationList = ({
               )}
             </S.RowMain>
           </S.Row>
-        ))}
+          );
+        })}
       </S.Rows>
     </S.Wrapper>
   );

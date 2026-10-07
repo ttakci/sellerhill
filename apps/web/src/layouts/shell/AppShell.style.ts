@@ -273,7 +273,7 @@ export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'stretch')};
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.2xs')};
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -289,7 +289,7 @@ export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')} ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.md')} ${tkn('spacing.2xs')};
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
   color: ${tkn('colors.sidebar.textMuted')};
   font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
@@ -301,7 +301,7 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 export const NavDivider = styled.div`
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
-  margin: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  margin: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
 `;
 
 export const NavItemWrapper = styled.div`
@@ -450,7 +450,7 @@ export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  margin-top: ${({ $isOpen, theme }) => ($isOpen ? theme.spacing.xs : '0')};
+  margin-top: ${({ $isOpen, theme }) => ($isOpen ? theme.spacing['2xs'] : '0')};
 `;
 
 export const SidebarFooter = styled.div`

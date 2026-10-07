@@ -193,8 +193,9 @@ export const MetaValue = styled.dd`
   }
 `;
 
-/** The figures strip: an optional chip line on top, then the figures, under one hairline. */
+/** The figures strip: figures + the detail affordance, under one hairline. */
 export const Footer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -204,8 +205,11 @@ export const Footer = styled.div`
 `;
 
 export const FooterBadgeRow = styled.div`
+  position: absolute;
+  top: 0;
+  left: ${tkn('spacing.md+')};
+  transform: translateY(-60%);
   display: flex;
-  justify-content: flex-start;
 `;
 
 /** Sale · cost · profit · ROI. */

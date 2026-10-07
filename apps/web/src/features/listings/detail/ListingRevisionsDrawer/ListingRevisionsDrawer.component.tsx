@@ -74,13 +74,16 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
   const { t } = useTranslation(['listings']);
   return (
     <S.Card>
-      <S.CardHead>
-        <Icon name="clock" size={13} color="text.tertiary" />
-        <Text variant="caption" color="text.tertiary" numeric>
+      <S.DateRibbon>
+        <S.DateRibbonIcon>
+          <Icon name="clock" size={13} />
+        </S.DateRibbonIcon>
+        <Text variant="caption" weight="semibold" color="text.secondary" numeric>
           {row.recordedAt}
         </Text>
-      </S.CardHead>
-      <S.ChangeStack>
+      </S.DateRibbon>
+      <S.CardBody>
+        <S.ChangeStack>
         <ChangeLine
           label={t('listings.detail.revisions.priceChange')}
           previous={row.previousPrice}
@@ -110,6 +113,7 @@ const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement 
           delta={row.quantityDelta}
         />
       </S.ChangeStack>
+      </S.CardBody>
     </S.Card>
   );
 };

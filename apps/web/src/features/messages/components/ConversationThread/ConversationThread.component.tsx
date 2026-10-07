@@ -48,7 +48,7 @@ export const ConversationThread = ({
     <S.Wrapper>
       <S.Header>
         <S.HeaderAvatar aria-hidden>
-          <Text variant="body-sm" weight="semibold" color="brand.primary">
+          <Text variant="body-sm" weight="semibold" color="text.inverse">
             {avatarLabel}
           </Text>
         </S.HeaderAvatar>

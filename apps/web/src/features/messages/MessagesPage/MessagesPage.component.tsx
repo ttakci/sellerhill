@@ -93,31 +93,37 @@ export const MessagesPageComponent = ({
           {folderGroups.map((group) => (
             <S.RailGroup key={group.key} aria-label={group.label}>
               <S.RailGroupLabel>
+                <S.RailGroupDot $tone={group.key === 'deleted' || group.key === 'archive' ? 'amber' : 'brand'} aria-hidden />
                 <Text variant="overline" color="text.tertiary">
                   {group.label}
                 </Text>
               </S.RailGroupLabel>
-              {group.items.map((item) => (
+              {group.items.map((item) => {
+                const isEbayItem = item.key.includes('FROM_EBAY');
+                const tone: 'brand' | 'amber' = isEbayItem ? 'amber' : 'brand';
+                return (
                 <S.RailItem
                   key={item.key}
                   type="button"
                   $active={item.isActive}
+                  $tone={tone}
                   aria-current={item.isActive || undefined}
                   onClick={item.onSelect}
                 >
-                  <Icon name={item.icon} size={16} color={item.isActive ? 'brand.primary' : 'text.secondary'} />
+                  <Icon name={item.icon} size={16} color={item.isActive ? (tone === 'amber' ? 'semantic.warning' : 'brand.primary') : 'text.secondary'} />
                   <S.RailItemLabel>
                     <Text variant="body-sm" weight={item.isActive ? 'semibold' : 'medium'} color="inherit">
                       {item.label}
                     </Text>
                   </S.RailItemLabel>
                   {!!item.count && (
-                    <Badge variant="primary" size="xs" isPill>
+                    <Badge variant={tone === 'amber' ? 'warning' : 'primary'} size="xs" isPill>
                       {item.count}
                     </Badge>
                   )}
                 </S.RailItem>
-              ))}
+                );
+              })}
             </S.RailGroup>
           ))}
         </S.RailPane>

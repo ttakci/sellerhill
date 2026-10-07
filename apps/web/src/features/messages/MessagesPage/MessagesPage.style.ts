@@ -21,7 +21,7 @@
  */
 
 import styled from '@emotion/styled';
-import { Card, PageContainer, tkn } from '@repo/ui';
+import { Card, glassSurface, PageContainer, tkn } from '@repo/ui';
 
 /**
  * The inbox is the one page that must FIT the viewport instead of scrolling
@@ -75,10 +75,16 @@ export const CompactFilters = styled.div`
 `;
 
 /**
- * The whole inbox — one Card. `grid-template-rows: minmax(0, 1fr)` (not the
- * implicit default) is load-bearing: it's what lets a grid item declare its
- * own `min-height: 0` and scroll internally instead of stretching the whole
- * shell to its content height.
+ * The whole inbox — one glass card over the aurora, so it reads as one
+ * mail surface with the same depth as every other glass page (orders,
+ * listings, order detail). `glassSurface` paints the sheen + blur + glass
+ * shadow into the shell itself — the inner panes stay transparent so the
+ * light shows through, not three opaque boxes glued together.
+ *
+ * `grid-template-rows: minmax(0, 1fr)` (not the implicit default) is
+ * load-bearing: it's what lets a grid item declare its own `min-height: 0`
+ * and scroll internally instead of stretching the whole shell to its content
+ * height.
  */
 export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   display: grid;
@@ -91,7 +97,7 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   min-height: 12rem;
   padding: 0;
   overflow: hidden;
-  box-shadow: ${tkn('shadows.md')};
+  ${({ theme }) => glassSurface(theme)}
 
   & > [data-pane='list'] {
     display: ${({ $threadOpen }) => ($threadOpen ? 'none' : 'flex')};
@@ -123,9 +129,9 @@ export const Shell = styled(Card)<{ $threadOpen: boolean }>`
   }
 `;
 
-/** Tinted so the rail reads as a sidebar-within-the-card, not a fourth
- * white box — the same `glass.tint` wash the thread's message canvas and
- * every card's figures row use. */
+/** Tinted so the rail reads as a sidebar-within-the-card — `panelCanvas`
+ * is a touch deeper than `glass.tint`, so the rail still lifts off the
+ * frosted shell instead of washing into it. */
 export const RailPane = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
@@ -133,8 +139,19 @@ export const RailPane = styled.div`
   min-height: 0;
   padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
   overflow-y: auto;
-  background: ${tkn('colors.glass.tint')};
+  scrollbar-width: thin;
+  scrollbar-color: ${tkn('colors.border.control')} transparent;
+  background: ${tkn('colors.glass.panelCanvas')};
   border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
+
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${tkn('colors.border.control')};
+    border-radius: ${tkn('radius.full')};
+  }
 `;
 
 /** The label takes the slack so the unread count badge sits at the row's end. */
@@ -150,16 +167,34 @@ export const RailGroup = styled.nav`
 `;
 
 export const RailGroupLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
   padding: 0 ${tkn('spacing.sm')} ${tkn('spacing.xs')};
 `;
 
-export const RailItem = styled.button<{ $active: boolean }>`
+export const RailGroupDot = styled.span<{ $tone: 'brand' | 'amber' }>`
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${({ $tone, theme }) =>
+    $tone === 'amber' ? theme.colors.semantic.warning : theme.colors.brand.primary};
+  opacity: 0.9;
+`;
+
+export const RailItem = styled.button<{ $active: boolean; $tone?: 'brand' | 'amber' }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
   width: 100%;
   padding: ${tkn('spacing.sm')} ${tkn('spacing.sm')};
   border: none;
+  border-left: 0.1875rem solid
+    ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
+  /* Keep amber tone visible on the active accent when the item belongs to FROM_EBAY */
+  ${({ $active, $tone, theme }) =>
+    $active && $tone === 'amber' ? `border-left-color: ${theme.colors.semantic.warning};` : ''}
   border-radius: ${tkn('radius.md')};
   background: ${({ $active, theme }) => ($active ? theme.colors.table.rowSelected : 'transparent')};
   color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.primary)};
