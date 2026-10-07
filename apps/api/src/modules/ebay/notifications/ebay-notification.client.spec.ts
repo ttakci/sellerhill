@@ -58,7 +58,7 @@ describe('EbayNotificationClient', () => {
   });
 
   it('reads the first supported payload of a topic', async () => {
-    mocked.get.mockResolvedValue({ status: 200, data: { topicId: 'NEW_MESSAGE', supportedPayloads: [{ format: 'JSON', schemaVersion: '1.0', deliveryProtocol: 'HTTPS' }] } });
+    mocked.get.mockResolvedValue({ status: 200, data: { topicId: 'NEW_MESSAGE', supportedPayloads: [{ format: ['JSON'], schemaVersion: '1.0', deliveryProtocol: 'HTTPS' }] } }); // eBay's real shape: format is an array
     await expect(client.getTopic('NEW_MESSAGE')).resolves.toEqual({ format: 'JSON', schemaVersion: '1.0', deliveryProtocol: 'HTTPS' });
   });
 

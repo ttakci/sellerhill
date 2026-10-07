@@ -56,7 +56,8 @@ export function useMessagesInbox(state: MessagesUrlState) {
   const { currentData: conversationsPage, isFetching: isListFetching, isLoading: isListLoading } =
     useGetConversationsQuery(
       { ebayAccountId, type: merged ? undefined : type, status: folderToStatus(folder), page, limit: MESSAGES_PAGE_SIZE },
-      { skip: !activeAccount || !messagingEnabled },
+      // Every visit reads eBay again: "did my message go, did they answer" must not come from a cache.
+      { skip: !activeAccount || !messagingEnabled, refetchOnMountOrArgChange: true },
     );
   const conversations = conversationsPage?.items ?? EMPTY_CONVERSATIONS;
 
@@ -75,7 +76,7 @@ export function useMessagesInbox(state: MessagesUrlState) {
 
   const { data: thread, isFetching: isThreadFetching } = useGetConversationThreadQuery(
     { conversationId: conversationId ?? '', ebayAccountId, type: threadType, page: 1, limit: MESSAGES_THREAD_LIMIT },
-    { skip: !conversationId || !activeAccount || !messagingEnabled },
+    { skip: !conversationId || !activeAccount || !messagingEnabled, refetchOnMountOrArgChange: true },
   );
 
   /** The store's own identities, lower-cased — a message from any of them is "mine". */
@@ -99,10 +100,28 @@ export function useMessagesInbox(state: MessagesUrlState) {
   /* ─── unread per conversation type — counted live from eBay, which also
    * corrects the sidebar badge (the server stores the recount) ─── */
 
-  const { data: unreadBreakdown } = useGetUnreadBreakdownQuery(
+  const { data: unreadBreakdown, refetch: refetchBreakdown } = useGetUnreadBreakdownQuery(
     { ebayAccountId },
-    { skip: !ebayAccountId || !messagingEnabled, pollingInterval: MESSAGES_BREAKDOWN_POLL_INTERVAL_MS },
+    {
+      skip: !ebayAccountId || !messagingEnabled,
+      pollingInterval: MESSAGES_BREAKDOWN_POLL_INTERVAL_MS,
+      refetchOnMountOrArgChange: true,
+    },
   );
+
+  // eBay sends no notice when a message is READ on its own site, so coming back
+  // to this tab recounts (which also corrects the sidebar badge). Scoped here —
+  // the store-wide RTK focus listener is not wired up in this app.
+  useEffect(() => {
+    if (!ebayAccountId || !messagingEnabled) {
+      return undefined;
+    }
+    const handleFocus = (): void => {
+      void refetchBreakdown();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [ebayAccountId, messagingEnabled, refetchBreakdown]);
 
   /* ─── opening an unread thread marks it read — once per conversation id ─── */
 

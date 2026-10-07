@@ -276,6 +276,17 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 168,
   }),
   def({
+    key: PlatformSettingKey.EBAY_MESSAGES_UNREAD_RECOUNT_MINUTES,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_MESSAGES_UNREAD_RECOUNT_MINUTES',
+    // 3 calls per recount. 500 sellers active 8 h/day: 10 min = ~72k/day
+    // (5 min = ~144k) of the 500,000/day Message pool.
+    defaultValue: '10',
+    min: 1,
+    max: 1440,
+  }),
+  def({
     key: PlatformSettingKey.EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN,
     category: PlatformSettingCategory.EBAY,
     type: PlatformSettingType.NUMBER,

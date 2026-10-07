@@ -125,7 +125,9 @@ export class EbayNotificationClient {
       throw new EbayNotificationApiError(res.status, [], `topic ${topicId} lists no supported payload`);
     }
     return {
-      format: asString(first.format),
+      // getTopic answers `format: ["JSON"]` (an array), but createSubscription takes one string;
+      // sending '' made every NEW_MESSAGE subscription fail with "Invalid request" (production, 2026-10-04..07).
+      format: asString(Array.isArray(first.format) ? first.format[0] : first.format),
       schemaVersion: asString(first.schemaVersion),
       deliveryProtocol: asString(first.deliveryProtocol),
     };

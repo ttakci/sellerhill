@@ -9,6 +9,7 @@ import {
 } from '@repo/shared';
 
 import type { DatabaseService } from '../../common/database/database.service';
+import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import type { EbayService } from '../ebay/ebay.service';
 import type { EbayNotificationService } from '../ebay/notifications/ebay-notification.service';
 
@@ -75,12 +76,13 @@ function build() {
     getAccountAccessToken: jest.fn().mockResolvedValue('tok'),
   };
   const db = { query: jest.fn() };
-  const notifications = { isEnabled: jest.fn().mockReturnValue(true) };
+  const notifications = { isEnabled: jest.fn().mockReturnValue(true), subscribeAccount: jest.fn().mockResolvedValue('created') };
   const service = new EbayMessagesService(
     client as unknown as EbayMessageClient,
     ebayService as unknown as EbayService,
     db as unknown as DatabaseService,
-    notifications as unknown as EbayNotificationService
+    notifications as unknown as EbayNotificationService,
+    { getNumber: jest.fn().mockResolvedValue(10) } as unknown as PlatformSettingsService
   );
   return { service, client, ebayService, db, notifications };
 }
@@ -253,6 +255,23 @@ describe('EbayMessagesService', () => {
       const update = db.query.mock.calls.find(([sql]) => /UPDATE ebay_accounts/.test(sql as string)) as [string, unknown[]];
       expect(update[1]).toEqual([10, ACCOUNT]);
     });
+
+    it('reuses a recount for a minute and drops it after the store marks a conversation read', async () => {
+      const { service, db, client } = build();
+      db.query.mockImplementation((sql: string) =>
+        Promise.resolve(/WHERE id = \$1 AND user_id = \$2/.test(sql) ? [accountRow()] : [])
+      );
+      client.getConversations.mockResolvedValue({ items: [], total: 1 });
+      client.updateRead.mockResolvedValue(undefined);
+
+      await service.unreadBreakdown(USER, ACCOUNT);
+      await service.unreadBreakdown(USER, ACCOUNT);
+      expect(client.getConversations).toHaveBeenCalledTimes(2);
+
+      await service.setRead(USER, 'c1', { ebayAccountId: ACCOUNT, type: EbayConversationType.FROM_MEMBERS, read: true });
+      await service.unreadBreakdown(USER, ACCOUNT);
+      expect(client.getConversations).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe('getThread', () => {
@@ -417,10 +436,10 @@ describe('EbayMessagesService', () => {
   describe('unreadCount', () => {
     const ACCOUNT_B = '22222222-2222-4222-8222-222222222222';
 
-    it('sums the stored counters with no eBay call while notifications are enabled', async () => {
+    it('sums the stored counters with no eBay call while they are under the recount interval', async () => {
       const { service, db, client, notifications } = build();
       notifications.isEnabled.mockReturnValue(true);
-      const recent = new Date(Date.now() - 60 * 60 * 1000);
+      const recent = new Date(Date.now() - 60 * 1000);
       db.query.mockResolvedValue([
         { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 2, unread_message_synced_at: recent, message_subscription_id: 'sub-a' },
         { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 5, unread_message_synced_at: recent, message_subscription_id: 'sub-b' },
@@ -442,14 +461,14 @@ describe('EbayMessagesService', () => {
       expect(params).toEqual([USER, EbayAccountStatus.ACTIVE]);
     });
 
-    it('recounts a stale store with no NEW_MESSAGE subscription even while notifications are enabled, at BACKGROUND priority', async () => {
+    it('recounts every store older than the recount interval (10 min here), subscribed or not (eBay sends nothing when a message is read on its site), at BACKGROUND priority', async () => {
       const { service, db, client, notifications } = build();
       notifications.isEnabled.mockReturnValue(true);
-      const old = new Date(Date.now() - 60 * 60 * 1000);
+      const old = new Date(Date.now() - 11 * 60 * 1000);
       db.query.mockImplementation((sql: string) => {
         if (/WHERE user_id = \$1 AND status = \$2/.test(sql)) {
           return Promise.resolve([
-            { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 9, unread_message_synced_at: old, message_subscription_id: null },
+            { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 9, unread_message_synced_at: old, message_subscription_id: 'sub-a' },
             { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 4, unread_message_synced_at: old, message_subscription_id: 'sub-b' },
           ]);
         }
@@ -460,57 +479,40 @@ describe('EbayMessagesService', () => {
       });
       client.getConversations
         .mockResolvedValueOnce({ items: [], total: 2 })
-        .mockResolvedValueOnce({ items: [], total: 0 });
+        .mockResolvedValueOnce({ items: [], total: 0 })
+        .mockResolvedValueOnce({ items: [], total: 1 })
+        .mockResolvedValueOnce({ items: [], total: 1 });
 
       const result = await service.unreadCount(USER);
 
-      expect(client.getConversations).toHaveBeenCalledTimes(2);
+      expect(client.getConversations).toHaveBeenCalledTimes(4);
       for (const call of client.getConversations.mock.calls as unknown[][]) {
         expect(call[2]).toBe(EbayCallPriority.BACKGROUND);
       }
       expect(result).toEqual({
-        total: 6,
+        total: 4,
         byAccount: [
           { ebayAccountId: ACCOUNT, unread: 2 },
-          { ebayAccountId: ACCOUNT_B, unread: 4 },
+          { ebayAccountId: ACCOUNT_B, unread: 2 },
         ],
       });
     });
 
-    it('recounts a SUBSCRIBED store once its counter is older than a day, so a missed webhook self-heals', async () => {
-      const { service, db, client, notifications } = build();
+    it('retries the NEW_MESSAGE subscription of a store that has none, at most once an hour', async () => {
+      const { service, db, notifications, ebayService } = build();
       notifications.isEnabled.mockReturnValue(true);
-      const dayOld = new Date(Date.now() - 25 * 60 * 60 * 1000);
-      const hourOld = new Date(Date.now() - 60 * 60 * 1000);
-      db.query.mockImplementation((sql: string) => {
-        if (/WHERE user_id = \$1 AND status = \$2/.test(sql)) {
-          return Promise.resolve([
-            { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 9, unread_message_synced_at: dayOld, message_subscription_id: 'sub-a' },
-            { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 4, unread_message_synced_at: hourOld, message_subscription_id: 'sub-b' },
-          ]);
-        }
-        if (/WHERE id = \$1 AND user_id = \$2/.test(sql)) {
-          return Promise.resolve([accountRow()]);
-        }
-        return Promise.resolve([]);
-      });
-      client.getConversations
-        .mockResolvedValueOnce({ items: [], total: 1 })
-        .mockResolvedValueOnce({ items: [], total: 0 });
+      db.query.mockResolvedValue([
+        { id: ACCOUNT, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 1, unread_message_synced_at: new Date(), message_subscription_id: null },
+        { id: ACCOUNT_B, granted_scopes: [...EBAY_MESSAGING_SCOPES], unread_message_count: 1, unread_message_synced_at: new Date(), message_subscription_id: 'sub-b' },
+      ]);
 
-      const result = await service.unreadCount(USER);
+      await service.unreadCount(USER);
+      await service.unreadCount(USER);
+      await new Promise((resolve) => setImmediate(resolve));
 
-      expect(client.getConversations).toHaveBeenCalledTimes(2);
-      for (const call of client.getConversations.mock.calls as unknown[][]) {
-        expect(call[2]).toBe(EbayCallPriority.BACKGROUND);
-      }
-      expect(result).toEqual({
-        total: 5,
-        byAccount: [
-          { ebayAccountId: ACCOUNT, unread: 1 },
-          { ebayAccountId: ACCOUNT_B, unread: 4 },
-        ],
-      });
+      expect(ebayService.getAccountAccessToken).toHaveBeenCalledTimes(1);
+      expect(notifications.subscribeAccount).toHaveBeenCalledTimes(1);
+      expect(notifications.subscribeAccount).toHaveBeenCalledWith(ACCOUNT, 'tok');
     });
 
     it('recounts a never-synced store from eBay first when notifications are off', async () => {

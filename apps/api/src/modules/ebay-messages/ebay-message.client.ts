@@ -102,8 +102,12 @@ const READ_STATUS_FROM_EBAY: Record<string, EbayConversationStatus> = {
   DELETED: EbayConversationStatus.DELETE,
 };
 
-/** eBay ignores `conversation_status=UNREAD` on FROM_EBAY (returns every conversation), so unread is read from `unreadCount`. */
-const UNREAD_SCAN_MAX_PAGES = 20;
+/**
+ * eBay ignores `conversation_status=UNREAD` on FROM_EBAY (returns every conversation), so unread is read from `unreadCount`.
+ * ponytail: only the newest 100 eBay notices are looked at (3 calls per recount, so the badge can recount every 5 min
+ * for 500 sellers inside the 500,000/day Message pool); an unread notice older than that is not counted.
+ */
+const UNREAD_SCAN_MAX_PAGES = 2;
 
 function asConversationStatus(v: unknown): EbayConversationStatus {
   if (typeof v === 'string' && READ_STATUS_FROM_EBAY[v]) {
@@ -236,29 +240,22 @@ export class EbayMessageClient {
 
   /**
    * Unread FROM_EBAY conversations: every active page read, those with
-   * `unreadCount > 0` kept, then paged locally. ~7 calls for 300 conversations
-   * on the 500,000/day Message pool.
-   * ponytail: capped at 20 pages (1,000 conversations); an older unread notice past that is not counted.
+   * `unreadCount > 0` kept, then paged locally (at most UNREAD_SCAN_MAX_PAGES pages).
    */
   private async scanUnread(
     token: string,
     q: ConversationListQuery,
     priority: EbayCallPriority
   ): Promise<ConversationListResult> {
-    const unread: EbayConversationDto[] = [];
-    let offset = 0;
-    for (let pageIndex = 0; pageIndex < UNREAD_SCAN_MAX_PAGES; pageIndex++) {
-      const page = await this.getConversations(
-        token,
-        { type: q.type, limit: EBAY_CONVERSATIONS_MAX_LIMIT, offset },
-        priority
-      );
-      unread.push(...page.items.filter((item) => item.unreadCount > 0));
-      offset += page.items.length;
-      if (page.items.length === 0 || offset >= page.total) {
-        break;
-      }
-    }
+    const read = (offset: number) =>
+      this.getConversations(token, { type: q.type, limit: EBAY_CONVERSATIONS_MAX_LIMIT, offset }, priority);
+    // The first page names the total; the rest are read in parallel (sequential reads took several seconds).
+    const first = await read(0);
+    const pages = Math.min(Math.ceil(first.total / EBAY_CONVERSATIONS_MAX_LIMIT), UNREAD_SCAN_MAX_PAGES);
+    const rest = await Promise.all(
+      Array.from({ length: Math.max(pages - 1, 0) }, (_, i) => read((i + 1) * EBAY_CONVERSATIONS_MAX_LIMIT))
+    );
+    const unread = [first, ...rest].flatMap((page) => page.items.filter((item) => item.unreadCount > 0));
     const start = clampOffset(q.offset);
     return { items: unread.slice(start, start + clampLimit(q.limit)), total: unread.length };
   }

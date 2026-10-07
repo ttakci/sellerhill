@@ -167,6 +167,12 @@ export enum PlatformSettingKey {
    * per sweep against a 5,000/day application-wide ceiling.
    */
   EBAY_RETURN_SYNC_INTERVAL_HOURS = 'ebay.returnSync.intervalHours',
+  /**
+   * Minutes before a store's unread-message badge is recounted from eBay (eBay
+   * sends nothing when a message is read on its own site). 3 Message API calls
+   * per recount against a 500,000/day application-wide pool.
+   */
+  EBAY_MESSAGES_UNREAD_RECOUNT_MINUTES = 'ebay.messages.unreadRecountMinutes',
   /** Stores per tick. */
   EBAY_RETURN_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.returnSync.maxAccountsPerRun',
   /**

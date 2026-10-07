@@ -13,6 +13,7 @@ import {
   EbayUnreadBreakdownDto,
   EbayUnreadCountDto,
   PaginatedConversationsDto,
+  PlatformSettingKey,
   hasMessagingScopes,
   type EbayBulkConversationStatus,
   type EbayConversationRead,
@@ -21,6 +22,7 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { EbayService } from '../ebay/ebay.service';
 import { EbayNotificationService } from '../ebay/notifications/ebay-notification.service';
 
@@ -36,18 +38,21 @@ export const MESSAGING_ERRORS = {
   TOO_LONG: 'ebay.errors.messageTooLong',
 } as const;
 
-/**
- * Without the NEW_MESSAGE webhook nothing keeps the stored counter current, so
- * the badge read recounts a store from eBay once its counter is older than this.
- */
-const UNREAD_STALE_MS = 15 * 60 * 1000;
 
 /**
- * A SUBSCRIBED store's counter is kept by the webhook, but a delivery eBay
- * dropped (or one we could not match) would leave it wrong for ever — so it is
- * recounted too once it is older than a day.
+ * A store with no NEW_MESSAGE subscription (connected before the 2026-10-07
+ * payload fix, or whose subscribe failed) is retried from the badge read, at
+ * most this often per store and process — never by asking the seller to reconnect.
  */
-const SUBSCRIBED_UNREAD_STALE_MS = 24 * 60 * 60 * 1000;
+const SUBSCRIBE_RETRY_MS = 60 * 60 * 1000;
+
+/**
+ * A store's live unread recount (3 Message API calls) is reused for this long,
+ * so page entries, tab switches and several open tabs cost eBay nothing extra.
+ * Dropped by the store's own read/archive/delete writes.
+ * ponytail: per-process memory; each API replica keeps its own copy.
+ */
+const BREAKDOWN_CACHE_MS = 60 * 1000;
 
 /** How eBay words a 403 that is about the token's grant rather than the request. */
 const SCOPE_ERROR_TEXT = /scope|permission|authoriz/i;
@@ -93,12 +98,15 @@ export interface ThreadQuery {
 @Injectable()
 export class EbayMessagesService {
   private readonly logger = new Logger(EbayMessagesService.name);
+  private readonly subscribeTriedAt = new Map<string, number>();
+  private readonly breakdownCache = new Map<string, { at: number; value: EbayUnreadBreakdownDto }>();
 
   constructor(
     private readonly client: EbayMessageClient,
     private readonly ebayService: EbayService,
     private readonly db: DatabaseService,
-    private readonly notifications: EbayNotificationService
+    private readonly notifications: EbayNotificationService,
+    private readonly settings: PlatformSettingsService
   ) {}
 
   async listConversations(userId: string, q: EbayConversationsQuery): Promise<PaginatedConversationsDto> {
@@ -234,6 +242,7 @@ export class EbayMessagesService {
     await this.call(account, () =>
       this.client.updateRead(token, conversationId, input.type, input.read, EbayCallPriority.INTERACTIVE)
     );
+    this.breakdownCache.delete(input.ebayAccountId);
     // A best guess until the next recount: one conversation moved across the line.
     const adjust = input.read
       ? 'unread_message_count = GREATEST(0, unread_message_count - 1)'
@@ -270,14 +279,13 @@ export class EbayMessagesService {
       succeeded.push(...result.succeeded);
       failed.push(...result.failed);
     }
+    this.breakdownCache.delete(input.ebayAccountId);
     return { succeeded, failed };
   }
 
   /**
-   * The sidebar badge. Read from the stored counters; only when nothing keeps a
-   * store's counter current — the webhook is off, or that store has no
-   * NEW_MESSAGE subscription — is a 15-minute-old counter recounted from eBay
-   * first; a subscribed store is recounted once its counter is a day old.
+   * The sidebar badge. Read from the stored counters; a store whose counter is
+   * older than `ebay.messages.unreadRecountMinutes` is recounted from eBay first.
    * Best-effort and at BACKGROUND priority (the badge poll is not a seller
    * action); a failed recount keeps the stored value.
    */
@@ -289,13 +297,17 @@ export class EbayMessagesService {
         ORDER BY created_at ASC`,
       [userId, EbayAccountStatus.ACTIVE]
     );
-    const webhookOff = !this.notifications.isEnabled();
+    // Panel-tunable (`ebay.messages.unreadRecountMinutes`, default 10).
+    const staleMs = (await this.settings.getNumber(PlatformSettingKey.EBAY_MESSAGES_UNREAD_RECOUNT_MINUTES)) * 60 * 1000;
     const byAccount: EbayUnreadCountDto['byAccount'] = [];
     for (const row of rows) {
       let unread = Number(row.unread_message_count) || 0;
-      const unsubscribed = webhookOff || !row.message_subscription_id;
-      const maxAgeMs = unsubscribed ? UNREAD_STALE_MS : SUBSCRIBED_UNREAD_STALE_MS;
-      if (hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at, maxAgeMs)) {
+      if (hasMessagingScopes(row.granted_scopes) && !row.message_subscription_id) {
+        this.retrySubscribe(row.id);
+      }
+      // The webhook adds new messages at once, but eBay sends nothing when a message is READ on its
+      // own site — so even a subscribed store is recounted once its counter is older than this.
+      if (hasMessagingScopes(row.granted_scopes) && isStale(row.unread_message_synced_at, staleMs)) {
         try {
           unread = await this.refreshUnread(userId, row.id, EbayCallPriority.BACKGROUND);
         } catch (error: unknown) {
@@ -320,6 +332,20 @@ export class EbayMessagesService {
     return (await this.unreadBreakdown(userId, ebayAccountId, priority)).total;
   }
 
+  /** Fire-and-forget NEW_MESSAGE subscribe for a store that has none; `subscribeAccount` never throws. */
+  private retrySubscribe(ebayAccountId: string): void {
+    const last = this.subscribeTriedAt.get(ebayAccountId) ?? 0;
+    if (!this.notifications.isEnabled() || Date.now() - last < SUBSCRIBE_RETRY_MS) {
+      return;
+    }
+    this.subscribeTriedAt.set(ebayAccountId, Date.now());
+    void this.ebayService
+      .getAccountAccessToken(ebayAccountId)
+      .then((token) => this.notifications.subscribeAccount(ebayAccountId, token))
+      .then((result) => this.logger.log(`eBay NEW_MESSAGE subscription retry for ${ebayAccountId}: ${result}`))
+      .catch((error: unknown) => this.logger.warn(`eBay NEW_MESSAGE subscription retry failed for ${ebayAccountId}: ${errorText(error)}`));
+  }
+
   /**
    * The same recount, kept per conversation type — the folder rail shows
    * "N unread" beside each type. It also stores the sum, so the sidebar badge
@@ -331,31 +357,35 @@ export class EbayMessagesService {
     priority: EbayCallPriority = EbayCallPriority.INTERACTIVE
   ): Promise<EbayUnreadBreakdownDto> {
     const account = await this.loadAccount(userId, ebayAccountId);
-    const token = await this.ebayService.getAccountAccessToken(ebayAccountId);
-    const counts: Record<EbayConversationType, number> = {
-      [EbayConversationType.FROM_MEMBERS]: 0,
-      [EbayConversationType.FROM_EBAY]: 0,
-    };
-    for (const type of [EbayConversationType.FROM_MEMBERS, EbayConversationType.FROM_EBAY]) {
-      const result = await this.call(account, () =>
-        this.client.getConversations(
-          token,
-          { type, status: EbayConversationStatus.UNREAD, limit: 1, offset: 0 },
-          priority
-        )
-      );
-      counts[type] = result.total;
+    const cached = this.breakdownCache.get(ebayAccountId);
+    if (cached && Date.now() - cached.at < BREAKDOWN_CACHE_MS) {
+      return cached.value;
     }
+    const token = await this.ebayService.getAccountAccessToken(ebayAccountId);
+    const count = (type: EbayConversationType) =>
+      this.call(account, () =>
+        this.client.getConversations(token, { type, status: EbayConversationStatus.UNREAD, limit: 1, offset: 0 }, priority)
+      ).then((result) => result.total);
+    const [members, ebay] = await Promise.all([
+      count(EbayConversationType.FROM_MEMBERS),
+      count(EbayConversationType.FROM_EBAY),
+    ]);
+    const counts: Record<EbayConversationType, number> = {
+      [EbayConversationType.FROM_MEMBERS]: members,
+      [EbayConversationType.FROM_EBAY]: ebay,
+    };
     const total = counts[EbayConversationType.FROM_MEMBERS] + counts[EbayConversationType.FROM_EBAY];
     await this.db.query(
       'UPDATE ebay_accounts SET unread_message_count = $1, unread_message_synced_at = NOW() WHERE id = $2',
       [total, ebayAccountId]
     );
-    return {
+    const value = {
       total,
       members: counts[EbayConversationType.FROM_MEMBERS],
       ebay: counts[EbayConversationType.FROM_EBAY],
     };
+    this.breakdownCache.set(ebayAccountId, { at: Date.now(), value });
+    return value;
   }
 
   /** Ownership (ACTIVE + this user's) and the messaging scopes, in one read. */

@@ -119,7 +119,7 @@ export const MessagesPageComponent = ({
                     </Text>
                   </S.RailItemLabel>
                   {!!item.count && (
-                    <Badge variant={tone === 'amber' ? 'warning' : 'primary'} size="xs" isPill>
+                    <Badge variant="solidNavy" size="xs">
                       {item.count}
                     </Badge>
                   )}

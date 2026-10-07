@@ -30,10 +30,12 @@ import { baseApi } from '@/api/baseApi';
 export const MESSAGES_UNREAD_POLL_INTERVAL_MS = 120_000;
 
 /**
- * How often an OPEN Messages page recounts its store's unread per type. Two
- * Message API calls against the 500,000/day pool, only while the page is open.
+ * How often an OPEN Messages page recounts its store's unread per type (3
+ * Message API calls, 500,000/day pool). New messages arrive by webhook and a
+ * return to the tab recounts at once, so this only catches a read on eBay's
+ * site while the page sits open.
  */
-export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 120_000;
+export const MESSAGES_BREAKDOWN_POLL_INTERVAL_MS = 600_000;
 
 export interface ConversationsQueryArgs {
   ebayAccountId: string;
