@@ -18,6 +18,7 @@ const PAGES: Array<[string[], string]> = [
   [['features/action-center/ActionCenterPage/ActionCenterPage.container.tsx'], 'features/action-center/ActionCenterPage/ActionCenterPage.container.tsx'],
   [['features/orders/all/hooks/useOrdersFilters.ts', 'features/orders/all/OrdersAllPage.container.tsx'], 'features/orders/all/hooks/useOrdersFilters.ts'],
   [['features/returns/ReturnsPage/hooks/useReturnsUrlState.ts', 'features/returns/ReturnsPage/ReturnsPage.container.tsx'], 'features/returns/ReturnsPage/hooks/useReturnsUrlState.ts'],
+  [['features/cancellations/CancellationsPage/hooks/useCancellationsUrlState.ts', 'features/cancellations/CancellationsPage/CancellationsPage.container.tsx'], 'features/cancellations/CancellationsPage/hooks/useCancellationsUrlState.ts'],
   [['features/messages/hooks/useMessagesUrlState.ts', 'features/messages/MessagesPage/MessagesPage.container.tsx'], 'features/messages/hooks/useMessagesUrlState.ts'],
   [['features/listings/overview/ListingsOverviewPage.container.tsx'], 'features/listings/overview/ListingsOverviewPage.container.tsx'],
   [['features/listings/all/hooks/useListingsFilters.ts', 'features/listings/all/ListingsAllPage.container.tsx'], 'features/listings/all/hooks/useListingsFilters.ts'],
@@ -43,6 +44,7 @@ describe('record pages follow their record’s store exactly once', () => {
     'features/listings/detail/ListingDetailPage.container.tsx',
     'features/listings/listing-jobs/details/ListingJobDetailsPage.container.tsx',
     'features/returns/ReturnDetailDrawer/ReturnDetailDrawer.container.tsx',
+    'features/cancellations/CancellationDetailDrawer/CancellationDetailDrawer.container.tsx',
   ])('%s', (file) => {
     expect(read(file).match(/useFollowRecordStore\(/g) ?? []).toHaveLength(1);
   });

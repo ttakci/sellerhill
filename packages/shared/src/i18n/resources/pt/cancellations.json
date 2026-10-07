@@ -1,0 +1,131 @@
+{
+  "cancellations": {
+    "title": "Cancelamentos",
+    "subtitle_one": "{{count}} pedido de cancelamento",
+    "subtitle_many": "{{count}} pedidos de cancelamento",
+    "subtitle_other": "{{count}} pedidos de cancelamento",
+    "loading": "Carregando pedidos de cancelamento…",
+    "notice": "Abra um pedido para ver o que o comprador solicitou e até quando o eBay precisa da sua resposta. Você pode aceitar ou recusar aqui.",
+    "tabs": {
+      "all": "Todas",
+      "action": "Precisam de ação",
+      "in_progress": "Em andamento",
+      "closed": "Encerradas",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Status do cancelamento"
+    },
+    "filters": {
+      "search": "Buscar ID de cancelamento, ID do pedido ou produto…",
+      "clear": "Limpar",
+      "resultCount_one": "{{count}} resultado",
+      "resultCount_many": "{{count}} resultados",
+      "resultCount_other": "{{count}} resultados"
+    },
+    "columns": {
+      "product": "Produto",
+      "request": "Pedido",
+      "status": "Status",
+      "due": "Responder até",
+      "reason": "Motivo",
+      "refund": "Reembolso ao comprador",
+      "requested": "Solicitado em",
+      "buyer": "Comprador"
+    },
+    "order": "Pedido",
+    "viewOrder": "Ver pedido",
+    "asin": "ASIN",
+    "unknownProduct": "Produto desconhecido",
+    "answer": "Aceitar ou recusar",
+    "dueBy": "até {{date}}",
+    "empty": {
+      "title": "Ainda não há pedidos de cancelamento",
+      "description": "Os pedidos que seus compradores pedirem para cancelar no eBay aparecerão aqui."
+    },
+    "emptyFiltered": {
+      "title": "Nenhum pedido corresponde aos filtros",
+      "description": "Tente outra aba ou outro termo de busca.",
+      "action": "Limpar filtros"
+    },
+    "bucket": {
+      "unconfirmed": "Não confirmado recentemente",
+      "action_overdue": "Atrasado",
+      "action_due": "Resposta pendente",
+      "in_progress": "Em andamento",
+      "closed": "Encerrado"
+    },
+    "bucketHint": {
+      "unconfirmed": "O eBay não confirmou este pedido recentemente, por isso o prazo não é exibido.",
+      "action_overdue": "O comprador está aguardando — o prazo do eBay para sua resposta terminou.",
+      "action_due": "O comprador pediu para cancelar. Aceite ou recuse antes do prazo do eBay.",
+      "in_progress": "No momento, nada é esperado de você.",
+      "closed": "O eBay encerrou este pedido."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "O comprador pediu para cancelar",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "O comprador cancelou ou há problema de endereço",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Sem estoque ou não é possível atender",
+      "other": "Outro motivo"
+    },
+    "detail": {
+      "title": "Cancelamento {{id}}",
+      "titleLoading": "Pedido de cancelamento",
+      "open": "Abrir pedido de cancelamento",
+      "loadFailed": "Não foi possível carregar este pedido",
+      "loadFailedDescription": "Tente novamente em instantes ou abra-o no eBay.",
+      "whatYouCanDo": "O que você pode fazer",
+      "nothingToDo": "Nada está pendente para você neste pedido.",
+      "openOnEbay": "Abrir no eBay",
+      "money": "Valores",
+      "requestedRefund": "Reembolso solicitado",
+      "actualRefund": "Reembolsado",
+      "amountOwed": "Valor que você deve",
+      "paymentStatus": "Status do pagamento",
+      "closedAt": "Encerrado",
+      "journey": "Percurso",
+      "journeyEmpty": "O eBay ainda não registrou nenhuma etapa."
+    },
+    "actions": {
+      "approve": "Aprovar",
+      "reject": "Rejeitar"
+    },
+    "confirm": {
+      "approve": {
+        "body": "O pedido é cancelado e a eBay reembolsa o comprador. Isso não pode ser desfeito.",
+        "confirm": "Aprovar cancelamento"
+      },
+      "reject": {
+        "body": "A eBay é informada de que você recusou e o pedido precisa ser enviado.",
+        "bodyWithTracking": "A eBay é informada de que você recusou e o código de rastreio {{tracking}} é enviado junto. O pedido precisa ser enviado.",
+        "confirm": "Rejeitar cancelamento"
+      }
+    },
+    "done": {
+      "approve": "Cancelamento aprovado. A eBay vai reembolsar o comprador.",
+      "reject": "Cancelamento rejeitado."
+    },
+    "actionsOff": "As ações de cancelamento no app estão desativadas — responda na eBay.",
+    "liveUnavailable": "Não foi possível acessar o eBay agora, então este é o último estado que o SellerHill viu. As respostas ficam disponíveis quando o eBay responder novamente.",
+    "errors": {
+      "actionsDisabled": "As ações de cancelamento no app estão desativadas nesta plataforma. Responda ao pedido na eBay.",
+      "actionNotAvailable": "A eBay não oferece mais esta ação no pedido. Atualize e veja o que está pendente agora.",
+      "suspended": "Sua assinatura está suspensa, então as ações de cancelamento estão pausadas. Quite a fatura na página de Cobrança.",
+      "ebayRejected": "A eBay recusou esta ação. Abra o pedido na eBay para ver o motivo.",
+      "unavailable": "Não foi possível acessar a eBay. Tente novamente em instantes.",
+      "sandbox": "As ações de cancelamento não estão disponíveis no sandbox da eBay.",
+      "notFound": "Este pedido de cancelamento não foi encontrado."
+    },
+    "party": {
+      "buyer": "Comprador",
+      "seller": "Você",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Cancelamento criado",
+      "SYSTEM_REFUND": "Reembolso emitido pelo eBay",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "O eBay atualizou o status do reembolso",
+      "buyerOther": "O comprador atualizou o pedido",
+      "sellerOther": "Você atualizou o pedido",
+      "ebayOther": "O eBay atualizou o pedido"
+    }
+  }
+}

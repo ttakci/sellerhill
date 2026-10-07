@@ -165,6 +165,7 @@ export const STORE_FILTERABLE_PATHS: readonly string[] = [
   '/listings/all',
   '/listings/jobs',
   '/returns',
+  '/cancellations',
 ];
 
 /**

@@ -112,6 +112,7 @@ export const baseApi = createApi({
     'BuyerMessageTemplates',
     'Messages',
     'Returns',
+    'Cancellations',
   ],
   endpoints: () => ({}),
 });

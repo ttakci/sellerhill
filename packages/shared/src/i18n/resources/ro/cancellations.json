@@ -1,0 +1,131 @@
+{
+  "cancellations": {
+    "title": "Anulări",
+    "subtitle_one": "{{count}} cerere de anulare",
+    "subtitle_few": "{{count}} cereri de anulare",
+    "subtitle_other": "{{count}} de cereri de anulare",
+    "loading": "Se încarcă cererile de anulare…",
+    "notice": "Deschide o cerere ca să vezi ce a cerut cumpărătorul și până când are nevoie eBay de răspunsul tău. O poți accepta sau refuza de aici.",
+    "tabs": {
+      "all": "Toate",
+      "action": "Necesită acțiune",
+      "in_progress": "În curs",
+      "closed": "Închise",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Starea anulării"
+    },
+    "filters": {
+      "search": "Caută după ID anulare, ID comandă sau produs…",
+      "clear": "Șterge",
+      "resultCount_one": "{{count}} rezultat",
+      "resultCount_few": "{{count}} rezultate",
+      "resultCount_other": "{{count}} de rezultate"
+    },
+    "columns": {
+      "product": "Produs",
+      "request": "Cerere",
+      "status": "Stare",
+      "due": "Răspunde până la",
+      "reason": "Motiv",
+      "refund": "Rambursare către cumpărător",
+      "requested": "Solicitată la",
+      "buyer": "Cumpărător"
+    },
+    "order": "Comandă",
+    "viewOrder": "Vezi comanda",
+    "asin": "ASIN",
+    "unknownProduct": "Produs necunoscut",
+    "answer": "Acceptă sau refuză",
+    "dueBy": "până la {{date}}",
+    "empty": {
+      "title": "Nicio cerere de anulare încă",
+      "description": "Comenzile pe care cumpărătorii tăi cer să le anulezi pe eBay vor apărea aici."
+    },
+    "emptyFiltered": {
+      "title": "Nicio cerere nu se potrivește filtrelor",
+      "description": "Încearcă o altă filă sau alt termen de căutare.",
+      "action": "Șterge filtrele"
+    },
+    "bucket": {
+      "unconfirmed": "Neconfirmată recent",
+      "action_overdue": "Întârziată",
+      "action_due": "Răspuns scadent",
+      "in_progress": "În desfășurare",
+      "closed": "Închisă"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay nu a confirmat recent această cerere, deci termenul nu este afișat.",
+      "action_overdue": "Cumpărătorul așteaptă — termenul eBay pentru răspunsul tău a expirat.",
+      "action_due": "Cumpărătorul a cerut anularea. Acceptă sau refuză înainte de termenul eBay.",
+      "in_progress": "Momentan nu se așteaptă nimic de la tine.",
+      "closed": "eBay a închis această cerere."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "Cumpărătorul a cerut anularea",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Cumpărătorul a anulat sau are o problemă de adresă",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Stoc epuizat sau nu poate fi onorată",
+      "other": "Alt motiv"
+    },
+    "detail": {
+      "title": "Anularea {{id}}",
+      "titleLoading": "Cerere de anulare",
+      "open": "Deschide cererea de anulare",
+      "loadFailed": "Această cerere nu a putut fi încărcată",
+      "loadFailedDescription": "Încearcă din nou peste puțin timp sau deschide-o pe eBay.",
+      "whatYouCanDo": "Ce poți face",
+      "nothingToDo": "Nimic nu așteaptă de la tine la această cerere.",
+      "openOnEbay": "Deschide pe eBay",
+      "money": "Sume",
+      "requestedRefund": "Rambursare solicitată",
+      "actualRefund": "Rambursat",
+      "amountOwed": "Suma pe care o datorezi",
+      "paymentStatus": "Starea plății",
+      "closedAt": "Închisă",
+      "journey": "Parcurs",
+      "journeyEmpty": "eBay nu a înregistrat încă niciun pas."
+    },
+    "actions": {
+      "approve": "Aprobă",
+      "reject": "Respinge"
+    },
+    "confirm": {
+      "approve": {
+        "body": "Comanda este anulată, iar eBay rambursează cumpărătorul. Acțiunea nu poate fi anulată.",
+        "confirm": "Aprobă anularea"
+      },
+      "reject": {
+        "body": "eBay este informat că ai refuzat, iar comanda trebuie expediată.",
+        "bodyWithTracking": "eBay este informat că ai refuzat și se trimite și numărul de urmărire {{tracking}}. Comanda trebuie expediată.",
+        "confirm": "Respinge anularea"
+      }
+    },
+    "done": {
+      "approve": "Anulare aprobată. eBay va rambursa cumpărătorul.",
+      "reject": "Anulare respinsă."
+    },
+    "actionsOff": "Acțiunile de anulare din aplicație sunt oprite — răspunde pe eBay.",
+    "liveUnavailable": "eBay nu a putut fi contactat acum, așa că este afișată ultima stare văzută de SellerHill. Răspunsurile vor fi disponibile când eBay răspunde din nou.",
+    "errors": {
+      "actionsDisabled": "Acțiunile de anulare din aplicație sunt oprite pe această platformă. Răspunde la cerere pe eBay.",
+      "actionNotAvailable": "eBay nu mai oferă această acțiune pentru cerere. Reîmprospătează și vezi ce așteaptă acum.",
+      "suspended": "Abonamentul tău este suspendat, deci acțiunile de anulare sunt oprite. Achită factura pe pagina Facturare.",
+      "ebayRejected": "eBay a refuzat această acțiune. Deschide cererea pe eBay ca să vezi motivul.",
+      "unavailable": "Nu s-a putut contacta eBay. Încearcă din nou peste puțin timp.",
+      "sandbox": "Acțiunile de anulare nu sunt disponibile în sandbox-ul eBay.",
+      "notFound": "Această cerere de anulare nu a fost găsită."
+    },
+    "party": {
+      "buyer": "Cumpărător",
+      "seller": "Tu",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Anulare creată",
+      "SYSTEM_REFUND": "Rambursare emisă de eBay",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay a actualizat starea rambursării",
+      "buyerOther": "Cumpărătorul a actualizat cererea",
+      "sellerOther": "Ai actualizat cererea",
+      "ebayOther": "eBay a actualizat cererea"
+    }
+  }
+}

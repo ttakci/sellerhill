@@ -22,6 +22,7 @@ import {
   DashboardChartGranularity,
   DashboardPeriodKey,
   EbayAccountStatus,
+  EbayCancellationAction,
   EbayConversationDto,
   EbayConversationStatus,
   EbayConversationThreadDto,
@@ -46,6 +47,7 @@ import {
   DEFAULT_LISTING_RULES,
   deriveOrderStage,
   deriveShipByState,
+  deriveCancellationBucket,
   deriveReturnBucket,
   PolicyType,
   ProfitBasis,
@@ -72,6 +74,9 @@ import {
   type DashboardDataDto,
   type DashboardHistoryMonth,
   type EbayBusinessPolicyDto,
+  type EbayCancellationDetailDto,
+  type EbayCancellationDto,
+  type EbayCancellationHistoryEntryDto,
   type EbayCampaignDetailDto,
   type EbayCampaignDto,
   type EbayReturnDetailDto,
@@ -91,6 +96,7 @@ import {
   type UserDto,
   type ListingRevisionDto,
   type ListingRevisionWithListingDto,
+  buildEbayCancellationUrl,
 } from '@repo/shared';
 
 /* =========================================================================
@@ -1445,6 +1451,111 @@ export function demoReturnDetail(row: EbayReturnDto): EbayReturnDetailDto {
     itemPrice: row.estimatedRefundAmount,
     closeReason: closed ? (row.actualRefundAmount !== null ? 'FULL_REFUNDED' : 'NO_REFUND') : null,
     closedAt: closed ? at(5) : null,
+  };
+}
+
+/* ── eBay cancellation requests ───────────────────────────────────────── */
+
+const DEMO_CANCELLATION_SEEDS: ReadonlyArray<{
+  reason: string;
+  /** Hours from now until eBay's deadline for the seller's answer (negative = missed); null = none. */
+  respondInHours: number | null;
+  closed: boolean;
+}> = [
+  { reason: 'BUYER_ASKED_CANCEL', respondInHours: 30, closed: false },
+  { reason: 'BUYER_CANCEL_OR_ADDRESS_ISSUE', respondInHours: -6, closed: false },
+  { reason: 'BUYER_ASKED_CANCEL', respondInHours: null, closed: false },
+  { reason: 'OUT_OF_STOCK_OR_CANNOT_FULFILL', respondInHours: null, closed: true },
+];
+
+function buildCancellations(): EbayCancellationDto[] {
+  const now = new Date();
+  const recent = DEMO_ORDERS.filter((o) => o.isTracked && o.product && o.createdAt >= isoDaysAgo(8));
+  // Never an empty pool: the fixtures are built at module load and must not throw.
+  const candidates = recent.length > 0 ? recent : DEMO_ORDERS.filter((o) => o.product);
+  if (candidates.length === 0) {
+    return [];
+  }
+
+  return DEMO_CANCELLATION_SEEDS.map((seed, k) => {
+    const order = candidates[(k * 3 + 1) % candidates.length];
+    const orderIndex = DEMO_ORDERS.indexOf(order);
+    const respondBy =
+      seed.respondInHours === null ? null : new Date(now.getTime() + seed.respondInHours * 3600000).toISOString();
+    const requestedAt = new Date(new Date(order.createdAt).getTime() + 6 * 3600000).toISOString();
+    const closedAt = seed.closed ? new Date(new Date(requestedAt).getTime() + 20 * 3600000).toISOString() : null;
+    const refund = round2(order.salePrice + order.saleShipping);
+    const bucket = deriveCancellationBucket(
+      {
+        state: seed.closed ? 'CLOSED' : 'CANCEL_REQUESTED',
+        requestorType: 'BUYER',
+        sellerRespondBy: respondBy,
+        closedAt,
+        // The demo is always "just synced", so nothing derives as unconfirmed.
+        lastSyncedAt: now,
+      },
+      now
+    );
+
+    return {
+      id: `demo-cancel-${k + 1}`,
+      cancelId: String(5456020649 + k * 7919),
+      // Same split the demo Orders page uses for its store filter.
+      ebayAccountId: orderIndex % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
+      legacyOrderId: order.ebayOrderId,
+      orderId: order.id,
+      bucket,
+      state: seed.closed ? 'CLOSED' : 'CANCEL_REQUESTED',
+      status: seed.closed ? 'CANCEL_CLOSED_WITH_REFUND' : 'CANCEL_PENDING',
+      reason: seed.reason,
+      closeReason: seed.closed ? 'SELLER_CANCEL' : null,
+      requestorType: 'BUYER',
+      buyerLoginName: order.buyerUsername ?? null,
+      requestedAt,
+      sellerRespondBy: respondBy,
+      closedAt,
+      requestedRefundAmount: refund,
+      currency: DEMO_CURRENCY,
+      lastSyncedAt: isoHoursAgo(1),
+      actionsEnabled: true,
+      availableActions: seed.closed || respondBy === null ? [] : [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT],
+      product: order.product
+        ? { title: order.product.title, imageUrl: order.product.imageUrl ?? null, asin: order.product.asin ?? null }
+        : null,
+    };
+  });
+}
+
+export const DEMO_CANCELLATIONS: EbayCancellationDto[] = buildCancellations();
+
+/**
+ * `GET /cancellations/:id/detail` for a demo request: the row plus the journey
+ * that fits its state, the amounts eBay reports once it has refunded, and the
+ * answers where the real API would offer them. The write itself goes through
+ * `demoWrite` and persists nothing.
+ */
+export function demoCancellationDetail(row: EbayCancellationDto): EbayCancellationDetailDto {
+  const at = (hoursAfter: number): string => new Date(new Date(row.requestedAt ?? isoDaysAgo(2)).getTime() + hoursAfter * 3600000).toISOString();
+  const closed = row.closedAt !== null;
+
+  const history: EbayCancellationHistoryEntryDto[] = [
+    { activity: 'BUYER_CREATE_CANCEL', party: 'BUYER', at: at(0), fromState: null, toState: 'CANCEL_REQUESTED' },
+  ];
+  if (closed) {
+    history.push(
+      { activity: 'SELLER_CREATE_CANCEL', party: 'SELLER', at: at(12), fromState: 'CANCEL_REQUESTED', toState: 'CANCEL_CLOSED' },
+      { activity: 'SYSTEM_REFUND', party: 'UNKNOWN', at: at(20), fromState: 'CANCEL_CLOSED', toState: 'CANCEL_CLOSED' }
+    );
+  }
+
+  return {
+    ...row,
+    live: true,
+    history,
+    actualRefundAmount: closed ? row.requestedRefundAmount : null,
+    amountToRecoup: closed || row.requestedRefundAmount === null ? null : round2(row.requestedRefundAmount * 0.83),
+    paymentStatus: closed ? 'REFUNDED' : 'PAID',
+    ebayUrl: buildEbayCancellationUrl(row.cancelId),
   };
 }
 

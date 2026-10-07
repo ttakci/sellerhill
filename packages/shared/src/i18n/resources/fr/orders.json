@@ -420,35 +420,7 @@
         "closed": "Clôturée",
         "unconfirmed": "Non confirmée récemment"
       },
-      "approve": "Approuver",
-      "reject": "Refuser",
-      "confirm": {
-        "approve": {
-          "title": "Approuver l'annulation ?",
-          "body": "La commande est annulée et eBay rembourse l'acheteur. Cette action est irréversible.",
-          "confirm": "Approuver l'annulation"
-        },
-        "reject": {
-          "title": "Refuser l'annulation ?",
-          "body": "eBay est informé de votre refus et la commande doit être expédiée.",
-          "bodyWithTracking": "eBay est informé de votre refus et le numéro de suivi {{tracking}} est transmis. La commande doit être expédiée.",
-          "confirm": "Refuser l'annulation"
-        }
-      },
-      "done": {
-        "approve": "Annulation approuvée. eBay remboursera l'acheteur.",
-        "reject": "Annulation refusée."
-      },
-      "actionsOff": "Les actions d'annulation dans l'app sont désactivées — répondez sur eBay.",
-      "errors": {
-        "actionsDisabled": "Les actions d'annulation dans l'app sont désactivées sur cette plateforme. Répondez à la demande sur eBay.",
-        "actionNotAvailable": "eBay ne propose plus cette action pour la demande. Actualisez et vérifiez ce qui est en attente.",
-        "suspended": "Votre abonnement est suspendu, les actions d'annulation sont donc en pause. Réglez la facture sur la page Facturation.",
-        "ebayRejected": "eBay a refusé cette action. Ouvrez la demande sur eBay pour en voir la raison.",
-        "unavailable": "eBay est injoignable. Réessayez dans un instant.",
-        "sandbox": "Les actions d'annulation ne sont pas disponibles sur le sandbox eBay.",
-        "notFound": "Cette demande d'annulation est introuvable."
-      }
+      "manage": "Gérer l’annulation"
     },
     "note": {
       "title": "Votre note",

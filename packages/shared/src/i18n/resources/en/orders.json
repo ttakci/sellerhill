@@ -420,35 +420,7 @@
         "closed": "Closed",
         "unconfirmed": "Not confirmed recently"
       },
-      "approve": "Approve",
-      "reject": "Reject",
-      "confirm": {
-        "approve": {
-          "title": "Approve the cancellation?",
-          "body": "The order is cancelled and eBay refunds the buyer. This cannot be undone.",
-          "confirm": "Approve cancellation"
-        },
-        "reject": {
-          "title": "Reject the cancellation?",
-          "body": "eBay is told you decline, and the order has to be shipped.",
-          "bodyWithTracking": "eBay is told you decline, and the tracking number {{tracking}} is sent along. The order has to be shipped.",
-          "confirm": "Reject cancellation"
-        }
-      },
-      "done": {
-        "approve": "Cancellation approved. eBay will refund the buyer.",
-        "reject": "Cancellation rejected."
-      },
-      "actionsOff": "In-app cancellation actions are off — answer on eBay.",
-      "errors": {
-        "actionsDisabled": "In-app cancellation actions are switched off on this platform. Answer the request on eBay.",
-        "actionNotAvailable": "eBay no longer offers this action on the request. Refresh and check what is waiting now.",
-        "suspended": "Your subscription is suspended, so cancellation actions are paused. Settle the invoice on the Billing page.",
-        "ebayRejected": "eBay refused this action. Open the request on eBay to see why.",
-        "unavailable": "eBay could not be reached. Try again in a moment.",
-        "sandbox": "Cancellation actions are not available on the eBay sandbox.",
-        "notFound": "This cancellation request was not found."
-      }
+      "manage": "Manage cancellation"
     },
     "note": {
       "title": "Your note",

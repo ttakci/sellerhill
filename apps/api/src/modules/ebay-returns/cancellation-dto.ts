@@ -12,6 +12,7 @@ import {
   EbayCancellationDto,
 } from '@repo/shared';
 
+import { firstImageUrl } from './ebay-returns.service';
 import { buildStoreScopedCancellationBucketSql } from './return-store-scope';
 
 /** The columns `cancellationColumnsSql` selects. Dates/amounts arrive as pg types or as JSON (row_to_json). */
@@ -34,6 +35,11 @@ export interface CancellationDtoRow {
   requested_refund_amount: string | number | null;
   currency: string | null;
   last_synced_at: Date | string;
+  /** The linked order's listing / product (`cancellationProductColumnsSql`); absent where not joined. */
+  listing_id?: string | null;
+  listing_title?: string | null;
+  listing_asin?: string | null;
+  product_image_urls?: string[] | string | null;
 }
 
 /** The SELECT list over an `ebay_cancellations` alias, with the store-scoped bucket. */
@@ -59,6 +65,10 @@ export function cancellationColumnsSql(alias: string, freshnessHours: number): s
   ].map((column) => `${alias}.${column}`);
   return `${columns.join(', ')}, ${buildStoreScopedCancellationBucketSql(alias, freshnessHours)} AS bucket`;
 }
+
+/** The product columns over `productJoinsSql` (order `o` → listing `l` → product `p`). */
+export const CANCELLATION_PRODUCT_COLUMNS_SQL =
+  'l.id AS listing_id, l.title AS listing_title, l.asin AS listing_asin, p.image_urls AS product_image_urls';
 
 const BUCKETS: readonly string[] = Object.values(CancellationBucket);
 
@@ -98,5 +108,12 @@ export function toCancellationDto(row: CancellationDtoRow, actionsEnabled: boole
       actionsEnabled && ACTIONABLE_CANCELLATION_BUCKETS.includes(bucket)
         ? [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT]
         : [],
+    product: row.listing_id
+      ? {
+          title: row.listing_title ?? null,
+          imageUrl: firstImageUrl(row.product_image_urls ?? null),
+          asin: row.listing_asin ?? null,
+        }
+      : null,
   };
 }

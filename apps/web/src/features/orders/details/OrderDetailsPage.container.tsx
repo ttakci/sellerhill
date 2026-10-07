@@ -1,4 +1,4 @@
-import { EbayCancellationAction, ORDER_NOTE_MAX_LENGTH, OrderStage } from '@repo/shared';
+import { ORDER_NOTE_MAX_LENGTH, OrderStage } from '@repo/shared';
 import {
   formatCurrency,
   formatDate,
@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import {
-  useActOnCancellationMutation,
   useGetOrderByIdQuery,
   useUpdateOrderAmazonDetailsMutation,
   useUpdateOrderNoteMutation,
@@ -63,7 +62,6 @@ export const OrderDetailsPageContainer: React.FC = () => {
   const [confirmNotPurchased, { isLoading: isConfirmingNotPurchased }] = useConfirmNotPurchasedMutation();
 
   const [updateNote, { isLoading: isSavingNote }] = useUpdateOrderNoteMutation();
-  const [actOnCancellation, { isLoading: isActingOnCancellation }] = useActOnCancellationMutation();
 
   useLoading(isUpdating);
 
@@ -420,71 +418,13 @@ export const OrderDetailsPageContainer: React.FC = () => {
       });
   }, [id, isNoteDirty, noteDraft, updateNote, showMessage, closeMessage, t]);
 
-  /*
-   * Approve / reject the buyer's cancellation request. Each asks first (approve
-   * cancels the order and refunds the buyer); the API's own i18n key explains a
-   * refusal, falling back to "eBay could not be reached".
-   */
+  /* The answers (accept / decline) live on the Cancellations page, one place per action. */
   const cancellationId = order?.cancellation?.id;
-  const runCancellationAction = useCallback(
-    (action: EbayCancellationAction) => {
-      if (!id || !cancellationId) {
-        return;
-      }
-      closeMessage();
-      actOnCancellation({ id: cancellationId, action, orderId: id })
-        .unwrap()
-        .then(() => {
-          showMessage(
-            {
-              type: 'success',
-              headerKey: 'translation:message.success.header',
-              descriptionKey: `orders:orders.cancellation.done.${action}`,
-              primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-            },
-            t
-          );
-        })
-        .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-          showMessage(
-            {
-              type: 'error',
-              headerKey: 'translation:message.error.header',
-              descriptionKey: getErrorI18nKey(error, 'orders:orders.cancellation.errors.unavailable'),
-              primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
-            },
-            t
-          );
-        });
-    },
-    [id, cancellationId, actOnCancellation, showMessage, closeMessage, t]
-  );
-
-  // A rejection carries the shipment pushed to eBay (number AND date — the API
-  // sends it only when both exist), so the dialog says so only then.
-  const rejectTracking =
-    order?.ebayTrackingPushedNumber && order.ebayTrackingPushedAt ? order.ebayTrackingPushedNumber : null;
-  const handleCancellationAction = useCallback(
-    (action: EbayCancellationAction) => {
-      const tracking = rejectTracking;
-      const bodyKey = action === EbayCancellationAction.REJECT && tracking ? 'bodyWithTracking' : 'body';
-      showMessage(
-        {
-          type: 'warning',
-          headerKey: `orders:orders.cancellation.confirm.${action}.title`,
-          descriptionKey: `orders:orders.cancellation.confirm.${action}.${bodyKey}`,
-          descriptionParams: { tracking: tracking ?? '' },
-          primaryButton: {
-            labelKey: `orders:orders.cancellation.confirm.${action}.confirm`,
-            onClick: () => runCancellationAction(action),
-          },
-          secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
-        },
-        t
-      );
-    },
-    [rejectTracking, showMessage, closeMessage, runCancellationAction, t]
-  );
+  const handleManageCancellation = useCallback(() => {
+    if (cancellationId) {
+      localeNavigate(`/cancellations?c=${encodeURIComponent(cancellationId)}`);
+    }
+  }, [cancellationId, localeNavigate]);
 
   /* eBay's ship-by date is shown while the seller still has something to do. */
   const shipBy = useMemo(() => {
@@ -544,8 +484,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
         isSavingNote={isSavingNote}
         onNoteChange={handleNoteChange}
         onSaveNote={handleSaveNote}
-        isActingOnCancellation={isActingOnCancellation}
-        onCancellationAction={handleCancellationAction}
+        onManageCancellation={handleManageCancellation}
       />
       {id && (
         <LinkAmazonModal

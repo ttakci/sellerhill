@@ -173,7 +173,7 @@ describe('ebay-returns module invariants', () => {
         'this.quotaEnforcement.isSuspended(userId)',
         'this.postOrder.isReturnSearchSupported()',
         'this.readLiveOrThrow(row, marketplaceId)',
-        'this.assertOffered(live)',
+        'this.assertOffered(live.row)',
         'this.ebay.getAccountAccessToken(',
         'this.postOrder.approveCancellation(',
         'this.postOrder.rejectCancellation(',
@@ -183,11 +183,16 @@ describe('ebay-returns module invariants', () => {
         expect(index).toBeGreaterThan(-1);
       }
       expect([...order]).toEqual([...order].sort((a, b) => a - b));
-      // Offered only on a buyer's open request eBay says awaits the seller.
-      const assert = code.slice(code.indexOf('private assertOffered('));
-      expect(assert).toContain('live.requestorType !== EBAY_CANCEL_REQUESTOR_BUYER');
-      expect(assert).toContain('live.closedAt !== null');
-      expect(assert).toContain('live.sellerRespondBy === null');
+      // The live read before an answer is never the drawer's cached one.
+      expect(act).not.toMatch(/this\.readLive\([^)]*false\)/);
+      // Offered only on a buyer's open request eBay says awaits the seller —
+      // the same predicate refuses an answer and hides the drawer's buttons.
+      expect(code.slice(code.indexOf('private assertOffered('))).toContain('if (!isCancellationAnswerable(live))');
+      const answerable = code.slice(code.indexOf('export function isCancellationAnswerable('));
+      expect(answerable).toContain('live.requestorType === EBAY_CANCEL_REQUESTOR_BUYER');
+      expect(answerable).toContain('live.closedAt === null');
+      expect(answerable).toContain('live.sellerRespondBy !== null');
+      expect(code).toContain('actionsEnabled && isCancellationAnswerable(row)');
       // No enum value of the pages the reference lacks decides anything.
       expect(code).not.toMatch(/CANCEL_PENDING|CANCEL_REQUESTED|cancelStatus ===|state ===/);
     });
@@ -234,7 +239,8 @@ describe('ebay-returns module invariants', () => {
       const cancellationReads = templateLiterals(source('ebay-cancellations-actions.service.ts')).filter((l) =>
         /\bFROM ebay_cancellations\b/.test(l)
       );
-      expect(cancellationReads.length).toBeGreaterThanOrEqual(3);
+      // list count + page, counts, detail, the row lookup.
+      expect(cancellationReads.length).toBeGreaterThanOrEqual(5);
       for (const literal of cancellationReads) {
         expect(literal).toMatch(/WHERE (c\.user_id = \$1|\$\{where\.join\(' AND '\)\})/);
       }
@@ -346,9 +352,17 @@ describe('ebay-returns module invariants', () => {
       expect(controller).toContain('@UseGuards(JwtAuthGuard)');
       expect(controller).not.toContain('OperatorSurface');
       expect(source('ebay-cancellations.controller.ts')).toContain('@UseGuards(JwtAuthGuard)');
-      expect(stripComments(source('ebay-cancellations.controller.ts'))).toMatch(
-        /this\.actions\.list\(req\.user\.sub,[\s\S]*this\.actions\.act\(req\.user\.sub,/
-      );
+      const cancellations = stripComments(source('ebay-cancellations.controller.ts'));
+      const cancellationHandlers = cancellations.match(/this\.actions\.\w+\([^,)]+/g) ?? [];
+      expect(cancellationHandlers.map((handler) => handler.split('(')[0])).toEqual([
+        'this.actions.counts',
+        'this.actions.list',
+        'this.actions.detail',
+        'this.actions.act',
+      ]);
+      for (const handler of cancellationHandlers) {
+        expect(handler).toMatch(/\(req\.user\.sub$/);
+      }
       // Every handler passes the authenticated user id, never one from the query string.
       const handlers = stripComments(controller).match(/this\.(returns|actions)\.\w+\([^,)]+/g) ?? [];
       expect(handlers.length).toBeGreaterThanOrEqual(4);
@@ -357,13 +371,16 @@ describe('ebay-returns module invariants', () => {
       }
     });
 
-    it('declares the static `counts` route before the collection route', () => {
-      const controller = stripComments(source('ebay-returns.controller.ts'));
-      const counts = controller.indexOf("@Get('counts')");
-      expect(counts).toBeGreaterThan(-1);
-      expect(counts).toBeLessThan(controller.indexOf('@Get()'));
-      expect(counts).toBeLessThan(controller.indexOf("@Get(':id/detail')"));
-    });
+    it.each(['ebay-returns.controller.ts', 'ebay-cancellations.controller.ts'])(
+      '%s declares the static `counts` route before the collection and id routes',
+      (file) => {
+        const controller = stripComments(source(file));
+        const counts = controller.indexOf("@Get('counts')");
+        expect(counts).toBeGreaterThan(-1);
+        expect(counts).toBeLessThan(controller.indexOf('@Get()'));
+        expect(counts).toBeLessThan(controller.indexOf("@Get(':id/detail')"));
+      }
+    );
   });
 
   describe('the sweep', () => {

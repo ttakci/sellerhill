@@ -1,7 +1,13 @@
 // apps/api/src/modules/ebay-returns/ebay-cancellations-actions.service.spec.ts
 
 import { Logger } from '@nestjs/common';
-import { CancellationBucket, EbayCancellationAction, PlatformSettingKey } from '@repo/shared';
+import {
+  CancellationBucket,
+  CancellationTab,
+  EbayCancellationAction,
+  PlatformSettingKey,
+  resolveReturnFreshnessHours,
+} from '@repo/shared';
 
 import {
   buildRejectCancelBody,
@@ -9,10 +15,12 @@ import {
   EbayCancellationsActionsService,
 } from './ebay-cancellations-actions.service';
 import { PostOrderRejectedError } from './post-order.client';
+import { buildStoreScopedCancellationBucketSql } from './return-store-scope';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
 const ID = '33333333-3333-4333-8333-333333333333';
 const ACCOUNT = '11111111-1111-4111-8111-11111111111a';
+const ORDER = '44444444-4444-4444-8444-444444444444';
 const SHIPPED_AT = new Date('2026-10-06T15:00:00.000Z');
 
 /** A live `cancelDetail`: the buyer's open request, awaiting the seller. */
@@ -25,6 +33,33 @@ const detail = (over: Record<string, unknown> = {}): Record<string, unknown> => 
   ...over,
 });
 
+/** A stored `ebay_cancellations` row as the list / detail SELECT returns it, linked to an order with a listing. */
+const storedRow = (over: Record<string, unknown> = {}): Record<string, unknown> => ({
+  id: ID,
+  cancel_id: '5000000123',
+  ebay_account_id: ACCOUNT,
+  legacy_order_id: '12-34567-89012',
+  order_id: ORDER,
+  bucket: CancellationBucket.ACTION_DUE,
+  state: 'REFUND_PENDING',
+  status: 'CANCEL_PENDING',
+  reason: 'BUYER_ASKED_CANCEL',
+  close_reason: null,
+  requestor_type: 'BUYER',
+  buyer_login_name: 'a_buyer',
+  requested_at: new Date('2026-10-06T10:00:00.000Z'),
+  seller_respond_by: new Date('2026-10-09T10:00:00.000Z'),
+  closed_at: null,
+  requested_refund_amount: '41.90',
+  currency: 'USD',
+  last_synced_at: new Date('2026-10-07T10:00:00.000Z'),
+  listing_id: '55555555-5555-4555-8555-555555555555',
+  listing_title: 'Desk lamp',
+  listing_asin: 'B000000001',
+  product_image_urls: ['https://img.example/lamp.jpg'],
+  ...over,
+});
+
 type QueryMock = jest.Mock<Promise<unknown[]>, [string, unknown[]?]>;
 
 function build(
@@ -34,6 +69,8 @@ function build(
     sandbox?: boolean;
     live?: Record<string, unknown>;
     tracking?: { number: string | null; at: Date | null };
+    /** The stored row the detail reads; null = not the caller's. */
+    stored?: Record<string, unknown> | null;
   } = {}
 ) {
   const order: string[] = [];
@@ -50,6 +87,10 @@ function build(
           ebay_tracking_pushed_at: options.tracking?.at ?? null,
         },
       ]);
+    }
+    if (sql.includes('LEFT JOIN listings l')) {
+      const stored = options.stored === undefined ? storedRow() : options.stored;
+      return Promise.resolve(stored ? [stored] : []);
     }
     return Promise.resolve([]);
   });
@@ -113,7 +154,7 @@ describe('EbayCancellationsActionsService.act', () => {
   it('refuses everything while the operator switch is off, before touching eBay', async () => {
     const { service, postOrder } = build({ enabled: false });
     await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({
-      key: 'orders.cancellation.errors.actionsDisabled',
+      key: 'cancellations.errors.actionsDisabled',
       status: 409,
     });
     expect(postOrder.getCancellation).not.toHaveBeenCalled();
@@ -122,10 +163,10 @@ describe('EbayCancellationsActionsService.act', () => {
 
   it('refuses a suspended account and a Sandbox deployment', async () => {
     await expect(build({ suspended: true }).service.act(USER, ID, EbayCancellationAction.REJECT)).rejects.toMatchObject({
-      key: 'orders.cancellation.errors.suspended',
+      key: 'cancellations.errors.suspended',
     });
     await expect(build({ sandbox: true }).service.act(USER, ID, EbayCancellationAction.REJECT)).rejects.toMatchObject({
-      key: 'orders.cancellation.errors.sandbox',
+      key: 'cancellations.errors.sandbox',
     });
   });
 
@@ -136,7 +177,7 @@ describe('EbayCancellationsActionsService.act', () => {
   ])('refuses to answer %s (LIVE read), with no write', async (_label, live) => {
     const { service, postOrder } = build({ live });
     await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({
-      key: 'orders.cancellation.errors.actionNotAvailable',
+      key: 'cancellations.errors.actionNotAvailable',
       status: 409,
     });
     expect(postOrder.approveCancellation).not.toHaveBeenCalled();
@@ -177,7 +218,7 @@ describe('EbayCancellationsActionsService.act', () => {
     const { service, query, postOrder, sync } = build();
     postOrder.approveCancellation.mockRejectedValueOnce(new PostOrderRejectedError('no', 400));
     await expect(service.act(USER, ID, EbayCancellationAction.APPROVE)).rejects.toMatchObject({
-      key: 'orders.cancellation.errors.ebayRejected',
+      key: 'cancellations.errors.ebayRejected',
       status: 409,
     });
     expect(String(audits(query)[0][1]?.[2])).toContain('"outcome":"rejected"');
@@ -193,41 +234,17 @@ describe('EbayCancellationsActionsService.act', () => {
     missing.query.mockResolvedValue([]);
     const error = await missing.service.act(USER, ID, EbayCancellationAction.APPROVE).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(CancellationActionError);
-    expect(error).toMatchObject({ key: 'orders.cancellation.errors.notFound', status: 404 });
+    expect(error).toMatchObject({ key: 'cancellations.errors.notFound', status: 404 });
   });
 });
 
 describe('EbayCancellationsActionsService.list', () => {
-  it('reads the caller’s BUYER requests, paged, and offers answers only on an action bucket with the switch on', async () => {
+  it('reads the caller’s BUYER requests, paged, and offers answers only on an action bucket', async () => {
     const { service, query } = build();
-    query.mockImplementation((sql: string) => {
-      if (sql.includes('COUNT(*)')) {
-        return Promise.resolve([{ count: '1' }]);
-      }
-      return Promise.resolve([
-        {
-          id: ID,
-          cancel_id: '5000000123',
-          ebay_account_id: ACCOUNT,
-          legacy_order_id: '12-34567-89012',
-          order_id: null,
-          bucket: CancellationBucket.ACTION_DUE,
-          state: 'REFUND_PENDING',
-          status: 'CANCEL_PENDING',
-          reason: 'BUYER_ASKED_CANCEL',
-          close_reason: null,
-          requestor_type: 'BUYER',
-          buyer_login_name: 'a_buyer',
-          requested_at: new Date('2026-10-06T10:00:00.000Z'),
-          seller_respond_by: new Date('2026-10-09T10:00:00.000Z'),
-          closed_at: null,
-          requested_refund_amount: '41.90',
-          currency: 'USD',
-          last_synced_at: new Date('2026-10-07T10:00:00.000Z'),
-        },
-      ]);
-    });
-    const page = await service.list(USER, { actionOnly: true });
+    query.mockImplementation((sql: string) =>
+      Promise.resolve(sql.includes('COUNT(*)') ? [{ count: 1 }] : [storedRow({ order_id: null, listing_id: null })])
+    );
+    const page = await service.list(USER, { tab: CancellationTab.ACTION });
     expect(page).toMatchObject({ total: 1, page: 1, limit: 20 });
     expect(page.items[0]).toMatchObject({
       cancelId: '5000000123',
@@ -237,10 +254,153 @@ describe('EbayCancellationsActionsService.list', () => {
       sellerRespondBy: '2026-10-09T10:00:00.000Z',
       actionsEnabled: true,
       availableActions: [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT],
+      product: null,
     });
     const [sql, params] = query.mock.calls[query.mock.calls.length - 1];
-    expect(sql).toContain('WHERE c.user_id = $1 AND c.requestor_type = $2');
-    expect(params?.slice(0, 2)).toEqual([USER, 'BUYER']);
+    expect(sql).toContain('WHERE c.user_id = $1 AND c.requestor_type = $2 AND');
+    expect(sql).toContain('= ANY($3::text[])');
+    expect(params?.slice(0, 3)).toEqual([USER, 'BUYER', [CancellationBucket.ACTION_OVERDUE, CancellationBucket.ACTION_DUE]]);
+  });
+
+  it('filters by store, order and search (cancel id, eBay order id, product title) and joins the product', async () => {
+    const { service, query } = build();
+    query.mockImplementation((sql: string) => Promise.resolve(sql.includes('COUNT(*)') ? [{ count: 1 }] : [storedRow()]));
+    const page = await service.list(USER, {
+      tab: CancellationTab.ALL,
+      ebayAccountId: ACCOUNT,
+      orderId: ORDER,
+      search: ' 50%_ ',
+      page: 2,
+      limit: 5,
+    });
+    expect(page.items[0].product).toEqual({ title: 'Desk lamp', imageUrl: 'https://img.example/lamp.jpg', asin: 'B000000001' });
+    const [countSql, countParams] = query.mock.calls.find(([q]) => q.includes('COUNT(*)')) ?? [''];
+    expect(countSql).toContain('LEFT JOIN listings l ON l.id = o.listing_id');
+    expect(countSql).toContain('c.ebay_account_id = $3::uuid AND c.order_id = $4::uuid');
+    expect(countSql).toContain('(c.cancel_id ILIKE $5 OR c.legacy_order_id ILIKE $5 OR l.title ILIKE $5)');
+    expect(countSql).not.toContain('::text[])');
+    expect(countParams).toEqual([USER, 'BUYER', ACCOUNT, ORDER, '%50\\%\\_%']);
+    const [, pageParams] = query.mock.calls[query.mock.calls.length - 1];
+    expect(pageParams?.slice(-2)).toEqual([5, 5]);
+  });
+});
+
+describe('EbayCancellationsActionsService.counts', () => {
+  it('groups the caller’s BUYER requests by the store-scoped bucket, zero-filled, store-filtered', async () => {
+    const { service, query } = build();
+    query.mockResolvedValue([
+      { bucket: CancellationBucket.ACTION_OVERDUE, count: 2 },
+      { bucket: CancellationBucket.CLOSED, count: '7' },
+      { bucket: 'not_a_bucket', count: 9 },
+    ]);
+    await expect(service.counts(USER, { ebayAccountId: ACCOUNT })).resolves.toEqual({
+      [CancellationBucket.UNCONFIRMED]: 0,
+      [CancellationBucket.ACTION_OVERDUE]: 2,
+      [CancellationBucket.ACTION_DUE]: 0,
+      [CancellationBucket.IN_PROGRESS]: 0,
+      [CancellationBucket.CLOSED]: 7,
+    });
+    const [sql, params] = query.mock.calls[0];
+    const bucket = buildStoreScopedCancellationBucketSql('c', resolveReturnFreshnessHours(6));
+    expect(sql).toContain(`SELECT ${bucket} AS bucket, COUNT(*)::int AS count`);
+    expect(sql).toContain('FROM ebay_cancellations c');
+    expect(sql).toContain('WHERE c.user_id = $1 AND c.requestor_type = $2 AND c.ebay_account_id = $3::uuid');
+    expect(sql).toContain('GROUP BY 1');
+    expect(params).toEqual([USER, 'BUYER', ACCOUNT]);
+  });
+
+  it('counts every store without a filter', async () => {
+    const { service, query } = build();
+    await service.counts(USER);
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).not.toContain('ebay_account_id = $3');
+    expect(params).toEqual([USER, 'BUYER']);
+  });
+});
+
+describe('EbayCancellationsActionsService.detail', () => {
+  /** A live `cancelDetail` with the parts only the detail read carries. */
+  const fullDetail = (over: Record<string, unknown> = {}): Record<string, unknown> =>
+    detail({
+      requestRefundAmount: { value: 13.65, currency: 'USD' },
+      paymentStatus: 'PAID',
+      activityHistories: [
+        { actionDate: { value: '2026-10-06T10:00:00.000Z' }, activityParty: 'BUYER', activityType: 'BUYER_CREATE_CANCEL' },
+      ],
+      refundInfo: { actualRefundDetail: { actualRefund: { totalAmount: { value: 13.65, currency: 'USD' } } } },
+      payoutRecoupInfo: { amountToRecoup: { value: 11.4, currency: 'USD' } },
+      ...over,
+    });
+
+  it('overlays the stored row with ONE live read and offers the answers the live request allows', async () => {
+    const { service, postOrder } = build({ live: fullDetail() });
+    const dto = await service.detail(USER, ID);
+    expect(dto).toMatchObject({
+      id: ID,
+      live: true,
+      bucket: CancellationBucket.ACTION_DUE,
+      requestedRefundAmount: 13.65,
+      actualRefundAmount: 13.65,
+      amountToRecoup: 11.4,
+      paymentStatus: 'PAID',
+      buyerLoginName: 'a_buyer',
+      availableActions: [EbayCancellationAction.APPROVE, EbayCancellationAction.REJECT],
+      ebayUrl: 'https://www.ebay.com/Cancel/Details?cancelId=5000000123',
+      product: { title: 'Desk lamp', imageUrl: 'https://img.example/lamp.jpg', asin: 'B000000001' },
+    });
+    expect(dto.history).toEqual([
+      { activity: 'BUYER_CREATE_CANCEL', party: 'BUYER', at: '2026-10-06T10:00:00.000Z', fromState: null, toState: null },
+    ]);
+    expect(postOrder.getCancellation).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the live read for 60 s, but an answer always reads eBay afresh', async () => {
+    const { service, postOrder } = build({ live: fullDetail() });
+    await service.detail(USER, ID);
+    await service.detail(USER, ID);
+    expect(postOrder.getCancellation).toHaveBeenCalledTimes(1);
+    await service.act(USER, ID, EbayCancellationAction.APPROVE);
+    // act: the fresh read before the write + the re-read after it.
+    expect(postOrder.getCancellation).toHaveBeenCalledTimes(3);
+  });
+
+  it('offers nothing when the live request no longer awaits the seller, or the switch is off', async () => {
+    const closed = await build({
+      live: fullDetail({ cancelCloseDate: { value: '2026-10-07T09:00:00.000Z' }, sellerResponseDueDate: undefined }),
+    }).service.detail(USER, ID);
+    expect(closed).toMatchObject({ live: true, bucket: CancellationBucket.CLOSED, availableActions: [] });
+
+    const off = await build({ enabled: false, live: fullDetail() }).service.detail(USER, ID);
+    expect(off).toMatchObject({ live: true, actionsEnabled: false, availableActions: [] });
+  });
+
+  it('falls back to the stored row, live:false and no answer, when eBay cannot be read', async () => {
+    const { service, postOrder } = build();
+    postOrder.getCancellation.mockRejectedValueOnce(new Error('timeout'));
+    await expect(service.detail(USER, ID)).resolves.toMatchObject({
+      live: false,
+      bucket: CancellationBucket.ACTION_DUE,
+      requestedRefundAmount: 41.9,
+      availableActions: [],
+      history: [],
+      actualRefundAmount: null,
+      amountToRecoup: null,
+      ebayUrl: 'https://www.ebay.com/Cancel/Details?cancelId=5000000123',
+    });
+  });
+
+  it('never calls eBay from a Sandbox deployment, and 404s a row that is not the caller’s', async () => {
+    const sandbox = build({ sandbox: true });
+    await expect(sandbox.service.detail(USER, ID)).resolves.toMatchObject({
+      live: false,
+      ebayUrl: 'https://www.sandbox.ebay.com/Cancel/Details?cancelId=5000000123',
+    });
+    expect(sandbox.postOrder.getCancellation).not.toHaveBeenCalled();
+
+    await expect(build({ stored: null }).service.detail(USER, ID)).rejects.toMatchObject({
+      key: 'cancellations.errors.notFound',
+      status: 404,
+    });
   });
 });
 

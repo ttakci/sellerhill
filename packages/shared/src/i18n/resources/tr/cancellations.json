@@ -1,0 +1,129 @@
+{
+  "cancellations": {
+    "title": "İptaller",
+    "subtitle_one": "{{count}} iptal talebi",
+    "subtitle_other": "{{count}} iptal talebi",
+    "loading": "İptal talepleri yükleniyor…",
+    "notice": "Alıcının ne istediğini ve eBay'in yanıtınızı ne zamana kadar beklediğini görmek için bir talebi açın. Buradan kabul edebilir veya reddedebilirsiniz.",
+    "tabs": {
+      "all": "Tümü",
+      "action": "Aksiyon gerekli",
+      "in_progress": "Devam eden",
+      "closed": "Kapanan",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "İptal durumu"
+    },
+    "filters": {
+      "search": "İptal kimliği, sipariş kimliği veya ürün ara…",
+      "clear": "Temizle",
+      "resultCount_one": "{{count}} sonuç",
+      "resultCount_other": "{{count}} sonuç"
+    },
+    "columns": {
+      "product": "Ürün",
+      "request": "Talep",
+      "status": "Durum",
+      "due": "Yanıt son tarihi",
+      "reason": "Neden",
+      "refund": "Alıcıya iade",
+      "requested": "Talep tarihi",
+      "buyer": "Alıcı"
+    },
+    "order": "Sipariş",
+    "viewOrder": "Siparişi görüntüle",
+    "asin": "ASIN",
+    "unknownProduct": "Bilinmeyen ürün",
+    "answer": "Kabul et veya reddet",
+    "dueBy": "Son tarih: {{date}}",
+    "empty": {
+      "title": "Henüz iptal talebi yok",
+      "description": "Alıcılarınızın eBay'de iptal etmek istediği siparişler burada görünür."
+    },
+    "emptyFiltered": {
+      "title": "Filtrelerinize uyan talep yok",
+      "description": "Başka bir sekme veya arama terimi deneyin.",
+      "action": "Filtreleri temizle"
+    },
+    "bucket": {
+      "unconfirmed": "Son zamanlarda doğrulanmadı",
+      "action_overdue": "Süresi geçti",
+      "action_due": "Yanıt bekleniyor",
+      "in_progress": "Devam ediyor",
+      "closed": "Kapandı"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay bu talebi son zamanlarda doğrulamadı, bu yüzden bekleyen işlem gösterilmiyor.",
+      "action_overdue": "Alıcı bekliyor — eBay'in yanıtınız için verdiği süre doldu.",
+      "action_due": "Alıcı iptal etmek istedi. eBay'in son tarihinden önce kabul edin veya reddedin.",
+      "in_progress": "Şu anda sizden beklenen bir şey yok.",
+      "closed": "eBay bu talebi kapattı."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "Alıcı iptal etmek istedi",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Alıcı iptal etti veya adres sorunu var",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Stokta yok veya gönderilemiyor",
+      "other": "Diğer neden"
+    },
+    "detail": {
+      "title": "İptal {{id}}",
+      "titleLoading": "İptal talebi",
+      "open": "İptal talebini aç",
+      "loadFailed": "Bu talep yüklenemedi",
+      "loadFailedDescription": "Biraz sonra tekrar deneyin veya eBay'de açın.",
+      "whatYouCanDo": "Yapabilecekleriniz",
+      "nothingToDo": "Bu talepte sizi bekleyen bir şey yok.",
+      "openOnEbay": "eBay'de aç",
+      "money": "Tutarlar",
+      "requestedRefund": "İstenen iade",
+      "actualRefund": "Geri ödendi",
+      "amountOwed": "Borcunuz olan tutar",
+      "paymentStatus": "Ödeme durumu",
+      "closedAt": "Kapandı",
+      "journey": "Süreç",
+      "journeyEmpty": "eBay henüz bir adım kaydetmedi."
+    },
+    "actions": {
+      "approve": "Onayla",
+      "reject": "Reddet"
+    },
+    "confirm": {
+      "approve": {
+        "body": "Sipariş iptal edilir ve eBay alıcıya iade yapar. Bu işlem geri alınamaz.",
+        "confirm": "İptali onayla"
+      },
+      "reject": {
+        "body": "eBay'e iptali kabul etmediğiniz bildirilir ve siparişin gönderilmesi gerekir.",
+        "bodyWithTracking": "eBay'e iptali kabul etmediğiniz bildirilir ve {{tracking}} takip numarası da gönderilir. Siparişin gönderilmesi gerekir.",
+        "confirm": "İptali reddet"
+      }
+    },
+    "done": {
+      "approve": "İptal onaylandı. eBay alıcıya iade yapacak.",
+      "reject": "İptal reddedildi."
+    },
+    "actionsOff": "Uygulama içi iptal işlemleri kapalı — yanıtı eBay'de verin.",
+    "liveUnavailable": "eBay'e şu anda ulaşılamadı, bu yüzden SellerHill'in gördüğü son durum gösteriliyor. eBay yeniden yanıt verince yanıt seçenekleri sunulur.",
+    "errors": {
+      "actionsDisabled": "Uygulama içi iptal işlemleri bu platformda kapalı. Talebi eBay'de yanıtlayın.",
+      "actionNotAvailable": "eBay artık bu talepte bu işlemi sunmuyor. Sayfayı yenileyin ve şimdi bekleyenleri kontrol edin.",
+      "suspended": "Aboneliğiniz askıya alındı, bu yüzden iptal işlemleri duraklatıldı. Faturayı Faturalandırma sayfasında ödeyin.",
+      "ebayRejected": "eBay bu işlemi reddetti. Nedenini görmek için talebi eBay'de açın.",
+      "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
+      "sandbox": "İptal işlemleri eBay sandbox ortamında kullanılamaz.",
+      "notFound": "Bu iptal talebi bulunamadı."
+    },
+    "party": {
+      "buyer": "Alıcı",
+      "seller": "Siz",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "İptal oluşturuldu",
+      "SYSTEM_REFUND": "eBay iade yaptı",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay iade durumunu güncelledi",
+      "buyerOther": "Alıcı talebi güncelledi",
+      "sellerOther": "Talebi güncellediniz",
+      "ebayOther": "eBay talebi güncelledi"
+    }
+  }
+}

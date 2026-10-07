@@ -21,6 +21,23 @@ describe('Action Center order links', () => {
     expect(src).toMatch(/\/orders\?stage=\$\{OrderStage\.TRACKING_HELD\}/);
   });
 
+  /*
+   * Buyer cancellation requests (2026-10-07, phase 2): the item opens the
+   * Cancellations page's "Needs action" tab, which lists linked AND unlinked
+   * requests — so the count includes both, and `unlinked` is context only.
+   */
+  it('links cancellation requests to the Cancellations page and counts the unlinked ones too', () => {
+    expect(src).toMatch(/actionPath: `\/cancellations\?tab=\$\{CancellationTab\.ACTION\}`/);
+    expect(src).not.toMatch(/cancelRequested=true/);
+    const item = src.slice(
+      src.indexOf('private async cancellationItems('),
+      src.indexOf('// ----------------------------------------------------------- connections')
+    );
+    expect(item).toContain('const count = toCount(row.count);');
+    expect(item).not.toMatch(/toCount\(row\.count\) - /);
+    expect(item).toContain('context: { overdue, unlinked }');
+  });
+
   it('counts blocked, cancelled and awaiting-purchase orders through buildOrderStageSql', () => {
     expect(src).toMatch(/buildOrderStageSql\('o'\)/);
     expect(src).not.toMatch(/buildFulfillmentStateSql/);

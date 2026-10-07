@@ -420,35 +420,7 @@
         "closed": "Kapandı",
         "unconfirmed": "Son zamanlarda doğrulanmadı"
       },
-      "approve": "Onayla",
-      "reject": "Reddet",
-      "confirm": {
-        "approve": {
-          "title": "İptal onaylansın mı?",
-          "body": "Sipariş iptal edilir ve eBay alıcıya iade yapar. Bu işlem geri alınamaz.",
-          "confirm": "İptali onayla"
-        },
-        "reject": {
-          "title": "İptal reddedilsin mi?",
-          "body": "eBay'e iptali kabul etmediğiniz bildirilir ve siparişin gönderilmesi gerekir.",
-          "bodyWithTracking": "eBay'e iptali kabul etmediğiniz bildirilir ve {{tracking}} takip numarası da gönderilir. Siparişin gönderilmesi gerekir.",
-          "confirm": "İptali reddet"
-        }
-      },
-      "done": {
-        "approve": "İptal onaylandı. eBay alıcıya iade yapacak.",
-        "reject": "İptal reddedildi."
-      },
-      "actionsOff": "Uygulama içi iptal işlemleri kapalı — yanıtı eBay'de verin.",
-      "errors": {
-        "actionsDisabled": "Uygulama içi iptal işlemleri bu platformda kapalı. Talebi eBay'de yanıtlayın.",
-        "actionNotAvailable": "eBay artık bu talepte bu işlemi sunmuyor. Sayfayı yenileyin ve şimdi bekleyenleri kontrol edin.",
-        "suspended": "Aboneliğiniz askıya alındı, bu yüzden iptal işlemleri duraklatıldı. Faturayı Faturalandırma sayfasında ödeyin.",
-        "ebayRejected": "eBay bu işlemi reddetti. Nedenini görmek için talebi eBay'de açın.",
-        "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
-        "sandbox": "İptal işlemleri eBay sandbox ortamında kullanılamaz.",
-        "notFound": "Bu iptal talebi bulunamadı."
-      }
+      "manage": "İptali yönet"
     },
     "note": {
       "title": "Notunuz",

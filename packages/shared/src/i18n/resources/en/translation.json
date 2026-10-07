@@ -125,6 +125,7 @@
     "orders": "Orders",
     "messages": "Messages",
     "returns": "Returns",
+    "cancellations": "Cancellations",
     "stores": "Stores",
     "billing": "Billing",
     "settings": "Settings",

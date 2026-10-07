@@ -263,10 +263,22 @@ export interface PostOrderCancelActivityHistory {
 /**
  * eBay `CancelDetail` — the `cancelDetail` container of
  * `GET /post-order/v2/cancellation/{cancelId}`: the summary's fields plus the
- * history (`refundInfo` / `moneyMovementInfo` are not read).
+ * history, the buyer refund eBay issued and what eBay recoups from the seller
+ * (only the fields read; `moneyMovementInfo` is not).
  */
 export interface PostOrderCancellationDetail extends PostOrderCancellationSummary {
   activityHistories?: PostOrderCancelActivityHistory[];
+  refundInfo?: {
+    actualRefundDetail?: {
+      /** `ActualRefund.totalAmount` — "the total amount of the buyer refund". */
+      actualRefund?: { totalAmount?: PostOrderAmount };
+    };
+  };
+  /** `PayoutRecoupInfo` — "will not be returned for unpaid orders". */
+  payoutRecoupInfo?: {
+    /** "the amount of the seller payout which must be recouped from the seller by eBay". */
+    amountToRecoup?: PostOrderAmount;
+  };
 }
 
 /**

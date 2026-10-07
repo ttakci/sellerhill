@@ -1,0 +1,129 @@
+{
+  "cancellations": {
+    "title": "Stornierungen",
+    "subtitle_one": "{{count}} Stornierungsanfrage",
+    "subtitle_other": "{{count}} Stornierungsanfragen",
+    "loading": "Stornierungsanfragen werden geladen…",
+    "notice": "Öffnen Sie eine Anfrage, um zu sehen, was der Käufer möchte und bis wann eBay Ihre Antwort braucht. Sie können sie hier annehmen oder ablehnen.",
+    "tabs": {
+      "all": "Alle",
+      "action": "Handlungsbedarf",
+      "in_progress": "In Bearbeitung",
+      "closed": "Geschlossen",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Stornierungsstatus"
+    },
+    "filters": {
+      "search": "Stornierungs-ID, Bestell-ID oder Artikel suchen…",
+      "clear": "Zurücksetzen",
+      "resultCount_one": "{{count}} Ergebnis",
+      "resultCount_other": "{{count}} Ergebnisse"
+    },
+    "columns": {
+      "product": "Produkt",
+      "request": "Anfrage",
+      "status": "Status",
+      "due": "Antwort fällig bis",
+      "reason": "Grund",
+      "refund": "Erstattung an Käufer",
+      "requested": "Angefragt am",
+      "buyer": "Käufer"
+    },
+    "order": "Bestellung",
+    "viewOrder": "Bestellung ansehen",
+    "asin": "ASIN",
+    "unknownProduct": "Unbekanntes Produkt",
+    "answer": "Annehmen oder ablehnen",
+    "dueBy": "bis {{date}}",
+    "empty": {
+      "title": "Noch keine Stornierungsanfragen",
+      "description": "Bestellungen, deren Stornierung Ihre Käufer auf eBay anfragen, erscheinen hier."
+    },
+    "emptyFiltered": {
+      "title": "Keine Anfragen passen zu Ihren Filtern",
+      "description": "Probieren Sie einen anderen Tab oder Suchbegriff.",
+      "action": "Filter zurücksetzen"
+    },
+    "bucket": {
+      "unconfirmed": "Zuletzt nicht bestätigt",
+      "action_overdue": "Überfällig",
+      "action_due": "Antwort fällig",
+      "in_progress": "In Bearbeitung",
+      "closed": "Geschlossen"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay hat diese Anfrage zuletzt nicht bestätigt, daher wird keine Frist angezeigt.",
+      "action_overdue": "Der Käufer wartet — die Frist von eBay für Ihre Antwort ist abgelaufen.",
+      "action_due": "Der Käufer möchte stornieren. Nehmen Sie an oder lehnen Sie ab, bevor die Frist von eBay endet.",
+      "in_progress": "Im Moment ist von Ihnen nichts zu tun.",
+      "closed": "eBay hat diese Anfrage geschlossen."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "Käufer möchte stornieren",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Käufer hat storniert oder Adressproblem",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Nicht auf Lager oder nicht lieferbar",
+      "other": "Anderer Grund"
+    },
+    "detail": {
+      "title": "Stornierung {{id}}",
+      "titleLoading": "Stornierungsanfrage",
+      "open": "Stornierungsanfrage öffnen",
+      "loadFailed": "Diese Anfrage konnte nicht geladen werden",
+      "loadFailedDescription": "Versuchen Sie es gleich noch einmal oder öffnen Sie sie auf eBay.",
+      "whatYouCanDo": "Was Sie tun können",
+      "nothingToDo": "Bei dieser Anfrage wartet nichts auf Sie.",
+      "openOnEbay": "Bei eBay öffnen",
+      "money": "Beträge",
+      "requestedRefund": "Angeforderte Erstattung",
+      "actualRefund": "Erstattet",
+      "amountOwed": "Von Ihnen geschuldeter Betrag",
+      "paymentStatus": "Zahlungsstatus",
+      "closedAt": "Geschlossen",
+      "journey": "Verlauf",
+      "journeyEmpty": "eBay hat noch keinen Schritt aufgezeichnet."
+    },
+    "actions": {
+      "approve": "Genehmigen",
+      "reject": "Ablehnen"
+    },
+    "confirm": {
+      "approve": {
+        "body": "Die Bestellung wird storniert und eBay erstattet dem Käufer den Betrag. Das lässt sich nicht rückgängig machen.",
+        "confirm": "Stornierung genehmigen"
+      },
+      "reject": {
+        "body": "eBay erfährt, dass Sie ablehnen, und die Bestellung muss versendet werden.",
+        "bodyWithTracking": "eBay erfährt, dass Sie ablehnen, und die Sendungsnummer {{tracking}} wird mitgeschickt. Die Bestellung muss versendet werden.",
+        "confirm": "Stornierung ablehnen"
+      }
+    },
+    "done": {
+      "approve": "Stornierung genehmigt. eBay erstattet dem Käufer den Betrag.",
+      "reject": "Stornierung abgelehnt."
+    },
+    "actionsOff": "Stornierungen in der App sind deaktiviert — antworten Sie auf eBay.",
+    "liveUnavailable": "eBay war gerade nicht erreichbar, daher zeigt SellerHill den zuletzt gesehenen Stand. Antworten sind wieder möglich, sobald eBay antwortet.",
+    "errors": {
+      "actionsDisabled": "Stornierungsaktionen in der App sind auf dieser Plattform deaktiviert. Beantworten Sie die Anfrage auf eBay.",
+      "actionNotAvailable": "eBay bietet diese Aktion für die Anfrage nicht mehr an. Aktualisieren Sie die Seite und prüfen Sie, was jetzt aussteht.",
+      "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Stornierungsaktionen pausiert. Begleichen Sie die Rechnung auf der Seite Abrechnung.",
+      "ebayRejected": "eBay hat diese Aktion abgelehnt. Öffnen Sie die Anfrage auf eBay, um den Grund zu sehen.",
+      "unavailable": "eBay ist nicht erreichbar. Versuchen Sie es gleich noch einmal.",
+      "sandbox": "Stornierungsaktionen sind in der eBay-Sandbox nicht verfügbar.",
+      "notFound": "Diese Stornierungsanfrage wurde nicht gefunden."
+    },
+    "party": {
+      "buyer": "Käufer",
+      "seller": "Sie",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Stornierung erstellt",
+      "SYSTEM_REFUND": "Erstattung von eBay ausgeführt",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay hat den Erstattungsstatus aktualisiert",
+      "buyerOther": "Der Käufer hat die Anfrage aktualisiert",
+      "sellerOther": "Sie haben die Anfrage aktualisiert",
+      "ebayOther": "eBay hat die Anfrage aktualisiert"
+    }
+  }
+}

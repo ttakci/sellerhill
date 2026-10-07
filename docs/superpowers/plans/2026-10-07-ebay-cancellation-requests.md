@@ -222,3 +222,74 @@ export interface EbayCancellationDto {
 ## Verification
 `pnpm --filter shared build && pnpm --filter api test -- ebay-returns cancellation ebay-rate-limits action-center orders-filter` ·
 `pnpm lint` · `pnpm typecheck`. Commit to `development` only (no UAT/main merge until told).
+
+## Phase 2 — a Cancellations page like Returns (operator request, 2026-10-07 11:05)
+
+The operator opened eBay's own "Cancel Details" page (`ebay.com/Cancel/Details?cancelId=5456020649`,
+order `11-15260-92166`, reason "Wrong payment information", refund $13.65, fee credit −$2.25,
+"Amount you owe" $11.40, buyer `vendulkresalov_0`, "Not eligible to relist") and asked for the
+same thing INSIDE the app as its own screen, mirroring the Returns page, with the other pages
+routing there. The order-detail card from phase 1 stays as facts + a "Manage cancellation" link;
+the two answers move to the page's drawer (one place per action).
+
+### Shared contract (packages/shared/src/domain/cancellations/)
+```ts
+export enum CancellationTab { ALL='all', ACTION='action', IN_PROGRESS='in_progress', CLOSED='closed' }
+export const CANCELLATION_TABS: Readonly<Record<CancellationTab, readonly CancellationBucket[]>>
+  // ALL=every bucket · ACTION=action_overdue+action_due · IN_PROGRESS=in_progress+unconfirmed · CLOSED=closed
+export interface EbayCancellationProductDto { title: string|null; imageUrl: string|null; asin: string|null }
+// EbayCancellationDto gains: product: EbayCancellationProductDto | null  (from linked order → listing → product)
+export interface CancellationsQueryDto { page?; limit?; tab?: CancellationTab; ebayAccountId?; search?; orderId? }
+export type CancellationBucketCountsDto = Record<CancellationBucket, number>
+export interface EbayCancellationHistoryEntryDto { activity: string|null; party: string|null; at: string|null; fromState: string|null; toState: string|null }
+export interface EbayCancellationDetailDto extends EbayCancellationDto {
+  live: boolean;                         // false = stored row only, no actions
+  history: EbayCancellationHistoryEntryDto[];   // activityHistories[], oldest first
+  actualRefundAmount: number | null;     // refundInfo.actualRefundDetail.actualRefund.totalAmount.value
+  amountToRecoup: number | null;         // payoutRecoupInfo.amountToRecoup.value ("Amount you owe")
+  paymentStatus: string | null;
+  ebayUrl: string | null;                // buildEbayCancellationUrl(cancelId, environment)
+}
+```
+`buildEbayCancellationUrl(cancelId, env)` in `packages/shared/src/domain/ebay/ebay.urls.ts`:
+production `https://www.ebay.com/Cancel/Details?cancelId=<id>` (observed on the operator's
+screen 2026-10-07, not a documented API URL — say so in the comment), sandbox
+`https://www.sandbox.ebay.com/Cancel/Details?cancelId=<id>`.
+
+### API
+- `GET /v1/cancellations` → `PaginatedCancellationsDto` with `tab`, `ebayAccountId`, `search`
+  (cancel id, legacy order id, product title), `orderId`; rows carry `product`.
+- `GET /v1/cancellations/counts?ebayAccountId=` → `CancellationBucketCountsDto` (store-scoped bucket).
+- `GET /v1/cancellations/:id/detail` → `EbayCancellationDetailDto`: stored row + ONE live
+  `getCancellation` (60 s cache like returns; failure → `live:false`, no actions);
+  `availableActions` from the LIVE row (BUYER, open, sellerResponseDueDate) + the switch.
+- `POST /v1/cancellations/:id/actions/:action` unchanged.
+- Action Center item: link `/cancellations?tab=action`; `count` includes unlinked rows again
+  (the page lists them), keep `context.unlinked`.
+- Specs: controller query parsing, counts SQL, detail mapper (history + amounts), guard spec
+  path list unchanged (no new eBay call).
+
+### Web (`apps/web/src/features/cancellations/`, copy the returns feature's shape)
+- Route `/:locale/cancellations` (lazy, `EbayAccountGuard`, `storeScoped`), locale-less redirect,
+  `routeMeta` entry, sidebar item "Cancellations" after Returns in the Sales group
+  (`translation:menu.cancellations`, icon: an `x-circle`-like icon that exists in the Icon set),
+  demo: `DEMO_STORE_FILTERABLE_PATHS` + fixtures for `/cancellations`, `/cancellations/counts`,
+  `/cancellations/:id/detail` (3–4 rows built from the demo orders).
+- `CancellationsPage` (4-file split + `hooks/useCancellationsUrlState.ts` `?tab&page&q&c`):
+  tabs All · Needs action · In progress · Closed with counts, search, `DataTable` cards
+  (`CancellationCard`, same anatomy as `ReturnCard`: title row = product title + bucket badge,
+  photo left, facts: cancel id · order no (link) · buyer · reason · requested · respond-by,
+  money row: refund to buyer · amount you owe), opens on Needs action once when something waits.
+- `CancellationDetailDrawer` (32rem drawer): status pane (bucket badge, respond-by, overdue red),
+  "What you can do": **Accept** / **Decline** buttons (ConfirmModal; decline copy names the tracking
+  that will be sent when the order has a pushed shipment) + "Open on eBay" (`ebayUrl`), order +
+  product facts with "View order", reason (label map for the three sample values + raw fallback),
+  money (requested refund, actual refund, amount you owe, payment status), journey from `history`
+  (oldest first; party label buyer/seller/eBay by `activityParty`). Live read failed → stored data,
+  a note, no buttons. Switch off → `cancellations.actionsOff` note.
+- Order detail card: keep facts; replace the two buttons with one "Manage cancellation" secondary
+  button → `/cancellations?c=<id>`.
+- i18n: new namespace `cancellations` in all 16 locales (+ `i18nResources` entries) with
+  tabs, card labels, drawer sections, actions, confirms, done messages, errors (move the
+  `orders.cancellation.errors.*` keys here and make the API return `cancellations.errors.*`),
+  `translation:menu.cancellations` in all 16 `translation.json`.

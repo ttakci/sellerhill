@@ -22,6 +22,14 @@ export enum CancellationBucket {
   CLOSED = 'closed',
 }
 
+/** Tabs on the cancellations page (`CANCELLATION_TABS` maps each to its buckets). */
+export enum CancellationTab {
+  ALL = 'all',
+  ACTION = 'action',
+  IN_PROGRESS = 'in_progress',
+  CLOSED = 'closed',
+}
+
 /**
  * `cancelState` value that means the request is over — the value the search
  * page's own samples carry on every closed request. The bucket also reads
@@ -47,6 +55,13 @@ const ACTION_VALUES: readonly string[] = Object.values(EbayCancellationAction);
 
 export function isEbayCancellationAction(value: unknown): value is EbayCancellationAction {
   return typeof value === 'string' && ACTION_VALUES.includes(value);
+}
+
+/** The product of the linked order's listing — the same join the returns page uses. */
+export interface EbayCancellationProductDto {
+  title: string | null;
+  imageUrl: string | null;
+  asin: string | null;
 }
 
 export interface EbayCancellationDto {
@@ -82,9 +97,58 @@ export interface EbayCancellationDto {
   actionsEnabled: boolean;
   /** Empty unless the bucket is action_due / action_overdue and `actionsEnabled`. */
   availableActions: EbayCancellationAction[];
+  /** Linked order → listing → product; null when the request is not linked or the order has no listing. */
+  product: EbayCancellationProductDto | null;
 }
 
-/** `GET /v1/cancellations` — the seller's requests, newest first (the fallback for unlinked rows). */
+export interface CancellationsQueryDto {
+  page?: number;
+  limit?: number;
+  tab?: CancellationTab;
+  ebayAccountId?: string;
+  /** Matches the eBay cancel id, the eBay order id (`legacyOrderId`) or the product title. */
+  search?: string;
+  /** SellerHill order id — the requests filed against one order. */
+  orderId?: string;
+}
+
+export type CancellationBucketCountsDto = Record<CancellationBucket, number>;
+
+/** One `activityHistories[]` entry of `GET /post-order/v2/cancellation/{cancelId}`. */
+export interface EbayCancellationHistoryEntryDto {
+  /** `activityType` (`CancelActivityTypeEnum`, not in the local reference), as sent. */
+  activity: string | null;
+  /** `activityParty` (`PartyEnum`: `BUYER` | `SELLER` | `UNKNOWN`), as sent. */
+  party: string | null;
+  /** `actionDate.value`. */
+  at: string | null;
+  /** `stateFrom` / `stateTo` (`CancelStateEnum`), as sent. */
+  fromState: string | null;
+  toState: string | null;
+}
+
+/**
+ * One request in full: the stored row plus what a live
+ * `GET /post-order/v2/cancellation/{cancelId}` said a moment ago. When that
+ * read fails `live` is false, the live-only parts are empty and no answer is
+ * offered.
+ */
+export interface EbayCancellationDetailDto extends EbayCancellationDto {
+  /** True when eBay answered the detail read; false = stored row only, no actions. */
+  live: boolean;
+  /** `activityHistories[]`, oldest first. */
+  history: EbayCancellationHistoryEntryDto[];
+  /** `refundInfo.actualRefundDetail.actualRefund.totalAmount.value` — what eBay refunded the buyer. */
+  actualRefundAmount: number | null;
+  /** `payoutRecoupInfo.amountToRecoup.value` — eBay's "Amount you owe". */
+  amountToRecoup: number | null;
+  /** `paymentStatus` (`PaymentStatusEnum`), as sent. */
+  paymentStatus: string | null;
+  /** eBay's own page for the request (`buildEbayCancellationUrl`). */
+  ebayUrl: string | null;
+}
+
+/** `GET /v1/cancellations` — the seller's BUYER requests, those awaiting an answer first. */
 export interface PaginatedCancellationsDto {
   items: EbayCancellationDto[];
   total: number;
@@ -96,20 +160,20 @@ export interface EbayCancellationActionResultDto {
   action: EbayCancellationAction;
 }
 
-/** i18n keys the API answers a refused or failed action with (`message`), in the `orders` namespace. */
+/** i18n keys the API answers a refused or failed action with (`message`), in the `cancellations` namespace. */
 export const CANCELLATION_ACTION_ERROR_KEY = {
   /** The operator has not switched in-app actions on. */
-  ACTIONS_DISABLED: 'orders.cancellation.errors.actionsDisabled',
+  ACTIONS_DISABLED: 'cancellations.errors.actionsDisabled',
   /** The LIVE request is not a buyer's open request awaiting the seller. */
-  NOT_OFFERED: 'orders.cancellation.errors.actionNotAvailable',
-  SUSPENDED: 'orders.cancellation.errors.suspended',
+  NOT_OFFERED: 'cancellations.errors.actionNotAvailable',
+  SUSPENDED: 'cancellations.errors.suspended',
   /** eBay refused the call (a 4xx). */
-  EBAY_REJECTED: 'orders.cancellation.errors.ebayRejected',
+  EBAY_REJECTED: 'cancellations.errors.ebayRejected',
   /** eBay could not be reached, or answered with an error of its own. */
-  UNAVAILABLE: 'orders.cancellation.errors.unavailable',
+  UNAVAILABLE: 'cancellations.errors.unavailable',
   /** The Post-Order API has no Sandbox. */
-  SANDBOX: 'orders.cancellation.errors.sandbox',
-  NOT_FOUND: 'orders.cancellation.errors.notFound',
+  SANDBOX: 'cancellations.errors.sandbox',
+  NOT_FOUND: 'cancellations.errors.notFound',
 } as const;
 
 export type CancellationActionErrorKey =

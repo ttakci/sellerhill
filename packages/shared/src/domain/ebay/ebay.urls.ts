@@ -26,6 +26,27 @@ export function buildEbayItemUrl(
 }
 
 /**
+ * eBay's own "Cancel Details" page for a cancellation request.
+ *
+ * OBSERVED, NOT DOCUMENTED: the production URL is the one the operator's
+ * browser showed on 2026-10-07 (`www.ebay.com/Cancel/Details?cancelId=…`);
+ * no eBay API reference documents a seller-facing cancellation page URL. The
+ * Sandbox host follows the same path by analogy and is unverified.
+ */
+const EBAY_CANCEL_DETAILS_URL: Record<EbayEnvironment, string> = {
+  [EbayEnvironment.PRODUCTION]: 'https://www.ebay.com/Cancel/Details',
+  [EbayEnvironment.SANDBOX]: 'https://www.sandbox.ebay.com/Cancel/Details',
+};
+
+export function buildEbayCancellationUrl(
+  cancelId: string,
+  environment: EbayEnvironment = EbayEnvironment.PRODUCTION
+): string {
+  const base = EBAY_CANCEL_DETAILS_URL[environment] ?? EBAY_CANCEL_DETAILS_URL[EbayEnvironment.PRODUCTION];
+  return `${base}?cancelId=${encodeURIComponent(cancelId)}`;
+}
+
+/**
  * Amazon storefront base URL for a marketplace (Amazon has no sandbox
  * counterpart — one storefront per marketplace, always live).
  */

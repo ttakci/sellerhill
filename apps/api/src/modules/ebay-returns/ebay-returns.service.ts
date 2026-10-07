@@ -59,15 +59,16 @@ interface BucketCountRow {
 }
 
 /** Same joins the orders list uses to reach a row's product (title / ASIN on the listing, image on the product). */
-const PRODUCT_JOINS = `LEFT JOIN orders o ON o.id = r.order_id
+export const productJoinsSql = (alias: string): string => `LEFT JOIN orders o ON o.id = ${alias}.order_id
        LEFT JOIN listings l ON l.id = o.listing_id
        LEFT JOIN products p ON p.id = l.product_id`;
+const PRODUCT_JOINS = productJoinsSql('r');
 
-function clampPage(page: number | undefined): number {
+export function clampPage(page: number | undefined): number {
   return typeof page === 'number' && Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
 }
 
-function clampLimit(limit: number | undefined): number {
+export function clampLimit(limit: number | undefined): number {
   if (typeof limit !== 'number' || !Number.isFinite(limit) || limit < 1) {
     return RETURNS_DEFAULT_PAGE_SIZE;
   }
@@ -75,7 +76,7 @@ function clampLimit(limit: number | undefined): number {
 }
 
 /** `%`, `_` and the escape character itself are literals in a search term. */
-function escapeLike(term: string): string {
+export function escapeLike(term: string): string {
   return term.replace(/[\\%_]/g, (char) => `\\${char}`);
 }
 
@@ -97,7 +98,7 @@ function toAmount(value: string | number | null): number | null {
 }
 
 /** `products.image_urls` is JSONB (already an array); a legacy row may hold a JSON string. */
-function firstImageUrl(raw: string[] | string | null): string | null {
+export function firstImageUrl(raw: string[] | string | null): string | null {
   if (!raw) {
     return null;
   }

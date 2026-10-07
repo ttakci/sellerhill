@@ -1,0 +1,131 @@
+{
+  "cancellations": {
+    "title": "Annullamenti",
+    "subtitle_one": "{{count}} richiesta di annullamento",
+    "subtitle_many": "{{count}} richieste di annullamento",
+    "subtitle_other": "{{count}} richieste di annullamento",
+    "loading": "Caricamento delle richieste di annullamento…",
+    "notice": "Apri una richiesta per vedere cosa chiede l’acquirente e quando eBay attende la tua risposta. Puoi accettarla o rifiutarla da qui.",
+    "tabs": {
+      "all": "Tutti",
+      "action": "Richiedono azione",
+      "in_progress": "In corso",
+      "closed": "Chiusi",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Stato dell’annullamento"
+    },
+    "filters": {
+      "search": "Cerca ID annullamento, ID ordine o prodotto…",
+      "clear": "Cancella",
+      "resultCount_one": "{{count}} risultato",
+      "resultCount_many": "{{count}} risultati",
+      "resultCount_other": "{{count}} risultati"
+    },
+    "columns": {
+      "product": "Prodotto",
+      "request": "Richiesta",
+      "status": "Stato",
+      "due": "Rispondi entro",
+      "reason": "Motivo",
+      "refund": "Rimborso all’acquirente",
+      "requested": "Richiesta il",
+      "buyer": "Acquirente"
+    },
+    "order": "Ordine",
+    "viewOrder": "Vedi ordine",
+    "asin": "ASIN",
+    "unknownProduct": "Prodotto sconosciuto",
+    "answer": "Accetta o rifiuta",
+    "dueBy": "entro il {{date}}",
+    "empty": {
+      "title": "Ancora nessuna richiesta di annullamento",
+      "description": "Gli ordini che i tuoi acquirenti chiedono di annullare su eBay compariranno qui."
+    },
+    "emptyFiltered": {
+      "title": "Nessuna richiesta corrisponde ai filtri",
+      "description": "Prova un’altra scheda o un altro termine di ricerca.",
+      "action": "Cancella filtri"
+    },
+    "bucket": {
+      "unconfirmed": "Non confermata di recente",
+      "action_overdue": "Scaduta",
+      "action_due": "Risposta in scadenza",
+      "in_progress": "In corso",
+      "closed": "Chiusa"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay non ha confermato di recente questa richiesta, quindi la scadenza non viene mostrata.",
+      "action_overdue": "L’acquirente aspetta: il termine di eBay per la tua risposta è scaduto.",
+      "action_due": "L’acquirente ha chiesto l’annullamento. Accetta o rifiuta prima della scadenza di eBay.",
+      "in_progress": "Al momento non ci si aspetta nulla da te.",
+      "closed": "eBay ha chiuso questa richiesta."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "L'acquirente ha chiesto l'annullamento",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "L'acquirente ha annullato o problema di indirizzo",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Esaurito o impossibile da evadere",
+      "other": "Altro motivo"
+    },
+    "detail": {
+      "title": "Annullamento {{id}}",
+      "titleLoading": "Richiesta di annullamento",
+      "open": "Apri richiesta di annullamento",
+      "loadFailed": "Impossibile caricare questa richiesta",
+      "loadFailedDescription": "Riprova tra poco, oppure aprila su eBay.",
+      "whatYouCanDo": "Cosa puoi fare",
+      "nothingToDo": "Su questa richiesta non c’è nulla in attesa da parte tua.",
+      "openOnEbay": "Apri su eBay",
+      "money": "Importi",
+      "requestedRefund": "Rimborso richiesto",
+      "actualRefund": "Rimborsato",
+      "amountOwed": "Importo che devi",
+      "paymentStatus": "Stato del pagamento",
+      "closedAt": "Chiusa",
+      "journey": "Percorso",
+      "journeyEmpty": "eBay non ha ancora registrato alcun passaggio."
+    },
+    "actions": {
+      "approve": "Approva",
+      "reject": "Rifiuta"
+    },
+    "confirm": {
+      "approve": {
+        "body": "L'ordine viene annullato ed eBay rimborsa l'acquirente. L'azione non può essere annullata.",
+        "confirm": "Approva annullamento"
+      },
+      "reject": {
+        "body": "eBay viene informato del tuo rifiuto e l'ordine deve essere spedito.",
+        "bodyWithTracking": "eBay viene informato del tuo rifiuto e viene inviato anche il numero di tracking {{tracking}}. L'ordine deve essere spedito.",
+        "confirm": "Rifiuta annullamento"
+      }
+    },
+    "done": {
+      "approve": "Annullamento approvato. eBay rimborserà l'acquirente.",
+      "reject": "Annullamento rifiutato."
+    },
+    "actionsOff": "Le azioni di annullamento nell'app sono disattivate: rispondi su eBay.",
+    "liveUnavailable": "Impossibile raggiungere eBay in questo momento, quindi viene mostrato l’ultimo stato visto da SellerHill. Le risposte saranno disponibili quando eBay risponderà di nuovo.",
+    "errors": {
+      "actionsDisabled": "Le azioni di annullamento nell'app sono disattivate su questa piattaforma. Rispondi alla richiesta su eBay.",
+      "actionNotAvailable": "eBay non offre più questa azione per la richiesta. Aggiorna e controlla cosa è in attesa ora.",
+      "suspended": "Il tuo abbonamento è sospeso, quindi le azioni di annullamento sono in pausa. Salda la fattura nella pagina Fatturazione.",
+      "ebayRejected": "eBay ha rifiutato questa azione. Apri la richiesta su eBay per vedere il motivo.",
+      "unavailable": "Impossibile raggiungere eBay. Riprova tra un attimo.",
+      "sandbox": "Le azioni di annullamento non sono disponibili nella sandbox di eBay.",
+      "notFound": "Questa richiesta di annullamento non è stata trovata."
+    },
+    "party": {
+      "buyer": "Acquirente",
+      "seller": "Tu",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Annullamento creato",
+      "SYSTEM_REFUND": "Rimborso emesso da eBay",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay ha aggiornato lo stato del rimborso",
+      "buyerOther": "L’acquirente ha aggiornato la richiesta",
+      "sellerOther": "Hai aggiornato la richiesta",
+      "ebayOther": "eBay ha aggiornato la richiesta"
+    }
+  }
+}

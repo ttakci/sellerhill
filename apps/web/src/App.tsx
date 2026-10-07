@@ -89,6 +89,9 @@ const MessagesPage = lazy(() =>
 const ReturnsPage = lazy(() =>
   import('./features/returns').then((m) => ({ default: m.ReturnsPageContainer }))
 );
+const CancellationsPage = lazy(() =>
+  import('./features/cancellations').then((m) => ({ default: m.CancellationsPageContainer }))
+);
 const ListingsAllPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingsAllPage }))
 );
@@ -370,6 +373,14 @@ export function App() {
                 </Lazy>
               }
             />
+            <Route
+              path="cancellations"
+              element={
+                <Lazy>
+                  <CancellationsPage />
+                </Lazy>
+              }
+            />
             <Route path="profile" element={<Navigate to="../settings" replace />} />
             <Route index element={<Navigate to="register" replace />} />
           </Route>
@@ -418,6 +429,7 @@ export function App() {
         <Route path="/best-sellers" element={<LocaleRedirect to="best-sellers" preserveQuery />} />
         <Route path="/messages" element={<LocaleRedirect to="messages" preserveQuery />} />
         <Route path="/returns" element={<LocaleRedirect to="returns" preserveQuery />} />
+        <Route path="/cancellations" element={<LocaleRedirect to="cancellations" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" preserveQuery />} />
         {/*

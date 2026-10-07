@@ -211,6 +211,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItem>
             </NavTooltip>
 
+            <NavTooltip label={t('translation:menu.cancellations')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $isCollapsed={sidebarCollapsed}
+                $active={pathWithoutLocale === '/cancellations'}
+                onClick={() => onLocaleNavigate('/cancellations')}
+                aria-label={t('translation:menu.cancellations')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="x-circle" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.cancellations')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
             <S.NavDivider />
 
             {!sidebarCollapsed && (

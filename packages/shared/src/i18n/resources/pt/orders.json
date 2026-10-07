@@ -420,35 +420,7 @@
         "closed": "Encerrado",
         "unconfirmed": "Não confirmado recentemente"
       },
-      "approve": "Aprovar",
-      "reject": "Rejeitar",
-      "confirm": {
-        "approve": {
-          "title": "Aprovar o cancelamento?",
-          "body": "O pedido é cancelado e a eBay reembolsa o comprador. Isso não pode ser desfeito.",
-          "confirm": "Aprovar cancelamento"
-        },
-        "reject": {
-          "title": "Rejeitar o cancelamento?",
-          "body": "A eBay é informada de que você recusou e o pedido precisa ser enviado.",
-          "bodyWithTracking": "A eBay é informada de que você recusou e o código de rastreio {{tracking}} é enviado junto. O pedido precisa ser enviado.",
-          "confirm": "Rejeitar cancelamento"
-        }
-      },
-      "done": {
-        "approve": "Cancelamento aprovado. A eBay vai reembolsar o comprador.",
-        "reject": "Cancelamento rejeitado."
-      },
-      "actionsOff": "As ações de cancelamento no app estão desativadas — responda na eBay.",
-      "errors": {
-        "actionsDisabled": "As ações de cancelamento no app estão desativadas nesta plataforma. Responda ao pedido na eBay.",
-        "actionNotAvailable": "A eBay não oferece mais esta ação no pedido. Atualize e veja o que está pendente agora.",
-        "suspended": "Sua assinatura está suspensa, então as ações de cancelamento estão pausadas. Quite a fatura na página de Cobrança.",
-        "ebayRejected": "A eBay recusou esta ação. Abra o pedido na eBay para ver o motivo.",
-        "unavailable": "Não foi possível acessar a eBay. Tente novamente em instantes.",
-        "sandbox": "As ações de cancelamento não estão disponíveis no sandbox da eBay.",
-        "notFound": "Este pedido de cancelamento não foi encontrado."
-      }
+      "manage": "Gerenciar cancelamento"
     },
     "note": {
       "title": "Sua nota",

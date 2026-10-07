@@ -1,0 +1,129 @@
+{
+  "cancellations": {
+    "title": "Cancellations",
+    "subtitle_one": "{{count}} cancellation request",
+    "subtitle_other": "{{count}} cancellation requests",
+    "loading": "Loading cancellation requests…",
+    "notice": "Open a request to see what the buyer asked for and when eBay needs your answer. You can accept or decline it from here.",
+    "tabs": {
+      "all": "All",
+      "action": "Needs action",
+      "in_progress": "In progress",
+      "closed": "Closed",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Cancellation status"
+    },
+    "filters": {
+      "search": "Search cancellation ID, order ID or product…",
+      "clear": "Clear",
+      "resultCount_one": "{{count}} result",
+      "resultCount_other": "{{count}} results"
+    },
+    "columns": {
+      "product": "Product",
+      "request": "Request",
+      "status": "Status",
+      "due": "Answer due",
+      "reason": "Reason",
+      "refund": "Refund to buyer",
+      "requested": "Requested",
+      "buyer": "Buyer"
+    },
+    "order": "Order",
+    "viewOrder": "View order",
+    "asin": "ASIN",
+    "unknownProduct": "Unknown product",
+    "answer": "Accept or decline",
+    "dueBy": "by {{date}}",
+    "empty": {
+      "title": "No cancellation requests yet",
+      "description": "Orders your buyers ask to cancel on eBay will appear here."
+    },
+    "emptyFiltered": {
+      "title": "No requests match your filters",
+      "description": "Try another tab or search term.",
+      "action": "Clear filters"
+    },
+    "bucket": {
+      "unconfirmed": "Not confirmed recently",
+      "action_overdue": "Overdue",
+      "action_due": "Answer due",
+      "in_progress": "In progress",
+      "closed": "Closed"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay has not confirmed this request recently, so what is due is not shown.",
+      "action_overdue": "The buyer is waiting — eBay's deadline for your answer has passed.",
+      "action_due": "The buyer asked to cancel. Accept or decline before eBay's deadline.",
+      "in_progress": "Nothing is due from you right now.",
+      "closed": "eBay closed this request."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "Buyer asked to cancel",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Buyer cancelled or has an address problem",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfil",
+      "other": "Other reason"
+    },
+    "detail": {
+      "title": "Cancellation {{id}}",
+      "titleLoading": "Cancellation request",
+      "open": "Open cancellation request",
+      "loadFailed": "This request could not be loaded",
+      "loadFailedDescription": "Try again in a moment, or open it on eBay.",
+      "whatYouCanDo": "What you can do",
+      "nothingToDo": "Nothing is waiting for you on this request.",
+      "openOnEbay": "Open on eBay",
+      "money": "Money",
+      "requestedRefund": "Requested refund",
+      "actualRefund": "Refunded",
+      "amountOwed": "Amount you owe",
+      "paymentStatus": "Payment status",
+      "closedAt": "Closed",
+      "journey": "Journey",
+      "journeyEmpty": "eBay has not recorded any step yet."
+    },
+    "actions": {
+      "approve": "Accept",
+      "reject": "Decline"
+    },
+    "confirm": {
+      "approve": {
+        "body": "The order is cancelled and eBay refunds the buyer. This cannot be undone.",
+        "confirm": "Accept cancellation"
+      },
+      "reject": {
+        "body": "eBay is told you decline, and the order has to be shipped.",
+        "bodyWithTracking": "eBay is told you decline, and the tracking number {{tracking}} is sent along. The order has to be shipped.",
+        "confirm": "Decline cancellation"
+      }
+    },
+    "done": {
+      "approve": "Cancellation accepted. eBay will refund the buyer.",
+      "reject": "Cancellation declined."
+    },
+    "actionsOff": "In-app cancellation actions are off — answer on eBay.",
+    "liveUnavailable": "eBay could not be reached just now, so this is the last state SellerHill saw. Answers are offered once eBay answers again.",
+    "errors": {
+      "actionsDisabled": "In-app cancellation actions are switched off on this platform. Answer the request on eBay.",
+      "actionNotAvailable": "eBay no longer offers this action on the request. Refresh and check what is waiting now.",
+      "suspended": "Your subscription is suspended, so cancellation actions are paused. Settle the invoice on the Billing page.",
+      "ebayRejected": "eBay refused this action. Open the request on eBay to see why.",
+      "unavailable": "eBay could not be reached. Try again in a moment.",
+      "sandbox": "Cancellation actions are not available on the eBay sandbox.",
+      "notFound": "This cancellation request was not found."
+    },
+    "party": {
+      "buyer": "Buyer",
+      "seller": "You",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Cancellation created",
+      "SYSTEM_REFUND": "Refund issued by eBay",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay updated the refund status",
+      "buyerOther": "Buyer updated the request",
+      "sellerOther": "You updated the request",
+      "ebayOther": "eBay updated the request"
+    }
+  }
+}

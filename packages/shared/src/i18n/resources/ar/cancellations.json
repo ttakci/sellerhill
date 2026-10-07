@@ -1,0 +1,137 @@
+{
+  "cancellations": {
+    "title": "الإلغاءات",
+    "subtitle_zero": "لا توجد طلبات إلغاء",
+    "subtitle_one": "طلب إلغاء واحد",
+    "subtitle_two": "طلبا إلغاء",
+    "subtitle_few": "{{count}} طلبات إلغاء",
+    "subtitle_many": "{{count}} طلب إلغاء",
+    "subtitle_other": "{{count}} طلب إلغاء",
+    "loading": "جارٍ تحميل طلبات الإلغاء…",
+    "notice": "افتح طلبًا لترى ما طلبه المشتري ومتى يحتاج eBay إلى ردك. يمكنك قبوله أو رفضه من هنا.",
+    "tabs": {
+      "all": "الكل",
+      "action": "تحتاج إجراء",
+      "in_progress": "قيد التنفيذ",
+      "closed": "مغلقة",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "حالة الإلغاء"
+    },
+    "filters": {
+      "search": "ابحث برقم الإلغاء أو رقم الطلب أو المنتج…",
+      "clear": "مسح",
+      "resultCount_zero": "لا توجد نتائج",
+      "resultCount_one": "نتيجة واحدة",
+      "resultCount_two": "نتيجتان",
+      "resultCount_few": "{{count}} نتائج",
+      "resultCount_many": "{{count}} نتيجة",
+      "resultCount_other": "{{count}} نتيجة"
+    },
+    "columns": {
+      "product": "المنتج",
+      "request": "الطلب",
+      "status": "الحالة",
+      "due": "موعد الرد",
+      "reason": "السبب",
+      "refund": "المبلغ المسترد للمشتري",
+      "requested": "تاريخ الطلب",
+      "buyer": "المشتري"
+    },
+    "order": "الطلب",
+    "viewOrder": "عرض الطلب",
+    "asin": "ASIN",
+    "unknownProduct": "منتج غير معروف",
+    "answer": "قبول أو رفض",
+    "dueBy": "قبل {{date}}",
+    "empty": {
+      "title": "لا توجد طلبات إلغاء بعد",
+      "description": "ستظهر هنا الطلبات التي يطلب مشترون إلغاءها على eBay."
+    },
+    "emptyFiltered": {
+      "title": "لا توجد طلبات تطابق عوامل التصفية",
+      "description": "جرّب تبويبًا آخر أو عبارة بحث أخرى.",
+      "action": "مسح عوامل التصفية"
+    },
+    "bucket": {
+      "unconfirmed": "لم يتم تأكيده مؤخرًا",
+      "action_overdue": "متأخر",
+      "action_due": "الرد مستحق",
+      "in_progress": "قيد التنفيذ",
+      "closed": "مغلق"
+    },
+    "bucketHint": {
+      "unconfirmed": "لم يؤكد eBay هذا الطلب مؤخرًا، لذلك لا يُعرض الموعد المطلوب.",
+      "action_overdue": "المشتري ينتظر — انتهت مهلة eBay لردك.",
+      "action_due": "طلب المشتري الإلغاء. اقبل الطلب أو ارفضه قبل مهلة eBay.",
+      "in_progress": "لا شيء مطلوب منك الآن.",
+      "closed": "أغلق eBay هذا الطلب."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "طلب المشتري الإلغاء",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "ألغى المشتري أو توجد مشكلة في العنوان",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "غير متوفر أو يتعذر التنفيذ",
+      "other": "سبب آخر"
+    },
+    "detail": {
+      "title": "الإلغاء {{id}}",
+      "titleLoading": "طلب إلغاء",
+      "open": "فتح طلب الإلغاء",
+      "loadFailed": "تعذّر تحميل هذا الطلب",
+      "loadFailedDescription": "حاول مرة أخرى بعد قليل، أو افتحه على eBay.",
+      "whatYouCanDo": "ما يمكنك فعله",
+      "nothingToDo": "لا شيء ينتظرك في هذا الطلب.",
+      "openOnEbay": "فتح على eBay",
+      "money": "المبالغ",
+      "requestedRefund": "المبلغ المطلوب استرداده",
+      "actualRefund": "تم الاسترداد",
+      "amountOwed": "المبلغ المستحق عليك",
+      "paymentStatus": "حالة الدفع",
+      "closedAt": "مغلق",
+      "journey": "مسار الطلب",
+      "journeyEmpty": "لم يسجّل eBay أي خطوة بعد."
+    },
+    "actions": {
+      "approve": "موافقة",
+      "reject": "رفض"
+    },
+    "confirm": {
+      "approve": {
+        "body": "سيُلغى الطلب وتردّ eBay المبلغ للمشتري. لا يمكن التراجع عن ذلك.",
+        "confirm": "الموافقة على الإلغاء"
+      },
+      "reject": {
+        "body": "سيتم إبلاغ eBay برفضك ويجب شحن الطلب.",
+        "bodyWithTracking": "سيتم إبلاغ eBay برفضك وإرسال رقم التتبع {{tracking}} معه. يجب شحن الطلب.",
+        "confirm": "رفض الإلغاء"
+      }
+    },
+    "done": {
+      "approve": "تمت الموافقة على الإلغاء. ستردّ eBay المبلغ للمشتري.",
+      "reject": "تم رفض الإلغاء."
+    },
+    "actionsOff": "إجراءات الإلغاء داخل التطبيق متوقفة — ردّ على eBay.",
+    "liveUnavailable": "تعذّر الوصول إلى eBay الآن، لذلك هذه آخر حالة رآها SellerHill. ستتوفر خيارات الرد عندما يستجيب eBay مجددًا.",
+    "errors": {
+      "actionsDisabled": "إجراءات الإلغاء داخل التطبيق متوقفة على هذه المنصة. ردّ على الطلب في eBay.",
+      "actionNotAvailable": "لم تعد eBay تتيح هذا الإجراء على الطلب. حدّث الصفحة وتحقق مما هو بانتظارك الآن.",
+      "suspended": "اشتراكك معلّق، لذلك توقفت إجراءات الإلغاء. سدّد الفاتورة من صفحة الفوترة.",
+      "ebayRejected": "رفضت eBay هذا الإجراء. افتح الطلب في eBay لمعرفة السبب.",
+      "unavailable": "تعذّر الوصول إلى eBay. حاول مرة أخرى بعد قليل.",
+      "sandbox": "إجراءات الإلغاء غير متاحة في بيئة eBay التجريبية.",
+      "notFound": "لم يتم العثور على طلب الإلغاء هذا."
+    },
+    "party": {
+      "buyer": "المشتري",
+      "seller": "أنت",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "تم إنشاء الإلغاء",
+      "SYSTEM_REFUND": "أصدر eBay استردادًا",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "حدّث eBay حالة الاسترداد",
+      "buyerOther": "حدّث المشتري الطلب",
+      "sellerOther": "حدّثت الطلب",
+      "ebayOther": "حدّث eBay الطلب"
+    }
+  }
+}

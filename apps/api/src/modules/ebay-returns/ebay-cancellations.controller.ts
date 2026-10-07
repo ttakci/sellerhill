@@ -14,7 +14,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { EbayCancellationActionResultDto, isEbayCancellationAction, PaginatedCancellationsDto } from '@repo/shared';
+import {
+  CancellationBucketCountsDto,
+  CancellationTab,
+  EbayCancellationActionResultDto,
+  EbayCancellationDetailDto,
+  isEbayCancellationAction,
+  PaginatedCancellationsDto,
+} from '@repo/shared';
 import { isUUID } from 'class-validator';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,8 +30,12 @@ import { CancellationActionError, EbayCancellationsActionsService } from './ebay
 
 type AuthedRequest = { user: { sub: string } };
 
-/** `?tab=action` — the only tab: requests awaiting the seller's answer. */
-const ACTION_TAB = 'action';
+const CANCELLATION_TAB_VALUES: readonly string[] = Object.values(CancellationTab);
+
+/** An unknown tab is ignored (no filter), never forwarded. */
+function parseTab(value: string | undefined): CancellationTab | undefined {
+  return value !== undefined && CANCELLATION_TAB_VALUES.includes(value) ? (value as CancellationTab) : undefined;
+}
 
 function parseUuid(value: string | undefined, name: string): string | undefined {
   if (value === undefined || value.trim() === '') {
@@ -34,6 +45,14 @@ function parseUuid(value: string | undefined, name: string): string | undefined 
     throw new BadRequestException(`${name} must be a UUID`);
   }
   return value.trim();
+}
+
+function requireUuid(value: string): string {
+  const id = parseUuid(value, 'id');
+  if (!id) {
+    throw new BadRequestException('id must be a UUID');
+  }
+  return id;
 }
 
 function parsePositiveInt(value: string | undefined): number | undefined {
@@ -59,11 +78,11 @@ function rethrowCancellationAction(error: unknown): never {
 }
 
 /**
- * eBay buyer cancellation requests — the seller's own. The list reads
- * `ebay_cancellations` (the order page carries the linked request on
- * `OrderDto.cancellation`; this is the fallback for unlinked rows); the ONE
- * write route answers a request through `EbayCancellationsActionsService`,
- * which holds every gate. A customer surface (`JwtAuthGuard`).
+ * eBay buyer cancellation requests — the seller's own (the Cancellations
+ * page). The list and the counts read `ebay_cancellations`; the detail adds
+ * one live eBay read; the ONE write route answers a request through
+ * `EbayCancellationsActionsService`, which holds every gate. A customer
+ * surface (`JwtAuthGuard`).
  */
 @ApiTags('cancellations')
 @ApiBearerAuth()
@@ -72,25 +91,52 @@ function rethrowCancellationAction(error: unknown): never {
 export class EbayCancellationsController {
   constructor(private readonly actions: EbayCancellationsActionsService) {}
 
+  // Declared before any parameterised route, so `counts` can never be read as an id.
+  @Get('counts')
+  @ApiOperation({ summary: 'How many of the seller’s eBay buyer cancellation requests sit in each bucket' })
+  @ApiQuery({ name: 'ebayAccountId', required: false, description: 'eBay account id (UUID)' })
+  counts(
+    @Request() req: AuthedRequest,
+    @Query('ebayAccountId') ebayAccountId?: string
+  ): Promise<CancellationBucketCountsDto> {
+    return this.actions.counts(req.user.sub, { ebayAccountId: parseUuid(ebayAccountId, 'ebayAccountId') });
+  }
+
   @Get()
   @ApiOperation({ summary: 'One page of the seller’s eBay buyer cancellation requests' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'tab', required: false, enum: CancellationTab })
+  @ApiQuery({ name: 'ebayAccountId', required: false, description: 'eBay account id (UUID)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Cancel id, eBay order id or product title' })
   @ApiQuery({ name: 'orderId', required: false, description: 'SellerHill order id (UUID)' })
-  @ApiQuery({ name: 'tab', required: false, enum: [ACTION_TAB] })
   list(
     @Request() req: AuthedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('orderId') orderId?: string,
-    @Query('tab') tab?: string
+    @Query('tab') tab?: string,
+    @Query('ebayAccountId') ebayAccountId?: string,
+    @Query('search') search?: string,
+    @Query('orderId') orderId?: string
   ): Promise<PaginatedCancellationsDto> {
     return this.actions.list(req.user.sub, {
       page: parsePositiveInt(page),
       limit: parsePositiveInt(limit),
+      tab: parseTab(tab),
+      ebayAccountId: parseUuid(ebayAccountId, 'ebayAccountId'),
+      search: typeof search === 'string' && search.trim() !== '' ? search.trim() : undefined,
       orderId: parseUuid(orderId, 'orderId'),
-      actionOnly: tab === ACTION_TAB,
     });
+  }
+
+  @Get(':id/detail')
+  @ApiOperation({ summary: 'One cancellation request in full: the stored row plus a live read from eBay' })
+  async detail(@Request() req: AuthedRequest, @Param('id') id: string): Promise<EbayCancellationDetailDto> {
+    try {
+      return await this.actions.detail(req.user.sub, requireUuid(id));
+    } catch (error) {
+      rethrowCancellationAction(error);
+    }
   }
 
   @Post(':id/actions/:action')
@@ -103,12 +149,8 @@ export class EbayCancellationsController {
     if (!isEbayCancellationAction(action)) {
       throw new BadRequestException('unknown cancellation action');
     }
-    const cancellationId = parseUuid(id, 'id');
-    if (!cancellationId) {
-      throw new BadRequestException('id must be a UUID');
-    }
     try {
-      return await this.actions.act(req.user.sub, cancellationId, action);
+      return await this.actions.act(req.user.sub, requireUuid(id), action);
     } catch (error) {
       rethrowCancellationAction(error);
     }

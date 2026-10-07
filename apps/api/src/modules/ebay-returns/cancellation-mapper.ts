@@ -10,6 +10,8 @@
 // that maps to nothing is one without a `cancelId` — there is no key to store
 // it under.
 
+import type { EbayCancellationHistoryEntryDto } from '@repo/shared';
+
 import { asCurrency, asIsoDate, asNumber, asRecord, asText } from './return-mapper';
 
 /** The mapped columns of an `ebay_cancellations` row (migration 145). */
@@ -63,5 +65,67 @@ export function mapCancellation(entry: unknown): EbayCancellationRow | null {
     requestedRefundAmount: asNumber(refund?.value),
     currency: asCurrency(refund?.currency),
     paymentStatus: asText(root.paymentStatus),
+  };
+}
+
+/** A live `cancelDetail`: the row plus the parts only the detail read carries. */
+export interface MappedCancellationDetail {
+  row: EbayCancellationRow;
+  /** `activityHistories[]`, oldest first. */
+  history: EbayCancellationHistoryEntryDto[];
+  /** `refundInfo.actualRefundDetail.actualRefund.totalAmount.value`. */
+  actualRefundAmount: number | null;
+  /** `payoutRecoupInfo.amountToRecoup.value`. */
+  amountToRecoup: number | null;
+  paymentStatus: string | null;
+}
+
+/**
+ * An eBay `Amount`'s value, only when it is in the row's currency (or either
+ * side names none): the page prints every figure with the row's currency, and
+ * `amountToRecoup` is documented in "the seller's currency", which can differ
+ * from the order's — a figure shown under the wrong currency is worse than none.
+ */
+function amountIn(container: unknown, currency: string | null): number | null {
+  const amount = asRecord(container);
+  const own = asCurrency(amount?.currency);
+  return own !== null && currency !== null && own !== currency ? null : asNumber(amount?.value);
+}
+
+function mapHistory(value: unknown): EbayCancellationHistoryEntryDto[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const entries: EbayCancellationHistoryEntryDto[] = [];
+  for (const raw of value) {
+    const entry = asRecord(raw);
+    if (entry) {
+      entries.push({
+        activity: asText(entry.activityType),
+        party: asText(entry.activityParty),
+        at: dateValue(entry.actionDate),
+        fromState: asText(entry.stateFrom),
+        toState: asText(entry.stateTo),
+      });
+    }
+  }
+  // Oldest first — eBay documents no order, and a timeline reads top-down.
+  return entries.sort((a, b) => (a.at ?? '').localeCompare(b.at ?? ''));
+}
+
+/** `cancelDetail` → row + history + the two amounts. Null only when `mapCancellation` is. */
+export function mapCancellationDetail(detail: unknown): MappedCancellationDetail | null {
+  const row = mapCancellation(detail);
+  const root = asRecord(detail);
+  if (!row || !root) {
+    return null;
+  }
+  const actualRefund = asRecord(asRecord(asRecord(root.refundInfo)?.actualRefundDetail)?.actualRefund);
+  return {
+    row,
+    history: mapHistory(root.activityHistories),
+    actualRefundAmount: amountIn(actualRefund?.totalAmount, row.currency),
+    amountToRecoup: amountIn(asRecord(root.payoutRecoupInfo)?.amountToRecoup, row.currency),
+    paymentStatus: row.paymentStatus,
   };
 }

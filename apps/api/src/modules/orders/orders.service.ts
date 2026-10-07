@@ -306,7 +306,7 @@ export class OrdersService {
 
     if (filters?.cancelRequested) {
       // An open BUYER request awaiting the seller's answer — the bucket the
-      // order card and the Action Center item read (`?cancelRequested=true`).
+      // order card and the Cancellations page read (`?cancelRequested=true`).
       const bucket = buildStoreScopedCancellationBucketSql('c', cancellation.freshnessHours);
       conditions.push(
         `EXISTS (SELECT 1 FROM ebay_cancellations c

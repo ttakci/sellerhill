@@ -14,6 +14,7 @@ describe('store-scoped routes', () => {
     '/orders/abc',
     '/messages',
     '/returns',
+    '/cancellations',
     '/campaigns',
     '/campaigns/123',
   ])('%s follows the active store', (path) => {

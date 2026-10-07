@@ -420,35 +420,7 @@
         "closed": "已关闭",
         "unconfirmed": "近期未确认"
       },
-      "approve": "批准",
-      "reject": "拒绝",
-      "confirm": {
-        "approve": {
-          "title": "批准取消？",
-          "body": "订单将被取消，eBay 会向买家退款。此操作无法撤销。",
-          "confirm": "批准取消"
-        },
-        "reject": {
-          "title": "拒绝取消？",
-          "body": "将通知 eBay 您拒绝取消，订单必须发货。",
-          "bodyWithTracking": "将通知 eBay 您拒绝取消，并一并发送物流单号 {{tracking}}。订单必须发货。",
-          "confirm": "拒绝取消"
-        }
-      },
-      "done": {
-        "approve": "已批准取消，eBay 将向买家退款。",
-        "reject": "已拒绝取消。"
-      },
-      "actionsOff": "应用内取消操作已关闭——请在 eBay 上回复。",
-      "errors": {
-        "actionsDisabled": "此平台已关闭应用内取消操作。请在 eBay 上回复该请求。",
-        "actionNotAvailable": "eBay 不再为该请求提供此操作。请刷新并查看当前待处理事项。",
-        "suspended": "您的订阅已暂停，取消操作已停用。请在“账单”页面结清发票。",
-        "ebayRejected": "eBay 拒绝了此操作。请在 eBay 上打开该请求查看原因。",
-        "unavailable": "无法连接到 eBay，请稍后再试。",
-        "sandbox": "eBay 沙盒不支持取消操作。",
-        "notFound": "未找到此取消请求。"
-      }
+      "manage": "管理取消"
     },
     "note": {
       "title": "您的备注",

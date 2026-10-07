@@ -17,7 +17,12 @@
 
 import { RETURN_FRESHNESS_MIN_HOURS } from '../returns/return-bucket';
 
-import { CancellationBucket, EBAY_CANCEL_REQUESTOR_BUYER, EBAY_CANCEL_STATE_CLOSED } from './cancellations.types';
+import {
+  CancellationBucket,
+  CancellationTab,
+  EBAY_CANCEL_REQUESTOR_BUYER,
+  EBAY_CANCEL_STATE_CLOSED,
+} from './cancellations.types';
 
 export interface CancellationBucketInput {
   state?: string | null;
@@ -85,3 +90,11 @@ export const ACTIONABLE_CANCELLATION_BUCKETS: readonly CancellationBucket[] = [
   CancellationBucket.ACTION_OVERDUE,
   CancellationBucket.ACTION_DUE,
 ];
+
+/** The buckets each cancellations-page tab shows — the `RETURN_TABS` shape. */
+export const CANCELLATION_TABS: Readonly<Record<CancellationTab, readonly CancellationBucket[]>> = {
+  [CancellationTab.ALL]: Object.values(CancellationBucket),
+  [CancellationTab.ACTION]: ACTIONABLE_CANCELLATION_BUCKETS,
+  [CancellationTab.IN_PROGRESS]: [CancellationBucket.IN_PROGRESS, CancellationBucket.UNCONFIRMED],
+  [CancellationTab.CLOSED]: [CancellationBucket.CLOSED],
+};

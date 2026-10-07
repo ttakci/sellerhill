@@ -1,4 +1,4 @@
-import type { EbayCancellationAction, OrderDto } from '@repo/shared';
+import type { OrderDto } from '@repo/shared';
 
 import type { OrderTimelineRow } from '../shared/order-timeline.types';
 
@@ -70,8 +70,6 @@ export interface OrderDetailsPageProps {
   isSavingNote: boolean;
   onNoteChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSaveNote: () => void;
-  /** A cancellation answer (approve / reject) is in flight. */
-  isActingOnCancellation: boolean;
-  /** Asks for confirmation, then answers the buyer's cancellation request on eBay. */
-  onCancellationAction: (action: EbayCancellationAction) => void;
+  /** Opens the cancellation request on the Cancellations page, where it is answered. */
+  onManageCancellation: () => void;
 }

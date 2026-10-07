@@ -130,6 +130,13 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     breadcrumbs: [{ labelKey: 'translation:menu.returns', path: '/returns' }],
   },
   {
+    path: '/cancellations',
+    storeScoped: true,
+    match: 'exact',
+    section: 'sales',
+    breadcrumbs: [{ labelKey: 'translation:menu.cancellations', path: '/cancellations' }],
+  },
+  {
     path: '/orders/',
     storeScoped: true,
     match: 'prefix',

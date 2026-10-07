@@ -1,4 +1,4 @@
-import { CancellationBucket, EbayCancellationAction, ProfitBasis } from '@repo/shared';
+import { CancellationBucket, ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -149,8 +149,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   isSavingNote,
   onNoteChange,
   onSaveNote,
-  isActingOnCancellation,
-  onCancellationAction,
+  onManageCancellation,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
@@ -394,37 +393,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Badge>
               </Meta>
             </S.MetaList>
-            {order.cancellation.availableActions.length > 0 ? (
-              <S.SectionActions>
-                {order.cancellation.availableActions.includes(EbayCancellationAction.APPROVE) && (
-                  <Button
-                    variant="primary"
-                    size="small"
-                    fullWidth
-                    onClick={() => onCancellationAction(EbayCancellationAction.APPROVE)}
-                    isLoading={isActingOnCancellation}
-                  >
-                    <Text variant="body-sm">{t('orders.cancellation.approve')}</Text>
-                  </Button>
-                )}
-                {order.cancellation.availableActions.includes(EbayCancellationAction.REJECT) && (
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    fullWidth
-                    onClick={() => onCancellationAction(EbayCancellationAction.REJECT)}
-                    isLoading={isActingOnCancellation}
-                  >
-                    <Text variant="body-sm">{t('orders.cancellation.reject')}</Text>
-                  </Button>
-                )}
-              </S.SectionActions>
-            ) : null}
-            {!order.cancellation.actionsEnabled &&
-            (order.cancellation.bucket === CancellationBucket.ACTION_DUE ||
-              order.cancellation.bucket === CancellationBucket.ACTION_OVERDUE) ? (
-              <InfoMessage>{t('orders.cancellation.actionsOff')}</InfoMessage>
-            ) : null}
+            <S.SectionActions>
+              <Button variant="secondary" size="small" fullWidth onClick={onManageCancellation}>
+                <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
+              </Button>
+            </S.SectionActions>
           </S.SectionContent>
         </SettingsCard>
       )}

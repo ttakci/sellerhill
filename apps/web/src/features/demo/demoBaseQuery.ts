@@ -13,10 +13,14 @@ import {
   OrderFulfillmentState,
   OrderStage,
   RETURN_TABS,
+  CANCELLATION_TABS,
+  CancellationBucket,
+  CancellationTab,
   ReturnBucket,
   ReturnTab,
   type ActionCenterSummaryDto,
   type ListingDto,
+  type EbayCancellationDto,
   type EbayReturnDto,
   type OrderDto,
   type OrderStageCountsDto,
@@ -54,9 +58,11 @@ import {
   DEMO_LISTINGS,
   DEMO_ORDERS,
   demoOrderTimeline,
+  demoCancellationDetail,
   demoReturnDetail,
   DEMO_PREDEFINED_TEMPLATES,
   DEMO_PROFILE,
+  DEMO_CANCELLATIONS,
   DEMO_RETURNS,
   DEMO_STORE_SETTINGS_ALL,
   DEMO_USER,
@@ -128,7 +134,7 @@ function parseRequest(args: string | FetchArgs): ParsedRequest {
  * fixture is never frozen or shared between two cache entries.
  */
 /** Pages that read `?store=` — the API's `STORE_FILTERABLE_PATHS`. */
-const DEMO_STORE_FILTERABLE_PATHS = ['/orders', '/listings', '/listings/all', '/listings/jobs', '/returns'];
+const DEMO_STORE_FILTERABLE_PATHS = ['/orders', '/listings', '/listings/all', '/listings/jobs', '/returns', '/cancellations'];
 
 /**
  * The demo Action Center narrowed to one store, as `?ebayAccountId=` does on
@@ -430,6 +436,52 @@ function filterConversations(params: Record<string, string>): EbayConversationDt
   );
 }
 
+/* ── eBay cancellation requests ───────────────────────────────────────── */
+
+/** `GET /cancellations` — tab (a bucket group), store and search, like the real endpoint. */
+function filterCancellations(params: Record<string, string>): EbayCancellationDto[] {
+  let rows = [...DEMO_CANCELLATIONS];
+
+  const tab = Object.values(CancellationTab).find((value) => String(value) === params.tab);
+  if (tab && tab !== CancellationTab.ALL) {
+    const wanted = CANCELLATION_TABS[tab];
+    rows = rows.filter((c) => wanted.includes(c.bucket));
+  }
+  if (params.ebayAccountId) {
+    rows = rows.filter((c) => c.ebayAccountId === params.ebayAccountId);
+  }
+  // Matches the cancel id, the eBay order id or the product title.
+  const search = params.search?.trim().toLowerCase();
+  if (search) {
+    rows = rows.filter(
+      (c) =>
+        c.cancelId.toLowerCase().includes(search) ||
+        (c.legacyOrderId ?? '').toLowerCase().includes(search) ||
+        (c.product?.title ?? '').toLowerCase().includes(search)
+    );
+  }
+
+  // What needs the seller first, a closed request last; newest first inside a bucket.
+  const BUCKET_ORDER = Object.values(CancellationBucket);
+  return rows.sort(
+    (a, b) =>
+      BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) ||
+      (b.requestedAt ?? '').localeCompare(a.requestedAt ?? '')
+  );
+}
+
+/** Whole-store bucket counts for the tab rail (store filter only — never tab or search). */
+function countCancellationBuckets(params: Record<string, string>): Record<CancellationBucket, number> {
+  const counts = Object.fromEntries(Object.values(CancellationBucket).map((b) => [b, 0])) as Record<
+    CancellationBucket,
+    number
+  >;
+  for (const row of filterCancellations({ ebayAccountId: params.ebayAccountId ?? '' })) {
+    counts[row.bucket] += 1;
+  }
+  return counts;
+}
+
 /* ── eBay returns ─────────────────────────────────────────────────────── */
 
 /** `GET /returns` — tab (a bucket group), store and search, like the real endpoint. */
@@ -709,6 +761,22 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
   if (returnDetail) {
     const found = DEMO_RETURNS.find((r) => r.id === returnDetail[1]);
     return found ? ok(demoReturnDetail(found)) : { error: { status: 404, data: { message: 'Not found' } } };
+  }
+
+  if (path === '/cancellations') {
+    return ok(paginate(filterCancellations(params), params));
+  }
+
+  if (path === '/cancellations/counts') {
+    return ok(countCancellationBuckets(params));
+  }
+
+  const cancellationDetail = /^\/cancellations\/(demo-cancel-[\w-]+)\/detail$/.exec(path);
+  if (cancellationDetail) {
+    const found = DEMO_CANCELLATIONS.find((c) => c.id === cancellationDetail[1]);
+    return found
+      ? ok(demoCancellationDetail(found))
+      : { error: { status: 404, data: { message: 'cancellations.errors.notFound' } } };
   }
 
   const orderDetail = /^\/orders\/(demo-order-[\w-]+)$/.exec(path);

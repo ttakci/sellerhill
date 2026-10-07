@@ -47,6 +47,7 @@ import {
   BillingLimitKey,
   BillingSubscriptionStatus,
   CancellationBucket,
+  CancellationTab,
   EBAY_CANCEL_REQUESTOR_BUYER,
   EntitlementState,
   EbayAccountStatus,
@@ -616,12 +617,11 @@ export class ActionCenterService {
    * (`sellerResponseDueDate` on a BUYER request). Its own probe, counted
    * through the store-scoped cancellation bucket the order card reads, with
    * the freshness horizon of the cancellation sweep's own interval. CRITICAL
-   * once a response date has passed. `count` covers only requests LINKED to
-   * an order — the link opens the orders list, and an item must never count
-   * something that list cannot show. `unlinked` carries the rest (the
-   * `legacyOrderId` = `ebay_order_id` equality is unverified; the sweep logs
-   * each unlinked BUYER request so the operator sees them until a web view
-   * for `GET /v1/cancellations` exists).
+   * once a response date has passed. `count` covers every such request,
+   * linked to an order or not — the link opens the Cancellations page's
+   * "Needs action" tab, which lists both (same bucket, same BUYER filter).
+   * `unlinked` says how many of them match no order we hold (the
+   * `legacyOrderId` = `ebay_order_id` equality is unverified).
    */
   private async cancellationItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
     const bucket = buildStoreScopedCancellationBucketSql(
@@ -642,10 +642,9 @@ export class ActionCenterService {
     let overdue = 0;
     let unlinked = 0;
     for (const row of rows) {
-      const rowUnlinked = toCount(row.unlinked);
-      const count = toCount(row.count) - rowUnlinked;
+      const count = toCount(row.count);
       total += count;
-      unlinked += rowUnlinked;
+      unlinked += toCount(row.unlinked);
       if (row.code === (CancellationBucket.ACTION_OVERDUE as string)) {
         overdue += count;
       }
@@ -657,9 +656,7 @@ export class ActionCenterService {
         severity: overdue > 0 ? ActionCenterSeverity.CRITICAL : ActionCenterSeverity.WARNING,
         count: total,
         context: { overdue, unlinked },
-        // The list opens on TRACKED orders by default; a request on an
-        // untracked sale is still an order the seller has to answer for.
-        actionPath: '/orders?cancelRequested=true&tracking=all',
+        actionPath: `/cancellations?tab=${CancellationTab.ACTION}`,
       },
     ];
   }

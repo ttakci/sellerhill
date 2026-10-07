@@ -19,6 +19,7 @@ import type amazon from './resources/en/amazon.json';
 import type auth from './resources/en/auth.json';
 import type billing from './resources/en/billing.json';
 import type campaigns from './resources/en/campaigns.json';
+import type cancellations from './resources/en/cancellations.json';
 import type dashboard from './resources/en/dashboard.json';
 import type ebay from './resources/en/ebay.json';
 import type listings from './resources/en/listings.json';
@@ -39,6 +40,7 @@ export type TranslationResource = typeof en &
   typeof auth &
   typeof billing &
   typeof campaigns &
+  typeof cancellations &
   typeof ebay &
   typeof dashboard &
   typeof listings &

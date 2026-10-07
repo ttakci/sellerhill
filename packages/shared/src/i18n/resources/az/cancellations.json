@@ -1,0 +1,129 @@
+{
+  "cancellations": {
+    "title": "Ləğvlər",
+    "subtitle_one": "{{count}} ləğv sorğusu",
+    "subtitle_other": "{{count}} ləğv sorğusu",
+    "loading": "Ləğv sorğuları yüklənir…",
+    "notice": "Alıcının nə istədiyini və eBay-in cavabınızı nə vaxta qədər gözlədiyini görmək üçün sorğunu açın. Buradan qəbul edə və ya rədd edə bilərsiniz.",
+    "tabs": {
+      "all": "Hamısı",
+      "action": "Tədbir tələb edir",
+      "in_progress": "Davam edən",
+      "closed": "Bağlanan",
+      "withCount": "{{label}} ({{count}})",
+      "ariaLabel": "Ləğv statusu"
+    },
+    "filters": {
+      "search": "Ləğv ID-si, sifariş ID-si və ya məhsul axtarın…",
+      "clear": "Təmizlə",
+      "resultCount_one": "{{count}} nəticə",
+      "resultCount_other": "{{count}} nəticə"
+    },
+    "columns": {
+      "product": "Məhsul",
+      "request": "Sorğu",
+      "status": "Status",
+      "due": "Cavab müddəti",
+      "reason": "Səbəb",
+      "refund": "Alıcıya geri ödəniş",
+      "requested": "Sorğu tarixi",
+      "buyer": "Alıcı"
+    },
+    "order": "Sifariş",
+    "viewOrder": "Sifarişə bax",
+    "asin": "ASIN",
+    "unknownProduct": "Naməlum məhsul",
+    "answer": "Qəbul et və ya rədd et",
+    "dueBy": "Son tarix: {{date}}",
+    "empty": {
+      "title": "Hələ ləğv sorğusu yoxdur",
+      "description": "Alıcılarınızın eBay-də ləğv etməyi istədiyi sifarişlər burada görünəcək."
+    },
+    "emptyFiltered": {
+      "title": "Filtrlərinizə uyğun sorğu yoxdur",
+      "description": "Başqa bir tab və ya axtarış sözü sınayın.",
+      "action": "Filtrləri təmizlə"
+    },
+    "bucket": {
+      "unconfirmed": "Son vaxtlar təsdiqlənməyib",
+      "action_overdue": "Gecikib",
+      "action_due": "Cavab gözlənilir",
+      "in_progress": "Davam edir",
+      "closed": "Bağlanıb"
+    },
+    "bucketHint": {
+      "unconfirmed": "eBay bu sorğunu son vaxtlar təsdiqləməyib, ona görə gözlənilən addım göstərilmir.",
+      "action_overdue": "Alıcı gözləyir — eBay-in cavabınız üçün verdiyi müddət bitib.",
+      "action_due": "Alıcı ləğv etməyi istədi. eBay-in son tarixindən əvvəl qəbul edin və ya rədd edin.",
+      "in_progress": "Hazırda sizdən gözlənilən bir şey yoxdur.",
+      "closed": "eBay bu sorğunu bağladı."
+    },
+    "reason": {
+      "BUYER_ASKED_CANCEL": "Alıcı ləğv etməyi xahiş etdi",
+      "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Alıcı ləğv etdi və ya ünvan problemi var",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Stokda yoxdur və ya yerinə yetirmək mümkün deyil",
+      "other": "Digər səbəb"
+    },
+    "detail": {
+      "title": "Ləğv {{id}}",
+      "titleLoading": "Ləğv sorğusu",
+      "open": "Ləğv sorğusunu aç",
+      "loadFailed": "Bu sorğu yüklənmədi",
+      "loadFailedDescription": "Bir azdan yenidən cəhd edin və ya eBay-də açın.",
+      "whatYouCanDo": "Nə edə bilərsiniz",
+      "nothingToDo": "Bu sorğuda sizi gözləyən bir şey yoxdur.",
+      "openOnEbay": "eBay-də aç",
+      "money": "Məbləğlər",
+      "requestedRefund": "Tələb olunan geri ödəniş",
+      "actualRefund": "Geri ödənilib",
+      "amountOwed": "Borcunuz olan məbləğ",
+      "paymentStatus": "Ödəniş statusu",
+      "closedAt": "Bağlanıb",
+      "journey": "Gedişat",
+      "journeyEmpty": "eBay hələ heç bir addım qeyd etməyib."
+    },
+    "actions": {
+      "approve": "Təsdiqlə",
+      "reject": "Rədd et"
+    },
+    "confirm": {
+      "approve": {
+        "body": "Sifariş ləğv edilir və eBay alıcıya geri ödəniş edir. Bunu geri qaytarmaq olmaz.",
+        "confirm": "Ləğvi təsdiqlə"
+      },
+      "reject": {
+        "body": "eBay-ə imtina etdiyiniz bildirilir və sifariş göndərilməlidir.",
+        "bodyWithTracking": "eBay-ə imtina etdiyiniz bildirilir və {{tracking}} izləmə nömrəsi də göndərilir. Sifariş göndərilməlidir.",
+        "confirm": "Ləğvi rədd et"
+      }
+    },
+    "done": {
+      "approve": "Ləğv təsdiqləndi. eBay alıcıya geri ödəniş edəcək.",
+      "reject": "Ləğv rədd edildi."
+    },
+    "actionsOff": "Tətbiq daxilində ləğv əməliyyatları söndürülüb — cavabı eBay-də verin.",
+    "liveUnavailable": "eBay ilə indi əlaqə qurulmadı, ona görə SellerHill-in gördüyü son vəziyyət göstərilir. eBay yenidən cavab verəndə cavab seçimləri təklif olunacaq.",
+    "errors": {
+      "actionsDisabled": "Tətbiq daxilində ləğv əməliyyatları bu platformada söndürülüb. Sorğuya eBay-də cavab verin.",
+      "actionNotAvailable": "eBay artıq bu sorğuda bu əməliyyatı təklif etmir. Səhifəni yeniləyin və indi gözləyənləri yoxlayın.",
+      "suspended": "Abunəliyiniz dayandırılıb, buna görə ləğv əməliyyatları durdurulub. Hesab-fakturanı Ödəniş səhifəsində ödəyin.",
+      "ebayRejected": "eBay bu əməliyyatı rədd etdi. Səbəbi görmək üçün sorğunu eBay-də açın.",
+      "unavailable": "eBay-ə qoşulmaq mümkün olmadı. Bir azdan yenidən cəhd edin.",
+      "sandbox": "Ləğv əməliyyatları eBay sandbox mühitində əlçatan deyil.",
+      "notFound": "Bu ləğv sorğusu tapılmadı."
+    },
+    "party": {
+      "buyer": "Alıcı",
+      "seller": "Siz",
+      "ebay": "eBay"
+    },
+    "history": {
+      "SELLER_CREATE_CANCEL": "Ləğv yaradıldı",
+      "SYSTEM_REFUND": "eBay geri ödəniş etdi",
+      "SYSTEM_NOTIFY_REFUND_STATUS": "eBay geri ödəniş statusunu yenilədi",
+      "buyerOther": "Alıcı sorğunu yenilədi",
+      "sellerOther": "Siz sorğunu yenilədiniz",
+      "ebayOther": "eBay sorğunu yenilədi"
+    }
+  }
+}

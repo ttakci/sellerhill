@@ -420,35 +420,7 @@
         "closed": "Bağlanıb",
         "unconfirmed": "Son vaxtlar təsdiqlənməyib"
       },
-      "approve": "Təsdiqlə",
-      "reject": "Rədd et",
-      "confirm": {
-        "approve": {
-          "title": "Ləğv təsdiqlənsin?",
-          "body": "Sifariş ləğv edilir və eBay alıcıya geri ödəniş edir. Bunu geri qaytarmaq olmaz.",
-          "confirm": "Ləğvi təsdiqlə"
-        },
-        "reject": {
-          "title": "Ləğv rədd edilsin?",
-          "body": "eBay-ə imtina etdiyiniz bildirilir və sifariş göndərilməlidir.",
-          "bodyWithTracking": "eBay-ə imtina etdiyiniz bildirilir və {{tracking}} izləmə nömrəsi də göndərilir. Sifariş göndərilməlidir.",
-          "confirm": "Ləğvi rədd et"
-        }
-      },
-      "done": {
-        "approve": "Ləğv təsdiqləndi. eBay alıcıya geri ödəniş edəcək.",
-        "reject": "Ləğv rədd edildi."
-      },
-      "actionsOff": "Tətbiq daxilində ləğv əməliyyatları söndürülüb — cavabı eBay-də verin.",
-      "errors": {
-        "actionsDisabled": "Tətbiq daxilində ləğv əməliyyatları bu platformada söndürülüb. Sorğuya eBay-də cavab verin.",
-        "actionNotAvailable": "eBay artıq bu sorğuda bu əməliyyatı təklif etmir. Səhifəni yeniləyin və indi gözləyənləri yoxlayın.",
-        "suspended": "Abunəliyiniz dayandırılıb, buna görə ləğv əməliyyatları durdurulub. Hesab-fakturanı Ödəniş səhifəsində ödəyin.",
-        "ebayRejected": "eBay bu əməliyyatı rədd etdi. Səbəbi görmək üçün sorğunu eBay-də açın.",
-        "unavailable": "eBay-ə qoşulmaq mümkün olmadı. Bir azdan yenidən cəhd edin.",
-        "sandbox": "Ləğv əməliyyatları eBay sandbox mühitində əlçatan deyil.",
-        "notFound": "Bu ləğv sorğusu tapılmadı."
-      }
+      "manage": "Ləğvi idarə et"
     },
     "note": {
       "title": "Qeydiniz",
