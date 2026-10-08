@@ -210,6 +210,7 @@ type ThemePath =
   | 'zIndex.overlay'
   | 'zIndex.drawer'
   | 'zIndex.modal'
+  | 'zIndex.popover'
   | 'zIndex.toast'
   | 'zIndex.loading'
   | 'zIndex.tooltip'

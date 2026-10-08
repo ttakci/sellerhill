@@ -18,6 +18,13 @@ export interface DatePickerDay {
   isToday: boolean;
 }
 
+/** Viewport coordinates (px) of the portaled calendar panel. */
+export interface DatePickerPanelPosition {
+  top: number;
+  left: number;
+  width: number;
+}
+
 export interface DatePickerProps {
   /** Selected date as `yyyy-mm-dd`, or `''` for none. */
   value: string;
@@ -49,6 +56,9 @@ export interface DatePickerComponentProps {
   weekdays: string[];
   days: DatePickerDay[];
   containerRef: React.RefObject<HTMLDivElement>;
+  panelRef: React.RefObject<HTMLDivElement>;
+  /** Viewport position of the portaled panel; null until measured. */
+  panelPosition: DatePickerPanelPosition | null;
   onToggle: () => void;
   onClear: () => void;
   onPreviousMonth: () => void;

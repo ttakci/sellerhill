@@ -252,6 +252,7 @@ export const zIndexTokens = {
   overlay: 9000, // scrims behind modal-tier surfaces
   drawer: 9100,
   modal: 9200,
+  popover: 9300, // portaled calendars/menus opened from inside a drawer or modal
   toast: 9400,
   loading: 9600, // global blocking overlay — above modal, below tooltip
   tooltip: 9800,
