@@ -58,7 +58,7 @@ interface TopListingDto {
 
 1. **Ranking** — one statement: `cur` = tracked orders in R grouped by `listing_id` with the shared `periodSelect` fragment; `prev` = the same over `periods[0].comparison`; LEFT JOIN, `ORDER BY <sort expr> DESC NULLS LAST, listing_id`, `LIMIT/OFFSET`, `COUNT(*) OVER ()` for `total`. Bounds through `buildLocalRangeSql`; the sort expression comes from an enum-keyed map, never user text.
 2. **Series** — for the page's listing ids only: `GROUP BY listing_id, to_char(date_trunc(unit, order_date AT TIME ZONE $tz), fmt)` (same `BUCKET_SQL` as the chart), zero-filled to `seriesKeys`.
-3. **Listings** — `ListingsService.getListingsByIds(userId, ids)` (new, public), built on the existing `mapListingRow` so the card shows exactly what the Listings page shows. `DashboardModule` imports `ListingsModule`; if that creates a module cycle (`module-cycle.guard.spec.ts`), extract the row query + mapper into a small provider both modules use instead.
+3. **Listings** — `ListingsService.getListingsByIds(userId, ids)` (new, public), built on the existing `mapListingRow` so the card shows exactly what the Listings page shows. The hydration lives in `TopListingsController` inside `ListingsModule`, which imports `DashboardModule` (not the reverse), so there is no module cycle.
 
 `changes` use `calcChange` (null when the previous value is 0), the same function the cards use.
 
