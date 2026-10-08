@@ -49,6 +49,7 @@ import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
+import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
@@ -235,11 +236,27 @@ interface RevisionRow {
   new_source_price: string | null;
 }
 
+/** Listing fields whose change moves the price or quantity on eBay — saving
+ *  any of them pushes the listing at once (`requestImmediateResync`). */
+const LISTING_REPRICING_FIELDS: Array<keyof UpdateListingRequest> = [
+  'listingSettingsGroupId',
+  'disableOrdering',
+  'disableRepricing',
+  'lockPrice',
+  'lockQuantity',
+  'priceOverride',
+  'quantityOverride',
+  'marginPercentOverride',
+  'marginFixedOverride',
+];
+
 /** `GET /listings/revisions` sort keys → SQL column (never interpolate the raw query value). */
 const REVISION_SORT_COLUMNS: Record<string, string> = {
   recordedAt: 'r.recorded_at',
   price: 'r.new_price',
-  product: 'LOWER(p.title)',
+  /* The listing's own (eBay) title, as the card shows it — the product's
+     Amazon title differs once the brand is stripped or the title rewritten. */
+  product: "LOWER(COALESCE(NULLIF(l.title, ''), p.title))",
 };
 
 /**
@@ -297,7 +314,10 @@ export class ListingsService {
     // stores" reads as off, which is the behaviour before the setting existed.
     @Optional() private readonly storeSettings?: StoreSettingsService,
     // Optional for the same reason; absent = UTC days.
-    @Optional() private readonly timezoneService?: TimezoneService
+    @Optional() private readonly timezoneService?: TimezoneService,
+    // Optional so a spec can build the service without it; absent = the change
+    // waits for the next refresh check, as it did before.
+    @Optional() private readonly stockSyncQueue?: StockSyncQueueService
   ) {}
 
   /**
@@ -1203,7 +1223,7 @@ export class ListingsService {
               r.previous_source_stock, r.previous_source_stock_status, r.new_source_stock, r.new_source_stock_status,
               r.previous_source_price, r.new_source_price,
               l.id AS listing_id, l.ebay_account_id, l.ebay_item_id, l.created_at AS listing_created_at,
-              p.asin, p.title, p.image_urls, p.brand,
+              p.asin, COALESCE(NULLIF(l.title, ''), p.title) AS title, p.image_urls, p.brand,
               ea.marketplace_id AS ebay_marketplace_id,
               COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name
        FROM listing_revisions r
@@ -1328,11 +1348,43 @@ export class ListingsService {
       params
     );
 
+    // A settings-group swap or an automation override changes the price or
+    // quantity the listing should carry on eBay. Push it now (operator
+    // decision, 2026-10-08) instead of waiting for the next refresh check:
+    // "Pause sales" must stop sales at once. Reuses the sale-driven stock
+    // sync, narrowed to this one listing: it is recomputed and sent only if
+    // its price/quantity actually changed (one bulk call).
+    if (
+      LISTING_REPRICING_FIELDS.some((key) => body[key] !== undefined) &&
+      existing.status === ListingStatus.ACTIVE &&
+      existing.productId
+    ) {
+      await this.requestImmediateResync(existing.productId, id);
+    }
+
     const updated = await this.getListing(userId, id);
     if (!updated) {
       throw new NotFoundException('Listing not found after update');
     }
     return updated;
+  }
+
+  /** Fail-soft: the edit is saved either way, and the next refresh check
+   *  applies it if the queue is unreachable. The id is unique per save, so a
+   *  completed job kept in BullMQ never swallows a later edit. Scoped to THIS
+   *  listing — a seller's save never recomputes another seller's listing. */
+  private async requestImmediateResync(productId: string, listingId: string): Promise<void> {
+    try {
+      await this.stockSyncQueue?.enqueueProductStockSync(
+        productId,
+        `listing-edit-${listingId}-${Date.now()}`,
+        listingId
+      );
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Listing ${listingId}: immediate eBay resync not queued (${error instanceof Error ? error.message : String(error)}); the next refresh check applies the change`
+      );
+    }
   }
 
   /**

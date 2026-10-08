@@ -24,11 +24,16 @@ export class StockSyncQueueService {
 
   constructor(@InjectQueue('stock-sync') private readonly stockSyncQueue: Queue) {}
 
-  async enqueueProductStockSync(productId: string, deliveryId?: string): Promise<void> {
+  /**
+   * `listingId` narrows the job to ONE listing (a listing-detail save): the
+   * sale-driven path leaves it out on purpose, because a sale moves the shared
+   * Amazon stock and every seller's listing of that ASIN may need a new quantity.
+   */
+  async enqueueProductStockSync(productId: string, deliveryId?: string, listingId?: string): Promise<void> {
     const bucket = Math.floor(Date.now() / StockSyncQueueService.DEDUP_WINDOW_MS);
     const jobId = deliveryId ? `stock-sync-${productId}-${deliveryId}` : `stock-sync:${productId}:${bucket}`;
 
-    await this.stockSyncQueue.add('sync-product-stock', stampCurrentCorrelation({ productId }), {
+    await this.stockSyncQueue.add('sync-product-stock', stampCurrentCorrelation({ productId, listingId }), {
       jobId,
       attempts: 3,
       backoff: { type: 'exponential', delay: 2000 },

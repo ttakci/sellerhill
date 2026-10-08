@@ -341,6 +341,7 @@ export class RefreshProcessorService extends WorkerHost {
         // Keepa returned no data for this ASIN → data failure (not transport):
         // escalating backoff, then quarantine past the threshold.
         await this.handleDataFailure(row);
+        pendingUpdates.push(...(await this.recomputeFromStoredData(row)));
         continue;
       }
 
@@ -359,6 +360,29 @@ export class RefreshProcessorService extends WorkerHost {
     // each listing cost four eBay calls of its own.
     await this.productSyncService.flushUpdates(pendingUpdates);
     await this.recordUnchangedChecks(checkedProductIds, pendingUpdates);
+  }
+
+  /**
+   * The Amazon page could not be read this time (blocked, timed out, no data,
+   * unreadable), but a change to a settings group, the store's tax rate or a
+   * listing override must still reach eBay (operator decision, 2026-10-08):
+   * recompute from the product's LAST STORED Amazon data. Nothing was observed,
+   * so these products are not logged as "checked, unchanged"; a listing whose
+   * computed price/quantity already matches costs no eBay call. Fail-soft.
+   */
+  private async recomputeFromStoredData(row: ProductRow): Promise<PendingListingUpdate[]> {
+    try {
+      return await this.productSyncService.computePendingUpdates(
+        row.id,
+        row.asin,
+        row.marketplace as AmazonMarketplace
+      );
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Recompute from stored data failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return [];
+    }
   }
 
   /**
@@ -419,10 +443,12 @@ export class RefreshProcessorService extends WorkerHost {
         floor,
       );
       if (plan.kind === 'skip') {
+        pending.push(...(await this.recomputeFromStoredData(row)));
         continue;
       }
       if (plan.kind === 'data_failure') {
         await this.handleDataFailure(row);
+        pending.push(...(await this.recomputeFromStoredData(row)));
         continue;
       }
       try {
@@ -458,9 +484,13 @@ export class RefreshProcessorService extends WorkerHost {
        WHERE id = $8`,
       [plan.price, plan.stock, plan.stockStatus, plan.keepMaxOrderQuantity, plan.maxOrderQuantity, plan.removed, intervalMinutes, row.id],
     );
-    return plan.commerceChanged
-      ? this.productSyncService.computePendingUpdates(row.id, row.asin, row.marketplace as AmazonMarketplace)
-      : [];
+    // Recompute on EVERY successful read, not only when Amazon's price or
+    // stock moved (operator decision, 2026-10-08): a change to a settings
+    // group, to the store's tax rate or to a listing's own overrides would
+    // otherwise wait for Amazon to move — possibly for ever. Costs no eBay
+    // call for a listing whose computed price/quantity is unchanged
+    // (`hasCommerceDelta`); the rest ride the batch's bulk flush.
+    return this.productSyncService.computePendingUpdates(row.id, row.asin, row.marketplace as AmazonMarketplace);
   }
 
   /**
@@ -559,17 +589,6 @@ export class RefreshProcessorService extends WorkerHost {
           `${commerceChanged ? ' [commerce]' : ''}${metadataChanged ? ' [metadata]' : ''}`
       );
 
-      if (commerceChanged) {
-        // Fan out: recompute every active listing sharing this ASIN. The push
-        // itself is deferred to the batch flush so listings from different
-        // products can share one eBay call.
-        return this.productSyncService.computePendingUpdates(
-          row.id,
-          row.asin,
-          row.marketplace as AmazonMarketplace
-        );
-      }
-      return [];
     } else {
       // Nothing commerce/metadata-wise moved, but stock_status and the
       // scraper-only columns still need the same rollback treatment here —
@@ -591,7 +610,12 @@ export class RefreshProcessorService extends WorkerHost {
       this.logger.debug(`Refreshed (unchanged) ASIN ${row.asin}`);
     }
 
-    return [];
+    // Recompute every active listing sharing this ASIN on every successful
+    // read — whether or not Amazon moved — so a settings-group, store tax or
+    // override change reaches eBay on the next check (operator decision,
+    // 2026-10-08; see the scraper branch). Unchanged listings cost no call;
+    // the push itself is deferred to the batch flush.
+    return this.productSyncService.computePendingUpdates(row.id, row.asin, row.marketplace as AmazonMarketplace);
   }
 
   /**

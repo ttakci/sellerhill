@@ -10,6 +10,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { LlmModule } from '../llm/llm.module';
 import { OrdersModule } from '../orders/orders.module';
+import { StockSyncQueueService } from '../orders/stock-sync-queue.service';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 import { VeroModule } from '../vero/vero.module';
 
@@ -80,6 +81,9 @@ import { TopListingsController } from './top-listings.controller';
     ListingStrategyService,
     ContentGenerationService,
     StockSyncProcessorService,
+    // Producer half of the same queue: a listing-detail save pushes its
+    // product's listings at once (ListingsService.requestImmediateResync).
+    StockSyncQueueService,
     EbayFeedSyncService,
     EbayFeedSyncProcessor,
     ListingCleanupService,

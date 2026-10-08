@@ -90,7 +90,7 @@ export class ProductSyncService {
    * Resolves the ASIN for a product, then recomputes + pushes every active
    * listing that shares it.
    */
-  async syncListingsForProduct(productId: string): Promise<void> {
+  async syncListingsForProduct(productId: string, listingId?: string): Promise<void> {
     const rows = await this.databaseService.query<{ asin: string; marketplace: string }>(
       `SELECT asin, marketplace FROM products WHERE id = $1`,
       [productId]
@@ -99,16 +99,22 @@ export class ProductSyncService {
       this.logger.debug(`syncListingsForProduct: product ${productId} not found`);
       return;
     }
-    await this.updateAllListingsForProduct(productId, rows[0].asin, rows[0].marketplace as AmazonMarketplace);
+    await this.updateAllListingsForProduct(
+      productId,
+      rows[0].asin,
+      rows[0].marketplace as AmazonMarketplace,
+      listingId
+    );
   }
 
   /** Compute + push for a single product. Callers with many products should batch instead. */
   async updateAllListingsForProduct(
     productId: string,
     asin: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    listingId?: string
   ): Promise<void> {
-    await this.flushUpdates(await this.computePendingUpdates(productId, asin, marketplace));
+    await this.flushUpdates(await this.computePendingUpdates(productId, asin, marketplace, listingId));
   }
 
   /**
@@ -118,7 +124,10 @@ export class ProductSyncService {
   async computePendingUpdates(
     productId: string,
     asin: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    /** Only this listing (a listing-detail save). Omitted = every active
+     *  listing of the ASIN, across sellers — what a refresh or a sale needs. */
+    listingId?: string
   ): Promise<PendingListingUpdate[]> {
     const listings = await this.databaseService.query<ListingRow>(
       `SELECT id, user_id, listing_settings_group_id, ebay_item_id, ebay_account_id,
@@ -136,8 +145,9 @@ export class ProductSyncService {
          -- otherwise), so this predicate needs no enforcement check of its own.
          AND over_plan_limit = FALSE
          -- A disconnected store's listings are not pushed (no token).
-         AND ${buildListingStoreActiveSql('listings')}`,
-      [productId, ListingStatus.ACTIVE]
+         AND ${buildListingStoreActiveSql('listings')}
+         AND ($3::uuid IS NULL OR id = $3::uuid)`,
+      [productId, ListingStatus.ACTIVE, listingId ?? null]
     );
 
     if (listings.length === 0) {

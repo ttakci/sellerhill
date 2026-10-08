@@ -19,6 +19,8 @@ import { ProductSyncService } from './product-sync.service';
  */
 interface StockSyncJobData {
   productId: string;
+  /** Set by a listing-detail save: recompute that listing only. */
+  listingId?: string;
 }
 
 @Processor('stock-sync', { concurrency: 3 })
@@ -38,10 +40,10 @@ export class StockSyncProcessorService extends WorkerHost {
         origin: 'worker',
       },
       async () => {
-        const { productId } = job.data as StockSyncJobData;
+        const { productId, listingId } = job.data as StockSyncJobData;
         this.logger.debug(`Processing stock-sync for product ${productId} (job ${job.id})`);
         try {
-          await this.productSyncService.syncListingsForProduct(productId);
+          await this.productSyncService.syncListingsForProduct(productId, listingId);
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : String(error);
           this.logger.error(`stock-sync failed for product ${productId}: ${message}`);
