@@ -3,7 +3,21 @@ import type * as Shared from '@repo/shared';
 import type { TFunction } from 'i18next';
 import { describe, expect, it } from 'vitest';
 
-import { buildGroupDetailSections, renderGroupTemplatePreview } from './groupDetails';
+import { buildGroupDetailSections, buildPreviewDocument, renderGroupTemplatePreview } from './groupDetails';
+
+describe('buildPreviewDocument', () => {
+  it('wraps the rendered HTML in a standalone UTF-8 document for the sandboxed iframe', () => {
+    const doc = buildPreviewDocument('<p>Ürün</p>');
+    expect(doc.startsWith('<!doctype html>')).toBe(true);
+    expect(doc).toContain('<meta charset="utf-8">');
+    expect(doc).toContain('<body><p>Ürün</p></body>');
+  });
+
+  it('returns an empty string for an empty template so no frame is drawn', () => {
+    expect(buildPreviewDocument('')).toBe('');
+    expect(buildPreviewDocument('   ')).toBe('');
+  });
+});
 
 const t = ((key: string, opts?: Record<string, unknown>) =>
   opts ? `${key}|${JSON.stringify(opts)}` : key) as unknown as TFunction;

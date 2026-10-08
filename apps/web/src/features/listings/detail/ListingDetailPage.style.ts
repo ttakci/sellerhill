@@ -415,19 +415,18 @@ export const GroupPreview = styled(SettingsCard)`
 /** The picked group's template, rendered with this listing — a scrollable
  *  frame under the template row (the catalog CSS is class-scoped, so injecting
  *  it is safe, as in the group edit drawer). */
-export const GroupTemplatePreview = styled.div`
+/**
+ * The template preview runs in a sandboxed iframe (no scripts, own document):
+ * it renders the listing's Amazon product data, which is third-party HTML.
+ */
+export const GroupTemplatePreviewFrame = styled.iframe`
+  display: block;
+  width: 100%;
+  height: 30rem;
   margin-top: ${tkn('spacing.sm')};
-  max-height: 30rem;
-  overflow: auto;
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
-`;
-
-export const GroupTemplatePreviewHtml = styled.div`
-  width: 100%;
-  min-width: 0;
-  overflow-wrap: anywhere;
 `;
 
 /** Vertical rhythm for a SettingsCard body with multiple top-level children. */

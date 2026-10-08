@@ -19,7 +19,7 @@ import {
 } from '../api/listings.api';
 import { buildMarginRangeDetails, summarizeMarginStrategy } from '../shared/margin-strategy';
 
-import { buildGroupDetailSections, renderGroupTemplatePreview } from './groupDetails';
+import { buildGroupDetailSections, buildPreviewDocument, renderGroupTemplatePreview } from './groupDetails';
 import { ListingDetailPageComponent } from './ListingDetailPage.component';
 import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
 
@@ -347,16 +347,19 @@ export const ListingDetailPageContainer: React.FC = () => {
         : [],
     [drawerGroup, predefinedTemplates, fmtCurrency, fmtRating, t, dash]
   );
+  // A standalone document for a sandboxed iframe — never injected into the app.
   const drawerGroupPreviewHtml = useMemo(
     () =>
       listing
-        ? renderGroupTemplatePreview(drawerGroup, predefinedTemplates, {
-            title: listing.title,
-            description: listing.description,
-            features: listing.features,
-            specs: listing.specs,
-            imageUrls: listing.imageUrls,
-          })
+        ? buildPreviewDocument(
+            renderGroupTemplatePreview(drawerGroup, predefinedTemplates, {
+              title: listing.title,
+              description: listing.description,
+              features: listing.features,
+              specs: listing.specs,
+              imageUrls: listing.imageUrls,
+            })
+          )
         : '',
     [drawerGroup, predefinedTemplates, listing]
   );

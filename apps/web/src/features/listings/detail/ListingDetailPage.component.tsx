@@ -183,7 +183,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   canPublish,
   statusLabel,
 }) => {
-  const { t, i18n } = useTranslation(['listings', 'translation', 'campaigns']);
+  const { t, i18n } = useTranslation(['listings', 'translation', 'campaigns', 'listingSettingsGroup']);
   const { control } = form;
 
   /* Shared EmptyState for both states — they used to be a bespoke block whose
@@ -743,9 +743,11 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                 ))}
               </S.MetaList>
               {section.key === 'template' && drawerGroupPreviewHtml ? (
-                <S.GroupTemplatePreview>
-                  <S.GroupTemplatePreviewHtml dangerouslySetInnerHTML={{ __html: drawerGroupPreviewHtml }} />
-                </S.GroupTemplatePreview>
+                <S.GroupTemplatePreviewFrame
+                  sandbox=""
+                  srcDoc={drawerGroupPreviewHtml}
+                  title={t('listingSettingsGroup:listingSettingsGroup.preview')}
+                />
               ) : null}
             </S.GroupPreview>
           ))}

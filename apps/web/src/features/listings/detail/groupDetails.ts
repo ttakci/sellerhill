@@ -107,6 +107,21 @@ export function buildGroupDetailSections(
  * renderer (same one publish uses). Brand, ASIN, price, currency, condition and
  * quantity are deliberately not passed — templates may not use them.
  */
+/**
+ * Wraps rendered template HTML into a standalone document for a SANDBOXED
+ * iframe (`sandbox=""`, `srcDoc`). The preview carries third-party product data
+ * (Amazon description/features), so it must never be injected into the app
+ * document: the sandbox blocks scripts and event handlers and keeps the
+ * template's CSS out of the app. eBay itself only receives the server-side
+ * sanitized copy.
+ */
+export function buildPreviewDocument(html: string): string {
+  if (!html.trim()) {
+    return '';
+  }
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:0;font-family:sans-serif;}img{max-width:100%;height:auto;}</style></head><body>${html}</body></html>`;
+}
+
 export function renderGroupTemplatePreview(
   group: Shared.ListingSettingsGroup | undefined,
   templates: ReadonlyArray<Shared.PredefinedTemplateResponse>,
