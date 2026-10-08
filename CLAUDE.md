@@ -23,9 +23,10 @@ pnpm validate         # lint + typecheck (full check — run manually or in CI)
 # Pre-commit hook runs `pnpm lint` only. `pnpm typecheck` is strict and is NOT
 # in the pre-commit hook. The web app's ~370 "pre-existing TS errors" (and 130
 # lint errors) were ONE environmental defect, fixed 2026-09-29 by
-# `apps/web/src/emotion.d.ts` — see "Emotion Theme augmentation" below. What is
-# left is 3 SVG `dominantBaseline` typings in packages/ui icons; once those are
-# clean, restore `pnpm run validate` in `.husky/pre-commit`.
+# `apps/web/src/emotion.d.ts` — see "Emotion Theme augmentation" below. What was
+# left (3 SVG `dominantBaseline` typings in packages/ui icons) is fixed: typecheck
+# is clean (0 errors, 2026-10-08). Restoring `pnpm run validate` in
+# `.husky/pre-commit` is now possible.
 
 # Docker (PostgreSQL 16 + pgvector image, Redis 7, pgAdmin, amazon-scraper, Loki/Promtail/Grafana)
 pnpm docker:up        # Start services
@@ -1764,10 +1765,10 @@ Sandbox and production eBay are separate sites with separate item id spaces: `eb
 
 ### Seller time zone (`users.timezone`, migration `149`)
 
-**The panel's "day" is the seller's own calendar day (operator decision, 2026-10-07).** `users.timezone` (IANA name, default `UTC`) decides what "today", "this week" and a custom `from`/`to` mean on the dashboard, and the orders `dateFrom`/`dateTo` and listings `soldFrom`/`soldTo` filters (list + CSV export) use the same local day, so a dashboard card and the list it links to cannot disagree. The daily e-mail reads the same day through `getDayMetrics`.
+**The panel's "day" is the seller's own calendar day (operator decision, 2026-10-07).** `users.timezone` (IANA name; nullable, NULL reads as `UTC`) decides what "today", "this week" and a custom `from`/`to` mean on the dashboard, and the orders `dateFrom`/`dateTo` and listings `soldFrom`/`soldTo` filters (list + CSV export) use the same local day, so a dashboard card and the list it links to cannot disagree. The daily e-mail reads the same day through `getDayMetrics`.
 
 - **Validated against Postgres, not Node** (`apps/api/src/common/timezone/`, `TimezoneService` in the `@Global` `TimezoneModule`): a set loaded once from `pg_timezone_names`, because SQL consumes the name and a name Node accepts but Postgres does not fails every query with 22023. Save refuses an unknown name (400 `profile.errors.invalidTimezone`); a stored value that has since become invalid reads as `UTC`.
-- **Filled once from the browser.** `useTimezoneAutoFill` in the seller `AppLayout` (not operators, not demo) saves the browser's zone the first time the stored value is still the default, and never overwrites a later choice. The setting itself lives in **Settings → Profile drawer (`ProfileDrawer`)**; `features/profile/ProfilePage` is dead code (`App.tsx` redirects `/profile` → `/settings`). `updateProfile` invalidates the `Dashboard` tag so the panel refetches in the new zone.
+- **Filled once from the browser.** `useTimezoneAutoFill` in the seller `AppLayout` (not operators, not demo) saves the browser's zone when the stored value is still NULL, and never overwrites a later choice. The setting itself lives in **Settings → Profile drawer (`ProfileDrawer`)**; `features/profile/ProfilePage` is dead code (`App.tsx` redirects `/profile` → `/settings`). `updateProfile` invalidates the `Dashboard` tag so the panel refetches in the new zone.
 - **SQL rule: bounds, not casts.** A local day is a half-open range of UTC instants computed once (`common/timezone/local-day-sql.ts` bound helpers, bound parameters) and compared against the raw `timestamptz` column; never wrap the column in `AT TIME ZONE` / `::date`, which defeats the index. Locked by `dashboard-local-day.guard.spec.ts` and `local-day-filters.guard.spec.ts` (source greps).
 - **What stays UTC, on purpose**: eBay's quota day (`EbayCallBudgetService`), Best Sellers `viewed_on`, subscription / quota windows (the Stripe period), data retention, queue and log timestamps. A seller's local day never moves a money or quota boundary.
 
@@ -2061,7 +2062,7 @@ Reference table, not exhaustive — `apps/api/migrations/` is the source of trut
 | `146` | `listing_revisions.previous_source_price` / `new_source_price` `NUMERIC(10,2)` — the Amazon price at each revision. Rows older than `146` carry NULLs. See "Listing detail". |
 | `147` | `ebay_cancellations.seller_answered_at` / `seller_answer` — the answer SellerHill sent and eBay accepted; an answered open request reads as ANSWERED. See "eBay cancellation requests". |
 | `148` | One-time fix: a tracked order eBay cancelled before any Amazon purchase gets cost 0 and profit = `ebay_earnings`. See "Order change tracking". |
-| `149` | `users.timezone` (IANA name, default `UTC`) — the seller's calendar day for the dashboard and the date filters. See "Seller time zone". |
+| `149` | `users.timezone` (`TEXT NULL`, IANA name; NULL reads as `UTC`) — the seller's calendar day for the dashboard and the date filters. See "Seller time zone". |
 | `136` | `orders.seller_note TEXT` — the seller's own private note on an order. Never written by order sync; cleared by the eBay account-deletion erasure. See "Order stages". |
 | `129` | One-time watermark rewind (`last_ebay_sync_at = GREATEST(created_at, NOW() - 90 days)`) so the first order-sync tick after deploy re-reads recently modified orders and fills their cancel/refund state. Its own file because `128` had already been applied somewhere when the statement was written — an applied migration never re-runs. |
 
