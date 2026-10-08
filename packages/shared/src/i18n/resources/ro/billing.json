@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "Istoricul facturilor",
-      "subtitle": "Tot ce ați plătit, direct din Stripe.",
+      "subtitle": "Toate plățile și facturile dumneavoastră sunt gestionate în siguranță prin Stripe.",
       "date": "Data",
       "description": "Descriere",
       "amount": "Sumă",

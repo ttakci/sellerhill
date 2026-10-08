@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "Rechnungsverlauf",
-      "subtitle": "Alles, was Sie bezahlt haben, direkt von Stripe.",
+      "subtitle": "Alle Zahlungen und Rechnungen werden sicher über Stripe abgewickelt.",
       "date": "Datum",
       "description": "Beschreibung",
       "amount": "Betrag",

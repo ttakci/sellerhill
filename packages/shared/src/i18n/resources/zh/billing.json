@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "发票历史",
-      "subtitle": "您已支付的全部款项，直接来自 Stripe。",
+      "subtitle": "您的所有付款和发票均通过 Stripe 安全管理。",
       "date": "日期",
       "description": "说明",
       "amount": "金额",

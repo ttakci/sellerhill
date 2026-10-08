@@ -8,7 +8,7 @@ import type { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
-import type { BillingFactTone as FactTone, BillingSummaryTone as SummaryTone } from './BillingPage.types';
+import type { BillingFactTone as FactTone } from './BillingPage.types';
 
 export const Container = PageContainer;
 
@@ -18,163 +18,114 @@ export const StateCard = styled(Card)`
   box-sizing: border-box;
 `;
 
-const toneInk = (tone: SummaryTone | FactTone, theme: Theme): string => {
+const toneInk = (tone: FactTone, theme: Theme): string => {
   if (tone === 'positive') {return theme.colors.semantic.success;}
   if (tone === 'negative') {return theme.colors.semantic.error;}
   if (tone === 'warning') {return theme.colors.semantic.warning;}
-  if (tone === 'active') {return theme.colors.brand.primary;}
   return theme.colors.text.primary;
 };
 
 /*
- * The summary card is the job page's summary pane (ListingJobDetailsPage):
- * full width, a faint wash of the subscription's state hue over the glass,
- * status + actions on one row, then label / value lists with the one headline
- * figure on the right. Both pages read the same way on purpose.
+ * The summary is the listing detail page's hero (ListingDetailPage): a blue
+ * wash over the glass whatever the status (operator choice), the status badge
+ * in its own row at the top-left, the plan's name as the heading, label /
+ * value fact rows, and one blue money strip with a brand bar on its leading
+ * edge. The two pages read the same way on purpose.
  */
-export const SummaryCard = styled(Card)<{ $tone: SummaryTone }>`
-  padding: 0;
-  overflow: hidden;
-  background-image: linear-gradient(
-    135deg,
-    ${({ $tone, theme }) => {
-      if ($tone === 'positive') {return theme.colors.semanticTint.success;}
-      if ($tone === 'negative') {return theme.colors.semanticTint.error;}
-      if ($tone === 'warning') {return theme.colors.semanticTint.warning;}
-      if ($tone === 'active') {return theme.colors.semanticTint.info;}
-      return theme.colors.semanticTint.neutral;
-    }} 0%,
-    transparent 65%
-  );
-`;
-
-export const SummaryTop = styled.div`
+export const Hero = styled(Card)`
+  background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.md+')};
-  min-width: 0;
+  padding: ${tkn('spacing.lg')};
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding: ${tkn('spacing.xl')};
+  }
 `;
 
-/** Status badge on the left, the page's actions on the right. */
-export const SummaryHeader = styled.div`
+/** The status badge — its own row at the hero's top-left, in flow (card standard). */
+export const StatusBadgeSlot = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
   flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 
-export const SummaryActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  flex-wrap: wrap;
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 100%;
-    & > * {
-      flex: 1 1 auto;
-    }
-  }
-`;
-
-export const SummaryBody = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.15fr) minmax(9rem, 0.7fr);
-  align-items: start;
-  gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-`;
-
-/** One column: a small caption heading over its label / value list. */
-export const FactColumn = styled.div`
+export const TitleRow = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 
-export const MetaList = styled.dl`
+/** The plan's name heads the hero; from `lg` it takes the page-title size, like the listing title. */
+export const PlanTitle = styled(UIText)`
+  min-width: 0;
+  line-height: ${tkn('typography.lineHeight.tight')};
+
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    font-size: ${tkn('typography.fontSize.xxl')};
+  }
+`;
+
+/** Fact rows: a fixed label track so every value starts on the same x. */
+export const FactList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;
+
+export const FactItem = styled.div`
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: ${tkn('spacing.md')};
-  row-gap: ${tkn('spacing.xs')};
-  align-items: baseline;
-  margin: 0;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: ${tkn('spacing.sm')};
+  align-items: center;
   min-width: 0;
-`;
 
-export const MetaRow = styled.div`
-  display: contents;
-`;
-
-export const MetaLabel = styled.dt`
-  margin: 0;
-  min-width: 0;
-`;
-
-export const MetaValue = styled.dd`
-  margin: 0;
-  min-width: 0;
-  overflow-wrap: anywhere;
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
 `;
 
 export const FactValue = styled(UIText)<{ $tone: FactTone }>`
   color: ${({ $tone, theme }) => toneInk($tone, theme)};
 `;
 
-/** The headline figure, right-aligned like the job page's progress. */
-export const Headline = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-  align-self: center;
-
-  @media (max-width: ${tkn('breakpoints.lg')}) {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-    align-self: stretch;
-  }
+/**
+ * The money and usage story as ONE strip — next charge, then each quota — on
+ * a blue tint with a solid brand-blue bar on its leading edge (the listing
+ * hero's KpiStrip). A quota near or at its limit keeps its amber / red.
+ */
+export const KpiStrip = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: ${tkn('spacing.md')};
+  margin-top: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.md')};
+  padding-left: ${tkn('spacing.lg')};
+  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.semanticTint.infoStrong')};
+  box-shadow:
+    inset 0.25rem 0 0 ${tkn('colors.brand.primary')},
+    ${tkn('shadows.sm')};
 `;
 
-export const HeadlineDot = styled.span<{ $tone: SummaryTone }>`
-  width: ${tkn('spacing.sm')};
-  height: ${tkn('spacing.sm')};
-  flex: 0 0 auto;
-  border-radius: ${tkn('radius.full')};
-  background: ${({ $tone, theme }) =>
-    $tone === 'default' ? theme.colors.text.tertiary : toneInk($tone, theme)};
-`;
-
-export const HeadlineCopy = styled.div`
+export const KpiItem = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.lg')}) {
-    align-items: flex-start;
-  }
 `;
 
-export const HeadlineValue = styled(UIText)<{ $tone: SummaryTone }>`
-  color: ${({ $tone, theme }) => toneInk($tone, theme)};
+export const KpiLabel = styled(UIText)`
+  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
-/** Notices that close the summary card (cancellation, past due, card expiring). */
+/** Notices that close the hero (pending downgrade, cancellation, past due, card expiring). */
 export const SummaryNotices = styled.div`
   display: flex;
   flex-direction: column;
@@ -186,12 +137,12 @@ export const SummaryNotices = styled.div`
   }
 `;
 
-/** The invoice list sits on the canvas, like the job page's item list. */
-export const InvoicesSection = styled.div`
+/** Update payment method / Manage subscription — in the PageHeader, wrapping on a phone. */
+export const HeaderActions = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
 `;
 
 /** Feature list in a plan card. */

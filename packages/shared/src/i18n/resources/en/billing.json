@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "Invoice history",
-      "subtitle": "Everything you have paid, straight from Stripe.",
+      "subtitle": "All your payments and invoices are managed securely through Stripe.",
       "date": "Date",
       "description": "Description",
       "amount": "Amount",

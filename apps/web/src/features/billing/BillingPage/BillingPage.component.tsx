@@ -77,22 +77,6 @@ function usageTone(variant: BillingUsageRow['barVariant']): BillingFactTone {
   return 'default';
 }
 
-/** A label / value row — no icon; the label column is the only ornament (job page pattern). */
-const factRow = (key: string, label: string, value: string, tone: BillingFactTone = 'default'): React.ReactElement => (
-  <S.MetaRow key={key}>
-    <S.MetaLabel>
-      <Text variant="body-sm" color="text.secondary">
-        {label}
-      </Text>
-    </S.MetaLabel>
-    <S.MetaValue>
-      <S.FactValue variant="body-sm" weight="bold" numeric $tone={tone}>
-        {value}
-      </S.FactValue>
-    </S.MetaValue>
-  </S.MetaRow>
-);
-
 /** Render a single plan comparison card. */
 function PlanCardView({
   plan,
@@ -191,9 +175,10 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   onCheckout,
   onManage,
   hasProviderSubscription,
+  planTitle,
+  planDescription,
   summaryFacts,
   summaryHeadline,
-  summaryTone,
   isPlansOpen,
   onOpenPlans,
   onClosePlans,
@@ -276,111 +261,124 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader title={t('billing:billing.title')} subtitle={t('billing:billing.subtitle')} />
+      <PageHeader
+        title={t('billing:billing.title')}
+        subtitle={t('billing:billing.subtitle')}
+        actions={
+          /* The page's actions sit where a record page keeps them — the
+             listing detail's header pattern. A past-due seller gets only the
+             portal: they need their card fixed, not a plan list. */
+          <S.HeaderActions>
+            {canOpenPortal ? (
+              <Button variant="primary" size="medium" isLoading={isPortalLoading} onClick={onManage}>
+                <Icon name="wallet-cards" size={16} />
+                <Text variant="body" weight="medium">
+                  {t('billing:billing.subscription.updatePayment')}
+                </Text>
+              </Button>
+            ) : null}
+            {needsPaymentFix ? null : (
+              <Button variant="primary" size="medium" onClick={onOpenPlans}>
+                <Icon name="layers" size={16} />
+                <Text variant="body" weight="medium">
+                  {t('billing:billing.subscription.manage')}
+                </Text>
+              </Button>
+            )}
+          </S.HeaderActions>
+        }
+      />
 
       {/*
-        ONE card for "what am I on, what is left, what do I pay next" — the job
-        detail page's summary pane: state hue wash, status + actions on top,
-        the subscription and the usage as two label / value lists, and the
-        headline figure on the right. The saved card is a row here, not a card
-        of its own.
+        ONE hero for "what am I on, what is left, what do I pay next" — the
+        listing detail page's hero: blue wash, the status badge top-left, the
+        plan's name as the heading, fact rows, and one blue strip with the next
+        charge and each quota. The saved card is a fact row, not a card.
       */}
-      <S.SummaryCard variant="elevated" $tone={summaryTone}>
-        <S.SummaryTop>
-          <S.SummaryHeader>
-            {subscriptionStatus ? (
-              <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" solid>
-                {isCancelling
-                  ? t('billing:billing.subscription.status.cancelling')
-                  : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
-              </Badge>
-            ) : (
-              <span />
-            )}
-            <S.SummaryActions>
-              {canOpenPortal ? (
-                <Button variant="primary" size="small" isLoading={isPortalLoading} onClick={onManage}>
-                  <Icon name="wallet-cards" size={16} />
-                  <Text variant="body-sm">{t('billing:billing.subscription.updatePayment')}</Text>
-                </Button>
-              ) : null}
-              {needsPaymentFix ? null : (
-                <Button variant="primary" size="small" onClick={onOpenPlans}>
-                  <Icon name="layers" size={16} />
-                  <Text variant="body-sm">{t('billing:billing.subscription.manage')}</Text>
-                </Button>
-              )}
-            </S.SummaryActions>
-          </S.SummaryHeader>
+      <S.Hero variant="elevated">
+        {subscriptionStatus ? (
+          <S.StatusBadgeSlot>
+            <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" solid>
+              {isCancelling
+                ? t('billing:billing.subscription.status.cancelling')
+                : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
+            </Badge>
+          </S.StatusBadgeSlot>
+        ) : null}
 
-          <S.SummaryBody>
-            <S.FactColumn>
-              <Text variant="caption" color="text.secondary">
-                {t('billing:billing.subscription.title')}
-              </Text>
-              <S.MetaList>
-                {summaryFacts.map((fact) => factRow(fact.label, fact.label, fact.value, fact.tone))}
-              </S.MetaList>
-            </S.FactColumn>
-
-            {usageRows.length > 0 ? (
-              <S.FactColumn>
-                <Text variant="caption" color="text.secondary">
-                  {t('billing:billing.usage.title')}
-                </Text>
-                <S.MetaList>
-                  {usageRows.map((row) =>
-                    factRow(row.labelKey, t(row.labelKey), row.ofDisplay, usageTone(row.barVariant)),
-                  )}
-                </S.MetaList>
-              </S.FactColumn>
-            ) : null}
-
-            {summaryHeadline ? (
-              <S.Headline>
-                <S.HeadlineDot $tone={summaryTone} aria-hidden="true" />
-                <S.HeadlineCopy>
-                  <Text variant="caption" color="text.secondary">
-                    {summaryHeadline.label}
-                  </Text>
-                  <S.HeadlineValue variant="metric-lg" weight="bold" numeric $tone={summaryTone}>
-                    {summaryHeadline.value}
-                  </S.HeadlineValue>
-                  {summaryHeadline.caption ? (
-                    <Text variant="caption" color="text.secondary" numeric>
-                      {summaryHeadline.caption}
-                    </Text>
-                  ) : null}
-                </S.HeadlineCopy>
-              </S.Headline>
-            ) : null}
-          </S.SummaryBody>
-
-          {hasNotices ? (
-            <S.SummaryNotices>
-              {scheduledChangeLine ? (
-                <S.ScheduledChangeRow>
-                  <Text variant="body-sm">{scheduledChangeLine}</Text>
-                  <Button
-                    variant="primary"
-                    size="small"
-                    isLoading={isCancellingChange}
-                    onClick={onCancelScheduledChange}
-                  >
-                    <Icon name="undo-2" size={16} />
-                    <Text variant="body-sm">{t('billing:billing.subscription.cancelScheduledChange')}</Text>
-                  </Button>
-                </S.ScheduledChangeRow>
-              ) : null}
-              {cancelsAtPeriodEndLine ? <InfoMessage>{cancelsAtPeriodEndLine}</InfoMessage> : null}
-              {noticeKey ? <InfoMessage>{t(noticeKey)}</InfoMessage> : null}
-              {paymentExpiringSoon ? (
-                <InfoMessage>{t('billing:billing.paymentMethod.expiringSoon')}</InfoMessage>
-              ) : null}
-            </S.SummaryNotices>
+        <S.TitleRow>
+          <S.PlanTitle variant="h2" weight="bold">
+            {planTitle}
+          </S.PlanTitle>
+          {planDescription ? (
+            <Text variant="body-sm" color="text.secondary">
+              {planDescription}
+            </Text>
           ) : null}
-        </S.SummaryTop>
-      </S.SummaryCard>
+        </S.TitleRow>
+
+        {summaryFacts.length > 0 ? (
+          <S.FactList>
+            {summaryFacts.map((fact) => (
+              <S.FactItem key={fact.label}>
+                <Text variant="body-sm" color="text.secondary">
+                  {fact.label}
+                </Text>
+                <S.FactValue variant="body-sm" numeric $tone={fact.tone ?? 'default'}>
+                  {fact.value}
+                </S.FactValue>
+              </S.FactItem>
+            ))}
+          </S.FactList>
+        ) : null}
+
+        {summaryHeadline || usageRows.length > 0 ? (
+          <S.KpiStrip>
+            {summaryHeadline ? (
+              <S.KpiItem>
+                <S.KpiLabel variant="caption" color="text.secondary">
+                  {summaryHeadline.label}
+                </S.KpiLabel>
+                <Text variant="metric-lg" weight="bold" numeric color="brand.primary">
+                  {summaryHeadline.value}
+                </Text>
+                {summaryHeadline.caption ? (
+                  <Text variant="caption" color="text.secondary" numeric>
+                    {summaryHeadline.caption}
+                  </Text>
+                ) : null}
+              </S.KpiItem>
+            ) : null}
+            {usageRows.map((row) => (
+              <S.KpiItem key={row.labelKey}>
+                <S.KpiLabel variant="caption" color="text.secondary">
+                  {t(row.labelKey)}
+                </S.KpiLabel>
+                <S.FactValue variant="metric-sm" weight="semibold" numeric $tone={usageTone(row.barVariant)}>
+                  {row.ofDisplay}
+                </S.FactValue>
+              </S.KpiItem>
+            ))}
+          </S.KpiStrip>
+        ) : null}
+
+        {hasNotices ? (
+          <S.SummaryNotices>
+            {scheduledChangeLine ? (
+              <S.ScheduledChangeRow>
+                <Text variant="body-sm">{scheduledChangeLine}</Text>
+                <Button variant="primary" size="small" isLoading={isCancellingChange} onClick={onCancelScheduledChange}>
+                  <Icon name="undo-2" size={16} />
+                  <Text variant="body-sm">{t('billing:billing.subscription.cancelScheduledChange')}</Text>
+                </Button>
+              </S.ScheduledChangeRow>
+            ) : null}
+            {cancelsAtPeriodEndLine ? <InfoMessage>{cancelsAtPeriodEndLine}</InfoMessage> : null}
+            {noticeKey ? <InfoMessage>{t(noticeKey)}</InfoMessage> : null}
+            {paymentExpiringSoon ? <InfoMessage>{t('billing:billing.paymentMethod.expiringSoon')}</InfoMessage> : null}
+          </S.SummaryNotices>
+        ) : null}
+      </S.Hero>
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
 

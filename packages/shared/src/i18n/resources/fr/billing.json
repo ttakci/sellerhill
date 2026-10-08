@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "Historique des factures",
-      "subtitle": "Tout ce que vous avez payé, directement depuis Stripe.",
+      "subtitle": "Tous vos paiements et factures sont gérés de manière sécurisée via Stripe.",
       "date": "Date",
       "description": "Description",
       "amount": "Montant",

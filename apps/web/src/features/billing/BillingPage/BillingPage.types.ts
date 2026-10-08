@@ -41,9 +41,6 @@ export interface BillingPlanCard {
   isCurrent: boolean;
 }
 
-/** The state hue washed over the summary card — same scale as the job page's. */
-export type BillingSummaryTone = 'default' | 'active' | 'positive' | 'warning' | 'negative';
-
 /** Ink of one value in the summary card's label / value lists. */
 export type BillingFactTone = 'default' | 'positive' | 'warning' | 'negative';
 
@@ -106,11 +103,14 @@ export interface BillingPageComponentProps {
   onCheckout: (planId: string) => void;
   /** True when a Stripe subscription exists — see BillingSummaryDto. */
   hasProviderSubscription: boolean;
-  /** The subscription column: plan, interval, renewal date, payment card. */
+  /** The hero's heading: the current plan's name (or "no subscription"). */
+  planTitle: string;
+  /** The plan's one-line description under the heading. */
+  planDescription: string | null;
+  /** Fact rows under the heading: interval, renewal date, payment card. */
   summaryFacts: BillingSummaryFact[];
-  /** Null when there is no date or amount worth headlining. */
+  /** Lead figure of the hero strip; null when there is no date or amount worth headlining. */
   summaryHeadline: BillingSummaryHeadline | null;
-  summaryTone: BillingSummaryTone;
   isPlansOpen: boolean;
   onOpenPlans: () => void;
   onClosePlans: () => void;

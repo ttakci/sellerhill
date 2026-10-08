@@ -186,7 +186,7 @@
     },
     "invoices": {
       "title": "Faktura tarixçəsi",
-      "subtitle": "Ödədiyiniz hər şey, birbaşa Stripe-dan.",
+      "subtitle": "Bütün ödənişləriniz və fakturalarınız Stripe vasitəsilə təhlükəsiz şəkildə idarə olunur.",
       "date": "Tarix",
       "description": "Təsvir",
       "amount": "Məbləğ",

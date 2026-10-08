@@ -49,7 +49,6 @@ import type {
   BillingPlanCard,
   BillingSummaryFact,
   BillingSummaryHeadline,
-  BillingSummaryTone,
   BillingUsageRow,
 } from './BillingPage.types';
 
@@ -214,7 +213,6 @@ export const BillingPage: React.FC = () => {
   const [addonSlugInFlight, setAddonSlugInFlight] = useState<string | null>(null);
 
   const isTrialPlan = currentPlanSlug === TRIAL_PLAN_SLUG;
-  const isWindingDown = Boolean(details?.cancelAtPeriodEnd);
 
   /*
    * The headline figure on the right of the summary card — the one number the
@@ -256,20 +254,19 @@ export const BillingPage: React.FC = () => {
     return null;
   }, [details, isTrialPlan, currentPeriodEndDisplay, subscriptionStatus, t, localeCfg.locale]);
 
+  /** The hero's heading — the plan's name, the way the listing hero leads with the product. */
+  const planTitle = currentPlanSlug
+    ? t(`billing:billing.plans.${currentPlanSlug}.name`)
+    : t('billing:billing.transition.no_subscription');
+  const planDescription = currentPlanSlug ? t(`billing:billing.plans.${currentPlanSlug}.description`) : null;
+
   /*
-   * The subscription column of the summary card. A trial is not billed and
-   * does not renew, so it gets neither an interval nor a "next renewal" row —
-   * the old one-line version printed both for an expired free trial.
+   * The fact rows under the plan name. A trial is not billed and does not
+   * renew, so it gets neither an interval nor a "next renewal" row — the old
+   * one-line version printed both for an expired free trial.
    */
   const summaryFacts: BillingSummaryFact[] = useMemo(() => {
-    const facts: BillingSummaryFact[] = [
-      {
-        label: t('billing:billing.subscription.plan'),
-        value: currentPlanSlug
-          ? t(`billing:billing.plans.${currentPlanSlug}.name`)
-          : t('billing:billing.transition.no_subscription'),
-      },
-    ];
+    const facts: BillingSummaryFact[] = [];
     if (!subscription) {
       return facts;
     }
@@ -300,7 +297,6 @@ export const BillingPage: React.FC = () => {
     return facts;
   }, [
     subscription,
-    currentPlanSlug,
     isTrialPlan,
     currentIntervalKey,
     currentPeriodEndDisplay,
@@ -309,27 +305,6 @@ export const BillingPage: React.FC = () => {
     details?.paymentMethod,
     t,
   ]);
-
-  /** The state hue washed over the summary card and its headline figure. */
-  const summaryTone: BillingSummaryTone = useMemo(() => {
-    if (subscriptionStatus === BillingSubscriptionStatus.PAST_DUE) {
-      return 'negative';
-    }
-    if (
-      isWindingDown ||
-      subscriptionStatus === BillingSubscriptionStatus.CANCELED ||
-      subscriptionStatus === BillingSubscriptionStatus.ENDED
-    ) {
-      return 'warning';
-    }
-    if (subscriptionStatus === BillingSubscriptionStatus.TRIALING) {
-      return 'active';
-    }
-    if (subscriptionStatus === BillingSubscriptionStatus.ACTIVE) {
-      return 'positive';
-    }
-    return 'default';
-  }, [subscriptionStatus, isWindingDown]);
 
   // Read live from Stripe on every load (see BillingDetailsDto.cancelAtPeriodEnd)
   // — a seller who cancelled via the Billing Portal wrote nothing to our
@@ -770,7 +745,8 @@ export const BillingPage: React.FC = () => {
       hasProviderSubscription={hasProviderSubscription}
       summaryFacts={summaryFacts}
       summaryHeadline={summaryHeadline}
-      summaryTone={summaryTone}
+      planTitle={planTitle}
+      planDescription={planDescription}
       isPlansOpen={isPlansOpen}
       onOpenPlans={handleOpenPlans}
       onClosePlans={handleClosePlans}
