@@ -16,8 +16,10 @@ export interface DateRangePickerProps {
   maxDate: string;
   /** Longest selectable span in days; once a start is picked, days farther away are disabled. */
   maxSpanDays?: number;
-  /** Text on the closed trigger, already composed ("Today · 7 Oct"). */
+  /** The period name on the closed trigger ("Today"). */
   triggerLabel: string;
+  /** The dates beside it, muted ("08.10.2026"); omitted while unknown. */
+  triggerHint?: string;
   /** Heading of the custom section / bottom sheet title. */
   customLabel: string;
   applyLabel: string;
@@ -50,6 +52,7 @@ export interface DateRangePickerComponentProps {
   presets: DateRangePickerPreset[];
   selectedPreset: string | null;
   triggerLabel: string;
+  triggerHint?: string;
   customLabel: string;
   applyLabel: string;
   cancelLabel: string;

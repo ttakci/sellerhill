@@ -13,6 +13,7 @@ export const DateRangePickerComponent = (props: DateRangePickerComponentProps): 
     presets,
     selectedPreset,
     triggerLabel,
+    triggerHint,
     customLabel,
     applyLabel,
     cancelLabel,
@@ -112,9 +113,16 @@ export const DateRangePickerComponent = (props: DateRangePickerComponentProps): 
   return (
     <S.Container ref={containerRef} className={className}>
       <S.Trigger type="button" $isOpen={isOpen} aria-haspopup="dialog" aria-expanded={isOpen} onClick={onToggle}>
-        <Icon name="calendar-today" size={18} color="text.secondary" />
-        <S.TriggerText>{triggerLabel}</S.TriggerText>
-        <Icon name="chevron-down" size={16} color="text.tertiary" />
+        <S.TriggerIcon>
+          <Icon name="calendar-today" size={16} color="brand.primary" />
+        </S.TriggerIcon>
+        <S.TriggerText>
+          {triggerLabel}
+          {triggerHint && <S.TriggerHint>{triggerHint}</S.TriggerHint>}
+        </S.TriggerText>
+        <S.TriggerChevron $isOpen={isOpen}>
+          <Icon name="chevron-down" size={16} color="text.tertiary" />
+        </S.TriggerChevron>
       </S.Trigger>
 
       {isOpen && !isMobile && (

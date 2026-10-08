@@ -9,7 +9,8 @@ import type { DateRangePickerDay, DateRangePickerMonth, DateRangePickerProps } f
 const MOBILE_MAX_WIDTH_PX = 640;
 
 const DAY_MS = 86_400_000;
-const dayNumber = (iso: string) => Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / DAY_MS;
+const dayNumber = (iso: string) =>
+  Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / DAY_MS;
 
 const viewOf = (iso: string) => ({ year: Number(iso.slice(0, 4)), month: Number(iso.slice(5, 7)) - 1 });
 
@@ -21,6 +22,7 @@ export const DateRangePicker = ({
   maxDate,
   maxSpanDays,
   triggerLabel,
+  triggerHint,
   customLabel,
   applyLabel,
   cancelLabel,
@@ -193,6 +195,7 @@ export const DateRangePicker = ({
       presets={presets}
       selectedPreset={draftStart ? null : selectedPreset}
       triggerLabel={triggerLabel}
+      triggerHint={triggerHint}
       customLabel={customLabel}
       applyLabel={applyLabel}
       cancelLabel={cancelLabel}

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 
-import { CONTROL_BORDER_COLOR_PATH, CONTROL_PADDING_X, controlHeight } from '../../styles/formControl';
+import { controlHeight } from '../../styles/formControl';
+import { glassSurfaceStrong } from '../../styles/glass';
 import { tkn } from '../../theme/tkn';
 
 export const Container = styled.div`
@@ -8,36 +9,98 @@ export const Container = styled.div`
   display: inline-flex;
 `;
 
-/** Compact control: same height as a small Select so it sits on the tab rail's baseline. */
+/**
+ * The closed control is a small glass pane, the same material as the period
+ * cards it filters: frosted surface, white edge, brand-tinted throw. A tinted
+ * calendar tile leads, the period name reads first and the dates sit beside
+ * it in muted tabular figures — the label is the answer, the dates the proof.
+ */
 export const Trigger = styled.button<{ $isOpen: boolean }>`
   display: inline-flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
   box-sizing: border-box;
   /* Fills the Container: natural width by default (the Container shrink-wraps),
      full row when a caller stretches the Container through its className. */
   width: 100%;
-  height: ${controlHeight('small', false)};
-  padding: 0 ${CONTROL_PADDING_X};
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid
-    ${({ $isOpen, theme }) => ($isOpen ? theme.colors.brand.primary : tkn(CONTROL_BORDER_COLOR_PATH)({ theme }))};
-  border-radius: ${tkn('radius.md')};
+  height: ${controlHeight('medium', false)};
+  padding: 0 ${tkn('spacing.md')} 0 ${tkn('spacing.xs')};
+  ${({ theme }) => glassSurfaceStrong(theme)}
+  border-color: ${({ $isOpen, theme }) => ($isOpen ? theme.colors.brand.primary : theme.colors.glass.edge)};
+  box-shadow: ${({ $isOpen, theme }) => ($isOpen ? theme.shadows.glassHover : theme.shadows.glass)};
+  border-radius: ${tkn('radius.lg')};
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    box-shadow: ${tkn('shadows.glassHover')};
+    transform: translateY(-0.0625rem);
+  }
 
   &:focus-visible {
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
     outline-offset: 0.125rem;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+`;
+
+/** The brand-tinted plate the calendar glyph sits on. */
+export const TriggerIcon = styled.span`
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 export const TriggerText = styled.span`
+  display: inline-flex;
   flex: 1 1 auto;
+  align-items: baseline;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
   text-align: start;
+  font-family: ${tkn('typography.fontFamily.heading')};
+  font-size: ${tkn('typography.fontSize.base')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  color: ${tkn('colors.text.primary')};
+`;
+
+/** The dates beside the period name: muted, tabular, after a hairline. */
+export const TriggerHint = styled.span`
+  padding-inline-start: ${tkn('spacing.sm')};
+  border-inline-start: 0.0625rem solid ${tkn('colors.border.primary')};
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.primary')};
+  font-weight: ${tkn('typography.fontWeight.normal')};
+  font-variant-numeric: tabular-nums;
+  color: ${tkn('colors.text.secondary')};
+`;
+
+/** Turns over while the panel is open. */
+export const TriggerChevron = styled.span<{ $isOpen: boolean }>`
+  display: inline-flex;
+  margin-inline-start: ${tkn('spacing.2xs')};
+  transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
+  transition: transform 0.2s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 /** Opens toward the left: the control sits at the rail's right end. */
@@ -53,9 +116,7 @@ export const Panel = styled.div<{ $roomPx: number | null }>`
      container), less the page gutter. Only when that binds do the
      months wrap under each other (Months is flex-wrap). */
   max-width: ${({ $roomPx, theme }) =>
-    $roomPx === null
-      ? `calc(100vw - 2 * ${theme.spacing.md})`
-      : `calc(${$roomPx}px - ${theme.spacing.md})`};
+    $roomPx === null ? `calc(100vw - 2 * ${theme.spacing.md})` : `calc(${$roomPx}px - ${theme.spacing.md})`};
   z-index: ${tkn('zIndex.dropdown')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
@@ -78,10 +139,8 @@ export const Presets = styled.div<{ $mobile: boolean }>`
   flex-direction: column;
   min-width: 12rem;
   padding: ${tkn('spacing.sm')};
-  border-inline-end: ${({ $mobile, theme }) =>
-    $mobile ? 'none' : `0.0625rem solid ${theme.colors.border.primary}`};
-  border-bottom: ${({ $mobile, theme }) =>
-    $mobile ? `0.0625rem solid ${theme.colors.border.primary}` : 'none'};
+  border-inline-end: ${({ $mobile, theme }) => ($mobile ? 'none' : `0.0625rem solid ${theme.colors.border.primary}`)};
+  border-bottom: ${({ $mobile, theme }) => ($mobile ? `0.0625rem solid ${theme.colors.border.primary}` : 'none')};
 `;
 
 export const PresetButton = styled.button<{ $active: boolean }>`
@@ -92,15 +151,17 @@ export const PresetButton = styled.button<{ $active: boolean }>`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   border: none;
   border-radius: ${tkn('radius.md')};
-  background: transparent;
+  background: ${({ $active, theme }) => ($active ? theme.colors.glass.tint : 'transparent')};
   text-align: start;
   cursor: pointer;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${({ $active, theme }) =>
+    $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.normal};
   color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.primary)};
 
   &:hover {
-    background: ${tkn('colors.background.tertiary')};
+    background: ${({ $active, theme }) => ($active ? theme.colors.glass.tint : theme.colors.background.tertiary)};
   }
 
   &:focus-visible {
