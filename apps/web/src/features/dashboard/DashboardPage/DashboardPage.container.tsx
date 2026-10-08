@@ -9,6 +9,7 @@ import {
   DashboardChartGranularity,
   DashboardRangePreset,
   DashboardTab,
+  DASHBOARD_MAX_RANGE_DAYS,
   DEFAULT_DASHBOARD_RANGE_PRESET,
 } from '@repo/shared';
 import { getLocaleConfig, useTheme, useUI, type DateRangePickerProps } from '@repo/ui';
@@ -70,9 +71,15 @@ export const DashboardPageContainer = (): React.ReactElement => {
 
   const {
     data: dashboardData,
-    isLoading: isDashboardLoading,
+    currentData: currentDashboardData,
+    isLoading: isInitialLoading,
+    isFetching: isDashboardFetching,
     error: dashboardError,
   } = useGetDashboardQuery({ range, ebayAccountId: storeFilter }, { skip: noStore });
+  // `dashboardData` keeps the PREVIOUS range's answer while a new one loads;
+  // `currentData` does not. Fetching without a current answer = the cards, chart
+  // and P&L show their own skeleton instead of last range's figures.
+  const isDashboardLoading = isInitialLoading || (isDashboardFetching && currentDashboardData === undefined);
 
   /* The tax rate the estimate actually used: the selected store's own row
      when it has one, else the global row (Store > Global) — never the
@@ -255,16 +262,22 @@ export const DashboardPageContainer = (): React.ReactElement => {
     if (!appliedRange) {
       return null;
     }
-    const name = appliedRange.preset
-      ? t(`dashboard.range.preset.${appliedRange.preset}` as 'dashboard.title')
+    // The chosen preset is named at once; the dates come from the response once it arrives.
+    const namedPreset = 'preset' in range ? range.preset : appliedRange.preset;
+    const name = namedPreset
+      ? t(`dashboard.range.preset.${namedPreset}` as 'dashboard.title')
       : t('dashboard.range.custom');
+    const shownFrom = 'from' in range ? range.from : appliedRange.from;
+    const shownTo = 'to' in range ? range.to : appliedRange.to;
+    const datesPending = isDashboardLoading && 'preset' in range;
     return {
       presets: rangePresets,
       selectedPreset: 'preset' in range ? range.preset : null,
       from: appliedRange.from,
       to: appliedRange.to,
       maxDate: appliedRange.today,
-      triggerLabel: `${name} · ${formatters.dateRange(appliedRange.from, appliedRange.to)}`,
+      maxSpanDays: DASHBOARD_MAX_RANGE_DAYS,
+      triggerLabel: datesPending ? name : `${name} · ${formatters.dateRange(shownFrom, shownTo)}`,
       customLabel: t('dashboard.range.custom'),
       applyLabel: t('dashboard.range.apply'),
       cancelLabel: t('dashboard.range.cancel'),
@@ -273,7 +286,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
       onPresetSelect: handlePresetSelect,
       onRangeApply: handleRangeApply,
     };
-  }, [appliedRange, range, rangePresets, formatters, locale, t, handlePresetSelect, handleRangeApply]);
+  }, [appliedRange, range, isDashboardLoading, rangePresets, formatters, locale, t, handlePresetSelect, handleRangeApply]);
 
   /* ─── errors ─── */
 
@@ -292,6 +305,15 @@ export const DashboardPageContainer = (): React.ReactElement => {
     // default range instead.
     if (dashboardError && 'status' in dashboardError && dashboardError.status === 400 && !isDefaultRange) {
       setRange({ preset: DEFAULT_DASHBOARD_RANGE_PRESET });
+      showMessage(
+        {
+          type: 'warning',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: 'dashboard:dashboard.errors.invalidRange',
+          primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+        },
+        t,
+      );
       return;
     }
     showMessage(

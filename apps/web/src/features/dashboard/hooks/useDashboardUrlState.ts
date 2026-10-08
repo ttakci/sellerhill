@@ -24,6 +24,9 @@ const PARAM_RANGE = 'range';
 const PARAM_FROM = 'from';
 const PARAM_TO = 'to';
 const PARAM_CARD = 'card';
+/** Bookmarks from before the range picker carried `?period=`; its four values are presets of the same name. */
+const PARAM_LEGACY_PERIOD = 'period';
+const LEGACY_PERIODS: string[] = ['today', 'thisWeek', 'thisMonth', 'thisYear'];
 const DEFAULT_TAB = DashboardTab.CARDS;
 
 export function useDashboardUrlState(): DashboardUrlState {
@@ -34,7 +37,10 @@ export function useDashboardUrlState(): DashboardUrlState {
 
   const from = searchParams.get(PARAM_FROM) ?? '';
   const to = searchParams.get(PARAM_TO) ?? '';
-  const rawRange = searchParams.get(PARAM_RANGE) ?? '';
+  const legacyPeriod = searchParams.get(PARAM_LEGACY_PERIOD) ?? '';
+  const hasNewParams = searchParams.has(PARAM_RANGE) || searchParams.has(PARAM_FROM) || searchParams.has(PARAM_TO);
+  const rawRange =
+    searchParams.get(PARAM_RANGE) ?? (!hasNewParams && LEGACY_PERIODS.includes(legacyPeriod) ? legacyPeriod : '');
   const rangeKey = isIsoDate(from) && isIsoDate(to) ? `c:${from}:${to}` : `p:${rawRange}`;
   const range = useMemo<DashboardRangeInput>(() => {
     if (rangeKey.startsWith('c:')) {

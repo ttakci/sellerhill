@@ -28,7 +28,10 @@ function make(today = '2026-10-07', timezone = 'Europe/Istanbul') {
     return []; // bucket queries: empty → zero-filled
   };
   const query = jest.fn((sql: string, params: unknown[] = []) => Promise.resolve(answer(sql, params)));
-  const timezones = { getForUser: jest.fn(() => Promise.resolve(timezone)) };
+  const timezones = {
+    getForUser: jest.fn(() => Promise.resolve(timezone)),
+    isValid: jest.fn((name: string) => Promise.resolve(name !== 'Mars/Olympus')),
+  };
   return { service: new DashboardService({ query } as never, timezones as never), query, timezones };
 }
 
@@ -83,6 +86,32 @@ describe('e-mail methods', () => {
     expect(call?.[1]).toEqual(['u1', ['2026-10-06'], ['2026-10-06'], 'Europe/Istanbul', 's1']);
   });
 
+  it('uses the seller\'s stored zone when the timezone is omitted or null', async () => {
+    const { service, query, timezones } = make();
+    await service.getDayMetrics('u1', '2026-10-06');
+    await service.getRangeMetrics('u1', { from: '2026-10-06', to: '2026-10-06' }, null);
+    expect(timezones.getForUser).toHaveBeenCalledTimes(2);
+    const calls = query.mock.calls.filter(([sql]) => String(sql).includes('WITH ORDINALITY'));
+    expect(calls.map((c) => (c[1] as unknown[])[3])).toEqual(['Europe/Istanbul', 'Europe/Istanbul']);
+  });
+
+  it('falls back to UTC for an unknown supplied zone, never sending it to SQL', async () => {
+    const { service, query } = make();
+    await service.getDayMetrics('u1', '2026-10-06', 'Mars/Olympus');
+    const call = query.mock.calls.find(([sql]) => String(sql).includes('WITH ORDINALITY'));
+    expect((call?.[1] as unknown[])[3]).toBe('UTC');
+    await service.getRangeMetricsByStore('u1', { from: '2026-10-06', to: '2026-10-06' }, 'Mars/Olympus');
+    const byStore = query.mock.calls.find(([sql]) => String(sql).includes('GROUPING SETS'));
+    expect((byStore?.[1] as unknown[])[3]).toBe('UTC');
+  });
+
+  it('getSellerToday answers the Postgres today of the seller\'s zone', async () => {
+    const { service, query } = make('2026-10-06', 'America/Los_Angeles');
+    await expect(service.getSellerToday('u1')).resolves.toBe('2026-10-06');
+    const todaySql = query.mock.calls.find(([sql]) => String(sql).includes('now() AT TIME ZONE'));
+    expect(todaySql?.[1]).toEqual(['America/Los_Angeles']);
+  });
+
   it('getRangeMetricsByStore returns the total row and each store row', async () => {
     const { service } = make();
     const r = await service.getRangeMetricsByStore('u1', { from: '2026-10-06', to: '2026-10-06' }, 'UTC');
@@ -105,5 +134,12 @@ describe('DashboardController range parsing', () => {
     const c = controller({ getDashboard: jest.fn() });
     await expect(c.getDashboard(req, 'forever')).rejects.toThrow(BadRequestException);
     await expect(c.getDashboard(req, undefined, '2026-10-01')).rejects.toThrow(BadRequestException);
+  });
+
+  it('refuses a repeated query param (an array) with a 400, not a 500', async () => {
+    const c = controller({ getDashboard: jest.fn() });
+    await expect(c.getDashboard(req, ['today', 'thisWeek'])).rejects.toThrow(BadRequestException);
+    await expect(c.getDashboard(req, undefined, ['2026-10-01'], '2026-10-02')).rejects.toThrow(BadRequestException);
+    await expect(c.getDashboard(req, undefined, '2026-10-01', ['2026-10-02'])).rejects.toThrow(BadRequestException);
   });
 });

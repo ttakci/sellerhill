@@ -21,7 +21,7 @@ export interface ProfileDrawerComponentProps {
   isSaving: boolean;
   timezone: string;
   timezoneOptions: { value: string; label: string }[];
-  onTimezoneChange: (value: string) => void;
+  onTimezoneChange: (value: string | number) => void;
   onFirstNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLastNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPhoneNumberChange: (value: string) => void;

@@ -13,8 +13,9 @@
  * with `toISOString()` silently shifted a day on any non-UTC server.
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
+  DEFAULT_USER_TIMEZONE,
   DashboardChartGranularity,
   DashboardRangeError,
   OrderCostCaptureStatus,
@@ -85,6 +86,8 @@ const BUCKET_SQL: Record<DashboardChartGranularity, { unit: string; format: stri
 
 @Injectable()
 export class DashboardService {
+  private readonly logger = new Logger(DashboardService.name);
+
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly timezoneService: TimezoneService,
@@ -158,44 +161,79 @@ export class DashboardService {
 
   /* ─── the e-mail contract: same fragment, same numbers as the cards ─── */
 
+  /**
+   * The seller's calendar "today" (YYYY-MM-DD) in their own time zone, so a caller
+   * can derive "yesterday" with `addIsoDays(today, -1)` instead of guessing.
+   */
+  async getSellerToday(userId: string): Promise<string> {
+    return this.getLocalToday(await this.timezoneService.getForUser(userId));
+  }
+
+  /**
+   * Metrics for a window of the seller's calendar days, from the same `periodSelect`
+   * fragment as the dashboard cards. `timezone` is optional: omitted/null/empty uses the
+   * seller's stored zone; a supplied name is validated against Postgres and falls back to UTC.
+   */
   async getRangeMetrics(
     userId: string,
     window: DashboardDateWindow,
-    timezone: string,
+    timezone?: string | null,
     ebayAccountId?: string,
   ): Promise<PeriodMetricsDto> {
     this.assertWindow(window);
-    const [row] = await this.aggregateWindows(userId, [window], timezone, ebayAccountId);
+    const tz = await this.resolveTimezone(userId, timezone);
+    const [row] = await this.aggregateWindows(userId, [window], tz, ebayAccountId);
     return this.buildPeriod(row);
   }
 
+  /**
+   * One calendar day (`localDate`, the seller's own day) - a one-day `getRangeMetrics`,
+   * same fragment as the cards, same optional/validated `timezone`.
+   */
   async getDayMetrics(
     userId: string,
     localDate: string,
-    timezone: string,
+    timezone?: string | null,
     ebayAccountId?: string,
   ): Promise<PeriodMetricsDto> {
     return this.getRangeMetrics(userId, { from: localDate, to: localDate }, timezone, ebayAccountId);
   }
 
+  /**
+   * A window's metrics in total and per store, same fragment as the cards and the same
+   * optional/validated `timezone` contract as `getRangeMetrics`.
+   */
   async getRangeMetricsByStore(
     userId: string,
     window: DashboardDateWindow,
-    timezone: string,
+    timezone?: string | null,
   ): Promise<{ total: PeriodMetricsDto; stores: DashboardStoreMetrics[] }> {
     this.assertWindow(window);
+    const tz = await this.resolveTimezone(userId, timezone);
     const rows = await this.databaseService.query<StoreAggregateRow>(
       `SELECT ebay_account_id, GROUPING(ebay_account_id) AS is_total, ${this.periodSelect()}
        FROM orders
        WHERE user_id = $1 AND ${buildLocalRangeSql('order_date', '$2', '$3', '$4')}
        GROUP BY GROUPING SETS ((ebay_account_id), ())`,
-      [userId, window.from, window.to, timezone],
+      [userId, window.from, window.to, tz],
     );
     const totalRow = rows.find((r) => this.num(r.is_total) === 1) ?? this.emptyAggregate();
     const stores = rows
       .filter((r) => this.num(r.is_total) === 0 && r.ebay_account_id)
       .map((r) => ({ ebayAccountId: r.ebay_account_id as string, metrics: this.buildPeriod(r) }));
     return { total: this.buildPeriod(totalRow), stores };
+  }
+
+  /** A zone is never trusted raw: NULL would blank every bound, an unknown name is a 22023. */
+  private async resolveTimezone(userId: string, timezone?: string | null): Promise<string> {
+    if (!timezone) {
+      return this.timezoneService.getForUser(userId);
+    }
+    if (await this.timezoneService.isValid(timezone)) {
+      return timezone;
+    }
+    this.logger.warn(`unknown time zone "${timezone.slice(0, 64)}" supplied for ${userId}; using UTC`);
+    return DEFAULT_USER_TIMEZONE;
   }
 
   /* ─── queries ─── */

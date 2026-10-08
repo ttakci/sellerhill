@@ -102,6 +102,11 @@ export const PresetButton = styled.button<{ $active: boolean }>`
   &:hover {
     background: ${tkn('colors.background.tertiary')};
   }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const Custom = styled.div`
@@ -159,6 +164,11 @@ export const NavButton = styled.button`
   &:hover {
     background: ${tkn('colors.background.tertiary')};
   }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const Grid = styled.div`
@@ -196,6 +206,7 @@ export const Sheet = styled.div`
   max-height: 85vh;
   overflow-y: auto;
   background: ${tkn('colors.surface.primary')};
+  padding-bottom: env(safe-area-inset-bottom);
   border-top-left-radius: ${tkn('radius.xl')};
   border-top-right-radius: ${tkn('radius.xl')};
 `;
@@ -227,5 +238,10 @@ export const Day = styled.button<{ $muted: boolean; $edge: boolean; $inRange: bo
   &:disabled {
     cursor: not-allowed;
     color: ${tkn('colors.text.tertiary')};
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
   }
 `;

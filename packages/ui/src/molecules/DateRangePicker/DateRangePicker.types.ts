@@ -14,6 +14,8 @@ export interface DateRangePickerProps {
   to: string;
   /** Last selectable day (seller-local today). */
   maxDate: string;
+  /** Longest selectable span in days; once a start is picked, days farther away are disabled. */
+  maxSpanDays?: number;
   /** Text on the closed trigger, already composed ("Today · 7 Oct"). */
   triggerLabel: string;
   /** Heading of the custom section / bottom sheet title. */

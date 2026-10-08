@@ -10,6 +10,7 @@ import type { ProfileDrawerProps } from './ProfileDrawer.types';
 
 import { useUpdateProfileMutation } from '@/features/profile/api/profileApi';
 import { getTimezoneOptions } from '@/features/profile/utils/timezoneOptions';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, profile }) => {
   const { t, i18n } = useTranslation();
@@ -48,6 +49,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       ? t('translation:settingsHub.drawer.profile.phoneInvalid')
       : undefined;
 
+  const handleTimezoneChange = useCallback((value: string | number): void => setTimezone(String(value)), []);
+
   const handleSave = useCallback((): void => {
     if (phoneNumber !== '' && !isValidPhone(phoneNumber)) {
       setSubmitAttempted(true);
@@ -64,12 +67,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       .then(() => {
         notifyDrawerDone({ onClose, showMessage, closeMessage, t });
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         showMessage(
           {
             type: 'error',
             headerKey: 'translation:common.error',
-            descriptionKey: 'translation:common.error',
+            // The API's own key (e.g. an unknown time zone), else the generic error.
+            descriptionKey: getErrorI18nKey(err as Parameters<typeof getErrorI18nKey>[0]),
           },
           t
         );
@@ -89,7 +93,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
       isSaving={isLoading}
       timezone={timezone}
       timezoneOptions={timezoneOptions}
-      onTimezoneChange={setTimezone}
+      onTimezoneChange={handleTimezoneChange}
       onFirstNameChange={(e) => setFirstName(e.target.value)}
       onLastNameChange={(e) => setLastName(e.target.value)}
       onPhoneNumberChange={(value) => setPhoneNumber(value)}

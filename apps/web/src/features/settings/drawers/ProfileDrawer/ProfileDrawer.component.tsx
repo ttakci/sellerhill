@@ -74,7 +74,7 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
             label={t('profile:profile.timezone.label')}
             options={timezoneOptions}
             value={timezone}
-            onChange={(value) => onTimezoneChange(String(value))}
+            onChange={onTimezoneChange}
             isSearchable
             fullWidth
           />

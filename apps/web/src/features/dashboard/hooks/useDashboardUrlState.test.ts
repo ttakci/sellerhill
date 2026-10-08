@@ -27,6 +27,15 @@ describe('useDashboardUrlState', () => {
       .toEqual({ from: '2026-09-01', to: '2026-09-30' });
   });
 
+  it('maps a legacy ?period= bookmark to the preset of the same name, unless a new param is present', () => {
+    expect(renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?period=thisYear') }).result.current.range)
+      .toEqual({ preset: DashboardRangePreset.THIS_YEAR });
+    expect(renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?period=thisYear&range=thisMonth') }).result.current.range)
+      .toEqual({ preset: DashboardRangePreset.THIS_MONTH });
+    expect(renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?period=bogus') }).result.current.range)
+      .toEqual({ preset: DashboardRangePreset.TODAY });
+  });
+
   it('an unknown preset falls back to today; a half custom range too', () => {
     expect(renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?range=forever') }).result.current.range)
       .toEqual({ preset: DashboardRangePreset.TODAY });

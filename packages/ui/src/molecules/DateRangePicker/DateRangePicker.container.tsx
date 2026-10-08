@@ -8,6 +8,9 @@ import type { DateRangePickerDay, DateRangePickerMonth, DateRangePickerProps } f
 /** Same threshold as Select/Dropdown's bottom sheet. */
 const MOBILE_MAX_WIDTH_PX = 640;
 
+const DAY_MS = 86_400_000;
+const dayNumber = (iso: string) => Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / DAY_MS;
+
 const viewOf = (iso: string) => ({ year: Number(iso.slice(0, 4)), month: Number(iso.slice(5, 7)) - 1 });
 
 export const DateRangePicker = ({
@@ -16,6 +19,7 @@ export const DateRangePicker = ({
   from,
   to,
   maxDate,
+  maxSpanDays,
   triggerLabel,
   customLabel,
   applyLabel,
@@ -118,7 +122,12 @@ export const DateRangePicker = ({
       const grid = buildMonthGrid(first.getFullYear(), first.getMonth(), weekStart);
       const days: DateRangePickerDay[] = grid.map((cell) => ({
         ...cell,
-        isDisabled: cell.iso > maxDate,
+        isDisabled:
+          cell.iso > maxDate ||
+          (maxSpanDays !== undefined &&
+            draftStart !== null &&
+            draftEnd === null &&
+            Math.abs(dayNumber(cell.iso) - dayNumber(draftStart)) > maxSpanDays - 1),
         isStart: cell.iso === start,
         isEnd: end !== null && cell.iso === end,
         isInRange: end !== null && cell.iso > start && cell.iso < end,
@@ -126,7 +135,7 @@ export const DateRangePicker = ({
       }));
       return { title: monthFormatter.format(first), days };
     });
-  }, [isMobile, view, weekStart, maxDate, start, end, monthFormatter]);
+  }, [isMobile, view, weekStart, maxDate, maxSpanDays, draftStart, draftEnd, start, end, monthFormatter]);
 
   const shiftMonth = useCallback((delta: number) => {
     setView((prev) => {
@@ -154,6 +163,14 @@ export const DateRangePicker = ({
 
   const handleDaySelect = (iso: string) => {
     if (iso > maxDate) {
+      return;
+    }
+    if (
+      maxSpanDays !== undefined &&
+      draftStart &&
+      !draftEnd &&
+      Math.abs(dayNumber(iso) - dayNumber(draftStart)) > maxSpanDays - 1
+    ) {
       return;
     }
     if (!draftStart || draftEnd) {

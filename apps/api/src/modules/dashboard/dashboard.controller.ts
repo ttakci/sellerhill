@@ -37,7 +37,17 @@ function parseStoreId(value: string | undefined): string | undefined {
 }
 
 /** `?from=&to=` (both, a custom range) wins over `?range=` (a preset); neither → today. */
-function parseRangeInput(range?: string, from?: string, to?: string): DashboardRangeInput {
+function parseRangeInput(range?: unknown, from?: unknown, to?: unknown): DashboardRangeInput {
+  // A repeated query param arrives as an array - never call a string method on it.
+  for (const value of [range, from, to]) {
+    if (value !== undefined && typeof value !== 'string') {
+      throw new BadRequestException(INVALID_RANGE);
+    }
+  }
+  return parseValidatedRange(range as string | undefined, from as string | undefined, to as string | undefined);
+}
+
+function parseValidatedRange(range?: string, from?: string, to?: string): DashboardRangeInput {
   const f = from?.trim();
   const t = to?.trim();
   if (f || t) {
@@ -91,9 +101,9 @@ export class DashboardController {
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   async getDashboard(
     @Request() req: { user: { sub: string } },
-    @Query('range') range?: string,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
+    @Query('range') range?: unknown,
+    @Query('from') from?: unknown,
+    @Query('to') to?: unknown,
     @Query('ebayAccountId') ebayAccountId?: string,
   ): Promise<DashboardDataDto> {
     const input = parseRangeInput(range, from, to);
