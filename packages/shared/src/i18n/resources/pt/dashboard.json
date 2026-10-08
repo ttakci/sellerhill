@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Cartões",
       "chart": "Gráfico",
-      "pnl": "DRE"
+      "pnl": "DRE",
+      "topSellers": "Mais vendidos"
     },
     "range": {
       "title": "Período",
@@ -137,6 +138,39 @@
       "untrackedExcludedLabel_many": "{{count}} pedidos não rastreados excluídos",
       "untrackedExcludedLabel_other": "{{count}} pedidos não rastreados excluídos",
       "untrackedExcludedTooltip": "Pedidos que não correspondem a um anúncio do SellerHill ficam fora de todos os números deste painel. Eles continuam na página Pedidos como “Não rastreado”; importe o anúncio para incluí-los."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> anúncio vendido",
+      "result_many": "<b>{{count}}</b> anúncios vendidos",
+      "result_other": "<b>{{count}}</b> anúncios vendidos",
+      "sortLabel": "Ordenar:",
+      "sort": {
+        "sales": "Faturamento",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Lucro líquido",
+        "change": "Variação"
+      },
+      "stats": {
+        "sales": "Faturamento",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Lucro líquido"
+      },
+      "columns": {
+        "product": "Produto",
+        "trend": "Tendência",
+        "sales": "Faturamento",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Lucro líquido",
+        "price": "Preço",
+        "stock": "Estoque (eBay/AMZ)"
+      },
+      "estimated": "estimado",
+      "emptyTitle": "Nenhuma venda neste período",
+      "emptySubtitle": "Os anúncios aparecem aqui assim que vendem no período escolhido.",
+      "trendAria": "Tendência no período escolhido"
     }
   }
 }

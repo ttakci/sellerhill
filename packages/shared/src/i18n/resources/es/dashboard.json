@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Tarjetas",
       "chart": "Gráfico",
-      "pnl": "Resultados"
+      "pnl": "Resultados",
+      "topSellers": "Más vendidos"
     },
     "range": {
       "title": "Rango de fechas",
@@ -137,6 +138,39 @@
       "untrackedExcludedLabel_many": "{{count}} pedidos sin seguimiento excluidos",
       "untrackedExcludedLabel_other": "{{count}} pedidos sin seguimiento excluidos",
       "untrackedExcludedTooltip": "Los pedidos que no coinciden con una publicación de SellerHill quedan fuera de todas las cifras de este panel. Siguen en la página de Pedidos como «Sin seguimiento»; importa la publicación para incluirlos."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> publicación vendida",
+      "result_many": "<b>{{count}}</b> publicaciones vendidas",
+      "result_other": "<b>{{count}}</b> publicaciones vendidas",
+      "sortLabel": "Ordenar:",
+      "sort": {
+        "sales": "Ingresos",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Ganancia neta",
+        "change": "Variación"
+      },
+      "stats": {
+        "sales": "Ingresos",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Ganancia neta"
+      },
+      "columns": {
+        "product": "Producto",
+        "trend": "Tendencia",
+        "sales": "Ingresos",
+        "units": "Unidades",
+        "orders": "Pedidos",
+        "netProfit": "Ganancia neta",
+        "price": "Precio",
+        "stock": "Stock (eBay/AMZ)"
+      },
+      "estimated": "estimada",
+      "emptyTitle": "No hubo ventas en este periodo",
+      "emptySubtitle": "Las publicaciones aparecen aquí en cuanto se venden en el periodo elegido.",
+      "trendAria": "Tendencia en el periodo elegido"
     }
   }
 }

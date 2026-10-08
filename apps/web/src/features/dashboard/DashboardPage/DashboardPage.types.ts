@@ -8,6 +8,7 @@ import type { DateRangePickerProps, IconName } from '@repo/ui';
 import type { CardsPanelProps } from '../components/CardsPanel';
 import type { ChartPanelContainerProps } from '../components/ChartPanel/ChartPanel.types';
 import type { PnlPanelContainerProps } from '../components/PnlPanel/PnlPanel.types';
+import type { TopSellersPanelProps } from '../components/TopSellersPanel';
 
 export interface DashboardTabItem {
   id: DashboardTab;
@@ -26,4 +27,5 @@ export interface DashboardPageComponentProps {
   cardsProps: CardsPanelProps;
   chartProps: ChartPanelContainerProps;
   pnlProps: PnlPanelContainerProps;
+  topSellersProps: TopSellersPanelProps;
 }

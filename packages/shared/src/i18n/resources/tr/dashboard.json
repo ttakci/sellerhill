@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Kartlar",
       "chart": "Çizelge",
-      "pnl": "K/Z"
+      "pnl": "K/Z",
+      "topSellers": "En çok satanlar"
     },
     "range": {
       "title": "Tarih aralığı",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} takipsiz sipariş dahil edilmedi",
       "untrackedExcludedLabel_other": "{{count}} takipsiz sipariş dahil edilmedi",
       "untrackedExcludedTooltip": "Bir SellerHill listesiyle eşleşmeyen siparişler bu paneldeki hiçbir rakama dahil edilmez. Siparişler sayfasında \"Takip edilmiyor\" olarak görünmeye devam eder; dahil etmek için ilgili listeyi içe aktarın."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> listing satıldı",
+      "result_other": "<b>{{count}}</b> listing satıldı",
+      "sortLabel": "Sırala:",
+      "sort": {
+        "sales": "Ciro",
+        "units": "Adet",
+        "orders": "Sipariş",
+        "netProfit": "Net kâr",
+        "change": "Değişim"
+      },
+      "stats": {
+        "sales": "Ciro",
+        "units": "Adet",
+        "orders": "Sipariş",
+        "netProfit": "Net kâr"
+      },
+      "columns": {
+        "product": "Ürün",
+        "trend": "Trend",
+        "sales": "Ciro",
+        "units": "Adet",
+        "orders": "Sipariş",
+        "netProfit": "Net kâr",
+        "price": "Fiyat",
+        "stock": "Stok (eBay/AMZ)"
+      },
+      "estimated": "tahmini",
+      "emptyTitle": "Bu dönemde satış yok",
+      "emptySubtitle": "Seçili dönemde satılan listeler burada görünür.",
+      "trendAria": "Seçili dönemdeki gidiş"
     }
   }
 }

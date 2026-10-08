@@ -63,14 +63,15 @@ export const nextSearchForActiveStore = (
 };
 
 /**
- * Params that belong to the store just left: the page number, the open
+ * Params that belong to the store just left: the page number (a list's
+ * `page`, the dashboard Top sellers tab's `tpage`), the open
  * record (return `r`, conversation `c`), an open drawer and a hand-off of
  * ASINs. Everything else is the VIEW the seller is in (dashboard tab and
  * period, the drafts view, the messages folder, list filters, a search) and
  * survives a switch — comparing two stores' charts or drafts is the point of
  * a switcher.
  */
-const STORE_BOUND_PARAMS = ['page', 'r', 'c', 'drawer', 'asins'] as const;
+const STORE_BOUND_PARAMS = ['page', 'tpage', 'r', 'c', 'drawer', 'asins'] as const;
 
 /**
  * The query string after the seller picks another store: the view is kept,

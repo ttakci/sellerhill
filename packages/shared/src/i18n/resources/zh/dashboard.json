@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "卡片",
       "chart": "图表",
-      "pnl": "损益表"
+      "pnl": "损益表",
+      "topSellers": "畅销商品"
     },
     "range": {
       "title": "日期范围",
@@ -127,6 +128,37 @@
       "uncostedTooltip": "其 Amazon 成本尚无法确定的销售，仅显示营收，不暗示任何利润。",
       "untrackedExcludedLabel_other": "已排除 {{count}} 个未跟踪订单",
       "untrackedExcludedTooltip": "未匹配到 SellerHill 刊登的订单不计入此面板的任何数据。它们仍显示在“订单”页面的“未跟踪”下；导入该刊登即可将其纳入。"
+    },
+    "topSellers": {
+      "result_other": "已售出 <b>{{count}}</b> 个刊登",
+      "sortLabel": "排序：",
+      "sort": {
+        "sales": "销售额",
+        "units": "件数",
+        "orders": "订单",
+        "netProfit": "净利润",
+        "change": "变化"
+      },
+      "stats": {
+        "sales": "销售额",
+        "units": "件数",
+        "orders": "订单",
+        "netProfit": "净利润"
+      },
+      "columns": {
+        "product": "商品",
+        "trend": "趋势",
+        "sales": "销售额",
+        "units": "件数",
+        "orders": "订单",
+        "netProfit": "净利润",
+        "price": "价格",
+        "stock": "库存 (eBay/AMZ)"
+      },
+      "estimated": "预估",
+      "emptyTitle": "此期间没有销售",
+      "emptySubtitle": "刊登在所选期间产生销售后会显示在这里。",
+      "trendAria": "所选期间的趋势"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { DashboardRangePreset, DashboardTab } from '@repo/shared';
+import { DashboardRangePreset, DashboardTab, TopListingSortKey } from '@repo/shared';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
@@ -73,5 +73,56 @@ describe('useDashboardUrlState', () => {
     act(() => result.current.setRange({ preset: DashboardRangePreset.THIS_WEEK }));
     expect(result.current.card).toBe(0);
     expect(result.current.range).toEqual({ preset: DashboardRangePreset.THIS_WEEK });
+  });
+
+  describe('top sellers sort and page', () => {
+    it('defaults to revenue, first page', () => {
+      const { result } = renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?tab=topSellers') });
+      expect(result.current.tab).toBe(DashboardTab.TOP_SELLERS);
+      expect(result.current.topSort).toBe(TopListingSortKey.SALES);
+      expect(result.current.topPage).toBe(1);
+    });
+
+    it('reads ?tsort= and ?tpage= back', () => {
+      const { result } = renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?tsort=units&tpage=3') });
+      expect(result.current.topSort).toBe(TopListingSortKey.UNITS);
+      expect(result.current.topPage).toBe(3);
+    });
+
+    it('an unknown sort falls back to revenue; a bad page to 1', () => {
+      const { result } = renderHook(() => useDashboardUrlState(), { wrapper: wrap('/d?tsort=bogus&tpage=-2') });
+      expect(result.current.topSort).toBe(TopListingSortKey.SALES);
+      expect(result.current.topPage).toBe(1);
+    });
+
+    it('changing the sort returns to the first page; the default sort is left out of the URL', () => {
+      const { result } = renderHook(withSearch, { wrapper: wrap('/d?tab=topSellers&tsort=units&tpage=3') });
+      act(() => result.current.state.setTopSort(TopListingSortKey.NET_PROFIT));
+      let params = new URLSearchParams(result.current.search);
+      expect(params.get('tsort')).toBe(TopListingSortKey.NET_PROFIT);
+      expect(params.has('tpage')).toBe(false);
+
+      act(() => result.current.state.setTopSort(TopListingSortKey.SALES));
+      params = new URLSearchParams(result.current.search);
+      expect(params.has('tsort')).toBe(false);
+      expect(result.current.state.topSort).toBe(TopListingSortKey.SALES);
+    });
+
+    it('setTopPage writes the page; page 1 is left out of the URL', () => {
+      const { result } = renderHook(withSearch, { wrapper: wrap('/d?tab=topSellers') });
+      act(() => result.current.state.setTopPage(2));
+      expect(new URLSearchParams(result.current.search).get('tpage')).toBe('2');
+      expect(result.current.state.topPage).toBe(2);
+      act(() => result.current.state.setTopPage(1));
+      expect(new URLSearchParams(result.current.search).has('tpage')).toBe(false);
+    });
+
+    it('switching range returns to the first page and keeps the sort', () => {
+      const { result } = renderHook(withSearch, { wrapper: wrap('/d?tab=topSellers&tsort=orders&tpage=4') });
+      act(() => result.current.state.setRange({ preset: DashboardRangePreset.THIS_MONTH }));
+      const params = new URLSearchParams(result.current.search);
+      expect(params.has('tpage')).toBe(false);
+      expect(params.get('tsort')).toBe(TopListingSortKey.ORDERS);
+    });
   });
 });

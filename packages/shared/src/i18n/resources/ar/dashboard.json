@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "البطاقات",
       "chart": "الرسم البياني",
-      "pnl": "الأرباح والخسائر"
+      "pnl": "الأرباح والخسائر",
+      "topSellers": "الأكثر مبيعًا"
     },
     "range": {
       "title": "النطاق الزمني",
@@ -152,6 +153,42 @@
       "untrackedExcludedLabel_many": "تم استبعاد {{count}} طلبًا غير متتبَّع",
       "untrackedExcludedLabel_other": "تم استبعاد {{count}} طلب غير متتبَّع",
       "untrackedExcludedTooltip": "الطلبات التي لم تُطابق أي إعلان في SellerHill لا تُدرج في أي رقم في هذه اللوحة. تبقى ظاهرة في صفحة الطلبات تحت \"غير متتبَّع\"؛ استورد الإعلان لإدراجها."
+    },
+    "topSellers": {
+      "result_zero": "<b>{{count}}</b> إدراج مُباع",
+      "result_one": "<b>{{count}}</b> إدراج مُباع",
+      "result_two": "<b>{{count}}</b> إدراجان مُباعان",
+      "result_few": "<b>{{count}}</b> إدراجات مُباعة",
+      "result_many": "<b>{{count}}</b> إدراجًا مُباعًا",
+      "result_other": "<b>{{count}}</b> إدراج مُباع",
+      "sortLabel": "ترتيب:",
+      "sort": {
+        "sales": "الإيرادات",
+        "units": "الوحدات",
+        "orders": "الطلبات",
+        "netProfit": "صافي الربح",
+        "change": "التغيّر"
+      },
+      "stats": {
+        "sales": "الإيرادات",
+        "units": "الوحدات",
+        "orders": "الطلبات",
+        "netProfit": "صافي الربح"
+      },
+      "columns": {
+        "product": "المنتج",
+        "trend": "الاتجاه",
+        "sales": "الإيرادات",
+        "units": "الوحدات",
+        "orders": "الطلبات",
+        "netProfit": "صافي الربح",
+        "price": "السعر",
+        "stock": "المخزون (eBay/AMZ)"
+      },
+      "estimated": "تقديري",
+      "emptyTitle": "لا مبيعات في هذه الفترة",
+      "emptySubtitle": "ستظهر الإدراجات هنا بمجرد بيعها في الفترة المحددة.",
+      "trendAria": "الاتجاه خلال الفترة المحددة"
     }
   }
 }

@@ -10,6 +10,7 @@ import React from 'react';
 import { CardsPanel } from '../components/CardsPanel';
 import { ChartPanel } from '../components/ChartPanel';
 import { PnlPanel } from '../components/PnlPanel';
+import { TopSellersPanel } from '../components/TopSellersPanel';
 
 import * as S from './DashboardPage.style';
 import type { DashboardPageComponentProps } from './DashboardPage.types';
@@ -24,6 +25,7 @@ export const DashboardPageComponent = ({
   cardsProps,
   chartProps,
   pnlProps,
+  topSellersProps,
 }: DashboardPageComponentProps): React.ReactElement => (
   <S.Container>
     <PageHeader title={title} subtitle={subtitle} />
@@ -42,5 +44,6 @@ export const DashboardPageComponent = ({
     {activeTab === DashboardTab.CHART && <ChartPanel {...chartProps} />}
     {activeTab === DashboardTab.PNL && <PnlPanel {...pnlProps} />}
     {activeTab === DashboardTab.CARDS && <CardsPanel {...cardsProps} />}
+    {activeTab === DashboardTab.TOP_SELLERS && <TopSellersPanel {...topSellersProps} />}
   </S.Container>
 );

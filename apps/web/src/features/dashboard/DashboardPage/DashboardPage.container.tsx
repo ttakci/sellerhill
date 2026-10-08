@@ -48,7 +48,8 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
   const { theme } = useTheme();
 
-  const { tab, range, card, setTab, setRange, setCard } = useDashboardUrlState();
+  const { tab, range, card, topSort, topPage, setTab, setRange, setCard, setTopSort, setTopPage } =
+    useDashboardUrlState();
   // The store chosen in the top bar; every figure on the page is that store's.
   const { activeStoreId } = useActiveStore();
   const storeFilter = activeStoreId ?? undefined;
@@ -173,6 +174,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
       { id: DashboardTab.CARDS, label: t('dashboard.tabs.cards'), icon: 'grid-view' },
       { id: DashboardTab.CHART, label: t('dashboard.tabs.chart'), icon: 'bar-chart' },
       { id: DashboardTab.PNL, label: t('dashboard.tabs.pnl'), icon: 'table' },
+      { id: DashboardTab.TOP_SELLERS, label: t('dashboard.tabs.topSellers'), icon: 'trending-up' },
     ],
     [t],
   );
@@ -375,6 +377,16 @@ export const DashboardPageContainer = (): React.ReactElement => {
           csvStamp: appliedRange?.to ?? '',
           formatters,
           isLoading: isDashboardLoading,
+        }}
+        topSellersProps={{
+          range,
+          ebayAccountId: storeFilter,
+          sortBy: topSort,
+          page: topPage,
+          onSortChange: setTopSort,
+          onPageChange: setTopPage,
+          locale,
+          onOpenListing: handleListingOpen,
         }}
       />
     </EbayAccountGuard>

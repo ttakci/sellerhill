@@ -12,6 +12,7 @@ import type {
   DashboardTab,
   DashboardValueFormat,
   PeriodMetricsDto,
+  TopListingSortKey,
 } from '@repo/shared';
 
 /** Calendar window behind a period card, as the API resolved it. */
@@ -52,15 +53,22 @@ export interface DashboardFormatters {
   weekday: (isoDate: string) => string;
 }
 
-/** URL-backed dashboard state (tab, date range, selected card). */
+/** URL-backed dashboard state (tab, date range, selected card, top sellers' sort and page). */
 export interface DashboardUrlState {
   tab: DashboardTab;
   range: DashboardRangeInput;
   /** Index of the selected period card (0 = the range itself). */
   card: number;
+  /** Top sellers tab: the ranking (`?tsort=`, revenue by default). */
+  topSort: TopListingSortKey;
+  /** Top sellers tab: 1-based page (`?tpage=`). */
+  topPage: number;
   setTab: (tab: DashboardTab) => void;
   setRange: (range: DashboardRangeInput) => void;
   setCard: (index: number) => void;
+  /** Also returns to the first page. */
+  setTopSort: (sort: TopListingSortKey) => void;
+  setTopPage: (page: number) => void;
 }
 
 /** One row of the P&L matrix / chart summary panel. */

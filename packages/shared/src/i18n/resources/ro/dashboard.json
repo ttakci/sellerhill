@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Carduri",
       "chart": "Grafic",
-      "pnl": "P&L"
+      "pnl": "P&L",
+      "topSellers": "Cele mai vândute"
     },
     "range": {
       "title": "Interval de date",
@@ -137,6 +138,39 @@
       "untrackedExcludedLabel_few": "{{count}} comenzi neurmărite excluse",
       "untrackedExcludedLabel_other": "{{count}} de comenzi neurmărite excluse",
       "untrackedExcludedTooltip": "Comenzile care nu corespund unui anunț SellerHill nu intră în nicio cifră din acest panou. Rămân pe pagina Comenzi cu eticheta „Neurmărită”; importați anunțul pentru a le include."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> anunț vândut",
+      "result_few": "<b>{{count}}</b> anunțuri vândute",
+      "result_other": "<b>{{count}}</b> de anunțuri vândute",
+      "sortLabel": "Sortează:",
+      "sort": {
+        "sales": "Încasări",
+        "units": "Unități",
+        "orders": "Comenzi",
+        "netProfit": "Profit net",
+        "change": "Variație"
+      },
+      "stats": {
+        "sales": "Încasări",
+        "units": "Unități",
+        "orders": "Comenzi",
+        "netProfit": "Profit net"
+      },
+      "columns": {
+        "product": "Produs",
+        "trend": "Tendință",
+        "sales": "Încasări",
+        "units": "Unități",
+        "orders": "Comenzi",
+        "netProfit": "Profit net",
+        "price": "Preț",
+        "stock": "Stoc (eBay/AMZ)"
+      },
+      "estimated": "estimat",
+      "emptyTitle": "Nicio vânzare în această perioadă",
+      "emptySubtitle": "Anunțurile apar aici imediat ce se vând în perioada aleasă.",
+      "trendAria": "Tendința în perioada aleasă"
     }
   }
 }

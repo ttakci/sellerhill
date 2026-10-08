@@ -6,6 +6,7 @@ import {
   BestSellersListType,
   DashboardRangePreset,
   DEFAULT_DASHBOARD_RANGE_PRESET,
+  DEFAULT_TOP_LISTING_SORT,
   EbayConversationDto,
   EbayConversationStatus,
   ListingStatus,
@@ -19,6 +20,9 @@ import {
   CancellationTab,
   ReturnBucket,
   ReturnTab,
+  TOP_LISTINGS_DEFAULT_LIMIT,
+  TOP_LISTINGS_MAX_LIMIT,
+  TopListingSortKey,
   type ActionCenterSummaryDto,
   type ListingDto,
   type EbayCancellationDto,
@@ -36,6 +40,7 @@ import {
   buildDemoBillingSummary,
   buildDemoDashboard,
   buildDemoOrderStats,
+  buildDemoTopListings,
   buildDemoUnread,
   buildDemoUnreadBreakdown,
   demoAllListingRevisions,
@@ -593,12 +598,23 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     return demoWrite(path, body);
   }
 
+  const dashboardRangeInput = (): DashboardRangeInput =>
+    params.from && params.to
+      ? { from: String(params.from), to: String(params.to) }
+      : { preset: (params.range as DashboardRangePreset) || DEFAULT_DASHBOARD_RANGE_PRESET };
+
+  // The more specific dashboard path is answered first.
+  if (path === '/dashboard/top-listings') {
+    const sortBy = (Object.values(TopListingSortKey) as string[]).includes(String(params.sortBy))
+      ? (params.sortBy as TopListingSortKey)
+      : DEFAULT_TOP_LISTING_SORT;
+    const page = Math.max(1, Number(params.page) || 1);
+    const limit = Math.min(TOP_LISTINGS_MAX_LIMIT, Math.max(1, Number(params.limit) || TOP_LISTINGS_DEFAULT_LIMIT));
+    return ok(buildDemoTopListings(dashboardRangeInput(), sortBy, page, limit));
+  }
+
   if (path === '/dashboard') {
-    const input: DashboardRangeInput =
-      params.from && params.to
-        ? { from: String(params.from), to: String(params.to) }
-        : { preset: (params.range as DashboardRangePreset) || DEFAULT_DASHBOARD_RANGE_PRESET };
-    return ok(buildDemoDashboard(input));
+    return ok(buildDemoDashboard(dashboardRangeInput()));
   }
 
   if (path === '/action-center') {

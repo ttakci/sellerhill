@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "कार्ड",
       "chart": "चार्ट",
-      "pnl": "P&L"
+      "pnl": "P&L",
+      "topSellers": "सबसे ज़्यादा बिकने वाले"
     },
     "range": {
       "title": "तारीख़ की अवधि",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} अनट्रैक्ड ऑर्डर शामिल नहीं",
       "untrackedExcludedLabel_other": "{{count}} अनट्रैक्ड ऑर्डर शामिल नहीं",
       "untrackedExcludedTooltip": "जो ऑर्डर किसी SellerHill लिस्टिंग से मेल नहीं खाते, वे इस डैशबोर्ड के किसी भी आँकड़े में शामिल नहीं होते। वे ऑर्डर पेज पर \"ट्रैक नहीं\" के रूप में दिखते रहते हैं; उन्हें शामिल करने के लिए लिस्टिंग इम्पोर्ट करें।"
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> लिस्टिंग बिकी",
+      "result_other": "<b>{{count}}</b> लिस्टिंग बिकीं",
+      "sortLabel": "क्रमबद्ध करें:",
+      "sort": {
+        "sales": "राजस्व",
+        "units": "यूनिट",
+        "orders": "ऑर्डर",
+        "netProfit": "शुद्ध मुनाफ़ा",
+        "change": "बदलाव"
+      },
+      "stats": {
+        "sales": "राजस्व",
+        "units": "यूनिट",
+        "orders": "ऑर्डर",
+        "netProfit": "शुद्ध मुनाफ़ा"
+      },
+      "columns": {
+        "product": "प्रोडक्ट",
+        "trend": "रुझान",
+        "sales": "राजस्व",
+        "units": "यूनिट",
+        "orders": "ऑर्डर",
+        "netProfit": "शुद्ध मुनाफ़ा",
+        "price": "कीमत",
+        "stock": "स्टॉक (eBay/AMZ)"
+      },
+      "estimated": "अनुमानित",
+      "emptyTitle": "इस अवधि में कोई बिक्री नहीं",
+      "emptySubtitle": "चुनी गई अवधि में बिकते ही लिस्टिंग यहाँ दिखेंगी।",
+      "trendAria": "चुनी गई अवधि का रुझान"
     }
   }
 }

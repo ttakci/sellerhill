@@ -57,6 +57,7 @@ import {
   SourceFetchOutcome,
   SourceStockStatus,
   TemplateType,
+  TopListingSortKey, type TopListingDto, type TopListingsPageDto,
   TrackingConversionProvider,
   TrackingConversionScope,
   UserRole,
@@ -1811,6 +1812,146 @@ export function buildDemoDashboard(input: DashboardRangeInput): DashboardDataDto
     periods,
     chart: { granularity: resolved.chartGranularity, points, summary: periods[0].metrics },
     pnl: { granularity: resolved.pnlGranularity, columns },
+  };
+}
+
+/** A demo order's listing, matched by ASIN — a draft has no eBay item, so no order can name it. */
+const listingOfOrder = (o: OrderDto): ListingDto | undefined =>
+  o.costCaptureStatus === OrderCostCaptureStatus.UNTRACKED
+    ? undefined
+    : DEMO_LISTINGS.find((l) => l.asin === o.product?.asin && l.status !== ListingStatus.DRAFT);
+
+/** Tracked, non-cancelled orders of a window, grouped by listing id — the API's scope. */
+function soldByListing(orders: OrderDto[]): Map<string, OrderDto[]> {
+  const byListing = new Map<string, OrderDto[]>();
+  for (const o of orders) {
+    const listing = o.status === OrderStatus.CANCELLED ? undefined : listingOfOrder(o);
+    if (listing) {
+      byListing.set(listing.id, [...(byListing.get(listing.id) ?? []), o]);
+    }
+  }
+  return byListing;
+}
+
+/**
+ * The Top sellers tab for a range: the same resolver and the same order rows
+ * as the cards (`buildDemoDashboard`), ranked like the API (descending, a
+ * missing change last, ties on the listing id), one page at a time.
+ */
+export function buildDemoTopListings(
+  input: DashboardRangeInput,
+  sortBy: TopListingSortKey,
+  page: number,
+  limit: number,
+): TopListingsPageDto {
+  const today = localIso(new Date());
+  let resolved: ResolvedDashboardRange;
+  try {
+    resolved = resolveDashboardRange(input, today);
+  } catch {
+    resolved = resolveDashboardRange({ preset: DEFAULT_DASHBOARD_RANGE_PRESET }, today);
+  }
+  const current = soldByListing(ordersIn(resolved.range));
+  const previous = soldByListing(ordersIn(resolved.periods[0].comparison));
+  const granularity = resolved.chartGranularity;
+  const seriesKeys = dashboardBucketKeys(resolved.range, granularity);
+  const windows =
+    granularity === DashboardChartGranularity.HOUR ? [] : dashboardBucketWindows(resolved.range, granularity);
+  // The series follows the sort metric; "change" draws revenue.
+  const bucketValue = (m: PeriodMetricsDto): number => {
+    switch (sortBy) {
+      case TopListingSortKey.UNITS:
+        return m.units;
+      case TopListingSortKey.ORDERS:
+        return m.orders;
+      case TopListingSortKey.NET_PROFIT:
+        return m.profitConfirmed;
+      default:
+        return m.sales;
+    }
+  };
+
+  const ranked = Array.from(current.entries()).map(([listingId, orders]) => {
+    const cur = aggregate(orders, null, null);
+    const prev = aggregate(previous.get(listingId) ?? [], null, null);
+    const metrics = {
+      sales: cur.sales,
+      units: cur.units,
+      orders: cur.orders,
+      netProfit: cur.profitConfirmed,
+      profitProvisional: cur.profitProvisional,
+      ordersPendingCapture: cur.ordersPendingCapture,
+    };
+    const changeOf = (a: number, b: number) => (b === 0 ? null : Math.round(((a - b) / b) * 1000) / 10);
+    const valueOf = (bucket: OrderDto[]) => bucketValue(aggregate(bucket, null, null));
+    const series =
+      granularity === DashboardChartGranularity.HOUR
+        ? seriesKeys.map((key) => {
+            const [day, hour] = key.split(' ');
+            return valueOf(
+              orders.filter((o) => {
+                const d = new Date(o.createdAt);
+                return localIso(d) === day && d.getHours() === Number(hour);
+              }),
+            );
+          })
+        : windows.map((w) => valueOf(ordersIn(w).filter((o) => orders.includes(o))));
+    return {
+      listingId,
+      metrics,
+      changes: {
+        sales: changeOf(cur.sales, prev.sales),
+        units: changeOf(cur.units, prev.units),
+        orders: changeOf(cur.orders, prev.orders),
+        netProfit: changeOf(cur.profitConfirmed, prev.profitConfirmed),
+      },
+      series,
+    };
+  });
+
+  const sortValue = (row: (typeof ranked)[number]): number | null =>
+    sortBy === TopListingSortKey.CHANGE
+      ? row.changes.sales
+      : sortBy === TopListingSortKey.NET_PROFIT
+        ? row.metrics.netProfit
+        : row.metrics[sortBy];
+  ranked.sort((a, b) => {
+    const va = sortValue(a);
+    const vb = sortValue(b);
+    if (va !== vb) {
+      if (va === null) {
+        return 1;
+      }
+      if (vb === null) {
+        return -1;
+      }
+      return vb - va;
+    }
+    return a.listingId.localeCompare(b.listingId);
+  });
+
+  const items: TopListingDto[] = ranked.slice((page - 1) * limit, page * limit).map(({ listingId, ...row }) => ({
+    ...row,
+    listing: DEMO_LISTINGS.find((l) => l.id === listingId) as ListingDto,
+  }));
+
+  return {
+    range: {
+      preset: resolved.preset,
+      from: resolved.range.from,
+      to: resolved.range.to,
+      today,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      chartGranularity: resolved.chartGranularity,
+      pnlGranularity: resolved.pnlGranularity,
+    },
+    sortBy,
+    granularity,
+    seriesKeys,
+    items,
+    total: ranked.length,
+    page,
+    limit,
   };
 }
 

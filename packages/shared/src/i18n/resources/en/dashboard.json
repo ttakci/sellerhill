@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Cards",
       "chart": "Chart",
-      "pnl": "P&L"
+      "pnl": "P&L",
+      "topSellers": "Top sellers"
     },
     "range": {
       "title": "Date range",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} untracked order excluded",
       "untrackedExcludedLabel_other": "{{count}} untracked orders excluded",
       "untrackedExcludedTooltip": "Orders that did not match a SellerHill listing are left out of every figure on this dashboard. They stay on the Orders page under \"Not tracked\"; import the listing to include them."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> listing sold",
+      "result_other": "<b>{{count}}</b> listings sold",
+      "sortLabel": "Sort:",
+      "sort": {
+        "sales": "Revenue",
+        "units": "Units",
+        "orders": "Orders",
+        "netProfit": "Net profit",
+        "change": "Change"
+      },
+      "stats": {
+        "sales": "Revenue",
+        "units": "Units",
+        "orders": "Orders",
+        "netProfit": "Net profit"
+      },
+      "columns": {
+        "product": "Product",
+        "trend": "Trend",
+        "sales": "Revenue",
+        "units": "Units",
+        "orders": "Orders",
+        "netProfit": "Net profit",
+        "price": "Price",
+        "stock": "Stock (eBay/AMZ)"
+      },
+      "estimated": "estimated",
+      "emptyTitle": "Nothing sold in this period",
+      "emptySubtitle": "Listings show up here as soon as they sell in the selected period.",
+      "trendAria": "Trend over the selected period"
     }
   }
 }

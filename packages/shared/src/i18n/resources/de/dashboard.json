@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Karten",
       "chart": "Diagramm",
-      "pnl": "GuV"
+      "pnl": "GuV",
+      "topSellers": "Topseller"
     },
     "range": {
       "title": "Zeitraum",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} nicht verfolgte Bestellung ausgeschlossen",
       "untrackedExcludedLabel_other": "{{count}} nicht verfolgte Bestellungen ausgeschlossen",
       "untrackedExcludedTooltip": "Bestellungen ohne passendes SellerHill-Angebot fließen in keine Kennzahl dieses Dashboards ein. Sie bleiben auf der Seite „Bestellungen“ unter „Nicht verfolgt“ sichtbar; importieren Sie das Angebot, um sie einzubeziehen."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> Angebot verkauft",
+      "result_other": "<b>{{count}}</b> Angebote verkauft",
+      "sortLabel": "Sortieren:",
+      "sort": {
+        "sales": "Umsatz",
+        "units": "Stück",
+        "orders": "Bestellungen",
+        "netProfit": "Nettogewinn",
+        "change": "Veränderung"
+      },
+      "stats": {
+        "sales": "Umsatz",
+        "units": "Stück",
+        "orders": "Bestellungen",
+        "netProfit": "Nettogewinn"
+      },
+      "columns": {
+        "product": "Produkt",
+        "trend": "Verlauf",
+        "sales": "Umsatz",
+        "units": "Stück",
+        "orders": "Bestellungen",
+        "netProfit": "Nettogewinn",
+        "price": "Preis",
+        "stock": "Bestand (eBay/AMZ)"
+      },
+      "estimated": "geschätzt",
+      "emptyTitle": "In diesem Zeitraum nichts verkauft",
+      "emptySubtitle": "Angebote erscheinen hier, sobald sie im gewählten Zeitraum verkauft werden.",
+      "trendAria": "Verlauf im gewählten Zeitraum"
     }
   }
 }

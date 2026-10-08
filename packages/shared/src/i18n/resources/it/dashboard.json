@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Schede",
       "chart": "Grafico",
-      "pnl": "Conto economico"
+      "pnl": "Conto economico",
+      "topSellers": "Più venduti"
     },
     "range": {
       "title": "Intervallo di date",
@@ -137,6 +138,39 @@
       "untrackedExcludedLabel_many": "{{count}} ordini non tracciati esclusi",
       "untrackedExcludedLabel_other": "{{count}} ordini non tracciati esclusi",
       "untrackedExcludedTooltip": "Gli ordini che non corrispondono a un’inserzione SellerHill sono esclusi da tutte le cifre di questa dashboard. Restano nella pagina Ordini come «Non tracciato»; importa l’inserzione per includerli."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> inserzione venduta",
+      "result_many": "<b>{{count}}</b> inserzioni vendute",
+      "result_other": "<b>{{count}}</b> inserzioni vendute",
+      "sortLabel": "Ordina:",
+      "sort": {
+        "sales": "Fatturato",
+        "units": "Unità",
+        "orders": "Ordini",
+        "netProfit": "Profitto netto",
+        "change": "Variazione"
+      },
+      "stats": {
+        "sales": "Fatturato",
+        "units": "Unità",
+        "orders": "Ordini",
+        "netProfit": "Profitto netto"
+      },
+      "columns": {
+        "product": "Prodotto",
+        "trend": "Andamento",
+        "sales": "Fatturato",
+        "units": "Unità",
+        "orders": "Ordini",
+        "netProfit": "Profitto netto",
+        "price": "Prezzo",
+        "stock": "Stock (eBay/AMZ)"
+      },
+      "estimated": "stimato",
+      "emptyTitle": "Nessuna vendita in questo periodo",
+      "emptySubtitle": "Le inserzioni compaiono qui non appena vendono nel periodo scelto.",
+      "trendAria": "Andamento nel periodo scelto"
     }
   }
 }

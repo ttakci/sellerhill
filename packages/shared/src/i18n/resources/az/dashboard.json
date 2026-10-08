@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Kartlar",
       "chart": "Qrafik",
-      "pnl": "Mənfəət və zərər"
+      "pnl": "Mənfəət və zərər",
+      "topSellers": "Ən çox satılanlar"
     },
     "range": {
       "title": "Tarix aralığı",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} izlənməyən sifariş daxil edilməyib",
       "untrackedExcludedLabel_other": "{{count}} izlənməyən sifariş daxil edilməyib",
       "untrackedExcludedTooltip": "SellerHill elanı ilə uyğunlaşmayan sifarişlər bu paneldəki heç bir rəqəmə daxil edilmir. Onlar Sifarişlər səhifəsində «İzlənmir» olaraq qalır; daxil etmək üçün elanı idxal edin."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> elan satılıb",
+      "result_other": "<b>{{count}}</b> elan satılıb",
+      "sortLabel": "Sırala:",
+      "sort": {
+        "sales": "Dövriyyə",
+        "units": "Ədəd",
+        "orders": "Sifariş",
+        "netProfit": "Xalis mənfəət",
+        "change": "Dəyişmə"
+      },
+      "stats": {
+        "sales": "Dövriyyə",
+        "units": "Ədəd",
+        "orders": "Sifariş",
+        "netProfit": "Xalis mənfəət"
+      },
+      "columns": {
+        "product": "Məhsul",
+        "trend": "Trend",
+        "sales": "Dövriyyə",
+        "units": "Ədəd",
+        "orders": "Sifariş",
+        "netProfit": "Xalis mənfəət",
+        "price": "Qiymət",
+        "stock": "Stok (eBay/AMZ)"
+      },
+      "estimated": "təxmini",
+      "emptyTitle": "Bu dövrdə satış yoxdur",
+      "emptySubtitle": "Seçilmiş dövrdə satılan elanlar burada görünəcək.",
+      "trendAria": "Seçilmiş dövr üzrə gediş"
     }
   }
 }

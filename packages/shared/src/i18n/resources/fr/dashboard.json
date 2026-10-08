@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "Cartes",
       "chart": "Graphique",
-      "pnl": "Résultat"
+      "pnl": "Résultat",
+      "topSellers": "Meilleures ventes"
     },
     "range": {
       "title": "Période",
@@ -137,6 +138,39 @@
       "untrackedExcludedLabel_many": "{{count}} commandes non suivies exclues",
       "untrackedExcludedLabel_other": "{{count}} commandes non suivies exclues",
       "untrackedExcludedTooltip": "Les commandes sans annonce SellerHill correspondante sont exclues de tous les chiffres de ce tableau de bord. Elles restent visibles sur la page Commandes sous « Non suivie » ; importez l’annonce pour les inclure."
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> annonce vendue",
+      "result_many": "<b>{{count}}</b> annonces vendues",
+      "result_other": "<b>{{count}}</b> annonces vendues",
+      "sortLabel": "Trier :",
+      "sort": {
+        "sales": "Chiffre d’affaires",
+        "units": "Unités",
+        "orders": "Commandes",
+        "netProfit": "Profit net",
+        "change": "Évolution"
+      },
+      "stats": {
+        "sales": "Chiffre d’affaires",
+        "units": "Unités",
+        "orders": "Commandes",
+        "netProfit": "Profit net"
+      },
+      "columns": {
+        "product": "Produit",
+        "trend": "Tendance",
+        "sales": "Chiffre d’affaires",
+        "units": "Unités",
+        "orders": "Commandes",
+        "netProfit": "Profit net",
+        "price": "Prix",
+        "stock": "Stock (eBay/AMZ)"
+      },
+      "estimated": "estimé",
+      "emptyTitle": "Aucune vente sur cette période",
+      "emptySubtitle": "Les annonces apparaissent ici dès qu’elles se vendent sur la période choisie.",
+      "trendAria": "Tendance sur la période choisie"
     }
   }
 }

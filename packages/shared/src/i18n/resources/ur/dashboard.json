@@ -14,7 +14,8 @@
     "tabs": {
       "cards": "کارڈز",
       "chart": "چارٹ",
-      "pnl": "نفع و نقصان"
+      "pnl": "نفع و نقصان",
+      "topSellers": "سب سے زیادہ فروخت"
     },
     "range": {
       "title": "تاریخ کی مدت",
@@ -132,6 +133,38 @@
       "untrackedExcludedLabel_one": "{{count}} غیر ٹریک شدہ آرڈر شامل نہیں",
       "untrackedExcludedLabel_other": "{{count}} غیر ٹریک شدہ آرڈر شامل نہیں",
       "untrackedExcludedTooltip": "جو آرڈر کسی SellerHill لسٹنگ سے مطابقت نہیں رکھتے وہ اس ڈیش بورڈ کے کسی بھی عدد میں شامل نہیں ہوتے۔ وہ آرڈرز کے صفحے پر \"ٹریک نہیں\" کے طور پر نظر آتے رہتے ہیں؛ انہیں شامل کرنے کے لیے لسٹنگ درآمد کریں۔"
+    },
+    "topSellers": {
+      "result_one": "<b>{{count}}</b> لسٹنگ فروخت ہوئی",
+      "result_other": "<b>{{count}}</b> لسٹنگز فروخت ہوئیں",
+      "sortLabel": "ترتیب:",
+      "sort": {
+        "sales": "آمدنی",
+        "units": "یونٹس",
+        "orders": "آرڈرز",
+        "netProfit": "خالص منافع",
+        "change": "تبدیلی"
+      },
+      "stats": {
+        "sales": "آمدنی",
+        "units": "یونٹس",
+        "orders": "آرڈرز",
+        "netProfit": "خالص منافع"
+      },
+      "columns": {
+        "product": "پروڈکٹ",
+        "trend": "رجحان",
+        "sales": "آمدنی",
+        "units": "یونٹس",
+        "orders": "آرڈرز",
+        "netProfit": "خالص منافع",
+        "price": "قیمت",
+        "stock": "اسٹاک (eBay/AMZ)"
+      },
+      "estimated": "تخمینی",
+      "emptyTitle": "اس مدت میں کوئی فروخت نہیں",
+      "emptySubtitle": "منتخب مدت میں فروخت ہوتے ہی لسٹنگز یہاں نظر آئیں گی۔",
+      "trendAria": "منتخب مدت کا رجحان"
     }
   }
 }

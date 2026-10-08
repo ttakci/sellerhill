@@ -64,7 +64,7 @@ describe('nextSearchForActiveStore', () => {
 
 describe('searchForStoreSwitch', () => {
   it('a switch drops paging and the open record, drawer and hand-off', () => {
-    expect(searchForStoreSwitch(new URLSearchParams('store=a&page=4&r=9&c=7&drawer=add&asins=B0X'), 'b', false).toString()).toBe('store=b');
+    expect(searchForStoreSwitch(new URLSearchParams('store=a&page=4&tpage=2&r=9&c=7&drawer=add&asins=B0X'), 'b', false).toString()).toBe('store=b');
   });
   it('a switch keeps the view the seller is in (tab, period, folder, draft view, filters)', () => {
     const next = searchForStoreSwitch(
