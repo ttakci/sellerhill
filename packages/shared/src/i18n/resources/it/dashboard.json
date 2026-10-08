@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "Impossibile mostrare questo intervallo di date."
+      "invalidRange": "Impossibile mostrare questo intervallo di date.",
+      "invalidSort": "Questo ordinamento non è disponibile."
     },
     "title": "Pannello",
     "subtitle": "Vendite, profitto e rendimento delle inserzioni",

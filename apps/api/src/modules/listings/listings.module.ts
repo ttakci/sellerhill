@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../../common/database/database.module';
 import { AdminModule } from '../admin/admin.module';
 import { BillingModule } from '../billing/billing.module';
+import { DashboardModule } from '../dashboard/dashboard.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { LlmModule } from '../llm/llm.module';
@@ -30,6 +31,7 @@ import { ProductSyncService } from './product-sync.service';
 import { RefreshProcessorService } from './refresh-processor.service';
 import { RefreshSchedulerService } from './refresh-scheduler.service';
 import { StockSyncProcessorService } from './stock-sync-processor.service';
+import { TopListingsController } from './top-listings.controller';
 
 @Module({
   imports: [
@@ -37,6 +39,10 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     AdminModule,
     BillingModule,
     ConfigModule,
+    // The top-sellers tab ranks through DashboardService. Dashboard imports
+    // nothing from Listings, so this adds no cycle — module-cycle.guard.spec.ts
+    // proves it.
+    DashboardModule,
     EbayModule,
     ListingSettingsGroupModule,
     // For adopting a newly imported listing's PAST orders (OrderSyncService).
@@ -60,7 +66,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
       { name: LISTING_CLEANUP_QUEUE }
     ),
   ],
-  controllers: [ListingsController],
+  controllers: [ListingsController, TopListingsController],
   providers: [
     ListingsService,
     ListingImportService,

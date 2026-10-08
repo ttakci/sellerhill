@@ -26,7 +26,7 @@ const INVALID_RANGE = 'dashboard.errors.invalidRange';
  * `?ebayAccountId=` is compared against a UUID column; a malformed value
  * would surface as a Postgres cast error (500). Absent/blank = no filter.
  */
-function parseStoreId(value: string | undefined): string | undefined {
+export function parseStoreId(value: string | undefined): string | undefined {
   if (value === undefined || value.trim() === '') {
     return undefined;
   }
@@ -37,7 +37,7 @@ function parseStoreId(value: string | undefined): string | undefined {
 }
 
 /** `?from=&to=` (both, a custom range) wins over `?range=` (a preset); neither → today. */
-function parseRangeInput(range?: unknown, from?: unknown, to?: unknown): DashboardRangeInput {
+export function parseRangeInput(range?: unknown, from?: unknown, to?: unknown): DashboardRangeInput {
   // A repeated query param arrives as an array - never call a string method on it.
   for (const value of [range, from, to]) {
     if (value !== undefined && typeof value !== 'string') {
@@ -67,7 +67,7 @@ function parseValidatedRange(range?: string, from?: string, to?: string): Dashbo
 }
 
 /** The class can cross the CJS boundary as a different copy; fall back to the name. */
-function isRangeError(error: unknown): boolean {
+export function isRangeError(error: unknown): boolean {
   return error instanceof DashboardRangeError || (error as Error | undefined)?.name === 'DashboardRangeError';
 }
 

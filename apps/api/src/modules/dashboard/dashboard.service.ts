@@ -20,6 +20,7 @@ import {
   DashboardRangeError,
   OrderCostCaptureStatus,
   OrderStatus,
+  TopListingSortKey,
   dashboardBucketKeys,
   dashboardBucketWindows,
   isIsoDate,
@@ -31,6 +32,8 @@ import {
   type DashboardRangeInput,
   type DashboardStoreMetrics,
   type PeriodMetricsDto,
+  type TopListingAggregate,
+  type TopListingsAggregatePage,
 } from '@repo/shared';
 
 import { DatabaseService, type QueryParam } from '../../common/database/database.service';
@@ -82,6 +85,36 @@ const BUCKET_SQL: Record<DashboardChartGranularity, { unit: string; format: stri
   [DashboardChartGranularity.DAY]: { unit: 'day', format: 'YYYY-MM-DD' },
   [DashboardChartGranularity.WEEK]: { unit: 'week', format: 'YYYY-MM-DD' },
   [DashboardChartGranularity.MONTH]: { unit: 'month', format: 'YYYY-MM-DD' },
+};
+
+interface TopRankRow {
+  listing_id: string;
+  cur: PeriodAggregateRow;
+  prev: PeriodAggregateRow | null;
+  total: string | number;
+}
+
+interface TopBucketRow extends PeriodAggregateRow {
+  listing_id: string;
+  period: string;
+}
+
+/** Sort expression per key — enum-keyed, never user text. */
+const TOP_SORT_SQL: Record<TopListingSortKey, string> = {
+  [TopListingSortKey.SALES]: 'cur.sales',
+  [TopListingSortKey.UNITS]: 'cur.units',
+  [TopListingSortKey.ORDERS]: 'cur.orders',
+  [TopListingSortKey.NET_PROFIT]: 'cur.profit_confirmed',
+  [TopListingSortKey.CHANGE]: '(cur.sales - prev.sales) / NULLIF(prev.sales, 0)',
+};
+
+/** Which aggregate column the sparkline draws for each sort. */
+const TOP_SERIES_FIELD: Record<TopListingSortKey, keyof PeriodAggregateRow> = {
+  [TopListingSortKey.SALES]: 'sales',
+  [TopListingSortKey.UNITS]: 'units',
+  [TopListingSortKey.ORDERS]: 'orders',
+  [TopListingSortKey.NET_PROFIT]: 'profit_confirmed',
+  [TopListingSortKey.CHANGE]: 'sales',
 };
 
 @Injectable()
@@ -156,6 +189,185 @@ export class DashboardService {
       periods,
       chart: { granularity: resolved.chartGranularity, points, summary: periods[0].metrics },
       pnl: { granularity: resolved.pnlGranularity, columns },
+    };
+  }
+
+  /**
+   * The listings that sold in the range, ranked. Same tracked scope, same
+   * local-day bounds and same periodSelect fragment as the cards, so a
+   * listing's figures add up with them.
+   */
+  async getTopListings(
+    userId: string,
+    input: DashboardRangeInput,
+    sortBy: TopListingSortKey,
+    page: number,
+    limit: number,
+    ebayAccountId?: string,
+  ): Promise<TopListingsAggregatePage> {
+    const timezone = await this.timezoneService.getForUser(userId);
+    const today = await this.getLocalToday(timezone);
+    const resolved = resolveDashboardRange(input, today); // DashboardRangeError → 400 in the controller
+    const comparison = resolved.periods[0].comparison;
+    const offset = (page - 1) * limit;
+
+    const params: QueryParam[] = [
+      userId, resolved.range.from, resolved.range.to, comparison.from, comparison.to, timezone,
+    ];
+    let store = '';
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+      store = ` AND ebay_account_id = $${params.length}`;
+    }
+    const limitParam = params.push(limit);
+    const offsetParam = params.push(offset);
+
+    const windowSql = (from: string, to: string) => `
+      SELECT listing_id, ${this.periodSelect()}
+      FROM orders
+      WHERE user_id = $1 AND listing_id IS NOT NULL
+        AND ${buildLocalRangeSql('order_date', from, to, '$6')}${store}
+      GROUP BY listing_id`;
+
+    const rows = await this.databaseService.query<TopRankRow>(
+      `WITH cur AS (${windowSql('$2', '$3')}),
+            prev AS (${windowSql('$4', '$5')})
+       SELECT cur.listing_id, to_jsonb(cur) AS cur, to_jsonb(prev) AS prev, COUNT(*) OVER () AS total
+       FROM cur LEFT JOIN prev ON prev.listing_id = cur.listing_id
+       WHERE cur.orders > 0
+       ORDER BY ${TOP_SORT_SQL[sortBy]} DESC NULLS LAST, cur.listing_id
+       LIMIT $${limitParam} OFFSET $${offsetParam}`,
+      params,
+    );
+
+    let total = rows.length > 0 ? this.num(rows[0].total) : 0;
+    if (rows.length === 0 && page > 1) {
+      total = await this.countTopListings(userId, resolved.range, timezone, ebayAccountId);
+    }
+
+    const seriesKeys = dashboardBucketKeys(resolved.range, resolved.chartGranularity);
+    const series = rows.length
+      ? await this.topListingSeries(
+          userId,
+          rows.map((r) => r.listing_id),
+          resolved.range,
+          resolved.chartGranularity,
+          timezone,
+          TOP_SERIES_FIELD[sortBy],
+          seriesKeys,
+          ebayAccountId,
+        )
+      : new Map<string, number[]>();
+
+    return {
+      range: {
+        preset: resolved.preset,
+        from: resolved.range.from,
+        to: resolved.range.to,
+        today,
+        timezone,
+        chartGranularity: resolved.chartGranularity,
+        pnlGranularity: resolved.pnlGranularity,
+      },
+      sortBy,
+      granularity: resolved.chartGranularity,
+      seriesKeys,
+      rows: rows.map((r) => this.toTopAggregate(r, series.get(r.listing_id) ?? seriesKeys.map(() => 0))),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  private async countTopListings(
+    userId: string,
+    range: DashboardDateWindow,
+    timezone: string,
+    ebayAccountId?: string,
+  ): Promise<number> {
+    const params: QueryParam[] = [userId, range.from, range.to, timezone];
+    let store = '';
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+      store = ` AND ebay_account_id = $${params.length}`;
+    }
+    const rows = await this.databaseService.query<{ total: string | number }>(
+      `SELECT COUNT(*) AS total FROM (
+         SELECT listing_id FROM orders
+         WHERE user_id = $1 AND listing_id IS NOT NULL
+           AND ${buildLocalRangeSql('order_date', '$2', '$3', '$4')}${store}
+         GROUP BY listing_id
+         HAVING COUNT(*) FILTER (WHERE status <> '${OrderStatus.CANCELLED}') > 0
+       ) t`,
+      params,
+    );
+    return this.num(rows[0]?.total);
+  }
+
+  /** The sort metric per bucket for the page's listings, zero-filled and key-aligned. */
+  private async topListingSeries(
+    userId: string,
+    listingIds: string[],
+    range: DashboardDateWindow,
+    granularity: DashboardChartGranularity,
+    timezone: string,
+    field: keyof PeriodAggregateRow,
+    seriesKeys: string[],
+    ebayAccountId?: string,
+  ): Promise<Map<string, number[]>> {
+    const { unit, format } = BUCKET_SQL[granularity];
+    const params: QueryParam[] = [userId, range.from, range.to, timezone, listingIds];
+    let store = '';
+    if (ebayAccountId) {
+      params.push(ebayAccountId);
+      store = ` AND ebay_account_id = $${params.length}`;
+    }
+    const rows = await this.databaseService.query<TopBucketRow>(
+      `SELECT listing_id,
+              to_char(date_trunc('${unit}', order_date AT TIME ZONE $4::text), '${format}') AS period,
+              ${this.periodSelect()}
+       FROM orders
+       WHERE user_id = $1 AND listing_id = ANY($5::uuid[])
+         AND ${buildLocalRangeSql('order_date', '$2', '$3', '$4')}${store}
+       GROUP BY listing_id, 2`,
+      params,
+    );
+    const byListing = new Map<string, Map<string, TopBucketRow>>();
+    for (const row of rows) {
+      const inner = byListing.get(row.listing_id) ?? new Map<string, TopBucketRow>();
+      inner.set(row.period, row);
+      byListing.set(row.listing_id, inner);
+    }
+    return new Map(
+      listingIds.map((id) => [
+        id,
+        seriesKeys.map((k) => this.round(this.num(byListing.get(id)?.get(k)?.[field] ?? 0))),
+      ]),
+    );
+  }
+
+  private toTopAggregate(row: TopRankRow, series: number[]): TopListingAggregate {
+    const cur = row.cur;
+    const prev = row.prev;
+    const change = (field: keyof PeriodAggregateRow) =>
+      this.calcChange(this.num(cur[field]), this.num(prev?.[field] ?? 0));
+    return {
+      listingId: row.listing_id,
+      metrics: {
+        sales: this.round(this.num(cur.sales)),
+        units: this.num(cur.units),
+        orders: this.num(cur.orders),
+        netProfit: this.round(this.num(cur.profit_confirmed)),
+        profitProvisional: this.round(this.num(cur.profit_provisional)),
+        ordersPendingCapture: this.num(cur.orders_pending_capture),
+      },
+      changes: {
+        sales: change('sales'),
+        units: change('units'),
+        orders: change('orders'),
+        netProfit: change('profit_confirmed'),
+      },
+      series,
     };
   }
 

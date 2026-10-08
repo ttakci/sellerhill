@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "Bu tarix aralığı göstərilə bilmir."
+      "invalidRange": "Bu tarix aralığı göstərilə bilmir.",
+      "invalidSort": "Bu sıralama mövcud deyil."
     },
     "title": "İdarə paneli",
     "subtitle": "Satışlar, mənfəət və elan göstəriciləri",

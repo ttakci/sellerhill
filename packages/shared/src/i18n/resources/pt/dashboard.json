@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "Não é possível exibir esse período de datas."
+      "invalidRange": "Não é possível exibir esse período de datas.",
+      "invalidSort": "Essa ordenação não está disponível."
     },
     "title": "Painel",
     "subtitle": "Vendas, lucro e desempenho dos anúncios",

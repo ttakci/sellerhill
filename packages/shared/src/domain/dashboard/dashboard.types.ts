@@ -5,6 +5,8 @@
  * P&L matrix (day|week|month columns). See `dashboard-range.ts`.
  */
 
+import type { ListingDto } from '../listings/listings.types';
+
 import type { DashboardPeriodLabel, DashboardRangePreset } from './dashboard-range';
 
 /** Dashboard tab ids (URL `?tab=`). */
@@ -12,6 +14,7 @@ export enum DashboardTab {
   CARDS = 'cards',
   CHART = 'chart',
   PNL = 'pnl',
+  TOP_SELLERS = 'topSellers',
 }
 
 /**
@@ -186,4 +189,59 @@ export interface DashboardDataDto {
 export interface DashboardStoreMetrics {
   ebayAccountId: string;
   metrics: PeriodMetricsDto;
+}
+
+export enum TopListingSortKey {
+  SALES = 'sales',
+  UNITS = 'units',
+  ORDERS = 'orders',
+  NET_PROFIT = 'netProfit',
+  CHANGE = 'change',
+}
+export const DEFAULT_TOP_LISTING_SORT = TopListingSortKey.SALES;
+export const TOP_LISTINGS_DEFAULT_LIMIT = 20;
+export const TOP_LISTINGS_MAX_LIMIT = 100;
+
+export interface TopListingMetrics {
+  sales: number;
+  units: number;
+  orders: number;
+  /** Confirmed (linked) net profit only — the cards' trust rule. */
+  netProfit: number;
+  profitProvisional: number;
+  ordersPendingCapture: number;
+}
+
+export interface TopListingChanges {
+  sales: number | null;
+  units: number | null;
+  orders: number | null;
+  netProfit: number | null;
+}
+
+/** One ranked row before hydration (what DashboardService returns). */
+export interface TopListingAggregate {
+  listingId: string;
+  metrics: TopListingMetrics;
+  changes: TopListingChanges;
+  series: number[];
+}
+
+export interface TopListingsAggregatePage {
+  range: DashboardRangeDto;
+  sortBy: TopListingSortKey;
+  granularity: DashboardChartGranularity;
+  seriesKeys: string[];
+  rows: TopListingAggregate[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface TopListingDto extends Omit<TopListingAggregate, 'listingId'> {
+  listing: ListingDto;
+}
+
+export interface TopListingsPageDto extends Omit<TopListingsAggregatePage, 'rows'> {
+  items: TopListingDto[];
 }

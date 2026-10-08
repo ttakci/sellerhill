@@ -242,7 +242,22 @@ const REVISION_SORT_COLUMNS: Record<string, string> = {
   product: 'LOWER(p.title)',
 };
 
-const SOURCE_STOCK_STATUSES = new Set<string>(Object.values(SourceStockStatus));
+/**
+ * The columns every list-shaped listing read selects (aliases `l`, `p`, `ea`).
+ * One constant so `getListings` and `getListingsByIds` cannot drift.
+ */
+const LISTING_LIST_COLUMNS = `l.*,
+             p.image_urls,
+             p.category as product_category,
+             p.stock as source_stock,
+             p.stock_status AS source_stock_status,
+             p.last_successful_refresh_at AS last_synced_at,
+             (p.source_removed_at IS NOT NULL) AS source_removed,
+             p.brand,
+             ea.marketplace_id AS ebay_marketplace_id,
+             (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at`;
+
+const SOURCE_STOCK_STATUSES =new Set<string>(Object.values(SourceStockStatus));
 
 function asSourceStockStatus(value: string | null): SourceStockStatus | null {
   return value && SOURCE_STOCK_STATUSES.has(value) ? (value as SourceStockStatus) : null;
@@ -660,16 +675,7 @@ export class ListingsService {
 
     const results = await this.databaseService.query<ListingQueryRow>(
       `
-      SELECT l.*,
-             p.image_urls,
-             p.category as product_category,
-             p.stock as source_stock,
-             p.stock_status AS source_stock_status,
-             p.last_successful_refresh_at AS last_synced_at,
-             (p.source_removed_at IS NOT NULL) AS source_removed,
-             p.brand,
-             ea.marketplace_id AS ebay_marketplace_id,
-             (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
+      SELECT ${LISTING_LIST_COLUMNS}
       ${fromJoin}
       ORDER BY ${sortExpr} ${sortOrder}, l.id ASC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -701,6 +707,27 @@ export class ListingsService {
       limit,
       categories: categoryRows.map((r) => r.category),
     };
+  }
+
+  /**
+   * The seller's own listings by id, in the list shape (same columns as
+   * `getListings`). Ids that are not the caller's are simply absent.
+   */
+  async getListingsByIds(userId: string, ids: string[]): Promise<ListingDto[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const rows = await this.databaseService.query<ListingQueryRow>(
+      `
+      SELECT ${LISTING_LIST_COLUMNS}
+      FROM listings l
+      LEFT JOIN products p ON l.product_id = p.id
+      LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
+      WHERE l.user_id = $1 AND l.id = ANY($2::uuid[])
+      `,
+      [userId, ids]
+    );
+    return rows.map((row) => this.mapListingRow(row));
   }
 
   private async getUntrackedListings(

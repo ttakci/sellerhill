@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "Bu tarih aralığı gösterilemiyor."
+      "invalidRange": "Bu tarih aralığı gösterilemiyor.",
+      "invalidSort": "Bu sıralama kullanılamıyor."
     },
     "title": "Kontrol paneli",
     "subtitle": "Satış, kâr ve liste performansı",

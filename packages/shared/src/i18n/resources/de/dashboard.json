@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "Dieser Datumsbereich kann nicht angezeigt werden."
+      "invalidRange": "Dieser Datumsbereich kann nicht angezeigt werden.",
+      "invalidSort": "Diese Sortierung ist nicht verfügbar."
     },
     "title": "Dashboard",
     "subtitle": "Umsatz, Gewinn und Leistung Ihrer Angebote",

@@ -1,7 +1,8 @@
 {
   "dashboard": {
     "errors": {
-      "invalidRange": "That date range can't be shown."
+      "invalidRange": "That date range can't be shown.",
+      "invalidSort": "That sort order is not available."
     },
     "title": "Dashboard",
     "subtitle": "Sales, profit, and listing performance",
