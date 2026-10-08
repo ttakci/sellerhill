@@ -28,6 +28,14 @@ describe('toTopSellerStats', () => {
     expect(stats[3]).toMatchObject({ tone: 'negative' });
   });
 
+  it('tones the revenue change: up positive, down negative, none without a comparison', () => {
+    expect(toTopSellerStats(item() as never, t, 'en-US')[0].secondaryTone).toBe('positive');
+    expect(toTopSellerStats(item({ change: 0 }) as never, t, 'en-US')[0].secondaryTone).toBe('positive');
+    const down = toTopSellerStats(item({ change: -3.14 }) as never, t, 'en-US')[0];
+    expect(down).toMatchObject({ secondary: '−3.1%', secondaryTone: 'negative' });
+    expect(toTopSellerStats(item({ change: null }) as never, t, 'en-US')[0].secondaryTone).toBeUndefined();
+  });
+
   it('adds the estimated note when part of the profit is provisional', () => {
     const stats = toTopSellerStats(item({ profitProvisional: 3 }) as never, t, 'en-US');
     expect(stats[3].secondary).toBe('dashboard.topSellers.estimated');

@@ -16,6 +16,8 @@ export interface ListingCardStat {
   previous?: string;
   /** Muted figure beside the value, e.g. the Amazon stock next to the eBay quantity: `1 (20+)`. */
   secondary?: string;
+  /** Colours `secondary` like a value of that tone (e.g. a change % green/red); omitted = muted. */
+  secondaryTone?: StatTone;
 }
 
 /** Labeled meta row (Brand, ASIN, eBay ID, …). Optional storeType renders value as IdBadge link. */

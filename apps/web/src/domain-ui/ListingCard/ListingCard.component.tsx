@@ -146,7 +146,12 @@ export const ListingCard = ({
                 <S.StatValue variant="body" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
                   {stat.value}
                 </S.StatValue>
-                {stat.secondary ? (
+                {stat.secondary && stat.secondaryTone ? (
+                  <S.StatValue variant="caption" numeric $tone={stat.secondaryTone}>
+                    {stat.secondary}
+                  </S.StatValue>
+                ) : null}
+                {stat.secondary && !stat.secondaryTone ? (
                   <Text variant="caption" color="text.secondary" numeric>
                     {stat.secondary}
                   </Text>

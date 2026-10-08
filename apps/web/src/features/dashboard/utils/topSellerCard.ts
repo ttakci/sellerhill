@@ -9,12 +9,20 @@ import type { TopListingDto } from '@repo/shared';
 import { formatCurrency, type SparklineTone } from '@repo/ui';
 import type { TFunction } from 'i18next';
 
-import type { ListingCardStat } from '@/domain-ui';
+import type { ListingCardStat, StatTone } from '@/domain-ui';
 
 /** The trend line's colour follows the revenue change: up green, down red, no comparison grey. */
 export const trendTone = (change: number | null): SparklineTone => {
   if (change === null || change === undefined) {
     return 'neutral';
+  }
+  return change >= 0 ? 'positive' : 'negative';
+};
+
+/** The change caption's colour: up positive, down negative, no comparison muted (undefined). */
+export const changeTone = (change: number | null): StatTone | undefined => {
+  if (change === null || change === undefined) {
+    return undefined;
   }
   return change >= 0 ? 'positive' : 'negative';
 };
@@ -42,6 +50,7 @@ export const toTopSellerStats = (item: TopListingDto, t: TFunction, locale: stri
       label: t('dashboard.topSellers.stats.sales'),
       value: formatCurrency(sales, locale, currency, 2),
       secondary: formatSignedPercent(item.changes.sales, locale),
+      secondaryTone: changeTone(item.changes.sales),
     },
     { label: t('dashboard.topSellers.stats.units'), value: count.format(units) },
     { label: t('dashboard.topSellers.stats.orders'), value: count.format(orders) },

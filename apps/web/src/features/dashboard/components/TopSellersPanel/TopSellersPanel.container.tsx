@@ -6,8 +6,8 @@
  * orders, confirmed net profit), not the listing's lifetime.
  */
 
-import { TOP_LISTINGS_DEFAULT_LIMIT, TopListingSortKey, type TopListingDto } from '@repo/shared';
-import { Sparkline, type ViewMode } from '@repo/ui';
+import { TOP_LISTINGS_DEFAULT_LIMIT, TopListingSortKey } from '@repo/shared';
+import type { ViewMode } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,12 +16,20 @@ import { useTopSellersColumns } from '../../hooks/useTopSellersColumns';
 import { toTopSellerStats, trendTone } from '../../utils/topSellerCard';
 
 import { TopSellersPanelComponent } from './TopSellersPanel.component';
-import type { TopSellersPanelProps } from './TopSellersPanel.types';
+import type { TopSellerCardModel, TopSellersPanelProps } from './TopSellersPanel.types';
 
-import { ListingCard } from '@/domain-ui';
 import { toListingCardProps } from '@/features/listings/shared/listing-card.mapper';
 
 const SORT_KEYS = Object.values(TopListingSortKey);
+
+/** The sort picker's label per key — exhaustive over the enum. */
+const SORT_LABEL_KEYS: Record<TopListingSortKey, string> = {
+  [TopListingSortKey.SALES]: 'dashboard.topSellers.sort.sales',
+  [TopListingSortKey.UNITS]: 'dashboard.topSellers.sort.units',
+  [TopListingSortKey.ORDERS]: 'dashboard.topSellers.sort.orders',
+  [TopListingSortKey.NET_PROFIT]: 'dashboard.topSellers.sort.netProfit',
+  [TopListingSortKey.CHANGE]: 'dashboard.topSellers.sort.change',
+};
 
 export const TopSellersPanel = ({
   range,
@@ -40,7 +48,7 @@ export const TopSellersPanel = ({
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [limit, setLimit] = useState<number>(TOP_LISTINGS_DEFAULT_LIMIT);
 
-  const { currentData, isFetching } = useGetTopListingsQuery(
+  const { currentData, isFetching, isError, refetch } = useGetTopListingsQuery(
     { range, ebayAccountId, sortBy, page, limit },
     { skip: !ebayAccountId },
   );
@@ -59,8 +67,24 @@ export const TopSellersPanel = ({
 
   const columns = useTopSellersColumns(locale);
 
+  const cards = useMemo(
+    () =>
+      Object.fromEntries(
+        items.map((item): [string, TopSellerCardModel] => [
+          item.listing.id,
+          {
+            card: toListingCardProps(item.listing, tListings, locale),
+            stats: toTopSellerStats(item, t, locale),
+            series: item.series,
+            trendTone: trendTone(item.changes.sales),
+          },
+        ]),
+      ),
+    [items, t, tListings, locale],
+  );
+
   const sortOptions = useMemo(
-    () => SORT_KEYS.map((key) => ({ value: key, label: t(`dashboard.topSellers.sort.${key}` as 'dashboard.title') })),
+    () => SORT_KEYS.map((key) => ({ value: key, label: t(SORT_LABEL_KEYS[key]) })),
     [t],
   );
 
@@ -82,34 +106,16 @@ export const TopSellersPanel = ({
     [onPageChange],
   );
 
-  const renderGridCard = useCallback(
-    (item: TopListingDto) => (
-      <ListingCard
-        key={item.listing.id}
-        {...toListingCardProps(item.listing, tListings, locale)}
-        stats={toTopSellerStats(item, t, locale)}
-        trend={
-          <Sparkline
-            values={item.series}
-            tone={trendTone(item.changes.sales)}
-            ariaLabel={t('dashboard.topSellers.trendAria')}
-          />
-        }
-        orientation="horizontal"
-        onClick={() => onOpenListing(item.listing.id)}
-      />
-    ),
-    [t, tListings, locale, onOpenListing],
-  );
-
-  const handleRowClick = useCallback((row: TopListingDto) => onOpenListing(row.listing.id), [onOpenListing]);
+  const handleRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   return (
     <TopSellersPanelComponent
       items={items}
+      cards={cards}
       total={total}
       columns={columns}
-      renderGridCard={renderGridCard}
       viewMode={viewMode}
       onViewModeChange={setViewMode}
       sortOptions={sortOptions}
@@ -125,7 +131,9 @@ export const TopSellersPanel = ({
         labelInfo: t('translation:common.showing_info'),
       }}
       isLoading={isLoading}
-      onRowClick={handleRowClick}
+      isError={isError && !isFetching}
+      onRetry={handleRetry}
+      onOpenListing={onOpenListing}
     />
   );
 };
