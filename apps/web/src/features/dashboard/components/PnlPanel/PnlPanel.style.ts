@@ -2,8 +2,21 @@
  * PnlPanel styles — sticky P&L matrix with an optional heat map overlay.
  */
 
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
+
+/**
+ * The metric column has a FIXED width, so the space the table gains from
+ * `min-width: 100%` goes to the value columns. Left on auto, a range with one
+ * or two columns (Today, Yesterday) handed all of it to this column and the
+ * labels sat in a half-empty band. Long labels wrap instead of widening it.
+ */
+const metricColumn = css`
+  width: 11rem;
+  min-width: 11rem;
+  white-space: normal;
+`;
 
 export const Toolbar = styled.div`
   display: flex;
@@ -38,12 +51,21 @@ export const Th = styled.th<{ $current?: boolean }>`
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:first-of-type {
+    ${metricColumn};
     left: 0;
     z-index: 3;
     text-align: left;
-    min-width: 12rem;
     background: ${tkn('colors.surface.secondary')};
     border-right: 0.0625rem solid ${tkn('colors.border.primary')};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: ${tkn('spacing.sm')};
+
+    &:first-of-type {
+      width: 7.5rem;
+      min-width: 7.5rem;
+    }
   }
 `;
 
@@ -75,15 +97,21 @@ export const Row = styled.tr<{ $emphasis: boolean }>`
 `;
 
 export const LabelCell = styled.td`
+  ${metricColumn};
   position: sticky;
   left: 0;
   z-index: 1;
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   text-align: left;
-  white-space: nowrap;
   background: ${tkn('colors.surface.primary')};
   border-right: 0.0625rem solid ${tkn('colors.border.primary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 7.5rem;
+    min-width: 7.5rem;
+    padding: ${tkn('spacing.sm')};
+  }
 `;
 
 export const ValueCell = styled.td<{ $intensity: number; $positive: boolean }>`
@@ -92,6 +120,10 @@ export const ValueCell = styled.td<{ $intensity: number; $positive: boolean }>`
   text-align: right;
   white-space: nowrap;
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: ${tkn('spacing.sm')};
+  }
 
   &::before {
     content: '';
