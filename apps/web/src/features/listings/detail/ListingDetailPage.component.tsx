@@ -276,7 +276,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.HeroInfo>
           <S.TitleRow>
             <S.TitleHeadingRow>
-              <S.ProductTitle variant="h3" weight="semibold">
+              <S.ProductTitle variant="h2" weight="bold">
                 {listing.title || listing.asin}
               </S.ProductTitle>
               <IconButton
