@@ -119,6 +119,8 @@ export interface ThemeColors {
     foreground: string;     // NEW — sidebar primary text color
     text: string;           // Alias of foreground (legacy compat — same value)
     textMuted: string;
+    /** Sidebar group headings — a step brighter than `textMuted`. */
+    groupHeading: string;
     hover: string;
     active: string;
     accent: string;

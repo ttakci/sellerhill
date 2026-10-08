@@ -299,6 +299,9 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 `;
 
 export const NavDivider = styled.div`
+  /* The nav is a scrolling flex column: without this, a list taller than the
+     viewport shrinks the 1px line to nothing. */
+  flex-shrink: 0;
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
   margin: ${tkn('spacing.xs')} ${tkn('spacing.sm')};

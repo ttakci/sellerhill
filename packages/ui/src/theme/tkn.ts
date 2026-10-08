@@ -64,6 +64,7 @@ type ThemePath =
   | 'colors.sidebar.background'
   | 'colors.sidebar.text'
   | 'colors.sidebar.textMuted'
+  | 'colors.sidebar.groupHeading'
   | 'colors.sidebar.foreground'
   | 'colors.sidebar.hover'
   | 'colors.sidebar.active'

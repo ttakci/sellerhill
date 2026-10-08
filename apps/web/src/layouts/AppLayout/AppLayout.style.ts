@@ -94,9 +94,15 @@ export const NavGroupHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  /* As tall as a nav item (same padding and min-height), with a little air
+     before the group's first item — a thin heading read cramped against the
+     items under it (operator request, 2026-10-08). */
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  min-height: 2.125rem; /* a nav item's rendered height (icon row + padding) */
+  box-sizing: border-box;
+  margin-bottom: ${tkn('spacing.xs')};
   border-radius: ${tkn('radius.md')};
-  color: ${tkn('colors.sidebar.textMuted')};
+  color: ${tkn('colors.sidebar.groupHeading')};
   cursor: pointer;
   user-select: none;
   transition: background ${tkn('transitions.fast')};
@@ -118,7 +124,7 @@ export const NavGroupHeader = styled.div`
 
 export const NavGroupChevron = styled.span<{ $open: boolean }>`
   display: inline-flex;
-  color: ${tkn('colors.sidebar.textMuted')};
+  color: ${tkn('colors.sidebar.groupHeading')};
   transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
   transition: transform ${tkn('transitions.fast')};
 

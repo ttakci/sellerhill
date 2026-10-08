@@ -91,7 +91,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('overview')}
                 onKeyDown={(event) => onNavGroupKeyDown('overview', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.overview')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.overview}>
@@ -162,7 +162,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('sales')}
                 onKeyDown={(event) => onNavGroupKeyDown('sales', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.sales')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.sales}>
@@ -253,7 +253,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('inventory')}
                 onKeyDown={(event) => onNavGroupKeyDown('inventory', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.inventory')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.inventory}>
@@ -325,7 +325,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('marketing')}
                 onKeyDown={(event) => onNavGroupKeyDown('marketing', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.marketing')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.marketing}>
@@ -360,7 +360,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('discover')}
                 onKeyDown={(event) => onNavGroupKeyDown('discover', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.discover')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.discover}>
@@ -403,7 +403,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 onClick={() => onToggleNavGroup('configuration')}
                 onKeyDown={(event) => onNavGroupKeyDown('configuration', event)}
               >
-                <Text variant="overline" color="sidebar.textMuted">
+                <Text variant="overline" color="sidebar.groupHeading">
                   {t('translation:menu.configuration')}
                 </Text>
                 <S.NavGroupChevron $open={openNavGroups.configuration}>

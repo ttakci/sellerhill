@@ -161,6 +161,7 @@ const lightColors: ThemeColors = {
     foreground: '#ffffff',
     text: '#ffffff',
     textMuted: 'rgba(255, 255, 255, 0.65)',
+    groupHeading: 'rgba(255, 255, 255, 0.78)',
     hover: 'rgba(255, 255, 255, 0.08)',
     active: '#162b6e',
     accent: '#2563eb',
@@ -382,6 +383,7 @@ const darkColors: ThemeColors = {
     foreground: '#f1f5f9',
     text: '#f1f5f9',
     textMuted: 'rgba(148, 163, 184, 0.7)',
+    groupHeading: 'rgba(148, 163, 184, 0.85)',
     hover: '#1c1f2e',
     active: '#1c1f2e',
     accent: '#4f6ef7', // tracks brand.primary — was stale indigo #6366f1
