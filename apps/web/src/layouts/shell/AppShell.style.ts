@@ -301,7 +301,7 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 export const NavDivider = styled.div`
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
-  margin: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  margin: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
 `;
 
 export const NavItemWrapper = styled.div`

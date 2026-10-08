@@ -82,3 +82,65 @@ export const ProfileUsageText = styled.div`
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
+
+/**
+ * A sidebar group's heading doubles as its fold toggle (operator request,
+ * 2026-10-08 — the earlier "never an accordion" rule was the same operator's
+ * and is withdrawn). The label keeps the old overline look; a small chevron on
+ * the right says it can fold.
+ */
+export const NavGroupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  color: ${tkn('colors.sidebar.textMuted')};
+  cursor: pointer;
+  user-select: none;
+  transition: background ${tkn('transitions.fast')};
+
+  &:hover {
+    background: ${tkn('colors.sidebar.hover')};
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.0625rem;
+  }
+`;
+
+export const NavGroupChevron = styled.span<{ $open: boolean }>`
+  display: inline-flex;
+  color: ${tkn('colors.sidebar.textMuted')};
+  transform: rotate(${({ $open }) => ($open ? '0deg' : '-90deg')});
+  transition: transform ${tkn('transitions.fast')};
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`;
+
+/** Folds with a height transition (0fr ↔ 1fr), and a folded group's items are
+ *  `visibility: hidden` so the keyboard cannot tab into them. */
+export const NavGroupItems = styled.div<{ $open: boolean }>`
+  display: grid;
+  grid-template-rows: ${({ $open }) => ($open ? '1fr' : '0fr')};
+  visibility: ${({ $open }) => ($open ? 'visible' : 'hidden')};
+  transition:
+    grid-template-rows ${tkn('transitions.normal')},
+    visibility ${tkn('transitions.normal')};
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`;
+
+export const NavGroupInner = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-height: 0;
+  overflow: hidden;
+`;

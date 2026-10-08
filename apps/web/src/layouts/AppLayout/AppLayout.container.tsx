@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
+import { useNavGroups } from './useNavGroups';
 
 import { resolveHomePath } from '@/app/operatorRouting';
 import { resolveBreadcrumbs, resolveRouteMeta } from '@/app/routeMeta';
@@ -54,6 +55,7 @@ export const AppLayout: React.FC = () => {
 
   // Strip locale prefix for path comparisons
   const pathWithoutLocale: string = stripLocaleFromPath(location.pathname);
+  const { openNavGroups, onToggleNavGroup, onNavGroupKeyDown } = useNavGroups(pathWithoutLocale);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -228,6 +230,9 @@ export const AppLayout: React.FC = () => {
       mobileSidebarOpen={mobileSidebarOpen}
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       pathWithoutLocale={pathWithoutLocale}
+      openNavGroups={openNavGroups}
+      onToggleNavGroup={onToggleNavGroup}
+      onNavGroupKeyDown={onNavGroupKeyDown}
       fitsViewport={fitsViewport}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}

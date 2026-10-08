@@ -1,14 +1,5 @@
 import { SUPPORTED_LOCALES } from '@repo/shared';
-import {
-  Breadcrumb,
-  ConfirmModal,
-  Dropdown,
-  Icon,
-  Logo,
-  MeshBackground,
-  ProgressRing,
-  Text,
-} from '@repo/ui';
+import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, ProgressRing, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -50,6 +41,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   billingPlanName,
   isProfileUsageOpen,
   onToggleProfileUsage,
+  openNavGroups,
+  onToggleNavGroup,
+  onNavGroupKeyDown,
 }) => {
   const { t } = useTranslation(['translation', 'actionCenter', 'bestSellers', 'listings', 'orders', 'billing']);
 
@@ -90,299 +84,373 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
           <S.NavSection $isCollapsed={sidebarCollapsed}>
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.overview}
+                onClick={() => onToggleNavGroup('overview')}
+                onKeyDown={(event) => onNavGroupKeyDown('overview', event)}
+              >
                 <Text variant="overline" color="sidebar.textMuted">
                   {t('translation:menu.overview')}
                 </Text>
-              </S.NavLabelWrapper>
+                <S.NavGroupChevron $open={openNavGroups.overview}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
             )}
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.overview}>
+              <S.NavGroupInner>
+                <NavTooltip label={t('translation:menu.dashboard')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/dashboard'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/dashboard')}
+                    aria-label={t('translation:menu.dashboard')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="dashboard" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.dashboard')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.dashboard')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/dashboard'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/dashboard')}
-                aria-label={t('translation:menu.dashboard')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="dashboard" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.dashboard')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
-            {/*
-              Pending Actions sits directly under Dashboard on purpose: the
-              dashboard says what happened, this says what is waiting. The badge
-              is what makes a blocked purchase or a revoked store token
-              discoverable without already suspecting it — every other surface
-              requires the seller to open the right list with the right filter
-              in mind. It renders nothing at all when the count is zero.
-            */}
-            <NavTooltip
-              label={
-                pendingActionCount > 0
-                  ? `${t('actionCenter:actionCenter.menu')} (${pendingActionCount})`
-                  : t('actionCenter:actionCenter.menu')
-              }
-              collapsed={sidebarCollapsed}
-            >
-              <S.NavItem
-                $active={pathWithoutLocale === '/actions'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/actions')}
-                aria-label={t('actionCenter:actionCenter.menu')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="bell-ring" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('actionCenter:actionCenter.menu')}</S.NavItemLabel>}
-                </S.NavItemContent>
-                {pendingActionCount > 0 &&
-                  (sidebarCollapsed ? (
-                    <S.NavBadgeDot $urgent={hasCriticalActions} />
-                  ) : (
-                    <S.NavBadge $urgent={hasCriticalActions}>{pendingActionCount}</S.NavBadge>
-                  ))}
-              </S.NavItem>
-            </NavTooltip>
+                {/*
+                  Pending Actions sits directly under Dashboard on purpose: the
+                  dashboard says what happened, this says what is waiting. The badge
+                  is what makes a blocked purchase or a revoked store token
+                  discoverable without already suspecting it — every other surface
+                  requires the seller to open the right list with the right filter
+                  in mind. It renders nothing at all when the count is zero.
+                */}
+                <NavTooltip
+                  label={
+                    pendingActionCount > 0
+                      ? `${t('actionCenter:actionCenter.menu')} (${pendingActionCount})`
+                      : t('actionCenter:actionCenter.menu')
+                  }
+                  collapsed={sidebarCollapsed}
+                >
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/actions'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/actions')}
+                    aria-label={t('actionCenter:actionCenter.menu')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="bell-ring" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('actionCenter:actionCenter.menu')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                    {pendingActionCount > 0 &&
+                      (sidebarCollapsed ? (
+                        <S.NavBadgeDot $urgent={hasCriticalActions} />
+                      ) : (
+                        <S.NavBadge $urgent={hasCriticalActions}>{pendingActionCount}</S.NavBadge>
+                      ))}
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
 
             <S.NavDivider />
 
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.sales}
+                onClick={() => onToggleNavGroup('sales')}
+                onKeyDown={(event) => onNavGroupKeyDown('sales', event)}
+              >
                 <Text variant="overline" color="sidebar.textMuted">
                   {t('translation:menu.sales')}
                 </Text>
-              </S.NavLabelWrapper>
+                <S.NavGroupChevron $open={openNavGroups.sales}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
             )}
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.sales}>
+              <S.NavGroupInner>
+                <NavTooltip label={t('translation:menu.orders')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $isCollapsed={sidebarCollapsed}
+                    $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
+                    onClick={() => onLocaleNavigate('/orders')}
+                    aria-label={t('translation:menu.orders')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="shopping-bag" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.orders')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.orders')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $isCollapsed={sidebarCollapsed}
-                $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
-                onClick={() => onLocaleNavigate('/orders')}
-                aria-label={t('translation:menu.orders')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="shopping-bag" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.orders')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                <NavTooltip
+                  label={
+                    unreadMessageCount > 0
+                      ? `${t('translation:menu.messages')} (${unreadMessageCount})`
+                      : t('translation:menu.messages')
+                  }
+                  collapsed={sidebarCollapsed}
+                >
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/messages'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/messages')}
+                    aria-label={t('translation:menu.messages')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="mail" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.messages')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                    {unreadMessageCount > 0 &&
+                      (sidebarCollapsed ? (
+                        <S.NavBadgeDot $urgent={false} />
+                      ) : (
+                        <S.NavBadge $urgent={false}>{unreadMessageCount}</S.NavBadge>
+                      ))}
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip
-              label={
-                unreadMessageCount > 0
-                  ? `${t('translation:menu.messages')} (${unreadMessageCount})`
-                  : t('translation:menu.messages')
-              }
-              collapsed={sidebarCollapsed}
-            >
-              <S.NavItem
-                $active={pathWithoutLocale === '/messages'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/messages')}
-                aria-label={t('translation:menu.messages')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="mail" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.messages')}</S.NavItemLabel>}
-                </S.NavItemContent>
-                {unreadMessageCount > 0 &&
-                  (sidebarCollapsed ? (
-                    <S.NavBadgeDot $urgent={false} />
-                  ) : (
-                    <S.NavBadge $urgent={false}>{unreadMessageCount}</S.NavBadge>
-                  ))}
-              </S.NavItem>
-            </NavTooltip>
+                <NavTooltip label={t('translation:menu.returns')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $isCollapsed={sidebarCollapsed}
+                    $active={pathWithoutLocale === '/returns'}
+                    onClick={() => onLocaleNavigate('/returns')}
+                    aria-label={t('translation:menu.returns')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="undo-2" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.returns')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.returns')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $isCollapsed={sidebarCollapsed}
-                $active={pathWithoutLocale === '/returns'}
-                onClick={() => onLocaleNavigate('/returns')}
-                aria-label={t('translation:menu.returns')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="undo-2" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.returns')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
-            <NavTooltip label={t('translation:menu.cancellations')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $isCollapsed={sidebarCollapsed}
-                $active={pathWithoutLocale === '/cancellations'}
-                onClick={() => onLocaleNavigate('/cancellations')}
-                aria-label={t('translation:menu.cancellations')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="x-circle" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.cancellations')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                <NavTooltip label={t('translation:menu.cancellations')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $isCollapsed={sidebarCollapsed}
+                    $active={pathWithoutLocale === '/cancellations'}
+                    onClick={() => onLocaleNavigate('/cancellations')}
+                    aria-label={t('translation:menu.cancellations')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="x-circle" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.cancellations')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
 
             <S.NavDivider />
 
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.inventory}
+                onClick={() => onToggleNavGroup('inventory')}
+                onKeyDown={(event) => onNavGroupKeyDown('inventory', event)}
+              >
                 <Text variant="overline" color="sidebar.textMuted">
                   {t('translation:menu.inventory')}
                 </Text>
-              </S.NavLabelWrapper>
+                <S.NavGroupChevron $open={openNavGroups.inventory}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
             )}
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.inventory}>
+              <S.NavGroupInner>
+                <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={
+                      pathWithoutLocale === '/listings' ||
+                      pathWithoutLocale === '/listings/all' ||
+                      (pathWithoutLocale.startsWith('/listings/') &&
+                        !pathWithoutLocale.startsWith('/listings/jobs') &&
+                        pathWithoutLocale !== '/listings/products' &&
+                        pathWithoutLocale !== '/listings/revisions' &&
+                        pathWithoutLocale !== '/listings/add')
+                    }
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/listings')}
+                    aria-label={t('translation:menu.ebayListings')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="inventory" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.ebayListings')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={
-                  (pathWithoutLocale === '/listings' ||
-                    pathWithoutLocale === '/listings/all' ||
-                    (pathWithoutLocale.startsWith('/listings/') &&
-                      !pathWithoutLocale.startsWith('/listings/jobs') &&
-                      pathWithoutLocale !== '/listings/products' &&
-                      pathWithoutLocale !== '/listings/revisions' &&
-                      pathWithoutLocale !== '/listings/add'))
-                }
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/listings')}
-                aria-label={t('translation:menu.ebayListings')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="inventory" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.ebayListings')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                <NavTooltip label={t('translation:menu.listingJobs')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/listings/jobs'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/listings/jobs')}
+                    aria-label={t('translation:menu.listingJobs')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="clipboard-list" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.listingJobs')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.listingJobs')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/listings/jobs'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/listings/jobs')}
-                aria-label={t('translation:menu.listingJobs')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="clipboard-list" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.listingJobs')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
-            <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/listings/revisions'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/listings/revisions')}
-                aria-label={t('translation:menu.revisionHistory')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="history" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                <NavTooltip label={t('translation:menu.revisionHistory')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/listings/revisions'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/listings/revisions')}
+                    aria-label={t('translation:menu.revisionHistory')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="history" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.revisionHistory')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
 
             <S.NavDivider />
 
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.marketing}
+                onClick={() => onToggleNavGroup('marketing')}
+                onKeyDown={(event) => onNavGroupKeyDown('marketing', event)}
+              >
                 <Text variant="overline" color="sidebar.textMuted">
                   {t('translation:menu.marketing')}
                 </Text>
-              </S.NavLabelWrapper>
+                <S.NavGroupChevron $open={openNavGroups.marketing}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
             )}
-
-            <NavTooltip label={t('translation:menu.campaigns')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/campaigns' || pathWithoutLocale.startsWith('/campaigns/')}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/campaigns')}
-                aria-label={t('translation:menu.campaigns')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="chart-line" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.campaigns')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.marketing}>
+              <S.NavGroupInner>
+                <NavTooltip label={t('translation:menu.campaigns')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/campaigns' || pathWithoutLocale.startsWith('/campaigns/')}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/campaigns')}
+                    aria-label={t('translation:menu.campaigns')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="chart-line" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.campaigns')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
 
             <S.NavDivider />
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-                <Text variant="overline" color="sidebar.textMuted">{t('translation:menu.discover')}</Text>
-              </S.NavLabelWrapper>
-            )}
-
-            {/*
-              Best Sellers is Amazon-side browsing (the seller picks products to
-              list) rather than managing the existing catalog, so it gets its
-              own "Discover" group instead of sitting under Inventory. Its own
-              top-level path keeps it out of the eBay Listings
-              `startsWith('/listings/')` active rule.
-            */}
-            <NavTooltip label={t('bestSellers:bestSellers.menu')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/best-sellers'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/best-sellers')}
-                aria-label={t('bestSellers:bestSellers.menu')}
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.discover}
+                onClick={() => onToggleNavGroup('discover')}
+                onKeyDown={(event) => onNavGroupKeyDown('discover', event)}
               >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="trending-up" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('bestSellers:bestSellers.menu')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.discover')}
+                </Text>
+                <S.NavGroupChevron $open={openNavGroups.discover}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
+            )}
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.discover}>
+              <S.NavGroupInner>
+                {/*
+                  Best Sellers is Amazon-side browsing (the seller picks products to
+                  list) rather than managing the existing catalog, so it gets its
+                  own "Discover" group instead of sitting under Inventory. Its own
+                  top-level path keeps it out of the eBay Listings
+                  `startsWith('/listings/')` active rule.
+                */}
+                <NavTooltip label={t('bestSellers:bestSellers.menu')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/best-sellers'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/best-sellers')}
+                    aria-label={t('bestSellers:bestSellers.menu')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="trending-up" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('bestSellers:bestSellers.menu')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
 
             <S.NavDivider />
 
             {!sidebarCollapsed && (
-              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <S.NavGroupHeader
+                role="button"
+                tabIndex={0}
+                aria-expanded={openNavGroups.configuration}
+                onClick={() => onToggleNavGroup('configuration')}
+                onKeyDown={(event) => onNavGroupKeyDown('configuration', event)}
+              >
                 <Text variant="overline" color="sidebar.textMuted">
                   {t('translation:menu.configuration')}
                 </Text>
-              </S.NavLabelWrapper>
+                <S.NavGroupChevron $open={openNavGroups.configuration}>
+                  <Icon name="chevron-down" size={14} />
+                </S.NavGroupChevron>
+              </S.NavGroupHeader>
             )}
+            <S.NavGroupItems $open={sidebarCollapsed || openNavGroups.configuration}>
+              <S.NavGroupInner>
+                <NavTooltip label={t('translation:menu.billing')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={pathWithoutLocale === '/billing'}
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/billing')}
+                    aria-label={t('translation:menu.billing')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="wallet-cards" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.billing')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
 
-            <NavTooltip label={t('translation:menu.billing')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={pathWithoutLocale === '/billing'}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/billing')}
-                aria-label={t('translation:menu.billing')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="wallet-cards" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.billing')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
-
-            {/*
-              No admin or support entry here on purpose. Staff work lives in
-              the operator console (`OperatorLayout`), which a seller account
-              cannot open — the two products no longer share a menu.
-            */}
-            <NavTooltip label={t('translation:menu.settings')} collapsed={sidebarCollapsed}>
-              <S.NavItem
-                $active={
-                  pathWithoutLocale.startsWith('/settings') ||
-                  pathWithoutLocale === '/profile' ||
-                  pathWithoutLocale === '/stores'
-                }
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/settings')}
-                aria-label={t('translation:menu.settings')}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="settings" size={20} />
-                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.settings')}</S.NavItemLabel>}
-                </S.NavItemContent>
-              </S.NavItem>
-            </NavTooltip>
+                {/*
+                  No admin or support entry here on purpose. Staff work lives in
+                  the operator console (`OperatorLayout`), which a seller account
+                  cannot open — the two products no longer share a menu.
+                */}
+                <NavTooltip label={t('translation:menu.settings')} collapsed={sidebarCollapsed}>
+                  <S.NavItem
+                    $active={
+                      pathWithoutLocale.startsWith('/settings') ||
+                      pathWithoutLocale === '/profile' ||
+                      pathWithoutLocale === '/stores'
+                    }
+                    $isCollapsed={sidebarCollapsed}
+                    onClick={() => onLocaleNavigate('/settings')}
+                    aria-label={t('translation:menu.settings')}
+                  >
+                    <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                      <Icon name="settings" size={20} />
+                      {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.settings')}</S.NavItemLabel>}
+                    </S.NavItemContent>
+                  </S.NavItem>
+                </NavTooltip>
+              </S.NavGroupInner>
+            </S.NavGroupItems>
           </S.NavSection>
 
           <S.SidebarFooter>

@@ -1,7 +1,11 @@
 import type { SupportedLocale, UserDto } from '@repo/shared';
 import type { BreadcrumbItem } from '@repo/ui';
+import type { KeyboardEvent } from 'react';
 
 import type { BillingUsageRow } from '@/features/billing/utils/usageRows.types';
+
+/** The sidebar's groups, in the order they are drawn. */
+export type NavGroupKey = 'overview' | 'sales' | 'inventory' | 'marketing' | 'discover' | 'configuration';
 
 export interface AppLayoutProps {
   user?: UserDto;
@@ -51,4 +55,9 @@ export interface AppLayoutProps {
   /** Whether the usage meters under the plan-name row are expanded. */
   isProfileUsageOpen: boolean;
   onToggleProfileUsage: () => void;
+  /** Which sidebar groups are open (folded groups are remembered per browser). */
+  openNavGroups: Record<NavGroupKey, boolean>;
+  onToggleNavGroup: (key: NavGroupKey) => void;
+  /** Enter / Space on a group header folds or opens it. */
+  onNavGroupKeyDown: (key: NavGroupKey, event: KeyboardEvent<HTMLElement>) => void;
 }
