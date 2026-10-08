@@ -1,5 +1,5 @@
 import { ListingJobStatus, ListingStatus, type ListingJobItemDto } from '@repo/shared';
-import { Badge, Button, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, Text } from '@repo/ui';
+import { Badge, Button, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, Text, Icon } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -81,6 +81,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
             icon="clipboard-list"
             title={t('listings.jobs.details.notFoundTitle')}
             description={t('listings.jobs.details.notFoundSubtitle')}
+            actionIcon="arrow-left"
             action={t('translation:common.back')}
             onAction={onBack}
             size="lg"
@@ -197,6 +198,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           icon="search"
           title={t('listings.empty.filtersTitle')}
           description={t('listings.empty.filtersSubtitle')}
+          actionIcon="x"
           action={t('listings.empty.filtersAction')}
           onAction={onClearItemSearch}
           size="md"
@@ -237,6 +239,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                   isLoading={isCancelling}
                   disabled={isCancelling}
                 >
+                  <Icon name="x-circle" size={16} />
                   <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
                 </Button>
               ) : null}

@@ -5,7 +5,7 @@
 // each made the three states look like three different screens.
 
 import type { BillingInvoiceDto } from '@repo/shared';
-import { Badge, Button, DataTable, EmptyState, InfoMessage, Text, formatDate, formatMicroCurrency } from '@repo/ui';
+import { Badge, Button, DataTable, EmptyState, InfoMessage, Text, formatDate, formatMicroCurrency, Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -76,10 +76,11 @@ export const InvoiceHistoryCard = ({
       <S.InvoiceCardFooter>
         {invoice.status !== 'paid' && invoice.hostedUrl ? (
           <Button
-            variant="secondary"
+            variant="primary"
             size="small"
             onClick={() => window.open(invoice.hostedUrl ?? '', '_blank', 'noopener')}
           >
+            <Icon name="payments" size={16} />
             <Text variant="body-sm">{t('billing:billing.invoices.payNow')}</Text>
           </Button>
         ) : null}
@@ -95,31 +96,38 @@ export const InvoiceHistoryCard = ({
   const body = (() => {
     if (isError) {
       return (
+        <S.StateCard variant="elevated" padding="lg">
         <EmptyState
           icon="alert-triangle"
           title={t('billing:billing.invoices.error')}
           description={t('billing:billing.invoices.errorDescription')}
+          actionIcon="refresh"
           action={t('billing:billing.invoices.retry')}
           onAction={onRetry}
         />
+        </S.StateCard>
       );
     }
     if (isLoading) {
       return (
-        <EmptyState
-          icon="receipt-text"
-          title={t('billing:billing.invoices.loading')}
-          description={t('billing:billing.invoices.loadingDescription')}
-        />
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="receipt-text"
+            title={t('billing:billing.invoices.loading')}
+            description={t('billing:billing.invoices.loadingDescription')}
+          />
+        </S.StateCard>
       );
     }
     if (invoices.length === 0) {
       return (
-        <EmptyState
-          icon="receipt-text"
-          title={t('billing:billing.invoices.empty')}
-          description={t('billing:billing.invoices.emptyDescription')}
-        />
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="receipt-text"
+            title={t('billing:billing.invoices.empty')}
+            description={t('billing:billing.invoices.emptyDescription')}
+          />
+        </S.StateCard>
       );
     }
     return (
@@ -173,10 +181,11 @@ export const InvoiceHistoryCard = ({
                 <S.RowActions>
                   {invoice.status !== 'paid' && invoice.hostedUrl ? (
                     <Button
-                      variant="secondary"
+                      variant="primary"
                       size="small"
                       onClick={() => window.open(invoice.hostedUrl ?? '', '_blank', 'noopener')}
                     >
+                      <Icon name="payments" size={16} />
                       <Text variant="body-sm">{t('billing:billing.invoices.payNow')}</Text>
                     </Button>
                   ) : null}
@@ -197,6 +206,7 @@ export const InvoiceHistoryCard = ({
         {hasLoadMoreError ? (
           <S.LoadMoreErrorRow>
             <InfoMessage
+              actionIcon="refresh"
               action={t('billing:billing.invoices.retry')}
               onAction={onRetry}
               isActionLoading={isLoadingMore}
@@ -206,7 +216,8 @@ export const InvoiceHistoryCard = ({
           </S.LoadMoreErrorRow>
         ) : hasMore ? (
           <S.MoreRow>
-            <Button variant="secondary" size="small" isLoading={isLoadingMore} onClick={onShowMore}>
+            <Button variant="primary" size="small" isLoading={isLoadingMore} onClick={onShowMore}>
+              <Icon name="chevron-down" size={16} />
               <Text variant="body-sm">{t('billing:billing.invoices.showMore')}</Text>
             </Button>
           </S.MoreRow>
@@ -216,15 +227,17 @@ export const InvoiceHistoryCard = ({
   })();
 
   return (
-    <S.Card
-      variant="section"
-      header={{
-        title: t('billing:billing.invoices.title'),
-        subtitle: t('billing:billing.invoices.subtitle'),
-      }}
-    >
+    <S.Section>
+      <S.SectionHeader>
+        <Text variant="h4" weight="semibold">
+          {t('billing:billing.invoices.title')}
+        </Text>
+        <Text variant="body-sm" color="text.secondary">
+          {t('billing:billing.invoices.subtitle')}
+        </Text>
+      </S.SectionHeader>
       {body}
-    </S.Card>
+    </S.Section>
   );
 };
 

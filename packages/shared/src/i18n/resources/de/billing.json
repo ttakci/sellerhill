@@ -167,6 +167,7 @@
       "portal": "Zahlungsmethode und Rechnungen",
       "portalHint": "Öffnet Stripe, um Ihre Karte zu aktualisieren, Rechnungen herunterzuladen oder zu kündigen.",
       "manageHint": "Verwalten Sie hier Ihre Zahlungsmethode, Ihren Tarif und Ihre Rechnungen.",
+      "nextChargeLabel": "Nächste Zahlung",
       "nextCharge": "Nächste Zahlung: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Endet am {{date}} – nach diesem Zeitraum fallen keine weiteren Kosten an",
       "scheduledChange": "Wechsel zu {{plan}} am {{date}}",

@@ -167,6 +167,7 @@
       "portal": "Payment method and invoices",
       "portalHint": "Opens Stripe to update your card, download invoices, or cancel.",
       "manageHint": "Manage your payment method, plan and invoices here.",
+      "nextChargeLabel": "Next payment",
       "nextCharge": "Next payment: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Cancels on {{date}} — no further charges after this period",
       "scheduledChange": "Switches to {{plan}} on {{date}}",

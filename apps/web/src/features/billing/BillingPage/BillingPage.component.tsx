@@ -12,8 +12,8 @@ import {
   Drawer,
   EmptyState,
   InfoMessage,
+  Icon,
   PageHeader,
-  ProgressRing,
   SettingsCard,
   Text,
 } from '@repo/ui';
@@ -21,14 +21,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { InvoiceHistoryCard } from '../components/InvoiceHistoryCard';
-import { PaymentMethodCard } from '../components/PaymentMethodCard';
 import { PlanChangeConfirm } from '../components/PlanChangeConfirm';
 
 import * as S from './BillingPage.style';
 import type {
+  BillingFactTone,
   BillingPageComponentProps,
   BillingPlanCardViewProps,
-  BillingUsageCellViewProps,
+  BillingUsageRow,
 } from './BillingPage.types';
 
 /**
@@ -66,37 +66,32 @@ function statusBadgeVariant(
   }
 }
 
-/** Render a single usage cell: label, used/limit, progress bar. */
-function UsageCellView({ row }: BillingUsageCellViewProps): React.ReactElement {
-  const { t } = useTranslation(['billing']);
-  return (
-    <S.UsageCell>
-      {/*
-        The ring carries the proportion and the percentage; the text beside it
-        carries the actual figures. Previously the used value was rendered
-        BOTH on its own and again inside "used of limit", so a full quota read
-        "50 50 / 50".
-      */}
-      <ProgressRing
-        value={row.barValue}
-        variant={row.barVariant}
-        size="sm"
-        centerLabel={row.ringLabel}
-        label={row.barAriaLabel}
-      />
-      <S.UsageTextStack>
-        <Text variant="body-sm" weight="semibold">
-          {t(row.labelKey)}
-        </Text>
-        <S.UsageValueRow>
-          <Text variant="body" weight="semibold" numeric>
-            {row.ofDisplay}
-          </Text>
-        </S.UsageValueRow>
-      </S.UsageTextStack>
-    </S.UsageCell>
-  );
+/** A quota near or at its limit reads amber / red, like the ring it replaced. */
+function usageTone(variant: BillingUsageRow['barVariant']): BillingFactTone {
+  if (variant === 'error') {
+    return 'negative';
+  }
+  if (variant === 'warning') {
+    return 'warning';
+  }
+  return 'default';
 }
+
+/** A label / value row — no icon; the label column is the only ornament (job page pattern). */
+const factRow = (key: string, label: string, value: string, tone: BillingFactTone = 'default'): React.ReactElement => (
+  <S.MetaRow key={key}>
+    <S.MetaLabel>
+      <Text variant="body-sm" color="text.secondary">
+        {label}
+      </Text>
+    </S.MetaLabel>
+    <S.MetaValue>
+      <S.FactValue variant="body-sm" weight="bold" numeric $tone={tone}>
+        {value}
+      </S.FactValue>
+    </S.MetaValue>
+  </S.MetaRow>
+);
 
 /** Render a single plan comparison card. */
 function PlanCardView({
@@ -164,13 +159,14 @@ function PlanCardView({
       </S.PlanFeatureList>
       <S.PlanCardFooter>
         <Button
-          variant={plan.isCurrent ? 'secondary' : 'primary'}
+          variant="primary"
           size="medium"
           fullWidth
           disabled={plan.isCurrent || providerUnconfigured || isCheckingOutOther}
           isLoading={isCheckingOutThis}
           onClick={() => onCheckout(plan.planId)}
         >
+          <Icon name={plan.isCurrent ? 'check' : 'arrow-right'} size={16} />
           <Text variant="body-sm">{ctaLabel}</Text>
         </Button>
       </S.PlanCardFooter>
@@ -187,7 +183,6 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   providerUnconfigured,
   subscriptionStatus,
   cancelAtPeriodEnd,
-  currentPlanSlug,
   usageRows,
   plans,
   compareInterval,
@@ -196,7 +191,9 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   onCheckout,
   onManage,
   hasProviderSubscription,
-  planMetaLine,
+  summaryFacts,
+  summaryHeadline,
+  summaryTone,
   isPlansOpen,
   onOpenPlans,
   onClosePlans,
@@ -204,12 +201,11 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   addonsSubtitle,
   addonSlugInFlight,
   onBuyAddon,
-  nextChargeLine,
   cancelsAtPeriodEndLine,
   scheduledChangeLine,
   onCancelScheduledChange,
   isCancellingChange,
-  paymentMethod,
+  paymentExpiringSoon,
   isPlanChangeOpen,
   planChangeBody,
   planChangeListingLimitWarning,
@@ -243,6 +239,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             icon="receipt-text"
             title={t('billing:billing.unavailableTitle')}
             description={t('billing:billing.unavailableSubtitle')}
+            actionIcon="refresh"
             action={t('translation:common.retry')}
             onAction={onRetry}
           />
@@ -252,178 +249,142 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   }
 
   /*
-   * The notice box is always shown — it is where "manage billing" lives now,
-   * not just where problems are announced.
-   *
-   * 'active' and 'full_access' carry a neutral hint instead of an alert: a
-   * healthy account still needs a place to reach the plans drawer, and
-   * rendering nothing there would leave that action with no home. Every other
-   * transition carries its real, actionable copy ("your payment failed", …).
+   * The notice under the summary is only for a state the seller has to act on
+   * ("your payment failed", "no subscription", …). A healthy account shows
+   * none — the actions live in the card's header row now, so the old neutral
+   * "manage your billing here" box had nothing left to carry.
    */
   const noticeKey =
     transition && transition !== 'active' && transition !== 'full_access'
       ? `billing:billing.transition.${transition}`
-      : 'billing:billing.subscription.manageHint';
+      : null;
 
   /**
-   * A past-due seller needs their CARD fixed, not a plan list.
-   *
-   * Every gate is closed for them (`past_due` -> SUSPENDED), AppLayout has just
-   * redirected them here, and the notice above literally says "update your
-   * payment method" — but the one button next to it used to open the twelve-plan
-   * drawer, with the Stripe portal link buried inside it as a secondary action.
-   * That is the wrong content for this state (they do not want a different plan)
-   * and the label did not describe what the button did. Send them straight to
-   * the portal instead, which is the only place a card can be changed.
-   *
-   * Guarded on `hasProviderSubscription` because the portal has nothing to show
-   * without a Stripe subscription, and on `providerUnconfigured` because the
-   * call would 409 — in both cases the plans drawer is still the right home for
-   * the action. Every other transition keeps the drawer: `no_subscription` and
-   * `canceled` need a plan chosen, not a card updated.
+   * A past-due seller needs their CARD fixed, not a plan list: every gate is
+   * closed for them and the notice says "update your payment method", so the
+   * portal is the only action offered. Guarded on `hasProviderSubscription`
+   * (the portal has nothing to show without a Stripe subscription) and on
+   * `providerUnconfigured` (the call would 409).
    */
-  const needsPaymentFix =
-    transition === 'past_due' && hasProviderSubscription && !providerUnconfigured;
-  const planNameKey = currentPlanSlug ? `billing:billing.plans.${currentPlanSlug}.name` : null;
+  const canOpenPortal = hasProviderSubscription && !providerUnconfigured;
+  const needsPaymentFix = transition === 'past_due' && canOpenPortal;
+  const isCancelling =
+    cancelAtPeriodEnd &&
+    (subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
+      subscriptionStatus === BillingSubscriptionStatus.TRIALING);
+  const hasNotices = Boolean(noticeKey || cancelsAtPeriodEndLine || paymentExpiringSoon || scheduledChangeLine);
 
   return (
     <S.Container>
       <PageHeader title={t('billing:billing.title')} subtitle={t('billing:billing.subtitle')} />
 
       {/*
-        ONE card for "what am I on and how much is left", not two.
-        Splitting the plan identity from its usage put the answer to a single
-        question across two cards, and the identity half was a vertical stack of
-        four short strings with no hierarchy. Trial and paid look identical here
-        on purpose — a trial IS the current plan, and showing it anywhere else
-        would make a trialling seller look like they had none.
+        ONE card for "what am I on, what is left, what do I pay next" — the job
+        detail page's summary pane: state hue wash, status + actions on top,
+        the subscription and the usage as two label / value lists, and the
+        headline figure on the right. The saved card is a row here, not a card
+        of its own.
       */}
-      <S.SubscriptionCard
-        variant="section"
-        header={{ title: t('billing:billing.subscription.title') }}
-        headerRight={
-          // Top-right of the CARD, in the header row next to the title — not
-          // beside the plan name, which put it in the middle of a text stack
-          // instead of the corner a status badge conventionally occupies (see
-          // the listing-detail hero card's own StatusBadgeSlot).
-          subscriptionStatus ? (
-            <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" isPill>
-              {/*
-                Same override as the variant above: a status that is
-                technically still 'active'/'trialing' in our own tables reads
-                as "Cancelling" once Stripe has the period end scheduled,
-                instead of contradicting the warning line right below it.
-              */}
-              {cancelAtPeriodEnd &&
-              (subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
-                subscriptionStatus === BillingSubscriptionStatus.TRIALING)
-                ? t('billing:billing.subscription.status.cancelling')
-                : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
-            </Badge>
-          ) : undefined
-        }
-      >
-        <S.PlanHeaderRow>
-          <S.PlanNameStack>
-            <Text variant="h3" weight="semibold">
-              {planNameKey ? t(planNameKey) : t('billing:billing.transition.no_subscription')}
-            </Text>
-            {planMetaLine ? (
-              <S.PlanMetaRow>
-                {/*
-                  One muted line, assembled in the container because what
-                  belongs on it depends on the kind of plan. A trial has no
-                  billing interval and does not renew — it used to read
-                  "Monthly billing · Next renewal" for an expired free trial,
-                  which was wrong on both counts.
-                */}
-                <Text variant="body-sm" color="text.secondary">
-                  {planMetaLine}
+      <S.SummaryCard variant="elevated" $tone={summaryTone}>
+        <S.SummaryTop>
+          <S.SummaryHeader>
+            {subscriptionStatus ? (
+              <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" solid>
+                {isCancelling
+                  ? t('billing:billing.subscription.status.cancelling')
+                  : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
+              </Badge>
+            ) : (
+              <span />
+            )}
+            <S.SummaryActions>
+              {canOpenPortal ? (
+                <Button variant="primary" size="small" isLoading={isPortalLoading} onClick={onManage}>
+                  <Icon name="wallet-cards" size={16} />
+                  <Text variant="body-sm">{t('billing:billing.subscription.updatePayment')}</Text>
+                </Button>
+              ) : null}
+              {needsPaymentFix ? null : (
+                <Button variant="primary" size="small" onClick={onOpenPlans}>
+                  <Icon name="layers" size={16} />
+                  <Text variant="body-sm">{t('billing:billing.subscription.manage')}</Text>
+                </Button>
+              )}
+            </S.SummaryActions>
+          </S.SummaryHeader>
+
+          <S.SummaryBody>
+            <S.FactColumn>
+              <Text variant="caption" color="text.secondary">
+                {t('billing:billing.subscription.title')}
+              </Text>
+              <S.MetaList>
+                {summaryFacts.map((fact) => factRow(fact.label, fact.label, fact.value, fact.tone))}
+              </S.MetaList>
+            </S.FactColumn>
+
+            {usageRows.length > 0 ? (
+              <S.FactColumn>
+                <Text variant="caption" color="text.secondary">
+                  {t('billing:billing.usage.title')}
                 </Text>
-              </S.PlanMetaRow>
+                <S.MetaList>
+                  {usageRows.map((row) =>
+                    factRow(row.labelKey, t(row.labelKey), row.ofDisplay, usageTone(row.barVariant)),
+                  )}
+                </S.MetaList>
+              </S.FactColumn>
             ) : null}
-            {nextChargeLine ? (
-              <Text variant="body-sm" color="text.secondary" numeric>
-                {nextChargeLine}
-              </Text>
+
+            {summaryHeadline ? (
+              <S.Headline>
+                <S.HeadlineDot $tone={summaryTone} aria-hidden="true" />
+                <S.HeadlineCopy>
+                  <Text variant="caption" color="text.secondary">
+                    {summaryHeadline.label}
+                  </Text>
+                  <S.HeadlineValue variant="metric-lg" weight="bold" numeric $tone={summaryTone}>
+                    {summaryHeadline.value}
+                  </S.HeadlineValue>
+                  {summaryHeadline.caption ? (
+                    <Text variant="caption" color="text.secondary" numeric>
+                      {summaryHeadline.caption}
+                    </Text>
+                  ) : null}
+                </S.HeadlineCopy>
+              </S.Headline>
             ) : null}
-            {cancelsAtPeriodEndLine ? (
-              <Text variant="body-sm" weight="semibold" color="semantic.warning" numeric>
-                {cancelsAtPeriodEndLine}
-              </Text>
-            ) : null}
-          </S.PlanNameStack>
-        </S.PlanHeaderRow>
+          </S.SummaryBody>
 
-        {scheduledChangeLine ? (
-          <S.ScheduledChangeRow>
-            <Text variant="body-sm">{scheduledChangeLine}</Text>
-            <Button
-              variant="secondary"
-              size="small"
-              isLoading={isCancellingChange}
-              onClick={onCancelScheduledChange}
-            >
-              <Text variant="body-sm">
-                {t('billing:billing.subscription.cancelScheduledChange')}
-              </Text>
-            </Button>
-          </S.ScheduledChangeRow>
-        ) : null}
-
-        {usageRows.length > 0 ? (
-          <S.UsageSection>
-            <S.PlanDivider />
-            <Text variant="body-sm" weight="semibold">
-              {t('billing:billing.usage.title')}
-            </Text>
-            {/* Three across on desktop, reflowing down on a narrow screen —
-                the three meters are the same kind of thing and read as one
-                row rather than a list of unrelated facts. */}
-            <S.UsageGrid>
-              {usageRows.map((row) => (
-                <UsageCellView key={row.labelKey} row={row} />
-              ))}
-            </S.UsageGrid>
-          </S.UsageSection>
-        ) : null}
-
-        <S.NoticeRow>
-          {/*
-            ONE box, always shown, full width — it carries both the message
-            AND the action now, rather than a separate button row plus a notice
-            that only sometimes appeared. Its width matches the usage grid
-            above it (S.NoticeRow stretches its child to 100%), so the row
-            reads as the close of the same card, not a narrower, disconnected
-            element. For a healthy subscription the copy is a neutral "manage
-            your billing here" hint — the action still needs a home even when
-            nothing is wrong.
-          */}
-          <InfoMessage
-            action={
-              needsPaymentFix
-                ? t('billing:billing.subscription.updatePayment')
-                : t('billing:billing.subscription.manage')
-            }
-            onAction={needsPaymentFix ? onManage : onOpenPlans}
-            isActionLoading={needsPaymentFix ? isPortalLoading : false}
-          >
-            {t(noticeKey)}
-          </InfoMessage>
-        </S.NoticeRow>
-      </S.SubscriptionCard>
-
-      {paymentMethod ? (
-        <PaymentMethodCard
-          paymentMethod={paymentMethod}
-          onChange={onManage}
-          isChangeLoading={isPortalLoading}
-        />
-      ) : null}
-
-      <InvoiceHistoryCard />
+          {hasNotices ? (
+            <S.SummaryNotices>
+              {scheduledChangeLine ? (
+                <S.ScheduledChangeRow>
+                  <Text variant="body-sm">{scheduledChangeLine}</Text>
+                  <Button
+                    variant="primary"
+                    size="small"
+                    isLoading={isCancellingChange}
+                    onClick={onCancelScheduledChange}
+                  >
+                    <Icon name="undo-2" size={16} />
+                    <Text variant="body-sm">{t('billing:billing.subscription.cancelScheduledChange')}</Text>
+                  </Button>
+                </S.ScheduledChangeRow>
+              ) : null}
+              {cancelsAtPeriodEndLine ? <InfoMessage>{cancelsAtPeriodEndLine}</InfoMessage> : null}
+              {noticeKey ? <InfoMessage>{t(noticeKey)}</InfoMessage> : null}
+              {paymentExpiringSoon ? (
+                <InfoMessage>{t('billing:billing.paymentMethod.expiringSoon')}</InfoMessage>
+              ) : null}
+            </S.SummaryNotices>
+          ) : null}
+        </S.SummaryTop>
+      </S.SummaryCard>
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
+
+      <InvoiceHistoryCard />
 
       {addons.length > 0 ? (
         <SettingsCard
@@ -446,13 +407,14 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
                 </S.AddonHeader>
                 <S.AddonFooter>
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="medium"
                     fullWidth
                     disabled={!addon.isPurchasable || providerUnconfigured}
                     isLoading={addonSlugInFlight === addon.slug}
                     onClick={() => onBuyAddon(addon.slug)}
                   >
+                    <Icon name="shopping-cart" size={16} />
                     <Text variant="body-sm">{t('billing:billing.addons.buy')}</Text>
                   </Button>
                 </S.AddonFooter>
@@ -488,13 +450,14 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
                 own tables.
               */}
               <Button
-                variant="secondary"
+                variant="primary"
                 size="medium"
                 fullWidth
                 disabled={providerUnconfigured}
                 isLoading={isPortalLoading}
                 onClick={onManage}
               >
+                <Icon name="external-link" size={16} />
                 <Text variant="body-sm">{t('billing:billing.subscription.portal')}</Text>
               </Button>
               <Text variant="caption" color="text.secondary">

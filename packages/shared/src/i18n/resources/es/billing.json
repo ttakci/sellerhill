@@ -167,6 +167,7 @@
       "portal": "Método de pago y facturas",
       "portalHint": "Abre Stripe para actualizar tu tarjeta, descargar facturas o cancelar.",
       "manageHint": "Administra aquí tu método de pago, tu plan y tus facturas.",
+      "nextChargeLabel": "Próximo pago",
       "nextCharge": "Próximo pago: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Se cancela el {{date}}: no habrá más cobros después de este periodo",
       "scheduledChange": "Cambia a {{plan}} el {{date}}",

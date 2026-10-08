@@ -47,6 +47,9 @@ import type {
   BillingAddonCard,
   BillingPendingPlanChange,
   BillingPlanCard,
+  BillingSummaryFact,
+  BillingSummaryHeadline,
+  BillingSummaryTone,
   BillingUsageRow,
 } from './BillingPage.types';
 
@@ -210,67 +213,123 @@ export const BillingPage: React.FC = () => {
   const [initiateAddonCheckout] = useInitiateAddonCheckoutMutation();
   const [addonSlugInFlight, setAddonSlugInFlight] = useState<string | null>(null);
 
-  /*
-   * The single muted line under the plan name.
-   *
-   * Assembled here rather than in the component because WHAT belongs on it
-   * depends on the kind of plan, and the old version got that wrong in two
-   * visible ways for a free trial: it printed the billing interval (a trial is
-   * not billed) and labelled the end date "next renewal" (a trial does not
-   * renew — and this one had already ended, so it read as a future renewal for
-   * something that was over).
-   *
-   * A paid plan keeps both parts; a trial gets only its end date, phrased for
-   * whether it is still running or already finished.
-   */
-  const planMetaLine = useMemo(() => {
-    if (!subscription) {
-      return null;
-    }
-    const isTrial = currentPlanSlug === TRIAL_PLAN_SLUG;
-    const parts: string[] = [];
+  const isTrialPlan = currentPlanSlug === TRIAL_PLAN_SLUG;
+  const isWindingDown = Boolean(details?.cancelAtPeriodEnd);
 
-    if (!isTrial && currentIntervalKey) {
-      parts.push(t(currentIntervalKey));
+  /*
+   * The headline figure on the right of the summary card — the one number the
+   * seller looks for first, the way the job page shows its progress. A paid
+   * plan shows its next charge; a cancelling one the day access ends; a trial
+   * the day it ends. Whatever date the headline carries is left out of the
+   * fact list beside it, so the same date is never printed twice.
+   */
+  const summaryHeadline: BillingSummaryHeadline | null = useMemo(() => {
+    if (details?.cancelAtPeriodEnd && details.cancelAt) {
+      return {
+        label: t('billing:billing.subscription.accessEnds'),
+        value: formatDate(details.cancelAt, localeCfg.locale, BILLING_DATE_OPTIONS),
+        caption: null,
+      };
     }
-    if (currentPeriodEndDisplay) {
-      const labelKey = isTrial
-        ? subscriptionStatus === BillingSubscriptionStatus.TRIALING
-          ? 'billing:billing.subscription.trialEnds'
-          : 'billing:billing.subscription.trialEnded'
-        : subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
-            subscriptionStatus === BillingSubscriptionStatus.TRIALING
+    if (typeof details?.nextChargeAmountMicros === 'number' && details.nextChargeAt) {
+      return {
+        label: t('billing:billing.subscription.nextChargeLabel'),
+        value: formatMicroCurrency(
+          details.nextChargeAmountMicros,
+          localeCfg.locale,
+          details.nextChargeCurrency ?? 'USD',
+        ),
+        caption: formatDate(details.nextChargeAt, localeCfg.locale, BILLING_DATE_OPTIONS),
+      };
+    }
+    if (isTrialPlan && currentPeriodEndDisplay) {
+      return {
+        label: t(
+          subscriptionStatus === BillingSubscriptionStatus.TRIALING
+            ? 'billing:billing.subscription.trialEnds'
+            : 'billing:billing.subscription.trialEnded',
+        ),
+        value: currentPeriodEndDisplay,
+        caption: null,
+      };
+    }
+    return null;
+  }, [details, isTrialPlan, currentPeriodEndDisplay, subscriptionStatus, t, localeCfg.locale]);
+
+  /*
+   * The subscription column of the summary card. A trial is not billed and
+   * does not renew, so it gets neither an interval nor a "next renewal" row —
+   * the old one-line version printed both for an expired free trial.
+   */
+  const summaryFacts: BillingSummaryFact[] = useMemo(() => {
+    const facts: BillingSummaryFact[] = [
+      {
+        label: t('billing:billing.subscription.plan'),
+        value: currentPlanSlug
+          ? t(`billing:billing.plans.${currentPlanSlug}.name`)
+          : t('billing:billing.transition.no_subscription'),
+      },
+    ];
+    if (!subscription) {
+      return facts;
+    }
+    if (!isTrialPlan && currentIntervalKey) {
+      facts.push({ label: t('billing:billing.subscription.interval'), value: t(currentIntervalKey) });
+    }
+    // The headline already carries the next charge's date (or the day access
+    // ends); a renewal row beside it would repeat it.
+    if (currentPeriodEndDisplay && !summaryHeadline) {
+      const labelKey =
+        subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
+        subscriptionStatus === BillingSubscriptionStatus.TRIALING
           ? 'billing:billing.subscription.nextRenewal'
           : 'billing:billing.subscription.accessEnds';
-      parts.push(`${t(labelKey)}: ${currentPeriodEndDisplay}`);
+      facts.push({ label: t(labelKey), value: currentPeriodEndDisplay });
     }
-    return parts.length > 0 ? parts.join(' · ') : null;
-  }, [subscription, currentPlanSlug, currentIntervalKey, currentPeriodEndDisplay, subscriptionStatus, t]);
+    const card = details?.paymentMethod;
+    if (card) {
+      facts.push({
+        label: t('billing:billing.paymentMethod.title'),
+        value: `${t('billing:billing.paymentMethod.card', {
+          brand: card.brand.toUpperCase(),
+          last4: card.last4,
+        })} · ${String(card.expMonth).padStart(2, '0')}/${card.expYear}`,
+        tone: card.expiringSoon ? 'warning' : 'default',
+      });
+    }
+    return facts;
+  }, [
+    subscription,
+    currentPlanSlug,
+    isTrialPlan,
+    currentIntervalKey,
+    currentPeriodEndDisplay,
+    summaryHeadline,
+    subscriptionStatus,
+    details?.paymentMethod,
+    t,
+  ]);
 
-  // A trialing seller has no upcoming invoice; the existing trial-end meta line
-  // stands in for this, so render nothing rather than an em dash beside a label.
-  // A subscription set to cancel at period end also has no REAL next charge —
-  // Stripe stops billing it — so that case is excluded here too, in favor of
-  // cancelsAtPeriodEndLine below. Without this exclusion a cancelled
-  // subscription still showed "Next payment: <date> · <amount>" for a charge
-  // that was never going to happen.
-  const nextChargeLine = useMemo(() => {
-    if (
-      typeof details?.nextChargeAmountMicros !== 'number' ||
-      !details.nextChargeAt ||
-      details.cancelAtPeriodEnd
-    ) {
-      return null;
+  /** The state hue washed over the summary card and its headline figure. */
+  const summaryTone: BillingSummaryTone = useMemo(() => {
+    if (subscriptionStatus === BillingSubscriptionStatus.PAST_DUE) {
+      return 'negative';
     }
-    return t('billing:billing.subscription.nextCharge', {
-      date: formatDate(details.nextChargeAt, localeCfg.locale, BILLING_DATE_OPTIONS),
-      amount: formatMicroCurrency(
-        details.nextChargeAmountMicros,
-        localeCfg.locale,
-        details.nextChargeCurrency ?? 'USD',
-      ),
-    });
-  }, [details, t, localeCfg.locale]);
+    if (
+      isWindingDown ||
+      subscriptionStatus === BillingSubscriptionStatus.CANCELED ||
+      subscriptionStatus === BillingSubscriptionStatus.ENDED
+    ) {
+      return 'warning';
+    }
+    if (subscriptionStatus === BillingSubscriptionStatus.TRIALING) {
+      return 'active';
+    }
+    if (subscriptionStatus === BillingSubscriptionStatus.ACTIVE) {
+      return 'positive';
+    }
+    return 'default';
+  }, [subscriptionStatus, isWindingDown]);
 
   // Read live from Stripe on every load (see BillingDetailsDto.cancelAtPeriodEnd)
   // — a seller who cancelled via the Billing Portal wrote nothing to our
@@ -702,7 +761,6 @@ export const BillingPage: React.FC = () => {
       providerUnconfigured={providerUnconfigured}
       subscriptionStatus={subscriptionStatus}
       cancelAtPeriodEnd={Boolean(details?.cancelAtPeriodEnd)}
-      currentPlanSlug={currentPlanSlug}
       usageRows={usageRows}
       plans={plans}
       compareInterval={compareInterval}
@@ -710,7 +768,9 @@ export const BillingPage: React.FC = () => {
       isPortalLoading={isPortalFetching}
       onCheckout={handleCheckout}
       hasProviderSubscription={hasProviderSubscription}
-      planMetaLine={planMetaLine}
+      summaryFacts={summaryFacts}
+      summaryHeadline={summaryHeadline}
+      summaryTone={summaryTone}
       isPlansOpen={isPlansOpen}
       onOpenPlans={handleOpenPlans}
       onClosePlans={handleClosePlans}
@@ -719,12 +779,11 @@ export const BillingPage: React.FC = () => {
       addonSlugInFlight={addonSlugInFlight}
       onBuyAddon={handleBuyAddon}
       onManage={handleManage}
-      nextChargeLine={nextChargeLine}
       cancelsAtPeriodEndLine={cancelsAtPeriodEndLine}
       scheduledChangeLine={scheduledChangeLine}
       onCancelScheduledChange={handleCancelScheduledChange}
       isCancellingChange={isCancellingChange}
-      paymentMethod={details?.paymentMethod ?? null}
+      paymentExpiringSoon={Boolean(details?.paymentMethod?.expiringSoon)}
       isPlanChangeOpen={Boolean(pendingChange)}
       planChangeBody={planChangeBody}
       planChangeListingLimitWarning={planChangeListingLimitWarning}

@@ -167,6 +167,7 @@
       "portal": "Moyen de paiement et factures",
       "portalHint": "Ouvre Stripe pour mettre à jour votre carte, télécharger vos factures ou résilier.",
       "manageHint": "Gérez ici votre moyen de paiement, votre forfait et vos factures.",
+      "nextChargeLabel": "Prochain paiement",
       "nextCharge": "Prochain paiement : {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Résiliation le {{date}} — aucun prélèvement supplémentaire après cette période",
       "scheduledChange": "Passage à {{plan}} le {{date}}",

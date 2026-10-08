@@ -1,10 +1,31 @@
 // apps/web/src/features/billing/components/InvoiceHistoryCard/InvoiceHistoryCard.style.ts
 
 import styled from '@emotion/styled';
-import { Card as UICard, SettingsCard, tkn } from '@repo/ui';
+import { Card as UICard, tkn } from '@repo/ui';
 
-export const Card = styled(SettingsCard)`
+/**
+ * The invoice list sits on the canvas, like the job detail page's item list —
+ * a heading over the cards, not a card around the cards.
+ */
+export const Section = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
   width: 100%;
+  min-width: 0;
+`;
+
+export const SectionHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+/** Loading, empty and error keep a pane of their own so the section never collapses. */
+export const StateCard = styled(UICard)`
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const RowActions = styled.div`

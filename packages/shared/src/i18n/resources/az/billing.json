@@ -167,6 +167,7 @@
       "portal": "Ödəniş üsulu və fakturalar",
       "portalHint": "Kartınızı yeniləmək, fakturaları yükləmək və ya ləğv etmək üçün Stripe-ı açır.",
       "manageHint": "Ödəniş üsulunuzu, planınızı və fakturalarınızı buradan idarə edin.",
+      "nextChargeLabel": "Növbəti ödəniş",
       "nextCharge": "Növbəti ödəniş: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "{{date}} tarixində ləğv olunur — bu dövrdən sonra əlavə ödəniş tutulmayacaq",
       "scheduledChange": "{{date}} tarixində {{plan}} planına keçir",

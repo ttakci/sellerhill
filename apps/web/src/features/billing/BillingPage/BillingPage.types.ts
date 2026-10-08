@@ -1,6 +1,5 @@
 import type {
   BillingInterval,
-  BillingPaymentMethodDto,
   BillingPlanChangePreviewDto,
   BillingSubscriptionStatus,
   BillingSummaryDto,
@@ -42,8 +41,25 @@ export interface BillingPlanCard {
   isCurrent: boolean;
 }
 
-export interface BillingUsageCellViewProps {
-  row: BillingUsageRow;
+/** The state hue washed over the summary card — same scale as the job page's. */
+export type BillingSummaryTone = 'default' | 'active' | 'positive' | 'warning' | 'negative';
+
+/** Ink of one value in the summary card's label / value lists. */
+export type BillingFactTone = 'default' | 'positive' | 'warning' | 'negative';
+
+/** One label / value row of the summary card, already localized. */
+export interface BillingSummaryFact {
+  label: string;
+  value: string;
+  tone?: BillingFactTone;
+}
+
+/** The big figure on the right of the summary card (next charge, access end, trial end). */
+export interface BillingSummaryHeadline {
+  label: string;
+  value: string;
+  /** A muted line under the figure — the next charge's date. */
+  caption: string | null;
 }
 
 export interface BillingPlanCardViewProps {
@@ -82,7 +98,6 @@ export interface BillingPageComponentProps {
    *  Stripe, changes), so without this flag the badge kept reading plain
    *  "Active" for a subscription that is already winding down. */
   cancelAtPeriodEnd: boolean;
-  currentPlanSlug: string | null;
   usageRows: BillingUsageRow[];
   plans: BillingPlanCard[];
   compareInterval: BillingInterval;
@@ -91,13 +106,11 @@ export interface BillingPageComponentProps {
   onCheckout: (planId: string) => void;
   /** True when a Stripe subscription exists — see BillingSummaryDto. */
   hasProviderSubscription: boolean;
-  /**
-   * The one muted line under the plan name, already assembled and localized.
-   * Built in the container because what belongs on it depends on the kind of
-   * plan: a trial has no billing interval and does not renew, so "Monthly
-   * billing · Next renewal" was wrong on both counts for one.
-   */
-  planMetaLine: string | null;
+  /** The subscription column: plan, interval, renewal date, payment card. */
+  summaryFacts: BillingSummaryFact[];
+  /** Null when there is no date or amount worth headlining. */
+  summaryHeadline: BillingSummaryHeadline | null;
+  summaryTone: BillingSummaryTone;
   isPlansOpen: boolean;
   onOpenPlans: () => void;
   onClosePlans: () => void;
@@ -111,13 +124,6 @@ export interface BillingPageComponentProps {
   addonSlugInFlight: string | null;
   onBuyAddon: (addonSlug: string) => void;
   onManage: () => void;
-  /** "Next payment: {date} · {amount}", already localized — null when there is
-   *  no upcoming Stripe invoice (a trialing seller, or no subscription yet),
-   *  OR when the subscription is set to cancel at period end (there is no
-   *  real next payment to show — see `cancelsAtPeriodEndLine`). The existing
-   *  trial-end meta line covers the trial case, so this renders nothing
-   *  rather than an em dash beside a label. */
-  nextChargeLine: string | null;
   /** "Cancels on {date} — no further charges after this period", already
    *  localized — null unless the seller cancelled via the Stripe Billing
    *  Portal (`cancel_at_period_end`). Read live from Stripe on every load, so
@@ -129,10 +135,8 @@ export interface BillingPageComponentProps {
   scheduledChangeLine: string | null;
   onCancelScheduledChange: () => void;
   isCancellingChange: boolean;
-  /** The customer's default Stripe payment method, from `GET /billing/details`.
-   *  Null for a trialing seller (no Stripe customer yet) — a normal state, not
-   *  an empty one, so the card renders nothing rather than a placeholder. */
-  paymentMethod: BillingPaymentMethodDto | null;
+  /** The saved card expires soon — a notice asks the seller to replace it. */
+  paymentExpiringSoon: boolean;
   /**
    * True once the seller has picked a plan to switch to (on an EXISTING
    * subscription) and its Stripe proration preview has come back — drives

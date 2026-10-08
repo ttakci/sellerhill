@@ -167,6 +167,7 @@
       "portal": "Metoda de plată și facturi",
       "portalHint": "Deschide Stripe pentru a actualiza cardul, a descărca facturi sau a anula.",
       "manageHint": "Gestionați aici metoda de plată, planul și facturile.",
+      "nextChargeLabel": "Următoarea plată",
       "nextCharge": "Următoarea plată: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Se anulează pe {{date}} — nu se mai taxează nimic după această perioadă",
       "scheduledChange": "Trece la {{plan}} pe {{date}}",

@@ -167,6 +167,7 @@
       "portal": "付款方式和发票",
       "portalHint": "将打开 Stripe，您可以更新银行卡、下载发票或取消订阅。",
       "manageHint": "在此管理您的付款方式、套餐和发票。",
+      "nextChargeLabel": "下次付款",
       "nextCharge": "下次付款：{{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "将于 {{date}} 取消，此周期结束后不会再收费",
       "scheduledChange": "将于 {{date}} 切换到 {{plan}}",

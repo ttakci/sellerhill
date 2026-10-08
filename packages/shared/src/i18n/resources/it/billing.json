@@ -167,6 +167,7 @@
       "portal": "Metodo di pagamento e fatture",
       "portalHint": "Apre Stripe per aggiornare la carta, scaricare le fatture o annullare.",
       "manageHint": "Gestisci qui il metodo di pagamento, il piano e le fatture.",
+      "nextChargeLabel": "Prossimo pagamento",
       "nextCharge": "Prossimo pagamento: {{date}} · {{amount}}",
       "cancelsAtPeriodEnd": "Si annulla il {{date}} — nessun ulteriore addebito dopo questo periodo",
       "scheduledChange": "Passa a {{plan}} il {{date}}",
