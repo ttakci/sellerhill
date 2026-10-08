@@ -48,7 +48,7 @@ export const ConversationList = ({
         {selectedCount > 0 && (
           <S.BulkActions>
             {bulkActions.map((action) => (
-              <Button key={action.id} variant="tertiary" size="xsmall" onClick={action.onClick}>
+              <Button key={action.id} variant="primary" size="xsmall" onClick={action.onClick}>
                 <Icon name={action.icon} size={14} />
                 <Text variant="body-sm" color="inherit">
                   {action.label}

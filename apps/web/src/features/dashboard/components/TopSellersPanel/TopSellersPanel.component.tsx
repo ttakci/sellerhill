@@ -55,6 +55,7 @@ export const TopSellersPanelComponent = ({
       icon="alert-triangle"
       title={t('translation:message.error.header')}
       description={t('listings:listings.errors.loadFailed')}
+      actionIcon="refresh"
       action={t('translation:common.retry')}
       onAction={onRetry}
       size="lg"

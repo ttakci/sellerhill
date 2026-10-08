@@ -12,6 +12,7 @@ export function AddCampaignListingsDrawerComponent(props: AddCampaignListingsDra
       onClose={props.onClose}
       title={t('campaigns.add.title')}
       primaryAction={{
+        icon: 'plus',
         label: t('campaigns.actions.addListings'),
         onClick: props.onSubmit,
         isLoading: props.isSaving,
@@ -90,6 +91,7 @@ export function AddCampaignListingsDrawerComponent(props: AddCampaignListingsDra
           <EmptyState
             title={t('campaigns.errors.load')}
             description={t('campaigns.errors.description')}
+            actionIcon="refresh"
             action={t('campaigns.actions.retry')}
             onAction={props.onRetryCandidates}
           />

@@ -8,7 +8,7 @@
 // matching PaymentMethodCard's stateless convention: everything arrives as
 // props.
 
-import { Button, InfoMessage, Modal, Text } from '@repo/ui';
+import { Button, InfoMessage, Modal, Text, Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -32,10 +32,12 @@ export const PlanChangeConfirm = ({
       title={t('billing:billing.planChange.title')}
       footer={
         <>
-          <Button variant="secondary" size="medium" disabled={isConfirming} onClick={onCancel}>
+          <Button variant="primary" size="medium" disabled={isConfirming} onClick={onCancel}>
+            <Icon name="x" size={16} />
             <Text variant="body-sm">{t('billing:billing.planChange.cancel')}</Text>
           </Button>
           <Button variant="primary" size="medium" isLoading={isConfirming} onClick={onConfirm}>
+            <Icon name="check" size={16} />
             <Text variant="body-sm">{t('billing:billing.planChange.confirm')}</Text>
           </Button>
         </>

@@ -22,6 +22,7 @@ export const ListingSettingsGroupPageComponent = ({
         actions={
           groups.length > 0 ? (
             <Button variant="primary" size="medium" onClick={onCreateGroup}>
+              <Icon name="plus" size={16} />
               <Text variant="body" weight="semibold">{t('listingSettingsGroup.createNewGroup')}</Text>
             </Button>
           ) : undefined
@@ -95,6 +96,7 @@ export const ListingSettingsGroupPageComponent = ({
             description={t('listingSettingsGroup.emptyState.description')}
           />
           <Button variant="primary" size="medium" onClick={onCreateGroup}>
+            <Icon name="plus" size={16} />
             <Text variant="body" weight="semibold">{t('listingSettingsGroup.createNewGroup')}</Text>
           </Button>
         </S.EmptyStateWrapper>

@@ -23,6 +23,7 @@ export function CreateCampaignDrawerComponent({
       onClose={onClose}
       title={t('campaigns.create.title')}
       primaryAction={{
+        icon: 'plus',
         label: t('campaigns.actions.create'),
         onClick: onSubmit,
         isLoading: isSaving,

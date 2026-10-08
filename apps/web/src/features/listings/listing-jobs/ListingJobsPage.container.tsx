@@ -1,5 +1,5 @@
 import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto, type ListingJobsQueryDto } from '@repo/shared';
-import { ProgressBar, Badge, Button, Text, formatDate, getLocaleConfig, type TableColumn, type ViewMode } from '@repo/ui';
+import { ProgressBar, Badge, Button, Text, formatDate, getLocaleConfig, type TableColumn, type ViewMode, Icon } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -225,6 +225,7 @@ export const ListingJobsPageContainer: React.FC = () => {
               isLoading={isCancelling && cancelTargetId === job.id}
               disabled={isCancelling}
             >
+              <Icon name="x" size={16} />
               <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
             </Button>
           ) : null;

@@ -461,10 +461,11 @@ export const AdminPageComponent = ({
                     </Text>
                     <Button
                       size="small"
-                      variant="secondary"
+                      variant="danger"
                       isLoading={listingQuality.isRemoving}
                       onClick={() => listingQuality.onRemoveDefault(row.id)}
                     >
+                      <Icon name="trash" size={16} />
                       <Text variant="body-sm">{t('admin.listingQuality.remove')}</Text>
                     </Button>
                   </S.RowActions>

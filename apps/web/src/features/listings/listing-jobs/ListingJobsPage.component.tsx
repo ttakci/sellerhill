@@ -96,6 +96,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                 isLoading={cancellingJobId === job.id}
                 disabled={Boolean(cancellingJobId)}
               >
+                <Icon name="x" size={16} />
                 <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
               </Button>
             ) : null}
@@ -214,6 +215,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
           icon="search"
           title={t('listings.empty.filtersTitle')}
           description={t('listings.empty.filtersSubtitle')}
+          actionIcon="x"
           action={t('listings.empty.filtersAction')}
           onAction={onClearFilters}
           size="lg"

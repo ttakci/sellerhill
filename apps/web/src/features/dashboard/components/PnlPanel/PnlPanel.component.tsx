@@ -34,7 +34,7 @@ export const PnlPanelComponent = ({
       actions={
         <S.Toolbar>
           <Toggle checked={heatmapEnabled} onChange={onToggleHeatmap} label={heatmapLabel} />
-          <Button variant="tertiary" size="small" onClick={onExport} disabled={isEmpty}>
+          <Button variant="primary" size="small" onClick={onExport} disabled={isEmpty}>
             <Icon name="file-download" size={16} />
             <Text variant="body-sm" weight="medium" color="inherit">
               {exportLabel}

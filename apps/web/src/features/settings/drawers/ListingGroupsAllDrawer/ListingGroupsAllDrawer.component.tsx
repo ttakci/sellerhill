@@ -46,6 +46,7 @@ export const ListingGroupsAllDrawerComponent: React.FC<ListingGroupsAllDrawerCom
       subtitle={subtitleLabel}
       size="lg"
       primaryAction={{
+        icon: 'arrow-right',
         label: t('translation:common.continue'),
         onClick: onContinue,
         disabled: isContinueDisabled,

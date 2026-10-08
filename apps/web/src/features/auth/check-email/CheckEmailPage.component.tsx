@@ -68,6 +68,7 @@ export const CheckEmailPageComponent = ({
 
             <S.ActionGroup>
               <Button onClick={onBackToLogin} variant="primary" fullWidth size="large">
+                <Icon name="arrow-left" size={16} />
                 <Text variant="body" weight="medium" color="text.inverse">
                   {t('auth:auth.checkEmail.loginButton')}
                 </Text>

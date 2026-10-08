@@ -173,6 +173,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               icon="search"
               title={t('orders.all.filtersTitle')}
               description={t('orders.all.filtersSubtitle')}
+              actionIcon="x"
               action={t('orders.all.filtersAction')}
               onAction={onClearFilters}
               size="lg"

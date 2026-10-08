@@ -75,8 +75,10 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
               iconTone="error"
               title={t('errorBoundary.title')}
               description={t('errorBoundary.message')}
+              actionIcon="refresh"
               action={t('errorBoundary.reload')}
               onAction={this.handleReload}
+              secondaryActionIcon="home"
               secondaryAction={t('errorBoundary.goHome')}
               onSecondaryAction={this.handleGoHome}
               size="lg"

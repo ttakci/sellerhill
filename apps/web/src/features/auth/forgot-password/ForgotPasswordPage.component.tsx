@@ -61,6 +61,7 @@ export const ForgotPasswordPageComponent = ({
 
               <S.ActionGroup>
                 <Button onClick={onBackToLogin} variant="primary" fullWidth size="large">
+                  <Icon name="arrow-left" size={16} />
                   <Text variant="body" weight="medium" color="text.inverse">
                     {t('auth:auth.passwordReset.forgot.backToLogin')}
                   </Text>
@@ -112,6 +113,7 @@ export const ForgotPasswordPageComponent = ({
                     isLoading={isLoading || isSubmitting}
                     size="large"
                   >
+                    <Icon name="send" size={16} />
                     <Text>{t('auth:auth.passwordReset.forgot.submitButton')}</Text>
                   </Button>
                 </S.ButtonContainer>

@@ -1,6 +1,7 @@
 import type React from 'react';
 
 import type { MessageType } from '../../context';
+import type { IconName } from '../Icon';
 
 export interface InfoMessageProps {
   children: React.ReactNode;
@@ -21,6 +22,8 @@ export interface InfoMessageProps {
    *  action/onAction/isActionLoading shape as EmptyState, so a hint that grows
    *  a call-to-action does not need a different API to learn. */
   action?: string;
+  /** 16px glyph before the action label */
+  actionIcon?: IconName;
   onAction?: () => void;
   isActionLoading?: boolean;
   className?: string;

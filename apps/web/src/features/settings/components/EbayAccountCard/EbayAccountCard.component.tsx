@@ -65,11 +65,12 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({
                 variant="dark"
               >
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   size="small"
                   onClick={() => onReconnect(store.id)}
                   isLoading={isReconnecting}
                 >
+                  <Icon name="refresh" size={16} />
                   <Text variant="body-sm" weight="semibold">
                     {t('translation:settingsHub.sections.ebay.reconnect.action')}
                   </Text>
@@ -78,11 +79,12 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({
             )}
             {onDisconnect && (
               <Button
-                variant="danger-tint"
+                variant="danger"
                 size="small"
                 onClick={() => onDisconnect(store.id)}
                 isLoading={isDisconnecting}
               >
+                <Icon name="plug" size={16} />
                 <Text variant="body-sm" weight="semibold">
                   {t('translation:settingsHub.sections.ebay.disconnect.action')}
                 </Text>

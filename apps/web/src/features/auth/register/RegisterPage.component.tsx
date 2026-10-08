@@ -128,6 +128,7 @@ export const RegisterPageComponent = ({
 
               <S.ButtonContainer>
                 <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting} size="large">
+                  <Icon name="user" size={16} />
                   <Text>{t('auth:auth.register.submitButton')}</Text>
                 </Button>
               </S.ButtonContainer>

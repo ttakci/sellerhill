@@ -67,6 +67,7 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
               isLoading={primaryAction.isLoading}
               disabled={primaryAction.disabled}
             >
+              {primaryAction.icon ? <Icon name={primaryAction.icon} size={16} /> : null}
               <Text variant="body" weight="semibold">
                 {primaryAction.label}
               </Text>

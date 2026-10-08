@@ -178,6 +178,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             icon="shopping-bag"
             title={t('orders.detail.notFoundTitle')}
             description={t('orders.detail.notFoundSubtitle')}
+            actionIcon="arrow-left"
             action={t('translation:common.back')}
             onAction={onBack}
           />
@@ -396,7 +397,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Meta>
             </S.MetaList>
             <S.SectionActions>
-              <Button variant="secondary" size="small" fullWidth onClick={onManageCancellation}>
+              <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
+                <Icon name="arrow-right" size={16} />
                 <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
               </Button>
             </S.SectionActions>
@@ -439,7 +441,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <Text variant="caption" color="text.secondary">
               {t('orders.note.hint')}
             </Text>
-            <Button variant="secondary" size="small" onClick={onSaveNote} isLoading={isSavingNote} disabled={!isNoteDirty}>
+            <Button variant="primary" size="small" onClick={onSaveNote} isLoading={isSavingNote} disabled={!isNoteDirty}>
+              <Icon name="save" size={16} />
               <Text variant="body-sm">{t('orders.note.save')}</Text>
             </Button>
           </S.NoteFooter>
@@ -529,7 +532,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </S.MetaList>
             {canCopyAddress && (
               <S.SectionActions>
-                <Button variant="secondary" size="small" onClick={onCopyAddress} fullWidth>
+                <Button variant="primary" size="small" onClick={onCopyAddress} fullWidth>
                   <Icon name="copy" size={16} />
                   <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
                 </Button>
@@ -690,7 +693,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   Amazon" is the secondary one. */}
               {canConfirmNotPurchased && onConfirmNotPurchased ? (
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   size="small"
                   fullWidth
                   onClick={onConfirmNotPurchased}
@@ -701,17 +704,18 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Button>
               ) : null}
               <Button
-                variant={canStartAutoFulfill ? 'secondary' : 'primary'}
+                variant="primary"
                 size="small"
                 onClick={onOpenLinkAmazon}
                 fullWidth
                 isLoading={isUpdating}
               >
+                <Icon name="link" size={16} />
                 <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
               </Button>
               {canConvertTracking && onConvertTracking ? (
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   size="small"
                   fullWidth
                   onClick={onConvertTracking}
@@ -734,12 +738,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 
       <S.MobileActionBar>
         <Button variant="primary" size="medium" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
+          <Icon name="link" size={16} />
           <Text variant="body" weight="semibold">
             {t('orders.detail.linkAmazon')}
           </Text>
         </Button>
         {canCopyAddress && (
-          <Button variant="secondary" size="medium" onClick={onCopyAddress}>
+          <Button variant="primary" size="medium" onClick={onCopyAddress}>
             <Icon name="copy" size={16} />
           </Button>
         )}

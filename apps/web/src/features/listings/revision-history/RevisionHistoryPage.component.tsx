@@ -189,6 +189,7 @@ export const RevisionHistoryPageComponent: React.FC<RevisionHistoryPageComponent
           icon="search"
           title={t('listings.empty.filtersTitle')}
           description={t('listings.empty.filtersSubtitle')}
+          actionIcon="x"
           action={t('listings.empty.filtersAction')}
           onAction={onClearFilters}
           size="lg"

@@ -1,5 +1,5 @@
 import { EbayAccountStatus } from '@repo/shared';
-import { Button, Card, EmptyState, PageHeader, StatusBadge, Text, Tooltip } from '@repo/ui';
+import { Button, Card, EmptyState, PageHeader, StatusBadge, Text, Tooltip, Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -63,11 +63,12 @@ export const StoresPageComponent = ({
                 <S.StoreActions>
                   <Tooltip content={t('translation:settingsHub.sections.ebay.reconnect.hint')} position="top" variant="dark">
                     <Button
-                      variant="secondary"
+                      variant="primary"
                       size="small"
                       onClick={() => onReconnect(account)}
                       isLoading={reconnectingId === account.id}
                     >
+                      <Icon name="refresh" size={16} />
                       <Text variant="body-sm" weight="semibold">
                         {t('translation:settingsHub.sections.ebay.reconnect.action')}
                       </Text>

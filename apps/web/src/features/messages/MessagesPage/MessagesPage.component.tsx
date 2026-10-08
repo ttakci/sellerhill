@@ -82,6 +82,7 @@ export const MessagesPageComponent = ({
           icon="mail"
           title={reconnectTitle}
           description={reconnectDescription}
+          actionIcon="refresh"
           action={reconnectAction}
           onAction={onReconnect}
           isActionLoading={isReconnecting}

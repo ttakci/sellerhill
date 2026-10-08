@@ -8,6 +8,7 @@ import {
   SegmentedControl,
   Text,
   Textarea,
+  Icon,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -97,6 +98,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
       subtitle={subtitleLabel}
       size="md"
       primaryAction={{
+        icon: 'save',
         label: t('translation:common.save'),
         onClick: onSave,
         isLoading: isSaving,
@@ -137,7 +139,8 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
             <Text variant="caption" color="text.tertiary">
               {keywordsHint}
             </Text>
-            <Button variant="secondary" onClick={onAdd}>
+            <Button variant="primary" onClick={onAdd}>
+              <Icon name="plus" size={16} />
               <Text weight="semibold">{addLabel}</Text>
             </Button>
             {errorMessage && (
@@ -171,6 +174,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
                     {hasSelection && (
                       <ToolbarRight>
                         <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
+                          <Icon name="trash" size={16} />
                           <Text weight="semibold">{bulkDeleteLabel}</Text>
                         </Button>
                       </ToolbarRight>

@@ -78,6 +78,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
               icon="search"
               title={t('listings.empty.filtersTitle')}
               description={t('listings.empty.filtersSubtitle')}
+              actionIcon="x"
               action={t('listings.empty.filtersAction')}
               onAction={onClearSearch}
               size="lg"

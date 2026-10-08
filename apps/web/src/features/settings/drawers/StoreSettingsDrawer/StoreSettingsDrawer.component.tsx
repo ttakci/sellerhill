@@ -35,6 +35,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
       subtitle={t('translation:settingsHub.drawer.storeSettings.subtitle')}
       size="md"
       primaryAction={{
+        icon: isLast ? 'save' : 'arrow-right',
         label: t(isLast ? 'translation:common.save' : 'translation:common.continue'),
         onClick: props.onContinue,
         isLoading: props.isSaving,

@@ -28,6 +28,7 @@ export const NotificationsDrawerComponent: React.FC<NotificationsDrawerComponent
       subtitle={t('translation:settingsHub.drawer.notifications.subtitle')}
       size="md"
       primaryAction={{
+        icon: 'save',
         label: t('translation:common.save'),
         onClick: onSave,
         isLoading: isSaving,

@@ -12,12 +12,16 @@ export interface EmptyStateProps {
   description: string;
   /** Label for the optional primary action button */
   action?: string;
+  /** 16px glyph before the primary action label */
+  actionIcon?: IconName;
   /** Click handler for the primary action */
   onAction?: () => void;
   /** Shows a spinner on the primary action button and disables it (e.g. while an async action is in flight) */
   isActionLoading?: boolean;
   /** Label for optional secondary action (e.g. clear filters) */
   secondaryAction?: string;
+  /** 16px glyph before the secondary action label */
+  secondaryActionIcon?: IconName;
   /** Click handler for the secondary action */
   onSecondaryAction?: () => void;
   /** Size variant controlling icon and spacing scale */

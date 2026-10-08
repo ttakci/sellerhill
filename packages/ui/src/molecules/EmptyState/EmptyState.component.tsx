@@ -13,8 +13,10 @@ export const EmptyState = ({
   description,
   action,
   onAction,
+  actionIcon,
   isActionLoading = false,
   secondaryAction,
+  secondaryActionIcon,
   onSecondaryAction,
   size = 'md',
   iconTone,
@@ -61,11 +63,13 @@ export const EmptyState = ({
         <S.Actions>
           {hasPrimary && (
             <Button variant="primary" size="medium" onClick={onAction} isLoading={isActionLoading}>
+              {actionIcon ? <Icon name={actionIcon} size={16} /> : null}
               <Text variant="body">{action}</Text>
             </Button>
           )}
           {hasSecondary && (
-            <Button variant="secondary" size="medium" onClick={onSecondaryAction}>
+            <Button variant="primary" size="medium" onClick={onSecondaryAction}>
+              {secondaryActionIcon ? <Icon name={secondaryActionIcon} size={16} /> : null}
               <Text variant="body">{secondaryAction}</Text>
             </Button>
           )}

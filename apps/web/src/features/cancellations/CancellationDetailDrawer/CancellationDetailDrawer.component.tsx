@@ -10,6 +10,7 @@ import {
   Radio,
   Text,
   ValidationMessage,
+  Icon,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -171,6 +172,7 @@ export const CancellationDetailDrawerComponent: React.FC<CancellationDetailDrawe
                 )}
                 <S.SendRow>
                   <Button type="button" variant="primary" size="medium" onClick={onSend} isLoading={isActing}>
+                    <Icon name="send" size={16} />
                     <Text variant="body" weight="medium">
                       {t('cancellations.form.send')}
                     </Text>

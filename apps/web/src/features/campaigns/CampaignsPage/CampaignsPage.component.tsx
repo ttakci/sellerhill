@@ -8,6 +8,7 @@ import {
   PageHeader,
   Text,
   type TableColumn,
+  Icon,
 } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 
@@ -147,6 +148,7 @@ export function CampaignsPageComponent({
           iconTone="error"
           title={t('campaigns.errors.load')}
           description={t(errorKey)}
+          actionIcon="refresh"
           action={t('campaigns.actions.retry')}
           onAction={onRetry}
         />
@@ -185,7 +187,8 @@ export function CampaignsPageComponent({
             gridMinItemWidth={gridMinItemWidth}
             gridMaxColumns={3}
             actions={
-              <Button onClick={onCreate} disabled={!canCreate}>
+              <Button variant="primary" onClick={onCreate} disabled={!canCreate}>
+                <Icon name="plus" size={16} />
                 <Text variant="body-sm">{t('campaigns.actions.create')}</Text>
               </Button>
             }

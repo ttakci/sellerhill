@@ -1,4 +1,4 @@
-import { Button, Drawer, FilePicker, Select, Text } from '@repo/ui';
+import { Button, Drawer, FilePicker, Select, Text, Icon } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ExistingListingsImportDrawer.style';
@@ -11,7 +11,7 @@ export const ExistingListingsImportDrawerComponent = (props: ExistingListingsImp
   );
   return (
     <Drawer isOpen={props.isOpen} onClose={props.onClose} onBack={props.onBack} title={t('listings.existingImport.title')} subtitle={props.storeLabel ? t('listings.existingImport.importingTo', { store: props.storeLabel }) : undefined} size="lg"
-      primaryAction={{ label: props.step === 0 ? t('translation:common.continue') : t('listings.existingImport.start'), onClick: props.step === 0 ? props.onNext : props.onSubmit, disabled: !props.canProceed || props.isLoading, isLoading: props.isLoading }}>
+      primaryAction={{ icon: props.step === 0 ? 'arrow-right' : 'upload', label: props.step === 0 ? t('translation:common.continue') : t('listings.existingImport.start'), onClick: props.step === 0 ? props.onNext : props.onSubmit, disabled: !props.canProceed || props.isLoading, isLoading: props.isLoading }}>
       <S.Stack>
         {props.step === 0 ? <>
           <S.Panel padding="lg"><Text variant="h4" weight="semibold">{t('listings.listingSettings.title')}</Text>
@@ -24,7 +24,7 @@ export const ExistingListingsImportDrawerComponent = (props: ExistingListingsImp
         </> : <S.Panel padding="lg">
           <Text variant="h4" weight="semibold">{t('listings.existingImport.fileTitle')}</Text>
           <Text variant="body-sm" color="text.secondary">{t('listings.existingImport.fileHint')}</Text>
-          <S.Actions><Button variant="secondary" onClick={props.onDownloadTemplate}><Text>{t('listings.existingImport.downloadTemplate')}</Text></Button></S.Actions>
+          <S.Actions><Button variant="primary" onClick={props.onDownloadTemplate}><Icon name="download" size={16} /><Text>{t('listings.existingImport.downloadTemplate')}</Text></Button></S.Actions>
           <FilePicker accept=".xlsx" fileName={props.fileName} label={t('listings.existingImport.chooseFile')} hint={t('listings.existingImport.xlsxOnly')} onChange={props.onFileChange} />
         </S.Panel>}
       </S.Stack>

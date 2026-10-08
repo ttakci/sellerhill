@@ -10,6 +10,7 @@ import {
   SegmentedControl,
   Text,
   Toggle,
+  Icon,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -99,12 +100,13 @@ export const AdminSettingsPanelComponent = ({
                     </Badge>
                   )}
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="small"
                     onClick={onEmailTest}
                     isLoading={isTestingEmail}
                     disabled={isTestingEmail}
                   >
+                    <Icon name="send" size={16} />
                     <Text variant="body-sm" weight="semibold">
                       {t('admin.settings.emailTest')}
                     </Text>
@@ -182,17 +184,19 @@ export const AdminSettingsPanelComponent = ({
                                 disabled={!row.canSave}
                                 isLoading={row.isPending}
                               >
+                                <Icon name="save" size={16} />
                                 <Text variant="body-sm" weight="semibold">
                                   {t('translation:common.save')}
                                 </Text>
                               </Button>
                               <Button
                                 type="button"
-                                variant="tertiary"
+                                variant="primary"
                                 size="small"
                                 disabled={row.isPending}
                                 onClick={() => onCancel(setting.key)}
                               >
+                                <Icon name="x" size={16} />
                                 <Text variant="body-sm" weight="semibold">
                                   {t('translation:common.cancel')}
                                 </Text>

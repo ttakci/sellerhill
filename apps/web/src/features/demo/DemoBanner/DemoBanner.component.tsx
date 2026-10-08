@@ -21,10 +21,12 @@ export const DemoBannerComponent = ({
       {description}
     </Text>
     <S.Actions>
-      <Button variant="tertiary" size="small" onClick={onExit}>
+      <Button variant="primary" size="small" onClick={onExit}>
+        <Icon name="log-out" size={16} />
         <Text variant="body-sm">{exitLabel}</Text>
       </Button>
       <Button variant="primary" size="small" onClick={onSignUp}>
+        <Icon name="user" size={16} />
         <Text variant="body-sm">{signUpLabel}</Text>
       </Button>
     </S.Actions>

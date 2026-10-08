@@ -100,6 +100,7 @@ export const VerifyEmailPageComponent = ({
 
             <S.ActionGroup>
               <Button onClick={onNavigateToLogin} variant="primary" fullWidth size="large">
+                <Icon name="key-round" size={16} />
                 <Text variant="body" weight="medium" color="text.inverse">
                   {t('auth:auth.register.loginLink')}
                 </Text>

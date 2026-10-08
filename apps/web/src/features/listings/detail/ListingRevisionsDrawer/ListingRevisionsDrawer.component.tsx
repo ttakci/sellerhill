@@ -225,12 +225,13 @@ export const ListingRevisionsDrawerComponent = ({
               {hasMore ? (
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="primary"
                   size="small"
                   fullWidth
                   isLoading={isLoadingMore}
                   onClick={onLoadMore}
                 >
+                  <Icon name="chevron-down" size={16} />
                   <Text variant="body-sm" weight="medium">
                     {t('listings.detail.revisions.loadMore')}
                   </Text>

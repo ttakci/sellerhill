@@ -112,6 +112,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
               icon="search"
               title={t('returns.emptyFiltered.title')}
               description={t('returns.emptyFiltered.description')}
+              actionIcon="x"
               action={t('returns.emptyFiltered.action')}
               onAction={onClearFilters}
               size="lg"

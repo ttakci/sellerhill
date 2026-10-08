@@ -1,4 +1,4 @@
-import { Button, SearchField, Text, Textarea } from '@repo/ui';
+import { Button, SearchField, Text, Textarea, Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +44,8 @@ export const VeroKeywordsPanelComponent: React.FC<VeroKeywordsPanelComponentProp
             rows={4}
           />
         </S.AddField>
-        <Button size="small" variant="secondary" onClick={onAdd} isLoading={isAdding} disabled={!draft.trim()}>
+        <Button size="small" variant="primary" onClick={onAdd} isLoading={isAdding} disabled={!draft.trim()}>
+          <Icon name="plus" size={16} />
           <Text variant="body-sm" weight="semibold">
             {t('admin.vero.add')}
           </Text>
@@ -74,10 +75,11 @@ export const VeroKeywordsPanelComponent: React.FC<VeroKeywordsPanelComponentProp
               <S.RowActions>
                 <Button
                   size="small"
-                  variant="secondary"
+                  variant="danger"
                   isLoading={removingId === row.id}
                   onClick={() => onRemove(row.id)}
                 >
+                  <Icon name="trash" size={16} />
                   <Text variant="body-sm">{t('admin.vero.remove')}</Text>
                 </Button>
               </S.RowActions>
@@ -92,14 +94,16 @@ export const VeroKeywordsPanelComponent: React.FC<VeroKeywordsPanelComponentProp
 
       {pageCount > 1 && (
         <S.Pager>
-          <Button size="small" variant="secondary" onClick={onPreviousPage} disabled={page <= 1}>
+          <Button size="small" variant="primary" onClick={onPreviousPage} disabled={page <= 1}>
+            <Icon name="chevron-left" size={16} />
             <Text variant="body-sm">{t('admin.vero.previous')}</Text>
           </Button>
           <Text variant="caption" color="text.secondary" numeric>
             {t('admin.vero.page', { page, pageCount })}
           </Text>
-          <Button size="small" variant="secondary" onClick={onNextPage} disabled={page >= pageCount}>
+          <Button size="small" variant="primary" onClick={onNextPage} disabled={page >= pageCount}>
             <Text variant="body-sm">{t('admin.vero.next')}</Text>
+            <Icon name="chevron-right" size={16} />
           </Button>
         </S.Pager>
       )}

@@ -120,6 +120,7 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
           iconTone="error"
           title={t('campaigns.errors.load')}
           description={t(props.errorKey)}
+          actionIcon="refresh"
           action={t('campaigns.actions.retry')}
           onAction={props.onRetry}
         />
@@ -150,18 +151,21 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
                 ))}
               </S.Facts>
               <S.Row>
-                <Button disabled={!props.writable || props.busy} onClick={props.onAddOpen}>
+                <Button variant="primary" disabled={!props.writable || props.busy} onClick={props.onAddOpen}>
+                  <Icon name="plus" size={16} />
                   <Text variant="body-sm">{t('campaigns.actions.addListings')}</Text>
                 </Button>
-                <Button variant="secondary" disabled={!props.writable || props.busy} onClick={() => props.onRateOpen()}>
+                <Button variant="primary" disabled={!props.writable || props.busy} onClick={() => props.onRateOpen()}>
+                  <Icon name="percent" size={16} />
                   <Text variant="body-sm">{t('campaigns.rate.defaultTitle')}</Text>
                 </Button>
                 {props.lifecycleAction && (
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     disabled={!props.writable || props.busy}
                     onClick={() => props.onAction(props.lifecycleAction as CampaignAction)}
                   >
+                    <Icon name={props.lifecycleAction === CampaignAction.PAUSE ? 'pause' : 'play-arrow'} size={16} />
                     <Text variant="body-sm">
                       {t(
                         props.lifecycleAction === CampaignAction.PAUSE
@@ -171,7 +175,8 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
                     </Text>
                   </Button>
                 )}
-                <Button variant="secondary" disabled={!props.writable || props.busy} onClick={props.onEndOpen}>
+                <Button variant="danger" disabled={!props.writable || props.busy} onClick={props.onEndOpen}>
+                  <Icon name="block" size={16} />
                   <Text variant="body-sm">{t('campaigns.actions.end')}</Text>
                 </Button>
               </S.Row>
@@ -219,10 +224,11 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
               )}
               actions={
                 <Button
-                  variant="secondary"
+                  variant="danger"
                   disabled={!props.writable || props.busy || !props.selectedRows.length}
                   onClick={() => props.onRemove(props.selectedRows)}
                 >
+                  <Icon name="x" size={16} />
                   <Text variant="body-sm">{t('campaigns.actions.removeListings')}</Text>
                 </Button>
               }

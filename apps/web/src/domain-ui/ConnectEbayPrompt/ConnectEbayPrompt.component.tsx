@@ -49,9 +49,11 @@ export const ConnectEbayPrompt = ({
           size="lg"
           title={t('ebay:ebay.accounts.noAccounts')}
           description={t('ebay:ebay.onboarding.description')}
+          actionIcon="link"
           action={t('ebay:ebay.connect.connectButton')}
           onAction={onConnect}
           isActionLoading={isLoading}
+          secondaryActionIcon="arrow-right"
           secondaryAction={secondaryAction}
           onSecondaryAction={onSkip}
         />

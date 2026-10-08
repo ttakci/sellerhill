@@ -33,6 +33,7 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
       subtitle={t('translation:settingsHub.drawer.profile.subtitle')}
       size="md"
       primaryAction={{
+        icon: 'save',
         label: t('translation:common.save'),
         onClick: onSave,
         isLoading: isSaving,

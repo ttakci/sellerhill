@@ -11,6 +11,7 @@ import {
   Select,
   Text,
   ValidationMessage,
+  Icon,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -210,6 +211,7 @@ export const ReturnDetailDrawerComponent: React.FC<ReturnDetailDrawerComponentPr
                 )}
                 <S.SendRow>
                   <Button type="button" variant="primary" size="medium" onClick={onSend} isLoading={isActing}>
+                    <Icon name="send" size={16} />
                     <Text variant="body" weight="medium">
                       {t('returns.form.send')}
                     </Text>

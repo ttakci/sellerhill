@@ -1,5 +1,5 @@
 import { BuyerMessageEventType } from '@repo/shared';
-import { Button, ConfirmModal, Drawer, ModernSelect, ModernTextInput, Text, Textarea } from '@repo/ui';
+import { Button, ConfirmModal, Drawer, ModernSelect, ModernTextInput, Text, Textarea, Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -45,6 +45,7 @@ export const BuyerMessageTemplateDrawerComponent: React.FC<BuyerMessageTemplateD
       subtitle={subtitleLabel}
       size="md"
       primaryAction={{
+        icon: 'save',
         label: t('storeSettings:storeSettings.messaging.templates.save'),
         onClick: onSave,
         isLoading: isSaving,
@@ -74,7 +75,8 @@ export const BuyerMessageTemplateDrawerComponent: React.FC<BuyerMessageTemplateD
         />
         {showReset && (
           <S.ResetRow>
-            <Button variant="tertiary" size="small" onClick={onResetRequest} isLoading={isResetting}>
+            <Button variant="primary" size="small" onClick={onResetRequest} isLoading={isResetting}>
+              <Icon name="refresh" size={16} />
               <Text>{resetLabel}</Text>
             </Button>
           </S.ResetRow>

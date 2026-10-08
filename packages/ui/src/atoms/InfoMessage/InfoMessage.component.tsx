@@ -24,6 +24,7 @@ export const InfoMessage = ({
   children,
   type = 'info',
   action,
+  actionIcon,
   onAction,
   isActionLoading,
   className,
@@ -49,7 +50,8 @@ export const InfoMessage = ({
     </S.Content>
     {action && onAction ? (
       <S.ActionSlot>
-        <Button variant="secondary" size="small" onClick={onAction} isLoading={isActionLoading}>
+        <Button variant="primary" size="small" onClick={onAction} isLoading={isActionLoading}>
+          {actionIcon ? <Icon name={actionIcon} size={16} /> : null}
           <Text variant="body-sm">{action}</Text>
         </Button>
       </S.ActionSlot>

@@ -1,5 +1,7 @@
 import type React from 'react';
 
+import type { IconName } from '../../atoms/Icon';
+
 export type DrawerSize = 'sm' | 'md' | 'lg';
 
 /**
@@ -10,6 +12,8 @@ export type DrawerSize = 'sm' | 'md' | 'lg';
  */
 export interface DrawerPrimaryAction {
   label: string;
+  /** 16px glyph before the label, the same pattern as the page action buttons. */
+  icon?: IconName;
   onClick: () => void;
   isLoading?: boolean;
   disabled?: boolean;

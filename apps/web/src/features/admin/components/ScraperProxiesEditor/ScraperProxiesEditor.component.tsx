@@ -133,12 +133,13 @@ export const ScraperProxiesEditorComponent = ({
               <S.RowActions>
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="primary"
                   size="small"
                   disabled={disabled || !canTestRow(row.localId) || rowStatuses[row.localId]?.state === ProxyRowTestState.TESTING}
                   isLoading={rowStatuses[row.localId]?.state === ProxyRowTestState.TESTING}
                   onClick={() => onTestRow(row.localId)}
                 >
+                  <Icon name="plug" size={16} />
                   <Text variant="body-sm" weight="semibold">
                     {t('admin.settings.scraperProxies.test')}
                   </Text>
@@ -162,7 +163,7 @@ export const ScraperProxiesEditorComponent = ({
       </S.RowList>
 
       <S.AddRow>
-        <Button type="button" variant="tertiary" size="small" disabled={disabled} onClick={onAddRow}>
+        <Button type="button" variant="primary" size="small" disabled={disabled} onClick={onAddRow}>
           <Icon name="plus" size={14} />
           <Text variant="body-sm" weight="semibold">
             {t('admin.settings.scraperProxies.add')}
@@ -175,7 +176,7 @@ export const ScraperProxiesEditorComponent = ({
           <Text variant="body-sm" color="text.secondary">
             {t('admin.settings.scraperProxies.testSavedHint')}
           </Text>
-          <Button type="button" variant="secondary" size="small" isLoading={isSavedTestRunning} onClick={onTestSaved}>
+          <Button type="button" variant="primary" size="small" isLoading={isSavedTestRunning} onClick={onTestSaved}>
             <Icon name="plug" size={14} />
             <Text variant="body-sm" weight="semibold">
               {t('admin.settings.scraperProxies.testSaved')}

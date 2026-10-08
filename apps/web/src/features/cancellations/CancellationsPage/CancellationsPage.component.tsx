@@ -112,13 +112,14 @@ export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
               icon="search"
               title={t('cancellations.emptyFiltered.title')}
               description={t('cancellations.emptyFiltered.description')}
+              actionIcon="x"
               action={t('cancellations.emptyFiltered.action')}
               onAction={onClearFilters}
               size="lg"
             />
           ) : (
             <EmptyState
-              icon="x-circle"
+              icon="package-x"
               title={t('cancellations.empty.title')}
               description={t('cancellations.empty.description')}
               size="lg"

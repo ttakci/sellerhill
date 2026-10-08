@@ -53,6 +53,7 @@ export const BuyerMessageTemplatesAllDrawerComponent: React.FC<BuyerMessageTempl
       subtitle={subtitleLabel}
       size="lg"
       primaryAction={{
+        icon: 'arrow-right',
         label: t('translation:common.continue'),
         onClick: onContinue,
         disabled: isContinueDisabled,

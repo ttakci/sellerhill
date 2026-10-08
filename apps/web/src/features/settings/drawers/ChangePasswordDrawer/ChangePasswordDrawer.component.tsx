@@ -28,6 +28,7 @@ export const ChangePasswordDrawerComponent: React.FC<ChangePasswordDrawerCompone
       subtitle={t('translation:settingsHub.drawer.password.subtitle')}
       size="md"
       primaryAction={{
+        icon: 'save',
         label: t('translation:common.save'),
         onClick: onSubmit,
         isLoading: isSaving,

@@ -24,6 +24,7 @@ export function EditCampaignRateDrawerComponent({
       onClose={onClose}
       title={t(isDefault ? 'campaigns.rate.defaultTitle' : 'campaigns.rate.title')}
       primaryAction={{
+        icon: isRetry ? 'refresh' : 'save',
         label: t(isRetry ? 'campaigns.rate.retryMembers' : 'campaigns.actions.save'),
         onClick: onSubmit,
         isLoading: isSaving,

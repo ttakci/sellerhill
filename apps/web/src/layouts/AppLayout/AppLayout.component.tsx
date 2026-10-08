@@ -235,7 +235,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     aria-label={t('translation:menu.cancellations')}
                   >
                     <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                      <Icon name="x-circle" size={20} />
+                      <Icon name="package-x" size={20} />
                       {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.cancellations')}</S.NavItemLabel>}
                     </S.NavItemContent>
                   </S.NavItem>

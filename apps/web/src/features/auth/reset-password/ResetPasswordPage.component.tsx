@@ -57,6 +57,7 @@ export const ResetPasswordPageComponent = ({
               </S.StatusHeader>
               <S.ActionGroup>
                 <Button onClick={onNavigateToLogin} variant="primary" fullWidth size="large">
+                  <Icon name="arrow-left" size={16} />
                   <Text variant="body" weight="medium" color="text.inverse">
                     {t('auth:auth.passwordReset.forgot.backToLogin')}
                   </Text>
@@ -80,6 +81,7 @@ export const ResetPasswordPageComponent = ({
               </S.StatusHeader>
               <S.ActionGroup>
                 <Button onClick={onRequestNewLink} variant="primary" fullWidth size="large">
+                  <Icon name="refresh" size={16} />
                   <Text variant="body" weight="medium" color="text.inverse">
                     {t('auth:auth.passwordReset.reset.requestNewLink')}
                   </Text>
@@ -132,6 +134,7 @@ export const ResetPasswordPageComponent = ({
                     isLoading={isLoading || isSubmitting}
                     size="large"
                   >
+                    <Icon name="lock-keyhole" size={16} />
                     <Text>{t('auth:auth.passwordReset.reset.submitButton')}</Text>
                   </Button>
                 </S.ButtonContainer>
