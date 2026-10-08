@@ -161,7 +161,7 @@
         "price": "قیمت",
         "stock": "اسٹاک (eBay/AMZ)"
       },
-      "estimated": "تخمینی",
+      "estimatedAmount": "{{amount}} تخمینی",
       "emptyTitle": "اس مدت میں کوئی فروخت نہیں",
       "emptySubtitle": "منتخب مدت میں فروخت ہوتے ہی لسٹنگز یہاں نظر آئیں گی۔",
       "trendAria": "منتخب مدت کا رجحان"

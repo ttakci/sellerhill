@@ -53,7 +53,8 @@ export const TopSellersPanel = ({
     { skip: !ebayAccountId },
   );
   // A new range/sort/page shows the skeleton, never the previous answer's rows.
-  const isLoading = isFetching && !currentData;
+  // No store yet (still resolving) is loading too — never a flash of "nothing sold".
+  const isLoading = (isFetching && !currentData) || !ebayAccountId;
   const items = useMemo(() => currentData?.items ?? [], [currentData]);
   const total = currentData?.total ?? 0;
 

@@ -46,6 +46,13 @@ describe('DashboardService.getTopListings', () => {
     expect(page.seriesKeys).toHaveLength(7);
   });
 
+  it('never uses the database calendar', async () => {
+    const { service, query } = make([]);
+    await service.getTopListings('u1', { preset: P.THIS_MONTH }, S.SALES, 1, 20);
+    const sql = String(query.mock.calls.find(([s]) => String(s).includes('WITH cur AS'))![0]);
+    expect(sql).not.toMatch(/CURRENT_DATE/);
+  });
+
   it('excludes listings that only have cancelled orders and filters tracked orders', async () => {
     const { service, query } = make([]);
     await service.getTopListings('u1', { preset: P.TODAY }, S.SALES, 1, 20);

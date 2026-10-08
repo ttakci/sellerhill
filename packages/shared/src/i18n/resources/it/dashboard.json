@@ -167,7 +167,7 @@
         "price": "Prezzo",
         "stock": "Stock (eBay/AMZ)"
       },
-      "estimated": "stimato",
+      "estimatedAmount": "{{amount}} stimato",
       "emptyTitle": "Nessuna vendita in questo periodo",
       "emptySubtitle": "Le inserzioni compaiono qui non appena vendono nel periodo scelto.",
       "trendAria": "Andamento nel periodo scelto"

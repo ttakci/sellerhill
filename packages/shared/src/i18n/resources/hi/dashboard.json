@@ -161,7 +161,7 @@
         "price": "कीमत",
         "stock": "स्टॉक (eBay/AMZ)"
       },
-      "estimated": "अनुमानित",
+      "estimatedAmount": "{{amount}} अनुमानित",
       "emptyTitle": "इस अवधि में कोई बिक्री नहीं",
       "emptySubtitle": "चुनी गई अवधि में बिकते ही लिस्टिंग यहाँ दिखेंगी।",
       "trendAria": "चुनी गई अवधि का रुझान"

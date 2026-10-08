@@ -161,7 +161,7 @@
         "price": "Qiymət",
         "stock": "Stok (eBay/AMZ)"
       },
-      "estimated": "təxmini",
+      "estimatedAmount": "{{amount}} təxmini",
       "emptyTitle": "Bu dövrdə satış yoxdur",
       "emptySubtitle": "Seçilmiş dövrdə satılan elanlar burada görünəcək.",
       "trendAria": "Seçilmiş dövr üzrə gediş"

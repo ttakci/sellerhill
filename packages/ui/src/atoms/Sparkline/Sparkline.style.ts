@@ -13,7 +13,7 @@ const TONE_COLOR = {
 export const Svg = styled.svg<{ $tone: SparklineTone; $size: SparklineSize }>`
   display: block;
   width: 100%;
-  height: ${({ $size }) => ($size === 'sm' ? '1.5rem' : '2rem')};
+  height: ${(props) => tkn(props.$size === 'sm' ? 'spacing.lg' : 'spacing.xl')(props)};
   color: ${(props) => TONE_COLOR[props.$tone](props)};
   overflow: visible;
 `;

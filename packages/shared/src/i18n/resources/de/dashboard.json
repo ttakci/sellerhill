@@ -161,7 +161,7 @@
         "price": "Preis",
         "stock": "Bestand (eBay/AMZ)"
       },
-      "estimated": "geschätzt",
+      "estimatedAmount": "{{amount}} geschätzt",
       "emptyTitle": "In diesem Zeitraum nichts verkauft",
       "emptySubtitle": "Angebote erscheinen hier, sobald sie im gewählten Zeitraum verkauft werden.",
       "trendAria": "Verlauf im gewählten Zeitraum"

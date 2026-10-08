@@ -167,7 +167,7 @@
         "price": "Preț",
         "stock": "Stoc (eBay/AMZ)"
       },
-      "estimated": "estimat",
+      "estimatedAmount": "{{amount}} estimat",
       "emptyTitle": "Nicio vânzare în această perioadă",
       "emptySubtitle": "Anunțurile apar aici imediat ce se vând în perioada aleasă.",
       "trendAria": "Tendința în perioada aleasă"

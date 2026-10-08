@@ -161,7 +161,7 @@
         "price": "মূল্য",
         "stock": "স্টক (eBay/AMZ)"
       },
-      "estimated": "আনুমানিক",
+      "estimatedAmount": "{{amount}} আনুমানিক",
       "emptyTitle": "এই সময়ে কোনো বিক্রি নেই",
       "emptySubtitle": "নির্বাচিত সময়ে বিক্রি হলেই লিস্টিং এখানে দেখা যাবে।",
       "trendAria": "নির্বাচিত সময়ের প্রবণতা"

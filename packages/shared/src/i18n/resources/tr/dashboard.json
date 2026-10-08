@@ -135,8 +135,8 @@
       "untrackedExcludedTooltip": "Bir SellerHill listesiyle eşleşmeyen siparişler bu paneldeki hiçbir rakama dahil edilmez. Siparişler sayfasında \"Takip edilmiyor\" olarak görünmeye devam eder; dahil etmek için ilgili listeyi içe aktarın."
     },
     "topSellers": {
-      "result_one": "<b>{{count}}</b> listing satıldı",
-      "result_other": "<b>{{count}}</b> listing satıldı",
+      "result_one": "<b>{{count}}</b> liste satıldı",
+      "result_other": "<b>{{count}}</b> liste satıldı",
       "sortLabel": "Sırala:",
       "sort": {
         "sales": "Ciro",
@@ -161,7 +161,7 @@
         "price": "Fiyat",
         "stock": "Stok (eBay/AMZ)"
       },
-      "estimated": "tahmini",
+      "estimatedAmount": "{{amount}} tahmini",
       "emptyTitle": "Bu dönemde satış yok",
       "emptySubtitle": "Seçili dönemde satılan listeler burada görünür.",
       "trendAria": "Seçili dönemdeki gidiş"

@@ -185,7 +185,7 @@
         "price": "السعر",
         "stock": "المخزون (eBay/AMZ)"
       },
-      "estimated": "تقديري",
+      "estimatedAmount": "{{amount}} تقديري",
       "emptyTitle": "لا مبيعات في هذه الفترة",
       "emptySubtitle": "ستظهر الإدراجات هنا بمجرد بيعها في الفترة المحددة.",
       "trendAria": "الاتجاه خلال الفترة المحددة"

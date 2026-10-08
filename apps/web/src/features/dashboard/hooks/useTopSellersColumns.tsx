@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from '../components/TopSellersPanel/TopSellersPanel.style';
-import { formatSignedMoney, formatSignedPercent, trendTone } from '../utils/topSellerCard';
+import { changeTone, formatSignedMoney, formatSignedPercent, profitTone, trendTone } from '../utils/topSellerCard';
 
-import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
+import { ProductTableCell, type ProductTableCellMetaRow, type StatTone } from '@/domain-ui';
 
 /**
  * Table columns for the Top sellers tab: the listing, its trend over the
@@ -20,18 +20,17 @@ export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>
     const count = new Intl.NumberFormat(locale);
     const money = (value: number, row: TopListingDto) =>
       formatCurrency(value, locale, row.listing.currency || 'USD', 2);
-    const toneColor = (value: number | null) => {
-      if (value === null) {
-        return 'text.secondary';
+    const toneColor = (tone: StatTone | undefined) => {
+      if (tone === 'positive') {
+        return 'semantic.success';
       }
-      return value >= 0 ? 'semantic.success' : 'semantic.error';
+      return tone === 'negative' ? 'semantic.error' : 'text.secondary';
     };
 
     return [
       {
         key: 'product',
         header: t('dashboard.topSellers.columns.product'),
-        width: '20.5rem',
         render: (_value, row) => {
           const { listing } = row;
           const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
@@ -72,7 +71,7 @@ export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>
                 {money(row.metrics.sales, row)}
               </Text>
               {change && (
-                <Text variant="caption" color={toneColor(row.changes.sales)} numeric>
+                <Text variant="caption" color={toneColor(changeTone(row.changes.sales))} numeric>
                   {change}
                 </Text>
               )}
@@ -109,12 +108,14 @@ export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>
         align: 'right',
         render: (_value, row) => (
           <S.MetricCell>
-            <Text variant="body-sm" weight="semibold" color={toneColor(row.metrics.netProfit)} numeric>
+            <Text variant="body-sm" weight="semibold" color={toneColor(profitTone(row.metrics.netProfit))} numeric>
               {formatSignedMoney(row.metrics.netProfit, locale, row.listing.currency || 'USD')}
             </Text>
             {row.metrics.profitProvisional !== 0 && (
               <Text variant="caption" color="text.secondary">
-                {t('dashboard.topSellers.estimated')}
+                {t('dashboard.topSellers.estimatedAmount', {
+                  amount: formatSignedMoney(row.metrics.profitProvisional, locale, row.listing.currency || 'USD'),
+                })}
               </Text>
             )}
           </S.MetricCell>

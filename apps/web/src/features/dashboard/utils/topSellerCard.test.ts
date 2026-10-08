@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toTopSellerStats } from './topSellerCard';
+import { profitTone, toTopSellerStats, trendTone } from './topSellerCard';
 
 const t = ((key: string) => key) as never;
 const item = (over: Partial<{ netProfit: number; profitProvisional: number; change: number | null }> = {}) => ({
@@ -28,16 +28,48 @@ describe('toTopSellerStats', () => {
     expect(stats[3]).toMatchObject({ tone: 'negative' });
   });
 
-  it('tones the revenue change: up positive, down negative, none without a comparison', () => {
+  it('tones the revenue change: up positive, down negative, flat or none muted', () => {
     expect(toTopSellerStats(item() as never, t, 'en-US')[0].secondaryTone).toBe('positive');
-    expect(toTopSellerStats(item({ change: 0 }) as never, t, 'en-US')[0].secondaryTone).toBe('positive');
+    expect(toTopSellerStats(item({ change: 0 }) as never, t, 'en-US')[0].secondaryTone).toBeUndefined();
     const down = toTopSellerStats(item({ change: -3.14 }) as never, t, 'en-US')[0];
     expect(down).toMatchObject({ secondary: '−3.1%', secondaryTone: 'negative' });
     expect(toTopSellerStats(item({ change: null }) as never, t, 'en-US')[0].secondaryTone).toBeUndefined();
   });
 
-  it('adds the estimated note when part of the profit is provisional', () => {
-    const stats = toTopSellerStats(item({ profitProvisional: 3 }) as never, t, 'en-US');
-    expect(stats[3].secondary).toBe('dashboard.topSellers.estimated');
+  it('tones the sparkline: flat or no comparison neutral', () => {
+    expect(trendTone(5)).toBe('positive');
+    expect(trendTone(-5)).toBe('negative');
+    expect(trendTone(0)).toBe('neutral');
+    expect(trendTone(null)).toBe('neutral');
+  });
+
+  it('a profit of exactly zero is neutral, not green', () => {
+    expect(toTopSellerStats(item({ netProfit: 0 }) as never, t, 'en-US')[3].tone).toBeUndefined();
+    expect(profitTone(0)).toBeUndefined();
+  });
+
+  it('all-provisional: confirmed value stays 0 and neutral, the estimate shows apart', () => {
+    const tt = ((key: string, o?: { amount: string }) => (o ? key + ':' + o.amount : key)) as never;
+    const stats = toTopSellerStats(item({ netProfit: 0, profitProvisional: 30 }) as never, tt, 'en-US');
+    expect(stats[3]).toMatchObject({
+      value: '$0.00',
+      secondary: 'dashboard.topSellers.estimatedAmount:+$30.00',
+    });
+    expect(stats[3].tone).toBeUndefined();
+  });
+
+  it('mixed: confirmed value with the provisional amount as the muted secondary', () => {
+    const tt = ((key: string, o?: { amount: string }) => (o ? key + ':' + o.amount : key)) as never;
+    const stats = toTopSellerStats(item({ netProfit: 10, profitProvisional: 30 }) as never, tt, 'en-US');
+    expect(stats[3]).toMatchObject({
+      value: '+$10.00',
+      tone: 'positive',
+      secondary: 'dashboard.topSellers.estimatedAmount:+$30.00',
+    });
+    expect(stats[3].secondaryTone).toBeUndefined();
+  });
+
+  it('no provisional profit: no secondary', () => {
+    expect(toTopSellerStats(item() as never, t, 'en-US')[3].secondary).toBeUndefined();
   });
 });
