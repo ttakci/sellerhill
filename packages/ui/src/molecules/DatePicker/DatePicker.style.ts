@@ -80,18 +80,20 @@ export const ClearButton = styled.button`
   cursor: pointer;
 `;
 
+/**
+ * Portaled to `document.body` and placed by the container (top/left measured
+ * from the field): inside a drawer the field sits in an `overflow: hidden`
+ * glass card, which clipped an in-flow panel and let the next card paint over it.
+ */
 export const Panel = styled.div`
-  position: absolute;
-  top: calc(100% + ${tkn('spacing.xs')});
-  inset-inline-start: 0;
-  z-index: ${tkn('zIndex.dropdown')};
+  position: fixed;
+  z-index: ${tkn('zIndex.popover')};
   box-sizing: border-box;
-  width: 18rem;
-  max-width: calc(100vw - 2rem);
+  width: 18rem; /* until measured; then the field's width */
   padding: ${tkn('spacing.md')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.md')};
   box-shadow: ${tkn('shadows.lg')};
 `;
 

@@ -1,8 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { DatePickerComponent } from './DatePicker.component';
-import type { DatePickerDay, DatePickerProps } from './DatePicker.types';
+import type { DatePickerDay, DatePickerPanelPosition, DatePickerProps } from './DatePicker.types';
 import { buildMonthGrid, firstDayOfWeek, isoOf } from './monthGrid';
+
+/** Gap between the field and the panel, and the panel's minimum inset from the viewport edge (px). */
+const PANEL_GAP_PX = 4;
+const VIEWPORT_INSET_PX = 8;
+/** Narrowest calendar (18rem at the default 16px root). */
+const PANEL_MIN_WIDTH_PX = 288;
 
 /** Parses `yyyy-mm-dd`; anything else is "no date". */
 const parseIso = (value: string): { year: number; month: number; day: number } | null => {
@@ -24,7 +30,9 @@ export const DatePicker = ({
   className,
 }: DatePickerProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [panelPosition, setPanelPosition] = useState<DatePickerPanelPosition | null>(null);
   const selected = useMemo(() => parseIso(value), [value]);
   const [view, setView] = useState(() => {
     const now = new Date();
@@ -36,9 +44,11 @@ export const DatePicker = ({
       return undefined;
     }
     const onPointerDown = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
       }
+      setIsOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -50,6 +60,49 @@ export const DatePicker = ({
     return () => {
       document.removeEventListener('mousedown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen]);
+
+  /*
+   * The panel is portaled to <body>, so it is placed from the field's viewport
+   * rect. Measured every frame while open: a parent Drawer slides in with a CSS
+   * transform, which fires neither `scroll` nor `resize`, and the drawer body
+   * scrolls under the field. State is written only when the position changes.
+   */
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+    let frameId = 0;
+    let last: DatePickerPanelPosition | null = null;
+    const update = () => {
+      const field = containerRef.current;
+      const panel = panelRef.current;
+      if (field && panel) {
+        const rect = field.getBoundingClientRect();
+        const height = panel.offsetHeight;
+        // Same width as the field, so the two edges line up; a narrow field
+        // (a filter row) still gets a calendar wide enough to tap.
+        const width = Math.min(Math.max(rect.width, PANEL_MIN_WIDTH_PX), window.innerWidth - 2 * VIEWPORT_INSET_PX);
+        const roomBelow = window.innerHeight - rect.bottom;
+        const openAbove = roomBelow < height + PANEL_GAP_PX && rect.top > roomBelow;
+        const top = openAbove ? rect.top - PANEL_GAP_PX - height : rect.bottom + PANEL_GAP_PX;
+        const rtl = window.getComputedStyle(field).direction === 'rtl';
+        const preferredLeft = rtl ? rect.right - width : rect.left;
+        const maxLeft = window.innerWidth - VIEWPORT_INSET_PX - width;
+        const left = Math.max(VIEWPORT_INSET_PX, Math.min(preferredLeft, maxLeft));
+        if (!last || last.top !== top || last.left !== left || last.width !== width) {
+          last = { top, left, width };
+          setPanelPosition(last);
+        }
+      }
+      frameId = requestAnimationFrame(update);
+    };
+    update();
+    return () => {
+      cancelAnimationFrame(frameId);
+      // The next opening starts hidden until it is measured again.
+      setPanelPosition(null);
     };
   }, [isOpen]);
 
@@ -108,6 +161,8 @@ export const DatePicker = ({
       weekdays={weekdays}
       days={days}
       containerRef={containerRef}
+      panelRef={panelRef}
+      panelPosition={panelPosition}
       onToggle={() => {
         // Opening lands on the selected month.
         if (!isOpen && selected) {

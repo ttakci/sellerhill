@@ -44,8 +44,10 @@ export const Hero = styled(Card)`
     padding: ${tkn('spacing.xl')};
   }
 
+  /* Capped at 18rem: a 26rem square photo made the hero ~32rem tall beside six
+     lines of text, leaving a tall empty gap above the money strip. */
   @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(20rem, 26rem) minmax(0, 1fr);
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
   }
 `;
 
@@ -167,6 +169,13 @@ export const ProductTitle = styled(Text)`
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-width: 0;
+  line-height: ${tkn('typography.lineHeight.tight')};
+
+  /* The product name is what the seller came to this page for, so from \`lg\`
+     it takes the page-title size (no variant sits between h2 and h1). */
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    font-size: ${tkn('typography.fontSize.xxl')};
+  }
 `;
 
 /**

@@ -1,4 +1,5 @@
 import type React from 'react';
+import { createPortal } from 'react-dom';
 
 import { Icon } from '../../atoms/Icon';
 
@@ -20,6 +21,8 @@ export const DatePickerComponent = ({
   weekdays,
   days,
   containerRef,
+  panelRef,
+  panelPosition,
   onToggle,
   onClear,
   onPreviousMonth,
@@ -49,37 +52,50 @@ export const DatePickerComponent = ({
       </S.ClearButton>
     )}
 
-    {isOpen && (
-      <S.Panel role="dialog" aria-label={label}>
-        <S.PanelHeader>
-          <S.NavButton type="button" aria-label={previousMonthLabel} onClick={onPreviousMonth}>
-            <Icon name="chevron-left" size={18} />
-          </S.NavButton>
-          <S.MonthTitle>{monthTitle}</S.MonthTitle>
-          <S.NavButton type="button" aria-label={nextMonthLabel} onClick={onNextMonth}>
-            <Icon name="chevron-right" size={18} />
-          </S.NavButton>
-        </S.PanelHeader>
-        <S.Grid>
-          {weekdays.map((weekday) => (
-            <S.Weekday key={weekday}>{weekday}</S.Weekday>
-          ))}
-          {days.map((day) => (
-            <S.Day
-              key={day.iso}
-              type="button"
-              $muted={!day.isCurrentMonth}
-              $selected={day.isSelected}
-              $today={day.isToday}
-              aria-pressed={day.isSelected}
-              onClick={() => onSelectDay(day.iso)}
-            >
-              {day.day}
-            </S.Day>
-          ))}
-        </S.Grid>
-      </S.Panel>
-    )}
+    {isOpen &&
+      createPortal(
+        <S.Panel
+          ref={panelRef}
+          role="dialog"
+          aria-label={label}
+          // eslint-disable-next-line design-system/no-inline-styles -- position measured from the field at runtime
+          style={{
+            top: panelPosition?.top ?? 0,
+            left: panelPosition?.left ?? 0,
+            width: panelPosition?.width,
+            visibility: panelPosition ? 'visible' : 'hidden',
+          }}
+        >
+          <S.PanelHeader>
+            <S.NavButton type="button" aria-label={previousMonthLabel} onClick={onPreviousMonth}>
+              <Icon name="chevron-left" size={18} />
+            </S.NavButton>
+            <S.MonthTitle>{monthTitle}</S.MonthTitle>
+            <S.NavButton type="button" aria-label={nextMonthLabel} onClick={onNextMonth}>
+              <Icon name="chevron-right" size={18} />
+            </S.NavButton>
+          </S.PanelHeader>
+          <S.Grid>
+            {weekdays.map((weekday) => (
+              <S.Weekday key={weekday}>{weekday}</S.Weekday>
+            ))}
+            {days.map((day) => (
+              <S.Day
+                key={day.iso}
+                type="button"
+                $muted={!day.isCurrentMonth}
+                $selected={day.isSelected}
+                $today={day.isToday}
+                aria-pressed={day.isSelected}
+                onClick={() => onSelectDay(day.iso)}
+              >
+                {day.day}
+              </S.Day>
+            ))}
+          </S.Grid>
+        </S.Panel>,
+        document.body
+      )}
   </S.Container>
 );
 
