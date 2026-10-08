@@ -210,6 +210,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             icon="inventory"
             title={t('listings.detail.notFoundTitle')}
             description={t('listings.detail.notFoundSubtitle')}
+            actionIcon="arrow-left"
             action={t('translation:common.back')}
             onAction={onBack}
           />
@@ -282,6 +283,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             ) : null}
             {canPublish ? (
               <Button variant="primary" size="medium" onClick={onPublish}>
+                <Icon name="upload" size={16} />
                 <Text variant="body" weight="medium">
                   {t('listings.detail.publish')}
                 </Text>
@@ -689,6 +691,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         subtitle={t('listings.detail.titleDrawerSubtitle')}
         size="md"
         primaryAction={{
+          icon: 'save',
           label: t('translation:common.save'),
           onClick: onSave,
           isLoading: isSaving,
@@ -713,6 +716,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         subtitle={t('listings.detail.groupDrawerSubtitle')}
         size="md"
         primaryAction={{
+          icon: 'save',
           label: t('translation:common.save'),
           onClick: onSaveGroup,
           isLoading: isSavingGroup,
@@ -760,6 +764,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         subtitle={t('listings.detail.automationDrawerSubtitle')}
         size="md"
         primaryAction={{
+          icon: 'save',
           label: t('listings.detail.saveOverrides'),
           onClick: onSaveOverrides,
           isLoading: isSavingOverrides,
