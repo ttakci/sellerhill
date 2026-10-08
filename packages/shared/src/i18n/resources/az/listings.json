@@ -483,7 +483,8 @@
       "saveOverrides": "Avtomatlaşdırmanı yadda saxla",
       "publish": "eBay-də dərc et",
       "publishHint": "Bu qaralama hələ eBay-də aktiv deyil. Qiymət və stok düzgün görünəndə dərc edin.",
-      "draftBanner": "Qaralama — eBay-də dərc edilməyib"
+      "draftBanner": "Qaralama — eBay-də dərc edilməyib",
+      "groupPreviewTitle": "Bu qrupun ayarları"
     },
     "products": {
       "searchPlaceholder": "Başlıq, ASIN və ya brend üzrə axtarın…"

@@ -42,7 +42,7 @@ export const SettingsCard: React.FC<SettingsCardProps> = ({
                 )}
                 {header && (
                   <S.TitleContent>
-                    <S.Title>{header.title}</S.Title>
+                    <S.Title $emphasis={header.emphasis}>{header.title}</S.Title>
                     {header.subtitle && (
                       <Text variant="body-sm" color="text.secondary">
                         {header.subtitle}

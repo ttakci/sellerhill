@@ -483,7 +483,8 @@
       "saveOverrides": "آٹومیشن محفوظ کریں",
       "publish": "eBay پر پبلش کریں",
       "publishHint": "یہ ڈرافٹ ابھی eBay پر لائیو نہیں۔ جب قیمت اور اسٹاک درست لگیں تو پبلش کریں۔",
-      "draftBanner": "ڈرافٹ — eBay پر پبلش نہیں ہوا"
+      "draftBanner": "ڈرافٹ — eBay پر پبلش نہیں ہوا",
+      "groupPreviewTitle": "اس گروپ کی ترتیبات"
     },
     "products": {
       "searchPlaceholder": "عنوان، ASIN یا برانڈ سے تلاش کریں…"

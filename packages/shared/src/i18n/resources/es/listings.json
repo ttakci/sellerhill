@@ -483,7 +483,8 @@
       "saveOverrides": "Guardar automatización",
       "publish": "Publicar en eBay",
       "publishHint": "Este borrador aún no está en vivo en eBay. Publícalo cuando el precio y el stock te parezcan correctos.",
-      "draftBanner": "Borrador — no publicado en eBay"
+      "draftBanner": "Borrador — no publicado en eBay",
+      "groupPreviewTitle": "Ajustes de este grupo"
     },
     "products": {
       "searchPlaceholder": "Buscar por título, ASIN o marca…"

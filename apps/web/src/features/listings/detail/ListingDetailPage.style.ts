@@ -1,26 +1,7 @@
 import styled from '@emotion/styled';
-import { Card, IconButton, PageContainerWithMobileBar, SettingsCard, Text, tkn } from '@repo/ui';
+import { Card, IconButton, PageContainer, SettingsCard, Text, tkn } from '@repo/ui';
 
-export const Container = PageContainerWithMobileBar;
-
-/** Call-to-action strip for draft → publish */
-export const DraftPublishBar = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  align-items: stretch;
-
-  @media (min-width: ${tkn('breakpoints.sm')}) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-`;
-
-export const DraftPublishCopy = styled.div`
-  min-width: 0;
-  flex: 1;
-`;
+export const Container = PageContainer;
 
 /**
  * Product hero: gallery + summary — stacks on phone, side-by-side tablet+.
@@ -140,17 +121,41 @@ export const GalleryArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
   }
 `;
 
-/** ONE line of thumbnails that scrolls sideways — wrapping onto a second row
- *  made the gallery taller than the column beside it. */
+/** The thumbnail carousel: a chevron at each end steps to the previous / next
+ *  image, and the strip between them follows the chosen thumbnail. */
+export const ThumbCarousel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+  flex-shrink: 0;
+`;
+
+export const ThumbArrow = styled(IconButton)`
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border-radius: ${tkn('radius.full')};
+`;
+
+/** ONE line of thumbnails — wrapping onto a second row made the gallery taller
+ *  than the column beside it. No scrollbar (the arrows and the container's
+ *  scroll-to-selected move it); a finger can still swipe it on a phone. */
 export const ThumbRow = styled.div`
   position: relative;
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: nowrap;
   gap: ${tkn('spacing.sm')};
+  min-width: 0;
   overflow-x: auto;
   scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  flex-shrink: 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 export const ThumbButton = styled.button<{ $active: boolean }>`
@@ -294,9 +299,11 @@ export const UpdatedValueRow = styled.div`
  * the profit figure, so the eye lands there first.
  */
 export const KpiStrip = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: ${tkn('spacing.md')};
+  /* A grid, not a wrapping row: five in a line on a desk, two or three per
+     line on a phone — a wrapping flex row fell to one figure per line. */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr));
+  gap: ${tkn('spacing.md')};
   margin-top: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md')};
   border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
@@ -313,9 +320,7 @@ export const KpiItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  flex: 1 1 7rem;
-  min-width: 7rem;
-  padding-right: ${tkn('spacing.md')};
+  min-width: 0;
 `;
 
 export const KpiLabel = styled(Text)`
@@ -323,9 +328,78 @@ export const KpiLabel = styled(Text)`
   white-space: nowrap;
 `;
 
-export const SectionGrid = styled.div`
+/** Revisions / End listing (or Delete / Publish on a draft) — wraps on a phone. */
+export const HeaderActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/**
+ * Product content in the wide column, the stock card and the eBay policies in
+ * the narrow one beside it (from `lg`). On a tablet the two short cards share
+ * a row above the content; on a phone the stock card leads, because "is this
+ * still selling?" is the question a seller opens a listing to answer.
+ * `grid-template-rows: auto 1fr` keeps the policies card tucked under the stock
+ * card instead of drifting down beside a long description.
+ */
+export const BodyGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'stock'
+    'content'
+    'policies';
+  gap: ${tkn('spacing.lg')};
+  align-items: start;
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'stock policies'
+      'content content';
+  }
+
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'content stock'
+      'content policies';
+  }
+`;
+
+/* SettingsCard is `height: 100%`; inside the grid that would stretch a short
+   card to its whole row, so each placed card takes its content's height. */
+export const ContentCard = styled(SettingsCard)`
+  grid-area: content;
+  height: auto;
+`;
+
+export const StockCard = styled(SettingsCard)`
+  grid-area: stock;
+  height: auto;
+`;
+
+export const PoliciesCard = styled(SettingsCard)`
+  grid-area: policies;
+  height: auto;
+`;
+
+/** The configuration block. It carried an "applies on the next sync" note
+ *  until saves started reaching eBay at once (2026-10-08). */
+export const ConfigSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+`;
+
+/** The settings group and the automation overrides — set once, changed
+ *  rarely — close the page, side by side from `md`. */
+export const ConfigGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: ${tkn('spacing.lg')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
@@ -333,11 +407,17 @@ export const SectionGrid = styled.div`
   }
 `;
 
-/** Full-width variant of the shared SettingsCard — layout only, spans both grid columns from `md` up. */
-export const FullWidthSettingsCard = styled(SettingsCard)`
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-column: 1 / -1;
-  }
+/** The change-group drawer's read-only preview of the picked group. */
+export const GroupPreview = styled(SettingsCard)`
+  height: auto;
+`;
+
+/** The group's per-range margin rules, one quiet line each, under the facts. */
+export const GroupPreviewRanges = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  margin-top: ${tkn('spacing.sm')};
 `;
 
 /** Vertical rhythm for a SettingsCard body with multiple top-level children. */
@@ -488,14 +568,6 @@ export const ProductContentBlock = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-/** Spacing for the InfoMessage under a card's summary rows — used by both the
- *  Listeleme Ayar Grubu and Otomasyon Durumu cards, since a group swap and an
- *  override both only apply on the next sync. Stays visible rather than
- *  hidden behind a hover tooltip. */
-export const AutomationSyncNoteSlot = styled.div`
-  margin-top: ${tkn('spacing.sm')};
-`;
-
 /** Stacks the boxed automation blocks with even spacing — matches the Store
  *  Settings buyer-messaging event list. */
 export const AutomationBlockList = styled.div`
@@ -595,23 +667,3 @@ export const FormStack = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
-/** Single manage CTA on phones */
-export const MobileActionBar = styled.div`
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: ${tkn('zIndex.sticky')};
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding-bottom: max(${tkn('spacing.sm')}, env(safe-area-inset-bottom));
-  background: ${tkn('colors.surface.primary')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  box-shadow: ${tkn('shadows.lg')};
-  box-sizing: border-box;
-
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    display: none;
-  }
-`;

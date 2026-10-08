@@ -483,7 +483,8 @@
       "saveOverrides": "Enregistrer l'automatisation",
       "publish": "Publier sur eBay",
       "publishHint": "Ce brouillon n'est pas encore en ligne sur eBay. Publiez-le lorsque les prix et le stock vous conviennent.",
-      "draftBanner": "Brouillon — non publié sur eBay"
+      "draftBanner": "Brouillon — non publié sur eBay",
+      "groupPreviewTitle": "Réglages de ce groupe"
     },
     "products": {
       "searchPlaceholder": "Rechercher par titre, ASIN ou marque…"

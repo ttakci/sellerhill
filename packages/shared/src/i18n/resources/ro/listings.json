@@ -483,7 +483,8 @@
       "saveOverrides": "Salvează automatizarea",
       "publish": "Publică pe eBay",
       "publishHint": "Această ciornă nu este încă activă pe eBay. Publicați când prețul și stocul arată bine.",
-      "draftBanner": "Ciornă — nepublicată pe eBay"
+      "draftBanner": "Ciornă — nepublicată pe eBay",
+      "groupPreviewTitle": "Setările acestui grup"
     },
     "products": {
       "searchPlaceholder": "Caută după titlu, ASIN sau brand…"

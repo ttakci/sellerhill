@@ -484,7 +484,8 @@
       "saveOverrides": "Save automation",
       "publish": "Publish to eBay",
       "publishHint": "This draft is not live on eBay yet. Publish when pricing and stock look right.",
-      "draftBanner": "Draft — not published to eBay"
+      "draftBanner": "Draft — not published to eBay",
+      "groupPreviewTitle": "This group's settings"
     },
     "products": {
       "searchPlaceholder": "Search by title, ASIN or brand…"

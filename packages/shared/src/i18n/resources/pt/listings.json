@@ -483,7 +483,8 @@
       "saveOverrides": "Salvar automação",
       "publish": "Publicar no eBay",
       "publishHint": "Este rascunho ainda não está no ar no eBay. Publique quando o preço e o estoque estiverem corretos.",
-      "draftBanner": "Rascunho — não publicado no eBay"
+      "draftBanner": "Rascunho — não publicado no eBay",
+      "groupPreviewTitle": "Configurações deste grupo"
     },
     "products": {
       "searchPlaceholder": "Pesquisar por título, ASIN ou marca…"

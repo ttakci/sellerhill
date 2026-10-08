@@ -483,7 +483,8 @@
       "saveOverrides": "保存自动化",
       "publish": "发布到 eBay",
       "publishHint": "此草稿尚未在 eBay 上线。待价格和库存确认无误后再发布。",
-      "draftBanner": "草稿：尚未发布到 eBay"
+      "draftBanner": "草稿：尚未发布到 eBay",
+      "groupPreviewTitle": "该分组的设置"
     },
     "products": {
       "searchPlaceholder": "按标题、ASIN 或品牌搜索…"

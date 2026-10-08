@@ -483,7 +483,8 @@
       "saveOverrides": "Salva l'automazione",
       "publish": "Pubblica su eBay",
       "publishHint": "Questa bozza non è ancora online su eBay. Pubblicala quando prezzo e stock ti sembrano corretti.",
-      "draftBanner": "Bozza — non pubblicata su eBay"
+      "draftBanner": "Bozza — non pubblicata su eBay",
+      "groupPreviewTitle": "Impostazioni di questo gruppo"
     },
     "products": {
       "searchPlaceholder": "Cerca per titolo, ASIN o marchio…"

@@ -39,6 +39,12 @@ export interface ListingOverridesUiState {
   marginFixedOverride: string;
 }
 
+/** One read-only label / value row (the change-group drawer's preview). */
+export interface ListingDetailFact {
+  label: string;
+  value: string;
+}
+
 export interface ListingDetailPageProps {
   listing: ListingDto | undefined;
   isLoading: boolean;
@@ -55,6 +61,11 @@ export interface ListingDetailPageProps {
   /** Per-range breakdown for the Kâr Marjı info tooltip — empty when there's
    *  only one range (nothing to break down beyond the summary label itself). */
   groupMarginRangeDetails: string[];
+  /** The group picked in the change-group drawer, read-only: margin, quantity,
+   *  buffer, fees and price ending. Empty until a group is picked. */
+  drawerGroupFacts: ListingDetailFact[];
+  /** That group's per-range margin rules, one line each (empty for one range). */
+  drawerGroupMarginRanges: string[];
   /** "N+" when the source only reports a lower bound, formatted via
    *  `formatSourceStock` in the container — never a bare number. */
   amazonStockText: string;
@@ -102,7 +113,6 @@ export interface ListingDetailPageProps {
   onEnd: () => void;
   onDelete: () => void;
   onPublish: () => void;
-  onManage: () => void;
   isRevisionsDrawerOpen: boolean;
   hasRevisions: boolean;
   onOpenRevisions: () => void;

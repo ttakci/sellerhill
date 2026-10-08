@@ -483,7 +483,8 @@
       "saveOverrides": "অটোমেশন সংরক্ষণ করুন",
       "publish": "eBay-তে প্রকাশ করুন",
       "publishHint": "এই খসড়া এখনও eBay-তে লাইভ নয়। মূল্য ও স্টক ঠিক মনে হলে প্রকাশ করুন।",
-      "draftBanner": "খসড়া — eBay-তে প্রকাশিত নয়"
+      "draftBanner": "খসড়া — eBay-তে প্রকাশিত নয়",
+      "groupPreviewTitle": "এই গ্রুপের সেটিংস"
     },
     "products": {
       "searchPlaceholder": "শিরোনাম, ASIN বা ব্র্যান্ড দিয়ে খুঁজুন…"

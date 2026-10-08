@@ -483,7 +483,8 @@
       "saveOverrides": "Сохранить автоматизацию",
       "publish": "Опубликовать на eBay",
       "publishHint": "Этот черновик ещё не опубликован на eBay. Опубликуйте, когда цены и остатки вас устроят.",
-      "draftBanner": "Черновик — не опубликован на eBay"
+      "draftBanner": "Черновик — не опубликован на eBay",
+      "groupPreviewTitle": "Настройки этой группы"
     },
     "products": {
       "searchPlaceholder": "Поиск по названию, ASIN или бренду…"

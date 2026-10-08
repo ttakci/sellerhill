@@ -9,10 +9,8 @@ import {
   IconName,
   type BadgeVariant,
   IdBadge,
-  InfoMessage,
   ModernSelect,
   PageHeader,
-  SettingsActionRow,
   SettingsCard,
   SettingsInfoRow,
   Text,
@@ -137,6 +135,8 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   groupStockBufferLabel,
   groupMarginSummaryLabel,
   groupMarginRangeDetails,
+  drawerGroupFacts,
+  drawerGroupMarginRanges,
   amazonStockText,
   sourceRemoved,
   paymentPolicyLabel,
@@ -174,7 +174,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   onEnd,
   onDelete,
   onPublish,
-  onManage,
   isRevisionsDrawerOpen,
   hasRevisions,
   onOpenRevisions,
@@ -250,20 +249,47 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         }
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
+        actions={
+          /* The page's actions sit where a record page keeps them: at the top,
+             at every width (PageHeader stacks them under the title on a phone).
+             They replaced a Danger zone card at the foot of the page, a draft
+             publish strip and a mobile "Manage" sheet — three places for what
+             is at most two buttons. Ending / deleting still ask first. */
+          <S.HeaderActions>
+            {hasRevisions ? (
+              <Button variant="primary" size="medium" onClick={onOpenRevisions}>
+                <Icon name="history" size={16} />
+                <Text variant="body" weight="medium">
+                  {t('listings.detail.revisions.action')}
+                </Text>
+              </Button>
+            ) : null}
+            {canEnd ? (
+              <Button variant="danger" size="medium" onClick={onEnd}>
+                <Icon name="block" size={16} />
+                <Text variant="body" weight="medium">
+                  {t('listings.detail.endShort')}
+                </Text>
+              </Button>
+            ) : null}
+            {canDelete ? (
+              <Button variant="danger" size="medium" onClick={onDelete}>
+                <Icon name="trash" size={16} />
+                <Text variant="body" weight="medium">
+                  {t('listings.detail.deleteShort')}
+                </Text>
+              </Button>
+            ) : null}
+            {canPublish ? (
+              <Button variant="primary" size="medium" onClick={onPublish}>
+                <Text variant="body" weight="medium">
+                  {t('listings.detail.publish')}
+                </Text>
+              </Button>
+            ) : null}
+          </S.HeaderActions>
+        }
       />
-
-      {canPublish ? (
-        <S.DraftPublishBar variant="elevated" padding="md">
-          <S.DraftPublishCopy>
-            <Text variant="body-sm" color="text.secondary">
-              {t('listings.detail.publishHint')}
-            </Text>
-          </S.DraftPublishCopy>
-          <Button variant="primary" size="medium" onClick={onPublish}>
-            <Text variant="body">{t('listings.detail.publish')}</Text>
-          </Button>
-        </S.DraftPublishBar>
-      ) : null}
 
       <S.Hero variant="elevated">
         <S.StatusBadgeSlot>
@@ -297,19 +323,27 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             ) : null}
           </S.GalleryMain>
           {images.length > 1 && (
-            <S.ThumbRow ref={thumbRowRef}>
-              {images.map((src, index) => (
-                <S.ThumbButton
-                  key={`${src}-${index}`}
-                  type="button"
-                  $active={index === selectedImageIndex}
-                  onClick={() => onSelectImage(index)}
-                  aria-label={t('listings.detail.imageThumb', { index: index + 1 })}
-                >
-                  <img src={src} alt="" />
-                </S.ThumbButton>
-              ))}
-            </S.ThumbRow>
+            <S.ThumbCarousel>
+              <S.ThumbArrow variant="outlined" onClick={onPrevImage} aria-label={t('listings.carousel.previous')}>
+                <Icon name="chevron-left" size={16} />
+              </S.ThumbArrow>
+              <S.ThumbRow ref={thumbRowRef}>
+                {images.map((src, index) => (
+                  <S.ThumbButton
+                    key={`${src}-${index}`}
+                    type="button"
+                    $active={index === selectedImageIndex}
+                    onClick={() => onSelectImage(index)}
+                    aria-label={t('listings.detail.imageThumb', { index: index + 1 })}
+                  >
+                    <img src={src} alt="" />
+                  </S.ThumbButton>
+                ))}
+              </S.ThumbRow>
+              <S.ThumbArrow variant="outlined" onClick={onNextImage} aria-label={t('listings.carousel.next')}>
+                <Icon name="chevron-right" size={16} />
+              </S.ThumbArrow>
+            </S.ThumbCarousel>
           )}
         </S.GalleryBlock>
 
@@ -319,13 +353,19 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               <S.ProductTitle variant="h2" weight="bold">
                 {listing.title || listing.asin}
               </S.ProductTitle>
-              <IconButton
-                variant="ghost"
-                onClick={onOpenTitleDrawer}
-                aria-label={t('listings.detail.titleDrawerTitle')}
-              >
-                <Icon name="edit" size={16} color="brand.primary" />
-              </IconButton>
+              {/* Drafts only: the edit is stored on our row and used at
+                  publish. On a live listing nothing pushes it to eBay
+                  (updateListing writes the DB only), so offering it there
+                  would show a title the buyer never sees. */}
+              {isDraft ? (
+                <IconButton
+                  variant="ghost"
+                  onClick={onOpenTitleDrawer}
+                  aria-label={t('listings.detail.titleDrawerTitle')}
+                >
+                  <Icon name="edit" size={16} color="brand.primary" />
+                </IconButton>
+              ) : null}
             </S.TitleHeadingRow>
             <S.BadgeRow>
               {listing.brand ? (
@@ -399,14 +439,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                 <Text variant="body-sm" numeric>
                   {formatDateTime(listing.lastSyncedAt ?? listing.updatedAt)}
                 </Text>
-                {hasRevisions ? (
-                  <Button variant="secondary" size="xsmall" onClick={onOpenRevisions}>
-                    <Icon name="history" size={14} />
-                    <Text variant="body-sm" weight="medium">
-                      {t('listings.detail.revisions.action')}
-                    </Text>
-                  </Button>
-                ) : null}
               </S.UpdatedValueRow>
             </S.IdItem>
           </S.IdList>
@@ -429,179 +461,13 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.HeroInfo>
       </S.Hero>
 
-      <S.SectionGrid>
-        <SettingsCard variant="section" header={{ title: t('listings.detail.performance') }}>
-          <S.MetaList>
-            <Meta label={t('listings.table.stock')}>
-              <Text variant="body" weight="semibold" numeric>
-                {listing.quantity}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.amazonStock')}>
-              <Text variant="body" weight="semibold" numeric>
-                {amazonStockText}
-              </Text>
-              {sourceRemoved && (
-                <Text variant="caption" color="semantic.error">
-                  {t('listings.detail.unavailableOnAmazon')}
-                </Text>
-              )}
-            </Meta>
-            <Meta label={t('listings.table.sold')}>
-              <Text variant="body" weight="semibold" numeric>
-                {listing.soldCount ?? 0}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.lastSale')}>
-              <Text variant="body" weight="semibold">
-                {listing.lastSaleAt ? formatDate(listing.lastSaleAt) : '—'}
-              </Text>
-            </Meta>
-          </S.MetaList>
-        </SettingsCard>
-
-        {/* Read-only — reassigning a policy here is not pushed to eBay's
-            offer yet, so this card only shows what's currently attached. */}
-        <SettingsCard variant="section" header={{ title: t('listings.detail.ebayPolicies') }}>
-          <SettingsInfoRow
-            label={t('listings.businessPolicies.paymentPolicy')}
-            value={paymentPolicyLabel}
-          />
-          <SettingsInfoRow
-            label={t('listings.businessPolicies.shippingPolicy')}
-            value={shippingPolicyLabel}
-          />
-          <SettingsInfoRow
-            label={t('listings.businessPolicies.returnPolicy')}
-            value={returnPolicyLabel}
-          />
-        </SettingsCard>
-
-        {/* Same compact fact-grid pattern as Performance — the group's own
-            settings, not just its name. Edit lives in the header now that the
-            body is plain facts, and opens a dedicated drawer that changes
-            ONLY the group — the automation overrides below have their own
-            edit action and their own drawer. */}
-        <SettingsCard
-          variant="section"
-          header={{ title: t('listings.detail.strategyGroupCardTitle') }}
-          headerRight={
-            <IconButton variant="ghost" onClick={onOpenGroupDrawer} aria-label={t('listings.detail.groupDrawerTitle')}>
-              <Icon name="edit" size={16} color="brand.primary" />
-            </IconButton>
-          }
-        >
-          <S.MetaList>
-            <Meta label={t('listings.detail.groupNameLabel')}>
-              <Text variant="body" weight="semibold">
-                {strategyGroupLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.detail.groupDefaultQuantityLabel')}>
-              <Text variant="body" weight="semibold" numeric>
-                {groupDefaultQuantityLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.detail.groupStockBufferLabel')}>
-              <Text variant="body" weight="semibold" numeric>
-                {groupStockBufferLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.detail.groupMarginLabel')}>
-              <S.MarginValueRow>
-                <Text variant="body" weight="semibold">
-                  {groupMarginSummaryLabel}
-                </Text>
-                {groupMarginRangeDetails.length > 0 ? (
-                  <Tooltip
-                    content={
-                      <>
-                        {groupMarginRangeDetails.map((row) => (
-                          <div key={row}>{row}</div>
-                        ))}
-                      </>
-                    }
-                    position="left"
-                    variant="dark"
-                  >
-                    <IconButton variant="ghost" aria-label={t('listings.detail.groupMarginTooltipLabel')}>
-                      <Icon name="info" size={14} color="text.tertiary" />
-                    </IconButton>
-                  </Tooltip>
-                ) : null}
-              </S.MarginValueRow>
-            </Meta>
-            {adCampaign ? (
-              <Meta label={t('campaigns:campaigns.listingContext.title')}>
-                <Button variant="text" size="small" onClick={() => onOpenCampaign(adCampaign.campaignId)}>
-                  <Text variant="body" weight="semibold">
-                    {adCampaign.rate === null
-                      ? adCampaign.name
-                      : t('campaigns:campaigns.listingContext.value', {
-                          name: adCampaign.name,
-                          rate: new Intl.NumberFormat(i18n.language).format(adCampaign.rate),
-                        })}
-                  </Text>
-                </Button>
-                {adCampaign.note ? (
-                  <Text variant="caption" color="text.secondary">
-                    {t(
-                      adCampaign.note === 'margin-override'
-                        ? 'campaigns:campaigns.readOnly.marginOverride'
-                        : 'campaigns:campaigns.listingContext.notFollowed'
-                    )}
-                  </Text>
-                ) : null}
-              </Meta>
-            ) : null}
-          </S.MetaList>
-
-          {!isDraft ? (
-            <S.AutomationSyncNoteSlot>
-              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
-            </S.AutomationSyncNoteSlot>
-          ) : null}
-        </SettingsCard>
-
-        {/* Automation overrides only — the strategy group has its own card and
-            drawer above. Each row is a plain fact (state + the value it
-            applies), not a filled box. */}
-        <SettingsCard
-          variant="section"
-          header={{ title: t('listings.detail.automationStatus') }}
-          headerRight={
-            <IconButton
-              variant="ghost"
-              onClick={onOpenAutomationDrawer}
-              aria-label={t('listings.detail.automationDrawerTitle')}
-            >
-              <Icon name="edit" size={16} color="brand.primary" />
-            </IconButton>
-          }
-        >
-          <S.MetaList>
-            {automationStatusItems.map((item) => (
-              <Meta key={item.key} icon={item.icon} iconColor={automationStateColor(item.state)} label={item.label}>
-                <Text variant="body" weight="semibold" color={automationStateColor(item.state)}>
-                  {automationStateLabel(item.state, t)}
-                </Text>
-                {item.detail ? (
-                  <Text variant="caption" color="text.secondary">
-                    {item.detail}
-                  </Text>
-                ) : null}
-              </Meta>
-            ))}
-          </S.MetaList>
-
-          {!isDraft ? (
-            <S.AutomationSyncNoteSlot>
-              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
-            </S.AutomationSyncNoteSlot>
-          ) : null}
-        </SettingsCard>
-
-        <S.FullWidthSettingsCard variant="section" header={{ title: t('listings.detail.productContent') }}>
+      {/* What a seller reads, then what they check, then what they rarely
+          touch: the product's own content takes the wide column, the live
+          stock / sales figures and the eBay policies sit beside it, and the
+          settings group + automation overrides close the page. On a phone
+          the stock card comes first — it answers "is this still selling?" */}
+      <S.BodyGrid>
+        <S.ContentCard variant="section" header={{ title: t('listings.detail.productContent'), emphasis: true }}>
           <S.ProductContentStack>
             {hasDescription && (
               <S.ProductContentBlock>
@@ -656,50 +522,166 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               </S.ProductContentBlock>
             )}
           </S.ProductContentStack>
-        </S.FullWidthSettingsCard>
+        </S.ContentCard>
 
-        {/* Ending and deleting a listing lived ONLY in the mobile Manage sheet,
-            whose bar is `display: none` from `md` up — so on desktop `onEnd` and
-            `onDelete` were handed to this component and never rendered, and a
-            seller had no way to take one listing down from its own page. A zone
-            card at the foot of the page reaches them at every width without
-            putting destructive buttons in the PageHeader. */}
-        {(canEnd || canDelete) && (
-          <S.FullWidthSettingsCard
+        <S.StockCard variant="section" header={{ title: t('listings.detail.performance'), emphasis: true }}>
+          <S.MetaList>
+            <Meta label={t('listings.table.stock')}>
+              <Text variant="body" weight="semibold" numeric>
+                {listing.quantity}
+              </Text>
+            </Meta>
+            <Meta label={t('listings.table.amazonStock')}>
+              <Text variant="body" weight="semibold" numeric>
+                {amazonStockText}
+              </Text>
+              {sourceRemoved && (
+                <Text variant="caption" color="semantic.error">
+                  {t('listings.detail.unavailableOnAmazon')}
+                </Text>
+              )}
+            </Meta>
+            <Meta label={t('listings.table.sold')}>
+              <Text variant="body" weight="semibold" numeric>
+                {listing.soldCount ?? 0}
+              </Text>
+            </Meta>
+            <Meta label={t('listings.table.lastSale')}>
+              <Text variant="body" weight="semibold">
+                {listing.lastSaleAt ? formatDate(listing.lastSaleAt) : '—'}
+              </Text>
+            </Meta>
+          </S.MetaList>
+        </S.StockCard>
+
+        {/* Read-only — reassigning a policy here is not pushed to eBay's
+            offer yet, so this card only shows what's currently attached. */}
+        <S.PoliciesCard variant="section" header={{ title: t('listings.detail.ebayPolicies'), emphasis: true }}>
+          <SettingsInfoRow label={t('listings.businessPolicies.paymentPolicy')} value={paymentPolicyLabel} />
+          <SettingsInfoRow label={t('listings.businessPolicies.shippingPolicy')} value={shippingPolicyLabel} />
+          <SettingsInfoRow label={t('listings.businessPolicies.returnPolicy')} value={returnPolicyLabel} />
+        </S.PoliciesCard>
+      </S.BodyGrid>
+
+      <S.ConfigSection>
+        <S.ConfigGrid>
+          {/* Same compact fact-grid pattern as Performance — the group's own
+              settings, not just its name. Edit lives in the header now that the
+              body is plain facts, and opens a dedicated drawer that changes
+              ONLY the group — the automation overrides below have their own
+              edit action and their own drawer. */}
+          <SettingsCard
             variant="section"
-            header={{
-              title: t('listings.detail.dangerTitle'),
-              subtitle: t('listings.detail.dangerSubtitle'),
-            }}
+            header={{ title: t('listings.detail.strategyGroupCardTitle'), emphasis: true }}
+            headerRight={
+              <IconButton
+                variant="ghost"
+                onClick={onOpenGroupDrawer}
+                aria-label={t('listings.detail.groupDrawerTitle')}
+              >
+                <Icon name="edit" size={16} color="brand.primary" />
+              </IconButton>
+            }
           >
-            {canEnd && (
-              <SettingsActionRow
-                icon="block"
-                label={t('listings.detail.endShort')}
-                subtitle={t('listings.detail.endHint')}
-                onClick={onEnd}
-              />
-            )}
-            {canDelete && (
-              <SettingsActionRow
-                icon="trash"
-                variant="danger"
-                label={t('listings.detail.deleteShort')}
-                subtitle={t('listings.detail.deleteHint')}
-                onClick={onDelete}
-              />
-            )}
-          </S.FullWidthSettingsCard>
-        )}
-      </S.SectionGrid>
+            <S.MetaList>
+              <Meta label={t('listings.detail.groupNameLabel')}>
+                <Text variant="body" weight="semibold">
+                  {strategyGroupLabel}
+                </Text>
+              </Meta>
+              <Meta label={t('listings.detail.groupDefaultQuantityLabel')}>
+                <Text variant="body" weight="semibold" numeric>
+                  {groupDefaultQuantityLabel}
+                </Text>
+              </Meta>
+              <Meta label={t('listings.detail.groupStockBufferLabel')}>
+                <Text variant="body" weight="semibold" numeric>
+                  {groupStockBufferLabel}
+                </Text>
+              </Meta>
+              <Meta label={t('listings.detail.groupMarginLabel')}>
+                <S.MarginValueRow>
+                  <Text variant="body" weight="semibold">
+                    {groupMarginSummaryLabel}
+                  </Text>
+                  {groupMarginRangeDetails.length > 0 ? (
+                    <Tooltip
+                      content={
+                        <>
+                          {groupMarginRangeDetails.map((row) => (
+                            <div key={row}>{row}</div>
+                          ))}
+                        </>
+                      }
+                      position="left"
+                      variant="dark"
+                    >
+                      <IconButton variant="ghost" aria-label={t('listings.detail.groupMarginTooltipLabel')}>
+                        <Icon name="info" size={14} color="text.tertiary" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : null}
+                </S.MarginValueRow>
+              </Meta>
+              {adCampaign ? (
+                <Meta label={t('campaigns:campaigns.listingContext.title')}>
+                  <Button variant="text" size="small" onClick={() => onOpenCampaign(adCampaign.campaignId)}>
+                    <Text variant="body" weight="semibold">
+                      {adCampaign.rate === null
+                        ? adCampaign.name
+                        : t('campaigns:campaigns.listingContext.value', {
+                            name: adCampaign.name,
+                            rate: new Intl.NumberFormat(i18n.language).format(adCampaign.rate),
+                          })}
+                    </Text>
+                  </Button>
+                  {adCampaign.note ? (
+                    <Text variant="caption" color="text.secondary">
+                      {t(
+                        adCampaign.note === 'margin-override'
+                          ? 'campaigns:campaigns.readOnly.marginOverride'
+                          : 'campaigns:campaigns.listingContext.notFollowed'
+                      )}
+                    </Text>
+                  ) : null}
+                </Meta>
+              ) : null}
+            </S.MetaList>
+          </SettingsCard>
 
-      <S.MobileActionBar>
-        <Button variant="primary" size="medium" onClick={onManage} fullWidth>
-          <Text variant="body" weight="semibold">
-            {t('listings.detail.manage')}
-          </Text>
-        </Button>
-      </S.MobileActionBar>
+          {/* Automation overrides only — the strategy group has its own card and
+              drawer above. Each row is a plain fact (state + the value it
+              applies), not a filled box. */}
+          <SettingsCard
+            variant="section"
+            header={{ title: t('listings.detail.automationStatus'), emphasis: true }}
+            headerRight={
+              <IconButton
+                variant="ghost"
+                onClick={onOpenAutomationDrawer}
+                aria-label={t('listings.detail.automationDrawerTitle')}
+              >
+                <Icon name="edit" size={16} color="brand.primary" />
+              </IconButton>
+            }
+          >
+            <S.MetaList>
+              {automationStatusItems.map((item) => (
+                <Meta key={item.key} icon={item.icon} iconColor={automationStateColor(item.state)} label={item.label}>
+                  <Text variant="body" weight="semibold" color={automationStateColor(item.state)}>
+                    {automationStateLabel(item.state, t)}
+                  </Text>
+                  {item.detail ? (
+                    <Text variant="caption" color="text.secondary">
+                      {item.detail}
+                    </Text>
+                  ) : null}
+                </Meta>
+              ))}
+            </S.MetaList>
+          </SettingsCard>
+        </S.ConfigGrid>
+      </S.ConfigSection>
 
       <Drawer
         isOpen={isTitleDrawerOpen}
@@ -747,7 +729,28 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             searchPlaceholder={t('translation:common.search')}
             noResultsMessage={t('translation:common.noResults')}
           />
-          {!isDraft ? <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage> : null}
+          {drawerGroupFacts.length > 0 ? (
+            <S.GroupPreview variant="section" header={{ title: t('listings.detail.groupPreviewTitle') }}>
+              <S.MetaList>
+                {drawerGroupFacts.map((fact) => (
+                  <Meta key={fact.label} label={fact.label}>
+                    <Text variant="body" weight="semibold" numeric>
+                      {fact.value}
+                    </Text>
+                  </Meta>
+                ))}
+              </S.MetaList>
+              {drawerGroupMarginRanges.length > 0 ? (
+                <S.GroupPreviewRanges>
+                  {drawerGroupMarginRanges.map((row) => (
+                    <Text key={row} variant="body-sm" color="text.secondary" numeric>
+                      {row}
+                    </Text>
+                  ))}
+                </S.GroupPreviewRanges>
+              ) : null}
+            </S.GroupPreview>
+          ) : null}
         </S.SectionContent>
       </Drawer>
 

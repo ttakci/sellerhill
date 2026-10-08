@@ -114,10 +114,11 @@ export const TitleContent = styled.div`
 `;
 
 /** Section title — card-title size per the h4 scale (15px / semibold) */
-export const Title = styled.div`
+export const Title = styled.div<{ $emphasis?: boolean }>`
   font-family: ${tkn('typography.fontFamily.heading')};
   font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: ${({ $emphasis, theme }) =>
+    $emphasis ? theme.typography.fontWeight.bold : theme.typography.fontWeight.semibold};
   color: ${tkn('colors.text.primary')};
   margin: 0;
   line-height: ${tkn('typography.lineHeight.tight')};

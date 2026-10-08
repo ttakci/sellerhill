@@ -484,7 +484,8 @@
       "saveOverrides": "Otomasyonu kaydet",
       "publish": "eBay'de Yayınla",
       "publishHint": "Bu taslak henüz eBay'de canlı değil. Fiyat ve stok uygunsa yayınlayın.",
-      "draftBanner": "Taslak — eBay'de yayınlanmadı"
+      "draftBanner": "Taslak — eBay'de yayınlanmadı",
+      "groupPreviewTitle": "Bu grubun ayarları"
     },
     "carousel": {
       "previous": "Önceki",

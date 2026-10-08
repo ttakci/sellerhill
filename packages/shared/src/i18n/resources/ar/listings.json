@@ -483,7 +483,8 @@
       "saveOverrides": "حفظ الأتمتة",
       "publish": "النشر على eBay",
       "publishHint": "هذه المسودة غير منشورة على eBay بعد. انشرها عندما تبدو الأسعار والمخزون مناسبة.",
-      "draftBanner": "مسودة، غير منشورة على eBay"
+      "draftBanner": "مسودة، غير منشورة على eBay",
+      "groupPreviewTitle": "إعدادات هذه المجموعة"
     },
     "products": {
       "searchPlaceholder": "البحث بالعنوان أو ASIN أو العلامة التجارية…"

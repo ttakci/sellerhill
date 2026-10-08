@@ -483,7 +483,8 @@
       "saveOverrides": "Automatisierung speichern",
       "publish": "Auf eBay veröffentlichen",
       "publishHint": "Dieser Entwurf ist auf eBay noch nicht live. Veröffentlichen Sie ihn, wenn Preis und Bestand stimmen.",
-      "draftBanner": "Entwurf – nicht auf eBay veröffentlicht"
+      "draftBanner": "Entwurf – nicht auf eBay veröffentlicht",
+      "groupPreviewTitle": "Einstellungen dieser Gruppe"
     },
     "products": {
       "searchPlaceholder": "Nach Titel, ASIN oder Marke suchen …"

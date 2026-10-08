@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
+  formatSourceStock, ListingStatus, PolicyType, resolvePriceEndingCents, updateListingSchema, type UpdateListingFormData,
 } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -20,7 +20,7 @@ import {
 import { buildMarginRangeDetails, summarizeMarginStrategy } from '../shared/margin-strategy';
 
 import { ListingDetailPageComponent } from './ListingDetailPage.component';
-import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
+import type { AutomationStatusItem, ListingDetailFact, ListingOverridesUiState } from './ListingDetailPage.types';
 
 import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
@@ -59,7 +59,7 @@ const parseOptionalNumber = (raw: string): number | null => {
 
 export const ListingDetailPageContainer: React.FC = () => {
   const { listingId } = useParams<{ listingId: string }>();
-  const { t, i18n } = useTranslation(['listings', 'translation']);
+  const { t, i18n } = useTranslation(['listings', 'translation', 'listingSettingsGroup']);
   const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
 
@@ -318,6 +318,48 @@ export const ListingDetailPageContainer: React.FC = () => {
   const groupMarginRangeDetails = useMemo(
     () => buildMarginRangeDetails(selectedGroup?.repricingStrategy, fmtCurrency, t, dash),
     [selectedGroup, fmtCurrency, t, dash]
+  );
+
+  /* The group chosen in the "change group" drawer — read-only, so the seller
+     sees what a group does before switching to it. Follows the select as it
+     changes, not the group the listing is on. */
+  const drawerGroupId = useWatch({ control: form.control, name: 'listingSettingsGroupId' });
+  const drawerGroup = useMemo(
+    () => listingSettingsGroups.find((g) => g.id === drawerGroupId),
+    [listingSettingsGroups, drawerGroupId]
+  );
+  const drawerGroupFacts = useMemo((): ListingDetailFact[] => {
+    if (!drawerGroup) {
+      return [];
+    }
+    const fees = drawerGroup.fees;
+    const qty = drawerGroup.stock?.defaultQuantity;
+    const buffer = drawerGroup.stock?.stockBuffer;
+    const ending = resolvePriceEndingCents(fees);
+    return [
+      {
+        label: t('listings.detail.groupMarginLabel'),
+        value: summarizeMarginStrategy(drawerGroup.repricingStrategy, fmtCurrency, t) ?? dash,
+      },
+      { label: t('listings.detail.groupDefaultQuantityLabel'), value: typeof qty === 'number' ? String(qty) : dash },
+      { label: t('listings.detail.groupStockBufferLabel'), value: typeof buffer === 'number' ? String(buffer) : dash },
+      {
+        label: t('listingSettingsGroup:listingSettingsGroup.ebayFee'),
+        value: typeof fees?.ebayFeePercent === 'number' ? `%${fees.ebayFeePercent}` : dash,
+      },
+      {
+        label: t('listingSettingsGroup:listingSettingsGroup.fixedFee'),
+        value: typeof fees?.fixedFeeAmount === 'number' ? fmtCurrency(fees.fixedFeeAmount) : dash,
+      },
+      {
+        label: t('listingSettingsGroup:listingSettingsGroup.priceRounding.title'),
+        value: ending === null ? t('listings.detail.automationBadgeOff') : `.${String(ending).padStart(2, '0')}`,
+      },
+    ];
+  }, [drawerGroup, fmtCurrency, t, dash]);
+  const drawerGroupMarginRanges = useMemo(
+    () => buildMarginRangeDetails(drawerGroup?.repricingStrategy, fmtCurrency, t, dash),
+    [drawerGroup, fmtCurrency, t, dash]
   );
 
   const statusLabel = useMemo(() => {
@@ -681,49 +723,6 @@ export const ListingDetailPageContainer: React.FC = () => {
     );
   };
 
-  /** Mobile manage sheet: the non-destructive shortcut (publish a draft, or edit
-      automation) without header button clutter. End and delete deliberately do
-      NOT appear here — they live in the Danger Zone card, which renders at every
-      width, and one irreversible action must have exactly one route to it. */
-  const handleManage = () => {
-    if (listing?.status === ListingStatus.DRAFT) {
-      showMessage(
-        {
-          type: 'info',
-          headerKey: 'listings:listings.detail.manage',
-          descriptionKey: 'listings:listings.detail.publishHint',
-          primaryButton: {
-            labelKey: 'listings:listings.detail.publish',
-            onClick: () => {
-              closeMessage();
-              handlePublish();
-            },
-          },
-          secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
-        },
-        t
-      );
-      return;
-    }
-
-    showMessage(
-      {
-        type: 'info',
-        headerKey: 'listings:listings.detail.manage',
-        descriptionKey: 'listings:listings.detail.automationDrawerSubtitle',
-        primaryButton: {
-          labelKey: 'listings:listings.detail.editConfig',
-          onClick: () => {
-            closeMessage();
-            handleOpenAutomationDrawer();
-          },
-        },
-        secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
-      },
-      t
-    );
-  };
-
   return (
     <ListingDetailPageComponent
       listing={listing}
@@ -738,6 +737,8 @@ export const ListingDetailPageContainer: React.FC = () => {
       groupStockBufferLabel={groupStockBufferLabel}
       groupMarginSummaryLabel={groupMarginSummaryLabel}
       groupMarginRangeDetails={groupMarginRangeDetails}
+      drawerGroupFacts={drawerGroupFacts}
+      drawerGroupMarginRanges={drawerGroupMarginRanges}
       amazonStockText={amazonStockText}
       sourceRemoved={sourceRemoved}
       paymentPolicyLabel={paymentPolicyLabel}
@@ -775,7 +776,6 @@ export const ListingDetailPageContainer: React.FC = () => {
       onEnd={handleEnd}
       onDelete={handleDelete}
       onPublish={handlePublish}
-      onManage={handleManage}
       isRevisionsDrawerOpen={isRevisionsDrawerOpen}
       hasRevisions={(revisionsPreview?.total ?? 0) > 0}
       onOpenRevisions={handleOpenRevisions}
