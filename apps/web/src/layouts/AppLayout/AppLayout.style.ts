@@ -101,6 +101,11 @@ export const NavGroupHeader = styled.div`
   user-select: none;
   transition: background ${tkn('transitions.fast')};
 
+  /* The group title is an overline (10px); on the sidebar it reads one step larger (operator request, 2026-10-08) */
+  & > span {
+    font-size: ${tkn('typography.fontSize.xs')};
+  }
+
   &:hover {
     background: ${tkn('colors.sidebar.hover')};
   }
