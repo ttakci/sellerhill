@@ -462,10 +462,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       </S.Hero>
 
       {/* What a seller reads, then what they check, then what they rarely
-          touch: the product's own content takes the wide column, the live
-          stock / sales figures and the eBay policies sit beside it, and the
-          settings group + automation overrides close the page. On a phone
-          the stock card comes first — it answers "is this still selling?" */}
+          touch: the product's own content across the page, the live stock /
+          sales figures and the eBay policies side by side under it, and the
+          settings group + automation overrides close the page. */}
       <S.BodyGrid>
         <S.ContentCard variant="section" header={{ title: t('listings.detail.productContent'), emphasis: true }}>
           <S.ProductContentStack>

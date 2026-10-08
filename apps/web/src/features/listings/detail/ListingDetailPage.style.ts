@@ -21,7 +21,8 @@ export const Hero = styled(Card)`
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
     align-items: stretch;
-    gap: ${tkn('spacing.xl')};
+    /* Row gap: the badge row sits close above the gallery and the summary. */
+    gap: ${tkn('spacing.md')} ${tkn('spacing.xl')};
     padding: ${tkn('spacing.xl')};
   }
 
@@ -32,11 +33,15 @@ export const Hero = styled(Card)`
   }
 `;
 
-/** Status badge pinned to the hero card's top-right corner. */
+/** The status badge — the card standard (ListingCard / OrderCard BadgeRow):
+ *  its own row at the hero's top-left, in flow, spanning both columns. */
 export const StatusBadgeSlot = styled.div`
-  position: absolute;
-  top: ${tkn('spacing.lg')};
-  right: ${tkn('spacing.lg')};
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
 `;
 
 /**
@@ -337,41 +342,29 @@ export const HeaderActions = styled.div`
 `;
 
 /**
- * Product content in the wide column, the stock card and the eBay policies in
- * the narrow one beside it (from `lg`). On a tablet the two short cards share
- * a row above the content; on a phone the stock card leads, because "is this
- * still selling?" is the question a seller opens a listing to answer.
- * `grid-template-rows: auto 1fr` keeps the policies card tucked under the stock
- * card instead of drifting down beside a long description.
+ * Product content across the full width, the stock card and the eBay policies
+ * side by side under it from `md` (one column on a phone, in the same order).
+ * The two short cards stretch to one height so their bottoms line up.
  */
 export const BodyGrid = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    'stock'
     'content'
+    'stock'
     'policies';
   gap: ${tkn('spacing.lg')};
-  align-items: start;
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
-      'stock policies'
-      'content content';
-  }
-
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      'content stock'
-      'content policies';
+      'content content'
+      'stock policies';
   }
 `;
 
-/* SettingsCard is `height: 100%`; inside the grid that would stretch a short
-   card to its whole row, so each placed card takes its content's height. */
+/* SettingsCard is `height: 100%`; the content card takes its own height, the
+   two short cards keep the stretch so they end on one line. */
 export const ContentCard = styled(SettingsCard)`
   grid-area: content;
   height: auto;
@@ -379,12 +372,10 @@ export const ContentCard = styled(SettingsCard)`
 
 export const StockCard = styled(SettingsCard)`
   grid-area: stock;
-  height: auto;
 `;
 
 export const PoliciesCard = styled(SettingsCard)`
   grid-area: policies;
-  height: auto;
 `;
 
 /** The configuration block. It carried an "applies on the next sync" note
