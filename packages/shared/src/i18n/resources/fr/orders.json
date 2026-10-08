@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Détails de la commande",
+      "subtitle": "Paiement, coût Amazon, livraison et suivi de la commande",
       "loadingSubtitle": "Récupération des détails de la commande…",
       "notFoundTitle": "Commande introuvable",
       "notFoundSubtitle": "Cette commande a peut-être été supprimée ou vous n'y avez pas accès.",

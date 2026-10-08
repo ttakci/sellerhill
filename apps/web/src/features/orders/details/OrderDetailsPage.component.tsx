@@ -10,7 +10,7 @@ import {
   PageHeader,
   SettingsCard,
   Text,
-  Textarea,
+  ModernTextInput,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,58 +60,36 @@ const Money = ({ label, value, total = false }: { label: string; value: string; 
   </Meta>
 );
 
-/** Same row, value stacked BELOW the label — for multi-line content such as an address. */
-const MetaBlock = ({
-  label,
-  rows,
-  children,
-}: {
-  label: string;
-  /** How many shared row units the block spans, so the rows under it keep lining up with the neighbouring cards. */
-  rows?: number;
-  children: React.ReactNode;
-}): React.ReactElement => (
-  <S.MetaBlockRow $rows={rows}>
+/** A record fact in the hero — label on a fixed track, value beside it. */
+const Fact = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
+  <S.IdItem>
     <Text variant="body-sm" color="text.secondary">
       {label}
     </Text>
-    <S.MetaBlockValue>{children}</S.MetaBlockValue>
-  </S.MetaBlockRow>
+    <S.IdValue>{children}</S.IdValue>
+  </S.IdItem>
 );
 
-/** One line of the receipt: label, dotted leader, figure. */
-const LedgerLine = ({
+/** One figure of the hero's money strip — the listing detail's KPI. */
+const Kpi = ({
   label,
   value,
-  total = false,
   color,
+  emphasis = false,
 }: {
   label: string;
   value: string;
-  total?: boolean;
   color?: string;
+  emphasis?: boolean;
 }): React.ReactElement => (
-  <S.LedgerLine $total={total}>
-    <Text variant="body-sm" color={total ? 'text.primary' : 'text.secondary'} weight={total ? 'semibold' : undefined}>
+  <S.KpiItem>
+    <S.KpiLabel variant="caption" color="text.secondary">
       {label}
-    </Text>
-    <S.LedgerLeader aria-hidden />
-    <Text variant={total ? 'body' : 'body-sm'} weight={total ? 'semibold' : 'medium'} numeric color={color}>
+    </S.KpiLabel>
+    <Text variant={emphasis ? 'metric-lg' : 'metric-sm'} weight={emphasis ? 'bold' : 'semibold'} numeric color={color}>
       {value}
     </Text>
-  </S.LedgerLine>
-);
-
-/** A record fact in the hero's label / value grid. */
-const Fact = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
-  <>
-    <S.FactLabel>
-      <Text variant="body-sm" color="text.secondary">
-        {label}
-      </Text>
-    </S.FactLabel>
-    <S.FactValue>{children}</S.FactValue>
-  </>
+  </S.KpiItem>
 );
 
 export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
@@ -146,10 +124,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   canCopyAddress,
   noteDraft,
   noteMaxLength,
-  isNoteDirty,
   isSavingNote,
   onNoteChange,
-  onSaveNote,
+  onNoteBlur,
+  onNoteKeyDown,
   onManageCancellation,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
@@ -207,340 +185,219 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const resolvedSaleTotal = order.salePrice + order.saleShipping + resolvedSaleTax;
 
   /*
-   * The order number IS the page title — a detail page is named after its
-   * record, not after the word "details". The stage sits beside it in the
-   * header's action slot: the one status of the page, read before anything
-   * else. Actions stay in the card that owns them (plus the mobile bar), so
-   * no primary button competes with the stage up here.
+   * The listing detail's format: a standard page title and subtitle, then ONE
+   * hero card carrying the record — the stage at its top-left, the photo, the
+   * order number and facts, the money strip and the seller's own note. The
+   * three summary cards follow, and the order's path closes the page.
    */
   return (
     <S.Container>
       <PageHeader
-        title={order.ebayOrderId}
-        subtitle={formatDate(order.createdAt)}
+        title={t('orders.detail.title')}
+        subtitle={t('orders.detail.subtitle')}
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
-        actions={
-          <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="md" withTooltip={false} />
-        }
       />
 
-      <S.Hero variant="elevated" padding="none">
-        <S.Product>
-          <S.ProductImage>
-            {order.product?.imageUrl ? (
-              <img src={order.product.imageUrl} alt={productTitle} />
-            ) : (
-              <Icon name="image" size={48} />
-            )}
-          </S.ProductImage>
+      <S.Hero variant="elevated">
+        <S.StatusBadgeSlot>
+          <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" withTooltip={false} />
+          {isEstimated && (
+            <Badge variant="warning" size="sm" solid>
+              {t('orders.estimateBadge')}
+            </Badge>
+          )}
+        </S.StatusBadgeSlot>
 
-          <S.ProductInfo>
-            <S.ProductTitle variant="h3" weight="semibold">
-              {productTitle}
-            </S.ProductTitle>
+        <S.ProductImage>
+          {order.product?.imageUrl ? (
+            <img src={order.product.imageUrl} alt={productTitle} />
+          ) : (
+            <Icon name="image" size={48} />
+          )}
+        </S.ProductImage>
 
-            <S.FactList>
-              <Fact label={t('orders.table.buyer')}>
-                <Text variant="body-sm">{order.buyerName || '—'}</Text>
-              </Fact>
-              <Fact label={t('orders.detail.quantity')}>
-                <Text variant="body-sm" numeric>
-                  {order.product?.quantity || 1} {t('orders.detail.unit')}
-                </Text>
-              </Fact>
-              {order.product?.sku ? (
-                <Fact label={t('orders.detail.sku')}>
-                  <Text variant="body-sm">{order.product.sku}</Text>
-                </Fact>
-              ) : null}
-              {order.product?.asin ? (
-                <Fact label={t('orders.detail.asin')}>
-                  <IdBadge id={order.product.asin} storeType="amazon" size="sm" plain />
-                </Fact>
-              ) : null}
-              {order.product?.ebayItemId ? (
-                <Fact label={t('orders.detail.ebayItemId')}>
-                  <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" plain />
-                </Fact>
-              ) : null}
-            </S.FactList>
-          </S.ProductInfo>
-        </S.Product>
+        <S.HeroInfo>
+          <S.ProductTitle variant="h2" weight="bold">
+            {productTitle}
+          </S.ProductTitle>
 
-        {/* The receipt: the one figure the seller came for, then the lines
-            that produced it — sale, what eBay paid out, what Amazon took. A
-            number a seller can check line by line is a number they trust. */}
-        <S.Ledger>
-          <S.LedgerHead>
-            <S.LedgerLabelRow>
-              <Text variant="body-sm" color="text.secondary">
-                {t('orders.detail.netProfitResult')}
+          <S.IdList>
+            <Fact label={t('orders.table.orderNumber')}>
+              <Text variant="body-sm" weight="semibold" numeric>
+                <CopyableText
+                  value={order.ebayOrderId}
+                  label={t('orders.table.orderNumber')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
               </Text>
-              {isEstimated && (
-                <Badge variant="warning" size="sm" solid>
-                  {t('orders.estimateBadge')}
-                </Badge>
-              )}
-            </S.LedgerLabelRow>
-            <S.HeadlineFigure variant="display" numeric $positive={profitPositive}>
-              {profitPositive ? '+' : ''}
-              {formatCurrency(order.netProfit)}
-            </S.HeadlineFigure>
-            <S.LedgerRatios>
-              {marginLabel && (
-                <S.LedgerRatio>
-                  <Text variant="caption" color="text.secondary">
-                    {t('orders.detail.margin')}
-                  </Text>
-                  <Text variant="body-sm" weight="semibold" numeric>
-                    {marginLabel}
-                  </Text>
-                </S.LedgerRatio>
-              )}
-              <S.LedgerRatio>
-                <Text variant="caption" color="text.secondary">
-                  {t('orders.detail.roi')}
-                </Text>
-                <Text variant="body-sm" weight="semibold" numeric>
-                  {roiLabel}
-                </Text>
-              </S.LedgerRatio>
-            </S.LedgerRatios>
-          </S.LedgerHead>
+            </Fact>
+            <Fact label={t('orders.detail.orderPlaced')}>
+              <Text variant="body-sm" numeric>
+                {formatDate(order.createdAt)}
+              </Text>
+            </Fact>
+            <Fact label={t('orders.detail.quantity')}>
+              <Text variant="body-sm" numeric>
+                {order.product?.quantity || 1} {t('orders.detail.unit')}
+              </Text>
+            </Fact>
+            {order.product?.sku ? (
+              <Fact label={t('orders.detail.sku')}>
+                <Text variant="body-sm">{order.product.sku}</Text>
+              </Fact>
+            ) : null}
+            {order.product?.asin ? (
+              <Fact label={t('orders.detail.asin')}>
+                <IdBadge id={order.product.asin} storeType="amazon" size="sm" plain />
+              </Fact>
+            ) : null}
+            {order.product?.ebayItemId ? (
+              <Fact label={t('orders.detail.ebayItemId')}>
+                <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" plain />
+              </Fact>
+            ) : null}
+          </S.IdList>
+        </S.HeroInfo>
 
-          <S.LedgerLines>
-            <LedgerLine label={t('orders.table.salePrice')} value={formatCurrency(order.salePrice)} />
-            <LedgerLine label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} />
-            <LedgerLine label={t('orders.detail.totalAmazonCost')} value={`−${formatCurrency(totalAmazonCost)}`} />
-            <LedgerLine
+        {/* Who it goes to — inside the record card, on its right. */}
+        <S.CustomerPanel>
+          <Text variant="body" weight="semibold">
+            {t('orders.detail.customerInfo')}
+          </Text>
+          <S.AddressBlock>
+            <Text variant="body-sm" color="text.secondary">
+              {t('orders.detail.shipTo')}
+            </Text>
+            <Text variant="body" weight="semibold">
+              {order.shippingAddress?.fullName || order.buyerName ? (
+                <CopyableText
+                  value={order.shippingAddress?.fullName || order.buyerName || ''}
+                  label={t('orders.detail.copyName')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
+              ) : (
+                '—'
+              )}
+            </Text>
+          </S.AddressBlock>
+          {order.shippingAddress ? (
+            <S.AddressBlock>
+              <Text variant="body-sm" color="text.secondary">
+                <CopyableText
+                  value={order.shippingAddress.street}
+                  label={t('orders.detail.copyStreet')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
+              </Text>
+              {order.shippingAddress.street2 ? (
+                <Text variant="body-sm" color="text.secondary">
+                  <CopyableText
+                    value={order.shippingAddress.street2}
+                    label={t('orders.detail.copyStreet2')}
+                    copiedLabel={t('orders.detail.copied')}
+                  />
+                </Text>
+              ) : null}
+              <Text variant="body-sm" color="text.secondary">
+                <CopyableText
+                  value={order.shippingAddress.city}
+                  label={t('orders.detail.copyCity')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
+                {', '}
+                <CopyableText
+                  value={order.shippingAddress.state}
+                  label={t('orders.detail.copyState')}
+                  copiedLabel={t('orders.detail.copied')}
+                />{' '}
+                <CopyableText
+                  value={order.shippingAddress.zipCode}
+                  label={t('orders.detail.copyZip')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
+              </Text>
+              <Text variant="body-sm" color="text.secondary">
+                <CopyableText
+                  value={order.shippingAddress.country}
+                  label={t('orders.detail.copyCountry')}
+                  copiedLabel={t('orders.detail.copied')}
+                />
+              </Text>
+              {/* The buyer's phone belongs with the ship-to block, the
+                  way eBay's own order page prints it. */}
+              {buyerPhoneDisplay ? (
+                <S.AddressPhoneRow>
+                  <Icon name="phone" size={14} color="text.tertiary" />
+                  <Text variant="body-sm" color="text.secondary">
+                    <CopyableText
+                      value={buyerPhoneDisplay}
+                      label={t('orders.detail.copyPhone')}
+                      copiedLabel={t('orders.detail.copied')}
+                    />
+                  </Text>
+                </S.AddressPhoneRow>
+              ) : null}
+            </S.AddressBlock>
+          ) : null}
+          <S.AddressBlock>
+            <Text variant="body-sm" color="text.secondary">
+              {t('orders.detail.contact')}
+            </Text>
+            <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
+          </S.AddressBlock>
+          {canCopyAddress && (
+            <Button variant="primary" size="small" onClick={onCopyAddress}>
+              <Icon name="copy" size={16} />
+              <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
+            </Button>
+          )}
+        </S.CustomerPanel>
+
+        {/* The money story in one strip, the listing detail's. */}
+        <S.KpiArea>
+          <S.KpiStrip>
+            <Kpi
               label={t('orders.detail.netProfitResult')}
+              emphasis
               value={formatCurrency(order.netProfit)}
-              total
               color={profitColor}
             />
-          </S.LedgerLines>
-
+            <Kpi label={t('orders.detail.roi')} value={roiLabel} />
+            <Kpi label={t('orders.table.salePrice')} value={formatCurrency(order.salePrice)} />
+            <Kpi label={t('orders.table.purchasePrice')} value={formatCurrency(totalAmazonCost)} />
+            <Kpi label={t('orders.detail.margin')} value={marginLabel ?? '—'} />
+          </S.KpiStrip>
           {isEstimated && (
             <S.EstimateNote variant="caption" color="text.tertiary">
               {t('orders.estimateNote')}
             </S.EstimateNote>
           )}
-        </S.Ledger>
-      </S.Hero>
+        </S.KpiArea>
 
-      {/* A buyer's cancellation request: what they asked, by when eBay needs the
-          answer, and the two answers the seller may give from here. */}
-      {order.cancellation && (
-        <SettingsCard variant="section" header={{ title: t('orders.cancellation.title') }}>
-          <S.SectionContent>
-            <S.MetaList>
-              <Meta label={t('orders.cancellation.buyer')}>
-                <Text variant="body-sm" weight="medium">
-                  {order.cancellation.buyerLoginName ?? '—'}
-                </Text>
-              </Meta>
-              <Meta label={t('orders.cancellation.reason')}>
-                {order.cancellation.reason && KNOWN_CANCEL_REASONS.includes(order.cancellation.reason) ? (
-                  <Text variant="body-sm" weight="medium">
-                    {t(`orders.cancellation.reasons.${order.cancellation.reason}`)}
-                  </Text>
-                ) : (
-                  <>
-                    <Text variant="body-sm" weight="medium">
-                      {t('orders.cancellation.reasons.other')}
-                    </Text>
-                    {order.cancellation.reason ? (
-                      <Text variant="caption" color="text.tertiary">
-                        {order.cancellation.reason}
-                      </Text>
-                    ) : null}
-                  </>
-                )}
-              </Meta>
-              {order.cancellation.requestedAt ? (
-                <Meta label={t('orders.cancellation.requestedAt')}>
-                  <Text variant="body-sm" weight="medium" numeric>
-                    {formatDate(order.cancellation.requestedAt)}
-                  </Text>
-                </Meta>
-              ) : null}
-              {order.cancellation.bucket !== CancellationBucket.CLOSED && order.cancellation.sellerRespondBy ? (
-                <Meta label={t('orders.cancellation.respondBy')}>
-                  <Text variant="body-sm" weight="medium" numeric>
-                    {formatDate(order.cancellation.sellerRespondBy)}
-                  </Text>
-                </Meta>
-              ) : null}
-              {order.cancellation.bucket === CancellationBucket.CLOSED ? (
-                <>
-                  {order.cancellation.closedAt ? (
-                    <Meta label={t('orders.cancellation.closedOn')}>
-                      <Text variant="body-sm" weight="medium" numeric>
-                        {formatDate(order.cancellation.closedAt)}
-                      </Text>
-                    </Meta>
-                  ) : null}
-                  {order.cancellation.closeReason ? (
-                    <Meta label={t('orders.cancellation.closeReason')}>
-                      <Text variant="body-sm" color="text.tertiary">
-                        {order.cancellation.closeReason}
-                      </Text>
-                    </Meta>
-                  ) : null}
-                </>
-              ) : null}
-              <Meta label={t('orders.detail.ebayStatus')}>
-                <Badge variant={CANCEL_BUCKET_VARIANT[order.cancellation.bucket]} size="xs" solid>
-                  {t(`orders.cancellation.bucket.${order.cancellation.bucket}`)}
-                </Badge>
-              </Meta>
-            </S.MetaList>
-            <S.SectionActions>
-              <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
-                <Icon name="arrow-right" size={16} />
-                <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
-              </Button>
-            </S.SectionActions>
-          </S.SectionContent>
-        </SettingsCard>
-      )}
-
-      {/* The order's path, step by step: what happened and when, where it is
-          standing now, and what is still ahead. */}
-      {timelineRows.length > 0 && (
-        <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
-          <S.TimelineBody>
-            {shipByLabel && (
-              <InfoMessage type={isShipByUrgent ? 'error' : 'info'}>
-                {t('orders.detail.shipByNotice', { date: shipByLabel })}
-              </InfoMessage>
-            )}
-            {multiItemCount !== null && (
-              <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
-            )}
-            <OrderTimeline rows={timelineRows} />
-          </S.TimelineBody>
-        </SettingsCard>
-      )}
-
-      {/* The seller's own note — theirs alone: nothing sends it to eBay,
-          Amazon or the buyer. */}
-      <SettingsCard variant="section" header={{ title: t('orders.note.title') }}>
-        <S.NoteBody>
-          <Textarea
+        {/* The seller's own note — theirs alone: nothing sends it to eBay,
+            Amazon or the buyer. One line; it saves when the field is left
+            (Enter leaves it, Escape puts the saved text back). */}
+        <S.HeroNote>
+          <ModernTextInput
+            name="sellerNote"
+            label={t('orders.note.title')}
             value={noteDraft}
             onChange={onNoteChange}
-            rows={3}
-            fullWidth
+            onBlur={onNoteBlur}
+            onKeyDown={onNoteKeyDown}
             maxLength={noteMaxLength}
-            placeholder={t('orders.note.placeholder')}
-            aria-label={t('orders.note.title')}
+            size="small"
+            isDisabled={isSavingNote}
+            fullWidth
           />
-          <S.NoteFooter>
-            <Text variant="caption" color="text.secondary">
-              {t('orders.note.hint')}
-            </Text>
-            <Button variant="primary" size="small" onClick={onSaveNote} isLoading={isSavingNote} disabled={!isNoteDirty}>
-              <Icon name="save" size={16} />
-              <Text variant="body-sm">{t('orders.note.save')}</Text>
-            </Button>
-          </S.NoteFooter>
-        </S.NoteBody>
-      </SettingsCard>
+          <Text variant="caption" color="text.secondary">
+            {t('orders.note.hint')}
+          </Text>
+        </S.HeroNote>
+      </S.Hero>
 
       <S.SectionGrid>
-        {/* Customer */}
-        <SettingsCard variant="section" header={{ title: t('orders.detail.customerInfo') }}>
-          <S.SectionContent>
-            <S.MetaList>
-              <MetaBlock label={t('orders.detail.shipTo')} rows={4}>
-                <Text variant="body" weight="semibold">
-                  {order.shippingAddress?.fullName || order.buyerName ? (
-                    <CopyableText
-                      value={order.shippingAddress?.fullName || order.buyerName || ''}
-                      label={t('orders.detail.copyName')}
-                      copiedLabel={t('orders.detail.copied')}
-                    />
-                  ) : (
-                    '—'
-                  )}
-                </Text>
-                {order.shippingAddress ? (
-                  <S.AddressBlock>
-                    <Text variant="body-sm" color="text.secondary">
-                      <CopyableText
-                        value={order.shippingAddress.street}
-                        label={t('orders.detail.copyStreet')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                    {order.shippingAddress.street2 ? (
-                      <Text variant="body-sm" color="text.secondary">
-                        <CopyableText
-                          value={order.shippingAddress.street2}
-                          label={t('orders.detail.copyStreet2')}
-                          copiedLabel={t('orders.detail.copied')}
-                        />
-                      </Text>
-                    ) : null}
-                    <Text variant="body-sm" color="text.secondary">
-                      <CopyableText
-                        value={order.shippingAddress.city}
-                        label={t('orders.detail.copyCity')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                      {', '}
-                      <CopyableText
-                        value={order.shippingAddress.state}
-                        label={t('orders.detail.copyState')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />{' '}
-                      <CopyableText
-                        value={order.shippingAddress.zipCode}
-                        label={t('orders.detail.copyZip')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                    <Text variant="body-sm" color="text.secondary">
-                      <CopyableText
-                        value={order.shippingAddress.country}
-                        label={t('orders.detail.copyCountry')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                    {/* The buyer's phone belongs with the ship-to block, the
-                        way eBay's own order page prints it. */}
-                    {buyerPhoneDisplay ? (
-                      <S.AddressPhoneRow>
-                        <Icon name="phone" size={14} color="text.tertiary" />
-                        <Text variant="body-sm" color="text.secondary">
-                          <CopyableText
-                            value={buyerPhoneDisplay}
-                            label={t('orders.detail.copyPhone')}
-                            copiedLabel={t('orders.detail.copied')}
-                          />
-                        </Text>
-                      </S.AddressPhoneRow>
-                    ) : null}
-                  </S.AddressBlock>
-                ) : null}
-              </MetaBlock>
-              <Meta label={t('orders.detail.contact')}>
-                <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
-              </Meta>
-            </S.MetaList>
-            {canCopyAddress && (
-              <S.SectionActions>
-                <Button variant="primary" size="small" onClick={onCopyAddress} fullWidth>
-                  <Icon name="copy" size={16} />
-                  <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
-                </Button>
-              </S.SectionActions>
-            )}
-          </S.SectionContent>
-        </SettingsCard>
-
         {/* eBay summary */}
         <SettingsCard variant="section" header={{ title: t('orders.detail.ebaySummary') }}>
           <S.SectionContent>
@@ -735,6 +592,101 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           </S.SectionContent>
         </SettingsCard>
       </S.SectionGrid>
+
+      {/* A buyer's cancellation request: what they asked, by when eBay needs the
+          answer, and the two answers the seller may give from here. */}
+      {order.cancellation && (
+        <SettingsCard variant="section" header={{ title: t('orders.cancellation.title') }}>
+          <S.SectionContent>
+            <S.MetaList>
+              <Meta label={t('orders.cancellation.buyer')}>
+                <Text variant="body-sm" weight="medium">
+                  {order.cancellation.buyerLoginName ?? '—'}
+                </Text>
+              </Meta>
+              <Meta label={t('orders.cancellation.reason')}>
+                {order.cancellation.reason && KNOWN_CANCEL_REASONS.includes(order.cancellation.reason) ? (
+                  <Text variant="body-sm" weight="medium">
+                    {t(`orders.cancellation.reasons.${order.cancellation.reason}`)}
+                  </Text>
+                ) : (
+                  <>
+                    <Text variant="body-sm" weight="medium">
+                      {t('orders.cancellation.reasons.other')}
+                    </Text>
+                    {order.cancellation.reason ? (
+                      <Text variant="caption" color="text.tertiary">
+                        {order.cancellation.reason}
+                      </Text>
+                    ) : null}
+                  </>
+                )}
+              </Meta>
+              {order.cancellation.requestedAt ? (
+                <Meta label={t('orders.cancellation.requestedAt')}>
+                  <Text variant="body-sm" weight="medium" numeric>
+                    {formatDate(order.cancellation.requestedAt)}
+                  </Text>
+                </Meta>
+              ) : null}
+              {order.cancellation.bucket !== CancellationBucket.CLOSED && order.cancellation.sellerRespondBy ? (
+                <Meta label={t('orders.cancellation.respondBy')}>
+                  <Text variant="body-sm" weight="medium" numeric>
+                    {formatDate(order.cancellation.sellerRespondBy)}
+                  </Text>
+                </Meta>
+              ) : null}
+              {order.cancellation.bucket === CancellationBucket.CLOSED ? (
+                <>
+                  {order.cancellation.closedAt ? (
+                    <Meta label={t('orders.cancellation.closedOn')}>
+                      <Text variant="body-sm" weight="medium" numeric>
+                        {formatDate(order.cancellation.closedAt)}
+                      </Text>
+                    </Meta>
+                  ) : null}
+                  {order.cancellation.closeReason ? (
+                    <Meta label={t('orders.cancellation.closeReason')}>
+                      <Text variant="body-sm" color="text.tertiary">
+                        {order.cancellation.closeReason}
+                      </Text>
+                    </Meta>
+                  ) : null}
+                </>
+              ) : null}
+              <Meta label={t('orders.detail.ebayStatus')}>
+                <Badge variant={CANCEL_BUCKET_VARIANT[order.cancellation.bucket]} size="xs" solid>
+                  {t(`orders.cancellation.bucket.${order.cancellation.bucket}`)}
+                </Badge>
+              </Meta>
+            </S.MetaList>
+            <S.SectionActions>
+              <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
+                <Icon name="arrow-right" size={16} />
+                <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
+              </Button>
+            </S.SectionActions>
+          </S.SectionContent>
+        </SettingsCard>
+      )}
+
+      {/* The order's path, step by step: what happened and when, where it is
+          standing now, and what is still ahead. */}
+      {timelineRows.length > 0 && (
+        <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
+          <S.TimelineBody>
+            {shipByLabel && (
+              <InfoMessage type={isShipByUrgent ? 'error' : 'info'}>
+                {t('orders.detail.shipByNotice', { date: shipByLabel })}
+              </InfoMessage>
+            )}
+            {multiItemCount !== null && (
+              <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
+            )}
+            <OrderTimeline rows={timelineRows} />
+          </S.TimelineBody>
+        </SettingsCard>
+      )}
 
       <S.MobileActionBar>
         <Button variant="primary" size="medium" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>

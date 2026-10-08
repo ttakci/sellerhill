@@ -8,7 +8,7 @@ import {
   useLoading,
   useUI,
 } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -80,7 +80,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
   }
   const isNoteDirty = noteDraft.trim() !== savedNote;
 
-  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNoteDraft(e.target.value);
   }, []);
 
@@ -399,7 +399,15 @@ export const OrderDetailsPageContainer: React.FC = () => {
     );
   }, [showMessage, closeMessage, runConfirmNotPurchased, t]);
 
+  /* Escape restores the saved text and then blurs; the blur runs before the
+     restored draft re-renders, so it must not save the stale one. */
+  const skipNoteSaveRef = useRef(false);
+
   const handleSaveNote = useCallback(() => {
+    if (skipNoteSaveRef.current) {
+      skipNoteSaveRef.current = false;
+      return;
+    }
     if (!id || !isNoteDirty) {
       return;
     }
@@ -417,6 +425,20 @@ export const OrderDetailsPageContainer: React.FC = () => {
         );
       });
   }, [id, isNoteDirty, noteDraft, updateNote, showMessage, closeMessage, t]);
+
+  const handleNoteKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.currentTarget.blur();
+      } else if (e.key === 'Escape') {
+        skipNoteSaveRef.current = true;
+        setNoteDraft(savedNote);
+        e.currentTarget.blur();
+      }
+    },
+    [savedNote]
+  );
 
   /* The answers (accept / decline) live on the Cancellations page, one place per action. */
   const cancellationId = order?.cancellation?.id;
@@ -480,10 +502,10 @@ export const OrderDetailsPageContainer: React.FC = () => {
         multiItemCount={multiItemCount}
         noteDraft={noteDraft}
         noteMaxLength={ORDER_NOTE_MAX_LENGTH}
-        isNoteDirty={isNoteDirty}
         isSavingNote={isSavingNote}
         onNoteChange={handleNoteChange}
-        onSaveNote={handleSaveNote}
+        onNoteBlur={handleSaveNote}
+        onNoteKeyDown={handleNoteKeyDown}
         onManageCancellation={handleManageCancellation}
       />
       {id && (

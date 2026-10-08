@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "订单详情",
+      "subtitle": "付款、Amazon 成本、配送和订单进度",
       "loadingSubtitle": "正在获取订单详情…",
       "notFoundTitle": "未找到订单",
       "notFoundSubtitle": "此订单可能已被移除，或您没有访问权限。",

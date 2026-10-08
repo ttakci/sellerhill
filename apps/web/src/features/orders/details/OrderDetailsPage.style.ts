@@ -1,75 +1,103 @@
 import styled from '@emotion/styled';
-import { Card, glassSurfaceStrong, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
+import { Card, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
 /**
- * The hero is one card with two halves: the product on the left, the money
- * on the right. The right half is the page's one memorable element — the
- * profit explained as a receipt (sale → earnings → cost → profit) rather than
- * five equal-sized figures in a grey strip. Everything else on the page is
- * quiet so this reads first.
+ * The hero — the listing detail's format: a blue wash over the glass, the stage
+ * badge at the top-left, the photo on the left, the record facts and the
+ * customer beside it, the money strip under them and the seller's one-line
+ * note across the foot. Named areas so the order can change per width:
+ *   phone   badge · image · info · kpi · customer · note
+ *   md      image | info, image | kpi, then customer and note full width
+ *   xl      image | info | customer, image | kpi kpi, note
  */
 export const Hero = styled(Card)`
+  position: relative;
+  background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  padding: 0;
-  overflow: hidden;
-
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(0, 1fr) 20rem;
-  }
-`;
-
-/** Image beside the product facts. Stacks on a phone. */
-export const Product = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xl')};
+  grid-template-areas:
+    'badge'
+    'image'
+    'info'
+    'kpi'
+    'customer'
+    'note';
+  gap: ${tkn('spacing.lg')};
   padding: ${tkn('spacing.lg')};
-  min-width: 0;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    flex-direction: column;
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+    grid-template-areas:
+      'badge badge'
+      'image info'
+      'image kpi'
+      'customer customer'
+      'note note';
+    gap: ${tkn('spacing.md')} ${tkn('spacing.xl')};
+    padding: ${tkn('spacing.xl')};
+  }
+
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr) minmax(16rem, 20rem);
+    grid-template-areas:
+      'badge badge badge'
+      'image info customer'
+      'image kpi kpi'
+      'note note note';
   }
 `;
 
+/** Stage (and the estimate chip) — its own row at the hero's top-left. */
+export const StatusBadgeSlot = styled.div`
+  grid-area: badge;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+/** The product photo — transparent, like the listing detail's gallery. From `md`
+ *  it spans the facts and the money strip, so it ends on the strip's line. */
 export const ProductImage = styled.div`
+  grid-area: image;
   position: relative;
-  width: 12rem;
-  height: 12rem;
-  flex-shrink: 0;
-  /* Transparent, per the product-image rule — a grey plate behind a cut-out
-     product shot reads as a broken image. A soft brand light sits BEHIND the
-     product instead, so the shot floats on the pane rather than sitting on it. */
-  background: radial-gradient(closest-side, ${tkn('colors.glass.glowBlue')}, transparent 72%);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 20rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border-radius: ${tkn('radius.sm')};
   overflow: hidden;
 
-  img {
+  > img {
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
 
-  svg {
-    color: ${tkn('colors.text.disabled')};
+  > svg {
+    color: ${tkn('colors.text.tertiary')};
   }
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    width: 100%;
-    height: 11rem;
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    aspect-ratio: auto;
+    max-height: none;
+    height: 100%;
+    min-height: 14rem;
   }
 `;
 
-export const ProductInfo = styled.div`
+export const HeroInfo = styled.div`
+  grid-area: info;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
-  flex: 1;
 `;
 
 /** The product title heads the hero, not the page. Clamped — Amazon titles run long. */
@@ -79,144 +107,111 @@ export const ProductTitle = styled(Text)`
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-width: 0;
-`;
-
-/** Record facts as a label / value grid — no icons, the label column is the ornament. */
-export const FactList = styled.dl`
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: ${tkn('spacing.lg')};
-  row-gap: ${tkn('spacing.xs')};
-  align-items: baseline;
-  margin: 0;
-  min-width: 0;
-`;
-
-export const FactLabel = styled.dt`
-  margin: 0;
-  white-space: nowrap;
-`;
-
-export const FactValue = styled.dd`
-  margin: 0;
-  min-width: 0;
-  overflow-wrap: anywhere;
-`;
-
-/**
- * The receipt. A tinted panel off the product half by one hairline, the
- * headline figure on top and the lines that produce it underneath.
- */
-export const Ledger = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.lg')};
-  /* A pane on the pane: a touch more opaque than the hero so the receipt
-     reads as a card laid on the glass, and lit from behind by the mint light
-     the canvas also carries. */
-  ${({ theme }) => glassSurfaceStrong(theme)}
-  background-image: radial-gradient(26rem 18rem at 100% 0%, ${tkn('colors.glass.glowMint')}, transparent 70%), ${tkn('colors.glass.sheen')};
-  border: none;
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  box-shadow: none;
-  min-width: 0;
+  line-height: ${tkn('typography.lineHeight.tight')};
 
   @media (min-width: ${tkn('breakpoints.lg')}) {
+    font-size: ${tkn('typography.fontSize.xxl')};
+  }
+`;
+
+/** The customer, inside the hero: a hairline above it below `xl`, beside it (left
+ *  hairline) from `xl`, where it sits right of the facts. */
+export const CustomerPanel = styled.div`
+  grid-area: customer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    padding-top: 0;
+    padding-left: ${tkn('spacing.xl')};
     border-top: none;
     border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
 `;
 
-export const LedgerHead = styled.div`
+/** Record facts as labelled rows on a fixed label track, like the listing detail's id list. */
+export const IdList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-`;
-
-/**
- * The one figure the page shouts: gradient ink (emerald → teal → brand for a
- * profit, red → orange for a loss). Clipped to the glyphs, so it is still
- * typography, not a badge. The Text atom sets `color`; the fill is forced
- * transparent so the gradient shows through.
- */
-export const HeadlineFigure = styled(Text)<{ $positive: boolean }>`
-  display: inline-block;
-  background: ${({ $positive, theme }) =>
-    $positive ? theme.colors.glass.profitGradient : theme.colors.glass.lossGradient};
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: ${tkn('typography.letterSpacing.tighter')};
-`;
-
-export const LedgerLabelRow = styled.div`
-  display: flex;
-  align-items: center;
   gap: ${tkn('spacing.xs')};
-  flex-wrap: wrap;
 `;
 
-/** Margin and ROI — two small labelled figures under the headline. */
-export const LedgerRatios = styled.div`
+export const IdItem = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
   gap: ${tkn('spacing.sm')};
-  margin-top: ${tkn('spacing.xs')};
+  align-items: center;
+  min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
 `;
 
-export const LedgerRatio = styled.div`
+export const IdValue = styled.div`
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+/** The money story as ONE strip on a blue tint with a brand-blue leading bar —
+ *  the listing detail's KPI strip. Profit keeps its own green / red. */
+export const KpiArea = styled.div`
+  grid-area: kpi;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+export const KpiStrip = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr));
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')};
+  padding-left: ${tkn('spacing.lg')};
+  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.semanticTint.infoStrong')};
+  box-shadow:
+    inset 0.25rem 0 0 ${tkn('colors.brand.primary')},
+    ${tkn('shadows.sm')};
+`;
+
+export const KpiItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 
-export const LedgerLines = styled.div`
-  display: flex;
-  flex-direction: column;
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-`;
-
-/** One line of the receipt: label left, figure right, a dotted leader between. */
-export const LedgerLine = styled.div<{ $total?: boolean }>`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} 0;
-  border-top: ${({ $total, theme }) => ($total ? `0.0625rem solid ${theme.colors.border.control}` : 'none')};
-  margin-top: ${({ $total, theme }) => ($total ? theme.spacing.xs : '0')};
-`;
-
-export const LedgerLeader = styled.span`
-  flex: 1;
-  min-width: ${tkn('spacing.md')};
-  border-bottom: 0.0625rem dotted ${tkn('colors.border.control')};
-  transform: translateY(-0.25rem);
+export const KpiLabel = styled(Text)`
+  line-height: ${tkn('typography.lineHeight.tight')};
+  white-space: nowrap;
 `;
 
 export const EstimateNote = styled(Text)`
   line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
-/** Timeline card body: the deadline / multi-item notices, then the steps. */
-export const NoteBody = styled.div`
+/** The seller's one-line note, across the hero's foot under a hairline. */
+export const HeroNote = styled.div`
+  grid-area: note;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.xs')};
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   min-width: 0;
 `;
 
-/** The privacy line and Save on one row; Save drops under it on a phone. */
-export const NoteFooter = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-`;
-
+/** Timeline card body: the deadline / multi-item notices, then the steps. */
 export const TimelineBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -244,10 +239,6 @@ export const SectionGrid = styled.div`
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 `;
 
@@ -322,28 +313,6 @@ export const MetaValue = styled.div`
   max-width: 60%;
   text-align: right;
   overflow-wrap: anywhere;
-`;
-
-/**
- * Same row chrome as MetaRow, but the value stacks BELOW the label — for
- * content that reads better left-aligned across several lines (an address).
- */
-export const MetaBlockRow = styled.div<{ $rows?: number }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-  /* min-height, not height: an address longer than its slot grows the row
-     instead of overflowing it. */
-  min-height: calc(${ROW} * ${({ $rows = 1 }) => $rows});
-  padding: ${tkn('spacing.sm-md')} 0;
-  box-sizing: border-box;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-`;
-
-export const MetaBlockValue = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
 `;
 
 export const AddressBlock = styled.div`

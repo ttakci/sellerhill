@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Sifariş təfərrüatları",
+      "subtitle": "Ödəniş, Amazon xərci, çatdırılma və sifarişin gedişi",
       "loadingSubtitle": "Sifariş təfərrüatları gətirilir…",
       "notFoundTitle": "Sifariş tapılmadı",
       "notFoundSubtitle": "Bu sifariş silinmiş ola bilər və ya ona girişiniz yoxdur.",

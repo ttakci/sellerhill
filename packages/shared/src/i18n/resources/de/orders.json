@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Bestelldetails",
+      "subtitle": "Zahlung, Amazon-Kosten, Versand und Bestellverlauf",
       "loadingSubtitle": "Bestelldetails werden abgerufen …",
       "notFoundTitle": "Bestellung nicht gefunden",
       "notFoundSubtitle": "Diese Bestellung wurde möglicherweise entfernt, oder Sie haben keinen Zugriff.",

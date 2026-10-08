@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Dettagli dell'ordine",
+      "subtitle": "Pagamento, costo Amazon, consegna e avanzamento dell’ordine",
       "loadingSubtitle": "Recupero dei dettagli dell'ordine…",
       "notFoundTitle": "Ordine non trovato",
       "notFoundSubtitle": "Questo ordine potrebbe essere stato rimosso oppure non hai accesso.",

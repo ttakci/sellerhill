@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Detalhes do pedido",
+      "subtitle": "Pagamento, custo na Amazon, entrega e andamento do pedido",
       "loadingSubtitle": "Buscando os detalhes do pedido…",
       "notFoundTitle": "Pedido não encontrado",
       "notFoundSubtitle": "Este pedido pode ter sido removido ou você não tem acesso a ele.",

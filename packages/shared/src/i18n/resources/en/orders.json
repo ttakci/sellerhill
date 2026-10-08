@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Order Details",
+      "subtitle": "Payment, Amazon cost, delivery and order progress",
       "loadingSubtitle": "Fetching order details…",
       "notFoundTitle": "Order not found",
       "notFoundSubtitle": "This order may have been removed or you do not have access.",

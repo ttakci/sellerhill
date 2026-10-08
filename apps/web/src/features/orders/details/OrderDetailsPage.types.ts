@@ -63,13 +63,15 @@ export interface OrderDetailsPageProps {
   /** How many items the eBay order holds when it is more than one, else null. */
   multiItemCount: number | null;
   canCopyAddress: boolean;
-  /** The seller's own note: the draft in the field, and whether it differs from what is saved. */
+  /** The seller's own note: the draft in the one-line field. */
   noteDraft: string;
   noteMaxLength: number;
-  isNoteDirty: boolean;
   isSavingNote: boolean;
-  onNoteChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onSaveNote: () => void;
+  onNoteChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Leaving the field saves the note when it changed. */
+  onNoteBlur: () => void;
+  /** Enter leaves the field (and so saves); Escape restores the saved text. */
+  onNoteKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   /** Opens the cancellation request on the Cancellations page, where it is answered. */
   onManageCancellation: () => void;
 }

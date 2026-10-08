@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Detaliile comenzii",
+      "subtitle": "Plată, cost Amazon, livrare și parcursul comenzii",
       "loadingSubtitle": "Se preiau detaliile comenzii…",
       "notFoundTitle": "Comanda nu a fost găsită",
       "notFoundSubtitle": "Această comandă poate fi eliminată sau nu aveți acces la ea.",

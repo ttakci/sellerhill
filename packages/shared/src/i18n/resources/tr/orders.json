@@ -168,6 +168,7 @@
     },
     "detail": {
       "title": "Sipariş Detayı",
+      "subtitle": "Ödeme, Amazon maliyeti, teslimat ve sipariş süreci",
       "loadingSubtitle": "Sipariş detayları getiriliyor…",
       "notFoundTitle": "Sipariş bulunamadı",
       "notFoundSubtitle": "Bu sipariş silinmiş olabilir veya erişim yetkiniz yok.",
