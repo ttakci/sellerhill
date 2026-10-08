@@ -271,6 +271,12 @@ export enum PlatformSettingKey {
   SMTP_USER = 'email.smtpUser',
   SMTP_PASSWORD = 'email.smtpPassword',
   SMTP_FROM = 'email.smtpFrom',
+  /**
+   * Master switch for the sellers' daily summary e-mail. Each seller's own
+   * switch (`users.digest_enabled`) is on by default; off here stops every
+   * summary at once without changing anyone's choice. Read on every tick.
+   */
+  DIGEST_ENABLED = 'email.digestEnabled',
 
   // --- Admin panel warning thresholds ---
   ADMIN_QUEUE_WAITING_THRESHOLD = 'admin.queueWaitingThreshold',

@@ -24,6 +24,8 @@ export { ListingGroupsAllDrawer } from './ListingGroupsAllDrawer';
 export type { ListingGroupsAllDrawerProps } from './ListingGroupsAllDrawer';
 export { ListingGroupsDrawer } from './ListingGroupsDrawer';
 export type { ListingGroupsDrawerProps } from './ListingGroupsDrawer';
+export { NotificationsDrawer } from './NotificationsDrawer';
+export type { NotificationsDrawerProps } from './NotificationsDrawer';
 export { ProfileDrawer } from './ProfileDrawer';
 export type { ProfileDrawerProps } from './ProfileDrawer';
 export { StoreSettingsDrawer } from './StoreSettingsDrawer';

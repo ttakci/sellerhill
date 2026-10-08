@@ -653,6 +653,13 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'SMTP_FROM',
     defaultValue: null,
   }),
+  def({
+    key: PlatformSettingKey.DIGEST_ENABLED,
+    category: PlatformSettingCategory.EMAIL,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'DIGEST_ENABLED',
+    defaultValue: 'true',
+  }),
 
   // --- Admin panel warning thresholds ---
   def({

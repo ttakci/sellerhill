@@ -311,6 +311,12 @@
         "subtitle": "Parol seçimləri",
         "changePassword": "Parolu dəyiş",
         "changePasswordSubtitle": "Giriş parolunuzu yeniləyin"
+      },
+      "notifications": {
+        "title": "Bildirişlər",
+        "digestLabel": "Gündəlik xülasə e-poçtu",
+        "digestOn": "Aktiv · hər gün {{time}} ({{timezone}})",
+        "digestOff": "Deaktiv"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Yeni parol cari paroldan fərqli olmalıdır",
         "successHeader": "Parol yeniləndi",
         "successDescription": "Parolunuz uğurla dəyişdirildi."
+      },
+      "notifications": {
+        "title": "Bildirişlər",
+        "subtitle": "SellerHill-in sizə hansı e-poçtları göndərəcəyini seçin",
+        "digestLabel": "Gündəlik xülasə e-poçtu",
+        "digestDescription": "Hər səhər bir e-poçt: dünənki sifarişlər, satışlar, mənfəət, ləğvlər, qaytarmalar və sizi gözləyən işlər.",
+        "sendTime": "Göndərilmə vaxtı",
+        "timezoneNote": "Vaxt saat qurşağınıza görə hesablanır: {{timezone}}. Saat qurşağını profilinizdən dəyişə bilərsiniz.",
+        "changeTimezone": "Saat qurşağını dəyiş"
       }
     }
   },

@@ -123,6 +123,7 @@ export const ADMIN_QUEUE_NAMES = [
   'ebay-campaign-sync',
   'listing-cleanup',
   'best-sellers-crawl',
+  'seller-digest',
 ] as const;
 
 @Injectable()

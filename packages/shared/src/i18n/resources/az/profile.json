@@ -31,7 +31,8 @@
       "help": "Panel və gündəlik xülasə günləri bu saat qurşağına görə hesablayır."
     },
     "errors": {
-      "invalidTimezone": "Bu saat qurşağı tanınmır."
+      "invalidTimezone": "Bu saat qurşağı tanınmır.",
+      "invalidDigestSendHour": "05:00 ilə 12:00 arasında saat seçin."
     }
   }
 }

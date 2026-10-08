@@ -311,6 +311,12 @@
         "subtitle": "密码偏好",
         "changePassword": "修改密码",
         "changePasswordSubtitle": "更新您的登录密码"
+      },
+      "notifications": {
+        "title": "通知",
+        "digestLabel": "每日摘要邮件",
+        "digestOn": "已开启 · 每天 {{time}}（{{timezone}}）",
+        "digestOff": "已关闭"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "新密码不能与当前密码相同",
         "successHeader": "密码已更新",
         "successDescription": "您的密码已成功修改。"
+      },
+      "notifications": {
+        "title": "通知",
+        "subtitle": "选择 SellerHill 向您发送哪些邮件",
+        "digestLabel": "每日摘要邮件",
+        "digestDescription": "每天早上一封邮件：昨日的订单、销售额、利润、取消、退货，以及等待您处理的事项。",
+        "sendTime": "发送时间",
+        "timezoneNote": "时间按您的时区计算：{{timezone}}。时区可在个人资料中修改。",
+        "changeTimezone": "修改时区"
       }
     }
   },

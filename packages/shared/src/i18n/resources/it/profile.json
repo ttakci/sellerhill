@@ -31,7 +31,8 @@
       "help": "La dashboard e il riepilogo giornaliero contano i giorni in questo fuso orario."
     },
     "errors": {
-      "invalidTimezone": "Questo fuso orario non è riconosciuto."
+      "invalidTimezone": "Questo fuso orario non è riconosciuto.",
+      "invalidDigestSendHour": "Scegli un'ora tra le 05:00 e le 12:00."
     }
   }
 }

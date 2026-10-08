@@ -31,7 +31,8 @@
       "help": "Dein Dashboard und die tägliche Zusammenfassung zählen Tage in dieser Zeitzone."
     },
     "errors": {
-      "invalidTimezone": "Diese Zeitzone wird nicht erkannt."
+      "invalidTimezone": "Diese Zeitzone wird nicht erkannt.",
+      "invalidDigestSendHour": "Wählen Sie eine Stunde zwischen 05:00 und 12:00 Uhr."
     }
   }
 }

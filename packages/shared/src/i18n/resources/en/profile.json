@@ -31,7 +31,8 @@
       "help": "Your dashboard and daily summary count days in this time zone."
     },
     "errors": {
-      "invalidTimezone": "This time zone is not recognised."
+      "invalidTimezone": "This time zone is not recognised.",
+      "invalidDigestSendHour": "Choose an hour between 05:00 and 12:00."
     }
   }
 }

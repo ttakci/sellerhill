@@ -311,6 +311,12 @@
         "subtitle": "Préférences de mot de passe",
         "changePassword": "Changer le mot de passe",
         "changePasswordSubtitle": "Mettez à jour votre mot de passe de connexion"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "digestLabel": "E-mail récapitulatif quotidien",
+        "digestOn": "Activé · chaque jour à {{time}} ({{timezone}})",
+        "digestOff": "Désactivé"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel",
         "successHeader": "Mot de passe mis à jour",
         "successDescription": "Votre mot de passe a été modifié avec succès."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "subtitle": "Choisissez les e-mails que SellerHill vous envoie",
+        "digestLabel": "E-mail récapitulatif quotidien",
+        "digestDescription": "Un e-mail chaque matin avec les commandes, ventes, bénéfices, annulations et retours de la veille, et ce qui vous attend.",
+        "sendTime": "Heure d'envoi",
+        "timezoneNote": "L'heure est lue dans votre fuseau horaire : {{timezone}}. Vous modifiez le fuseau horaire dans votre profil.",
+        "changeTimezone": "Modifier le fuseau horaire"
       }
     }
   },

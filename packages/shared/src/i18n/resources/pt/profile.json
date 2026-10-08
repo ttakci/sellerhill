@@ -31,7 +31,8 @@
       "help": "Seu painel e o resumo diário contam os dias neste fuso horário."
     },
     "errors": {
-      "invalidTimezone": "Este fuso horário não é reconhecido."
+      "invalidTimezone": "Este fuso horário não é reconhecido.",
+      "invalidDigestSendHour": "Escolha uma hora entre 05:00 e 12:00."
     }
   }
 }

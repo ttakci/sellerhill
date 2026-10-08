@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { type UpdateProfileRequest } from '@repo/shared';
-import { IsString, IsOptional, Matches, MaxLength, ValidateIf } from 'class-validator';
+import { DIGEST_SEND_HOUR_MAX, DIGEST_SEND_HOUR_MIN, type UpdateProfileRequest } from '@repo/shared';
+import { IsBoolean, IsInt, IsString, IsOptional, Matches, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 
 export class UpdateProfileDto implements UpdateProfileRequest {
   @ApiPropertyOptional({ description: 'User first name', example: 'John' })
@@ -55,4 +55,16 @@ export class UpdateProfileDto implements UpdateProfileRequest {
   @IsString()
   @MaxLength(64)
   timezone?: string;
+
+  @ApiPropertyOptional({ description: 'Daily summary e-mail on/off' })
+  @IsOptional()
+  @IsBoolean()
+  digestEnabled?: boolean;
+
+  @ApiPropertyOptional({ description: 'Local hour the daily summary is sent', example: 8 })
+  @IsOptional()
+  @IsInt()
+  @Min(DIGEST_SEND_HOUR_MIN)
+  @Max(DIGEST_SEND_HOUR_MAX)
+  digestSendHour?: number;
 }

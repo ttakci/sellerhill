@@ -1,5 +1,11 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { UserStatus, type ProfileDto, type UpdateProfileRequest } from '@repo/shared';
+import {
+  DIGEST_SEND_HOUR_MAX,
+  DIGEST_SEND_HOUR_MIN,
+  UserStatus,
+  type ProfileDto,
+  type UpdateProfileRequest,
+} from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { TimezoneService } from '../../common/timezone/timezone.service';
@@ -17,6 +23,8 @@ interface UserEntity {
   city_state: string | null;
   postal_code: string | null;
   timezone: string | null;
+  digest_enabled: boolean;
+  digest_send_hour: number;
   email_verified: boolean;
   status: UserStatus;
   created_at: Date;
@@ -34,7 +42,7 @@ export class ProfileService {
 
   async getProfile(userId: string): Promise<ProfileDto> {
     const users = await this.databaseService.query<UserEntity>(
-      'SELECT id, first_name, last_name, email, phone_number, avatar_url, job_title, bio, country, city_state, postal_code, timezone, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, first_name, last_name, email, phone_number, avatar_url, job_title, bio, country, city_state, postal_code, timezone, digest_enabled, digest_send_hour, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
       [userId]
     );
 
@@ -48,6 +56,14 @@ export class ProfileService {
   async updateProfile(userId: string, request: UpdateProfileRequest): Promise<ProfileDto> {
     if (request.timezone !== undefined && !(await this.timezoneService.isValid(request.timezone))) {
       throw new BadRequestException('profile.errors.invalidTimezone');
+    }
+    if (
+      request.digestSendHour !== undefined &&
+      (!Number.isInteger(request.digestSendHour) ||
+        request.digestSendHour < DIGEST_SEND_HOUR_MIN ||
+        request.digestSendHour > DIGEST_SEND_HOUR_MAX)
+    ) {
+      throw new BadRequestException('profile.errors.invalidDigestSendHour');
     }
 
     const updates: string[] = [];
@@ -64,7 +80,9 @@ export class ProfileService {
         country: 'country',
         cityState: 'city_state',
         postalCode: 'postal_code',
-        timezone: 'timezone'
+        timezone: 'timezone',
+        digestEnabled: 'digest_enabled',
+        digestSendHour: 'digest_send_hour'
     };
 
     Object.entries(request).forEach(([key, value]) => {
@@ -110,6 +128,8 @@ export class ProfileService {
       cityState: user.city_state || undefined,
       postalCode: user.postal_code || undefined,
       timezone: user.timezone || undefined,
+      digestEnabled: user.digest_enabled,
+      digestSendHour: user.digest_send_hour,
       emailVerified: user.email_verified,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),

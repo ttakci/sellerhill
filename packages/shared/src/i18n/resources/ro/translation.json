@@ -311,6 +311,12 @@
         "subtitle": "Preferințe pentru parolă",
         "changePassword": "Schimbă parola",
         "changePasswordSubtitle": "Actualizați parola de autentificare"
+      },
+      "notifications": {
+        "title": "Notificări",
+        "digestLabel": "E-mail cu rezumatul zilnic",
+        "digestOn": "Activ · în fiecare zi la {{time}} ({{timezone}})",
+        "digestOff": "Dezactivat"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Parola nouă trebuie să fie diferită de cea curentă",
         "successHeader": "Parolă actualizată",
         "successDescription": "Parola dvs. a fost schimbată cu succes."
+      },
+      "notifications": {
+        "title": "Notificări",
+        "subtitle": "Alege ce e-mailuri îți trimite SellerHill",
+        "digestLabel": "E-mail cu rezumatul zilnic",
+        "digestDescription": "Un e-mail în fiecare dimineață cu comenzile, vânzările, profitul, anulările și retururile de ieri și ce te așteaptă.",
+        "sendTime": "Ora trimiterii",
+        "timezoneNote": "Ora este citită în fusul tău orar: {{timezone}}. Fusul orar îl schimbi din profil.",
+        "changeTimezone": "Schimbă fusul orar"
       }
     }
   },

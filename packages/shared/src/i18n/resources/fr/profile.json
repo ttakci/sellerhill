@@ -31,7 +31,8 @@
       "help": "Votre tableau de bord et le résumé quotidien comptent les jours dans ce fuseau horaire."
     },
     "errors": {
-      "invalidTimezone": "Ce fuseau horaire n'est pas reconnu."
+      "invalidTimezone": "Ce fuseau horaire n'est pas reconnu.",
+      "invalidDigestSendHour": "Choisissez une heure entre 05:00 et 12:00."
     }
   }
 }

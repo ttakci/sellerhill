@@ -60,6 +60,7 @@ export const OBSERVED_QUEUE_NAMES = [
   'ebay-campaign-sync',
   'listing-cleanup',
   'best-sellers-crawl',
+  'seller-digest',
 ] as const;
 
 /** A BullMQ QueueEvents job event payload (minimal shape we consume). */

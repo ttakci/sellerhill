@@ -311,6 +311,12 @@
         "subtitle": "تفضيلات كلمة المرور",
         "changePassword": "تغيير كلمة المرور",
         "changePasswordSubtitle": "حدّث كلمة مرور تسجيل الدخول"
+      },
+      "notifications": {
+        "title": "الإشعارات",
+        "digestLabel": "رسالة الملخص اليومي",
+        "digestOn": "مفعّل · كل يوم الساعة {{time}} ({{timezone}})",
+        "digestOff": "متوقف"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "يجب أن تختلف كلمة المرور الجديدة عن الحالية",
         "successHeader": "تم تحديث كلمة المرور",
         "successDescription": "تم تغيير كلمة المرور بنجاح."
+      },
+      "notifications": {
+        "title": "الإشعارات",
+        "subtitle": "اختر الرسائل التي يرسلها لك SellerHill",
+        "digestLabel": "رسالة الملخص اليومي",
+        "digestDescription": "رسالة واحدة كل صباح: طلبات الأمس والمبيعات والأرباح والإلغاءات والمرتجعات وما ينتظر انتباهك.",
+        "sendTime": "وقت الإرسال",
+        "timezoneNote": "يُحتسب الوقت حسب منطقتك الزمنية: {{timezone}}. يمكنك تغيير المنطقة الزمنية من ملفك الشخصي.",
+        "changeTimezone": "تغيير المنطقة الزمنية"
       }
     }
   },

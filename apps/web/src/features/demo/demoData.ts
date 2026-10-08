@@ -2277,6 +2277,8 @@ export const DEMO_PROFILE: ProfileDto = {
   cityState: 'Austin, TX',
   postalCode: '78704',
   emailVerified: true,
+  digestEnabled: true,
+  digestSendHour: 8,
   createdAt: isoDaysAgo(ACCOUNT_AGE_DAYS),
   updatedAt: isoDaysAgo(4),
 };

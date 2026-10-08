@@ -21,6 +21,7 @@ export type SettingsDrawerKey =
   | 'storeSettings'
   | 'storeBlacklist'
   | 'password'
+  | 'notifications'
   | 'listingGroupCreate'
   | 'listingGroupEdit'
   | 'listingGroupList'

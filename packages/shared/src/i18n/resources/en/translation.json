@@ -311,6 +311,12 @@
         "subtitle": "Password preferences",
         "changePassword": "Change Password",
         "changePasswordSubtitle": "Update your login password"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "digestLabel": "Daily summary e-mail",
+        "digestOn": "On · every day at {{time}} ({{timezone}})",
+        "digestOff": "Off"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "New password must be different from current",
         "successHeader": "Password updated",
         "successDescription": "Your password has been changed successfully."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "subtitle": "Choose which e-mails SellerHill sends you",
+        "digestLabel": "Daily summary e-mail",
+        "digestDescription": "One e-mail each morning with yesterday's orders, sales, profit, cancellations, returns and what is waiting for you.",
+        "sendTime": "Sending time",
+        "timezoneNote": "The time is read in your time zone: {{timezone}}. You change the time zone in your profile.",
+        "changeTimezone": "Change time zone"
       }
     }
   },

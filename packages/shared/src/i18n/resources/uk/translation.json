@@ -311,6 +311,12 @@
         "subtitle": "Налаштування пароля",
         "changePassword": "Змінити пароль",
         "changePasswordSubtitle": "Оновіть пароль для входу"
+      },
+      "notifications": {
+        "title": "Сповіщення",
+        "digestLabel": "Щоденний підсумок на e-mail",
+        "digestOn": "Увімкнено · щодня о {{time}} ({{timezone}})",
+        "digestOff": "Вимкнено"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Новий пароль має відрізнятися від поточного",
         "successHeader": "Пароль оновлено",
         "successDescription": "Ваш пароль успішно змінено."
+      },
+      "notifications": {
+        "title": "Сповіщення",
+        "subtitle": "Оберіть, які листи SellerHill надсилатиме вам",
+        "digestLabel": "Щоденний підсумок на e-mail",
+        "digestDescription": "Один лист щоранку: учорашні замовлення, продажі, прибуток, скасування, повернення та те, що чекає на вашу увагу.",
+        "sendTime": "Час надсилання",
+        "timezoneNote": "Час визначається за вашим часовим поясом: {{timezone}}. Часовий пояс змінюється в профілі.",
+        "changeTimezone": "Змінити часовий пояс"
       }
     }
   },

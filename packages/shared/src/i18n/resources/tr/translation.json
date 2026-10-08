@@ -311,6 +311,12 @@
         "subtitle": "Şifre tercihleri",
         "changePassword": "Şifre Değiştir",
         "changePasswordSubtitle": "Giriş şifrenizi güncelleyin"
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "digestLabel": "Günlük özet e-postası",
+        "digestOn": "Açık · her gün {{time}} ({{timezone}})",
+        "digestOff": "Kapalı"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Yeni şifre mevcut şifreden farklı olmalı",
         "successHeader": "Şifre güncellendi",
         "successDescription": "Şifreniz başarıyla değiştirildi."
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "subtitle": "SellerHill'in size hangi e-postaları göndereceğini seçin",
+        "digestLabel": "Günlük özet e-postası",
+        "digestDescription": "Her sabah tek bir e-posta: dünkü siparişler, satışlar, kâr, iptaller, iadeler ve sizi bekleyen işler.",
+        "sendTime": "Gönderim saati",
+        "timezoneNote": "Saat, saat diliminize göre okunur: {{timezone}}. Saat dilimini profilinizden değiştirebilirsiniz.",
+        "changeTimezone": "Saat dilimini değiştir"
       }
     }
   },

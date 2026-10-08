@@ -4,7 +4,7 @@
  * Section cards keep header icons; account rows keep row icons.
  */
 
-import type { ProfileDto } from '@repo/shared';
+import { DEFAULT_DIGEST_SEND_HOUR, type ProfileDto } from '@repo/shared';
 import { ConfirmModal, InfoMessage, PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ import {
   ListingGroupDrawer,
   ListingGroupsAllDrawer,
   ListingGroupsDrawer,
+  NotificationsDrawer,
   ProfileDrawer,
   StoreSettingsDrawer,
 } from '../drawers';
@@ -196,6 +197,38 @@ const AccountSecuritySection = ({
   );
 };
 
+const NotificationsSection = ({
+  profile,
+  onOpen,
+}: {
+  profile: ProfileDto | null;
+  onOpen: () => void;
+}): React.ReactElement => {
+  const { t } = useTranslation(['translation']);
+  const hour = String(profile?.digestSendHour ?? DEFAULT_DIGEST_SEND_HOUR).padStart(2, '0');
+  const subtitle = profile?.digestEnabled
+    ? t('translation:settingsHub.sections.notifications.digestOn', {
+        time: `${hour}:00`,
+        timezone: profile.timezone || 'UTC',
+      })
+    : t('translation:settingsHub.sections.notifications.digestOff');
+  return (
+    <SettingsCard
+      variant="section"
+      header={{
+        title: t('translation:settingsHub.sections.notifications.title'),
+      }}
+    >
+      <SettingsActionRow
+        icon="mail"
+        label={t('translation:settingsHub.sections.notifications.digestLabel')}
+        subtitle={subtitle}
+        onClick={onOpen}
+      />
+    </SettingsCard>
+  );
+};
+
 export const SettingsHubPageComponent = ({
   profile,
   ebayAccounts,
@@ -258,10 +291,17 @@ export const SettingsHubPageComponent = ({
         />
         <S.ColumnStack>
           <ListingGroupsSection onManage={onViewAllListingGroups} />
+          <NotificationsSection profile={profile ?? null} onOpen={() => onOpenDrawer('notifications')} />
           <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} />
         </S.ColumnStack>
       </S.TwoColGrid>
 
+      <NotificationsDrawer
+        isOpen={activeDrawer === 'notifications'}
+        onClose={onCloseDrawer}
+        profile={profile ?? undefined}
+        onOpenProfile={() => onOpenDrawer('profile')}
+      />
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountsDrawer
         isOpen={activeDrawer === 'ebayAccounts'}

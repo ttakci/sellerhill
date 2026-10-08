@@ -31,7 +31,8 @@
       "help": "Tu panel y el resumen diario cuentan los días en esta zona horaria."
     },
     "errors": {
-      "invalidTimezone": "No se reconoce esta zona horaria."
+      "invalidTimezone": "No se reconoce esta zona horaria.",
+      "invalidDigestSendHour": "Elige una hora entre las 05:00 y las 12:00."
     }
   }
 }

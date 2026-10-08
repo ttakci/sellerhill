@@ -311,6 +311,12 @@
         "subtitle": "Preferenze della password",
         "changePassword": "Cambia password",
         "changePasswordSubtitle": "Aggiorna la password di accesso"
+      },
+      "notifications": {
+        "title": "Notifiche",
+        "digestLabel": "E-mail di riepilogo giornaliero",
+        "digestOn": "Attivo · ogni giorno alle {{time}} ({{timezone}})",
+        "digestOff": "Disattivato"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "La nuova password deve essere diversa da quella attuale",
         "successHeader": "Password aggiornata",
         "successDescription": "La tua password è stata modificata correttamente."
+      },
+      "notifications": {
+        "title": "Notifiche",
+        "subtitle": "Scegli quali e-mail SellerHill ti invia",
+        "digestLabel": "E-mail di riepilogo giornaliero",
+        "digestDescription": "Una e-mail ogni mattina con ordini, vendite, profitto, annullamenti e resi di ieri, e ciò che ti aspetta.",
+        "sendTime": "Orario di invio",
+        "timezoneNote": "L'orario è letto nel tuo fuso orario: {{timezone}}. Il fuso orario si modifica nel profilo.",
+        "changeTimezone": "Cambia fuso orario"
       }
     }
   },

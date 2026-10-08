@@ -148,6 +148,7 @@ export class AdminController {
     @InjectQueue('ebay-billing-sync') private readonly ebayBillingSyncQueue: Queue,
     @InjectQueue('listing-cleanup') private readonly listingCleanupQueue: Queue,
     @InjectQueue('best-sellers-crawl') private readonly bestSellersCrawlQueue: Queue,
+    @InjectQueue('seller-digest') private readonly sellerDigestQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -172,6 +173,7 @@ export class AdminController {
       { name: 'ebay-campaign-sync', queue: this.ebayCampaignSyncQueue },
       { name: 'listing-cleanup', queue: this.listingCleanupQueue },
       { name: 'best-sellers-crawl', queue: this.bestSellersCrawlQueue },
+      { name: 'seller-digest', queue: this.sellerDigestQueue },
     ];
   }
 

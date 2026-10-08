@@ -311,6 +311,12 @@
         "subtitle": "Passworteinstellungen",
         "changePassword": "Passwort ändern",
         "changePasswordSubtitle": "Ihr Anmeldepasswort aktualisieren"
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "digestLabel": "Tägliche Zusammenfassung per E-Mail",
+        "digestOn": "An · täglich um {{time}} ({{timezone}})",
+        "digestOff": "Aus"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "Das neue Passwort muss sich vom aktuellen unterscheiden",
         "successHeader": "Passwort aktualisiert",
         "successDescription": "Ihr Passwort wurde erfolgreich geändert."
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "subtitle": "Wählen Sie, welche E-Mails SellerHill Ihnen sendet",
+        "digestLabel": "Tägliche Zusammenfassung per E-Mail",
+        "digestDescription": "Jeden Morgen eine E-Mail mit den gestrigen Bestellungen, Umsätzen, Gewinn, Stornierungen, Retouren und dem, was auf Sie wartet.",
+        "sendTime": "Versandzeit",
+        "timezoneNote": "Die Uhrzeit gilt in Ihrer Zeitzone: {{timezone}}. Die Zeitzone ändern Sie in Ihrem Profil.",
+        "changeTimezone": "Zeitzone ändern"
       }
     }
   },

@@ -311,6 +311,12 @@
         "subtitle": "पासवर्ड प्राथमिकताएँ",
         "changePassword": "पासवर्ड बदलें",
         "changePasswordSubtitle": "अपना लॉगिन पासवर्ड अपडेट करें"
+      },
+      "notifications": {
+        "title": "सूचनाएँ",
+        "digestLabel": "दैनिक सारांश ईमेल",
+        "digestOn": "चालू · हर दिन {{time}} बजे ({{timezone}})",
+        "digestOff": "बंद"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "नया पासवर्ड मौजूदा पासवर्ड से अलग होना चाहिए",
         "successHeader": "पासवर्ड अपडेट हो गया",
         "successDescription": "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।"
+      },
+      "notifications": {
+        "title": "सूचनाएँ",
+        "subtitle": "चुनें कि SellerHill आपको कौन-से ईमेल भेजे",
+        "digestLabel": "दैनिक सारांश ईमेल",
+        "digestDescription": "हर सुबह एक ईमेल: कल के ऑर्डर, बिक्री, मुनाफ़ा, रद्दीकरण, रिटर्न और जो काम आपका इंतज़ार कर रहे हैं।",
+        "sendTime": "भेजने का समय",
+        "timezoneNote": "समय आपके टाइम ज़ोन के अनुसार पढ़ा जाता है: {{timezone}}। टाइम ज़ोन आप प्रोफ़ाइल में बदल सकते हैं।",
+        "changeTimezone": "टाइम ज़ोन बदलें"
       }
     }
   },

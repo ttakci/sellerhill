@@ -31,7 +31,8 @@
       "help": "仪表盘和每日摘要按此时区计算日期。"
     },
     "errors": {
-      "invalidTimezone": "无法识别此时区。"
+      "invalidTimezone": "无法识别此时区。",
+      "invalidDigestSendHour": "请选择 05:00 至 12:00 之间的整点。"
     }
   }
 }

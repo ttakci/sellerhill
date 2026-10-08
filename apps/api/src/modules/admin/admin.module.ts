@@ -68,6 +68,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'ebay-campaign-sync' },
       { name: 'listing-cleanup' },
       { name: 'best-sellers-crawl' },
+      { name: 'seller-digest' },
     ),
   ],
   controllers: [AdminController],

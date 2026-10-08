@@ -153,10 +153,12 @@ export class EmailService {
   private replaceVariables(content: string, variables: Record<string, string>): string {
     let result = content;
 
-    // Replace {{variableName}} with actual values
+    // Replace {{variableName}} with actual values. The replacement is a
+    // FUNCTION so a value is inserted verbatim: a string replacement would
+    // expand `$&`, `$1` or `$$` inside it (a store name, a money figure).
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
-      result = result.replace(regex, value);
+      result = result.replace(regex, () => value);
     });
 
     // Add current year automatically
@@ -327,6 +329,29 @@ export class EmailService {
   }
 
   /**
+   * The seller's daily summary. Every value in `variables` is already
+   * HTML-escaped (or is HTML the digest renderer built from escaped parts);
+   * `dashboardUrl` / `settingsUrl` are filled here so the links carry the
+   * locale segment like every other backend-built link.
+   */
+  async sendDailyDigest(
+    email: string,
+    variables: Record<string, string>,
+    locale: string = 'en'
+  ): Promise<void> {
+    await this.sendTemplatedEmail(
+      email,
+      'daily_digest',
+      {
+        ...variables,
+        dashboardUrl: this.appUrl(locale, '/dashboard'),
+        settingsUrl: this.appUrl(locale, '/settings?drawer=notifications'),
+      },
+      locale
+    );
+  }
+
+  /**
    * Billing page link, WITH the locale segment.
    *
    * The router reads the first path segment as the locale, so a bare
@@ -336,9 +361,14 @@ export class EmailService {
    * subscription"). A backend-built link must carry the locale itself.
    */
   private billingUrl(locale: string): string {
+    return this.appUrl(locale, '/billing');
+  }
+
+  /** A seller-app link with the locale segment (see `billingUrl`). */
+  private appUrl(locale: string, path: string): string {
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL', { infer: true }) || 'http://localhost:5173';
     const safeLocale = isValidLocale(locale) ? locale : DEFAULT_LOCALE;
-    return `${frontendUrl}/${safeLocale}/billing`;
+    return `${frontendUrl}/${safeLocale}${path}`;
   }
 }

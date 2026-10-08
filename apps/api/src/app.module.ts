@@ -31,6 +31,7 @@ import { ListingsModule } from './modules/listings/listings.module';
 import { LlmModule } from './modules/llm/llm.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { SellerDigestModule } from './modules/seller-digest/seller-digest.module';
 import { StoreSettingsModule } from './modules/store-settings/store-settings.module';
 
 @Module({
@@ -85,6 +86,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     EbayCampaignsModule,
     DashboardModule,
     ActionCenterModule,
+    SellerDigestModule,
     BestSellersModule,
     StoreSettingsModule,
     ListingSettingsGroupModule,

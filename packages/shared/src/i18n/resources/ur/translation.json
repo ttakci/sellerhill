@@ -311,6 +311,12 @@
         "subtitle": "پاس ورڈ کی ترجیحات",
         "changePassword": "پاس ورڈ تبدیل کریں",
         "changePasswordSubtitle": "اپنا لاگ ان پاس ورڈ اپ ڈیٹ کریں"
+      },
+      "notifications": {
+        "title": "اطلاعات",
+        "digestLabel": "روزانہ خلاصہ ای میل",
+        "digestOn": "آن · ہر روز {{time}} بجے ({{timezone}})",
+        "digestOff": "آف"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "نیا پاس ورڈ موجودہ پاس ورڈ سے مختلف ہونا چاہیے",
         "successHeader": "پاس ورڈ اپ ڈیٹ ہو گیا",
         "successDescription": "آپ کا پاس ورڈ کامیابی سے تبدیل ہو گیا ہے۔"
+      },
+      "notifications": {
+        "title": "اطلاعات",
+        "subtitle": "منتخب کریں کہ SellerHill آپ کو کون سی ای میلز بھیجے",
+        "digestLabel": "روزانہ خلاصہ ای میل",
+        "digestDescription": "ہر صبح ایک ای میل: کل کے آرڈرز، فروخت، منافع، منسوخیاں، واپسیاں اور وہ کام جو آپ کے منتظر ہیں۔",
+        "sendTime": "بھیجنے کا وقت",
+        "timezoneNote": "وقت آپ کے ٹائم زون کے مطابق پڑھا جاتا ہے: {{timezone}}۔ ٹائم زون پروفائل میں تبدیل کریں۔",
+        "changeTimezone": "ٹائم زون تبدیل کریں"
       }
     }
   },

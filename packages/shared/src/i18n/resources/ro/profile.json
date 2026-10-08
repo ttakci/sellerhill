@@ -31,7 +31,8 @@
       "help": "Tabloul de bord și rezumatul zilnic numără zilele în acest fus orar."
     },
     "errors": {
-      "invalidTimezone": "Acest fus orar nu este recunoscut."
+      "invalidTimezone": "Acest fus orar nu este recunoscut.",
+      "invalidDigestSendHour": "Alege o oră între 05:00 și 12:00."
     }
   }
 }

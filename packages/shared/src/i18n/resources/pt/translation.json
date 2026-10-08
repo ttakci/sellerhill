@@ -311,6 +311,12 @@
         "subtitle": "Preferências de senha",
         "changePassword": "Alterar senha",
         "changePasswordSubtitle": "Atualize a senha de login"
+      },
+      "notifications": {
+        "title": "Notificações",
+        "digestLabel": "E-mail de resumo diário",
+        "digestOn": "Ativado · todos os dias às {{time}} ({{timezone}})",
+        "digestOff": "Desativado"
       }
     },
     "drawer": {
@@ -483,6 +489,15 @@
         "sameAsCurrent": "A nova senha deve ser diferente da atual",
         "successHeader": "Senha atualizada",
         "successDescription": "Sua senha foi alterada com sucesso."
+      },
+      "notifications": {
+        "title": "Notificações",
+        "subtitle": "Escolha quais e-mails o SellerHill envia para você",
+        "digestLabel": "E-mail de resumo diário",
+        "digestDescription": "Um e-mail toda manhã com os pedidos, vendas, lucro, cancelamentos e devoluções de ontem, e o que está esperando por você.",
+        "sendTime": "Horário de envio",
+        "timezoneNote": "O horário é lido no seu fuso horário: {{timezone}}. Você altera o fuso horário no seu perfil.",
+        "changeTimezone": "Alterar fuso horário"
       }
     }
   },

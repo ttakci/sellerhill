@@ -31,7 +31,8 @@
       "help": "Panel ve günlük özet günleri bu saat dilimine göre sayar."
     },
     "errors": {
-      "invalidTimezone": "Bu saat dilimi tanınmıyor."
+      "invalidTimezone": "Bu saat dilimi tanınmıyor.",
+      "invalidDigestSendHour": "05:00 ile 12:00 arasında bir saat seçin."
     }
   }
 }
