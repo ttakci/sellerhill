@@ -110,14 +110,14 @@ const Kpi = ({
   label: string;
   value: string;
   color?: string;
-  /** The profit figure: one step larger and bold, so the eye lands there first. */
+  /** The profit figure: the strip's largest size and bold, so the eye lands there first. */
   emphasis?: boolean;
 }): React.ReactElement => (
   <S.KpiItem>
     <S.KpiLabel variant="caption" color="text.secondary">
       {label}
     </S.KpiLabel>
-    <Text variant={emphasis ? 'metric' : 'metric-sm'} weight={emphasis ? 'bold' : 'semibold'} numeric color={color}>
+    <Text variant={emphasis ? 'metric-lg' : 'metric-sm'} weight={emphasis ? 'bold' : 'semibold'} numeric color={color}>
       {value}
     </Text>
   </S.KpiItem>

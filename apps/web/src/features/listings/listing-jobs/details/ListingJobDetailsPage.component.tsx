@@ -225,7 +225,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
       />
 
       {job ? (
-        <S.SummaryCard variant="elevated" $tone={progressTone}>
+        <S.SummaryCard variant="elevated">
           <S.SummaryTop>
             <S.SummaryHeader>
               <Badge variant={jobStatusBadgeVariant(job.status)} size="sm" solid>

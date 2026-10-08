@@ -7,28 +7,24 @@ export const Container = PageContainer;
 type ProgressTone = 'default' | 'active' | 'positive' | 'negative';
 
 /* ── Summary — same quiet pane as JobCard / ListingCard ── */
-export const SummaryCard = styled(Card)<{ $tone: ProgressTone }>`
+/* The listing detail hero's blue wash over the glass, fading out by 65%
+   (operator choice: blue, whatever the job's state). */
+export const SummaryCard = styled(Card)`
   padding: 0;
   overflow: hidden;
-  /* A faint wash of the job's state hue over the glass — lifts the page without a new surface. */
-  background-image: linear-gradient(
-    135deg,
-    ${({ $tone, theme }) => {
-      if ($tone === 'positive') {return theme.colors.semanticTint.success;}
-      if ($tone === 'negative') {return theme.colors.semanticTint.error;}
-      if ($tone === 'active') {return theme.colors.semanticTint.info;}
-      return theme.colors.semanticTint.neutral;
-    }} 0%,
-    transparent 65%
-  );
+  background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
 `;
 
 export const SummaryTop = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.md+')};
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
   min-width: 0;
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding: ${tkn('spacing.xl')};
+  }
 `;
 
 export const SummaryHeader = styled.div`

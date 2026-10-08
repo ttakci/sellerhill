@@ -10,6 +10,9 @@ export const Container = PageContainer;
  */
 export const Hero = styled(Card)`
   position: relative;
+  /* A blue wash over the glass, fading out by 65% — the job detail's summary
+     card does the same (operator choice: blue, whatever the status). */
+  background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
@@ -298,10 +301,9 @@ export const UpdatedValueRow = styled.div`
 `;
 
 /**
- * The money story as ONE strip — profit, ROI, sale price, cost, margin — under
- * a single hairline on the pane's own surface. Not a tinted box inside the
- * card (one surface per card), and not five boxes: the only colour in it is
- * the profit figure, so the eye lands there first.
+ * The money story as ONE strip — profit, ROI, sale price, cost, margin — on a
+ * blue tint with a solid brand-blue bar on its leading edge, so it reads as
+ * the page's headline. The profit figure keeps its own green / red.
  */
 export const KpiStrip = styled.div`
   /* A grid, not a wrapping row: five in a line on a desk, two or three per
@@ -313,7 +315,11 @@ export const KpiStrip = styled.div`
   padding: ${tkn('spacing.md')};
   border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
   border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.semanticTint.info')};
+  background: ${tkn('colors.semanticTint.infoStrong')};
+  box-shadow:
+    inset 0.25rem 0 0 ${tkn('colors.brand.primary')},
+    ${tkn('shadows.sm')};
+  padding-left: ${tkn('spacing.lg')};
 
   /* From md up HeroInfo is card-height, so push the strip to the bottom. */
   @media (min-width: ${tkn('breakpoints.md')}) {
