@@ -412,12 +412,22 @@ export const GroupPreview = styled(SettingsCard)`
   height: auto;
 `;
 
-/** The group's per-range margin rules, one quiet line each, under the facts. */
-export const GroupPreviewRanges = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+/** The picked group's template, rendered with this listing — a scrollable
+ *  frame under the template row (the catalog CSS is class-scoped, so injecting
+ *  it is safe, as in the group edit drawer). */
+export const GroupTemplatePreview = styled.div`
   margin-top: ${tkn('spacing.sm')};
+  max-height: 30rem;
+  overflow: auto;
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.md')};
+`;
+
+export const GroupTemplatePreviewHtml = styled.div`
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 `;
 
 /** Vertical rhythm for a SettingsCard body with multiple top-level children. */
@@ -533,7 +543,7 @@ export const MetaValue = styled.div`
   min-width: 0;
   max-width: 60%;
   text-align: right;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 `;
 
 /** Kâr Marjı row's value + its info tooltip trigger, side by side on the

@@ -135,8 +135,8 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   groupStockBufferLabel,
   groupMarginSummaryLabel,
   groupMarginRangeDetails,
-  drawerGroupFacts,
-  drawerGroupMarginRanges,
+  drawerGroupSections,
+  drawerGroupPreviewHtml,
   amazonStockText,
   sourceRemoved,
   paymentPolicyLabel,
@@ -729,28 +729,26 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             searchPlaceholder={t('translation:common.search')}
             noResultsMessage={t('translation:common.noResults')}
           />
-          {drawerGroupFacts.length > 0 ? (
-            <S.GroupPreview variant="section" header={{ title: t('listings.detail.groupPreviewTitle') }}>
+          {drawerGroupSections.map((section) => (
+            <S.GroupPreview key={section.key} variant="section" header={{ title: section.title }}>
               <S.MetaList>
-                {drawerGroupFacts.map((fact) => (
-                  <Meta key={fact.label} label={fact.label}>
-                    <Text variant="body" weight="semibold" numeric>
-                      {fact.value}
-                    </Text>
+                {section.rows.map((row) => (
+                  <Meta key={row.label} label={row.label}>
+                    {row.values.map((value) => (
+                      <Text key={value} variant="body" weight="semibold" numeric>
+                        {value}
+                      </Text>
+                    ))}
                   </Meta>
                 ))}
               </S.MetaList>
-              {drawerGroupMarginRanges.length > 0 ? (
-                <S.GroupPreviewRanges>
-                  {drawerGroupMarginRanges.map((row) => (
-                    <Text key={row} variant="body-sm" color="text.secondary" numeric>
-                      {row}
-                    </Text>
-                  ))}
-                </S.GroupPreviewRanges>
+              {section.key === 'template' && drawerGroupPreviewHtml ? (
+                <S.GroupTemplatePreview>
+                  <S.GroupTemplatePreviewHtml dangerouslySetInnerHTML={{ __html: drawerGroupPreviewHtml }} />
+                </S.GroupTemplatePreview>
               ) : null}
             </S.GroupPreview>
-          ) : null}
+          ))}
         </S.SectionContent>
       </Drawer>
 

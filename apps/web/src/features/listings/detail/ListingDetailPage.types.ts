@@ -1,9 +1,41 @@
 import type { ListingDto, ListingStatus, UpdateListingFormData } from '@repo/shared';
 import type { IconName } from '@repo/ui';
+import type { TFunction } from 'i18next';
 import type { RefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import type { SwipeNavigationHandlers } from '@/hooks/useSwipeNavigation';
+
+/** One read-only row of the change-group drawer: a label and one or more value
+ *  lines (the margin row lists every tier on its own line). */
+export interface GroupDetailRow {
+  label: string;
+  values: string[];
+}
+
+/** A titled block of rows, mirroring one step of the group edit drawer. */
+export interface GroupDetailSection {
+  key: 'general' | 'deductions' | 'pricing' | 'rules' | 'template';
+  title: string;
+  rows: GroupDetailRow[];
+}
+
+/** Formatting helpers the group-detail view model needs from the container. */
+export interface GroupDetailDeps {
+  t: TFunction;
+  fmtCurrency: (value: number) => string;
+  fmtRating: (value: number) => string;
+  dash: string;
+}
+
+/** The listing fields the template preview is rendered with. */
+export interface GroupPreviewListing {
+  title: string;
+  description?: string;
+  features?: string[];
+  specs?: Record<string, string>;
+  imageUrls?: string[];
+}
 
 export interface ListingDetailSelectOption {
   id: string;
@@ -61,11 +93,10 @@ export interface ListingDetailPageProps {
   /** Per-range breakdown for the Kâr Marjı info tooltip — empty when there's
    *  only one range (nothing to break down beyond the summary label itself). */
   groupMarginRangeDetails: string[];
-  /** The group picked in the change-group drawer, read-only: margin, quantity,
-   *  buffer, fees and price ending. Empty until a group is picked. */
-  drawerGroupFacts: ListingDetailFact[];
-  /** That group's per-range margin rules, one line each (empty for one range). */
-  drawerGroupMarginRanges: string[];
+  /** The group picked in the change-group drawer, read-only, in the edit drawer's steps. */
+  drawerGroupSections: GroupDetailSection[];
+  /** The picked group's template rendered with THIS listing's data ('' = none). */
+  drawerGroupPreviewHtml: string;
   /** "N+" when the source only reports a lower bound, formatted via
    *  `formatSourceStock` in the container — never a bare number. */
   amazonStockText: string;

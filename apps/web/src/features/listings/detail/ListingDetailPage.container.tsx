@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  formatSourceStock, ListingStatus, PolicyType, resolvePriceEndingCents, updateListingSchema, type UpdateListingFormData,
+  formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
 } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -19,11 +19,15 @@ import {
 } from '../api/listings.api';
 import { buildMarginRangeDetails, summarizeMarginStrategy } from '../shared/margin-strategy';
 
+import { buildGroupDetailSections, renderGroupTemplatePreview } from './groupDetails';
 import { ListingDetailPageComponent } from './ListingDetailPage.component';
-import type { AutomationStatusItem, ListingDetailFact, ListingOverridesUiState } from './ListingDetailPage.types';
+import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
 
 import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
-import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import {
+  useGetListingSettingsGroupsQuery,
+  useGetPredefinedTemplatesQuery,
+} from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getErrorI18nKey, isFetchBaseQueryError } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
@@ -328,38 +332,33 @@ export const ListingDetailPageContainer: React.FC = () => {
     () => listingSettingsGroups.find((g) => g.id === drawerGroupId),
     [listingSettingsGroups, drawerGroupId]
   );
-  const drawerGroupFacts = useMemo((): ListingDetailFact[] => {
-    if (!drawerGroup) {
-      return [];
-    }
-    const fees = drawerGroup.fees;
-    const qty = drawerGroup.stock?.defaultQuantity;
-    const buffer = drawerGroup.stock?.stockBuffer;
-    const ending = resolvePriceEndingCents(fees);
-    return [
-      {
-        label: t('listings.detail.groupMarginLabel'),
-        value: summarizeMarginStrategy(drawerGroup.repricingStrategy, fmtCurrency, t) ?? dash,
-      },
-      { label: t('listings.detail.groupDefaultQuantityLabel'), value: typeof qty === 'number' ? String(qty) : dash },
-      { label: t('listings.detail.groupStockBufferLabel'), value: typeof buffer === 'number' ? String(buffer) : dash },
-      {
-        label: t('listingSettingsGroup:listingSettingsGroup.ebayFee'),
-        value: typeof fees?.ebayFeePercent === 'number' ? `%${fees.ebayFeePercent}` : dash,
-      },
-      {
-        label: t('listingSettingsGroup:listingSettingsGroup.fixedFee'),
-        value: typeof fees?.fixedFeeAmount === 'number' ? fmtCurrency(fees.fixedFeeAmount) : dash,
-      },
-      {
-        label: t('listingSettingsGroup:listingSettingsGroup.priceRounding.title'),
-        value: ending === null ? t('listings.detail.automationBadgeOff') : `.${String(ending).padStart(2, '0')}`,
-      },
-    ];
-  }, [drawerGroup, fmtCurrency, t, dash]);
-  const drawerGroupMarginRanges = useMemo(
-    () => buildMarginRangeDetails(drawerGroup?.repricingStrategy, fmtCurrency, t, dash),
-    [drawerGroup, fmtCurrency, t, dash]
+  const { data: predefinedTemplates = [] } = useGetPredefinedTemplatesQuery(undefined, {
+    skip: !isGroupDrawerOpen,
+  });
+  const fmtRating = useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(localeCfg.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value),
+    [localeCfg.locale]
+  );
+  const drawerGroupSections = useMemo(
+    () =>
+      drawerGroup
+        ? buildGroupDetailSections(drawerGroup, predefinedTemplates, { t, fmtCurrency, fmtRating, dash })
+        : [],
+    [drawerGroup, predefinedTemplates, fmtCurrency, fmtRating, t, dash]
+  );
+  const drawerGroupPreviewHtml = useMemo(
+    () =>
+      listing
+        ? renderGroupTemplatePreview(drawerGroup, predefinedTemplates, {
+            title: listing.title,
+            description: listing.description,
+            features: listing.features,
+            specs: listing.specs,
+            imageUrls: listing.imageUrls,
+          })
+        : '',
+    [drawerGroup, predefinedTemplates, listing]
   );
 
   const statusLabel = useMemo(() => {
@@ -737,8 +736,8 @@ export const ListingDetailPageContainer: React.FC = () => {
       groupStockBufferLabel={groupStockBufferLabel}
       groupMarginSummaryLabel={groupMarginSummaryLabel}
       groupMarginRangeDetails={groupMarginRangeDetails}
-      drawerGroupFacts={drawerGroupFacts}
-      drawerGroupMarginRanges={drawerGroupMarginRanges}
+      drawerGroupSections={drawerGroupSections}
+      drawerGroupPreviewHtml={drawerGroupPreviewHtml}
       amazonStockText={amazonStockText}
       sourceRemoved={sourceRemoved}
       paymentPolicyLabel={paymentPolicyLabel}
