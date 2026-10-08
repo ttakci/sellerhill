@@ -337,6 +337,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
         subtitle={
           userData ? t('dashboard.greeting', { name: userData.firstName }) : t('dashboard.subtitle')
         }
+        subtitleEmphasis={userData?.firstName || undefined}
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}

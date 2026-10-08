@@ -18,6 +18,7 @@ import type { DashboardPageComponentProps } from './DashboardPage.types';
 export const DashboardPageComponent = ({
   title,
   subtitle,
+  subtitleEmphasis,
   tabs,
   activeTab,
   onTabChange,
@@ -28,7 +29,20 @@ export const DashboardPageComponent = ({
   topSellersProps,
 }: DashboardPageComponentProps): React.ReactElement => (
   <S.Container>
-    <PageHeader title={title} subtitle={subtitle} />
+    <PageHeader
+      title={title}
+      subtitle={
+        subtitleEmphasis && subtitle.includes(subtitleEmphasis) ? (
+          <>
+            {subtitle.slice(0, subtitle.indexOf(subtitleEmphasis))}
+            <strong>{subtitleEmphasis}</strong>
+            {subtitle.slice(subtitle.indexOf(subtitleEmphasis) + subtitleEmphasis.length)}
+          </>
+        ) : (
+          subtitle
+        )
+      }
+    />
 
     <S.Toolbar>
       {/* Shared TabNav — this rail was hand-rolled here while Admin and

@@ -19,6 +19,8 @@ export interface DashboardTabItem {
 export interface DashboardPageComponentProps {
   title: string;
   subtitle: string;
+  /** Part of the subtitle (the seller's name) rendered bold. */
+  subtitleEmphasis?: string;
   tabs: DashboardTabItem[];
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
