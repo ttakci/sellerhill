@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainerWithMobileBar, SettingsCard, Text, tkn } from '@repo/ui';
+import { Card, IconButton, PageContainerWithMobileBar, SettingsCard, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
@@ -58,6 +58,12 @@ export const StatusBadgeSlot = styled.div`
   right: ${tkn('spacing.lg')};
 `;
 
+/**
+ * From `md` up the gallery column stretches to the hero's height (the grid's
+ * `align-items: stretch`) and the photo takes whatever the thumbnail strip
+ * leaves, so the strip's bottom edge and the economics strip's bottom edge sit
+ * on one line instead of the figures hanging below the pictures.
+ */
 export const GalleryBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -65,8 +71,10 @@ export const GalleryBlock = styled.div`
   min-width: 0;
 `;
 
-/** Transparent shell — match ListingCard / listings-all product image */
+/** Transparent shell — match ListingCard / listings-all product image. A
+ *  carousel: arrows over the photo (and a touch swipe) step through the images. */
 export const GalleryMain = styled.div`
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   max-height: 20rem;
@@ -76,26 +84,73 @@ export const GalleryMain = styled.div`
   background: transparent;
   border-radius: ${tkn('radius.sm')};
   overflow: hidden;
+  touch-action: pan-y;
 
-  img {
+  > img {
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
 
-  svg {
+  > svg {
     color: ${tkn('colors.text.tertiary')};
   }
 
   @media (min-width: ${tkn('breakpoints.md')}) {
+    aspect-ratio: auto;
     max-height: none;
+    flex: 1 1 0;
+    min-height: 14rem;
+  }
+
+  /* Arrows show on hover with a pointer; on touch screens they stay visible. */
+  &:hover > button,
+  & > button:focus-visible {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    & > button {
+      opacity: 1;
+    }
   }
 `;
 
+/** The listing carousel's round brand-blue arrow, inside the photo's edges. */
+export const GalleryArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
+  position: absolute;
+  top: 50%;
+  ${({ $side, theme }) => ($side === 'left' ? `left: ${theme.spacing.sm}` : `right: ${theme.spacing.sm}`)};
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.primary')};
+  border-color: transparent;
+  color: ${tkn('colors.text.inverse')};
+  opacity: 0;
+  z-index: 1;
+  box-shadow: ${tkn('shadows.md')};
+  transition: opacity ${tkn('transitions.fast')};
+
+  &:hover {
+    background: ${tkn('colors.brand.primaryHover')};
+    color: ${tkn('colors.text.inverse')};
+  }
+`;
+
+/** ONE line of thumbnails that scrolls sideways — wrapping onto a second row
+ *  made the gallery taller than the column beside it. */
 export const ThumbRow = styled.div`
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: ${tkn('spacing.sm')};
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  flex-shrink: 0;
 `;
 
 export const ThumbButton = styled.button<{ $active: boolean }>`
@@ -108,6 +163,7 @@ export const ThumbButton = styled.button<{ $active: boolean }>`
   cursor: pointer;
   overflow: hidden;
   flex-shrink: 0;
+  scroll-snap-align: start;
   transition: border-color ${tkn('transitions.fast')};
 
   img {

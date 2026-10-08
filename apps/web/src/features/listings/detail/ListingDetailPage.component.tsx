@@ -144,6 +144,10 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   returnPolicyLabel,
   selectedImageIndex,
   onSelectImage,
+  onPrevImage,
+  onNextImage,
+  gallerySwipeHandlers,
+  thumbRowRef,
   descriptionExpanded,
   onToggleDescription,
   isTitleDrawerOpen,
@@ -269,11 +273,31 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.StatusBadgeSlot>
 
         <S.GalleryBlock>
-          <S.GalleryMain>
-            {mainImage ? <img src={mainImage} alt={listing.title} /> : <Icon name="image" size={48} />}
+          <S.GalleryMain {...gallerySwipeHandlers}>
+            {mainImage ? <img key={mainImage} src={mainImage} alt={listing.title} /> : <Icon name="image" size={48} />}
+            {images.length > 1 ? (
+              <>
+                <S.GalleryArrow
+                  $side="left"
+                  variant="elevated"
+                  onClick={onPrevImage}
+                  aria-label={t('listings.carousel.previous')}
+                >
+                  <Icon name="chevron-left" size={20} />
+                </S.GalleryArrow>
+                <S.GalleryArrow
+                  $side="right"
+                  variant="elevated"
+                  onClick={onNextImage}
+                  aria-label={t('listings.carousel.next')}
+                >
+                  <Icon name="chevron-right" size={20} />
+                </S.GalleryArrow>
+              </>
+            ) : null}
           </S.GalleryMain>
           {images.length > 1 && (
-            <S.ThumbRow>
+            <S.ThumbRow ref={thumbRowRef}>
               {images.map((src, index) => (
                 <S.ThumbButton
                   key={`${src}-${index}`}
@@ -376,8 +400,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                   {formatDateTime(listing.lastSyncedAt ?? listing.updatedAt)}
                 </Text>
                 {hasRevisions ? (
-                  <Button variant="text" size="small" onClick={onOpenRevisions}>
-                    <Text variant="body-sm" weight="medium" color="brand.primary">
+                  <Button variant="secondary" size="xsmall" onClick={onOpenRevisions}>
+                    <Icon name="history" size={14} />
+                    <Text variant="body-sm" weight="medium">
                       {t('listings.detail.revisions.action')}
                     </Text>
                   </Button>

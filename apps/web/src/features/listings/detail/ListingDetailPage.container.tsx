@@ -3,7 +3,7 @@ import {
   formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
 } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -24,6 +24,7 @@ import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDet
 
 import { useFollowRecordStore } from '@/features/ebay/hooks/useFollowRecordStore';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation';
 import { getErrorI18nKey, isFetchBaseQueryError } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
@@ -63,6 +64,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   const { showMessage, closeMessage } = useUI();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const thumbRowRef = useRef<HTMLDivElement>(null);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [isTitleDrawerOpen, setIsTitleDrawerOpen] = useState(false);
   const [isGroupDrawerOpen, setIsGroupDrawerOpen] = useState(false);
@@ -326,6 +328,32 @@ export const ListingDetailPageContainer: React.FC = () => {
     const translated = t(key);
     return translated === key ? listing.status : translated;
   }, [listing, t]);
+
+  /* The gallery is a carousel: the arrows over the photo and a swipe step
+     through the images (wrapping at both ends), and the thumbnail strip — one
+     line that scrolls sideways — keeps the chosen thumbnail in view. */
+  const imageCount = listing?.imageUrls?.length ?? 0;
+  const handlePrevImage = useCallback(() => {
+    if (imageCount > 1) {
+      setSelectedImageIndex((index) => (index - 1 + imageCount) % imageCount);
+    }
+  }, [imageCount]);
+  const handleNextImage = useCallback(() => {
+    if (imageCount > 1) {
+      setSelectedImageIndex((index) => (index + 1) % imageCount);
+    }
+  }, [imageCount]);
+  const gallerySwipeHandlers = useSwipeNavigation(handleNextImage, handlePrevImage);
+  useEffect(() => {
+    const row = thumbRowRef.current;
+    const thumb = row?.children[selectedImageIndex] as HTMLElement | undefined;
+    if (!row || !thumb) {
+      return;
+    }
+    /* Scroll the strip only (scrollIntoView would also scroll the page). */
+    const target = thumb.offsetLeft - (row.clientWidth - thumb.clientWidth) / 2;
+    row.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+  }, [selectedImageIndex]);
 
   /** "N+" when the source only reports a lower bound (e.g. Amazon's "In
    *  Stock" or an order-limit dropdown) — a bare number would read as an
@@ -717,6 +745,10 @@ export const ListingDetailPageContainer: React.FC = () => {
       returnPolicyLabel={returnPolicyLabel}
       selectedImageIndex={selectedImageIndex}
       onSelectImage={setSelectedImageIndex}
+      onPrevImage={handlePrevImage}
+      onNextImage={handleNextImage}
+      gallerySwipeHandlers={gallerySwipeHandlers}
+      thumbRowRef={thumbRowRef}
       descriptionExpanded={descriptionExpanded}
       onToggleDescription={() => setDescriptionExpanded((v) => !v)}
       isTitleDrawerOpen={isTitleDrawerOpen}

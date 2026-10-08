@@ -1,6 +1,9 @@
 import type { ListingDto, ListingStatus, UpdateListingFormData } from '@repo/shared';
 import type { IconName } from '@repo/ui';
+import type { RefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+
+import type { SwipeNavigationHandlers } from '@/hooks/useSwipeNavigation';
 
 export interface ListingDetailSelectOption {
   id: string;
@@ -63,6 +66,13 @@ export interface ListingDetailPageProps {
   returnPolicyLabel: string;
   selectedImageIndex: number;
   onSelectImage: (index: number) => void;
+  /** Step the gallery back / forward one image (wraps at both ends). */
+  onPrevImage: () => void;
+  onNextImage: () => void;
+  /** Touch swipe over the main photo steps the gallery. */
+  gallerySwipeHandlers: SwipeNavigationHandlers;
+  /** The thumbnail strip, scrolled so the chosen thumbnail stays in view. */
+  thumbRowRef: RefObject<HTMLDivElement>;
   descriptionExpanded: boolean;
   onToggleDescription: () => void;
   isTitleDrawerOpen: boolean;
