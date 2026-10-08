@@ -1,4 +1,4 @@
-import { ORDER_NOTE_MAX_LENGTH, OrderStage } from '@repo/shared';
+import { CancellationBucket, ORDER_NOTE_MAX_LENGTH, OrderStage } from '@repo/shared';
 import {
   formatCurrency,
   formatDate,
@@ -204,32 +204,12 @@ export const OrderDetailsPageContainer: React.FC = () => {
     return formatPercent(order.netProfit / order.salePrice, localeCfg.locale, 1);
   }, [order, localeCfg]);
 
-  const canCopyAddress = Boolean(order?.shippingAddress);
-
-  const handleCopyAddress = useCallback(() => {
-    if (!order?.shippingAddress) {
-      return;
-    }
-    const addr = [
-      order.buyerName,
-      order.shippingAddress.street,
-      `${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`,
-      order.shippingAddress.country,
-    ]
-      .filter(Boolean)
-      .join('\n');
-    void navigator.clipboard.writeText(addr).then(() => {
-      showMessage(
-        {
-          type: 'success',
-          headerKey: 'translation:message.success.header',
-          descriptionKey: 'orders:orders.detail.addressCopied',
-          primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-        },
-        t
-      );
-    });
-  }, [order, showMessage, closeMessage, t]);
+  /* "Manage cancellation" only while the buyer's request waits for the
+     seller's answer; a request already answered or closed needs nothing, and
+     the cancellation card keeps showing it. */
+  const canManageCancellation =
+    order?.cancellation?.bucket === CancellationBucket.ACTION_DUE ||
+    order?.cancellation?.bucket === CancellationBucket.ACTION_OVERDUE;
 
   /*
    * Offer the action only when it can actually do something:
@@ -482,12 +462,11 @@ export const OrderDetailsPageContainer: React.FC = () => {
         amazonTotalBeforeTax={amazonTotalBeforeTax}
         buyerPhoneDisplay={buyerPhoneDisplay}
         onBack={handleBack}
-        onCopyAddress={handleCopyAddress}
         onOpenLinkAmazon={() => setIsLinkModalOpen(true)}
         onOpenAmazonOrderUrl={
           order?.amazonOrderUrl ? () => window.open(order.amazonOrderUrl, '_blank', 'noopener,noreferrer') : undefined
         }
-        canCopyAddress={canCopyAddress}
+        canManageCancellation={canManageCancellation}
         canConvertTracking={canConvertTracking}
         isConvertingTracking={isConvertingTracking}
         onConvertTracking={handleConvertTracking}

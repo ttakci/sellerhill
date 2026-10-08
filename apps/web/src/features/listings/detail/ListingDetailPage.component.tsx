@@ -250,47 +250,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         }
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
-        actions={
-          /* The page's actions sit where a record page keeps them: at the top,
-             at every width (PageHeader stacks them under the title on a phone).
-             They replaced a Danger zone card at the foot of the page, a draft
-             publish strip and a mobile "Manage" sheet — three places for what
-             is at most two buttons. Ending / deleting still ask first. */
-          <S.HeaderActions>
-            {hasRevisions ? (
-              <Button variant="primary" size="medium" onClick={onOpenRevisions}>
-                <Icon name="history" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('listings.detail.revisions.action')}
-                </Text>
-              </Button>
-            ) : null}
-            {canEnd ? (
-              <Button variant="danger" size="medium" onClick={onEnd}>
-                <Icon name="block" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('listings.detail.endShort')}
-                </Text>
-              </Button>
-            ) : null}
-            {canDelete ? (
-              <Button variant="danger" size="medium" onClick={onDelete}>
-                <Icon name="trash" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('listings.detail.deleteShort')}
-                </Text>
-              </Button>
-            ) : null}
-            {canPublish ? (
-              <Button variant="primary" size="medium" onClick={onPublish}>
-                <Icon name="upload" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('listings.detail.publish')}
-                </Text>
-              </Button>
-            ) : null}
-          </S.HeaderActions>
-        }
       />
 
       <S.Hero variant="elevated">
@@ -299,6 +258,42 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             {statusLabel}
           </Badge>
         </S.StatusBadgeSlot>
+
+        {/* The title (and brand · category) on its own row under the badge, so
+            the gallery's top edge, the first fact and the first button start on
+            one line — the order detail's format. */}
+        <S.TitleRow>
+          <S.TitleHeadingRow>
+            <S.ProductTitle variant="h2" weight="bold">
+              {listing.title || listing.asin}
+            </S.ProductTitle>
+            {/* Drafts only: the edit is stored on our row and used at
+                publish. On a live listing nothing pushes it to eBay
+                (updateListing writes the DB only), so offering it there
+                would show a title the buyer never sees. */}
+            {isDraft ? (
+              <IconButton
+                variant="ghost"
+                onClick={onOpenTitleDrawer}
+                aria-label={t('listings.detail.titleDrawerTitle')}
+              >
+                <Icon name="edit" size={16} color="brand.primary" />
+              </IconButton>
+            ) : null}
+          </S.TitleHeadingRow>
+          <S.BadgeRow>
+            {listing.brand ? (
+              <Text variant="body-sm" color="text.secondary" weight="medium">
+                {listing.brand}
+              </Text>
+            ) : null}
+            {listing.category ? (
+              <Text variant="body-sm" color="text.secondary">
+                {listing.category}
+              </Text>
+            ) : null}
+          </S.BadgeRow>
+        </S.TitleRow>
 
         <S.GalleryBlock>
           <S.GalleryMain {...gallerySwipeHandlers}>
@@ -350,39 +345,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.GalleryBlock>
 
         <S.HeroInfo>
-          <S.TitleRow>
-            <S.TitleHeadingRow>
-              <S.ProductTitle variant="h2" weight="bold">
-                {listing.title || listing.asin}
-              </S.ProductTitle>
-              {/* Drafts only: the edit is stored on our row and used at
-                  publish. On a live listing nothing pushes it to eBay
-                  (updateListing writes the DB only), so offering it there
-                  would show a title the buyer never sees. */}
-              {isDraft ? (
-                <IconButton
-                  variant="ghost"
-                  onClick={onOpenTitleDrawer}
-                  aria-label={t('listings.detail.titleDrawerTitle')}
-                >
-                  <Icon name="edit" size={16} color="brand.primary" />
-                </IconButton>
-              ) : null}
-            </S.TitleHeadingRow>
-            <S.BadgeRow>
-              {listing.brand ? (
-                <Text variant="body-sm" color="text.secondary" weight="medium">
-                  {listing.brand}
-                </Text>
-              ) : null}
-              {listing.category ? (
-                <Text variant="body-sm" color="text.secondary">
-                  {listing.category}
-                </Text>
-              ) : null}
-            </S.BadgeRow>
-          </S.TitleRow>
-
           {/* Labelled and stacked, like the listing card's meta rows. A bare row
               of two badges did not say WHICH marketplace each id belonged to,
               which is why the page also carried "open on Amazon / eBay" text
@@ -444,23 +406,64 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               </S.UpdatedValueRow>
             </S.IdItem>
           </S.IdList>
-
-          {/* The whole money story in one strip. It absorbed the old standalone
-              "price & profit" card, whose three values were a second, quieter
-              copy of these — one of them (margin) literally the same number. */}
-          <S.KpiStrip>
-            <Kpi
-              label={t('listings.table.estimatedProfit')}
-              emphasis
-              value={formatCurrency(profit)}
-              color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
-            />
-            <Kpi label={t('listings.table.roi')} value={`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`} />
-            <Kpi label={t('listings.table.price')} value={formatCurrency(listing.price)} />
-            <Kpi label={t('listings.table.purchasePrice')} value={formatCurrency(cost)} />
-            <Kpi label={t('listings.table.profitMargin')} value={`${margin.toFixed(1)}%`} />
-          </S.KpiStrip>
         </S.HeroInfo>
+
+        {/* The whole money story in one strip. It absorbed the old standalone
+            "price & profit" card, whose three values were a second, quieter
+            copy of these — one of them (margin) literally the same number. */}
+        <S.KpiStrip>
+          <Kpi
+            label={t('listings.table.estimatedProfit')}
+            emphasis
+            value={formatCurrency(profit)}
+            color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
+          />
+          <Kpi label={t('listings.table.roi')} value={`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`} />
+          <Kpi label={t('listings.table.price')} value={formatCurrency(listing.price)} />
+          <Kpi label={t('listings.table.purchasePrice')} value={formatCurrency(cost)} />
+          <Kpi label={t('listings.table.profitMargin')} value={`${margin.toFixed(1)}%`} />
+        </S.KpiStrip>
+
+        {/* The page's actions, stacked in the card's right column from xl (a row
+            under the summary below it) — the order detail's pattern. They
+            replaced a Danger zone card, a draft publish strip and a mobile
+            "Manage" sheet. Ending / deleting still ask first. */}
+        {hasRevisions || canEnd || canDelete || canPublish ? (
+          <S.HeroActions>
+          {hasRevisions ? (
+            <Button variant="primary" size="small" onClick={onOpenRevisions}>
+              <Icon name="history" size={16} />
+              <Text variant="body-sm">
+                {t('listings.detail.revisions.action')}
+              </Text>
+            </Button>
+          ) : null}
+          {canEnd ? (
+            <Button variant="danger" size="small" onClick={onEnd}>
+              <Icon name="block" size={16} />
+              <Text variant="body-sm">
+                {t('listings.detail.endShort')}
+              </Text>
+            </Button>
+          ) : null}
+          {canDelete ? (
+            <Button variant="danger" size="small" onClick={onDelete}>
+              <Icon name="trash" size={16} />
+              <Text variant="body-sm">
+                {t('listings.detail.deleteShort')}
+              </Text>
+            </Button>
+          ) : null}
+          {canPublish ? (
+            <Button variant="primary" size="small" onClick={onPublish}>
+              <Icon name="upload" size={16} />
+              <Text variant="body-sm">
+                {t('listings.detail.publish')}
+              </Text>
+            </Button>
+          ) : null}
+          </S.HeroActions>
+        ) : null}
       </S.Hero>
 
       {/* What a seller reads, then what they check, then what they rarely

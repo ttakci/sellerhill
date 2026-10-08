@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Une commande Amazon avait déjà été passée pour cette vente. Annulez-la sur Amazon, ou retournez l'article s'il a déjà été expédié.",
       "shipBy": "Expédier avant le",
       "shipByNotice": "Date limite d'expédition eBay : {{date}}",
+      "shipByHeading": "Date limite d'expédition eBay",
       "multiItemNotice": "Nombre d'articles dans cette commande eBay : {{count}}. SellerHill ne suit que le premier et n'achète pas cette commande automatiquement — achetez et expédiez les autres articles vous-même."
     },
     "modal": {

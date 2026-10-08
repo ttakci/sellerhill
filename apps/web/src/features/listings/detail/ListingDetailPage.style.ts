@@ -5,6 +5,12 @@ export const Container = PageContainer;
 
 /**
  * Product hero: gallery + summary — stacks on phone, side-by-side tablet+.
+ * The order detail's format, in named areas:
+ *   phone   badge · title · gallery · info · kpi · actions
+ *   md      title, gallery | info, gallery | kpi, then the actions row
+ *   xl      title, gallery | info | actions, gallery | kpi kpi — the money
+ *           strip runs under the facts AND the buttons, the photo is 16rem
+ *           (both the order detail's)
  * Extends the Card atom; this was a hand-rolled copy of it (identical surface,
  * radius, shadow and padding), which is how it drifted onto the 6px radius.
  */
@@ -15,6 +21,13 @@ export const Hero = styled(Card)`
   background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
   display: grid;
   grid-template-columns: 1fr;
+  grid-template-areas:
+    'badge'
+    'title'
+    'gallery'
+    'info'
+    'kpi'
+    'actions';
   gap: ${tkn('spacing.lg')};
   /* Roomier than the Card atom's own \`lg\` inset (~17px) — this is the page's
      headline surface and read as cramped at the smaller padding. Set here
@@ -23,6 +36,12 @@ export const Hero = styled(Card)`
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+    grid-template-areas:
+      'badge badge'
+      'title title'
+      'gallery info'
+      'gallery kpi'
+      'actions actions';
     align-items: stretch;
     /* Row gap: the badge row sits close above the gallery and the summary. */
     gap: ${tkn('spacing.md')} ${tkn('spacing.xl')};
@@ -34,12 +53,23 @@ export const Hero = styled(Card)`
   @media (min-width: ${tkn('breakpoints.lg')}) {
     grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
   }
+
+  /* From xl a third column on the right holds the page's action buttons,
+     and the money strip runs under the facts and the buttons. */
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    grid-template-columns: 16rem minmax(0, 1fr) 12rem;
+    grid-template-areas:
+      'badge badge badge'
+      'title title title'
+      'gallery info actions'
+      'gallery kpi kpi';
+  }
 `;
 
 /** The status badge — the card standard (ListingCard / OrderCard BadgeRow):
  *  its own row at the hero's top-left, in flow, spanning both columns. */
 export const StatusBadgeSlot = styled.div`
-  grid-column: 1 / -1;
+  grid-area: badge;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -54,6 +84,7 @@ export const StatusBadgeSlot = styled.div`
  * on one line instead of the figures hanging below the pictures.
  */
 export const GalleryBlock = styled.div`
+  grid-area: gallery;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -79,6 +110,8 @@ export const GalleryMain = styled.div`
     width: 100%;
     height: 100%;
     object-fit: contain;
+    /* Pinned to the frame's top: the photo's top edge is the row's line. */
+    object-position: center top;
   }
 
   > svg {
@@ -90,6 +123,13 @@ export const GalleryMain = styled.div`
     max-height: none;
     flex: 1 1 0;
     min-height: 14rem;
+  }
+
+  /* From xl a 16rem square — the order detail's photo size. */
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    aspect-ratio: 1 / 1;
+    flex: 0 0 auto;
+    min-height: 0;
   }
 
   /* Arrows show on hover with a pointer; on touch screens they stay visible. */
@@ -191,22 +231,19 @@ export const ThumbButton = styled.button<{ $active: boolean }>`
 `;
 
 export const HeroInfo = styled.div`
+  grid-area: info;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
 
   /* The grid stretches this column to the card's full height (align-items:
-     stretch), so the content can spread top-to-bottom instead of bunching at
-     the top with dead white space beneath. Small top padding nudges the title
-     clear of the gallery's top edge; \`KpiStrip\`'s \`margin-top: auto\` takes the
-     slack below. */
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    padding-top: ${tkn('spacing.md')};
-  }
+     stretch); the first fact starts on the gallery's top line and
+     \`KpiStrip\`'s \`margin-top: auto\` takes the slack below. */
 `;
 
 export const TitleRow = styled.div`
+  grid-area: title;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
@@ -308,10 +345,11 @@ export const UpdatedValueRow = styled.div`
 export const KpiStrip = styled.div`
   /* A grid, not a wrapping row: five in a line on a desk, two or three per
      line on a phone — a wrapping flex row fell to one figure per line. */
+  grid-area: kpi;
+  align-self: end;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr));
   gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md')};
   border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
   border-radius: ${tkn('radius.md')};
@@ -320,11 +358,6 @@ export const KpiStrip = styled.div`
     inset 0.25rem 0 0 ${tkn('colors.brand.primary')},
     ${tkn('shadows.sm')};
   padding-left: ${tkn('spacing.lg')};
-
-  /* From md up HeroInfo is card-height, so push the strip to the bottom. */
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    margin-top: auto;
-  }
 `;
 
 export const KpiItem = styled.div`
@@ -339,12 +372,45 @@ export const KpiLabel = styled(Text)`
   white-space: nowrap;
 `;
 
-/** Revisions / End listing (or Delete / Publish on a draft) — wraps on a phone. */
-export const HeaderActions = styled.div`
+/**
+ * Revisions / End listing (or Delete / Publish on a draft) inside the hero:
+ * stacked full width on a phone, a row under the summary (hairline above) from
+ * `md`, and from `xl` stacked full width in the card's own right column
+ * (hairline on its left), level with the gallery's top edge.
+ */
+export const HeroActions = styled.div`
+  grid-area: actions;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: ${tkn('spacing.sm')};
+  min-width: 0;
+
+  & > * {
+    width: 100%;
+  }
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-top: ${tkn('spacing.md')};
+    border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+
+    & > * {
+      width: auto;
+    }
+  }
+
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    flex-direction: column;
+    padding-top: 0;
+    padding-left: ${tkn('spacing.lg')};
+    border-top: none;
+    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
+
+    & > * {
+      width: 100%;
+    }
+  }
 `;
 
 /**

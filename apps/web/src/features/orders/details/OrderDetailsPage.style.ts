@@ -1,16 +1,19 @@
 import styled from '@emotion/styled';
-import { Card, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
+import { Card, PageContainer, Text, tkn } from '@repo/ui';
 
-export const Container = PageContainerWithMobileBar;
+export const Container = PageContainer;
 
 /**
  * The hero — the listing detail's format: a blue wash over the glass, the stage
  * badge at the top-left, the photo on the left, the record facts and the
- * customer beside it, the money strip under them and the seller's one-line
- * note across the foot. Named areas so the order can change per width:
- *   phone   badge · image · info · kpi · customer · note
- *   md      image | info, image | kpi, then customer and note full width
- *   xl      image | info | customer, image | kpi kpi, note
+ * customer beside it, the order's action buttons stacked on the right, the
+ * money strip under them and the seller's one-line note across the foot. The
+ * product title has its own row under the badge, so the photo's top edge, the
+ * first fact, the customer heading and the first button share one line.
+ * Named areas so the order can change per width:
+ *   phone   badge · title · image · info · kpi · customer · actions · note
+ *   md      title, image | info, image | kpi, then customer | actions, note
+ *   xl      title, image | info | customer | actions, image | kpi kpi kpi, note
  */
 export const Hero = styled(Card)`
   position: relative;
@@ -19,10 +22,12 @@ export const Hero = styled(Card)`
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     'badge'
+    'title'
     'image'
     'info'
     'kpi'
     'customer'
+    'actions'
     'note';
   gap: ${tkn('spacing.lg')};
   padding: ${tkn('spacing.lg')};
@@ -31,21 +36,25 @@ export const Hero = styled(Card)`
     grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
     grid-template-areas:
       'badge badge'
+      'title title'
       'image info'
       'image kpi'
-      'customer customer'
+      'customer actions'
       'note note';
     gap: ${tkn('spacing.md')} ${tkn('spacing.xl')};
     padding: ${tkn('spacing.xl')};
   }
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr) minmax(16rem, 20rem);
+    /* Fixed side columns, so the facts column takes everything left. */
+    grid-template-columns: 16rem minmax(0, 1fr) 12.5rem 12rem;
+    column-gap: ${tkn('spacing.lg')};
     grid-template-areas:
-      'badge badge badge'
-      'image info customer'
-      'image kpi kpi'
-      'note note note';
+      'badge badge badge badge'
+      'title title title title'
+      'image info customer actions'
+      'image kpi kpi kpi'
+      'note note note note';
   }
 `;
 
@@ -56,6 +65,18 @@ export const StatusBadgeSlot = styled.div`
   flex-wrap: wrap;
   align-items: center;
   gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+/** eBay's ship-by date at the badge row's right end: a small label over the
+ *  date in bold. Wraps under the badges on a phone, still right-aligned. */
+export const ShipByBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${tkn('spacing.2xs')};
+  margin-left: auto;
+  text-align: right;
   min-width: 0;
 `;
 
@@ -78,6 +99,7 @@ export const ProductImage = styled.div`
     width: 100%;
     height: 100%;
     object-fit: contain;
+    object-position: center top;
   }
 
   > svg {
@@ -92,16 +114,20 @@ export const ProductImage = styled.div`
   }
 `;
 
+/* A size container: the facts stack (label over value) when this column is
+   narrow — the four-column hero leaves it little room on a 1280–1400px screen. */
 export const HeroInfo = styled.div`
   grid-area: info;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
+  container-type: inline-size;
 `;
 
 /** The product title heads the hero, not the page. Clamped — Amazon titles run long. */
 export const ProductTitle = styled(Text)`
+  grid-area: title;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -128,7 +154,26 @@ export const CustomerPanel = styled.div`
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
     padding-top: 0;
-    padding-left: ${tkn('spacing.xl')};
+    padding-left: ${tkn('spacing.lg')};
+    border-top: none;
+    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
+  }
+`;
+
+/** The order's action buttons, stacked full-width in the card's right column —
+ *  beside the customer (left hairline) from `xl`, under a hairline below it. */
+export const HeroActions = styled.div`
+  grid-area: actions;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    padding-top: 0;
+    padding-left: ${tkn('spacing.lg')};
     border-top: none;
     border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
@@ -147,6 +192,17 @@ export const IdItem = styled.div`
   gap: ${tkn('spacing.sm')};
   align-items: center;
   min-width: 0;
+
+  /* From xl the facts share the row with the customer and the buttons. */
+  @media (min-width: ${tkn('breakpoints.xl')}) {
+    grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr);
+  }
+
+  /* Too narrow for label | value side by side: label over value. */
+  @container (max-width: 18rem) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     grid-template-columns: 1fr;
@@ -225,21 +281,45 @@ export const TimelineBody = styled.div`
  * lines — carried a void under them. The row rhythm still lines the first
  * rows up across the cards; only the bottoms differ.
  */
+/**
+ * The eBay card (two columns of its own) beside the Amazon card from `lg`.
+ * The cards keep SettingsCard's `height: 100%`, so both stretch to the row's
+ * height and end on one line; stacked below `lg`.
+ */
 export const SectionGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   gap: ${tkn('spacing.lg')};
 
-  /* SettingsCard fills its slot (height: 100%), which under a grid resolves
-     to the row's height and stretches it anyway; each card here is content-high. */
-  & > * {
-    height: auto;
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
+`;
+
+/** The eBay card's body: what the buyer paid | what you earned — two panes
+ *  with a gap between them, side by side from `md`, stacked on a phone. */
+export const EbayColumns = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: ${tkn('spacing.md')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+`;
+
+/** One pane of the eBay card (operator request, 2026-10-09: the two halves read
+ *  as two separate parts) — a tinted, bordered box inside the card. */
+export const EbayPane = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 /** Wrapper for the shared EmptyState on the loading / not-found screens. */
@@ -321,32 +401,21 @@ export const AddressBlock = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
+/** The Amazon order number with its open-on-Amazon icon beside it. */
+export const OrderIdValue = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
 /** Phone line under the ship-to address. */
 export const AddressPhoneRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
   margin-top: ${tkn('spacing.2xs')};
-`;
-
-export const MobileActionBar = styled.div`
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: ${tkn('zIndex.sticky')};
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  padding-bottom: max(${tkn('spacing.sm')}, env(safe-area-inset-bottom));
-  background: ${tkn('colors.surface.primary')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
-  box-shadow: ${tkn('shadows.lg')};
-  box-sizing: border-box;
-
-  @media (min-width: ${tkn('breakpoints.md')}) {
-    display: none;
-  }
 `;
 
 /** AmazonDetailsModal layout helpers */

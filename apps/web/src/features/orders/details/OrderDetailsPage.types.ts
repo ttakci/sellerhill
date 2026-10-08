@@ -26,7 +26,6 @@ export interface OrderDetailsPageProps {
   /** The buyer's phone as eBay prints it (`+1 843-408-1812`), or null. */
   buyerPhoneDisplay: string | null;
   onBack: () => void;
-  onCopyAddress: () => void;
   onOpenLinkAmazon: () => void;
   onOpenAmazonOrderUrl?: () => void;
   /**
@@ -62,7 +61,8 @@ export interface OrderDetailsPageProps {
   isShipByUrgent: boolean;
   /** How many items the eBay order holds when it is more than one, else null. */
   multiItemCount: number | null;
-  canCopyAddress: boolean;
+  /** The buyer's cancellation request waits for the seller's answer. */
+  canManageCancellation: boolean;
   /** The seller's own note: the draft in the one-line field. */
   noteDraft: string;
   noteMaxLength: number;

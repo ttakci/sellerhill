@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Bu satış için Amazon siparişi zaten verilmişti. Siparişi Amazon'da iptal edin; kargolandıysa ürünü iade edin.",
       "shipBy": "Son gönderim tarihi",
       "shipByNotice": "eBay son gönderim tarihi: {{date}}",
+      "shipByHeading": "eBay son gönderim tarihi",
       "multiItemNotice": "Bu eBay siparişinde {{count}} ürün var. SellerHill yalnızca ilkini izler ve bu siparişi otomatik satın almaz; diğer ürünleri kendiniz alıp gönderin."
     },
     "modal": {

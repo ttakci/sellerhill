@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "此订单已在 Amazon 下单采购。请在 Amazon 上取消；如已发货，请办理退货。",
       "shipBy": "最晚发货时间",
       "shipByNotice": "eBay 最晚发货时间：{{date}}",
+      "shipByHeading": "eBay 最晚发货时间",
       "multiItemNotice": "这笔 eBay 订单包含 {{count}} 件商品。SellerHill 只跟踪第一件，并且不会自动购买此订单——请自行购买并发出其余商品。"
     },
     "modal": {

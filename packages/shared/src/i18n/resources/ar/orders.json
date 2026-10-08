@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "سبق تقديم طلب على Amazon لهذه الصفقة. ألغِه على Amazon، أو أرجِع المنتج إن كان قد شُحن.",
       "shipBy": "آخر موعد للشحن",
       "shipByNotice": "آخر موعد للشحن على eBay: {{date}}",
+      "shipByHeading": "آخر موعد للشحن على eBay",
       "multiItemNotice": "عدد المنتجات في طلب eBay هذا: {{count}}. يتتبع SellerHill المنتج الأول فقط ولا يشتري هذا الطلب تلقائياً — اشترِ المنتجات الأخرى واشحنها بنفسك."
     },
     "modal": {

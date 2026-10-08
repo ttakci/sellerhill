@@ -5,6 +5,7 @@ import {
   CopyableText,
   EmptyState,
   Icon,
+  IconButton,
   IdBadge,
   InfoMessage,
   PageHeader,
@@ -106,7 +107,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   amazonTotalBeforeTax,
   buyerPhoneDisplay,
   onBack,
-  onCopyAddress,
   onOpenLinkAmazon,
   onOpenAmazonOrderUrl,
   canConvertTracking,
@@ -121,7 +121,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   shipByLabel,
   isShipByUrgent,
   multiItemCount,
-  canCopyAddress,
+  canManageCancellation,
   noteDraft,
   noteMaxLength,
   isSavingNote,
@@ -207,7 +207,26 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {t('orders.estimateBadge')}
             </Badge>
           )}
+          {/* eBay's ship-by date, while the seller still has to act — the
+              deadline the whole order runs against, at the card's top-right. */}
+          {shipByLabel && (
+            <S.ShipByBlock>
+              <Text variant="caption" color={isShipByUrgent ? 'semantic.error' : 'text.secondary'}>
+                {t('orders.detail.shipByHeading')}
+              </Text>
+              <Text variant="metric" weight="bold" numeric color={isShipByUrgent ? 'semantic.error' : 'text.primary'}>
+                {shipByLabel}
+              </Text>
+            </S.ShipByBlock>
+          )}
         </S.StatusBadgeSlot>
+
+        {/* The product title on its own row under the badge, above the photo;
+            the photo, the facts, the customer and the buttons all start on
+            the next line together. */}
+        <S.ProductTitle variant="h2" weight="bold">
+          {productTitle}
+        </S.ProductTitle>
 
         <S.ProductImage>
           {order.product?.imageUrl ? (
@@ -218,10 +237,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         </S.ProductImage>
 
         <S.HeroInfo>
-          <S.ProductTitle variant="h2" weight="bold">
-            {productTitle}
-          </S.ProductTitle>
-
           <S.IdList>
             <Fact label={t('orders.table.orderNumber')}>
               <Text variant="body-sm" weight="semibold" numeric>
@@ -315,9 +330,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   value={order.shippingAddress.zipCode}
                   label={t('orders.detail.copyZip')}
                   copiedLabel={t('orders.detail.copied')}
-                />
-              </Text>
-              <Text variant="body-sm" color="text.secondary">
+                />{' '}
                 <CopyableText
                   value={order.shippingAddress.country}
                   label={t('orders.detail.copyCountry')}
@@ -340,19 +353,60 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               ) : null}
             </S.AddressBlock>
           ) : null}
-          <S.AddressBlock>
-            <Text variant="body-sm" color="text.secondary">
-              {t('orders.detail.contact')}
-            </Text>
-            <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
-          </S.AddressBlock>
-          {canCopyAddress && (
-            <Button variant="primary" size="small" onClick={onCopyAddress}>
-              <Icon name="copy" size={16} />
-              <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
-            </Button>
-          )}
         </S.CustomerPanel>
+
+        {/* Every action of the order, stacked in the card's right column. At
+            most three show at once: starting the automatic order and "not on
+            Amazon" exclude each other and both exclude converting a tracking
+            number; "manage cancellation" only while the request awaits an answer. */}
+        <S.HeroActions>
+          {canStartAutoFulfill && onStartAutoFulfill ? (
+            <Button
+              variant="primary"
+              size="small"
+              fullWidth
+              onClick={onStartAutoFulfill}
+              isLoading={isStartingAutoFulfill}
+            >
+              <Icon name="shopping-cart" size={16} />
+              <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
+            </Button>
+          ) : null}
+          {canConfirmNotPurchased && onConfirmNotPurchased ? (
+            <Button
+              variant="primary"
+              size="small"
+              fullWidth
+              onClick={onConfirmNotPurchased}
+              isLoading={isConfirmingNotPurchased}
+            >
+              <Icon name="help" size={16} />
+              <Text variant="body-sm">{t('orders.autoFulfill.notPurchased.button')}</Text>
+            </Button>
+          ) : null}
+          <Button variant="primary" size="small" fullWidth onClick={onOpenLinkAmazon} isLoading={isUpdating}>
+            <Icon name="link" size={16} />
+            <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
+          </Button>
+          {canConvertTracking && onConvertTracking ? (
+            <Button
+              variant="primary"
+              size="small"
+              fullWidth
+              onClick={onConvertTracking}
+              isLoading={isConvertingTracking}
+            >
+              <Icon name="repeat" size={16} />
+              <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
+            </Button>
+          ) : null}
+          {canManageCancellation ? (
+            <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
+              <Icon name="arrow-right" size={16} />
+              <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
+            </Button>
+          ) : null}
+        </S.HeroActions>
 
         {/* The money story in one strip, the listing detail's. */}
         <S.KpiArea>
@@ -398,103 +452,110 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       </S.Hero>
 
       <S.SectionGrid>
-        {/* eBay summary */}
+        {/* eBay summary — what the buyer paid | what you earned, as two panes. */}
         <SettingsCard variant="section" header={{ title: t('orders.detail.ebaySummary') }}>
-          <S.SectionContent>
-            <S.GroupLabel>
-              <Text variant="body-sm" weight="semibold">
-                {t('orders.detail.whatBuyerPaid')}
-              </Text>
-            </S.GroupLabel>
-            <S.MetaList>
-              <Meta label={t('orders.detail.ebayStatus')}>
-                <Text variant="body-sm" weight="medium">
-                  {statusLabel}
+          <S.EbayColumns>
+            <S.EbayPane>
+              <S.GroupLabel>
+                <Text variant="body-sm" weight="semibold">
+                  {t('orders.detail.whatBuyerPaid')}
                 </Text>
-              </Meta>
-              {order.ebayCancelledAt ? (
-                <Meta label={t('orders.detail.ebayCancelledOn')}>
+              </S.GroupLabel>
+              <S.MetaList>
+                <Meta label={t('orders.detail.ebayStatus')}>
                   <Text variant="body-sm" weight="medium">
-                    {formatDate(order.ebayCancelledAt)}
+                    {statusLabel}
                   </Text>
                 </Meta>
+                {order.ebayCancelledAt ? (
+                  <Meta label={t('orders.detail.ebayCancelledOn')}>
+                    <Text variant="body-sm" weight="medium">
+                      {formatDate(order.ebayCancelledAt)}
+                    </Text>
+                  </Meta>
+                ) : null}
+                {order.shipByDate ? (
+                  <Meta label={t('orders.detail.shipBy')}>
+                    <Text variant="body-sm" weight="medium" numeric>
+                      {formatDate(order.shipByDate)}
+                    </Text>
+                  </Meta>
+                ) : null}
+                <Money label={t('orders.detail.subtotal')} value={formatCurrency(order.salePrice)} />
+                <Money label={t('orders.detail.shipping')} value={formatCurrency(order.saleShipping)} />
+                <Money label={t('orders.detail.salesTax')} value={formatCurrency(resolvedSaleTax)} />
+                <Money label={t('orders.detail.orderTotal')} value={formatCurrency(resolvedSaleTotal)} />
+              </S.MetaList>
+            </S.EbayPane>
+            <S.EbayPane>
+              <S.GroupLabel>
+                <Text variant="body-sm" weight="semibold">
+                  {t('orders.detail.whatYouEarned')}
+                </Text>
+              </S.GroupLabel>
+              <S.MetaList>
+                <Money label={t('orders.detail.earningsOrderTotal')} value={formatCurrency(resolvedSaleTotal)} />
+              </S.MetaList>
+              <S.GroupLabel>
+                <Text variant="caption" color="text.tertiary">
+                  {t('orders.detail.ebayCollectedFromBuyer')}
+                </Text>
+              </S.GroupLabel>
+              <S.MetaList>
+                <Money label={t('orders.detail.ebayCollectedTax')} value={`−${formatCurrency(resolvedSaleTax)}`} />
+              </S.MetaList>
+              <S.GroupLabel>
+                <Text variant="caption" color="text.tertiary">
+                  {t('orders.detail.sellingCosts')}
+                </Text>
+              </S.GroupLabel>
+              <S.MetaList>
+                {/* `ebayMarketplaceFee` is eBay's own reported figure (migration
+                      098); `transactionFee` is only the seller's configured-percent
+                      ESTIMATE, shown here solely when eBay has not reported yet. */}
+                <Money
+                  label={t('orders.detail.transactionFees')}
+                  value={`−${formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}`}
+                />
+                {/* `adFee` is the settings group's configured FIXED fee — an
+                      estimate, not a charge eBay reported. eBay's own figure above
+                      already contains its per-order fixed portion, so it is listed
+                      only while eBay has not reported the real fee. */}
+                {(order.ebayMarketplaceFee === null || order.ebayMarketplaceFee === undefined) && order.adFee > 0 ? (
+                  <Money label={t('orders.detail.adFee')} value={`−${formatCurrency(order.adFee)}`} />
+                ) : null}
+              </S.MetaList>
+              <S.MetaList>
+                <Money label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} total />
+              </S.MetaList>
+              {/* What eBay reports was refunded (paymentSummary.refunds). NULL
+                    means eBay reported no refund, so the block is absent — never a
+                    "0.00" row that would read as a refund of nothing. */}
+              {order.ebayRefundedAmount !== null && order.ebayRefundedAmount !== undefined ? (
+                <>
+                  <S.GroupLabel>
+                    <Text variant="caption" color="text.tertiary">
+                      {t('orders.detail.refundGroup')}
+                    </Text>
+                  </S.GroupLabel>
+                  <S.MetaList>
+                    <Money
+                      label={t('orders.detail.refundedAmount')}
+                      value={`−${formatCurrency(order.ebayRefundedAmount)}`}
+                    />
+                    {order.ebayRefundedAt ? (
+                      <Meta label={t('orders.detail.refundedOn')}>
+                        <Text variant="body-sm" weight="medium">
+                          {formatDate(order.ebayRefundedAt)}
+                        </Text>
+                      </Meta>
+                    ) : null}
+                  </S.MetaList>
+                  <InfoMessage>{t('orders.detail.refundNote')}</InfoMessage>
+                </>
               ) : null}
-              {order.shipByDate ? (
-                <Meta label={t('orders.detail.shipBy')}>
-                  <Text variant="body-sm" weight="medium" numeric>
-                    {formatDate(order.shipByDate)}
-                  </Text>
-                </Meta>
-              ) : null}
-              <Money label={t('orders.detail.subtotal')} value={formatCurrency(order.salePrice)} />
-              <Money label={t('orders.detail.shipping')} value={formatCurrency(order.saleShipping)} />
-              <Money label={t('orders.detail.salesTax')} value={formatCurrency(resolvedSaleTax)} />
-              <Money label={t('orders.detail.orderTotal')} value={formatCurrency(resolvedSaleTotal)} />
-            </S.MetaList>
-            <S.GroupLabel>
-              <Text variant="body-sm" weight="semibold">
-                {t('orders.detail.whatYouEarned')}
-              </Text>
-            </S.GroupLabel>
-            <S.MetaList>
-              <Money label={t('orders.detail.earningsOrderTotal')} value={formatCurrency(resolvedSaleTotal)} />
-            </S.MetaList>
-            <S.GroupLabel>
-              <Text variant="caption" color="text.tertiary">
-                {t('orders.detail.ebayCollectedFromBuyer')}
-              </Text>
-            </S.GroupLabel>
-            <S.MetaList>
-              <Money label={t('orders.detail.ebayCollectedTax')} value={`−${formatCurrency(resolvedSaleTax)}`} />
-            </S.MetaList>
-            <S.GroupLabel>
-              <Text variant="caption" color="text.tertiary">
-                {t('orders.detail.sellingCosts')}
-              </Text>
-            </S.GroupLabel>
-            <S.MetaList>
-              {/* `ebayMarketplaceFee` is eBay's own reported figure (migration
-                  098); `transactionFee` is only the seller's configured-percent
-                  ESTIMATE, shown here solely when eBay has not reported yet. */}
-              <Money
-                label={t('orders.detail.transactionFees')}
-                value={`−${formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}`}
-              />
-              {/* `adFee` is the settings group's configured FIXED fee — an
-                  estimate, not a charge eBay reported. eBay's own figure above
-                  already contains its per-order fixed portion, so it is listed
-                  only while eBay has not reported the real fee. */}
-              {(order.ebayMarketplaceFee === null || order.ebayMarketplaceFee === undefined) && order.adFee > 0 ? (
-                <Money label={t('orders.detail.adFee')} value={`−${formatCurrency(order.adFee)}`} />
-              ) : null}
-            </S.MetaList>
-            <S.MetaList>
-              <Money label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} total />
-            </S.MetaList>
-            {/* What eBay reports was refunded (paymentSummary.refunds). NULL
-                means eBay reported no refund, so the block is absent — never a
-                "0.00" row that would read as a refund of nothing. */}
-            {order.ebayRefundedAmount !== null && order.ebayRefundedAmount !== undefined ? (
-              <>
-                <S.GroupLabel>
-                  <Text variant="caption" color="text.tertiary">
-                    {t('orders.detail.refundGroup')}
-                  </Text>
-                </S.GroupLabel>
-                <S.MetaList>
-                  <Money label={t('orders.detail.refundedAmount')} value={`−${formatCurrency(order.ebayRefundedAmount)}`} />
-                  {order.ebayRefundedAt ? (
-                    <Meta label={t('orders.detail.refundedOn')}>
-                      <Text variant="body-sm" weight="medium">
-                        {formatDate(order.ebayRefundedAt)}
-                      </Text>
-                    </Meta>
-                  ) : null}
-                </S.MetaList>
-                <InfoMessage>{t('orders.detail.refundNote')}</InfoMessage>
-              </>
-            ) : null}
-          </S.SectionContent>
+            </S.EbayPane>
+          </S.EbayColumns>
         </SettingsCard>
 
         {/* Amazon costs */}
@@ -514,6 +575,30 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               <Money label={t('orders.detail.totalBeforeTax')} value={formatCurrency(amazonTotalBeforeTax)} />
               <Money label={t('orders.detail.estimatedTax')} value={formatCurrency(order.amazonTax || 0)} />
               <Money label={t('orders.detail.grandTotal')} value={formatCurrency(totalAmazonCost)} total />
+              {/* The real Amazon order number (never a dry run's SIM- id), with
+                  Amazon's own order page one click away. */}
+              {order.amazonOrderId && !order.isSimulated && (
+                <Meta label={t('orders.detail.amazonOrder')}>
+                  <S.OrderIdValue>
+                    <Text variant="body-sm" weight="medium" numeric>
+                      <CopyableText
+                        value={order.amazonOrderId}
+                        label={t('orders.detail.amazonOrder')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
+                    </Text>
+                    {onOpenAmazonOrderUrl ? (
+                      <IconButton
+                        variant="ghost"
+                        aria-label={t('orders.detail.amazonOrder')}
+                        onClick={onOpenAmazonOrderUrl}
+                      >
+                        <Icon name="external-link" size={14} color="text.tertiary" />
+                      </IconButton>
+                    ) : null}
+                  </S.OrderIdValue>
+                </Meta>
+              )}
               {order.amazonTrackingNumber && (
                 <Meta label={t('orders.detail.amazonTracking')}>
                   <Text variant="body-sm" weight="medium" numeric>
@@ -529,66 +614,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Meta>
               )}
             </S.MetaList>
-            <S.SectionActions>
-              {order.trackingProblemCode && (
+            {order.trackingProblemCode && (
+              <S.SectionActions>
                 <InfoMessage type="warning">{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
-              )}
-              {canStartAutoFulfill && onStartAutoFulfill ? (
-                <Button
-                  variant="primary"
-                  size="small"
-                  fullWidth
-                  onClick={onStartAutoFulfill}
-                  isLoading={isStartingAutoFulfill}
-                >
-                  <Icon name="shopping-cart" size={16} />
-                  <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
-                </Button>
-              ) : null}
-              {/* Purchase not confirmed: linking the order found on Amazon is
-                  the primary action (the button below); declaring it "not on
-                  Amazon" is the secondary one. */}
-              {canConfirmNotPurchased && onConfirmNotPurchased ? (
-                <Button
-                  variant="primary"
-                  size="small"
-                  fullWidth
-                  onClick={onConfirmNotPurchased}
-                  isLoading={isConfirmingNotPurchased}
-                >
-                  <Icon name="help" size={16} />
-                  <Text variant="body-sm">{t('orders.autoFulfill.notPurchased.button')}</Text>
-                </Button>
-              ) : null}
-              <Button
-                variant="primary"
-                size="small"
-                onClick={onOpenLinkAmazon}
-                fullWidth
-                isLoading={isUpdating}
-              >
-                <Icon name="link" size={16} />
-                <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
-              </Button>
-              {canConvertTracking && onConvertTracking ? (
-                <Button
-                  variant="primary"
-                  size="small"
-                  fullWidth
-                  onClick={onConvertTracking}
-                  isLoading={isConvertingTracking}
-                >
-                  <Icon name="repeat" size={16} />
-                  <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
-                </Button>
-              ) : null}
-              {order.amazonOrderUrl && onOpenAmazonOrderUrl ? (
-                <Button variant="text" size="small" onClick={onOpenAmazonOrderUrl}>
-                  <Icon name="external-link" size={16} />
-                  <Text variant="body-sm">{t('orders.detail.amazonOrder')}</Text>
-                </Button>
-              ) : null}
-            </S.SectionActions>
+              </S.SectionActions>
+            )}
           </S.SectionContent>
         </SettingsCard>
       </S.SectionGrid>
@@ -660,12 +690,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 </Badge>
               </Meta>
             </S.MetaList>
-            <S.SectionActions>
-              <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
-                <Icon name="arrow-right" size={16} />
-                <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
-              </Button>
-            </S.SectionActions>
           </S.SectionContent>
         </SettingsCard>
       )}
@@ -675,11 +699,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       {timelineRows.length > 0 && (
         <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
           <S.TimelineBody>
-            {shipByLabel && (
-              <InfoMessage type={isShipByUrgent ? 'error' : 'info'}>
-                {t('orders.detail.shipByNotice', { date: shipByLabel })}
-              </InfoMessage>
-            )}
             {multiItemCount !== null && (
               <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>
             )}
@@ -687,20 +706,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           </S.TimelineBody>
         </SettingsCard>
       )}
-
-      <S.MobileActionBar>
-        <Button variant="primary" size="medium" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
-          <Icon name="link" size={16} />
-          <Text variant="body" weight="semibold">
-            {t('orders.detail.linkAmazon')}
-          </Text>
-        </Button>
-        {canCopyAddress && (
-          <Button variant="primary" size="medium" onClick={onCopyAddress}>
-            <Icon name="copy" size={16} />
-          </Button>
-        )}
-      </S.MobileActionBar>
     </S.Container>
   );
 };

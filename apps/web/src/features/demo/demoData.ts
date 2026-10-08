@@ -962,6 +962,8 @@ function buildOrders(): OrderDto[] {
     // conversion is HELD (raw numbers are never pushed). One inside the 12 h
     // grace (amber), one past it (red) so the demo shows both alarm colours.
     let shippedDetectedAt: string | null = null;
+    // The Place Order click stamp — set only on the "purchase not confirmed" sample.
+    let autoFulfillSubmittedAt: string | null = null;
     const isSimulated = false;
 
     if (i === 3) {
@@ -1003,6 +1005,16 @@ function buildOrders(): OrderDto[] {
       costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
       fulfillmentState = OrderFulfillmentState.NOT_AUTOMATED;
       status = OrderStatus.PENDING;
+    } else if (i === 22) {
+      // The automatic checkout clicked Place Order and no confirmation came
+      // back: the stage is "purchase not confirmed" and the page offers
+      // "It is not on Amazon" beside the manual link.
+      costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
+      fulfillmentState = OrderFulfillmentState.ACTION_REQUIRED;
+      autoFulfillStatus = AutoFulfillStatus.BLOCKED;
+      autoFulfillBlockedReason = AutoFulfillBlockedReason.NO_CONFIRMATION;
+      autoFulfillSubmittedAt = isoHoursAgo(5);
+      status = OrderStatus.WAITING_SHIPMENT;
     } else if (i === 24) {
       // Automation off for this store: the seller buys this one by hand.
       costCaptureStatus = OrderCostCaptureStatus.PROVISIONAL;
@@ -1073,6 +1085,7 @@ function buildOrders(): OrderDto[] {
       amazonCancelledAt,
       shippedDetectedAt: shippedDetectedAtResolved,
       ebayTrackingPushedAt,
+      autoFulfillSubmittedAt,
     });
     // eBay's ship-by date: a few days after the sale. An open order older than
     // that reads "late to ship" beside its stage, exactly as the API derives it.
@@ -1132,6 +1145,14 @@ function buildOrders(): OrderDto[] {
       ebayEarnings,
       purchasePrice: costCaptureStatus === OrderCostCaptureStatus.UNTRACKED ? 0 : purchasePrice,
       amazonOrderId,
+      // Amazon's own order page, the "Amazon order" action — real ids only.
+      amazonOrderUrl:
+        amazonOrderId && !isSimulated
+          ? `https://www.amazon.com/gp/your-account/order-details?orderID=${amazonOrderId}`
+          : undefined,
+      // The sale bought by hand (automation off) can be handed to the
+      // automatic checkout with "Start automatic order".
+      canStartAutoFulfill: i === 24,
       amazonTrackingNumber,
       convertedTrackingNumber,
       ebayTrackingPushedNumber: convertedTrackingNumber,

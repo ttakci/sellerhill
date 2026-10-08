@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Ya se había hecho un pedido en Amazon para esta venta. Cancélalo en Amazon o devuelve el artículo si ya se envió.",
       "shipBy": "Enviar antes de",
       "shipByNotice": "Fecha límite de envío de eBay: {{date}}",
+      "shipByHeading": "Fecha límite de envío de eBay",
       "multiItemNotice": "Artículos en este pedido de eBay: {{count}}. SellerHill solo hace seguimiento del primero y no compra este pedido automáticamente; compra y envía los demás artículos por tu cuenta."
     },
     "modal": {

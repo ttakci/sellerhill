@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Bu satış üçün Amazon sifarişi artıq verilmişdi. Onu Amazon-da ləğv edin; göndərilibsə, məhsulu geri qaytarın.",
       "shipBy": "Son göndərmə tarixi",
       "shipByNotice": "eBay-də son göndərmə tarixi: {{date}}",
+      "shipByHeading": "eBay-də son göndərmə tarixi",
       "multiItemNotice": "Bu eBay sifarişində {{count}} məhsul var. SellerHill yalnız birincini izləyir və bu sifarişi avtomatik almır — digər məhsulları özünüz alıb göndərin."
     },
     "modal": {

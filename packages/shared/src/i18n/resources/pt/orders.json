@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Um pedido na Amazon já havia sido feito para esta venda. Cancele-o na Amazon ou devolva o item se já tiver sido enviado.",
       "shipBy": "Enviar até",
       "shipByNotice": "Prazo de envio do eBay: {{date}}",
+      "shipByHeading": "Prazo de envio do eBay",
       "multiItemNotice": "Itens neste pedido do eBay: {{count}}. O SellerHill acompanha apenas o primeiro e não compra este pedido automaticamente — compre e envie os outros itens você mesmo."
     },
     "modal": {

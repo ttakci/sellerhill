@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Pentru această vânzare fusese deja plasată o comandă pe Amazon. Anulați-o pe Amazon sau returnați produsul dacă a fost deja expediat.",
       "shipBy": "Expediere până la",
       "shipByNotice": "Termen de expediere eBay: {{date}}",
+      "shipByHeading": "Termen de expediere eBay",
       "multiItemNotice": "Produse în această comandă eBay: {{count}}. SellerHill îl urmărește doar pe primul și nu cumpără automat această comandă — cumpără și expediază tu celelalte produse."
     },
     "modal": {

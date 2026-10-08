@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Für diesen Verkauf wurde bereits eine Amazon-Bestellung aufgegeben. Stornieren Sie sie bei Amazon oder senden Sie den Artikel zurück, falls er schon versandt wurde.",
       "shipBy": "Versand bis",
       "shipByNotice": "eBay-Versandfrist: {{date}}",
+      "shipByHeading": "eBay-Versandfrist",
       "multiItemNotice": "Diese eBay-Bestellung enthält {{count}} Artikel. SellerHill verfolgt nur den ersten und kauft diese Bestellung nicht automatisch — kaufen und versenden Sie die übrigen Artikel selbst."
     },
     "modal": {

@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "An Amazon order was already placed for this sale. Cancel it on Amazon, or return the item if it has shipped.",
       "shipBy": "Ship by",
       "shipByNotice": "eBay ship-by date: {{date}}",
+      "shipByHeading": "eBay ship-by date",
       "multiItemNotice": "This eBay order holds {{count}} items. SellerHill tracks only the first one and does not buy this order automatically — buy and ship the other items yourself."
     },
     "modal": {

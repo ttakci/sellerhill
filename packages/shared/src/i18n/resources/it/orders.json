@@ -249,6 +249,7 @@
       "cancelledAmazonOpenAction": "Per questa vendita era già stato effettuato un ordine su Amazon. Annullalo su Amazon oppure restituisci l'articolo se è già stato spedito.",
       "shipBy": "Spedire entro",
       "shipByNotice": "Termine di spedizione eBay: {{date}}",
+      "shipByHeading": "Termine di spedizione eBay",
       "multiItemNotice": "Articoli in questo ordine eBay: {{count}}. SellerHill segue solo il primo e non acquista questo ordine automaticamente: acquista e spedisci tu gli altri articoli."
     },
     "modal": {
