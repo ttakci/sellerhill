@@ -208,18 +208,28 @@ export const CancellationDetailDrawerComponent: React.FC<CancellationDetailDrawe
                   {detail.history.map((step, index) => (
                     <S.HistoryRow key={step.id}>
                       <S.Rail>
-                        <S.Marker $actor={step.actor} />
+                        <S.StepMarker $upcoming={step.upcoming} />
                         {index < detail.history.length - 1 && <S.RailLine />}
                       </S.Rail>
                       <S.HistoryText>
-                        <Text variant="body-sm" weight="semibold" color="text.primary">
+                        <Text
+                          variant="body-sm"
+                          weight={step.upcoming ? 'regular' : 'semibold'}
+                          color={step.upcoming ? 'text.tertiary' : 'text.primary'}
+                        >
                           {step.label}
                         </Text>
                         <S.HistoryMeta>
-                          {step.at && (
-                            <Text variant="caption" color="text.tertiary" numeric>
-                              {step.at}
+                          {step.upcoming ? (
+                            <Text variant="caption" color="text.tertiary">
+                              {t('cancellations.history.pending')}
                             </Text>
+                          ) : (
+                            step.at && (
+                              <Text variant="caption" color="text.tertiary" numeric>
+                                {step.at}
+                              </Text>
+                            )
                           )}
                           <Text variant="caption" color="text.tertiary">
                             {t(`cancellations.party.${step.actor}`)}

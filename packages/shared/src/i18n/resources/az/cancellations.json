@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Alıcı ləğv sorğusu açdı",
+      "SELLER_APPROVE": "Sorğunu qəbul etdiniz",
+      "pending": "Gözlənilir",
+      "upcoming": {
+        "answer": "Cavabınız",
+        "refund": "eBay alıcıya geri ödəniş edir",
+        "close": "eBay sorğunu bağlayır"
+      },
       "SELLER_CREATE_CANCEL": "Ləğv yaradıldı",
       "SYSTEM_REFUND": "eBay geri ödəniş etdi",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay geri ödəniş statusunu yenilədi",

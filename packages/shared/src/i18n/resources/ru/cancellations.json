@@ -122,6 +122,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Покупатель запросил отмену",
+      "SELLER_APPROVE": "Вы приняли запрос",
+      "pending": "Ожидается",
+      "upcoming": {
+        "answer": "Ваш ответ",
+        "refund": "eBay возвращает деньги покупателю",
+        "close": "eBay закрывает запрос"
+      },
       "SELLER_CREATE_CANCEL": "Отмена создана",
       "SYSTEM_REFUND": "eBay выполнил возврат",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay обновил статус возврата",

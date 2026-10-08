@@ -121,6 +121,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "El comprador pidió cancelar",
+      "SELLER_APPROVE": "Aceptaste la solicitud",
+      "pending": "Pendiente",
+      "upcoming": {
+        "answer": "Tu respuesta",
+        "refund": "eBay reembolsa al comprador",
+        "close": "eBay cierra la solicitud"
+      },
       "SELLER_CREATE_CANCEL": "Cancelación creada",
       "SYSTEM_REFUND": "eBay emitió el reembolso",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay actualizó el estado del reembolso",

@@ -120,6 +120,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Alıcı iptal talebi açtı",
+      "SELLER_APPROVE": "Talebi kabul ettiniz",
+      "pending": "Bekleniyor",
+      "upcoming": {
+        "answer": "Yanıtınız",
+        "refund": "eBay alıcıya iade yapar",
+        "close": "eBay talebi kapatır"
+      },
       "SELLER_CREATE_CANCEL": "İptal oluşturuldu",
       "SYSTEM_REFUND": "eBay iade yaptı",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay iade durumunu güncelledi",

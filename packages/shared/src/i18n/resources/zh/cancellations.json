@@ -119,6 +119,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "买家申请取消",
+      "SELLER_APPROVE": "您已接受该请求",
+      "pending": "等待中",
+      "upcoming": {
+        "answer": "您的答复",
+        "refund": "eBay 向买家退款",
+        "close": "eBay 关闭该请求"
+      },
       "SELLER_CREATE_CANCEL": "已创建取消",
       "SYSTEM_REFUND": "eBay 已退款",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay 更新了退款状态",

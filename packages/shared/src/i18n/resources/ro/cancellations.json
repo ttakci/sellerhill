@@ -121,6 +121,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Cumpărătorul a cerut anularea",
+      "SELLER_APPROVE": "Ați acceptat solicitarea",
+      "pending": "În așteptare",
+      "upcoming": {
+        "answer": "Răspunsul dvs.",
+        "refund": "eBay rambursează cumpărătorul",
+        "close": "eBay închide solicitarea"
+      },
       "SELLER_CREATE_CANCEL": "Anulare creată",
       "SYSTEM_REFUND": "Rambursare emisă de eBay",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay a actualizat starea rambursării",

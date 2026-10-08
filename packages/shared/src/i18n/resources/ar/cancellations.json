@@ -124,6 +124,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "طلب المشتري الإلغاء",
+      "SELLER_APPROVE": "قبلت الطلب",
+      "pending": "قيد الانتظار",
+      "upcoming": {
+        "answer": "ردك",
+        "refund": "يرد eBay المبلغ إلى المشتري",
+        "close": "يغلق eBay الطلب"
+      },
       "SELLER_CREATE_CANCEL": "تم إنشاء الإلغاء",
       "SYSTEM_REFUND": "أصدر eBay استردادًا",
       "SYSTEM_NOTIFY_REFUND_STATUS": "حدّث eBay حالة الاسترداد",

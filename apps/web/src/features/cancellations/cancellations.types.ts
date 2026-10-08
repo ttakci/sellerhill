@@ -73,14 +73,20 @@ export interface UseCancellationsUrlStateResult {
   setSelected: (id: string | null) => void;
 }
 
-/** Who did a step of the journey — drives the marker colour. */
+/** Who did a step of the journey — named under the step. */
 export type CancellationHistoryActor = 'buyer' | 'seller' | 'ebay';
+
+/** A step an open request still has ahead of it (`cancellations.history.upcoming.<key>`). */
+export type CancellationUpcomingStep = 'answer' | 'refund' | 'close';
 
 export interface CancellationHistoryRowView {
   id: string;
   actor: CancellationHistoryActor;
   label: string;
+  /** Null for an upcoming step. */
   at: string | null;
+  /** Not happened yet: drawn faded with a hollow marker; a step eBay recorded is green. */
+  upcoming: boolean;
 }
 
 /** One request in full, presentation-ready for the detail drawer. */

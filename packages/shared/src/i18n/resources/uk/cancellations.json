@@ -122,6 +122,14 @@
       "ebay": "eBay"
     },
     "history": {
+      "BUYER_CREATE_CANCEL": "Покупець попросив скасувати",
+      "SELLER_APPROVE": "Ви прийняли запит",
+      "pending": "Очікується",
+      "upcoming": {
+        "answer": "Ваша відповідь",
+        "refund": "eBay повертає кошти покупцеві",
+        "close": "eBay закриває запит"
+      },
       "SELLER_CREATE_CANCEL": "Скасування створено",
       "SYSTEM_REFUND": "eBay виконав повернення коштів",
       "SYSTEM_NOTIFY_REFUND_STATUS": "eBay оновив статус повернення коштів",
