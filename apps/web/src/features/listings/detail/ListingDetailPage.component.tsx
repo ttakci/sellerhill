@@ -1,11 +1,13 @@
 import { ListingStatus, type UpdateListingFormData } from '@repo/shared';
 import {
+  Badge,
   Button,
   Drawer,
   EmptyState,
   Icon,
   IconButton,
   IconName,
+  type BadgeVariant,
   IdBadge,
   InfoMessage,
   ModernSelect,
@@ -13,7 +15,6 @@ import {
   SettingsActionRow,
   SettingsCard,
   SettingsInfoRow,
-  StatusBadge,
   Text,
   Textarea,
   TextInput,
@@ -30,11 +31,23 @@ import * as S from './ListingDetailPage.style';
 import type { AutomationRuleState, ListingDetailPageProps } from './ListingDetailPage.types';
 import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
 
-/** RETRYING has no StatusBadge status of its own; `pending` carries the same
- *  amber "in progress" tint. Every other ListingStatus value matches a
- *  StatusBadge status 1:1. */
-const listingStatusToBadgeStatus = (status: ListingStatus): string =>
-  status === ListingStatus.RETRYING ? 'pending' : status;
+/** The listing card's own status colours (`ListingCard`: solid, dark fill,
+ *  white ink), so the badge reads the same on the list and on the detail page.
+ *  Draft and ended are neutral there; an error is red; a retry is amber. */
+const listingStatusBadgeVariant = (status: ListingStatus): BadgeVariant => {
+  switch (status) {
+    case ListingStatus.ACTIVE:
+      return 'success';
+    case ListingStatus.ERROR:
+      return 'error';
+    case ListingStatus.RETRYING:
+      return 'warning';
+    case ListingStatus.DRAFT:
+    case ListingStatus.INACTIVE:
+    default:
+      return 'neutral';
+  }
+};
 
 /**
  * A fact row. Labels carry no icon — the one exception is an automation rule,
@@ -94,16 +107,19 @@ const Kpi = ({
   label,
   value,
   color = 'text.primary',
+  emphasis = false,
 }: {
   label: string;
   value: string;
   color?: string;
+  /** The profit figure: one step larger and bold, so the eye lands there first. */
+  emphasis?: boolean;
 }): React.ReactElement => (
   <S.KpiItem>
     <S.KpiLabel variant="caption" color="text.secondary">
       {label}
     </S.KpiLabel>
-    <Text variant="metric-sm" weight="semibold" numeric color={color}>
+    <Text variant={emphasis ? 'metric' : 'metric-sm'} weight={emphasis ? 'bold' : 'semibold'} numeric color={color}>
       {value}
     </Text>
   </S.KpiItem>
@@ -247,9 +263,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
       <S.Hero variant="elevated">
         <S.StatusBadgeSlot>
-          <StatusBadge status={listingStatusToBadgeStatus(listing.status)} size="lg">
+          <Badge variant={listingStatusBadgeVariant(listing.status)} size="sm" solid>
             {statusLabel}
-          </StatusBadge>
+          </Badge>
         </S.StatusBadgeSlot>
 
         <S.GalleryBlock>
@@ -352,12 +368,12 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             <S.IdItem>
               <S.IdItemLabel>
                 <Text variant="body-sm" color="text.secondary">
-                  {t('listings.detail.updatedAt')}
+                  {t('listings.table.lastSynced')}
                 </Text>
               </S.IdItemLabel>
               <S.UpdatedValueRow>
                 <Text variant="body-sm" numeric>
-                  {formatDateTime(listing.updatedAt)}
+                  {formatDateTime(listing.lastSyncedAt ?? listing.updatedAt)}
                 </Text>
                 {hasRevisions ? (
                   <Button variant="text" size="small" onClick={onOpenRevisions}>
@@ -376,6 +392,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
           <S.KpiStrip>
             <Kpi
               label={t('listings.table.estimatedProfit')}
+              emphasis
               value={formatCurrency(profit)}
               color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
             />
