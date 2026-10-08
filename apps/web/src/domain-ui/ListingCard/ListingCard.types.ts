@@ -1,4 +1,5 @@
 import type { IconName } from '@repo/ui';
+import type { ReactNode } from 'react';
 
 export type ListingCardOrientation = 'horizontal' | 'vertical';
 export type StatTone = 'default' | 'positive' | 'negative' | 'info';
@@ -72,6 +73,8 @@ export interface ListingCardProps {
   selectionAriaLabel?: string;
   /** Label for the "opens the detail page" hint at the end of the figures row; omit for no hint. */
   detailLabel?: string;
+  /** A small chart above the figures row, e.g. a period sparkline. */
+  trend?: ReactNode;
   /** @deprecated The card has no "Details →" footer any more — the whole card is the button. Accepted and ignored. */
   showDetailAction?: boolean;
 }

@@ -43,6 +43,7 @@ export const ListingCard = ({
   onSelectedChange,
   selectionAriaLabel,
   detailLabel,
+  trend,
   ...rest
 }: ListingCardProps): React.ReactElement => {
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
@@ -122,6 +123,8 @@ export const ListingCard = ({
           </S.Content>
         </S.Body>
       </S.Top>
+
+      {trend ? <S.Trend>{trend}</S.Trend> : null}
 
       <S.Footer>
         <S.StatsGrid>

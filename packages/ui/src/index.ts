@@ -46,6 +46,8 @@ export type {
 
 export { Badge } from './atoms/Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from './atoms/Badge';
+export { Sparkline } from './atoms/Sparkline';
+export type { SparklineProps, SparklineSize, SparklineTone } from './atoms/Sparkline';
 
 export { Skeleton } from './atoms/Skeleton';
 export type { SkeletonProps, SkeletonRadius } from './atoms/Skeleton';
@@ -223,3 +225,4 @@ export {
   formatPercent,
   getLocaleConfig,
 } from './utils/format';
+export { buildSparklinePoints } from './utils/sparkline';

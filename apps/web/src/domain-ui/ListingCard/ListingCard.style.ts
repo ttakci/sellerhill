@@ -229,6 +229,11 @@ export const MetaValueText = styled(Text)<{ $multiline: boolean }>`
   overflow-wrap: ${({ $multiline }) => ($multiline ? 'anywhere' : 'normal')};
 `;
 
+/** Sits above the figures row, inset like the Footer. */
+export const Trend = styled.div`
+  padding: 0 ${tkn('spacing.md+')} ${tkn('spacing.sm')};
+`;
+
 /** Same strip as OrderCard: figures + the detail hint in one grid, under one hairline. */
 export const Footer = styled.div`
   position: relative;
