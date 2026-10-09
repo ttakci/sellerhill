@@ -1,4 +1,4 @@
-import { EmptyState, ModernSelect } from '@repo/ui';
+import { Button, Icon, ModernSelect, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,11 +28,20 @@ export const ConnectEbayPrompt = ({
   // decision, 2026-09-17) — leaving is done by cancelling the subscription in
   // the Stripe portal, and self-service deactivation offered a destructive
   // action to someone who had simply not finished connecting yet.
-  const secondaryAction = onSkip ? t('ebay:ebay.onboarding.skipButton') : undefined;
-
   return (
-    <S.Layout>
-      <S.StyledCard variant="bordered" padding="lg" className={className}>
+    <S.Layout className={className}>
+      <S.Hero variant="bordered" padding="none">
+        <S.Head>
+          <S.IconDisc>
+            <Icon name="link" size={24} color="text.inverse" />
+          </S.IconDisc>
+          <S.Copy>
+            <Text variant="h2" weight="bold">{t('ebay:ebay.accounts.noAccounts')}</Text>
+            <Text variant="body" color="text.secondary">
+              {t('ebay:ebay.onboarding.description')}
+            </Text>
+          </S.Copy>
+        </S.Head>
         {showMarketplaceSelect && (
           <S.MarketplaceSelectWrapper>
             <ModernSelect
@@ -44,21 +53,27 @@ export const ConnectEbayPrompt = ({
             />
           </S.MarketplaceSelectWrapper>
         )}
-        <EmptyState
-          icon="link"
-          size="lg"
-          title={t('ebay:ebay.accounts.noAccounts')}
-          description={t('ebay:ebay.onboarding.description')}
-          actionIcon="link"
-          action={t('ebay:ebay.connect.connectButton')}
-          onAction={onConnect}
-          isActionLoading={isLoading}
-          secondaryActionIcon="arrow-right"
-          secondaryAction={secondaryAction}
-          onSecondaryAction={onSkip}
-        />
-      </S.StyledCard>
-      {footnote && <S.Footnote type="info">{footnote}</S.Footnote>}
+        <S.Actions>
+          <Button variant="primary" size="medium" onClick={onConnect} isLoading={isLoading}>
+            <Icon name="link" size={16} />
+            <Text variant="body">{t('ebay:ebay.connect.connectButton')}</Text>
+          </Button>
+          {onSkip && (
+            <Button variant="teal" size="medium" onClick={onSkip}>
+              <Icon name="arrow-right" size={16} />
+              <Text variant="body">{t('ebay:ebay.onboarding.skipButton')}</Text>
+            </Button>
+          )}
+        </S.Actions>
+        {footnote && (
+          <S.Footnote>
+            <Icon name="info" size={16} color="brand.primary" />
+            <Text variant="body-sm" color="text.secondary">
+              {footnote}
+            </Text>
+          </S.Footnote>
+        )}
+      </S.Hero>
     </S.Layout>
   );
 };
