@@ -33,7 +33,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Te quedan {{remaining}} de {{limit}} productos en este período",
     "allowanceUnlimited": "Vistas de productos ilimitadas",
-    "allowanceHint": "Cada página de lista que abres descuenta sus productos de tu cupo. Volver a abrir la misma página el mismo día (UTC) no se cuenta de nuevo; otro día sí se vuelve a contar. Ordenar y filtrar nunca cuentan.",
+    "allowanceHint": "Cada página de lista que abres descuenta sus productos de tu cupo. Volver a abrir la misma página el mismo día no se cuenta de nuevo; otro día sí se vuelve a contar. Ordenar y filtrar nunca cuentan.",
     "lastFetched": "Última consulta en Amazon",
     "locked": {
       "title_one": "{{count}} producto más de esta página está fuera del límite mensual de tu plan",

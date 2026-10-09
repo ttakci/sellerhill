@@ -32,7 +32,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Bu dövrdə {{limit}} məhsuldan {{remaining}} qalıb",
     "allowanceUnlimited": "Limitsiz məhsul görüntüləmə",
-    "allowanceHint": "Açdığınız hər siyahı səhifəsindəki məhsullar limitinizdən çıxılır. Eyni səhifəni eyni gün (UTC) yenidən açmaq təkrar sayılmır; başqa gün açsanız yenidən sayılır. Sıralama və filtrləmə heç vaxt sayılmır.",
+    "allowanceHint": "Açdığınız hər siyahı səhifəsindəki məhsullar limitinizdən çıxılır. Eyni səhifəni eyni gün yenidən açmaq təkrar sayılmır; başqa gün açsanız yenidən sayılır. Sıralama və filtrləmə heç vaxt sayılmır.",
     "lastFetched": "Amazon-dan son alınma",
     "locked": {
       "title_one": "Bu səhifədə daha {{count}} məhsul planınızın aylıq limitindən kənardır",

@@ -32,7 +32,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Noch {{remaining}} von {{limit}} Produkten in diesem Zeitraum",
     "allowanceUnlimited": "Unbegrenzte Produktansichten",
-    "allowanceHint": "Jede geöffnete Listenseite zählt ihre Produkte gegen Ihr Kontingent. Dieselbe Seite am selben Tag (UTC) erneut zu öffnen, zählt nicht doppelt; an einem anderen Tag zählt sie erneut. Sortieren und Filtern zählen nie.",
+    "allowanceHint": "Jede geöffnete Listenseite zählt ihre Produkte gegen Ihr Kontingent. Dieselbe Seite am selben Tag erneut zu öffnen, zählt nicht doppelt; an einem anderen Tag zählt sie erneut. Sortieren und Filtern zählen nie.",
     "lastFetched": "Zuletzt von Amazon abgerufen",
     "locked": {
       "title_one": "{{count}} weiteres Produkt auf dieser Seite liegt außerhalb des monatlichen Kontingents Ihres Tarifs",

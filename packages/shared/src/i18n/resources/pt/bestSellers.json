@@ -33,7 +33,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Restam {{remaining}} de {{limit}} produtos neste período",
     "allowanceUnlimited": "Visualizações de produtos ilimitadas",
-    "allowanceHint": "Cada página de lista que você abre desconta seus produtos da sua cota. Reabrir a mesma página no mesmo dia (UTC) não conta de novo; em outro dia, conta novamente. Ordenar e filtrar nunca contam.",
+    "allowanceHint": "Cada página de lista que você abre desconta seus produtos da sua cota. Reabrir a mesma página no mesmo dia não conta de novo; em outro dia, conta novamente. Ordenar e filtrar nunca contam.",
     "lastFetched": "Última busca na Amazon",
     "locked": {
       "title_one": "{{count}} produto a mais nesta página está fora da franquia mensal do seu plano",

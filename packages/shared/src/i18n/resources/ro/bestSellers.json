@@ -33,7 +33,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Mai aveți {{remaining}} din {{limit}} produse în această perioadă",
     "allowanceUnlimited": "Vizualizări de produse nelimitate",
-    "allowanceHint": "Fiecare pagină de listă deschisă își scade produsele din limita dvs. Redeschiderea aceleiași pagini în aceeași zi (UTC) nu se numără din nou; în altă zi se numără din nou. Sortarea și filtrarea nu se numără niciodată.",
+    "allowanceHint": "Fiecare pagină de listă deschisă își scade produsele din limita dvs. Redeschiderea aceleiași pagini în aceeași zi nu se numără din nou; în altă zi se numără din nou. Sortarea și filtrarea nu se numără niciodată.",
     "lastFetched": "Ultima preluare de pe Amazon",
     "locked": {
       "title_one": "Încă {{count}} produs de pe această pagină depășește alocarea lunară a planului dvs.",
