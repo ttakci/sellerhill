@@ -179,6 +179,7 @@
       "SHIPPED": "Enviado"
     },
     "errors": {
+      "exportFailed": "No se pudo completar la exportación. Inténtalo de nuevo.",
       "actionsDisabled": "Las acciones de devolución desde la aplicación están desactivadas en esta plataforma. Responde la devolución en eBay.",
       "actionNotAvailable": "eBay ya no ofrece esta acción en la devolución. Actualiza y revisa qué está pendiente ahora.",
       "suspended": "Tu suscripción está suspendida, así que las acciones de devolución están en pausa. Paga la factura en la página de Facturación.",

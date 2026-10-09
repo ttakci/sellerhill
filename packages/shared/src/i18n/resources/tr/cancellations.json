@@ -106,6 +106,7 @@
     "actionsOff": "Uygulama içi iptal işlemleri kapalı — yanıtı eBay'de verin.",
     "liveUnavailable": "eBay'e şu anda ulaşılamadı, bu yüzden SellerHill'in gördüğü son durum gösteriliyor. eBay yeniden yanıt verince yanıt seçenekleri sunulur.",
     "errors": {
+      "exportFailed": "Dışa aktarma tamamlanamadı. Lütfen tekrar deneyin.",
       "actionsDisabled": "Uygulama içi iptal işlemleri bu platformda kapalı. Talebi eBay'de yanıtlayın.",
       "actionNotAvailable": "eBay artık bu talepte bu işlemi sunmuyor. Sayfayı yenileyin ve şimdi bekleyenleri kontrol edin.",
       "suspended": "Aboneliğiniz askıya alındı, bu yüzden iptal işlemleri duraklatıldı. Faturayı Faturalandırma sayfasında ödeyin.",

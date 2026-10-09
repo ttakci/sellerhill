@@ -106,6 +106,7 @@
     "actionsOff": "Tətbiq daxilində ləğv əməliyyatları söndürülüb — cavabı eBay-də verin.",
     "liveUnavailable": "eBay ilə indi əlaqə qurulmadı, ona görə SellerHill-in gördüyü son vəziyyət göstərilir. eBay yenidən cavab verəndə cavab seçimləri təklif olunacaq.",
     "errors": {
+      "exportFailed": "İxrac tamamlanmadı. Zəhmət olmasa yenidən cəhd edin.",
       "actionsDisabled": "Tətbiq daxilində ləğv əməliyyatları bu platformada söndürülüb. Sorğuya eBay-də cavab verin.",
       "actionNotAvailable": "eBay artıq bu sorğuda bu əməliyyatı təklif etmir. Səhifəni yeniləyin və indi gözləyənləri yoxlayın.",
       "suspended": "Abunəliyiniz dayandırılıb, buna görə ləğv əməliyyatları durdurulub. Hesab-fakturanı Ödəniş səhifəsində ödəyin.",

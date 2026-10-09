@@ -179,6 +179,7 @@
       "SHIPPED": "Spedito"
     },
     "errors": {
+      "exportFailed": "Non è stato possibile completare l'esportazione. Riprova.",
       "actionsDisabled": "Le azioni sui resi dall'app sono disattivate su questa piattaforma. Rispondi al reso su eBay.",
       "actionNotAvailable": "eBay non offre più questa azione su questo reso. Aggiorna e controlla cosa è in attesa adesso.",
       "suspended": "Il tuo abbonamento è sospeso, quindi le azioni sui resi sono in pausa. Salda la fattura nella pagina Fatturazione.",

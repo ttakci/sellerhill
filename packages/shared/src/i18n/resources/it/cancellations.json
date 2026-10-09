@@ -107,6 +107,7 @@
     "actionsOff": "Le azioni di annullamento nell'app sono disattivate: rispondi su eBay.",
     "liveUnavailable": "Impossibile raggiungere eBay in questo momento, quindi viene mostrato l’ultimo stato visto da SellerHill. Le risposte saranno disponibili quando eBay risponderà di nuovo.",
     "errors": {
+      "exportFailed": "Non è stato possibile completare l'esportazione. Riprova.",
       "actionsDisabled": "Le azioni di annullamento nell'app sono disattivate su questa piattaforma. Rispondi alla richiesta su eBay.",
       "actionNotAvailable": "eBay non offre più questa azione per la richiesta. Aggiorna e controlla cosa è in attesa ora.",
       "suspended": "Il tuo abbonamento è sospeso, quindi le azioni di annullamento sono in pausa. Salda la fattura nella pagina Fatturazione.",

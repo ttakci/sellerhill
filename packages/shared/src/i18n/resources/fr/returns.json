@@ -179,6 +179,7 @@
       "SHIPPED": "Expédié"
     },
     "errors": {
+      "exportFailed": "L'export n'a pas pu être terminé. Veuillez réessayer.",
       "actionsDisabled": "Les actions de retour depuis l'application sont désactivées sur cette plateforme. Répondez au retour sur eBay.",
       "actionNotAvailable": "eBay ne propose plus cette action sur ce retour. Actualisez et vérifiez ce qui est attendu maintenant.",
       "suspended": "Votre abonnement est suspendu, les actions de retour sont donc en pause. Réglez la facture sur la page Facturation.",

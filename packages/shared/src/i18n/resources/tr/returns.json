@@ -178,6 +178,7 @@
       "SHIPPED": "Gönderildi"
     },
     "errors": {
+      "exportFailed": "Dışa aktarma tamamlanamadı. Lütfen tekrar deneyin.",
       "actionsDisabled": "Uygulama içi iade işlemleri bu platformda kapalı. İadeyi eBay üzerinden yanıtlayın.",
       "actionNotAvailable": "eBay bu iadede artık bu işlemi sunmuyor. Yenileyip sizden ne beklendiğine bakın.",
       "suspended": "Aboneliğiniz askıda olduğu için iade işlemleri duraklatıldı. Faturayı Faturalandırma sayfasından ödeyin.",

@@ -178,6 +178,7 @@
       "SHIPPED": "Shipped"
     },
     "errors": {
+      "exportFailed": "The export could not be completed. Please try again.",
       "actionsDisabled": "In-app return actions are switched off on this platform. Answer the return on eBay.",
       "actionNotAvailable": "eBay no longer offers this action on the return. Refresh and check what is waiting now.",
       "suspended": "Your subscription is suspended, so return actions are paused. Settle the invoice on the Billing page.",

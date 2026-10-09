@@ -7,6 +7,8 @@ import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.typ
 
 export interface ReturnsPageProps {
   rows: ReturnRowView[];
+  /** Downloads every row the current filters select as a CSV. */
+  onDownload: () => void;
   columns: TableColumn<ReturnRowView>[];
   /** Column manager + sort picker — the same toolbar as the listings and orders tables. */
   columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];

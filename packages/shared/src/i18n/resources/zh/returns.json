@@ -177,6 +177,7 @@
       "SHIPPED": "已寄出"
     },
     "errors": {
+      "exportFailed": "导出未能完成，请重试。",
       "actionsDisabled": "此平台已关闭应用内退货操作，请在 eBay 上处理退货。",
       "actionNotAvailable": "eBay 已不再为此退货提供该操作。请刷新并查看当前需要处理的事项。",
       "suspended": "您的订阅已暂停，退货操作已停用。请在“账单”页面结清发票。",

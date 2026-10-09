@@ -178,6 +178,7 @@
       "SHIPPED": "Versendet"
     },
     "errors": {
+      "exportFailed": "Der Export konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
       "actionsDisabled": "Rückgabe-Aktionen aus der App sind auf dieser Plattform abgeschaltet. Beantworten Sie die Rückgabe bei eBay.",
       "actionNotAvailable": "eBay bietet diese Aktion bei dieser Rückgabe nicht mehr an. Aktualisieren Sie und prüfen Sie, was jetzt ansteht.",
       "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Rückgabe-Aktionen pausiert. Begleichen Sie die Rechnung auf der Abrechnungsseite.",

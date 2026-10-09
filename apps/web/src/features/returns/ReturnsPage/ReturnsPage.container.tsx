@@ -1,4 +1,4 @@
-import { RETURN_TABS, ReturnBucket, ReturnTab, type ReturnsQueryDto } from '@repo/shared';
+import { RETURN_TABS, ReturnBucket, ReturnTab, type EbayReturnDto, type ReturnsQueryDto } from '@repo/shared';
 import { getLocaleConfig, type IconName, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { returnBucketPresentation } from '../shared/return-presentation';
 import { toReturnRowView } from '../shared/return-row.mapper';
 
 import { useReturnsColumns } from './hooks/useReturnsColumns';
+import { useReturnsExport } from './hooks/useReturnsExport';
 import { useReturnsUrlState } from './hooks/useReturnsUrlState';
 import { ReturnsPageComponent } from './ReturnsPage.component';
 
@@ -64,6 +65,18 @@ export const ReturnsPageContainer: React.FC = () => {
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const accounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData?.items]);
+
+  /* What the export reads: the list's own filters, every page. */
+  const exportQuery = useMemo(
+    () => ({
+      tab,
+      ebayAccountId: store || undefined,
+      search: search || undefined,
+      sortBy: sortBy ?? undefined,
+      sortOrder: sortDirection,
+    }),
+    [tab, store, search, sortBy, sortDirection]
+  );
 
   const { data, isLoading, isFetching } = useGetReturnsQuery(
     {
@@ -135,17 +148,17 @@ export const ReturnsPageContainer: React.FC = () => {
 
   /* Money renders in the currency eBay reported on the return, else in the
      marketplace currency of the store it belongs to — never the UI language. */
-  const rows = useMemo<ReturnRowView[]>(
-    () =>
-      (data?.items ?? []).map((item) =>
-        toReturnRowView(item, {
-          translate: (key, options) => t(key, options ?? {}),
-          locale,
-          currencyFor: (ebayAccountId) => resolveStoreCurrency(accounts, ebayAccountId),
-        })
-      ),
-    [data?.items, accounts, locale, t]
+  const toRow = useCallback(
+    (item: EbayReturnDto): ReturnRowView =>
+      toReturnRowView(item, {
+        translate: (key, options) => t(key, options ?? {}),
+        locale,
+        currencyFor: (ebayAccountId) => resolveStoreCurrency(accounts, ebayAccountId),
+      }),
+    [accounts, locale, t]
   );
+
+  const rows = useMemo<ReturnRowView[]>(() => (data?.items ?? []).map(toRow), [data?.items, toRow]);
 
   const allColumns = useReturnsColumns();
 
@@ -247,9 +260,12 @@ export const ReturnsPageContainer: React.FC = () => {
   const handleRowOpen = useCallback((row: ReturnRowView) => setSelected(row.id), [setSelected]);
   const handleCloseDetail = useCallback(() => setSelected(null), [setSelected]);
 
+  const { exportCsv } = useReturnsExport(exportQuery, toRow);
+
   return (
     <EbayAccountGuard>
       <ReturnsPageComponent
+        onDownload={() => void exportCsv()}
         rows={rows}
         columns={columns}
         columnOptions={columnOptions}

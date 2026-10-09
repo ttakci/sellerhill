@@ -7,6 +7,8 @@ import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.typ
 
 export interface CancellationsPageProps {
   rows: CancellationRowView[];
+  /** Downloads every row the current filters select as a CSV. */
+  onDownload: () => void;
   columns: TableColumn<CancellationRowView>[];
   /** Column manager + sort picker — the same toolbar as the listings and orders tables. */
   columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];

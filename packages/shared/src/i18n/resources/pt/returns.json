@@ -179,6 +179,7 @@
       "SHIPPED": "Enviado"
     },
     "errors": {
+      "exportFailed": "Não foi possível concluir a exportação. Tente novamente.",
       "actionsDisabled": "As ações de devolução pelo aplicativo estão desativadas nesta plataforma. Responda à devolução no eBay.",
       "actionNotAvailable": "O eBay não oferece mais esta ação nesta devolução. Atualize e veja o que está pendente agora.",
       "suspended": "Sua assinatura está suspensa, então as ações de devolução estão pausadas. Quite a fatura na página de Cobrança.",

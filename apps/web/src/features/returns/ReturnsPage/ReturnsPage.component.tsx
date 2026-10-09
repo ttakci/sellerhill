@@ -25,6 +25,7 @@ const TAB_COLORS: readonly StatusTabColor[] = [
 
 export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   rows,
+  onDownload,
   columns,
   columnOptions,
   visibleColumnKeys,
@@ -95,6 +96,8 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
       </S.FilterBar>
 
       <DataTable
+        onDownload={rows.length > 0 ? onDownload : undefined}
+        downloadLabel={t('listings:listings.actions.export')}
         sortOptions={sortOptions}
         sortValue={sortValue}
         onSortChange={onSortChange}

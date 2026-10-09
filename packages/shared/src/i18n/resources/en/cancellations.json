@@ -106,6 +106,7 @@
     "actionsOff": "In-app cancellation actions are off — answer on eBay.",
     "liveUnavailable": "eBay could not be reached just now, so this is the last state SellerHill saw. Answers are offered once eBay answers again.",
     "errors": {
+      "exportFailed": "The export could not be completed. Please try again.",
       "actionsDisabled": "In-app cancellation actions are switched off on this platform. Answer the request on eBay.",
       "actionNotAvailable": "eBay no longer offers this action on the request. Refresh and check what is waiting now.",
       "suspended": "Your subscription is suspended, so cancellation actions are paused. Settle the invoice on the Billing page.",

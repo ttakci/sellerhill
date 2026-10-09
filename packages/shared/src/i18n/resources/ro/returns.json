@@ -179,6 +179,7 @@
       "SHIPPED": "Expediat"
     },
     "errors": {
+      "exportFailed": "Exportul nu a putut fi finalizat. Încercați din nou.",
       "actionsDisabled": "Acțiunile pentru retururi din aplicație sunt dezactivate pe această platformă. Răspunde la retur pe eBay.",
       "actionNotAvailable": "eBay nu mai oferă această acțiune pentru acest retur. Reîncarcă și verifică ce așteaptă acum.",
       "suspended": "Abonamentul tău este suspendat, așa că acțiunile pentru retururi sunt oprite. Achită factura din pagina Facturare.",

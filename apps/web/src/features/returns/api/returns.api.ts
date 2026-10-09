@@ -85,5 +85,10 @@ export const returnsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetReturnsQuery, useGetReturnCountsQuery, useGetReturnDetailQuery, useActOnReturnMutation } =
-  returnsApi;
+export const {
+  useGetReturnsQuery,
+  useLazyGetReturnsQuery,
+  useGetReturnCountsQuery,
+  useGetReturnDetailQuery,
+  useActOnReturnMutation,
+} = returnsApi;

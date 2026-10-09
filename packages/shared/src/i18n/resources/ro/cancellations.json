@@ -107,6 +107,7 @@
     "actionsOff": "Acțiunile de anulare din aplicație sunt oprite — răspunde pe eBay.",
     "liveUnavailable": "eBay nu a putut fi contactat acum, așa că este afișată ultima stare văzută de SellerHill. Răspunsurile vor fi disponibile când eBay răspunde din nou.",
     "errors": {
+      "exportFailed": "Exportul nu a putut fi finalizat. Încercați din nou.",
       "actionsDisabled": "Acțiunile de anulare din aplicație sunt oprite pe această platformă. Răspunde la cerere pe eBay.",
       "actionNotAvailable": "eBay nu mai oferă această acțiune pentru cerere. Reîmprospătează și vezi ce așteaptă acum.",
       "suspended": "Abonamentul tău este suspendat, deci acțiunile de anulare sunt oprite. Achită factura pe pagina Facturare.",

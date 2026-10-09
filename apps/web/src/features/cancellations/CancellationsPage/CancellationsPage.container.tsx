@@ -1,4 +1,10 @@
-import { CANCELLATION_TABS, CancellationBucket, CancellationTab, type CancellationsQueryDto } from '@repo/shared';
+import {
+  CANCELLATION_TABS,
+  CancellationBucket,
+  CancellationTab,
+  type CancellationsQueryDto,
+  type EbayCancellationDto,
+} from '@repo/shared';
 import { getLocaleConfig, type IconName, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +16,7 @@ import { toCancellationRowView } from '../shared/cancellation.mapper';
 
 import { CancellationsPageComponent } from './CancellationsPage.component';
 import { useCancellationsColumns } from './hooks/useCancellationsColumns';
+import { useCancellationsExport } from './hooks/useCancellationsExport';
 import { useCancellationsUrlState } from './hooks/useCancellationsUrlState';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
@@ -64,6 +71,18 @@ export const CancellationsPageContainer: React.FC = () => {
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const accounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData?.items]);
+
+  /* What the export reads: the list's own filters, every page. */
+  const exportQuery = useMemo(
+    () => ({
+      tab,
+      ebayAccountId: store || undefined,
+      search: search || undefined,
+      sortBy: sortBy ?? undefined,
+      sortOrder: sortDirection,
+    }),
+    [tab, store, search, sortBy, sortDirection]
+  );
 
   const { data, isLoading, isFetching } = useGetCancellationsQuery(
     {
@@ -135,17 +154,17 @@ export const CancellationsPageContainer: React.FC = () => {
 
   /* Money renders in the currency eBay reported on the request, else in the
      marketplace currency of the store it belongs to — never the UI language. */
-  const rows = useMemo<CancellationRowView[]>(
-    () =>
-      (data?.items ?? []).map((item) =>
-        toCancellationRowView(item, {
-          translate: (key, options) => t(key, options ?? {}),
-          locale,
-          currencyFor: (ebayAccountId) => resolveStoreCurrency(accounts, ebayAccountId),
-        })
-      ),
-    [data?.items, accounts, locale, t]
+  const toRow = useCallback(
+    (item: EbayCancellationDto): CancellationRowView =>
+      toCancellationRowView(item, {
+        translate: (key, options) => t(key, options ?? {}),
+        locale,
+        currencyFor: (ebayAccountId) => resolveStoreCurrency(accounts, ebayAccountId),
+      }),
+    [accounts, locale, t]
   );
+
+  const rows = useMemo<CancellationRowView[]>(() => (data?.items ?? []).map(toRow), [data?.items, toRow]);
 
   const allColumns = useCancellationsColumns();
 
@@ -247,9 +266,12 @@ export const CancellationsPageContainer: React.FC = () => {
   const handleRowOpen = useCallback((row: CancellationRowView) => setSelected(row.id), [setSelected]);
   const handleCloseDetail = useCallback(() => setSelected(null), [setSelected]);
 
+  const { exportCsv } = useCancellationsExport(exportQuery, toRow);
+
   return (
     <EbayAccountGuard>
       <CancellationsPageComponent
+        onDownload={() => void exportCsv()}
         rows={rows}
         columns={columns}
         columnOptions={columnOptions}

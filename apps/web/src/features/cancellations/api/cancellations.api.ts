@@ -92,6 +92,7 @@ export const cancellationsApi = baseApi.injectEndpoints({
 
 export const {
   useGetCancellationsQuery,
+  useLazyGetCancellationsQuery,
   useGetCancellationCountsQuery,
   useGetCancellationDetailQuery,
   useActOnCancellationMutation,

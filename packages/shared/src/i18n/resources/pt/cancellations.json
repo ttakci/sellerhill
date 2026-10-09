@@ -107,6 +107,7 @@
     "actionsOff": "As ações de cancelamento no app estão desativadas — responda na eBay.",
     "liveUnavailable": "Não foi possível acessar o eBay agora, então este é o último estado que o SellerHill viu. As respostas ficam disponíveis quando o eBay responder novamente.",
     "errors": {
+      "exportFailed": "Não foi possível concluir a exportação. Tente novamente.",
       "actionsDisabled": "As ações de cancelamento no app estão desativadas nesta plataforma. Responda ao pedido na eBay.",
       "actionNotAvailable": "A eBay não oferece mais esta ação no pedido. Atualize e veja o que está pendente agora.",
       "suspended": "Sua assinatura está suspensa, então as ações de cancelamento estão pausadas. Quite a fatura na página de Cobrança.",

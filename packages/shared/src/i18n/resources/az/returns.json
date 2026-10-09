@@ -178,6 +178,7 @@
       "SHIPPED": "Göndərildi"
     },
     "errors": {
+      "exportFailed": "İxrac tamamlanmadı. Zəhmət olmasa yenidən cəhd edin.",
       "actionsDisabled": "Tətbiqdaxili qaytarma əməliyyatları bu platformada söndürülüb. Qaytarmanı eBay-də cavablandırın.",
       "actionNotAvailable": "eBay bu qaytarmada artıq bu əməliyyatı təklif etmir. Səhifəni yeniləyib indi nə gözlənildiyinə baxın.",
       "suspended": "Abunəliyiniz dayandırıldığı üçün qaytarma əməliyyatları durdurulub. Fakturanı Ödənişlər səhifəsindən ödəyin.",
