@@ -15,7 +15,6 @@ import {
 import {
   AmazonAccountStatus,
   type AmazonAccountPublicDto,
-  type ConfirmNotPurchasedResultDto,
   CreateAmazonAccountDto,
   LinkAmazonOrderDto,
   type StartAutoFulfillResultDto,
@@ -28,7 +27,6 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
-import { AmazonOrderSyncQueueService } from './amazon-order-sync.queue';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
@@ -51,8 +49,7 @@ export class AmazonController {
     private readonly databaseService: DatabaseService,
     private readonly orderSyncService: OrderSyncService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly trackingConversion: TrackingConversionService,
-    private readonly orderSyncQueue: AmazonOrderSyncQueueService
+    private readonly trackingConversion: TrackingConversionService
   ) {}
 
   @Get('accounts')
@@ -148,7 +145,8 @@ export class AmazonController {
   /**
    * Start the automatic Amazon purchase for one order by hand — the retry for
    * a purchase that stopped before anything was bought (card declined at the
-   * payment step, address, stock, captcha…). The rules live in
+   * payment step, address, stock, captcha…), or — after the seller checked
+   * Amazon — one whose outcome was never confirmed. The rules live in
    * `canStartAutoFulfillManually` (the same one `OrderDto.canStartAutoFulfill`
    * reports) and `OrderSyncService.startAutoFulfillManually`; ownership is
    * checked there. Every refusal is a 409 carrying an i18n key.
@@ -166,33 +164,6 @@ export class AmazonController {
       throw new ConflictException(result.errorKey);
     }
     return { queued: true, dryRun: result.dryRun };
-  }
-
-  /**
-   * The seller declares that an automatic purchase whose outcome is unknown
-   * (the Place Order click went out, no confirmation came back) did NOT
-   * happen, which clears the click stamp and brings "Start automatic order"
-   * back. The rule lives in `OrderSyncService.confirmNotPurchased`: it also
-   * requires that the Amazon account's order list was scanned AFTER the click
-   * and found nothing. When that scan has not run yet the answer is a 409 and
-   * the scan is queued here, so the seller can try again in a few minutes.
-   */
-  @Post('orders/:orderId/confirm-not-purchased')
-  async confirmNotPurchased(
-    @Req() req: AuthenticatedRequest,
-    @Param('orderId') orderId: string
-  ): Promise<ConfirmNotPurchasedResultDto> {
-    const result = await this.orderSyncService.confirmNotPurchased(req.user.sub, orderId);
-    if (!result.ok) {
-      if (result.notFound) {
-        throw new NotFoundException(result.errorKey);
-      }
-      for (const accountId of result.accountsToScan ?? []) {
-        await this.orderSyncQueue.enqueueAccount(accountId).catch(() => undefined);
-      }
-      throw new ConflictException(result.errorKey);
-    }
-    return { cleared: true };
   }
 
   @Post('orders/:orderId/link-amazon')

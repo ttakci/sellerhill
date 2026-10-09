@@ -5,7 +5,8 @@
 //   before the click            retry-safe, automatically
 //   the click                   exactly once, claimed in the database
 //   after the click, proven     placed
-//   after the click, unproven   unknown outcome: never re-clicked
+//   after the click, unproven   unknown outcome: never re-clicked automatically —
+//                               only by the seller, after checking Amazon
 //
 // `orders.auto_fulfill_submitted_at` is stamped — as a compare-and-set —
 // immediately before the Place Order click. Every rule below fails NOTHING at
@@ -120,7 +121,7 @@ describe('the Place Order click boundary', () => {
 });
 
 describe('the click stamp is cleared in exactly one place', () => {
-  it('only confirmNotPurchased ever sets auto_fulfill_submitted_at back to NULL', () => {
+  it('only the seller manual start ever sets auto_fulfill_submitted_at back to NULL', () => {
     const dirs = [__dirname, path.join(__dirname, '..', 'orders')];
     const offenders: string[] = [];
     for (const dir of dirs) {
@@ -140,13 +141,17 @@ describe('the click stamp is cleared in exactly one place', () => {
     const orderSync = fs
       .readFileSync(path.join(__dirname, '..', 'orders', 'order-sync.service.ts'), 'utf8')
       .replace(/\r\n/g, '\n');
-    const confirm = methodBody(orderSync, 'async confirmNotPurchased(');
-    expect(confirm).toContain('SET auto_fulfill_submitted_at = NULL');
-    // Two independent facts: the scan-after-click rule, and the seller's call.
-    expect(confirm).toContain('resolveConfirmNotPurchased(');
-    expect(confirm.indexOf('resolveConfirmNotPurchased(')).toBeLessThan(
-      confirm.indexOf('SET auto_fulfill_submitted_at = NULL')
-    );
+    const start = methodBody(orderSync, 'async startAutoFulfillManually(');
+    // Cleared in the claim itself, and only for a row that was stamped.
+    expect(start).toContain('auto_fulfill_submitted_at = NULL');
+    expect(start).toContain('const clearClick = unconfirmed');
+    // The claim matches whether the row was stamped when read, so a row stamped since is not taken.
+    expect(start).toContain('AND (auto_fulfill_submitted_at IS NOT NULL) = $8::boolean');
+    // A scan that saw a matching Amazon order refuses — before the rule, and again in the claim's SQL.
+    expect(start).toContain('purchaseFoundOnAmazon');
+    expect(start).toContain('suspectOnAmazon: row.suspect_unclaimed === true');
+    expect(start).toContain('AND NOT (auto_fulfill_suspect_amazon_order_id IS NOT NULL');
+    expect(start.indexOf('purchaseFoundOnAmazon')).toBeLessThan(start.indexOf('UPDATE orders'));
   });
 
   it('a status write never moves a row out of PLACED', () => {
@@ -155,12 +160,11 @@ describe('the click stamp is cleared in exactly one place', () => {
     expect(setStatus).toContain('AutoFulfillStatus.PLACED');
   });
 
-  it('nothing that re-arms a purchase takes a stamped row', () => {
+  it('nothing that re-arms a purchase AUTOMATICALLY takes a stamped row', () => {
     const orderSync = fs
       .readFileSync(path.join(__dirname, '..', 'orders', 'order-sync.service.ts'), 'utf8')
       .replace(/\r\n/g, '\n');
     for (const signature of [
-      'async startAutoFulfillManually(',
       'private async resumeSuspendedAutoFulfill(',
       'private async releaseOrdersAwaitingPayment(',
     ]) {

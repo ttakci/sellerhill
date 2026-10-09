@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill va passer une vraie commande Amazon pour cette vente avec votre compte Amazon de commandes automatiques, livrée à l'acheteur eBay. Votre plafond de dépenses s'applique toujours : l'achat s'arrête si le total le dépasse. Ne continuez que si vous n'avez pas déjà acheté l'article vous-même.",
         "confirm": "Lancer l'achat",
         "queued": "L'achat a démarré. Le statut de la commande se met à jour dans quelques minutes.",
-        "queuedDryRun": "Un test a démarré. Ce compte Amazon est en mode test : rien ne sera acheté."
-      },
-      "notPurchased": {
-        "button": "Elle n'est pas sur Amazon",
-        "confirmTitle": "Confirmer qu'Amazon n'a aucune commande pour cette vente ?",
-        "confirmDescription": "Ne continuez qu'après avoir consulté les commandes de ce compte Amazon et constaté que la commande n'y figure pas. SellerHill vérifie aussi la liste des commandes du compte et refuse tant que cette vérification n'a pas eu lieu. Ensuite, la commande automatique peut être relancée — si la commande existe bien sur Amazon, l'article sera acheté deux fois.",
-        "confirm": "Oui, elle n'y est pas",
-        "done": "Marquée comme non achetée. Vous pouvez relancer la commande automatique."
+        "queuedDryRun": "Un test a démarré. Ce compte Amazon est en mode test : rien ne sera acheté.",
+        "unknownConfirmTitle": "Avez-vous vérifié vos commandes Amazon ?",
+        "unknownConfirmDescription": "Le dernier achat automatique pour cette vente n'a reçu aucune confirmation d'Amazon : la commande existe peut-être déjà. Ne continuez que si vous avez consulté les commandes de ce compte Amazon et qu'elle n'y est pas — sinon l'article sera acheté deux fois. Si vous la trouvez, fermez cette fenêtre et associez plutôt la commande Amazon.",
+        "unknownConfirm": "Elle n'y est pas, acheter"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Cette vente dépasse le plafond de dépenses de votre compte Amazon. Augmentez le plafond dans les paramètres du compte Amazon ou achetez l'article manuellement.",
       "autoFulfillAlreadyStarted": "Le statut de cette commande vient de changer : l'achat a peut-être déjà démarré. Actualisez la page.",
       "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période.",
-      "purchaseNotYetChecked": "SellerHill n'a pas encore vérifié les commandes de ce compte Amazon depuis la tentative d'achat. La vérification vient d'être lancée — réessayez dans quelques minutes.",
-      "purchaseNotUnknown": "Cette commande n'attend pas de confirmation d'achat. Elle est peut-être déjà associée ou en cours. Actualisez la page.",
       "purchaseFoundOnAmazon": "SellerHill a trouvé une commande Amazon pour ce produit, passée vers le moment de la tentative d'achat, mais n'a pas pu la rattacher à cette vente avec certitude. Ouvrez vos commandes Amazon et associez-la à la main. Si cette commande correspond à une autre vente, associez-la d'abord à cette vente.",
       "noteTooLong": "La note peut contenir 1 000 caractères au maximum.",
       "noteInvalid": "La note n'a pas pu être enregistrée."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Achat non confirmé",
         "meaning": "Le bouton de commande a été actionné sur Amazon, mais aucune confirmation n'est revenue. La commande existe peut-être.",
-        "action": "Vérifiez d'abord vos commandes Amazon. Si la commande s'y trouve, associez-la. N'achetez pas de nouveau avant d'avoir vérifié."
+        "action": "Vérifiez d'abord vos commandes Amazon. Si la commande s'y trouve, associez-la. Sinon, relancez la commande automatique."
       },
       "purchase_blocked": {
         "label": "Achat bloqué",

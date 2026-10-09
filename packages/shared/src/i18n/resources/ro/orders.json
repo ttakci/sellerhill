@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill va plasa o comandă Amazon reală pentru această vânzare cu contul tău Amazon pentru comenzi automate, cu livrare la cumpărătorul eBay. Limita ta de cheltuieli rămâne valabilă, iar achiziția se oprește dacă totalul o depășește. Continuă doar dacă nu ai cumpărat deja produsul singur.",
         "confirm": "Pornește achiziția",
         "queued": "Achiziția a pornit. Starea comenzii se actualizează în câteva minute.",
-        "queuedDryRun": "A pornit un test. Acest cont Amazon este în modul de test, deci nu se va cumpăra nimic."
-      },
-      "notPurchased": {
-        "button": "Nu este pe Amazon",
-        "confirmTitle": "Confirmi că Amazon nu are nicio comandă pentru această vânzare?",
-        "confirmDescription": "Continuă doar după ce te-ai uitat la comenzile acestui cont Amazon și comanda nu este acolo. SellerHill verifică și el lista de comenzi a contului și refuză până când această verificare are loc. După aceea, comanda automată poate fi pornită din nou — dacă totuși comanda există pe Amazon, produsul va fi cumpărat de două ori.",
-        "confirm": "Da, nu este acolo",
-        "done": "Marcată ca necumpărată. Poți porni din nou comanda automată."
+        "queuedDryRun": "A pornit un test. Acest cont Amazon este în modul de test, deci nu se va cumpăra nimic.",
+        "unknownConfirmTitle": "Ai verificat comenzile tale Amazon?",
+        "unknownConfirmDescription": "Ultima achiziție automată pentru această vânzare nu a primit confirmare de la Amazon, deci comanda poate exista deja. Continuă doar dacă ai verificat comenzile acestui cont Amazon și ea nu este acolo — altfel produsul va fi cumpărat de două ori. Dacă o găsești, închide această fereastră și asociază comanda Amazon.",
+        "unknownConfirm": "Nu este acolo, cumpără"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Această vânzare depășește limita de cheltuieli a contului tău Amazon. Mărește limita din setările contului Amazon sau cumpără produsul manual.",
       "autoFulfillAlreadyStarted": "Starea acestei comenzi tocmai s-a schimbat, deci achiziția poate să fi pornit deja. Reîncarcă pagina.",
       "autoFulfillQuotaExhausted": "Limita de comenzi automate a planului tău pentru această perioadă s-a epuizat.",
-      "purchaseNotYetChecked": "SellerHill nu a verificat încă comenzile acestui cont Amazon de la încercarea de cumpărare. Verificarea a fost pornită acum — încearcă din nou peste câteva minute.",
-      "purchaseNotUnknown": "Această comandă nu așteaptă o confirmare de achiziție. Poate fi deja asociată sau în curs. Reîncarcă pagina.",
       "purchaseFoundOnAmazon": "SellerHill a găsit o comandă Amazon pentru acest produs, plasată în jurul momentului încercării de cumpărare, dar nu a putut-o asocia cu certitudine acestei vânzări. Deschide comenzile tale Amazon și asociaz-o manual. Dacă acea comandă aparține altei vânzări, asociaz-o mai întâi acelei vânzări.",
       "noteTooLong": "Nota poate avea cel mult 1.000 de caractere.",
       "noteInvalid": "Nota nu a putut fi salvată."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Achiziție neconfirmată",
         "meaning": "Butonul de comandă a fost apăsat pe Amazon, dar nu a venit nicio confirmare. Comanda poate exista.",
-        "action": "Verifică mai întâi comenzile tale Amazon. Dacă comanda este acolo, asociaz-o. Nu cumpăra din nou înainte să verifici."
+        "action": "Verifică mai întâi comenzile tale Amazon. Dacă comanda este acolo, asociaz-o. Dacă nu, pornește din nou comanda automată."
       },
       "purchase_blocked": {
         "label": "Cumpărare blocată",

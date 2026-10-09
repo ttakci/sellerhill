@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill effettuerà un vero ordine Amazon per questa vendita con il tuo account Amazon per gli ordini automatici, con spedizione all'acquirente eBay. Il tuo limite di spesa resta valido e l'acquisto si ferma se il totale lo supera. Continua solo se non hai già acquistato l'articolo tu stesso.",
         "confirm": "Avvia acquisto",
         "queued": "L'acquisto è partito. Lo stato dell'ordine si aggiorna tra pochi minuti.",
-        "queuedDryRun": "È partita una prova. Questo account Amazon è in modalità test, quindi non verrà acquistato nulla."
-      },
-      "notPurchased": {
-        "button": "Non è su Amazon",
-        "confirmTitle": "Confermi che su Amazon non c'è un ordine per questa vendita?",
-        "confirmDescription": "Continua solo dopo aver guardato gli ordini di questo account Amazon e aver visto che l'ordine non c'è. Anche SellerHill controlla l'elenco ordini dell'account e rifiuta finché quel controllo non è stato eseguito. Dopo, l'ordine automatico può essere avviato di nuovo: se l'ordine esiste davvero su Amazon, l'articolo verrà acquistato due volte.",
-        "confirm": "Sì, non c'è",
-        "done": "Segnato come non acquistato. Puoi avviare di nuovo l'ordine automatico."
+        "queuedDryRun": "È partita una prova. Questo account Amazon è in modalità test, quindi non verrà acquistato nulla.",
+        "unknownConfirmTitle": "Hai controllato i tuoi ordini Amazon?",
+        "unknownConfirmDescription": "L'ultimo acquisto automatico per questa vendita non ha ricevuto conferma da Amazon, quindi l'ordine potrebbe già esistere. Continua solo se hai controllato gli ordini di questo account Amazon e non c'è, altrimenti l'articolo verrà acquistato due volte. Se lo trovi, chiudi questa finestra e collega invece l'ordine Amazon.",
+        "unknownConfirm": "Non c'è, acquista"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Questa vendita supera il limite di spesa del tuo account Amazon. Aumenta il limite nelle impostazioni dell'account Amazon o acquista l'articolo manualmente.",
       "autoFulfillAlreadyStarted": "Lo stato di questo ordine è appena cambiato, quindi l'acquisto potrebbe essere già partito. Aggiorna la pagina.",
       "autoFulfillQuotaExhausted": "Il limite di ordini automatici del tuo piano per questo periodo è esaurito.",
-      "purchaseNotYetChecked": "SellerHill non ha ancora controllato gli ordini di questo account Amazon dal tentativo di acquisto. Il controllo è stato avviato ora: riprova tra qualche minuto.",
-      "purchaseNotUnknown": "Questo ordine non è in attesa di una conferma d'acquisto. Potrebbe essere già collegato o in corso. Aggiorna la pagina.",
       "purchaseFoundOnAmazon": "SellerHill ha trovato un ordine Amazon per questo prodotto, effettuato intorno al momento del tentativo di acquisto, ma non è riuscito ad abbinarlo con certezza a questa vendita. Apri i tuoi ordini Amazon e collegalo a mano. Se quell'ordine appartiene a un'altra vendita, collegalo prima a quella.",
       "noteTooLong": "La nota può contenere al massimo 1.000 caratteri.",
       "noteInvalid": "Impossibile salvare la nota."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Acquisto non confermato",
         "meaning": "Il pulsante dell'ordine è stato premuto su Amazon, ma non è tornata alcuna conferma. L'ordine potrebbe esistere.",
-        "action": "Controlla prima i tuoi ordini Amazon. Se l'ordine c'è, collegalo. Non acquistare di nuovo prima di aver controllato."
+        "action": "Controlla prima i tuoi ordini Amazon. Se l'ordine c'è, collegalo. Se non c'è, avvia di nuovo l'ordine automatico."
       },
       "purchase_blocked": {
         "label": "Acquisto bloccato",

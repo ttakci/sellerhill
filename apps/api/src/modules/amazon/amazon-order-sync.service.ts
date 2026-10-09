@@ -202,9 +202,9 @@ export class AmazonOrderSyncService {
     // An Amazon order that LOOKS like the one an unconfirmed automatic purchase
     // produced (same product, dated around the click, this account) but that
     // the strict matcher would not link. It is not linked — that would be a
-    // guess — but it is remembered: while it stands, `confirmNotPurchased`
-    // refuses, so "the scan linked nothing" can never be read as "Amazon has
-    // no order" when the scan did see a likely one. Best-effort per order.
+    // guess — but it is remembered: while it stands, the seller's manual
+    // restart of that purchase (`startAutoFulfillManually`) is refused, so a
+    // likely order is linked instead of bought twice. Best-effort per order.
     for (const suspect of suspects) {
       try {
         await this.databaseService.query(

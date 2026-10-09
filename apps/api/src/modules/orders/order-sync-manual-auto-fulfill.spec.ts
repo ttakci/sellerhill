@@ -22,6 +22,7 @@ interface OrderRowFake {
   amazon_account_id: string | null;
   auto_fulfill_submitted_at?: Date | null;
   ebay_line_item_count?: number | null;
+  suspect_unclaimed?: boolean;
 }
 
 interface AccountFake {
@@ -62,7 +63,7 @@ function harness(opts: {
   const db = {
     query: jest.fn((sql: string, params: unknown[] = []) => {
       statements.push({ sql, params });
-      if (sql.includes('FROM orders') && sql.includes('WHERE id = $1 AND user_id = $2') && sql.trim().startsWith('SELECT')) {
+      if (sql.includes('suspect_unclaimed') && sql.trim().startsWith('SELECT')) {
         return Promise.resolve(opts.row ? [opts.row] : []);
       }
       if (sql.includes('SELECT listing_id, quantity, ebay_account_id FROM orders')) {
@@ -115,7 +116,7 @@ function harness(opts: {
   );
   const recompute = jest.spyOn(service, 'recomputeProfit').mockResolvedValue(undefined);
   const writes = () => statements.filter((s) => s.sql.trim().startsWith('UPDATE'));
-  return { service, statements, writes, queue, quota, storeSettings, recompute };
+  return { service, statements, writes, queue, quota, storeSettings, recompute, events };
 }
 
 const accounts: AccountFake[] = [
@@ -144,21 +145,54 @@ describe('OrderSyncService.startAutoFulfillManually', () => {
       AutoFulfillStatus.BLOCKED,
       AutoFulfillBlockedReason.PAYMENT,
       null,
+      false,
     ]);
     expect(claim?.sql).not.toContain('amazon_order_id = NULL');
-    // The claim itself refuses a row whose Place Order click was stamped.
-    expect(claim?.sql).toContain('auto_fulfill_submitted_at IS NULL');
+    // The claim matches the click stamp it read (none here), so a row stamped
+    // in between is not taken, and it never clears a stamp it did not see.
+    expect(claim?.sql).toContain('AND (auto_fulfill_submitted_at IS NOT NULL) = $8::boolean');
+    expect(claim?.sql).not.toContain('auto_fulfill_submitted_at = NULL');
   });
 
-  it('refuses a row whose Place Order click was stamped, whatever its status and reason', async () => {
+  it('restarts a purchase not confirmed — the seller checked Amazon — and clears the click stamp in the claim', async () => {
+    const clickedAt = new Date('2026-10-01T10:00:00Z');
     const h = harness({
-      row: blockedRow({ auto_fulfill_submitted_at: new Date('2026-10-01T10:00:00Z') }),
+      row: blockedRow({
+        auto_fulfill_blocked_reason: AutoFulfillBlockedReason.NO_CONFIRMATION,
+        auto_fulfill_submitted_at: clickedAt,
+      }),
+      accounts,
+    });
+
+    await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({ ok: true, dryRun: true });
+
+    const claim = h.statements.find((s) => s.sql.includes('RETURNING ebay_order_id'));
+    expect(claim?.sql).toContain('auto_fulfill_submitted_at = NULL');
+    expect(claim?.sql).toContain('auto_fulfill_suspect_amazon_order_id = NULL');
+    // Matched against the stamp it read, and re-checked against a suspect order in SQL.
+    expect(claim?.params[7]).toBe(true);
+    expect(claim?.sql).toContain('AND NOT (auto_fulfill_suspect_amazon_order_id IS NOT NULL');
+    expect(h.queue.enqueueManual).toHaveBeenCalledTimes(1);
+    expect(h.events.record).toHaveBeenCalledWith(
+      '17-15222-04697',
+      'confirmed_not_purchased',
+      expect.objectContaining({ userId: 'user-1' })
+    );
+  });
+
+  it('refuses a purchase not confirmed while a scan saw a matching Amazon order, and changes nothing', async () => {
+    const h = harness({
+      row: blockedRow({
+        auto_fulfill_blocked_reason: AutoFulfillBlockedReason.NO_CONFIRMATION,
+        auto_fulfill_submitted_at: new Date('2026-10-01T10:00:00Z'),
+        suspect_unclaimed: true,
+      }),
       accounts,
     });
 
     await expect(h.service.startAutoFulfillManually('user-1', 'order-1')).resolves.toEqual({
       ok: false,
-      errorKey: 'orders.errors.autoFulfillNotRestartable',
+      errorKey: 'orders.errors.purchaseFoundOnAmazon',
     });
     expect(h.writes()).toHaveLength(0);
     expect(h.queue.enqueueManual).not.toHaveBeenCalled();
@@ -229,7 +263,7 @@ describe('OrderSyncService.startAutoFulfillManually', () => {
     });
   });
 
-  it('refuses no_confirmation and changes nothing — the order may already exist on Amazon', async () => {
+  it('refuses no_confirmation WITHOUT a click stamp and changes nothing — only the stamp opens that state', async () => {
     const h = harness({
       row: blockedRow({ auto_fulfill_blocked_reason: AutoFulfillBlockedReason.NO_CONFIRMATION }),
       accounts,

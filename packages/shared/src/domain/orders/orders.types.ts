@@ -594,15 +594,6 @@ export interface StartAutoFulfillResultDto {
   dryRun: boolean;
 }
 
-/**
- * `POST /amazon/orders/:orderId/confirm-not-purchased` — the click stamp was
- * cleared: the order left the `purchase_unknown` stage and the automatic
- * purchase may be started again.
- */
-export interface ConfirmNotPurchasedResultDto {
-  cleared: true;
-}
-
 export interface OrderFiltersDto {
   search?: string;
   dateFrom?: string;

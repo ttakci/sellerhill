@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill hará un pedido real en Amazon para esta venta con tu cuenta de Amazon para pedidos automáticos, con envío al comprador de eBay. Tu límite de gasto sigue aplicando y la compra se detiene si el total lo supera. Continúa solo si no compraste el artículo tú mismo.",
         "confirm": "Iniciar compra",
         "queued": "La compra comenzó. El estado del pedido se actualiza en unos minutos.",
-        "queuedDryRun": "Comenzó una prueba. Esta cuenta de Amazon está en modo de prueba, así que no se comprará nada."
-      },
-      "notPurchased": {
-        "button": "No está en Amazon",
-        "confirmTitle": "¿Confirmas que Amazon no tiene un pedido para esta venta?",
-        "confirmDescription": "Continúa solo después de haber revisado los pedidos de esta cuenta de Amazon y comprobar que el pedido no está. SellerHill también revisa la lista de pedidos de la cuenta y no acepta la confirmación hasta que esa revisión se haya hecho. Después, el pedido automático puede iniciarse de nuevo; si el pedido sí existe en Amazon, el artículo se comprará dos veces.",
-        "confirm": "Sí, no está ahí",
-        "done": "Marcado como no comprado. Puedes iniciar de nuevo el pedido automático."
+        "queuedDryRun": "Comenzó una prueba. Esta cuenta de Amazon está en modo de prueba, así que no se comprará nada.",
+        "unknownConfirmTitle": "¿Revisaste tus pedidos de Amazon?",
+        "unknownConfirmDescription": "La última compra automática de esta venta no recibió confirmación de Amazon, así que el pedido puede existir ya. Continúa solo si revisaste los pedidos de esta cuenta de Amazon y no está ahí; de lo contrario, el artículo se comprará dos veces. Si lo encuentras, cierra esta ventana y vincula el pedido de Amazon.",
+        "unknownConfirm": "No está, comprar"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Esta venta supera el límite de gasto de tu cuenta de Amazon. Sube el límite en la configuración de la cuenta de Amazon o compra el artículo manualmente.",
       "autoFulfillAlreadyStarted": "El estado de este pedido acaba de cambiar, así que puede que la compra ya haya comenzado. Actualiza la página.",
       "autoFulfillQuotaExhausted": "Se agotó el límite de pedidos automáticos de tu plan para este periodo.",
-      "purchaseNotYetChecked": "SellerHill todavía no ha revisado los pedidos de esta cuenta de Amazon desde el intento de compra. La revisión acaba de iniciarse; inténtalo de nuevo en unos minutos.",
-      "purchaseNotUnknown": "Este pedido no está esperando una confirmación de compra. Puede que ya esté vinculado o en curso. Actualiza la página.",
       "purchaseFoundOnAmazon": "SellerHill encontró un pedido de Amazon de este producto, realizado en torno al intento de compra, pero no pudo asociarlo a esta venta con certeza. Abre tus pedidos de Amazon y vincúlalo manualmente. Si ese pedido pertenece a otra venta, vincúlalo primero a esa venta.",
       "noteTooLong": "La nota puede tener 1000 caracteres como máximo.",
       "noteInvalid": "No se pudo guardar la nota."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Compra no confirmada",
         "meaning": "Se pulsó el botón de pedido en Amazon, pero no llegó ninguna confirmación. Es posible que el pedido exista.",
-        "action": "Revisa primero tus pedidos de Amazon. Si el pedido está ahí, vincúlalo. No lo compres otra vez antes de comprobarlo."
+        "action": "Revisa primero tus pedidos de Amazon. Si el pedido está ahí, vincúlalo. Si no, vuelve a iniciar el pedido automático."
       },
       "purchase_blocked": {
         "label": "Compra bloqueada",

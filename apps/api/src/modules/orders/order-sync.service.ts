@@ -15,11 +15,9 @@ import {
   EbayAccountStatus,
   OrderCostCaptureStatus,
   OrderStatus,
-  ConfirmNotPurchasedRefusal,
   canStartAutoFulfillManually,
   isOrderAlreadyFulfilled,
   isSimulatedAmazonOrderId,
-  resolveConfirmNotPurchased,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
@@ -99,15 +97,6 @@ export function toOrderCost(unitPrice: number | null | undefined, quantity: numb
 export type ManualAutoFulfillStart =
   | { ok: true; dryRun: boolean }
   | { ok: false; errorKey: string; notFound?: boolean };
-
-/**
- * Outcome of `confirmNotPurchased`. A `notYetChecked` refusal names the Amazon
- * accounts whose order list still has to be scanned, so the caller can queue
- * that scan and the seller can try again in a few minutes.
- */
-export type ConfirmNotPurchasedResult =
-  | { ok: true }
-  | { ok: false; errorKey: string; notFound?: boolean; accountsToScan?: string[] };
 
 /**
  * Runaway guard for one store in one tick: 50 pages of 200 is 10,000 modified
@@ -1072,16 +1061,30 @@ export class OrderSyncService {
       amazon_account_id: string | null;
       auto_fulfill_submitted_at: Date | null;
       ebay_line_item_count: number | null;
+      suspect_unclaimed: boolean;
     }>(
-      `SELECT ebay_order_id, sale_total, status, listing_id, listing_over_plan_limit,
-              auto_fulfill_status, auto_fulfill_blocked_reason, amazon_order_id, amazon_account_id,
-              auto_fulfill_submitted_at, ebay_line_item_count
-         FROM orders
-        WHERE id = $1 AND user_id = $2`,
+      `SELECT o.ebay_order_id, o.sale_total, o.status, o.listing_id, o.listing_over_plan_limit,
+              o.auto_fulfill_status, o.auto_fulfill_blocked_reason, o.amazon_order_id, o.amazon_account_id,
+              o.auto_fulfill_submitted_at, o.ebay_line_item_count,
+              (o.auto_fulfill_suspect_amazon_order_id IS NOT NULL
+                AND NOT EXISTS (
+                  SELECT 1 FROM orders held
+                   WHERE held.amazon_order_id = o.auto_fulfill_suspect_amazon_order_id
+                )) AS suspect_unclaimed
+         FROM orders o
+        WHERE o.id = $1 AND o.user_id = $2`,
       [orderId, userId]
     );
     if (!row) {
       return { ok: false, notFound: true, errorKey: 'orders.errors.notFound' };
+    }
+    // A purchase whose outcome is unknown (the Place Order click went out, no
+    // confirmation came back). A scan of the Amazon orders saw an order that may
+    // be it and could not tie it to a sale: the seller links it by hand rather
+    // than buying again.
+    const unconfirmed = !!row.auto_fulfill_submitted_at;
+    if (unconfirmed && row.suspect_unclaimed && !row.amazon_order_id) {
+      return { ok: false, errorKey: 'orders.errors.purchaseFoundOnAmazon' };
     }
     const allowed = canStartAutoFulfillManually({
       status: row.status,
@@ -1092,6 +1095,7 @@ export class OrderSyncService {
       amazonOrderId: row.amazon_order_id,
       submittedAt: row.auto_fulfill_submitted_at,
       lineItemCount: row.ebay_line_item_count,
+      suspectOnAmazon: row.suspect_unclaimed === true,
     });
     if (!allowed) {
       return { ok: false, errorKey: 'orders.errors.autoFulfillNotRestartable' };
@@ -1136,17 +1140,28 @@ export class OrderSyncService {
       ? `, amazon_order_id = NULL, amazon_linked_at = NULL, purchase_price = 0,
            amazon_tax = NULL, amazon_shipping = NULL`
       : '';
+    // An unconfirmed purchase: the seller checked Amazon and asked to buy
+    // again. This is the ONLY place the click stamp is ever cleared — in the
+    // same statement that claims the row, re-checking in SQL that no scan has
+    // since seen a matching Amazon order, so the checkout starts from "not
+    // clicked" and its own click boundary applies again.
+    const clearClick = unconfirmed
+      ? `, auto_fulfill_submitted_at = NULL, auto_fulfill_suspect_amazon_order_id = NULL`
+      : '';
     const claimed = await this.databaseService.query<{ ebay_order_id: string }>(
       `UPDATE orders
           SET auto_fulfill_status = $1,
               auto_fulfill_blocked_reason = NULL,
-              updated_at = CURRENT_TIMESTAMP${clearSimulation}
+              updated_at = CURRENT_TIMESTAMP${clearSimulation}${clearClick}
         WHERE id = $2 AND user_id = $3
           AND status = $4
           AND auto_fulfill_status = $5
           AND auto_fulfill_blocked_reason IS NOT DISTINCT FROM $6
           AND amazon_order_id IS NOT DISTINCT FROM $7
-          AND auto_fulfill_submitted_at IS NULL
+          AND (auto_fulfill_submitted_at IS NOT NULL) = $8::boolean
+          AND NOT (auto_fulfill_suspect_amazon_order_id IS NOT NULL
+                   AND NOT EXISTS (SELECT 1 FROM orders held
+                                    WHERE held.amazon_order_id = orders.auto_fulfill_suspect_amazon_order_id))
         RETURNING ebay_order_id`,
       [
         AutoFulfillStatus.PENDING,
@@ -1156,6 +1171,9 @@ export class OrderSyncService {
         row.auto_fulfill_status,
         row.auto_fulfill_blocked_reason,
         row.amazon_order_id,
+        // Whether the row was stamped, not the instant: the stamp is only ever
+        // written while NULL, so a stamped row keeps its value until cleared.
+        unconfirmed,
       ]
     );
     if (claimed.length === 0) {
@@ -1194,6 +1212,16 @@ export class OrderSyncService {
     this.logger.log(
       `Manual auto-fulfill queued for ${row.ebay_order_id} on account ${pick.id}${pick.auto_fulfill_dry_run ? ' (dry run)' : ''}`
     );
+    if (unconfirmed) {
+      this.logger.warn(
+        `Order ${row.ebay_order_id}: seller restarted an unconfirmed purchase after checking Amazon; click stamp cleared`
+      );
+      await this.autoFulfillEvents.record(row.ebay_order_id, AutoFulfillEvent.CONFIRMED_NOT_PURCHASED, {
+        userId,
+        amazonAccountId: row.amazon_account_id,
+        detail: { clickedAt: row.auto_fulfill_submitted_at?.toISOString() ?? null },
+      });
+    }
     await this.autoFulfillEvents.record(row.ebay_order_id, AutoFulfillEvent.MANUAL_START, {
       userId,
       amazonAccountId: pick.id,
@@ -1324,120 +1352,6 @@ export class OrderSyncService {
       lineItemCount: live.lineItemCount,
       manual,
     });
-  }
-
-  /**
-   * The seller declares that an unconfirmed purchase did NOT happen
-   * (`POST /amazon/orders/:id/confirm-not-purchased`).
-   *
-   * This is the ONLY thing that ever clears the click stamp, and it takes two
-   * independent facts (`resolveConfirmNotPurchased`): the Amazon account's
-   * order list was scanned AFTER the click and linked nothing, and the seller
-   * says so. "Not found" alone never re-arms a purchase — the scan is strict
-   * and Amazon's list can lag — and neither does the seller alone.
-   *
-   * On success the row becomes FAILED with no reason (why the click produced
-   * no order is not known, so none is claimed), which is the state the "Start
-   * automatic order" button accepts.
-   */
-  async confirmNotPurchased(userId: string, orderId: string): Promise<ConfirmNotPurchasedResult> {
-    const [row] = await this.databaseService.query<{
-      ebay_order_id: string;
-      status: OrderStatus;
-      auto_fulfill_status: AutoFulfillStatus | null;
-      amazon_order_id: string | null;
-      amazon_account_id: string | null;
-      auto_fulfill_submitted_at: Date | null;
-      suspect_unclaimed: boolean;
-    }>(
-      `SELECT o.ebay_order_id, o.status, o.auto_fulfill_status, o.amazon_order_id, o.amazon_account_id,
-              o.auto_fulfill_submitted_at,
-              (o.auto_fulfill_suspect_amazon_order_id IS NOT NULL
-                AND NOT EXISTS (
-                  SELECT 1 FROM orders held
-                   WHERE held.amazon_order_id = o.auto_fulfill_suspect_amazon_order_id
-                )) AS suspect_unclaimed
-         FROM orders o
-        WHERE o.id = $1 AND o.user_id = $2`,
-      [orderId, userId]
-    );
-    if (!row) {
-      return { ok: false, notFound: true, errorKey: 'orders.errors.notFound' };
-    }
-    // A scan saw an Amazon order that may be this purchase (same product, dated
-    // around the click) and could not match it with certainty. Until that order
-    // is linked to SOME sale — this one or another — "it is not on Amazon" is
-    // not a claim the system can accept.
-    if (row.suspect_unclaimed && row.auto_fulfill_submitted_at && !row.amazon_order_id) {
-      return { ok: false, errorKey: 'orders.errors.purchaseFoundOnAmazon' };
-    }
-
-    // The account the click was made on; a row stamped by migration 132 has
-    // none, and then EVERY one of the seller's accounts must have been scanned.
-    const accounts = await this.databaseService.query<{ id: string; last_orders_sync_at: Date | null }>(
-      row.amazon_account_id
-        ? `SELECT id, last_orders_sync_at FROM amazon_accounts WHERE id = $1 AND user_id = $2`
-        : `SELECT id, last_orders_sync_at FROM amazon_accounts WHERE $1::text IS NULL AND user_id = $2`,
-      [row.amazon_account_id, userId]
-    );
-    const scanTimes = accounts.map((a) => (a.last_orders_sync_at ? new Date(a.last_orders_sync_at).getTime() : null));
-    const accountScannedAt =
-      scanTimes.length > 0 && scanTimes.every((t): t is number => t !== null)
-        ? new Date(Math.min(...scanTimes))
-        : null;
-
-    const refusal = resolveConfirmNotPurchased({
-      status: row.status,
-      autoFulfillStatus: row.auto_fulfill_status,
-      amazonOrderId: row.amazon_order_id,
-      submittedAt: row.auto_fulfill_submitted_at,
-      accountScannedAt,
-    });
-    if (refusal === ConfirmNotPurchasedRefusal.NOT_UNKNOWN) {
-      return { ok: false, errorKey: 'orders.errors.purchaseNotUnknown' };
-    }
-    if (refusal === ConfirmNotPurchasedRefusal.NOT_YET_CHECKED) {
-      return {
-        ok: false,
-        errorKey: 'orders.errors.purchaseNotYetChecked',
-        accountsToScan: accounts.map((a) => a.id),
-      };
-    }
-
-    const cleared = await this.databaseService.query<{ ebay_order_id: string }>(
-      `UPDATE orders
-          SET auto_fulfill_submitted_at = NULL,
-              auto_fulfill_suspect_amazon_order_id = NULL,
-              auto_fulfill_status = $3,
-              auto_fulfill_blocked_reason = NULL,
-              updated_at = CURRENT_TIMESTAMP
-        WHERE id = $1 AND user_id = $2
-          AND auto_fulfill_submitted_at IS NOT NULL
-          AND amazon_order_id IS NULL
-          AND auto_fulfill_status NOT IN ($4, $5, $6)
-        RETURNING ebay_order_id`,
-      [
-        orderId,
-        userId,
-        AutoFulfillStatus.FAILED,
-        AutoFulfillStatus.PLACED,
-        AutoFulfillStatus.PENDING,
-        AutoFulfillStatus.RUNNING,
-      ]
-    );
-    if (cleared.length === 0) {
-      // Linked, placed or restarted between the read and the write.
-      return { ok: false, errorKey: 'orders.errors.purchaseNotUnknown' };
-    }
-    this.logger.warn(
-      `Order ${row.ebay_order_id}: seller confirmed the unproven purchase did not happen; click stamp cleared`
-    );
-    await this.autoFulfillEvents.record(row.ebay_order_id, AutoFulfillEvent.CONFIRMED_NOT_PURCHASED, {
-      userId,
-      amazonAccountId: row.amazon_account_id,
-      detail: { clickedAt: row.auto_fulfill_submitted_at?.toISOString() ?? null },
-    });
-    return { ok: true };
   }
 
   /**

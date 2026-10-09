@@ -12,10 +12,9 @@ import { AutoFulfillBlockedReason, AutoFulfillStatus, OrderStatus } from './orde
  *
  * Deliberately absent:
  *  - NO_CONFIRMATION — the click went out and no Amazon order id came back.
- *    The order may exist; retrying could buy it a second time. A card declined
- *    AFTER the click lands here too, which is why the seller checks Amazon and
- *    links the order by hand instead.
  *  - INTERRUPTED — the process died mid-checkout; same ambiguity.
+ *    Both carry the click stamp, and a stamped row is decided by the stamp
+ *    branch of `canStartAutoFulfillManually`, never by this list.
  *  - The SKIPPED-only reasons (order cancelled / unpaid / already fulfilled /
  *    listing over the plan limit): each describes the eBay sale or the plan,
  *    and a click changes none of them.
@@ -56,51 +55,13 @@ export interface ManualAutoFulfillInput {
   submittedAt?: string | Date | null;
   /** `orders.ebay_line_item_count` — above 1 the checkout would buy one item of several. */
   lineItemCount?: number | null;
-}
-
-export interface ConfirmNotPurchasedInput {
-  status: OrderStatus;
-  autoFulfillStatus: AutoFulfillStatus | null;
-  amazonOrderId: string | null;
-  /** `orders.auto_fulfill_submitted_at`. */
-  submittedAt: string | Date | null;
-  /** `amazon_accounts.last_orders_sync_at` of the account the click was made on. */
-  accountScannedAt: string | Date | null;
-}
-
-/** Why the seller may not (yet) declare an unconfirmed purchase "not bought". */
-export enum ConfirmNotPurchasedRefusal {
-  /** The order is not in the unknown-outcome state at all. */
-  NOT_UNKNOWN = 'not_unknown',
-  /** No scan of the Amazon account's orders has completed since the click. */
-  NOT_YET_CHECKED = 'not_yet_checked',
-}
-
-/**
- * May the seller declare "the click produced no Amazon order" and get the
- * automatic purchase back? This is the ONLY thing that ever clears the click
- * stamp, so it needs two independent facts: a scan of that Amazon account's
- * order list completed AFTER the click (and linked nothing — a linked order
- * has an id and is refused here), and the seller's own confirmation (the
- * endpoint call). Neither alone re-arms a purchase.
- */
-export function resolveConfirmNotPurchased(input: ConfirmNotPurchasedInput): ConfirmNotPurchasedRefusal | null {
-  const unknown =
-    !!input.submittedAt &&
-    !input.amazonOrderId &&
-    input.status === OrderStatus.WAITING_SHIPMENT &&
-    input.autoFulfillStatus !== AutoFulfillStatus.PLACED &&
-    input.autoFulfillStatus !== AutoFulfillStatus.PENDING &&
-    input.autoFulfillStatus !== AutoFulfillStatus.RUNNING;
-  if (!unknown) {
-    return ConfirmNotPurchasedRefusal.NOT_UNKNOWN;
-  }
-  const clickedAt = new Date(input.submittedAt as string | Date).getTime();
-  const scannedAt = input.accountScannedAt ? new Date(input.accountScannedAt).getTime() : Number.NaN;
-  if (!Number.isFinite(scannedAt) || !Number.isFinite(clickedAt) || scannedAt <= clickedAt) {
-    return ConfirmNotPurchasedRefusal.NOT_YET_CHECKED;
-  }
-  return null;
+  /**
+   * A scan of the Amazon orders saw an order that may be this purchase (same
+   * product, dated around the click) and could not tie it to a sale with
+   * certainty (`auto_fulfill_suspect_amazon_order_id`, not held by any order).
+   * While it stands, an unconfirmed purchase is not started again.
+   */
+  suspectOnAmazon?: boolean;
 }
 
 /**
@@ -119,6 +80,11 @@ export function resolveConfirmNotPurchased(input: ConfirmNotPurchasedInput): Con
  *    or the sale was over the account's cap. The reasoned SKIPPED states
  *    describe the sale itself and are refused.
  *
+ * One state where something MAY have been bought: the purchase not confirmed
+ * (`purchase_unknown`, the click stamp set, no Amazon order id). The seller
+ * checks Amazon and decides; the page asks before it acts, and a scan that saw
+ * a matching Amazon order (`suspectOnAmazon`) still refuses.
+ *
  * Never PENDING or RUNNING: a job may be queued or mid-checkout, and a second
  * one could buy twice. Never PLACED. And always only for a paid, unshipped,
  * uncancelled sale of a tracked listing inside the plan limit, with no real
@@ -134,14 +100,23 @@ export function canStartAutoFulfillManually(input: ManualAutoFulfillInput): bool
   if (input.amazonOrderId && !isSimulatedAmazonOrderId(input.amazonOrderId)) {
     return false;
   }
-  // The click stamp outranks every status and reason below: the order may
-  // exist on Amazon. Only `resolveConfirmNotPurchased` + the seller clear it.
-  if (input.submittedAt) {
-    return false;
-  }
   // The checkout buys ONE line; a second click would not change that.
   if ((input.lineItemCount ?? 1) > 1) {
     return false;
+  }
+  // The click stamp outranks every status and reason below: the Place Order
+  // click went out and no confirmation came back, so the order may exist on
+  // Amazon. The seller may still start it again (operator decision,
+  // 2026-10-09: they check Amazon, then either link the order or buy again;
+  // the page asks "did you check?" first) — but never while a scan saw a
+  // matching Amazon order, and never while a job may be queued or mid-checkout.
+  if (input.submittedAt) {
+    return (
+      !input.suspectOnAmazon &&
+      input.autoFulfillStatus !== AutoFulfillStatus.PLACED &&
+      input.autoFulfillStatus !== AutoFulfillStatus.PENDING &&
+      input.autoFulfillStatus !== AutoFulfillStatus.RUNNING
+    );
   }
   switch (input.autoFulfillStatus) {
     case AutoFulfillStatus.BLOCKED:

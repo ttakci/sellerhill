@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill, otomatik sipariş için ayarlı Amazon hesabınızla bu satış için gerçek bir Amazon siparişi verecek ve ürün eBay alıcısına gönderilecek. Harcama limitiniz yine geçerli; toplam limiti aşarsa satın alma durur. Ürünü kendiniz almadıysanız devam edin.",
         "confirm": "Satın almayı başlat",
         "queued": "Satın alma başladı. Siparişin durumu birkaç dakika içinde güncellenir.",
-        "queuedDryRun": "Test çalıştırması başladı. Bu Amazon hesabı test modunda olduğu için hiçbir şey satın alınmayacak."
-      },
-      "notPurchased": {
-        "button": "Amazon'da yok",
-        "confirmTitle": "Bu satış için Amazon'da sipariş olmadığını onaylıyor musunuz?",
-        "confirmDescription": "Yalnızca bu Amazon hesabının siparişlerine bakıp siparişin orada olmadığını gördüyseniz devam edin. SellerHill de hesabın sipariş listesini kontrol eder ve bu kontrol yapılmadan onayı kabul etmez. Onaydan sonra otomatik sipariş yeniden başlatılabilir; sipariş aslında Amazon'da varsa ürün iki kez alınır.",
-        "confirm": "Evet, orada yok",
-        "done": "Satın alınmadı olarak işaretlendi. Otomatik siparişi yeniden başlatabilirsiniz."
+        "queuedDryRun": "Test çalıştırması başladı. Bu Amazon hesabı test modunda olduğu için hiçbir şey satın alınmayacak.",
+        "unknownConfirmTitle": "Amazon siparişlerinizi kontrol ettiniz mi?",
+        "unknownConfirmDescription": "Bu satış için önceki otomatik satın alma Amazon'dan onay almadı; sipariş zaten oluşmuş olabilir. Yalnızca bu Amazon hesabının siparişlerine baktıysanız ve sipariş orada yoksa devam edin — aksi halde ürün iki kez satın alınır. Siparişi bulursanız bu pencereyi kapatıp Amazon siparişini bağlayın.",
+        "unknownConfirm": "Orada yok, satın al"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Bu satış Amazon hesabınızın harcama limitini aşıyor. Limiti Amazon hesabının ayarlarından yükseltin veya ürünü elle alın.",
       "autoFulfillAlreadyStarted": "Siparişin durumu az önce değişti, satın alma zaten başlamış olabilir. Sayfayı yenileyin.",
       "autoFulfillQuotaExhausted": "Planınızın bu dönemki otomatik sipariş limiti doldu.",
-      "purchaseNotYetChecked": "SellerHill, satın alma denemesinden sonra bu Amazon hesabının siparişlerini henüz kontrol etmedi. Kontrol şimdi başlatıldı; birkaç dakika sonra yeniden deneyin.",
-      "purchaseNotUnknown": "Bu sipariş satın alma onayı beklemiyor. Zaten bağlanmış ya da işlemde olabilir. Sayfayı yenileyin.",
       "purchaseFoundOnAmazon": "SellerHill, satın alma denemesiyle aynı zamanlarda bu ürün için verilmiş bir Amazon siparişi buldu ama onu bu satışla kesin olarak eşleştiremedi. Amazon siparişlerinizi açıp siparişi elle bağlayın. O sipariş başka bir satışa aitse önce o satışa bağlayın.",
       "noteTooLong": "Not en fazla 1.000 karakter olabilir.",
       "noteInvalid": "Not kaydedilemedi."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Satın alma doğrulanamadı",
         "meaning": "Amazon'da sipariş düğmesine basıldı ama onay gelmedi. Sipariş oluşmuş olabilir.",
-        "action": "Önce Amazon siparişlerinizi kontrol edin. Sipariş oradaysa bağlayın. Kontrol etmeden yeniden satın almayın."
+        "action": "Önce Amazon siparişlerinizi kontrol edin. Sipariş oradaysa bağlayın, yoksa otomatik siparişi yeniden başlatın."
       },
       "purchase_blocked": {
         "label": "Satın alma engellendi",

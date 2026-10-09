@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill 将使用你的自动下单 Amazon 账户为这笔销售下一个真实的 Amazon 订单，并寄送给 eBay 买家。你的消费上限依然有效，总额超过上限时购买会停止。只有在你尚未自行购买该商品时才继续。",
         "confirm": "开始购买",
         "queued": "购买已开始。订单状态会在几分钟内更新。",
-        "queuedDryRun": "测试运行已开始。该 Amazon 账户处于测试模式，不会购买任何商品。"
-      },
-      "notPurchased": {
-        "button": "Amazon 上没有",
-        "confirmTitle": "确认 Amazon 上没有这笔销售对应的订单？",
-        "confirmDescription": "只有在您查看过该 Amazon 账户的订单并且确实没有这笔订单之后才继续。SellerHill 也会检查该账户的订单列表，在检查完成之前不会接受确认。之后可以重新启动自动下单——如果订单其实已在 Amazon 上存在，商品将被购买两次。",
-        "confirm": "是的，没有",
-        "done": "已标记为未购买。您可以重新启动自动下单。"
+        "queuedDryRun": "测试运行已开始。该 Amazon 账户处于测试模式，不会购买任何商品。",
+        "unknownConfirmTitle": "您查看过 Amazon 订单了吗？",
+        "unknownConfirmDescription": "这笔销售上一次的自动购买没有收到 Amazon 的确认，订单可能已经存在。只有在您查看过此 Amazon 账户的订单且其中没有该订单时才继续，否则商品会被购买两次。如果找到了，请关闭此窗口并关联该 Amazon 订单。",
+        "unknownConfirm": "没有，购买"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "这笔销售超过了你的 Amazon 账户的消费上限。请在 Amazon 账户设置中提高上限，或手动购买该商品。",
       "autoFulfillAlreadyStarted": "此订单的状态刚刚发生变化，购买可能已经开始。请刷新页面。",
       "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。",
-      "purchaseNotYetChecked": "自本次购买尝试以来，SellerHill 尚未检查该 Amazon 账户的订单。检查现已启动——请几分钟后重试。",
-      "purchaseNotUnknown": "该订单并未在等待购买确认。它可能已被关联或正在处理中。请刷新页面。",
       "purchaseFoundOnAmazon": "SellerHill 在 Amazon 上找到了一笔该商品的订单，下单时间与本次购买尝试相近，但无法确定它对应这笔销售。请打开您的 Amazon 订单并手动关联。如果该订单属于另一笔销售，请先将其关联到那笔销售。",
       "noteTooLong": "备注最多 1,000 个字符。",
       "noteInvalid": "备注无法保存。"
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "购买未确认",
         "meaning": "已在 Amazon 上点击下单按钮，但没有收到确认。订单可能已经生成。",
-        "action": "请先查看您的 Amazon 订单。如果订单在那里，请将其关联。确认之前不要再次购买。"
+        "action": "请先查看您的 Amazon 订单。如果订单在那里，请将其关联；如果没有，请重新开始自动下单。"
       },
       "purchase_blocked": {
         "label": "下单被阻止",

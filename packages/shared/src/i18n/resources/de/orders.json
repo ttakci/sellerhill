@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill gibt mit deinem Amazon-Konto für automatische Bestellungen eine echte Amazon-Bestellung für diesen Verkauf auf, Lieferung an den eBay-Käufer. Dein Ausgabelimit gilt weiterhin; liegt die Summe darüber, wird der Kauf gestoppt. Fahre nur fort, wenn du den Artikel nicht schon selbst gekauft hast.",
         "confirm": "Kauf starten",
         "queued": "Der Kauf wurde gestartet. Der Status der Bestellung aktualisiert sich in wenigen Minuten.",
-        "queuedDryRun": "Ein Testlauf wurde gestartet. Dieses Amazon-Konto ist im Testmodus, es wird nichts gekauft."
-      },
-      "notPurchased": {
-        "button": "Nicht bei Amazon vorhanden",
-        "confirmTitle": "Bestätigen, dass es bei Amazon keine Bestellung für diesen Verkauf gibt?",
-        "confirmDescription": "Fahren Sie nur fort, nachdem Sie die Bestellungen dieses Amazon-Kontos angesehen haben und die Bestellung dort nicht zu finden ist. SellerHill prüft die Bestellliste des Kontos ebenfalls und lehnt ab, solange diese Prüfung nicht gelaufen ist. Danach kann die automatische Bestellung erneut gestartet werden — existiert die Bestellung doch bei Amazon, wird der Artikel zweimal gekauft.",
-        "confirm": "Ja, sie ist nicht dort",
-        "done": "Als nicht gekauft markiert. Sie können die automatische Bestellung erneut starten."
+        "queuedDryRun": "Ein Testlauf wurde gestartet. Dieses Amazon-Konto ist im Testmodus, es wird nichts gekauft.",
+        "unknownConfirmTitle": "Haben Sie Ihre Amazon-Bestellungen geprüft?",
+        "unknownConfirmDescription": "Der letzte automatische Kauf für diesen Verkauf hat keine Bestätigung von Amazon erhalten, die Bestellung kann also bereits existieren. Fahren Sie nur fort, wenn Sie die Bestellungen dieses Amazon-Kontos angesehen haben und sie dort nicht ist — sonst wird der Artikel zweimal gekauft. Finden Sie sie, schließen Sie dieses Fenster und verknüpfen Sie stattdessen die Amazon-Bestellung.",
+        "unknownConfirm": "Nicht vorhanden, kaufen"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "Dieser Verkauf liegt über dem Ausgabelimit deines Amazon-Kontos. Erhöhe das Limit in den Einstellungen des Amazon-Kontos oder kaufe den Artikel manuell.",
       "autoFulfillAlreadyStarted": "Der Status dieser Bestellung hat sich gerade geändert, der Kauf wurde vielleicht schon gestartet. Lade die Seite neu.",
       "autoFulfillQuotaExhausted": "Das Limit deines Tarifs für automatische Bestellungen ist für diesen Zeitraum aufgebraucht.",
-      "purchaseNotYetChecked": "SellerHill hat die Bestellungen dieses Amazon-Kontos seit dem Kaufversuch noch nicht geprüft. Die Prüfung wurde jetzt gestartet — versuchen Sie es in ein paar Minuten erneut.",
-      "purchaseNotUnknown": "Diese Bestellung wartet nicht auf eine Kaufbestätigung. Sie ist möglicherweise bereits verknüpft oder in Bearbeitung. Laden Sie die Seite neu.",
       "purchaseFoundOnAmazon": "SellerHill hat eine Amazon-Bestellung für diesen Artikel gefunden, die etwa zum Zeitpunkt des Kaufversuchs aufgegeben wurde, konnte sie diesem Verkauf aber nicht sicher zuordnen. Öffnen Sie Ihre Amazon-Bestellungen und verknüpfen Sie sie manuell. Gehört die Bestellung zu einem anderen Verkauf, verknüpfen Sie sie zuerst mit diesem.",
       "noteTooLong": "Die Notiz darf höchstens 1.000 Zeichen lang sein.",
       "noteInvalid": "Die Notiz konnte nicht gespeichert werden."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Kauf nicht bestätigt",
         "meaning": "Der Bestellbutton bei Amazon wurde gedrückt, aber es kam keine Bestätigung zurück. Die Bestellung existiert möglicherweise.",
-        "action": "Prüfen Sie zuerst Ihre Amazon-Bestellungen. Ist die Bestellung dort, verknüpfen Sie sie. Kaufen Sie nicht erneut, bevor Sie nachgesehen haben."
+        "action": "Prüfen Sie zuerst Ihre Amazon-Bestellungen. Ist die Bestellung dort, verknüpfen Sie sie. Ist sie es nicht, starten Sie die automatische Bestellung erneut."
       },
       "purchase_blocked": {
         "label": "Kauf blockiert",

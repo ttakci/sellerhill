@@ -153,14 +153,10 @@
         "confirmDescription": "SellerHill will place a real Amazon order for this sale with your automatic-order Amazon account, shipped to the eBay buyer. Your spending cap still applies, and the purchase stops if the total is over it. Only continue if you have not already bought the item yourself.",
         "confirm": "Start purchase",
         "queued": "The purchase has started. The order's status updates in a few minutes.",
-        "queuedDryRun": "A test run has started. This Amazon account is in test mode, so nothing will be bought."
-      },
-      "notPurchased": {
-        "button": "It is not on Amazon",
-        "confirmTitle": "Confirm that Amazon has no order for this sale?",
-        "confirmDescription": "Only continue after you have looked at this Amazon account's orders and the order is not there. SellerHill checks the account's order list too and refuses until that check has run. Afterwards the automatic order can be started again — if the order does exist on Amazon, the item would be bought twice.",
-        "confirm": "Yes, it is not there",
-        "done": "Marked as not purchased. You can start the automatic order again."
+        "queuedDryRun": "A test run has started. This Amazon account is in test mode, so nothing will be bought.",
+        "unknownConfirmTitle": "Did you check your Amazon orders?",
+        "unknownConfirmDescription": "The last automatic purchase for this sale got no confirmation from Amazon, so the order may already exist. Continue only if you have looked at this Amazon account's orders and it is not there — otherwise the item is bought twice. If you find it, close this and link the Amazon order instead.",
+        "unknownConfirm": "It is not there, buy it"
       }
     },
     "pagination": {
@@ -283,8 +279,6 @@
       "autoFulfillOverCap": "This sale is over your Amazon account's spending cap. Raise the cap in the Amazon account's settings, or buy the item by hand.",
       "autoFulfillAlreadyStarted": "This order's status changed a moment ago, so the purchase may already have started. Refresh the page.",
       "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up.",
-      "purchaseNotYetChecked": "SellerHill has not yet checked this Amazon account's orders since the purchase attempt. The check has now been started — try again in a few minutes.",
-      "purchaseNotUnknown": "This order is not waiting for a purchase confirmation. It may already be linked or in progress. Refresh the page.",
       "purchaseFoundOnAmazon": "SellerHill found an Amazon order for this product, placed around the time of the purchase attempt, but could not match it to this sale with certainty. Open your Amazon orders and link it by hand. If that order belongs to another sale, link it to that sale first.",
       "noteTooLong": "The note can be at most 1,000 characters.",
       "noteInvalid": "The note could not be saved."
@@ -327,7 +321,7 @@
       "purchase_unknown": {
         "label": "Purchase not confirmed",
         "meaning": "The order button was pressed on Amazon, but no confirmation came back. The order may exist.",
-        "action": "Check your Amazon orders first. If the order is there, link it. Do not buy it again before you have checked."
+        "action": "Check your Amazon orders first. If the order is there, link it. If it is not, start the automatic order again."
       },
       "purchase_blocked": {
         "label": "Purchase blocked",
