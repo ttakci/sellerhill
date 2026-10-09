@@ -114,20 +114,30 @@ export const JobCardHeader = styled.div`
 `;
 
 /**
- * Cancel as a red X in the card's top-right corner (operator, 2026-10-09): a
+ * Cancel as a solid red X chip in the card's top-right corner (operator, 2026-10-09): a
  * solid red "Cancel" button was the loudest thing on a card whose action is
  * rarely needed. Its name is on a tooltip; a tap on a phone (no hover) goes
  * straight to the confirm dialog, which names the action.
  */
 export const CancelX = styled(IconButton)`
+  /* Drawn like the solid status badge beside it: red fill, white cross, badge corners. */
   && {
-    color: ${tkn('colors.semantic.error')};
     padding: ${tkn('spacing.xs')};
+    color: ${tkn('colors.text.inverse')};
+    background: ${tkn('colors.semantic.error')};
+    border-color: ${tkn('colors.semantic.error')};
+    border-radius: ${tkn('radius.sm')};
+  }
+
+  && svg {
+    width: 1rem;
+    height: 1rem;
   }
 
   &&:hover:not(:disabled) {
-    color: ${tkn('colors.semantic.error')};
-    background: ${tkn('colors.semanticTint.error')};
+    color: ${tkn('colors.text.inverse')};
+    background: ${tkn('colors.semantic.error')};
+    box-shadow: ${tkn('shadows.md')};
   }
 `;
 

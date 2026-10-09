@@ -97,7 +97,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   }}
                   disabled={Boolean(cancellingJobId)}
                 >
-                  <Icon name="x" size={20} />
+                  <Icon name="x" size={16} />
                 </S.CancelX>
               </Tooltip>
             ) : null}
