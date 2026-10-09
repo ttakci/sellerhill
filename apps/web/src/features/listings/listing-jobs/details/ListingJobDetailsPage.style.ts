@@ -43,9 +43,16 @@ export const SummaryBody = styled.div`
   gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   min-width: 0;
   @media (max-width: ${tkn('breakpoints.lg')}) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* A phone: the record facts across the top, then the counts on the left and
+     the progress figure on their right (operator, 2026-10-09) — stacked, the
+     figure fell to the foot of the card. */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+
+    & > :first-child {
+      grid-column: 1 / -1;
+    }
   }
 `;
 
@@ -77,6 +84,8 @@ const progressPulse = keyframes`
 export const ProgressSignal = styled.div`
   display: flex; align-items: center; justify-content: flex-end; gap: ${tkn('spacing.sm')}; min-width: 0; align-self: center;
   @media (max-width: ${tkn('breakpoints.lg')}) { grid-column: 1 / -1; justify-content: flex-start; align-self: stretch; }
+  /* A phone: beside the counts, not under them (see SummaryBody). */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) { grid-column: auto; justify-content: flex-end; align-self: center; }
 `;
 export const ProgressDot = styled.span<{ $tone: ProgressTone; $active: boolean }>`
   width: ${tkn('spacing.sm')}; height: ${tkn('spacing.sm')}; flex: 0 0 auto; border-radius: ${tkn('radius.full')};
