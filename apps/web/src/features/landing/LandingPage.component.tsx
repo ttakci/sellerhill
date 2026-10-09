@@ -239,6 +239,9 @@ const ABOUT_FACTS: { key: string; icon: IconName }[] = [
   { key: 'security', icon: 'shield-check' },
 ];
 
+/** Space left between the fixed navbar and the section a menu link scrolls to. */
+const SCROLL_GAP_PX = 32;
+
 /** Feature-menu entries in the navbar: each scrolls to its own anchor. */
 const FEATURE_MENU: { key: string; target: string; icon: IconName }[] = [
   { key: 'why', target: 'why', icon: 'check-list' },
@@ -312,8 +315,26 @@ export const LandingPageComponent = ({
 
   const scrollTo = useCallback(
     (id: string) => {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       onCloseMobileMenu();
+      const target = document.getElementById(id);
+      if (!target) {
+        return;
+      }
+      if (id === 'top') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      // The navbar is fixed, so a plain scrollIntoView parks the target's first
+      // line under it (a showcase row has no top padding of its own). Land the
+      // target's CONTENT, past its own top padding, just below the navbar.
+      const navbar = document.querySelector('[data-landing-navbar]');
+      const navHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+      const paddingTop = parseFloat(window.getComputedStyle(target).paddingTop) || 0;
+      const contentTop = target.getBoundingClientRect().top + window.scrollY + paddingTop;
+      window.scrollTo({
+        top: Math.max(contentTop - navHeight - SCROLL_GAP_PX, 0),
+        behavior: 'smooth',
+      });
     },
     [onCloseMobileMenu]
   );
@@ -332,7 +353,7 @@ export const LandingPageComponent = ({
   return (
     <S.Page>
       {/* ── Navbar ─────────────────────────────────────── */}
-      <S.Navbar $scrolled={scrolled}>
+      <S.Navbar $scrolled={scrolled} data-landing-navbar>
         <S.NavInner>
           <S.NavBrand type="button" onClick={() => scrollTo('top')} aria-label="SellerHill">
             <Logo layout="full" height={38} />
@@ -537,7 +558,6 @@ export const LandingPageComponent = ({
       <S.Section id="why" data-reveal="why">
         <S.Reveal $visible={seen('why')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.why.eyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.why.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.why.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -704,7 +724,6 @@ export const LandingPageComponent = ({
         <S.Reveal $visible={seen('groups')}>
           <S.GroupsLayout>
             <S.SplitHead>
-              <S.Eyebrow>{t('translation:landing.groups.eyebrow')}</S.Eyebrow>
               <S.SplitTitle>{t('translation:landing.groups.sectionTitle')}</S.SplitTitle>
               <S.SplitSubtitle>{t('translation:landing.groups.sectionSubtitle')}</S.SplitSubtitle>
               <S.ParamGrid>
@@ -754,7 +773,6 @@ export const LandingPageComponent = ({
       <S.Section id="templates" data-reveal="templates">
         <S.Reveal $visible={seen('templates')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.templates.eyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.templates.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.templates.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -762,7 +780,7 @@ export const LandingPageComponent = ({
         <S.Reveal $visible={seen('templates')} $delay={1}>
           <S.TemplatesLayout>
             <S.TemplateSide>
-              <S.TemplateTabs role="tablist" aria-label={t('translation:landing.templates.eyebrow')}>
+              <S.TemplateTabs role="tablist" aria-label={t('translation:landing.templates.sectionTitle')}>
                 {TEMPLATE_PREVIEWS.map((tpl) => (
                   <S.TemplateTab
                     key={tpl.key}
@@ -814,7 +832,6 @@ export const LandingPageComponent = ({
       <S.Section $alt id="showcase" data-reveal="showcase">
         <S.Reveal $visible={seen('showcase')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.showcase.eyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.showcase.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.showcase.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -898,7 +915,6 @@ export const LandingPageComponent = ({
         <S.Reveal $visible={seen('mobile')}>
           <S.MobileLayout>
             <S.SplitHead>
-              <S.DarkEyebrow>{t('translation:landing.mobile.eyebrow')}</S.DarkEyebrow>
               <S.DarkTitle>{t('translation:landing.mobile.sectionTitle')}</S.DarkTitle>
               <S.DarkText>{t('translation:landing.mobile.sectionSubtitle')}</S.DarkText>
               <S.DarkBullets>
@@ -932,7 +948,6 @@ export const LandingPageComponent = ({
       <S.Section id="trust" data-reveal="trust">
         <S.Reveal $visible={seen('trust')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.trust.eyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.trust.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.trust.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -1045,7 +1060,6 @@ export const LandingPageComponent = ({
       <S.Section $alt id="pricing" data-reveal="pricing">
         <S.Reveal $visible={seen('pricing')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.pricing.eyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.pricing.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.pricing.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -1225,7 +1239,6 @@ export const LandingPageComponent = ({
         <S.AboutLayout>
           <S.Reveal $visible={seen('about')}>
             <S.AboutText>
-              <S.Eyebrow>{t('translation:landing.about.eyebrow')}</S.Eyebrow>
               <S.AboutTitle>{t('translation:landing.about.sectionTitle')}</S.AboutTitle>
               <S.AboutLead>{t('translation:landing.about.lead')}</S.AboutLead>
               <S.BentoText>{t('translation:landing.about.body')}</S.BentoText>
