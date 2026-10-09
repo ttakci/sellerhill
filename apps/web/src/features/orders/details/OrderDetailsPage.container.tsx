@@ -129,12 +129,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
     // "Cancelled" is a finished stage with nothing to do — except when a real
     // Amazon order was already placed for the sale and Amazon has not reported
     // it cancelled. The platform never cancels an Amazon order, so say so.
-    if (
-      order.stage === OrderStage.CANCELLED &&
-      order.amazonOrderId &&
-      !order.isSimulated &&
-      !order.amazonCancelledAt
-    ) {
+    if (order.stage === OrderStage.CANCELLED && order.amazonOrderId && !order.isSimulated && !order.amazonCancelledAt) {
       return t('orders.detail.cancelledAmazonOpenAction');
     }
     return orderStageHasAction(order.stage) ? t(`orders.stage.${order.stage}.action`) : null;
@@ -207,6 +202,11 @@ export const OrderDetailsPageContainer: React.FC = () => {
   /* "Manage cancellation" only while the buyer's request waits for the
      seller's answer; a request already answered or closed needs nothing, and
      the cancellation card keeps showing it. */
+  /* "Link Amazon order" stays offered at every stage — also to replace an
+     Amazon order already linked — except once the work is over: the order was
+     delivered, or the sale was cancelled on eBay. */
+  const canLinkAmazon = order?.stage !== OrderStage.DELIVERED && order?.stage !== OrderStage.CANCELLED;
+
   const canManageCancellation =
     order?.cancellation?.bucket === CancellationBucket.ACTION_DUE ||
     order?.cancellation?.bucket === CancellationBucket.ACTION_OVERDUE;
@@ -463,6 +463,10 @@ export const OrderDetailsPageContainer: React.FC = () => {
         buyerPhoneDisplay={buyerPhoneDisplay}
         onBack={handleBack}
         onOpenLinkAmazon={() => setIsLinkModalOpen(true)}
+        canLinkAmazon={canLinkAmazon}
+        hasHeroActions={
+          canLinkAmazon || canStartAutoFulfill || canConfirmNotPurchased || canConvertTracking || canManageCancellation
+        }
         onOpenAmazonOrderUrl={
           order?.amazonOrderUrl ? () => window.open(order.amazonOrderUrl, '_blank', 'noopener,noreferrer') : undefined
         }

@@ -27,6 +27,10 @@ export interface OrderDetailsPageProps {
   buyerPhoneDisplay: string | null;
   onBack: () => void;
   onOpenLinkAmazon: () => void;
+  /** Hidden once the order is delivered or the sale was cancelled on eBay — the work is over. */
+  canLinkAmazon: boolean;
+  /** At least one action button is offered; otherwise the actions column is not drawn. */
+  hasHeroActions: boolean;
   onOpenAmazonOrderUrl?: () => void;
   /**
    * Whether this order's tracking can still be converted: Amazon has given us a

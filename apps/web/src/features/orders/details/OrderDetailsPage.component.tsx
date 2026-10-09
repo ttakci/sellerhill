@@ -117,6 +117,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   buyerPhoneDisplay,
   onBack,
   onOpenLinkAmazon,
+  canLinkAmazon,
+  hasHeroActions,
   onOpenAmazonOrderUrl,
   canConvertTracking,
   isConvertingTracking,
@@ -374,55 +376,60 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             Amazon" exclude each other and both exclude converting a tracking
             number; "manage cancellation" only while the request awaits an answer.
             Each action has its own colour: start green, not-on-Amazon navy, link
-            blue, convert teal, manage cancellation orange. */}
-        <S.HeroActions>
-          {canStartAutoFulfill && onStartAutoFulfill ? (
-            <Button
-              variant="success"
-              size="small"
-              fullWidth
-              onClick={onStartAutoFulfill}
-              isLoading={isStartingAutoFulfill}
-            >
-              <Icon name="shopping-cart" size={16} />
-              <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
-            </Button>
-          ) : null}
-          {canConfirmNotPurchased && onConfirmNotPurchased ? (
-            <Button
-              variant="navy"
-              size="small"
-              fullWidth
-              onClick={onConfirmNotPurchased}
-              isLoading={isConfirmingNotPurchased}
-            >
-              <Icon name="help" size={16} />
-              <Text variant="body-sm">{t('orders.autoFulfill.notPurchased.button')}</Text>
-            </Button>
-          ) : null}
-          <Button variant="primary" size="small" fullWidth onClick={onOpenLinkAmazon} isLoading={isUpdating}>
-            <Icon name="link" size={16} />
-            <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
-          </Button>
-          {canConvertTracking && onConvertTracking ? (
-            <Button
-              variant="teal"
-              size="small"
-              fullWidth
-              onClick={onConvertTracking}
-              isLoading={isConvertingTracking}
-            >
-              <Icon name="repeat" size={16} />
-              <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
-            </Button>
-          ) : null}
-          {canManageCancellation ? (
-            <Button variant="orange" size="small" fullWidth onClick={onManageCancellation}>
-              <Icon name="arrow-right" size={16} />
-              <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
-            </Button>
-          ) : null}
-        </S.HeroActions>
+            blue, convert teal, manage cancellation orange. A finished order
+            (delivered, or cancelled on eBay) usually has none: then no column. */}
+        {hasHeroActions ? (
+          <S.HeroActions>
+            {canStartAutoFulfill && onStartAutoFulfill ? (
+              <Button
+                variant="success"
+                size="small"
+                fullWidth
+                onClick={onStartAutoFulfill}
+                isLoading={isStartingAutoFulfill}
+              >
+                <Icon name="shopping-cart" size={16} />
+                <Text variant="body-sm">{t('orders.autoFulfill.start.button')}</Text>
+              </Button>
+            ) : null}
+            {canConfirmNotPurchased && onConfirmNotPurchased ? (
+              <Button
+                variant="navy"
+                size="small"
+                fullWidth
+                onClick={onConfirmNotPurchased}
+                isLoading={isConfirmingNotPurchased}
+              >
+                <Icon name="help" size={16} />
+                <Text variant="body-sm">{t('orders.autoFulfill.notPurchased.button')}</Text>
+              </Button>
+            ) : null}
+            {canLinkAmazon ? (
+              <Button variant="primary" size="small" fullWidth onClick={onOpenLinkAmazon} isLoading={isUpdating}>
+                <Icon name="link" size={16} />
+                <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
+              </Button>
+            ) : null}
+            {canConvertTracking && onConvertTracking ? (
+              <Button
+                variant="teal"
+                size="small"
+                fullWidth
+                onClick={onConvertTracking}
+                isLoading={isConvertingTracking}
+              >
+                <Icon name="repeat" size={16} />
+                <Text variant="body-sm">{t('orders.actions.convertTracking')}</Text>
+              </Button>
+            ) : null}
+            {canManageCancellation ? (
+              <Button variant="orange" size="small" fullWidth onClick={onManageCancellation}>
+                <Icon name="arrow-right" size={16} />
+                <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
+              </Button>
+            ) : null}
+          </S.HeroActions>
+        ) : null}
 
         {/* The money story in one strip, the listing detail's. */}
         <S.KpiArea>
