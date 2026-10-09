@@ -26,14 +26,6 @@ export const TabsRow = styled.div`
   min-width: 0;
 `;
 
-/** "Clear selection" + "List selected (N)" — wrap under the title on a phone. */
-export const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-`;
-
 /**
  * The selected tab takes its list's colour — rail, label and icon — the way
  * the Orders stage rail colours each stage. Positions follow
@@ -187,14 +179,17 @@ export const RangeSeparator = styled.span`
   flex-shrink: 0;
 `;
 
+/** "Clear all", "Clear selection" and "List selected (N)", pushed to the row's end. */
 export const FilterActions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.sm')};
   margin-left: auto;
 
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     margin-left: 0;
+    justify-content: flex-end;
   }
 `;
 

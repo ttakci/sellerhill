@@ -282,29 +282,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader
-        title={t('bestSellers.title')}
-        subtitle={t('bestSellers.subtitle')}
-        actions={
-          isDisabled ? undefined : (
-            <S.HeaderActions>
-              {selectedCount > 0 && (
-                <Button variant="text" size="medium" onClick={onClearSelection}>
-                  <Text variant="body-sm" weight="semibold">
-                    {t('bestSellers.clearSelectionAll')}
-                  </Text>
-                </Button>
-              )}
-              <Button variant="primary" size="medium" onClick={onListSelected} disabled={selectedCount === 0}>
-                <Icon name="plus" size={16} />
-                <Text variant="body-sm" weight="semibold">
-                  {t('bestSellers.listSelected', { count: selectedCount })}
-                </Text>
-              </Button>
-            </S.HeaderActions>
-          )
-        }
-      />
+      <PageHeader title={t('bestSellers.title')} subtitle={t('bestSellers.subtitle')} />
 
       {isDisabled ? (
         <S.StateCard padding="lg">{renderState()}</S.StateCard>
@@ -385,6 +363,23 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                         <Text variant="body-sm">{t('listings:listings.filters.clearAll')}</Text>
                       </Button>
                     )}
+                    {/* The page's one action sits at the end of the controls
+                        row; the selection spans lists and pages, so "clear"
+                        here empties all of it (the table's header box clears
+                        only this page). */}
+                    {selectedCount > 0 && (
+                      <Button variant="text" size="small" onClick={onClearSelection}>
+                        <Text variant="body-sm" weight="semibold">
+                          {t('bestSellers.clearSelectionAll')}
+                        </Text>
+                      </Button>
+                    )}
+                    <Button variant="primary" size="small" onClick={onListSelected} disabled={selectedCount === 0}>
+                      <Icon name="plus" size={16} />
+                      <Text variant="body-sm" weight="semibold">
+                        {t('bestSellers.listSelected', { count: selectedCount })}
+                      </Text>
+                    </Button>
                   </S.FilterActions>
                 </S.FilterRow>
 
