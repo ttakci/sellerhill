@@ -245,7 +245,6 @@
       "refundGroup": "Alıcıya qaytarılan",
       "refundedAmount": "Geri qaytarılan məbləğ",
       "refundedOn": "Geri qaytarma tarixi",
-      "refundNote": "eBay-in bildirdiyi geri qaytarma məbləğidir. eBay-in yığdığı satış vergisi buraya daxil deyil, ona görə alıcıya daha çox qaytarılmış ola bilər.",
       "cancelledAmazonOpenAction": "Bu satış üçün Amazon sifarişi artıq verilmişdi. Onu Amazon-da ləğv edin; göndərilibsə, məhsulu geri qaytarın.",
       "shipBy": "Son göndərmə tarixi",
       "shipByNotice": "eBay-də son göndərmə tarixi: {{date}}",

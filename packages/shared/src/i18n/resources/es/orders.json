@@ -245,7 +245,6 @@
       "refundGroup": "Reembolsado al comprador",
       "refundedAmount": "Importe reembolsado",
       "refundedOn": "Fecha del reembolso",
-      "refundNote": "Es el importe del reembolso que informa eBay. No incluye el impuesto sobre las ventas que eBay recaudó, por lo que el comprador pudo haber recibido más.",
       "cancelledAmazonOpenAction": "Ya se había hecho un pedido en Amazon para esta venta. Cancélalo en Amazon o devuelve el artículo si ya se envió.",
       "shipBy": "Enviar antes de",
       "shipByNotice": "Fecha límite de envío de eBay: {{date}}",

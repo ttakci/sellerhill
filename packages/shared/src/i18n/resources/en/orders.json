@@ -245,7 +245,6 @@
       "refundGroup": "Refunded to the buyer",
       "refundedAmount": "Refunded amount",
       "refundedOn": "Refund date",
-      "refundNote": "The amount eBay reports for the refund. It leaves out any sales tax eBay collected, so the buyer may have received more.",
       "cancelledAmazonOpenAction": "An Amazon order was already placed for this sale. Cancel it on Amazon, or return the item if it has shipped.",
       "shipBy": "Ship by",
       "shipByNotice": "eBay ship-by date: {{date}}",

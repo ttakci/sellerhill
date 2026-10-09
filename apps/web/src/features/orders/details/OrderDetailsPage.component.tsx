@@ -574,7 +574,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                       </Meta>
                     ) : null}
                   </S.MetaList>
-                  <InfoMessage>{t('orders.detail.refundNote')}</InfoMessage>
                 </>
               ) : null}
             </S.EbayPane>

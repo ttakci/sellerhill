@@ -245,7 +245,6 @@
       "refundGroup": "Alıcıya iade edilen",
       "refundedAmount": "İade tutarı",
       "refundedOn": "İade tarihi",
-      "refundNote": "eBay'in bildirdiği iade tutarıdır. eBay'in tahsil ettiği satış vergisini içermez; alıcıya yapılan iade daha yüksek olabilir.",
       "cancelledAmazonOpenAction": "Bu satış için Amazon siparişi zaten verilmişti. Siparişi Amazon'da iptal edin; kargolandıysa ürünü iade edin.",
       "shipBy": "Son gönderim tarihi",
       "shipByNotice": "eBay son gönderim tarihi: {{date}}",

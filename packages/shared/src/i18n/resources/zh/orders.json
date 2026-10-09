@@ -245,7 +245,6 @@
       "refundGroup": "已退款给买家",
       "refundedAmount": "退款金额",
       "refundedOn": "退款日期",
-      "refundNote": "这是 eBay 报告的退款金额，不包含 eBay 代收的销售税，因此买家实际收到的退款可能更多。",
       "cancelledAmazonOpenAction": "此订单已在 Amazon 下单采购。请在 Amazon 上取消；如已发货，请办理退货。",
       "shipBy": "最晚发货时间",
       "shipByNotice": "eBay 最晚发货时间：{{date}}",

@@ -245,7 +245,6 @@
       "refundGroup": "An den Käufer erstattet",
       "refundedAmount": "Erstattungsbetrag",
       "refundedOn": "Erstattungsdatum",
-      "refundNote": "Der von eBay gemeldete Erstattungsbetrag. Von eBay eingezogene Umsatzsteuer ist nicht enthalten, der Käufer kann also mehr erhalten haben.",
       "cancelledAmazonOpenAction": "Für diesen Verkauf wurde bereits eine Amazon-Bestellung aufgegeben. Stornieren Sie sie bei Amazon oder senden Sie den Artikel zurück, falls er schon versandt wurde.",
       "shipBy": "Versand bis",
       "shipByNotice": "eBay-Versandfrist: {{date}}",

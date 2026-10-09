@@ -245,7 +245,6 @@
       "refundGroup": "Rambursat cumpărătorului",
       "refundedAmount": "Suma rambursată",
       "refundedOn": "Data rambursării",
-      "refundNote": "Este suma rambursării raportată de eBay. Nu include taxa pe vânzări colectată de eBay, deci cumpărătorul poate să fi primit mai mult.",
       "cancelledAmazonOpenAction": "Pentru această vânzare fusese deja plasată o comandă pe Amazon. Anulați-o pe Amazon sau returnați produsul dacă a fost deja expediat.",
       "shipBy": "Expediere până la",
       "shipByNotice": "Termen de expediere eBay: {{date}}",
