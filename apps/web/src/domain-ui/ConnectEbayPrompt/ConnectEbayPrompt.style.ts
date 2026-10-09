@@ -67,6 +67,7 @@ export const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.sm')};
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     flex-direction: column;
