@@ -4,7 +4,9 @@
  */
 
 import styled from '@emotion/styled';
-import { DateRangePicker, PageContainer, TabNav, tkn } from '@repo/ui';
+import { DateRangePicker, PageContainer, tkn } from '@repo/ui';
+
+import { StatusTabs } from '@/components/StatusTabs';
 
 export const Container = PageContainer;
 
@@ -29,8 +31,8 @@ export const Toolbar = styled.div`
   }
 `;
 
-/* The rail itself lives in the shared TabNav atom. */
-export const Tabs = styled(TabNav)`
+/* The shared status rail (the Orders look): only the selected tab takes its colour. */
+export const Tabs = styled(StatusTabs)`
   flex: 1 1 auto;
   min-width: 0;
 `;
