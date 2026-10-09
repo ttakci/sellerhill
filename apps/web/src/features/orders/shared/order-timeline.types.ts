@@ -23,6 +23,8 @@ export interface OrderTimelineRow {
   reference: string | null;
   /** A buyer-message sub-step. */
   isMessage: boolean;
+  /** The closing "sale cancelled on eBay" step: it happened, so it never reads as a faded, skipped step. */
+  isCancellation: boolean;
 }
 
 export interface OrderTimelineRowContext {

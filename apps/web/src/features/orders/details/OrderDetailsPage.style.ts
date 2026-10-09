@@ -47,7 +47,7 @@ export const Hero = styled(Card)`
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
     /* Fixed side columns, so the facts column takes everything left. */
-    grid-template-columns: 16rem minmax(0, 1fr) 12.5rem 12rem;
+    grid-template-columns: 16rem minmax(0, 1fr) 12.5rem 13rem;
     column-gap: ${tkn('spacing.lg')};
     grid-template-areas:
       'badge badge badge badge'
@@ -171,9 +171,19 @@ export const HeroActions = styled.div`
   padding-top: ${tkn('spacing.md')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
 
+  /* A label never runs into the button's edge: the Button atom is one clipped
+     line, so a long label (or a longer translation) wraps inside its own padding. */
+  && button {
+    height: auto;
+    min-height: ${tkn('controls.height.small')};
+    padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+    white-space: normal;
+    text-align: center;
+  }
+
   @media (min-width: ${tkn('breakpoints.xl')}) {
     padding-top: 0;
-    padding-left: ${tkn('spacing.lg')};
+    padding-left: ${tkn('spacing.md')};
     border-top: none;
     border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
@@ -450,4 +460,22 @@ export const FormRow = styled.div`
 
 export const ErrorText = styled(Text)`
   display: block;
+`;
+
+/**
+ * A tracking number as a tinted chip, so it stands out from the cost rows:
+ * amber for Amazon's own number (the supplier's, never shown to the buyer),
+ * green for the converted number eBay and the buyer see.
+ */
+export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.sm')};
+  border: 0.0625rem solid
+    ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success'))};
+  background: ${({ $tone }) =>
+    $tone === 'amazon' ? tkn('colors.semanticTint.warning') : tkn('colors.semanticTint.success')};
+  overflow-wrap: anywhere;
 `;

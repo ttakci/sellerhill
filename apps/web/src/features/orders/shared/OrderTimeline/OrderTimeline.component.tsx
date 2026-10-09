@@ -30,12 +30,16 @@ const BODY_COLOR: Record<OrderTimelineStepState, string> = {
 export const OrderTimeline: React.FC<OrderTimelineProps> = ({ rows }) => (
   <S.List role="list">
     {rows.map((row, index) => {
-      const inFocus = row.state === OrderTimelineStepState.CURRENT || row.state === OrderTimelineStepState.ATTENTION;
+      // A cancellation is the order's last fact, not a step it skipped: as loud as the step it is standing on.
+      const inFocus =
+        row.isCancellation ||
+        row.state === OrderTimelineStepState.CURRENT ||
+        row.state === OrderTimelineStepState.ATTENTION;
       const isLast = index === rows.length - 1;
       return (
         <S.Row key={row.id} role="listitem">
           <S.Rail>
-            <S.Marker $state={row.state} $small={row.isMessage}>
+            <S.Marker $state={row.isCancellation ? OrderTimelineStepState.ATTENTION : row.state} $small={row.isMessage}>
               <Icon name={row.icon} size={row.isMessage ? 12 : 16} />
             </S.Marker>
             {!isLast && <S.Connector />}
@@ -44,7 +48,13 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ rows }) => (
             <Text
               variant={row.isMessage ? 'body-sm' : 'body'}
               weight={inFocus || (!row.isMessage && row.state === OrderTimelineStepState.DONE) ? 'semibold' : undefined}
-              color={row.isMessage ? 'text.secondary' : LABEL_COLOR[row.state]}
+              color={
+                row.isMessage
+                  ? 'text.secondary'
+                  : row.isCancellation && row.state === OrderTimelineStepState.SKIPPED
+                    ? 'text.primary'
+                    : LABEL_COLOR[row.state]
+              }
             >
               {row.label}
             </Text>
@@ -60,7 +70,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ rows }) => (
             </Text>
           </S.When>
           <S.Body $last={isLast} $message={row.isMessage}>
-            <Text variant="body-sm" color={BODY_COLOR[row.state]}>
+            <Text variant="body-sm" color={row.isCancellation ? 'text.primary' : BODY_COLOR[row.state]}>
               {row.description}
             </Text>
             {row.action && (

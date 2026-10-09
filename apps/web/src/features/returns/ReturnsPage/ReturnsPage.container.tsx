@@ -1,10 +1,11 @@
-import { RETURN_TABS, ReturnTab, type ReturnsQueryDto } from '@repo/shared';
+import { RETURN_TABS, ReturnBucket, ReturnTab, type ReturnsQueryDto } from '@repo/shared';
 import { getLocaleConfig, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetReturnCountsQuery, useGetReturnsQuery } from '../api/returns.api';
 import type { ReturnRowView } from '../returns.types';
+import { returnBucketPresentation } from '../shared/return-presentation';
 import { toReturnRowView } from '../shared/return-row.mapper';
 
 import { useReturnsColumns } from './hooks/useReturnsColumns';
@@ -12,6 +13,7 @@ import { useReturnsUrlState } from './hooks/useReturnsUrlState';
 import { ReturnsPageComponent } from './ReturnsPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.types';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 
@@ -81,6 +83,18 @@ export const ReturnsPageContainer: React.FC = () => {
     (tabId: ReturnTab): number =>
       counts ? RETURN_TABS[tabId].reduce((sum, bucket) => sum + (counts[bucket] ?? 0), 0) : 0,
     [counts]
+  );
+
+  // Every status the badge can show, with what it means — the orders page's legend, for returns.
+  const legendRows = useMemo<StatusLegendRow[]>(
+    () =>
+      Object.values(ReturnBucket).map((bucket) => ({
+        key: bucket,
+        label: t(`returns.bucket.${bucket}`),
+        meaning: t(`returns.bucketHint.${bucket}`),
+        ...returnBucketPresentation(bucket),
+      })),
+    [t]
   );
 
   const tabItems = useMemo<TabNavItem[]>(
@@ -250,6 +264,7 @@ export const ReturnsPageContainer: React.FC = () => {
         }}
         tab={tab}
         tabItems={tabItems}
+        legendRows={legendRows}
         onTabChange={handleTabChange}
         search={searchInput}
         onSearchChange={handleSearchChange}

@@ -87,7 +87,7 @@ export function toCancellationRowView(item: EbayCancellationDto, ctx: Cancellati
     reasonLabel: translate(`cancellations.reason.${reasonKey}`),
     reasonRaw: reasonKey === 'other' ? item.reason : null,
     refundAmount:
-      item.requestedRefundAmount === null ? null : formatCurrency(item.requestedRefundAmount, locale, currency),
+      item.requestedRefundAmount === null ? null : formatCurrency(item.requestedRefundAmount, locale, currency, 2),
     requestedAt: item.requestedAt ? formatDate(item.requestedAt, locale, REQUESTED_FORMAT) : null,
   };
 }

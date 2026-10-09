@@ -1,6 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
+  formatSourceStock,
+  ListingStatus,
+  PolicyType,
+  updateListingSchema,
+  type UpdateListingFormData,
 } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -373,7 +377,7 @@ export const ListingDetailPageContainer: React.FC = () => {
     return translated === key ? listing.status : translated;
   }, [listing, t]);
 
-  /* The gallery is a carousel: the arrows over the photo and a swipe step
+  /* The gallery is a carousel: the thumbnail strip's chevrons and a swipe over the photo step
      through the images (wrapping at both ends), and the thumbnail strip — one
      line that scrolls sideways — keeps the chosen thumbnail in view. */
   const imageCount = listing?.imageUrls?.length ?? 0;

@@ -91,8 +91,9 @@ export const GalleryBlock = styled.div`
   min-width: 0;
 `;
 
-/** Transparent shell — match ListingCard / listings-all product image. A
- *  carousel: arrows over the photo (and a touch swipe) step through the images. */
+/** Transparent shell — match ListingCard / listings-all product image. The
+ *  thumbnail strip's chevrons (and a touch swipe here) step through the images;
+ *  no arrows sit over the photo itself. */
 export const GalleryMain = styled.div`
   position: relative;
   width: 100%;
@@ -130,42 +131,6 @@ export const GalleryMain = styled.div`
     aspect-ratio: 1 / 1;
     flex: 0 0 auto;
     min-height: 0;
-  }
-
-  /* Arrows show on hover with a pointer; on touch screens they stay visible. */
-  &:hover > button,
-  & > button:focus-visible {
-    opacity: 1;
-  }
-
-  @media (hover: none) {
-    & > button {
-      opacity: 1;
-    }
-  }
-`;
-
-/** The listing carousel's round brand-blue arrow, inside the photo's edges. */
-export const GalleryArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
-  position: absolute;
-  top: 50%;
-  ${({ $side, theme }) => ($side === 'left' ? `left: ${theme.spacing.sm}` : `right: ${theme.spacing.sm}`)};
-  transform: translateY(-50%);
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.brand.primary')};
-  border-color: transparent;
-  color: ${tkn('colors.text.inverse')};
-  opacity: 0;
-  z-index: 1;
-  box-shadow: ${tkn('shadows.md')};
-  transition: opacity ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.brand.primaryHover')};
-    color: ${tkn('colors.text.inverse')};
   }
 `;
 
@@ -738,4 +703,3 @@ export const FormStack = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
 `;
-

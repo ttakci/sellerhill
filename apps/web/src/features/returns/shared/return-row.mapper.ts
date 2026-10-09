@@ -73,7 +73,7 @@ export function toReturnRowView(item: EbayReturnDto, ctx: ReturnRowContext): Ret
     isOverdue: item.bucket === ReturnBucket.ACTION_OVERDUE,
     reasonLabel: translate(`returns.reasonType.${resolveReasonTypeKey(item.reasonType)}`),
     buyerComment: item.buyerComment?.trim() || null,
-    refundAmount: hasRefund ? formatCurrency(refundValue, locale, currency) : null,
+    refundAmount: hasRefund ? formatCurrency(refundValue, locale, currency, 2) : null,
     refundLabel: hasRefund ? translate(refunded ? 'returns.refund.refunded' : 'returns.refund.estimated') : null,
     isRefunded: refunded,
     openedAt: item.createdOnEbayAt ? formatDate(item.createdOnEbayAt, locale, OPENED_FORMAT) : null,

@@ -3,6 +3,8 @@ import type { DataTableProps, TabNavItem, TableColumn } from '@repo/ui';
 
 import type { ReturnRowView } from '../returns.types';
 
+import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.types';
+
 export interface ReturnsPageProps {
   rows: ReturnRowView[];
   columns: TableColumn<ReturnRowView>[];
@@ -21,6 +23,8 @@ export interface ReturnsPageProps {
   /** Counted tabs (All · Needs action · In progress · Closed). */
   tab: ReturnTab;
   tabItems: TabNavItem[];
+  /** The status legend's rows, opened from the end of the tab row. */
+  legendRows: StatusLegendRow[];
   onTabChange: (tabId: string) => void;
   search: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

@@ -72,6 +72,7 @@ export function toOrderTimelineRows(
       reason: explainedByStage && step.key === OrderTimelineStepKey.PURCHASE ? ctx.reasonLabel : null,
       reference: step.reference ?? null,
       isMessage: step.isMessage === true,
+      isCancellation: step.key === OrderTimelineStepKey.SALE_CANCELLED,
     };
   });
 }

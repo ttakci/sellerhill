@@ -298,26 +298,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.GalleryBlock>
           <S.GalleryMain {...gallerySwipeHandlers}>
             {mainImage ? <img key={mainImage} src={mainImage} alt={listing.title} /> : <Icon name="image" size={48} />}
-            {images.length > 1 ? (
-              <>
-                <S.GalleryArrow
-                  $side="left"
-                  variant="elevated"
-                  onClick={onPrevImage}
-                  aria-label={t('listings.carousel.previous')}
-                >
-                  <Icon name="chevron-left" size={20} />
-                </S.GalleryArrow>
-                <S.GalleryArrow
-                  $side="right"
-                  variant="elevated"
-                  onClick={onNextImage}
-                  aria-label={t('listings.carousel.next')}
-                >
-                  <Icon name="chevron-right" size={20} />
-                </S.GalleryArrow>
-              </>
-            ) : null}
           </S.GalleryMain>
           {images.length > 1 && (
             <S.ThumbCarousel>
@@ -430,38 +410,30 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             "Manage" sheet. Ending / deleting still ask first. */}
         {hasRevisions || canEnd || canDelete || canPublish ? (
           <S.HeroActions>
-          {hasRevisions ? (
-            <Button variant="primary" size="small" onClick={onOpenRevisions}>
-              <Icon name="history" size={16} />
-              <Text variant="body-sm">
-                {t('listings.detail.revisions.action')}
-              </Text>
-            </Button>
-          ) : null}
-          {canEnd ? (
-            <Button variant="danger" size="small" onClick={onEnd}>
-              <Icon name="block" size={16} />
-              <Text variant="body-sm">
-                {t('listings.detail.endShort')}
-              </Text>
-            </Button>
-          ) : null}
-          {canDelete ? (
-            <Button variant="danger" size="small" onClick={onDelete}>
-              <Icon name="trash" size={16} />
-              <Text variant="body-sm">
-                {t('listings.detail.deleteShort')}
-              </Text>
-            </Button>
-          ) : null}
-          {canPublish ? (
-            <Button variant="primary" size="small" onClick={onPublish}>
-              <Icon name="upload" size={16} />
-              <Text variant="body-sm">
-                {t('listings.detail.publish')}
-              </Text>
-            </Button>
-          ) : null}
+            {hasRevisions ? (
+              <Button variant="primary" size="small" onClick={onOpenRevisions}>
+                <Icon name="history" size={16} />
+                <Text variant="body-sm">{t('listings.detail.revisions.action')}</Text>
+              </Button>
+            ) : null}
+            {canEnd ? (
+              <Button variant="danger" size="small" onClick={onEnd}>
+                <Icon name="block" size={16} />
+                <Text variant="body-sm">{t('listings.detail.endShort')}</Text>
+              </Button>
+            ) : null}
+            {canDelete ? (
+              <Button variant="danger" size="small" onClick={onDelete}>
+                <Icon name="trash" size={16} />
+                <Text variant="body-sm">{t('listings.detail.deleteShort')}</Text>
+              </Button>
+            ) : null}
+            {canPublish ? (
+              <Button variant="primary" size="small" onClick={onPublish}>
+                <Icon name="upload" size={16} />
+                <Text variant="body-sm">{t('listings.detail.publish')}</Text>
+              </Button>
+            ) : null}
           </S.HeroActions>
         ) : null}
       </S.Hero>

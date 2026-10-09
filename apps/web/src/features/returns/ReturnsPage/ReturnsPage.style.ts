@@ -4,11 +4,14 @@ import { PageContainer, Text as UIText, tkn } from '@repo/ui';
 export const Container = PageContainer;
 
 /** The counted tab rail. It scrolls inside itself rather than wrapping or widening the page. */
+/* Tabs on the left, the status legend toggle on the right; the opened legend wraps under both. */
 export const TabsRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
-  overflow-x: auto;
 `;
 
 export const FilterBar = styled.div`

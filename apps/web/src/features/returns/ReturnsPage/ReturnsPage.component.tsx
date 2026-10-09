@@ -9,6 +9,8 @@ import { ReturnCard } from '../shared/ReturnCard';
 import * as S from './ReturnsPage.style';
 import type { ReturnsPageProps } from './ReturnsPage.types';
 
+import { StatusLegend } from '@/components/StatusLegend';
+
 export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   rows,
   columns,
@@ -25,6 +27,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   pagination,
   tab,
   tabItems,
+  legendRows,
   onTabChange,
   search,
   onSearchChange,
@@ -38,9 +41,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
 }) => {
   const { t } = useTranslation(['returns', 'listings', 'translation']);
 
-  const renderGridCard = (row: ReturnRowView) => (
-    <ReturnCard key={row.id} row={row} onOpen={() => onRowOpen(row)} />
-  );
+  const renderGridCard = (row: ReturnRowView) => <ReturnCard key={row.id} row={row} onOpen={() => onRowOpen(row)} />;
 
   return (
     <S.Container>
@@ -55,6 +56,7 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
           variant="underline"
           ariaLabel={t('returns.tabs.ariaLabel')}
         />
+        <StatusLegend rows={legendRows} />
       </S.TabsRow>
 
       <S.FilterBar>
@@ -89,7 +91,13 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
             i18nKey="listings.filters.resultListed"
             ns="listings"
             values={{ count: resultCount }}
-            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+            components={{
+              b: (
+                <Text variant="body-sm" weight="bold" color="text.primary">
+                  {null}
+                </Text>
+              ),
+            }}
           />
         }
         gridMinItemWidth="26rem"

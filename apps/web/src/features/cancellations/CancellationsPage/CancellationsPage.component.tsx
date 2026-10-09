@@ -9,6 +9,8 @@ import { CancellationCard } from '../shared/CancellationCard';
 import * as S from './CancellationsPage.style';
 import type { CancellationsPageProps } from './CancellationsPage.types';
 
+import { StatusLegend } from '@/components/StatusLegend';
+
 export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
   rows,
   columns,
@@ -25,6 +27,7 @@ export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
   pagination,
   tab,
   tabItems,
+  legendRows,
   onTabChange,
   search,
   onSearchChange,
@@ -55,6 +58,7 @@ export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
           variant="underline"
           ariaLabel={t('cancellations.tabs.ariaLabel')}
         />
+        <StatusLegend rows={legendRows} />
       </S.TabsRow>
 
       <S.FilterBar>
@@ -89,7 +93,13 @@ export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
             i18nKey="listings.filters.resultListed"
             ns="listings"
             values={{ count: resultCount }}
-            components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+            components={{
+              b: (
+                <Text variant="body-sm" weight="bold" color="text.primary">
+                  {null}
+                </Text>
+              ),
+            }}
           />
         }
         gridMinItemWidth="26rem"

@@ -3,6 +3,8 @@ import type { DataTableProps, TabNavItem, TableColumn } from '@repo/ui';
 
 import type { CancellationRowView } from '../cancellations.types';
 
+import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.types';
+
 export interface CancellationsPageProps {
   rows: CancellationRowView[];
   columns: TableColumn<CancellationRowView>[];
@@ -21,6 +23,8 @@ export interface CancellationsPageProps {
   /** Counted tabs (All · Needs action · In progress · Closed). */
   tab: CancellationTab;
   tabItems: TabNavItem[];
+  /** The status legend's rows, opened from the end of the tab row. */
+  legendRows: StatusLegendRow[];
   onTabChange: (tabId: string) => void;
   search: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

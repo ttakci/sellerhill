@@ -34,11 +34,16 @@ export const ReturnCard: React.FC<ReturnCardProps> = ({ row, onOpen, className }
       showStage={false}
       leadingBadge={<ReturnBucketBadge bucket={row.bucket} size="sm" />}
       meta={meta}
-      footerBadge={
-        row.refundLabel ? { label: row.refundLabel, variant: row.isRefunded ? 'success' : 'warning' } : undefined
-      }
       stats={[
-        { label: t('returns.columns.refund'), value: row.refundAmount ?? EMPTY_VALUE },
+        // The label says whether the money went out ("Refunded") or is eBay's estimate — no separate chip.
+        {
+          label:
+            row.refundLabel && !row.isRefunded
+              ? `${t('returns.columns.refund')} · ${row.refundLabel}`
+              : row.refundLabel ?? t('returns.columns.refund'),
+          value: row.refundAmount ?? EMPTY_VALUE,
+          tone: row.isRefunded ? 'positive' : 'default',
+        },
         {
           label: t('returns.columns.deadline'),
           value: row.dueDate ?? EMPTY_VALUE,

@@ -31,14 +31,15 @@ const KNOWN_CANCEL_REASONS: readonly string[] = [
 ];
 
 /** Same colours as the cancellations page: red overdue, amber due, teal answered, sky moving, green closed, grey unknown. */
-const CANCEL_BUCKET_VARIANT: Record<CancellationBucket, 'error' | 'warning' | 'teal' | 'sky' | 'success' | 'neutral'> = {
-  [CancellationBucket.ACTION_OVERDUE]: 'error',
-  [CancellationBucket.ACTION_DUE]: 'warning',
-  [CancellationBucket.ANSWERED]: 'teal',
-  [CancellationBucket.IN_PROGRESS]: 'sky',
-  [CancellationBucket.CLOSED]: 'success',
-  [CancellationBucket.UNCONFIRMED]: 'neutral',
-};
+const CANCEL_BUCKET_VARIANT: Record<CancellationBucket, 'error' | 'warning' | 'teal' | 'sky' | 'success' | 'neutral'> =
+  {
+    [CancellationBucket.ACTION_OVERDUE]: 'error',
+    [CancellationBucket.ACTION_DUE]: 'warning',
+    [CancellationBucket.ANSWERED]: 'teal',
+    [CancellationBucket.IN_PROGRESS]: 'sky',
+    [CancellationBucket.CLOSED]: 'success',
+    [CancellationBucket.UNCONFIRMED]: 'neutral',
+  };
 
 /** Label on the left, value right-aligned. No icon: the label is the signpost. */
 const Meta = ({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement => (
@@ -53,7 +54,15 @@ const Meta = ({ label, children }: { label: string; children: React.ReactNode })
 );
 
 /** A money row of a card — the figure in tabular numerals, emphasised on a total. */
-const Money = ({ label, value, total = false }: { label: string; value: string; total?: boolean }): React.ReactElement => (
+const Money = ({
+  label,
+  value,
+  total = false,
+}: {
+  label: string;
+  value: string;
+  total?: boolean;
+}): React.ReactElement => (
   <Meta label={label}>
     <Text variant={total ? 'metric-sm' : 'body-sm'} weight={total ? 'semibold' : 'medium'} numeric>
       {value}
@@ -201,7 +210,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 
       <S.Hero variant="elevated">
         <S.StatusBadgeSlot>
-          <OrderStageBadge stage={order.stage} shippedDetectedAt={order.shippedDetectedAt} size="sm" withTooltip={false} />
+          <OrderStageBadge
+            stage={order.stage}
+            shippedDetectedAt={order.shippedDetectedAt}
+            size="sm"
+            withTooltip={false}
+          />
           {isEstimated && (
             <Badge variant="warning" size="sm" solid>
               {t('orders.estimateBadge')}
@@ -601,16 +615,28 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               )}
               {order.amazonTrackingNumber && (
                 <Meta label={t('orders.detail.amazonTracking')}>
-                  <Text variant="body-sm" weight="medium" numeric>
-                    {order.amazonTrackingNumber}
-                  </Text>
+                  <S.TrackingChip $tone="amazon">
+                    <Text variant="body-sm" weight="semibold" numeric>
+                      <CopyableText
+                        value={order.amazonTrackingNumber}
+                        label={t('orders.detail.amazonTracking')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
+                    </Text>
+                  </S.TrackingChip>
                 </Meta>
               )}
               {order.convertedTrackingNumber && (
                 <Meta label={t('orders.detail.convertedTracking')}>
-                  <Text variant="body-sm" weight="medium" numeric>
-                    {order.convertedTrackingNumber}
-                  </Text>
+                  <S.TrackingChip $tone="converted">
+                    <Text variant="body-sm" weight="semibold" numeric>
+                      <CopyableText
+                        value={order.convertedTrackingNumber}
+                        label={t('orders.detail.convertedTracking')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
+                    </Text>
+                  </S.TrackingChip>
                 </Meta>
               )}
             </S.MetaList>

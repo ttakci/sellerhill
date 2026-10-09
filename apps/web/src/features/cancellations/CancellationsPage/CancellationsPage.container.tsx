@@ -1,10 +1,11 @@
-import { CANCELLATION_TABS, CancellationTab, type CancellationsQueryDto } from '@repo/shared';
+import { CANCELLATION_TABS, CancellationBucket, CancellationTab, type CancellationsQueryDto } from '@repo/shared';
 import { getLocaleConfig, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetCancellationCountsQuery, useGetCancellationsQuery } from '../api/cancellations.api';
 import type { CancellationRowView } from '../cancellations.types';
+import { cancellationBucketPresentation } from '../shared/cancellation-presentation';
 import { toCancellationRowView } from '../shared/cancellation.mapper';
 
 import { CancellationsPageComponent } from './CancellationsPage.component';
@@ -12,6 +13,7 @@ import { useCancellationsColumns } from './hooks/useCancellationsColumns';
 import { useCancellationsUrlState } from './hooks/useCancellationsUrlState';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import type { StatusLegendRow } from '@/components/StatusLegend/StatusLegend.types';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 
@@ -22,8 +24,7 @@ const isTab = (value: string): value is CancellationTab => (TAB_IDS as readonly 
 type CancellationSortKey = NonNullable<CancellationsQueryDto['sortBy']>;
 /** The sortable columns — their keys are the API's `sortBy` values. */
 const CANCELLATION_SORT_KEYS: CancellationSortKey[] = ['requestedAt', 'dueBy', 'refund'];
-const isSortKey = (value: string): value is CancellationSortKey =>
-  (CANCELLATION_SORT_KEYS as string[]).includes(value);
+const isSortKey = (value: string): value is CancellationSortKey => (CANCELLATION_SORT_KEYS as string[]).includes(value);
 
 /**
  * eBay cancellation requests — which buyers asked to cancel, and by when eBay needs
@@ -82,6 +83,18 @@ export const CancellationsPageContainer: React.FC = () => {
     (tabId: CancellationTab): number =>
       counts ? CANCELLATION_TABS[tabId].reduce((sum, bucket) => sum + (counts[bucket] ?? 0), 0) : 0,
     [counts]
+  );
+
+  // Every status the badge can show, with what it means — the orders page's legend, for cancellations.
+  const legendRows = useMemo<StatusLegendRow[]>(
+    () =>
+      Object.values(CancellationBucket).map((bucket) => ({
+        key: bucket,
+        label: t(`cancellations.bucket.${bucket}`),
+        meaning: t(`cancellations.bucketHint.${bucket}`),
+        ...cancellationBucketPresentation(bucket),
+      })),
+    [t]
   );
 
   const tabItems = useMemo<TabNavItem[]>(
@@ -251,6 +264,7 @@ export const CancellationsPageContainer: React.FC = () => {
         }}
         tab={tab}
         tabItems={tabItems}
+        legendRows={legendRows}
         onTabChange={handleTabChange}
         search={searchInput}
         onSearchChange={handleSearchChange}
