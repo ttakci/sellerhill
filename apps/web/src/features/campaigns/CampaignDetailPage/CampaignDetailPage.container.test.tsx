@@ -326,7 +326,9 @@ describe('campaign detail and writes', () => {
       },
     ]);
     await screen.findByText(/1\.234,50\s£/);
-    expect(screen.getAllByText('Nicht verfügbar').length).toBeGreaterThan(3);
+    // Unknown figures are an em dash (never 0); a missing fact keeps its words.
+    expect(screen.getAllByText('—').length).toBeGreaterThan(3);
+    expect(screen.getAllByText('Nicht verfügbar').length).toBeGreaterThan(0);
     expect(screen.queryByText('0,00 £')).not.toBeInTheDocument();
     expect(screen.getAllByText('0').length).toBe(2);
   });

@@ -24,7 +24,7 @@ export function useCampaignDetailView(
   const facts =
     campaignView && detail
       ? [
-          { label: t('campaigns.campaign.status'), value: campaignView.status },
+          // The status is the hero's badge, so it is not repeated as a fact.
           { label: t('campaigns.campaign.strategy'), value: campaignView.strategy },
           { label: t('campaigns.campaign.rateType'), value: campaignView.rateType },
           { label: t('campaigns.campaign.defaultRate'), value: campaignView.defaultRate },

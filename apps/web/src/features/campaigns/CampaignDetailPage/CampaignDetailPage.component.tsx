@@ -13,10 +13,12 @@ import {
   Text,
   type TableColumn,
 } from '@repo/ui';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AddCampaignListingsDrawerContainer } from '../drawers/AddCampaignListingsDrawer/AddCampaignListingsDrawer.container';
 import { EditCampaignRateDrawerContainer } from '../drawers/EditCampaignRateDrawer/EditCampaignRateDrawer.container';
+import * as H from '../shared/campaignSurfaces.style';
 
 import * as S from './CampaignDetailPage.style';
 import type { CampaignDetailPageProps, CampaignMemberView } from './CampaignDetailPage.types';
@@ -100,13 +102,13 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
   ];
   return (
     <S.Container>
-      <PageHeader
-        title={props.detail?.campaign.name ?? t('campaigns.detail.title')}
-        subtitle={t('campaigns.detail.subtitle')}
-      />
-      <Button variant="text" size="small" onClick={props.onBack}>
-        <Text variant="body-sm">{t('campaigns.actions.back')}</Text>
-      </Button>
+      <PageHeader title={t('campaigns.detail.title')} subtitle={t('campaigns.detail.subtitle')} />
+      <S.BackRow>
+        <Button variant="text" size="small" onClick={props.onBack}>
+          <Icon name="arrow-left" size={16} />
+          <Text variant="body-sm">{t('campaigns.actions.back')}</Text>
+        </Button>
+      </S.BackRow>
       {!props.hasStore ? (
         <EmptyState icon="storefront" title={t('campaigns.detail.title')} description={t('campaigns.empty.noStore')} />
       ) : props.isLoading ? (
@@ -127,41 +129,68 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
       ) : (
         props.detail && (
           <S.Stack>
-            {props.writeReason && (
-              <InfoMessage type="info">
-                <Text variant="body-sm">{props.writeReason}</Text>
-              </InfoMessage>
-            )}
-            <S.Panel variant="bordered" padding="lg">
-              {props.campaignView?.outsideSellerHill && (
-                <Badge variant="info">
-                  <Text variant="caption">{t('campaigns.campaign.outsideSellerHill')}</Text>
-                </Badge>
-              )}
-              <S.Facts>
+            <H.Hero variant="elevated">
+              <H.HeroBadges>
+                {props.campaignView && (
+                  <Badge variant={props.campaignView.statusTone} size="sm" solid>
+                    {props.campaignView.status}
+                  </Badge>
+                )}
+                {props.campaignView?.outsideSellerHill && (
+                  <Badge variant="info" size="sm">
+                    {t('campaigns.campaign.outsideSellerHill')}
+                  </Badge>
+                )}
+                {props.campaignView?.readOnly && (
+                  <Badge variant="neutral" size="sm">
+                    {t('campaigns.readOnly.title')}
+                  </Badge>
+                )}
+              </H.HeroBadges>
+              <H.HeroTitle>
+                <H.HeroHeading variant="h2" weight="bold">
+                  {props.detail.campaign.name}
+                </H.HeroHeading>
+              </H.HeroTitle>
+              <H.FactList>
                 {props.facts.map((fact) => (
-                  <S.Fact key={fact.label}>
-                    <Text variant="caption" muted>
-                      {fact.label}
-                    </Text>
-                    <Text variant="body-sm" numeric>
-                      {fact.value}
-                    </Text>
-                  </S.Fact>
+                  <Fragment key={fact.label}>
+                    <H.FactLabel>
+                      <Text variant="body-sm" color="text.secondary">
+                        {fact.label}
+                      </Text>
+                    </H.FactLabel>
+                    <H.FactValue>
+                      <Text variant="body-sm" weight="bold" numeric>
+                        {fact.value}
+                      </Text>
+                    </H.FactValue>
+                  </Fragment>
                 ))}
-              </S.Facts>
-              <S.Row>
-                <Button variant="primary" disabled={!props.writable || props.busy} onClick={props.onAddOpen}>
+              </H.FactList>
+              <H.HeroActions>
+                <Button
+                  variant="primary"
+                  size="small"
+                  disabled={!props.writable || props.busy}
+                  onClick={props.onAddOpen}
+                >
                   <Icon name="plus" size={16} />
                   <Text variant="body-sm">{t('campaigns.actions.addListings')}</Text>
                 </Button>
-                <Button variant="primary" disabled={!props.writable || props.busy} onClick={() => props.onRateOpen()}>
+                <Button
+                  variant="teal"
+                  size="small"
+                  disabled={!props.writable || props.busy}
+                  onClick={() => props.onRateOpen()}
+                >
                   <Icon name="percent" size={16} />
                   <Text variant="body-sm">{t('campaigns.rate.defaultTitle')}</Text>
                 </Button>
                 {props.lifecycleAction && (
                   <Button
-                    variant="primary"
+                    variant={props.lifecycleAction === CampaignAction.PAUSE ? 'orange' : 'success'}
+                    size="small"
                     disabled={!props.writable || props.busy}
                     onClick={() => props.onAction(props.lifecycleAction as CampaignAction)}
                   >
@@ -175,40 +204,64 @@ export function CampaignDetailPageComponent(props: CampaignDetailPageProps) {
                     </Text>
                   </Button>
                 )}
-                <Button variant="danger" disabled={!props.writable || props.busy} onClick={props.onEndOpen}>
+                <Button
+                  variant="danger"
+                  size="small"
+                  disabled={!props.writable || props.busy}
+                  onClick={props.onEndOpen}
+                >
                   <Icon name="block" size={16} />
                   <Text variant="body-sm">{t('campaigns.actions.end')}</Text>
                 </Button>
-              </S.Row>
-              {props.feedback && (
-                <InfoMessage type="info">
-                  <Text variant="body-sm">{props.feedback}</Text>
-                </InfoMessage>
-              )}
-            </S.Panel>
-            <Text variant="h2" weight="semibold">
-              {t('campaigns.list.period')}
-            </Text>
-            <S.Facts>
-              {props.metrics.map((metric) => (
-                <Card key={metric.key} variant="stat" padding="lg">
-                  <S.Fact>
-                    <Text variant="caption" muted>
-                      {metric.label}
-                    </Text>
-                    <Text variant="metric" numeric>
-                      {metric.value}
-                    </Text>
-                  </S.Fact>
-                </Card>
-              ))}
-            </S.Facts>
-            <Text variant="caption" muted>
-              {t('campaigns.detail.metricsNote')}
-            </Text>
-            <Text variant="h2" weight="semibold">
-              {t('campaigns.members.title')}
-            </Text>
+              </H.HeroActions>
+              <H.KpiSection>
+                <Text variant="caption" weight="semibold" color="text.secondary">
+                  {t('campaigns.list.period')}
+                </Text>
+                <H.KpiStrip>
+                  {props.metrics.map((metric) => (
+                    <H.KpiItem key={metric.key}>
+                      <H.KpiLabel variant="caption" color="text.secondary">
+                        {metric.label}
+                      </H.KpiLabel>
+                      <Text
+                        variant="metric"
+                        weight="bold"
+                        numeric
+                        color={
+                          !metric.known ? 'text.tertiary' : metric.key === 'roas' ? 'brand.primary' : 'text.primary'
+                        }
+                      >
+                        {metric.value}
+                      </Text>
+                    </H.KpiItem>
+                  ))}
+                </H.KpiStrip>
+                {props.metrics.some((metric) => !metric.known) && (
+                  <Text variant="caption" color="text.tertiary">
+                    {t('campaigns.detail.metricsNote')}
+                  </Text>
+                )}
+                <H.HeroNotices>
+                  {props.writeReason && (
+                    <InfoMessage type="info">
+                      <Text variant="body-sm">{props.writeReason}</Text>
+                    </InfoMessage>
+                  )}
+                  {props.feedback && (
+                    <InfoMessage type="info">
+                      <Text variant="body-sm">{props.feedback}</Text>
+                    </InfoMessage>
+                  )}
+                </H.HeroNotices>
+              </H.KpiSection>
+            </H.Hero>
+
+            <H.SectionHeading>
+              <Text variant="h3" weight="semibold">
+                {t('campaigns.members.title')}
+              </Text>
+            </H.SectionHeading>
             <DataTable
               data={props.members}
               columns={columns}

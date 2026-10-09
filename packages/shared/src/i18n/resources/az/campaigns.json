@@ -12,7 +12,18 @@
         "quantitySold": "Satılan say",
         "unavailable": "Mövcud deyil"
       },
-      "period": "Son 31 gün"
+      "period": "Son 31 gün",
+      "tabs": {
+        "all": "Hamısı",
+        "ariaLabel": "Kampaniyanın statusu"
+      },
+      "search": "Kampaniya adı və ya ID ilə axtar",
+      "summaryHint": "Bu mağazanın bütün kampaniyalarının cəmi.",
+      "emptyFiltered": {
+        "title": "Uyğun kampaniya yoxdur",
+        "description": "Başqa status və ya axtarış sınayın.",
+        "action": "Filtrləri təmizlə"
+      }
     },
     "detail": {
       "title": "Kampaniya təfərrüatları",

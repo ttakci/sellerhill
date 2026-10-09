@@ -12,7 +12,18 @@
         "quantitySold": "售出数量",
         "unavailable": "暂无数据"
       },
-      "period": "最近31天"
+      "period": "最近31天",
+      "tabs": {
+        "all": "全部",
+        "ariaLabel": "广告活动状态"
+      },
+      "search": "按广告活动名称或 ID 搜索",
+      "summaryHint": "此店铺所有广告活动的合计。",
+      "emptyFiltered": {
+        "title": "没有匹配的广告活动",
+        "description": "请尝试其他状态或搜索。",
+        "action": "清除筛选"
+      }
     },
     "detail": {
       "title": "活动详情",

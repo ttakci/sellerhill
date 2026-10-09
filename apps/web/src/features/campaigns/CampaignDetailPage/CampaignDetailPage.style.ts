@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainer, tkn } from '@repo/ui';
+import { PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 export const Stack = styled.div`
@@ -9,26 +9,10 @@ export const Stack = styled.div`
   min-width: 0;
   overflow-wrap: anywhere;
 `;
-export const Row = styled.div`
+/** "Back to campaigns" sits on the canvas at the start of the page, never stretched. */
+export const BackRow = styled.div`
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-export const Panel = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  min-width: 0;
-`;
-export const Facts = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(${tkn('spacing.xxxl')} * 3)), 1fr));
-  gap: ${tkn('spacing.md')};
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: 1fr;
-  }
+  margin-top: calc(-1 * ${tkn('spacing.sm')});
 `;
 export const Fact = styled.div`
   display: flex;

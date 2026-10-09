@@ -12,7 +12,18 @@
         "quantitySold": "Verkaufte Stückzahl",
         "unavailable": "Nicht verfügbar"
       },
-      "period": "Letzte 31 Tage"
+      "period": "Letzte 31 Tage",
+      "tabs": {
+        "all": "Alle",
+        "ariaLabel": "Kampagnenstatus"
+      },
+      "search": "Nach Kampagnenname oder ID suchen",
+      "summaryHint": "Summen über alle Kampagnen dieses Shops.",
+      "emptyFiltered": {
+        "title": "Keine passenden Kampagnen",
+        "description": "Versuchen Sie einen anderen Status oder eine andere Suche.",
+        "action": "Filter zurücksetzen"
+      }
     },
     "detail": {
       "title": "Kampagnendetails",

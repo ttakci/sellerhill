@@ -173,7 +173,9 @@ describe('campaign list and create', () => {
       screen.getByText('Advertising eligibility is unavailable. Creating campaigns is disabled.')
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create campaign' })).toBeDisabled();
-    expect(screen.getAllByText('Unavailable').length).toBeGreaterThanOrEqual(9);
+    // Unknown figures are an em dash (never 0), and the hero says they wait for eBay's report.
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9);
+    expect(screen.getByText(/pending eBay reports/)).toBeInTheDocument();
     expect(screen.queryByText('$0.00')).not.toBeInTheDocument();
     expect(screen.queryByText('0×')).not.toBeInTheDocument();
   });
@@ -188,11 +190,30 @@ describe('campaign list and create', () => {
     expect(screen.getByText('Advertising is unavailable for this store.')).toBeInTheDocument();
     expect(screen.getByText('Read-only campaign')).toBeInTheDocument();
     expect(screen.getByText('Created outside SellerHill')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Campaign details' })).toBeEnabled();
+    // The whole card opens the campaign.
+    expect(screen.getByRole('button', { name: 'Summer campaign' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Create campaign' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: /table/i }));
-    expect(screen.getByRole('button', { name: 'Summer campaign' })).toBeEnabled();
+    // In the table the row opens it.
+    expect(screen.getByText('Summer campaign').closest('tr')).not.toBeNull();
     expect(screen.getByText('Created outside SellerHill')).toBeInTheDocument();
+  });
+  it('filters by status tab and search, with counts on the tabs', async () => {
+    list([
+      campaign(),
+      campaign({ id: '2', campaignId: '456', name: 'Winter clearance', status: EbayCampaignStatus.PAUSED }),
+    ]);
+    mount();
+    await screen.findByText('Summer campaign');
+    fireEvent.click(screen.getByRole('tab', { name: /Paused/ }));
+    expect(screen.queryByText('Summer campaign')).not.toBeInTheDocument();
+    expect(screen.getByText('Winter clearance')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /All/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search by campaign name or ID' }), {
+      target: { value: 'summer' },
+    });
+    expect(screen.getByText('Summer campaign')).toBeInTheDocument();
+    expect(screen.queryByText('Winter clearance')).not.toBeInTheDocument();
   });
   it('validates on click, preserves the form, and sends the active store with valid input', async () => {
     list([]);

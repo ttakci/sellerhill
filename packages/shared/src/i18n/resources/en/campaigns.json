@@ -12,7 +12,18 @@
         "quantitySold": "Quantity sold",
         "unavailable": "Unavailable"
       },
-      "period": "Last 31 days"
+      "period": "Last 31 days",
+      "tabs": {
+        "all": "All",
+        "ariaLabel": "Campaign status"
+      },
+      "search": "Search by campaign name or ID",
+      "summaryHint": "Totals across every campaign of this store.",
+      "emptyFiltered": {
+        "title": "No campaigns match",
+        "description": "Try another status or search.",
+        "action": "Clear filters"
+      }
     },
     "detail": {
       "title": "Campaign details",

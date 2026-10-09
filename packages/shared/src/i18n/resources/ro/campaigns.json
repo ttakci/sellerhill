@@ -12,7 +12,18 @@
         "quantitySold": "Cantitate vândută",
         "unavailable": "Indisponibil"
       },
-      "period": "Ultimele 31 de zile"
+      "period": "Ultimele 31 de zile",
+      "tabs": {
+        "all": "Toate",
+        "ariaLabel": "Starea campaniei"
+      },
+      "search": "Caută după numele sau ID-ul campaniei",
+      "summaryHint": "Totaluri pentru toate campaniile acestui magazin.",
+      "emptyFiltered": {
+        "title": "Nicio campanie potrivită",
+        "description": "Încearcă altă stare sau altă căutare.",
+        "action": "Șterge filtrele"
+      }
     },
     "detail": {
       "title": "Detalii campanie",
