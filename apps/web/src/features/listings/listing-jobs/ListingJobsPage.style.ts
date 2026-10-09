@@ -1,6 +1,6 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Card, IconButton, PageContainer, Text as UIText, tkn } from '@repo/ui';
+import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -111,34 +111,6 @@ export const JobCardHeader = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
-`;
-
-/**
- * Cancel as a solid red X chip in the card's top-right corner (operator, 2026-10-09): a
- * solid red "Cancel" button was the loudest thing on a card whose action is
- * rarely needed. Its name is on a tooltip; a tap on a phone (no hover) goes
- * straight to the confirm dialog, which names the action.
- */
-export const CancelX = styled(IconButton)`
-  /* Drawn like the solid status badge beside it: red fill, white cross, badge corners. */
-  && {
-    padding: ${tkn('spacing.xs')};
-    color: ${tkn('colors.text.inverse')};
-    background: ${tkn('colors.semantic.error')};
-    border-color: ${tkn('colors.semantic.error')};
-    border-radius: ${tkn('radius.sm')};
-  }
-
-  && svg {
-    width: 1rem;
-    height: 1rem;
-  }
-
-  &&:hover:not(:disabled) {
-    color: ${tkn('colors.text.inverse')};
-    background: ${tkn('colors.semantic.error')};
-    box-shadow: ${tkn('shadows.md')};
-  }
 `;
 
 /** Tells the seller the whole card opens the job. */

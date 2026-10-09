@@ -1,8 +1,9 @@
 import { ListingJobStatus, ListingStatus, type ListingJobItemDto } from '@repo/shared';
-import { Badge, Button, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, Text, Icon } from '@repo/ui';
+import { Badge, ConfirmModal, DataTable, EmptyState, PageHeader, SearchField, Select, Text } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { CancelJobButton } from '../shared/CancelJobButton';
 import { jobStatusBadgeVariant } from '../shared/job-status-badge';
 
 import * as S from './ListingJobDetailsPage.style';
@@ -232,16 +233,11 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 {jobStatusLabel(job.status)}
               </Badge>
               {canCancel ? (
-                <Button
-                  variant="danger"
-                  size="small"
+                <CancelJobButton
+                  label={t('listings.jobs.details.cancel')}
                   onClick={onCancelRequest}
-                  isLoading={isCancelling}
                   disabled={isCancelling}
-                >
-                  <Icon name="x-circle" size={16} />
-                  <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-                </Button>
+                />
               ) : null}
             </S.SummaryHeader>
             <S.SummaryBody>

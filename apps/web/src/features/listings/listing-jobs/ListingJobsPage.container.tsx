@@ -1,5 +1,5 @@
 import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto, type ListingJobsQueryDto } from '@repo/shared';
-import { ProgressBar, Badge, Button, Text, formatDate, getLocaleConfig, type TableColumn, type ViewMode, Icon } from '@repo/ui';
+import { ProgressBar, Badge, Text, formatDate, getLocaleConfig, type TableColumn, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { useCancelListingJobMutation, useGetListingJobsQuery } from '../api/list
 
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
+import { CancelJobButton } from './shared/CancelJobButton';
 import { jobStatusBadgeVariant } from './shared/job-status-badge';
 import { resolveJobDateRange } from './utils/jobDateRange';
 
@@ -215,24 +216,19 @@ export const ListingJobsPageContainer: React.FC = () => {
           const canCancel =
             job.status === ListingJobStatus.PENDING || job.status === ListingJobStatus.PROCESSING;
           return canCancel ? (
-            <Button
-              variant="danger"
-              size="small"
+            <CancelJobButton
+              label={t('listings.jobs.details.cancel')}
               onClick={(event) => {
                 event.stopPropagation();
                 setCancelTargetId(job.id);
               }}
-              isLoading={isCancelling && cancelTargetId === job.id}
               disabled={isCancelling}
-            >
-              <Icon name="x" size={16} />
-              <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-            </Button>
+            />
           ) : null;
         },
       },
     ],
-    [t, statusLabel, formatJobDate, isCancelling, cancelTargetId]
+    [t, statusLabel, formatJobDate, isCancelling]
   );
 
   // Match the listings/orders tables: sellers can hide and reorder columns,

@@ -10,13 +10,13 @@ import {
   SearchField,
   Select,
   Text,
-  Tooltip,
 } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import * as S from './ListingJobsPage.style';
 import type { ListingJobsPageComponentProps } from './ListingJobsPage.types';
+import { CancelJobButton } from './shared/CancelJobButton';
 import { jobStatusBadgeVariant } from './shared/job-status-badge';
 
 export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> = ({
@@ -87,19 +87,14 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
               {statusLabel(job.status)}
             </Badge>
             {canCancel ? (
-              <Tooltip content={t('listings.jobs.details.cancel')} position="top" variant="dark">
-                <S.CancelX
-                  variant="ghost"
-                  aria-label={t('listings.jobs.details.cancel')}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onCancelRequest(job.id);
-                  }}
-                  disabled={Boolean(cancellingJobId)}
-                >
-                  <Icon name="x" size={16} />
-                </S.CancelX>
-              </Tooltip>
+              <CancelJobButton
+                label={t('listings.jobs.details.cancel')}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onCancelRequest(job.id);
+                }}
+                disabled={Boolean(cancellingJobId)}
+              />
             ) : null}
           </S.JobCardHeader>
 
