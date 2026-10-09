@@ -1,5 +1,5 @@
 import { RETURN_TABS, ReturnBucket, ReturnTab, type ReturnsQueryDto } from '@repo/shared';
-import { getLocaleConfig, type TabNavItem, type TableColumn } from '@repo/ui';
+import { getLocaleConfig, type IconName, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,14 @@ import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 
 const TAB_IDS: readonly ReturnTab[] = Object.values(ReturnTab);
+
+/** The Orders rail's icons for the same meanings. */
+const RETURN_TAB_ICON: Record<ReturnTab, IconName> = {
+  [ReturnTab.ALL]: 'format-list-bulleted',
+  [ReturnTab.ACTION]: 'shield-alert',
+  [ReturnTab.IN_PROGRESS]: 'loader',
+  [ReturnTab.CLOSED]: 'check-circle',
+};
 
 const isTab = (value: string): value is ReturnTab => (TAB_IDS as readonly string[]).includes(value);
 
@@ -102,6 +110,7 @@ export const ReturnsPageContainer: React.FC = () => {
       TAB_IDS.map((tabId) => ({
         id: tabId,
         label: t(`returns.tabs.${tabId}`),
+        icon: RETURN_TAB_ICON[tabId],
         // A count pill beside the label, as on the orders page — never baked into the label.
         count: tabId === ReturnTab.ALL || !counts ? undefined : countFor(tabId),
       })),

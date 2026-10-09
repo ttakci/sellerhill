@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainer, TabNav, Text as UIText, tkn, type AppTheme } from '@repo/ui';
+import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -11,53 +11,6 @@ export const TabsRow = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
-`;
-
-/**
- * Status tabs exactly like the Orders stage rail: a plain icon before each
- * label (no disc), and only the SELECTED tab takes its colour — icon, label,
- * underline and a filled count pill. Positions follow
- * `CampaignTab`: All brand blue, Running green, Paused amber, Ended navy (the
- * badge colours on the cards).
- */
-const CAMPAIGN_TAB_COLORS = [
-  'colors.brand.primary',
-  'colors.semantic.success',
-  'colors.semantic.warning',
-  'colors.badge.navy',
-] as const;
-
-const campaignTabColor = (theme: AppTheme, position: number, color: (typeof CAMPAIGN_TAB_COLORS)[number]): string => {
-  const ink = String(tkn(color)({ theme }));
-  const inverse = String(tkn('colors.text.inverse')({ theme }));
-  const selected = `> [role='tab']:nth-of-type(${position})[aria-selected='true']`;
-  return `
-    ${selected},
-    ${selected}:hover {
-      color: ${ink};
-    }
-    ${selected}::after {
-      background: ${ink};
-    }
-    ${selected} > span:last-child {
-      color: ${inverse};
-      background: ${ink};
-    }
-  `;
-};
-
-export const StatusTabs = styled(TabNav)`
-  > [role='tab'][aria-selected='true'] {
-    font-weight: ${tkn('typography.fontWeight.bold')};
-  }
-
-  > [role='tab'][aria-selected='true'] > span:last-child {
-    font-weight: ${tkn('typography.fontWeight.bold')};
-    box-shadow: 0 0 0 0.0625rem ${tkn('colors.glass.edge')};
-  }
-
-  ${({ theme }) =>
-    CAMPAIGN_TAB_COLORS.map((color, index) => campaignTabColor(theme as AppTheme, index + 1, color)).join('')}
 `;
 
 export const FilterBarRow = styled.div`

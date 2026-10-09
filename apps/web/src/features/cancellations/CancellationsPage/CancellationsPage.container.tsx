@@ -1,5 +1,5 @@
 import { CANCELLATION_TABS, CancellationBucket, CancellationTab, type CancellationsQueryDto } from '@repo/shared';
-import { getLocaleConfig, type TabNavItem, type TableColumn } from '@repo/ui';
+import { getLocaleConfig, type IconName, type TabNavItem, type TableColumn } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,14 @@ import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 
 const TAB_IDS: readonly CancellationTab[] = Object.values(CancellationTab);
+
+/** The Orders rail's icons for the same meanings. */
+const CANCELLATION_TAB_ICON: Record<CancellationTab, IconName> = {
+  [CancellationTab.ALL]: 'format-list-bulleted',
+  [CancellationTab.ACTION]: 'shield-alert',
+  [CancellationTab.IN_PROGRESS]: 'loader',
+  [CancellationTab.CLOSED]: 'check-circle',
+};
 
 const isTab = (value: string): value is CancellationTab => (TAB_IDS as readonly string[]).includes(value);
 
@@ -102,6 +110,7 @@ export const CancellationsPageContainer: React.FC = () => {
       TAB_IDS.map((tabId) => ({
         id: tabId,
         label: t(`cancellations.tabs.${tabId}`),
+        icon: CANCELLATION_TAB_ICON[tabId],
         // A count pill beside the label, as on the orders page — never baked into the label.
         count: tabId === CancellationTab.ALL || !counts ? undefined : countFor(tabId),
       })),

@@ -1,4 +1,4 @@
-import { Button, DataTable, EmptyState, PageHeader, SearchField, TabNav, Text } from '@repo/ui';
+import { Button, DataTable, EmptyState, PageHeader, SearchField, Text } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -10,6 +10,18 @@ import * as S from './CancellationsPage.style';
 import type { CancellationsPageProps } from './CancellationsPage.types';
 
 import { StatusLegend } from '@/components/StatusLegend';
+import { StatusTabs, type StatusTabColor } from '@/components/StatusTabs';
+
+/**
+ * One colour per `CancellationTab`, in order — the Orders rail's own colours
+ * for the same meanings: all blue · needs action red · in progress blue · closed green.
+ */
+const TAB_COLORS: readonly StatusTabColor[] = [
+  'colors.brand.primary',
+  'colors.semantic.error',
+  'colors.semantic.info',
+  'colors.semantic.success',
+];
 
 export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
   rows,
@@ -51,7 +63,8 @@ export const CancellationsPageComponent: React.FC<CancellationsPageProps> = ({
       <PageHeader title={t('cancellations.title')} subtitle={t('cancellations.subtitle')} />
 
       <S.TabsRow>
-        <TabNav
+        <StatusTabs
+          $colors={TAB_COLORS}
           items={tabItems}
           value={tab}
           onChange={onTabChange}

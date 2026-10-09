@@ -19,6 +19,16 @@ import { CampaignCard } from './CampaignCard.component';
 import * as S from './CampaignsPage.style';
 import type { CampaignsPageProps, CampaignView } from './CampaignsPage.types';
 
+import { StatusTabs, type StatusTabColor } from '@/components/StatusTabs';
+
+/** One colour per `CampaignTab`, in order: all · running · paused · ended (the card badge colours). */
+const TAB_COLORS: readonly StatusTabColor[] = [
+  'colors.brand.primary',
+  'colors.semantic.success',
+  'colors.semantic.warning',
+  'colors.badge.navy',
+];
+
 export function CampaignsPageComponent({
   campaigns,
   metrics,
@@ -203,7 +213,8 @@ export function CampaignsPageComponent({
           </H.SummaryHero>
 
           <S.TabsRow>
-            <S.StatusTabs
+            <StatusTabs
+              $colors={TAB_COLORS}
               items={tabItems}
               value={tab}
               onChange={onTabChange}

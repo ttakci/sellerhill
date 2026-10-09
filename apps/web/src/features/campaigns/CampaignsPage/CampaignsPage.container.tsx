@@ -80,7 +80,7 @@ export function CampaignsPageContainer() {
     [CampaignTab.ENDED]: t('campaigns.campaign.ended'),
   };
   const tabIcons: Record<CampaignTab, IconName> = {
-    [CampaignTab.ALL]: 'list-alt',
+    [CampaignTab.ALL]: 'format-list-bulleted',
     [CampaignTab.RUNNING]: 'play-arrow',
     [CampaignTab.PAUSED]: 'pause',
     [CampaignTab.ENDED]: 'block',

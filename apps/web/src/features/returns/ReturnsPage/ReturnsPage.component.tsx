@@ -1,4 +1,4 @@
-import { Button, DataTable, EmptyState, PageHeader, SearchField, TabNav, Text } from '@repo/ui';
+import { Button, DataTable, EmptyState, PageHeader, SearchField, Text } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -10,6 +10,18 @@ import * as S from './ReturnsPage.style';
 import type { ReturnsPageProps } from './ReturnsPage.types';
 
 import { StatusLegend } from '@/components/StatusLegend';
+import { StatusTabs, type StatusTabColor } from '@/components/StatusTabs';
+
+/**
+ * One colour per `ReturnTab`, in order — the Orders rail's own colours for the
+ * same meanings: all blue · needs action red · in progress blue · closed green.
+ */
+const TAB_COLORS: readonly StatusTabColor[] = [
+  'colors.brand.primary',
+  'colors.semantic.error',
+  'colors.semantic.info',
+  'colors.semantic.success',
+];
 
 export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
   rows,
@@ -49,7 +61,8 @@ export const ReturnsPageComponent: React.FC<ReturnsPageProps> = ({
       <PageHeader title={t('returns.title')} subtitle={t('returns.subtitle')} />
 
       <S.TabsRow>
-        <TabNav
+        <StatusTabs
+          $colors={TAB_COLORS}
           items={tabItems}
           value={tab}
           onChange={onTabChange}
