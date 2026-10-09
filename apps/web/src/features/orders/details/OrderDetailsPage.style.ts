@@ -466,7 +466,7 @@ export const ErrorText = styled(Text)`
 
 /**
  * A tracking number as a solid coloured chip with white ink, so it stands out from
- * the cost rows: amber for Amazon's own number (the supplier's, never shown to
+ * the cost rows: blue for Amazon's own number (the supplier's, never shown to
  * the buyer), green for the converted number eBay and the buyer see.
  */
 export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
@@ -475,7 +475,7 @@ export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   max-width: 100%;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.sm')};
-  background: ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success'))};
+  background: ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.brand.primary') : tkn('colors.semantic.success'))};
   overflow-wrap: anywhere;
 
   /* The copy trigger's light hover wash would hide the white ink on a dark chip. */
