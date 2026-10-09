@@ -154,6 +154,9 @@ const lightColors: ThemeColors = {
     navy: '#1e3a8a',
     navyTint: '#e8eefc',
     navyBorder: '#c3d2f5',
+    purple: '#7e22ce',
+    purpleTint: '#faf5ff',
+    purpleBorder: '#e9d5ff',
   },
 
   sidebar: {
@@ -360,6 +363,9 @@ const darkColors: ThemeColors = {
     navy: '#a5b4fc',
     navyTint: 'rgba(129, 140, 248, 0.12)',
     navyBorder: 'rgba(129, 140, 248, 0.25)',
+    purple: '#d8b4fe',
+    purpleTint: 'rgba(192, 132, 252, 0.12)',
+    purpleBorder: 'rgba(192, 132, 252, 0.25)',
   },
 
   dashboard: {

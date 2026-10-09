@@ -27,41 +27,36 @@ export const TabsRow = styled.div`
 `;
 
 /**
- * Each list keeps its own colour on the rail, the way the Orders stage rail
- * gives every stage one. With no count to carry it, the ICON is the badge:
- * always in its list's colour on that colour's light tint, and on the
- * selected tab a solid disc with white ink, beside a coloured label and
- * underline — the Orders rail's filled count pill, in this page's terms.
- * Positions follow `BEST_SELLERS_LIST_TYPE_ORDER`: Best Sellers (brand blue),
- * New Releases (teal), Movers & Shakers (green), Most Wished For (red), Most
- * Gifted (amber).
+ * Like the Orders stage rail, only the SELECTED list takes its colour: a solid
+ * disc with white ink around its icon (with no count to carry it, the icon is
+ * the badge), a bold coloured label and underline. Unselected icons stay
+ * neutral grey on a grey disc. Five hues that cannot be mistaken for each
+ * other — teal was dropped, it read as the same green, and navy as the
+ * same blue. Positions follow `BEST_SELLERS_LIST_TYPE_ORDER`: Best Sellers
+ * amber (the trophy), New Releases brand blue, Movers & Shakers purple
+ * (operator request), Most Wished For red, Most Gifted green.
  */
 const LIST_TAB_COLORS = [
-  { ink: 'colors.brand.primary', tint: 'colors.semanticTint.info' },
-  { ink: 'colors.badge.teal', tint: 'colors.badge.tealTint' },
-  { ink: 'colors.semantic.success', tint: 'colors.semanticTint.success' },
-  { ink: 'colors.semantic.error', tint: 'colors.semanticTint.error' },
-  { ink: 'colors.semantic.warning', tint: 'colors.semanticTint.warning' },
+  'colors.semantic.warning',
+  'colors.brand.primary',
+  'colors.badge.purple',
+  'colors.semantic.error',
+  'colors.semantic.success',
 ] as const;
 
-const listTabColor = (theme: AppTheme, position: number, colors: (typeof LIST_TAB_COLORS)[number]): string => {
-  const ink = String(tkn(colors.ink)({ theme }));
-  const tint = String(tkn(colors.tint)({ theme }));
+const listTabColor = (theme: AppTheme, position: number, color: (typeof LIST_TAB_COLORS)[number]): string => {
+  const ink = String(tkn(color)({ theme }));
   const inverse = String(tkn('colors.text.inverse')({ theme }));
-  const tab = `> [role='tab']:nth-of-type(${position})`;
+  const tab = `> [role='tab']:nth-of-type(${position})[aria-selected='true']`;
   return `
-    ${tab} > div[aria-hidden='true'] {
-      color: ${ink};
-      background: ${tint};
-    }
-    ${tab}[aria-selected='true'],
-    ${tab}[aria-selected='true']:hover {
+    ${tab},
+    ${tab}:hover {
       color: ${ink};
     }
-    ${tab}[aria-selected='true']::after {
+    ${tab}::after {
       background: ${ink};
     }
-    ${tab}[aria-selected='true'] > div[aria-hidden='true'] {
+    ${tab} > div[aria-hidden='true'] {
       color: ${inverse};
       background: ${ink};
     }
@@ -79,6 +74,7 @@ export const ListTabs = styled(TabNav)`
     width: 1.5rem;
     height: 1.5rem;
     border-radius: ${tkn('radius.full')};
+    background: ${tkn('colors.semanticTint.neutral')};
     transition:
       background ${tkn('transitions.fast')},
       color ${tkn('transitions.fast')};
@@ -93,7 +89,7 @@ export const ListTabs = styled(TabNav)`
     font-weight: ${tkn('typography.fontWeight.bold')};
   }
 
-  ${({ theme }) => LIST_TAB_COLORS.map((colors, index) => listTabColor(theme as AppTheme, index + 1, colors)).join('')}
+  ${({ theme }) => LIST_TAB_COLORS.map((color, index) => listTabColor(theme as AppTheme, index + 1, color)).join('')}
 `;
 
 /** "13,760 of 15,000 products left" + the info glyph explaining how it is counted. */

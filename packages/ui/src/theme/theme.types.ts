@@ -111,6 +111,10 @@ export interface ThemeColors {
     navy: string;
     navyTint: string;
     navyBorder: string;
+    /** Purple — the Product Search "Movers & Shakers" tab (operator request, 2026-10-09). */
+    purple: string;
+    purpleTint: string;
+    purpleBorder: string;
   };
 
   // Sidebar-specific (dark panel tokens)
