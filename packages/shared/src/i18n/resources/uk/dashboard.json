@@ -121,7 +121,9 @@
       "title": "Прибутки та збитки",
       "subtitle": "Розбивка вибраного періоду",
       "parameter": "Показник / період",
-      "currentPeriod": "Поточний період",
+      "currentDay": "Сьогодні",
+      "currentWeek": "Цей тиждень",
+      "currentMonth": "Цей місяць",
       "heatmap": "Теплова карта",
       "export": "Завантажити CSV"
     },
@@ -176,6 +178,16 @@
       "estimatedAmount": "{{amount}} орієнтовно",
       "emptyTitle": "За цей період продажів немає",
       "emptySubtitle": "Лістинги з’являться тут, щойно вони продадуться у вибраному періоді.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "по годинах",
+          "day": "по днях",
+          "week": "по тижнях",
+          "month": "по місяцях"
+        },
+        "peak": "Максимум: {{date}} · {{value}}"
+      },
       "trendAria": "Динаміка за вибраний період"
     }
   }

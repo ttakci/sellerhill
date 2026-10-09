@@ -76,3 +76,18 @@ export const toTopSellerStats = (item: TopListingDto, t: TFunction, locale: stri
     },
   ];
 };
+
+/**
+ * The bucket the trend header names as the best one: the highest value, the
+ * earliest on a tie. Null when no bucket carried a positive value — a line of
+ * zeros (or of losses) has no "best" worth naming.
+ */
+export const findPeakIndex = (values: number[]): number | null => {
+  let peak: number | null = null;
+  values.forEach((value, index) => {
+    if (value > 0 && (peak === null || value > values[peak])) {
+      peak = index;
+    }
+  });
+  return peak;
+};

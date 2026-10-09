@@ -109,7 +109,9 @@
       "title": "损益表",
       "subtitle": "所选时段的明细",
       "parameter": "指标 / 周期",
-      "currentPeriod": "当前周期",
+      "currentDay": "今天",
+      "currentWeek": "本周",
+      "currentMonth": "本月",
       "heatmap": "热力图",
       "export": "下载 CSV"
     },
@@ -158,6 +160,16 @@
       "estimatedAmount": "{{amount}} 预估",
       "emptyTitle": "此期间没有销售",
       "emptySubtitle": "刊登在所选期间产生销售后会显示在这里。",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "按小时",
+          "day": "按天",
+          "week": "按周",
+          "month": "按月"
+        },
+        "peak": "最高：{{date}} · {{value}}"
+      },
       "trendAria": "所选期间的趋势"
     }
   }

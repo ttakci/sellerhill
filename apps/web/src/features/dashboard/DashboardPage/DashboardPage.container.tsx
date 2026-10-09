@@ -388,6 +388,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
           onSortChange: setTopSort,
           onPageChange: setTopPage,
           locale,
+          formatters,
           onOpenListing: handleListingOpen,
         }}
       />

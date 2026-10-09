@@ -113,7 +113,9 @@
       "title": "نفع و نقصان",
       "subtitle": "منتخب مدت کی تفصیل",
       "parameter": "میٹرک / مدت",
-      "currentPeriod": "موجودہ مدت",
+      "currentDay": "آج",
+      "currentWeek": "اس ہفتے",
+      "currentMonth": "اس مہینے",
       "heatmap": "ہیٹ میپ",
       "export": "CSV ڈاؤن لوڈ کریں"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} تخمینی",
       "emptyTitle": "اس مدت میں کوئی فروخت نہیں",
       "emptySubtitle": "منتخب مدت میں فروخت ہوتے ہی لسٹنگز یہاں نظر آئیں گی۔",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "فی گھنٹہ",
+          "day": "روزانہ",
+          "week": "ہفتہ وار",
+          "month": "ماہانہ"
+        },
+        "peak": "سب سے زیادہ: {{date}} · {{value}}"
+      },
       "trendAria": "منتخب مدت کا رجحان"
     }
   }

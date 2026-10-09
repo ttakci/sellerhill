@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { profitTone, toTopSellerStats, trendTone } from './topSellerCard';
+import { findPeakIndex, profitTone, toTopSellerStats, trendTone } from './topSellerCard';
 
 const t = ((key: string) => key) as never;
 const item = (over: Partial<{ netProfit: number; profitProvisional: number; change: number | null }> = {}) => ({
   listing: { currency: 'USD' } as never,
-  metrics: { sales: 1234.5, units: 7, orders: 6, netProfit: over.netProfit ?? 210.25, profitProvisional: over.profitProvisional ?? 0, ordersPendingCapture: 0 },
+  metrics: {
+    sales: 1234.5,
+    units: 7,
+    orders: 6,
+    netProfit: over.netProfit ?? 210.25,
+    profitProvisional: over.profitProvisional ?? 0,
+    ordersPendingCapture: 0,
+  },
   changes: { sales: over.change === undefined ? 12.5 : over.change, units: null, orders: null, netProfit: null },
   series: [],
 });
@@ -14,8 +21,10 @@ describe('toTopSellerStats', () => {
   it('shows period sales with its % change, units, orders and net profit', () => {
     const stats = toTopSellerStats(item() as never, t, 'en-US');
     expect(stats.map((s) => s.label)).toEqual([
-      'dashboard.topSellers.stats.sales', 'dashboard.topSellers.stats.units',
-      'dashboard.topSellers.stats.orders', 'dashboard.topSellers.stats.netProfit',
+      'dashboard.topSellers.stats.sales',
+      'dashboard.topSellers.stats.units',
+      'dashboard.topSellers.stats.orders',
+      'dashboard.topSellers.stats.netProfit',
     ]);
     expect(stats[0].value).toBe('$1,234.50');
     expect(stats[0].secondary).toBe('+12.5%');
@@ -71,5 +80,18 @@ describe('toTopSellerStats', () => {
 
   it('no provisional profit: no secondary', () => {
     expect(toTopSellerStats(item() as never, t, 'en-US')[3].secondary).toBeUndefined();
+  });
+});
+
+describe('findPeakIndex', () => {
+  it('names the highest bucket, the earliest on a tie', () => {
+    expect(findPeakIndex([0, 3, 1, 3])).toBe(1);
+    expect(findPeakIndex([0, 0, 24.2])).toBe(2);
+  });
+
+  it('has no peak when nothing positive was recorded', () => {
+    expect(findPeakIndex([])).toBeNull();
+    expect(findPeakIndex([0, 0])).toBeNull();
+    expect(findPeakIndex([-5, 0])).toBeNull();
   });
 });

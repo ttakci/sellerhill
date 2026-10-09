@@ -113,7 +113,9 @@
       "title": "Kâr & zarar",
       "subtitle": "Seçili dönemin dökümü",
       "parameter": "Metrik / Dönem",
-      "currentPeriod": "Güncel dönem",
+      "currentDay": "Bugün",
+      "currentWeek": "Bu hafta",
+      "currentMonth": "Bu ay",
       "heatmap": "Isı haritası",
       "export": "CSV indir"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} tahmini",
       "emptyTitle": "Bu dönemde satış yok",
       "emptySubtitle": "Seçili dönemde satılan listeler burada görünür.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "saatlik",
+          "day": "günlük",
+          "week": "haftalık",
+          "month": "aylık"
+        },
+        "peak": "En yüksek: {{date}} · {{value}}"
+      },
       "trendAria": "Seçili dönemdeki gidiş"
     }
   }

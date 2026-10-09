@@ -4,7 +4,7 @@
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Text, tkn } from '@repo/ui';
 
 /**
  * The metric column has a FIXED width, so the space the table gains from
@@ -46,8 +46,7 @@ export const Th = styled.th<{ $current?: boolean }>`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   text-align: right;
   white-space: nowrap;
-  background: ${({ $current, theme }) =>
-    $current ? theme.colors.brand.secondary : theme.colors.surface.secondary};
+  background: ${({ $current, theme }) => ($current ? theme.colors.brand.secondary : theme.colors.surface.secondary)};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:first-of-type {
@@ -69,6 +68,11 @@ export const Th = styled.th<{ $current?: boolean }>`
   }
 `;
 
+/** "Today" under the current column's date. */
+export const ThCaption = styled(Text)`
+  display: block;
+`;
+
 export const GroupRow = styled.tr`
   td {
     padding: ${tkn('spacing.sm')} ${tkn('spacing.md')} ${tkn('spacing.2xs')};
@@ -87,8 +91,7 @@ export const GroupRow = styled.tr`
 
 export const Row = styled.tr<{ $emphasis: boolean }>`
   td {
-    border-top: ${({ $emphasis, theme }) =>
-      $emphasis ? `0.0625rem solid ${theme.colors.border.primary}` : 'none'};
+    border-top: ${({ $emphasis, theme }) => ($emphasis ? `0.0625rem solid ${theme.colors.border.primary}` : 'none')};
   }
 
   &:hover td {

@@ -113,7 +113,9 @@
       "title": "Profit & loss",
       "subtitle": "Breakdown of the selected period",
       "parameter": "Metric / Period",
-      "currentPeriod": "Current period",
+      "currentDay": "Today",
+      "currentWeek": "This week",
+      "currentMonth": "This month",
       "heatmap": "Heat map",
       "export": "Download CSV"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} estimated",
       "emptyTitle": "Nothing sold in this period",
       "emptySubtitle": "Listings show up here as soon as they sell in the selected period.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "hourly",
+          "day": "daily",
+          "week": "weekly",
+          "month": "monthly"
+        },
+        "peak": "Best: {{date}} · {{value}}"
+      },
       "trendAria": "Trend over the selected period"
     }
   }

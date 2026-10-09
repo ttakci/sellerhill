@@ -5,9 +5,11 @@
  */
 
 import type { TopListingDto } from '@repo/shared';
-import { DataTable, EmptyState, Sparkline, Text } from '@repo/ui';
+import { DataTable, EmptyState, Text } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
+import { TrendChart } from '../TrendChart';
 
 import type { TopSellersPanelComponentProps } from './TopSellersPanel.types';
 
@@ -28,6 +30,10 @@ export const TopSellersPanelComponent = ({
   isError,
   onRetry,
   onOpenListing,
+  trendColors,
+  formatTrendTick,
+  formatTrendTooltipTitle,
+  stopCardClick,
 }: TopSellersPanelComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'listings', 'translation']);
 
@@ -42,7 +48,18 @@ export const TopSellersPanelComponent = ({
         detailLabel={undefined}
         stats={model.stats}
         trend={
-          <Sparkline values={model.series} tone={model.trendTone} ariaLabel={t('dashboard.topSellers.trendAria')} />
+          <TrendChart
+            points={model.trend.points}
+            title={model.trend.title}
+            peakLabel={model.trend.peakLabel}
+            valueLabel={model.trend.valueLabel}
+            colors={{ ...trendColors, line: model.trend.color }}
+            formatTick={formatTrendTick}
+            formatTooltipTitle={formatTrendTooltipTitle}
+            formatValue={model.trend.formatValue}
+            ariaLabel={t('dashboard.topSellers.trendAria')}
+            onChartClick={stopCardClick}
+          />
         }
         orientation="horizontal"
         onClick={() => onOpenListing(item.listing.id)}
@@ -81,7 +98,13 @@ export const TopSellersPanelComponent = ({
           ns="dashboard"
           count={total}
           values={{ count: total }}
-          components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+          components={{
+            b: (
+              <Text variant="body-sm" weight="bold" color="text.primary">
+                {null}
+              </Text>
+            ),
+          }}
         />
       }
       gridMinItemWidth="27rem"

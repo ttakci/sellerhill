@@ -3,7 +3,11 @@
  */
 
 import type { DashboardRangeInput, TopListingDto, TopListingSortKey } from '@repo/shared';
-import type { DataTableProps, SparklineTone, TableColumn, ViewMode } from '@repo/ui';
+import type { DataTableProps, TableColumn, ViewMode } from '@repo/ui';
+import type React from 'react';
+
+import type { DashboardFormatters } from '../../dashboard.types';
+import type { TrendChartColors, TrendChartPoint } from '../TrendChart';
 
 import type { ListingCardProps, ListingCardStat } from '@/domain-ui';
 
@@ -19,6 +23,8 @@ export interface TopSellersPanelProps {
   onPageChange: (page: number) => void;
   /** Number/date locale (separators only — money keeps the listing's currency). */
   locale: string;
+  /** The page's date formatters: the trend axis labels a bucket exactly as the Chart tab does. */
+  formatters: DashboardFormatters;
   onOpenListing: (listingId: string) => void;
 }
 
@@ -28,8 +34,18 @@ export interface TopSellerCardModel {
   card: Omit<ListingCardProps, 'orientation'>;
   /** The range's figures in place of the listing's lifetime ones. */
   stats: ListingCardStat[];
-  series: number[];
-  trendTone: SparklineTone;
+  trend: TopSellerTrendModel;
+}
+
+/** One card's trend pane: the bucket values and the texts around them. */
+export interface TopSellerTrendModel {
+  points: TrendChartPoint[];
+  /** "Revenue · daily" */
+  title: string;
+  peakLabel?: string;
+  valueLabel: string;
+  color: string;
+  formatValue: (value: number) => string;
 }
 
 export interface TopSellersPanelComponentProps {
@@ -49,4 +65,9 @@ export interface TopSellersPanelComponentProps {
   isError: boolean;
   onRetry: () => void;
   onOpenListing: (listingId: string) => void;
+  /** Shared by every card's trend pane. */
+  trendColors: Omit<TrendChartColors, 'line'>;
+  formatTrendTick: (key: string) => string;
+  formatTrendTooltipTitle: (key: string) => string;
+  stopCardClick: (event: React.MouseEvent) => void;
 }

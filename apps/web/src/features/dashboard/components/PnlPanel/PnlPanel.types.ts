@@ -20,6 +20,8 @@ export interface PnlPanelContainerProps {
 export interface PnlColumnHeader {
   key: string;
   label: string;
+  /** "Today" / "This week" / "This month" under the current column's label. */
+  caption?: string;
   /** The column that contains today — highlighted. */
   isCurrent: boolean;
 }

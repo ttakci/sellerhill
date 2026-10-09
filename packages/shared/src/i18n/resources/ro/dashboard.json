@@ -117,7 +117,9 @@
       "title": "Profit și pierdere",
       "subtitle": "Detalierea perioadei selectate",
       "parameter": "Indicator / Perioadă",
-      "currentPeriod": "Perioada curentă",
+      "currentDay": "Astăzi",
+      "currentWeek": "Săptămâna aceasta",
+      "currentMonth": "Luna aceasta",
       "heatmap": "Hartă termică",
       "export": "Descarcă CSV"
     },
@@ -170,6 +172,16 @@
       "estimatedAmount": "{{amount}} estimat",
       "emptyTitle": "Nicio vânzare în această perioadă",
       "emptySubtitle": "Anunțurile apar aici imediat ce se vând în perioada aleasă.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "pe oră",
+          "day": "zilnic",
+          "week": "săptămânal",
+          "month": "lunar"
+        },
+        "peak": "Maxim: {{date}} · {{value}}"
+      },
       "trendAria": "Tendința în perioada aleasă"
     }
   }

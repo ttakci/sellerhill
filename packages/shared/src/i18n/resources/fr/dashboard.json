@@ -117,7 +117,9 @@
       "title": "Compte de résultat",
       "subtitle": "Détail de la période sélectionnée",
       "parameter": "Indicateur / Période",
-      "currentPeriod": "Période en cours",
+      "currentDay": "Aujourd’hui",
+      "currentWeek": "Cette semaine",
+      "currentMonth": "Ce mois-ci",
       "heatmap": "Carte thermique",
       "export": "Télécharger le CSV"
     },
@@ -170,6 +172,16 @@
       "estimatedAmount": "{{amount}} estimé",
       "emptyTitle": "Aucune vente sur cette période",
       "emptySubtitle": "Les annonces apparaissent ici dès qu’elles se vendent sur la période choisie.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "par heure",
+          "day": "quotidien",
+          "week": "hebdomadaire",
+          "month": "mensuel"
+        },
+        "peak": "Maximum : {{date}} · {{value}}"
+      },
       "trendAria": "Tendance sur la période choisie"
     }
   }

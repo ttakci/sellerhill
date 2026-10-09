@@ -117,7 +117,9 @@
       "title": "Lucros e perdas",
       "subtitle": "Detalhamento do período selecionado",
       "parameter": "Métrica / Período",
-      "currentPeriod": "Período atual",
+      "currentDay": "Hoje",
+      "currentWeek": "Esta semana",
+      "currentMonth": "Este mês",
       "heatmap": "Mapa de calor",
       "export": "Baixar CSV"
     },
@@ -170,6 +172,16 @@
       "estimatedAmount": "{{amount}} estimado",
       "emptyTitle": "Nenhuma venda neste período",
       "emptySubtitle": "Os anúncios aparecem aqui assim que vendem no período escolhido.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "por hora",
+          "day": "diário",
+          "week": "semanal",
+          "month": "mensal"
+        },
+        "peak": "Máximo: {{date}} · {{value}}"
+      },
       "trendAria": "Tendência no período escolhido"
     }
   }

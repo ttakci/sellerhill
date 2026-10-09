@@ -113,7 +113,9 @@
       "title": "Mənfəət və zərər",
       "subtitle": "Seçilmiş dövrün bölgüsü",
       "parameter": "Göstərici / Dövr",
-      "currentPeriod": "Cari dövr",
+      "currentDay": "Bu gün",
+      "currentWeek": "Bu həftə",
+      "currentMonth": "Bu ay",
       "heatmap": "İstilik xəritəsi",
       "export": "CSV yüklə"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} təxmini",
       "emptyTitle": "Bu dövrdə satış yoxdur",
       "emptySubtitle": "Seçilmiş dövrdə satılan elanlar burada görünəcək.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "saatlıq",
+          "day": "gündəlik",
+          "week": "həftəlik",
+          "month": "aylıq"
+        },
+        "peak": "Ən yüksək: {{date}} · {{value}}"
+      },
       "trendAria": "Seçilmiş dövr üzrə gediş"
     }
   }

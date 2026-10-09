@@ -4,7 +4,7 @@
  * range), owns the heat-map toggle and produces the client-side CSV export.
  */
 
-import { DashboardValueFormat, type DashboardPnlColumn } from '@repo/shared';
+import { DashboardChartGranularity, DashboardValueFormat, type DashboardPnlColumn } from '@repo/shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,18 @@ import { buildPnlCsv, downloadCsv, heatIntensity } from '../../utils/pnlExport';
 
 import { PnlPanelComponent } from './PnlPanel.component';
 import type { PnlColumnHeader, PnlPanelContainerProps, PnlSection } from './PnlPanel.types';
+
+/**
+ * The caption under the column that contains the seller's today. The column
+ * keeps its date ("09 Oct"): a bare "Current period" in its place read as a
+ * total of the whole range. P&L columns are never hourly.
+ */
+const CURRENT_CAPTION_KEY: Record<DashboardChartGranularity, string> = {
+  [DashboardChartGranularity.HOUR]: 'dashboard.pnl.currentDay',
+  [DashboardChartGranularity.DAY]: 'dashboard.pnl.currentDay',
+  [DashboardChartGranularity.WEEK]: 'dashboard.pnl.currentWeek',
+  [DashboardChartGranularity.MONTH]: 'dashboard.pnl.currentMonth',
+};
 
 /** Ceiling opacity of a heat-map cell — keeps the number readable. */
 const HEAT_MAX_OPACITY = 0.18;
@@ -33,11 +45,8 @@ export const PnlPanel = ({
   const [heatmapEnabled, setHeatmapEnabled] = useState(true);
 
   const columnLabels = useMemo(
-    () =>
-      columns.map((column) =>
-        column.isCurrent ? t('dashboard.pnl.currentPeriod') : formatters.pnlColumnLabel(column, granularity),
-      ),
-    [columns, formatters, granularity, t],
+    () => columns.map((column) => formatters.pnlColumnLabel(column, granularity)),
+    [columns, formatters, granularity]
   );
 
   const columnHeaders = useMemo<PnlColumnHeader[]>(
@@ -45,17 +54,14 @@ export const PnlPanel = ({
       columns.map((column, index) => ({
         key: column.key,
         label: columnLabels[index],
+        caption: column.isCurrent ? t(CURRENT_CAPTION_KEY[granularity]) : undefined,
         isCurrent: column.isCurrent,
       })),
-    [columns, columnLabels],
+    [columns, columnLabels, granularity, t]
   );
 
   const sections = useMemo<PnlSection[]>(() => {
-    const formatValue = (
-      format: DashboardValueFormat,
-      value: number,
-      negative?: boolean,
-    ): string => {
+    const formatValue = (format: DashboardValueFormat, value: number, negative?: boolean): string => {
       if (format === DashboardValueFormat.PERCENT) {
         return formatters.percent(value);
       }

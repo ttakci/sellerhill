@@ -117,7 +117,9 @@
       "title": "Profitti e perdite",
       "subtitle": "Dettaglio del periodo selezionato",
       "parameter": "Metrica / Periodo",
-      "currentPeriod": "Periodo attuale",
+      "currentDay": "Oggi",
+      "currentWeek": "Questa settimana",
+      "currentMonth": "Questo mese",
       "heatmap": "Mappa di calore",
       "export": "Scarica il CSV"
     },
@@ -170,6 +172,16 @@
       "estimatedAmount": "{{amount}} stimato",
       "emptyTitle": "Nessuna vendita in questo periodo",
       "emptySubtitle": "Le inserzioni compaiono qui non appena vendono nel periodo scelto.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "orario",
+          "day": "giornaliero",
+          "week": "settimanale",
+          "month": "mensile"
+        },
+        "peak": "Massimo: {{date}} · {{value}}"
+      },
       "trendAria": "Andamento nel periodo scelto"
     }
   }

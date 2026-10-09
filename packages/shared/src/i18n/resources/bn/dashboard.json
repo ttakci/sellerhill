@@ -113,7 +113,9 @@
       "title": "লাভ ও ক্ষতি",
       "subtitle": "নির্বাচিত সময়কালের বিভাজন",
       "parameter": "মেট্রিক / সময়কাল",
-      "currentPeriod": "বর্তমান সময়কাল",
+      "currentDay": "আজ",
+      "currentWeek": "এই সপ্তাহ",
+      "currentMonth": "এই মাস",
       "heatmap": "হিট ম্যাপ",
       "export": "CSV ডাউনলোড"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} আনুমানিক",
       "emptyTitle": "এই সময়ে কোনো বিক্রি নেই",
       "emptySubtitle": "নির্বাচিত সময়ে বিক্রি হলেই লিস্টিং এখানে দেখা যাবে।",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "ঘণ্টাভিত্তিক",
+          "day": "দৈনিক",
+          "week": "সাপ্তাহিক",
+          "month": "মাসিক"
+        },
+        "peak": "সর্বোচ্চ: {{date}} · {{value}}"
+      },
       "trendAria": "নির্বাচিত সময়ের প্রবণতা"
     }
   }

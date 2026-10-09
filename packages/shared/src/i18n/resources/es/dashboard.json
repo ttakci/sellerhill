@@ -117,7 +117,9 @@
       "title": "Estado de resultados",
       "subtitle": "Desglose del periodo seleccionado",
       "parameter": "Métrica / Periodo",
-      "currentPeriod": "Periodo actual",
+      "currentDay": "Hoy",
+      "currentWeek": "Esta semana",
+      "currentMonth": "Este mes",
       "heatmap": "Mapa de calor",
       "export": "Descargar CSV"
     },
@@ -170,6 +172,16 @@
       "estimatedAmount": "{{amount}} estimada",
       "emptyTitle": "No hubo ventas en este periodo",
       "emptySubtitle": "Las publicaciones aparecen aquí en cuanto se venden en el periodo elegido.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "por hora",
+          "day": "diario",
+          "week": "semanal",
+          "month": "mensual"
+        },
+        "peak": "Máximo: {{date}} · {{value}}"
+      },
       "trendAria": "Tendencia en el periodo elegido"
     }
   }

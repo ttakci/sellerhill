@@ -121,7 +121,9 @@
       "title": "Прибыли и убытки",
       "subtitle": "Разбивка выбранного периода",
       "parameter": "Показатель / период",
-      "currentPeriod": "Текущий период",
+      "currentDay": "Сегодня",
+      "currentWeek": "Эта неделя",
+      "currentMonth": "Этот месяц",
       "heatmap": "Тепловая карта",
       "export": "Скачать CSV"
     },
@@ -176,6 +178,16 @@
       "estimatedAmount": "{{amount}} ориентировочно",
       "emptyTitle": "За этот период продаж нет",
       "emptySubtitle": "Листинги появятся здесь, как только они продадутся в выбранном периоде.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "по часам",
+          "day": "по дням",
+          "week": "по неделям",
+          "month": "по месяцам"
+        },
+        "peak": "Максимум: {{date}} · {{value}}"
+      },
       "trendAria": "Динамика за выбранный период"
     }
   }

@@ -113,7 +113,9 @@
       "title": "Gewinn und Verlust",
       "subtitle": "Aufschlüsselung des gewählten Zeitraums",
       "parameter": "Kennzahl / Zeitraum",
-      "currentPeriod": "Aktueller Zeitraum",
+      "currentDay": "Heute",
+      "currentWeek": "Diese Woche",
+      "currentMonth": "Dieser Monat",
       "heatmap": "Heatmap",
       "export": "CSV herunterladen"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} geschätzt",
       "emptyTitle": "In diesem Zeitraum nichts verkauft",
       "emptySubtitle": "Angebote erscheinen hier, sobald sie im gewählten Zeitraum verkauft werden.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "stündlich",
+          "day": "täglich",
+          "week": "wöchentlich",
+          "month": "monatlich"
+        },
+        "peak": "Höchstwert: {{date}} · {{value}}"
+      },
       "trendAria": "Verlauf im gewählten Zeitraum"
     }
   }

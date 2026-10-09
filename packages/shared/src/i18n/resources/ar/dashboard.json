@@ -129,7 +129,9 @@
       "title": "الأرباح والخسائر",
       "subtitle": "تفصيل الفترة المحددة",
       "parameter": "المؤشر / الفترة",
-      "currentPeriod": "الفترة الحالية",
+      "currentDay": "اليوم",
+      "currentWeek": "هذا الأسبوع",
+      "currentMonth": "هذا الشهر",
       "heatmap": "خريطة حرارية",
       "export": "تنزيل CSV"
     },
@@ -188,6 +190,16 @@
       "estimatedAmount": "{{amount}} تقديري",
       "emptyTitle": "لا مبيعات في هذه الفترة",
       "emptySubtitle": "ستظهر الإدراجات هنا بمجرد بيعها في الفترة المحددة.",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "كل ساعة",
+          "day": "يومي",
+          "week": "أسبوعي",
+          "month": "شهري"
+        },
+        "peak": "الأعلى: {{date}} · {{value}}"
+      },
       "trendAria": "الاتجاه خلال الفترة المحددة"
     }
   }

@@ -69,6 +69,11 @@ export const PnlPanelComponent = ({
                   <Text variant="body-sm" weight="semibold">
                     {column.label}
                   </Text>
+                  {column.caption ? (
+                    <S.ThCaption variant="caption" weight="semibold" color="brand.primary">
+                      {column.caption}
+                    </S.ThCaption>
+                  ) : null}
                 </S.Th>
               ))}
             </tr>

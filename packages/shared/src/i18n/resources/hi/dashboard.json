@@ -113,7 +113,9 @@
       "title": "लाभ और हानि",
       "subtitle": "चुनी गई अवधि का ब्रेकडाउन",
       "parameter": "मेट्रिक / अवधि",
-      "currentPeriod": "मौजूदा अवधि",
+      "currentDay": "आज",
+      "currentWeek": "इस सप्ताह",
+      "currentMonth": "इस महीने",
       "heatmap": "हीट मैप",
       "export": "CSV डाउनलोड करें"
     },
@@ -164,6 +166,16 @@
       "estimatedAmount": "{{amount}} अनुमानित",
       "emptyTitle": "इस अवधि में कोई बिक्री नहीं",
       "emptySubtitle": "चुनी गई अवधि में बिकते ही लिस्टिंग यहाँ दिखेंगी।",
+      "trend": {
+        "title": "{{metric}} · {{granularity}}",
+        "granularity": {
+          "hour": "प्रति घंटा",
+          "day": "दैनिक",
+          "week": "साप्ताहिक",
+          "month": "मासिक"
+        },
+        "peak": "सर्वाधिक: {{date}} · {{value}}"
+      },
       "trendAria": "चुनी गई अवधि का रुझान"
     }
   }
