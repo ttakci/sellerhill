@@ -475,8 +475,7 @@ export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   max-width: 100%;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.sm')};
-  background: ${({ $tone }) =>
-    $tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success')};
+  background: ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success'))};
   overflow-wrap: anywhere;
 
   /* The copy trigger's light hover wash would hide the white ink on a dark chip. */
