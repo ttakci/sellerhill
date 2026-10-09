@@ -3,8 +3,9 @@ import { ButtonHTMLAttributes, ReactNode } from 'react';
 /** `danger-tint` is the light-fill destructive action — same semantic tint
  *  Badge's error variant uses, for a "cancel/stop" action that shouldn't
  *  read as loud as a full delete (`danger`, solid fill). */
-/** `teal` is a solid teal fill — a second solid action beside a `primary`
- *  one, so two actions side by side do not read as the same button. */
+/** `navy` is a solid fill in the sidebar's navy — a second, quieter solid
+ *  action beside a `primary` one, so two actions side by side do not read as
+ *  the same button. */
 /** `success`, `teal` and `orange` are further solid fills, for a row of
  *  actions where each one should be told apart by colour (the order detail). */
 export type ButtonVariant =
