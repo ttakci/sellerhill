@@ -32,6 +32,7 @@ import { BestSellersViewState } from '../bestSellers.types';
 import * as S from './BestSellersPage.style';
 import type { BestSellersItemView, BestSellersPageComponentProps } from './BestSellersPage.types';
 import { CategoryTree } from './CategoryTree';
+import { StarRating } from './StarRating';
 
 import { ListingCard, type ListingCardMetaItem } from '@/domain-ui';
 
@@ -150,7 +151,15 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     const meta: ListingCardMetaItem[] = [
       { label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon' },
       { label: t('bestSellers.table.price'), value: item.priceLabel ?? EMPTY_VALUE },
-      { label: t('bestSellers.table.rating'), value: item.ratingValueLabel ?? EMPTY_VALUE, column: 'secondary' },
+      {
+        label: t('bestSellers.table.rating'),
+        value: item.ratingValueLabel ?? EMPTY_VALUE,
+        valuePrefix:
+          item.ratingStars && item.ratingValueLabel ? (
+            <StarRating stars={item.ratingStars} label={item.ratingValueLabel} />
+          ) : undefined,
+        column: 'secondary',
+      },
       { label: t('bestSellers.table.reviews'), value: item.reviewsLabel ?? EMPTY_VALUE, column: 'secondary' },
     ];
     if (item.rankChangeLabel) {

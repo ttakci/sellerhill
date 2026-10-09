@@ -222,6 +222,14 @@ export const MetaValue = styled.dd`
   }
 `;
 
+/** Sits before a value (a star row beside a rating); never shrinks under the text. */
+export const MetaValuePrefix = styled.span`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-end: ${tkn('spacing.xs')};
+`;
+
 export const MetaValueText = styled(Text)<{ $multiline: boolean }>`
   overflow: hidden;
   text-overflow: ${({ $multiline }) => ($multiline ? 'clip' : 'ellipsis')};

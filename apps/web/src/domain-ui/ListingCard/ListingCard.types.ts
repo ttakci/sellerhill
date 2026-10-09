@@ -29,6 +29,8 @@ export interface ListingCardMetaItem {
   tone?: 'default' | 'negative';
   /** Long result explanations wrap instead of being cut like identifiers. */
   multiline?: boolean;
+  /** Drawn before the value, e.g. a star row beside a rating. */
+  valuePrefix?: ReactNode;
   /** Put the row in the second column beside the first (stock, dates); wraps under it when narrow. */
   column?: 'secondary';
   /** @deprecated Labels carry no icon any more (2026-10-01); accepted and ignored. */

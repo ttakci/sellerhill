@@ -150,6 +150,7 @@ import {
   Sparkles,
   SquarePen,
   Star,
+  StarHalf,
   Store,
   Sun,
   Table,
@@ -401,6 +402,7 @@ export const iconMap = {
   clock: lucide(Clock),
   layers: lucide(Layers),
   star: lucide(Star),
+  'star-half': lucide(StarHalf),
   /** A real table grid — was drawing a document */
   table: lucide(Table),
   'file-text': lucide(FileText),

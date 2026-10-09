@@ -1,7 +1,7 @@
 import type { BulkAction, ColumnOption, SelectOption, TabNavItem, TableColumn } from '@repo/ui';
 import type React from 'react';
 
-import type { BestSellersFilterValues, BestSellersViewState } from '../bestSellers.types';
+import type { BestSellersFilterValues, BestSellersStarFill, BestSellersViewState } from '../bestSellers.types';
 
 import type { BestSellersCategoryTreeRow } from './CategoryTree';
 
@@ -28,6 +28,8 @@ export interface BestSellersItemView {
   priceLabel: string | null;
   /** The star average alone (`4.6`), for the star stat and column; null when unrated. */
   ratingValueLabel: string | null;
+  /** The five stars drawn beside the average; null when unrated. */
+  ratingStars: BestSellersStarFill[] | null;
   /** The review count alone, grouped for the locale — the Reviews column and stat. */
   reviewsLabel: string | null;
   /** Movers & Shakers only — `+250%`; null on every other list. */

@@ -46,6 +46,7 @@ import {
   BEST_SELLERS_RATING_OPTIONS,
   matchesBestSellersFilters,
 } from '../utils/bestSellersFilters';
+import { toStarFills } from '../utils/bestSellersRating';
 import {
   DEFAULT_BEST_SELLERS_SORT,
   formatBestSellersSort,
@@ -218,6 +219,7 @@ export const BestSellersPageContainer: React.FC = () => {
             ? formatCurrency(item.price.amount, localeCfg.locale, item.price.currency, PRICE_FRACTION_DIGITS)
             : item.priceText,
           ratingValueLabel: average === null ? null : ratingFormat.format(average),
+          ratingStars: average === null ? null : toStarFills(average),
           reviewsLabel: reviewCount === null ? null : countFormat.format(reviewCount),
           rankChangeLabel:
             item.rankChangePercent === null
@@ -253,6 +255,7 @@ export const BestSellersPageContainer: React.FC = () => {
       imageUrl: null,
       priceLabel: null,
       ratingValueLabel: null,
+      ratingStars: null,
       reviewsLabel: null,
       rankChangeLabel: null,
       isSelected: false,

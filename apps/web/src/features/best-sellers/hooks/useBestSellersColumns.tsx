@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { BestSellersSortKey } from '../bestSellers.types';
 import * as S from '../BestSellersPage/BestSellersPage.style';
 import type { BestSellersColumns, BestSellersItemView } from '../BestSellersPage/BestSellersPage.types';
+import { StarRating } from '../BestSellersPage/StarRating';
 
 import { ProductTableCell } from '@/domain-ui';
 
@@ -59,13 +60,13 @@ export function useBestSellersColumns(showRankChange: boolean): BestSellersColum
         sortable: true,
         header: t('bestSellers.table.rank'),
         align: 'right',
-        width: '5rem',
+        width: '4.5rem',
         render: (_value, row) => (row.isLocked ? renderLockedCell('2rem') : renderFigure(row.rankLabel)),
       },
       {
         key: 'product',
         header: t('bestSellers.table.product'),
-        width: '20.5rem',
+        width: '17.5rem',
         render: (_value, row) =>
           row.isLocked ? (
             <S.LockedProductCell role="img" aria-label={t('bestSellers.locked.rowLabel')}>
@@ -88,7 +89,7 @@ export function useBestSellersColumns(showRankChange: boolean): BestSellersColum
         sortable: true,
         header: t('bestSellers.table.price'),
         align: 'right',
-        width: '7rem',
+        width: '6.5rem',
         render: (_value, row) => (row.isLocked ? renderLockedCell('3.5rem') : renderFigure(row.priceLabel)),
       },
       {
@@ -96,17 +97,17 @@ export function useBestSellersColumns(showRankChange: boolean): BestSellersColum
         sortable: true,
         header: t('bestSellers.table.rating'),
         align: 'right',
-        width: '6rem',
+        width: '8rem',
         render: (_value, row) => {
           if (row.isLocked) {
             return renderLockedCell('3rem');
           }
-          if (!row.ratingValueLabel) {
+          if (!row.ratingValueLabel || !row.ratingStars) {
             return renderFigure(null, 'regular');
           }
           return (
             <S.RatingValue>
-              <Icon name="star" size={14} color="semantic.warning" filled />
+              <StarRating stars={row.ratingStars} label={row.ratingValueLabel} />
               <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
                 {row.ratingValueLabel}
               </Text>
@@ -119,7 +120,7 @@ export function useBestSellersColumns(showRankChange: boolean): BestSellersColum
         sortable: true,
         header: t('bestSellers.table.reviews'),
         align: 'right',
-        width: '7rem',
+        width: '9rem',
         render: (_value, row) => (row.isLocked ? renderLockedCell('3rem') : renderFigure(row.reviewsLabel, 'regular')),
       },
     ];

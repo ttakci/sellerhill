@@ -181,3 +181,6 @@ export interface BestSellersSort {
   key: BestSellersSortKey;
   direction: BestSellersSortDirection;
 }
+
+/** One of the five stars drawn for a rating, Amazon's way: full, half or empty. */
+export type BestSellersStarFill = 'full' | 'half' | 'empty';

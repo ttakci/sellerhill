@@ -107,14 +107,17 @@ export const ListingCard = ({
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" plain onClick={(e) => e.stopPropagation()} />
                     ) : (
-                      <S.MetaValueText
-                        variant="body-sm"
-                        weight="bold"
-                        color={item.tone === 'negative' ? 'semantic.error' : 'text.primary'}
-                        $multiline={Boolean(item.multiline)}
-                      >
-                        {item.value}
-                      </S.MetaValueText>
+                      <>
+                        {item.valuePrefix ? <S.MetaValuePrefix>{item.valuePrefix}</S.MetaValuePrefix> : null}
+                        <S.MetaValueText
+                          variant="body-sm"
+                          weight="bold"
+                          color={item.tone === 'negative' ? 'semantic.error' : 'text.primary'}
+                          $multiline={Boolean(item.multiline)}
+                        >
+                          {item.value}
+                        </S.MetaValueText>
+                      </>
                     )}
                   </S.MetaValue>
                 </React.Fragment>
