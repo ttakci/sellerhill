@@ -27,7 +27,31 @@ function readFlag(): boolean {
   }
 }
 
-const active = readFlag();
+/**
+ * Pages that are the way OUT of the app: the landing and the sign-in/sign-up
+ * screens. Opening one in the demo tab (typed URL, bookmark, back button)
+ * ends the demo — otherwise the landing wore the demo banner and the login
+ * form was answered by fixtures, handing out the sample user.
+ */
+const DEMO_EXIT_PATH =
+  /^\/(?:(?:[a-z]{2}\/)?(?:login|register|verify-email|auth\/check-email|forgot-password|reset-password)\/?)?$/;
+
+function readActive(): boolean {
+  if (!readFlag()) {
+    return false;
+  }
+  if (DEMO_EXIT_PATH.test(window.location.pathname)) {
+    try {
+      sessionStorage.removeItem(DEMO_FLAG_KEY);
+    } catch {
+      // ignore — this document is still served by the real API below
+    }
+    return false;
+  }
+  return true;
+}
+
+const active = readActive();
 
 /** True for the whole lifetime of this document when the demo is running. */
 export function isDemoMode(): boolean {

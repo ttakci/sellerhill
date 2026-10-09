@@ -20,6 +20,7 @@ import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { useGetBillingSummaryQuery } from '@/features/billing/api/billing.api';
 import { buildBillingUsageRows } from '@/features/billing/utils/usageRows';
+import { exitDemoMode, isDemoMode } from '@/features/demo/demoMode';
 import { useActiveStore } from '@/features/ebay/hooks/useActiveStore';
 import {
   MESSAGES_UNREAD_POLL_INTERVAL_MS,
@@ -92,6 +93,14 @@ export const AppLayout: React.FC = () => {
   );
 
   const handleLogout = useCallback(() => {
+    // A demo visitor has no session to end. Logging out means leaving the demo,
+    // and leaving the demo must be a full navigation that drops the flag —
+    // a router push would keep serving fixtures (incl. a sample user on
+    // /auth/refresh) on the login page and the landing.
+    if (isDemoMode()) {
+      exitDemoMode('/');
+      return;
+    }
     void (async () => {
       try {
         await apiLogout().unwrap();

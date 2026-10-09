@@ -17,7 +17,7 @@ import { LandingPageComponent } from './LandingPage.component';
 import type { LandingPricingPlan, LandingTrialOffer } from './LandingPage.types';
 
 import { useGetBillingCatalogQuery } from '@/features/billing/api/billing.api';
-import { enterDemoMode } from '@/features/demo';
+import { enterDemoMode, exitDemoMode, isDemoMode } from '@/features/demo';
 import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
 import { storeLocalePreference } from '@/utils/locale';
 
@@ -148,6 +148,15 @@ export const LandingPageContainer = (): React.ReactElement => {
   const [currentLocale, setCurrentLocale] = useState(i18n.language);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // A full load of the landing already drops the demo flag (demoMode.ts). This
+  // covers reaching it inside a demo document without a reload (the router's
+  // catch-all redirect): leave the demo with one clean navigation.
+  useEffect(() => {
+    if (isDemoMode()) {
+      exitDemoMode(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+    }
+  }, []);
 
   // Public billing catalog — no auth required. Drives the landing pricing grid
   // so prices + limits are never hardcoded. When the call fails (API down, or
