@@ -237,51 +237,24 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             box-shadow: ${glow(theme.colors.semantic.error, 'press')};
           }
         `;
-      case 'navy':
-        /* Solid sidebar navy, white label — the second solid action. */
-        return css`
-          background-color: ${theme.colors.sidebar.background};
-          color: ${theme.colors.text.inverse};
-          border: 0.0625rem solid ${theme.colors.sidebar.background};
-          box-shadow: ${glow(theme.colors.sidebar.background, 'rest')};
-
-          &:hover:not(:disabled) {
-            background-color: ${theme.colors.sidebar.active};
-            box-shadow: ${glow(theme.colors.sidebar.background, 'hover')};
-          }
-
-          &:active:not(:disabled) {
-            background-color: ${theme.colors.sidebar.background};
-            box-shadow: ${glow(theme.colors.sidebar.background, 'press')};
-          }
-        `;
-      case 'success':
       case 'teal':
-      case 'orange': {
-        /* Further solid fills with a white label, built like `danger`. */
-        const fill =
-          $variant === 'success'
-            ? theme.colors.semantic.success
-            : $variant === 'teal'
-              ? theme.colors.badge.teal
-              : theme.colors.badge.orange;
+        /* Solid teal, white label — the second solid action. */
         return css`
-          background-color: ${fill};
+          background-color: ${theme.colors.badge.teal};
           color: ${theme.colors.text.inverse};
-          border: 0.0625rem solid ${fill};
-          box-shadow: ${glow(fill, 'rest')};
+          border: 0.0625rem solid ${theme.colors.badge.teal};
+          box-shadow: ${glow(theme.colors.badge.teal, 'rest')};
 
           &:hover:not(:disabled) {
-            filter: ${theme.mode === 'dark' ? 'brightness(1.1)' : 'brightness(0.92)'};
-            box-shadow: ${glow(fill, 'hover')};
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
+            box-shadow: ${glow(theme.colors.badge.teal, 'hover')};
           }
 
           &:active:not(:disabled) {
             filter: brightness(1);
-            box-shadow: ${glow(fill, 'press')};
+            box-shadow: ${glow(theme.colors.badge.teal, 'press')};
           }
         `;
-      }
       case 'danger-tint':
         /* Light fill, error-toned label — the same tint/border pair Badge's
            error variant uses, so a "cancel" action reads as related-but-lighter

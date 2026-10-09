@@ -316,7 +316,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             they need their card fixed, not a plan list. */}
         <S.HeroActions>
           {canOpenPortal ? (
-            <Button variant="navy" size="medium" isLoading={isPortalLoading} onClick={onManage}>
+            <Button variant="teal" size="medium" isLoading={isPortalLoading} onClick={onManage}>
               <Icon name="wallet-cards" size={16} />
               <Text variant="body" weight="medium">
                 {t('billing:billing.subscription.updatePayment')}
