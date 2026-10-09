@@ -46,11 +46,10 @@ export const Hero = styled(Card)`
   }
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
-    /* Fixed side columns, so the facts column takes everything left. */
-    /* The facts and the buttons share what the photo and the customer leave, 2:1,
+    /* The facts and the buttons share what the photo and the customer leave, 3:2,
        so the buttons column widens on a large screen instead of the facts
-       taking it all; the buttons never go below 13rem. */
-    grid-template-columns: 16rem minmax(0, 2fr) 12.5rem minmax(13rem, 1fr);
+       taking it all; the buttons never go below 14rem. */
+    grid-template-columns: 15rem minmax(0, 3fr) 12.5rem minmax(14rem, 2fr);
     column-gap: ${tkn('spacing.lg')};
     grid-template-areas:
       'badge badge badge badge'
@@ -466,18 +465,18 @@ export const ErrorText = styled(Text)`
 `;
 
 /**
- * A tracking number as a solid dark chip with white ink, so it stands out from
- * the cost rows: navy for Amazon's own number (the supplier's, never shown to
+ * A tracking number as a solid coloured chip with white ink, so it stands out from
+ * the cost rows: amber for Amazon's own number (the supplier's, never shown to
  * the buyer), green for the converted number eBay and the buyer see.
  */
 export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.sm')};
   background: ${({ $tone }) =>
-    $tone === 'amazon' ? tkn('colors.sidebar.background') : tkn('colors.semantic.success')};
+    $tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success')};
   overflow-wrap: anywhere;
 
   /* The copy trigger's light hover wash would hide the white ink on a dark chip. */
