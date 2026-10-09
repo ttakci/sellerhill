@@ -23,10 +23,11 @@ describe('Action Center order links', () => {
 
   /*
    * Buyer cancellation requests (2026-10-07, phase 2): the item opens the
-   * Cancellations page's "Needs action" tab, which lists linked AND unlinked
-   * requests — so the count includes both, and `unlinked` is context only.
+   * Cancellations page's "Needs action" tab. Since 2026-10-09 both list only
+   * requests on OUR sales (`buildTrackedOrderSql`), so the count is exactly
+   * the rows that tab lists.
    */
-  it('links cancellation requests to the Cancellations page and counts the unlinked ones too', () => {
+  it('links cancellation requests to the Cancellations page and counts what it lists', () => {
     expect(src).toMatch(/actionPath: `\/cancellations\?tab=\$\{CancellationTab\.ACTION\}`/);
     expect(src).not.toMatch(/cancelRequested=true/);
     const item = src.slice(
@@ -35,7 +36,8 @@ describe('Action Center order links', () => {
     );
     expect(item).toContain('const count = toCount(row.count);');
     expect(item).not.toMatch(/toCount\(row\.count\) - /);
-    expect(item).toContain('context: { overdue, unlinked }');
+    expect(item).toContain('context: { overdue }');
+    expect(item).toContain("buildTrackedOrderSql('c')");
   });
 
   it('counts blocked, cancelled and awaiting-purchase orders through buildOrderStageSql', () => {

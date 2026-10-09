@@ -8,6 +8,7 @@ import { EbayReturnsService } from './ebay-returns.service';
 import {
   buildReturnStoreActiveSql,
   buildStoreScopedReturnBucketSql,
+  buildTrackedOrderSql,
   scopeReturnBucketToStore,
 } from './return-store-scope';
 import type { ReturnSweepScheduleService } from './return-sweep-schedule.service';
@@ -369,7 +370,7 @@ describe('EbayReturnsService.counts', () => {
     await service.counts(USER, { ebayAccountId: ACCOUNT });
 
     const [sql, params] = query.mock.calls[0];
-    expect(sql).toContain('WHERE r.user_id = $1 AND r.ebay_account_id = $2::uuid');
+    expect(sql).toContain(`WHERE r.user_id = $1 AND ${buildTrackedOrderSql('r')} AND r.ebay_account_id = $2::uuid`);
     expect(params).toEqual([USER, ACCOUNT]);
   });
 });

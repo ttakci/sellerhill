@@ -13,6 +13,7 @@ import { buildLocalRangeSql } from '../../common/timezone/local-day-sql';
 import { ActionCenterService } from '../action-center/action-center.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { DashboardService } from '../dashboard/dashboard.service';
+import { buildTrackedOrderSql } from '../ebay-returns/return-store-scope';
 import { EmailService } from '../email/email.service';
 
 import { buildDigestClaimSql, toDigestClaim, type DigestClaim, type DigestClaimRow } from './digest-claim';
@@ -120,15 +121,21 @@ export class SellerDigestService {
     );
   }
 
-  /** Buyer cancel requests and returns OPENED on that local day (not what is still open — that is `pending`). */
+  /**
+   * Buyer cancel requests and returns OPENED on that local day (not what is
+   * still open — that is `pending`). Only those on OUR sales, the rows the
+   * Returns / Cancellations pages show (`buildTrackedOrderSql`).
+   */
   private async loadCounts(userId: string, reportDay: string, timezone: string): Promise<CountsRow> {
     const rows = await this.databaseService.query<CountsRow>(
       `SELECT
          (SELECT COUNT(*) FROM ebay_cancellations c
            WHERE c.user_id = $1 AND c.requestor_type = $4
+             AND ${buildTrackedOrderSql('c')}
              AND ${buildLocalRangeSql('c.requested_at', '$2', '$2', '$3')}) AS cancel_requests,
          (SELECT COUNT(*) FROM ebay_returns r
            WHERE r.user_id = $1
+             AND ${buildTrackedOrderSql('r')}
              AND ${buildLocalRangeSql('r.created_on_ebay_at', '$2', '$2', '$3')}) AS new_returns`,
       [userId, reportDay, timezone, EBAY_CANCEL_REQUESTOR_BUYER],
     );

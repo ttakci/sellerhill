@@ -41,7 +41,7 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { localDayEndExclusiveSql, localDayStartSql } from '../../common/timezone/local-day-sql';
 import { TimezoneService } from '../../common/timezone/timezone.service';
 import { cancellationColumnsSql, CancellationDtoRow, toCancellationDto } from '../ebay-returns/cancellation-dto';
-import { buildStoreScopedCancellationBucketSql } from '../ebay-returns/return-store-scope';
+import { buildStoreScopedCancellationBucketSql, buildTrackedOrderSql } from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 
 import { OrderSyncQueueService } from './order-sync-queue.service';
@@ -172,7 +172,9 @@ export class OrdersService {
 
   /**
    * LATERAL: the newest BUYER cancellation request linked to the order, as one
-   * JSON column with the store-scoped bucket (`OrderDto.cancellation`). The
+   * JSON column with the store-scoped bucket (`OrderDto.cancellation`). An untracked
+   * order carries none — the Cancellations page shows only OUR sales
+   * (`buildTrackedOrderSql`), so its "Manage cancellation" link would land nowhere. The
    * link is `legacyOrderId` = `ebay_order_id`, same seller and store — an
    * assumption the first live request settles (CLAUDE.md, "eBay cancellation
    * requests").
@@ -186,6 +188,7 @@ export class OrdersService {
                    AND c.ebay_account_id = o.ebay_account_id
                    AND c.user_id = o.user_id
                    AND c.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}'
+                   AND ${buildTrackedOrderSql('c')}
                  ORDER BY c.requested_at DESC NULLS LAST, c.first_seen_at DESC
                  LIMIT 1) x
       ) oc ON TRUE`;
@@ -322,6 +325,7 @@ export class OrdersService {
                     AND c.ebay_account_id = o.ebay_account_id
                     AND c.user_id = o.user_id
                     AND c.requestor_type = '${EBAY_CANCEL_REQUESTOR_BUYER}'
+                    AND ${buildTrackedOrderSql('c')}
                     AND (${bucket}) IN (${ACTIONABLE_CANCELLATION_BUCKETS.map((b) => `'${b}'`).join(', ')}))`
       );
     }

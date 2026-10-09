@@ -33,6 +33,7 @@ import type {
   PostOrderReturnDetail,
 } from './post-order.types';
 import { mapReturnDetail, type MappedReturnDetail } from './return-detail-mapper';
+import { buildTrackedOrderSql } from './return-store-scope';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 /** A refused or failed action — the controller maps the status, the seller sees the key. */
@@ -372,7 +373,7 @@ export class EbayReturnsActionsService {
       `SELECT r.id, r.return_id, r.ebay_account_id, ea.marketplace_id
          FROM ebay_returns r
          JOIN ebay_accounts ea ON ea.id = r.ebay_account_id
-        WHERE r.user_id = $1 AND r.id = $2::uuid`,
+        WHERE r.user_id = $1 AND r.id = $2::uuid AND ${buildTrackedOrderSql('r')}`,
       [userId, id]
     );
     return rows[0] ?? null;

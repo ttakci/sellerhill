@@ -74,6 +74,7 @@ import { BillingService } from '../billing/billing.service';
 import {
   buildStoreScopedCancellationBucketSql,
   buildStoreScopedReturnBucketSql,
+  buildTrackedOrderSql,
 } from '../ebay-returns/return-store-scope';
 import { ReturnSweepScheduleService } from '../ebay-returns/return-sweep-schedule.service';
 import { buildGroupRuleSql, buildNotSellingSql } from '../listings/listing-cleanup.helpers';
@@ -584,6 +585,7 @@ export class ActionCenterService {
       `SELECT ${bucket} AS code, COUNT(*) AS count
          FROM ebay_returns r
         WHERE r.user_id = $1
+          AND ${buildTrackedOrderSql('r')}
           AND ${bucket} IN ($2, $3)
           ${storeScopeSql('r', 4)}
         GROUP BY 1`,
@@ -617,22 +619,21 @@ export class ActionCenterService {
    * (`sellerResponseDueDate` on a BUYER request). Its own probe, counted
    * through the store-scoped cancellation bucket the order card reads, with
    * the freshness horizon of the cancellation sweep's own interval. CRITICAL
-   * once a response date has passed. `count` covers every such request,
-   * linked to an order or not — the link opens the Cancellations page's
-   * "Needs action" tab, which lists both (same bucket, same BUYER filter).
-   * `unlinked` says how many of them match no order we hold (the
-   * `legacyOrderId` = `ebay_order_id` equality is unverified).
+   * once a response date has passed. Only requests on OUR sales count
+   * (`buildTrackedOrderSql`, 2026-10-09) — the same rows the Cancellations
+   * page's "Needs action" tab lists (same bucket, same BUYER filter).
    */
   private async cancellationItems(userId: string, store: string | null): Promise<ActionCenterItemDto[]> {
     const bucket = buildStoreScopedCancellationBucketSql(
       'c',
       resolveReturnFreshnessHours((await this.returnSchedule.resolveCancellations()).intervalHours)
     );
-    const rows = await this.db.query<{ code: string | null; count: string; unlinked: string }>(
-      `SELECT ${bucket} AS code, COUNT(*) AS count, COUNT(*) FILTER (WHERE c.order_id IS NULL) AS unlinked
+    const rows = await this.db.query<{ code: string | null; count: string }>(
+      `SELECT ${bucket} AS code, COUNT(*) AS count
          FROM ebay_cancellations c
         WHERE c.user_id = $1
           AND c.requestor_type = $5
+          AND ${buildTrackedOrderSql('c')}
           AND ${bucket} IN ($2, $3)
           ${storeScopeSql('c', 4)}
         GROUP BY 1`,
@@ -640,11 +641,9 @@ export class ActionCenterService {
     );
     let total = 0;
     let overdue = 0;
-    let unlinked = 0;
     for (const row of rows) {
       const count = toCount(row.count);
       total += count;
-      unlinked += toCount(row.unlinked);
       if (row.code === (CancellationBucket.ACTION_OVERDUE as string)) {
         overdue += count;
       }
@@ -655,7 +654,7 @@ export class ActionCenterService {
         group: ActionCenterGroup.ORDERS,
         severity: overdue > 0 ? ActionCenterSeverity.CRITICAL : ActionCenterSeverity.WARNING,
         count: total,
-        context: { overdue, unlinked },
+        context: { overdue },
         actionPath: `/cancellations?tab=${CancellationTab.ACTION}`,
       },
     ];

@@ -168,11 +168,11 @@ export class EbayCancellationsSyncService {
         const linked = await this.upsertCancellation(account, row);
         stored += 1;
         if (!linked && row.requestorType === EBAY_CANCEL_REQUESTOR_BUYER && row.closedAt === null) {
-          // The order-id equality is unverified: an open BUYER request that
-          // matched no order is invisible on the orders page, so say so.
+          // An open BUYER request that matched no order we hold is shown
+          // nowhere (only OUR sales are — `buildTrackedOrderSql`), so say so.
           this.logger.warn(
             `Cancellation ${row.cancelId} on eBay account ${account.id} (legacy order ${row.legacyOrderId ?? '?'}) ` +
-              'is linked to no order; it is counted but not listed'
+              'is linked to no order; it is not shown to the seller'
           );
         }
       } catch (err) {

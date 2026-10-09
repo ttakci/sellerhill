@@ -15,7 +15,7 @@ import {
   EbayCancellationsActionsService,
 } from './ebay-cancellations-actions.service';
 import { PostOrderRejectedError } from './post-order.client';
-import { buildStoreScopedCancellationBucketSql } from './return-store-scope';
+import { buildStoreScopedCancellationBucketSql, buildTrackedOrderSql } from './return-store-scope';
 
 const USER = '00000000-0000-4000-8000-00000000000a';
 const ID = '33333333-3333-4333-8333-333333333333';
@@ -320,7 +320,9 @@ describe('EbayCancellationsActionsService.counts', () => {
     const bucket = buildStoreScopedCancellationBucketSql('c', resolveReturnFreshnessHours(6));
     expect(sql).toContain(`SELECT ${bucket} AS bucket, COUNT(*)::int AS count`);
     expect(sql).toContain('FROM ebay_cancellations c');
-    expect(sql).toContain('WHERE c.user_id = $1 AND c.requestor_type = $2 AND c.ebay_account_id = $3::uuid');
+    expect(sql).toContain(
+      `WHERE c.user_id = $1 AND c.requestor_type = $2 AND ${buildTrackedOrderSql('c')} AND c.ebay_account_id = $3::uuid`
+    );
     expect(sql).toContain('GROUP BY 1');
     expect(params).toEqual([USER, 'BUYER', ACCOUNT]);
   });
@@ -349,8 +351,14 @@ describe('EbayCancellationsActionsService.detail', () => {
     });
 
   it('overlays the stored row with ONE live read and offers the answers the live request allows', async () => {
+    // The fixture's response date is 2026-10-09T10:00Z: read it the day before,
+    // or the bucket turns overdue once the real clock passes it.
+    jest.useFakeTimers({
+      now: new Date('2026-10-08T10:00:00.000Z'),
+      doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask'],
+    });
     const { service, postOrder } = build({ live: fullDetail() });
-    const dto = await service.detail(USER, ID);
+    const dto = await service.detail(USER, ID).finally(() => jest.useRealTimers());
     expect(dto).toMatchObject({
       id: ID,
       live: true,

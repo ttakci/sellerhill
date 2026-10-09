@@ -43,7 +43,7 @@ import { EbayCancellationsSyncService } from './ebay-cancellations-sync.service'
 import { clampLimit, clampPage, escapeLike, productJoinsSql } from './ebay-returns.service';
 import { PostOrderClient, PostOrderRejectedError } from './post-order.client';
 import type { PostOrderRejectCancelRequest } from './post-order.types';
-import { buildStoreScopedCancellationBucketSql } from './return-store-scope';
+import { buildStoreScopedCancellationBucketSql, buildTrackedOrderSql } from './return-store-scope';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
 
 /** A refused or failed answer — the controller maps the status, the seller sees the key. */
@@ -137,7 +137,7 @@ export class EbayCancellationsActionsService {
     const limit = clampLimit(query.limit);
     const { bucketSql, freshnessHours, actionsEnabled } = await this.listContext();
 
-    const where = ['c.user_id = $1', 'c.requestor_type = $2'];
+    const where = ['c.user_id = $1', 'c.requestor_type = $2', buildTrackedOrderSql('c')];
     const params: QueryParam[] = [userId, EBAY_CANCEL_REQUESTOR_BUYER];
     if (query.tab && query.tab !== CancellationTab.ALL) {
       params.push([...CANCELLATION_TABS[query.tab]]);
@@ -197,7 +197,7 @@ export class EbayCancellationsActionsService {
   /** How many of the caller's BUYER requests sit in each bucket — every bucket present, zero-filled. */
   async counts(userId: string, filter: { ebayAccountId?: string } = {}): Promise<CancellationBucketCountsDto> {
     const { bucketSql } = await this.listContext();
-    const where = ['c.user_id = $1', 'c.requestor_type = $2'];
+    const where = ['c.user_id = $1', 'c.requestor_type = $2', buildTrackedOrderSql('c')];
     const params: QueryParam[] = [userId, EBAY_CANCEL_REQUESTOR_BUYER];
     if (filter.ebayAccountId) {
       params.push(filter.ebayAccountId);
@@ -232,7 +232,7 @@ export class EbayCancellationsActionsService {
       `SELECT ${cancellationColumnsSql('c', freshnessHours)}, ${CANCELLATION_PRODUCT_COLUMNS_SQL}
          FROM ebay_cancellations c
        ${productJoinsSql('c')}
-        WHERE c.user_id = $1 AND c.id = $2::uuid`,
+        WHERE c.user_id = $1 AND c.id = $2::uuid AND ${buildTrackedOrderSql('c')}`,
       [userId, id]
     );
     if (!rows[0]) {
@@ -412,7 +412,7 @@ export class EbayCancellationsActionsService {
          FROM ebay_cancellations c
          JOIN ebay_accounts ea ON ea.id = c.ebay_account_id
          LEFT JOIN orders o ON o.id = c.order_id AND o.user_id = c.user_id
-        WHERE c.user_id = $1 AND c.id = $2::uuid`,
+        WHERE c.user_id = $1 AND c.id = $2::uuid AND ${buildTrackedOrderSql('c')}`,
       [userId, id]
     );
     return rows[0] ?? null;

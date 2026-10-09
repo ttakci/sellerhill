@@ -20,6 +20,7 @@ import { RETURNS_DEFAULT_PAGE_SIZE, RETURNS_MAX_PAGE_SIZE } from './ebay-returns
 import {
   buildReturnStoreActiveSql,
   buildStoreScopedReturnBucketSql,
+  buildTrackedOrderSql,
   scopeReturnBucketToStore,
 } from './return-store-scope';
 import { ReturnSweepScheduleService } from './return-sweep-schedule.service';
@@ -63,6 +64,8 @@ export const productJoinsSql = (alias: string): string => `LEFT JOIN orders o ON
        LEFT JOIN listings l ON l.id = o.listing_id
        LEFT JOIN products p ON p.id = l.product_id`;
 const PRODUCT_JOINS = productJoinsSql('r');
+/** Only returns of OUR sales are shown (`buildTrackedOrderSql`). */
+const TRACKED = buildTrackedOrderSql('r');
 
 export function clampPage(page: number | undefined): number {
   return typeof page === 'number' && Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
@@ -171,7 +174,7 @@ export class EbayReturnsService {
     const { bucketSql, freshnessHours } = await this.bucketContext();
 
     const params: QueryParam[] = [userId];
-    let filters = '';
+    let filters = ` AND ${TRACKED}`;
 
     const buckets = query.tab ? RETURN_TABS[query.tab] : undefined;
     if (buckets && query.tab !== ReturnTab.ALL) {
@@ -257,7 +260,7 @@ export class EbayReturnsService {
               ${buildReturnStoreActiveSql('r')} AS store_active
          FROM ebay_returns r
        ${PRODUCT_JOINS}
-        WHERE r.user_id = $1 AND r.id = $2::uuid`,
+        WHERE r.user_id = $1 AND r.id = $2::uuid AND ${TRACKED}`,
       params
     );
     const row = rows[0];
@@ -267,7 +270,7 @@ export class EbayReturnsService {
   /** How many returns sit in each bucket — every bucket present, zero-filled. */
   async counts(userId: string, filter: { ebayAccountId?: string } = {}): Promise<ReturnBucketCountsDto> {
     const params: QueryParam[] = [userId];
-    let filters = '';
+    let filters = ` AND ${TRACKED}`;
     if (filter.ebayAccountId) {
       params.push(filter.ebayAccountId);
       filters += ` AND r.ebay_account_id = $${params.length}::uuid`;

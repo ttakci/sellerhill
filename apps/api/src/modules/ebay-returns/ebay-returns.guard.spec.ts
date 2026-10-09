@@ -278,7 +278,7 @@ describe('ebay-returns module invariants', () => {
         expect(literal).toMatch(/WHERE (c\.user_id = \$1|\$\{where\.join\(' AND '\)\})/);
       }
       expect(stripComments(source('ebay-cancellations-actions.service.ts'))).toContain(
-        "const where = ['c.user_id = $1', 'c.requestor_type = $2'];"
+        "const where = ['c.user_id = $1', 'c.requestor_type = $2', buildTrackedOrderSql('c')];"
       );
     });
   });

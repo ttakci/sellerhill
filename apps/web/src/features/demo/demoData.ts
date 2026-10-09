@@ -1241,8 +1241,6 @@ const RETURN_SEEDS: Array<{
   /** Hours from now until eBay's response deadline (negative = already missed). */
   respondInHours: number | null;
   refunded: boolean;
-  /** False = filed against an eBay order this account does not hold: no product, no link. */
-  knownOrder: boolean;
 }> = [
   {
     // Deadline missed — the one row that must read red.
@@ -1254,7 +1252,6 @@ const RETURN_SEEDS: Array<{
     activity: EbayReturnSellerActivity.SELLER_PROVIDE_LABEL,
     respondInHours: -6,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'ITEM_DELIVERED',
@@ -1265,7 +1262,6 @@ const RETURN_SEEDS: Array<{
     activity: EbayReturnSellerActivity.SELLER_ISSUE_REFUND,
     respondInHours: 30,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'RETURN_LABEL_PENDING',
@@ -1277,7 +1273,6 @@ const RETURN_SEEDS: Array<{
     activity: EbayReturnSellerActivity.SELLER_PROVIDE_LABEL,
     respondInHours: 52,
     refunded: false,
-    knownOrder: true,
   },
   {
     // An activity value the page does not localize: it must read "Respond on
@@ -1290,7 +1285,6 @@ const RETURN_SEEDS: Array<{
     activity: 'SELLER_SEND_MESSAGE',
     respondInHours: null,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'ITEM_DELIVERED',
@@ -1301,7 +1295,6 @@ const RETURN_SEEDS: Array<{
     activity: null,
     respondInHours: null,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'ITEM_READY_TO_SHIP',
@@ -1313,7 +1306,6 @@ const RETURN_SEEDS: Array<{
     activity: 'SELLER_PROVIDE_LABEL',
     respondInHours: 60,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'ITEM_SHIPPED',
@@ -1324,7 +1316,6 @@ const RETURN_SEEDS: Array<{
     activity: null,
     respondInHours: null,
     refunded: false,
-    knownOrder: true,
   },
   {
     state: 'CLOSED',
@@ -1335,18 +1326,6 @@ const RETURN_SEEDS: Array<{
     activity: null,
     respondInHours: null,
     refunded: true,
-    knownOrder: true,
-  },
-  {
-    state: 'CLOSED',
-    status: 'CLOSED',
-    reason: 'NO_REASON',
-    reasonType: EbayReturnReasonType.UNKNOWN,
-    comment: null,
-    activity: null,
-    respondInHours: null,
-    refunded: true,
-    knownOrder: false,
   },
 ];
 
@@ -1371,9 +1350,9 @@ function buildReturns(): EbayReturnDto[] {
       returnId: String(5012345678 + k * 7919),
       // Same split the demo Orders page uses for its store filter.
       ebayAccountId: orderIndex % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
-      ebayOrderId: seed.knownOrder ? order.ebayOrderId : `13-${20480 + k * 17}-${51200 + k * 3}`,
-      orderId: seed.knownOrder ? order.id : null,
-      ebayItemId: seed.knownOrder ? order.product?.ebayItemId ?? null : `1${255900000000 + k * 211}`,
+      ebayOrderId: order.ebayOrderId,
+      orderId: order.id,
+      ebayItemId: order.product?.ebayItemId ?? null,
       returnQuantity: order.product?.quantity ?? 1,
       bucket: deriveReturnBucket(
         {
@@ -1401,7 +1380,7 @@ function buildReturns(): EbayReturnDto[] {
       createdOnEbayAt: new Date(new Date(order.createdAt).getTime() + 4 * 86400000).toISOString(),
       lastSyncedAt: isoHoursAgo(1),
       product:
-        seed.knownOrder && order.product
+        order.product
           ? {
               title: order.product.title,
               imageUrl: order.product.imageUrl ?? null,
@@ -1549,7 +1528,7 @@ function buildCancellations(): EbayCancellationDto[] {
   const now = new Date();
   const recent = DEMO_ORDERS.filter((o) => o.isTracked && o.product && o.createdAt >= isoDaysAgo(8));
   // Never an empty pool: the fixtures are built at module load and must not throw.
-  const candidates = recent.length > 0 ? recent : DEMO_ORDERS.filter((o) => o.product);
+  const candidates = recent.length > 0 ? recent : DEMO_ORDERS.filter((o) => o.isTracked && o.product);
   if (candidates.length === 0) {
     return [];
   }

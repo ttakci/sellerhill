@@ -32,6 +32,27 @@ export function buildReturnStoreActiveSql(alias: string): string {
   return `EXISTS (SELECT 1 FROM ebay_accounts ret_store WHERE ret_store.id = ${alias}.ebay_account_id AND ret_store.status = '${EbayAccountStatus.ACTIVE}')`;
 }
 
+/**
+ * The return / cancellation belongs to one of OUR sales (operator decision,
+ * 2026-10-09): it is linked to an order that matched one of the seller's
+ * SellerHill listings at first ingest (`orders.listing_id IS NOT NULL`). Over
+ * an `ebay_returns` or `ebay_cancellations` alias — both carry `order_id`.
+ *
+ * A row linked to no order (a sale from before the store was connected) or to
+ * an untracked order (a sale made through another tool) is hidden from every
+ * seller-facing read: the pages, their counts, the detail, the answers, the
+ * Action Center and the daily e-mail. The sweep still stores it, so a listing
+ * imported later (which adopts its past orders) brings its returns back.
+ * Ending a listing keeps the order's `listing_id` (only drafts are ever
+ * deleted, and a draft has no orders), so an ended listing's returns stay.
+ */
+export function buildTrackedOrderSql(alias: string): string {
+  if (!SQL_ALIAS.test(alias)) {
+    throw new Error(`Unsafe SQL alias: ${alias}`);
+  }
+  return `EXISTS (SELECT 1 FROM orders tracked_o WHERE tracked_o.id = ${alias}.order_id AND tracked_o.listing_id IS NOT NULL)`;
+}
+
 /** The ONE bucket expression for seller-facing reads: the shared bucket, store-scoped. */
 export function buildStoreScopedReturnBucketSql(alias: string, freshnessHours: number): string {
   const bucket = buildReturnBucketSql(alias, freshnessHours);
