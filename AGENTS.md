@@ -617,7 +617,7 @@ Customers see only two capacity metrics — active listings and monthly automati
 
 **Pro (10,000 listings) is the single exception at 7%.** Easync's own curve is a flat ~$22 per 1,000 listings at every tier except 10,000, which they price at ~$18.60 per 1,000 — 16% below their own curve, an anchor on the most-compared tier. Following that anchor down on both price *and* quota puts a fully-utilised user above what they pay, so the quota is trimmed there instead. Overage is an add-on sale (~$20 per 100 extra AO against a ~$10 cost), not a loss.
 
-**Do not re-derive these numbers from a competitor's page without re-running the cost model** — the two are not interchangeable, and a competitor whose cost structure differs (Easync in-house tracking, AslDrop self-scraped pricing data instead of a Keepa licence) can sustain prices we cannot.
+**Do not re-derive these numbers from a competitor's page without re-running the cost model** — the two are not interchangeable, and a competitor whose cost structure differs (Easync in-house tracking, rakip self-scraped pricing data instead of a Keepa licence) can sustain prices we cannot.
 
 Plan prices, limits, active state, ordering, and Stripe price IDs are stored in billing catalog tables, not TypeScript constants or UI copy. Landing pricing reads the public catalog. Do not create a second plan model.
 

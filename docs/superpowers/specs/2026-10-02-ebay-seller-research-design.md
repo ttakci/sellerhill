@@ -22,7 +22,7 @@ A seller types another eBay seller's username (or pastes their store URL), picks
 | Decision | Why |
 |---|---|
 | **Scrape eBay's public HTML; never the eBay APIs for this.** | The API License Agreement forbids deriving "data relating to the performance of sellers" and "information relating to specific eBay Users" without written permission, and every API call is signed with OUR keyset — the one order sync, listing and tracking depend on. HTML scraping is a User Agreement §3 exposure, but it is not traceable to the keyset. The Browse API (`filter=sellers:{…}`, `estimatedSoldQuantity`) is **not** used anywhere in this feature; a guard spec enforces it. |
-| **Active listings + sold counter, NOT the sold/completed search.** | The sold filter (`LH_Sold=1`) redirected to sign-in in the 2026-10-02 probe; active listings and the per-item sold counter are what every buyer sees and are what AslScout serves ("30-day and 7-day sold quantities — per individual product"). No eBay account, no account pool. |
+| **Active listings + sold counter, NOT the sold/completed search.** | The sold filter (`LH_Sold=1`) redirected to sign-in in the 2026-10-02 probe; active listings and the per-item sold counter are what every buyer sees and are what rakip serves ("30-day and 7-day sold quantities — per individual product"). No eBay account, no account pool. |
 | **A separate egress for eBay — separate service, separate proxy list, separate IPs.** | Operator rule: eBay traffic never shares an IP with the Amazon pool, and the api container never fetches eBay pages. |
 | **Matching depth = plan (2): open the eBay item page and read UPC/EAN/ISBN/MPN + brand; barcode search on Amazon first, keywords second.** | A wrong ASIN costs the seller trust; the extra page costs ~1 s on a flat-rate proxy. |
 | **Hand-off = Best Sellers': tick → `/listings?drawer=add&asins=…`.** | One place to create listings. |
@@ -32,7 +32,7 @@ A seller types another eBay seller's username (or pastes their store URL), picks
 
 - No eBay account, no login, no cookies that identify a person.
 - No sold/completed-item search, no Terapeak, no Marketplace Insights, no Browse API.
-- No seller-level revenue estimate, sell-through rate or "store health" score — only per-listing figures the page actually shows. (AslScout's revenue figure is price × sold; we show both numbers and let the seller multiply.)
+- No seller-level revenue estimate, sell-through rate or "store health" score — only per-listing figures the page actually shows. (rakip's revenue figure is price × sold; we show both numbers and let the seller multiply.)
 - No scheduled re-scans, no tracking a competitor over time, no alerts. A scan is a snapshot.
 - No image matching, no LLM in the matching path. (`LLM_CONTENT` is create-only by rule; this feature adds no LLM call at all.)
 - No store-name fuzzy search. Input is a username or a URL (§6.1); a bare name that is not a username fails with a clear message.
@@ -264,9 +264,9 @@ DTO shapes live in `packages/shared/src/domain/seller-research/seller-research.t
 
 | Item | Proposal (2026-10-02) | Note |
 |---|---|---|
-| Free allowance | **3 scans / month on every plan, trial included** | AslScout trial: 5 scans once. A per-tier ladder (Mini 3 … Enterprise 50) is the other option; it matches the other meters but is more rows to explain |
-| Packs | 50 / $4.99 · 150 / $9.99 · **500** / $14.99 | AslScout: 40 / $9.99 · 120 / $16.99 · unlimited / $24.99 (subscriptions). **"Unlimited" cannot be a top-up**: credits are a quantity on one billing window. An unlimited tier would be a recurring add-on — a different Stripe object and a different local model, not in V1. With our own browsers on flat-rate IPs the unit cost is time, so a 500 pack is safe; under an unblocker it is not. |
-| Rescan | free inside 24 h | AslScout charges a rescan half price |
+| Free allowance | **3 scans / month on every plan, trial included** | rakip trial: 5 scans once. A per-tier ladder (Mini 3 … Enterprise 50) is the other option; it matches the other meters but is more rows to explain |
+| Packs | 50 / $4.99 · 150 / $9.99 · **500** / $14.99 | rakip: 40 / $9.99 · 120 / $16.99 · unlimited / $24.99 (subscriptions). **"Unlimited" cannot be a top-up**: credits are a quantity on one billing window. An unlimited tier would be a recurring add-on — a different Stripe object and a different local model, not in V1. With our own browsers on flat-rate IPs the unit cost is time, so a 500 pack is safe; under an unblocker it is not. |
+| Rescan | free inside 24 h | rakip charges a rescan half price |
 
 ## 10. Web
 
