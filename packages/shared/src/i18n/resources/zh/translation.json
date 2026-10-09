@@ -558,7 +558,7 @@
         "label": "每个商品刊登填写的商品属性数量"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "专业刊登模板"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "刊登模板",
       "sectionTitle": "专业的刊登效果，无需设计师。",
-      "sectionSubtitle": "从 12 款现成模板中任选一款，或编写您自己的 HTML。每个设置组都可以使用各自的模板。下方预览由我们的真实模板渲染而成。",
+      "sectionSubtitle": "从 24 款现成模板中任选一款，或编写您自己的 HTML。每个设置组都可以使用各自的模板。下方预览由我们的真实模板渲染而成。",
       "names": {
         "generalStore": "综合店铺",
         "techGadgets": "数码科技",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "不限自动订单和物流跟踪数量",
       "upToConversions": "每月 {{limit}} 次物流单号转换",
       "unlimitedConversions": "不限物流单号转换次数",
+      "unlimitedAiTitles": "无限次 AI 标题优化",
       "upToBestSellers": "每月 {{limit}} 件热销榜商品",
       "unlimitedBestSellers": "不限热销榜浏览",
       "catalogError": "暂时无法加载实时价格。下方显示套餐概览。",
       "included": {
-        "groups": "设置组和 12 款刊登模板",
+        "groups": "设置组和 24 款刊登模板",
         "sync": "每天 4 次检查价格和库存",
         "specifics": "完整的 eBay 商品属性",
         "actions": "待处理事项页面",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "我可以修改刊登模板吗？",
-        "answer": "可以。您可以从 12 款现成模板中任选一款，编辑其中任何一款，或编写您自己的 HTML 模板。每个设置组都可以使用不同的模板，并且在保存之前，预览会显示您的商品刊登在 eBay 上的样子。"
+        "answer": "可以。您可以从 24 款现成模板中任选一款，编辑其中任何一款，或编写您自己的 HTML 模板。每个设置组都可以使用不同的模板，并且在保存之前，预览会显示您的商品刊登在 eBay 上的样子。"
       },
       "q9": {
         "question": "你们会保存我的银行卡信息或账号信息吗？",

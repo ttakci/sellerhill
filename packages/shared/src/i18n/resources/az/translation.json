@@ -558,7 +558,7 @@
         "label": "hər elanda doldurulmuş məhsul xüsusiyyəti"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "peşəkar elan şablonu"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Elan şablonları",
       "sectionTitle": "Peşəkar görünən elanlar, dizayner lazım deyil.",
-      "sectionSubtitle": "12 hazır şablondan birini seçin və ya öz HTML-nizi yazın. Hər Parametr qrupu öz şablonundan istifadə edə bilər. Aşağıdakı önizləmələr real şablonlarımızla göstərilir.",
+      "sectionSubtitle": "24 hazır şablondan birini seçin və ya öz HTML-nizi yazın. Hər Parametr qrupu öz şablonundan istifadə edə bilər. Aşağıdakı önizləmələr real şablonlarımızla göstərilir.",
       "names": {
         "generalStore": "Ümumi mağaza",
         "techGadgets": "Texnologiya",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
       "upToConversions": "Ayda {{limit}} izləmə çevirməsi",
       "unlimitedConversions": "Limitsiz izləmə çevirməsi",
+      "unlimitedAiTitles": "Süni intellektlə limitsiz başlıq optimallaşdırması",
       "upToBestSellers": "Ayda {{limit}} Ən Çox Satılanlar məhsulu",
       "unlimitedBestSellers": "Limitsiz Ən Çox Satılanlar baxışı",
       "catalogError": "Canlı qiymətlər hazırda yüklənə bilmədi. Aşağıda plan icmalı göstərilir.",
       "included": {
-        "groups": "Parametr qrupları və 12 elan şablonu",
+        "groups": "Parametr qrupları və 24 elan şablonu",
         "sync": "Gündə 4× qiymət və stok yoxlaması",
         "specifics": "Tam eBay məhsul xüsusiyyətləri",
         "actions": "Gözləyən əməliyyatlar ekranı",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Elan şablonlarını dəyişə bilərəmmi?",
-        "answer": "Bəli. 12 hazır şablondan birini seçin, istədiyinizi redaktə edin və ya öz HTML şablonunuzu yazın. Hər Parametr qrupu fərqli şablondan istifadə edə bilər, önizləmə isə yadda saxlamazdan əvvəl elanınızın eBay-də necə görünəcəyini göstərir."
+        "answer": "Bəli. 24 hazır şablondan birini seçin, istədiyinizi redaktə edin və ya öz HTML şablonunuzu yazın. Hər Parametr qrupu fərqli şablondan istifadə edə bilər, önizləmə isə yadda saxlamazdan əvvəl elanınızın eBay-də necə görünəcəyini göstərir."
       },
       "q9": {
         "question": "Kart və ya hesab məlumatlarımı saxlayırsınız?",

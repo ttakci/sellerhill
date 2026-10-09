@@ -558,7 +558,7 @@
         "label": "item specifics per listing, filled"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "professional listing templates"
       },
       "trial": {
@@ -888,11 +888,12 @@
       "unlimitedOrders": "Unlimited automatic orders and shipment tracking",
       "upToConversions": "{{limit}} tracking conversions / month",
       "unlimitedConversions": "Unlimited tracking conversions",
+      "unlimitedAiTitles": "Unlimited AI title optimization",
       "upToBestSellers": "{{limit}} Best Sellers products / month",
       "unlimitedBestSellers": "Unlimited Best Sellers browsing",
       "catalogError": "Live pricing couldn't be loaded right now. Plan overview shown below.",
       "included": {
-        "groups": "Setting Groups & 12 listing templates",
+        "groups": "Setting Groups & 24 listing templates",
         "sync": "Price & stock checks 4× a day",
         "specifics": "Complete eBay item specifics",
         "actions": "Pending Actions screen",
@@ -975,7 +976,7 @@
       },
       "q8": {
         "question": "Can I change the listing templates?",
-        "answer": "Yes. Pick one of 12 ready-made templates, edit any of them, or write your own HTML template. Every Setting Group can use a different template, and the preview shows how your listing will look on eBay before you save."
+        "answer": "Yes. Pick one of 24 ready-made templates, edit any of them, or write your own HTML template. Every Setting Group can use a different template, and the preview shows how your listing will look on eBay before you save."
       },
       "q9": {
         "question": "Do you store my card details or account details?",

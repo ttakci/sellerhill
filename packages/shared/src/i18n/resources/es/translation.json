@@ -558,7 +558,7 @@
         "label": "características del artículo por publicación, completadas"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "plantillas profesionales de publicaciones"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Plantillas de publicaciones",
       "sectionTitle": "Publicaciones de aspecto profesional, sin necesidad de diseñador.",
-      "sectionSubtitle": "Elige una de las 12 plantillas listas para usar o escribe tu propio HTML. Cada Grupo de ajustes puede usar su propia plantilla. Las vistas previas de abajo se generan con nuestras plantillas reales.",
+      "sectionSubtitle": "Elige una de las 24 plantillas listas para usar o escribe tu propio HTML. Cada Grupo de ajustes puede usar su propia plantilla. Las vistas previas de abajo se generan con nuestras plantillas reales.",
       "names": {
         "generalStore": "Tienda general",
         "techGadgets": "Tecnología",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Pedidos automáticos y seguimiento de envíos ilimitados",
       "upToConversions": "{{limit}} conversiones de seguimiento / mes",
       "unlimitedConversions": "Conversiones de seguimiento ilimitadas",
+      "unlimitedAiTitles": "Optimización ilimitada de títulos con IA",
       "upToBestSellers": "{{limit}} productos de Más vendidos / mes",
       "unlimitedBestSellers": "Exploración ilimitada de Más vendidos",
       "catalogError": "No se pudieron cargar los precios en vivo en este momento. Se muestra a continuación un resumen de los planes.",
       "included": {
-        "groups": "Grupos de ajustes y 12 plantillas de publicaciones",
+        "groups": "Grupos de ajustes y 24 plantillas de publicaciones",
         "sync": "Revisiones de precio y stock 4 veces al día",
         "specifics": "Características del artículo de eBay completas",
         "actions": "Pantalla de Acciones pendientes",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "¿Puedo cambiar las plantillas de publicaciones?",
-        "answer": "Sí. Elige una de las 12 plantillas listas para usar, edita cualquiera de ellas o escribe tu propia plantilla HTML. Cada Grupo de ajustes puede usar una plantilla distinta, y la vista previa muestra cómo se verá tu publicación en eBay antes de guardar."
+        "answer": "Sí. Elige una de las 24 plantillas listas para usar, edita cualquiera de ellas o escribe tu propia plantilla HTML. Cada Grupo de ajustes puede usar una plantilla distinta, y la vista previa muestra cómo se verá tu publicación en eBay antes de guardar."
       },
       "q9": {
         "question": "¿Guardan los datos de mi tarjeta o de mi cuenta?",

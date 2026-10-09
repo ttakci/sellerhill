@@ -558,7 +558,7 @@
         "label": "ilan başına ürün özelliğine kadar"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "hazır profesyonel ilan şablonu"
       },
       "trial": {
@@ -888,11 +888,12 @@
       "unlimitedOrders": "Sınırsız otomatik sipariş ve kargo takibi",
       "upToConversions": "Ayda {{limit}} takip numarası dönüştürme",
       "unlimitedConversions": "Sınırsız takip numarası dönüştürme",
+      "unlimitedAiTitles": "Sınırsız yapay zekâ ile başlık optimizasyonu",
       "upToBestSellers": "Ayda {{limit}} Çok Satanlar ürünü",
       "unlimitedBestSellers": "Sınırsız Çok Satanlar gezintisi",
       "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
       "included": {
-        "groups": "Ayar Grupları ve 12 ilan şablonu",
+        "groups": "Ayar Grupları ve 24 ilan şablonu",
         "sync": "Günde 4 kez fiyat ve stok takibi",
         "specifics": "Eksiksiz eBay ürün özellikleri",
         "actions": "Bekleyen Aksiyonlar ekranı",
@@ -975,7 +976,7 @@
       },
       "q8": {
         "question": "İlan şablonlarını değiştirebilir miyim?",
-        "answer": "Evet. 12 hazır şablondan birini seçebilir, dilediğinizi düzenleyebilir ya da kendi HTML şablonunuzu yazabilirsiniz. Her Ayar Grubu farklı bir şablon kullanabilir; önizleme, ilanınızın eBay'de nasıl görüneceğini kaydetmeden önce gösterir."
+        "answer": "Evet. 24 hazır şablondan birini seçebilir, dilediğinizi düzenleyebilir ya da kendi HTML şablonunuzu yazabilirsiniz. Her Ayar Grubu farklı bir şablon kullanabilir; önizleme, ilanınızın eBay'de nasıl görüneceğini kaydetmeden önce gösterir."
       },
       "q9": {
         "question": "Kart bilgilerimi ve hesap bilgilerimi saklıyor musunuz?",

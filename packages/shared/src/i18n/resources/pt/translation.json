@@ -558,7 +558,7 @@
         "label": "características do item por anúncio, preenchidas"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "modelos de anúncio profissionais"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Modelos de anúncios",
       "sectionTitle": "Anúncios com aparência profissional, sem precisar de designer.",
-      "sectionSubtitle": "Escolha um dos 12 modelos prontos ou escreva seu próprio HTML. Cada Grupo de configurações pode usar seu próprio modelo. As pré-visualizações abaixo são renderizadas com os nossos modelos reais.",
+      "sectionSubtitle": "Escolha um dos 24 modelos prontos ou escreva seu próprio HTML. Cada Grupo de configurações pode usar seu próprio modelo. As pré-visualizações abaixo são renderizadas com os nossos modelos reais.",
       "names": {
         "generalStore": "Loja geral",
         "techGadgets": "Tecnologia",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Pedidos automáticos e rastreio de envios ilimitados",
       "upToConversions": "{{limit}} conversões de rastreio / mês",
       "unlimitedConversions": "Conversões de rastreio ilimitadas",
+      "unlimitedAiTitles": "Otimização ilimitada de títulos com IA",
       "upToBestSellers": "{{limit}} produtos de Mais vendidos / mês",
       "unlimitedBestSellers": "Navegação ilimitada em Mais vendidos",
       "catalogError": "Não foi possível carregar os preços ao vivo agora. Veja abaixo a visão geral dos planos.",
       "included": {
-        "groups": "Grupos de configurações e 12 modelos de anúncios",
+        "groups": "Grupos de configurações e 24 modelos de anúncios",
         "sync": "Verificações de preço e estoque 4× ao dia",
         "specifics": "Características do item do eBay completas",
         "actions": "Tela de Ações pendentes",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Posso alterar os modelos de anúncios?",
-        "answer": "Sim. Escolha um dos 12 modelos prontos, edite qualquer um deles ou escreva seu próprio modelo HTML. Cada Grupo de configurações pode usar um modelo diferente, e a pré-visualização mostra como o seu anúncio ficará no eBay antes de você salvar."
+        "answer": "Sim. Escolha um dos 24 modelos prontos, edite qualquer um deles ou escreva seu próprio modelo HTML. Cada Grupo de configurações pode usar um modelo diferente, e a pré-visualização mostra como o seu anúncio ficará no eBay antes de você salvar."
       },
       "q9": {
         "question": "Vocês armazenam os dados do meu cartão ou da minha conta?",

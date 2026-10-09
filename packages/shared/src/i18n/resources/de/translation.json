@@ -558,7 +558,7 @@
         "label": "Artikelmerkmale pro Angebot, ausgefüllt"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "professionelle Angebotsvorlagen"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Angebotsvorlagen",
       "sectionTitle": "Professionell wirkende Angebote, ohne Designer.",
-      "sectionSubtitle": "Wählen Sie eine von 12 fertigen Vorlagen oder schreiben Sie Ihr eigenes HTML. Jede Einstellungsgruppe kann ihre eigene Vorlage verwenden. Die Vorschauen unten werden mit unseren echten Vorlagen erstellt.",
+      "sectionSubtitle": "Wählen Sie eine von 24 fertigen Vorlagen oder schreiben Sie Ihr eigenes HTML. Jede Einstellungsgruppe kann ihre eigene Vorlage verwenden. Die Vorschauen unten werden mit unseren echten Vorlagen erstellt.",
       "names": {
         "generalStore": "Gemischtwaren",
         "techGadgets": "Technik",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
       "upToConversions": "{{limit}} Sendungsnummern-Umwandlungen / Monat",
       "unlimitedConversions": "Unbegrenzte Sendungsnummern-Umwandlungen",
+      "unlimitedAiTitles": "Unbegrenzte KI-Titeloptimierung",
       "upToBestSellers": "{{limit}} Bestseller-Produkte / Monat",
       "unlimitedBestSellers": "Unbegrenztes Bestseller-Stöbern",
       "catalogError": "Die aktuellen Preise konnten gerade nicht geladen werden. Unten wird die Tarifübersicht angezeigt.",
       "included": {
-        "groups": "Einstellungsgruppen und 12 Angebotsvorlagen",
+        "groups": "Einstellungsgruppen und 24 Angebotsvorlagen",
         "sync": "Preis- und Bestandsprüfungen 4× täglich",
         "specifics": "Vollständige eBay-Artikelmerkmale",
         "actions": "Bildschirm für Offene Aufgaben",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Kann ich die Angebotsvorlagen ändern?",
-        "answer": "Ja. Wählen Sie eine von 12 fertigen Vorlagen, bearbeiten Sie eine beliebige davon oder schreiben Sie Ihre eigene HTML-Vorlage. Jede Einstellungsgruppe kann eine andere Vorlage verwenden, und die Vorschau zeigt vor dem Speichern, wie Ihr Angebot auf eBay aussehen wird."
+        "answer": "Ja. Wählen Sie eine von 24 fertigen Vorlagen, bearbeiten Sie eine beliebige davon oder schreiben Sie Ihre eigene HTML-Vorlage. Jede Einstellungsgruppe kann eine andere Vorlage verwenden, und die Vorschau zeigt vor dem Speichern, wie Ihr Angebot auf eBay aussehen wird."
       },
       "q9": {
         "question": "Speichern Sie meine Kartendaten oder Kontodaten?",

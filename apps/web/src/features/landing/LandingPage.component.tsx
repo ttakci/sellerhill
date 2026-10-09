@@ -795,14 +795,6 @@ export const LandingPageComponent = ({
                   </S.TemplateTab>
                 ))}
               </S.TemplateTabs>
-              <S.TemplatePoints>
-                {(['editable', 'mobile', 'clean', 'specs'] as const).map((key) => (
-                  <S.TemplatePoint key={key}>
-                    <Icon name="check-circle" size={16} />
-                    <span>{t(`translation:landing.templates.points.${key}`)}</span>
-                  </S.TemplatePoint>
-                ))}
-              </S.TemplatePoints>
             </S.TemplateSide>
             <S.TemplatePreview>
               <S.TemplateBar>
@@ -1104,13 +1096,17 @@ export const LandingPageComponent = ({
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.amazonOrdersDisplay}</span>
                         </S.PlanFeature>
-                        <S.PlanFeature>
+                        <S.PlanFeature $strong>
                           <Icon name="check-circle" size={15} color="semantic.success" />
-                          <span>{plan.listingsDisplay}</span>
+                          <span>{plan.trackingConversionsDisplay}</span>
+                        </S.PlanFeature>
+                        <S.PlanFeature $strong>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{t('translation:landing.pricing.unlimitedAiTitles')}</span>
                         </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
-                          <span>{plan.trackingConversionsDisplay}</span>
+                          <span>{plan.listingsDisplay}</span>
                         </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
@@ -1152,16 +1148,20 @@ export const LandingPageComponent = ({
                             {t(`translation:landing.pricing.catalogFallback.${plan}.orders`)}
                           </span>
                         </S.PlanFeature>
-                        <S.PlanFeature>
+                        <S.PlanFeature $strong>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>
-                            {t(`translation:landing.pricing.catalogFallback.${plan}.listings`)}
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.conversions`)}
                           </span>
+                        </S.PlanFeature>
+                        <S.PlanFeature $strong>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{t('translation:landing.pricing.unlimitedAiTitles')}</span>
                         </S.PlanFeature>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>
-                            {t(`translation:landing.pricing.catalogFallback.${plan}.conversions`)}
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.listings`)}
                           </span>
                         </S.PlanFeature>
                         <S.PlanFeature>

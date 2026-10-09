@@ -558,7 +558,7 @@
         "label": "specificații ale articolului completate pe anunț"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "șabloane profesionale de anunțuri"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Șabloane de anunțuri",
       "sectionTitle": "Anunțuri cu aspect profesionist, fără designer.",
-      "sectionSubtitle": "Alegeți unul dintre cele 12 șabloane gata făcute sau scrieți propriul HTML. Fiecare grup de setări poate folosi propriul șablon. Previzualizările de mai jos sunt generate cu șabloanele noastre reale.",
+      "sectionSubtitle": "Alegeți unul dintre cele 24 de șabloane gata făcute sau scrieți propriul HTML. Fiecare grup de setări poate folosi propriul șablon. Previzualizările de mai jos sunt generate cu șabloanele noastre reale.",
       "names": {
         "generalStore": "Magazin general",
         "techGadgets": "Tehnologie",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Comenzi automate și urmărire a livrărilor nelimitate",
       "upToConversions": "{{limit}} conversii de urmărire / lună",
       "unlimitedConversions": "Conversii de urmărire nelimitate",
+      "unlimitedAiTitles": "Optimizare nelimitată a titlurilor cu AI",
       "upToBestSellers": "{{limit}} de produse Cele mai vândute / lună",
       "unlimitedBestSellers": "Răsfoire nelimitată a Celor mai vândute",
       "catalogError": "Prețurile live nu au putut fi încărcate acum. Mai jos este afișată o prezentare generală a planurilor.",
       "included": {
-        "groups": "Grupuri de setări și 12 șabloane de anunțuri",
+        "groups": "Grupuri de setări și 24 de șabloane de anunțuri",
         "sync": "Verificări de preț și stoc de 4× pe zi",
         "specifics": "Specificații complete ale articolului eBay",
         "actions": "Ecranul Acțiuni în așteptare",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Pot modifica șabloanele de anunțuri?",
-        "answer": "Da. Alegeți unul dintre cele 12 șabloane gata făcute, editați-l pe oricare sau scrieți propriul șablon HTML. Fiecare grup de setări poate folosi un alt șablon, iar previzualizarea arată cum va arăta anunțul pe eBay înainte de a salva."
+        "answer": "Da. Alegeți unul dintre cele 24 de șabloane gata făcute, editați-l pe oricare sau scrieți propriul șablon HTML. Fiecare grup de setări poate folosi un alt șablon, iar previzualizarea arată cum va arăta anunțul pe eBay înainte de a salva."
       },
       "q9": {
         "question": "Stocați datele cardului sau ale contului meu?",

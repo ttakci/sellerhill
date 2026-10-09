@@ -558,7 +558,7 @@
         "label": "caratteristiche dell'articolo per inserzione, compilate"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "modelli di inserzione professionali"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Modelli di inserzione",
       "sectionTitle": "Inserzioni dall'aspetto professionale, senza bisogno di un designer.",
-      "sectionSubtitle": "Scegli uno dei 12 modelli già pronti o scrivi il tuo HTML. Ogni Gruppo di impostazioni può usare il proprio modello. Le anteprime qui sotto sono generate con i nostri modelli reali.",
+      "sectionSubtitle": "Scegli uno dei 24 modelli già pronti o scrivi il tuo HTML. Ogni Gruppo di impostazioni può usare il proprio modello. Le anteprime qui sotto sono generate con i nostri modelli reali.",
       "names": {
         "generalStore": "Negozio generico",
         "techGadgets": "Tecnologia",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Ordini automatici e tracciamento delle spedizioni illimitati",
       "upToConversions": "{{limit}} conversioni di tracciamento / mese",
       "unlimitedConversions": "Conversioni di tracciamento illimitate",
+      "unlimitedAiTitles": "Ottimizzazione illimitata dei titoli con IA",
       "upToBestSellers": "{{limit}} prodotti Più venduti / mese",
       "unlimitedBestSellers": "Esplorazione illimitata dei Più venduti",
       "catalogError": "Al momento non è stato possibile caricare i prezzi aggiornati. Qui sotto trovi la panoramica dei piani.",
       "included": {
-        "groups": "Gruppi di impostazioni e 12 modelli di inserzione",
+        "groups": "Gruppi di impostazioni e 24 modelli di inserzione",
         "sync": "Controlli di prezzo e stock 4 volte al giorno",
         "specifics": "Caratteristiche dell'articolo eBay complete",
         "actions": "Schermata Azioni in sospeso",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Posso cambiare i modelli di inserzione?",
-        "answer": "Sì. Scegli uno dei 12 modelli già pronti, modifica quello che vuoi oppure scrivi un tuo modello HTML. Ogni Gruppo di impostazioni può usare un modello diverso e l'anteprima mostra come apparirà la tua inserzione su eBay prima di salvare."
+        "answer": "Sì. Scegli uno dei 24 modelli già pronti, modifica quello che vuoi oppure scrivi un tuo modello HTML. Ogni Gruppo di impostazioni può usare un modello diverso e l'anteprima mostra come apparirà la tua inserzione su eBay prima di salvare."
       },
       "q9": {
         "question": "Conservate i dati della mia carta o dei miei account?",

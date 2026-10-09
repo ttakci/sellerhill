@@ -558,7 +558,7 @@
         "label": "caractéristiques d'article renseignées par annonce"
       },
       "templates": {
-        "value": "12",
+        "value": "24",
         "label": "modèles d'annonces professionnels"
       },
       "trial": {
@@ -657,7 +657,7 @@
     "templates": {
       "eyebrow": "Modèles d'annonces",
       "sectionTitle": "Des annonces d'aspect professionnel, sans designer.",
-      "sectionSubtitle": "Choisissez l'un des 12 modèles prêts à l'emploi ou rédigez votre propre HTML. Chaque groupe de paramètres peut utiliser son propre modèle. Les aperçus ci-dessous sont générés avec nos vrais modèles.",
+      "sectionSubtitle": "Choisissez l'un des 24 modèles prêts à l'emploi ou rédigez votre propre HTML. Chaque groupe de paramètres peut utiliser son propre modèle. Les aperçus ci-dessous sont générés avec nos vrais modèles.",
       "names": {
         "generalStore": "Boutique généraliste",
         "techGadgets": "High-tech",
@@ -876,11 +876,12 @@
       "unlimitedOrders": "Commandes automatiques et suivi d'expédition illimités",
       "upToConversions": "{{limit}} conversions de suivi / mois",
       "unlimitedConversions": "Conversions de suivi illimitées",
+      "unlimitedAiTitles": "Optimisation illimitée des titres par IA",
       "upToBestSellers": "{{limit}} produits Meilleures ventes / mois",
       "unlimitedBestSellers": "Consultation illimitée des Meilleures ventes",
       "catalogError": "Les tarifs en direct n'ont pas pu être chargés pour le moment. Aperçu des forfaits ci-dessous.",
       "included": {
-        "groups": "Groupes de paramètres et 12 modèles d'annonces",
+        "groups": "Groupes de paramètres et 24 modèles d'annonces",
         "sync": "Contrôle des prix et du stock 4× par jour",
         "specifics": "Caractéristiques d'article eBay complètes",
         "actions": "Écran des actions en attente",
@@ -963,7 +964,7 @@
       },
       "q8": {
         "question": "Puis-je modifier les modèles d'annonces ?",
-        "answer": "Oui. Choisissez l'un des 12 modèles prêts à l'emploi, modifiez-les à votre guise ou rédigez votre propre modèle HTML. Chaque groupe de paramètres peut utiliser un modèle différent, et l'aperçu montre l'apparence de votre annonce sur eBay avant l'enregistrement."
+        "answer": "Oui. Choisissez l'un des 24 modèles prêts à l'emploi, modifiez-les à votre guise ou rédigez votre propre modèle HTML. Chaque groupe de paramètres peut utiliser un modèle différent, et l'aperçu montre l'apparence de votre annonce sur eBay avant l'enregistrement."
       },
       "q9": {
         "question": "Conservez-vous les données de ma carte ou de mes comptes ?",
