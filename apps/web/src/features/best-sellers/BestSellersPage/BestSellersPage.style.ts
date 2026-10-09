@@ -33,7 +33,7 @@ export const TabsRow = styled.div`
  * neutral grey on a grey disc. Five hues that cannot be mistaken for each
  * other — teal was dropped, it read as the same green, and navy as the
  * same blue. Positions follow `BEST_SELLERS_LIST_TYPE_ORDER`: Best Sellers
- * amber (the trophy), New Releases brand blue, Movers & Shakers purple
+ * amber (the trophy — the same ink as the rating stars), New Releases brand blue, Movers & Shakers purple
  * (operator request), Most Wished For red, Most Gifted green.
  */
 const LIST_TAB_COLORS = [
