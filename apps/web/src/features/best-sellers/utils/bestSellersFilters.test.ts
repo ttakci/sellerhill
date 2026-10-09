@@ -1,6 +1,8 @@
 import type { BestSellersItemDto } from '@repo/shared';
 import { describe, expect, it } from 'vitest';
 
+import { BestSellersRangeKey, type BestSellersRangeValue } from '../bestSellers.types';
+
 import {
   EMPTY_BEST_SELLERS_FILTERS,
   hasActiveBestSellersFilters,
@@ -10,7 +12,7 @@ import {
 } from './bestSellersFilters';
 
 const item = (overrides: Partial<BestSellersItemDto> = {}): BestSellersItemDto => ({
-  rank: 1,
+  rank: 7,
   asin: 'B0TEST0001',
   title: 'Sample',
   link: null,
@@ -24,8 +26,24 @@ const item = (overrides: Partial<BestSellersItemDto> = {}): BestSellersItemDto =
   ...overrides,
 });
 
-const criteria = (values: Partial<typeof EMPTY_BEST_SELLERS_FILTERS>) =>
-  toBestSellersFilterCriteria({ ...EMPTY_BEST_SELLERS_FILTERS, ...values });
+const criteria = ({
+  search = '',
+  minRating = '',
+  ranges = {},
+}: {
+  search?: string;
+  minRating?: string;
+  ranges?: Partial<Record<BestSellersRangeKey, Partial<BestSellersRangeValue>>>;
+}) =>
+  toBestSellersFilterCriteria({
+    search,
+    minRating,
+    ranges: {
+      [BestSellersRangeKey.PRICE]: { min: '', max: '', ...ranges[BestSellersRangeKey.PRICE] },
+      [BestSellersRangeKey.REVIEWS]: { min: '', max: '', ...ranges[BestSellersRangeKey.REVIEWS] },
+      [BestSellersRangeKey.RANK]: { min: '', max: '', ...ranges[BestSellersRangeKey.RANK] },
+    },
+  });
 
 describe('parseFilterNumber', () => {
   it('reads blanks and junk as no constraint', () => {
@@ -42,18 +60,23 @@ describe('parseFilterNumber', () => {
 
 describe('matchesBestSellersFilters', () => {
   it('passes everything with no filter set', () => {
-    const empty = criteria({});
+    const empty = toBestSellersFilterCriteria(EMPTY_BEST_SELLERS_FILTERS);
     expect(hasActiveBestSellersFilters(empty)).toBe(false);
-    expect(matchesBestSellersFilters(item({ rating: null, price: null }), empty)).toBe(true);
+    expect(matchesBestSellersFilters(item({ rating: null, price: null, rank: null }), empty)).toBe(true);
   });
 
-  it('applies rating, reviews and the price range inclusively', () => {
+  it('applies rating and every range inclusively', () => {
     expect(matchesBestSellersFilters(item(), criteria({ minRating: '4.5' }))).toBe(true);
     expect(matchesBestSellersFilters(item(), criteria({ minRating: '4.6' }))).toBe(false);
-    expect(matchesBestSellersFilters(item(), criteria({ minReviews: '1200' }))).toBe(true);
-    expect(matchesBestSellersFilters(item(), criteria({ minReviews: '1201' }))).toBe(false);
-    expect(matchesBestSellersFilters(item(), criteria({ priceMin: '19.99', priceMax: '19.99' }))).toBe(true);
-    expect(matchesBestSellersFilters(item(), criteria({ priceMax: '15' }))).toBe(false);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { reviews: { min: '1200' } } }))).toBe(true);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { reviews: { min: '1201' } } }))).toBe(false);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { reviews: { max: '1000' } } }))).toBe(false);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { price: { min: '19.99', max: '19.99' } } }))).toBe(
+      true,
+    );
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { price: { max: '15' } } }))).toBe(false);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { rank: { max: '10' } } }))).toBe(true);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { rank: { min: '1', max: '5' } } }))).toBe(false);
   });
 
   it('matches the search text against title and ASIN, case-insensitively', () => {
@@ -66,6 +89,9 @@ describe('matchesBestSellersFilters', () => {
 
   it('fails a product whose field is unknown', () => {
     expect(matchesBestSellersFilters(item({ rating: null }), criteria({ minRating: '3' }))).toBe(false);
-    expect(matchesBestSellersFilters(item({ price: null }), criteria({ priceMax: '100' }))).toBe(false);
+    expect(matchesBestSellersFilters(item({ price: null }), criteria({ ranges: { price: { max: '100' } } }))).toBe(
+      false,
+    );
+    expect(matchesBestSellersFilters(item({ rank: null }), criteria({ ranges: { rank: { max: '10' } } }))).toBe(false);
   });
 });

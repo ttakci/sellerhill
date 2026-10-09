@@ -34,6 +34,7 @@
     "allowance": "Mai aveți {{remaining}} din {{limit}} produse în această perioadă",
     "allowanceUnlimited": "Vizualizări de produse nelimitate",
     "allowanceHint": "Fiecare produs afișat se contorizează o dată pe perioadă; redeschiderea aceleiași liste astăzi nu se numără de două ori.",
+    "lastFetched": "Ultima preluare de pe Amazon",
     "locked": {
       "title_one": "Încă {{count}} produs de pe această pagină depășește alocarea lunară a planului dvs.",
       "title_few": "Încă {{count}} produse de pe această pagină depășesc alocarea lunară a planului dvs.",

@@ -34,6 +34,7 @@
     "allowance": "Ti restano {{remaining}} prodotti su {{limit}} in questo periodo",
     "allowanceUnlimited": "Visualizzazioni prodotto illimitate",
     "allowanceHint": "Ogni prodotto che vedi conta una volta per periodo; riaprire oggi la stessa classifica non viene contato due volte.",
+    "lastFetched": "Ultimo aggiornamento da Amazon",
     "locked": {
       "title_one": "{{count}} altro prodotto in questa pagina è oltre il limite mensile del tuo piano",
       "title_many": "Altri {{count}} prodotti in questa pagina sono oltre il limite mensile del tuo piano",

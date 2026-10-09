@@ -106,31 +106,49 @@ export interface BestSellersRefusalBody {
 }
 
 /**
- * Seller-side filters over the products of the page being viewed, kept as the
- * raw text the seller typed (a half-typed "4." must not snap back to "4").
- * Each is optional; an empty string means "no constraint". Only fields Amazon
- * actually prints on a Best Sellers card exist here — rating, review count and
- * price. Prime and "bought in past month" are not on those pages, so there is
- * nothing honest to filter them on.
+ * The range filters of the "Advanced filters" section, mirroring the Listings
+ * page's min/max fields. Only fields Amazon actually prints on a ranking card
+ * exist here — price, review count and rank. Prime and "bought in past month"
+ * are not on those pages, so there is nothing honest to filter them on.
+ */
+export enum BestSellersRangeKey {
+  PRICE = 'price',
+  REVIEWS = 'reviews',
+  RANK = 'rank',
+}
+
+export type BestSellersRangeBound = 'min' | 'max';
+
+/** One range as the raw text the seller typed (a half-typed "4." must not snap back to "4"). */
+export interface BestSellersRangeValue {
+  min: string;
+  max: string;
+}
+
+/**
+ * Seller-side filters over the products of the page being viewed. Each is
+ * optional; an empty string means "no constraint".
  */
 export interface BestSellersFilterValues {
   /** Free text matched against the product title and ASIN; `''` = any. */
   search: string;
   /** Minimum star average, one of `BEST_SELLERS_RATING_OPTIONS`; `''` = any. */
   minRating: string;
-  minReviews: string;
-  priceMin: string;
-  priceMax: string;
+  ranges: Record<BestSellersRangeKey, BestSellersRangeValue>;
 }
 
-/** The same filters parsed into numbers; `null` = no constraint. */
+/** A range parsed into numbers; `null` = that side is open. */
+export interface BestSellersRangeCriteria {
+  min: number | null;
+  max: number | null;
+}
+
+/** The same filters parsed; `null` = no constraint. */
 export interface BestSellersFilterCriteria {
-  /** Lower-cased, trimmed search text; `null` = no constraint. */
+  /** Lower-cased, trimmed search text. */
   search: string | null;
   minRating: number | null;
-  minReviews: number | null;
-  priceMin: number | null;
-  priceMax: number | null;
+  ranges: Record<BestSellersRangeKey, BestSellersRangeCriteria>;
 }
 
 export interface BestSellersFilters {
@@ -139,9 +157,8 @@ export interface BestSellersFilters {
   isActive: boolean;
   setSearch: (value: string) => void;
   setMinRating: (value: string) => void;
-  setMinReviews: (value: string) => void;
-  setPriceMin: (value: string) => void;
-  setPriceMax: (value: string) => void;
+  setRange: (key: BestSellersRangeKey, bound: BestSellersRangeBound, value: string) => void;
+  clearRange: (key: BestSellersRangeKey) => void;
   clear: () => void;
 }
 

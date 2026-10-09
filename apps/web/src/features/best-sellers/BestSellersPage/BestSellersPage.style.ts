@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainer, tkn } from '@repo/ui';
+import { Card, IconButton, PageContainer, TabNav, tkn, type AppTheme } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -24,6 +24,39 @@ export const TabsRow = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
+`;
+
+/**
+ * The selected tab takes its list's colour — rail, label and icon — the way
+ * the Orders stage rail colours each stage. Positions follow
+ * `BEST_SELLERS_LIST_TYPE_ORDER`: Best Sellers (brand blue), New Releases
+ * (teal), Movers & Shakers (green), Most Wished For (red), Most Gifted (amber).
+ */
+const LIST_TAB_COLORS = [
+  'colors.brand.primary',
+  'colors.badge.teal',
+  'colors.semantic.success',
+  'colors.semantic.error',
+  'colors.semantic.warning',
+] as const;
+
+const selectedTabColor = (theme: AppTheme, position: number, color: (typeof LIST_TAB_COLORS)[number]): string => {
+  const value = String(tkn(color)({ theme }));
+  return `
+    > [role='tab']:nth-of-type(${position})[aria-selected='true'] {
+      color: ${value};
+    }
+    > [role='tab']:nth-of-type(${position})[aria-selected='true']:hover {
+      color: ${value};
+    }
+    > [role='tab']:nth-of-type(${position})[aria-selected='true']::after {
+      background: ${value};
+    }
+  `;
+};
+
+export const ListTabs = styled(TabNav)`
+  ${({ theme }) => LIST_TAB_COLORS.map((color, index) => selectedTabColor(theme as AppTheme, index + 1, color)).join('')}
 `;
 
 /** "13,760 of 15,000 products left" + the info glyph explaining how it is counted. */
@@ -142,28 +175,6 @@ export const SelectWrapper = styled.div`
   }
 `;
 
-export const NumberWrapper = styled.div`
-  width: 10.5rem;
-  flex-shrink: 0;
-
-  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
-    width: 100%;
-  }
-`;
-
-export const PriceRange = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  width: 15rem;
-  flex-shrink: 0;
-  min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
-    width: 100%;
-  }
-`;
-
 export const RangeSeparator = styled.span`
   flex-shrink: 0;
 `;
@@ -177,6 +188,70 @@ export const FilterActions = styled.div`
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     margin-left: 0;
   }
+`;
+
+/* --- Advanced filters (the Listings page's section) --------------------- */
+
+export const FilterBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
+/** Applied filters, one removable chip each. */
+export const ChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+export const ChipInner = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+`;
+
+/** The chip's own remove control — an IconButton shrunk to the chip's line height. */
+export const ChipRemove = styled(IconButton)`
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 0;
+  padding: 0;
+`;
+
+export const AdvancedDivider = styled.div`
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+`;
+
+export const AdvancedHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const AdvancedChevron = styled.span<{ $isOpen: boolean }>`
+  display: inline-flex;
+  transition: transform ${tkn('transitions.fast')};
+  transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
+`;
+
+export const RangeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const RangeRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
 `;
 
 /** "50 products listed · 3 selected" — the selected count rides beside the result label. */

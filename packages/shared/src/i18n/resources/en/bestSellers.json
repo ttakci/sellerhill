@@ -33,6 +33,7 @@
     "allowance": "{{remaining}} of {{limit}} products left this period",
     "allowanceUnlimited": "Unlimited product views",
     "allowanceHint": "Every product you see counts once per period; the same list opened again today is not counted twice.",
+    "lastFetched": "Last fetched from Amazon",
     "locked": {
       "title_one": "{{count}} more product on this page is outside your plan's monthly allowance",
       "title_other": "{{count}} more products on this page are outside your plan's monthly allowance",

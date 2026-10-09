@@ -34,6 +34,7 @@
     "allowance": "Restam {{remaining}} de {{limit}} produtos neste período",
     "allowanceUnlimited": "Visualizações de produtos ilimitadas",
     "allowanceHint": "Cada produto que você vê conta uma vez por período; abrir a mesma lista de novo hoje não conta duas vezes.",
+    "lastFetched": "Última busca na Amazon",
     "locked": {
       "title_one": "{{count}} produto a mais nesta página está fora da franquia mensal do seu plano",
       "title_many": "{{count}} produtos a mais nesta página estão fora da franquia mensal do seu plano",

@@ -32,6 +32,7 @@
     "allowance": "本周期还剩 {{remaining}}/{{limit}} 件商品可查看",
     "allowanceUnlimited": "不限商品查看数量",
     "allowanceHint": "每件看到的商品每个周期只计一次；今天再次打开同一榜单不会重复计算。",
+    "lastFetched": "最后从亚马逊获取",
     "locked": {
       "title_other": "本页还有 {{count}} 件商品超出您套餐的每月额度",
       "description": "升级套餐或购买加购包即可查看。额度随每个计费周期重置。",

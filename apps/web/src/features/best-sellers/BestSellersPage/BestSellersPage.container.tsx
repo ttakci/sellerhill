@@ -15,12 +15,21 @@ import {
   BestSellersListType,
   SourceFetchOutcome, type BestSellersBrowseAllowanceDto, type BestSellersQueryDto,
 } from '@repo/shared';
-import { formatCurrency, getLocaleConfig, type BulkAction, type SelectOption, type TabNavItem } from '@repo/ui';
+import {
+  formatCurrency,
+  formatDate,
+  getLocaleConfig,
+  type BulkAction,
+  type IconName,
+  type SelectOption,
+  type TabNavItem,
+} from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetBestSellersQuery } from '../api/bestSellersApi';
 import {
+  BestSellersRangeKey,
   BestSellersSortKey,
   BestSellersViewState,
   type BestSellersRefusalBody,
@@ -32,7 +41,11 @@ import { useBestSellersFilters } from '../hooks/useBestSellersFilters';
 import { useBestSellersSelection } from '../hooks/useBestSellersSelection';
 import { useBestSellersUrlState } from '../hooks/useBestSellersUrlState';
 import { flattenCategoryTree } from '../utils/bestSellersCategoryTree';
-import { BEST_SELLERS_RATING_OPTIONS, matchesBestSellersFilters } from '../utils/bestSellersFilters';
+import {
+  BEST_SELLERS_RANGE_KEYS,
+  BEST_SELLERS_RATING_OPTIONS,
+  matchesBestSellersFilters,
+} from '../utils/bestSellersFilters';
 import {
   DEFAULT_BEST_SELLERS_SORT,
   formatBestSellersSort,
@@ -41,7 +54,12 @@ import {
 } from '../utils/bestSellersSort';
 
 import { BestSellersPage as BestSellersPageComponent } from './BestSellersPage.component';
-import type { BestSellersItemView, BestSellersPagination } from './BestSellersPage.types';
+import type {
+  BestSellersFilterChip,
+  BestSellersItemView,
+  BestSellersPagination,
+  BestSellersRangeFilterView,
+} from './BestSellersPage.types';
 import type { BestSellersCategoryTreeRow } from './CategoryTree';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
@@ -72,6 +90,38 @@ const BILLING_PATH = '/billing';
 const lockedRowKey = (index: number): string => `locked-${index}`;
 
 const isUnlocked = (row: BestSellersItemView): boolean => !row.isLocked;
+
+/** One glyph per Amazon list, literal to what the list ranks (the rail colours them by position). */
+const LIST_TYPE_ICON: Record<BestSellersListType, IconName> = {
+  [BestSellersListType.BEST_SELLERS]: 'trophy',
+  [BestSellersListType.NEW_RELEASES]: 'package-plus',
+  [BestSellersListType.MOVERS_AND_SHAKERS]: 'trending-up',
+  [BestSellersListType.MOST_WISHED_FOR]: 'heart',
+  [BestSellersListType.MOST_GIFTED]: 'gift',
+};
+
+/** Advanced-section label per range: the column names, so a filter reads like the figure it narrows. */
+const RANGE_LABEL_KEY: Record<BestSellersRangeKey, string> = {
+  [BestSellersRangeKey.PRICE]: 'bestSellers.table.price',
+  [BestSellersRangeKey.REVIEWS]: 'bestSellers.table.reviews',
+  [BestSellersRangeKey.RANK]: 'bestSellers.table.rank',
+};
+
+/** "≥ 5", "≤ 20" or "5 – 20" — the Listings chip wording. */
+const describeRange = (min: string, max: string): string => {
+  if (min.trim() !== '' && max.trim() !== '') {
+    return `${min.trim()} – ${max.trim()}`;
+  }
+  return min.trim() !== '' ? `\u2265 ${min.trim()}` : `\u2264 ${max.trim()}`;
+};
+
+const LAST_FETCHED_FORMAT: Intl.DateTimeFormatOptions = {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+};
 
 export const BestSellersPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['bestSellers', 'translation']);
@@ -298,22 +348,77 @@ export const BestSellersPageContainer: React.FC = () => {
     (value: string | number) => filters.setMinRating(String(value)),
     [filters],
   );
-  const handleMinReviewsChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => filters.setMinReviews(event.target.value),
-    [filters],
-  );
-  const handlePriceMinChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => filters.setPriceMin(event.target.value),
-    [filters],
-  );
-  const handlePriceMaxChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => filters.setPriceMax(event.target.value),
-    [filters],
+
+  /* --- Advanced filters: the Listings page's min/max rows + removable chips --- */
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const handleToggleAdvanced = useCallback(() => setAdvancedOpen((open) => !open), []);
+
+  const { setRange, clearRange, setMinRating } = filters;
+  const rangeFilters = useMemo<BestSellersRangeFilterView[]>(
+    () =>
+      BEST_SELLERS_RANGE_KEYS.map((key) => ({
+        key,
+        label: t(RANGE_LABEL_KEY[key]),
+        min: filters.values.ranges[key].min,
+        max: filters.values.ranges[key].max,
+        onMinChange: (event: React.ChangeEvent<HTMLInputElement>) => setRange(key, 'min', event.target.value),
+        onMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => setRange(key, 'max', event.target.value),
+      })),
+    [filters.values.ranges, setRange, t],
   );
 
+  // One chip per filter that is narrowing the page. Search stays in its own
+  // box, exactly as on the Listings page.
+  const activeFilterChips = useMemo<BestSellersFilterChip[]>(() => {
+    const chips: BestSellersFilterChip[] = [];
+    if (filters.criteria.minRating !== null) {
+      const option = ratingOptions.find((opt) => String(opt.value) === filters.values.minRating);
+      chips.push({
+        key: 'rating',
+        label: option ? option.label : filters.values.minRating,
+        onRemove: () => setMinRating(''),
+      });
+    }
+    BEST_SELLERS_RANGE_KEYS.forEach((key) => {
+      const criteria = filters.criteria.ranges[key];
+      if (criteria.min === null && criteria.max === null) {
+        return;
+      }
+      const raw = filters.values.ranges[key];
+      chips.push({
+        key,
+        label: `${t(RANGE_LABEL_KEY[key])} ${describeRange(
+          criteria.min === null ? '' : raw.min,
+          criteria.max === null ? '' : raw.max,
+        )}`,
+        onRemove: () => clearRange(key),
+      });
+    });
+    return chips;
+  }, [filters.criteria, filters.values, ratingOptions, setMinRating, clearRange, t]);
+
+  /*
+   * Same rail as Orders: an icon per tab, coloured by position when selected.
+   * Switching list keeps the category (Amazon's node ids are shared between
+   * the lists) and drops the page; the request is keyed on both list and
+   * category, and a category this list does not carry answers "not found"
+   * with the way back to all categories.
+   */
   const listTypeOptions = useMemo<TabNavItem[]>(
-    () => BEST_SELLERS_LIST_TYPE_ORDER.map((value) => ({ id: value, label: t(`bestSellers.listTypes.${value}`) })),
+    () =>
+      BEST_SELLERS_LIST_TYPE_ORDER.map((value) => ({
+        id: value,
+        label: t(`bestSellers.listTypes.${value}`),
+        icon: LIST_TYPE_ICON[value],
+      })),
     [t],
+  );
+
+  /** When this page was read from Amazon: the shared cache's fetch time, else this live fetch. */
+  const lastFetchedAt = currentData?.cachedAt ?? currentData?.fetchedAt ?? null;
+  const lastFetchedLabel = useMemo(
+    () => (lastFetchedAt ? formatDate(lastFetchedAt, localeCfg.locale, LAST_FETCHED_FORMAT) : null),
+    [lastFetchedAt, localeCfg],
   );
 
   const [categorySearch, setCategorySearch] = useState('');
@@ -619,14 +724,16 @@ export const BestSellersPageContainer: React.FC = () => {
         filterValues={filters.values}
         onSearchChange={handleSearchChange}
         onMinRatingChange={handleMinRatingChange}
-        onMinReviewsChange={handleMinReviewsChange}
-        onPriceMinChange={handlePriceMinChange}
-        onPriceMaxChange={handlePriceMaxChange}
+        rangeFilters={rangeFilters}
+        activeFilterChips={activeFilterChips}
+        advancedOpen={advancedOpen}
+        onToggleAdvanced={handleToggleAdvanced}
         hasActiveFilters={filters.isActive}
         onClearFilters={filters.clear}
         onBackToAllCategories={handleBackToAllCategories}
         onRetry={handleRetry}
         allowanceLabel={allowanceLabel}
+        lastFetchedLabel={lastFetchedLabel}
         pagination={pagination}
       />
     </EbayAccountGuard>

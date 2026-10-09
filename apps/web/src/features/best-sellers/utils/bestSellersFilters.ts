@@ -7,17 +7,28 @@
  */
 import type { BestSellersItemDto } from '@repo/shared';
 
-import type { BestSellersFilterCriteria, BestSellersFilterValues } from '../bestSellers.types';
+import { BestSellersRangeKey, type BestSellersFilterCriteria, type BestSellersFilterValues, type BestSellersRangeCriteria, type BestSellersRangeValue } from '../bestSellers.types';
 
 /** Star thresholds offered in the rating filter; `''` is "any rating". */
 export const BEST_SELLERS_RATING_OPTIONS: readonly string[] = ['', '3', '3.5', '4', '4.5'];
 
+/** The advanced section's fields, in the order they are shown. */
+export const BEST_SELLERS_RANGE_KEYS: readonly BestSellersRangeKey[] = [
+  BestSellersRangeKey.PRICE,
+  BestSellersRangeKey.REVIEWS,
+  BestSellersRangeKey.RANK,
+];
+
+const EMPTY_RANGE: BestSellersRangeValue = { min: '', max: '' };
+
 export const EMPTY_BEST_SELLERS_FILTERS: BestSellersFilterValues = {
   search: '',
   minRating: '',
-  minReviews: '',
-  priceMin: '',
-  priceMax: '',
+  ranges: {
+    [BestSellersRangeKey.PRICE]: EMPTY_RANGE,
+    [BestSellersRangeKey.REVIEWS]: EMPTY_RANGE,
+    [BestSellersRangeKey.RANK]: EMPTY_RANGE,
+  },
 };
 
 /** A typed value as a non-negative number, or null when blank / not a number. */
@@ -30,14 +41,23 @@ export function parseFilterNumber(raw: string): number | null {
   return Number.isFinite(value) && value >= 0 ? value : null;
 }
 
+const toRangeCriteria = (range: BestSellersRangeValue): BestSellersRangeCriteria => ({
+  min: parseFilterNumber(range.min),
+  max: parseFilterNumber(range.max),
+});
+
+export const isRangeActive = (range: BestSellersRangeCriteria): boolean => range.min !== null || range.max !== null;
+
 export function toBestSellersFilterCriteria(values: BestSellersFilterValues): BestSellersFilterCriteria {
   const search = values.search.trim().toLowerCase();
   return {
     search: search === '' ? null : search,
     minRating: parseFilterNumber(values.minRating),
-    minReviews: parseFilterNumber(values.minReviews),
-    priceMin: parseFilterNumber(values.priceMin),
-    priceMax: parseFilterNumber(values.priceMax),
+    ranges: {
+      [BestSellersRangeKey.PRICE]: toRangeCriteria(values.ranges[BestSellersRangeKey.PRICE]),
+      [BestSellersRangeKey.REVIEWS]: toRangeCriteria(values.ranges[BestSellersRangeKey.REVIEWS]),
+      [BestSellersRangeKey.RANK]: toRangeCriteria(values.ranges[BestSellersRangeKey.RANK]),
+    },
   };
 }
 
@@ -45,10 +65,31 @@ export function hasActiveBestSellersFilters(criteria: BestSellersFilterCriteria)
   return (
     criteria.search !== null ||
     criteria.minRating !== null ||
-    criteria.minReviews !== null ||
-    criteria.priceMin !== null ||
-    criteria.priceMax !== null
+    BEST_SELLERS_RANGE_KEYS.some((key) => isRangeActive(criteria.ranges[key]))
   );
+}
+
+function readRangeField(item: BestSellersItemDto, key: BestSellersRangeKey): number | null {
+  switch (key) {
+    case BestSellersRangeKey.PRICE:
+      return item.price?.amount ?? null;
+    case BestSellersRangeKey.REVIEWS:
+      return item.rating?.count ?? null;
+    case BestSellersRangeKey.RANK:
+    default:
+      return item.rank;
+  }
+}
+
+/** Inclusive on both ends; an unknown value fails any active side of the range. */
+function withinRange(value: number | null, range: BestSellersRangeCriteria): boolean {
+  if (!isRangeActive(range)) {
+    return true;
+  }
+  if (value === null) {
+    return false;
+  }
+  return (range.min === null || value >= range.min) && (range.max === null || value <= range.max);
 }
 
 /**
@@ -57,10 +98,6 @@ export function hasActiveBestSellersFilters(criteria: BestSellersFilterCriteria)
  * constraint: an unknown value is not evidence that it clears the bar.
  */
 export function matchesBestSellersFilters(item: BestSellersItemDto, criteria: BestSellersFilterCriteria): boolean {
-  const average = item.rating?.average ?? null;
-  const reviews = item.rating?.count ?? null;
-  const price = item.price?.amount ?? null;
-
   if (
     criteria.search !== null &&
     !(item.title ?? '').toLowerCase().includes(criteria.search) &&
@@ -68,18 +105,9 @@ export function matchesBestSellersFilters(item: BestSellersItemDto, criteria: Be
   ) {
     return false;
   }
-
+  const average = item.rating?.average ?? null;
   if (criteria.minRating !== null && (average === null || average < criteria.minRating)) {
     return false;
   }
-  if (criteria.minReviews !== null && (reviews === null || reviews < criteria.minReviews)) {
-    return false;
-  }
-  if (criteria.priceMin !== null && (price === null || price < criteria.priceMin)) {
-    return false;
-  }
-  if (criteria.priceMax !== null && (price === null || price > criteria.priceMax)) {
-    return false;
-  }
-  return true;
+  return BEST_SELLERS_RANGE_KEYS.every((key) => withinRange(readRangeField(item, key), criteria.ranges[key]));
 }

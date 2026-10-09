@@ -43,6 +43,23 @@ export interface BestSellersColumns {
   columnOptions: ColumnOption[];
 }
 
+/** One min/max row of the "Advanced filters" section (the Listings pattern). */
+export interface BestSellersRangeFilterView {
+  key: string;
+  label: string;
+  min: string;
+  max: string;
+  onMinChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+/** A removable chip naming one applied filter. */
+export interface BestSellersFilterChip {
+  key: string;
+  label: string;
+  onRemove: () => void;
+}
+
 export interface BestSellersPagination {
   count: number;
   page: number;
@@ -111,14 +128,15 @@ export interface BestSellersPageComponentProps {
   isSubCategory: boolean;
   onBackToAllCategories: () => void;
 
-  /** Search / rating / reviews / price filters over the page being viewed. */
+  /** Search + rating in the main row; price / reviews / rank ranges in the advanced section. */
   ratingOptions: SelectOption[];
   filterValues: BestSellersFilterValues;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMinRatingChange: (value: string | number) => void;
-  onMinReviewsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onPriceMinChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onPriceMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  rangeFilters: BestSellersRangeFilterView[];
+  activeFilterChips: BestSellersFilterChip[];
+  advancedOpen: boolean;
+  onToggleAdvanced: () => void;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
 
@@ -129,5 +147,11 @@ export interface BestSellersPageComponentProps {
    * this period" / "Unlimited product views"); null before anything arrived.
    */
   allowanceLabel: string | null;
+  /**
+   * When this page was read from Amazon ("9 Oct, 11:20"): the cache's fetch
+   * time, or now on a live fetch. Shown in each card's footer; null while
+   * nothing has arrived.
+   */
+  lastFetchedLabel: string | null;
   pagination: BestSellersPagination | undefined;
 }

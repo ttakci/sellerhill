@@ -10,6 +10,7 @@
  */
 
 import {
+  Badge,
   Button,
   DataTable,
   Drawer,
@@ -19,7 +20,6 @@ import {
   SearchField,
   Select,
   Skeleton,
-  TabNav,
   Text,
   TextInput,
   Tooltip,
@@ -86,13 +86,15 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   filterValues,
   onSearchChange,
   onMinRatingChange,
-  onMinReviewsChange,
-  onPriceMinChange,
-  onPriceMaxChange,
+  rangeFilters,
+  activeFilterChips,
+  advancedOpen,
+  onToggleAdvanced,
   hasActiveFilters,
   onClearFilters,
   onRetry,
   allowanceLabel,
+  lastFetchedLabel,
   pagination,
 }) => {
   const { t } = useTranslation(['bestSellers', 'listings', 'translation']);
@@ -135,10 +137,11 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
 
   /*
    * The eBay Listings card, fed Amazon figures: the rank leads the title row
-   * where a listing shows its status, the ASIN (and on Movers & Shakers the
-   * 24-hour rank change) are the facts, and price · rating · reviews are the
-   * figures row. Clicking the card ticks it — there is no detail page to open,
-   * so the card carries no "Details" hint.
+   * where a listing shows its status; ASIN, price, rating, reviews (and on
+   * Movers & Shakers the 24-hour rank change) are the facts beside the photo,
+   * in two columns; the footer says when the list was last read from Amazon.
+   * Clicking the card ticks it — there is no detail page to open, so the card
+   * carries no "Details" hint.
    */
   const renderGridCard = (item: BestSellersItemView) => {
     if (item.isLocked) {
@@ -146,6 +149,9 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
     }
     const meta: ListingCardMetaItem[] = [
       { label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon' },
+      { label: t('bestSellers.table.price'), value: item.priceLabel ?? EMPTY_VALUE },
+      { label: t('bestSellers.table.rating'), value: item.ratingValueLabel ?? EMPTY_VALUE, column: 'secondary' },
+      { label: t('bestSellers.table.reviews'), value: item.reviewsLabel ?? EMPTY_VALUE, column: 'secondary' },
     ];
     if (item.rankChangeLabel) {
       meta.push({ label: t('bestSellers.table.rankChange'), value: item.rankChangeLabel });
@@ -158,18 +164,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
         imageUrl={item.imageUrl ?? undefined}
         status={item.rankLabel ? { label: item.rankLabel, tone: 'neutral' } : undefined}
         meta={meta}
-        stats={[
-          { label: t('bestSellers.table.price'), value: item.priceLabel ?? EMPTY_VALUE },
-          item.ratingValueLabel
-            ? {
-                label: t('bestSellers.table.rating'),
-                value: item.ratingValueLabel,
-                icon: 'star',
-                iconColor: 'semantic.warning',
-              }
-            : { label: t('bestSellers.table.rating'), value: EMPTY_VALUE },
-          { label: t('bestSellers.table.reviews'), value: item.reviewsLabel ?? EMPTY_VALUE },
-        ]}
+        stats={[{ label: t('bestSellers.lastFetched'), value: lastFetchedLabel ?? EMPTY_VALUE }]}
         orientation="horizontal"
         selectable
         selected={item.isSelected}
@@ -284,7 +279,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
       ) : (
         <>
           <S.TabsRow>
-            <TabNav
+            <S.ListTabs
               items={listTypeOptions}
               value={listType}
               onChange={onListTypeChange}
@@ -320,84 +315,114 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
             </S.SidebarPanel>
 
             <S.ContentColumn>
-              <S.FilterRow>
-                <S.MobileCategoryTrigger>
-                  <Button variant="secondary" size="small" onClick={onOpenCategoryDrawer}>
-                    <Icon name="grid-view" size={16} />
-                    <S.MobileCategoryTriggerLabel>
-                      <Text variant="body-sm" weight="semibold" truncate>
-                        {activeCategoryLabel}
-                      </Text>
-                    </S.MobileCategoryTriggerLabel>
-                    <Icon name="chevron-down" size={14} />
-                  </Button>
-                </S.MobileCategoryTrigger>
-                <S.SearchWrapper>
-                  <SearchField
-                    value={filterValues.search}
-                    onChange={onSearchChange}
-                    placeholder={t('bestSellers.filters.searchPlaceholder')}
-                    size="small"
-                    fullWidth
-                  />
-                </S.SearchWrapper>
-                <S.SelectWrapper>
-                  <Select
-                    value={filterValues.minRating}
-                    onChange={onMinRatingChange}
-                    options={ratingOptions}
-                    placeholder={t('bestSellers.filters.anyRating')}
-                    size="small"
-                    fullWidth
-                  />
-                </S.SelectWrapper>
-                <S.NumberWrapper>
-                  <TextInput
-                    name="bestSellersMinReviews"
-                    value={filterValues.minReviews}
-                    onChange={onMinReviewsChange}
-                    placeholder={t('bestSellers.filters.minReviews')}
-                    ariaLabel={t('bestSellers.filters.minReviews')}
-                    type="number"
-                    size="small"
-                    fullWidth
-                  />
-                </S.NumberWrapper>
-                <S.PriceRange>
-                  <TextInput
-                    name="bestSellersPriceMin"
-                    value={filterValues.priceMin}
-                    onChange={onPriceMinChange}
-                    placeholder={t('bestSellers.filters.priceMin')}
-                    ariaLabel={t('bestSellers.filters.priceMin')}
-                    type="number"
-                    size="small"
-                    fullWidth
-                  />
-                  <S.RangeSeparator>
-                    <Text variant="body" color="text.tertiary">
-                      –
-                    </Text>
-                  </S.RangeSeparator>
-                  <TextInput
-                    name="bestSellersPriceMax"
-                    value={filterValues.priceMax}
-                    onChange={onPriceMaxChange}
-                    placeholder={t('bestSellers.filters.priceMax')}
-                    ariaLabel={t('bestSellers.filters.priceMax')}
-                    type="number"
-                    size="small"
-                    fullWidth
-                  />
-                </S.PriceRange>
-                <S.FilterActions>
-                  {hasActiveFilters && (
-                    <Button variant="text" size="small" onClick={onClearFilters}>
-                      <Text variant="body-sm">{t('listings:listings.filters.clearAll')}</Text>
+              <S.FilterBlock>
+                <S.FilterRow>
+                  <S.MobileCategoryTrigger>
+                    <Button variant="secondary" size="small" onClick={onOpenCategoryDrawer}>
+                      <Icon name="grid-view" size={16} />
+                      <S.MobileCategoryTriggerLabel>
+                        <Text variant="body-sm" weight="semibold" truncate>
+                          {activeCategoryLabel}
+                        </Text>
+                      </S.MobileCategoryTriggerLabel>
+                      <Icon name="chevron-down" size={14} />
                     </Button>
-                  )}
-                </S.FilterActions>
-              </S.FilterRow>
+                  </S.MobileCategoryTrigger>
+                  <S.SearchWrapper>
+                    <SearchField
+                      value={filterValues.search}
+                      onChange={onSearchChange}
+                      placeholder={t('bestSellers.filters.searchPlaceholder')}
+                      size="small"
+                      fullWidth
+                    />
+                  </S.SearchWrapper>
+                  <S.SelectWrapper>
+                    <Select
+                      value={filterValues.minRating}
+                      onChange={onMinRatingChange}
+                      options={ratingOptions}
+                      placeholder={t('bestSellers.filters.anyRating')}
+                      size="small"
+                      fullWidth
+                    />
+                  </S.SelectWrapper>
+                  <S.FilterActions>
+                    {hasActiveFilters && (
+                      <Button variant="text" size="small" onClick={onClearFilters}>
+                        <Text variant="body-sm">{t('listings:listings.filters.clearAll')}</Text>
+                      </Button>
+                    )}
+                  </S.FilterActions>
+                </S.FilterRow>
+
+                {activeFilterChips.length > 0 && (
+                  <S.ChipRow>
+                    {activeFilterChips.map((chip) => (
+                      <Badge key={chip.key} variant="primary" size="md">
+                        <S.ChipInner>
+                          <Text variant="body-sm" weight="semibold" color="brand.primary">
+                            {chip.label}
+                          </Text>
+                          <S.ChipRemove
+                            type="button"
+                            variant="ghost"
+                            onClick={chip.onRemove}
+                            aria-label={t('listings:listings.filters.removeFilter', { label: chip.label })}
+                          >
+                            <Icon name="x" size={14} color="brand.primary" />
+                          </S.ChipRemove>
+                        </S.ChipInner>
+                      </Badge>
+                    ))}
+                  </S.ChipRow>
+                )}
+
+                <S.AdvancedDivider />
+                <S.AdvancedHeaderRow>
+                  <Button variant="text" size="small" onClick={onToggleAdvanced}>
+                    <Icon name="sliders-horizontal" size={16} color="brand.primary" />
+                    <Text variant="body-sm" weight="semibold" color="brand.primary">
+                      {t('listings:listings.filters.advancedFilters')}
+                    </Text>
+                    <S.AdvancedChevron $isOpen={advancedOpen}>
+                      <Icon name="chevron-down" size={16} color="brand.primary" />
+                    </S.AdvancedChevron>
+                  </Button>
+                </S.AdvancedHeaderRow>
+
+                {advancedOpen && (
+                  <S.RangeGrid>
+                    {rangeFilters.map((field) => (
+                      <S.RangeRow key={field.key}>
+                        <TextInput
+                          name={`bestSellers-${field.key}-min`}
+                          value={field.min}
+                          onChange={field.onMinChange}
+                          label={`${field.label} · ${t('listings:listings.filters.min')}`}
+                          type="number"
+                          size="medium"
+                          fullWidth
+                        />
+                        <S.RangeSeparator>
+                          <Text variant="body" color="text.tertiary">
+                            –
+                          </Text>
+                        </S.RangeSeparator>
+                        <TextInput
+                          name={`bestSellers-${field.key}-max`}
+                          value={field.max}
+                          onChange={field.onMaxChange}
+                          label={`${field.label} · ${t('listings:listings.filters.max')}`}
+                          type="number"
+                          size="medium"
+                          fullWidth
+                        />
+                      </S.RangeRow>
+                    ))}
+                  </S.RangeGrid>
+                )}
+              </S.FilterBlock>
 
               <DataTable<BestSellersItemView>
                 columns={columns}
