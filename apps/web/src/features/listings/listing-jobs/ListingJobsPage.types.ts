@@ -35,7 +35,6 @@ export interface ListingJobsPageComponentProps {
   onCancelRequest: (jobId: string) => void;
   onCancelDismiss: () => void;
   onCancelConfirm: () => void;
-  onDownload: () => void;
   onBack: () => void;
   formatPercent: (job: ListingJobDto) => number;
   formatJobDate: (iso: string) => string;

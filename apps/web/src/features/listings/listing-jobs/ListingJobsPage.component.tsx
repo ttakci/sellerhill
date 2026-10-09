@@ -52,7 +52,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   onCancelRequest,
   onCancelDismiss,
   onCancelConfirm,
-  onDownload,
   onBack,
   formatPercent,
   formatJobDate,
@@ -284,7 +283,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
       <DataTable
         gridMinItemWidth="24rem"
         gridMaxColumns={3}
-        downloadLabel={t('listings.actions.export')}
         resultLabel={
           <Trans
             i18nKey="listings.filters.resultListed"
@@ -315,7 +313,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
         emptyContent={emptyState}
         loading={isInitialLoading}
         emptyMessage={t('listings.jobs.empty')}
-        onDownload={isEmpty || isInitialLoading ? undefined : onDownload}
         pagination={pagination}
         onRowClick={(row) => onJobClick(row.id)}
       />

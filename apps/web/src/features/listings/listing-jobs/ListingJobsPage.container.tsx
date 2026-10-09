@@ -363,40 +363,6 @@ export const ListingJobsPageContainer: React.FC = () => {
     localeNavigate('/listings');
   }, [localeNavigate]);
 
-  const handleDownload = useCallback(() => {
-    const headers = [
-      t('listings.jobs.table.id'),
-      t('listings.jobs.table.status'),
-      t('listings.jobs.table.processed'),
-      t('listings.jobs.stats.success'),
-      t('listings.jobs.stats.failed'),
-      t('listings.jobs.table.total'),
-      t('listings.jobs.table.createdAt'),
-    ];
-    const rows = jobs.map((job) =>
-      [
-        job.id,
-        job.status,
-        job.processedCount,
-        job.successCount,
-        job.failedCount,
-        job.totalAsins,
-        new Date(job.createdAt).toISOString(),
-      ]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(',')
-    );
-    const csvContent = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `sellerhill_jobs_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }, [jobs, t]);
 
   return (
     <EbayAccountGuard>
@@ -433,7 +399,6 @@ export const ListingJobsPageContainer: React.FC = () => {
         onCancelRequest={setCancelTargetId}
         onCancelDismiss={() => setCancelTargetId(null)}
         onCancelConfirm={() => void handleCancelConfirm()}
-        onDownload={handleDownload}
         onBack={handleBack}
         formatPercent={jobPercent}
         formatJobDate={formatJobDate}
