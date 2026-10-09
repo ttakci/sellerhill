@@ -616,7 +616,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {order.amazonTrackingNumber && (
                 <Meta label={t('orders.detail.amazonTracking')}>
                   <S.TrackingChip $tone="amazon">
-                    <Text variant="body-sm" weight="semibold" numeric>
+                    <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
                       <CopyableText
                         value={order.amazonTrackingNumber}
                         label={t('orders.detail.amazonTracking')}
@@ -629,7 +629,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {order.convertedTrackingNumber && (
                 <Meta label={t('orders.detail.convertedTracking')}>
                   <S.TrackingChip $tone="converted">
-                    <Text variant="body-sm" weight="semibold" numeric>
+                    <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
                       <CopyableText
                         value={order.convertedTrackingNumber}
                         label={t('orders.detail.convertedTracking')}

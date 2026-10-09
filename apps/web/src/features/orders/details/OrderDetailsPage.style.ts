@@ -47,7 +47,10 @@ export const Hero = styled(Card)`
 
   @media (min-width: ${tkn('breakpoints.xl')}) {
     /* Fixed side columns, so the facts column takes everything left. */
-    grid-template-columns: 16rem minmax(0, 1fr) 12.5rem 13rem;
+    /* The facts and the buttons share what the photo and the customer leave, 2:1,
+       so the buttons column widens on a large screen instead of the facts
+       taking it all; the buttons never go below 13rem. */
+    grid-template-columns: 16rem minmax(0, 2fr) 12.5rem minmax(13rem, 1fr);
     column-gap: ${tkn('spacing.lg')};
     grid-template-areas:
       'badge badge badge badge'
@@ -463,9 +466,9 @@ export const ErrorText = styled(Text)`
 `;
 
 /**
- * A tracking number as a tinted chip, so it stands out from the cost rows:
- * amber for Amazon's own number (the supplier's, never shown to the buyer),
- * green for the converted number eBay and the buyer see.
+ * A tracking number as a solid dark chip with white ink, so it stands out from
+ * the cost rows: navy for Amazon's own number (the supplier's, never shown to
+ * the buyer), green for the converted number eBay and the buyer see.
  */
 export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   display: inline-flex;
@@ -473,9 +476,13 @@ export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   max-width: 100%;
   padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.sm')};
-  border: 0.0625rem solid
-    ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.semantic.warning') : tkn('colors.semantic.success'))};
   background: ${({ $tone }) =>
-    $tone === 'amazon' ? tkn('colors.semanticTint.warning') : tkn('colors.semanticTint.success')};
+    $tone === 'amazon' ? tkn('colors.sidebar.background') : tkn('colors.semantic.success')};
   overflow-wrap: anywhere;
+
+  /* The copy trigger's light hover wash would hide the white ink on a dark chip. */
+  && [role='button']:hover,
+  && [role='button']:focus-visible {
+    background: transparent;
+  }
 `;
