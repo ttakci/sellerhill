@@ -114,6 +114,7 @@
         "ebay_restricted_item": "eBay bu ürünü veya kategoriyi hesabınız için kısıtlıyor.",
         "provider_budget_exhausted": "Bugünkü eBay API kotası doldu. Bu ürün sıraya alındı ve otomatik olarak devam edecek.",
         "blacklisted_keyword": "Mağaza ayarlarınızdaki kara liste bu ürünü engelledi (kelime: \"{{keyword}}\"). Kelimeyi kaldırın veya listeleme şablonunuzu düzenleyin.",
+        "blacklisted_keyword_any": "Mağaza ayarlarınızdaki kara liste bu ürünleri engelledi. Kelimeyi kaldırın veya listeleme şablonunuzu düzenleyin.",
         "cancelled": "Bu ASIN işlenmeden önce iptal edildi.",
         "unknown": "Liste oluşturulamadı.",
         "blocked_by_rule": "Listeleme kurallarınızdan biri nedeniyle atlandı.",

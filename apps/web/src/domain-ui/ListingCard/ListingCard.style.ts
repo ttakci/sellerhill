@@ -43,11 +43,15 @@ export const SelectionControl = styled.div`
   justify-content: center;
   flex-shrink: 0;
 
-  /* On a phone the photo leads the card, so the tick floats over its top-left corner. */
+  /*
+   * On a phone the title row sits under the photo, so the tick floats in the
+   * card's top-RIGHT corner — the status / rank badge owns the top-left one,
+   * and a tick there covered it.
+   */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     position: absolute;
-    top: ${tkn('spacing.lg')};
-    left: ${tkn('spacing.lg')};
+    top: ${tkn('spacing.md')};
+    right: ${tkn('spacing.md')};
     z-index: 1;
     padding: ${tkn('spacing.xs')};
     border-radius: ${tkn('radius.sm')};
@@ -108,7 +112,7 @@ export const Body = styled.div<{ $orientation: ListingCardOrientation }>`
   }
 `;
 
-export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
+export const Image = styled.div<{ $orientation: ListingCardOrientation; $empty: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,12 +143,12 @@ export const Image = styled.div<{ $orientation: ListingCardOrientation }>`
   }
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    ${({ $orientation }) =>
+    ${({ $orientation, $empty }) =>
       $orientation === 'horizontal'
         ? `
         order: -1;
         width: 100%;
-        height: 10rem;
+        height: ${$empty ? '4rem' : '10rem'};
       `
         : `
         height: 9rem;
@@ -242,11 +246,16 @@ export const Trend = styled.div`
   padding: 0 ${tkn('spacing.md+')} ${tkn('spacing.sm')};
 `;
 
-/** Same strip as OrderCard: figures + the detail hint in one grid, under one hairline. */
+/**
+ * Same strip as OrderCard, under one hairline: the figures on the left, the
+ * detail hint in its own column on the right — never a cell of the figures
+ * grid, where a phone pushed it onto a line of its own.
+ */
 export const Footer = styled.div`
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
@@ -256,17 +265,22 @@ export const Footer = styled.div`
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  min-width: 0;
+
+  /* A 360px phone fits three figures beside the detail hint only with a tighter gap. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    column-gap: ${tkn('spacing.sm')};
+  }
 `;
 
 /** Tells the seller the whole card opens the detail page. */
 export const DetailHint = styled.span`
   display: inline-flex;
   align-items: center;
-  align-self: center;
-  justify-self: end;
   gap: ${tkn('spacing.2xs')};
+  white-space: nowrap;
 `;
 
 export const StatCell = styled.div`
@@ -280,10 +294,13 @@ export const StatLabel = styled(Text)`
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
+/* Wraps: a "previous → new" pair (revision cards) is wider than a phone's
+   figure cell, and unwrapped the two prices printed over each other. */
 export const StatValueRow = styled.span`
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: ${tkn('spacing.2xs')};
+  gap: 0 ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 

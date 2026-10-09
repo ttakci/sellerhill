@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay restringe este artículo o categoría para tu cuenta.",
         "provider_budget_exhausted": "Se agotó la cuota diaria de la API de eBay. Esta publicación está en cola y continuará automáticamente.",
         "blacklisted_keyword": "La lista negra de tus Ajustes de la tienda bloqueó esta publicación (palabra clave: «{{keyword}}»). Elimina la palabra clave o ajusta tu plantilla de publicación.",
+        "blacklisted_keyword_any": "La lista negra de tus Ajustes de la tienda bloqueó estas publicaciones. Elimina la palabra clave o ajusta tu plantilla de publicación.",
         "cancelled": "Cancelado antes de procesar este ASIN.",
         "unknown": "No se pudo crear la publicación.",
         "blocked_by_rule": "Omitido por una de tus reglas de publicación.",

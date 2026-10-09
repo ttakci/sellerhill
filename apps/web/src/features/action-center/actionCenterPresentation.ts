@@ -96,11 +96,24 @@ const BREAKDOWN_NAMESPACE: Partial<Record<ActionCenterItemKey, string>> = {
 };
 
 /**
+ * A few failure sentences name ONE item's detail (the blacklist one quotes
+ * the keyword that matched). A breakdown chip sums many items and carries no
+ * such detail, so it reads a keyword-free summary instead — otherwise the
+ * seller saw a literal `{{keyword}}`.
+ */
+const BREAKDOWN_SUMMARY_CODE: Record<string, string> = {
+  blacklisted_keyword: 'blacklisted_keyword_any',
+};
+
+/**
  * Full i18n key for one breakdown code, or null when the item has no localized
  * vocabulary — in which case the row shows its count without a reason chip
  * rather than printing a raw enum value at the seller.
  */
 export const breakdownLabelKey = (item: ActionCenterItemKey, code: string): string | null => {
   const namespace = BREAKDOWN_NAMESPACE[item];
-  return namespace ? `${namespace}.${code}` : null;
+  if (!namespace) {
+    return null;
+  }
+  return `${namespace}.${BREAKDOWN_SUMMARY_CODE[code] ?? code}`;
 };

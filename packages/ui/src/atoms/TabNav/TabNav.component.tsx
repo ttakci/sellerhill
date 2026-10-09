@@ -3,18 +3,19 @@ import type React from 'react';
 import { Icon } from '../Icon';
 
 import * as S from './TabNav.style';
-import type { TabNavProps } from './TabNav.types';
+import type { TabNavComponentProps } from './TabNav.types';
 
-export const TabNav: React.FC<TabNavProps> = ({
+export const TabNavComponent: React.FC<TabNavComponentProps> = ({
   items,
   value,
   onChange,
   variant = 'underline',
   ariaLabel,
   className,
+  listRef,
 }) => {
   return (
-    <S.TabList $variant={variant} className={className} role="tablist" aria-label={ariaLabel}>
+    <S.TabList ref={listRef} $variant={variant} className={className} role="tablist" aria-label={ariaLabel}>
       {items.map((item) => {
         const isActive = item.id === value;
         return (
@@ -37,4 +38,4 @@ export const TabNav: React.FC<TabNavProps> = ({
   );
 };
 
-TabNav.displayName = 'TabNav';
+TabNavComponent.displayName = 'TabNavComponent';

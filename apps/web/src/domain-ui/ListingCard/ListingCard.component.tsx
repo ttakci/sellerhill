@@ -90,7 +90,7 @@ export const ListingCard = ({
         </S.TitleRow>
 
         <S.Body $orientation={orientation}>
-          <S.Image $orientation={orientation}>
+          <S.Image $orientation={orientation} $empty={!imageUrl}>
             {imageUrl ? <img src={imageUrl} alt={title} /> : <Icon name="image" size={32} />}
           </S.Image>
 
@@ -162,15 +162,15 @@ export const ListingCard = ({
               </S.StatValueRow>
             </S.StatCell>
           ))}
-          {detailLabel && onClick ? (
-            <S.DetailHint>
-              <Text variant="caption" weight="semibold" color="brand.primary">
-                {detailLabel}
-              </Text>
-              <Icon name="chevron-right" size={16} color="brand.primary" />
-            </S.DetailHint>
-          ) : null}
         </S.StatsGrid>
+        {detailLabel && onClick ? (
+          <S.DetailHint>
+            <Text variant="caption" weight="semibold" color="brand.primary">
+              {detailLabel}
+            </Text>
+            <Icon name="chevron-right" size={16} color="brand.primary" />
+          </S.DetailHint>
+        ) : null}
       </S.Footer>
     </S.Wrapper>
   );

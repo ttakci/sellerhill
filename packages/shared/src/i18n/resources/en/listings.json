@@ -114,6 +114,7 @@
         "ebay_restricted_item": "eBay restricts this item or category for your account.",
         "provider_budget_exhausted": "Today's eBay API allowance is used up. This listing is queued and will continue automatically.",
         "blacklisted_keyword": "Your Store Settings blacklist blocked this listing (keyword: \"{{keyword}}\"). Remove the keyword or adjust your listing template.",
+        "blacklisted_keyword_any": "Your Store Settings blacklist blocked these listings. Remove the keyword or adjust your listing template.",
         "cancelled": "Cancelled before this ASIN was processed.",
         "unknown": "The listing could not be created.",
         "blocked_by_rule": "Skipped by one of your listing rules.",

@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay bu məhsulu və ya kateqoriyanı hesabınız üçün məhdudlaşdırır.",
         "provider_budget_exhausted": "Bu günün eBay API limiti istifadə olunub. Bu elan növbədədir və avtomatik davam edəcək.",
         "blacklisted_keyword": "Mağaza parametrlərinizdəki qara siyahı bu elanı blokladı (açar söz: \"{{keyword}}\"). Açar sözü silin və ya elan şablonunuzu tənzimləyin.",
+        "blacklisted_keyword_any": "Mağaza parametrlərinizdəki qara siyahı bu elanları blokladı. Açar sözü silin və ya elan şablonunuzu düzəldin.",
         "cancelled": "Bu ASIN emal olunmazdan əvvəl ləğv edildi.",
         "unknown": "Elan yaradıla bilmədi.",
         "blocked_by_rule": "Elan qaydalarınızdan biri tərəfindən atlandı.",

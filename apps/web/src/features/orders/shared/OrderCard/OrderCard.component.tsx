@@ -49,7 +49,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       </S.TitleRow>
 
       <S.Body>
-        <S.Image>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
+        <S.Image $empty={!imageUrl}>{imageUrl ? <img src={imageUrl} alt={productTitle} /> : <Icon name="image" size={28} />}</S.Image>
 
         <S.Content>
           {meta.length > 0 && (
@@ -78,7 +78,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       </S.Body>
     </S.Top>
 
-    <S.Footer>
+    <S.Footer $hasBadge={Boolean(footerBadge)}>
       {footerBadge && (
         <S.FooterBadgeRow>
           <Badge variant={footerBadge.variant ?? 'warning'} size="sm" solid>
@@ -97,6 +97,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </S.StatValue>
         </S.StatCell>
       ))}
+      </S.MoneyRow>
       {detailLabel && onClick ? (
         <S.DetailHint>
           <Text variant="caption" weight="semibold" color="brand.primary">
@@ -105,7 +106,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           <Icon name="chevron-right" size={16} color="brand.primary" />
         </S.DetailHint>
       ) : null}
-      </S.MoneyRow>
     </S.Footer>
   </S.Wrapper>
 );

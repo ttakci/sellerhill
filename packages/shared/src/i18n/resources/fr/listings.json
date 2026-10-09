@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay restreint cet article ou cette catégorie pour votre compte.",
         "provider_budget_exhausted": "Le quota d'API eBay du jour est épuisé. Cette annonce est en file d'attente et continuera automatiquement.",
         "blacklisted_keyword": "La liste noire de vos paramètres de boutique a bloqué cette annonce (mot-clé : « {{keyword}} »). Supprimez le mot-clé ou ajustez votre modèle d'annonce.",
+        "blacklisted_keyword_any": "La liste noire de vos paramètres de boutique a bloqué ces annonces. Supprimez le mot-clé ou ajustez votre modèle d'annonce.",
         "cancelled": "Annulé avant le traitement de cet ASIN.",
         "unknown": "L'annonce n'a pas pu être créée.",
         "blocked_by_rule": "Ignoré par l'une de vos règles d'annonces.",

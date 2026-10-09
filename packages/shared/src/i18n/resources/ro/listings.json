@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay restricționează acest articol sau această categorie pentru contul dvs.",
         "provider_budget_exhausted": "Cota de astăzi pentru API-ul eBay a fost consumată. Acest anunț este în coadă și va continua automat.",
         "blacklisted_keyword": "Lista neagră din Setări magazin a blocat acest anunț (cuvânt cheie: „{{keyword}}”). Eliminați cuvântul cheie sau ajustați șablonul anunțului.",
+        "blacklisted_keyword_any": "Lista neagră din Setări magazin a blocat aceste anunțuri. Eliminați cuvântul cheie sau ajustați șablonul anunțului.",
         "cancelled": "Anulat înainte ca acest ASIN să fie procesat.",
         "unknown": "Anunțul nu a putut fi creat.",
         "blocked_by_rule": "Omis de una dintre regulile dvs. pentru anunțuri.",

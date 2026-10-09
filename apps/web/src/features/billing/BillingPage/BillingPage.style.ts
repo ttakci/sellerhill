@@ -183,11 +183,21 @@ export const UsageFigure = styled.div`
 export const UsageUsed = styled(FactValue)`
   font-size: ${tkn('typography.fontSize.xxl')};
   line-height: ${tkn('typography.lineHeight.tight')};
+
+  /* A phone gives each quota ~8rem: one step down keeps "2.796 / 50.000" on one line. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    font-size: ${tkn('typography.fontSize.xl')};
+  }
 `;
 
-/** The quota's ceiling beside it, muted and smaller. */
+/** The quota's ceiling beside it, muted and smaller — never split from its slash. */
 export const UsageLimit = styled(UIText)`
   font-size: ${tkn('typography.fontSize.lg')};
+  white-space: nowrap;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    font-size: ${tkn('typography.fontSize.base')};
+  }
 `;
 
 /** Notices that close the hero (pending downgrade, cancellation, past due, card expiring). */

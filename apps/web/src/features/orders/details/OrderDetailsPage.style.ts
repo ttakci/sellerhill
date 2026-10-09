@@ -216,9 +216,10 @@ export const IdItem = styled.div`
     gap: ${tkn('spacing.2xs')};
   }
 
+  /* A phone still has room for label | value side by side (stacking doubled
+     the hero's height): only the label track narrows. */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    gap: ${tkn('spacing.2xs')};
+    grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr);
   }
 `;
 

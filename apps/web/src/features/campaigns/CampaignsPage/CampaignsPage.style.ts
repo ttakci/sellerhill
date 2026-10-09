@@ -199,9 +199,10 @@ export const StatsRow = styled.div`
   background: ${tkn('colors.glass.tint')};
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    /* Three figures and the detail hint on ONE row — the hint used to drop onto its own line. */
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: center;
   }
 `;
 
@@ -225,8 +226,5 @@ export const DetailHint = styled.span`
   margin-left: auto;
   gap: ${tkn('spacing.2xs')};
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-column: 1 / -1;
-    margin-left: 0;
-  }
+  white-space: nowrap;
 `;

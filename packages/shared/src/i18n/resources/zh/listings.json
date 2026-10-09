@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay 对您的账号限制了此商品或分类。",
         "provider_budget_exhausted": "今日的 eBay API 额度已用完。此商品刊登已排队，将自动继续。",
         "blacklisted_keyword": "您的店铺设置黑名单拦截了此商品刊登（关键词：“{{keyword}}”）。请移除该关键词，或调整您的刊登模板。",
+        "blacklisted_keyword_any": "您的店铺设置黑名单拦截了这些商品刊登。请移除该关键词，或调整您的刊登模板。",
         "cancelled": "在处理此 ASIN 之前已取消。",
         "unknown": "无法创建此商品刊登。",
         "blocked_by_rule": "已被您的某条刊登规则跳过。",

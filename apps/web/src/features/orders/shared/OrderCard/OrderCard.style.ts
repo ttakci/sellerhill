@@ -95,7 +95,7 @@ export const Body = styled.div`
   }
 `;
 
-export const Image = styled.div`
+export const Image = styled.div<{ $empty: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,8 @@ export const Image = styled.div`
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     order: -1;
     width: 100%;
-    height: 10rem;
+    /* No photo: a small placeholder, not a 10rem empty band. */
+    height: ${({ $empty }) => ($empty ? '4rem' : '10rem')};
   }
 `;
 
@@ -193,13 +194,20 @@ export const MetaValue = styled.dd`
   }
 `;
 
-/** The figures strip: figures + the detail affordance, under one hairline. */
-export const Footer = styled.div`
+/**
+ * The figures strip under one hairline: the figures on the left, the detail
+ * affordance in its own column on the right — as a cell of the figures grid
+ * it dropped onto a line of its own on a phone.
+ */
+export const Footer = styled.div<{ $hasBadge: boolean }>`
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
+  /* The badge straddling the hairline ("Estimated") reaches into the strip: clear the figure labels under it. */
+  padding-top: ${({ $hasBadge, theme }) => ($hasBadge ? theme.spacing.lg : theme.spacing['sm-md'])};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   background: ${tkn('colors.glass.tint')};
 `;
@@ -215,17 +223,22 @@ export const FooterBadgeRow = styled.div`
 /** Sale · cost · profit · ROI. */
 export const MoneyRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
   gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  min-width: 0;
+
+  /* A 360px phone fits three figures beside the detail hint only with a tighter gap. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    column-gap: ${tkn('spacing.sm')};
+  }
 `;
 
 /** Tells the seller the whole card opens the order. */
 export const DetailHint = styled.span`
   display: inline-flex;
   align-items: center;
-  align-self: center;
-  justify-self: end;
   gap: ${tkn('spacing.2xs')};
+  white-space: nowrap;
 `;
 
 export const StatCell = styled.div`

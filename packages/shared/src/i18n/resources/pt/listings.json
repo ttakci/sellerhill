@@ -113,6 +113,7 @@
         "ebay_restricted_item": "O eBay restringe este item ou categoria para a sua conta.",
         "provider_budget_exhausted": "A cota diária de uso da API do eBay acabou. Este anúncio está na fila e continuará automaticamente.",
         "blacklisted_keyword": "A lista de bloqueio das suas Configurações da loja impediu este anúncio (palavra-chave: \"{{keyword}}\"). Remova a palavra-chave ou ajuste o seu modelo de anúncio.",
+        "blacklisted_keyword_any": "A lista de bloqueio das suas Configurações da loja impediu estes anúncios. Remova a palavra-chave ou ajuste o modelo do anúncio.",
         "cancelled": "Cancelado antes de este ASIN ser processado.",
         "unknown": "Não foi possível criar o anúncio.",
         "blocked_by_rule": "Ignorado por uma das suas regras de anúncios.",

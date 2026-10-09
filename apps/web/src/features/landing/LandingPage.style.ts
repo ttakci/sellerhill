@@ -330,6 +330,25 @@ export const LoginButton = styled.button<{ $block?: boolean; $onDark?: boolean }
   @media (max-width: ${NAV_COLLAPSE}) {
     display: ${(p) => (p.$block ? 'inline-flex' : 'none')};
   }
+
+  /*
+   * The mobile menu's Login on the navy sheet: a hairline border alone left it
+   * invisible there (operator, 2026-10-09). It is a solid white button with
+   * navy ink, so it reads beside the blue "Start free" without competing with it.
+   */
+  ${(p) =>
+    p.$block && p.$onDark
+      ? `
+    justify-content: center;
+    background: ${p.theme.colors.surface.primary};
+    border-color: ${p.theme.colors.surface.primary};
+    color: ${p.theme.colors.sidebar.background};
+
+    &:hover {
+      background: ${p.theme.colors.surface.secondary};
+    }
+  `
+      : ''}
 `;
 
 export const NavCta = styled.button<{ $block?: boolean }>`

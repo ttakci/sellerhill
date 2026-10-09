@@ -113,6 +113,7 @@
         "ebay_restricted_item": "eBay limita questo articolo o questa categoria per il tuo account.",
         "provider_budget_exhausted": "Il limite giornaliero delle API eBay è esaurito. Questa inserzione è in coda e proseguirà automaticamente.",
         "blacklisted_keyword": "La lista nera nelle Impostazioni del negozio ha bloccato questa inserzione (parola chiave: \"{{keyword}}\"). Rimuovi la parola chiave o modifica il tuo modello di inserzione.",
+        "blacklisted_keyword_any": "La lista nera nelle Impostazioni del negozio ha bloccato queste inserzioni. Rimuovi la parola chiave o modifica il modello dell'inserzione.",
         "cancelled": "Annullato prima che questo ASIN venisse elaborato.",
         "unknown": "Non è stato possibile creare l'inserzione.",
         "blocked_by_rule": "Saltato da una delle tue regole delle inserzioni.",

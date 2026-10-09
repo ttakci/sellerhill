@@ -23,16 +23,11 @@ export const TabList = styled.div<{ $variant: 'underline' | 'pill' }>`
     display: none;
   }
 
-  /* On a phone the rail has no right-hand filter to stay level with, and a
-     scrolled-off tab is an invisible one (operator, 2026-10-01: "the tabs do
-     not fit the screen") — so below the sm breakpoint the tabs wrap onto a second row
-     instead of hiding past the edge. */
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    flex-wrap: wrap;
-    row-gap: 0;
-    column-gap: ${tkn('spacing.md')};
-    overflow-x: visible;
-  }
+  /* Phones too: one row that swipes sideways (operator, 2026-10-09). The
+     2026-10-01 rule that wrapped the rail onto a second row below sm is gone;
+     the container keeps the selected tab in view instead. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 
   /*
    * As a flex item of a COLUMN-direction parent (a toolbar stacking the rail

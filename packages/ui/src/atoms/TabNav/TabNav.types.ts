@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import type { IconName } from '../Icon';
 
 /** One entry in a tab rail. Navigation only — the caller owns the panel. */
@@ -26,4 +28,10 @@ export interface TabNavProps {
   /** Accessible name for the rail, e.g. "Admin sections". */
   ariaLabel?: string;
   className?: string;
+}
+
+/** What the container hands the presentational rail. */
+export interface TabNavComponentProps extends TabNavProps {
+  /** The rail element, so the container can keep the selected tab in view. */
+  listRef: React.RefObject<HTMLDivElement>;
 }

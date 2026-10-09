@@ -56,6 +56,11 @@ export const FilterActions = styled.div`
   margin-left: auto;
   min-height: ${tkn('controls.height.medium')};
 
+  /* Nothing to clear: no empty control-high box (on a phone it left a gap under the filters). */
+  &:empty {
+    display: none;
+  }
+
   @media (max-width: ${tkn('breakpoints.lg')}) {
     margin-left: 0;
     width: 100%;
@@ -115,6 +120,7 @@ export const DetailHint = styled.span`
   flex: 0 0 auto;
   margin-left: auto;
   gap: ${tkn('spacing.2xs')};
+  white-space: nowrap;
 `;
 
 export const FooterActions = styled.div`
@@ -125,11 +131,10 @@ export const FooterActions = styled.div`
   flex: 0 0 auto;
   margin-left: auto;
 
+  /* Always the last column of the figures row, even when "Remaining" is not shown. */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-column: 1 / -1;
-    width: 100%;
+    grid-column: -2 / -1;
     margin-left: 0;
-    justify-content: space-between;
   }
 `;
 
@@ -269,10 +274,12 @@ export const StatsGrid = styled.div`
   background: ${tkn('colors.glass.tint')};
   flex-shrink: 0;
 
+  /* Three figures and the detail hint on ONE row — the hint used to drop onto its own line. */
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: center;
+    column-gap: ${tkn('spacing.sm')};
   }
 `;
 
