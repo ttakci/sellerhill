@@ -2193,15 +2193,20 @@ export const ShowcaseList = styled.div`
 
 export const ShowcaseRow = styled.div<{ $reversed?: boolean }>`
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  /* Zigzag: every other row puts the screen on the left. The screen keeps the
+     wider track on both sides. :first-child, never :first-of-type — the copy
+     and the frame are different elements, so the -of-type pair matched both
+     children with one rule each and the rows never flipped. */
+  grid-template-columns: ${(p) =>
+    p.$reversed ? 'minmax(0, 1.1fr) minmax(0, 0.9fr)' : 'minmax(0, 0.9fr) minmax(0, 1.1fr)'};
   gap: ${tkn('spacing.xxl')};
   align-items: center;
 
-  & > :first-of-type {
+  & > :first-child {
     order: ${(p) => (p.$reversed ? 2 : 1)};
   }
 
-  & > :last-of-type {
+  & > :last-child {
     order: ${(p) => (p.$reversed ? 1 : 2)};
   }
 
@@ -2209,11 +2214,11 @@ export const ShowcaseRow = styled.div<{ $reversed?: boolean }>`
     grid-template-columns: 1fr;
     gap: ${tkn('spacing.lg')};
 
-    & > :first-of-type {
+    & > :first-child {
       order: 1;
     }
 
-    & > :last-of-type {
+    & > :last-child {
       order: 2;
     }
   }
