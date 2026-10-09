@@ -77,11 +77,20 @@ export function buildBillingUsageRows(
       : limit > 0
         ? `${Math.min(999, Math.round((used / limit) * 100))}%`
         : '—';
+    const remainingDisplay =
+      !isUnlimited && limit > 0
+        ? t('billing:billing.limits.remaining', {
+            remaining: new Intl.NumberFormat(locale).format(Math.max(0, limit - used)),
+          })
+        : null;
     rows.push({
       ringLabel,
       labelKey,
       usedDisplay,
       ofDisplay,
+      limitDisplay,
+      remainingDisplay,
+      isUnlimited,
       barValue: usageBarValue(used, limit),
       barVariant: usageBarVariant(used, limit),
       barAriaLabel: `${t(labelKey)}: ${usedDisplay} / ${limitDisplay}`,

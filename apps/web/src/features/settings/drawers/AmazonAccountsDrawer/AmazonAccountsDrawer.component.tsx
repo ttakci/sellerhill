@@ -45,7 +45,8 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
           </EmptyCard>
         )}
         <QuickActionCard
-          variant="brand"
+          variant="solid"
+          icon="plus"
           title={t('translation:settingsHub.drawer.amazonAccounts.addNew.title')}
           subtitle={t('translation:settingsHub.drawer.amazonAccounts.addNew.subtitle')}
           onClick={onAddNew}

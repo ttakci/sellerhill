@@ -66,7 +66,7 @@ function statusBadgeVariant(
   }
 }
 
-/** A quota near or at its limit reads amber / red, like the ring it replaced. */
+/** A quota near or at its limit reads amber / red; a healthy one is brand blue. */
 function usageTone(variant: BillingUsageRow['barVariant']): BillingFactTone {
   if (variant === 'error') {
     return 'negative';
@@ -74,7 +74,12 @@ function usageTone(variant: BillingUsageRow['barVariant']): BillingFactTone {
   if (variant === 'warning') {
     return 'warning';
   }
-  return 'default';
+  return 'brand';
+}
+
+/** What is left reads green while there is room, amber / red as it runs out. */
+function remainingTone(variant: BillingUsageRow['barVariant']): BillingFactTone {
+  return variant === 'error' || variant === 'warning' ? usageTone(variant) : 'positive';
 }
 
 /** Render a single plan comparison card. */
@@ -261,33 +266,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader
-        title={t('billing:billing.title')}
-        subtitle={t('billing:billing.subtitle')}
-        actions={
-          /* The page's actions sit where a record page keeps them — the
-             listing detail's header pattern. A past-due seller gets only the
-             portal: they need their card fixed, not a plan list. */
-          <S.HeaderActions>
-            {canOpenPortal ? (
-              <Button variant="primary" size="medium" isLoading={isPortalLoading} onClick={onManage}>
-                <Icon name="wallet-cards" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('billing:billing.subscription.updatePayment')}
-                </Text>
-              </Button>
-            ) : null}
-            {needsPaymentFix ? null : (
-              <Button variant="primary" size="medium" onClick={onOpenPlans}>
-                <Icon name="layers" size={16} />
-                <Text variant="body" weight="medium">
-                  {t('billing:billing.subscription.manage')}
-                </Text>
-              </Button>
-            )}
-          </S.HeaderActions>
-        }
-      />
+      <PageHeader title={t('billing:billing.title')} subtitle={t('billing:billing.subtitle')} />
 
       {/*
         ONE hero for "what am I on, what is left, what do I pay next" — the
@@ -332,18 +311,36 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           </S.FactList>
         ) : null}
 
+        {/* The page's actions sit inside the hero, on its right — the listing
+            and order detail pattern. A past-due seller gets only the portal:
+            they need their card fixed, not a plan list. */}
+        <S.HeroActions>
+          {canOpenPortal ? (
+            <Button variant="primary" size="small" isLoading={isPortalLoading} onClick={onManage}>
+              <Icon name="wallet-cards" size={16} />
+              <Text variant="body-sm">{t('billing:billing.subscription.updatePayment')}</Text>
+            </Button>
+          ) : null}
+          {needsPaymentFix ? null : (
+            <Button variant="primary" size="small" onClick={onOpenPlans}>
+              <Icon name="layers" size={16} />
+              <Text variant="body-sm">{t('billing:billing.subscription.manage')}</Text>
+            </Button>
+          )}
+        </S.HeroActions>
+
         {summaryHeadline || usageRows.length > 0 ? (
           <S.KpiStrip>
             {summaryHeadline ? (
               <S.KpiItem>
-                <S.KpiLabel variant="caption" color="text.secondary">
+                <S.KpiLabel variant="body" color="text.secondary">
                   {summaryHeadline.label}
                 </S.KpiLabel>
                 <Text variant="metric-lg" weight="bold" numeric color="brand.primary">
                   {summaryHeadline.value}
                 </Text>
                 {summaryHeadline.caption ? (
-                  <Text variant="caption" color="text.secondary" numeric>
+                  <Text variant="body-sm" color="text.secondary" numeric>
                     {summaryHeadline.caption}
                   </Text>
                 ) : null}
@@ -351,12 +348,31 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             ) : null}
             {usageRows.map((row) => (
               <S.KpiItem key={row.labelKey}>
-                <S.KpiLabel variant="caption" color="text.secondary">
+                <S.KpiLabel variant="body" color="text.secondary">
                   {t(row.labelKey)}
                 </S.KpiLabel>
-                <S.FactValue variant="metric-sm" weight="semibold" numeric $tone={usageTone(row.barVariant)}>
-                  {row.ofDisplay}
-                </S.FactValue>
+                {/* Used in colour, the ceiling muted, what is left in green
+                    (amber / red as it runs out). */}
+                <S.UsageFigure aria-label={row.barAriaLabel}>
+                  <S.UsageUsed variant="metric" weight="bold" numeric $tone={usageTone(row.barVariant)}>
+                    {row.usedDisplay}
+                  </S.UsageUsed>
+                  {row.isUnlimited ? null : (
+                    <S.UsageLimit variant="body" color="text.secondary" numeric>
+                      / {row.limitDisplay}
+                    </S.UsageLimit>
+                  )}
+                </S.UsageFigure>
+                {row.isUnlimited || row.remainingDisplay ? (
+                  <S.FactValue
+                    variant="body"
+                    weight="semibold"
+                    numeric
+                    $tone={row.isUnlimited ? 'positive' : remainingTone(row.barVariant)}
+                  >
+                    {row.isUnlimited ? row.limitDisplay : row.remainingDisplay}
+                  </S.FactValue>
+                ) : null}
               </S.KpiItem>
             ))}
           </S.KpiStrip>

@@ -46,7 +46,8 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
           viewAllLabel={t('translation:settingsHub.drawer.ebayAccounts.viewAll.title')}
         />
         <QuickActionCard
-          variant="brand"
+          variant="solid"
+          icon="plus"
           title={t('translation:settingsHub.drawer.ebayAccounts.addNew.title')}
           subtitle={t('translation:settingsHub.drawer.ebayAccounts.addNew.subtitle')}
           onClick={onConnectNew}

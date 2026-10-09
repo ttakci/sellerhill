@@ -57,7 +57,8 @@ export const BuyerMessageTemplatesDrawerComponent: React.FC<BuyerMessageTemplate
           viewAllLabel={t('storeSettings:storeSettings.messaging.templates.hub.viewAll.title')}
         />
         <QuickActionCard
-          variant="brand"
+          variant="solid"
+          icon="plus"
           title={t('storeSettings:storeSettings.messaging.templates.hub.addNew.title')}
           subtitle={t('storeSettings:storeSettings.messaging.templates.hub.addNew.subtitle')}
           onClick={onCreate}

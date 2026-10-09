@@ -55,7 +55,7 @@ export const ListingGroupsDrawerComponent: React.FC<ListingGroupsDrawerComponent
             <EmptyState icon="layers" title={emptyTitle} description={emptyDescription} />
           </FormCard>
         )}
-        <QuickActionCard variant="brand" title={createTitle} subtitle={createSubtitle} onClick={onCreate} />
+        <QuickActionCard variant="solid" icon="plus" title={createTitle} subtitle={createSubtitle} onClick={onCreate} />
       </BodyStack>
     </Drawer>
   );

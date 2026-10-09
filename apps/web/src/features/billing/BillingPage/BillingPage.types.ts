@@ -42,7 +42,7 @@ export interface BillingPlanCard {
 }
 
 /** Ink of one value in the summary card's label / value lists. */
-export type BillingFactTone = 'default' | 'positive' | 'warning' | 'negative';
+export type BillingFactTone = 'default' | 'brand' | 'positive' | 'warning' | 'negative';
 
 /** One label / value row of the summary card, already localized. */
 export interface BillingSummaryFact {

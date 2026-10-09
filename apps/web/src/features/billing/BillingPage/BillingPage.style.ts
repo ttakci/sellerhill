@@ -22,6 +22,7 @@ const toneInk = (tone: FactTone, theme: Theme): string => {
   if (tone === 'positive') {return theme.colors.semantic.success;}
   if (tone === 'negative') {return theme.colors.semantic.error;}
   if (tone === 'warning') {return theme.colors.semantic.warning;}
+  if (tone === 'brand') {return theme.colors.brand.primary;}
   return theme.colors.text.primary;
 };
 
@@ -30,22 +31,63 @@ const toneInk = (tone: FactTone, theme: Theme): string => {
  * wash over the glass whatever the status (operator choice), the status badge
  * in its own row at the top-left, the plan's name as the heading, label /
  * value fact rows, and one blue money strip with a brand bar on its leading
- * edge. The two pages read the same way on purpose.
+ * edge. The page's actions sit inside the card on its right (the listing and
+ * order detail pattern), so the two pages read the same way.
  */
 export const Hero = styled(Card)`
   background-image: linear-gradient(135deg, ${tkn('colors.semanticTint.infoStrong')} 0%, transparent 65%);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'badge'
+    'title'
+    'facts'
+    'actions'
+    'kpi'
+    'notices';
+  align-content: start;
   gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.lg')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: minmax(0, 1fr) 14rem;
+    grid-template-areas:
+      'badge badge'
+      'title actions'
+      'facts actions'
+      'kpi kpi'
+      'notices notices';
+    column-gap: ${tkn('spacing.xl')};
     padding: ${tkn('spacing.xl')};
+  }
+`;
+
+/**
+ * Update payment method / Manage subscription: stacked full width on a phone,
+ * and from `md` in the card's own right column with a hairline on its left,
+ * level with the plan's name — the listing / order detail's HeroActions.
+ */
+export const HeroActions = styled.div`
+  grid-area: actions;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+
+  & > * {
+    width: 100%;
+  }
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding-left: ${tkn('spacing.lg')};
+    border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
 `;
 
 /** The status badge — its own row at the hero's top-left, in flow (card standard). */
 export const StatusBadgeSlot = styled.div`
+  grid-area: badge;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -54,6 +96,7 @@ export const StatusBadgeSlot = styled.div`
 `;
 
 export const TitleRow = styled.div`
+  grid-area: title;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
@@ -72,6 +115,7 @@ export const PlanTitle = styled(UIText)`
 
 /** Fact rows: a fixed label track so every value starts on the same x. */
 export const FactList = styled.div`
+  grid-area: facts;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
@@ -100,6 +144,7 @@ export const FactValue = styled(UIText)<{ $tone: FactTone }>`
  * hero's KpiStrip). A quota near or at its limit keeps its amber / red.
  */
 export const KpiStrip = styled.div`
+  grid-area: kpi;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
   gap: ${tkn('spacing.md')};
@@ -125,8 +170,29 @@ export const KpiLabel = styled(UIText)`
   line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
+/** A quota's figure: what is used (coloured), then the ceiling in muted ink. */
+export const UsageFigure = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+/** A quota's used figure — the page-title size, so it reads at a glance. */
+export const UsageUsed = styled(FactValue)`
+  font-size: ${tkn('typography.fontSize.xxl')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+/** The quota's ceiling beside it, muted and smaller. */
+export const UsageLimit = styled(UIText)`
+  font-size: ${tkn('typography.fontSize.lg')};
+`;
+
 /** Notices that close the hero (pending downgrade, cancellation, past due, card expiring). */
 export const SummaryNotices = styled.div`
+  grid-area: notices;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -135,14 +201,6 @@ export const SummaryNotices = styled.div`
   & > * {
     width: 100%;
   }
-`;
-
-/** Update payment method / Manage subscription — in the PageHeader, wrapping on a phone. */
-export const HeaderActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
 `;
 
 /** Feature list in a plan card. */
