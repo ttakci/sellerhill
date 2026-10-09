@@ -255,6 +255,33 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             box-shadow: ${glow(theme.colors.sidebar.background, 'press')};
           }
         `;
+      case 'success':
+      case 'teal':
+      case 'orange': {
+        /* Further solid fills with a white label, built like `danger`. */
+        const fill =
+          $variant === 'success'
+            ? theme.colors.semantic.success
+            : $variant === 'teal'
+              ? theme.colors.badge.teal
+              : theme.colors.badge.orange;
+        return css`
+          background-color: ${fill};
+          color: ${theme.colors.text.inverse};
+          border: 0.0625rem solid ${fill};
+          box-shadow: ${glow(fill, 'rest')};
+
+          &:hover:not(:disabled) {
+            filter: ${theme.mode === 'dark' ? 'brightness(1.1)' : 'brightness(0.92)'};
+            box-shadow: ${glow(fill, 'hover')};
+          }
+
+          &:active:not(:disabled) {
+            filter: brightness(1);
+            box-shadow: ${glow(fill, 'press')};
+          }
+        `;
+      }
       case 'danger-tint':
         /* Light fill, error-toned label — the same tint/border pair Badge's
            error variant uses, so a "cancel" action reads as related-but-lighter

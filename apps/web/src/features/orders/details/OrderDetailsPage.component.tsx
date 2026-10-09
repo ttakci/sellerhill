@@ -372,11 +372,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         {/* Every action of the order, stacked in the card's right column. At
             most three show at once: starting the automatic order and "not on
             Amazon" exclude each other and both exclude converting a tracking
-            number; "manage cancellation" only while the request awaits an answer. */}
+            number; "manage cancellation" only while the request awaits an answer.
+            Each action has its own colour: start green, not-on-Amazon navy, link
+            blue, convert teal, manage cancellation orange. */}
         <S.HeroActions>
           {canStartAutoFulfill && onStartAutoFulfill ? (
             <Button
-              variant="primary"
+              variant="success"
               size="small"
               fullWidth
               onClick={onStartAutoFulfill}
@@ -388,7 +390,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           ) : null}
           {canConfirmNotPurchased && onConfirmNotPurchased ? (
             <Button
-              variant="primary"
+              variant="navy"
               size="small"
               fullWidth
               onClick={onConfirmNotPurchased}
@@ -404,7 +406,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           </Button>
           {canConvertTracking && onConvertTracking ? (
             <Button
-              variant="primary"
+              variant="teal"
               size="small"
               fullWidth
               onClick={onConvertTracking}
@@ -415,7 +417,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </Button>
           ) : null}
           {canManageCancellation ? (
-            <Button variant="primary" size="small" fullWidth onClick={onManageCancellation}>
+            <Button variant="orange" size="small" fullWidth onClick={onManageCancellation}>
               <Icon name="arrow-right" size={16} />
               <Text variant="body-sm">{t('orders.cancellation.manage')}</Text>
             </Button>

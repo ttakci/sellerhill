@@ -6,7 +6,19 @@ import { ButtonHTMLAttributes, ReactNode } from 'react';
 /** `navy` is a solid fill in the sidebar's navy — a second, quieter solid
  *  action beside a `primary` one, so two actions side by side do not read as
  *  the same button. */
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'text' | 'danger' | 'danger-tint' | 'navy';
+/** `success`, `teal` and `orange` are further solid fills, for a row of
+ *  actions where each one should be told apart by colour (the order detail). */
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'text'
+  | 'danger'
+  | 'danger-tint'
+  | 'navy'
+  | 'success'
+  | 'teal'
+  | 'orange';
 
 export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 
