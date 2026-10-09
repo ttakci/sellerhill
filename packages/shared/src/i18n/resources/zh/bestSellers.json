@@ -31,7 +31,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "本周期还剩 {{remaining}}/{{limit}} 件商品可查看",
     "allowanceUnlimited": "不限商品查看数量",
-    "allowanceHint": "每件看到的商品每个周期只计一次；今天再次打开同一榜单不会重复计算。",
+    "allowanceHint": "您打开的每个列表页面，其中的商品都会计入您的额度。同一天（UTC）再次打开同一页面不会重复计数；换一天打开会重新计数。排序和筛选从不计数。",
     "lastFetched": "最后从亚马逊获取",
     "locked": {
       "title_other": "本页还有 {{count}} 件商品超出您套餐的每月额度",

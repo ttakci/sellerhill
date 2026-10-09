@@ -23,7 +23,7 @@ export const ProductTableCell: React.FC<ProductTableCellProps> = ({
       {meta && meta.length > 0 && (
         <S.Meta>
           {meta.map((row) => (
-            <S.MetaRow key={`${row.label}-${row.id}`}>
+            <S.MetaRow key={`${row.label}-${row.id}`} $single={meta.length === 1}>
               <S.MetaLabelRow>
                 <S.MetaLabel>{row.label}</S.MetaLabel>
               </S.MetaLabelRow>

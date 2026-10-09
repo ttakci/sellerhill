@@ -300,7 +300,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                 <Text variant="body-sm" color="text.secondary" numeric>
                   {allowanceLabel}
                 </Text>
-                <Tooltip content={t('bestSellers.allowanceHint')} position="bottom" variant="dark">
+                <Tooltip content={t('bestSellers.allowanceHint')} position="left" variant="dark">
                   <Icon name="info" size={16} color="text.tertiary" />
                 </Tooltip>
               </S.Allowance>

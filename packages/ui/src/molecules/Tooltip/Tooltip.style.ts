@@ -25,6 +25,10 @@ export const TooltipPortal = styled.div<{
   line-height: ${tkn('typography.lineHeight.normal')};
   white-space: normal;
   pointer-events: none;
+  /* A fixed box with only a left offset shrinks to the space between that
+     offset and the viewport's right edge, so a tooltip near that edge became
+     one word wide. Size to the content instead; max-width still wraps. */
+  width: max-content;
   max-width: 20rem;
   word-break: break-word;
   transition: opacity ${tkn('transitions.fast')};

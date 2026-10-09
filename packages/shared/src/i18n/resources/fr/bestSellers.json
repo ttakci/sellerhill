@@ -33,7 +33,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Il vous reste {{remaining}} produits sur {{limit}} pour cette période",
     "allowanceUnlimited": "Consultation illimitée des produits",
-    "allowanceHint": "Chaque produit affiché compte une fois par période ; rouvrir la même liste aujourd’hui n’est pas compté deux fois.",
+    "allowanceHint": "Chaque page de liste ouverte décompte ses produits de votre quota. Rouvrir la même page le même jour (UTC) n’est pas recompté ; un autre jour, elle est comptée à nouveau. Le tri et les filtres ne comptent jamais.",
     "lastFetched": "Dernière récupération sur Amazon",
     "locked": {
       "title_one": "{{count}} produit de plus sur cette page dépasse le quota mensuel de votre forfait",

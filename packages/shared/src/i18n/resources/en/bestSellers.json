@@ -32,7 +32,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "{{remaining}} of {{limit}} products left this period",
     "allowanceUnlimited": "Unlimited product views",
-    "allowanceHint": "Every product you see counts once per period; the same list opened again today is not counted twice.",
+    "allowanceHint": "Each list page you open counts its products against your allowance. The same page opened again on the same day (UTC) is not counted twice; on another day it counts again. Sorting and filtering never count.",
     "lastFetched": "Last fetched from Amazon",
     "locked": {
       "title_one": "{{count}} more product on this page is outside your plan's monthly allowance",

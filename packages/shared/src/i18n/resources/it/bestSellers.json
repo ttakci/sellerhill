@@ -33,7 +33,7 @@
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Ti restano {{remaining}} prodotti su {{limit}} in questo periodo",
     "allowanceUnlimited": "Visualizzazioni prodotto illimitate",
-    "allowanceHint": "Ogni prodotto che vedi conta una volta per periodo; riaprire oggi la stessa classifica non viene contato due volte.",
+    "allowanceHint": "Ogni pagina di elenco che apri conta i suoi prodotti sulla tua quota. Riaprire la stessa pagina nello stesso giorno (UTC) non viene ricontato; in un altro giorno viene contata di nuovo. Ordinamento e filtri non contano mai.",
     "lastFetched": "Ultimo aggiornamento da Amazon",
     "locked": {
       "title_one": "{{count}} altro prodotto in questa pagina è oltre il limite mensile del tuo piano",

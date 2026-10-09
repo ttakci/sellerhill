@@ -69,10 +69,15 @@ export const Meta = styled.div`
   min-width: 0;
 `;
 
-export const MetaRow = styled.div`
+/*
+ * The fixed label track lines several rows up (ASIN over eBay ID). With one
+ * row there is nothing to line up, and the track only pushed the id away
+ * from its label, so the label takes its own width instead.
+ */
+export const MetaRow = styled.div<{ $single?: boolean }>`
   display: grid;
-  grid-template-columns: 5.75rem minmax(0, 1fr);
-  column-gap: ${tkn('spacing.xs')};
+  grid-template-columns: ${({ $single }) => ($single ? 'max-content' : '5.75rem')} minmax(0, 1fr);
+  column-gap: ${({ $single }) => ($single ? tkn('spacing.sm') : tkn('spacing.xs'))};
   align-items: center;
   min-width: 0;
 
