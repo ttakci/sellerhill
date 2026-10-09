@@ -59,14 +59,16 @@ export function useBestSellersColumns(showRankChange: boolean): BestSellersColum
         key: BestSellersSortKey.RANK,
         sortable: true,
         header: t('bestSellers.table.rank'),
-        align: 'right',
+        align: 'center',
         width: '4.5rem',
         render: (_value, row) => (row.isLocked ? renderLockedCell('2rem') : renderFigure(row.rankLabel)),
       },
       {
         key: 'product',
         header: t('bestSellers.table.product'),
-        width: '17.5rem',
+        // No width: under the fixed table layout this column takes whatever the
+        // others leave, so a wide screen shows more of the title instead of
+        // spreading the spare room over every column (as Orders does).
         render: (_value, row) =>
           row.isLocked ? (
             <S.LockedProductCell role="img" aria-label={t('bestSellers.locked.rowLabel')}>
