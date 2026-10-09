@@ -40,6 +40,7 @@ const criteria = ({
     minRating,
     ranges: {
       [BestSellersRangeKey.PRICE]: { min: '', max: '', ...ranges[BestSellersRangeKey.PRICE] },
+      [BestSellersRangeKey.RATING]: { min: '', max: '', ...ranges[BestSellersRangeKey.RATING] },
       [BestSellersRangeKey.REVIEWS]: { min: '', max: '', ...ranges[BestSellersRangeKey.REVIEWS] },
       [BestSellersRangeKey.RANK]: { min: '', max: '', ...ranges[BestSellersRangeKey.RANK] },
     },
@@ -77,6 +78,15 @@ describe('matchesBestSellersFilters', () => {
     expect(matchesBestSellersFilters(item(), criteria({ ranges: { price: { max: '15' } } }))).toBe(false);
     expect(matchesBestSellersFilters(item(), criteria({ ranges: { rank: { max: '10' } } }))).toBe(true);
     expect(matchesBestSellersFilters(item(), criteria({ ranges: { rank: { min: '1', max: '5' } } }))).toBe(false);
+  });
+
+  it('takes a typed star range with a decimal point or comma', () => {
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { rating: { min: '4.2' } } }))).toBe(true);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { rating: { min: '4,6' } } }))).toBe(false);
+    expect(matchesBestSellersFilters(item(), criteria({ ranges: { rating: { max: '4,4' } } }))).toBe(false);
+    expect(matchesBestSellersFilters(item({ rating: null }), criteria({ ranges: { rating: { min: '1' } } }))).toBe(
+      false,
+    );
   });
 
   it('matches the search text against title and ASIN, case-insensitively', () => {

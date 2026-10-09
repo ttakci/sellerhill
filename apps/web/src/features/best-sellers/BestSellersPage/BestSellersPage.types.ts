@@ -51,6 +51,8 @@ export interface BestSellersRangeFilterView {
   label: string;
   min: string;
   max: string;
+  /** `text` for the star range, so a decimal comma ("4,2") is not rejected by a number field. */
+  inputType: 'number' | 'text';
   onMinChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }

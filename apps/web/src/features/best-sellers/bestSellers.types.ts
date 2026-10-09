@@ -108,11 +108,13 @@ export interface BestSellersRefusalBody {
 /**
  * The range filters of the "Advanced filters" section, mirroring the Listings
  * page's min/max fields. Only fields Amazon actually prints on a ranking card
- * exist here — price, review count and rank. Prime and "bought in past month"
+ * exist here — price, star rating, review count and rank. Prime and "bought in past month"
  * are not on those pages, so there is nothing honest to filter them on.
  */
 export enum BestSellersRangeKey {
   PRICE = 'price',
+  /** Star average, typed freely (4.2, 4,2) — finer than the main row's 3 / 3.5 / 4 / 4.5 picker. */
+  RATING = 'rating',
   REVIEWS = 'reviews',
   RANK = 'rank',
 }

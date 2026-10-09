@@ -103,6 +103,7 @@ const LIST_TYPE_ICON: Record<BestSellersListType, IconName> = {
 /** Advanced-section label per range: the column names, so a filter reads like the figure it narrows. */
 const RANGE_LABEL_KEY: Record<BestSellersRangeKey, string> = {
   [BestSellersRangeKey.PRICE]: 'bestSellers.table.price',
+  [BestSellersRangeKey.RATING]: 'bestSellers.table.rating',
   [BestSellersRangeKey.REVIEWS]: 'bestSellers.table.reviews',
   [BestSellersRangeKey.RANK]: 'bestSellers.table.rank',
 };
@@ -363,6 +364,7 @@ export const BestSellersPageContainer: React.FC = () => {
         label: t(RANGE_LABEL_KEY[key]),
         min: filters.values.ranges[key].min,
         max: filters.values.ranges[key].max,
+        inputType: key === BestSellersRangeKey.RATING ? 'text' : 'number',
         onMinChange: (event: React.ChangeEvent<HTMLInputElement>) => setRange(key, 'min', event.target.value),
         onMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => setRange(key, 'max', event.target.value),
       })),

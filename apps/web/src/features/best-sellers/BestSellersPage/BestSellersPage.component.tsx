@@ -427,7 +427,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                           value={field.min}
                           onChange={field.onMinChange}
                           label={`${field.label} · ${t('listings:listings.filters.min')}`}
-                          type="number"
+                          type={field.inputType}
                           size="medium"
                           fullWidth
                         />
@@ -441,7 +441,7 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                           value={field.max}
                           onChange={field.onMaxChange}
                           label={`${field.label} · ${t('listings:listings.filters.max')}`}
-                          type="number"
+                          type={field.inputType}
                           size="medium"
                           fullWidth
                         />

@@ -15,6 +15,7 @@ export const BEST_SELLERS_RATING_OPTIONS: readonly string[] = ['', '3', '3.5', '
 /** The advanced section's fields, in the order they are shown. */
 export const BEST_SELLERS_RANGE_KEYS: readonly BestSellersRangeKey[] = [
   BestSellersRangeKey.PRICE,
+  BestSellersRangeKey.RATING,
   BestSellersRangeKey.REVIEWS,
   BestSellersRangeKey.RANK,
 ];
@@ -26,6 +27,7 @@ export const EMPTY_BEST_SELLERS_FILTERS: BestSellersFilterValues = {
   minRating: '',
   ranges: {
     [BestSellersRangeKey.PRICE]: EMPTY_RANGE,
+    [BestSellersRangeKey.RATING]: EMPTY_RANGE,
     [BestSellersRangeKey.REVIEWS]: EMPTY_RANGE,
     [BestSellersRangeKey.RANK]: EMPTY_RANGE,
   },
@@ -55,6 +57,7 @@ export function toBestSellersFilterCriteria(values: BestSellersFilterValues): Be
     minRating: parseFilterNumber(values.minRating),
     ranges: {
       [BestSellersRangeKey.PRICE]: toRangeCriteria(values.ranges[BestSellersRangeKey.PRICE]),
+      [BestSellersRangeKey.RATING]: toRangeCriteria(values.ranges[BestSellersRangeKey.RATING]),
       [BestSellersRangeKey.REVIEWS]: toRangeCriteria(values.ranges[BestSellersRangeKey.REVIEWS]),
       [BestSellersRangeKey.RANK]: toRangeCriteria(values.ranges[BestSellersRangeKey.RANK]),
     },
@@ -73,6 +76,8 @@ function readRangeField(item: BestSellersItemDto, key: BestSellersRangeKey): num
   switch (key) {
     case BestSellersRangeKey.PRICE:
       return item.price?.amount ?? null;
+    case BestSellersRangeKey.RATING:
+      return item.rating?.average ?? null;
     case BestSellersRangeKey.REVIEWS:
       return item.rating?.count ?? null;
     case BestSellersRangeKey.RANK:
