@@ -16,15 +16,20 @@ export interface CsvPage<T> {
 export const CSV_EXPORT_MAX_ROWS = 5000;
 
 /*
- * A cell that starts with = + @ (or a tab / carriage return, or a "-" not
- * followed by a figure) is run as a formula by Excel and Sheets. Buyer-written
- * text reaches these files, so such a cell is prefixed with an apostrophe.
+ * A cell that starts with = + - @ (or a tab / carriage return) is run as a
+ * formula by Excel and Sheets, and buyer-written text reaches these files —
+ * so such a cell is prefixed with an apostrophe (OWASP's CSV-injection rule).
+ * The one exception is a cell that is WHOLLY a negative figure ("-12,50",
+ * "-$3.10"): it stays a number. "-2+3+cmd|..." is not wholly a figure.
  */
-const FORMULA_START = /^(?:[=+@\t\r]|-(?![\d$.,]))/;
+const FORMULA_START = /^[=+\-@\t\r]/;
+const PLAIN_NEGATIVE_FIGURE = /^-[$€£₺]?\d[\d.,]*$/;
+
+const isFormulaLike = (text: string): boolean => FORMULA_START.test(text) && !PLAIN_NEGATIVE_FIGURE.test(text);
 
 const toCell = (value: CsvCell): string => {
   const text = value === null || value === undefined ? '' : String(value);
-  const safe = FORMULA_START.test(text) ? `'${text}` : text;
+  const safe = isFormulaLike(text) ? `'${text}` : text;
   return `"${safe.replace(/"/g, '""')}"`;
 };
 

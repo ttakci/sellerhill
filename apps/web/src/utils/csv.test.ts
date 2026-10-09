@@ -21,6 +21,12 @@ describe('buildCsv', () => {
     );
   });
 
+  it('neutralises a formula that starts with a minus and a figure', () => {
+    const cells = ["-2+3+cmd|' /C calc'!A0", '-1)*cmd', '\tx', '\r=1'];
+    const lines = buildCsv(['F'], cells.map((cell) => [cell])).split('\r\n').slice(1);
+    expect(lines).toEqual(cells.map((cell) => `"'${cell.replace(/"/g, '""')}"`));
+  });
+
   it('leaves negative figures alone', () => {
     expect(buildCsv(['N'], [['-12,50'], ['-$3.10']])).toBe('"N"\r\n"-12,50"\r\n"-$3.10"');
   });
