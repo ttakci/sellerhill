@@ -316,15 +316,19 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             they need their card fixed, not a plan list. */}
         <S.HeroActions>
           {canOpenPortal ? (
-            <Button variant="primary" size="small" isLoading={isPortalLoading} onClick={onManage}>
+            <Button variant="navy" size="medium" isLoading={isPortalLoading} onClick={onManage}>
               <Icon name="wallet-cards" size={16} />
-              <Text variant="body-sm">{t('billing:billing.subscription.updatePayment')}</Text>
+              <Text variant="body" weight="medium">
+                {t('billing:billing.subscription.updatePayment')}
+              </Text>
             </Button>
           ) : null}
           {needsPaymentFix ? null : (
-            <Button variant="primary" size="small" onClick={onOpenPlans}>
+            <Button variant="primary" size="medium" onClick={onOpenPlans}>
               <Icon name="layers" size={16} />
-              <Text variant="body-sm">{t('billing:billing.subscription.manage')}</Text>
+              <Text variant="body" weight="medium">
+                {t('billing:billing.subscription.manage')}
+              </Text>
             </Button>
           )}
         </S.HeroActions>

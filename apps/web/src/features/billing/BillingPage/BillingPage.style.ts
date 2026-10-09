@@ -50,7 +50,7 @@ export const Hero = styled(Card)`
   padding: ${tkn('spacing.lg')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: minmax(0, 1fr) 14rem;
+    grid-template-columns: minmax(0, 1fr) 19rem;
     grid-template-areas:
       'badge badge'
       'title actions'
@@ -80,7 +80,7 @@ export const HeroActions = styled.div`
   }
 
   @media (min-width: ${tkn('breakpoints.md')}) {
-    padding-left: ${tkn('spacing.lg')};
+    padding-left: ${tkn('spacing.xl')};
     border-left: 0.0625rem solid ${tkn('colors.border.primary')};
   }
 `;
