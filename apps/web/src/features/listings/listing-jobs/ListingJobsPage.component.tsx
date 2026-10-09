@@ -10,6 +10,7 @@ import {
   SearchField,
   Select,
   Text,
+  Tooltip,
 } from '@repo/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -86,19 +87,19 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
               {statusLabel(job.status)}
             </Badge>
             {canCancel ? (
-              <Button
-                variant="danger"
-                size="small"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onCancelRequest(job.id);
-                }}
-                isLoading={cancellingJobId === job.id}
-                disabled={Boolean(cancellingJobId)}
-              >
-                <Icon name="x" size={16} />
-                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-              </Button>
+              <Tooltip content={t('listings.jobs.details.cancel')} position="top" variant="dark">
+                <S.CancelX
+                  variant="ghost"
+                  aria-label={t('listings.jobs.details.cancel')}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onCancelRequest(job.id);
+                  }}
+                  disabled={Boolean(cancellingJobId)}
+                >
+                  <Icon name="x" size={20} />
+                </S.CancelX>
+              </Tooltip>
             ) : null}
           </S.JobCardHeader>
 

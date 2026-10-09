@@ -1,6 +1,6 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
+import { Card, IconButton, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -111,6 +111,24 @@ export const JobCardHeader = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
+`;
+
+/**
+ * Cancel as a red X in the card's top-right corner (operator, 2026-10-09): a
+ * solid red "Cancel" button was the loudest thing on a card whose action is
+ * rarely needed. Its name is on a tooltip; a tap on a phone (no hover) goes
+ * straight to the confirm dialog, which names the action.
+ */
+export const CancelX = styled(IconButton)`
+  && {
+    color: ${tkn('colors.semantic.error')};
+    padding: ${tkn('spacing.xs')};
+  }
+
+  &&:hover:not(:disabled) {
+    color: ${tkn('colors.semantic.error')};
+    background: ${tkn('colors.semanticTint.error')};
+  }
 `;
 
 /** Tells the seller the whole card opens the job. */
