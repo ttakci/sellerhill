@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Best Sellers",
-    "title": "Amazon Best Sellers",
+    "menu": "Product Search",
+    "title": "Product Search",
     "subtitle": "Browse Amazon's top lists, tick the products you want and send them to Add Listings in one step.",
     "listTypes": {
       "best_sellers": "Best Sellers",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} product selected",
     "selected_other": "{{count}} products selected",
     "listSelected": "List selected ({{count}})",
-    "clearSelection": "Clear",
+    "clearSelectionAll": "Clear selection",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "No rating yet",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "{{remaining}} of {{limit}} products left this period",
     "allowanceUnlimited": "Unlimited product views",
@@ -52,13 +49,12 @@
       "rankChange": "Rank change (24h)"
     },
     "filters": {
+      "searchPlaceholder": "Search title or ASIN",
       "anyRating": "Any rating",
       "ratingAtLeast": "{{value}}+ stars",
       "minReviews": "Min. reviews",
       "priceMin": "Min. price",
-      "priceMax": "Max. price",
-      "clear": "Clear filters",
-      "resultCount": "{{shown}} of {{total}} products on this page"
+      "priceMax": "Max. price"
     },
     "states": {
       "loading": {

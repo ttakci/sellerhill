@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Bestseller",
-    "title": "Amazon Bestseller",
+    "menu": "Produktsuche",
+    "title": "Produktsuche",
     "subtitle": "Stöbern Sie in den Top-Listen von Amazon, markieren Sie die gewünschten Produkte und übergeben Sie sie in einem Schritt an „Angebote hinzufügen“.",
     "listTypes": {
       "best_sellers": "Bestseller",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} Produkt ausgewählt",
     "selected_other": "{{count}} Produkte ausgewählt",
     "listSelected": "Auswahl einstellen ({{count}})",
-    "clearSelection": "Leeren",
+    "clearSelectionAll": "Auswahl aufheben",
     "rank": "Nr. {{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Noch keine Bewertung",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Noch {{remaining}} von {{limit}} Produkten in diesem Zeitraum",
     "allowanceUnlimited": "Unbegrenzte Produktansichten",
@@ -52,13 +49,12 @@
       "rankChange": "Rangänderung (24 Std.)"
     },
     "filters": {
+      "searchPlaceholder": "Titel oder ASIN suchen",
       "anyRating": "Alle Bewertungen",
       "ratingAtLeast": "Ab {{value}} Sternen",
       "minReviews": "Mind. Rezensionen",
       "priceMin": "Mindestpreis",
-      "priceMax": "Höchstpreis",
-      "clear": "Filter zurücksetzen",
-      "resultCount": "{{shown}} von {{total}} Produkten auf dieser Seite"
+      "priceMax": "Höchstpreis"
     },
     "states": {
       "loading": {

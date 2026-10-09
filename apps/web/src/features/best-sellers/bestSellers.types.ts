@@ -114,6 +114,8 @@ export interface BestSellersRefusalBody {
  * nothing honest to filter them on.
  */
 export interface BestSellersFilterValues {
+  /** Free text matched against the product title and ASIN; `''` = any. */
+  search: string;
   /** Minimum star average, one of `BEST_SELLERS_RATING_OPTIONS`; `''` = any. */
   minRating: string;
   minReviews: string;
@@ -123,6 +125,8 @@ export interface BestSellersFilterValues {
 
 /** The same filters parsed into numbers; `null` = no constraint. */
 export interface BestSellersFilterCriteria {
+  /** Lower-cased, trimmed search text; `null` = no constraint. */
+  search: string | null;
   minRating: number | null;
   minReviews: number | null;
   priceMin: number | null;
@@ -133,9 +137,30 @@ export interface BestSellersFilters {
   values: BestSellersFilterValues;
   criteria: BestSellersFilterCriteria;
   isActive: boolean;
+  setSearch: (value: string) => void;
   setMinRating: (value: string) => void;
   setMinReviews: (value: string) => void;
   setPriceMin: (value: string) => void;
   setPriceMax: (value: string) => void;
   clear: () => void;
+}
+
+/**
+ * What the page can be ordered by. Sorting runs over the page already in the
+ * browser (at most 50 products), so every key is a field Amazon printed on
+ * the card. `rank_change` exists only on Movers & Shakers.
+ */
+export enum BestSellersSortKey {
+  RANK = 'rank',
+  PRICE = 'price',
+  RATING = 'rating',
+  REVIEWS = 'reviews',
+  RANK_CHANGE = 'rankChange',
+}
+
+export type BestSellersSortDirection = 'asc' | 'desc';
+
+export interface BestSellersSort {
+  key: BestSellersSortKey;
+  direction: BestSellersSortDirection;
 }

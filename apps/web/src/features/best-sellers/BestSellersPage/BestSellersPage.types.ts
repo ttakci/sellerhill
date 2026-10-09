@@ -1,4 +1,4 @@
-import type { SelectOption, TabNavItem } from '@repo/ui';
+import type { BulkAction, ColumnOption, SelectOption, TabNavItem, TableColumn } from '@repo/ui';
 import type React from 'react';
 
 import type { BestSellersFilterValues, BestSellersViewState } from '../bestSellers.types';
@@ -26,17 +26,21 @@ export interface BestSellersItemView {
   imageUrl: string | null;
   /** `$19.99` from the structured price, else Amazon's own price text, else null. */
   priceLabel: string | null;
-  /** `★ 4.6 (12,345)` / `★ 4.6`, or null when the product has no rating yet. */
-  ratingLabel: string | null;
-  /** The star average alone (`4.6`), for the card's star stat; null when unrated. */
+  /** The star average alone (`4.6`), for the star stat and column; null when unrated. */
   ratingValueLabel: string | null;
-  /** The review count alone, grouped for the locale — the table's Reviews column. */
+  /** The review count alone, grouped for the locale — the Reviews column and stat. */
   reviewsLabel: string | null;
   /** Movers & Shakers only — `+250%`; null on every other list. */
   rankChangeLabel: string | null;
   isSelected: boolean;
   /** True for an allowance placeholder — never selectable, never sent to Add Listings. */
   isLocked: boolean;
+}
+
+/** What `useBestSellersColumns` hands the container. */
+export interface BestSellersColumns {
+  allColumns: TableColumn<BestSellersItemView>[];
+  columnOptions: ColumnOption[];
 }
 
 export interface BestSellersPagination {
@@ -53,13 +57,34 @@ export interface BestSellersPageComponentProps {
   viewState: BestSellersViewState;
   /** Visible products first, then `lockedCount` locked placeholders — the DataTable's rows. */
   items: BestSellersItemView[];
+
+  /* --- Table chrome, the same set the Listings / Orders pages pass ---------- */
+  columns: TableColumn<BestSellersItemView>[];
+  columnOptions: ColumnOption[];
+  visibleColumnKeys: string[];
+  onToggleColumn: (key: string) => void;
+  onMoveColumn: (key: string, direction: -1 | 1) => void;
+  sortOptions: { value: string; label: string }[];
+  sortValue: string;
+  onSortChange: (value: string | number) => void;
+  sortColumn: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (columnKey: string) => void;
+  /** Products shown on this page after the filters ("N products listed"). */
+  resultCount: number;
+
   /** Rows of `items` that are ticked — what the table's selection column reflects. */
   selectedRows: BestSellersItemView[];
   onSelectionChange: (rows: BestSellersItemView[]) => void;
   /** False for a locked placeholder, so it gets no checkbox and select-all skips it. */
   isRowSelectable: (row: BestSellersItemView) => boolean;
-  /** True when at least one real (unlocked) product is on the page. */
-  hasSelectableItems: boolean;
+  /** Ticked products across every list and page — they travel together to Add Listings. */
+  selectedCount: number;
+  /** "List selected (N)" / select page / clear — the table's bulk-actions menu. */
+  bulkActions: BulkAction<BestSellersItemView>[];
+  /** Ticks / unticks a product (card click, table row click); a locked placeholder is ignored. */
+  onToggleRow: (row: BestSellersItemView) => void;
+
   /** Products on this page outside the allowance; drives the locked rows and the upsell card. */
   lockedCount: number;
   /** Sends the seller to the billing page (plans + top-ups). */
@@ -69,7 +94,7 @@ export interface BestSellersPageComponentProps {
   listType: string;
   onListTypeChange: (value: string) => void;
 
-  /** Pre-flattened two-level category tree — see `useBestSellersCategoryTree`. */
+  /** Pre-flattened category tree — see `useBestSellersCategoryTree`. */
   categoryTreeRows: BestSellersCategoryTreeRow[];
   categorySearchValue: string;
   onCategorySearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -86,24 +111,17 @@ export interface BestSellersPageComponentProps {
   isSubCategory: boolean;
   onBackToAllCategories: () => void;
 
-  /** Rating / reviews / price filters over the page being viewed. */
+  /** Search / rating / reviews / price filters over the page being viewed. */
   ratingOptions: SelectOption[];
   filterValues: BestSellersFilterValues;
+  onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMinRatingChange: (value: string | number) => void;
   onMinReviewsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPriceMinChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPriceMaxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
-  /** "12 of 50 products on this page" while a filter narrows the page; null otherwise. */
-  filterResultLabel: string | null;
 
-  selectedCount: number;
-  isAllOnPageSelected: boolean;
-  onToggleSelectAllOnPage: (checked: boolean) => void;
-  onToggleItem: (asin: string) => void;
-  onListSelected: () => void;
-  onClearSelection: () => void;
   onRetry: () => void;
 
   /**

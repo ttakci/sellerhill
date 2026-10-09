@@ -1,28 +1,31 @@
 /**
  * BestSellersPage Component (Presentation)
  *
- * Lays out the five Amazon lists, the category picker and the ranked products.
- * Every figure arrives formatted and every state is already decided by the
- * container; this file only chooses which markup to show for it.
+ * The product-search page, laid out like the Orders and eBay Listings pages:
+ * title → tab rail (the five Amazon lists) → filter row on the canvas → the
+ * shared DataTable with its result label, sort picker, column manager, bulk
+ * actions and pagination. The category tree is the one addition, as a sticky
+ * column beside the results. Every figure arrives formatted and every state is
+ * already decided by the container; this file only chooses the markup.
  */
 
 import {
   Button,
-  Checkbox,
   DataTable,
   Drawer,
   EmptyState,
   Icon,
   PageHeader,
+  SearchField,
   Select,
   Skeleton,
   TabNav,
   Text,
   TextInput,
-  type TableColumn,
+  Tooltip,
 } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { BestSellersViewState } from '../bestSellers.types';
 
@@ -30,13 +33,10 @@ import * as S from './BestSellersPage.style';
 import type { BestSellersItemView, BestSellersPageComponentProps } from './BestSellersPage.types';
 import { CategoryTree } from './CategoryTree';
 
-import { ListingCard, ProductTableCell, type ListingCardMetaItem } from '@/domain-ui';
+import { ListingCard, type ListingCardMetaItem } from '@/domain-ui';
 
-/**
- * Same grid as the eBay Listings page — the card IS the listings card, laid out
- * horizontally, so it needs the same minimum track and the same two-column cap.
- */
-const GRID_MIN_ITEM_WIDTH = '24rem';
+/** The eBay Listings grid: same minimum track, same two-column cap. */
+const GRID_MIN_ITEM_WIDTH = '27rem';
 const GRID_MAX_COLUMNS = 2;
 
 const EMPTY_VALUE = '—';
@@ -47,10 +47,24 @@ const SKELETON_CARD_COUNT = 10;
 export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   viewState,
   items,
+  columns,
+  columnOptions,
+  visibleColumnKeys,
+  onToggleColumn,
+  onMoveColumn,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortColumn,
+  sortDirection,
+  onSort,
+  resultCount,
   selectedRows,
   onSelectionChange,
   isRowSelectable,
-  hasSelectableItems,
+  selectedCount,
+  bulkActions,
+  onToggleRow,
   lockedCount,
   onUpgrade,
   listTypeOptions,
@@ -70,19 +84,13 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   onBackToAllCategories,
   ratingOptions,
   filterValues,
+  onSearchChange,
   onMinRatingChange,
   onMinReviewsChange,
   onPriceMinChange,
   onPriceMaxChange,
   hasActiveFilters,
   onClearFilters,
-  filterResultLabel,
-  selectedCount,
-  isAllOnPageSelected,
-  onToggleSelectAllOnPage,
-  onToggleItem,
-  onListSelected,
-  onClearSelection,
   onRetry,
   allowanceLabel,
   pagination,
@@ -90,98 +98,10 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   const { t } = useTranslation(['bestSellers', 'listings', 'translation']);
 
   /*
-   * A locked row holds no data (the server withheld the product), so every
-   * cell of it is a blurred skeleton bar — the product cell additionally
-   * carries the lock glyph, unblurred, so the row reads as "locked" rather
-   * than "still loading".
-   */
-  const renderLockedCell = (align: 'left' | 'center' | 'right', width: string) => (
-    <S.LockedCell $align={align} aria-hidden="true">
-      <Skeleton width={width} height="0.875rem" />
-    </S.LockedCell>
-  );
-
-  const columns: TableColumn<BestSellersItemView>[] = [
-    {
-      key: 'rank',
-      header: t('bestSellers.table.rank'),
-      align: 'right',
-      width: '5rem',
-      render: (_value, row) =>
-        row.isLocked ? (
-          renderLockedCell('right', '2rem')
-        ) : (
-          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
-            {row.rankLabel ?? EMPTY_VALUE}
-          </Text>
-        ),
-    },
-    {
-      key: 'title',
-      header: t('bestSellers.table.product'),
-      render: (_value, row) =>
-        row.isLocked ? (
-          <S.LockedProductCell role="img" aria-label={t('bestSellers.locked.rowLabel')}>
-            <Icon name="lock" size={18} color="text.tertiary" />
-            <S.LockedLines aria-hidden="true">
-              <Skeleton width="70%" height="0.875rem" />
-              <Skeleton width="40%" height="0.75rem" />
-            </S.LockedLines>
-          </S.LockedProductCell>
-        ) : (
-          <ProductTableCell
-            title={row.title}
-            imageUrl={row.imageUrl ?? undefined}
-            meta={[{ label: t('listings:listings.table.asin'), id: row.asin, storeType: 'amazon' }]}
-          />
-        ),
-    },
-    {
-      key: 'priceLabel',
-      header: t('bestSellers.table.price'),
-      align: 'right',
-      render: (_value, row) =>
-        row.isLocked ? (
-          renderLockedCell('right', '3.5rem')
-        ) : (
-          <Text variant="body-sm" weight="semibold" color="text.primary" numeric>
-            {row.priceLabel ?? EMPTY_VALUE}
-          </Text>
-        ),
-    },
-    {
-      key: 'ratingLabel',
-      header: t('bestSellers.table.rating'),
-      align: 'right',
-      render: (_value, row) =>
-        row.isLocked ? (
-          renderLockedCell('right', '4.5rem')
-        ) : (
-          <Text variant="body-sm" color="text.secondary" numeric>
-            {row.ratingLabel ?? t('bestSellers.noRating')}
-          </Text>
-        ),
-    },
-    {
-      key: 'reviewsLabel',
-      header: t('bestSellers.table.reviews'),
-      align: 'right',
-      render: (_value, row) =>
-        row.isLocked ? (
-          renderLockedCell('right', '3rem')
-        ) : (
-          <Text variant="body-sm" color="text.secondary" numeric>
-            {row.reviewsLabel ?? EMPTY_VALUE}
-          </Text>
-        ),
-    },
-  ];
-
-  /*
-   * A locked placeholder mirrors the horizontal listings card — square image
-   * slot beside title, meta and stat strip — so the grid keeps one rhythm. It
-   * holds only skeleton bars (the server withheld the product), blurred, with
-   * the lock disc on top, unblurred.
+   * A locked placeholder mirrors the listings card — title row, 9rem image
+   * beside the facts, figures row — so the grid keeps one rhythm. It holds only
+   * skeleton bars (the server withheld the product), blurred, with the lock
+   * disc on top, unblurred.
    */
   const renderLockedGridCard = (item: BestSellersItemView) => (
     <S.LockedCard
@@ -192,16 +112,18 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
       aria-label={t('bestSellers.locked.rowLabel')}
     >
       <S.LockedCardBody aria-hidden="true">
-        <S.LockedImageSlot>
-          <Skeleton width="100%" height="100%" radius="sm" />
-        </S.LockedImageSlot>
-        <S.LockedCardLines>
-          <Skeleton width="90%" height="0.875rem" />
-          <Skeleton width="65%" height="0.875rem" />
-          <Skeleton width="45%" height="0.75rem" />
-          <Skeleton width="55%" height="0.75rem" />
-          <Skeleton width="100%" height="3rem" radius="sm" />
-        </S.LockedCardLines>
+        <Skeleton width="85%" height="1rem" />
+        <S.LockedCardRow>
+          <S.LockedImageSlot>
+            <Skeleton width="100%" height="100%" radius="sm" />
+          </S.LockedImageSlot>
+          <S.LockedCardLines>
+            <Skeleton width="55%" height="0.75rem" />
+            <Skeleton width="45%" height="0.75rem" />
+            <Skeleton width="60%" height="0.75rem" />
+          </S.LockedCardLines>
+        </S.LockedCardRow>
+        <Skeleton width="100%" height="3rem" radius="sm" />
       </S.LockedCardBody>
       <S.LockedOverlay>
         <S.LockedBadge>
@@ -212,32 +134,29 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   );
 
   /*
-   * The eBay Listings card, fed Amazon figures: rank, review count and ASIN as
-   * labelled meta rows, price and star rating in the stat strip (a third stat
-   * wrapped the strip onto two lines at this card width). Clicking the card ticks
-   * it (there is no detail page to open), so the "Details" arrow is hidden.
+   * The eBay Listings card, fed Amazon figures: the rank leads the title row
+   * where a listing shows its status, the ASIN (and on Movers & Shakers the
+   * 24-hour rank change) are the facts, and price · rating · reviews are the
+   * figures row. Clicking the card ticks it — there is no detail page to open,
+   * so the card carries no "Details" hint.
    */
   const renderGridCard = (item: BestSellersItemView) => {
     if (item.isLocked) {
       return renderLockedGridCard(item);
     }
-    const meta: ListingCardMetaItem[] = [];
-    if (item.rankLabel) {
-      meta.push({ label: t('bestSellers.table.rank'), value: item.rankLabel });
-    }
+    const meta: ListingCardMetaItem[] = [
+      { label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon' },
+    ];
     if (item.rankChangeLabel) {
       meta.push({ label: t('bestSellers.table.rankChange'), value: item.rankChangeLabel });
     }
-    if (item.reviewsLabel) {
-      meta.push({ label: t('bestSellers.table.reviews'), value: item.reviewsLabel });
-    }
-    meta.push({ label: t('listings:listings.table.asin'), value: item.asin, storeType: 'amazon' });
 
     return (
       <ListingCard
         key={item.asin}
         title={item.title}
         imageUrl={item.imageUrl ?? undefined}
+        status={item.rankLabel ? { label: item.rankLabel, tone: 'neutral' } : undefined}
         meta={meta}
         stats={[
           { label: t('bestSellers.table.price'), value: item.priceLabel ?? EMPTY_VALUE },
@@ -249,13 +168,14 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                 iconColor: 'semantic.warning',
               }
             : { label: t('bestSellers.table.rating'), value: EMPTY_VALUE },
+          { label: t('bestSellers.table.reviews'), value: item.reviewsLabel ?? EMPTY_VALUE },
         ]}
         orientation="horizontal"
         selectable
         selected={item.isSelected}
-        onSelectedChange={() => onToggleItem(item.asin)}
+        onSelectedChange={() => onToggleRow(item)}
         selectionAriaLabel={item.title}
-        onClick={() => onToggleItem(item.asin)}
+        onClick={() => onToggleRow(item)}
       />
     );
   };
@@ -263,21 +183,21 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   /**
    * One `EmptyState` for every non-grid situation, so empty and each refusal
    * read as the same screen. (The first load is not one of them: it is the
-   * table's own skeleton grid — see `loading` below.) It sits inside
-   * the DataTable's own empty slot when the toolbar still applies (the seller
-   * can switch list or category out of a refused one), and on its own card
-   * when the feature is switched off altogether.
+   * table's own skeleton grid — see `loading` below.) It sits inside the
+   * DataTable's empty slot when the controls still apply (the seller can switch
+   * list or category out of a refused one), and on its own card when the
+   * feature is switched off altogether.
    */
   const renderState = () => {
     switch (viewState) {
       case BestSellersViewState.NO_MATCHES:
         return (
           <EmptyState
-            icon="filter"
+            icon="search"
             title={t('bestSellers.states.noMatches.title')}
             description={t('bestSellers.states.noMatches.description')}
             actionIcon="x"
-            action={t('bestSellers.filters.clear')}
+            action={t('listings:listings.filters.clearAll')}
             onAction={onClearFilters}
             size="lg"
           />
@@ -357,105 +277,101 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader
-        title={t('bestSellers.title')}
-        subtitle={t('bestSellers.subtitle')}
-        actions={
-          isDisabled ? undefined : (
-            <S.HeaderActions>
-              {selectedCount > 0 && (
-                <Button variant="text" size="medium" onClick={onClearSelection}>
-                  <Text variant="body-sm" weight="semibold">
-                    {t('bestSellers.clearSelection')}
-                  </Text>
-                </Button>
-              )}
-              <Button variant="primary" size="medium" onClick={onListSelected} disabled={selectedCount === 0}>
-                <Icon name="plus" size={16} />
-                <Text variant="body-sm" weight="semibold">
-                  {t('bestSellers.listSelected', { count: selectedCount })}
-                </Text>
-              </Button>
-            </S.HeaderActions>
-          )
-        }
-      />
+      <PageHeader title={t('bestSellers.title')} subtitle={t('bestSellers.subtitle')} />
 
       {isDisabled ? (
         <S.StateCard padding="lg">{renderState()}</S.StateCard>
       ) : (
-        <S.PageBody>
-          <S.SidebarPanel variant="bordered" padding="lg">
-            <S.SidebarHeader>
-              <Icon name="grid-view" size={16} />
-              <Text variant="h5">{t('bestSellers.categories.title')}</Text>
-            </S.SidebarHeader>
-            <CategoryTree
-              rows={categoryTreeRows}
-              searchValue={categorySearchValue}
-              onSearchChange={onCategorySearchChange}
-              onSelect={onCategorySelect}
-              onToggleExpand={onToggleCategoryExpand}
-              hasDepartments={hasDepartments}
+        <>
+          <S.TabsRow>
+            <TabNav
+              items={listTypeOptions}
+              value={listType}
+              onChange={onListTypeChange}
+              variant="underline"
+              ariaLabel={t('bestSellers.listTypesAriaLabel')}
             />
-          </S.SidebarPanel>
+            {allowanceLabel && (
+              <S.Allowance>
+                <Text variant="body-sm" color="text.secondary" numeric>
+                  {allowanceLabel}
+                </Text>
+                <Tooltip content={t('bestSellers.allowanceHint')} position="bottom" variant="dark">
+                  <Icon name="info" size={16} color="text.tertiary" />
+                </Tooltip>
+              </S.Allowance>
+            )}
+          </S.TabsRow>
 
-          <S.ContentColumn>
-            <S.MobileCategoryTrigger>
-              <Button variant="secondary" size="medium" onClick={onOpenCategoryDrawer}>
+          <S.PageBody>
+            <S.SidebarPanel variant="bordered" padding="lg">
+              <S.SidebarHeader>
                 <Icon name="grid-view" size={16} />
-                <S.MobileCategoryTriggerLabel>
-                  <Text variant="body-sm" weight="semibold" truncate>
-                    {activeCategoryLabel}
-                  </Text>
-                </S.MobileCategoryTriggerLabel>
-                <Icon name="chevron-down" size={14} />
-              </Button>
-            </S.MobileCategoryTrigger>
-
-            <S.Toolbar>
-              <TabNav
-                items={listTypeOptions}
-                value={listType}
-                onChange={onListTypeChange}
-                ariaLabel={t('bestSellers.listTypesAriaLabel')}
+                <Text variant="h5">{t('bestSellers.categories.title')}</Text>
+              </S.SidebarHeader>
+              <CategoryTree
+                rows={categoryTreeRows}
+                searchValue={categorySearchValue}
+                onSearchChange={onCategorySearchChange}
+                onSelect={onCategorySelect}
+                onToggleExpand={onToggleCategoryExpand}
+                hasDepartments={hasDepartments}
               />
+            </S.SidebarPanel>
 
+            <S.ContentColumn>
               <S.FilterRow>
-                <S.FilterSelect>
+                <S.MobileCategoryTrigger>
+                  <Button variant="secondary" size="small" onClick={onOpenCategoryDrawer}>
+                    <Icon name="grid-view" size={16} />
+                    <S.MobileCategoryTriggerLabel>
+                      <Text variant="body-sm" weight="semibold" truncate>
+                        {activeCategoryLabel}
+                      </Text>
+                    </S.MobileCategoryTriggerLabel>
+                    <Icon name="chevron-down" size={14} />
+                  </Button>
+                </S.MobileCategoryTrigger>
+                <S.SearchWrapper>
+                  <SearchField
+                    value={filterValues.search}
+                    onChange={onSearchChange}
+                    placeholder={t('bestSellers.filters.searchPlaceholder')}
+                    size="small"
+                    fullWidth
+                  />
+                </S.SearchWrapper>
+                <S.SelectWrapper>
                   <Select
                     value={filterValues.minRating}
                     onChange={onMinRatingChange}
                     options={ratingOptions}
                     placeholder={t('bestSellers.filters.anyRating')}
-                    iconLeft="star"
-                    size="medium"
+                    size="small"
                     fullWidth
                   />
-                </S.FilterSelect>
-                <S.FilterNumber>
+                </S.SelectWrapper>
+                <S.NumberWrapper>
                   <TextInput
                     name="bestSellersMinReviews"
                     value={filterValues.minReviews}
                     onChange={onMinReviewsChange}
                     placeholder={t('bestSellers.filters.minReviews')}
                     ariaLabel={t('bestSellers.filters.minReviews')}
-                    iconLeft="message-circle"
                     type="number"
-                    size="medium"
+                    size="small"
                     fullWidth
                   />
-                </S.FilterNumber>
-                <S.FilterPriceRange>
+                </S.NumberWrapper>
+                <S.PriceRange>
                   <TextInput
                     name="bestSellersPriceMin"
                     value={filterValues.priceMin}
                     onChange={onPriceMinChange}
                     placeholder={t('bestSellers.filters.priceMin')}
                     ariaLabel={t('bestSellers.filters.priceMin')}
-                    iconLeft="circle-dollar-sign"
                     type="number"
-                    size="medium"
+                    size="small"
                     fullWidth
                   />
                   <S.RangeSeparator>
@@ -470,94 +386,99 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                     placeholder={t('bestSellers.filters.priceMax')}
                     ariaLabel={t('bestSellers.filters.priceMax')}
                     type="number"
-                    size="medium"
+                    size="small"
                     fullWidth
                   />
-                </S.FilterPriceRange>
-                {hasActiveFilters && (
-                  <Button variant="text" size="small" onClick={onClearFilters}>
-                    <Text variant="body-sm" weight="semibold">
-                      {t('bestSellers.filters.clear')}
-                    </Text>
-                  </Button>
-                )}
-
-                <S.FilterSpacer />
-
-                <Checkbox
-                  checked={isAllOnPageSelected}
-                  onChange={onToggleSelectAllOnPage}
-                  disabled={!hasSelectableItems}
-                  label={t('bestSellers.selectAllOnPage')}
-                />
+                </S.PriceRange>
+                <S.FilterActions>
+                  {hasActiveFilters && (
+                    <Button variant="text" size="small" onClick={onClearFilters}>
+                      <Text variant="body-sm">{t('listings:listings.filters.clearAll')}</Text>
+                    </Button>
+                  )}
+                </S.FilterActions>
               </S.FilterRow>
 
-              <S.MetaRow>
-                {filterResultLabel && (
-                  <Text variant="caption" weight="semibold" color="text.primary" numeric>
-                    {filterResultLabel}
-                  </Text>
-                )}
-                {selectedCount > 0 && (
-                  <Text variant="caption" weight="semibold" color="brand.primary" numeric>
-                    {t('bestSellers.selected', { count: selectedCount })}
-                  </Text>
-                )}
-                {allowanceLabel && (
-                  <Text variant="caption" color="text.secondary" numeric>
-                    {allowanceLabel}
-                  </Text>
-                )}
-                <Text variant="caption" color="text.tertiary">
-                  {t('bestSellers.allowanceHint')}
-                </Text>
-              </S.MetaRow>
-            </S.Toolbar>
+              <DataTable<BestSellersItemView>
+                columns={columns}
+                data={items}
+                renderGridCard={renderGridCard}
+                gridMinItemWidth={GRID_MIN_ITEM_WIDTH}
+                gridMaxColumns={GRID_MAX_COLUMNS}
+                defaultViewMode="grid"
+                hideViewToggle={!isReady}
+                selectable
+                selectedRows={selectedRows}
+                onSelectionChange={onSelectionChange}
+                isRowSelectable={isRowSelectable}
+                bulkActions={isReady ? bulkActions : undefined}
+                bulkActionsPlaceholder={t('listings:listings.actions.bulkActions')}
+                columnOptions={isReady ? columnOptions : undefined}
+                visibleColumnKeys={visibleColumnKeys}
+                onToggleColumn={onToggleColumn}
+                onMoveColumn={onMoveColumn}
+                columnManagerLabel={t('listings:listings.table.columns')}
+                sortOptions={isReady ? sortOptions : undefined}
+                sortValue={sortValue}
+                onSortChange={onSortChange}
+                sortLabel={t('listings:listings.filters.sortLabel')}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={onSort}
+                resultLabel={
+                  isReady ? (
+                    <S.ResultLabel>
+                      <Trans
+                        i18nKey="listings.filters.resultListed"
+                        ns="listings"
+                        values={{ count: resultCount }}
+                        components={{ b: <Text variant="body-sm" weight="bold" color="text.primary">{null}</Text> }}
+                      />
+                      {selectedCount > 0 && (
+                        <Text variant="body-sm" weight="semibold" color="brand.primary" numeric>
+                          · {t('bestSellers.selected', { count: selectedCount })}
+                        </Text>
+                      )}
+                    </S.ResultLabel>
+                  ) : undefined
+                }
+                emptyContent={renderState()}
+                loading={viewState === BestSellersViewState.LOADING}
+                skeletonCount={SKELETON_CARD_COUNT}
+                pagination={isReady ? pagination : undefined}
+                onRowClick={(row) => onToggleRow(row)}
+              />
 
-            <DataTable<BestSellersItemView>
-              columns={columns}
-              data={items}
-              renderGridCard={renderGridCard}
-              gridMinItemWidth={GRID_MIN_ITEM_WIDTH}
-              gridMaxColumns={GRID_MAX_COLUMNS}
-              defaultViewMode="grid"
-              selectable
-              selectedRows={selectedRows}
-              onSelectionChange={onSelectionChange}
-              isRowSelectable={isRowSelectable}
-              emptyContent={renderState()}
-              loading={viewState === BestSellersViewState.LOADING}
-              skeletonCount={SKELETON_CARD_COUNT}
-              pagination={isReady ? pagination : undefined}
+              {isReady && lockedCount > 0 && (
+                <S.UpsellCard variant="bordered" padding="lg">
+                  <EmptyState
+                    icon="lock"
+                    title={t('bestSellers.locked.title', { count: lockedCount })}
+                    description={t('bestSellers.locked.description')}
+                    actionIcon="arrow-up-right"
+                    action={t('bestSellers.locked.cta')}
+                    onAction={onUpgrade}
+                  />
+                </S.UpsellCard>
+              )}
+            </S.ContentColumn>
+          </S.PageBody>
+
+          <Drawer
+            isOpen={isCategoryDrawerOpen}
+            onClose={onCloseCategoryDrawer}
+            title={t('bestSellers.categories.drawerTitle')}
+          >
+            <CategoryTree
+              rows={categoryTreeRows}
+              searchValue={categorySearchValue}
+              onSearchChange={onCategorySearchChange}
+              onSelect={onCategorySelect}
+              onToggleExpand={onToggleCategoryExpand}
+              hasDepartments={hasDepartments}
             />
-
-            {isReady && lockedCount > 0 && (
-              <S.UpsellCard variant="bordered" padding="lg">
-                <EmptyState
-                  icon="lock"
-                  title={t('bestSellers.locked.title', { count: lockedCount })}
-                  description={t('bestSellers.locked.description')}
-                  actionIcon="arrow-up-right"
-                  action={t('bestSellers.locked.cta')}
-                  onAction={onUpgrade}
-                />
-              </S.UpsellCard>
-            )}
-          </S.ContentColumn>
-        </S.PageBody>
-      )}
-
-      {!isDisabled && (
-        <Drawer isOpen={isCategoryDrawerOpen} onClose={onCloseCategoryDrawer} title={t('bestSellers.categories.drawerTitle')}>
-          <CategoryTree
-            rows={categoryTreeRows}
-            searchValue={categorySearchValue}
-            onSearchChange={onCategorySearchChange}
-            onSelect={onCategorySelect}
-            onToggleExpand={onToggleCategoryExpand}
-            hasDepartments={hasDepartments}
-          />
-        </Drawer>
+          </Drawer>
+        </>
       )}
     </S.Container>
   );

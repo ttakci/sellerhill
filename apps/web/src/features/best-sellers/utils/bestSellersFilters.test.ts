@@ -56,6 +56,14 @@ describe('matchesBestSellersFilters', () => {
     expect(matchesBestSellersFilters(item(), criteria({ priceMax: '15' }))).toBe(false);
   });
 
+  it('matches the search text against title and ASIN, case-insensitively', () => {
+    expect(matchesBestSellersFilters(item({ title: 'Steel Water Bottle' }), criteria({ search: ' water ' }))).toBe(true);
+    expect(matchesBestSellersFilters(item(), criteria({ search: 'b0test' }))).toBe(true);
+    expect(matchesBestSellersFilters(item(), criteria({ search: 'lamp' }))).toBe(false);
+    expect(matchesBestSellersFilters(item({ title: null }), criteria({ search: 'sample' }))).toBe(false);
+    expect(hasActiveBestSellersFilters(criteria({ search: '   ' }))).toBe(false);
+  });
+
   it('fails a product whose field is unknown', () => {
     expect(matchesBestSellersFilters(item({ rating: null }), criteria({ minRating: '3' }))).toBe(false);
     expect(matchesBestSellersFilters(item({ price: null }), criteria({ priceMax: '100' }))).toBe(false);

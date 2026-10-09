@@ -13,6 +13,7 @@ import type { BestSellersFilterCriteria, BestSellersFilterValues } from '../best
 export const BEST_SELLERS_RATING_OPTIONS: readonly string[] = ['', '3', '3.5', '4', '4.5'];
 
 export const EMPTY_BEST_SELLERS_FILTERS: BestSellersFilterValues = {
+  search: '',
   minRating: '',
   minReviews: '',
   priceMin: '',
@@ -30,7 +31,9 @@ export function parseFilterNumber(raw: string): number | null {
 }
 
 export function toBestSellersFilterCriteria(values: BestSellersFilterValues): BestSellersFilterCriteria {
+  const search = values.search.trim().toLowerCase();
   return {
+    search: search === '' ? null : search,
     minRating: parseFilterNumber(values.minRating),
     minReviews: parseFilterNumber(values.minReviews),
     priceMin: parseFilterNumber(values.priceMin),
@@ -40,6 +43,7 @@ export function toBestSellersFilterCriteria(values: BestSellersFilterValues): Be
 
 export function hasActiveBestSellersFilters(criteria: BestSellersFilterCriteria): boolean {
   return (
+    criteria.search !== null ||
     criteria.minRating !== null ||
     criteria.minReviews !== null ||
     criteria.priceMin !== null ||
@@ -56,6 +60,14 @@ export function matchesBestSellersFilters(item: BestSellersItemDto, criteria: Be
   const average = item.rating?.average ?? null;
   const reviews = item.rating?.count ?? null;
   const price = item.price?.amount ?? null;
+
+  if (
+    criteria.search !== null &&
+    !(item.title ?? '').toLowerCase().includes(criteria.search) &&
+    !item.asin.toLowerCase().includes(criteria.search)
+  ) {
+    return false;
+  }
 
   if (criteria.minRating !== null && (average === null || average < criteria.minRating)) {
     return false;

@@ -12,23 +12,35 @@ export const Container = PageContainer;
  */
 const LOCKED_BLUR = '0.3rem';
 
-/** Header actions — "List selected (N)" + Clear — wrap under the title on a phone. */
-export const HeaderActions = styled.div`
+/*
+ * Same column as the Orders / Listings pages: title → tab rail → controls →
+ * rows, all on the page canvas. The rail holds the five Amazon lists; the
+ * allowance meter sits at its far end, where Orders keeps its stage legend.
+ */
+export const TabsRow = styled.div`
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+/** "13,760 of 15,000 products left" + the info glyph explaining how it is counted. */
+export const Allowance = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
 `;
 
 /**
- * Sidebar (category tree) + content column. The sidebar is a real column
- * above `lg`, matching how the app's own shell collapses its sidebar at the
- * same breakpoint; below it, `SidebarPanel` hides and `MobileCategoryTrigger`
- * (a Drawer opener) takes over — see `MobileCategoryTrigger`.
+ * Category tree + content. The tree is a real column from `lg`; below it the
+ * sidebar hides and the filter row's category button opens it in a Drawer.
  */
 export const PageBody = styled.div`
   display: grid;
-  grid-template-columns: 18rem minmax(0, 1fr);
+  grid-template-columns: 17rem minmax(0, 1fr);
   align-items: start;
   gap: ${tkn('spacing.lg')};
 
@@ -59,12 +71,34 @@ export const SidebarHeader = styled.div`
   color: ${tkn('colors.text.secondary')};
 `;
 
+export const ContentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
+/** The Orders filter row: compact controls of one height, "clear all" pushed right. */
+export const FilterRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+  min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
 /** Opens the category Drawer below `lg`; the persistent sidebar takes over above it. */
 export const MobileCategoryTrigger = styled.div`
   display: none;
 
   @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     display: flex;
+    width: 100%;
 
     & > button {
       width: 100%;
@@ -82,50 +116,23 @@ export const MobileCategoryTriggerLabel = styled.span`
   text-align: left;
 `;
 
-export const ContentColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  min-width: 0;
-`;
-
-/* Same surface as the Listings / Orders / Products filter bars. */
-export const Toolbar = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  box-shadow: ${tkn('shadows.sm')};
-  box-sizing: border-box;
-  min-width: 0;
-
-  @media (max-width: ${tkn('breakpoints.md')}) {
-    padding: ${tkn('spacing.md')};
-  }
-`;
-
-/**
- * Filters on the left, select-all pushed right; wraps on narrow widths. Widths
- * follow the Listings filter bar (Select 12rem) so the two toolbars line up.
- */
-export const FilterRow = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  min-width: 0;
+/* The search takes what the fixed-width controls leave, so the row fits the
+   content column beside the category tree on one line at desktop widths. */
+export const SearchWrapper = styled.div`
+  flex: 1 1 11rem;
+  min-width: 11rem;
+  max-width: 18rem;
 
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
-    flex-direction: column;
-    align-items: stretch;
+    /* The row is a column here, so a flex-basis would become a height. */
+    flex: none;
+    width: 100%;
+    max-width: none;
   }
 `;
 
-export const FilterSelect = styled.div`
-  width: 11rem;
+export const SelectWrapper = styled.div`
+  width: 9rem;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -135,8 +142,8 @@ export const FilterSelect = styled.div`
   }
 `;
 
-export const FilterNumber = styled.div`
-  width: 11rem;
+export const NumberWrapper = styled.div`
+  width: 10.5rem;
   flex-shrink: 0;
 
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
@@ -144,11 +151,11 @@ export const FilterNumber = styled.div`
   }
 `;
 
-export const FilterPriceRange = styled.div`
+export const PriceRange = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-  width: 18rem;
+  width: 15rem;
   flex-shrink: 0;
   min-width: 0;
 
@@ -161,25 +168,49 @@ export const RangeSeparator = styled.span`
   flex-shrink: 0;
 `;
 
-export const FilterSpacer = styled.div`
-  flex: 1 1 auto;
+export const FilterActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  margin-left: auto;
+
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    margin-left: 0;
+  }
 `;
 
-/** Allowance meter + its one-line explanation, muted under the filters. */
-export const MetaRow = styled.div`
-  display: flex;
+/** "50 products listed · 3 selected" — the selected count rides beside the result label. */
+export const ResultLabel = styled.span`
+  display: inline-flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: ${tkn('spacing.2xs')} ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xs')};
+`;
+
+/* --- Table cells ------------------------------------------------------------ */
+
+/** Numeric cells stay on one line and stack their digits down the column. */
+export const CompactMetric = styled.div`
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+`;
+
+/** Filled star beside the average, flush right with the other figures. */
+export const RatingValue = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${tkn('spacing.2xs')};
+  white-space: nowrap;
 `;
 
 /* --- Locked placeholders ---------------------------------------------------- */
 
 /**
- * A product the allowance did not cover. Same footprint as the listings card so
- * the grid keeps its rhythm, but it is not a tap surface: no hover lift, no
- * pointer, no selection outline. The blurred body underneath is skeleton bars
- * only; the lock badge sits on top, unblurred, so the state is legible.
+ * A product the allowance did not cover, drawn in the listings card's own
+ * anatomy — title row, 9rem image beside the facts, figures row — so the grid
+ * keeps one rhythm. It is not a tap surface. The blurred body underneath is
+ * skeleton bars only; the lock disc sits on top, unblurred.
  */
 export const LockedCard = styled(Card)`
   position: relative;
@@ -192,13 +223,18 @@ export const LockedCard = styled(Card)`
   overflow: hidden;
 `;
 
-/** Same geometry as the horizontal ListingCard: 10.5rem image slot beside the content. */
 export const LockedCardBody = styled.div`
   display: flex;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.lg')};
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.md+')};
   filter: blur(${LOCKED_BLUR});
   pointer-events: none;
+`;
+
+export const LockedCardRow = styled.div`
+  display: flex;
+  gap: ${tkn('spacing.md')};
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
     flex-direction: column;
@@ -206,9 +242,14 @@ export const LockedCardBody = styled.div`
 `;
 
 export const LockedImageSlot = styled.div`
-  width: 10.5rem;
-  height: 10.5rem;
+  width: 9rem;
+  height: 9rem;
   flex-shrink: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 100%;
+    height: 10rem;
+  }
 `;
 
 export const LockedCardLines = styled.div`
@@ -259,12 +300,11 @@ export const LockedLines = styled.div`
   pointer-events: none;
 `;
 
-/** Any other table cell of a locked row — one blurred bar, aligned like its column. */
-export const LockedCell = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
+/** Any other table cell of a locked row — one blurred bar, flush right with its figure column. */
+export const LockedCell = styled.div`
   display: flex;
   align-items: center;
-  justify-content: ${({ $align }) =>
-    $align === 'right' ? 'flex-end' : $align === 'center' ? 'center' : 'flex-start'};
+  justify-content: flex-end;
   filter: blur(${LOCKED_BLUR});
   pointer-events: none;
   user-select: none;
@@ -277,7 +317,7 @@ export const UpsellCard = styled(Card)`
   justify-content: center;
 `;
 
-/** Every non-grid state (disabled feature, first load, refusals) shares one surface. */
+/** The switched-off feature gets one surface of its own. */
 export const StateCard = styled(Card)`
   display: flex;
   align-items: center;

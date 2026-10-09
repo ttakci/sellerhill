@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "热销榜",
-    "title": "Amazon 热销榜",
+    "menu": "商品搜索",
+    "title": "商品搜索",
     "subtitle": "浏览 Amazon 的热门榜单，勾选想要的商品，一步发送到“添加刊登”。",
     "listTypes": {
       "best_sellers": "热销榜",
@@ -26,11 +26,8 @@
     "selectAllOnPage": "全选本页",
     "selected_other": "已选 {{count}} 件商品",
     "listSelected": "刊登所选 ({{count}})",
-    "clearSelection": "清除",
+    "clearSelectionAll": "清除选择",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "暂无评分",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "本周期还剩 {{remaining}}/{{limit}} 件商品可查看",
     "allowanceUnlimited": "不限商品查看数量",
@@ -50,13 +47,12 @@
       "rankChange": "排名变化（24 小时）"
     },
     "filters": {
+      "searchPlaceholder": "搜索标题或 ASIN",
       "anyRating": "所有评分",
       "ratingAtLeast": "{{value}} 星及以上",
       "minReviews": "最少评论数",
       "priceMin": "最低价格",
-      "priceMax": "最高价格",
-      "clear": "清除筛选",
-      "resultCount": "本页 {{total}} 件商品中的 {{shown}} 件"
+      "priceMax": "最高价格"
     },
     "states": {
       "loading": {

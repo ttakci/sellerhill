@@ -15,18 +15,30 @@ import {
   BestSellersListType,
   SourceFetchOutcome, type BestSellersBrowseAllowanceDto, type BestSellersQueryDto,
 } from '@repo/shared';
-import { formatCurrency, getLocaleConfig, type SelectOption, type TabNavItem } from '@repo/ui';
+import { formatCurrency, getLocaleConfig, type BulkAction, type SelectOption, type TabNavItem } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetBestSellersQuery } from '../api/bestSellersApi';
-import { BestSellersViewState, type BestSellersRefusalBody } from '../bestSellers.types';
+import {
+  BestSellersSortKey,
+  BestSellersViewState,
+  type BestSellersRefusalBody,
+  type BestSellersSort,
+} from '../bestSellers.types';
 import { useBestSellersCategoryTree } from '../hooks/useBestSellersCategoryTree';
+import { useBestSellersColumns } from '../hooks/useBestSellersColumns';
 import { useBestSellersFilters } from '../hooks/useBestSellersFilters';
 import { useBestSellersSelection } from '../hooks/useBestSellersSelection';
 import { useBestSellersUrlState } from '../hooks/useBestSellersUrlState';
 import { flattenCategoryTree } from '../utils/bestSellersCategoryTree';
 import { BEST_SELLERS_RATING_OPTIONS, matchesBestSellersFilters } from '../utils/bestSellersFilters';
+import {
+  DEFAULT_BEST_SELLERS_SORT,
+  formatBestSellersSort,
+  parseBestSellersSort,
+  sortBestSellersItems,
+} from '../utils/bestSellersSort';
 
 import { BestSellersPage as BestSellersPageComponent } from './BestSellersPage.component';
 import type { BestSellersItemView, BestSellersPagination } from './BestSellersPage.types';
@@ -126,18 +138,26 @@ export const BestSellersPageContainer: React.FC = () => {
     [pageItems, filters.isActive, filters.criteria],
   );
 
+  /*
+   * Sorting, like filtering, reorders the page already in the browser - no new
+   * fetch, so nothing more is taken from the allowance. Only Movers & Shakers
+   * prints a rank change; on any other list that sort falls back to Amazon's
+   * own order rather than sorting 50 nulls.
+   */
+  const isMoversList = listType === BestSellersListType.MOVERS_AND_SHAKERS;
+  const [requestedSort, setRequestedSort] = useState<BestSellersSort>(DEFAULT_BEST_SELLERS_SORT);
+  const sort =
+    requestedSort.key === BestSellersSortKey.RANK_CHANGE && !isMoversList ? DEFAULT_BEST_SELLERS_SORT : requestedSort;
+  const sortedItems = useMemo(
+    () => sortBestSellersItems(filteredItems, sort.key, sort.direction),
+    [filteredItems, sort.key, sort.direction],
+  );
+
   const items = useMemo<BestSellersItemView[]>(
     () =>
-      filteredItems.map((item) => {
+      sortedItems.map((item) => {
         const average = item.rating?.average ?? null;
         const reviewCount = item.rating?.count ?? null;
-        const reviewsLabel = reviewCount === null ? null : countFormat.format(reviewCount);
-        const ratingLabel =
-          average === null
-            ? null
-            : reviewsLabel === null
-              ? t('bestSellers.rating', { average: ratingFormat.format(average) })
-              : t('bestSellers.ratingWithReviews', { average: ratingFormat.format(average), reviews: reviewsLabel });
         return {
           asin: item.asin,
           rank: item.rank,
@@ -147,9 +167,8 @@ export const BestSellersPageContainer: React.FC = () => {
           priceLabel: item.price
             ? formatCurrency(item.price.amount, localeCfg.locale, item.price.currency, PRICE_FRACTION_DIGITS)
             : item.priceText,
-          ratingLabel,
           ratingValueLabel: average === null ? null : ratingFormat.format(average),
-          reviewsLabel,
+          reviewsLabel: reviewCount === null ? null : countFormat.format(reviewCount),
           rankChangeLabel:
             item.rankChangePercent === null
               ? null
@@ -161,7 +180,7 @@ export const BestSellersPageContainer: React.FC = () => {
           isLocked: false,
         };
       }),
-    [filteredItems, countFormat, ratingFormat, localeCfg, selection, t],
+    [sortedItems, countFormat, ratingFormat, localeCfg, selection, t],
   );
 
   /*
@@ -183,7 +202,6 @@ export const BestSellersPageContainer: React.FC = () => {
       title: '',
       imageUrl: null,
       priceLabel: null,
-      ratingLabel: null,
       ratingValueLabel: null,
       reviewsLabel: null,
       rankChangeLabel: null,
@@ -195,7 +213,6 @@ export const BestSellersPageContainer: React.FC = () => {
 
   const pageAsins = useMemo(() => items.map((item) => item.asin), [items]);
   const selectedRows = useMemo(() => items.filter((item) => item.isSelected), [items]);
-  const isAllOnPageSelected = items.length > 0 && selectedRows.length === items.length;
 
   const viewState = useMemo<BestSellersViewState>(() => {
     if (refusal) {
@@ -273,18 +290,10 @@ export const BestSellersPageContainer: React.FC = () => {
     [ratingFormat, t],
   );
 
-  /** "12 of 50 products on this page" — only while a filter is narrowing the page. */
-  const filterResultLabel = useMemo<string | null>(
-    () =>
-      filters.isActive && pageItems.length > 0
-        ? t('bestSellers.filters.resultCount', {
-            shown: countFormat.format(filteredItems.length),
-            total: countFormat.format(pageItems.length),
-          })
-        : null,
-    [filters.isActive, pageItems.length, filteredItems.length, countFormat, t],
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => filters.setSearch(event.target.value),
+    [filters],
   );
-
   const handleMinRatingChange = useCallback(
     (value: string | number) => filters.setMinRating(String(value)),
     [filters],
@@ -410,15 +419,13 @@ export const BestSellersPageContainer: React.FC = () => {
     setCategory(BEST_SELLERS_ROOT_CATEGORY);
   }, [setCategory]);
 
-  const handleToggleSelectAllOnPage = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        selection.selectMany(pageAsins);
-      } else {
-        selection.deselectMany(pageAsins);
+  const handleToggleRow = useCallback(
+    (row: BestSellersItemView) => {
+      if (!row.isLocked) {
+        selection.toggle(row.asin);
       }
     },
-    [selection, pageAsins],
+    [selection],
   );
 
   // The table hands back whatever rows it holds; a locked placeholder can
@@ -439,6 +446,109 @@ export const BestSellersPageContainer: React.FC = () => {
     }
     localeNavigate(buildAddListingsPath([...selection.selectedAsins]));
   }, [selection.count, selection.selectedAsins, localeNavigate]);
+
+  /*
+   * The Listings page's bulk menu, carrying this page's actions. The selection
+   * outlives the page (products ticked on other lists and pages go along), so
+   * "List selected" sends the whole selection, not just the rows the table
+   * hands back.
+   */
+  const bulkActions = useMemo<BulkAction<BestSellersItemView>[]>(
+    () => [
+      ...(selection.count > 0
+        ? [
+            { label: t('bestSellers.listSelected', { count: selection.count }), onClick: handleListSelected },
+            { label: t('bestSellers.clearSelectionAll'), onClick: selection.clear },
+          ]
+        : []),
+      { label: t('bestSellers.selectAllOnPage'), onClick: () => selection.selectMany(pageAsins) },
+    ],
+    [selection, pageAsins, handleListSelected, t],
+  );
+
+  /* --- Columns: same visibility + ordering model as the Listings table --- */
+  const { allColumns, columnOptions } = useBestSellersColumns(isMoversList);
+  const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const orderedKeys = useMemo(() => {
+    const all = allColumns.map((col) => col.key || '');
+    return [...columnOrder.filter((k) => all.includes(k)), ...all.filter((k) => !columnOrder.includes(k))];
+  }, [allColumns, columnOrder]);
+  const visibleColumnKeys = useMemo(
+    () => orderedKeys.filter((key) => !hiddenColumnKeys.includes(key)),
+    [orderedKeys, hiddenColumnKeys],
+  );
+  const orderedColumnOptions = useMemo(
+    () =>
+      orderedKeys
+        .map((key) => columnOptions.find((opt) => opt.key === key))
+        .filter((opt): opt is (typeof columnOptions)[number] => Boolean(opt)),
+    [orderedKeys, columnOptions],
+  );
+  const visibleColumns = useMemo(
+    () =>
+      visibleColumnKeys
+        .map((key) => allColumns.find((col) => col.key === key))
+        .filter((col): col is (typeof allColumns)[number] => Boolean(col)),
+    [allColumns, visibleColumnKeys],
+  );
+  const handleToggleColumn = useCallback((key: string) => {
+    setHiddenColumnKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  }, []);
+  const handleMoveColumn = useCallback(
+    (key: string, direction: -1 | 1) => {
+      const index = orderedKeys.indexOf(key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= orderedKeys.length) {
+        return;
+      }
+      const next = [...orderedKeys];
+      [next[index], next[target]] = [next[target], next[index]];
+      setColumnOrder(next);
+    },
+    [orderedKeys],
+  );
+
+  /* --- Sort picker + sortable headers, the Listings / Orders pair --- */
+  const sortOptions = useMemo<{ value: string; label: string }[]>(
+    () =>
+      columnOptions
+        .filter((opt) => opt.key !== 'product')
+        .flatMap((opt) =>
+          opt.key === String(BestSellersSortKey.RANK)
+            ? [
+                { value: `${opt.key}:asc`, label: `${opt.label} ↑` },
+                { value: `${opt.key}:desc`, label: `${opt.label} ↓` },
+              ]
+            : [
+                { value: `${opt.key}:desc`, label: `${opt.label} ↓` },
+                { value: `${opt.key}:asc`, label: `${opt.label} ↑` },
+              ],
+        ),
+    [columnOptions],
+  );
+  const handleSortChange = useCallback((value: string | number) => {
+    const parsed = parseBestSellersSort(String(value));
+    if (parsed) {
+      setRequestedSort(parsed);
+    }
+  }, []);
+  // A header click flips the direction on the current column; a new column
+  // opens on its most useful end (rank: best first, figures: highest first).
+  const handleSort = useCallback(
+    (columnKey: string) => {
+      const parsed = parseBestSellersSort(`${columnKey}:asc`);
+      if (!parsed) {
+        return;
+      }
+      if (parsed.key === sort.key) {
+        setRequestedSort({ key: sort.key, direction: sort.direction === 'asc' ? 'desc' : 'asc' });
+      } else {
+        setRequestedSort({ key: parsed.key, direction: parsed.key === BestSellersSortKey.RANK ? 'asc' : 'desc' });
+      }
+    },
+    [sort.key, sort.direction],
+  );
 
   const handleUpgrade = useCallback(() => {
     localeNavigate(BILLING_PATH);
@@ -471,10 +581,24 @@ export const BestSellersPageContainer: React.FC = () => {
       <BestSellersPageComponent
         viewState={viewState}
         items={rows}
+        columns={visibleColumns}
+        columnOptions={orderedColumnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={handleToggleColumn}
+        onMoveColumn={handleMoveColumn}
+        sortOptions={sortOptions}
+        sortValue={formatBestSellersSort(sort)}
+        onSortChange={handleSortChange}
+        sortColumn={sort.key}
+        sortDirection={sort.direction}
+        onSort={handleSort}
+        resultCount={items.length}
         selectedRows={selectedRows}
         onSelectionChange={handleSelectionChange}
         isRowSelectable={isUnlocked}
-        hasSelectableItems={items.length > 0}
+        selectedCount={selection.count}
+        bulkActions={bulkActions}
+        onToggleRow={handleToggleRow}
         lockedCount={lockedCount}
         onUpgrade={handleUpgrade}
         listTypeOptions={listTypeOptions}
@@ -493,20 +617,14 @@ export const BestSellersPageContainer: React.FC = () => {
         isSubCategory={category !== BEST_SELLERS_ROOT_CATEGORY}
         ratingOptions={ratingOptions}
         filterValues={filters.values}
+        onSearchChange={handleSearchChange}
         onMinRatingChange={handleMinRatingChange}
         onMinReviewsChange={handleMinReviewsChange}
         onPriceMinChange={handlePriceMinChange}
         onPriceMaxChange={handlePriceMaxChange}
         hasActiveFilters={filters.isActive}
         onClearFilters={filters.clear}
-        filterResultLabel={filterResultLabel}
         onBackToAllCategories={handleBackToAllCategories}
-        selectedCount={selection.count}
-        isAllOnPageSelected={isAllOnPageSelected}
-        onToggleSelectAllOnPage={handleToggleSelectAllOnPage}
-        onToggleItem={selection.toggle}
-        onListSelected={handleListSelected}
-        onClearSelection={selection.clear}
         onRetry={handleRetry}
         allowanceLabel={allowanceLabel}
         pagination={pagination}

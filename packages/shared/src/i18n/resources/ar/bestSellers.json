@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "الأكثر مبيعًا",
-    "title": "الأكثر مبيعًا في Amazon",
+    "menu": "البحث عن المنتجات",
+    "title": "البحث عن المنتجات",
     "subtitle": "تصفّح قوائم Amazon الأعلى، حدّد المنتجات التي تريدها وأرسلها إلى إضافة القوائم في خطوة واحدة.",
     "listTypes": {
       "best_sellers": "الأكثر مبيعًا",
@@ -31,11 +31,8 @@
     "selected_many": "تم تحديد {{count}} منتجًا",
     "selected_other": "تم تحديد {{count}} منتج",
     "listSelected": "إدراج المحدد ({{count}})",
-    "clearSelection": "مسح",
+    "clearSelectionAll": "مسح التحديد",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "لا يوجد تقييم بعد",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "بقي {{remaining}} من {{limit}} منتجًا في هذه الفترة",
     "allowanceUnlimited": "عرض غير محدود للمنتجات",
@@ -60,13 +57,12 @@
       "rankChange": "تغيّر الترتيب (24 ساعة)"
     },
     "filters": {
+      "searchPlaceholder": "ابحث بالعنوان أو ASIN",
       "anyRating": "أي تقييم",
       "ratingAtLeast": "{{value}}+ نجوم",
       "minReviews": "الحد الأدنى للمراجعات",
       "priceMin": "أدنى سعر",
-      "priceMax": "أعلى سعر",
-      "clear": "مسح عوامل التصفية",
-      "resultCount": "{{shown}} من {{total}} منتجًا في هذه الصفحة"
+      "priceMax": "أعلى سعر"
     },
     "states": {
       "loading": {

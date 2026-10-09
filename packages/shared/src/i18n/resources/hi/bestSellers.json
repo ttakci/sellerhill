@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "बेस्ट सेलर",
-    "title": "Amazon बेस्ट सेलर",
+    "menu": "उत्पाद खोज",
+    "title": "उत्पाद खोज",
     "subtitle": "Amazon की शीर्ष सूचियाँ देखें, चाहे गए उत्पादों को चुनें और उन्हें एक ही चरण में लिस्टिंग जोड़ें पर भेजें।",
     "listTypes": {
       "best_sellers": "बेस्ट सेलर",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} उत्पाद चुना गया",
     "selected_other": "{{count}} उत्पाद चुने गए",
     "listSelected": "चुने गए को सूचीबद्ध करें ({{count}})",
-    "clearSelection": "साफ़ करें",
+    "clearSelectionAll": "चयन साफ़ करें",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "अभी कोई रेटिंग नहीं",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "इस अवधि में {{limit}} में से {{remaining}} उत्पाद बाकी हैं",
     "allowanceUnlimited": "असीमित उत्पाद देखना",
@@ -52,13 +49,12 @@
       "rankChange": "रैंक बदलाव (24 घंटे)"
     },
     "filters": {
+      "searchPlaceholder": "शीर्षक या ASIN खोजें",
       "anyRating": "कोई भी रेटिंग",
       "ratingAtLeast": "{{value}}+ स्टार",
       "minReviews": "न्यूनतम समीक्षाएँ",
       "priceMin": "न्यूनतम कीमत",
-      "priceMax": "अधिकतम कीमत",
-      "clear": "फ़िल्टर हटाएँ",
-      "resultCount": "इस पेज पर {{total}} में से {{shown}} उत्पाद"
+      "priceMax": "अधिकतम कीमत"
     },
     "states": {
       "loading": {

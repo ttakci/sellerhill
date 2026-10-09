@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Бестселери",
-    "title": "Бестселери Amazon",
+    "menu": "Пошук товарів",
+    "title": "Пошук товарів",
     "subtitle": "Переглядайте топ-списки Amazon, позначайте потрібні товари та надсилайте їх у «Додати оголошення» одним кроком.",
     "listTypes": {
       "best_sellers": "Бестселери",
@@ -29,11 +29,8 @@
     "selected_many": "Вибрано {{count}} товарів",
     "selected_other": "Вибрано {{count}} товару",
     "listSelected": "Виставити вибрані ({{count}})",
-    "clearSelection": "Очистити",
+    "clearSelectionAll": "Зняти виділення",
     "rank": "№{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Поки без оцінки",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Залишилося {{remaining}} із {{limit}} товарів у цьому періоді",
     "allowanceUnlimited": "Необмежений перегляд товарів",
@@ -56,13 +53,12 @@
       "rankChange": "Зміна місця (24 год)"
     },
     "filters": {
+      "searchPlaceholder": "Пошук за назвою або ASIN",
       "anyRating": "Будь-яка оцінка",
       "ratingAtLeast": "Від {{value}} зірок",
       "minReviews": "Мін. відгуків",
       "priceMin": "Мін. ціна",
-      "priceMax": "Макс. ціна",
-      "clear": "Скинути фільтри",
-      "resultCount": "{{shown}} з {{total}} товарів на цій сторінці"
+      "priceMax": "Макс. ціна"
     },
     "states": {
       "loading": {

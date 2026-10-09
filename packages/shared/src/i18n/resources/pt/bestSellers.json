@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Mais vendidos",
-    "title": "Mais vendidos na Amazon",
+    "menu": "Busca de produtos",
+    "title": "Busca de produtos",
     "subtitle": "Navegue pelas listas em destaque da Amazon, marque os produtos que quiser e envie-os para Adicionar anúncios em um só passo.",
     "listTypes": {
       "best_sellers": "Mais vendidos",
@@ -28,11 +28,8 @@
     "selected_many": "{{count}} produtos selecionados",
     "selected_other": "{{count}} produtos selecionados",
     "listSelected": "Anunciar selecionados ({{count}})",
-    "clearSelection": "Limpar",
+    "clearSelectionAll": "Limpar seleção",
     "rank": "Nº {{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Ainda sem avaliação",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Restam {{remaining}} de {{limit}} produtos neste período",
     "allowanceUnlimited": "Visualizações de produtos ilimitadas",
@@ -54,13 +51,12 @@
       "rankChange": "Variação de posição (24 h)"
     },
     "filters": {
+      "searchPlaceholder": "Buscar título ou ASIN",
       "anyRating": "Qualquer avaliação",
       "ratingAtLeast": "{{value}}+ estrelas",
       "minReviews": "Avaliações mín.",
       "priceMin": "Preço mín.",
-      "priceMax": "Preço máx.",
-      "clear": "Limpar filtros",
-      "resultCount": "{{shown}} de {{total}} produtos nesta página"
+      "priceMax": "Preço máx."
     },
     "states": {
       "loading": {

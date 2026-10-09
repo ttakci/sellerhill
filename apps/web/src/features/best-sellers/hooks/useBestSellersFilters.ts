@@ -29,6 +29,7 @@ export function useBestSellersFilters(): BestSellersFilters {
     values,
     criteria,
     isActive: hasActiveBestSellersFilters(criteria),
+    setSearch: useMemo(() => setField('search'), [setField]),
     setMinRating: useMemo(() => setField('minRating'), [setField]),
     setMinReviews: useMemo(() => setField('minReviews'), [setField]),
     setPriceMin: useMemo(() => setField('priceMin'), [setField]),

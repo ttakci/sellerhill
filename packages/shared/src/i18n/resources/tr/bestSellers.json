@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Çok Satanlar",
-    "title": "Amazon Çok Satanlar",
+    "menu": "Ürün Arama",
+    "title": "Ürün Arama",
     "subtitle": "Amazon'un öne çıkan listelerine göz atın, istediğiniz ürünleri işaretleyin ve tek adımda Liste Ekle'ye gönderin.",
     "listTypes": {
       "best_sellers": "Çok Satanlar",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} ürün seçildi",
     "selected_other": "{{count}} ürün seçildi",
     "listSelected": "Seçilenleri listele ({{count}})",
-    "clearSelection": "Temizle",
+    "clearSelectionAll": "Seçimi temizle",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Henüz puan yok",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Bu dönem {{limit}} üründen {{remaining}} tanesi kaldı",
     "allowanceUnlimited": "Sınırsız ürün görüntüleme",
@@ -52,13 +49,12 @@
       "rankChange": "Sıra değişimi (24 sa)"
     },
     "filters": {
+      "searchPlaceholder": "Başlık veya ASIN ara",
       "anyRating": "Tüm puanlar",
       "ratingAtLeast": "{{value}}+ yıldız",
-      "minReviews": "En az değerlendirme",
-      "priceMin": "En düşük fiyat",
-      "priceMax": "En yüksek fiyat",
-      "clear": "Filtreleri temizle",
-      "resultCount": "Bu sayfadaki {{total}} üründen {{shown}} tanesi"
+      "minReviews": "Min. değerlendirme",
+      "priceMin": "Min. fiyat",
+      "priceMax": "Maks. fiyat"
     },
     "states": {
       "loading": {

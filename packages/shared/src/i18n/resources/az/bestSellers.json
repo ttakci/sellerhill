@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Ən Çox Satılanlar",
-    "title": "Amazon Ən Çox Satılanlar",
+    "menu": "Məhsul axtarışı",
+    "title": "Məhsul axtarışı",
     "subtitle": "Amazon-un ən yaxşı siyahılarına baxın, istədiyiniz məhsulları işarələyin və onları bir addımda Elan Əlavə Et bölməsinə göndərin.",
     "listTypes": {
       "best_sellers": "Ən Çox Satılanlar",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} məhsul seçildi",
     "selected_other": "{{count}} məhsul seçildi",
     "listSelected": "Seçilənləri elan et ({{count}})",
-    "clearSelection": "Təmizlə",
+    "clearSelectionAll": "Seçimi təmizlə",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Hələ reytinq yoxdur",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Bu dövrdə {{limit}} məhsuldan {{remaining}} qalıb",
     "allowanceUnlimited": "Limitsiz məhsul görüntüləmə",
@@ -52,13 +49,12 @@
       "rankChange": "Sıra dəyişikliyi (24 saat)"
     },
     "filters": {
+      "searchPlaceholder": "Başlıq və ya ASIN axtar",
       "anyRating": "Bütün reytinqlər",
       "ratingAtLeast": "{{value}}+ ulduz",
       "minReviews": "Minimum rəy",
       "priceMin": "Minimum qiymət",
-      "priceMax": "Maksimum qiymət",
-      "clear": "Filtrləri təmizlə",
-      "resultCount": "Bu səhifədəki {{total}} məhsuldan {{shown}}"
+      "priceMax": "Maksimum qiymət"
     },
     "states": {
       "loading": {

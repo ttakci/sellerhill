@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Cele mai vândute",
-    "title": "Cele mai vândute pe Amazon",
+    "menu": "Căutare produse",
+    "title": "Căutare produse",
     "subtitle": "Răsfoiți topurile Amazon, bifați produsele dorite și trimiteți-le către Adăugare anunțuri într-un singur pas.",
     "listTypes": {
       "best_sellers": "Cele mai vândute",
@@ -28,11 +28,8 @@
     "selected_few": "{{count}} produse selectate",
     "selected_other": "{{count}} de produse selectate",
     "listSelected": "Listați selecția ({{count}})",
-    "clearSelection": "Golire",
+    "clearSelectionAll": "Ștergeți selecția",
     "rank": "Nr. {{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Fără evaluare încă",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Mai aveți {{remaining}} din {{limit}} produse în această perioadă",
     "allowanceUnlimited": "Vizualizări de produse nelimitate",
@@ -54,13 +51,12 @@
       "rankChange": "Schimbare poziție (24 h)"
     },
     "filters": {
+      "searchPlaceholder": "Căutați titlu sau ASIN",
       "anyRating": "Orice evaluare",
       "ratingAtLeast": "{{value}}+ stele",
       "minReviews": "Recenzii min.",
       "priceMin": "Preț min.",
-      "priceMax": "Preț max.",
-      "clear": "Șterge filtrele",
-      "resultCount": "{{shown}} din {{total}} produse pe această pagină"
+      "priceMax": "Preț max."
     },
     "states": {
       "loading": {

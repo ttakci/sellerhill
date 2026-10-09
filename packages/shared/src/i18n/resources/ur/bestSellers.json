@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "بیسٹ سیلرز",
-    "title": "Amazon بیسٹ سیلرز",
+    "menu": "مصنوعات کی تلاش",
+    "title": "مصنوعات کی تلاش",
     "subtitle": "Amazon کی نمایاں فہرستیں دیکھیں، جو مصنوعات چاہیں منتخب کریں اور انہیں ایک ہی مرحلے میں لسٹنگ شامل کریں پر بھیجیں۔",
     "listTypes": {
       "best_sellers": "بیسٹ سیلرز",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}} مصنوعہ منتخب",
     "selected_other": "{{count}} مصنوعات منتخب",
     "listSelected": "منتخب شدہ لسٹ کریں ({{count}})",
-    "clearSelection": "صاف کریں",
+    "clearSelectionAll": "انتخاب صاف کریں",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "ابھی کوئی ریٹنگ نہیں",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "اس مدت میں {{limit}} میں سے {{remaining}} مصنوعات باقی ہیں",
     "allowanceUnlimited": "لامحدود مصنوعات دیکھیں",
@@ -52,13 +49,12 @@
       "rankChange": "رینک میں تبدیلی (24 گھنٹے)"
     },
     "filters": {
+      "searchPlaceholder": "عنوان یا ASIN تلاش کریں",
       "anyRating": "کوئی بھی ریٹنگ",
       "ratingAtLeast": "{{value}}+ ستارے",
       "minReviews": "کم از کم تبصرے",
       "priceMin": "کم از کم قیمت",
-      "priceMax": "زیادہ سے زیادہ قیمت",
-      "clear": "فلٹر صاف کریں",
-      "resultCount": "اس صفحے پر {{total}} میں سے {{shown}} مصنوعات"
+      "priceMax": "زیادہ سے زیادہ قیمت"
     },
     "states": {
       "loading": {

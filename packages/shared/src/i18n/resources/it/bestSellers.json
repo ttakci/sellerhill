@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Più venduti",
-    "title": "Più venduti su Amazon",
+    "menu": "Ricerca prodotti",
+    "title": "Ricerca prodotti",
     "subtitle": "Sfoglia le classifiche di Amazon, seleziona i prodotti che ti interessano e inviali ad Aggiungi inserzioni in un solo passaggio.",
     "listTypes": {
       "best_sellers": "Più venduti",
@@ -28,11 +28,8 @@
     "selected_many": "{{count}} prodotti selezionati",
     "selected_other": "{{count}} prodotti selezionati",
     "listSelected": "Metti in vendita la selezione ({{count}})",
-    "clearSelection": "Svuota",
+    "clearSelectionAll": "Cancella selezione",
     "rank": "N. {{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Nessuna valutazione",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Ti restano {{remaining}} prodotti su {{limit}} in questo periodo",
     "allowanceUnlimited": "Visualizzazioni prodotto illimitate",
@@ -54,13 +51,12 @@
       "rankChange": "Variazione posizione (24 h)"
     },
     "filters": {
+      "searchPlaceholder": "Cerca titolo o ASIN",
       "anyRating": "Qualsiasi valutazione",
       "ratingAtLeast": "{{value}}+ stelle",
       "minReviews": "Recensioni min.",
       "priceMin": "Prezzo min.",
-      "priceMax": "Prezzo max.",
-      "clear": "Cancella filtri",
-      "resultCount": "{{shown}} di {{total}} prodotti in questa pagina"
+      "priceMax": "Prezzo max."
     },
     "states": {
       "loading": {

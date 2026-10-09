@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "Бестселлеры",
-    "title": "Бестселлеры Amazon",
+    "menu": "Поиск товаров",
+    "title": "Поиск товаров",
     "subtitle": "Просматривайте топ-списки Amazon, отмечайте нужные товары и отправляйте их в «Добавить объявления» одним шагом.",
     "listTypes": {
       "best_sellers": "Бестселлеры",
@@ -29,11 +29,8 @@
     "selected_many": "Выбрано {{count}} товаров",
     "selected_other": "Выбрано {{count}} товара",
     "listSelected": "Выставить выбранные ({{count}})",
-    "clearSelection": "Очистить",
+    "clearSelectionAll": "Снять выделение",
     "rank": "№{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "Пока без оценки",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "Осталось {{remaining}} из {{limit}} товаров в этом периоде",
     "allowanceUnlimited": "Неограниченный просмотр товаров",
@@ -56,13 +53,12 @@
       "rankChange": "Изменение места (24 ч)"
     },
     "filters": {
+      "searchPlaceholder": "Поиск по названию или ASIN",
       "anyRating": "Любая оценка",
       "ratingAtLeast": "От {{value}} звёзд",
       "minReviews": "Мин. отзывов",
       "priceMin": "Мин. цена",
-      "priceMax": "Макс. цена",
-      "clear": "Сбросить фильтры",
-      "resultCount": "{{shown}} из {{total}} товаров на этой странице"
+      "priceMax": "Макс. цена"
     },
     "states": {
       "loading": {

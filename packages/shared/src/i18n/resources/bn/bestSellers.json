@@ -1,7 +1,7 @@
 {
   "bestSellers": {
-    "menu": "বেস্ট সেলার",
-    "title": "Amazon বেস্ট সেলার",
+    "menu": "পণ্য অনুসন্ধান",
+    "title": "পণ্য অনুসন্ধান",
     "subtitle": "Amazon-এর শীর্ষ তালিকাগুলি ব্রাউজ করুন, পছন্দের পণ্যে টিক দিন এবং এক ধাপে লিস্টিং যোগ করায় পাঠান।",
     "listTypes": {
       "best_sellers": "বেস্ট সেলার",
@@ -27,11 +27,8 @@
     "selected_one": "{{count}}টি পণ্য নির্বাচিত",
     "selected_other": "{{count}}টি পণ্য নির্বাচিত",
     "listSelected": "নির্বাচিতগুলি লিস্ট করুন ({{count}})",
-    "clearSelection": "মুছুন",
+    "clearSelectionAll": "নির্বাচন মুছুন",
     "rank": "#{{rank}}",
-    "rating": "★ {{average}}",
-    "ratingWithReviews": "★ {{average}} ({{reviews}})",
-    "noRating": "এখনও কোনো রেটিং নেই",
     "rankChange": "{{sign}}{{value}}%",
     "allowance": "এই সময়কালে {{limit}}টির মধ্যে {{remaining}}টি পণ্য বাকি",
     "allowanceUnlimited": "সীমাহীন পণ্য দেখা",
@@ -52,13 +49,12 @@
       "rankChange": "র‍্যাঙ্ক পরিবর্তন (24 ঘণ্টা)"
     },
     "filters": {
+      "searchPlaceholder": "শিরোনাম বা ASIN খুঁজুন",
       "anyRating": "যেকোনো রেটিং",
       "ratingAtLeast": "{{value}}+ তারা",
       "minReviews": "ন্যূনতম রিভিউ",
       "priceMin": "ন্যূনতম মূল্য",
-      "priceMax": "সর্বোচ্চ মূল্য",
-      "clear": "ফিল্টার মুছুন",
-      "resultCount": "এই পৃষ্ঠার {{total}}টির মধ্যে {{shown}}টি পণ্য"
+      "priceMax": "সর্বোচ্চ মূল্য"
     },
     "states": {
       "loading": {
