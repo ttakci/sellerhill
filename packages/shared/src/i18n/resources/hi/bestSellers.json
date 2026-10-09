@@ -23,7 +23,6 @@
       "expand": "{{name}} विस्तृत करें",
       "collapse": "{{name}} संक्षिप्त करें"
     },
-    "selectAllOnPage": "इस पृष्ठ के सभी चुनें",
     "selected_one": "{{count}} उत्पाद चुना गया",
     "selected_other": "{{count}} उत्पाद चुने गए",
     "listSelected": "चुने गए को सूचीबद्ध करें ({{count}})",

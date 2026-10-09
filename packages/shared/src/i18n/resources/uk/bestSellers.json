@@ -23,7 +23,6 @@
       "expand": "Розгорнути «{{name}}»",
       "collapse": "Згорнути «{{name}}»"
     },
-    "selectAllOnPage": "Вибрати все на цій сторінці",
     "selected_one": "Вибрано {{count}} товар",
     "selected_few": "Вибрано {{count}} товари",
     "selected_many": "Вибрано {{count}} товарів",

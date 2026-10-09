@@ -1,4 +1,4 @@
-import type { BulkAction, ColumnOption, SelectOption, TabNavItem, TableColumn } from '@repo/ui';
+import type { ColumnOption, SelectOption, TabNavItem, TableColumn } from '@repo/ui';
 import type React from 'react';
 
 import type { BestSellersFilterValues, BestSellersStarFill, BestSellersViewState } from '../bestSellers.types';
@@ -99,8 +99,10 @@ export interface BestSellersPageComponentProps {
   isRowSelectable: (row: BestSellersItemView) => boolean;
   /** Ticked products across every list and page — they travel together to Add Listings. */
   selectedCount: number;
-  /** "List selected (N)" / select page / clear — the table's bulk-actions menu. */
-  bulkActions: BulkAction<BestSellersItemView>[];
+  /** Sends every ticked ASIN (all lists and pages) to the Add Listings drawer. */
+  onListSelected: () => void;
+  /** Unticks everything, on every list and page — the table's header box clears this page only. */
+  onClearSelection: () => void;
   /** Ticks / unticks a product (card click, table row click); a locked placeholder is ignored. */
   onToggleRow: (row: BestSellersItemView) => void;
 

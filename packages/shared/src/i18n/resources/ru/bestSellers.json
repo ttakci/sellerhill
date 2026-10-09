@@ -23,7 +23,6 @@
       "expand": "Развернуть «{{name}}»",
       "collapse": "Свернуть «{{name}}»"
     },
-    "selectAllOnPage": "Выбрать все на этой странице",
     "selected_one": "Выбран {{count}} товар",
     "selected_few": "Выбрано {{count}} товара",
     "selected_many": "Выбрано {{count}} товаров",

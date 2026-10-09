@@ -23,7 +23,6 @@
       "expand": "Expand {{name}}",
       "collapse": "Collapse {{name}}"
     },
-    "selectAllOnPage": "Select all on this page",
     "selected_one": "{{count}} product selected",
     "selected_other": "{{count}} products selected",
     "listSelected": "List selected ({{count}})",

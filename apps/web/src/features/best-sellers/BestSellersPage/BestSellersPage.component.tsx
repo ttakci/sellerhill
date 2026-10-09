@@ -64,7 +64,8 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
   onSelectionChange,
   isRowSelectable,
   selectedCount,
-  bulkActions,
+  onListSelected,
+  onClearSelection,
   onToggleRow,
   lockedCount,
   onUpgrade,
@@ -281,7 +282,29 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader title={t('bestSellers.title')} subtitle={t('bestSellers.subtitle')} />
+      <PageHeader
+        title={t('bestSellers.title')}
+        subtitle={t('bestSellers.subtitle')}
+        actions={
+          isDisabled ? undefined : (
+            <S.HeaderActions>
+              {selectedCount > 0 && (
+                <Button variant="text" size="medium" onClick={onClearSelection}>
+                  <Text variant="body-sm" weight="semibold">
+                    {t('bestSellers.clearSelectionAll')}
+                  </Text>
+                </Button>
+              )}
+              <Button variant="primary" size="medium" onClick={onListSelected} disabled={selectedCount === 0}>
+                <Icon name="plus" size={16} />
+                <Text variant="body-sm" weight="semibold">
+                  {t('bestSellers.listSelected', { count: selectedCount })}
+                </Text>
+              </Button>
+            </S.HeaderActions>
+          )
+        }
+      />
 
       {isDisabled ? (
         <S.StateCard padding="lg">{renderState()}</S.StateCard>
@@ -445,8 +468,6 @@ export const BestSellersPage: React.FC<BestSellersPageComponentProps> = ({
                 selectedRows={selectedRows}
                 onSelectionChange={onSelectionChange}
                 isRowSelectable={isRowSelectable}
-                bulkActions={isReady ? bulkActions : undefined}
-                bulkActionsPlaceholder={t('listings:listings.actions.bulkActions')}
                 columnOptions={isReady ? columnOptions : undefined}
                 visibleColumnKeys={visibleColumnKeys}
                 onToggleColumn={onToggleColumn}

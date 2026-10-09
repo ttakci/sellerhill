@@ -19,7 +19,6 @@ import {
   formatCurrency,
   formatDate,
   getLocaleConfig,
-  type BulkAction,
   type IconName,
   type SelectOption,
   type TabNavItem,
@@ -555,25 +554,6 @@ export const BestSellersPageContainer: React.FC = () => {
     localeNavigate(buildAddListingsPath([...selection.selectedAsins]));
   }, [selection.count, selection.selectedAsins, localeNavigate]);
 
-  /*
-   * The Listings page's bulk menu, carrying this page's actions. The selection
-   * outlives the page (products ticked on other lists and pages go along), so
-   * "List selected" sends the whole selection, not just the rows the table
-   * hands back.
-   */
-  const bulkActions = useMemo<BulkAction<BestSellersItemView>[]>(
-    () => [
-      ...(selection.count > 0
-        ? [
-            { label: t('bestSellers.listSelected', { count: selection.count }), onClick: handleListSelected },
-            { label: t('bestSellers.clearSelectionAll'), onClick: selection.clear },
-          ]
-        : []),
-      { label: t('bestSellers.selectAllOnPage'), onClick: () => selection.selectMany(pageAsins) },
-    ],
-    [selection, pageAsins, handleListSelected, t],
-  );
-
   /* --- Columns: same visibility + ordering model as the Listings table --- */
   const { allColumns, columnOptions } = useBestSellersColumns(isMoversList);
   const [hiddenColumnKeys, setHiddenColumnKeys] = useState<string[]>([]);
@@ -705,7 +685,8 @@ export const BestSellersPageContainer: React.FC = () => {
         onSelectionChange={handleSelectionChange}
         isRowSelectable={isUnlocked}
         selectedCount={selection.count}
-        bulkActions={bulkActions}
+        onListSelected={handleListSelected}
+        onClearSelection={selection.clear}
         onToggleRow={handleToggleRow}
         lockedCount={lockedCount}
         onUpgrade={handleUpgrade}

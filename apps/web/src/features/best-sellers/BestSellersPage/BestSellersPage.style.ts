@@ -26,6 +26,14 @@ export const TabsRow = styled.div`
   min-width: 0;
 `;
 
+/** "Clear selection" + "List selected (N)" — wrap under the title on a phone. */
+export const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.sm')};
+`;
+
 /**
  * The selected tab takes its list's colour — rail, label and icon — the way
  * the Orders stage rail colours each stage. Positions follow

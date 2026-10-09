@@ -23,7 +23,6 @@
       "expand": "{{name}} aufklappen",
       "collapse": "{{name}} zuklappen"
     },
-    "selectAllOnPage": "Alle auf dieser Seite auswählen",
     "selected_one": "{{count}} Produkt ausgewählt",
     "selected_other": "{{count}} Produkte ausgewählt",
     "listSelected": "Auswahl einstellen ({{count}})",

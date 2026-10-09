@@ -23,7 +23,6 @@
       "expand": "{{name}} খুলুন",
       "collapse": "{{name}} গুটান"
     },
-    "selectAllOnPage": "এই পৃষ্ঠার সব নির্বাচন করুন",
     "selected_one": "{{count}}টি পণ্য নির্বাচিত",
     "selected_other": "{{count}}টি পণ্য নির্বাচিত",
     "listSelected": "নির্বাচিতগুলি লিস্ট করুন ({{count}})",

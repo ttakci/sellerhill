@@ -23,7 +23,6 @@
       "expand": "展开 {{name}}",
       "collapse": "收起 {{name}}"
     },
-    "selectAllOnPage": "全选本页",
     "selected_other": "已选 {{count}} 件商品",
     "listSelected": "刊登所选 ({{count}})",
     "clearSelectionAll": "清除选择",

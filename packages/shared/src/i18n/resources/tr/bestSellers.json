@@ -23,7 +23,6 @@
       "expand": "{{name}} genişlet",
       "collapse": "{{name}} daralt"
     },
-    "selectAllOnPage": "Bu sayfadakilerin tümünü seç",
     "selected_one": "{{count}} ürün seçildi",
     "selected_other": "{{count}} ürün seçildi",
     "listSelected": "Seçilenleri listele ({{count}})",

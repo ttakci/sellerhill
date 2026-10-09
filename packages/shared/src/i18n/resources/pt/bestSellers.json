@@ -23,7 +23,6 @@
       "expand": "Expandir {{name}}",
       "collapse": "Recolher {{name}}"
     },
-    "selectAllOnPage": "Selecionar tudo nesta página",
     "selected_one": "{{count}} produto selecionado",
     "selected_many": "{{count}} produtos selecionados",
     "selected_other": "{{count}} produtos selecionados",

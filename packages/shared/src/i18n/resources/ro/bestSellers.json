@@ -23,7 +23,6 @@
       "expand": "Extindeți {{name}}",
       "collapse": "Restrângeți {{name}}"
     },
-    "selectAllOnPage": "Selectați tot de pe această pagină",
     "selected_one": "{{count}} produs selectat",
     "selected_few": "{{count}} produse selectate",
     "selected_other": "{{count}} de produse selectate",
