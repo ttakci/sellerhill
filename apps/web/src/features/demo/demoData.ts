@@ -915,7 +915,7 @@ const DEMO_HANDLING_DAYS = 4;
 /** The seller's own notes on two sample orders (fixture index → note). */
 const DEMO_ORDER_NOTES: Record<number, string> = {
   0: 'Buyer asked for delivery before the weekend.',
-  3: 'Repeat buyer — third order this month.',
+  3: 'Repeat buyer. Third order this month.',
 };
 
 /** Orders pinned to today so the dashboard's "Today" card is never empty. */
@@ -2146,7 +2146,7 @@ const CONVERSATION_SEEDS: Array<{
       demoMessage(
         'demo-msg-1-1',
         buyerHandle('Aaron Pike', 47),
-        'Hi, just checking — has my order shipped yet?',
+        'Hi, just checking in. Has my order shipped yet?',
         4,
         2,
         true
@@ -2173,7 +2173,7 @@ const CONVERSATION_SEEDS: Array<{
       demoMessage(
         'demo-msg-2-1',
         buyerHandle('Chloe Bennett', 12),
-        'I moved recently — can you ship this to a new address instead of the one on file?',
+        'I moved recently. Can you ship this to my new address instead of the one on file?',
         1,
         4,
         false
@@ -2200,7 +2200,7 @@ const CONVERSATION_SEEDS: Array<{
       demoMessage(
         'demo-msg-3-2',
         STORE_SELLER_USERNAME,
-        'So glad it arrived safely — thanks for shopping with us!',
+        'So glad it arrived safely. Thanks for shopping with us!',
         18,
         3,
         true
@@ -2227,7 +2227,7 @@ const CONVERSATION_SEEDS: Array<{
       demoMessage(
         'demo-msg-4-2',
         STORE_SELLER_USERNAME,
-        'Yes — the 40-hour figure already includes the case, with ANC on throughout.',
+        'Yes, the 40-hour figure already includes the case, with ANC on throughout.',
         6,
         2,
         true
@@ -2569,34 +2569,34 @@ export const DEMO_BUYER_MESSAGE_TEMPLATES: BuyerMessageTemplate[] = [
     'demo-tpl-1',
     BuyerMessageEventType.ORDER_RECEIVED,
     'Thanks for your order',
-    'Hi {{buyer_name}},\n\nThanks for your order! We are getting {{item_title}} ready and will send tracking as soon as it ships.\n\n— {{store_name}}',
+    'Hi {{buyer_name}},\n\nThanks for your order! We are getting {{item_title}} ready and will send tracking as soon as it ships.\n\nThanks,\n{{store_name}}',
     true
   ),
   template(
     'demo-tpl-2',
     BuyerMessageEventType.SHIPPED,
     'On its way',
-    'Hi {{buyer_name}},\n\nGood news — {{item_title}} has shipped. You can follow it with tracking number {{tracking_number}}.\n\n— {{store_name}}',
+    'Hi {{buyer_name}},\n\nGood news! {{item_title}} has shipped. You can follow it with tracking number {{tracking_number}}.\n\nThanks,\n{{store_name}}',
     true
   ),
   template(
     'demo-tpl-3',
     BuyerMessageEventType.DELIVERED,
     'Delivered',
-    'Hi {{buyer_name}},\n\n{{item_title}} shows as delivered. If anything is not right, just reply here and we will sort it out.\n\n— {{store_name}}',
+    'Hi {{buyer_name}},\n\n{{item_title}} shows as delivered. If anything is not right, just reply here and we will sort it out.\n\nThanks,\n{{store_name}}',
     true
   ),
   template(
     'demo-tpl-4',
     BuyerMessageEventType.FEEDBACK_REQUEST,
     'How did we do?',
-    'Hi {{buyer_name}},\n\nHope {{item_title}} is working out. If you have a moment, feedback helps our small store a lot.\n\n— {{store_name}}',
+    'Hi {{buyer_name}},\n\nHope {{item_title}} is working out. If you have a moment, feedback helps our small store a lot.\n\nThanks,\n{{store_name}}',
     true
   ),
   template(
     'demo-tpl-5',
     BuyerMessageEventType.SHIPPED,
-    'Shipped — short version',
+    'Shipped (short version)',
     'Your order is on the way. Tracking: {{tracking_number}}',
     false
   ),
