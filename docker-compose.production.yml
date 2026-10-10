@@ -244,7 +244,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${SCRAPER_MEMORY_LIMIT:-1G}
+          memory: ${SCRAPER_MEMORY_LIMIT:-4G}
     networks:
       - scraper_net
 
@@ -284,9 +284,19 @@ services:
     # treating every domain assignment as an unrecognized-port guess.
     expose:
       - '80'
+    # Static files only; does not grow with sellers.
+    deploy:
+      resources:
+        limits:
+          memory: ${WEB_MEMORY_LIMIT:-512M}
     networks:
       - coolify
 
+  # Every service carries a memory limit (2026-10-10). A service without one
+  # can take the whole host if it ever leaks; with one, only that container is
+  # OOM-killed and restarted. Postgres and Redis are separate Coolify resources:
+  # their limits are set in Coolify (Resource Limits), 16G and 4G, and Redis
+  # keeps maxmemory-policy=noeviction (BullMQ must never lose a job silently).
   # ---- Log tracing (Loki + Promtail + Grafana) ----
   # Promtail tails the api service's JSON log files via the shared api_logs
   # volume. Grafana intentionally publishes no ports — reach it via an SSH
@@ -299,6 +309,11 @@ services:
     volumes:
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
+    # Grows with log volume; sized for ~500 sellers.
+    deploy:
+      resources:
+        limits:
+          memory: ${LOKI_MEMORY_LIMIT:-4G}
     networks:
       - coolify
 
@@ -312,6 +327,11 @@ services:
       - api_logs:/var/log/sellerhill-api:ro
       - promtail_positions:/tmp/positions
     command: -config.expand-env=true -config.file=/etc/promtail/config.yml
+    # Tails the api log files; does not grow with sellers.
+    deploy:
+      resources:
+        limits:
+          memory: ${PROMTAIL_MEMORY_LIMIT:-512M}
     networks:
       - coolify
     depends_on:
@@ -327,6 +347,11 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: 'false'
     volumes:
       - grafana_data:/var/lib/grafana
+    # Operator dashboards only; does not grow with sellers.
+    deploy:
+      resources:
+        limits:
+          memory: ${GRAFANA_MEMORY_LIMIT:-1G}
     networks:
       - coolify
     depends_on:
