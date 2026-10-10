@@ -496,9 +496,6 @@
       "draftBanner": "Draft — not published to eBay",
       "groupPreviewTitle": "This group's settings"
     },
-    "products": {
-      "searchPlaceholder": "Search by title, ASIN or brand…"
-    },
     "schedule": {
       "title": "Spread over time",
       "hint": "List a set number of products a day, inside the hours you choose, instead of all at once. Price, stock and your listing rules are checked when each product's turn comes.",

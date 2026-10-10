@@ -55,11 +55,10 @@ export const KeywordSection = styled.div`
   min-width: 0;
   overflow: hidden;
 
-  > span,
-  > p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  /* The Tooltip wrapper is inline-flex; let it (and the truncating text in it) shrink. */
+  & > * {
+    min-width: 0;
+    max-width: 100%;
   }
 `;
 

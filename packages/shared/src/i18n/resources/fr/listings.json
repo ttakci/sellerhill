@@ -495,9 +495,6 @@
       "draftBanner": "Brouillon — non publié sur eBay",
       "groupPreviewTitle": "Réglages de ce groupe"
     },
-    "products": {
-      "searchPlaceholder": "Rechercher par titre, ASIN ou marque…"
-    },
     "schedule": {
       "title": "Étaler dans le temps",
       "hint": "Mettez en ligne un nombre fixe de produits par jour, dans les heures que vous choisissez, plutôt que tous à la fois. Le prix, le stock et vos règles d'annonces sont vérifiés quand vient le tour de chaque produit.",

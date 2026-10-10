@@ -23,7 +23,6 @@ const PAGES: Array<[string[], string]> = [
   [['features/listings/overview/ListingsOverviewPage.container.tsx'], 'features/listings/overview/ListingsOverviewPage.container.tsx'],
   [['features/listings/all/hooks/useListingsFilters.ts', 'features/listings/all/ListingsAllPage.container.tsx'], 'features/listings/all/hooks/useListingsFilters.ts'],
   [['features/listings/listing-jobs/ListingJobsPage.container.tsx'], 'features/listings/listing-jobs/ListingJobsPage.container.tsx'],
-  [['features/listings/products/ProductsPage.container.tsx'], 'features/listings/products/ProductsPage.container.tsx'],
   [['features/listings/revision-history/RevisionHistoryPage.container.tsx'], 'features/listings/revision-history/RevisionHistoryPage.container.tsx'],
 ];
 

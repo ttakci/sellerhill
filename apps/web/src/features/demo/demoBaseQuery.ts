@@ -668,30 +668,6 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     return ok({ ...paginate(rows, params), categories: DEMO_LISTING_CATEGORIES });
   }
 
-  if (path === '/listings/products') {
-    const search = params.search?.trim().toLowerCase();
-    const rows = DEMO_LISTINGS.filter(
-      (l) =>
-        (!params.ebayAccountId || l.ebayAccountId === params.ebayAccountId) &&
-        (!search || l.title.toLowerCase().includes(search) || l.asin.toLowerCase().includes(search))
-    ).map((l) => ({
-      id: l.productId,
-      asin: l.asin,
-      title: l.title,
-      brand: l.brand,
-      category: l.category,
-      price: l.purchasePrice ?? 0,
-      currency: 'USD',
-      stock: l.sourceStock ?? 0,
-      stockStatus: l.sourceStockStatus,
-      imageUrls: l.imageUrls,
-      listingCount: 1,
-      updatedAt: l.updatedAt,
-      createdAt: l.createdAt,
-    }));
-    return ok(paginate(rows, params));
-  }
-
   if (path === '/listings/jobs') {
     const search = params.search?.trim().toLowerCase();
     let jobs = DEMO_LISTING_JOBS;

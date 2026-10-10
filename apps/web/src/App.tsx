@@ -98,9 +98,6 @@ const ListingsAllPage = lazy(() =>
 const RevisionHistoryPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.RevisionHistoryPage }))
 );
-const ProductsPage = lazy(() =>
-  import('./features/listings').then((m) => ({ default: m.ProductsPage }))
-);
 const ListingOverviewPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingOverviewPage }))
 );
@@ -312,14 +309,8 @@ export function App() {
                 </Lazy>
               }
             />
-            <Route
-              path="listings/products"
-              element={
-                <Lazy>
-                  <ProductsPage />
-                </Lazy>
-              }
-            />
+            {/* The Products page was removed (2026-10-10); an old link lands on the listings. */}
+            <Route path="listings/products" element={<Navigate to=".." relative="path" replace />} />
             {/*
               One canonical create flow. `/listings/add` used to render a second,
               independently-built full page over the same Zod schema as the

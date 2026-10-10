@@ -105,9 +105,6 @@
     "forbidden": "Giriş qadağandır",
     "serverError": "Xəta baş verdi. Zəhmət olmasa daha sonra yenidən cəhd edin."
   },
-  "products": {
-    "subtitle": "Bütün aktiv elanlarınız üçün məhsul təfərrüatlarına və Amazon məlumatlarına baxın."
-  },
   "menu": {
     "marketing": "Marketinq",
     "campaigns": "Reklam kampaniyaları",
@@ -118,7 +115,6 @@
     "listingJobs": "Elan işləri",
     "revisionHistory": "Dəyişiklik tarixçəsi",
     "drafts": "Qaralamalar",
-    "products": "Məhsullar",
     "inventory": "Anbar",
     "discover": "Kəşf",
     "sales": "Satışlar",

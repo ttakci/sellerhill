@@ -495,9 +495,6 @@
       "draftBanner": "Qaralama — eBay-də dərc edilməyib",
       "groupPreviewTitle": "Bu qrupun ayarları"
     },
-    "products": {
-      "searchPlaceholder": "Başlıq, ASIN və ya brend üzrə axtarın…"
-    },
     "schedule": {
       "title": "Zamana yay",
       "hint": "Məhsulları birdən yox, seçdiyiniz saatlar daxilində gündə müəyyən sayda elan edin. Qiymət, stok və elan qaydalarınız hər məhsulun növbəsi çatanda yoxlanılır.",

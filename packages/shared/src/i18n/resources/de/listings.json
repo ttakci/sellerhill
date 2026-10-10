@@ -495,9 +495,6 @@
       "draftBanner": "Entwurf – nicht auf eBay veröffentlicht",
       "groupPreviewTitle": "Einstellungen dieser Gruppe"
     },
-    "products": {
-      "searchPlaceholder": "Nach Titel, ASIN oder Marke suchen …"
-    },
     "schedule": {
       "title": "Über die Zeit verteilen",
       "hint": "Bieten Sie eine festgelegte Anzahl Produkte pro Tag innerhalb der von Ihnen gewählten Stunden an, statt alle auf einmal. Preis, Bestand und Ihre Angebotsregeln werden geprüft, wenn ein Produkt an der Reihe ist.",

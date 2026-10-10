@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ActiveStoreProvider } from './ActiveStoreProvider';
@@ -72,5 +72,32 @@ describe('ActiveStoreProvider', () => {
     renderAt('/en/dashboard?store=a&tab=chart&page=3');
     act(() => control.switchTo('b'));
     expect(screen.getByTestId('probe').textContent).toBe('b|/en/dashboard?store=b&tab=chart');
+  });
+
+  // The provider sits above the routes, so a <Navigate> below it moves the
+  // browser in the same commit as the provider's ?store= write. That write used
+  // to navigate from the OLD path and undo the redirect (`/listings/add` stayed
+  // on a listing-detail page called "add"). MemoryRouter writes no history
+  // state, so this needs the real BrowserRouter.
+  it('a redirect below the provider is not undone by the ?store= write', () => {
+    window.history.replaceState(null, '', '/en/listings/products');
+    render(
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/:locale/*"
+            element={
+              <ActiveStoreProvider>
+                <Routes>
+                  <Route path="listings/products" element={<Navigate to=".." relative="path" replace />} />
+                  <Route path="*" element={<Probe />} />
+                </Routes>
+              </ActiveStoreProvider>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    );
+    expect(screen.getByTestId('probe').textContent).toBe('a|/en/listings?store=a');
   });
 });

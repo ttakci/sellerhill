@@ -2,7 +2,7 @@
  * Listings Domain Types
  */
 
-import type { ProductData, ProductIdentifiers } from '../products/product-data.types';
+import type { ProductIdentifiers } from '../products/product-data.types';
 import type { SourceStockStatus } from '../products/source-product.types';
 
 import type { ListingFailureCode, ListingFailureDetails } from './listing-failure.types';
@@ -529,29 +529,6 @@ export interface AllListingRevisionsQueryDto {
 /** Paginated response for `GET /listings/revisions`. */
 export interface PaginatedListingRevisionsWithListingDto {
   items: ListingRevisionWithListingDto[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-/**
- * Query for `GET /listings/products`.
- * Same rationale as `ListingJobsQueryDto` — the products endpoint returned the
- * user's whole distinct-product catalog on every page load.
- */
-export interface UserProductsQueryDto {
-  page?: number;
-  /** Page size (default 20, clamped to 100). */
-  limit?: number;
-  /** Matches product title, ASIN or brand. */
-  search?: string;
-  /** Only products with at least one of the seller's listings on this eBay store. A UUID; anything else is a 400. */
-  ebayAccountId?: string;
-}
-
-/** Paginated user-products response. */
-export interface PaginatedProductsDto {
-  items: ProductData[];
   total: number;
   page: number;
   limit: number;

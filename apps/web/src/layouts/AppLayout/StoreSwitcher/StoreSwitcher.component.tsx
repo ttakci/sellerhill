@@ -24,7 +24,7 @@ export const StoreSwitcherComponent = ({
   );
   if (!hasMenu) {
     return (
-      <S.StaticLabel title={activeLabel}>
+      <S.StaticLabel>
         <Icon name="storefront" size={18} color="brand.primary" />
         {name}
       </S.StaticLabel>
@@ -35,7 +35,7 @@ export const StoreSwitcherComponent = ({
       align="right"
       width="14rem"
       trigger={
-        <S.Trigger aria-label={t('translation:header.selectStore')} title={activeLabel}>
+        <S.Trigger aria-label={t('translation:header.selectStore')}>
           <Icon name="storefront" size={18} color="brand.primary" />
           {name}
           <Icon name="chevron-down" size={12} />

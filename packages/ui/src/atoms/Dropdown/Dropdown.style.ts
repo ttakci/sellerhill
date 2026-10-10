@@ -19,17 +19,24 @@ export const Menu = styled.div<{
   $width?: string;
 }>`
   position: absolute;
-  ${({ $direction }) => ($direction === 'up' ? 'bottom: 120%;' : 'top: 120%;')}
+  /* Same 4px gap and surface as Select's option list, so a menu and a
+     select read as one family. */
+  ${({ $direction }) => ($direction === 'up' ? 'bottom: calc(100% + 0.25rem);' : 'top: calc(100% + 0.25rem);')}
   ${({ $align }) => ($align === 'left' ? 'left: 0;' : 'right: 0;')};
   z-index: ${tkn('zIndex.dropdown')};
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   flex-direction: column;
   ${({ $width }) => ($width ? `width: ${$width}; min-width: unset;` : 'min-width: 16.25rem;')}; /* 260px */
-  background: ${tkn('colors.background.secondary')};
+  box-sizing: border-box;
+  gap: ${tkn('spacing.2xs')};
+  background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.md')};
-  padding: ${tkn('spacing.sm')} 0;
+  padding: ${tkn('spacing.xs')};
   box-shadow: ${tkn('shadows.lg')};
+  /* A long menu (16 languages) scrolls inside itself instead of running off the screen. */
+  max-height: min(70vh, 26rem);
+  overflow-y: auto;
   animation: ${({ $direction }) => ($direction === 'up' ? 'fadeInUp' : 'fadeIn')} 0.2s ease-out;
 
   @keyframes fadeIn {
@@ -56,9 +63,10 @@ export const Menu = styled.div<{
 `;
 
 export const DropdownHeader = styled.div`
+  /* The menu is inset by spacing.xs; the header's rule still spans edge to edge. */
+  margin: calc(-1 * ${tkn('spacing.xs')}) calc(-1 * ${tkn('spacing.xs')}) ${tkn('spacing.2xs')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  margin-bottom: ${tkn('spacing.sm')};
 `;
 
 export const ItemLabel = styled.span`
@@ -70,26 +78,37 @@ export const ItemLabel = styled.span`
 export const MenuItem = styled.button<{ $variant?: 'default' | 'danger'; $selected?: boolean }>`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm-md')};
+  gap: ${tkn('spacing.sm')};
   width: 100%;
-  padding: ${tkn('spacing.sm+')} ${tkn('spacing.sm-md')};
+  /* Select's option geometry: inset rounded rows, never edge-to-edge strips.
+     A fixed row height keeps Arabic / Devanagari labels (taller fallback
+     fonts) from making their rows taller than the Latin ones. */
+  min-height: 2.25rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm+')};
+  line-height: ${tkn('typography.lineHeight.tight')};
   border: none;
+  border-radius: ${tkn('radius.sm')};
   background: transparent;
   cursor: pointer;
 
+  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
-  transition: all ${tkn('transitions.fast')};
+  transition: background-color ${tkn('transitions.fast')};
   color: ${({ $variant, theme }) => ($variant === 'danger' ? theme.colors.semantic.error : theme.colors.text.primary)};
 
   ${({ $selected, theme }) =>
-    $selected ? `background: ${theme.colors.brand.secondary}; color: ${theme.colors.brand.primary};` : ''}
+    $selected ? `background: ${theme.colors.brand.primary}10; color: ${theme.colors.brand.primary};` : ''}
 
   &:hover {
-    background: ${({ $selected, theme }) =>
-      $selected ? theme.colors.brand.secondary : theme.colors.background.tertiary};
-    color: ${({ $variant, theme }) =>
-      $variant === 'danger' ? theme.colors.semantic.error : theme.colors.brand.primary};
+    background: ${({ $selected, $variant, theme }) =>
+      $selected
+        ? `${theme.colors.brand.primary}15`
+        : $variant === 'danger'
+          ? theme.colors.semanticTint.error
+          : theme.colors.background.tertiary};
   }
 
   /* Menu items are real <button>s but had hover only — arrow-keying through an
@@ -172,12 +191,13 @@ export const MobileMenuItem = styled.button<{ $variant?: 'default' | 'danger'; $
   background: transparent;
   cursor: pointer;
 
+  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.base')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${({ $variant, theme }) => ($variant === 'danger' ? theme.colors.semantic.error : theme.colors.text.primary)};
 
   ${({ $selected, theme }) =>
-    $selected ? `background: ${theme.colors.brand.secondary}; color: ${theme.colors.brand.primary};` : ''}
+    $selected ? `background: ${theme.colors.brand.primary}10; color: ${theme.colors.brand.primary};` : ''}
 
   &:active {
     background: ${tkn('colors.background.tertiary')};

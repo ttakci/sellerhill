@@ -105,9 +105,6 @@
     "forbidden": "Accesso negato",
     "serverError": "Si è verificato un errore. Riprova più tardi."
   },
-  "products": {
-    "subtitle": "Consulta i dettagli dei prodotti e i dati Amazon di tutte le tue inserzioni attive."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Campagne pubblicitarie",
@@ -118,7 +115,6 @@
     "listingJobs": "Attività di inserzione",
     "revisionHistory": "Cronologia revisioni",
     "drafts": "Bozze",
-    "products": "Prodotti",
     "inventory": "Inventario",
     "discover": "Scopri",
     "sales": "Vendite",

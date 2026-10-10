@@ -60,11 +60,22 @@ export const ActiveStoreProvider = ({ children }: ActiveStoreProviderProps): Rea
   // The URL mirrors the choice on store-scoped pages (and a foreign or stale
   // `?store=` is corrected rather than sent to the API).
   useEffect(() => {
+    // This provider sits above the routes, so a <Navigate> rendered in the
+    // same commit (`/listings/products` → `/listings`, `/listings/add` →
+    // `/listings?drawer=add`) has already moved the browser when this runs.
+    // Writing the search now would navigate from the OLD path and undo the
+    // redirect. BrowserRouter keeps the current entry's key in history.state;
+    // when it is not this render's location, skip — the render on the new
+    // location mirrors the store. (MemoryRouter writes no history state.)
+    const browserKey = (window.history.state as { key?: string } | null)?.key;
+    if (browserKey && browserKey !== location.key) {
+      return;
+    }
     const next = nextSearchForActiveStore(searchParams, activeStoreId, storeScoped);
     if (next) {
       setSearchParams(next, { replace: true });
     }
-  }, [searchParams, activeStoreId, storeScoped, setSearchParams]);
+  }, [searchParams, activeStoreId, storeScoped, setSearchParams, location.key]);
 
   // Whatever became active — a deep link, a record's own store — becomes the
   // choice, so leaving for a store-independent page keeps it. Adjusted during

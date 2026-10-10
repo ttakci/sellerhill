@@ -50,6 +50,11 @@ export const LegendChip = styled.button<{ $active: boolean }>`
   &:hover {
     opacity: 1;
   }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const LegendDot = styled.span<{ $color: string }>`

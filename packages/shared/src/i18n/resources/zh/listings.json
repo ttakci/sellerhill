@@ -495,9 +495,6 @@
       "draftBanner": "草稿：尚未发布到 eBay",
       "groupPreviewTitle": "该分组的设置"
     },
-    "products": {
-      "searchPlaceholder": "按标题、ASIN 或品牌搜索…"
-    },
     "schedule": {
       "title": "分时段刊登",
       "hint": "在您选定的时间段内，每天刊登固定数量的商品，而不是一次全部刊登。价格、库存和您的刊登规则会在每个商品轮到时进行检查。",

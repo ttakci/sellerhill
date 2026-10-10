@@ -16,14 +16,16 @@ export const ViewToggle = ({
       <S.ToggleButton
         $active={viewMode === 'grid'}
         onClick={() => onViewModeChange('grid')}
-        title={gridLabel ?? 'Grid'}
+        aria-pressed={viewMode === 'grid'}
+        aria-label={gridLabel ?? 'Grid'}
       >
         <Icon name="grid-view" size={20} />
       </S.ToggleButton>
       <S.ToggleButton
         $active={viewMode === 'table'}
         onClick={() => onViewModeChange('table')}
-        title={tableLabel ?? 'Table'}
+        aria-pressed={viewMode === 'table'}
+        aria-label={tableLabel ?? 'Table'}
       >
         <Icon name="format-list-bulleted" size={20} />
       </S.ToggleButton>

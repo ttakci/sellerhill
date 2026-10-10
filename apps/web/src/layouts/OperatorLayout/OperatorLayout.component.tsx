@@ -63,7 +63,8 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate(navItems[0]?.path ?? '/')}
-              title={t('translation:operator.console')}
+              role="link"
+              aria-label={t('translation:operator.console')}
             >
               <Logo layout="wordmark" height={32} />
             </S.LogoArea>
@@ -133,7 +134,7 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
               <S.HeaderRight>
                 <Dropdown
                   align="right"
-                  width="8rem"
+                  width="10rem"
                   trigger={
                     <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
                       <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
@@ -144,8 +145,8 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                     </Tooltip>
                   }
                   items={[
-                    { label: t('translation:languages.en'), onClick: () => onChangeLanguage('en') },
-                    { label: t('translation:languages.tr'), onClick: () => onChangeLanguage('tr') },
+                    { label: t('translation:languages.en'), selected: i18nLanguage === 'en', onClick: () => onChangeLanguage('en') },
+                    { label: t('translation:languages.tr'), selected: i18nLanguage === 'tr', onClick: () => onChangeLanguage('tr') },
                   ]}
                 />
 

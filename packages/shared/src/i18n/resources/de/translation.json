@@ -105,9 +105,6 @@
     "forbidden": "Zugriff verweigert",
     "serverError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
   },
-  "products": {
-    "subtitle": "Sehen Sie sich Produktdetails und Amazon-Daten für alle Ihre aktiven Angebote an."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Werbekampagnen",
@@ -118,7 +115,6 @@
     "listingJobs": "Angebotsaufträge",
     "revisionHistory": "Änderungsverlauf",
     "drafts": "Entwürfe",
-    "products": "Produkte",
     "inventory": "Inventar",
     "discover": "Entdecken",
     "sales": "Umsatz",

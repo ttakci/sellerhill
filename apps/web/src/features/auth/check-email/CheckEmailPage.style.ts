@@ -144,7 +144,7 @@ export const IconContainer = styled.div`
   border-radius: ${tkn('radius.full')};
   margin-bottom: ${tkn('spacing.md')};
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     width: 4rem;
     height: 4rem;
     margin-bottom: ${tkn('spacing.lg')};

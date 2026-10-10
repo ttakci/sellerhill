@@ -32,10 +32,8 @@ import {
   type PaginatedListingRevisionsDto,
   type PaginatedListingRevisionsWithListingDto,
   type PaginatedListingsDto,
-  type PaginatedProductsDto,
   type ProductData,
   type ProductIdentifiers,
-  type UserProductsQueryDto,
   type UpdateListingRequest,
 } from '@repo/shared';
 import { isUUID } from 'class-validator';
@@ -124,7 +122,7 @@ interface ListingQueryRow {
   ad_rate_applied?: string | null;
 }
 
-/** Row type for getUserProducts query */
+/** Row type for a `products` row read with its stored provider data. */
 interface ProductQueryRow {
   id: string;
   asin: string;
@@ -944,86 +942,6 @@ export class ListingsService {
    * Get all unique products for a user from their listings
    */
   /**
-   * Distinct products behind a user's listings, paginated.
-   *
-   * Was an unbounded `SELECT DISTINCT` that returned the whole catalog on every
-   * page load while the browser sliced ten rows out of it.
-   */
-  async getUserProducts(userId: string, query: UserProductsQueryDto = {}): Promise<PaginatedProductsDto> {
-    const page = Math.max(1, query.page ?? 1);
-    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
-    const offset = (page - 1) * limit;
-
-    const params: (string | number | null)[] = [userId];
-    const conditions = ['l.user_id = $1'];
-    const search = query.search?.trim();
-    if (search) {
-      params.push(`%${search}%`);
-      conditions.push(
-        `(p.title ILIKE $${params.length} OR p.asin ILIKE $${params.length} OR p.brand ILIKE $${params.length})`
-      );
-    }
-    // A product belongs to a store when at least one of the seller's listings
-    // of it is on that store. EXISTS rather than a filter on the joined `l`
-    // keeps the DISTINCT page and the COUNT(DISTINCT p.id) total in step.
-    const ebayAccountId = query.ebayAccountId?.trim();
-    if (ebayAccountId) {
-      params.push(ebayAccountId);
-      conditions.push(`EXISTS (
-        SELECT 1 FROM listings ls
-         WHERE ls.product_id = p.id
-           AND ls.user_id = $1
-           AND ls.ebay_account_id = $${params.length}
-      )`);
-    }
-
-    const fromJoin = `
-      FROM products p
-      INNER JOIN listings l ON p.id = l.product_id
-      WHERE ${conditions.join(' AND ')}
-    `;
-
-    // COUNT(DISTINCT p.id) — a product with several listings must count once,
-    // matching the DISTINCT in the page query.
-    const countResult = await this.databaseService.query<{ count: string }>(
-      `SELECT COUNT(DISTINCT p.id)::text AS count ${fromJoin}`,
-      params
-    );
-    const total = parseInt(countResult[0]?.count || '0', 10);
-
-    const results = await this.databaseService.query<ProductQueryRow>(
-      `
-      SELECT DISTINCT p.*
-      ${fromJoin}
-      ORDER BY p.created_at DESC, p.id ASC
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
-      `,
-      [...params, limit, offset]
-    );
-
-    const items: ProductData[] = results.map((row) => ({
-      asin: row.asin,
-      title: row.title,
-      description: row.description ?? '',
-      price: {
-        current:
-          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
-        avg30:
-          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
-        currency: row.currency || 'USD',
-      },
-      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(row.image_urls || '[]') as string[]),
-      brand: row.brand ?? '',
-      category: row.category ?? undefined,
-      manufacturer: row.brand ?? undefined, // Fallback
-      features: Array.isArray(row.features) ? row.features : (JSON.parse(row.features || '[]') as string[]),
-      updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
-    }));
-
-    return { items, total, page, limit };
-  }
-
-  /**
    * Get a single listing by ID
    */
   async getListing(userId: string, id: string): Promise<ListingDto | null> {
@@ -1395,8 +1313,8 @@ export class ListingsService {
    * means an existing catalog produces full item specifics on the next listing
    * create, instead of waiting for a refresh cycle to touch the row.
    *
-   * Structural (`Pick`) rather than `ProductQueryRow` so both the products
-   * list query and the listing detail query (`ListingQueryRow`, which joins
+   * Structural (`Pick`) rather than `ProductQueryRow` so both the product
+   * read and the listing detail query (`ListingQueryRow`, which joins
    * in the same three product columns) can share this without one being
    * cast to the other's much larger, unrelated shape.
    */

@@ -15,17 +15,17 @@ export const CardGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px */
     grid-template-columns: repeat(3, 1fr);
   }
 
-  @media (min-width: 80rem) {
+  @media (min-width: ${tkn('breakpoints.xl')}) {
     /* 1280px */
     grid-template-columns: repeat(4, 1fr);
   }
@@ -39,7 +39,7 @@ export const CardBodyContent = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     /* 1023px */
     padding: ${tkn('spacing.md')};
   }

@@ -64,7 +64,7 @@ export const AuthCard = styled.div`
   max-width: 25rem; /* 400px */
   background: ${tkn('colors.surface.primary')};
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     /* 640px */
     padding: 0;
   }

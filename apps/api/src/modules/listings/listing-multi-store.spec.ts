@@ -262,20 +262,6 @@ describe('store filters', () => {
     expect(page.items[0].ebayAccountId).toBeNull();
   });
 
-  it('GET /listings/products keeps only products with a listing on that store, in the count too', async () => {
-    const { service, db } = buildService((sql) => (/COUNT\(DISTINCT p\.id\)/.test(sql) ? [{ count: '0' }] : []));
-
-    await service.getUserProducts('user-1', { ebayAccountId: STORE });
-
-    const [countSql, countParams] = db.query.mock.calls[0];
-    const [pageSql] = db.query.mock.calls[1];
-    expect(countSql).toMatch(/COUNT\(DISTINCT p\.id\)/);
-    for (const sql of [countSql, pageSql]) {
-      expect(sql).toMatch(/EXISTS \(\s*SELECT 1 FROM listings ls\s+WHERE ls\.product_id = p\.id\s+AND ls\.user_id = \$1\s+AND ls\.ebay_account_id = \$2/);
-    }
-    expect(countParams).toEqual(['user-1', STORE]);
-  });
-
   it('GET /listings categories follow the same store filter as the list', async () => {
     const { service, db } = buildService((sql) => (/COUNT\(/.test(sql) ? [{ count: '0' }] : []));
 
@@ -290,19 +276,15 @@ describe('store filters', () => {
 describe('ListingsController — a store filter that is not a UUID is a 400', () => {
   const listingsService = {
     getJobs: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, limit: 20 }),
-    getUserProducts: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, limit: 20 }),
     getListings: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, limit: 20, categories: [] }),
   };
   const controller = new ListingsController(listingsService as never, {} as never, {} as never);
   const req = { user: { sub: 'user-1' } };
 
-  it('refuses a malformed id on jobs, products and the list', async () => {
+  it('refuses a malformed id on jobs and the list', async () => {
     await expect(
       controller.getJobs(req, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 'nope')
     ).rejects.toBeInstanceOf(BadRequestException);
-    await expect(controller.getProducts(req, undefined, undefined, undefined, 'nope')).rejects.toBeInstanceOf(
-      BadRequestException
-    );
     await expect(
       controller.getListings(req, undefined, undefined, undefined, undefined, undefined, undefined, 'nope')
     ).rejects.toBeInstanceOf(BadRequestException);
@@ -311,10 +293,5 @@ describe('ListingsController — a store filter that is not a UUID is a 400', ()
   it('passes a valid id through and treats blank as no filter', async () => {
     await controller.getJobs(req, undefined, undefined, undefined, undefined, undefined, undefined, undefined, STORE);
     expect(listingsService.getJobs).toHaveBeenLastCalledWith('user-1', expect.objectContaining({ ebayAccountId: STORE }));
-    await controller.getProducts(req, undefined, undefined, undefined, ' ');
-    expect(listingsService.getUserProducts).toHaveBeenLastCalledWith(
-      'user-1',
-      expect.objectContaining({ ebayAccountId: undefined })
-    );
   });
 });

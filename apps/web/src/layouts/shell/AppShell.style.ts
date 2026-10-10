@@ -1,6 +1,6 @@
 import { keyframes, Theme } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { tkn } from '@repo/ui';
 
 /**
  * Expanded sidebar rail. Single source of truth — the docked width, the mobile
@@ -307,11 +307,6 @@ export const NavDivider = styled.div`
   margin: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
 `;
 
-export const NavItemWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
 export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $isSubItem?: boolean }>`
   display: flex;
   width: ${({ $isCollapsed }) => ($isCollapsed ? SIDEBAR_LOGO_HEIGHT : '100%')};
@@ -437,25 +432,6 @@ export const NavItemLabel = styled.span`
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
-export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boolean }>`
-  display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'flex')};
-  align-items: center;
-  transition: transform ${tkn('transitions.normal')};
-  transform: ${({ $isOpen }) => ($isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
-  color: ${tkn('colors.sidebar.textMuted')};
-`;
-
-export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
-  max-height: ${({ $isOpen }) => ($isOpen ? '62.5rem' : '0')}; /* 1000px */
-  overflow: hidden;
-  transition: max-height ${tkn('transitions.normal')};
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  margin-top: ${({ $isOpen, theme }) => ($isOpen ? theme.spacing['2xs'] : '0')};
-`;
-
 export const SidebarFooter = styled.div`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   /* Keeps the logout row above the phone's home indicator. */
@@ -540,53 +516,10 @@ export const LogoutButton = styled.button<{ $isCollapsed: boolean }>`
     background: ${tkn('colors.sidebar.hover')};
     color: ${tkn('colors.semantic.error')};
   }
-`;
 
-export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm-md')}; /* 12px */
-  padding: ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  transition: all ${tkn('transitions.fast')};
-  position: relative;
-  max-width: 100%;
-  overflow: hidden;
-
-  ${({ $isCollapsed, theme }) =>
-    $isCollapsed &&
-    `
-    justify-content: center;
-    padding: ${theme.spacing.sm} 0;
-  `}
-`;
-
-export const ProfileBadge = styled.div`
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: ${tkn('colors.brand.primary')};
-  color: ${tkn('colors.sidebar.text')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  flex-shrink: 0;
-`;
-
-export const ProfileDetails = styled.div`
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  & > span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 10rem;
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.sidebar.accent')};
+    outline-offset: -0.125rem;
   }
 `;
 
@@ -648,13 +581,13 @@ export const HeaderInner = styled.div`
   padding: ${tkn('spacing.sm+')} ${tkn('spacing.lg')};
   box-sizing: border-box;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     flex-wrap: nowrap;
     padding: 0 ${tkn('spacing.xl')};
     gap: 0;
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     padding: 0 ${tkn('spacing.xxl')};
   }
 `;
@@ -665,7 +598,7 @@ export const HeaderLeft = styled.div`
   gap: ${tkn('spacing.sm')};
   order: 1; /* First on mobile */
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     width: auto;
     gap: ${tkn('spacing.md')};
@@ -683,7 +616,7 @@ export const BreadcrumbArea = styled.div`
   order: 3; /* Last on mobile (New Line) */
   margin-top: ${tkn('spacing.xs')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     width: auto;
     flex-basis: auto;
@@ -706,87 +639,23 @@ export const MobileMenuButton = styled.button`
   color: ${tkn('colors.text.secondary')};
   border-radius: ${tkn('radius.md')};
 
+  transition: all ${tkn('transitions.fast')};
+
+  /* Same hover wash as the language / store / profile controls beside it. */
   &:hover {
-    background: ${tkn('colors.brand.secondary')};
+    background: ${tkn('colors.table.rowHover')};
     color: ${tkn('colors.brand.primary')};
   }
 
-  @media (min-width: 64rem) {
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
+
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px — desktop uses in-sidebar collapse control */
     display: none;
   }
-`;
-
-/** @deprecated Desktop toggle moved into sidebar footer — kept only if referenced */
-export const ToggleButton = styled.button`
-  background: transparent;
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  width: ${tkn('spacing.xl')};
-  height: ${tkn('spacing.xl')};
-  display: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${tkn('radius.md')};
-  cursor: pointer;
-  color: ${tkn('colors.text.primary')};
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.brand.secondary')};
-    border-color: ${tkn('colors.brand.primary')};
-    color: ${tkn('colors.brand.primary')};
-    transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
-export const SearchArea = styled.div`
-  display: none;
-
-  @media (min-width: 48rem) {
-    /* 768px */
-    display: flex;
-    align-items: center;
-    gap: ${tkn('spacing.sm')};
-    color: ${tkn('colors.text.tertiary')};
-    max-width: 25rem; /* 400px */
-    width: 100%;
-    padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-    background: ${tkn('colors.background.primary')};
-    border-radius: ${tkn('radius.md')};
-    border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-    transition: border-color ${tkn('transitions.fast')};
-
-    &:focus-within {
-      border-color: ${tkn('colors.border.focus')};
-    }
-  }
-`;
-
-export const SearchInput = styled.input`
-  border: none;
-  background: transparent;
-  font-size: ${tkn('typography.fontSize.sm')};
-  width: 100%;
-  color: ${tkn('colors.text.primary')};
-  outline: none;
-
-  &::placeholder {
-    color: ${tkn('colors.text.tertiary')};
-  }
-`;
-
-export const Kbd = styled.kbd`
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.tertiary')};
-  background: ${tkn('colors.background.secondary')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
 `;
 
 export const HeaderRight = styled.div`
@@ -795,7 +664,7 @@ export const HeaderRight = styled.div`
   gap: ${tkn('spacing.2xs')};
   order: 2; /* Ensure it stays on top row with HeaderLeft */
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     gap: ${tkn('spacing.xs')};
     order: 3;
@@ -810,19 +679,35 @@ export const VerticalDivider = styled.div`
   flex-shrink: 0;
 `;
 
-export const LanguageSelectTrigger = styled.div`
+/**
+ * The top bar's three controls (language, store, profile) share ONE shape:
+ * the compact control height, the control radius, and the app's hover wash
+ * (the same faint brand tint a list row takes) instead of a thin off-white
+ * strip that read as a different product.
+ */
+const headerControl = (theme: Theme): string => `
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
+  gap: ${theme.spacing.xs};
+  height: ${theme.controls.height.small};
+  box-sizing: border-box;
+  padding: 0 ${theme.spacing['sm-md']};
+  border: 0.0625rem solid transparent; /* 1px — reserved so hover never shifts layout */
+  border-radius: ${theme.radius.md};
+  color: ${theme.colors.text.secondary};
   cursor: pointer;
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  transition: background ${tkn('transitions.fast')};
-  max-width: 15rem;
+  transition: all ${theme.transitions.fast};
 
   &:hover {
-    background: ${tkn('colors.background.primary')};
+    background: ${theme.colors.table.rowHover};
+    border-color: ${theme.colors.semanticTintBorder.info};
+    color: ${theme.colors.brand.primary};
   }
+`;
+
+export const LanguageSelectTrigger = styled.div`
+  ${({ theme }) => headerControl(theme)}
+  max-width: 15rem;
 `;
 
 export const LanguageText = styled.span`
@@ -833,56 +718,11 @@ export const LanguageText = styled.span`
   transition: color ${tkn('transitions.fast')};
 `;
 
-export const NotificationBadge = styled.span`
-  position: absolute;
-  top: 0.625rem; /* 10px */
-  right: 0.625rem; /* 10px */
-  width: 0.375rem; /* 6px */
-  height: 0.375rem; /* 6px */
-  border-radius: 50%;
-  background: ${tkn('colors.semantic.error')}; /* Red dot */
-  border: 0.09375rem solid ${tkn('colors.background.secondary')}; /* 1.5px */
-  box-sizing: content-box;
-`;
-
-export const ProfileArea = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-
-  @media (min-width: 48rem) {
-    /* 768px */
-    gap: ${tkn('spacing.sm-md')}; /* 12px */
-    padding-left: ${tkn('spacing.md')};
-    border-left: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-  }
-
-  cursor: pointer;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  transition: background ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.background.primary')};
-  }
-`;
-
-export const ProfileInfo = styled.div`
-  display: none;
-
-  @media (min-width: 64rem) {
-    /* 1024px */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`;
-
 export const AvatarWrapper = styled.div`
   width: ${tkn('spacing.xl')};
   height: ${tkn('spacing.xl')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     width: ${tkn('spacing.xxl')};
     height: ${tkn('spacing.xxl')};
@@ -894,35 +734,14 @@ export const AvatarWrapper = styled.div`
   box-shadow: ${tkn('shadows.sm')};
 `;
 
-export const AvatarImg = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
 /**
  * HeaderProfileArea - User profile display in the top-right header
  */
 export const HeaderProfileArea = styled.div`
-  display: flex;
-  align-items: center;
+  ${({ theme }) => headerControl(theme)}
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  cursor: pointer;
-  transition: background ${tkn('transitions.fast')};
+  padding-left: ${tkn('spacing.2xs')};
   max-width: 15rem; /* 240px */
-
-  &:hover {
-    background: ${tkn('colors.background.primary')};
-  }
-
-  @media (max-width: 47.9375rem) {
-    /* 767px — hide text on mobile, show only avatar */
-    .profile-info {
-      display: none;
-    }
-  }
 `;
 
 /**
@@ -940,7 +759,7 @@ export const HeaderProfileInfo = styled.div`
     line-height: ${tkn('typography.lineHeight.tight')};
   }
 
-  @media (max-width: 47.9375rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     /* 767px */
     display: none;
   }
@@ -1015,11 +834,11 @@ export const ContentInner = styled.div<{ $fitsViewport?: boolean }>`
      bottom gutter shrinks to the top one. */
   ${({ $fitsViewport, theme }) => ($fitsViewport ? `padding-bottom: ${theme.spacing.md} !important;` : '')}
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     padding: ${tkn('spacing.md')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     padding: ${tkn('spacing.md')} ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
   }
 `;
@@ -1085,12 +904,4 @@ export const LoadingFill = styled.div`
     width: 100%;
     animation: none;
   }
-`;
-export const PageTitle = styled(Text)`
-  font-size: inherit;
-`;
-
-export const DropdownHeaderWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
 `;

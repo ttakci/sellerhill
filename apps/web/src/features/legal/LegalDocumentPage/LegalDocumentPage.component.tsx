@@ -127,7 +127,7 @@ export const LegalDocumentPageComponent = ({
 
           <Dropdown
             align="right"
-            width="8rem"
+            width="10rem"
             trigger={
               <S.LanguageTrigger>
                 <Text variant="body-sm" weight="medium" color="sidebar.text">
@@ -138,6 +138,7 @@ export const LegalDocumentPageComponent = ({
             }
             items={SUPPORTED_LOCALES.map((locale) => ({
               label: t(`translation:languages.${locale}`),
+              selected: locale === currentLocale,
               onClick: () => onLocaleChange(locale),
             }))}
           />

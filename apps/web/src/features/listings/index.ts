@@ -3,5 +3,4 @@ export { ListingsAllPage as ListingsAllPage } from './all/ListingsAllPage.contai
 export { ListingJobsPageContainer as ListingJobsPage } from './listing-jobs/ListingJobsPage.container';
 export { ListingJobDetailsPageContainer as ListingJobDetailsPage } from './listing-jobs/details/ListingJobDetailsPage.container';
 export { RevisionHistoryPageContainer as RevisionHistoryPage } from './revision-history/RevisionHistoryPage.container';
-export { ProductsPageContainer as ProductsPage } from './products/ProductsPage.container';
 export { ListingDetailPage } from './detail';

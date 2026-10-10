@@ -22,6 +22,16 @@ code {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* Browsers do NOT hand buttons and form fields the page font: without this a
+   hand-rolled <button> (a menu row, a card that is a button) rendered in the OS
+   system font, beside Lexend everywhere else. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* Controls are pressed, not read. Chrome leaves button text selectable, so a
    press that drags a pixel highlighted the label in the OS accent colour — a
    foreign purple on a purple-accent Windows theme. Covers every control, not

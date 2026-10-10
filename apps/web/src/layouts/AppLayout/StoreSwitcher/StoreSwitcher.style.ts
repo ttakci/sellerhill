@@ -3,9 +3,10 @@ import { tkn } from '@repo/ui';
 
 import { HeaderProfileArea } from '../AppLayout.style';
 
-/** Same block as the user's name beside it (padding, radius, hover), capped so a long store name truncates. */
+/** Same control as the language and profile triggers beside it, capped so a long store name truncates. */
 export const Trigger = styled(HeaderProfileArea)`
   gap: ${tkn('spacing.xs')};
+  padding-left: ${tkn('spacing.sm-md')};
   max-width: 13rem;
   min-width: 0;
 `;
@@ -16,6 +17,7 @@ export const StaticLabel = styled(Trigger)`
 
   &:hover {
     background: transparent;
+    border-color: transparent;
   }
 `;
 
@@ -24,8 +26,8 @@ export const Name = styled.div`
   overflow: hidden;
   display: flex;
 
-  @media (max-width: 47.9375rem) {
-    /* 767px — only the icon on a phone */
+  /* Only the icon on a phone. */
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     display: none;
   }
 `;

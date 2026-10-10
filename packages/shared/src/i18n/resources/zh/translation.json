@@ -105,9 +105,6 @@
     "forbidden": "禁止访问",
     "serverError": "发生错误，请稍后重试。"
   },
-  "products": {
-    "subtitle": "查看所有在售商品刊登的商品详情和 Amazon 数据。"
-  },
   "menu": {
     "marketing": "营销",
     "campaigns": "广告活动",
@@ -118,7 +115,6 @@
     "listingJobs": "刊登任务",
     "revisionHistory": "修订记录",
     "drafts": "草稿",
-    "products": "商品",
     "inventory": "库存",
     "discover": "发现",
     "sales": "销售",

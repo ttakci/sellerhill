@@ -193,6 +193,11 @@ export const ThumbButton = styled.button<{ $active: boolean }>`
   &:hover {
     border-color: ${tkn('colors.brand.primary')};
   }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const HeroInfo = styled.div`

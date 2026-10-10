@@ -12,7 +12,7 @@ export const FooterWrapper = styled.footer`
   align-items: center;
   justify-content: space-between;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     flex-direction: row;
   }

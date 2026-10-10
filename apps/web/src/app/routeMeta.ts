@@ -88,16 +88,6 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     ],
   },
   {
-    path: '/listings/products',
-    storeScoped: true,
-    match: 'exact',
-    section: 'inventory',
-    breadcrumbs: [
-      { labelKey: 'translation:menu.listings', path: '/listings' },
-      { labelKey: 'translation:menu.products' },
-    ],
-  },
-  {
     path: '/listings/',
     storeScoped: true,
     match: 'prefix',

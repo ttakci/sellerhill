@@ -105,9 +105,6 @@
     "forbidden": "Accès interdit",
     "serverError": "Une erreur s'est produite. Veuillez réessayer plus tard."
   },
-  "products": {
-    "subtitle": "Consultez les détails des produits et les données Amazon de toutes vos annonces actives."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Campagnes publicitaires",
@@ -118,7 +115,6 @@
     "listingJobs": "Tâches d'annonces",
     "revisionHistory": "Historique des révisions",
     "drafts": "Brouillons",
-    "products": "Produits",
     "inventory": "Inventaire",
     "discover": "Découvrir",
     "sales": "Ventes",

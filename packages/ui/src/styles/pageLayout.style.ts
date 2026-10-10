@@ -36,7 +36,7 @@ export const PageContainer = styled.div`
 export const PageContainerWithMobileBar = styled(PageContainer)`
   padding-bottom: calc(${tkn('spacing.xxxl')} + 4.5rem);
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     padding-bottom: ${tkn('spacing.xxxl')};
   }
 `;

@@ -14,7 +14,7 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   padding: ${tkn('spacing.md')};
   animation: fadeIn 0.2s ease-out;
 
-  @media (max-width: 48rem) { /* 768px */
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) { /* 768px */
     padding: ${tkn('spacing.sm')};
   }
 
@@ -55,7 +55,7 @@ export const ModalContainer = styled.div<{ $size: string }>`
   box-shadow: ${tkn('shadows.xl')};
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     max-width: calc(100% - ${tkn('spacing.md')});
     border-radius: ${tkn('radius.lg')};
   }

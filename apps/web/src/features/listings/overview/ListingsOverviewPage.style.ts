@@ -19,7 +19,7 @@ export const TwoColumnLayout = styled.div`
     min-width: 0;
   }
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     grid-template-columns: 1fr;
   }
 `;

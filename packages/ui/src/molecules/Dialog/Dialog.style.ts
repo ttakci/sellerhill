@@ -27,7 +27,7 @@ export const Content = styled.div`
   box-sizing: border-box;
   min-width: 0;
 
-  @media (max-width: 30rem) {
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
     padding: ${tkn('spacing.lg')} ${tkn('spacing.md')} ${tkn('spacing.lg')};
   }
 `;
@@ -69,7 +69,7 @@ export const IconCircle = styled.div<{ $type: string }>`
     stroke: ${tkn('colors.text.inverse')};
   }
 
-  @media (max-width: 30rem) {
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
     width: 3.25rem;
     height: 3.25rem;
   }
@@ -82,7 +82,7 @@ export const Title = styled(UIText)`
   /* Headline (xxl = 24px). */
   font-size: ${tkn('typography.fontSize.xxl')};
 
-  @media (max-width: 30rem) {
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
     font-size: ${tkn('typography.fontSize.xl')};
   }
 `;
@@ -121,7 +121,7 @@ export const ButtonStack = styled.div`
     border-radius: ${tkn('radius.md')};
   }
 
-  @media (max-width: 30rem) {
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
     & > button {
       min-height: ${tkn('controls.height.medium')};
     }

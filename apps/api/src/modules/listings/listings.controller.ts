@@ -30,7 +30,6 @@ import {
   type PaginatedListingRevisionsDto,
   type PaginatedListingRevisionsWithListingDto,
   type PaginatedListingsDto,
-  type PaginatedProductsDto,
   ProductData,
   type UpdateListingRequest,
   isListingsStockPreset,
@@ -363,27 +362,6 @@ export class ListingsController {
       ebayAccountId: parseOptionalAccountId(ebayAccountId),
       sortBy,
       sortOrder,
-    });
-  }
-
-  /**
-   * Get products behind the user's listings (paginated)
-   */
-  @ApiOperation({ summary: 'Get unique products from user listings (paginated)' })
-  @Get('products')
-  async getProducts(
-    @Request() req: { user: { sub: string } },
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('search') search?: string,
-    @Query('ebayAccountId') ebayAccountId?: string
-  ): Promise<PaginatedProductsDto> {
-    const userId = req.user.sub;
-    return this.listingsService.getUserProducts(userId, {
-      page: toPositiveInt(page),
-      limit: toPositiveInt(limit),
-      search,
-      ebayAccountId: parseOptionalAccountId(ebayAccountId),
     });
   }
 

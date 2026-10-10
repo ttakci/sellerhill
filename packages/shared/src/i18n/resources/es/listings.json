@@ -495,9 +495,6 @@
       "draftBanner": "Borrador — no publicado en eBay",
       "groupPreviewTitle": "Ajustes de este grupo"
     },
-    "products": {
-      "searchPlaceholder": "Buscar por título, ASIN o marca…"
-    },
     "schedule": {
       "title": "Distribuir en el tiempo",
       "hint": "Publica una cantidad fija de productos por día, dentro de las horas que elijas, en lugar de todos a la vez. El precio, el stock y tus reglas de publicación se revisan cuando le toca a cada producto.",

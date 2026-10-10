@@ -22,7 +22,7 @@ export const Bar = styled.div`
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('shadows.xl')};
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     flex-wrap: wrap;
     justify-content: center;
     text-align: center;

@@ -500,9 +500,6 @@
       "previous": "Önceki",
       "next": "Sonraki"
     },
-    "products": {
-      "searchPlaceholder": "Başlık, ASIN veya marka ile ara…"
-    },
     "schedule": {
       "title": "Zamana yay",
       "hint": "Ürünleri bir anda değil, seçtiğiniz saatler arasında günde belirli sayıda listeleyin. Fiyat, stok ve listeleme kurallarınız her ürünün sırası geldiğinde kontrol edilir.",

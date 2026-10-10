@@ -45,7 +45,13 @@ export const BrandButton = styled.button`
   border: none;
   background: none;
   padding: 0;
+  border-radius: ${tkn('radius.sm')};
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.sidebar.accent')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const HeaderActions = styled.div`

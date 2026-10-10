@@ -176,8 +176,6 @@ export type { SegmentedControlOption, SegmentedControlProps } from './molecules/
 export { IdBadge } from './molecules/IdBadge';
 export type { IdBadgeProps, StoreType } from './molecules/IdBadge';
 
-export { LanguageSwitcher } from './molecules/LanguageSwitcher';
-export type { LanguageSwitcherProps, LocaleOption } from './molecules/LanguageSwitcher';
 
 export { MessageComposer } from './molecules/MessageComposer';
 export type {

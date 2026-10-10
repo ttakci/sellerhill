@@ -105,9 +105,6 @@
     "forbidden": "Acces interzis",
     "serverError": "A apărut o eroare. Încercați din nou mai târziu."
   },
-  "products": {
-    "subtitle": "Vizualizați detaliile produselor și datele Amazon pentru toate anunțurile dvs. active."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Campanii publicitare",
@@ -118,7 +115,6 @@
     "listingJobs": "Sarcini de anunțuri",
     "revisionHistory": "Istoric revizii",
     "drafts": "Ciorne",
-    "products": "Produse",
     "inventory": "Inventar",
     "discover": "Descoperă",
     "sales": "Vânzări",

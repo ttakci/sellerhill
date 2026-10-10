@@ -495,9 +495,6 @@
       "draftBanner": "Rascunho — não publicado no eBay",
       "groupPreviewTitle": "Configurações deste grupo"
     },
-    "products": {
-      "searchPlaceholder": "Pesquisar por título, ASIN ou marca…"
-    },
     "schedule": {
       "title": "Distribuir ao longo do tempo",
       "hint": "Anuncie um número definido de produtos por dia, dentro dos horários escolhidos, em vez de todos de uma vez. Preço, estoque e suas regras de anúncios são verificados quando chega a vez de cada produto.",

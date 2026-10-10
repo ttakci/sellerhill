@@ -105,9 +105,6 @@
     "forbidden": "Erişim yasak",
     "serverError": "Bir hata oluştu. Lütfen tekrar deneyin."
   },
-  "products": {
-    "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
-  },
   "menu": {
     "marketing": "Pazarlama",
     "campaigns": "Reklam kampanyaları",
@@ -118,7 +115,6 @@
     "listingJobs": "Liste İşleri",
     "revisionHistory": "Revizyon Geçmişi",
     "drafts": "Taslaklar",
-    "products": "Ürünler",
     "inventory": "Envanter",
     "discover": "Keşfet",
     "sales": "Satışlar",

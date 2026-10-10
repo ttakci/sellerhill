@@ -48,7 +48,7 @@ export const ProfileHeaderContent = styled.div`
   gap: ${tkn('spacing.xs')};
   text-align: center;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     text-align: left;
   }
@@ -62,7 +62,7 @@ export const ProfileBadges = styled.div`
   gap: ${tkn('spacing.sm')};
   margin-top: ${tkn('spacing.xs')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     justify-content: flex-start;
   }
@@ -101,7 +101,7 @@ export const SectionContent = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.md+')} ${tkn('spacing.xl')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     grid-template-columns: 1fr 1fr;
   }
@@ -162,7 +162,7 @@ export const InfoGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.xl')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     grid-template-columns: 1fr 1fr;
   }
@@ -209,7 +209,7 @@ export const FormRow = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     /* 768px */
     grid-template-columns: 1fr 1fr;
   }

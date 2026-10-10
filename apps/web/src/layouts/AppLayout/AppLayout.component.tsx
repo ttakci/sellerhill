@@ -76,7 +76,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/dashboard')}
-              title={t('translation:menu.dashboard')}
+              role="link"
+              aria-label={t('translation:menu.dashboard')}
             >
               <Logo layout="wordmark" height={32} />
             </S.LogoArea>
@@ -270,7 +271,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       pathWithoutLocale === '/listings/all' ||
                       (pathWithoutLocale.startsWith('/listings/') &&
                         !pathWithoutLocale.startsWith('/listings/jobs') &&
-                        pathWithoutLocale !== '/listings/products' &&
                         pathWithoutLocale !== '/listings/revisions' &&
                         pathWithoutLocale !== '/listings/add')
                     }
@@ -493,7 +493,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <S.HeaderRight>
                 <Dropdown
                   align="right"
-                  width="8rem"
+                  width="10rem"
                   trigger={
                     <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
                       <Icon name="globe" size={18} color="brand.primary" />
@@ -503,6 +503,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   }
                   items={SUPPORTED_LOCALES.map((locale) => ({
                     label: t(`translation:languages.${locale}`),
+                    selected: locale === i18nLanguage,
                     onClick: () => onChangeLanguage(locale),
                   }))}
                 />

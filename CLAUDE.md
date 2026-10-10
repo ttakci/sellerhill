@@ -158,7 +158,7 @@ i18n lives under `landing.{navbar,hero,proof,why,groups,templates,showcase,profi
 **Navbar and mobile menu.**
 - **The navbar row must never get an `overflow` value** — any non-`visible` overflow also clips vertically, and the absolutely-positioned Features `Dropdown` opens to nothing. `S.NavLinks` children keep natural width (`&& > * { flex-shrink: 0; width: auto }` — doubled `&&` beats the Dropdown atom's `width: 100%`), and the row hands over to the hamburger at `NAV_COLLAPSE` (1280px, sized to the Turkish row incl. "Hakkımızda"). **Adding a nav link means re-measuring that breakpoint.**
 - Navbar controls on navy use full `colors.sidebar.text`. Controls reused on light surfaces too (`LoginButton`, `LanguageTrigger`, `LanguageText`) take a `$onDark` prop at their dark call sites; omitted, they follow the `landing.*` theme colours. The navbar Login is a plain icon + text link.
-- The language control is the app's own `Dropdown` pattern (8rem wide, same as `AppLayout`/`OperatorLayout`), showing the full language name via `t('translation:languages.<code>')` — never a 2-letter code.
+- The language control is the app's own `Dropdown` pattern (the app shells use 10rem since 2026-10-10, room for the selected-language check), showing the full language name via `t('translation:languages.<code>')` — never a 2-letter code.
 - `S.MobileMenu` is a full-screen navy sheet (`inset: 0`, `sidebar.*` ink), full-width link rows, two equal full-width CTAs, bottom padding reserving `env(safe-area-inset-bottom)`.
 
 **Footer** is navy (`sidebar.background`/`sidebar.divider`, `sidebar.text*` ink — required because the logo's "SELLER" is white) with Product, **Contact** and Legal columns. Contact shows the legal name, address, `tel:` phone and `mailto:` e-mail from `BUSINESS_CONTACT` — facts, not copy, and they **must match what the payment processor holds as the business's customer-facing information** (change both or neither). Legal links go to Privacy, Terms and `/privacy#cookies`.
@@ -1694,7 +1694,7 @@ All values come from `packages/ui/src/theme/designTokens.ts` + `atoms/Text/Text.
 - Every interactive atom carries a `:focus-visible` ring in `brand.primary`. Checkbox / Radio / Toggle hide their real `<input>`, so they mirror focus onto the visible box with `input:focus-visible + &` — a plain sibling selector, **never** an Emotion component selector (those need the babel plugin and crash at runtime).
 
 ### Card grids (list surfaces)
-`DataTable`'s grid derives its column count from **`gridMinItemWidth`** (the narrowest track a card can survive in) via `auto-fill`, optionally capped by **`gridMaxColumns`** — never a fixed column count, which crushed wide horizontal cards. Current settings: Orders `26rem`/max 2 · Listings `24rem`/max 2 · Jobs `20rem` · Products `19rem` · Invoice history `18rem`. A card that lays out horizontally (thumbnail beside content) must declare a wide minimum; a compact tile can go narrow.
+`DataTable`'s grid derives its column count from **`gridMinItemWidth`** (the narrowest track a card can survive in) via `auto-fill`, optionally capped by **`gridMaxColumns`** — never a fixed column count, which crushed wide horizontal cards. Current settings: Orders `26rem`/max 2 · Listings `24rem`/max 2 · Jobs `20rem` · Invoice history `18rem`. A card that lays out horizontally (thumbnail beside content) must declare a wide minimum; a compact tile can go narrow.
 
 Inside a card, a fixed `repeat(N, 1fr)` stat strip is the usual failure mode — use `repeat(auto-fit, minmax(…, 1fr))` so cells reflow instead of truncating.
 
@@ -1741,11 +1741,9 @@ Sandbox and production eBay are separate sites with separate item id spaces: `eb
 - Amazon has no sandbox; `AmazonCheckoutService`'s Playwright navigation to `amazon.com/dp/<asin>` is a real purchase flow, not a UI link, and stays as-is.
 
 ### Every list endpoint is server-paginated (mandatory)
-`GET /listings`, `GET /listings/jobs` and `GET /listings/products` all return `{ items, total, page, limit }`. (The jobs page polls every 5s; an unbounded array re-downloaded the whole job history on every poll.)
+`GET /listings` and `GET /listings/jobs` both return `{ items, total, page, limit }`. (`GET /listings/products` and its Products page were removed 2026-10-10; `/listings/products` redirects to `/listings`.) (The jobs page polls every 5s; an unbounded array re-downloaded the whole job history on every poll.)
 
 - `ListingJobsQueryDto` — `page`, `limit` (default 20, clamped 100), `search` (job-id prefix), `status`.
-- `UserProductsQueryDto` — `page`, `limit`, `search` (title / ASIN / brand).
-- Product counts use `COUNT(DISTINCT p.id)` to match the `SELECT DISTINCT` page query — a product with several listings must count once.
 - Every filter control resets `page` to 1; otherwise a narrowed result set leaves the user on an empty page.
 - **Never add a list endpoint that returns a bare array.** If a UI shows a table or grid over it, it needs `page`/`limit` on day one.
 
@@ -1872,7 +1870,7 @@ The operator asked for the app to read as premium and trustworthy; the orders li
 
 **Round 3 — the whole app (2026-10-01, operator: "apply it to every screen; cards are the default, not the table").** The orders rules above now hold on every seller screen, and the rollout settled five more:
 - **Every `DataTable` opens on CARDS, at every width** (`DataTable.container.tsx`: `defaultViewMode ?? 'grid'`; the orders page and the revision history start on `'grid'` too). A card carries the photo and reads the way a seller thinks about a sale or a listing; the table is one `ViewToggle` away for scanning figures. Do not pass `defaultViewMode="table"` to a new list.
-- **Filter rows sit on the canvas, never in a card of their own** — `FilterBar` in the listings, drafts, products, jobs, job detail, revision history, returns and messages pages is a plain flex column; the result count is plain caption text, not a tinted chip. The first surface on a list page is the first row of data.
+- **Filter rows sit on the canvas, never in a card of their own** — `FilterBar` in the listings, drafts, jobs, job detail, revision history, returns and messages pages is a plain flex column; the result count is plain caption text, not a tinted chip. The first surface on a list page is the first row of data.
 - **One card shape for every list card** — `ListingCard` (domain-ui, also the dashboard and Best Sellers), the listing-jobs `JobCard` and `ReturnCard` mirror `OrderCard`: the title block, a `<dl>` of label / value rows with NO icon, then the figures under one hairline on `glass.tint` (`StatsGrid` / `Facts`), sentence-case labels, no "Details →" footer (the whole card is the button). The anatomy inside the top block is "Card anatomy" below. `ListingCardMetaItem.icon`, `ProductTableCellMetaRow.icon` and `ListingCard`'s `showDetailAction` are accepted and ignored; `SettingsInfoRow.icon` is optional and the listing detail's fact rows omit it. The listing detail's KPI strip and the job detail's stat strip are hairline-separated rows on the pane, not tinted boxes.
 - **Hand-rolled controls were folded back into the atoms, and new ones must not appear** (operator request — one atomic design system, tokens only): the Amazon link modal's native `<select>` is a `ModernSelect`; the dashboard and Messages store filters are the same `Select size="small"` (no icon) as the list pages' store filter — a filter that holds a value is a `Select`, never a `Dropdown` with a button trigger (`Dropdown` is a menu of actions); the period card's "show more" and the listings advanced-filter header are `Button variant="text"`; the blacklist scope tag is a `Badge`. `styled.button` / `styled.select` in a feature `.style.ts` is the smell to look for.
 - **A `StatusBadge` never prints the raw enum.** `getEbayAccountStatusLabel` (`features/ebay/utils/`) and `getAmazonAccountStatusLabel` (`features/amazon/utils/`) resolve the store and buyer-account statuses through the existing `ebay.accounts.status*` / `amazon.accounts.status*` keys; the stores page and both account cards use them (they showed "Active" in Turkish).
@@ -1920,7 +1918,7 @@ The seller works on ONE eBay store at a time, chosen in ONE place: the `StoreSwi
 **Currency is resolved from the connected eBay store's marketplace — NEVER from the UI language.** `getLocaleConfig(language)` (`packages/ui/src/utils/format.ts`) returns `{ locale }` only — it once also returned a language-keyed currency, which rendered eBay-USD amounts as TRY for Turkish-language sessions. Money gets its currency from domain data:
 - **A listing** carries its own resolved `ListingDto.currency` — `useListingsColumns` formats each row with `listing.currency`, not a page-wide value.
 - **An order, the dashboard, and anywhere else without a per-row currency field** resolve it via `apps/web/src/utils/resolveStoreCurrency.ts`: given the user's connected eBay accounts (`useGetEbayAccountsQuery`) and an optional `ebayAccountId` (an active store filter, or the order's own `ebayAccountId`), it returns that account's marketplace currency, falling back to the first connected account, then to eBay US.
-- **Amazon-sourced money** (the Products page) is always `'USD'` — only Amazon US exists — never derived from the eBay store or the UI language.
+- **Amazon-sourced money** (e.g. the Amazon card on the order detail) is always `'USD'` — only Amazon US exists — never derived from the eBay store or the UI language.
 - **A billing plan's price** or an **admin/platform cost** carries its own `currency` field from its own domain.
 
 ### Listing settings group — content policy
@@ -1943,7 +1941,7 @@ The seller works on ONE eBay store at a time, chosen in ONE place: the `StoreSwi
 ### Domain UI vs design system
 - Product-specific composites live in `apps/web/src/domain-ui/` (`ListingCard`, `ConnectEbayPrompt`, `ProductTableCell`).
 - `@repo/ui` is design-system only (atoms/molecules/organisms + tokens). Do not re-add domain widgets there.
-- **`ProductTableCell` is the product identity cell for EVERY table** (listings, orders, products) — three drifted hand-rolled copies were folded into it. Props are `title` (always fully on the tooltip), `imageUrl`, `meta` (labelled `IdBadge` rows) and a `subtitle` slot. A new table showing a product uses this — do not write another.
+- **`ProductTableCell` is the product identity cell for EVERY table** (listings, orders, top sellers…) — three drifted hand-rolled copies were folded into it. Props are `title` (always fully on the tooltip), `imageUrl`, `meta` (labelled `IdBadge` rows) and a `subtitle` slot. A new table showing a product uses this — do not write another.
 
 ### Route metadata
 - Breadcrumbs: `apps/web/src/app/routeMeta.ts` (`APP_ROUTE_META`, `resolveRouteMeta`, `resolveBreadcrumbs`). It describes the seller app only.
@@ -1982,7 +1980,7 @@ Every one of these existed as a private copy before being folded back into the d
 - **Nested flows** → a real nested `Drawer` with `onBack`, not inline content swapped into the parent's card.
 
 ### Page-level loading is not the global overlay
-`useLoading(...)` takes **mutation flags only**. Folding an initial `useQuery` `isLoading` into it covers the whole app with the blocking overlay on first paint. Initial fetch of a LIST renders the `DataTable`'s skeleton (`loading`, card-shaped placeholders — a title line, a thumbnail with text lines, a stat footer — so the grid keeps its height when the real cards arrive; jobs, products, revision history, listings, drafts, orders, returns, Best Sellers); any other page renders its own `EmptyState` (loading title + description). Never the overlay.
+`useLoading(...)` takes **mutation flags only**. Folding an initial `useQuery` `isLoading` into it covers the whole app with the blocking overlay on first paint. Initial fetch of a LIST renders the `DataTable`'s skeleton (`loading`, card-shaped placeholders — a title line, a thumbnail with text lines, a stat footer — so the grid keeps its height when the real cards arrive; jobs, revision history, listings, drafts, orders, returns, Best Sellers); any other page renders its own `EmptyState` (loading title + description). Never the overlay.
 **The blocking overlay is SellerHill's own, and scrims are dimmed, never blurred (2026-10-02, operator request).** `S.LoadingOverlay` (shared shell, both layouts) is a `colors.surface.loadingOverlay` scrim (black 35%) over the unchanged page — no white wash, no `backdrop-filter` — with a navy `S.LoadingCard` holding `<Logo layout="wordmark" />` (white SELLER needs a dark surface) and an amber indeterminate bar (`prefers-reduced-motion` freezes it). `Modal` and `Drawer` overlays use `colors.surface.overlay` (black 40%) with no `backdrop-filter`; do not put a blur back on a scrim — the page behind must stay legible. (Frosted glass panes and the sticky header keep their own blur.)
 
 ### Listings CSV export

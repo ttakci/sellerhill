@@ -1,5 +1,5 @@
 import { BlacklistAction } from '@repo/shared';
-import { Badge, Checkbox, Icon, Text } from '@repo/ui';
+import { Badge, Checkbox, Icon, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -32,10 +32,12 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
               <Checkbox checked={selected} onChange={onSelect} aria-label={t('translation:common.select')} />
             </S.CheckboxSection>
           )}
-          <S.KeywordSection title={keyword}>
-            <Text weight="bold" color="text.primary">
-              {keyword}
-            </Text>
+          <S.KeywordSection>
+            <Tooltip content={keyword} position="top" variant="dark">
+              <Text weight="bold" color="text.primary" truncate>
+                {keyword}
+              </Text>
+            </Tooltip>
           </S.KeywordSection>
         </S.HeaderLeft>
         <S.ActionButton

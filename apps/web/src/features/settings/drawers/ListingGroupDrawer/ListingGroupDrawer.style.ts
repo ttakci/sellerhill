@@ -96,7 +96,7 @@ export const RepricingFieldGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.md')};
 
-  @media (min-width: 36rem) {
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     grid-template-columns: repeat(2, 1fr);
   }
 `;

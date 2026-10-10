@@ -17,7 +17,7 @@ export const HeaderWrapper = styled.div<{ $noMargin?: boolean }>`
   /* $noMargin kept for API compat; margin is always 0 (parent gap) */
   margin-bottom: 0;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     flex-direction: row;
     align-items: flex-start;
   }
@@ -38,10 +38,10 @@ export const BackButtonWrap = styled.div<{ $mobileOnly?: boolean }>`
   /* Align with h1 cap height */
   margin-top: ${tkn('spacing.2xs')};
 
-  ${({ $mobileOnly }) =>
+  ${({ $mobileOnly, theme }) =>
     $mobileOnly &&
     `
-    @media (min-width: 48rem) {
+    @media (min-width: ${theme.breakpoints.md}) {
       display: none;
     }
   `}
@@ -61,7 +61,7 @@ export const ActionsArea = styled.div`
   gap: ${tkn('spacing.sm')};
   flex-shrink: 0;
   /* Align actions to title baseline row on desktop */
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     padding-top: ${tkn('spacing.2xs')};
   }
 `;

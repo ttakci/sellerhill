@@ -495,9 +495,6 @@
       "draftBanner": "Bozza — non pubblicata su eBay",
       "groupPreviewTitle": "Impostazioni di questo gruppo"
     },
-    "products": {
-      "searchPlaceholder": "Cerca per titolo, ASIN o marchio…"
-    },
     "schedule": {
       "title": "Distribuisci nel tempo",
       "hint": "Inserisci un numero fisso di prodotti al giorno, nelle ore che scegli, invece di tutti insieme. Prezzo, stock e le tue regole delle inserzioni vengono controllati quando arriva il turno di ciascun prodotto.",

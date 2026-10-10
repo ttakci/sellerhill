@@ -105,9 +105,6 @@
     "forbidden": "Acesso proibido",
     "serverError": "Ocorreu um erro. Tente novamente mais tarde."
   },
-  "products": {
-    "subtitle": "Veja os detalhes dos produtos e os dados da Amazon de todos os seus anúncios ativos."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Campanhas publicitárias",
@@ -118,7 +115,6 @@
     "listingJobs": "Tarefas de anúncios",
     "revisionHistory": "Histórico de revisões",
     "drafts": "Rascunhos",
-    "products": "Produtos",
     "inventory": "Estoque",
     "discover": "Descobrir",
     "sales": "Vendas",

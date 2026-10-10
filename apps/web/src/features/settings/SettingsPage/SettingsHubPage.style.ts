@@ -19,7 +19,7 @@ export const TwoColGrid = styled.div`
     height: 100%;
   }
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     grid-template-columns: 1fr;
   }
 `;

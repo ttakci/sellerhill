@@ -24,7 +24,7 @@ export const FilterBarRow = styled.div`
   gap: ${tkn('spacing.md')};
   flex-wrap: wrap;
 
-  @media (max-width: 64rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     flex-direction: column;
     align-items: stretch;
     gap: ${tkn('spacing.sm')};
@@ -38,7 +38,7 @@ export const SearchWrapper = styled.div`
   position: relative;
   z-index: 1;
 
-  @media (max-width: 64rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     width: 100%;
   }
 `;
@@ -49,7 +49,7 @@ export const SelectWrapper = styled.div`
   position: relative;
   z-index: 2;
 
-  @media (max-width: 64rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     width: 100%;
   }
 `;
@@ -61,7 +61,7 @@ export const FilterActions = styled.div`
   margin-left: auto;
   min-height: ${tkn('controls.height.medium')};
 
-  @media (max-width: 64rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     margin-left: 0;
     min-height: auto;
   }
@@ -117,7 +117,7 @@ export const NumericFilterGrid = styled.div`
   gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   padding-top: ${tkn('spacing.sm')};
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     grid-template-columns: 1fr;
   }
 `;

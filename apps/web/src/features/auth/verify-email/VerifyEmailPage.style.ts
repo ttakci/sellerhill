@@ -175,7 +175,7 @@ export const StatusIconWrapper = styled.div<{ $type: 'success' | 'error' | 'load
     }
   }};
 
-  @media (max-width: 40rem) {
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     width: 4rem;
     height: 4rem;
     margin-bottom: ${tkn('spacing.lg')};

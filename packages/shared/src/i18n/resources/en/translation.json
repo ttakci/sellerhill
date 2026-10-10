@@ -105,9 +105,6 @@
     "forbidden": "Access forbidden",
     "serverError": "An error occurred. Please try again later."
   },
-  "products": {
-    "subtitle": "View product details and Amazon data for all your active listings."
-  },
   "menu": {
     "marketing": "Marketing",
     "campaigns": "Ad campaigns",
@@ -118,7 +115,6 @@
     "listingJobs": "Listing jobs",
     "revisionHistory": "Revision history",
     "drafts": "Drafts",
-    "products": "Products",
     "inventory": "Inventory",
     "discover": "Discover",
     "sales": "Sales",

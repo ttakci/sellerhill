@@ -28,7 +28,7 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
   gap: ${tkn('spacing.md')};
   background: transparent;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     flex-direction: ${({ $variant }) => ($variant === 'panel' ? 'column' : 'row')};
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
     padding: ${({ $variant, theme }) =>
@@ -52,7 +52,7 @@ export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
   max-width: ${({ $variant }) => ($variant === 'panel' ? '50%' : 'none')};
   min-width: 0;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     max-width: 100%;
   }
 `;
@@ -133,7 +133,7 @@ export const HeaderRight = styled.div<{ $variant: SettingsCardVariant }>`
   max-width: ${({ $variant }) => ($variant === 'panel' ? '50%' : 'none')};
   flex-shrink: 0;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     flex: 1;
     max-width: 100%;
   }
