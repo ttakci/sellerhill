@@ -15,6 +15,10 @@ import type { TrendChartDotProps, TrendChartProps } from './TrendChart.types';
 
 const CHART_MARGIN = { top: 8, right: 8, left: 8, bottom: 0 } as const;
 const TICK_GAP = 24;
+/** A thin date axis, so most of a table cell's height is the plot the tooltip answers on. */
+const COMPACT_AXIS_HEIGHT = 18;
+/** Room on both sides so the first and last date are not cut in a table cell. */
+const COMPACT_MARGIN = { top: 6, right: 20, left: 20, bottom: 0 } as const;
 const LINE_STROKE_WIDTH = 2;
 const SOLD_DOT_RADIUS = 3.5;
 const EMPTY_DOT_RADIUS = 2;
@@ -37,29 +41,37 @@ export const TrendChart = ({
   formatTooltipTitle,
   formatValue,
   ariaLabel,
+  compact = false,
   onChartClick,
 }: TrendChartProps): React.ReactElement => (
-  <S.Pane>
-    <S.Header>
-      <Text variant="caption" weight="semibold" color="text.secondary">
-        {title}
-      </Text>
-      {peakLabel ? (
-        <Text variant="caption" color="text.tertiary" numeric>
-          {peakLabel}
+  <S.Pane $compact={compact}>
+    {compact ? null : (
+      <S.Header>
+        <Text variant="caption" weight="semibold" color="text.secondary">
+          {title}
         </Text>
-      ) : null}
-    </S.Header>
-    <S.Chart role="img" aria-label={ariaLabel} onClick={onChartClick}>
+        {peakLabel ? (
+          <Text variant="caption" color="text.tertiary" numeric>
+            {peakLabel}
+          </Text>
+        ) : null}
+      </S.Header>
+    )}
+    <S.Chart $compact={compact} role="img" aria-label={ariaLabel} onClick={onChartClick}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={CHART_MARGIN}>
+        <LineChart data={points} margin={compact ? COMPACT_MARGIN : CHART_MARGIN}>
           <XAxis
             dataKey="key"
-            tickFormatter={formatTick}
+            // A table cell names only the first and the last bucket (every tick
+            // stays, so the tooltip still snaps to each bucket).
+            tickFormatter={(key: string, index: number) =>
+              !compact || index === 0 || index === points.length - 1 ? formatTick(key) : ''
+            }
             tick={{ fontSize: colors.axisFontSize, fill: colors.axis }}
             axisLine={false}
             tickLine={false}
-            interval="preserveStartEnd"
+            interval={compact ? 0 : 'preserveStartEnd'}
+            height={compact ? COMPACT_AXIS_HEIGHT : undefined}
             minTickGap={TICK_GAP}
           />
           <YAxis hide domain={Y_DOMAIN} />
@@ -99,12 +111,14 @@ export const TrendChart = ({
             strokeWidth={LINE_STROKE_WIDTH}
             dot={({ cx, cy, index, value }: TrendChartDotProps) => {
               const sold = typeof value === 'number' && value !== 0;
+              // In a narrow table cell only the buckets that sold carry a dot.
+              const hidden = compact && !sold;
               return (
                 <circle
                   key={`dot-${index ?? 0}`}
                   cx={cx}
                   cy={cy}
-                  r={sold ? SOLD_DOT_RADIUS : EMPTY_DOT_RADIUS}
+                  r={hidden ? 0 : sold ? SOLD_DOT_RADIUS : EMPTY_DOT_RADIUS}
                   fill={sold ? colors.line : colors.surface}
                   stroke={sold ? colors.line : colors.empty}
                   strokeWidth={DOT_STROKE_WIDTH}

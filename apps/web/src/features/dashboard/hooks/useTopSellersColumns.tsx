@@ -1,10 +1,12 @@
 import { formatSourceStock, type TopListingDto } from '@repo/shared';
-import { formatCurrency, Sparkline, Text, type TableColumn } from '@repo/ui';
-import { useMemo } from 'react';
+import { formatCurrency, Text, type TableColumn } from '@repo/ui';
+import { useMemo, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from '../components/TopSellersPanel/TopSellersPanel.style';
-import { changeTone, formatSignedMoney, formatSignedPercent, profitTone, trendTone } from '../utils/topSellerCard';
+import type { TopSellerTrendModel } from '../components/TopSellersPanel/TopSellersPanel.types';
+import { TrendChart, type TrendChartColors } from '../components/TrendChart';
+import { changeTone, formatSignedMoney, formatSignedPercent, profitTone } from '../utils/topSellerCard';
 
 import { ProductTableCell, type ProductTableCellMetaRow, type StatTone } from '@/domain-ui';
 
@@ -13,7 +15,17 @@ import { ProductTableCell, type ProductTableCellMetaRow, type StatTone } from '@
  * range, then the period figures. Money is two decimals in each listing's
  * own currency (never the UI language); `locale` sets separators only.
  */
-export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>[] {
+export interface TopSellersTrendColumn {
+  /** The same trend the card shows, by listing id. */
+  trendFor: (listingId: string) => TopSellerTrendModel | undefined;
+  colors: Omit<TrendChartColors, 'line'>;
+  formatTick: (key: string) => string;
+  formatTooltipTitle: (key: string) => string;
+  /** A tap on the chart shows its tooltip rather than opening the listing. */
+  stopRowClick: (event: MouseEvent) => void;
+}
+
+export function useTopSellersColumns(locale: string, trend: TopSellersTrendColumn): TableColumn<TopListingDto>[] {
   const { t } = useTranslation(['dashboard', 'listings', 'translation']);
 
   return useMemo<TableColumn<TopListingDto>[]>(() => {
@@ -46,17 +58,26 @@ export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>
       {
         key: 'trend',
         header: t('dashboard.topSellers.columns.trend'),
-        width: '7rem',
-        render: (_value, row) => (
-          <S.TrendCell>
-            <Sparkline
-              values={row.series}
-              tone={trendTone(row.changes.sales)}
-              ariaLabel={t('dashboard.topSellers.trendAria')}
-              size="sm"
-            />
-          </S.TrendCell>
-        ),
+        width: '11rem',
+        render: (_value, row) => {
+          const model = trend.trendFor(row.listing.id);
+          return model ? (
+            <S.TrendCell>
+              <TrendChart
+                compact
+                points={model.points}
+                title={model.title}
+                valueLabel={model.valueLabel}
+                colors={{ ...trend.colors, line: model.color }}
+                formatTick={trend.formatTick}
+                formatTooltipTitle={trend.formatTooltipTitle}
+                formatValue={model.formatValue}
+                ariaLabel={t('dashboard.topSellers.trendAria')}
+                onChartClick={trend.stopRowClick}
+              />
+            </S.TrendCell>
+          ) : null;
+        },
       },
       {
         key: 'sales',
@@ -151,5 +172,5 @@ export function useTopSellersColumns(locale: string): TableColumn<TopListingDto>
         },
       },
     ];
-  }, [t, locale]);
+  }, [t, locale, trend]);
 }

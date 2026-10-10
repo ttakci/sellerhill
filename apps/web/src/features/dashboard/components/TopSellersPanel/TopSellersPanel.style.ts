@@ -18,4 +18,6 @@ export const MetricCell = styled.div`
 export const TrendCell = styled.div`
   display: flex;
   align-items: center;
+  width: 100%;
+  min-width: 0;
 `;

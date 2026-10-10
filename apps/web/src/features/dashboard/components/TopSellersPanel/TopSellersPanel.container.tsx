@@ -87,7 +87,6 @@ export const TopSellersPanel = ({
     }
   }, [currentData, page, onPageChange]);
 
-  const columns = useTopSellersColumns(locale);
   const theme = useTheme();
 
   // Up green, down red; flat or no comparison in the brand blue (a grey line read as "disabled").
@@ -169,6 +168,19 @@ export const TopSellersPanel = ({
       ),
     [items, t, tListings, locale, buildTrend]
   );
+
+  // The table's trend column draws the same trend as the card, in its compact form.
+  const trendColumn = useMemo(
+    () => ({
+      trendFor: (listingId: string) => cards[listingId]?.trend,
+      colors: trendColors,
+      formatTick: formatTrendTick,
+      formatTooltipTitle: formatTrendTooltipTitle,
+      stopRowClick: stopCardClick,
+    }),
+    [cards, trendColors, formatTrendTick, formatTrendTooltipTitle, stopCardClick]
+  );
+  const columns = useTopSellersColumns(locale, trendColumn);
 
   const sortOptions = useMemo(() => SORT_KEYS.map((key) => ({ value: key, label: t(SORT_LABEL_KEYS[key]) })), [t]);
 

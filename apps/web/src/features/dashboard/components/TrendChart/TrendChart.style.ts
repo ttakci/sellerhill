@@ -2,15 +2,22 @@ import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
 /** Its own pane inside the card: a header line, then the chart with a date axis. */
-export const Pane = styled.div`
+export const Pane = styled.div<{ $compact: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')} ${tkn('spacing.xs')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.surface.primary')};
   min-width: 0;
+  width: 100%;
+
+  ${({ $compact, theme }) =>
+    $compact
+      ? ''
+      : `
+    padding: ${theme.spacing.sm} ${theme.spacing['sm-md']} ${theme.spacing.xs};
+    border: 0.0625rem solid ${theme.colors.border.primary};
+    border-radius: ${theme.radius.md};
+    background: ${theme.colors.surface.primary};
+  `}
 `;
 
 export const Header = styled.div`
@@ -28,13 +35,13 @@ export const Header = styled.div`
   }
 `;
 
-export const Chart = styled.div`
-  height: 6rem;
+export const Chart = styled.div<{ $compact: boolean }>`
+  height: ${({ $compact }) => ($compact ? '4rem' : '6rem')};
   min-width: 0;
   cursor: crosshair;
 
   @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    height: 5rem;
+    height: ${({ $compact }) => ($compact ? '4rem' : '5rem')};
   }
 `;
 

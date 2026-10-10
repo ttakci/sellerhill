@@ -46,6 +46,11 @@ export interface TrendChartProps {
   formatTooltipTitle: (key: string) => string;
   formatValue: (value: number) => string;
   ariaLabel: string;
+  /**
+   * Table-cell form: no frame and no header line (the column header says what
+   * it is), a shorter chart, and only the first and last dates on the axis.
+   */
+  compact?: boolean;
   /** Keeps a tap on the chart (which shows a tooltip) from opening the listing. */
   onChartClick: (event: React.MouseEvent) => void;
 }
