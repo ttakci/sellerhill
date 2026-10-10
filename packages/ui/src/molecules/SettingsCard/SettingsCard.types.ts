@@ -22,4 +22,7 @@ export interface SettingsCardProps {
   headerRight?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
+  /** The rule under a section card's header. On by default; off for a card
+   *  whose body is its own bordered panes (the order detail's summaries). */
+  showHeaderDivider?: boolean;
 }

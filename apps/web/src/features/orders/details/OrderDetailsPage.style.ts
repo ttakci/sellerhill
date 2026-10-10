@@ -313,6 +313,9 @@ export const SectionGrid = styled.div`
 /** The eBay card's body: what the buyer paid | what you earned — two panes
  *  with a gap between them, side by side from `md`, stacked on a phone. */
 export const EbayColumns = styled.div`
+  /* Fills the card body (a flex column the section grid stretches), so the
+     panes of both summary cards end on one line. */
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
@@ -323,9 +326,10 @@ export const EbayColumns = styled.div`
   }
 `;
 
-/** One pane of the eBay card (operator request, 2026-10-09: the two halves read
- *  as two separate parts) — a tinted, bordered box inside the card. */
-export const EbayPane = styled.div`
+/** One summary pane — a tinted, bordered box inside the card: the eBay card's
+ *  two halves (operator request, 2026-10-09: they read as two separate parts)
+ *  and the Amazon card's one (2026-10-10: the three sit side by side alike). */
+export const SummaryPane = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -333,6 +337,12 @@ export const EbayPane = styled.div`
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
   background: ${tkn('colors.glass.tint')};
+
+  /* On a phone the pane's inset would push long values (order number,
+     tracking chips) onto a second line inside the fixed-height rows. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: 0 ${tkn('spacing.sm')} ${tkn('spacing.xs')};
+  }
 `;
 
 /** Wrapper for the shared EmptyState on the loading / not-found screens. */
@@ -354,6 +364,16 @@ export const SectionContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
+`;
+
+/** The Amazon card's body: its one pane fills the card, which the section grid
+ *  stretches to the eBay card's height, so the panes end on one line. */
+export const AmazonPaneContent = styled(SectionContent)`
+  flex: 1 1 auto;
+
+  & > :first-child {
+    flex: 1 1 auto;
+  }
 `;
 
 /** Space above a card's action buttons, kept out of the row rhythm. */
@@ -406,6 +426,11 @@ export const MetaValue = styled.div`
   max-width: 60%;
   text-align: right;
   overflow-wrap: anywhere;
+
+  /* On a phone the label wraps before an order or tracking number does. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    max-width: 72%;
+  }
 `;
 
 export const AddressBlock = styled.div`
@@ -421,6 +446,7 @@ export const OrderIdValue = styled.span`
   justify-content: flex-end;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
+  white-space: nowrap;
 `;
 
 /** Phone line under the ship-to address. */
@@ -476,8 +502,13 @@ export const TrackingChip = styled.span<{ $tone: 'amazon' | 'converted' }>`
   max-width: 100%;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.sm')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  }
+
   background: ${({ $tone }) => ($tone === 'amazon' ? tkn('colors.brand.primary') : tkn('colors.semantic.success'))};
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 
   /* The copy trigger's light hover wash would hide the white ink on a dark chip. */
   && [role='button']:hover,

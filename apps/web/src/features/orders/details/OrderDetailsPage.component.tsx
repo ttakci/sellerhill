@@ -476,9 +476,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 
       <S.SectionGrid>
         {/* eBay summary — what the buyer paid | what you earned, as two panes. */}
-        <SettingsCard variant="section" header={{ title: t('orders.detail.ebaySummary') }}>
+        <SettingsCard
+          variant="section"
+          header={{ title: t('orders.detail.ebaySummary'), emphasis: true }}
+          showHeaderDivider={false}
+        >
           <S.EbayColumns>
-            <S.EbayPane>
+            <S.SummaryPane>
               <S.GroupLabel>
                 <Text variant="body-sm" weight="semibold">
                   {t('orders.detail.whatBuyerPaid')}
@@ -509,8 +513,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                 <Money label={t('orders.detail.salesTax')} value={formatCurrency(resolvedSaleTax)} />
                 <Money label={t('orders.detail.orderTotal')} value={formatCurrency(resolvedSaleTotal)} />
               </S.MetaList>
-            </S.EbayPane>
-            <S.EbayPane>
+            </S.SummaryPane>
+            <S.SummaryPane>
               <S.GroupLabel>
                 <Text variant="body-sm" weight="semibold">
                   {t('orders.detail.whatYouEarned')}
@@ -576,91 +580,97 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   </S.MetaList>
                 </>
               ) : null}
-            </S.EbayPane>
+            </S.SummaryPane>
           </S.EbayColumns>
         </SettingsCard>
 
         {/* Amazon costs */}
-        <SettingsCard variant="section" header={{ title: t('orders.detail.amazonCosts') }}>
-          <S.SectionContent>
+        <SettingsCard
+          variant="section"
+          header={{ title: t('orders.detail.amazonCosts'), emphasis: true }}
+          showHeaderDivider={false}
+        >
+          <S.AmazonPaneContent>
             {/* Same lines, same order, same names as Amazon's own Order Summary
                 so the seller can check this card against the Amazon page line
                 by line. */}
-            <S.GroupLabel>
-              <Text variant="body-sm" weight="semibold">
-                {t('orders.detail.whatYouPaidAmazon')}
-              </Text>
-            </S.GroupLabel>
-            <S.MetaList>
-              <Money label={t('orders.detail.itemSubtotal')} value={formatCurrency(order.purchasePrice)} />
-              <Money label={t('orders.detail.shippingHandling')} value={formatCurrency(order.amazonShipping || 0)} />
-              <Money label={t('orders.detail.totalBeforeTax')} value={formatCurrency(amazonTotalBeforeTax)} />
-              <Money label={t('orders.detail.estimatedTax')} value={formatCurrency(order.amazonTax || 0)} />
-              <Money label={t('orders.detail.grandTotal')} value={formatCurrency(totalAmazonCost)} total />
-              {/* The real Amazon order number (never a dry run's SIM- id), with
+            <S.SummaryPane>
+              <S.GroupLabel>
+                <Text variant="body-sm" weight="semibold">
+                  {t('orders.detail.whatYouPaidAmazon')}
+                </Text>
+              </S.GroupLabel>
+              <S.MetaList>
+                <Money label={t('orders.detail.itemSubtotal')} value={formatCurrency(order.purchasePrice)} />
+                <Money label={t('orders.detail.shippingHandling')} value={formatCurrency(order.amazonShipping || 0)} />
+                <Money label={t('orders.detail.totalBeforeTax')} value={formatCurrency(amazonTotalBeforeTax)} />
+                <Money label={t('orders.detail.estimatedTax')} value={formatCurrency(order.amazonTax || 0)} />
+                <Money label={t('orders.detail.grandTotal')} value={formatCurrency(totalAmazonCost)} total />
+                {/* The real Amazon order number (never a dry run's SIM- id), with
                   Amazon's own order page one click away. */}
-              {order.amazonOrderId && !order.isSimulated && (
-                <Meta label={t('orders.detail.amazonOrder')}>
-                  <S.OrderIdValue>
-                    <Text variant="body-sm" weight="medium" numeric>
-                      <CopyableText
-                        value={order.amazonOrderId}
-                        label={t('orders.detail.amazonOrder')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                    {onOpenAmazonOrderUrl ? (
-                      <IconButton
-                        variant="ghost"
-                        aria-label={t('orders.detail.amazonOrder')}
-                        onClick={onOpenAmazonOrderUrl}
-                      >
-                        <Icon name="external-link" size={14} color="text.tertiary" />
-                      </IconButton>
-                    ) : null}
-                  </S.OrderIdValue>
-                </Meta>
-              )}
-              {order.amazonTrackingNumber && (
-                <Meta label={t('orders.detail.amazonTracking')}>
-                  <S.TrackingChip $tone="amazon">
-                    <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
-                      <CopyableText
-                        value={order.amazonTrackingNumber}
-                        label={t('orders.detail.amazonTracking')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                  </S.TrackingChip>
-                </Meta>
-              )}
-              {order.convertedTrackingNumber && (
-                <Meta label={t('orders.detail.convertedTracking')}>
-                  <S.TrackingChip $tone="converted">
-                    <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
-                      <CopyableText
-                        value={order.convertedTrackingNumber}
-                        label={t('orders.detail.convertedTracking')}
-                        copiedLabel={t('orders.detail.copied')}
-                      />
-                    </Text>
-                  </S.TrackingChip>
-                </Meta>
-              )}
-            </S.MetaList>
+                {order.amazonOrderId && !order.isSimulated && (
+                  <Meta label={t('orders.detail.amazonOrder')}>
+                    <S.OrderIdValue>
+                      <Text variant="body-sm" weight="medium" numeric>
+                        <CopyableText
+                          value={order.amazonOrderId}
+                          label={t('orders.detail.amazonOrder')}
+                          copiedLabel={t('orders.detail.copied')}
+                        />
+                      </Text>
+                      {onOpenAmazonOrderUrl ? (
+                        <IconButton
+                          variant="ghost"
+                          aria-label={t('orders.detail.amazonOrder')}
+                          onClick={onOpenAmazonOrderUrl}
+                        >
+                          <Icon name="external-link" size={14} color="text.tertiary" />
+                        </IconButton>
+                      ) : null}
+                    </S.OrderIdValue>
+                  </Meta>
+                )}
+                {order.amazonTrackingNumber && (
+                  <Meta label={t('orders.detail.amazonTracking')}>
+                    <S.TrackingChip $tone="amazon">
+                      <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
+                        <CopyableText
+                          value={order.amazonTrackingNumber}
+                          label={t('orders.detail.amazonTracking')}
+                          copiedLabel={t('orders.detail.copied')}
+                        />
+                      </Text>
+                    </S.TrackingChip>
+                  </Meta>
+                )}
+                {order.convertedTrackingNumber && (
+                  <Meta label={t('orders.detail.convertedTracking')}>
+                    <S.TrackingChip $tone="converted">
+                      <Text variant="body-sm" weight="semibold" numeric color="text.inverse">
+                        <CopyableText
+                          value={order.convertedTrackingNumber}
+                          label={t('orders.detail.convertedTracking')}
+                          copiedLabel={t('orders.detail.copied')}
+                        />
+                      </Text>
+                    </S.TrackingChip>
+                  </Meta>
+                )}
+              </S.MetaList>
+            </S.SummaryPane>
             {order.trackingProblemCode && (
               <S.SectionActions>
                 <InfoMessage type="warning">{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
               </S.SectionActions>
             )}
-          </S.SectionContent>
+          </S.AmazonPaneContent>
         </SettingsCard>
       </S.SectionGrid>
 
       {/* A buyer's cancellation request: what they asked, by when eBay needs the
           answer, and the two answers the seller may give from here. */}
       {order.cancellation && (
-        <SettingsCard variant="section" header={{ title: t('orders.cancellation.title') }}>
+        <SettingsCard variant="section" header={{ title: t('orders.cancellation.title'), emphasis: true }}>
           <S.SectionContent>
             <S.MetaList>
               <Meta label={t('orders.cancellation.buyer')}>
@@ -731,7 +741,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       {/* The order's path, step by step: what happened and when, where it is
           standing now, and what is still ahead. */}
       {timelineRows.length > 0 && (
-        <SettingsCard variant="section" header={{ title: t('orders.timeline.title') }}>
+        <SettingsCard variant="section" header={{ title: t('orders.timeline.title'), emphasis: true }}>
           <S.TimelineBody>
             {multiItemCount !== null && (
               <InfoMessage>{t('orders.detail.multiItemNotice', { count: multiItemCount })}</InfoMessage>

@@ -13,6 +13,7 @@ export const SettingsCard: React.FC<SettingsCardProps> = ({
   headerRight,
   children,
   className,
+  showHeaderDivider = true,
 }) => {
   const showHeader = header || headerLeft || headerRight;
 
@@ -56,7 +57,7 @@ export const SettingsCard: React.FC<SettingsCardProps> = ({
           {headerRight && <S.HeaderRight $variant={variant}>{headerRight}</S.HeaderRight>}
         </S.CardHeader>
       )}
-      {showHeader && variant === 'section' && children && <S.HeaderDivider $variant={variant} />}
+      {showHeader && showHeaderDivider && variant === 'section' && children && <S.HeaderDivider $variant={variant} />}
       {children && (
         <S.CardBody $variant={variant} $hasHeader={!!showHeader}>
           {children}
