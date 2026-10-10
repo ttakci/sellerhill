@@ -13,9 +13,9 @@
     "postalCode": "Posta Kodu",
     "taxId": "Vergi Numarası",
     "edit": "Düzenle",
-    "home": "Anasayfa",
+    "home": "Ana sayfa",
     "subtitle": "Hesap ayarlarınızı ve kişisel bilgilerinizi yönetin.",
-    "defaultJobTitle": "Takım Müdürü",
+    "defaultJobTitle": "Ekip Yöneticisi",
     "locationNotSet": "Konum belirtilmedi",
     "defaultBio": "Profesyonel e-ticaret yöneticisi.",
     "updateSuccess": "Profil başarıyla güncellendi.",
@@ -28,7 +28,7 @@
     "timezone": {
       "title": "Saat dilimi",
       "label": "Saat dilimi",
-      "help": "Panel ve günlük özet günleri bu saat dilimine göre sayar."
+      "help": "Kontrol paneli ve günlük özet, günleri bu saat dilimine göre hesaplar."
     },
     "errors": {
       "invalidTimezone": "Bu saat dilimi tanınmıyor.",

@@ -48,7 +48,7 @@
       "delete": "Delete",
       "refresh": "Refresh",
       "selected": "{{count}} selected",
-      "deleteConfirm": "Delete the selected conversation(s)? They will no longer appear in any folder."
+      "deleteConfirm": "Delete the selected conversations? They move to the Deleted folder."
     },
     "reconnect": {
       "title": "Reconnect this store",

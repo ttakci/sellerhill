@@ -48,7 +48,7 @@
       "delete": "Sil",
       "refresh": "Yenile",
       "selected": "{{count}} seçildi",
-      "deleteConfirm": "Seçilen konuşmalar silinsin mi? Silinen konuşmalar hiçbir klasörde görünmez."
+      "deleteConfirm": "Seçilen konuşmalar silinsin mi? Silinenler klasörüne taşınırlar."
     },
     "reconnect": {
       "title": "Bu mağazayı yeniden bağlayın",

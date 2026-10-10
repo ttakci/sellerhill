@@ -187,3 +187,23 @@ UPDATE buyer_message_system_defaults
    SET body = replace(body, 'Good news — your "{{item_title}}" is on its way!', 'Good news! Your "{{item_title}}" is on its way.'),
        updated_at = NOW()
  WHERE event_type = 'shipped';
+
+-- 6. Turkish billing e-mails: the subscription is a "plan", as on the billing
+-- page ("ek paket" stays the name of a top-up pack). Order matters: the longer
+-- forms are replaced before the shorter ones they contain.
+
+UPDATE email_templates
+   SET subject = replace(subject, 'paketinizin', 'planınızın'),
+       html_content = replace(replace(replace(replace(replace(replace(replace(replace(replace(html_content,
+         'paketinizin', 'planınızın'),
+         'paketinizi', 'planınızı'),
+         'paketiniz,', 'planınız,'),
+         'Paket fiyatınız', 'Plan fiyatınız'),
+         'paket fiyatınız', 'plan fiyatınız'),
+         'Başka bir pakete geçmek', 'Başka bir plana geçmek'),
+         'bir paket seçin', 'bir plan seçin'),
+         '>Paket seç<', '>Plan seç<'),
+         'yeni paketle', 'yeni planla'),
+       updated_at = NOW()
+ WHERE locale = 'tr'
+   AND template_key IN ('billing_payment_failed', 'billing_trial_ending', 'billing_price_change');

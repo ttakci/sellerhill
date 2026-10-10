@@ -52,16 +52,16 @@
     },
     "bucketHint": {
       "unconfirmed": "eBay has not confirmed this request recently, so what is due is not shown.",
-      "action_overdue": "The buyer is waiting — eBay's deadline for your answer has passed.",
+      "action_overdue": "The buyer is waiting. eBay's deadline for your answer has passed.",
       "action_due": "The buyer asked to cancel. Accept or decline before eBay's deadline.",
-      "answered": "You answered this request. eBay is processing it — nothing more is due from you.",
+      "answered": "You answered this request. eBay is processing it, and nothing more is due from you.",
       "in_progress": "Nothing is due from you right now.",
       "closed": "eBay closed this request."
     },
     "reason": {
       "BUYER_ASKED_CANCEL": "Buyer asked to cancel",
       "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Buyer cancelled or has an address problem",
-      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfil",
+      "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfill",
       "other": "Other reason"
     },
     "detail": {
@@ -103,7 +103,7 @@
       "approve": "Cancellation accepted. eBay will refund the buyer.",
       "reject": "Cancellation declined."
     },
-    "actionsOff": "In-app cancellation actions are off — answer on eBay.",
+    "actionsOff": "In-app cancellation actions are off. Answer on eBay.",
     "liveUnavailable": "eBay could not be reached just now, so this is the last state SellerHill saw. Answers are offered once eBay answers again.",
     "errors": {
       "exportFailed": "The export could not be completed. Please try again.",
@@ -112,7 +112,7 @@
       "suspended": "Your subscription is suspended, so cancellation actions are paused. Settle the invoice on the Billing page.",
       "ebayRejected": "eBay refused this action. Open the request on eBay to see why.",
       "unavailable": "eBay could not be reached. Try again in a moment.",
-      "sandbox": "Cancellation actions are not available on the eBay sandbox.",
+      "sandbox": "Cancellation actions are not available in eBay's test environment.",
       "notFound": "This cancellation request was not found."
     },
     "party": {

@@ -13,7 +13,7 @@
     "continue": "Devam Et",
     "saveSuccess": "Değişiklikler başarıyla kaydedildi",
     "saveError": "Değişiklikler kaydedilemedi",
-    "showing_info": "{{total}} kayıttan {{from}} - {{to}} arası gösteriliyor",
+    "showing_info": "{{total}} kayıttan {{from}}-{{to}} arası gösteriliyor",
     "showing": "Gösterilen",
     "of": "üzerinden",
     "rowsPerPage": "Sayfa başına kayıt:",
@@ -24,7 +24,7 @@
     "unknownProduct": "Bilinmeyen Ürün",
     "views": {
       "label": "Görünüm",
-      "grid": "Grid",
+      "grid": "Kart",
       "table": "Tablo"
     },
     "actions": {
@@ -99,11 +99,11 @@
     "details": "Hata Detayları (Sadece Geliştirme)"
   },
   "error": {
-    "resourceNotFound": "{{resourceName}} ID {{resourceId}} bulunamadı",
+    "resourceNotFound": "ID'si {{resourceId}} olan {{resourceName}} bulunamadı",
     "validationFailed": "Doğrulama başarısız",
     "unauthorized": "Yetkiniz yok",
-    "forbidden": "Erişim yasak",
-    "serverError": "Bir hata oluştu. Lütfen tekrar deneyin."
+    "forbidden": "Erişim izniniz yok",
+    "serverError": "Bir hata oluştu. Lütfen daha sonra tekrar deneyin."
   },
   "menu": {
     "marketing": "Pazarlama",
@@ -128,7 +128,7 @@
     "admin": "Yönetim Operasyonları",
     "configuration": "Yapılandırma",
     "storeSettings": "Mağaza Ayarları",
-    "listingSettingsGroups": "Listeleme Ayar Grupları",
+    "listingSettingsGroups": "Liste Ayar Grupları",
     "amazonAccounts": "Amazon Hesapları",
     "reports": "Raporlar",
     "support": "Destek",
@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Amazon Hesabı",
-          "subtitle": "Sipariş taraması için alıcı hesaplarınızı yönetin"
+          "subtitle": "Siparişleriniz için kullanılan Amazon alıcı hesaplarını yönetin"
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Bağlanma Tarihi",
         "reconnect": {
           "action": "Yeniden bağla",
-          "hint": "Bu mağazanın izinlerini yenilemek için eBay'e yeniden giriş yapın. Mağaza, siparişleri ve ilanları olduğu gibi kalır; önce koparmanıza gerek yok."
+          "hint": "Bu mağazanın izinlerini yenilemek için eBay'e yeniden giriş yapın. Mağaza, siparişleri ve ilanları olduğu gibi kalır. Önce bağlantıyı kesmenize gerek yok."
         },
         "disconnect": {
           "action": "Bağlantıyı Kes",
@@ -243,7 +243,7 @@
           "success": "eBay mağazasının bağlantısı kesildi."
         },
         "manageStores": {
-          "empty": "Henüz bağlı eBay mağaza yok"
+          "empty": "Henüz bağlı eBay mağazası yok"
         },
         "marketplace": "Pazar yeri"
       },
@@ -290,13 +290,13 @@
       },
       "storeManagement": {
         "title": "Mağaza Yapılandırması",
-        "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
+        "subtitle": "Mağaza ayarları ve ilan kelime kara listesi",
         "storeSettings": "Mağaza Ayarları",
         "storeSettingsSubtitle": "Konum, doğrulama ve bölgesel tercihler",
         "manageMessageTemplates": "Mesaj Şablonları",
         "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin ve oluşturun",
         "manageBlacklist": "Kara Listeyi Yönet",
-        "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler",
+        "manageBlacklistSubtitle": "İlan başlığı, açıklaması ve özelliklerinde engellenecek kelimeler",
         "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır."
       },
       "listingGroups": {
@@ -306,7 +306,7 @@
         "manageSubtitle": "Fiyatlandırma ve stok gruplarınızı görüntüleyin, düzenleyin ve oluşturun",
         "viewAll": "Tümü",
         "create": "Yeni Grup Oluştur",
-        "createSubtitle": "Yeni bir yeniden fiyatlandırma stratejisi ve kâr marjı tanımla",
+        "createSubtitle": "Yeni bir yeniden fiyatlandırma stratejisi ve kâr marjı tanımlayın",
         "groupCount": "{{count}} grup"
       },
       "account": {
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Amazon Hesapları",
-        "subtitle": "Sipariş taraması için alıcı hesaplarınız",
+        "subtitle": "Siparişlerde kullanılan alıcı hesaplarınız",
         "addNew": {
           "title": "Yeni Amazon Hesabı",
-          "subtitle": "Sipariş taraması için yeni bir alıcı hesabı bağlayın"
+          "subtitle": "Siparişleriniz için yeni bir alıcı hesabı bağlayın"
         },
         "empty": {
           "title": "Henüz alıcı hesabı yok",
-          "description": "Siparişlerinizi taramak ve gerçek maliyetleri yakalamak için bir Amazon alıcı hesabı bağlayın."
+          "description": "Amazon siparişlerinizi okuyup gerçek maliyetlerini kaydedebilmemiz için bir Amazon alıcı hesabı bağlayın."
         },
         "viewAll": {
           "title": "Tümü"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Amazon Hesabı Ekle",
-        "subtitle": "Sipariş taraması için kimlik bilgilerini sağlayın",
+        "subtitle": "Amazon alıcı hesabınızın giriş bilgilerini girin",
         "label": "Hesap Etiketi",
         "email": "E-posta",
         "password": "Şifre",
         "twoFactorSecret": "2FA gizli anahtarı",
-        "twoFactorSecretHint": "Zorunlu. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister ve sizin adınıza cevaplayabileceğimiz tek yöntem authenticator anahtarıdır. Amazon'un Giriş ve Güvenlik ayarlarından bir authenticator uygulaması açıp kurulum anahtarını (6 haneli kodu değil) buraya yapıştırın. Mevcut bir hesabı düzenlerken, kayıtlı anahtarı korumak için boş bırakın."
+        "twoFactorSecretHint": "Zorunlu. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister. Bu kodu sizin yerinize ancak doğrulama uygulaması anahtarıyla girebiliriz. Amazon'un Giriş ve Güvenlik ayarlarından bir doğrulama uygulaması açın ve kurulum anahtarını buraya yapıştırın (6 haneli kodu değil). Mevcut bir hesabı düzenlerken kayıtlı anahtarı korumak için boş bırakın."
       },
       "amazonEdit": {
         "title": "Amazon Hesabını Düzenle",
@@ -388,7 +388,7 @@
         "password": "Yeni Şifre",
         "passwordHint": "Mevcut şifreyi korumak için boş bırakın",
         "twoFactorSecret": "2FA gizli anahtarı",
-        "twoFactorHint": "Mevcut 2FA secret'ını korumak için boş bırakın",
+        "twoFactorHint": "Mevcut 2FA anahtarını korumak için boş bırakın",
         "twoFactorBadgeSet": "2FA kurulu",
         "twoFactorBadgeNotSet": "2FA yok"
       },
@@ -404,13 +404,13 @@
       },
       "storeSettings": {
         "title": "Mağaza Ayarları",
-        "subtitle": "Seçili kapsam için konum ve listing doğrulaması",
-        "global": "Global (tüm mağazalar)",
+        "subtitle": "Seçili kapsam için konum ve ilan doğrulaması",
+        "global": "Genel (tüm mağazalar)",
         "appliesTo": "Uygulandığı yer",
         "checkBlacklist": "Kara liste kelimelerini kontrol et",
-        "checkBlacklistDesc": "Yayınlamadan önce listing başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
+        "checkBlacklistDesc": "Yayınlamadan önce ilan başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
         "allowCrossStoreAsins": "Diğer mağazalarımdaki ASIN'ler bu mağazaya da eklenebilsin",
-        "allowCrossStoreAsinsDesc": "Tüm mağazalar için açarsanız her mağaza her ASIN'i listeleyebilir; tek bir mağazada açarsanız yalnızca o mağaza diğer mağazalarınızda zaten olan ASIN'leri ekleyebilir. Bu mağazada zaten olan bir ASIN her zaman atlanır.",
+        "allowCrossStoreAsinsDesc": "Tüm mağazalar için açarsanız her mağaza her ASIN'i listeleyebilir. Tek bir mağazada açarsanız yalnızca o mağaza, diğer mağazalarınızda zaten olan ASIN'leri ekleyebilir. Bu mağazada zaten olan bir ASIN her zaman atlanır.",
         "allowCrossStoreAsinsInherited": "Bu mağaza için bir seçim kaydedene kadar tüm mağazaların ayarı geçerlidir.",
         "country": "Ülke",
         "countryPlaceholder": "Ülke seçin",
@@ -435,7 +435,7 @@
       "blacklist": {
         "manage": {
           "title": "Kara Listeyi Yönet",
-          "subtitle": "Seçili kapsam için listing başlığı, açıklaması ve özelliklerinde engellenen kelimeler"
+          "subtitle": "Seçili kapsam için ilan başlığı, açıklaması ve özelliklerinde engellenen kelimeler"
         },
         "add": {
           "keyword": "Kelime",
@@ -464,7 +464,7 @@
           }
         },
         "list": {
-          "empty": "Seçili kapsam için blacklist kelimesi yok",
+          "empty": "Seçili kapsam için kara liste kelimesi yok",
           "noResults": "Aramanızla eşleşen kelime yok",
           "removeLabel": "Kelimeyi kaldır",
           "selectAll": "Tümünü seç",
@@ -543,7 +543,7 @@
       "eyebrow": "Amazon → eBay otomasyonu",
       "headline": "eBay mağazanız için tam otomasyon.",
       "headlineAccent": "Uygun fiyatla.",
-      "subheading": "Ürün grubuna özel fiyat ve şablon kuralları, günde 4 kez fiyat ve stok takibi, eksiksiz doldurulan ürün özellikleri, otomatik sipariş ve kargo takibi. Üstelik sizi her adımda yönlendiren bir Bekleyen Aksiyonlar ekranıyla.",
+      "subheading": "Ürün grubuna özel fiyat ve şablon kuralları, günde 4 kez fiyat ve stok takibi, eksiksiz doldurulan ürün özellikleri, otomatik sipariş ve kargo takibi. Üstelik sıradaki işinizi tam olarak gösteren bir Bekleyen Aksiyonlar ekranı da var.",
       "ctaPrimary": "Ücretsiz başla",
       "ctaSecondary": "Canlı demo",
       "trialTitle": "1 AY ÜCRETSİZ DENE!",
@@ -566,7 +566,7 @@
       },
       "specifics": {
         "value": "45",
-        "label": "ilan başına ürün özelliğine kadar"
+        "label": "ürün özelliğine kadar, her ilanda"
       },
       "templates": {
         "value": "24",
@@ -593,7 +593,7 @@
       },
       "sync": {
         "title": "Günde 4 kez fiyat ve stok takibi",
-        "description": "Kaynak fiyat ve stok her gün dört kez kontrol edilir; değişiklik aynı turda eBay ilanınıza yansır. Günlük kontrol bile nadirken, siz stoğu biten ürünü satmaz, zarar ettiren fiyatla beklemezsiniz.",
+        "description": "Kaynak fiyat ve stok her gün dört kez kontrol edilir ve değişiklik aynı turda eBay ilanınıza yansır. Böylece stoğu biten ürünü satmaz, zarar ettiren fiyatta beklemezsiniz. Bu kategoride günde bir kontrol bile nadirdir.",
         "caption": "Her 6 saatte bir kontrol"
       },
       "specifics": {
@@ -618,14 +618,14 @@
       },
       "price": {
         "title": "Uygun fiyatlı otomasyon",
-        "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette, otomatik sipariş sınırsız; paketler yalnızca ilan, takip numarası dönüştürme ve Çok Satanlar gezinti hakkına göre ayrılır.",
-        "cta": "Paketleri gör"
+        "description": "Profesyonel bir otomasyonun tamamı, uygun bir aylık ücretle. Tüm özellikler her planda, otomatik sipariş sınırsız. Planlar yalnızca ilan, takip numarası dönüştürme ve Çok Satanlar gezinti hakkına göre ayrılır.",
+        "cta": "Planları gör"
       }
     },
     "groups": {
       "eyebrow": "Ayar Grupları",
       "sectionTitle": "Tek mağaza. İhtiyacınız kadar strateji.",
-      "sectionSubtitle": "Ayar Grubu; fiyat kuralını, ilan şablonunu ve stok ayarlarını bir kez tanımlayıp istediğiniz ürünlere uyguladığınız yeniden kullanılabilir bir settir. Sezonluk kampanyalar, kategoriye özel kurallar ya da yüksek marjlı ürünler için ayrı gruplar açın.",
+      "sectionSubtitle": "Ayar Grubu yeniden kullanılabilir bir ayar setidir: fiyat kuralını, ilan şablonunu ve stok ayarlarını bir kez tanımlar, istediğiniz ürünlere uygularsınız. Sezonluk kampanyalar, kategoriye özel kurallar ya da yüksek marjlı ürünler için ayrı gruplar açın.",
       "params": {
         "margin": {
           "title": "Kâr marjı",
@@ -645,7 +645,7 @@
         },
         "content": {
           "title": "Başlık ve içerik",
-          "description": "Marka temizleme ve yapay zekâ başlığı gruba göre."
+          "description": "Gruba göre marka temizleme ve yapay zekâ ile başlık."
         }
       },
       "examplesTitle": "Örnek kullanım",
@@ -675,7 +675,7 @@
         "homeDecor": "Ev & Dekorasyon",
         "kitchenDining": "Mutfak",
         "fitnessSports": "Spor & Fitness",
-        "outdoorSurvival": "Outdoor",
+        "outdoorSurvival": "Açık Hava",
         "beautyHealth": "Güzellik & Sağlık",
         "apparelFashion": "Giyim & Moda",
         "autoParts": "Oto Parça",
@@ -698,7 +698,7 @@
       "points": {
         "editable": "Tamamen düzenlenebilir: şablonu açın, dilediğiniz gibi değiştirin.",
         "mobile": "Mobil uyumlu: eBay uygulamasında da düzgün görünür.",
-        "clean": "Tedarikçi adı yok: açıklamada ve görsellerde tedarikçiye ait hiçbir iz kalmaz.",
+        "clean": "Tedarikçi izi yok: açıklamada ve görsellerde tedarikçiye ait hiçbir iz kalmaz.",
         "specs": "Ürün özellikleri ve öne çıkan maddeler otomatik yerleşir."
       },
       "previewNote": "Canlı şablon, kaydırarak inceleyin",
@@ -710,7 +710,7 @@
       "sectionSubtitle": "Aşağıdaki görseller tasarım taslağı değil; kayıt gerektirmeyen demo hesabımızdan alınmış gerçek ekranlardır.",
       "actionCenter": {
         "title": "Bekleyen Aksiyonlar: sıradaki işiniz hep belli",
-        "detail": "Otomasyon kendi başına çözemediği her durumu buraya bırakır: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, dolmak üzere olan paket limitleri. Her madde ne olduğunu, neden önemli olduğunu ve tek tıkla nereye gitmeniz gerektiğini söyler.",
+        "detail": "Otomasyonun kendi başına çözemediği her durum buraya düşer: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, dolmak üzere olan plan limitleri. Her madde ne olduğunu, neden önemli olduğunu ve tek tıkla nereye gitmeniz gerektiğini söyler.",
         "point": "Kenar çubuğundaki sayaç, sizi bekleyen iş sayısını her ekranda gösterir."
       },
       "itemSpecifics": {
@@ -724,7 +724,7 @@
         "point": "Sipariş başına harcama üst sınırını siz belirlersiniz; sınırı aşan sipariş onayınızı bekler."
       },
       "priceStock": {
-        "title": "Fiyat ve stok günde 4 kez senkron",
+        "title": "Fiyat ve stok günde 4 kez güncellenir",
         "detail": "Her ilanın kaynak fiyatı ve stoğu günde dört kez kontrol edilir. Değişiklik olduğunda eBay fiyatı Ayar Grubunuzdaki marj kuralıyla yeniden hesaplanır ve stok, tamponunuz düşülerek güncellenir.",
         "point": "İlan bazında fiyatı ya da adedi sabitleyebilir, satışı tek tıkla duraklatabilirsiniz."
       }
@@ -811,15 +811,15 @@
     },
     "standard": {
       "sectionTitle": "Ve bir otomasyon platformundan beklediğiniz her şey.",
-      "sectionSubtitle": "Temel özellikler eksiksiz; hepsi her pakette.",
+      "sectionSubtitle": "Temel özellikler eksiksiz; hepsi her planda.",
       "items": {
         "bulkAsin": {
           "title": "Toplu ASIN ile listeleme",
-          "description": "Yüzlerce ASIN'i yapıştırın, ilanlar kuyrukta hazırlansın."
+          "description": "Yüzlerce ASIN'i yapıştırın, ilanlar sizin için hazırlansın."
         },
         "aiTitle": {
           "title": "Yapay zekâ başlıkları",
-          "description": "80 karakterin tamamını aramaya uygun kullanan başlıklar."
+          "description": "Arama için 80 karakterin tamamını kullanan başlıklar."
         },
         "autoOrder": {
           "title": "Otomatik sipariş",
@@ -839,7 +839,7 @@
         },
         "import": {
           "title": "Mevcut ilanları içe aktarın",
-          "description": "eBay'de zaten yayında olan ilanlarınızı sisteme alın."
+          "description": "eBay'de zaten yayında olan ilanlarınızı SellerHill'e alın."
         },
         "blacklist": {
           "title": "Kara liste kontrolü",
@@ -864,7 +864,7 @@
       },
       "step4": {
         "title": "Otomasyonu SellerHill yürütsün",
-        "description": "Fiyat ve stok günde 4 kez senkron kalır, siparişler verilir, takip numaraları işlenir, alıcı mesajları gider."
+        "description": "Fiyat ve stok günde 4 kez güncellenir, siparişler verilir, takip numaraları işlenir, alıcı mesajları gider."
       },
       "step5": {
         "title": "Bekleyen Aksiyonları takip edin",
@@ -873,7 +873,7 @@
     },
     "demo": {
       "sectionTitle": "Kaydolmadan önce SellerHill'i görün.",
-      "sectionSubtitle": "Panoyu, ilanları, siparişleri, Ayar Gruplarını ve Bekleyen Aksiyonları örnek verilerle inceleyin. Doldurulacak form yok, iptal edilecek bir şey yok.",
+      "sectionSubtitle": "Paneli, ilanları, siparişleri, Ayar Gruplarını ve Bekleyen Aksiyonları örnek verilerle inceleyin. Doldurulacak form yok, iptal edilecek bir şey yok.",
       "button": "Canlı demoyu dene",
       "note": "Hesap gerekmez · Kredi kartı gerekmez · Hiçbir şey kaydedilmez.",
       "bullets": {
@@ -885,13 +885,13 @@
     "pricing": {
       "eyebrow": "Fiyatlandırma",
       "sectionTitle": "Uygun fiyatlı otomasyon.",
-      "sectionSubtitle": "Her pakette bütün özellikler var. Paketler aktif ilan sayısına, takip numarası dönüştürme hakkına ve Çok Satanlar gezinti hakkına göre ayrılır; otomatik sipariş her pakette sınırsızdır. Başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
+      "sectionSubtitle": "Her planda bütün özellikler var. Planlar aktif ilan sayısına, takip numarası dönüştürme hakkına ve Çok Satanlar gezinti hakkına göre ayrılır; otomatik sipariş her planda sınırsızdır. Başka araçlarda üst planlara saklanan özellikleri en küçük planda bile kullanırsınız.",
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
       "planCta": "Ücretsiz dene",
-      "showAllPlans": "{{count}} paketin tümünü gör",
-      "showFewerPlans": "Daha az paket göster",
+      "showAllPlans": "{{count}} planın tümünü gör",
+      "showFewerPlans": "Daha az plan göster",
       "notIncluded": "Dâhil değil",
       "upToListings": "{{limit}} aktif ilan · sınırsız ilan ekleme ve kaldırma",
       "unlimitedListings": "Sınırsız aktif ilan",
@@ -902,7 +902,7 @@
       "unlimitedAiTitles": "Sınırsız yapay zekâ ile başlık optimizasyonu",
       "upToBestSellers": "Ayda {{limit}} Çok Satanlar ürünü",
       "unlimitedBestSellers": "Sınırsız Çok Satanlar gezintisi",
-      "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
+      "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda plan özeti gösteriliyor.",
       "included": {
         "groups": "Ayar Grupları ve 24 ilan şablonu",
         "sync": "Günde 4 kez fiyat ve stok takibi",
@@ -942,7 +942,7 @@
           "bestSellers": "Ayda 25,000 Çok Satanlar ürünü"
         }
       },
-      "trialPlanNote": "Ücretsiz denemeler deneme paketiyle başlar. Bu pakete dilediğiniz an geçebilirsiniz.",
+      "trialPlanNote": "Ücretsiz denemeler deneme planıyla başlar. Bu plana dilediğiniz an geçebilirsiniz.",
       "trial": {
         "title": "{{days}} gün ücretsiz deneyin",
         "listings": "{{limit}} aktif ilan",
@@ -983,7 +983,7 @@
       },
       "q7": {
         "question": "Bekleyen Aksiyonlar ekranı ne işe yarar?",
-        "answer": "Otomasyonun kendi başına çözemediği her durum buraya düşer: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, stoğu biten aktif ilanlar ya da dolmak üzere olan paket limitleri. Her madde en acilden başlayarak sıralanır ve sizi doğrudan ilgili ekrana götürür."
+        "answer": "Otomasyonun kendi başına çözemediği her durum buraya düşer: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, stoğu biten aktif ilanlar ya da dolmak üzere olan plan limitleri. Her madde en acilden başlayarak sıralanır ve sizi doğrudan ilgili ekrana götürür."
       },
       "q8": {
         "question": "İlan şablonlarını değiştirebilir miyim?",
@@ -1008,8 +1008,8 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Daha akıllı otomasyon. Daha düşük fiyat.",
-        "subheading": "Ürün grubuna özel stratejiler, günde 4 kez senkron, eksiksiz ürün özellikleri ve sizi yönlendiren Bekleyen Aksiyonlar. Bir ay ücretsiz deneyin, kredi kartı gerekmez.",
+        "headline": "Daha akıllı otomasyon. Uygun fiyatla.",
+        "subheading": "Ürün grubuna özel stratejiler, günde 4 kez fiyat ve stok takibi, eksiksiz ürün özellikleri ve sizi yönlendiren Bekleyen Aksiyonlar. Bir ay ücretsiz deneyin, kredi kartı gerekmez.",
         "button": "Ücretsiz başla"
       }
     },
@@ -1038,7 +1038,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Örnek veri — hiçbir şey kaydedilmez.",
+      "description": "Örnek veri. Hiçbir şey kaydedilmez.",
       "exit": "Demodan çık",
       "signUp": "Ücretsiz hesap aç"
     },

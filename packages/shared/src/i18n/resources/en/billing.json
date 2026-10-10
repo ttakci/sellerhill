@@ -19,13 +19,13 @@
       "contactSales": "Contact sales",
       "freeTrial": "Free trial available",
       "mostPopular": "Most popular",
-      "informationalOnly": "Billing enforcement is off — plans are informational only. All features are currently unrestricted.",
+      "informationalOnly": "Plan limits are not enforced right now, so every feature is available. Plans are shown for information only.",
       "free": {
         "name": "Free"
       },
       "trial": {
         "name": "Free trial",
-        "description": "A time-limited trial of SellerHill. Not purchasable — it starts automatically when you sign up."
+        "description": "A time-limited trial of SellerHill. It cannot be bought: it starts automatically when you sign up."
       },
       "unlimitedOrders": "Unlimited automatic orders and shipment tracking",
       "activeListings": "{{limit}} active listings · add and remove without limit",
@@ -86,13 +86,13 @@
         "description": "A retired plan. Existing subscriptions keep working; new sign-ups choose from the plans above."
       },
       "switchTo": "Switch to {{plan}}",
-      "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice.",
+      "switchDone": "Your plan change is confirmed.",
       "planNamed": "{{plan}} Plan"
     },
     "planChange": {
       "title": "Confirm plan change",
       "upgradeBody": "Switching to {{plan}}. {{amount}} will be charged now. Your next invoice will be {{nextAmount}} on {{nextDate}}.",
-      "downgradeBody": "Switching to {{plan}} on {{date}}. Nothing is charged now — you keep your current plan until then.",
+      "downgradeBody": "Switching to {{plan}} on {{date}}. Nothing is charged now, and you keep your current plan until then.",
       "listingLimitWarning": "You have {{active}} active listings and the new plan allows {{limit}}. From {{date}}, only your oldest {{limit}} listings are tracked; the other {{over}} stop getting price/stock sync and automated order handling. If you want to choose which listings stay tracked, end the ones you don't need before that date.",
       "confirm": "Confirm",
       "cancel": "Cancel"
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Best Sellers products",
         "unit": "products",
-        "description": "How many products you can view on the Best Sellers page per billing period, from cached and live lists alike."
+        "description": "How many products you can view on the Best Sellers page per billing period. Every product shown counts, whether the list was already loaded or fetched fresh."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Manage your payment method, plan and invoices here.",
       "nextChargeLabel": "Next payment",
       "nextCharge": "Next payment: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "Cancels on {{date}} — no further charges after this period",
+      "cancelsAtPeriodEnd": "Cancels on {{date}}. No further charges after this period.",
       "scheduledChange": "Switches to {{plan}} on {{date}}",
       "scheduledChangeUnknownPlan": "Your plan changes on {{date}}",
       "cancelScheduledChange": "Cancel",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Full access — billing enforcement is off. All features are unrestricted.",
+      "full_access": "Full access: plan limits are not enforced, so every feature is available.",
       "active": "Your subscription is active.",
-      "no_subscription": "No active subscription. Choose a plan to enable billing.",
+      "no_subscription": "No active subscription. Choose a plan to continue.",
       "past_due": "Your subscription is past due. Update your payment method to restore access."
     },
     "provider": {
-      "unconfiguredTitle": "Billing not configured",
-      "unconfiguredBody": "Checkout and subscription management are unavailable because no billing provider is connected. Contact your operator."
+      "unconfiguredTitle": "Payments unavailable",
+      "unconfiguredBody": "Payments are not available right now, so you cannot subscribe or manage your subscription. Please contact support."
     },
     "usage": {
       "title": "Usage this period",
@@ -279,9 +279,9 @@
       "no_active_subscription": "No active subscription found.",
       "no_open_period": "No open usage period for this limit.",
       "already_reserved": "This resource is already reserved.",
-      "providerNotConfigured": "Payments are not enabled on this environment yet. Please try again later.",
+      "providerNotConfigured": "Payments are not available yet. Please try again later.",
       "planNotMirrored": "This plan is not available for purchase yet. Please choose another plan or contact support.",
-      "checkoutFailed": "Checkout could not be started. Please try again in a moment — if it keeps failing, contact support.",
+      "checkoutFailed": "Checkout could not be started. Please try again in a moment. If it keeps failing, contact support.",
       "portalFailed": "The billing portal could not be opened. Please try again in a moment.",
       "noCustomer": "No billing account yet. Choose a plan first to set one up.",
       "planNotFound": "That plan could not be found.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "You have reached your plan limit. Upgrade to continue.",
       "addonNotFound": "That top-up package could not be found.",
       "noSubscription": "You do not have an active subscription to change.",
-      "planChangeFailed": "The plan could not be changed right now. Please try again, or use \"Manage billing\".",
-      "subscriptionSuspended": "Your subscription is not active, so new listings are paused. Choose a plan to resume — everything restarts on its own.",
-      "subscriptionSuspendedOrders": "Your subscription is not active, so order automation is paused. Choose a plan to resume — everything restarts on its own.",
+      "planChangeFailed": "The plan could not be changed right now. Please try again, or use \"Manage subscription\".",
+      "subscriptionSuspended": "Your subscription is not active, so new listings are paused. Choose a plan to resume. Everything restarts on its own.",
+      "subscriptionSuspendedOrders": "Your subscription is not active, so order automation is paused. Choose a plan to resume. Everything restarts on its own.",
       "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan.",
-      "alreadySubscribed": "You already have an active subscription. Use \"Switch plan\" to change it instead of subscribing again.",
+      "alreadySubscribed": "You already have an active subscription. To change it, pick a new plan under \"Manage subscription\" instead of subscribing again.",
       "invoicesFailed": "Invoice history could not be loaded. Please try again in a moment.",
-      "paymentRequiresAction": "Your bank asked for extra confirmation for this card, so the plan change was cancelled and you are still on your current plan. Open “Manage billing” to update your payment method, then try again.",
+      "paymentRequiresAction": "Your bank asked for extra confirmation for this card, so the plan change was cancelled and you are still on your current plan. Update your card with “Update payment method”, then try again.",
       "invalidCheckoutSession": "This payment confirmation link is not valid."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "You have used your monthly Best Sellers allowance. Top up to keep browsing Amazon's lists until the period renews."
       },
       "buy": "Buy",
-      "note": "A top-up applies to the current calendar month only, which is why it is offered when you reach the limit rather than in advance. Your plan allowance resets on the 1st."
+      "note": "A top-up applies to the current billing period only, which is why it is offered when you reach the limit and not in advance. Your plan allowance resets when the period renews."
     }
   }
 }

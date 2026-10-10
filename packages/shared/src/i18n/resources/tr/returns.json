@@ -98,7 +98,7 @@
       "open": "İadeyi aç",
       "loadFailed": "Bu iade yüklenemedi",
       "loadFailedDescription": "Biraz sonra tekrar deneyin ya da eBay'de açın.",
-      "offline": "eBay'e şu an ulaşılamadı; gördüğünüz, SellerHill'in bildiği son durum. eBay yeniden yanıt verdiğinde işlemler sunulur.",
+      "offline": "eBay'e şu anda ulaşılamadı, bu yüzden SellerHill'in gördüğü son durum gösteriliyor. eBay yeniden yanıt verince işlemler sunulur.",
       "buyer": "Alıcı",
       "quantity": "Adet",
       "returnType": "İade türü",
@@ -108,7 +108,7 @@
       "shipment": "İade kargosu",
       "shippedAt": "Gönderildi",
       "deliveredAt": "Teslim edildi",
-      "markedReceived": "Teslim alındı işaretlendi",
+      "markedReceived": "Teslim alındı olarak işaretlendi",
       "yes": "Evet",
       "no": "Hayır",
       "journey": "Süreç",
@@ -117,7 +117,7 @@
       "trackingNumber": "Takip {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "İade numarası",
-      "actionsOff": "Uygulama içi iade işlemleri kapalı — eBay üzerinden yanıtlayın."
+      "actionsOff": "Uygulama içi iade işlemleri kapalı. eBay üzerinden yanıtlayın."
     },
     "actions": {
       "done": {
@@ -184,7 +184,7 @@
       "suspended": "Aboneliğiniz askıda olduğu için iade işlemleri duraklatıldı. Faturayı Faturalandırma sayfasından ödeyin.",
       "ebayRejected": "eBay bu işlemi reddetti. Nedenini görmek için iadeyi eBay'de açın.",
       "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
-      "sandbox": "İade işlemleri eBay sandbox ortamında kullanılamaz.",
+      "sandbox": "İade işlemleri eBay test ortamında kullanılamaz.",
       "refundAmountUnknown": "eBay bu iade için geri ödeme tutarı bildirmedi; geri ödemenin eBay üzerinden yapılması gerekiyor.",
       "notFound": "Bu iade bulunamadı.",
       "labelFileRequired": "Etiket dosyasını seçin.",

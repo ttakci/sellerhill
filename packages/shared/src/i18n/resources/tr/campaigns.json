@@ -17,7 +17,7 @@
         "all": "Tümü",
         "ariaLabel": "Kampanya durumu"
       },
-      "search": "Kampanya adı veya kimliğiyle ara",
+      "search": "Kampanya adı veya numarasıyla ara",
       "summaryHint": "Bu mağazanın tüm kampanyalarının toplamı.",
       "emptyFiltered": {
         "title": "Eşleşen kampanya yok",
@@ -29,8 +29,8 @@
       "title": "Kampanya ayrıntıları",
       "breadcrumb": "Kampanya ayrıntıları",
       "subtitle": "Bu kampanyadaki ilanlar.",
-      "metricsNote": "Henüz görünmeyen metrikler eBay raporlarını bekliyor; rakamların kesinleşmesi yaklaşık 72 saat sürebilir.",
-      "eligibilityUnavailable": "Reklam uygunluğu bilinmiyor. Kampanya değişiklikleri kapalı."
+      "metricsNote": "Görünmeyen rakamlar eBay raporlarını bekliyor. Rakamların kesinleşmesi yaklaşık 72 saat sürebilir.",
+      "eligibilityUnavailable": "Bu mağazanın reklam verip veremeyeceği kontrol edilemedi. Bu yüzden kampanya değişiklikleri kapalı."
     },
     "campaign": {
       "name": "Kampanya adı",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Henüz kampanya yok",
-      "description": "Seçili mağazanızın kampanyaları eşitlemeden sonra burada görünür.",
+      "description": "Seçili mağazanızın kampanyaları eBay'den alındıktan sonra burada görünür.",
       "noStore": "Üst çubuktan bir eBay mağazası seçin."
     },
     "errors": {
@@ -77,20 +77,20 @@
       "suspended": "Bu mağaza askıya alındı.",
       "notFound": "Kampanya bulunamadı.",
       "ineligible": "Bu mağaza reklam için uygun değil.",
-      "readOnly": "Bu kampanya salt okunur.",
+      "readOnly": "Bu kampanya değiştirilemez.",
       "invalidRate": "En fazla bir ondalık basamakla %2,0 ile %100,0 arasında bir reklam oranı girin.",
       "ebayRejected": "eBay işlemi tamamlayamadı. Tekrar deneyin.",
       "invalidName": "1–80 karakter uzunluğunda bir kampanya adı girin.",
       "nameTaken": "Bu ada sahip bir kampanya zaten var."
     },
     "readOnly": {
-      "title": "Salt okunur kampanya",
-      "marginOverride": "Kâr marjı özel olarak belirlendiği için reklam oranı SellerHill fiyatına uygulanmaz.",
-      "rule_based": "Kural tabanlı kampanyalar salt okunur.",
-      "cost_per_click": "Tıklama başına maliyet kampanyaları salt okunur.",
-      "dynamic_rate": "Dinamik oranlı kampanyalar salt okunur.",
-      "ended": "Bitmiş kampanyalar salt okunur.",
-      "unsupported": "Bu kampanya türü salt okunur."
+      "title": "Değiştirilemeyen kampanya",
+      "marginOverride": "Bu ilana özel kâr marjı tanımlı olduğu için reklam oranı SellerHill'in belirlediği fiyata dahil edilmez.",
+      "rule_based": "Kural tabanlı kampanyalar değiştirilemez.",
+      "cost_per_click": "Tıklama başına ücretli kampanyalar değiştirilemez.",
+      "dynamic_rate": "Dinamik oranlı kampanyalar değiştirilemez.",
+      "ended": "Sona eren kampanyalar değiştirilemez.",
+      "unsupported": "Bu kampanya türü değiştirilemez."
     },
     "create": {
       "title": "Kampanya oluştur",
@@ -115,7 +115,7 @@
     "add": {
       "title": "İlan ekle",
       "group": "Ayar grubu",
-      "groupHint": "Grup seçimi, hiçbir kampanyada olmayan uygun ilanlarla seçiminizi bir kez doldurur. Sürekli bir kural oluşturmaz.",
+      "groupHint": "Bir grup seçtiğinizde, gruptaki henüz hiçbir kampanyada olmayan uygun ilanlar seçilir. Bu tek seferliktir: gruba sonradan eklenen ilanlar dahil edilmez.",
       "groupsError": "Ayar grupları yüklenemedi.",
       "groupError": "Grubun tamamı yüklenemedi. Seçiminiz korundu.",
       "retryGroup": "Grup seçimini yeniden dene",
@@ -144,16 +144,16 @@
     "listingContext": {
       "title": "Reklam kampanyası",
       "value": "{{name}} · {{rate}}%",
-      "notFollowed": "Fiyat bu kampanyanın oranını izlemiyor."
+      "notFollowed": "Fiyat bu kampanyanın oranına göre ayarlanmıyor."
     },
     "eligibility": {
       "ineligible": "Bu mağazada reklam kullanılamıyor.",
-      "unavailable": "Reklam uygunluğu bilgisi alınamadı. Kampanya oluşturma devre dışı."
+      "unavailable": "Bu mağazanın reklam verip veremeyeceği kontrol edilemedi. Bu yüzden şu anda kampanya oluşturulamaz."
     },
     "results": {
       "summary": "Onaylanan değişiklik: {{changed}}. Zaten kampanyada: {{already}}. Onaylanmayan veya başarısız: {{failed}}.",
-      "retryHint": "Başarısız veya onaylanmayan ilanlar yeniden denemek için korunur.",
-      "unconfirmed": "Hiçbir ilan güncellemesi onaylanmadı. Varsayılan oranı kontrol etmek için kampanya bilgilerini yenileyin."
+      "retryHint": "Başarısız veya onaylanmayan ilanları yeniden deneyebilirsiniz.",
+      "unconfirmed": "Hiçbir ilan güncellemesi onaylanmadı. Varsayılan oranı kontrol etmek için kampanyayı yenileyin."
     }
   }
 }

@@ -29,8 +29,8 @@
       "title": "Campaign details",
       "breadcrumb": "Campaign details",
       "subtitle": "Listings in this campaign.",
-      "metricsNote": "Unavailable metrics are pending eBay reports; figures may reconcile within about 72 hours.",
-      "eligibilityUnavailable": "Advertising eligibility is unavailable. Campaign changes are disabled."
+      "metricsNote": "Missing figures are waiting for eBay's reports. They can take about 72 hours to settle.",
+      "eligibilityUnavailable": "We could not check whether this store can advertise, so campaign changes are turned off."
     },
     "campaign": {
       "name": "Campaign name",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "No campaigns yet",
-      "description": "Your active store’s campaigns will appear here after synchronization.",
+      "description": "Your active store’s campaigns will appear here once they are loaded from eBay.",
       "noStore": "Select an eBay store in the top bar."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Read-only campaign",
-      "marginOverride": "Margin override: ad rate is not applied to the SellerHill price.",
+      "marginOverride": "This listing has its own margin, so the ad rate is not included in the price SellerHill sets.",
       "rule_based": "Rule-based campaigns are read-only.",
       "cost_per_click": "Cost-per-click campaigns are read-only.",
       "dynamic_rate": "Dynamic-rate campaigns are read-only.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Add listings",
       "group": "Settings group",
-      "groupHint": "Selecting a group fills this selection once with eligible listings in no campaign. It creates no ongoing rule.",
+      "groupHint": "Choosing a group selects its eligible listings that are not in any campaign yet. This happens once: listings added to the group later are not included.",
       "groupsError": "Settings groups could not be loaded.",
       "groupError": "The entire group could not be loaded. Your selection was kept.",
       "retryGroup": "Retry group selection",
@@ -134,7 +134,7 @@
     "rate": {
       "title": "Change ad rate",
       "defaultTitle": "Change default ad rate",
-      "retryMembers": "Retry failed members",
+      "retryMembers": "Retry failed listings",
       "success": "Ad rate updated."
     },
     "lifecycle": {
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "Advertising is unavailable for this store.",
-      "unavailable": "Advertising eligibility is unavailable. Creating campaigns is disabled."
+      "unavailable": "We could not check whether this store can advertise, so you cannot create campaigns right now."
     },
     "results": {
       "summary": "Confirmed changes: {{changed}}. Already in campaign: {{already}}. Unconfirmed or failed: {{failed}}.",
-      "retryHint": "Failed or unconfirmed listings remain available for retry.",
-      "unconfirmed": "No listing updates were confirmed. Refresh the campaign facts to check the default rate."
+      "retryHint": "You can retry the failed or unconfirmed listings.",
+      "unconfirmed": "No listing updates were confirmed. Refresh the campaign to check its default rate."
     }
   }
 }

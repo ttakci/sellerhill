@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Listing Settings Groups",
-    "subtitle": "Manage and assign strategy templates to your product listings for automated optimization.",
+    "subtitle": "Group your pricing, stock and template settings, and assign them to your listings.",
     "loadingDescription": "Fetching your listing groups.",
     "createNewGroup": "Create New Group",
     "editGroup": "Edit Listing Group",
@@ -11,7 +11,7 @@
     "groupName": "Group Name",
     "groupNamePlaceholder": "e.g., Premium Electronics",
     "description": "Description",
-    "descriptionPlaceholder": "Enter group internal notes...",
+    "descriptionPlaceholder": "Add your own notes about this group...",
     "stripBrandFromTitle": "Remove brand from title",
     "stripBrandFromTitleInfo": "Automatically removes the Amazon brand name from your eBay title. Applies to new listings only.",
     "aiTitleEnabled": "AI-assisted title",
@@ -97,11 +97,11 @@
         "description": "High-contrast technical layout with clear fitment warnings and rugged styling"
       },
       "ds-apparel-fashion": {
-        "name": "Apparel Fashion",
+        "name": "Apparel & Fashion",
         "description": "Lookbook-style elegant layout, emphasizing sizing charts and fabric care"
       },
       "ds-beauty-health": {
-        "name": "Beauty Health",
+        "name": "Beauty & Health",
         "description": "Spa-like, clean design with structured sections for ingredients and how-to-use"
       },
       "ds-pet-supplies": {
@@ -109,7 +109,7 @@
         "description": "Playful yet structured layout with bright accents, focusing on material safety and sizing"
       },
       "ds-fitness-sports": {
-        "name": "Fitness Sports",
+        "name": "Fitness & Sports",
         "description": "High-energy, bold typography layout focusing on durability, materials, and active lifestyle"
       },
       "ds-outdoor-survival": {
@@ -121,7 +121,7 @@
         "description": "Fun, colorful layout focusing on safety certifications and age appropriateness"
       },
       "ds-kitchen-dining": {
-        "name": "Kitchen Dining",
+        "name": "Kitchen & Dining",
         "description": "Clean, recipe-book style layout focusing on material safety and dimensions"
       }
     },
@@ -146,7 +146,7 @@
       "templateMinLength": "Template must be at least 10 characters",
       "predefinedTemplateRequired": "Please select a predefined template",
       "minOnePriceRange": "At least one price range is required",
-      "maxPriceRanges": "Maximum 10 price ranges allowed",
+      "maxPriceRanges": "You can add up to 10 price ranges",
       "overlappingPriceRanges": "Price ranges cannot overlap",
       "minStockBuffer": "Stock buffer must be 0 or greater"
     },
@@ -196,9 +196,9 @@
     "addRange": "Add Range",
     "calculator": {
       "title": "Price calculator",
-      "subtitle": "Test these settings — not saved, just a preview.",
+      "subtitle": "Try these settings here. Nothing is saved.",
       "amazonPrice": "Amazon purchase price",
-      "adRate": "Ad rate what-if (%)",
+      "adRate": "Ad rate to test (%)",
       "amazonPriceError": "Enter an Amazon purchase price greater than 0.",
       "adRateError": "Enter an ad rate from 0 to 100 with at most one decimal place.",
       "combinedRateError": "The eBay fee and ad rate together must be below 100%.",
@@ -225,7 +225,7 @@
       "info": "Every calculated price is rounded up to the next amount with this ending, so your target profit is never reduced. A fixed price you set on a listing is not changed.",
       "endingLabel": "Price ending (cents, 0–99)",
       "example": "Example: {{from}} becomes {{to}}.",
-      "hint": "Enter a whole number from 0 to 99 — 99 gives prices like $24.99."
+      "hint": "Enter a whole number from 0 to 99. For example, 99 gives prices like $24.99."
     },
     "amazonTaxRateNote": "Your price calculation automatically accounts for the estimated tax you pay when buying from Amazon. Set this rate under Store Settings → Amazon Sales Tax Rate.",
     "stockControl": "Stock Control",
@@ -277,7 +277,7 @@
         "title": "What may be listed",
         "minPrice": "Min. Amazon price",
         "maxPrice": "Max. Amazon price",
-        "priceHint": "Leave a field empty for no limit. A product priced outside the range is skipped, and the job shows why.",
+        "priceHint": "Leave a field empty for no limit. A product priced outside the range is skipped, and the listing job shows why.",
         "priceError": "The maximum must not be lower than the minimum.",
         "amazonShippedOnly": "Only products Amazon ships itself",
         "amazonShippedOnlyHint": "Skips an offer that another seller ships from their own stock. Automatic ordering and tracking work best with products Amazon ships.",

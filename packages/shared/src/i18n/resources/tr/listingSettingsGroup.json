@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
-    "title": "Listeleme Ayarları Grupları",
-    "subtitle": "Otomatik optimizasyon için ürün listelerinize strateji şablonları yönetin ve atayın.",
+    "title": "Liste Ayar Grupları",
+    "subtitle": "Fiyat, stok ve şablon ayarlarınızı gruplar halinde toplayın ve listelerinize atayın.",
     "loadingDescription": "Liste gruplarınız getiriliyor.",
     "createNewGroup": "Yeni Grup Oluştur",
     "editGroup": "Listeleme Grubunu Düzenle",
@@ -11,7 +11,7 @@
     "groupName": "Grup Adı",
     "groupNamePlaceholder": "örn., Premium Elektronik",
     "description": "Açıklama",
-    "descriptionPlaceholder": "Grup iç notlarını girin...",
+    "descriptionPlaceholder": "Bu grup için kendi notlarınızı ekleyin...",
     "stripBrandFromTitle": "Başlıkta markayı kaldır",
     "stripBrandFromTitleInfo": "Amazon marka adını eBay başlığından otomatik olarak kaldırır. Yalnızca yeni listelerde geçerlidir.",
     "aiTitleEnabled": "Yapay zeka destekli başlık",
@@ -67,7 +67,7 @@
       "stockBuffer": "Stok Tamponu",
       "fee": "Komisyon",
       "fixedFee": "Sabit Ücret",
-      "aiTitle": "AI Başlık",
+      "aiTitle": "Yapay Zeka Başlığı",
       "customTemplate": "Özelleştirilmiş Şablon"
     },
     "emptyState": {
@@ -82,7 +82,7 @@
       },
       "ds-minimalist": {
         "name": "Minimalist",
-        "description": "Tamamen özelliklere ve güvene odaklanan, ultra temiz, tek sütunlu, siyah-beyaz düzen"
+        "description": "Yalnızca özelliklere ve güvene odaklanan sade, tek sütunlu, siyah-beyaz düzen"
       },
       "ds-tech-gadgets": {
         "name": "Teknoloji Cihazları",
@@ -90,7 +90,7 @@
       },
       "ds-home-decor": {
         "name": "Ev Dekorasyonu",
-        "description": "Yumuşak renkler, büyük görsel vurgusu ve samimi tipografi düzeni ile sıcak, estetik düzen"
+        "description": "Yumuşak renkler, büyük görseller ve samimi yazı tipleriyle sıcak, estetik bir düzen"
       },
       "ds-auto-parts": {
         "name": "Oto Parça",
@@ -105,7 +105,7 @@
         "description": "İçerikler ve kullanım talimatları için yapılandırılmış bölümlere sahip, spa tarzı temiz tasarım"
       },
       "ds-pet-supplies": {
-        "name": "Evcil Hayvan",
+        "name": "Evcil Hayvan Ürünleri",
         "description": "Malzeme güvenliği ve boyutlara odaklanan, parlak vurgulara sahip eğlenceli ancak yapılandırılmış düzen"
       },
       "ds-fitness-sports": {
@@ -113,7 +113,7 @@
         "description": "Dayanıklılık, malzemeler ve aktif yaşama odaklanan yüksek enerjili, kalın tipografili düzen"
       },
       "ds-outdoor-survival": {
-        "name": "Outdoor ve Hayatta Kalma",
+        "name": "Doğa ve Hayatta Kalma",
         "description": "Dayanıklılık, hava koşullarına direnç ve taktiksel özelliklere odaklanan, toprak tonlarında sağlam düzen"
       },
       "ds-toys-kids": {
@@ -146,7 +146,7 @@
       "templateMinLength": "Şablon en az 10 karakter olmalıdır",
       "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",
       "minOnePriceRange": "En az bir fiyat aralığı gereklidir",
-      "maxPriceRanges": "Maksimum 10 fiyat aralığına izin verilir",
+      "maxPriceRanges": "En fazla 10 fiyat aralığı ekleyebilirsiniz",
       "overlappingPriceRanges": "Fiyat aralıkları örtüşemez",
       "minStockBuffer": "Stok tamponu 0 veya daha büyük olmalıdır"
     },
@@ -196,9 +196,9 @@
     "addRange": "Aralık Ekle",
     "calculator": {
       "title": "Fiyat hesaplayıcı",
-      "subtitle": "Bu ayarları test edin — kaydedilmez, sadece önizlemedir.",
+      "subtitle": "Bu ayarları burada deneyin. Hiçbir şey kaydedilmez.",
       "amazonPrice": "Amazon alış fiyatı",
-      "adRate": "Reklam oranı denemesi (%)",
+      "adRate": "Denenecek reklam oranı (%)",
       "amazonPriceError": "0'dan büyük bir Amazon alış fiyatı girin.",
       "adRateError": "0 ile 100 arasında, en fazla bir ondalıklı reklam oranı girin.",
       "combinedRateError": "eBay ücreti ve reklam oranı toplamı %100'ün altında olmalı.",
@@ -215,8 +215,8 @@
         "ebayFee": "eBay ücreti ({{pct}})",
         "adFee": "Reklam ücreti ({{pct}})",
         "fixedFee": "Sabit ücret",
-        "floorApplied": "eBay'in $0.99 minimumunun altında, şuna yükseltildi",
-        "rounding": "{{ending}} sonuna yukarı yuvarlandı"
+        "floorApplied": "eBay'in $0.99 alt sınırının altında kaldı, şu tutara yükseltildi",
+        "rounding": "{{ending}} ile bitecek şekilde yukarı yuvarlandı"
       }
     },
     "feesAndTaxes": "Ücretler ve Vergiler",
@@ -224,12 +224,12 @@
       "title": "Fiyat sonunu yuvarla",
       "info": "Hesaplanan her fiyat, bu sonla biten bir üst tutara yuvarlanır; hedef kârınız asla azalmaz. Bir listede elle sabitlediğiniz fiyat değişmez.",
       "endingLabel": "Fiyat sonu (cent, 0–99)",
-      "example": "Örnek: {{from}} → {{to}} olur.",
-      "hint": "0 ile 99 arasında tam sayı girin — 99 yazarsanız fiyatlar $24.99 gibi biter."
+      "example": "Örnek: {{from}} fiyatı {{to}} olur.",
+      "hint": "0 ile 99 arasında bir tam sayı girin. Örneğin 99 yazarsanız fiyatlar $24.99 gibi biter."
     },
     "amazonTaxRateNote": "Fiyat hesaplanırken Amazon'dan alışverişte ödediğiniz tahmini vergi de otomatik olarak dikkate alınır. Bu oranı Mağaza Ayarları → Amazon Satış Vergisi Oranı bölümünden ayarlayabilirsiniz.",
     "stockControl": "Stok Kontrolü",
-    "ebayStockQuantity": "eBay Stok",
+    "ebayStockQuantity": "eBay Stoğu",
     "stockBuffer": "Stok Tamponu",
     "stockBufferDescription": "eBay miktarı, Amazon stoğundan bu tampon düşülerek hesaplanır (asla 0'ın altına inmez) ve eBay Stok değeriyle sınırlanır.",
     "htmlTemplate": "HTML Şablonu",
@@ -271,20 +271,20 @@
         "veroHint": "eBay'in VeRO programı üzerinden ilanları şikâyet ettiği bilinen markaların ürünlerini atlar. eBay şikâyet edilen ilanı kaldırır ve bunu hesabınızın aleyhine sayar.",
         "veroOffWarning": "Koruma kapalıyken, eBay'de ilanları şikâyet eden markaların ürünleri de diğerleri gibi listelenir. Bir VeRO şikâyeti eBay hesabınızın kısıtlanmasına yol açabilir.",
         "hideBrand": "Markayı eBay'e gönderme",
-        "hideBrandHint": "İlan Markasız olarak yayınlanır: marka başlıktan ve ürün özelliklerinden çıkarılır; barkod ve parça numarası da gönderilmez, çünkü eBay kataloğu markayı geri eklerdi."
+        "hideBrandHint": "İlan markasız yayınlanır. Marka başlıktan ve ürün özelliklerinden çıkarılır. Barkod ve parça numarası da gönderilmez, çünkü eBay kataloğu markayı geri ekler."
       },
       "filters": {
         "title": "Neler listelenebilir",
         "minPrice": "En düşük Amazon fiyatı",
         "maxPrice": "En yüksek Amazon fiyatı",
-        "priceHint": "Sınır istemiyorsanız alanı boş bırakın. Fiyatı aralığın dışında kalan ürün atlanır ve işte nedeni gösterilir.",
+        "priceHint": "Sınır istemiyorsanız alanı boş bırakın. Fiyatı bu aralığın dışında kalan ürün atlanır ve nedeni liste işinde gösterilir.",
         "priceError": "En yüksek fiyat, en düşük fiyattan küçük olamaz.",
         "amazonShippedOnly": "Yalnızca Amazon'un kendi gönderdiği ürünler",
         "amazonShippedOnlyHint": "Başka bir satıcının kendi stoğundan gönderdiği teklifleri atlar. Otomatik sipariş ve kargo takibi, Amazon'un gönderdiği ürünlerde en iyi çalışır.",
         "primeOnly": "Yalnızca Prime'a uygun teklifler",
         "primeOnlyHint": "Amazon'un Prime ile teslim etmediği teklifleri atlar. Prime teklifler genelde daha erken ulaşır, bu da eBay'deki hazırlık sürenize uymanızı kolaylaştırır.",
-        "pesticideProtection": "EPA numarası olmayan ilaçları atla",
-        "pesticideProtectionHint": "eBay; böcek ilacı, kovucu, yabani ot ilacı, dezenfektan ve havuz kimyasalı ilanlarında EPA kayıt numarası ister. Amazon sayfasında numara yoksa ürün, eBay'in reddetmesini beklemeden atlanır.",
+        "pesticideProtection": "EPA numarası olmayan pestisitleri atla",
+        "pesticideProtectionHint": "eBay, böcek ilacı, kovucu, yabani ot ilacı, dezenfektan ve havuz kimyasalı ilanlarında EPA kayıt numarası ister. Amazon sayfasında numara yoksa ürün, eBay'in reddetmesini beklemeden atlanır.",
         "minRating": "En düşük puan",
         "minReviewCount": "En az değerlendirme sayısı",
         "ratingHint": "Alt sınır belirlendiğinde, henüz puanı olmayan ürün atlanır.",

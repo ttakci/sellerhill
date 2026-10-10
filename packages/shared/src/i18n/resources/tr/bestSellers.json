@@ -20,8 +20,8 @@
       "title": "Kategoriler",
       "mobileLabel": "Kategori",
       "drawerTitle": "Kategorilere göz atın",
-      "expand": "{{name}} genişlet",
-      "collapse": "{{name}} daralt"
+      "expand": "{{name}} alt kategorilerini göster",
+      "collapse": "{{name}} alt kategorilerini gizle"
     },
     "selected_one": "{{count}} ürün seçildi",
     "selected_other": "{{count}} ürün seçildi",
@@ -32,12 +32,12 @@
     "allowance": "Bu dönem {{limit}} üründen {{remaining}} tanesi kaldı",
     "allowanceUnlimited": "Sınırsız ürün görüntüleme",
     "allowanceHint": "Açtığınız her liste sayfasındaki ürünler hakkınızdan düşer. Aynı sayfayı aynı gün yeniden açmak tekrar sayılmaz; başka bir gün açarsanız yeniden sayılır. Sıralama ve filtreleme hiç sayılmaz.",
-    "lastFetched": "Amazon'dan son çekilme",
+    "lastFetched": "Amazon'dan son güncelleme",
     "locked": {
-      "title_one": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
-      "title_other": "Bu sayfada {{count}} ürün daha paketinizin aylık hakkının dışında",
+      "title_one": "Bu sayfada {{count}} ürün daha planınızın aylık hakkının dışında",
+      "title_other": "Bu sayfada {{count}} ürün daha planınızın aylık hakkının dışında",
       "description": "Onları görmek için paketinizi yükseltin ya da ek paket alın. Hakkınız her fatura döneminde yenilenir.",
-      "cta": "Paketleri ve ek paketleri gör",
+      "cta": "Planları ve ek paketleri gör",
       "rowLabel": "Kilitli ürün"
     },
     "table": {
@@ -79,22 +79,22 @@
       },
       "retry": "Yeniden dene",
       "unavailable": {
-        "title": "Çok Satanlar geçici olarak kullanılamıyor",
-        "description": "Liste servisine şu anda ulaşılamıyor. İlanlarınız ve siparişleriniz etkilenmez."
+        "title": "Ürün Arama geçici olarak kullanılamıyor",
+        "description": "Amazon listeleri şu anda yüklenemiyor. İlanlarınız ve siparişleriniz etkilenmez."
       },
       "disabled": {
-        "title": "Çok Satanlar bu hesapta etkin değil",
+        "title": "Ürün Arama bu hesapta etkin değil",
         "description": "Amazon listelerine göz atma hesabınız için kapalı. Görmeyi bekliyorsanız destekle iletişime geçin."
       },
       "limitReached": {
-        "title": "Bugün çok fazla canlı liste yüklemesi yapıldı",
-        "description": "Bugün zaten yüklenen listeler hâlâ açık — onlardan birine geçin ya da yarın yeniden deneyin."
+        "title": "Günlük liste sınırına ulaşıldı",
+        "description": "Bugün yüklenen listeleri hâlâ açabilirsiniz. Onlardan birini açın ya da yarın yeniden deneyin."
       }
     },
     "errors": {
-      "disabled": "Çok Satanlar bu hesapta etkin değil.",
-      "dailyLimitReached": "Bugün çok fazla canlı liste yüklemesi yapıldı. Yarın yeniden deneyin.",
-      "unavailable": "Çok Satanlar geçici olarak kullanılamıyor.",
+      "disabled": "Ürün Arama bu hesapta etkin değil.",
+      "dailyLimitReached": "Günlük liste sınırına ulaştınız. Yarın yeniden deneyin.",
+      "unavailable": "Ürün Arama geçici olarak kullanılamıyor.",
       "unsupportedMarketplace": "Bu pazar yeri desteklenmiyor."
     }
   }

@@ -7,7 +7,7 @@
       "connectingButton": "Bağlanıyor...",
       "marketplaceLabel": "Pazar Yeri",
       "marketplaceUS": "Amerika Birleşik Devletleri (eBay.com)",
-      "marketplaceUK": "İngiltere (eBay.co.uk)",
+      "marketplaceUK": "Birleşik Krallık (eBay.co.uk)",
       "marketplaceDE": "Almanya (eBay.de)",
       "marketplaceFR": "Fransa (eBay.fr)",
       "marketplaceIT": "İtalya (eBay.it)",
@@ -25,38 +25,38 @@
       "statusRevoked": "İptal Edildi",
       "statusError": "Hata",
       "disconnectButton": "Bağlantıyı Kes",
-      "refreshTokenButton": "Token Yenile"
+      "refreshTokenButton": "Bağlantıyı Yenile"
     },
     "callback": {
       "processing": "eBay bağlantısı işleniyor...",
-      "success": "eBay hesabı başarıyla bağlandı! Dashboard'a yönlendiriliyor...",
+      "success": "eBay hesabı başarıyla bağlandı! Kontrol paneline yönlendiriliyor...",
       "error": "eBay hesabı bağlanırken hata oluştu. Lütfen tekrar deneyin.",
       "cancelled": "eBay bağlantısı iptal edildi."
     },
     "errors": {
-      "invalidState": "Geçersiz state parametresi",
-      "authorizationFailed": "eBay yetkilendirmesi başarısız",
-      "tokenExchangeFailed": "Yetkilendirme kodunun token'a dönüştürülmesi başarısız",
+      "invalidState": "eBay bağlantısı doğrulanamadı. Lütfen tekrar deneyin.",
+      "authorizationFailed": "eBay yetkilendirmesi başarısız oldu",
+      "tokenExchangeFailed": "eBay mağazanızın bağlantısı tamamlanamadı. Lütfen tekrar deneyin.",
       "accountAlreadyConnected": "Bu eBay mağazası başka bir SellerHill hesabına bağlı. Mağazayı daha önce bağladığınız hesapla giriş yapın; erişemiyorsanız destek ile iletişime geçin.",
-      "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz deneme hakkını kullanmış. Bağlamak için bir paket seçin.",
-      "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı",
+      "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz deneme hakkını kullanmış. Bağlamak için bir plan seçin.",
+      "noAuthorizationCode": "eBay bağlantıyı onaylamadı. Lütfen tekrar deneyin.",
       "storeOwnedByAnotherAccount": "Bu eBay mağazası başka bir SellerHill hesabına bağlı. Devretmek için destek ile iletişime geçin.",
       "accountNotFound": "Bu eBay mağazası bulunamadı.",
-      "identityUnavailable": "eBay hesabınızı eBay üzerinden doğrulayamadık. Hiçbir şey bağlanmadı; lütfen biraz sonra tekrar deneyin.",
-      "messagingScopeMissing": "Mesajlar için eBay mağazanızı yeniden bağlayın — mevcut yetki mesajlaşmayı kapsamıyor.",
+      "identityUnavailable": "eBay hesabınızı eBay üzerinden doğrulayamadık, bu yüzden hiçbir şey bağlanmadı. Lütfen biraz sonra tekrar deneyin.",
+      "messagingScopeMissing": "Mesajları açmak için eBay mağazanızı yeniden bağlayın. Mevcut bağlantınız mesajlaşmayı kapsamıyor.",
       "messagingReplyNotAllowed": "eBay'den gelen mesajlar buradan yanıtlanamaz.",
-      "messagingUnavailable": "eBay mesajlaşma geçici olarak kullanılamıyor. Lütfen tekrar deneyin.",
+      "messagingUnavailable": "eBay mesajları geçici olarak kullanılamıyor. Lütfen tekrar deneyin.",
       "messagingRejected": "eBay bu isteği kabul etmedi. Mesajı kontrol edip tekrar deneyin.",
       "messageTooLong": "Bir mesaj en fazla 2000 karakter olabilir."
     },
     "onboarding": {
       "title": "eBay Mağazanızı Bağlayın",
       "header": "Pazar Yeri Kurulumu",
-      "description": "Ürünlerinizi senkronize etmeye başlamak için önce eBay mağazanızı bağlamanız gerekmektedir.",
+      "description": "Ürünlerinizi senkronize etmeye başlamak için önce eBay mağazanızı bağlayın.",
       "connectButton": "eBay Hesabı Bağla",
       "skipButton": "Şimdilik Atla",
       "usOnlyNote": "Şu anda yalnızca ABD pazar yeri desteklenmektedir. Yakında diğer bölgeler de eklenecektir.",
-      "brandingDescription": "eBay mağazanızı SellerHill'a bağlayarak tüm satış süreçlerinizi tek bir merkezden yönetmeye başlayın."
+      "brandingDescription": "eBay mağazanızı SellerHill'e bağlayın ve tüm satış süreçlerinizi tek bir merkezden yönetin."
     }
   }
 }

@@ -25,7 +25,7 @@
       "statusRevoked": "Revoked",
       "statusError": "Error",
       "disconnectButton": "Disconnect",
-      "refreshTokenButton": "Refresh Token"
+      "refreshTokenButton": "Refresh Connection"
     },
     "callback": {
       "processing": "Processing eBay connection...",
@@ -34,16 +34,16 @@
       "cancelled": "eBay connection was cancelled."
     },
     "errors": {
-      "invalidState": "Invalid state parameter",
+      "invalidState": "The eBay connection could not be verified. Please try again.",
       "authorizationFailed": "eBay authorization failed",
-      "tokenExchangeFailed": "Failed to exchange authorization code for tokens",
+      "tokenExchangeFailed": "We could not finish connecting your eBay store. Please try again.",
       "accountAlreadyConnected": "This eBay store is connected to another SellerHill account. Sign in with the account you connected it to; if you can't access it, contact support.",
       "ebayTrialAlreadyUsed": "This eBay store has already used its free trial. Choose a plan to connect it.",
-      "noAuthorizationCode": "No authorization code received from eBay",
+      "noAuthorizationCode": "eBay did not confirm the connection. Please try again.",
       "storeOwnedByAnotherAccount": "This eBay store is linked to a different SellerHill account. Contact support to transfer it.",
       "accountNotFound": "That eBay store was not found.",
-      "identityUnavailable": "We could not confirm your eBay account with eBay. Nothing was connected — please try again in a moment.",
-      "messagingScopeMissing": "Reconnect your eBay store to enable messages — the current authorization does not include messaging.",
+      "identityUnavailable": "We could not confirm your eBay account with eBay, so nothing was connected. Please try again in a moment.",
+      "messagingScopeMissing": "Reconnect your eBay store to turn on messages. Your current connection does not include messaging.",
       "messagingReplyNotAllowed": "Messages from eBay cannot be replied to here.",
       "messagingUnavailable": "eBay messaging is temporarily unavailable. Please try again.",
       "messagingRejected": "eBay did not accept this request. Please check the message and try again.",
@@ -53,9 +53,9 @@
       "title": "Connect Your eBay Store",
       "header": "Marketplace Setup",
       "description": "To start syncing your items, you first need to connect your eBay store.",
-      "connectButton": "eBay Account",
+      "connectButton": "Connect eBay Account",
       "skipButton": "Skip for Now",
-      "usOnlyNote": "Currently only US marketplace is supported. More regions coming soon.",
+      "usOnlyNote": "Only the US marketplace is supported for now. More regions are coming soon.",
       "brandingDescription": "Link your eBay store to SellerHill to manage all your sales processes from a single hub."
     }
   }

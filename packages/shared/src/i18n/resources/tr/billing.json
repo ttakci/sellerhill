@@ -19,13 +19,13 @@
       "contactSales": "Satış ekibiyle iletişime geç",
       "freeTrial": "Ücretsiz deneme mevcut",
       "mostPopular": "En popüler",
-      "informationalOnly": "Faturalandırma zorunluluğu kapalı — planlar yalnızca bilgilendirme amaçlıdır. Tüm özellikler şu anda kısıtlamasız.",
+      "informationalOnly": "Plan limitleri şu anda uygulanmıyor, tüm özellikler açık. Planlar yalnızca bilgi amaçlı gösteriliyor.",
       "free": {
         "name": "Ücretsiz"
       },
       "trial": {
         "name": "Ücretsiz deneme",
-        "description": "SellerHill'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
+        "description": "SellerHill'in süreli deneme sürümü. Satın alınmaz, kayıt olduğunuzda kendiliğinden başlar."
       },
       "unlimitedOrders": "Sınırsız otomatik sipariş ve kargo takibi",
       "activeListings": "{{limit}} aktif ilan · sınırsız ilan ekleme ve kaldırma",
@@ -75,7 +75,7 @@
       },
       "business": {
         "name": "Business",
-        "description": "Yirmi bin ilanda çok mağazalı işletmeler için."
+        "description": "Yirmi bin ilanla çalışan çok mağazalı işletmeler için."
       },
       "enterprise": {
         "name": "Enterprise",
@@ -83,30 +83,30 @@
       },
       "scale": {
         "name": "Scale",
-        "description": "Kaldırılmış paket. Mevcut abonelikler çalışmaya devam eder; yeni kayıtlar yukarıdaki paketlerden seçer."
+        "description": "Artık sunulmayan bir plan. Mevcut abonelikler çalışmaya devam eder; yeni kayıtlar yukarıdaki planlardan birini seçer."
       },
-      "switchTo": "{{plan}} paketine geç",
-      "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak.",
+      "switchTo": "{{plan}} planına geç",
+      "switchDone": "Plan değişikliğiniz onaylandı.",
       "planNamed": "{{plan}} Planı"
     },
     "planChange": {
       "title": "Plan değişikliğini onaylayın",
-      "upgradeBody": "{{plan}} paketine geçiyorsunuz. Şimdi {{amount}} tahsil edilecek. Bir sonraki faturanız {{nextDate}} tarihinde {{nextAmount}} olacak.",
-      "downgradeBody": "{{date}} tarihinde {{plan}} paketine geçeceksiniz. Şimdi hiçbir tahsilat yapılmaz — o tarihe kadar mevcut planınızda kalırsınız.",
-      "listingLimitWarning": "Şu an {{active}} aktif ilanınız var, yeni paketin limiti ise {{limit}}. {{date}} tarihinden itibaren yalnızca en eski {{limit}} ilanınız takip edilir; kalan {{over}} ilanın fiyat/stok takibi ve siparişlerinin otomatik işlenmesi durur. Hangi ilanların takipte kalacağını seçmek isterseniz bu tarihe kadar istemediğiniz ilanları sonlandırabilirsiniz.",
+      "upgradeBody": "{{plan}} planına geçiyorsunuz. Şimdi {{amount}} tahsil edilecek. Bir sonraki faturanız {{nextDate}} tarihinde {{nextAmount}} olacak.",
+      "downgradeBody": "{{date}} tarihinde {{plan}} planına geçeceksiniz. Şimdi ödeme alınmaz, o tarihe kadar mevcut planınızda kalırsınız.",
+      "listingLimitWarning": "Şu an {{active}} aktif ilanınız var, yeni planın limiti ise {{limit}}. {{date}} tarihinden itibaren yalnızca en eski {{limit}} ilanınız takip edilir; kalan {{over}} ilanın fiyat/stok güncellemesi ve siparişlerinin otomatik işlenmesi durur. Hangi ilanların takipte kalacağını kendiniz seçmek isterseniz, istemediğiniz ilanları bu tarihe kadar sonlandırın.",
       "confirm": "Onayla",
       "cancel": "Vazgeç"
     },
     "limits": {
       "listings_per_month": {
-        "label": "Aktif listeler",
-        "unit": "liste",
-        "description": "Tüm mağazalarınızdaki maksimum aktif liste sayısı."
+        "label": "Aktif ilanlar",
+        "unit": "ilan",
+        "description": "Tüm mağazalarınızdaki en fazla aktif ilan sayısı."
       },
       "amazon_orders_per_month": {
         "label": "Otomatik siparişler",
         "unit": "sipariş",
-        "description": "Sizin adınıza verilen (otomatik ya da elle bağlanan) Amazon siparişleri. Her pakette sınırsız."
+        "description": "Sizin adınıza verilen (otomatik ya da elle bağlanan) Amazon siparişleri. Her planda sınırsız."
       },
       "unlimited": "Sınırsız",
       "disabled": "Dahil değil",
@@ -118,12 +118,12 @@
       "tracking_conversions_per_month": {
         "label": "Kargo takip dönüşümü",
         "unit": "dönüşüm",
-        "description": "Ayda kaç gönderinin takip numarasının dönüştürüleceği — alıcı tedarikçinizi görmesin diye."
+        "description": "Alıcı tedarikçinizi görmesin diye ayda kaç gönderinin takip numarasının dönüştürüleceği."
       },
       "best_sellers_products_per_month": {
         "label": "Çok Satanlar ürünleri",
         "unit": "ürün",
-        "description": "Çok Satanlar sayfasında fatura dönemi başına görüntüleyebileceğiniz ürün sayısı; önbellekten gelen ve canlı listeler aynı şekilde sayılır."
+        "description": "Çok Satanlar sayfasında fatura dönemi başına görüntüleyebileceğiniz ürün sayısı. Liste önceden hazır olsa da yeni getirilse de gösterilen her ürün sayılır."
       }
     },
     "subscription": {
@@ -166,12 +166,12 @@
       "accessEnds": "Erişim bitişi",
       "portal": "Ödeme yöntemi ve faturalar",
       "portalHint": "Kartınızı güncellemek, fatura indirmek veya iptal etmek için Stripe açılır.",
-      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin.",
+      "manageHint": "Ödeme yönteminizi, planınızı ve faturalarınızı buradan yönetin.",
       "nextChargeLabel": "Sonraki ödeme",
       "nextCharge": "Bir sonraki ödeme: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "{{date}} tarihinde iptal edilecek — bu dönemden sonra ücret alınmayacak",
-      "scheduledChange": "{{date}} tarihinde {{plan}} paketine geçecek",
-      "scheduledChangeUnknownPlan": "Paketiniz {{date}} tarihinde değişecek",
+      "cancelsAtPeriodEnd": "{{date}} tarihinde iptal edilecek. Bu dönemden sonra ücret alınmayacak.",
+      "scheduledChange": "{{date}} tarihinde {{plan}} planına geçecek",
+      "scheduledChangeUnknownPlan": "Planınız {{date}} tarihinde değişecek",
       "cancelScheduledChange": "Vazgeç",
       "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi.",
       "confirmCancelScheduledChangeTitle": "Plan değişikliğinden vazgeç",
@@ -222,17 +222,17 @@
       }
     },
     "transition": {
-      "full_access": "Tam erişim — faturalandırma zorunluluğu kapalı. Tüm özellikler kısıtlamasız.",
+      "full_access": "Tam erişim: plan limitleri uygulanmıyor, tüm özellikler açık.",
       "active": "Aboneliğiniz aktif.",
-      "no_subscription": "Aktif abonelik yok. Faturalandırmayı etkinleştirmek için bir plan seçin.",
+      "no_subscription": "Aktif aboneliğiniz yok. Devam etmek için bir plan seçin.",
       "past_due": "Aboneliğinizin vadesi geçmiş. Erişimi geri kazanmak için ödeme yönteminizi güncelleyin."
     },
     "provider": {
-      "unconfiguredTitle": "Faturalandırma yapılandırılmamış",
-      "unconfiguredBody": "Hiçbir faturalandırma sağlayıcısı bağlı olmadığı için ödeme ve abonelik yönetimi kullanılamıyor. Operatörünüzle iletişime geçin."
+      "unconfiguredTitle": "Ödemeler kullanılamıyor",
+      "unconfiguredBody": "Ödemeler şu anda kullanılamıyor. Abone olamaz ve aboneliğinizi yönetemezsiniz. Lütfen destek ile iletişime geçin."
     },
     "usage": {
-      "title": "Bu dönem kullanımı",
+      "title": "Bu dönemki kullanım",
       "subtitle": "Kullanım, sonraki faturalandırma döneminin başında sıfırlanır.",
       "period": "Dönem",
       "noOpenPeriod": "Aktif kullanım dönemi yok",
@@ -279,24 +279,24 @@
       "no_active_subscription": "Aktif abonelik bulunamadı.",
       "no_open_period": "Bu limit için açık kullanım dönemi yok.",
       "already_reserved": "Bu kaynak zaten ayrılmış.",
-      "providerNotConfigured": "Bu ortamda ödeme henüz etkin değil. Lütfen daha sonra tekrar deneyin.",
-      "planNotMirrored": "Bu paket henüz satın alınamıyor. Başka bir paket seçin veya destek ile iletişime geçin.",
-      "checkoutFailed": "Ödeme başlatılamadı. Lütfen biraz sonra tekrar deneyin — sorun sürerse destek ile iletişime geçin.",
+      "providerNotConfigured": "Ödemeler henüz kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+      "planNotMirrored": "Bu plan henüz satın alınamıyor. Başka bir plan seçin veya destek ile iletişime geçin.",
+      "checkoutFailed": "Ödeme başlatılamadı. Lütfen biraz sonra tekrar deneyin. Sorun sürerse destek ile iletişime geçin.",
       "portalFailed": "Fatura portalı açılamadı. Lütfen biraz sonra tekrar deneyin.",
-      "noCustomer": "Henüz bir fatura hesabınız yok. Önce bir paket seçin.",
-      "planNotFound": "Paket bulunamadı.",
-      "priceNotFound": "Bu paket için aktif bir fiyat bulunamadı.",
-      "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz denemesini zaten kullanmış. Devam etmek için bir paket seçin.",
+      "noCustomer": "Henüz bir fatura hesabınız yok. Önce bir plan seçin.",
+      "planNotFound": "Plan bulunamadı.",
+      "priceNotFound": "Bu plan için aktif bir fiyat bulunamadı.",
+      "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz denemesini zaten kullanmış. Devam etmek için bir plan seçin.",
       "quotaExhausted": "Plan limitinize ulaştınız. Devam etmek için planınızı yükseltin.",
       "addonNotFound": "Ek paket bulunamadı.",
       "noSubscription": "Değiştirilecek aktif bir aboneliğiniz yok.",
-      "planChangeFailed": "Paket şu anda değiştirilemedi. Tekrar deneyin ya da \"Aboneliği yönet\" üzerinden ilerleyin.",
-      "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
-      "subscriptionSuspendedOrders": "Aboneliğiniz aktif olmadığı için sipariş işlemleri durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
-      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin.",
-      "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Planı değiştir\" ile geçiş yapın.",
+      "planChangeFailed": "Plan şu anda değiştirilemedi. Tekrar deneyin ya da \"Aboneliği yönet\" üzerinden ilerleyin.",
+      "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir plan seçin. Her şey kendiliğinden yeniden başlar.",
+      "subscriptionSuspendedOrders": "Aboneliğiniz aktif olmadığı için sipariş otomasyonu durduruldu. Devam etmek için bir plan seçin. Her şey kendiliğinden yeniden başlar.",
+      "listingQuotaExhausted": "Planınızın izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst plana geçin.",
+      "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Aboneliği yönet\" bölümünden yeni bir plan seçin.",
       "invoicesFailed": "Fatura geçmişi yüklenemedi. Lütfen biraz sonra tekrar deneyin.",
-      "paymentRequiresAction": "Bankanız bu kart için ek doğrulama istedi; plan değişikliği iptal edildi ve mevcut paketinizde kaldınız. “Faturalandırmayı yönet” ile ödeme yönteminizi güncelleyip tekrar deneyin.",
+      "paymentRequiresAction": "Bankanız bu kart için ek doğrulama istedi. Plan değişikliği iptal edildi ve mevcut planınızda kaldınız. “Ödeme yöntemini güncelle” ile kartınızı güncelleyip tekrar deneyin.",
       "invalidCheckoutSession": "Bu ödeme onay bağlantısı geçerli değil."
     },
     "actions": {
@@ -335,14 +335,14 @@
       }
     },
     "addons": {
-      "title": "Bu ay daha fazlası mı gerekli?",
+      "title": "Bu ay daha fazlasına mı ihtiyacınız var?",
       "subtitle": "Aylık bir limite ulaştınız. Fatura döneminiz yenilenene kadar devam etmek için ek paket alabilirsiniz.",
       "subtitleByLimit": {
         "tracking_conversions_per_month": "Aylık kargo takip dönüşüm hakkınızı kullandınız. Dönem yenilenene kadar tedarikçinizi gizlemeye devam etmek için ek paket alabilirsiniz.",
         "best_sellers_products_per_month": "Aylık Çok Satanlar hakkınızı kullandınız. Dönem yenilenene kadar Amazon listelerine göz atmaya devam etmek için ek paket alabilirsiniz."
       },
       "buy": "Satın al",
-      "note": "Ek paket yalnızca içinde bulunduğunuz takvim ayı için geçerlidir; bu yüzden önceden değil, limite ulaştığınızda sunulur. Paket hakkınız ayın 1’inde yenilenir."
+      "note": "Ek paket yalnızca içinde bulunduğunuz fatura dönemi için geçerlidir. Bu yüzden önceden değil, limite ulaştığınızda sunulur. Plan hakkınız dönem yenilendiğinde sıfırlanır."
     }
   }
 }

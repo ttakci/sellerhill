@@ -129,12 +129,12 @@
       "confirmedLabel": "Confirmed",
       "confirmedTooltip": "Profit from orders whose real Amazon costs were captured. An unknown cost is never counted as zero.",
       "estimatedLabel": "Estimated",
-      "estimatedTooltip": "Orders awaiting Amazon fulfillment use an estimated cost (Amazon tax at your configured rate of {{rate}}%).",
+      "estimatedTooltip": "Orders whose real Amazon costs are not in yet use an estimated cost, with Amazon tax at your rate of {{rate}}%.",
       "uncostedLabel": "Revenue without cost",
-      "uncostedTooltip": "Sales whose Amazon cost could not be resolved yet — revenue only, no profit implied.",
+      "uncostedTooltip": "Sales whose Amazon cost is not known yet. This is revenue only and says nothing about profit.",
       "untrackedExcludedLabel_one": "{{count}} untracked order excluded",
       "untrackedExcludedLabel_other": "{{count}} untracked orders excluded",
-      "untrackedExcludedTooltip": "Orders that did not match a SellerHill listing are left out of every figure on this dashboard. They stay on the Orders page under \"Not tracked\"; import the listing to include them."
+      "untrackedExcludedTooltip": "Orders that did not match a SellerHill listing are left out of every figure on this dashboard. They stay on the Orders page under \"Not tracked\". Import the listing to include them."
     },
     "topSellers": {
       "result_one": "<b>{{count}}</b> listing sold",

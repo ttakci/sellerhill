@@ -117,7 +117,7 @@
       "trackingNumber": "Tracking {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "Return ID",
-      "actionsOff": "In-app return actions are off — answer on eBay."
+      "actionsOff": "In-app return actions are off. Answer on eBay."
     },
     "actions": {
       "done": {
@@ -184,7 +184,7 @@
       "suspended": "Your subscription is suspended, so return actions are paused. Settle the invoice on the Billing page.",
       "ebayRejected": "eBay refused this action. Open the return on eBay to see why.",
       "unavailable": "eBay could not be reached. Try again in a moment.",
-      "sandbox": "Return actions are not available on the eBay sandbox.",
+      "sandbox": "Return actions are not available in eBay's test environment.",
       "refundAmountUnknown": "eBay did not report a refund amount for this return, so the refund has to be issued on eBay.",
       "notFound": "This return was not found.",
       "labelFileRequired": "Choose the label file.",

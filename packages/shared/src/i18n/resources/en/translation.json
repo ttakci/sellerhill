@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Amazon Account",
-          "subtitle": "Manage your buyer accounts for order scraping"
+          "subtitle": "Manage the Amazon buyer accounts used for your orders"
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Connected Since",
         "reconnect": {
           "action": "Reconnect",
-          "hint": "Sign in to eBay again to renew this store's permissions. The store, its orders and listings stay as they are — no need to disconnect first."
+          "hint": "Sign in to eBay again to renew this store's permissions. The store, its orders and its listings stay as they are. You don't need to disconnect first."
         },
         "disconnect": {
           "action": "Disconnect",
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Amazon Accounts",
-        "subtitle": "Your buyer accounts for order scraping",
+        "subtitle": "Your Amazon buyer accounts used for orders",
         "addNew": {
           "title": "New Amazon Account",
-          "subtitle": "Connect a new buyer account for order scraping"
+          "subtitle": "Connect a new buyer account for your orders"
         },
         "empty": {
           "title": "No buyer accounts yet",
-          "description": "Connect an Amazon buyer account to scan your orders and capture real costs."
+          "description": "Connect an Amazon buyer account so we can read your Amazon orders and record their real costs."
         },
         "viewAll": {
           "title": "All"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Add Amazon Account",
-        "subtitle": "Provide credentials for order scraping",
+        "subtitle": "Enter the sign-in details of your Amazon buyer account",
         "label": "Account Label",
         "email": "Email",
         "password": "Password",
         "twoFactorSecret": "2FA secret key",
-        "twoFactorSecretHint": "Required. Amazon asks for a verification code on almost every automated sign-in, and an authenticator key is the only one we can answer for you. In Amazon's Login & Security settings turn on an authenticator app and paste the setup key here — not a 6-digit code. When editing an existing account, leave this blank to keep the saved key."
+        "twoFactorSecretHint": "Required. Amazon asks for a verification code on almost every automatic sign-in, and an authenticator key is the only way we can enter that code for you. In Amazon's Login & Security settings, turn on an authenticator app and paste its setup key here, not a 6-digit code. When editing an account, leave this blank to keep the saved key."
       },
       "amazonEdit": {
         "title": "Edit Amazon Account",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Check blacklist keywords",
         "checkBlacklistDesc": "Scan listing titles, descriptions, specifics, and brand against your blacklist before publishing. Each keyword's own field selection controls where it's checked.",
         "allowCrossStoreAsins": "Allow ASINs already listed on my other stores",
-        "allowCrossStoreAsinsDesc": "Set for all stores, every store may list any ASIN; set on one store, only that store may add ASINs your other stores already carry. An ASIN already on this store is always skipped.",
+        "allowCrossStoreAsinsDesc": "When set for all stores, every store may list any ASIN. When set on one store, only that store may add ASINs your other stores already carry. An ASIN already on this store is always skipped.",
         "allowCrossStoreAsinsInherited": "Following the all-stores setting until you save a choice for this store.",
         "country": "Country",
         "countryPlaceholder": "Select a country",
@@ -593,7 +593,7 @@
       },
       "sync": {
         "title": "Price & stock tracked 4 times a day",
-        "description": "Source price and stock are checked four times every day, and any change reaches your eBay listing in the same pass. When even a daily check is rare, you stop selling what's out of stock and stop sitting on prices that lose money.",
+        "description": "Source price and stock are checked four times every day, and any change reaches your eBay listing in the same pass. You stop selling what's out of stock and stop sitting on prices that lose money. In this category, even one check a day is rare.",
         "caption": "A check every 6 hours"
       },
       "specifics": {
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Affordable automation",
-        "description": "The complete professional automation set for a far lower monthly fee. Every feature is in every plan, automatic orders are unlimited, and plans differ only by listings, tracking conversions and Best Sellers browsing.",
+        "description": "The complete professional automation set at an affordable monthly fee. Every feature is in every plan, automatic orders are unlimited, and plans differ only by listings, tracking conversions and Best Sellers browsing.",
         "cta": "See plans"
       }
     },
@@ -815,7 +815,7 @@
       "items": {
         "bulkAsin": {
           "title": "Bulk ASIN listing",
-          "description": "Paste hundreds of ASINs and let the listings build in the queue."
+          "description": "Paste hundreds of ASINs and the listings are built for you."
         },
         "aiTitle": {
           "title": "AI-optimized titles",
@@ -885,7 +885,7 @@
     "pricing": {
       "eyebrow": "Pricing",
       "sectionTitle": "Affordable automation.",
-      "sectionSubtitle": "Every plan includes every feature. Plans differ by active listings, tracking conversions and your Best Sellers browsing allowance; automatic orders are unlimited on every plan, so features other tools keep for their top tiers are yours even on the smallest plan.",
+      "sectionSubtitle": "Every plan includes every feature. Plans differ by active listings, tracking conversions and your Best Sellers browsing allowance. Automatic orders are unlimited on every plan, so features other tools keep for their top tiers are yours even on the smallest plan.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "mostPopular": "Most popular",
@@ -1008,7 +1008,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Smarter automation. A lower price.",
+        "headline": "Smarter automation. At an affordable price.",
         "subheading": "Strategies per product group, sync four times a day, complete item specifics and a Pending Actions screen that guides you. Try it free for a month, no credit card required.",
         "button": "Start free"
       }
@@ -1038,7 +1038,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Sample data — nothing is saved.",
+      "description": "Sample data. Nothing is saved.",
       "exit": "Exit demo",
       "signUp": "Create free account"
     },

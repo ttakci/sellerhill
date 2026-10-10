@@ -1,7 +1,7 @@
 {
   "actionCenter": {
     "title": "Bekleyen Aksiyonlar",
-    "subtitle": "Müdahalenizi bekleyen her şey, en acilden başlayarak. Bir maddeye dokunun, onu çözeceğiniz ekrana doğrudan gidin.",
+    "subtitle": "Sizi bekleyen her şey, en acilden başlayarak burada. Bir maddeyi açtığınızda onu çözeceğiniz ekrana gidersiniz.",
     "menu": "Bekleyen Aksiyonlar",
     "refresh": "Yenile",
     "updatedAt": "Güncellendi: {{time}}",
@@ -47,7 +47,7 @@
     "groups": {
       "orders": {
         "title": "Siparişler",
-        "subtitle": "Diğer ucunda bekleyen bir alıcı olan satışlar."
+        "subtitle": "Alıcının beklediği satışlar."
       },
       "connections": {
         "title": "Bağlantılar",
@@ -59,7 +59,7 @@
       },
       "plan": {
         "title": "Plan ve kapasite",
-        "subtitle": "Yakında işlem reddetmeye başlayacak limitler."
+        "subtitle": "Dolduğunda yeni işlemleri durduracak limitler."
       },
       "setup": {
         "title": "Kurulum",
@@ -69,8 +69,8 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon, ödemesini yaptığınız bir siparişi iptal etti",
-        "description_one": "{{count}} sipariş Amazon tarafında iptal edildi. eBay satışı hâlâ geçerli ve alıcıya borçlusunuz — eBay bunu bir kusur olarak saymadan önce yeniden sipariş verin veya iade edin.",
-        "description_other": "{{count}} sipariş Amazon tarafında iptal edildi. Bu eBay satışları hâlâ geçerli ve alıcılara borçlusunuz — eBay bunları kusur olarak saymadan önce yeniden sipariş verin veya iade edin.",
+        "description_one": "{{count}} sipariş Amazon tarafında iptal edildi. eBay satışı hâlâ geçerli ve ürünü alıcıya göndermeniz gerekiyor. eBay bunu kusur olarak saymadan önce yeniden sipariş verin ya da alıcıya iade yapın.",
+        "description_other": "{{count}} sipariş Amazon tarafında iptal edildi. Bu eBay satışları hâlâ geçerli ve ürünleri alıcılara göndermeniz gerekiyor. eBay bunları kusur olarak saymadan önce yeniden sipariş verin ya da alıcılara iade yapın.",
         "action": "Siparişleri incele"
       },
       "order_fulfillment_blocked": {
@@ -80,7 +80,7 @@
         "action": "Siparişleri incele"
       },
       "order_purchase_unknown": {
-        "title": "Satın alma doğrulanamadı — önce Amazon'u kontrol edin",
+        "title": "Satın alma doğrulanamadı: önce Amazon'u kontrol edin",
         "description_one": "Amazon satın alması doğrulanamayan sipariş sayısı: {{count}}. Sipariş düğmesine basıldı ama onay gelmedi; sipariş oluşmuş olabilir. Yeniden bir şey alınmadan önce Amazon'u kontrol edip siparişi bağlayın.",
         "description_other": "Amazon satın alması doğrulanamayan sipariş sayısı: {{count}}. Sipariş düğmesine basıldı ama onay gelmedi; sipariş oluşmuş olabilir. Yeniden bir şey alınmadan önce Amazon'u kontrol edip siparişi bağlayın.",
         "action": "Siparişleri incele"
@@ -99,14 +99,14 @@
       },
       "order_tracking_problem": {
         "title": "Takip dönüşümünde sorun var",
-        "description_one": "Kargoya verilmiş {{count}} siparişte takip sağlayıcısı kaynaklı açık bir sorun var. Sorun çözülene kadar o sipariş, alıcınıza dönüştürülmüş numara yerine orijinal Amazon takip numarasını gösteriyor.",
-        "description_other": "Kargoya verilmiş {{count}} siparişte takip sağlayıcısı kaynaklı açık sorunlar var. Sorunlar çözülene kadar o siparişler, alıcılarınıza dönüştürülmüş numara yerine orijinal Amazon takip numaralarını gösteriyor.",
+        "description_one": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık bir sorun var. Sorun çözülene kadar o sipariş, alıcınıza dönüştürülmüş numara yerine orijinal Amazon takip numarasını gösteriyor.",
+        "description_other": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık sorunlar var. Sorunlar çözülene kadar o siparişler, alıcılarınıza dönüştürülmüş numara yerine orijinal Amazon takip numaralarını gösteriyor.",
         "action": "Siparişleri görüntüle"
       },
       "order_tracking_conversion_held": {
         "title": "eBay'de kargolandı olarak işaretlenmeyen siparişler",
-        "description_one": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numarası dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numarasını alıcınıza asla göndermiyoruz. Sebebi giderdiğinizde sipariş otomatik olarak kargolanır; o zamana kadar geç kargo riski taşır.",
-        "description_other": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numaraları dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numaralarını alıcılarınıza asla göndermiyoruz. Sebebi giderdiğinizde siparişler otomatik olarak kargolanır; o zamana kadar geç kargo riski taşırlar.",
+        "description_one": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numarası dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numarasını alıcınıza asla göndermiyoruz. Sorunu giderdiğinizde sipariş eBay'de otomatik olarak kargolandı olarak işaretlenir. O zamana kadar geç kargo kusuru riski taşır.",
+        "description_other": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numaraları dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numaralarını alıcılarınıza asla göndermiyoruz. Sorunu giderdiğinizde siparişler eBay'de otomatik olarak kargolandı olarak işaretlenir. O zamana kadar geç kargo kusuru riski taşırlar.",
         "action": "Siparişleri görüntüle"
       },
       "order_cancelled_amazon_open": {
@@ -129,8 +129,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Alıcı iptal talebi",
-        "description_one": "{{count}} alıcı bir siparişi iptal etmek istedi — eBay'in son tarihinden önce buradan onaylayın veya reddedin",
-        "description_other": "{{count}} alıcı sipariş iptali istedi — eBay'in son tarihinden önce buradan onaylayın veya reddedin",
+        "description_one": "{{count}} alıcı bir siparişi iptal etmek istedi. Talebi eBay'in son tarihinden önce buradan onaylayın veya reddedin.",
+        "description_other": "{{count}} alıcı sipariş iptali istedi. Talepleri eBay'in son tarihinden önce buradan onaylayın veya reddedin.",
         "action": "Talepleri incele"
       },
       "ebay_account_disconnected": {
@@ -147,32 +147,32 @@
       },
       "amazon_account_needs_attention": {
         "title": "Bir Amazon alıcı hesabı giriş yapamıyor",
-        "description_one": "{{count}} alıcı hesabı giriş yapamıyor, bu hesap üzerinden hiçbir şey satın alınamaz.",
-        "description_other": "{{count}} alıcı hesabı giriş yapamıyor, bu hesaplar üzerinden hiçbir şey satın alınamaz.",
+        "description_one": "{{count}} alıcı hesabı giriş yapamıyor. Bu hesap üzerinden hiçbir şey satın alınamıyor.",
+        "description_other": "{{count}} alıcı hesabı giriş yapamıyor. Bu hesaplar üzerinden hiçbir şey satın alınamıyor.",
         "action": "Hesapları yönet"
       },
       "listing_job_failures": {
         "title": "Oluşturulamayan ilanlar",
-        "description_one": "Son {{days}} günde {{count}} ilan başarısız oldu. Neden, sizin tarafınızdan düzeltilebilir olup olmadığını söyler.",
-        "description_other": "Son {{days}} günde {{count}} ilan başarısız oldu. Nedenler, hangilerinin sizin tarafınızdan düzeltilebileceğini söyler.",
+        "description_one": "Son {{days}} günde {{count}} ilan oluşturulamadı. Nedenine bakarak sorunu sizin düzeltip düzeltemeyeceğinizi görebilirsiniz.",
+        "description_other": "Son {{days}} günde {{count}} ilan oluşturulamadı. Nedenlere bakarak hangilerini sizin düzeltebileceğinizi görebilirsiniz.",
         "action": "İşleri görüntüle"
       },
       "listing_source_unavailable": {
         "title": "Amazon ürünü erişilemeyen veya okunamayan yayındaki ilanlar",
-        "description_one": "{{count}} aktif ilan, Amazon'da erişilemeyen veya verisi okunamayan bir ürüne bağlı. Ürünü kontrol edin; kalkmışsa ilanı sonlandırın.",
-        "description_other": "{{count}} aktif ilan, Amazon'da erişilemeyen veya verisi okunamayan ürünlere bağlı. Ürünleri kontrol edin; kalkmışsa ilanları sonlandırın.",
+        "description_one": "{{count}} aktif ilan, Amazon'da erişilemeyen veya verisi okunamayan bir ürüne bağlı. Ürünü kontrol edin; Amazon'dan kalktıysa ilanı sonlandırın.",
+        "description_other": "{{count}} aktif ilan, Amazon'da erişilemeyen veya verisi okunamayan ürünlere bağlı. Ürünleri kontrol edin; Amazon'dan kalkanların ilanlarını sonlandırın.",
         "action": "İlanları incele"
       },
       "listing_out_of_stock": {
         "title": "Stok adedi sıfır olan yayındaki ilanlar",
-        "description_one": "{{count}} aktif ilan eBay'de satacak bir şey olmadan görünüyor. Kaynak stoklanana kadar kazandırmaz.",
-        "description_other": "{{count}} aktif ilan eBay'de satacak bir şey olmadan görünüyor. Kaynak stoklanana kadar kazandırmazlar.",
+        "description_one": "{{count}} aktif ilan eBay'de stoksuz görünüyor. Amazon'da stok gelene kadar satış yapmaz.",
+        "description_other": "{{count}} aktif ilan eBay'de stoksuz görünüyor. Amazon'da stok gelene kadar satış yapmazlar.",
         "action": "İlanları incele"
       },
       "listing_drafts_pending": {
         "title": "Hiç yayınlanmamış taslaklar",
-        "description_one": "{{count}} taslak hazır ve size hiçbir maliyeti yok — ama yayına alınana kadar hiçbir şey de satmıyor.",
-        "description_other": "{{count}} taslak hazır ve size hiçbir maliyeti yok — ama yayına alınana kadar hiçbir şey de satmıyorlar.",
+        "description_one": "{{count}} taslak hazır ve size bir maliyeti yok. Ama yayına alınana kadar satış da yapmaz.",
+        "description_other": "{{count}} taslak hazır ve size bir maliyeti yok. Ama yayına alınana kadar satış da yapmazlar.",
         "action": "Taslakları gör"
       },
       "plan_listing_quota": {
@@ -183,7 +183,7 @@
       "plan_ao_quota": {
         "title": "Aylık otomatik sipariş limitiniz dolmak üzere",
         "description": "Bu ay {{limit}} otomatik sipariş hakkınızın {{used}} tanesini kullandınız. Limit dolduğunda ay yenilenene kadar yeni siparişleri elle vermeniz gerekir.",
-        "action": "Paketi görüntüle"
+        "action": "Planı görüntüle"
       },
       "plan_past_due": {
         "title": "Son ödemeniz alınamadı",
@@ -198,12 +198,12 @@
       },
       "setup_no_ebay_store": {
         "title": "eBay mağazanızı bağlayın",
-        "description": "Bağlı bir eBay mağazası olmadan SellerHill'de hiçbir şey çalışmaz — ilanlar, siparişler ve otomasyonun hepsi buna bağlı. Önce yapılması gereken tek şey bu.",
+        "description": "Bağlı bir eBay mağazası olmadan SellerHill'de hiçbir şey çalışmaz. İlanlar, siparişler ve otomasyon buna bağlı, bu yüzden önce bunu yapın.",
         "action": "eBay'i bağla"
       },
       "setup_no_amazon_account": {
         "title": "Henüz Amazon alıcı hesabı yok",
-        "description": "Satış yapıyorsunuz ama satın alacak bir Amazon hesabı yok — her siparişi elle almanız gerekiyor. Bir hesap eklediğinizde otomatik karşılama açılır.",
+        "description": "Satış yapıyorsunuz ama satın alma yapacak bir Amazon hesabı yok, bu yüzden her siparişi elle almanız gerekiyor. Bir hesap eklediğinizde otomatik satın alma açılır.",
         "action": "Hesap ekle"
       },
       "setup_no_store_settings": {
@@ -212,35 +212,35 @@
         "action": "Ayarları yapılandır"
       },
       "setup_no_listing_settings_group": {
-        "title": "Henüz listing grup yok",
-        "description": "Bir listing ayar grubu fiyatlama, stok ve fiyat güncelleme kurallarını tanımlar — her ilanın bir gruba ihtiyacı vardır, bu yüzden gruplandırmadan ilk ilanınızı oluşturamazsınız.",
+        "title": "Henüz liste ayar grubu yok",
+        "description": "Liste ayar grubu fiyatlandırma, stok ve fiyat güncelleme kurallarınızı belirler. Her ilanın bir gruba ihtiyacı var, bu yüzden grup olmadan ilk ilanınızı oluşturamazsınız.",
         "action": "Grup oluştur"
       },
       "setup_auto_fulfill_off": {
         "title": "Otomatik satın alma kapalı",
-        "description": "Amazon hesaplarınız bağlı ama hiçbiri satın almaya yetkili değil. Bir harcama tavanıyla açtığınızda yeni siparişler sizin yerinize satın alınır.",
+        "description": "Amazon hesaplarınız bağlı ama hiçbirinde otomatik satın alma açık değil. Bir harcama limitiyle açtığınızda yeni siparişler sizin yerinize satın alınır.",
         "action": "Aç"
       },
       "plan_conversion_quota": {
         "title": "Aylık kargo takip dönüşüm limitiniz dolmak üzere",
-        "description": "Bu ay {{limit}} dönüşüm hakkınızın {{used}} tanesini kullandınız. Limit dolduğunda siparişler yine gönderilir ve eBay yine takip numarası alır — ancak bu Amazon’un kendi numarası olur, yani alıcılar tedarikçinizi görebilir.",
-        "action": "Paketi görüntüle"
+        "description": "Bu ay {{limit}} dönüşüm hakkınızın {{used}} tanesini kullandınız. Limit dolduğunda siparişler yine gönderilir ve eBay yine takip numarası alır. Ancak bu, Amazon'un kendi numarası olur ve alıcılar tedarikçinizi görebilir.",
+        "action": "Planı görüntüle"
       },
       "plan_suspended": {
         "title": "Otomasyon askıya alındı",
-        "description": "Aboneliğiniz aktif olmadığı için yeni ilan açma, fiyat ve stok güncellemesi, otomatik satın alma ve kargo takip dönüşümü durdu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
-        "action": "Paket seç"
+        "description": "Aboneliğiniz aktif olmadığı için yeni ilan açma, fiyat ve stok güncellemesi, otomatik satın alma ve kargo takip dönüşümü durdu. Devam etmek için bir plan seçin. Her şey kendiliğinden yeniden başlar.",
+        "action": "Plan seç"
       },
       "listing_not_selling": {
         "title": "Satmayan ilanlar",
-        "description_one": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızdaki yerine değmiyorsa bitirin.",
-        "description_other": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızdaki yerine değmeyenleri bitirin.",
+        "description_one": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızda yer kaplamaya değmiyorsa sonlandırın.",
+        "description_other": "{{count}} aktif ilan, belirlediğiniz süre içinde hiç satış yapmadı. İnceleyin; planınızda yer kaplamaya değmeyenleri sonlandırın.",
         "action": "İlanları incele"
       }
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Yeniden kimlik doğrulaması gerekiyor",
+        "needs_reauth": "Yeniden giriş yapılması gerekiyor",
         "invalid": "Geçersiz kimlik bilgileri",
         "locked": "Amazon tarafından kilitlendi"
       },
@@ -254,9 +254,9 @@
         "tracking_url_mismatch": "Takip bağlantısı uyuşmuyor",
         "needs_tracking_upload": "Kargo bilgisi bekleniyor",
         "update_not_applied": "Güncelleme henüz uygulanmadı",
-        "assign_validation": "Sağlayıcı tarafından reddedildi",
-        "shipment_exception": "Kargo firması istisnası",
-        "tracking_update_unavailable": "Sağlayıcı şu an kullanılamıyor"
+        "assign_validation": "Dönüşüm reddedildi",
+        "shipment_exception": "Kargo firmasında sorun",
+        "tracking_update_unavailable": "Dönüşüm şu an yapılamıyor"
       }
     }
   }

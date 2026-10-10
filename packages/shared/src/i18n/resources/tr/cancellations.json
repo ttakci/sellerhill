@@ -11,7 +11,7 @@
       "ariaLabel": "İptal durumu"
     },
     "filters": {
-      "search": "İptal kimliği, sipariş kimliği veya ürün ara…",
+      "search": "İptal no, sipariş no veya ürün ara…",
       "clear": "Temizle",
       "resultCount_one": "{{count}} sonuç",
       "resultCount_other": "{{count}} sonuç"
@@ -52,9 +52,9 @@
     },
     "bucketHint": {
       "unconfirmed": "eBay bu talebi son zamanlarda doğrulamadı, bu yüzden bekleyen işlem gösterilmiyor.",
-      "action_overdue": "Alıcı bekliyor — eBay'in yanıtınız için verdiği süre doldu.",
+      "action_overdue": "Alıcı bekliyor. eBay'in yanıtınız için verdiği süre doldu.",
       "action_due": "Alıcı iptal etmek istedi. eBay'in son tarihinden önce kabul edin veya reddedin.",
-      "answered": "Bu talebi yanıtladınız. eBay işliyor — sizden beklenen başka bir şey yok.",
+      "answered": "Bu talebi yanıtladınız. eBay talebi işliyor, sizden beklenen başka bir şey yok.",
       "in_progress": "Şu anda sizden beklenen bir şey yok.",
       "closed": "eBay bu talebi kapattı."
     },
@@ -76,12 +76,12 @@
       "money": "Tutarlar",
       "requestedRefund": "İstenen iade",
       "actualRefund": "Geri ödendi",
-      "amountOwed": "Borcunuz olan tutar",
+      "amountOwed": "Borçlu olduğunuz tutar",
       "paymentStatus": "Ödeme durumu",
       "closedAt": "Kapandı",
       "journey": "Süreç",
       "journeyEmpty": "eBay henüz bir adım kaydetmedi.",
-      "requestId": "Talep ID",
+      "requestId": "Talep No",
       "orderNo": "Sipariş No"
     },
     "actions": {
@@ -103,7 +103,7 @@
       "approve": "İptal onaylandı. eBay alıcıya iade yapacak.",
       "reject": "İptal reddedildi."
     },
-    "actionsOff": "Uygulama içi iptal işlemleri kapalı — yanıtı eBay'de verin.",
+    "actionsOff": "Uygulama içi iptal işlemleri kapalı. Yanıtı eBay'de verin.",
     "liveUnavailable": "eBay'e şu anda ulaşılamadı, bu yüzden SellerHill'in gördüğü son durum gösteriliyor. eBay yeniden yanıt verince yanıt seçenekleri sunulur.",
     "errors": {
       "exportFailed": "Dışa aktarma tamamlanamadı. Lütfen tekrar deneyin.",
@@ -112,7 +112,7 @@
       "suspended": "Aboneliğiniz askıya alındı, bu yüzden iptal işlemleri duraklatıldı. Faturayı Faturalandırma sayfasında ödeyin.",
       "ebayRejected": "eBay bu işlemi reddetti. Nedenini görmek için talebi eBay'de açın.",
       "unavailable": "eBay'e ulaşılamadı. Biraz sonra tekrar deneyin.",
-      "sandbox": "İptal işlemleri eBay sandbox ortamında kullanılamaz.",
+      "sandbox": "İptal işlemleri eBay test ortamında kullanılamaz.",
       "notFound": "Bu iptal talebi bulunamadı."
     },
     "party": {
@@ -142,7 +142,7 @@
       "shipDate": "Gönderim tarihi (isteğe bağlı)",
       "tracking": "Takip numarası (isteğe bağlı)",
       "send": "Gönder",
-      "choose": "Onayla veya reddet seçin."
+      "choose": "Onaylamayı ya da reddetmeyi seçin."
     }
   }
 }

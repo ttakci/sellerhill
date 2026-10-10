@@ -77,16 +77,16 @@
       "in_progress": "Amazon'dan alınıyor",
       "not_automated": "Otomatik değil",
       "manual": "Elle alındı",
-      "simulated": "Test çalışması — sipariş verilmedi",
+      "simulated": "Test çalışması, sipariş verilmedi",
       "filter": {
         "all": "Tüm karşılama durumları"
       },
       "detail": {
         "title": "Amazon karşılama",
         "amazonOrderId": "Amazon siparişi",
-        "simulatedNotice": "Bu bir test çalışmasıdır. Amazon'da sipariş verilmedi ve para çekilmedi — aşağıdaki maliyet ve kâr simüle edilmiştir.",
+        "simulatedNotice": "Bu bir test çalışması. Amazon'da sipariş verilmedi ve para çekilmedi. Aşağıdaki maliyet ve kâr simüle edilmiştir.",
         "actionRequiredNotice": "Otomasyon satın almadan önce durdu. Sebebi inceleyip bu siparişi elle karşılayın.",
-        "cancelledNotice": "Amazon siparişi iptal edildi. eBay satışı hâlâ alıcıya borçlu — başka bir yolla karşılayın.",
+        "cancelledNotice": "Amazon siparişi iptal edildi. Ürünü eBay alıcısına hâlâ göndermeniz gerekiyor, siparişi başka bir yolla karşılayın.",
         "notAutomatedNotice": "Bu sipariş için otomatik sipariş kapalı.",
         "attemptedAt": "Son deneme"
       }
@@ -95,14 +95,14 @@
       "tracked": "Bir listeye bağlı",
       "untracked": "Listeye bağlı değil",
       "problem": {
-        "wrongPageType": "Takip sağlayıcısı Amazon sipariş sayfasını okuyamadı — sayfa biçimi değişmiş olabilir. Bu otomatik olarak yeniden denenecek.",
+        "wrongPageType": "Takip numarasını dönüştürmek için Amazon sipariş sayfası okunamadı. Amazon sayfayı değiştirmiş olabilir. Otomatik olarak yeniden denenecek.",
         "amazonSessionExpired": "Bu siparişi okumak için kullanılan Amazon oturumunun süresi doldu ve yeniden giriş yapılması gerekiyor.",
         "trackingUrlMismatch": "Amazon sipariş sayfasındaki takip bağlantısı beklenenle eşleşmedi. Bu otomatik olarak yeniden denenecek.",
-        "needsTrackingUpload": "Takip numarası dönüştürülebilmesi için sevkiyat bilgilerinin yüklenmesi bekleniyor.",
-        "updateNotApplied": "Takip güncellemesi sağlayıcı tarafından henüz uygulanmadı. Bu otomatik olarak yeniden denenecek.",
-        "assignValidation": "Takip sağlayıcısı bu sipariş için sevkiyat bilgilerini reddetti.",
-        "shipmentException": "Takip sağlayıcısı bu sevkiyatta bir sorun bildirdi.",
-        "trackingUpdateUnavailable": "Takip sağlayıcısı şu anda bu sevkiyatı güncelleyemedi.",
+        "needsTrackingUpload": "Takip numarasının dönüştürülebilmesi için sevkiyat bilgileri bekleniyor.",
+        "updateNotApplied": "Takip güncellemesi henüz uygulanmadı. Otomatik olarak yeniden denenecek.",
+        "assignValidation": "Bu siparişin sevkiyat bilgileri takip dönüşümü sırasında reddedildi.",
+        "shipmentException": "Bu sevkiyatta bir sorun bildirildi.",
+        "trackingUpdateUnavailable": "Bu sevkiyatın takibi şu anda güncellenemedi.",
         "generic": "Bu siparişin takip dönüştürmesiyle ilgili bir sorun var. Otomatik olarak yeniden denenecek."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Ürün Amazon'da bulunamadı",
         "captcha": "Captcha gerekti",
-        "otp": "MFA/OTP doğrulaması",
+        "otp": "Doğrulama kodu gerekti",
         "login": "Giriş başarısız",
         "out_of_stock": "Stokta yok",
         "address": "Adres sorunu",
         "payment": "Ödeme reddedildi",
-        "cap": "Tavan aşıldı",
+        "cap": "Harcama limiti aşıldı",
         "no_confirmation": "Onay alınamadı",
-        "proxy_required": "Proxy yapılandırılmamış",
+        "proxy_required": "Hesap proxy'si kullanılamadı",
         "quota_exhausted": "Aylık kota doldu",
         "cart": "Sepet uyuşmazlığı",
         "review_unreadable": "Sipariş toplamı okunamadı",
-        "interrupted": "Satın alma yarıda kesildi — Amazon'u kontrol edin",
+        "interrupted": "Satın alma yarıda kesildi, Amazon'u kontrol edin",
         "subscription_suspended": "Abonelik askıya alındı",
-        "listing_over_plan_limit": "İlan, paket limitinin dışında",
-        "order_already_fulfilled": "Zaten kargolanmış — alınacak bir şey yok",
+        "listing_over_plan_limit": "İlan, plan limitinin dışında",
+        "order_already_fulfilled": "Zaten kargolanmış, alınacak bir şey yok",
         "order_not_paid": "Alıcının ödemesi bekleniyor",
-        "order_cancelled": "eBay'de iptal edildi — alınacak bir şey yok",
-        "multi_item_order": "Siparişte birden fazla ürün var — elle alın",
-        "cancel_requested": "Alıcı iptal istedi — eBay'de yanıtlayın",
+        "order_cancelled": "eBay'de iptal edildi, alınacak bir şey yok",
+        "multi_item_order": "Siparişte birden fazla ürün var, elle alın",
+        "cancel_requested": "Alıcı iptal istedi, eBay'de yanıtlayın",
         "loss_limit": "Zarar limitinizin üzerinde"
       },
       "reasonLabel": "Sebep: {{reason}}",
@@ -150,7 +150,7 @@
       "start": {
         "button": "Otomatik siparişi başlat",
         "confirmTitle": "Bu sipariş şimdi Amazon'dan alınsın mı?",
-        "confirmDescription": "SellerHill, otomatik sipariş için ayarlı Amazon hesabınızla bu satış için gerçek bir Amazon siparişi verecek ve ürün eBay alıcısına gönderilecek. Harcama limitiniz yine geçerli; toplam limiti aşarsa satın alma durur. Ürünü kendiniz almadıysanız devam edin.",
+        "confirmDescription": "SellerHill, otomatik siparişe ayarlı Amazon hesabınızla bu satış için gerçek bir Amazon siparişi verecek ve ürün eBay alıcısına gönderilecek. Harcama limitiniz yine geçerli; toplam limiti aşarsa satın alma durur. Yalnızca ürünü kendiniz almadıysanız devam edin.",
         "confirm": "Satın almayı başlat",
         "queued": "Satın alma başladı. Siparişin durumu birkaç dakika içinde güncellenir.",
         "queuedDryRun": "Test çalıştırması başladı. Bu Amazon hesabı test modunda olduğu için hiçbir şey satın alınmayacak."
@@ -202,7 +202,7 @@
       "viewMore": "Daha Fazla Detay",
       "updateAmazon": "Amazon Bilgisi Gir",
       "netProfitAnalysis": "NET KÂR ANALİZİ",
-      "analysisDesc": "Bu hesaplama, tüm platform ücretleri ve vergiler düştükten sonraki eBay kazancınızdan, orijinal Amazon satın alma maliyetinin çıkarılmasıyla yapılır.",
+      "analysisDesc": "Tüm platform ücretleri ve vergiler düşüldükten sonraki eBay kazancınızdan Amazon satın alma maliyeti çıkarılarak hesaplanır.",
       "calculation": "Hesaplama",
       "netProfitResult": "Net Kâr",
       "roi": "Yatırım Getirisi (ROI)",
@@ -239,7 +239,7 @@
       "quantity": "Adet",
       "unit": "adet",
       "sku": "SKU",
-      "na": "Mevcut Değil",
+      "na": "Yok",
       "ebayStatus": "eBay durumu",
       "ebayCancelledOn": "eBay'de iptal tarihi",
       "refundGroup": "Alıcıya iade edilen",
@@ -253,8 +253,8 @@
     },
     "modal": {
       "title": "Amazon Sipariş Bilgisi Gir",
-      "amazonUrl": "Amazon Sipariş Detay URL'i",
-      "trackingUrl": "Takip URL'i (İsteğe Bağlı)",
+      "amazonUrl": "Amazon Sipariş Detay URL'si",
+      "trackingUrl": "Takip URL'si (İsteğe Bağlı)",
       "taxAmount": "Vergi Tutarı ($)",
       "shippingCost": "Kargo Maliyeti ($)",
       "infoText": "Vergi ve kargo maliyetlerini girdiğinizde, bu sipariş için Net Kâr otomatik olarak yeniden hesaplanacaktır.",
@@ -264,18 +264,18 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Tahmini",
-    "estimateNote": "Tahmini kâr — Amazon siparişi oluşturulduğunda kesinleşir. Son bilinen Amazon fiyatına dayanır; Amazon kargo ücreti dahil değildir.",
+    "estimateNote": "Tahmini kâr. Amazon siparişi verildiğinde kesinleşir. Son bilinen Amazon fiyatına dayanır; Amazon kargo ücreti dahil değildir.",
     "footer": {
       "copyright": "© 2026 SellerHill E-ticaret Çözümleri. Tüm hakları saklıdır."
     },
     "errors": {
       "notFound": "Sipariş bulunamadı.",
-      "noTrackingYet": "Bu siparişin henüz Amazon takip numarası yok — kargoya verilmemiş.",
-      "conversionUnavailable": "Kargo takibi şu anda dönüştürülemedi. Paket limitinizi ve dönüşüm ayarlarınızı kontrol edip tekrar deneyin.",
+      "noTrackingYet": "Bu siparişin henüz Amazon takip numarası yok. Sipariş kargoya verilmedi.",
+      "conversionUnavailable": "Kargo takibi şu anda dönüştürülemedi. Plan limitinizi ve dönüşüm ayarlarınızı kontrol edip tekrar deneyin.",
       "conversionDone": "Kargo takibi dönüştürüldü.",
       "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
-      "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir.",
-      "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz.",
+      "trackingAlreadyPushed": "eBay'de bu sipariş için orijinal takip numarası zaten kayıtlı ve değiştirilemez. Şimdi dönüştürmek alıcının gördüğü numarayı değiştirmez.",
+      "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde planınızın ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz.",
       "storeNotConnected": "Bu siparişin eBay mağazası bağlı değil. Mağazayı yeniden bağlayın, ardından takip numarasını dönüştürün.",
       "autoFulfillNotRestartable": "Bu siparişin otomatik satın alması yeniden başlatılamaz. Sipariş zaten alınmış ya da işlemde olabilir veya ikinci bir satın alma oluşabilir. Amazon siparişlerinizi kontrol edip siparişi elle bağlayın.",
       "autoFulfillNoAccount": "Otomatik sipariş için hazır bir Amazon hesabı yok. Ayarlar'da bir Amazon hesabı için otomatik siparişi açın ve harcama limiti girin.",
@@ -291,7 +291,7 @@
     "stage": {
       "amazon_cancelled": {
         "label": "Amazon iptal etti",
-        "meaning": "Amazon satın almayı iptal etti. eBay alıcısına ürün hâlâ borçlu.",
+        "meaning": "Amazon satın almayı iptal etti. Ürünü eBay alıcısına hâlâ göndermeniz gerekiyor.",
         "action": "Siparişi başka yoldan gönderin, sonra yeni Amazon siparişini bağlayın."
       },
       "cancelled": {
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Takip bekletiliyor",
-        "meaning": "Amazon kargoladı ama takip henüz eBay'e ulaşmadı — genellikle takip dönüşümü bekliyordur.",
+        "meaning": "Amazon kargoladı ama takip numarası henüz eBay'e ulaşmadı. Genellikle takip dönüşümü hâlâ bekliyordur.",
         "action": "Takibi dönüştürün ya da siparişte görünen nedeni giderin."
       },
       "buying": {
@@ -335,7 +335,7 @@
       },
       "awaiting_payment": {
         "label": "Ödeme bekleniyor",
-        "meaning": "Alıcı henüz ödemedi. Ödemeden önce satın almayın."
+        "meaning": "Alıcı henüz ödeme yapmadı. Ödeme gelene kadar satın almayın."
       },
       "to_purchase": {
         "label": "Satın alınacak",
@@ -356,7 +356,7 @@
       "open": "Durumları açıkla",
       "columnStage": "Durum",
       "columnMeaning": "Anlamı",
-      "columnAction": "Siz ne yaparsınız"
+      "columnAction": "Yapmanız gereken"
     },
     "timeline": {
       "title": "Sipariş süreci",

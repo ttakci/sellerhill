@@ -67,7 +67,7 @@
       "processing": "Processing",
       "cancelled": "Cancelled",
       "pending": "Pending",
-      "waiting_shipment": "Waiting Shipment"
+      "waiting_shipment": "Awaiting Shipment"
     },
     "fulfillmentState": {
       "column": "Amazon fulfillment",
@@ -77,16 +77,16 @@
       "in_progress": "Buying on Amazon",
       "not_automated": "Not automated",
       "manual": "Bought manually",
-      "simulated": "Test run — no purchase",
+      "simulated": "Test run, no purchase",
       "filter": {
         "all": "All fulfillment states"
       },
       "detail": {
         "title": "Amazon fulfillment",
         "amazonOrderId": "Amazon order",
-        "simulatedNotice": "This is a test run. No Amazon order was placed and no money was charged — the costs and profit below are simulated.",
+        "simulatedNotice": "This is a test run. No Amazon order was placed and no money was charged. The costs and profit below are simulated.",
         "actionRequiredNotice": "Automation stopped before buying. Review the reason and fulfill this order manually.",
-        "cancelledNotice": "The Amazon purchase was cancelled. The eBay sale is still owed to the buyer — fulfill it another way.",
+        "cancelledNotice": "The Amazon purchase was cancelled. You still owe the eBay buyer this item, so fulfill it another way.",
         "notAutomatedNotice": "Automatic ordering is off for this order.",
         "attemptedAt": "Last attempt"
       }
@@ -95,14 +95,14 @@
       "tracked": "Linked to a listing",
       "untracked": "Not linked to a listing",
       "problem": {
-        "wrongPageType": "The tracking provider could not read Amazon's order page — it may have changed format. This will be retried automatically.",
+        "wrongPageType": "Amazon's order page could not be read to convert the tracking number. Amazon may have changed the page. This will be retried automatically.",
         "amazonSessionExpired": "The Amazon session used to read this order has expired and needs to be signed in again.",
         "trackingUrlMismatch": "The tracking link on Amazon's order page did not match what we expected. This will be retried automatically.",
-        "needsTrackingUpload": "Waiting on the shipment details to be uploaded before the tracking number can be converted.",
-        "updateNotApplied": "The tracking update has not been applied by the provider yet. This will be retried automatically.",
-        "assignValidation": "The tracking provider rejected the shipment details for this order.",
-        "shipmentException": "The tracking provider reported an exception on this shipment.",
-        "trackingUpdateUnavailable": "The tracking provider could not update this shipment right now.",
+        "needsTrackingUpload": "Waiting for the shipment details before the tracking number can be converted.",
+        "updateNotApplied": "The tracking update has not been applied yet. This will be retried automatically.",
+        "assignValidation": "The shipment details for this order were rejected during tracking conversion.",
+        "shipmentException": "A problem was reported on this shipment.",
+        "trackingUpdateUnavailable": "This shipment's tracking could not be updated right now.",
         "generic": "There is a problem with this order's tracking conversion. It will be retried automatically."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Product not found on Amazon",
         "captcha": "Captcha required",
-        "otp": "MFA/OTP challenge",
+        "otp": "Verification code required",
         "login": "Login failed",
         "out_of_stock": "Out of stock",
         "address": "Address problem",
         "payment": "Payment declined",
-        "cap": "Over cost cap",
+        "cap": "Over spending cap",
         "no_confirmation": "No confirmation",
-        "proxy_required": "No proxy configured",
+        "proxy_required": "Account proxy could not be used",
         "quota_exhausted": "Monthly quota reached",
         "cart": "Cart mismatch",
         "review_unreadable": "Order total unreadable",
-        "interrupted": "Purchase interrupted — check Amazon",
+        "interrupted": "Purchase interrupted, check Amazon",
         "subscription_suspended": "Subscription suspended",
         "listing_over_plan_limit": "Listing outside plan limit",
-        "order_already_fulfilled": "Already shipped — nothing to buy",
+        "order_already_fulfilled": "Already shipped, nothing to buy",
         "order_not_paid": "Waiting for buyer payment",
-        "order_cancelled": "Cancelled on eBay — nothing to buy",
-        "multi_item_order": "Order has several items — buy by hand",
-        "cancel_requested": "Buyer asked to cancel — answer on eBay",
+        "order_cancelled": "Cancelled on eBay, nothing to buy",
+        "multi_item_order": "Order has several items, buy by hand",
+        "cancel_requested": "Buyer asked to cancel, answer on eBay",
         "loss_limit": "Over your loss limit"
       },
       "reasonLabel": "Reason: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "It is not on Amazon",
         "confirmTitle": "Confirm that Amazon has no order for this sale?",
-        "confirmDescription": "Only continue after you have looked at this Amazon account's orders and the order is not there. SellerHill checks the account's order list too and refuses until that check has run. Afterwards the automatic order can be started again — if the order does exist on Amazon, the item would be bought twice.",
+        "confirmDescription": "Only continue after you have looked at this Amazon account's orders and the order is not there. SellerHill checks the account's order list too and refuses until that check has run. Afterwards the automatic order can be started again. If the order does exist on Amazon, the item would be bought twice.",
         "confirm": "Yes, it is not there",
         "done": "Marked as not purchased. You can start the automatic order again."
       }
@@ -202,7 +202,7 @@
       "viewMore": "View more details",
       "updateAmazon": "Enter Amazon Info",
       "netProfitAnalysis": "NET PROFIT ANALYSIS",
-      "analysisDesc": "This calculation factors in your actual earnings from eBay after all platform fees and taxes, subtracted by the original Amazon purchase cost.",
+      "analysisDesc": "Your eBay earnings after all platform fees and taxes, minus the original Amazon purchase cost.",
       "calculation": "Calculation",
       "netProfitResult": "Net Profit",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Ship by",
       "shipByNotice": "eBay ship-by date: {{date}}",
       "shipByHeading": "eBay ship-by date",
-      "multiItemNotice": "This eBay order holds {{count}} items. SellerHill tracks only the first one and does not buy this order automatically — buy and ship the other items yourself."
+      "multiItemNotice": "This eBay order holds {{count}} items. SellerHill tracks only the first one and does not buy this order automatically. Buy and ship the other items yourself."
     },
     "modal": {
       "title": "Enter Amazon Order Info",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Estimated",
-    "estimateNote": "Estimated profit — finalizes when the Amazon order is placed. Based on the last known Amazon price; Amazon shipping not included.",
+    "estimateNote": "Estimated profit. It becomes final once the Amazon order is placed. Based on the last known Amazon price; Amazon shipping is not included.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. All rights reserved."
     },
     "errors": {
       "notFound": "Order not found.",
-      "noTrackingYet": "This order has no Amazon tracking number yet — it has not shipped.",
+      "noTrackingYet": "This order has no Amazon tracking number yet. It has not shipped.",
       "conversionUnavailable": "Tracking could not be converted right now. Check your plan limit and conversion settings, then try again.",
       "conversionDone": "Tracking converted.",
       "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "This sale is over your Amazon account's spending cap. Raise the cap in the Amazon account's settings, or buy the item by hand.",
       "autoFulfillAlreadyStarted": "This order's status changed a moment ago, so the purchase may already have started. Refresh the page.",
       "autoFulfillQuotaExhausted": "Your plan's automatic order limit for this period is used up.",
-      "purchaseNotYetChecked": "SellerHill has not yet checked this Amazon account's orders since the purchase attempt. The check has now been started — try again in a few minutes.",
+      "purchaseNotYetChecked": "SellerHill has not yet checked this Amazon account's orders since the purchase attempt. The check has now been started. Try again in a few minutes.",
       "purchaseNotUnknown": "This order is not waiting for a purchase confirmation. It may already be linked or in progress. Refresh the page.",
       "purchaseFoundOnAmazon": "SellerHill found an Amazon order for this product, placed around the time of the purchase attempt, but could not match it to this sale with certainty. Open your Amazon orders and link it by hand. If that order belongs to another sale, link it to that sale first.",
       "noteTooLong": "The note can be at most 1,000 characters.",
@@ -292,7 +292,7 @@
       "amazon_cancelled": {
         "label": "Amazon cancelled",
         "meaning": "Amazon cancelled the purchase. The eBay buyer is still owed the item.",
-        "action": "Fulfil this order another way, then link the new Amazon order."
+        "action": "Fulfill this order another way, then link the new Amazon order."
       },
       "cancelled": {
         "label": "Cancelled",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Tracking held",
-        "meaning": "Amazon shipped, but the tracking has not reached eBay yet — usually the tracking conversion is still pending.",
+        "meaning": "Amazon shipped, but the tracking number has not reached eBay yet. Usually the tracking conversion is still pending.",
         "action": "Convert the tracking, or fix the cause shown on the order."
       },
       "buying": {
@@ -411,7 +411,7 @@
       "reasons": {
         "BUYER_ASKED_CANCEL": "Buyer asked to cancel",
         "BUYER_CANCEL_OR_ADDRESS_ISSUE": "Buyer cancelled or has an address problem",
-        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfil",
+        "OUT_OF_STOCK_OR_CANNOT_FULFILL": "Out of stock or cannot fulfill",
         "other": "Other reason"
       },
       "bucket": {

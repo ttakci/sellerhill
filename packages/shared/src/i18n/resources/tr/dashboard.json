@@ -13,7 +13,7 @@
     "backToDashboard": "Panele dön",
     "tabs": {
       "cards": "Kartlar",
-      "chart": "Çizelge",
+      "chart": "Grafik",
       "pnl": "K/Z",
       "topSellers": "Trendler"
     },
@@ -65,9 +65,9 @@
     },
     "metrics": {
       "sales": "Satışlar",
-      "units": "Birimler",
+      "units": "Adet",
       "orders": "Siparişler",
-      "ordersUnits": "Siparişler / Birimler",
+      "ordersUnits": "Sipariş / Adet",
       "refunds": "Geri ödemeler",
       "refundRate": "Geri ödeme oranı",
       "grossProfit": "Brüt kâr",
@@ -76,10 +76,10 @@
       "margin": "Marj",
       "roi": "ROI",
       "avgOrderValue": "Ort. sipariş",
-      "costOfGoods": "Malların maliyeti",
+      "costOfGoods": "Ürün maliyeti",
       "transactionFees": "İşlem ücretleri",
       "adFees": "Reklam ücretleri",
-      "amazonShipping": "Amazon nakliye",
+      "amazonShipping": "Amazon kargo",
       "amazonTax": "Amazon vergisi",
       "revenueUncosted": "Maliyetsiz ciro"
     },
@@ -90,7 +90,7 @@
     },
     "listingsSection": "Listeler",
     "ordersSection": "Siparişler",
-    "listingsCount": "{{count}} satışlı",
+    "listingsCount": "{{count}} satış yapan",
     "ordersCount": "{{count}} sipariş",
     "viewAllListings": "Tümünü gör",
     "viewAllOrders": "Tümünü gör",
@@ -105,12 +105,12 @@
       "series": {
         "netProfit": "Net kâr",
         "sales": "Satışlar",
-        "units": "Birimler",
+        "units": "Adet",
         "refunds": "Geri ödemeler"
       }
     },
     "pnl": {
-      "title": "Kâr & zarar",
+      "title": "Kâr ve zarar",
       "subtitle": "Seçili dönemin dökümü",
       "parameter": "Metrik / Dönem",
       "currentDay": "Bugün",
@@ -129,16 +129,16 @@
       "confirmedLabel": "Doğrulanmış",
       "confirmedTooltip": "Gerçek Amazon maliyetleri alınmış siparişlerden gelen kâr. Bilinmeyen maliyet asla sıfır sayılmaz.",
       "estimatedLabel": "Tahmini",
-      "estimatedTooltip": "Amazon karşılaması beklenen siparişler tahmini maliyet kullanır (Amazon vergisi, yapılandırılan %{{rate}} oranında).",
+      "estimatedTooltip": "Gerçek Amazon maliyeti henüz gelmeyen siparişlerde tahmini maliyet kullanılır. Amazon vergisi, ayarladığınız %{{rate}} oranıyla hesaplanır.",
       "uncostedLabel": "Maliyetsiz ciro",
-      "uncostedTooltip": "Amazon maliyeti henüz çözülemeyen satışlar — yalnızca ciro, kâr ifade etmez.",
+      "uncostedTooltip": "Amazon maliyeti henüz bilinmeyen satışlar. Yalnızca ciroyu gösterir, kâr anlamına gelmez.",
       "untrackedExcludedLabel_one": "{{count}} takipsiz sipariş dahil edilmedi",
       "untrackedExcludedLabel_other": "{{count}} takipsiz sipariş dahil edilmedi",
-      "untrackedExcludedTooltip": "Bir SellerHill listesiyle eşleşmeyen siparişler bu paneldeki hiçbir rakama dahil edilmez. Siparişler sayfasında \"Takip edilmiyor\" olarak görünmeye devam eder; dahil etmek için ilgili listeyi içe aktarın."
+      "untrackedExcludedTooltip": "Bir SellerHill listesiyle eşleşmeyen siparişler bu paneldeki hiçbir rakama dahil edilmez. Bu siparişler Siparişler sayfasında \"Takip edilmiyor\" altında görünmeye devam eder. Dahil etmek için ilgili listeyi içe aktarın."
     },
     "topSellers": {
-      "result_one": "<b>{{count}}</b> liste satıldı",
-      "result_other": "<b>{{count}}</b> liste satıldı",
+      "result_one": "<b>{{count}}</b> liste satış yaptı",
+      "result_other": "<b>{{count}}</b> liste satış yaptı",
       "sortLabel": "Sırala:",
       "sort": {
         "sales": "Ciro",
@@ -176,7 +176,7 @@
         },
         "peak": "En yüksek: {{date}} · {{value}}"
       },
-      "trendAria": "Seçili dönemdeki gidiş"
+      "trendAria": "Seçili dönemdeki eğilim"
     }
   }
 }

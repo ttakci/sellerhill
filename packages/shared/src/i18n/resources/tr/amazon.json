@@ -2,7 +2,7 @@
   "amazon": {
     "accounts": {
       "title": "Amazon Alışveriş Hesapları",
-      "subtitle": "Sipariş takibi ve fiyat çekme için Amazon alışveriş hesaplarınızı yönetin",
+      "subtitle": "Sipariş takibi ve sipariş maliyetleri için Amazon alışveriş hesaplarınızı yönetin",
       "addButton": "Amazon Hesabı Ekle",
       "noAccounts": "Henüz Amazon hesabı bağlı değil",
       "noAccountsDescription": "Sipariş fiyatlarını ve kargo durumunu otomatik takip etmek için Amazon alışveriş hesabınızı ekleyin",
@@ -23,13 +23,13 @@
       "editTitle": "Amazon Hesabını Düzenle",
       "labelField": "Hesap Adı",
       "labelPlaceholder": "ör. Kişisel Amazon",
-      "emailField": "Amazon E-posta",
+      "emailField": "Amazon E-posta Adresi",
       "emailPlaceholder": "ornek@email.com",
-      "passwordField": "Amazon Şifre",
+      "passwordField": "Amazon Şifresi",
       "passwordPlaceholder": "Amazon şifrenizi girin",
-      "twoFactorField": "2FA Gizli Anahtar",
-      "twoFactorPlaceholder": "İsteğe bağlı - Amazon 2FA ayarlarından",
-      "twoFactorInfo": "2FA etkinleştirilmişse, Amazon hesap güvenlik ayarlarındaki gizli anahtarı girin",
+      "twoFactorField": "2FA Gizli Anahtarı",
+      "twoFactorPlaceholder": "Amazon 2FA ayarlarınızdan alın",
+      "twoFactorInfo": "Amazon hesabınızın güvenlik ayarlarındaki gizli anahtarı girin.",
       "saveButton": "Hesabı Kaydet",
       "savingButton": "Kaydediliyor...",
       "verifyingButton": "Doğrulanıyor...",
@@ -46,25 +46,25 @@
       "orderId": "Amazon Sipariş No",
       "orderIdPlaceholder": "ör. 112-1234567-1234567",
       "orderIdHelp": "Amazon sipariş numaranızı girin (sipariş geçmişinizde veya onay e-postanızda bulunur)",
-      "linkButton": "Bağla ve Çek",
+      "linkButton": "Siparişi Bağla",
       "linkingButton": "Bağlanıyor...",
       "progressLoggingIn": "Amazon'a giriş yapılıyor...",
-      "progressNavigating": "Sipariş sayfasına yönlendiriliyor...",
-      "progressScraping": "Sipariş detayları çekiliyor...",
+      "progressNavigating": "Sipariş sayfası açılıyor...",
+      "progressScraping": "Sipariş detayları okunuyor...",
       "progressSaving": "Veriler kaydediliyor...",
       "successTitle": "Amazon Siparişi Bağlandı",
-      "successMessage": "Sipariş detayları başarıyla çekildi ve bağlandı",
+      "successMessage": "Sipariş detayları okundu ve sipariş bağlandı.",
       "errorTitle": "Sipariş Bağlanamadı",
       "errorNoAccount": "Lütfen önce bir Amazon hesabı ekleyin",
-      "errorScraping": "Amazon sipariş detayları çekilemedi. Lütfen sipariş numarasını kontrol edip tekrar deneyin.",
+      "errorScraping": "Amazon sipariş detayları okunamadı. Lütfen sipariş numarasını kontrol edip tekrar deneyin.",
       "errorInvalidCredentials": "Amazon bilgileri geçersiz. Lütfen hesabınızı güncelleyin.",
-      "errorRateLimit": "Çok fazla istek. Lütfen daha sonra tekrar deneyin.",
+      "errorRateLimit": "Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
       "costCaptureFailed": "Amazon siparişi bulundu ancak maliyet detayları okunamadı. Kâr son bilinen değerde korundu.",
       "noAccountsTitle": "Amazon Hesabı Yok",
       "noAccountsMessage": "Sipariş bağlamak için önce bir Amazon alışveriş hesabı eklemeniz gerekiyor.",
       "addAccountLink": "Amazon Hesabı Ekle",
       "noListingTitle": "Önce bu eBay ilanını içe aktarın",
-      "noListingMessage": "Bu siparişin eBay ilanı içe aktarılmadığı için sipariş bir ilana bağlı değil. Amazon siparişini yine de bağlayıp gerçek maliyetleri alabilirsiniz; ancak kargolandığında takip numarası eBay’e gönderilemez, çünkü eBay ilanın taşıdığı satır kalemini ister. Bu gönderim sonradan tekrar denenmez. Önce ilanı içe aktarırsanız bu sipariş ona kendiliğinden bağlanır.",
+      "noListingMessage": "Bu siparişin eBay ilanı içe aktarılmadığı için sipariş bir ilana bağlı değil. Amazon siparişini yine de bağlayıp gerçek maliyetleri görebilirsiniz. Ancak sipariş kargolandığında takip numarası eBay'e gönderilemez ve bu sonradan tekrar denenmez. Önce ilanı içe aktarırsanız sipariş ona kendiliğinden bağlanır.",
       "importListingButton": "İlanı içe aktar",
       "linkAnywayButton": "Yine de bağla"
     },
@@ -85,17 +85,17 @@
       }
     },
     "autoFulfill": {
-      "autoFulfillEnabled": "Bu hesabı otomatik karşılama için kullan",
-      "autoFulfillEnabledHint": "Açıldığında, eşleşen eBay siparişleri bu Amazon hesabı üzerinden (diğer etkin hesaplarla sırayla) otomatik olarak satın alınır. Ayrıca Mağaza Ayarları'nda genel otomatik karşılama açık olmalı ve aşağıda bir harcama limiti belirlenmelidir.",
-      "autoFulfillCapTotal": "Maksimum sipariş tutarı (otomatik karşılama limiti)",
-      "autoFulfillCapTotalHint": "Hesap başına harcama tavanı (USD). Bu tutarın üzerindeki siparişler bu hesabı atlar. Otomatik karşılamanın etkinleştirilmesi için gereklidir.",
+      "autoFulfillEnabled": "Bu hesabı otomatik sipariş için kullan",
+      "autoFulfillEnabledHint": "Açıkken, ilanlarınıza gelen eBay siparişleri bu Amazon hesabıyla otomatik olarak satın alınır. Etkin diğer hesaplarınızla sırayla kullanılır. Ayrıca Mağaza Ayarları'nda otomatik sipariş açık olmalı ve aşağıda bir harcama limiti belirlemelisiniz.",
+      "autoFulfillCapTotal": "En yüksek sipariş tutarı (otomatik sipariş limiti)",
+      "autoFulfillCapTotalHint": "Bu hesap için harcama üst sınırı (USD). Bu tutarı aşan siparişler bu hesapla satın alınmaz. Otomatik siparişi açmak için zorunludur.",
       "autoFulfillCapTotalPlaceholder": "ör. 250",
-      "autoFulfillDryRun": "Deneme modu (sipariş oluşturmadan akışı çalıştır)",
-      "autoFulfillDryRunHint": "Sipariş Verme adımı hariç tam ödeme akışını çalıştırır; inceleme toplamı yakalanır ve gösterilir."
+      "autoFulfillDryRun": "Deneme modu (siparişi vermeden ödeme adımlarını uygula)",
+      "autoFulfillDryRunHint": "Amazon ödeme adımlarının tamamını uygular ama Sipariş Ver adımından önce durur. Böylece satın almadan sipariş toplamını görebilirsiniz."
     },
     "proxy": {
       "sectionTitle": "Proxy",
-      "stepSubtitle": "İsteğe bağlı — bu hesabın otomasyonunu kendi proxy'niz üzerinden yönlendirin",
+      "stepSubtitle": "İsteğe bağlı. Bu hesabın otomasyonunu kendi proxy'niz üzerinden yönlendirin.",
       "enabled": "Proxy'yi etkinleştir",
       "enabledHint": "Hesabınızı korumak için bir proxy sunucusu kullanın",
       "connectionType": "Bağlantı Türü",
@@ -103,7 +103,7 @@
       "port": "Port girin",
       "username": "Kullanıcı adı",
       "password": "Parola",
-      "hint": "İsteğe bağlıdır. Bu hesabın otomasyon trafiğini kendi proxy'niz üzerinden yönlendirmek isterseniz ekleyin — IP tabanlı engellemelere karşı ekstra koruma sağlar."
+      "hint": "İsteğe bağlıdır. Bu hesabın otomasyon trafiğini kendi proxy'niz üzerinden yönlendirmek için ekleyin. IP tabanlı engellemelere karşı ek koruma sağlar."
     },
     "marketplace": {
       "label": "Pazar Yeri",
@@ -112,11 +112,11 @@
       "readOnlyHint": "Hesap oluşturulduktan sonra pazar yeri değiştirilemez."
     },
     "errors": {
-      "autoFulfillCapRequired": "Bu hesapta otomatik karşılamayı etkinleştirmek için bir maksimum sipariş tutarı belirleyin.",
+      "autoFulfillCapRequired": "Bu hesapta otomatik siparişi açmak için en yüksek sipariş tutarını belirleyin.",
       "proxyHostPortRequired": "Bu hesap için proxy kullanmak üzere bir sunucu adresi ve port girin.",
       "unsupportedMarketplace": "Bu Amazon pazar yeri henüz kullanılamıyor.",
-      "twoFactorSecretRequired": "Hesabın authenticator (2FA) gizli anahtarını ekleyin. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister ve sizin adınıza cevaplayabileceğimiz tek yöntem budur.",
-      "twoFactorSecretInvalid": "Bu bir authenticator gizli anahtarına benzemiyor. Amazon'un authenticator uygulaması kurulumundaki kurulum anahtarını yapıştırın (A–Z harfleri ve 2–7 rakamları), 6 haneli kodu değil."
+      "twoFactorSecretRequired": "Hesabın doğrulama uygulaması (2FA) gizli anahtarını ekleyin. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister ve sizin yerinize yanıtlayabildiğimiz tek yöntem budur.",
+      "twoFactorSecretInvalid": "Bu bir doğrulama uygulaması gizli anahtarına benzemiyor. 6 haneli kodu değil, Amazon'da doğrulama uygulamasını kurarken verilen kurulum anahtarını yapıştırın (A–Z harfleri ve 2–7 rakamları)."
     }
   }
 }

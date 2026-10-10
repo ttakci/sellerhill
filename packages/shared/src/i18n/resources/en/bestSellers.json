@@ -79,22 +79,22 @@
       },
       "retry": "Try again",
       "unavailable": {
-        "title": "Best Sellers is temporarily unavailable",
-        "description": "The list service is not reachable right now. Your listings and orders are not affected."
+        "title": "Product Search is temporarily unavailable",
+        "description": "Amazon's lists cannot be loaded right now. Your listings and orders are not affected."
       },
       "disabled": {
-        "title": "Best Sellers is not enabled on this account",
+        "title": "Product Search is not enabled on this account",
         "description": "Browsing Amazon lists is switched off for your account. Contact support if you expected to see it."
       },
       "limitReached": {
-        "title": "Too many live list loads today",
-        "description": "Lists already loaded today are still available — switch to one of them, or try again tomorrow."
+        "title": "Daily list limit reached",
+        "description": "Lists already loaded today are still available. Open one of them, or try again tomorrow."
       }
     },
     "errors": {
-      "disabled": "Best Sellers is not enabled on this account.",
-      "dailyLimitReached": "Too many live list loads today. Try again tomorrow.",
-      "unavailable": "Best Sellers is temporarily unavailable.",
+      "disabled": "Product Search is not enabled on this account.",
+      "dailyLimitReached": "You have reached today's list limit. Try again tomorrow.",
+      "unavailable": "Product Search is temporarily unavailable.",
       "unsupportedMarketplace": "This marketplace is not supported."
     }
   }
