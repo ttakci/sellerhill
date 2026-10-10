@@ -68,6 +68,7 @@
       "stockBuffer": "Rezervă de stoc",
       "fee": "Comision",
       "fixedFee": "Comision fix",
+      "aiTitle": "Titlu AI",
       "customTemplate": "Șablon personalizat"
     },
     "emptyState": {

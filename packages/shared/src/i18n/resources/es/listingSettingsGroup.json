@@ -68,6 +68,7 @@
       "stockBuffer": "Colchón de stock",
       "fee": "Comisión",
       "fixedFee": "Comisión fija",
+      "aiTitle": "Título con IA",
       "customTemplate": "Plantilla personalizada"
     },
     "emptyState": {

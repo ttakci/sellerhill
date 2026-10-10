@@ -67,6 +67,7 @@
       "stockBuffer": "Stock buffer",
       "fee": "Commission",
       "fixedFee": "Fixed fee",
+      "aiTitle": "AI title",
       "customTemplate": "Customized Template"
     },
     "emptyState": {

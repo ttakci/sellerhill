@@ -67,6 +67,7 @@
       "stockBuffer": "Stok ehtiyatı",
       "fee": "Komissiya",
       "fixedFee": "Sabit haqq",
+      "aiTitle": "AI başlıq",
       "customTemplate": "Fərdiləşdirilmiş şablon"
     },
     "emptyState": {

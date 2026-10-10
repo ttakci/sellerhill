@@ -68,6 +68,7 @@
       "stockBuffer": "Réserve de stock",
       "fee": "Commission",
       "fixedFee": "Frais fixes",
+      "aiTitle": "Titre IA",
       "customTemplate": "Modèle personnalisé"
     },
     "emptyState": {

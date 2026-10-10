@@ -20,12 +20,8 @@ export const summarizeMarginStrategy = (
   if (!ranges || ranges.length === 0) {
     return undefined;
   }
-  const percents = ranges
-    .map((r) => r.profitMarginPercent)
-    .filter((v): v is number => typeof v === 'number');
-  const fixedAmounts = ranges
-    .map((r) => r.fixedProfitAmount)
-    .filter((v): v is number => typeof v === 'number');
+  const percents = ranges.map((r) => r.profitMarginPercent).filter((v): v is number => typeof v === 'number');
+  const fixedAmounts = ranges.map((r) => r.fixedProfitAmount).filter((v): v is number => typeof v === 'number');
 
   if (percents.length > 0 && fixedAmounts.length === 0) {
     const min = Math.min(...percents);
@@ -41,9 +37,9 @@ export const summarizeMarginStrategy = (
 };
 
 /**
- * Per-range breakdown backing the Kâr Marjı info tooltip — only meaningful once
- * there is more than one range to distinguish; a single range already says
- * everything `summarizeMarginStrategy` itself does, so it returns `[]` there.
+ * Per-range breakdown backing the Kâr Marjı info tooltip — one line per range,
+ * a single range included (the summary alone hides which price band it covers),
+ * `[]` only when the group has no range at all.
  */
 export const buildMarginRangeDetails = (
   ranges: ReadonlyArray<Omit<PriceRange, 'id'>> | undefined,
@@ -51,7 +47,7 @@ export const buildMarginRangeDetails = (
   t: TFunction,
   dash: string
 ): string[] => {
-  if (!ranges || ranges.length <= 1) {
+  if (!ranges || ranges.length === 0) {
     return [];
   }
   return ranges.map((range) => {

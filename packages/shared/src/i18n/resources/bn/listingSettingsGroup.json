@@ -67,6 +67,7 @@
       "stockBuffer": "স্টক বাফার",
       "fee": "কমিশন",
       "fixedFee": "নির্দিষ্ট ফি",
+      "aiTitle": "AI শিরোনাম",
       "customTemplate": "কাস্টমাইজড টেমপ্লেট"
     },
     "emptyState": {

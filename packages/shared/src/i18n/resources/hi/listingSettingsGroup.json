@@ -67,6 +67,7 @@
       "stockBuffer": "स्टॉक बफ़र",
       "fee": "कमीशन",
       "fixedFee": "निश्चित शुल्क",
+      "aiTitle": "AI शीर्षक",
       "customTemplate": "कस्टमाइज़ किया गया टेम्पलेट"
     },
     "emptyState": {

@@ -24,6 +24,11 @@ export interface SettingsRecordCardProps {
   /** One muted line under the title. */
   description?: string;
   facts?: SettingsRecordFact[];
+  /**
+   * A second label / value column beside `facts` (a settings group's fees);
+   * it drops under the first column when the card is too narrow for two.
+   */
+  secondaryFacts?: SettingsRecordFact[];
   /** A clamped text preview (a message template's body). */
   preview?: string;
   /** A red line under the facts — why the record is broken. */

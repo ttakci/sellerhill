@@ -66,6 +66,7 @@
       "stockBuffer": "库存缓冲",
       "fee": "佣金",
       "fixedFee": "固定费用",
+      "aiTitle": "AI 标题",
       "customTemplate": "自定义模板"
     },
     "emptyState": {

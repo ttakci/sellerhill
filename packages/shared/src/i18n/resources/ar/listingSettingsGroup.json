@@ -71,6 +71,7 @@
       "stockBuffer": "هامش المخزون",
       "fee": "العمولة",
       "fixedFee": "رسوم ثابتة",
+      "aiTitle": "عنوان بالذكاء الاصطناعي",
       "customTemplate": "قالب مخصص"
     },
     "emptyState": {

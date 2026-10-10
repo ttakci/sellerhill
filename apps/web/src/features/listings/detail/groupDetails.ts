@@ -40,7 +40,7 @@ export function buildGroupDetailSections(
   const fees = group.fees;
   const ending = resolvePriceEndingCents(fees);
   const tiers = buildMarginRangeDetails(group.repricingStrategy, fmtCurrency, t, dash);
-  const marginValues = tiers.length > 0 ? tiers : [summarizeMarginStrategy(group.repricingStrategy, fmtCurrency, t) ?? dash];
+  const marginValues = tiers.length > 1 ? tiers : [summarizeMarginStrategy(group.repricingStrategy, fmtCurrency, t) ?? dash];
 
   const outOfStock =
     typeof rules.outOfStockEndDays === 'number'

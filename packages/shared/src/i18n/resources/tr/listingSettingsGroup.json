@@ -67,6 +67,7 @@
       "stockBuffer": "Stok Tamponu",
       "fee": "Komisyon",
       "fixedFee": "Sabit Ücret",
+      "aiTitle": "AI Başlık",
       "customTemplate": "Özelleştirilmiş Şablon"
     },
     "emptyState": {

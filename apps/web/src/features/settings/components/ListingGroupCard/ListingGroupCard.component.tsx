@@ -32,6 +32,12 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
   const marginSummary = summarizeMarginStrategy(group.repricingStrategy, fmtMoney, t) ?? marginNotSet;
   const marginRangeDetails = buildMarginRangeDetails(group.repricingStrategy, fmtMoney, t, marginNotSet);
 
+  // The right-hand column: what eBay takes, and whether the group rewrites
+  // titles with AI — read the same way the listing detail's group drawer
+  // reads them.
+  const feePercent = Number(group.fees?.ebayFeePercent);
+  const fixedFee = Number(group.fees?.fixedFeeAmount);
+
   const marginValue = (
     <>
       <Text variant="body-sm" weight="bold" numeric>
@@ -73,6 +79,22 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
         { label: t('listingSettingsGroup.card.defaultQuantity'), value: String(group.stock.defaultQuantity) },
         { label: t('listingSettingsGroup.card.stockBuffer'), value: String(group.stock.stockBuffer ?? 0) },
         { label: t('listings:listings.detail.groupMarginLabel'), value: marginValue },
+      ]}
+      secondaryFacts={[
+        {
+          label: t('listingSettingsGroup.card.fee'),
+          value: Number.isFinite(feePercent) ? `%${feePercent}` : marginNotSet,
+        },
+        {
+          label: t('listingSettingsGroup.card.fixedFee'),
+          value: Number.isFinite(fixedFee) ? fmtMoney(fixedFee) : marginNotSet,
+        },
+        {
+          label: t('listingSettingsGroup.card.aiTitle'),
+          value: group.content?.aiTitleEnabled
+            ? t('listings:listings.detail.automationBadgeActive')
+            : t('listings:listings.detail.automationBadgeOff'),
+        },
       ]}
       onClick={() => onClick(group.id)}
       ariaLabel={t('listingSettingsGroup.tooltips.editGroup')}

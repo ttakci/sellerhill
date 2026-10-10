@@ -2,7 +2,36 @@ import { Badge, Icon, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 
 import * as S from './SettingsRecordCard.style';
-import type { SettingsRecordCardProps } from './SettingsRecordCard.types';
+import type { SettingsRecordCardProps, SettingsRecordFact } from './SettingsRecordCard.types';
+
+/** One label / value list; a plain string value is rendered bold, one line. */
+const renderFacts = (facts: SettingsRecordFact[]): React.ReactNode => (
+  <S.MetaList>
+    {facts.map((fact) => (
+      <React.Fragment key={fact.label}>
+        <S.MetaLabel>
+          <Text variant="body-sm" color="text.secondary">
+            {fact.label}
+          </Text>
+        </S.MetaLabel>
+        <S.MetaValue>
+          {typeof fact.value === 'string' ? (
+            <S.OneLine
+              variant="body-sm"
+              weight="bold"
+              numeric
+              color={fact.tone === 'negative' ? 'semantic.error' : 'text.primary'}
+            >
+              {fact.value}
+            </S.OneLine>
+          ) : (
+            fact.value
+          )}
+        </S.MetaValue>
+      </React.Fragment>
+    ))}
+  </S.MetaList>
+);
 
 /**
  * One settings record (store, buyer account, template, settings group) in the
@@ -16,6 +45,7 @@ export const SettingsRecordCard: React.FC<SettingsRecordCardProps> = ({
   title,
   description,
   facts = [],
+  secondaryFacts = [],
   preview,
   notice,
   actions,
@@ -74,31 +104,10 @@ export const SettingsRecordCard: React.FC<SettingsRecordCardProps> = ({
         </S.TitleBlock>
 
         {facts.length > 0 && (
-          <S.MetaList>
-            {facts.map((fact) => (
-              <React.Fragment key={fact.label}>
-                <S.MetaLabel>
-                  <Text variant="body-sm" color="text.secondary">
-                    {fact.label}
-                  </Text>
-                </S.MetaLabel>
-                <S.MetaValue>
-                  {typeof fact.value === 'string' ? (
-                    <S.OneLine
-                      variant="body-sm"
-                      weight="bold"
-                      numeric
-                      color={fact.tone === 'negative' ? 'semantic.error' : 'text.primary'}
-                    >
-                      {fact.value}
-                    </S.OneLine>
-                  ) : (
-                    fact.value
-                  )}
-                </S.MetaValue>
-              </React.Fragment>
-            ))}
-          </S.MetaList>
+          <S.FactColumns $split={secondaryFacts.length > 0}>
+            {renderFacts(facts)}
+            {secondaryFacts.length > 0 ? renderFacts(secondaryFacts) : null}
+          </S.FactColumns>
         )}
 
         {preview ? (

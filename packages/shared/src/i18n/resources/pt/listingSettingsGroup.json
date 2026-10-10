@@ -68,6 +68,7 @@
       "stockBuffer": "Margem de estoque",
       "fee": "Comissão",
       "fixedFee": "Taxa fixa",
+      "aiTitle": "Título com IA",
       "customTemplate": "Modelo personalizado"
     },
     "emptyState": {

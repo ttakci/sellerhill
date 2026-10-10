@@ -46,6 +46,7 @@ export const Wrapper = styled(Card, {
 `;
 
 export const Top = styled.div`
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm-md')};
@@ -93,6 +94,41 @@ export const OneLine = styled(Text)`
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+`;
+
+/**
+ * One or two fact lists. Narrow, both lists pour into this one label / value
+ * grid (the lists are `display: contents`), so a second list's values line up
+ * under the first's. Once the card is wide enough for two (a container query,
+ * so the drawer, the hub carousel and a phone each decide by the card's own
+ * width), a split card puts the second list beside the first.
+ */
+export const FactColumns = styled.div<{ $split: boolean }>`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: ${tkn('spacing.md')};
+  row-gap: ${tkn('spacing.xs')};
+  align-items: baseline;
+  min-width: 0;
+
+  & > dl {
+    display: contents;
+  }
+
+  @container (min-width: 26rem) {
+    ${({ $split, theme }) =>
+      $split
+        ? `
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: ${theme.spacing.lg};
+      align-items: start;
+
+      & > dl {
+        display: grid;
+      }
+    `
+        : ''}
+  }
 `;
 
 /** Label / value pairs, the same grid as ListingCard / the job card. */

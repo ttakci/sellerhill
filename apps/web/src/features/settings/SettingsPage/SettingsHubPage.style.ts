@@ -54,17 +54,27 @@ export const ColumnStack = styled.div`
   gap: ${tkn('spacing.md')};
   min-width: 0;
 
-  /* Cards share the column's height, so the stack ends level with the card
-     beside it (StackedGrid stretches both columns to one height). */
+  /* The stack ends level with the card beside it (StackedGrid stretches both
+     columns to one height). The cards below the first keep their natural
+     height; the first takes whatever the column has left, its row centred. */
   && > * {
     height: auto;
+    flex: 0 0 auto;
+  }
+
+  && > :first-child {
     flex: 1 1 auto;
+  }
+
+  && > :first-child > :last-child {
+    justify-content: center;
   }
 
   /* One-row cards: tighter header, body and row insets than a long card, so
      three of them stack to the height of the card beside them. Card anatomy:
-     header, divider, body > rows. */
-  && > * > :first-of-type {
+     header, divider, body > rows. The first card keeps the standard header,
+     so its divider lines up with the divider of the card beside it. */
+  && > :not(:first-child) > :first-of-type {
     padding-top: ${tkn('spacing.md')};
     padding-bottom: ${tkn('spacing.sm')};
   }

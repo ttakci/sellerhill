@@ -69,6 +69,7 @@
       "stockBuffer": "Буфер залишків",
       "fee": "Комісія",
       "fixedFee": "Фіксована комісія",
+      "aiTitle": "ШІ-заголовок",
       "customTemplate": "Змінений шаблон"
     },
     "emptyState": {

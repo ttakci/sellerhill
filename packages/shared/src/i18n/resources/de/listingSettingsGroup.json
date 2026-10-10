@@ -67,6 +67,7 @@
       "stockBuffer": "Bestandspuffer",
       "fee": "Provision",
       "fixedFee": "Feste Gebühr",
+      "aiTitle": "KI-Titel",
       "customTemplate": "Angepasste Vorlage"
     },
     "emptyState": {

@@ -67,6 +67,7 @@
       "stockBuffer": "اسٹاک بفر",
       "fee": "کمیشن",
       "fixedFee": "مقررہ فیس",
+      "aiTitle": "AI عنوان",
       "customTemplate": "حسب ضرورت ٹیمپلیٹ"
     },
     "emptyState": {

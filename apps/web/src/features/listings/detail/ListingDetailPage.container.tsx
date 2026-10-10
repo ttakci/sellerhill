@@ -322,7 +322,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   );
 
   /** Per-range breakdown backing the Kâr Marjı info tooltip — see
-   *  `buildMarginRangeDetails`; empty for a single-range group. */
+   *  `buildMarginRangeDetails`; empty only when the group has no range. */
   const groupMarginRangeDetails = useMemo(
     () => buildMarginRangeDetails(selectedGroup?.repricingStrategy, fmtCurrency, t, dash),
     [selectedGroup, fmtCurrency, t, dash]
