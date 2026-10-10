@@ -185,7 +185,7 @@
       "suspended": "Il tuo abbonamento è sospeso, quindi le azioni sui resi sono in pausa. Salda la fattura nella pagina Fatturazione.",
       "ebayRejected": "eBay ha rifiutato questa azione. Apri il reso su eBay per vederne il motivo.",
       "unavailable": "eBay non è raggiungibile. Riprova tra un istante.",
-      "sandbox": "Le azioni sui resi non sono disponibili nel sandbox di eBay.",
+      "sandbox": "Le azioni sui resi non sono disponibili nell'ambiente di prova di eBay.",
       "refundAmountUnknown": "eBay non ha indicato un importo di rimborso per questo reso, quindi il rimborso va emesso su eBay.",
       "notFound": "Questo reso non è stato trovato.",
       "labelFileRequired": "Scegli il file dell'etichetta.",

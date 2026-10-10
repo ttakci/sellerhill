@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Einstellungsgruppen für Angebote",
-    "subtitle": "Verwalten Sie Strategievorlagen und weisen Sie sie Ihren Produktangeboten für die automatische Optimierung zu.",
+    "subtitle": "Bündeln Sie Ihre Preis-, Bestands- und Vorlageneinstellungen und weisen Sie sie Ihren Angeboten zu.",
     "loadingDescription": "Ihre Angebotsgruppen werden geladen.",
     "createNewGroup": "Neue Gruppe erstellen",
     "editGroup": "Angebotsgruppe bearbeiten",
@@ -11,7 +11,7 @@
     "groupName": "Gruppenname",
     "groupNamePlaceholder": "z. B. Premium-Elektronik",
     "description": "Beschreibung",
-    "descriptionPlaceholder": "Interne Notizen zur Gruppe eingeben ...",
+    "descriptionPlaceholder": "Eigene Notizen zu dieser Gruppe hinzufügen ...",
     "stripBrandFromTitle": "Marke aus dem Titel entfernen",
     "stripBrandFromTitleInfo": "Entfernt automatisch den Amazon-Markennamen aus Ihrem eBay-Titel. Gilt nur für neue Angebote.",
     "aiTitleEnabled": "KI-gestützter Titel",
@@ -146,7 +146,7 @@
       "templateMinLength": "Die Vorlage muss mindestens 10 Zeichen lang sein",
       "predefinedTemplateRequired": "Bitte wählen Sie eine vordefinierte Vorlage aus",
       "minOnePriceRange": "Mindestens ein Preisbereich ist erforderlich",
-      "maxPriceRanges": "Maximal 10 Preisbereiche sind erlaubt",
+      "maxPriceRanges": "Sie können bis zu 10 Preisbereiche hinzufügen",
       "overlappingPriceRanges": "Preisbereiche dürfen sich nicht überschneiden",
       "minStockBuffer": "Der Bestandspuffer muss 0 oder größer sein"
     },
@@ -196,7 +196,7 @@
     "addRange": "Bereich hinzufügen",
     "calculator": {
       "title": "Preisrechner",
-      "subtitle": "Testen Sie diese Einstellungen – wird nicht gespeichert, nur eine Vorschau.",
+      "subtitle": "Probieren Sie diese Einstellungen hier aus. Es wird nichts gespeichert.",
       "amazonPrice": "Amazon-Einkaufspreis",
       "adRate": "Anzeigenrate zum Testen (%)",
       "amazonPriceError": "Gib einen Amazon-Einkaufspreis über 0 ein.",
@@ -225,7 +225,7 @@
       "info": "Jeder berechnete Preis wird auf den nächsten Betrag mit dieser Endung aufgerundet, sodass Ihr Zielgewinn nie sinkt. Ein Preis, den Sie in einem Angebot fest eingestellt haben, bleibt unverändert.",
       "endingLabel": "Preisendung (Cent, 0–99)",
       "example": "Beispiel: Aus {{from}} wird {{to}}.",
-      "hint": "Geben Sie eine ganze Zahl von 0 bis 99 ein — 99 ergibt Preise wie $24.99."
+      "hint": "Geben Sie eine ganze Zahl von 0 bis 99 ein. Zum Beispiel ergibt 99 Preise wie $24.99."
     },
     "amazonTaxRateNote": "Ihre Preisberechnung berücksichtigt automatisch die geschätzte Steuer, die Sie beim Einkauf bei Amazon zahlen. Legen Sie diesen Satz unter Shop-Einstellungen → Amazon-Umsatzsteuersatz fest.",
     "stockControl": "Bestandssteuerung",
@@ -240,7 +240,7 @@
     "ebayFormat": "EBAY-FORMAT",
     "sample": {
       "productTitle": "Kabellose Ohrhörer, aktive Geräuschunterdrückung, 40 Std. Akku",
-      "productDescription": "Hybride aktive Geräuschunterdrückung, ein 40-Stunden-Ladeetui und ein Spielmodus mit geringer Latenz – in kompakten Ohrhörern für Reise, Arbeit und Training.",
+      "productDescription": "Hybride aktive Geräuschunterdrückung, ein 40-Stunden-Ladeetui und ein Spielmodus mit geringer Latenz in kompakten Ohrhörern für Reise, Arbeit und Training.",
       "productSpecs": "<ul><li>Aktive Geräuschunterdrückung</li><li>40 Stunden Akkulaufzeit</li><li>Universelle Bluetooth-Kompatibilität</li><li>Integriertes Mikrofon</li></ul>"
     },
     "drawer": {
@@ -277,7 +277,7 @@
         "title": "Was angeboten werden darf",
         "minPrice": "Min. Amazon-Preis",
         "maxPrice": "Max. Amazon-Preis",
-        "priceHint": "Lassen Sie ein Feld leer, wenn es keine Grenze geben soll. Ein Produkt außerhalb des Preisbereichs wird übersprungen, und der Auftrag zeigt den Grund.",
+        "priceHint": "Lassen Sie ein Feld leer, wenn es keine Grenze geben soll. Ein Produkt außerhalb des Preisbereichs wird übersprungen, und der Angebotsauftrag zeigt den Grund.",
         "priceError": "Das Maximum darf nicht niedriger als das Minimum sein.",
         "amazonShippedOnly": "Nur Produkte, die Amazon selbst versendet",
         "amazonShippedOnlyHint": "Überspringt ein Angebot, das ein anderer Verkäufer aus eigenem Bestand versendet. Automatische Bestellung und Sendungsverfolgung funktionieren am besten mit Produkten, die Amazon versendet.",

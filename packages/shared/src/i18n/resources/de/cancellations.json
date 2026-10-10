@@ -52,9 +52,9 @@
     },
     "bucketHint": {
       "unconfirmed": "eBay hat diese Anfrage zuletzt nicht bestätigt, daher wird keine Frist angezeigt.",
-      "action_overdue": "Der Käufer wartet — die Frist von eBay für Ihre Antwort ist abgelaufen.",
+      "action_overdue": "Der Käufer wartet. Die Frist von eBay für Ihre Antwort ist abgelaufen.",
       "action_due": "Der Käufer möchte stornieren. Nehmen Sie an oder lehnen Sie ab, bevor die Frist von eBay endet.",
-      "answered": "Sie haben diese Anfrage beantwortet. eBay bearbeitet sie – Sie müssen nichts weiter tun.",
+      "answered": "Sie haben diese Anfrage beantwortet. eBay bearbeitet sie, und Sie müssen nichts weiter tun.",
       "in_progress": "Im Moment ist von Ihnen nichts zu tun.",
       "closed": "eBay hat diese Anfrage geschlossen."
     },
@@ -103,7 +103,7 @@
       "approve": "Stornierung genehmigt. eBay erstattet dem Käufer den Betrag.",
       "reject": "Stornierung abgelehnt."
     },
-    "actionsOff": "Stornierungen in der App sind deaktiviert — antworten Sie auf eBay.",
+    "actionsOff": "Stornierungen in der App sind deaktiviert. Antworten Sie auf eBay.",
     "liveUnavailable": "eBay war gerade nicht erreichbar, daher zeigt SellerHill den zuletzt gesehenen Stand. Antworten sind wieder möglich, sobald eBay antwortet.",
     "errors": {
       "exportFailed": "Der Export konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
@@ -112,7 +112,7 @@
       "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Stornierungsaktionen pausiert. Begleichen Sie die Rechnung auf der Seite Abrechnung.",
       "ebayRejected": "eBay hat diese Aktion abgelehnt. Öffnen Sie die Anfrage auf eBay, um den Grund zu sehen.",
       "unavailable": "eBay ist nicht erreichbar. Versuchen Sie es gleich noch einmal.",
-      "sandbox": "Stornierungsaktionen sind in der eBay-Sandbox nicht verfügbar.",
+      "sandbox": "Stornierungsaktionen sind in der Testumgebung von eBay nicht verfügbar.",
       "notFound": "Diese Stornierungsanfrage wurde nicht gefunden."
     },
     "party": {

@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Grupuri de setări pentru anunțuri",
-    "subtitle": "Gestionați și atribuiți șabloane de strategie anunțurilor dvs. de produse pentru optimizare automată.",
+    "subtitle": "Grupați setările de preț, stoc și șablon și atribuiți-le anunțurilor dvs.",
     "loadingDescription": "Se preiau grupurile dvs. de anunțuri.",
     "createNewGroup": "Creează un grup nou",
     "editGroup": "Editează grupul de anunțuri",
@@ -11,7 +11,7 @@
     "groupName": "Numele grupului",
     "groupNamePlaceholder": "ex.: Electronice premium",
     "description": "Descriere",
-    "descriptionPlaceholder": "Introduceți note interne despre grup...",
+    "descriptionPlaceholder": "Adăugați propriile note despre acest grup...",
     "stripBrandFromTitle": "Elimină brandul din titlu",
     "stripBrandFromTitleInfo": "Elimină automat numele brandului Amazon din titlul dvs. eBay. Se aplică doar anunțurilor noi.",
     "aiTitleEnabled": "Titlu asistat de AI",
@@ -147,7 +147,7 @@
       "templateMinLength": "Șablonul trebuie să aibă cel puțin 10 caractere",
       "predefinedTemplateRequired": "Selectați un șablon predefinit",
       "minOnePriceRange": "Este necesar cel puțin un interval de preț",
-      "maxPriceRanges": "Sunt permise cel mult 10 intervale de preț",
+      "maxPriceRanges": "Puteți adăuga cel mult 10 intervale de preț",
       "overlappingPriceRanges": "Intervalele de preț nu se pot suprapune",
       "minStockBuffer": "Rezerva de stoc trebuie să fie 0 sau mai mare"
     },
@@ -197,9 +197,9 @@
     "addRange": "Adaugă interval",
     "calculator": {
       "title": "Calculator de preț",
-      "subtitle": "Testați aceste setări — nu se salvează, este doar o previzualizare.",
+      "subtitle": "Încercați aici aceste setări. Nu se salvează nimic.",
       "amazonPrice": "Prețul de achiziție Amazon",
-      "adRate": "Simulare rată publicitară (%)",
+      "adRate": "Rată publicitară de testat (%)",
       "amazonPriceError": "Introdu un preț de achiziție Amazon mai mare de 0.",
       "adRateError": "Introdu o rată publicitară între 0 și 100, cu cel mult o zecimală.",
       "combinedRateError": "Comisionul eBay și rata publicitară trebuie să însumeze sub 100%.",
@@ -226,7 +226,7 @@
       "info": "Fiecare preț calculat este rotunjit în sus la următoarea sumă cu acest final, astfel încât profitul țintă nu scade niciodată. Un preț fixat manual pe o listare nu se modifică.",
       "endingLabel": "Finalul prețului (cenți, 0–99)",
       "example": "Exemplu: {{from}} devine {{to}}.",
-      "hint": "Introduceți un număr întreg de la 0 la 99 — cu 99 prețurile arată ca $24.99."
+      "hint": "Introduceți un număr întreg de la 0 la 99. De exemplu, cu 99 prețurile arată ca $24.99."
     },
     "amazonTaxRateNote": "Calculul prețului dvs. ia în considerare automat taxa estimată pe care o plătiți la cumpărarea de pe Amazon. Setați această rată în Setări magazin → Rata taxei pe vânzări Amazon.",
     "stockControl": "Controlul stocului",
@@ -278,7 +278,7 @@
         "title": "Ce poate fi publicat",
         "minPrice": "Preț Amazon minim",
         "maxPrice": "Preț Amazon maxim",
-        "priceHint": "Lăsați un câmp gol pentru a nu avea limită. Un produs cu prețul în afara intervalului este omis, iar sarcina arată motivul.",
+        "priceHint": "Lăsați un câmp gol pentru a nu avea limită. Un produs cu prețul în afara intervalului este omis, iar sarcina de anunțuri arată motivul.",
         "priceError": "Maximul nu poate fi mai mic decât minimul.",
         "amazonShippedOnly": "Doar produsele pe care Amazon le expediază direct",
         "amazonShippedOnlyHint": "Omite o ofertă expediată de alt vânzător din propriul stoc. Comanda automată și urmărirea funcționează cel mai bine cu produsele expediate de Amazon.",

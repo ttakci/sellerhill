@@ -117,7 +117,7 @@
       "trackingNumber": "Sendungsnummer {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "Rücknahme-ID",
-      "actionsOff": "In-App-Aktionen für Rücknahmen sind ausgeschaltet — antworten Sie auf eBay."
+      "actionsOff": "In-App-Aktionen für Rücknahmen sind ausgeschaltet. Antworten Sie auf eBay."
     },
     "actions": {
       "done": {
@@ -184,7 +184,7 @@
       "suspended": "Ihr Abonnement ist ausgesetzt, daher sind Rückgabe-Aktionen pausiert. Begleichen Sie die Rechnung auf der Abrechnungsseite.",
       "ebayRejected": "eBay hat diese Aktion abgelehnt. Öffnen Sie die Rückgabe bei eBay, um den Grund zu sehen.",
       "unavailable": "eBay war nicht erreichbar. Versuchen Sie es gleich noch einmal.",
-      "sandbox": "Rückgabe-Aktionen sind in der eBay-Sandbox nicht verfügbar.",
+      "sandbox": "Rückgabe-Aktionen sind in der Testumgebung von eBay nicht verfügbar.",
       "refundAmountUnknown": "eBay hat für diese Rückgabe keinen Erstattungsbetrag gemeldet; die Erstattung muss bei eBay veranlasst werden.",
       "notFound": "Diese Rückgabe wurde nicht gefunden.",
       "labelFileRequired": "Wählen Sie die Etikettdatei.",

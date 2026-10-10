@@ -77,7 +77,7 @@
       "in_progress": "Comprando en Amazon",
       "not_automated": "No automatizado",
       "manual": "Comprado manualmente",
-      "simulated": "Ejecución de prueba — sin compra",
+      "simulated": "Ejecución de prueba, sin compra",
       "filter": {
         "all": "Todos los estados de cumplimiento"
       },
@@ -86,7 +86,7 @@
         "amazonOrderId": "Pedido de Amazon",
         "simulatedNotice": "Esta es una ejecución de prueba. No se realizó ningún pedido en Amazon ni se cobró dinero: los costos y la ganancia de abajo son simulados.",
         "actionRequiredNotice": "La automatización se detuvo antes de comprar. Revisa el motivo y cumple este pedido manualmente.",
-        "cancelledNotice": "La compra en Amazon fue cancelada. La venta en eBay sigue pendiente con el comprador: cúmplela de otra manera.",
+        "cancelledNotice": "La compra en Amazon fue cancelada. Todavía le debes este artículo al comprador de eBay, así que cúmplelo de otra manera.",
         "notAutomatedNotice": "Los pedidos automáticos están desactivados para este pedido.",
         "attemptedAt": "Último intento"
       }
@@ -95,14 +95,14 @@
       "tracked": "Vinculado a un anuncio",
       "untracked": "No vinculado a un anuncio",
       "problem": {
-        "wrongPageType": "El proveedor de seguimiento no pudo leer la página del pedido de Amazon; puede que haya cambiado de formato. Se reintentará automáticamente.",
+        "wrongPageType": "No se pudo leer la página del pedido de Amazon para convertir el número de seguimiento. Puede que Amazon haya cambiado la página. Se reintentará automáticamente.",
         "amazonSessionExpired": "La sesión de Amazon usada para leer este pedido caducó y hay que volver a iniciar sesión.",
         "trackingUrlMismatch": "El enlace de seguimiento de la página del pedido de Amazon no coincidía con lo esperado. Se reintentará automáticamente.",
-        "needsTrackingUpload": "Esperando a que se suban los datos del envío para poder convertir el número de seguimiento.",
-        "updateNotApplied": "El proveedor aún no ha aplicado la actualización de seguimiento. Se reintentará automáticamente.",
-        "assignValidation": "El proveedor de seguimiento rechazó los datos del envío de este pedido.",
-        "shipmentException": "El proveedor de seguimiento informó de una excepción en este envío.",
-        "trackingUpdateUnavailable": "El proveedor de seguimiento no pudo actualizar este envío en este momento.",
+        "needsTrackingUpload": "Esperando los datos del envío para poder convertir el número de seguimiento.",
+        "updateNotApplied": "La actualización de seguimiento aún no se ha aplicado. Se reintentará automáticamente.",
+        "assignValidation": "Los datos del envío de este pedido se rechazaron durante la conversión del seguimiento.",
+        "shipmentException": "Se informó un problema en este envío.",
+        "trackingUpdateUnavailable": "El seguimiento de este envío no se pudo actualizar en este momento.",
         "generic": "Hay un problema con la conversión del seguimiento de este pedido. Se reintentará automáticamente."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Producto no encontrado en Amazon",
         "captcha": "Se requiere captcha",
-        "otp": "Desafío de MFA/OTP",
+        "otp": "Se requiere un código de verificación",
         "login": "Falló el inicio de sesión",
         "out_of_stock": "Sin stock",
         "address": "Problema con la dirección",
         "payment": "Pago rechazado",
-        "cap": "Supera el límite de costo",
+        "cap": "Supera el límite de gasto",
         "no_confirmation": "Sin confirmación",
-        "proxy_required": "Sin proxy configurado",
+        "proxy_required": "No se pudo usar el proxy de la cuenta",
         "quota_exhausted": "Se alcanzó la cuota mensual",
         "cart": "El carrito no coincide",
         "review_unreadable": "No se pudo leer el total del pedido",
-        "interrupted": "Compra interrumpida — revisa Amazon",
+        "interrupted": "Compra interrumpida, revisa Amazon",
         "subscription_suspended": "Suscripción suspendida",
         "listing_over_plan_limit": "Publicación fuera del límite del plan",
         "order_already_fulfilled": "Ya enviado: nada que comprar",
         "order_not_paid": "Esperando el pago del comprador",
         "order_cancelled": "Cancelado en eBay: nada que comprar",
-        "multi_item_order": "El pedido tiene varios artículos — compra manualmente",
-        "cancel_requested": "El comprador pidió cancelar — responde en eBay",
+        "multi_item_order": "El pedido tiene varios artículos, compra manualmente",
+        "cancel_requested": "El comprador pidió cancelar, responde en eBay",
         "loss_limit": "Por encima de tu límite de pérdida"
       },
       "reasonLabel": "Motivo: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "No está en Amazon",
         "confirmTitle": "¿Confirmas que Amazon no tiene un pedido para esta venta?",
-        "confirmDescription": "Continúa solo después de haber revisado los pedidos de esta cuenta de Amazon y comprobar que el pedido no está. SellerHill también revisa la lista de pedidos de la cuenta y no acepta la confirmación hasta que esa revisión se haya hecho. Después, el pedido automático puede iniciarse de nuevo; si el pedido sí existe en Amazon, el artículo se comprará dos veces.",
+        "confirmDescription": "Continúa solo después de haber revisado los pedidos de esta cuenta de Amazon y comprobar que el pedido no está. SellerHill también revisa la lista de pedidos de la cuenta y no acepta la confirmación hasta que esa revisión se haya hecho. Después, el pedido automático puede iniciarse de nuevo. Si el pedido sí existe en Amazon, el artículo se comprará dos veces.",
         "confirm": "Sí, no está ahí",
         "done": "Marcado como no comprado. Puedes iniciar de nuevo el pedido automático."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Ver más detalles",
       "updateAmazon": "Ingresar datos de Amazon",
       "netProfitAnalysis": "ANÁLISIS DE GANANCIA NETA",
-      "analysisDesc": "Este cálculo considera tus ganancias reales de eBay después de todas las comisiones e impuestos de la plataforma, restando el costo original de la compra en Amazon.",
+      "analysisDesc": "Tus ganancias de eBay después de todas las comisiones e impuestos de la plataforma, menos el costo original de la compra en Amazon.",
       "calculation": "Cálculo",
       "netProfitResult": "Ganancia neta",
       "roi": "ROI",
@@ -264,7 +264,7 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Estimada",
-    "estimateNote": "Ganancia estimada: se finaliza cuando se realiza el pedido de Amazon. Se basa en el último precio conocido de Amazon; no incluye el envío de Amazon.",
+    "estimateNote": "Ganancia estimada. Será definitiva cuando se realice el pedido de Amazon. Se basa en el último precio conocido de Amazon; no incluye el envío de Amazon.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Todos los derechos reservados."
     },
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Rastreo retenido",
-        "meaning": "Amazon envió, pero el rastreo aún no llegó a eBay — normalmente la conversión del rastreo sigue pendiente.",
+        "meaning": "Amazon envió, pero el número de rastreo aún no llegó a eBay. Normalmente la conversión del rastreo sigue pendiente.",
         "action": "Convierte el rastreo o corrige la causa que se muestra en el pedido."
       },
       "buying": {

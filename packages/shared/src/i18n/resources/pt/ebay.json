@@ -25,7 +25,7 @@
       "statusRevoked": "Revogada",
       "statusError": "Erro",
       "disconnectButton": "Desconectar",
-      "refreshTokenButton": "Atualizar token"
+      "refreshTokenButton": "Atualizar conexão"
     },
     "callback": {
       "processing": "Processando a conexão com o eBay...",
@@ -34,16 +34,16 @@
       "cancelled": "A conexão com o eBay foi cancelada."
     },
     "errors": {
-      "invalidState": "Parâmetro de estado inválido",
+      "invalidState": "Não foi possível verificar a conexão com o eBay. Tente novamente.",
       "authorizationFailed": "A autorização do eBay falhou",
-      "tokenExchangeFailed": "Falha ao trocar o código de autorização por tokens",
+      "tokenExchangeFailed": "Não foi possível concluir a conexão da sua loja eBay. Tente novamente.",
       "accountAlreadyConnected": "Esta loja eBay está conectada a outra conta do SellerHill. Entre com a conta à qual você a conectou; se não conseguir acessá-la, entre em contato com o suporte.",
       "ebayTrialAlreadyUsed": "Esta loja eBay já usou o período de avaliação gratuito. Escolha um plano para conectá-la.",
-      "noAuthorizationCode": "Nenhum código de autorização recebido do eBay",
+      "noAuthorizationCode": "O eBay não confirmou a conexão. Tente novamente.",
       "storeOwnedByAnotherAccount": "Esta loja eBay está vinculada a uma conta diferente do SellerHill. Entre em contato com o suporte para transferi-la.",
       "accountNotFound": "Essa loja eBay não foi encontrada.",
-      "identityUnavailable": "Não foi possível confirmar sua conta eBay junto ao eBay. Nada foi conectado — tente novamente em instantes.",
-      "messagingScopeMissing": "Reconecte sua loja eBay para ativar as mensagens — a autorização atual não inclui mensagens.",
+      "identityUnavailable": "Não foi possível confirmar sua conta eBay junto ao eBay, então nada foi conectado. Tente novamente em instantes.",
+      "messagingScopeMissing": "Reconecte sua loja eBay para ativar as mensagens. Sua conexão atual não inclui mensagens.",
       "messagingReplyNotAllowed": "Não é possível responder aqui às mensagens do eBay.",
       "messagingUnavailable": "As mensagens do eBay estão temporariamente indisponíveis. Tente novamente.",
       "messagingRejected": "O eBay não aceitou esta solicitação. Verifique a mensagem e tente novamente.",
@@ -53,7 +53,7 @@
       "title": "Conecte sua loja eBay",
       "header": "Configuração do marketplace",
       "description": "Para começar a sincronizar seus itens, primeiro você precisa conectar sua loja eBay.",
-      "connectButton": "Conta eBay",
+      "connectButton": "Conectar conta eBay",
       "skipButton": "Pular por enquanto",
       "usOnlyNote": "No momento, apenas o marketplace dos EUA é compatível. Mais regiões em breve.",
       "brandingDescription": "Vincule sua loja eBay ao SellerHill para gerenciar todos os seus processos de venda em um único lugar."

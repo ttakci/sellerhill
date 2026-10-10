@@ -48,7 +48,7 @@
       "delete": "删除",
       "refresh": "刷新",
       "selected": "已选择 {{count}} 项",
-      "deleteConfirm": "删除所选对话？删除后它们将不再出现在任何文件夹中。"
+      "deleteConfirm": "删除所选对话？它们将移至“已删除”文件夹。"
     },
     "reconnect": {
       "title": "重新连接此店铺",

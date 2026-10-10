@@ -59,7 +59,7 @@
       },
       "plan": {
         "title": "Tarif und Kapazität",
-        "subtitle": "Limits, ab denen Aufträge abgelehnt werden."
+        "subtitle": "Limits, die neue Vorgänge stoppen, sobald sie erreicht sind."
       },
       "setup": {
         "title": "Einrichtung",
@@ -69,8 +69,8 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon hat einen bereits bezahlten Einkauf storniert",
-        "description_one": "{{count}} Bestellung wurde auf Amazon-Seite storniert. Der eBay-Verkauf besteht weiterhin und ist dem Käufer noch geschuldet – bestellen Sie erneut oder erstatten Sie, bevor eBay es als Mangel wertet.",
-        "description_other": "{{count}} Bestellungen wurden auf Amazon-Seite storniert. Diese eBay-Verkäufe bestehen weiterhin und sind den Käufern noch geschuldet – bestellen Sie erneut oder erstatten Sie, bevor eBay sie als Mängel wertet.",
+        "description_one": "{{count}} Bestellung wurde auf Amazon-Seite storniert. Der eBay-Verkauf besteht weiterhin, und Sie schulden dem Käufer den Artikel noch. Bestellen Sie erneut oder erstatten Sie dem Käufer den Betrag, bevor eBay es als Mangel wertet.",
+        "description_other": "{{count}} Bestellungen wurden auf Amazon-Seite storniert. Diese eBay-Verkäufe bestehen weiterhin, und Sie schulden den Käufern die Artikel noch. Bestellen Sie erneut oder erstatten Sie den Käufern den Betrag, bevor eBay sie als Mängel wertet.",
         "action": "Bestellungen prüfen"
       },
       "order_fulfillment_blocked": {
@@ -80,7 +80,7 @@
         "action": "Bestellungen prüfen"
       },
       "order_purchase_unknown": {
-        "title": "Kauf nicht bestätigt — zuerst Amazon prüfen",
+        "title": "Kauf nicht bestätigt: zuerst Amazon prüfen",
         "description_one": "Bestellungen, deren Amazon-Kauf nicht bestätigt werden konnte: {{count}}. Der Bestellbutton wurde gedrückt, aber es kam keine Bestätigung, die Bestellung existiert also möglicherweise. Prüfen Sie Amazon und verknüpfen Sie sie, bevor erneut etwas gekauft wird.",
         "description_other": "Bestellungen, deren Amazon-Kauf nicht bestätigt werden konnte: {{count}}. Der Bestellbutton wurde gedrückt, aber es kam keine Bestätigung, die Bestellung existiert also möglicherweise. Prüfen Sie Amazon und verknüpfen Sie sie, bevor erneut etwas gekauft wird.",
         "action": "Bestellungen prüfen"
@@ -99,20 +99,20 @@
       },
       "order_tracking_problem": {
         "title": "Problem bei der Umwandlung der Sendungsnummer",
-        "description_one": "Bei {{count}} versendeten Bestellung besteht ein offenes Problem mit dem Tracking-Anbieter. Bis es gelöst ist, sieht Ihr Käufer bei dieser Bestellung die ursprüngliche Amazon-Sendungsnummer statt einer umgewandelten.",
-        "description_other": "Bei {{count}} versendeten Bestellungen bestehen offene Probleme mit dem Tracking-Anbieter. Bis sie gelöst sind, sehen Ihre Käufer bei diesen Bestellungen die ursprünglichen Amazon-Sendungsnummern statt umgewandelter.",
+        "description_one": "Bei {{count}} versendeten Bestellung besteht ein offenes Problem bei der Umwandlung der Sendungsnummer. Öffnen Sie die Bestellung, um zu sehen, was zu tun ist.",
+        "description_other": "Bei {{count}} versendeten Bestellungen bestehen offene Probleme bei der Umwandlung der Sendungsnummern. Öffnen Sie die Bestellungen, um zu sehen, was zu tun ist.",
         "action": "Bestellungen ansehen"
       },
       "order_tracking_conversion_held": {
         "title": "Bestellungen nicht als versendet auf eBay markiert",
-        "description_one": "{{count}} Bestellung wurde vor über {{hours}} Stunden bei Amazon versendet, ist aber auf eBay noch nicht als versendet markiert, weil ihre Sendungsnummer nicht umgewandelt werden konnte. Wir senden die ursprüngliche Amazon-Sendungsnummer nie an Ihren Käufer. Beheben Sie die Ursache, dann wird die Bestellung automatisch versendet – bis dahin droht ein Mangel wegen verspäteten Versands.",
-        "description_other": "{{count}} Bestellungen wurden vor über {{hours}} Stunden bei Amazon versendet, sind aber auf eBay noch nicht als versendet markiert, weil ihre Sendungsnummern nicht umgewandelt werden konnten. Wir senden die ursprünglichen Amazon-Sendungsnummern nie an Ihre Käufer. Beheben Sie die Ursache, dann werden sie automatisch versendet – bis dahin drohen Mängel wegen verspäteten Versands.",
+        "description_one": "{{count}} Bestellung wurde vor über {{hours}} Stunden bei Amazon versendet, ist aber auf eBay nicht als versendet markiert, weil ihre Sendungsnummer nicht umgewandelt werden konnte. Wir senden die ursprüngliche Amazon-Sendungsnummer nie an Ihren Käufer. Sobald Sie die Ursache beheben, wird die Bestellung automatisch als versendet markiert. Bis dahin droht ein Mangel wegen verspäteten Versands.",
+        "description_other": "{{count}} Bestellungen wurden vor über {{hours}} Stunden bei Amazon versendet, sind aber auf eBay nicht als versendet markiert, weil ihre Sendungsnummern nicht umgewandelt werden konnten. Wir senden die ursprünglichen Amazon-Sendungsnummern nie an Ihre Käufer. Sobald Sie die Ursache beheben, werden sie automatisch als versendet markiert. Bis dahin drohen Mängel wegen verspäteten Versands.",
         "action": "Bestellungen ansehen"
       },
       "order_cancelled_amazon_open": {
         "title": "eBay hat einen Verkauf storniert, den Sie bereits bei Amazon gekauft haben",
-        "description_one": "{{count}} Bestellung wurde in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebene Amazon-Bestellung ist noch offen. Auf diesen Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellung oder senden Sie den Artikel zurück, falls er schon versandt wurde.",
-        "description_other": "{{count}} Bestellungen wurden in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebenen Amazon-Bestellungen sind noch offen. Auf diese Artikel wartet niemand mehr — stornieren Sie die Amazon-Bestellungen oder senden Sie die Artikel zurück, falls sie schon versandt wurden.",
+        "description_one": "{{count}} Bestellung wurde in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebene Amazon-Bestellung ist noch offen. Auf diesen Artikel wartet niemand mehr. Stornieren Sie die Amazon-Bestellung oder senden Sie den Artikel zurück, falls er schon versandt wurde.",
+        "description_other": "{{count}} Bestellungen wurden in den letzten {{days}} Tagen bei eBay storniert, aber die dafür aufgegebenen Amazon-Bestellungen sind noch offen. Auf diese Artikel wartet niemand mehr. Stornieren Sie die Amazon-Bestellungen oder senden Sie die Artikel zurück, falls sie schon versandt wurden.",
         "action": "Bestellungen prüfen"
       },
       "order_late_to_ship": {
@@ -129,8 +129,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Stornierungsanfrage eines Käufers",
-        "description_one": "{{count}} Käufer möchte eine Bestellung stornieren — genehmigen oder lehnen Sie sie hier vor Ablauf der eBay-Frist ab",
-        "description_other": "{{count}} Käufer möchten Bestellungen stornieren — genehmigen oder lehnen Sie sie hier vor Ablauf der eBay-Frist ab",
+        "description_one": "{{count}} Käufer möchte eine Bestellung stornieren. Genehmigen oder lehnen Sie die Anfrage hier vor Ablauf der eBay-Frist ab.",
+        "description_other": "{{count}} Käufer möchten Bestellungen stornieren. Genehmigen oder lehnen Sie die Anfragen hier vor Ablauf der eBay-Frist ab.",
         "action": "Anfragen prüfen"
       },
       "ebay_account_disconnected": {
@@ -171,8 +171,8 @@
       },
       "listing_drafts_pending": {
         "title": "Entwürfe, die nie veröffentlicht wurden",
-        "description_one": "{{count}} Entwurf ist vorbereitet und kostet Sie nichts – verkauft aber auch nichts, solange er nicht live geht.",
-        "description_other": "{{count}} Entwürfe sind vorbereitet und kosten Sie nichts – verkaufen aber auch nichts, solange sie nicht live gehen.",
+        "description_one": "{{count}} Entwurf ist fertig und kostet Sie nichts, verkauft aber nichts, solange er nicht live ist.",
+        "description_other": "{{count}} Entwürfe sind fertig und kosten Sie nichts, verkaufen aber nichts, solange sie nicht live sind.",
         "action": "Entwürfe ansehen"
       },
       "plan_listing_quota": {
@@ -198,22 +198,22 @@
       },
       "setup_no_ebay_store": {
         "title": "Verbinden Sie Ihren eBay-Shop",
-        "description": "Ohne verbundenen eBay-Shop kann in SellerHill nichts laufen – Angebote, Bestellungen und Automatisierung hängen alle davon ab. Das ist das Erste, was Sie tun sollten.",
+        "description": "Ohne verbundenen eBay-Shop kann in SellerHill nichts laufen. Angebote, Bestellungen und Automatisierung hängen alle davon ab, erledigen Sie das also zuerst.",
         "action": "eBay verbinden"
       },
       "setup_no_amazon_account": {
         "title": "Noch kein Amazon-Käuferkonto",
-        "description": "Sie verkaufen, aber es gibt kein Amazon-Konto zum Einkaufen – jede Bestellung muss von Hand gekauft werden. Mit einem Konto ist die automatische Abwicklung möglich.",
+        "description": "Sie verkaufen, aber es gibt kein Amazon-Konto zum Einkaufen, daher muss jede Bestellung von Hand gekauft werden. Fügen Sie eines hinzu, um den automatischen Einkauf einzuschalten.",
         "action": "Konto hinzufügen"
       },
       "setup_no_store_settings": {
         "title": "Shop-Einstellungen noch nicht konfiguriert",
-        "description": "Ihr Versandursprung und Ihre Sperrlisten-Schlüsselwörter sind noch nicht festgelegt. Sie werden zur Kostenberechnung verwendet und verhindern, dass Angebote mit gesperrten Inhalten veröffentlicht werden.",
+        "description": "Ihre Shop-Adresse und Ihre Sperrlisten-Wörter sind noch nicht festgelegt. Die Adresse erscheint bei eBay als Artikelstandort, und die Sperrliste verhindert, dass Angebote mit gesperrten Wörtern online gehen.",
         "action": "Einstellungen konfigurieren"
       },
       "setup_no_listing_settings_group": {
         "title": "Noch keine Einstellungsgruppe für Angebote",
-        "description": "Eine Einstellungsgruppe für Angebote legt Preis-, Bestands- und Preisanpassungsregeln fest – jedes Angebot braucht eine, ohne sie können Sie Ihr erstes Angebot nicht erstellen.",
+        "description": "Eine Einstellungsgruppe für Angebote legt Ihre Preis-, Bestands- und Preisanpassungsregeln fest. Jedes Angebot braucht eine, daher können Sie ohne sie Ihr erstes Angebot nicht erstellen.",
         "action": "Gruppe erstellen"
       },
       "setup_auto_fulfill_off": {
@@ -223,12 +223,12 @@
       },
       "plan_conversion_quota": {
         "title": "Monatliches Limit für Sendungsnummern-Umwandlungen fast erreicht",
-        "description": "Sie haben in diesem Monat {{used}} von {{limit}} Sendungsnummern-Umwandlungen genutzt. Ist das Limit erreicht, werden Bestellungen weiterhin versendet und eBay erhält weiterhin eine Sendungsnummer – es ist dann aber die ursprüngliche Amazon-Nummer, sodass Käufer Ihren Lieferanten erkennen können.",
+        "description": "Sie haben in diesem Monat {{used}} von {{limit}} Sendungsnummern-Umwandlungen genutzt. Ist das Limit erreicht, werden Bestellungen weiterhin versendet und eBay erhält weiterhin eine Sendungsnummer. Es ist dann aber die ursprüngliche Amazon-Nummer, sodass Käufer Ihren Lieferanten erkennen können.",
         "action": "Tarif ansehen"
       },
       "plan_suspended": {
         "title": "Die Automatisierung ist ausgesetzt",
-        "description": "Ihr Abonnement ist nicht mehr aktiv, daher sind neue Angebote, Preis- und Bestandsaktualisierungen, der automatische Einkauf und die Umwandlung von Sendungsnummern gestoppt. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
+        "description": "Ihr Abonnement ist nicht mehr aktiv, daher sind neue Angebote, Preis- und Bestandsaktualisierungen, der automatische Einkauf und die Umwandlung von Sendungsnummern gestoppt. Wählen Sie einen Tarif, um fortzufahren. Alles startet von selbst wieder.",
         "action": "Tarif wählen"
       },
       "listing_not_selling": {
@@ -254,9 +254,9 @@
         "tracking_url_mismatch": "Tracking-Link stimmt nicht überein",
         "needs_tracking_upload": "Warten auf Versanddetails",
         "update_not_applied": "Aktualisierung noch nicht angewendet",
-        "assign_validation": "Vom Anbieter abgelehnt",
+        "assign_validation": "Umwandlung abgelehnt",
         "shipment_exception": "Ausnahme beim Versanddienstleister",
-        "tracking_update_unavailable": "Anbieter nicht verfügbar"
+        "tracking_update_unavailable": "Umwandlung vorübergehend nicht verfügbar"
       }
     }
   }

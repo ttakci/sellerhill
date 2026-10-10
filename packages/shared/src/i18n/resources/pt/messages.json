@@ -48,7 +48,7 @@
       "delete": "Excluir",
       "refresh": "Atualizar",
       "selected": "{{count}} selecionada(s)",
-      "deleteConfirm": "Excluir a(s) conversa(s) selecionada(s)? Elas não aparecerão mais em nenhuma pasta."
+      "deleteConfirm": "Excluir as conversas selecionadas? Elas serão movidas para a pasta Excluídas."
     },
     "reconnect": {
       "title": "Reconecte esta loja",

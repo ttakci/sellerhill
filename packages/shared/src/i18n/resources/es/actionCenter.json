@@ -60,7 +60,7 @@
       },
       "plan": {
         "title": "Plan y capacidad",
-        "subtitle": "Límites que empezarán a rechazar trabajo."
+        "subtitle": "Límites que detienen el trabajo nuevo cuando se alcanzan."
       },
       "setup": {
         "title": "Configuración",
@@ -70,9 +70,9 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon canceló una compra que ya pagaste",
-        "description_one": "{{count}} pedido fue cancelado por parte de Amazon. La venta en eBay sigue activa y sigue pendiente con el comprador: vuelve a pedirlo o reembolsa antes de que eBay lo cuente como defecto.",
-        "description_many": "{{count}} pedidos fueron cancelados por parte de Amazon. Esas ventas en eBay siguen activas y siguen pendientes con los compradores: vuelve a pedirlos o reembolsa antes de que eBay los cuente como defectos.",
-        "description_other": "{{count}} pedidos fueron cancelados por parte de Amazon. Esas ventas en eBay siguen activas y siguen pendientes con los compradores: vuelve a pedirlos o reembolsa antes de que eBay los cuente como defectos.",
+        "description_one": "{{count}} pedido fue cancelado por parte de Amazon. La venta en eBay sigue activa y todavía le debes el artículo al comprador. Vuelve a pedirlo o reembolsa al comprador antes de que eBay lo cuente como defecto.",
+        "description_many": "{{count}} pedidos fueron cancelados por parte de Amazon. Esas ventas en eBay siguen activas y todavía les debes los artículos a los compradores. Vuelve a pedirlos o reembolsa a los compradores antes de que eBay los cuente como defectos.",
+        "description_other": "{{count}} pedidos fueron cancelados por parte de Amazon. Esas ventas en eBay siguen activas y todavía les debes los artículos a los compradores. Vuelve a pedirlos o reembolsa a los compradores antes de que eBay los cuente como defectos.",
         "action": "Revisar pedidos"
       },
       "order_fulfillment_blocked": {
@@ -83,7 +83,7 @@
         "action": "Revisar pedidos"
       },
       "order_purchase_unknown": {
-        "title": "Compra no confirmada — revisa Amazon primero",
+        "title": "Compra no confirmada: revisa Amazon primero",
         "description_one": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
         "description_many": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
         "description_other": "Pedidos cuya compra en Amazon no se pudo confirmar: {{count}}. Se pulsó el botón de pedido pero no llegó confirmación, así que el pedido puede existir. Revisa Amazon y vincúlalo antes de volver a comprar nada.",
@@ -105,16 +105,16 @@
       },
       "order_tracking_problem": {
         "title": "La conversión del seguimiento tiene un problema",
-        "description_one": "{{count}} pedido enviado tiene un problema abierto con el proveedor de seguimiento. Hasta que se resuelva, ese pedido muestra a tu comprador el número de seguimiento original de Amazon en lugar de uno convertido.",
-        "description_many": "{{count}} pedidos enviados tienen problemas abiertos con el proveedor de seguimiento. Hasta que se resuelvan, esos pedidos muestran a tus compradores los números de seguimiento originales de Amazon en lugar de los convertidos.",
-        "description_other": "{{count}} pedidos enviados tienen problemas abiertos con el proveedor de seguimiento. Hasta que se resuelvan, esos pedidos muestran a tus compradores los números de seguimiento originales de Amazon en lugar de los convertidos.",
+        "description_one": "{{count}} pedido enviado tiene un problema abierto con la conversión del seguimiento. Abre el pedido para ver qué hay que corregir.",
+        "description_many": "{{count}} pedidos enviados tienen problemas abiertos con la conversión del seguimiento. Abre los pedidos para ver qué hay que corregir.",
+        "description_other": "{{count}} pedidos enviados tienen problemas abiertos con la conversión del seguimiento. Abre los pedidos para ver qué hay que corregir.",
         "action": "Ver pedidos"
       },
       "order_tracking_conversion_held": {
         "title": "Pedidos no marcados como enviados en eBay",
-        "description_one": "{{count}} pedido se envió en Amazon hace más de {{hours}} horas pero no se ha marcado como enviado en eBay, porque su número de seguimiento no se pudo convertir. Nunca enviamos a tu comprador el número de seguimiento original de Amazon. Resuelve la causa y el pedido se enviará automáticamente; mientras tanto, corre el riesgo de un defecto por envío tardío.",
-        "description_many": "{{count}} pedidos se enviaron en Amazon hace más de {{hours}} horas pero no se han marcado como enviados en eBay, porque sus números de seguimiento no se pudieron convertir. Nunca enviamos a tus compradores los números de seguimiento originales de Amazon. Resuelve la causa y se enviarán automáticamente; mientras tanto, corren el riesgo de defectos por envío tardío.",
-        "description_other": "{{count}} pedidos se enviaron en Amazon hace más de {{hours}} horas pero no se han marcado como enviados en eBay, porque sus números de seguimiento no se pudieron convertir. Nunca enviamos a tus compradores los números de seguimiento originales de Amazon. Resuelve la causa y se enviarán automáticamente; mientras tanto, corren el riesgo de defectos por envío tardío.",
+        "description_one": "{{count}} pedido se envió en Amazon hace más de {{hours}} horas pero no está marcado como enviado en eBay, porque su número de seguimiento no se pudo convertir. Nunca enviamos a tu comprador el número de seguimiento original de Amazon. Cuando resuelvas la causa, el pedido se marcará como enviado automáticamente. Mientras tanto, corre el riesgo de un defecto por envío tardío.",
+        "description_many": "{{count}} pedidos se enviaron en Amazon hace más de {{hours}} horas pero no están marcados como enviados en eBay, porque sus números de seguimiento no se pudieron convertir. Nunca enviamos a tus compradores los números de seguimiento originales de Amazon. Cuando resuelvas la causa, se marcarán como enviados automáticamente. Mientras tanto, corren el riesgo de defectos por envío tardío.",
+        "description_other": "{{count}} pedidos se enviaron en Amazon hace más de {{hours}} horas pero no están marcados como enviados en eBay, porque sus números de seguimiento no se pudieron convertir. Nunca enviamos a tus compradores los números de seguimiento originales de Amazon. Cuando resuelvas la causa, se marcarán como enviados automáticamente. Mientras tanto, corren el riesgo de defectos por envío tardío.",
         "action": "Ver pedidos"
       },
       "order_cancelled_amazon_open": {
@@ -140,8 +140,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Solicitud de cancelación del comprador",
-        "description_one": "{{count}} comprador pidió cancelar un pedido: apruébalo o recházalo aquí antes del plazo de eBay",
-        "description_other": "{{count}} compradores pidieron cancelar pedidos: apruébalos o recházalos aquí antes del plazo de eBay",
+        "description_one": "{{count}} comprador pidió cancelar un pedido. Aprueba o rechaza la solicitud aquí antes del plazo de eBay.",
+        "description_other": "{{count}} compradores pidieron cancelar un pedido. Aprueba o rechaza las solicitudes aquí antes del plazo de eBay.",
         "action": "Revisar solicitudes"
       },
       "ebay_account_disconnected": {
@@ -188,9 +188,9 @@
       },
       "listing_drafts_pending": {
         "title": "Borradores que nunca se publicaron",
-        "description_one": "{{count}} borrador está preparado y no te cuesta nada, pero tampoco vende nada hasta que se publique.",
-        "description_many": "{{count}} borradores están preparados y no te cuestan nada, pero tampoco venden nada hasta que se publiquen.",
-        "description_other": "{{count}} borradores están preparados y no te cuestan nada, pero tampoco venden nada hasta que se publiquen.",
+        "description_one": "{{count}} borrador está listo y no te cuesta nada, pero no vende nada hasta que se publique.",
+        "description_many": "{{count}} borradores están listos y no te cuestan nada, pero no venden nada hasta que se publiquen.",
+        "description_other": "{{count}} borradores están listos y no te cuestan nada, pero no venden nada hasta que se publiquen.",
         "action": "Ver borradores"
       },
       "plan_listing_quota": {
@@ -217,22 +217,22 @@
       },
       "setup_no_ebay_store": {
         "title": "Conecta tu tienda de eBay",
-        "description": "Nada más en SellerHill puede funcionar sin una tienda de eBay conectada: las publicaciones, los pedidos y la automatización dependen de ella. Es lo primero que debes hacer.",
+        "description": "Nada en SellerHill puede funcionar sin una tienda de eBay conectada. Las publicaciones, los pedidos y la automatización dependen de ella, así que hazlo primero.",
         "action": "Conectar eBay"
       },
       "setup_no_amazon_account": {
         "title": "Aún no hay una cuenta de comprador de Amazon",
-        "description": "Estás vendiendo, pero no hay una cuenta de Amazon desde la cual comprar: cada pedido tiene que comprarse a mano. Al agregar una se activa el cumplimiento automático.",
+        "description": "Estás vendiendo, pero no hay una cuenta de Amazon desde la cual comprar, así que cada pedido se tiene que comprar a mano. Agrega una para activar la compra automática.",
         "action": "Agregar cuenta"
       },
       "setup_no_store_settings": {
         "title": "Los ajustes de la tienda aún no están configurados",
-        "description": "Tu origen de envío y las palabras clave de la lista negra aún no están definidos. Se usan para calcular costos y para evitar que se publiquen publicaciones con contenido bloqueado.",
+        "description": "La dirección de tu tienda y las palabras de tu lista negra aún no están definidas. La dirección aparece en eBay como ubicación del artículo, y la lista negra evita que se publiquen anuncios con palabras bloqueadas.",
         "action": "Configurar ajustes"
       },
       "setup_no_listing_settings_group": {
         "title": "Aún no hay un grupo de ajustes de publicación",
-        "description": "Un grupo de ajustes de publicación define las reglas de precios, stock y repricing: toda publicación necesita uno, así que no puedes crear tu primera publicación sin él.",
+        "description": "Un grupo de ajustes de publicación define tus reglas de precios, stock y repricing. Toda publicación necesita uno, así que no puedes crear tu primera publicación sin él.",
         "action": "Crear un grupo"
       },
       "setup_auto_fulfill_off": {
@@ -247,7 +247,7 @@
       },
       "plan_suspended": {
         "title": "La automatización está suspendida",
-        "description": "Tu suscripción ya no está activa, por lo que se detuvieron las publicaciones nuevas, las actualizaciones de precio y stock, la compra automática y la conversión de seguimiento. Elige un plan para reanudar: todo se reinicia por sí solo.",
+        "description": "Tu suscripción ya no está activa, por lo que se detuvieron las publicaciones nuevas, las actualizaciones de precio y stock, la compra automática y la conversión de seguimiento. Elige un plan para reanudar. Todo se reinicia por sí solo.",
         "action": "Elegir un plan"
       },
       "listing_not_selling": {
@@ -260,7 +260,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Requiere volver a autenticarse",
+        "needs_reauth": "Debe volver a iniciar sesión",
         "invalid": "Credenciales no válidas",
         "locked": "Bloqueada por Amazon"
       },
@@ -274,9 +274,9 @@
         "tracking_url_mismatch": "El enlace de seguimiento no coincide",
         "needs_tracking_upload": "Esperando los datos del envío",
         "update_not_applied": "Actualización aún no aplicada",
-        "assign_validation": "Rechazado por el proveedor",
+        "assign_validation": "Conversión rechazada",
         "shipment_exception": "Excepción del transportista",
-        "tracking_update_unavailable": "Proveedor no disponible"
+        "tracking_update_unavailable": "Conversión no disponible temporalmente"
       }
     }
   }

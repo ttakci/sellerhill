@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Account Amazon",
-          "subtitle": "Gestisci i tuoi account acquirente per la lettura degli ordini"
+          "subtitle": "Gestisci gli account acquirente Amazon usati per i tuoi ordini"
         }
       },
       "ebay": {
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Account Amazon",
-        "subtitle": "I tuoi account acquirente per la lettura degli ordini",
+        "subtitle": "I tuoi account acquirente Amazon usati per gli ordini",
         "addNew": {
           "title": "Nuovo account Amazon",
-          "subtitle": "Collega un nuovo account acquirente per la lettura degli ordini"
+          "subtitle": "Collega un nuovo account acquirente per i tuoi ordini"
         },
         "empty": {
           "title": "Nessun account acquirente per ora",
-          "description": "Collega un account acquirente Amazon per analizzare i tuoi ordini e registrare i costi reali."
+          "description": "Collega un account acquirente Amazon per permetterci di leggere i tuoi ordini Amazon e registrarne i costi reali."
         },
         "viewAll": {
           "title": "Tutti"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Aggiungi un account Amazon",
-        "subtitle": "Inserisci le credenziali per la lettura degli ordini",
+        "subtitle": "Inserisci i dati di accesso del tuo account acquirente Amazon",
         "label": "Etichetta dell'account",
         "email": "Email",
         "password": "Password",
         "twoFactorSecret": "Chiave segreta 2FA",
-        "twoFactorSecretHint": "Obbligatoria. Amazon chiede un codice di verifica quasi a ogni accesso automatico, e la chiave di un'app di autenticazione è l'unica a cui possiamo rispondere al posto tuo. Nelle impostazioni «Accesso e sicurezza» di Amazon attiva un'app di autenticazione e incolla qui la chiave di configurazione, non un codice a 6 cifre. Se modifichi un account esistente, lascia vuoto il campo per mantenere la chiave salvata."
+        "twoFactorSecretHint": "Obbligatoria. Amazon chiede un codice di verifica quasi a ogni accesso automatico, e la chiave di un'app di autenticazione è l'unico modo in cui possiamo inserire quel codice al posto tuo. Nelle impostazioni «Accesso e sicurezza» di Amazon attiva un'app di autenticazione e incolla qui la sua chiave di configurazione, non un codice a 6 cifre. Se modifichi un account, lascia vuoto il campo per mantenere la chiave salvata."
       },
       "amazonEdit": {
         "title": "Modifica l'account Amazon",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Controlla le parole chiave della lista nera",
         "checkBlacklistDesc": "Prima della pubblicazione, cerca nella lista nera nei titoli, nelle descrizioni, nelle caratteristiche e nel marchio delle inserzioni. La selezione dei campi di ogni parola chiave determina dove viene controllata.",
         "allowCrossStoreAsins": "Consenti ASIN già presenti negli altri miei negozi",
-        "allowCrossStoreAsinsDesc": "Attivato per tutti i negozi, ogni negozio può pubblicare qualsiasi ASIN; attivato su un solo negozio, solo quel negozio può aggiungere ASIN già presenti negli altri tuoi negozi. Un ASIN già presente in questo negozio viene sempre saltato.",
+        "allowCrossStoreAsinsDesc": "Se attivato per tutti i negozi, ogni negozio può pubblicare qualsiasi ASIN. Se attivato su un solo negozio, solo quel negozio può aggiungere ASIN già presenti negli altri tuoi negozi. Un ASIN già presente in questo negozio viene sempre saltato.",
         "allowCrossStoreAsinsInherited": "Vale l'impostazione di tutti i negozi finché non salvi una scelta per questo negozio.",
         "country": "Paese",
         "countryPlaceholder": "Seleziona un paese",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Prezzo e stock monitorati 4 volte al giorno",
-        "description": "Prezzo e stock della fonte vengono controllati quattro volte al giorno e ogni variazione arriva alla tua inserzione eBay nello stesso passaggio. Anche quando un controllo al giorno sarebbe già raro, smetti di vendere ciò che è esaurito e di restare fermo su prezzi in perdita.",
+        "description": "Prezzo e stock della fonte vengono controllati quattro volte al giorno e ogni variazione arriva alla tua inserzione eBay nello stesso passaggio. Smetti di vendere ciò che è esaurito e di restare fermo su prezzi in perdita. In questo settore anche un solo controllo al giorno è raro.",
         "caption": "Un controllo ogni 6 ore"
       },
       "specifics": {
         "title": "Caratteristiche dell'articolo, davvero compilate",
-        "description": "Non saltiamo i campi obbligatori con «Non applicabile». Ogni attributo viene abbinato a un valore accettato dalla categoria eBay, così la tua inserzione compare nei filtri degli acquirenti.",
+        "description": "I campi obbligatori vengono compilati con i dati reali del prodotto ovunque esistano, abbinati ai valori accettati dalla categoria eBay. La tua inserzione compare nei filtri degli acquirenti.",
         "others": "Altri",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Automazione accessibile",
-        "description": "L'insieme completo di strumenti di automazione professionale per un canone mensile molto più basso. Ogni funzionalità è inclusa in ogni piano, gli ordini automatici sono illimitati; i piani differiscono solo per inserzioni, conversioni di tracciamento ed esplorazione dei Più venduti.",
+        "description": "L'insieme completo di strumenti di automazione professionale a un canone mensile accessibile. Ogni funzionalità è inclusa in ogni piano, gli ordini automatici sono illimitati e i piani differiscono solo per inserzioni, conversioni di tracciamento ed esplorazione dei Più venduti.",
         "cta": "Vedi i piani"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Inserzioni ASIN in blocco",
-          "description": "Incolla centinaia di ASIN e lascia che le inserzioni vengano create in coda."
+          "description": "Incolla centinaia di ASIN e le inserzioni vengono create per te."
         },
         "aiTitle": {
           "title": "Titoli ottimizzati con l'IA",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Prezzi",
       "sectionTitle": "Automazione accessibile.",
-      "sectionSubtitle": "Ogni piano include tutte le funzionalità. I piani differiscono per inserzioni attive, conversioni di tracciamento e limite di esplorazione dei Più venduti; gli ordini automatici sono illimitati in ogni piano, quindi le funzionalità che altri strumenti riservano ai piani superiori sono tue anche con il piano più piccolo.",
+      "sectionSubtitle": "Ogni piano include tutte le funzionalità. I piani differiscono per inserzioni attive, conversioni di tracciamento e limite di esplorazione dei Più venduti. Gli ordini automatici sono illimitati in ogni piano, quindi le funzionalità che altri strumenti riservano ai piani superiori sono tue anche con il piano più piccolo.",
       "billingNote": "Annulli quando vuoi. I prezzi non includono le imposte locali, ove applicabili.",
       "perMonth": "/mese",
       "mostPopular": "Il più scelto",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Come compilate le caratteristiche dell'articolo?",
-        "answer": "Raccogliamo ogni attributo che il catalogo di origine ha per un prodotto e lo abbiniamo ai campi definiti dalla categoria eBay. Quando una categoria accetta solo certi valori, scegliamo quello giusto dal suo elenco. Invece di saltare i campi obbligatori con «Non applicabile», li compiliamo con valori reali, inviando fino a 45 caratteristiche per inserzione."
+        "answer": "Raccogliamo ogni attributo che il catalogo di origine ha per un prodotto e lo abbiniamo ai campi definiti dalla categoria eBay. Quando una categoria accetta solo certi valori, scegliamo quello giusto dal suo elenco. I campi obbligatori ricevono valori reali ovunque i dati del prodotto li contengano, e ogni inserzione riporta fino a 45 caratteristiche."
       },
       "q4": {
         "question": "Come funzionano gli ordini automatici?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Automazione più intelligente. Un prezzo più basso.",
+        "headline": "Automazione più intelligente. A un prezzo accessibile.",
         "subheading": "Strategie per gruppo di prodotti, sincronizzazione quattro volte al giorno, caratteristiche dell'articolo complete e una schermata Azioni in sospeso che ti guida. Provalo gratis per un mese, senza carta di credito.",
         "button": "Inizia gratis"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Dati di esempio — nulla viene salvato.",
+      "description": "Dati di esempio. Nulla viene salvato.",
       "exit": "Esci dalla demo",
       "signUp": "Crea un account gratuito"
     },

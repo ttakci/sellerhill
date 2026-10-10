@@ -5,13 +5,13 @@
     "saveChanges": "Salva le modifiche",
     "viewLogs": "Vedi i log",
     "globalSettings": "Applica le impostazioni a tutti i negozi",
-    "globalDescription": "Attivalo per estendere la configurazione qui sotto a ogni negozio collegato. Disattivalo per selezionare un negozio specifico.",
+    "globalDescription": "Attivalo per applicare le impostazioni qui sotto a ogni negozio collegato. Disattivalo per scegliere un solo negozio.",
     "selectStore": "Seleziona il negozio",
     "selectStorePlaceholder": "Cerca e seleziona un negozio...",
     "locationSectionTitle": "Impostazioni di posizione",
     "locationSectionSubtitle": "Gestisci l'indirizzo fisico e la regione del tuo negozio",
     "country": "Paese",
-    "state": "Regione/Località",
+    "state": "Stato/Regione",
     "zipCode": "CAP",
     "blacklistType_title": "Titolo",
     "blacklistType_description": "Descrizione",
@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Marchio e produttore",
     "copyright": "© {{year}} SellerHill Platform. Tutti i diritti riservati.",
     "amazonTaxRate": "Aliquota dell'imposta sulle vendite Amazon (%)",
-    "amazonTaxRateDesc": "Aliquota stimata dell'imposta sulle vendite Amazon applicata al costo d'acquisto. Viene usata in due modi: aumenta il prezzo della tua inserzione eBay in modo da coprire questo costo e, finché il profitto di un ordine è ancora provvisorio e l'ordine Amazon non è stato ancora effettuato, ne stima il profitto.",
+    "amazonTaxRateDesc": "Imposta sulle vendite Amazon stimata sul costo d'acquisto. Aumenta il prezzo eBay per coprire questo costo e stima il profitto di un ordine finché l'ordine Amazon non viene effettuato.",
     "autoFulfillEnabled": "Effettua automaticamente gli ordini Amazon dopo le vendite eBay",
     "autoFulfillEnabledHint": "Quando è attivo, SellerHill acquista l'articolo su Amazon con il tuo account acquirente collegato. Disattivalo per ordinare manualmente.",
     "autoFulfillEnabledInfo": "Attivalo solo dopo aver collegato e configurato un account acquirente Amazon. L'ordine automatico richiede anche che siano attivi l'impostazione di evasione automatica e il limite di spesa di quell'account.",
@@ -30,12 +30,12 @@
       "amountHint": "Nella valuta del tuo negozio. 0 significa non acquistare mai in perdita."
     },
     "trackingConversionProvider": "Conversione del numero di tracciamento",
-    "trackingConversionProviderHint": "I numeri dei corrieri reali vengono inoltrati così come sono. Amazon Logistics (TBA) passa invariato.",
-    "trackingConversionProviderLocal": "Integrato (locale)",
-    "trackingConversionApiComingSoon": "Un fornitore di conversione basato su API è nella roadmap.",
+    "trackingConversionProviderHint": "I numeri dei corrieri reali vengono inviati così come sono. Anche i numeri Amazon Logistics (TBA) restano invariati.",
+    "trackingConversionProviderLocal": "Integrato",
+    "trackingConversionApiComingSoon": "È prevista un'altra opzione di conversione.",
     "messaging": {
       "title": "Messaggi agli acquirenti",
-      "subtitle": "Invia automaticamente messaggi agli acquirenti nei momenti chiave dell'ordine. Facoltativo e per singolo evento.",
+      "subtitle": "Invia automaticamente messaggi agli acquirenti nei momenti chiave dell'ordine. Puoi attivare o disattivare ogni evento.",
       "masterEnable": "Attiva i messaggi automatici agli acquirenti",
       "shippedWarning": "eBay invia già una notifica di tracciamento quando un ordine viene segnato come spedito. Inviarne un'altra è facoltativo.",
       "delayDays": "Ritardo (giorni)",
@@ -49,9 +49,9 @@
         "feedback_request": "Richiesta di feedback"
       },
       "eventDescriptions": {
-        "order_received": "Invia il messaggio selezionato quando viene ricevuto per la prima volta un nuovo ordine eBay corrispondente.",
-        "shipped": "Invia il messaggio selezionato dopo che il tracciamento Amazon segna l'ordine come spedito. Anche eBay invia la propria notifica di tracciamento.",
-        "delivered": "Invia il messaggio selezionato quando il tracciamento Amazon conferma la consegna.",
+        "order_received": "Invia il messaggio selezionato quando arriva un nuovo ordine eBay per una delle tue inserzioni SellerHill.",
+        "shipped": "Invia il messaggio selezionato quando Amazon ha spedito l'ordine. Anche eBay invia la propria notifica di tracciamento.",
+        "delivered": "Invia il messaggio selezionato quando il tracciamento Amazon indica che l'ordine è stato consegnato.",
         "feedback_request": "Invia la richiesta di feedback selezionata dopo un numero di giorni scelto dalla consegna."
       },
       "templateSource": "Modello",
@@ -74,7 +74,7 @@
           "subtitle": "Visualizza, modifica o crea i tuoi modelli di messaggio automatico per gli acquirenti",
           "allEvents": "Tutti gli eventi",
           "empty": "Ancora nessun modello per questo evento",
-          "emptyDescription": "Crea un modello per usare parole tue negli eventi di messaggistica agli acquirenti."
+          "emptyDescription": "Crea un modello per usare parole tue nei messaggi agli acquirenti."
         },
         "create": {
           "title": "Nuovo modello di messaggio",
@@ -93,17 +93,17 @@
         "delete": "Elimina",
         "reset": "Ripristina il predefinito",
         "resetConfirm": "Ripristinare il messaggio predefinito originale? Le tue modifiche al testo andranno perse.",
-        "deleteConfirmDescription": "Verrà eliminato definitivamente «{{name}}». Se un evento di messaggistica lo sta usando, quell'evento smetterà di inviare finché non sceglierai un altro modello."
+        "deleteConfirmDescription": "«{{name}}» verrà eliminato definitivamente. Se un evento lo usa, quell'evento smette di inviare messaggi finché non scegli un altro modello."
       }
     },
     "trackingConversionEnabled": "Nascondi i numeri di tracciamento del mio fornitore",
-    "trackingConversionEnabledHint": "Il tuo acquirente vede un nuovo numero di tracciamento emesso dal nostro partner di tracciamento al posto di quello Amazon originale, così nulla su eBay riporta al tuo fornitore. Se un numero non può essere convertito, non ricorriamo mai a quello Amazon: l'ordine viene trattenuto e ti viene mostrato nelle Azioni in sospeso.",
+    "trackingConversionEnabledHint": "Il tuo acquirente vede un nuovo numero di tracciamento del nostro partner di tracciamento al posto di quello Amazon, così nulla su eBay riporta al tuo fornitore. Se un numero non può essere convertito, non inviamo mai quello Amazon. L'ordine viene trattenuto e ti viene mostrato nelle Azioni in sospeso.",
     "trackingConversionScope": "Quali corrieri convertire",
     "trackingConversionScopeAll": "Tutti i corrieri",
     "trackingConversionScopeAmazonOnly": "Solo Amazon Logistics (TBA)",
-    "trackingConversionScopeHint": "I numeri di Amazon Logistics (TBA) dicono apertamente «Amazon», quindi convertire solo quelli nasconde il segnale più evidente del tuo fornitore e usa molto meno della tua quota mensile di conversioni. Convertire tutti i corrieri nasconde di più — un numero UPS o USPS spedito da Amazon spesso può essere rintracciato — ma costa di più, ed eBay considera la scansione di un corriere nativo una prova di consegna più solida se un acquirente sostiene di non aver ricevuto l'articolo.",
+    "trackingConversionScopeHint": "I numeri di Amazon Logistics (TBA) dicono apertamente «Amazon». Convertire solo quelli nasconde il segnale più evidente del tuo fornitore e usa molto meno della tua quota mensile di conversioni. Convertire tutti i corrieri nasconde di più, perché un numero UPS o USPS spedito da Amazon spesso può essere rintracciato, ma costa di più. Inoltre, se un acquirente dice che l'articolo non è mai arrivato, eBay considera la scansione del corriere originale una prova di consegna più solida.",
     "trackingConvertManualOrders": "Converti gli ordini collegati a mano",
-    "trackingConvertManualOrdersHint": "Un ordine conta come collegato a mano ogni volta che SellerHill non ha effettuato l'acquisto su Amazon in prima persona: l'hai acquistato tu e hai inserito il numero d'ordine, oppure il sistema lo ha abbinato per te. Se l'ordine automatico è disattivato, tutti i tuoi ordini rientrano in questo gruppo: disattivare questa opzione significa quindi che nessun numero di tracciamento viene convertito e il tuo acquirente vede quello Amazon originale. Attivo per impostazione predefinita. Se lo disattivi, il numero Amazon originale viene inviato automaticamente a eBay non appena Amazon spedisce l'ordine, ed eBay non consente di modificarlo in seguito.",
+    "trackingConvertManualOrdersHint": "Un ordine conta come collegato a mano quando non è stato SellerHill ad acquistarlo su Amazon: l'hai acquistato tu e hai inserito il numero d'ordine, oppure lo abbiamo abbinato al tuo ordine Amazon. Se l'ordine automatico è disattivato, tutti i tuoi ordini rientrano in questo gruppo, quindi disattivare questa opzione significa che nulla viene convertito e il tuo acquirente vede il numero Amazon originale. Attivo per impostazione predefinita. Se lo disattivi, il numero Amazon originale arriva a eBay non appena Amazon spedisce l'ordine, ed eBay non consente di modificarlo in seguito.",
     "trackingExposure": {
       "conversionOff": "La conversione del numero di tracciamento è disattivata. I tuoi acquirenti vedono il numero di tracciamento Amazon originale (TBA…) e possono risalire direttamente al tuo fornitore.",
       "manualAll": "Poiché l'ordine automatico è disattivato, OGNI tuo ordine conta come collegato a mano. Con questa impostazione disattivata nulla viene convertito: il numero Amazon originale, TBA incluso, arriva a eBay ed espone il tuo fornitore.",

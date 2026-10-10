@@ -29,8 +29,8 @@
       "title": "Detalhes da campanha",
       "breadcrumb": "Detalhes da campanha",
       "subtitle": "Anúncios desta campanha.",
-      "metricsNote": "As métricas indisponíveis aguardam os relatórios do eBay; a conciliação pode levar cerca de 72 horas.",
-      "eligibilityUnavailable": "A elegibilidade para publicidade é desconhecida. As alterações estão desativadas."
+      "metricsNote": "Os números ausentes aguardam os relatórios do eBay. Eles podem levar cerca de 72 horas para se ajustar.",
+      "eligibilityUnavailable": "Não foi possível verificar se esta loja pode anunciar, então as alterações de campanha estão desativadas."
     },
     "campaign": {
       "name": "Nome da campanha",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Ainda não há campanhas",
-      "description": "As campanhas da sua loja ativa aparecerão aqui após a sincronização.",
+      "description": "As campanhas da sua loja ativa aparecerão aqui quando forem carregadas do eBay.",
       "noStore": "Selecione uma loja eBay na barra superior."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Campanha somente leitura",
-      "marginOverride": "Margem personalizada: a taxa publicitária não se aplica ao preço do SellerHill.",
+      "marginOverride": "Este anúncio tem margem própria, então a taxa publicitária não entra no preço definido pelo SellerHill.",
       "rule_based": "Campanhas baseadas em regras são somente leitura.",
       "cost_per_click": "Campanhas de custo por clique são somente leitura.",
       "dynamic_rate": "Campanhas de taxa dinâmica são somente leitura.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Adicionar anúncios",
       "group": "Grupo de configurações",
-      "groupHint": "O grupo preenche a seleção uma vez com anúncios elegíveis sem campanha. Não cria uma regra permanente.",
+      "groupHint": "Ao escolher um grupo, são selecionados os anúncios elegíveis dele que ainda não estão em nenhuma campanha. Isso acontece uma única vez: anúncios adicionados ao grupo depois não são incluídos.",
       "groupsError": "Não foi possível carregar os grupos de configurações.",
       "groupError": "Não foi possível carregar todo o grupo. Sua seleção foi mantida.",
       "retryGroup": "Tentar seleção do grupo novamente",
@@ -134,7 +134,7 @@
     "rate": {
       "title": "Alterar taxa",
       "defaultTitle": "Alterar taxa publicitária padrão",
-      "retryMembers": "Tentar anúncios com falha novamente",
+      "retryMembers": "Tentar de novo os anúncios com falha",
       "success": "Taxa publicitária atualizada."
     },
     "lifecycle": {
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "A publicidade não está disponível para esta loja.",
-      "unavailable": "A elegibilidade para publicidade está indisponível. A criação de campanhas está desativada."
+      "unavailable": "Não foi possível verificar se esta loja pode anunciar, então você não pode criar campanhas agora."
     },
     "results": {
       "summary": "Alterações confirmadas: {{changed}}. Já na campanha: {{already}}. Não confirmadas ou com falha: {{failed}}.",
-      "retryHint": "Os anúncios com falha ou não confirmados continuam disponíveis para nova tentativa.",
-      "unconfirmed": "Nenhuma atualização confirmada. Atualize os dados da campanha para verificar a taxa padrão."
+      "retryHint": "Você pode tentar de novo os anúncios com falha ou não confirmados.",
+      "unconfirmed": "Nenhuma atualização de anúncio foi confirmada. Atualize a campanha para verificar a taxa padrão dela."
     }
   }
 }

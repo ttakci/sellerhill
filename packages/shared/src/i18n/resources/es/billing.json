@@ -19,7 +19,7 @@
       "contactSales": "Contactar con ventas",
       "freeTrial": "Prueba gratuita disponible",
       "mostPopular": "Más popular",
-      "informationalOnly": "La aplicación de la facturación está desactivada: los planes son solo informativos. Por ahora todas las funciones están sin restricciones.",
+      "informationalOnly": "Los límites de los planes no se aplican por ahora, así que todas las funciones están disponibles. Los planes se muestran solo como información.",
       "free": {
         "name": "Gratis"
       },
@@ -86,7 +86,7 @@
         "description": "Un plan retirado. Las suscripciones existentes siguen funcionando; los nuevos registros eligen entre los planes anteriores."
       },
       "switchTo": "Cambiar a {{plan}}",
-      "switchDone": "Tu plan se cambió. Stripe prorrateará la diferencia en tu próxima factura.",
+      "switchDone": "Tu cambio de plan está confirmado.",
       "planNamed": "Plan {{plan}}"
     },
     "planChange": {
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Productos de Más vendidos",
         "unit": "productos",
-        "description": "Cuántos productos puedes ver en la página Más vendidos por período de facturación, tanto de listas en caché como en vivo."
+        "description": "Cuántos productos puedes ver en la página Más vendidos por período de facturación. Cuenta cada producto mostrado, tanto si la lista ya estaba cargada como si se trajo en ese momento."
       }
     },
     "subscription": {
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Acceso completo: la aplicación de la facturación está desactivada. Todas las funciones están sin restricciones.",
+      "full_access": "Acceso completo: los límites de los planes no se aplican, así que todas las funciones están disponibles.",
       "active": "Tu suscripción está activa.",
-      "no_subscription": "No hay una suscripción activa. Elige un plan para habilitar la facturación.",
+      "no_subscription": "No hay una suscripción activa. Elige un plan para continuar.",
       "past_due": "Tu suscripción está vencida. Actualiza tu método de pago para restablecer el acceso."
     },
     "provider": {
-      "unconfiguredTitle": "Facturación sin configurar",
-      "unconfiguredBody": "El pago y la administración de suscripciones no están disponibles porque no hay un proveedor de facturación conectado. Contacta con tu operador."
+      "unconfiguredTitle": "Pagos no disponibles",
+      "unconfiguredBody": "Los pagos no están disponibles en este momento, así que no puedes suscribirte ni administrar tu suscripción. Contacta con soporte."
     },
     "usage": {
       "title": "Uso en este periodo",
@@ -279,9 +279,9 @@
       "no_active_subscription": "No se encontró una suscripción activa.",
       "no_open_period": "No hay un periodo de uso abierto para este límite.",
       "already_reserved": "Este recurso ya está reservado.",
-      "providerNotConfigured": "Los pagos aún no están habilitados en este entorno. Inténtalo de nuevo más tarde.",
+      "providerNotConfigured": "Los pagos aún no están disponibles. Inténtalo de nuevo más tarde.",
       "planNotMirrored": "Este plan aún no está disponible para su compra. Elige otro plan o contacta con soporte.",
-      "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo en un momento; si sigue fallando, contacta con soporte.",
+      "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo en un momento. Si sigue fallando, contacta con soporte.",
       "portalFailed": "No se pudo abrir el portal de facturación. Inténtalo de nuevo en un momento.",
       "noCustomer": "Aún no hay una cuenta de facturación. Elige primero un plan para crearla.",
       "planNotFound": "No se encontró ese plan.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Alcanzaste el límite de tu plan. Mejora tu plan para continuar.",
       "addonNotFound": "No se encontró ese paquete adicional.",
       "noSubscription": "No tienes una suscripción activa que cambiar.",
-      "planChangeFailed": "No se pudo cambiar el plan en este momento. Inténtalo de nuevo o usa «Administrar facturación».",
-      "subscriptionSuspended": "Tu suscripción no está activa, por lo que las publicaciones nuevas están en pausa. Elige un plan para reanudar: todo se reinicia por sí solo.",
-      "subscriptionSuspendedOrders": "Tu suscripción no está activa, por lo que la automatización de pedidos está en pausa. Elige un plan para reanudar: todo se reinicia por sí solo.",
+      "planChangeFailed": "No se pudo cambiar el plan en este momento. Inténtalo de nuevo o usa «Administrar suscripción».",
+      "subscriptionSuspended": "Tu suscripción no está activa, por lo que las publicaciones nuevas están en pausa. Elige un plan para reanudar. Todo se reinicia por sí solo.",
+      "subscriptionSuspendedOrders": "Tu suscripción no está activa, por lo que la automatización de pedidos está en pausa. Elige un plan para reanudar. Todo se reinicia por sí solo.",
       "listingQuotaExhausted": "Usaste todas las publicaciones activas que permite tu plan. Finaliza una publicación para liberar un espacio, o sube de plan.",
-      "alreadySubscribed": "Ya tienes una suscripción activa. Usa «Cambiar de plan» para modificarla en lugar de suscribirte de nuevo.",
+      "alreadySubscribed": "Ya tienes una suscripción activa. Para cambiarla, elige un plan nuevo en «Administrar suscripción» en lugar de suscribirte de nuevo.",
       "invoicesFailed": "No se pudo cargar el historial de facturas. Inténtalo de nuevo en un momento.",
-      "paymentRequiresAction": "Tu banco pidió una confirmación adicional para esta tarjeta, por lo que el cambio de plan se canceló y sigues en tu plan actual. Abre «Administrar facturación» para actualizar tu método de pago y vuelve a intentarlo.",
+      "paymentRequiresAction": "Tu banco pidió una confirmación adicional para esta tarjeta, por lo que el cambio de plan se canceló y sigues en tu plan actual. Actualiza tu tarjeta con «Actualizar método de pago» y vuelve a intentarlo.",
       "invalidCheckoutSession": "Este enlace de confirmación de pago no es válido."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Usaste tu límite mensual de Más vendidos. Recarga para seguir explorando las listas de Amazon hasta que el período se renueve."
       },
       "buy": "Comprar",
-      "note": "Una recarga se aplica solo al mes calendario en curso, por eso se ofrece cuando alcanzas el límite y no por adelantado. La asignación de tu plan se restablece el día 1."
+      "note": "Una recarga se aplica solo al período de facturación en curso, por eso se ofrece cuando alcanzas el límite y no por adelantado. La asignación de tu plan se restablece cuando se renueva el período."
     }
   }
 }

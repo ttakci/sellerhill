@@ -129,12 +129,12 @@
       "confirmedLabel": "Bestätigt",
       "confirmedTooltip": "Gewinn aus Bestellungen, deren tatsächliche Amazon-Kosten erfasst wurden. Unbekannte Kosten werden nie als null gewertet.",
       "estimatedLabel": "Geschätzt",
-      "estimatedTooltip": "Bestellungen, die auf die Amazon-Abwicklung warten, verwenden geschätzte Kosten (Amazon-Steuer mit Ihrem eingestellten Satz von {{rate}} %).",
+      "estimatedTooltip": "Bestellungen, deren tatsächliche Amazon-Kosten noch nicht vorliegen, verwenden geschätzte Kosten, mit Amazon-Steuer zu Ihrem Satz von {{rate}} %.",
       "uncostedLabel": "Umsatz ohne Kosten",
-      "uncostedTooltip": "Verkäufe, deren Amazon-Kosten noch nicht ermittelt werden konnten – nur Umsatz, kein Gewinn ausgewiesen.",
+      "uncostedTooltip": "Verkäufe, deren Amazon-Kosten noch nicht bekannt sind. Das ist nur Umsatz und sagt nichts über den Gewinn aus.",
       "untrackedExcludedLabel_one": "{{count}} nicht verfolgte Bestellung ausgeschlossen",
       "untrackedExcludedLabel_other": "{{count}} nicht verfolgte Bestellungen ausgeschlossen",
-      "untrackedExcludedTooltip": "Bestellungen ohne passendes SellerHill-Angebot fließen in keine Kennzahl dieses Dashboards ein. Sie bleiben auf der Seite „Bestellungen“ unter „Nicht verfolgt“ sichtbar; importieren Sie das Angebot, um sie einzubeziehen."
+      "untrackedExcludedTooltip": "Bestellungen ohne passendes SellerHill-Angebot fließen in keine Kennzahl dieses Dashboards ein. Sie bleiben auf der Seite „Bestellungen“ unter „Nicht verfolgt“ sichtbar. Importieren Sie das Angebot, um sie einzubeziehen."
     },
     "topSellers": {
       "result_one": "<b>{{count}}</b> Angebot verkauft",

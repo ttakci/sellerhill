@@ -29,8 +29,8 @@
       "title": "Kampaniya təfərrüatları",
       "breadcrumb": "Kampaniya təfərrüatları",
       "subtitle": "Bu kampaniyadakı elanlar.",
-      "metricsNote": "Mövcud olmayan göstəricilər eBay hesabatlarını gözləyir; dəqiqləşmə təxminən 72 saat çəkə bilər.",
-      "eligibilityUnavailable": "Reklam uyğunluğu məlum deyil. Kampaniya dəyişiklikləri deaktivdir."
+      "metricsNote": "Çatışmayan rəqəmlər eBay hesabatlarını gözləyir. Onların dəqiqləşməsi təxminən 72 saat çəkə bilər.",
+      "eligibilityUnavailable": "Bu mağazanın reklam verə biləcəyini yoxlaya bilmədik, ona görə kampaniya dəyişiklikləri söndürülüb."
     },
     "campaign": {
       "name": "Kampaniyanın adı",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Hələ kampaniya yoxdur",
-      "description": "Aktiv mağazanızın kampaniyaları sinxronlaşdırmadan sonra burada görünəcək.",
+      "description": "Aktiv mağazanızın kampaniyaları eBay-dən yükləndikdən sonra burada görünəcək.",
       "noStore": "Üst paneldən eBay mağazası seçin."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Yalnız oxunan kampaniya",
-      "marginOverride": "Xüsusi mənfəət marjası: reklam faizi SellerHill qiymətinə tətbiq edilmir.",
+      "marginOverride": "Bu elanın öz mənfəət marjası var, ona görə reklam faizi SellerHill-in təyin etdiyi qiymətə daxil edilmir.",
       "rule_based": "Qayda əsaslı kampaniyalar yalnız oxunur.",
       "cost_per_click": "Klik başına ödəniş kampaniyaları yalnız oxunur.",
       "dynamic_rate": "Dinamik faizli kampaniyalar yalnız oxunur.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Elan əlavə et",
       "group": "Ayar qrupu",
-      "groupHint": "Qrup seçimi kampaniyada olmayan uyğun elanlarla seçimi bir dəfə doldurur. Davamlı qayda yaratmır.",
+      "groupHint": "Qrup seçdikdə onun hələ heç bir kampaniyada olmayan uyğun elanları seçilir. Bu, bir dəfə baş verir: qrupa sonradan əlavə edilən elanlar daxil edilmir.",
       "groupsError": "Ayar qrupları yüklənmədi.",
       "groupError": "Bütün qrup yüklənmədi. Seçiminiz saxlanıldı.",
       "retryGroup": "Qrup seçimini yenidən yoxla",
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "Bu mağazada reklam mövcud deyil.",
-      "unavailable": "Reklam uyğunluğu məlumatı mövcud deyil. Kampaniya yaratmaq deaktivdir."
+      "unavailable": "Bu mağazanın reklam verə biləcəyini yoxlaya bilmədik, ona görə hazırda kampaniya yarada bilməzsiniz."
     },
     "results": {
       "summary": "Təsdiqlənmiş dəyişiklik: {{changed}}. Artıq kampaniyadadır: {{already}}. Təsdiqlənməmiş və ya uğursuz: {{failed}}.",
-      "retryHint": "Uğursuz və ya təsdiqlənməmiş elanlar təkrar cəhd üçün saxlanılır.",
-      "unconfirmed": "Heç bir elan yeniləməsi təsdiqlənmədi. Standart faizi yoxlamaq üçün kampaniya məlumatlarını yeniləyin."
+      "retryHint": "Uğursuz və ya təsdiqlənməmiş elanları yenidən cəhd edə bilərsiniz.",
+      "unconfirmed": "Heç bir elan yeniləməsi təsdiqlənmədi. Standart faizi yoxlamaq üçün kampaniyanı yeniləyin."
     }
   }
 }

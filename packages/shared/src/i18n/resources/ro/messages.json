@@ -48,7 +48,7 @@
       "delete": "Șterge",
       "refresh": "Reîmprospătează",
       "selected": "{{count}} selectate",
-      "deleteConfirm": "Ștergi conversațiile selectate? Nu vor mai apărea în niciun dosar."
+      "deleteConfirm": "Ștergi conversațiile selectate? Vor fi mutate în dosarul Șterse."
     },
     "reconnect": {
       "title": "Reconectează acest magazin",

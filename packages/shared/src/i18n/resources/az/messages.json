@@ -48,7 +48,7 @@
       "delete": "Sil",
       "refresh": "Yenilə",
       "selected": "{{count}} seçildi",
-      "deleteConfirm": "Seçilmiş yazışmalar silinsin? Onlar artıq heç bir qovluqda görünməyəcək."
+      "deleteConfirm": "Seçilmiş yazışmalar silinsin? Onlar Silinənlər qovluğuna keçəcək."
     },
     "reconnect": {
       "title": "Bu mağazanı yenidən qoşun",

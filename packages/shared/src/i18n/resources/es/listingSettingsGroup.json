@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Grupos de ajustes de publicación",
-    "subtitle": "Administra y asigna plantillas de estrategia a tus publicaciones de productos para una optimización automática.",
+    "subtitle": "Agrupa tus ajustes de precio, stock y plantilla, y asígnalos a tus publicaciones.",
     "loadingDescription": "Obteniendo tus grupos de publicaciones.",
     "createNewGroup": "Crear grupo nuevo",
     "editGroup": "Editar grupo de publicaciones",
@@ -11,7 +11,7 @@
     "groupName": "Nombre del grupo",
     "groupNamePlaceholder": "p. ej., Electrónica premium",
     "description": "Descripción",
-    "descriptionPlaceholder": "Ingresa notas internas del grupo...",
+    "descriptionPlaceholder": "Agrega tus propias notas sobre este grupo...",
     "stripBrandFromTitle": "Quitar la marca del título",
     "stripBrandFromTitleInfo": "Elimina automáticamente el nombre de la marca de Amazon de tu título de eBay. Solo se aplica a las publicaciones nuevas.",
     "aiTitleEnabled": "Título asistido por IA",
@@ -147,7 +147,7 @@
       "templateMinLength": "La plantilla debe tener al menos 10 caracteres",
       "predefinedTemplateRequired": "Selecciona una plantilla predefinida",
       "minOnePriceRange": "Se requiere al menos un rango de precios",
-      "maxPriceRanges": "Se permiten como máximo 10 rangos de precios",
+      "maxPriceRanges": "Puedes agregar hasta 10 rangos de precios",
       "overlappingPriceRanges": "Los rangos de precios no pueden superponerse",
       "minStockBuffer": "El colchón de stock debe ser 0 o mayor"
     },
@@ -197,9 +197,9 @@
     "addRange": "Agregar rango",
     "calculator": {
       "title": "Calculadora de precios",
-      "subtitle": "Prueba estos ajustes: no se guarda nada, es solo una vista previa.",
+      "subtitle": "Prueba estos ajustes aquí. No se guarda nada.",
       "amazonPrice": "Precio de compra en Amazon",
-      "adRate": "Simulación de tarifa publicitaria (%)",
+      "adRate": "Tarifa publicitaria a probar (%)",
       "amazonPriceError": "Introduce un precio de compra en Amazon mayor que 0.",
       "adRateError": "Introduce una tarifa publicitaria entre 0 y 100 con un decimal como máximo.",
       "combinedRateError": "La comisión de eBay y la tarifa publicitaria juntas deben ser inferiores al 100 %.",
@@ -226,7 +226,7 @@
       "info": "Cada precio calculado se redondea hacia arriba al siguiente importe con esta terminación, así que tu ganancia objetivo nunca se reduce. Un precio fijado manualmente en un anuncio no cambia.",
       "endingLabel": "Terminación del precio (centavos, 0–99)",
       "example": "Ejemplo: {{from}} pasa a {{to}}.",
-      "hint": "Ingresa un número entero de 0 a 99 — con 99 los precios quedan como $24.99."
+      "hint": "Ingresa un número entero de 0 a 99. Por ejemplo, con 99 los precios quedan como $24.99."
     },
     "amazonTaxRateNote": "El cálculo de tu precio tiene en cuenta automáticamente el impuesto estimado que pagas al comprar en Amazon. Define esta tasa en Ajustes de la tienda → Tasa de impuesto sobre las ventas de Amazon.",
     "stockControl": "Control de stock",
@@ -278,7 +278,7 @@
         "title": "Qué se puede publicar",
         "minPrice": "Precio mín. en Amazon",
         "maxPrice": "Precio máx. en Amazon",
-        "priceHint": "Deja un campo vacío si no quieres límite. Un producto con precio fuera del rango se omite, y la tarea muestra el motivo.",
+        "priceHint": "Deja un campo vacío si no quieres límite. Un producto con precio fuera del rango se omite, y la tarea de publicación muestra el motivo.",
         "priceError": "El máximo no puede ser menor que el mínimo.",
         "amazonShippedOnly": "Solo productos que Amazon envía por sí mismo",
         "amazonShippedOnlyHint": "Omite una oferta que otro vendedor envía desde su propio stock. El pedido automático y el seguimiento funcionan mejor con productos que envía Amazon.",

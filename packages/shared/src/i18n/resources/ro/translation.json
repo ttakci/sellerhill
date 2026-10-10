@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Cont Amazon",
-          "subtitle": "Gestionați conturile de cumpărător pentru preluarea comenzilor"
+          "subtitle": "Gestionați conturile de cumpărător Amazon folosite pentru comenzile dvs."
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Conectat din",
         "reconnect": {
           "action": "Reconectează",
-          "hint": "Autentifică-te din nou în eBay pentru a reînnoi permisiunile acestui magazin. Magazinul, comenzile și anunțurile lui rămân neschimbate — nu e nevoie să îl deconectezi mai întâi."
+          "hint": "Autentifică-te din nou în eBay pentru a reînnoi permisiunile acestui magazin. Magazinul, comenzile și anunțurile lui rămân neschimbate. Nu e nevoie să îl deconectezi mai întâi."
         },
         "disconnect": {
           "action": "Deconectează",
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Conturi Amazon",
-        "subtitle": "Conturile dvs. de cumpărător pentru preluarea comenzilor",
+        "subtitle": "Conturile dvs. de cumpărător Amazon folosite pentru comenzi",
         "addNew": {
           "title": "Cont Amazon nou",
-          "subtitle": "Conectați un nou cont de cumpărător pentru preluarea comenzilor"
+          "subtitle": "Conectați un nou cont de cumpărător pentru comenzile dvs."
         },
         "empty": {
           "title": "Niciun cont de cumpărător încă",
-          "description": "Conectați un cont de cumpărător Amazon pentru a scana comenzile și a înregistra costurile reale."
+          "description": "Conectați un cont de cumpărător Amazon ca să vă putem citi comenzile Amazon și înregistra costurile lor reale."
         },
         "viewAll": {
           "title": "Toate"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Adaugă cont Amazon",
-        "subtitle": "Furnizați datele de autentificare pentru preluarea comenzilor",
+        "subtitle": "Introduceți datele de autentificare ale contului dvs. de cumpărător Amazon",
         "label": "Etichetă cont",
         "email": "E-mail",
         "password": "Parolă",
         "twoFactorSecret": "Cheie secretă 2FA",
-        "twoFactorSecretHint": "Obligatoriu. Amazon cere un cod de verificare la aproape fiecare autentificare automată, iar o cheie pentru aplicația de autentificare este singura la care putem răspunde în locul dvs. În setările Amazon „Login & Security” activați o aplicație de autentificare și lipiți aici cheia de configurare — nu un cod de 6 cifre. La editarea unui cont existent, lăsați câmpul necompletat pentru a păstra cheia salvată."
+        "twoFactorSecretHint": "Obligatoriu. Amazon cere un cod de verificare la aproape fiecare autentificare automată, iar o cheie pentru aplicația de autentificare este singura modalitate prin care putem introduce acel cod în locul dvs. În setările Amazon „Login & Security” activați o aplicație de autentificare și lipiți aici cheia ei de configurare, nu un cod de 6 cifre. La editarea unui cont, lăsați câmpul necompletat pentru a păstra cheia salvată."
       },
       "amazonEdit": {
         "title": "Editează contul Amazon",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Verifică cuvintele cheie din lista neagră",
         "checkBlacklistDesc": "Scanează titlurile, descrierile, specificațiile și brandul anunțurilor în raport cu lista neagră înainte de publicare. Selecția de câmpuri a fiecărui cuvânt cheie stabilește unde este verificat.",
         "allowCrossStoreAsins": "Permite ASIN-uri deja listate în celelalte magazine ale mele",
-        "allowCrossStoreAsinsDesc": "Activat pentru toate magazinele, orice magazin poate lista orice ASIN; activat pentru un singur magazin, doar acel magazin poate adăuga ASIN-uri pe care celelalte magazine le au deja. Un ASIN care este deja în acest magazin este întotdeauna omis.",
+        "allowCrossStoreAsinsDesc": "Când este activat pentru toate magazinele, orice magazin poate lista orice ASIN. Când este activat pentru un singur magazin, doar acel magazin poate adăuga ASIN-uri pe care celelalte magazine le au deja. Un ASIN care este deja în acest magazin este întotdeauna omis.",
         "allowCrossStoreAsinsInherited": "Se aplică setarea pentru toate magazinele până când salvezi o alegere pentru acest magazin.",
         "country": "Țară",
         "countryPlaceholder": "Selectați o țară",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Preț și stoc urmărite de 4 ori pe zi",
-        "description": "Prețul și stocul sursă sunt verificate de patru ori în fiecare zi, iar orice modificare ajunge în anunțul dvs. eBay în aceeași rulare. Nu mai vindeți ce nu mai este în stoc și nu mai păstrați prețuri care aduc pierderi.",
+        "description": "Prețul și stocul sursă sunt verificate de patru ori în fiecare zi, iar orice modificare ajunge în anunțul dvs. eBay în aceeași rulare. Nu mai vindeți ce nu mai este în stoc și nu mai păstrați prețuri care aduc pierderi. În această categorie, chiar și o singură verificare pe zi este rară.",
         "caption": "O verificare la fiecare 6 ore"
       },
       "specifics": {
         "title": "Specificații ale articolului, completate cu adevărat",
-        "description": "Nu sărim peste câmpurile obligatorii cu „Does not apply”. Fiecare atribut este asociat cu o valoare acceptată de categoria eBay, astfel încât anunțul dvs. apare în filtrele cumpărătorilor.",
+        "description": "Câmpurile obligatorii sunt completate din datele reale ale produsului oriunde există, potrivite cu valorile acceptate de categoria eBay. Anunțul dvs. apare în filtrele cumpărătorilor.",
         "others": "Alții",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Automatizare accesibilă",
-        "description": "Setul complet de automatizare profesională la un abonament lunar mult mai mic. Fiecare funcție este în fiecare plan, comenzile automate sunt nelimitate; planurile diferă doar prin anunțuri, conversii de urmărire și răsfoirea Celor mai vândute.",
+        "description": "Setul complet de automatizare profesională la un abonament lunar accesibil. Fiecare funcție este în fiecare plan, comenzile automate sunt nelimitate, iar planurile diferă doar prin anunțuri, conversii de urmărire și răsfoirea Celor mai vândute.",
         "cta": "Vezi planurile"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Publicare în masă cu ASIN",
-          "description": "Lipiți sute de ASIN-uri și lăsați anunțurile să se creeze în coadă."
+          "description": "Lipiți sute de ASIN-uri, iar anunțurile sunt create pentru dvs."
         },
         "aiTitle": {
           "title": "Titluri optimizate cu AI",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Prețuri",
       "sectionTitle": "Automatizare accesibilă.",
-      "sectionSubtitle": "Fiecare plan include toate funcțiile. Planurile diferă prin anunțurile active, conversiile de urmărire și alocarea de răsfoire a Celor mai vândute; comenzile automate sunt nelimitate în fiecare plan, așa că funcțiile pe care alte instrumente le rezervă nivelurilor superioare sunt ale dvs. chiar și în cel mai mic plan.",
+      "sectionSubtitle": "Fiecare plan include toate funcțiile. Planurile diferă prin anunțurile active, conversiile de urmărire și alocarea de răsfoire a Celor mai vândute. Comenzile automate sunt nelimitate în fiecare plan, așa că funcțiile pe care alte instrumente le rezervă nivelurilor superioare sunt ale dvs. chiar și în cel mai mic plan.",
       "billingNote": "Anulați oricând. Prețurile nu includ taxele locale, acolo unde se aplică.",
       "perMonth": "/lună",
       "mostPopular": "Cel mai popular",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Cum completați specificațiile articolului?",
-        "answer": "Colectăm fiecare atribut pe care catalogul sursă îl are pentru un produs și îl asociem câmpurilor definite de categoria eBay. Când o categorie acceptă doar anumite valori, o alegem pe cea potrivită din lista ei. În loc să sărim peste câmpurile obligatorii cu „Does not apply”, le completăm cu valori reale, trimițând până la 45 de specificații pe anunț."
+        "answer": "Colectăm fiecare atribut pe care catalogul sursă îl are pentru un produs și îl asociem câmpurilor definite de categoria eBay. Când o categorie acceptă doar anumite valori, o alegem pe cea potrivită din lista ei. Câmpurile obligatorii primesc valori reale oriunde datele produsului le conțin, iar fiecare anunț are până la 45 de specificații."
       },
       "q4": {
         "question": "Cum funcționează comanda automată?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Automatizare mai inteligentă. Un preț mai mic.",
+        "headline": "Automatizare mai inteligentă. La un preț accesibil.",
         "subheading": "Strategii pentru fiecare grup de produse, sincronizare de patru ori pe zi, specificații complete ale articolului și un ecran Acțiuni în așteptare care vă îndrumă. Încercați gratuit o lună, fără card bancar.",
         "button": "Începeți gratuit"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Date de exemplu — nimic nu se salvează.",
+      "description": "Date de exemplu. Nimic nu se salvează.",
       "exit": "Ieși din demo",
       "signUp": "Creează cont gratuit"
     },

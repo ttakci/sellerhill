@@ -118,7 +118,7 @@
       "trackingNumber": "Rastreamento {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "ID da devolução",
-      "actionsOff": "As ações de devolução no app estão desativadas — responda no eBay."
+      "actionsOff": "As ações de devolução no app estão desativadas. Responda no eBay."
     },
     "actions": {
       "done": {
@@ -185,7 +185,7 @@
       "suspended": "Sua assinatura está suspensa, então as ações de devolução estão pausadas. Quite a fatura na página de Cobrança.",
       "ebayRejected": "O eBay recusou esta ação. Abra a devolução no eBay para ver o motivo.",
       "unavailable": "Não foi possível contatar o eBay. Tente novamente em instantes.",
-      "sandbox": "As ações de devolução não estão disponíveis no sandbox do eBay.",
+      "sandbox": "As ações de devolução não estão disponíveis no ambiente de teste do eBay.",
       "refundAmountUnknown": "O eBay não informou um valor de reembolso para esta devolução, então o reembolso precisa ser emitido no eBay.",
       "notFound": "Esta devolução não foi encontrada.",
       "labelFileRequired": "Escolha o arquivo da etiqueta.",

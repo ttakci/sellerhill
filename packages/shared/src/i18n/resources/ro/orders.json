@@ -77,16 +77,16 @@
       "in_progress": "Se cumpără pe Amazon",
       "not_automated": "Neautomatizată",
       "manual": "Cumpărată manual",
-      "simulated": "Rulare de test — fără achiziție",
+      "simulated": "Rulare de test, fără achiziție",
       "filter": {
         "all": "Toate stările de îndeplinire"
       },
       "detail": {
         "title": "Îndeplinire Amazon",
         "amazonOrderId": "Comandă Amazon",
-        "simulatedNotice": "Aceasta este o rulare de test. Nu a fost plasată nicio comandă Amazon și nu s-au taxat bani — costurile și profitul de mai jos sunt simulate.",
+        "simulatedNotice": "Aceasta este o rulare de test. Nu a fost plasată nicio comandă Amazon și nu s-au taxat bani. Costurile și profitul de mai jos sunt simulate.",
         "actionRequiredNotice": "Automatizarea s-a oprit înainte de cumpărare. Verificați motivul și îndepliniți această comandă manual.",
-        "cancelledNotice": "Achiziția Amazon a fost anulată. Vânzarea eBay este încă datorată cumpărătorului — îndepliniți-o în alt mod.",
+        "cancelledNotice": "Achiziția Amazon a fost anulată. Încă îi datorați acest produs cumpărătorului eBay, așa că onorați comanda în alt mod.",
         "notAutomatedNotice": "Comandarea automată este dezactivată pentru această comandă.",
         "attemptedAt": "Ultima încercare"
       }
@@ -95,14 +95,14 @@
       "tracked": "Asociată unui anunț",
       "untracked": "Neasociată unui anunț",
       "problem": {
-        "wrongPageType": "Furnizorul de urmărire nu a putut citi pagina comenzii Amazon — este posibil să-și fi schimbat formatul. Se va reîncerca automat.",
+        "wrongPageType": "Pagina comenzii Amazon nu a putut fi citită pentru a converti numărul de urmărire. Este posibil ca Amazon să fi schimbat pagina. Se va reîncerca automat.",
         "amazonSessionExpired": "Sesiunea Amazon folosită pentru a citi această comandă a expirat și trebuie autentificată din nou.",
         "trackingUrlMismatch": "Linkul de urmărire de pe pagina comenzii Amazon nu a corespuns cu ce ne așteptam. Se va reîncerca automat.",
-        "needsTrackingUpload": "Se așteaptă încărcarea detaliilor expedierii înainte ca numărul de urmărire să poată fi convertit.",
-        "updateNotApplied": "Actualizarea urmăririi nu a fost încă aplicată de furnizor. Se va reîncerca automat.",
-        "assignValidation": "Furnizorul de urmărire a respins detaliile expedierii pentru această comandă.",
-        "shipmentException": "Furnizorul de urmărire a raportat o excepție pentru această expediere.",
-        "trackingUpdateUnavailable": "Furnizorul de urmărire nu a putut actualiza această expediere acum.",
+        "needsTrackingUpload": "Se așteaptă detaliile expedierii înainte ca numărul de urmărire să poată fi convertit.",
+        "updateNotApplied": "Actualizarea urmăririi nu a fost încă aplicată. Se va reîncerca automat.",
+        "assignValidation": "Detaliile expedierii pentru această comandă au fost respinse la conversia numărului de urmărire.",
+        "shipmentException": "A fost raportată o problemă la această expediere.",
+        "trackingUpdateUnavailable": "Urmărirea acestei expedieri nu a putut fi actualizată acum.",
         "generic": "Există o problemă cu conversia urmăririi acestei comenzi. Se va reîncerca automat."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Produsul nu a fost găsit pe Amazon",
         "captcha": "Captcha necesar",
-        "otp": "Provocare MFA/OTP",
+        "otp": "Este necesar un cod de verificare",
         "login": "Autentificare eșuată",
         "out_of_stock": "Fără stoc",
         "address": "Problemă cu adresa",
         "payment": "Plată refuzată",
-        "cap": "Peste plafonul de cost",
+        "cap": "Peste plafonul de cheltuieli",
         "no_confirmation": "Fără confirmare",
-        "proxy_required": "Niciun proxy configurat",
+        "proxy_required": "Proxy-ul contului nu a putut fi folosit",
         "quota_exhausted": "Cota lunară a fost atinsă",
         "cart": "Coș necorespunzător",
         "review_unreadable": "Totalul comenzii este ilizibil",
-        "interrupted": "Achiziție întreruptă — verificați Amazon",
+        "interrupted": "Achiziție întreruptă, verificați Amazon",
         "subscription_suspended": "Abonament suspendat",
         "listing_over_plan_limit": "Anunț în afara limitei planului",
-        "order_already_fulfilled": "Deja expediată — nu este nimic de cumpărat",
+        "order_already_fulfilled": "Deja expediată, nu este nimic de cumpărat",
         "order_not_paid": "Se așteaptă plata cumpărătorului",
-        "order_cancelled": "Anulată pe eBay — nimic de cumpărat",
-        "multi_item_order": "Comanda are mai multe produse — cumpără manual",
-        "cancel_requested": "Cumpărătorul a cerut anularea — răspunde pe eBay",
+        "order_cancelled": "Anulată pe eBay, nimic de cumpărat",
+        "multi_item_order": "Comanda are mai multe produse, cumpără manual",
+        "cancel_requested": "Cumpărătorul a cerut anularea, răspunde pe eBay",
         "loss_limit": "Peste limita ta de pierdere"
       },
       "reasonLabel": "Motiv: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Nu este pe Amazon",
         "confirmTitle": "Confirmi că Amazon nu are nicio comandă pentru această vânzare?",
-        "confirmDescription": "Continuă doar după ce te-ai uitat la comenzile acestui cont Amazon și comanda nu este acolo. SellerHill verifică și el lista de comenzi a contului și refuză până când această verificare are loc. După aceea, comanda automată poate fi pornită din nou — dacă totuși comanda există pe Amazon, produsul va fi cumpărat de două ori.",
+        "confirmDescription": "Continuă doar după ce te-ai uitat la comenzile acestui cont Amazon și comanda nu este acolo. SellerHill verifică și el lista de comenzi a contului și refuză până când această verificare are loc. După aceea, comanda automată poate fi pornită din nou. Dacă totuși comanda există pe Amazon, produsul va fi cumpărat de două ori.",
         "confirm": "Da, nu este acolo",
         "done": "Marcată ca necumpărată. Poți porni din nou comanda automată."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Vezi mai multe detalii",
       "updateAmazon": "Introduceți informațiile Amazon",
       "netProfitAnalysis": "ANALIZA PROFITULUI NET",
-      "analysisDesc": "Acest calcul ia în considerare câștigurile dvs. reale de la eBay după toate comisioanele și taxele platformei, din care se scade costul inițial de achiziție Amazon.",
+      "analysisDesc": "Câștigurile dvs. eBay după toate comisioanele și taxele platformei, minus costul inițial de achiziție Amazon.",
       "calculation": "Calcul",
       "netProfitResult": "Profit net",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Expediere până la",
       "shipByNotice": "Termen de expediere eBay: {{date}}",
       "shipByHeading": "Termen de expediere eBay",
-      "multiItemNotice": "Produse în această comandă eBay: {{count}}. SellerHill îl urmărește doar pe primul și nu cumpără automat această comandă — cumpără și expediază tu celelalte produse."
+      "multiItemNotice": "Produse în această comandă eBay: {{count}}. SellerHill îl urmărește doar pe primul și nu cumpără automat această comandă. Cumpără și expediază tu celelalte produse."
     },
     "modal": {
       "title": "Introduceți informațiile comenzii Amazon",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Estimat",
-    "estimateNote": "Profit estimat — se finalizează la plasarea comenzii Amazon. Bazat pe ultimul preț Amazon cunoscut; transportul Amazon nu este inclus.",
+    "estimateNote": "Profit estimat. Devine final la plasarea comenzii Amazon. Bazat pe ultimul preț Amazon cunoscut; transportul Amazon nu este inclus.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Toate drepturile rezervate."
     },
     "errors": {
       "notFound": "Comanda nu a fost găsită.",
-      "noTrackingYet": "Această comandă nu are încă un număr de urmărire Amazon — nu a fost expediată.",
+      "noTrackingYet": "Această comandă nu are încă un număr de urmărire Amazon. Nu a fost expediată.",
       "conversionUnavailable": "Urmărirea nu a putut fi convertită acum. Verificați limita planului și setările de conversie, apoi încercați din nou.",
       "conversionDone": "Urmărirea a fost convertită.",
       "orderNotTracked": "Această comandă nu este asociată unuia dintre anunțurile dvs., deci un număr de urmărire convertit nu ar putea fi trimis niciodată către eBay. Asociați mai întâi comanda cu anunțul ei.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "Această vânzare depășește limita de cheltuieli a contului tău Amazon. Mărește limita din setările contului Amazon sau cumpără produsul manual.",
       "autoFulfillAlreadyStarted": "Starea acestei comenzi tocmai s-a schimbat, deci achiziția poate să fi pornit deja. Reîncarcă pagina.",
       "autoFulfillQuotaExhausted": "Limita de comenzi automate a planului tău pentru această perioadă s-a epuizat.",
-      "purchaseNotYetChecked": "SellerHill nu a verificat încă comenzile acestui cont Amazon de la încercarea de cumpărare. Verificarea a fost pornită acum — încearcă din nou peste câteva minute.",
+      "purchaseNotYetChecked": "SellerHill nu a verificat încă comenzile acestui cont Amazon de la încercarea de cumpărare. Verificarea a fost pornită acum. Încearcă din nou peste câteva minute.",
       "purchaseNotUnknown": "Această comandă nu așteaptă o confirmare de achiziție. Poate fi deja asociată sau în curs. Reîncarcă pagina.",
       "purchaseFoundOnAmazon": "SellerHill a găsit o comandă Amazon pentru acest produs, plasată în jurul momentului încercării de cumpărare, dar nu a putut-o asocia cu certitudine acestei vânzări. Deschide comenzile tale Amazon și asociaz-o manual. Dacă acea comandă aparține altei vânzări, asociaz-o mai întâi acelei vânzări.",
       "noteTooLong": "Nota poate avea cel mult 1.000 de caractere.",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Urmărire reținută",
-        "meaning": "Amazon a expediat, dar urmărirea nu a ajuns încă la eBay — de obicei conversia urmăririi este încă în așteptare.",
+        "meaning": "Amazon a expediat, dar numărul de urmărire nu a ajuns încă la eBay. De obicei conversia urmăririi este încă în așteptare.",
         "action": "Convertiți urmărirea sau remediați cauza afișată în comandă."
       },
       "buying": {

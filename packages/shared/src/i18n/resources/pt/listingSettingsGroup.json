@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Grupos de configurações de anúncios",
-    "subtitle": "Gerencie e atribua modelos de estratégia aos seus anúncios de produtos para uma otimização automatizada.",
+    "subtitle": "Agrupe suas configurações de preço, estoque e modelo e atribua-as aos seus anúncios.",
     "loadingDescription": "Buscando seus grupos de anúncios.",
     "createNewGroup": "Criar novo grupo",
     "editGroup": "Editar grupo de anúncios",
@@ -11,7 +11,7 @@
     "groupName": "Nome do grupo",
     "groupNamePlaceholder": "ex.: Eletrônicos premium",
     "description": "Descrição",
-    "descriptionPlaceholder": "Digite as observações internas do grupo...",
+    "descriptionPlaceholder": "Adicione suas próprias observações sobre este grupo...",
     "stripBrandFromTitle": "Remover a marca do título",
     "stripBrandFromTitleInfo": "Remove automaticamente o nome da marca da Amazon do seu título no eBay. Aplica-se apenas a novos anúncios.",
     "aiTitleEnabled": "Título assistido por IA",
@@ -147,7 +147,7 @@
       "templateMinLength": "O modelo deve ter pelo menos 10 caracteres",
       "predefinedTemplateRequired": "Selecione um modelo predefinido",
       "minOnePriceRange": "É necessária pelo menos uma faixa de preço",
-      "maxPriceRanges": "São permitidas no máximo 10 faixas de preço",
+      "maxPriceRanges": "Você pode adicionar até 10 faixas de preço",
       "overlappingPriceRanges": "As faixas de preço não podem se sobrepor",
       "minStockBuffer": "A margem de estoque deve ser 0 ou maior"
     },
@@ -197,9 +197,9 @@
     "addRange": "Adicionar faixa",
     "calculator": {
       "title": "Calculadora de preços",
-      "subtitle": "Teste estas configurações — não é salvo, é apenas uma prévia.",
+      "subtitle": "Teste estas configurações aqui. Nada é salvo.",
       "amazonPrice": "Preço de compra na Amazon",
-      "adRate": "Simulação da taxa de anúncio (%)",
+      "adRate": "Taxa de anúncio para testar (%)",
       "amazonPriceError": "Insira um preço de compra na Amazon maior que 0.",
       "adRateError": "Insira uma taxa de anúncio de 0 a 100 com, no máximo, uma casa decimal.",
       "combinedRateError": "A soma da taxa do eBay com a taxa de anúncio deve ser inferior a 100%.",
@@ -226,7 +226,7 @@
       "info": "Cada preço calculado é arredondado para cima até o próximo valor com esse final, então seu lucro-alvo nunca diminui. Um preço fixado manualmente em um anúncio não é alterado.",
       "endingLabel": "Final do preço (centavos, 0–99)",
       "example": "Exemplo: {{from}} passa a {{to}}.",
-      "hint": "Digite um número inteiro de 0 a 99 — com 99 os preços ficam como $24.99."
+      "hint": "Digite um número inteiro de 0 a 99. Por exemplo, com 99 os preços ficam como $24.99."
     },
     "amazonTaxRateNote": "O cálculo do seu preço considera automaticamente o imposto estimado que você paga ao comprar na Amazon. Defina essa alíquota em Configuração da loja → Alíquota de imposto sobre vendas da Amazon.",
     "stockControl": "Controle de estoque",
@@ -278,7 +278,7 @@
         "title": "O que pode ser anunciado",
         "minPrice": "Preço mín. na Amazon",
         "maxPrice": "Preço máx. na Amazon",
-        "priceHint": "Deixe um campo vazio para não ter limite. Um produto com preço fora do intervalo é ignorado, e a tarefa mostra o motivo.",
+        "priceHint": "Deixe um campo vazio para não ter limite. Um produto com preço fora do intervalo é ignorado, e a tarefa de anúncios mostra o motivo.",
         "priceError": "O máximo não pode ser menor que o mínimo.",
         "amazonShippedOnly": "Somente produtos enviados pela própria Amazon",
         "amazonShippedOnlyHint": "Ignora uma oferta enviada por outro vendedor a partir do estoque dele. Pedidos automáticos e rastreamento funcionam melhor com produtos enviados pela Amazon.",

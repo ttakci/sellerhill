@@ -60,7 +60,7 @@
       },
       "plan": {
         "title": "Plano e capacidade",
-        "subtitle": "Limites que começarão a recusar trabalho."
+        "subtitle": "Limites que interrompem novos trabalhos quando são atingidos."
       },
       "setup": {
         "title": "Configuração",
@@ -70,9 +70,9 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "A Amazon cancelou uma compra que você já pagou",
-        "description_one": "{{count}} pedido foi cancelado pela Amazon. A venda no eBay continua ativa e ainda é devida ao comprador — refaça o pedido ou reembolse antes que o eBay o conte como defeito.",
-        "description_many": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e ainda são devidas aos compradores — refaça os pedidos ou reembolse antes que o eBay os conte como defeitos.",
-        "description_other": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e ainda são devidas aos compradores — refaça os pedidos ou reembolse antes que o eBay os conte como defeitos.",
+        "description_one": "{{count}} pedido foi cancelado pela Amazon. A venda no eBay continua ativa e você ainda deve o item ao comprador. Refaça o pedido ou reembolse o comprador antes que o eBay o conte como defeito.",
+        "description_many": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e você ainda deve os itens aos compradores. Refaça os pedidos ou reembolse os compradores antes que o eBay os conte como defeitos.",
+        "description_other": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e você ainda deve os itens aos compradores. Refaça os pedidos ou reembolse os compradores antes que o eBay os conte como defeitos.",
         "action": "Revisar pedidos"
       },
       "order_fulfillment_blocked": {
@@ -83,7 +83,7 @@
         "action": "Revisar pedidos"
       },
       "order_purchase_unknown": {
-        "title": "Compra não confirmada — verifique a Amazon primeiro",
+        "title": "Compra não confirmada: verifique a Amazon primeiro",
         "description_one": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
         "description_many": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
         "description_other": "Pedidos cuja compra na Amazon não pôde ser confirmada: {{count}}. O botão de pedido foi acionado, mas a confirmação não veio, então o pedido pode existir. Verifique a Amazon e vincule-o antes de comprar qualquer coisa de novo.",
@@ -105,23 +105,23 @@
       },
       "order_tracking_problem": {
         "title": "A conversão de rastreio tem um problema",
-        "description_one": "{{count}} pedido enviado tem um problema em aberto com o provedor de rastreamento. Até que seja resolvido, esse pedido mostra ao seu comprador o código de rastreio original da Amazon em vez de um convertido.",
-        "description_many": "{{count}} pedidos enviados têm problemas em aberto com o provedor de rastreamento. Até que sejam resolvidos, esses pedidos mostram aos seus compradores os códigos de rastreio originais da Amazon em vez de convertidos.",
-        "description_other": "{{count}} pedidos enviados têm problemas em aberto com o provedor de rastreamento. Até que sejam resolvidos, esses pedidos mostram aos seus compradores os códigos de rastreio originais da Amazon em vez de convertidos.",
+        "description_one": "{{count}} pedido enviado tem um problema em aberto na conversão do rastreio. Abra o pedido para ver o que precisa ser corrigido.",
+        "description_many": "{{count}} pedidos enviados têm problemas em aberto na conversão do rastreio. Abra os pedidos para ver o que precisa ser corrigido.",
+        "description_other": "{{count}} pedidos enviados têm problemas em aberto na conversão do rastreio. Abra os pedidos para ver o que precisa ser corrigido.",
         "action": "Ver pedidos"
       },
       "order_tracking_conversion_held": {
         "title": "Pedidos não marcados como enviados no eBay",
-        "description_one": "{{count}} pedido foi enviado pela Amazon há mais de {{hours}} horas, mas não foi marcado como enviado no eBay, porque seu código de rastreio não pôde ser convertido. Nunca enviamos o código de rastreio original da Amazon ao seu comprador. Resolva a causa e o pedido é enviado automaticamente — até lá, há risco de defeito por envio atrasado.",
-        "description_many": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não foram marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Resolva a causa e eles são enviados automaticamente — até lá, há risco de defeitos por envio atrasado.",
-        "description_other": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não foram marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Resolva a causa e eles são enviados automaticamente — até lá, há risco de defeitos por envio atrasado.",
+        "description_one": "{{count}} pedido foi enviado pela Amazon há mais de {{hours}} horas, mas não está marcado como enviado no eBay, porque seu código de rastreio não pôde ser convertido. Nunca enviamos o código de rastreio original da Amazon ao seu comprador. Quando você resolver a causa, o pedido será marcado como enviado automaticamente. Até lá, há risco de defeito por envio atrasado.",
+        "description_many": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não estão marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Quando você resolver a causa, eles serão marcados como enviados automaticamente. Até lá, há risco de defeitos por envio atrasado.",
+        "description_other": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não estão marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Quando você resolver a causa, eles serão marcados como enviados automaticamente. Até lá, há risco de defeitos por envio atrasado.",
         "action": "Ver pedidos"
       },
       "order_cancelled_amazon_open": {
         "title": "O eBay cancelou uma venda que você já comprou na Amazon",
-        "description_one": "{{count}} pedido foi cancelado no eBay nos últimos {{days}} dias, mas o pedido da Amazon feito para ele continua aberto. Ninguém mais espera esse item — cancele o pedido da Amazon ou devolva o item se já tiver sido enviado.",
-        "description_many": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens — cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
-        "description_other": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens — cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
+        "description_one": "{{count}} pedido foi cancelado no eBay nos últimos {{days}} dias, mas o pedido da Amazon feito para ele continua aberto. Ninguém mais espera esse item. Cancele o pedido da Amazon ou devolva o item se já tiver sido enviado.",
+        "description_many": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens. Cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
+        "description_other": "{{count}} pedidos foram cancelados no eBay nos últimos {{days}} dias, mas os pedidos da Amazon feitos para eles continuam abertos. Ninguém mais espera esses itens. Cancele os pedidos da Amazon ou devolva os itens se já tiverem sido enviados.",
         "action": "Revisar pedidos"
       },
       "order_late_to_ship": {
@@ -140,8 +140,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Pedido de cancelamento do comprador",
-        "description_one": "{{count}} comprador pediu para cancelar um pedido — aprove ou rejeite aqui antes do prazo da eBay",
-        "description_other": "{{count}} compradores pediram para cancelar pedidos — aprove ou rejeite aqui antes do prazo da eBay",
+        "description_one": "{{count}} comprador pediu para cancelar um pedido. Aprove ou rejeite a solicitação aqui antes do prazo do eBay.",
+        "description_other": "{{count}} compradores pediram para cancelar um pedido. Aprove ou rejeite as solicitações aqui antes do prazo do eBay.",
         "action": "Revisar pedidos"
       },
       "ebay_account_disconnected": {
@@ -188,9 +188,9 @@
       },
       "listing_drafts_pending": {
         "title": "Rascunhos que nunca foram publicados",
-        "description_one": "{{count}} rascunho está preparado e não custa nada — mas também não vende nada até ser publicado.",
-        "description_many": "{{count}} rascunhos estão preparados e não custam nada — mas também não vendem nada até serem publicados.",
-        "description_other": "{{count}} rascunhos estão preparados e não custam nada — mas também não vendem nada até serem publicados.",
+        "description_one": "{{count}} rascunho está pronto e não custa nada, mas não vende nada até ser publicado.",
+        "description_many": "{{count}} rascunhos estão prontos e não custam nada, mas não vendem nada até serem publicados.",
+        "description_other": "{{count}} rascunhos estão prontos e não custam nada, mas não vendem nada até serem publicados.",
         "action": "Ver rascunhos"
       },
       "plan_listing_quota": {
@@ -217,22 +217,22 @@
       },
       "setup_no_ebay_store": {
         "title": "Conecte sua loja eBay",
-        "description": "Nada mais no SellerHill funciona sem uma loja eBay conectada — anúncios, pedidos e automação dependem dela. Esta é a primeira coisa a fazer.",
+        "description": "Nada no SellerHill funciona sem uma loja eBay conectada. Anúncios, pedidos e automação dependem dela, então faça isso primeiro.",
         "action": "Conectar eBay"
       },
       "setup_no_amazon_account": {
         "title": "Ainda não há conta de comprador da Amazon",
-        "description": "Você está vendendo, mas não há uma conta da Amazon para comprar — todos os pedidos precisam ser comprados manualmente. Adicionar uma ativa o atendimento automático.",
+        "description": "Você está vendendo, mas não há uma conta da Amazon para comprar, então todos os pedidos precisam ser comprados manualmente. Adicione uma para ativar a compra automática.",
         "action": "Adicionar conta"
       },
       "setup_no_store_settings": {
         "title": "Configurações da loja ainda não definidas",
-        "description": "Sua origem de envio e as palavras da lista de bloqueio ainda não foram definidas. Elas são usadas para calcular custos e evitar que anúncios sejam publicados com conteúdo bloqueado.",
+        "description": "O endereço da sua loja e as palavras da lista de bloqueio ainda não foram definidos. O endereço aparece no eBay como local do item, e a lista de bloqueio impede que anúncios com palavras bloqueadas sejam publicados.",
         "action": "Configurar"
       },
       "setup_no_listing_settings_group": {
         "title": "Ainda não há um grupo de configurações de anúncios",
-        "description": "Um grupo de configurações de anúncios define as regras de preço, estoque e reajuste — todo anúncio precisa de um, então você não consegue criar seu primeiro anúncio sem ele.",
+        "description": "Um grupo de configurações de anúncios define suas regras de preço, estoque e reajuste. Todo anúncio precisa de um, então você não consegue criar seu primeiro anúncio sem ele.",
         "action": "Criar um grupo"
       },
       "setup_auto_fulfill_off": {
@@ -242,12 +242,12 @@
       },
       "plan_conversion_quota": {
         "title": "Limite mensal de conversões de rastreio quase atingido",
-        "description": "Você usou {{used}} de {{limit}} conversões de rastreio neste mês. Quando o limite for atingido, os pedidos continuam sendo enviados e o eBay ainda recebe um código de rastreio — mas será o original da Amazon, então os compradores poderão ver seu fornecedor.",
+        "description": "Você usou {{used}} de {{limit}} conversões de rastreio neste mês. Quando o limite for atingido, os pedidos continuam sendo enviados e o eBay ainda recebe um código de rastreio. Mas será o código original da Amazon, então os compradores poderão ver seu fornecedor.",
         "action": "Ver plano"
       },
       "plan_suspended": {
         "title": "A automação está suspensa",
-        "description": "Sua assinatura não está mais ativa, então novos anúncios, atualizações de preço e estoque, compras automáticas e conversão de rastreio foram interrompidos. Escolha um plano para retomar — tudo recomeça sozinho.",
+        "description": "Sua assinatura não está mais ativa, então novos anúncios, atualizações de preço e estoque, compras automáticas e conversão de rastreio foram interrompidos. Escolha um plano para retomar. Tudo recomeça sozinho.",
         "action": "Escolher um plano"
       },
       "listing_not_selling": {
@@ -260,7 +260,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Requer nova autenticação",
+        "needs_reauth": "Precisa fazer login novamente",
         "invalid": "Credenciais inválidas",
         "locked": "Bloqueada pela Amazon"
       },
@@ -274,9 +274,9 @@
         "tracking_url_mismatch": "Link de rastreio divergente",
         "needs_tracking_upload": "Aguardando detalhes da remessa",
         "update_not_applied": "Atualização ainda não aplicada",
-        "assign_validation": "Rejeitado pelo provedor",
+        "assign_validation": "Conversão rejeitada",
         "shipment_exception": "Exceção da transportadora",
-        "tracking_update_unavailable": "Provedor indisponível"
+        "tracking_update_unavailable": "Conversão temporariamente indisponível"
       }
     }
   }

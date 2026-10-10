@@ -29,8 +29,8 @@
       "title": "Kampagnendetails",
       "breadcrumb": "Kampagnendetails",
       "subtitle": "Angebote in dieser Kampagne.",
-      "metricsNote": "Nicht verfügbare Kennzahlen warten auf eBay-Berichte; der Abgleich kann etwa 72 Stunden dauern.",
-      "eligibilityUnavailable": "Die Werbeberechtigung ist unbekannt. Kampagnenänderungen sind deaktiviert."
+      "metricsNote": "Fehlende Werte warten auf die Berichte von eBay. Es kann etwa 72 Stunden dauern, bis sie feststehen.",
+      "eligibilityUnavailable": "Wir konnten nicht prüfen, ob dieser Shop werben darf, daher sind Kampagnenänderungen deaktiviert."
     },
     "campaign": {
       "name": "Kampagnenname",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Noch keine Kampagnen",
-      "description": "Die Kampagnen Ihres aktiven Shops erscheinen hier nach der Synchronisierung.",
+      "description": "Die Kampagnen Ihres aktiven Shops erscheinen hier, sobald sie von eBay geladen wurden.",
       "noStore": "Wählen Sie oben einen eBay-Shop aus."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Schreibgeschützte Kampagne",
-      "marginOverride": "Individuelle Marge: Die Werberate wird nicht auf den SellerHill-Preis angewendet.",
+      "marginOverride": "Dieses Angebot hat eine eigene Marge, daher ist die Werberate nicht im Preis enthalten, den SellerHill festlegt.",
       "rule_based": "Regelbasierte Kampagnen sind schreibgeschützt.",
       "cost_per_click": "Kampagnen mit Kosten pro Klick sind schreibgeschützt.",
       "dynamic_rate": "Kampagnen mit dynamischem Satz sind schreibgeschützt.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Angebote hinzufügen",
       "group": "Einstellungsgruppe",
-      "groupHint": "Die Gruppe füllt diese Auswahl einmal mit geeigneten Angeboten ohne Kampagne. Es entsteht keine dauerhafte Regel.",
+      "groupHint": "Die Auswahl einer Gruppe markiert deren geeignete Angebote, die noch in keiner Kampagne sind. Das geschieht nur einmal: Angebote, die später zur Gruppe hinzukommen, sind nicht enthalten.",
       "groupsError": "Einstellungsgruppen konnten nicht geladen werden.",
       "groupError": "Die gesamte Gruppe konnte nicht geladen werden. Ihre Auswahl bleibt erhalten.",
       "retryGroup": "Gruppenauswahl erneut versuchen",
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "Werbung ist für diesen Shop nicht verfügbar.",
-      "unavailable": "Die Werbeberechtigung ist nicht verfügbar. Kampagnen können nicht erstellt werden."
+      "unavailable": "Wir konnten nicht prüfen, ob dieser Shop werben darf, daher können Sie gerade keine Kampagnen erstellen."
     },
     "results": {
       "summary": "Bestätigte Änderungen: {{changed}}. Bereits in der Kampagne: {{already}}. Unbestätigt oder fehlgeschlagen: {{failed}}.",
-      "retryHint": "Fehlgeschlagene oder unbestätigte Angebote bleiben für einen erneuten Versuch erhalten.",
-      "unconfirmed": "Keine Angebotsänderungen bestätigt. Aktualisieren Sie die Kampagnendaten, um den Standardsatz zu prüfen."
+      "retryHint": "Sie können die fehlgeschlagenen oder unbestätigten Angebote erneut versuchen.",
+      "unconfirmed": "Keine Angebotsänderungen bestätigt. Aktualisieren Sie die Kampagne, um ihren Standardsatz zu prüfen."
     }
   }
 }

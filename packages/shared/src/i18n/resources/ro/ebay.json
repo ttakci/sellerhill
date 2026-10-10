@@ -25,7 +25,7 @@
       "statusRevoked": "Revocat",
       "statusError": "Eroare",
       "disconnectButton": "Deconectează",
-      "refreshTokenButton": "Reîmprospătează tokenul"
+      "refreshTokenButton": "Reîmprospătează conexiunea"
     },
     "callback": {
       "processing": "Se procesează conexiunea eBay...",
@@ -34,16 +34,16 @@
       "cancelled": "Conexiunea eBay a fost anulată."
     },
     "errors": {
-      "invalidState": "Parametru de stare invalid",
+      "invalidState": "Conexiunea eBay nu a putut fi verificată. Încercați din nou.",
       "authorizationFailed": "Autorizarea eBay a eșuat",
-      "tokenExchangeFailed": "Codul de autorizare nu a putut fi schimbat cu tokenuri",
+      "tokenExchangeFailed": "Nu am putut finaliza conectarea magazinului dvs. eBay. Încercați din nou.",
       "accountAlreadyConnected": "Acest magazin eBay este conectat la alt cont SellerHill. Autentificați-vă cu contul la care l-ați conectat; dacă nu îl puteți accesa, contactați asistența.",
       "ebayTrialAlreadyUsed": "Acest magazin eBay și-a folosit deja încercarea gratuită. Alegeți un plan pentru a-l conecta.",
-      "noAuthorizationCode": "Nu s-a primit niciun cod de autorizare de la eBay",
+      "noAuthorizationCode": "eBay nu a confirmat conexiunea. Încercați din nou.",
       "storeOwnedByAnotherAccount": "Acest magazin eBay este asociat unui alt cont SellerHill. Contactați asistența pentru a-l transfera.",
       "accountNotFound": "Magazinul eBay respectiv nu a fost găsit.",
-      "identityUnavailable": "Nu am putut confirma contul dvs. eBay cu eBay. Nu s-a conectat nimic — încercați din nou peste puțin timp.",
-      "messagingScopeMissing": "Reconectați magazinul eBay pentru a activa mesajele — autorizarea actuală nu include mesageria.",
+      "identityUnavailable": "Nu am putut confirma contul dvs. eBay cu eBay, deci nu s-a conectat nimic. Încercați din nou peste puțin timp.",
+      "messagingScopeMissing": "Reconectați magazinul eBay pentru a activa mesajele. Conexiunea actuală nu include mesageria.",
       "messagingReplyNotAllowed": "La mesajele de la eBay nu se poate răspunde de aici.",
       "messagingUnavailable": "Mesageria eBay este temporar indisponibilă. Încercați din nou.",
       "messagingRejected": "eBay nu a acceptat această solicitare. Verificați mesajul și încercați din nou.",
@@ -53,7 +53,7 @@
       "title": "Conectați-vă magazinul eBay",
       "header": "Configurarea pieței",
       "description": "Pentru a începe sincronizarea articolelor, trebuie mai întâi să vă conectați magazinul eBay.",
-      "connectButton": "Cont eBay",
+      "connectButton": "Conectează contul eBay",
       "skipButton": "Omite deocamdată",
       "usOnlyNote": "În prezent este acceptată doar piața din SUA. Alte regiuni vor fi disponibile în curând.",
       "brandingDescription": "Legați-vă magazinul eBay la SellerHill pentru a gestiona toate procesele de vânzare dintr-un singur loc."

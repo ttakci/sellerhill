@@ -19,7 +19,7 @@
       "contactSales": "联系销售",
       "freeTrial": "可免费试用",
       "mostPopular": "最受欢迎",
-      "informationalOnly": "账单限制已关闭，套餐仅供参考。目前所有功能均不受限制。",
+      "informationalOnly": "目前未执行套餐限制，因此所有功能均可使用。套餐仅供参考。",
       "free": {
         "name": "免费版"
       },
@@ -86,7 +86,7 @@
         "description": "已停售的套餐。现有订阅继续有效；新用户请从上方套餐中选择。"
       },
       "switchTo": "切换到 {{plan}}",
-      "switchDone": "您的套餐已更改。Stripe 会在您的下一张账单中按比例结算差额。",
+      "switchDone": "您的套餐变更已确认。",
       "planNamed": "{{plan}} 套餐"
     },
     "planChange": {
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "热销榜商品",
         "unit": "件商品",
-        "description": "每个计费周期内您可在热销榜页面查看的商品数量，缓存榜单与实时榜单同样计入。"
+        "description": "每个计费周期内您可在热销榜页面查看的商品数量。无论榜单是已加载过的还是新获取的，显示的每件商品都会计入。"
       }
     },
     "subscription": {
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "完全访问：账单限制已关闭，所有功能均不受限制。",
+      "full_access": "完全访问：目前未执行套餐限制，因此所有功能均可使用。",
       "active": "您的订阅有效。",
-      "no_subscription": "没有有效的订阅。请选择一个套餐以启用账单功能。",
+      "no_subscription": "没有有效的订阅。请选择一个套餐以继续。",
       "past_due": "您的订阅已逾期未付。请更新付款方式以恢复访问。"
     },
     "provider": {
-      "unconfiguredTitle": "账单功能未配置",
-      "unconfiguredBody": "由于未连接账单服务商，结账和订阅管理暂不可用。请联系您的运营人员。"
+      "unconfiguredTitle": "付款暂不可用",
+      "unconfiguredBody": "付款功能目前不可用，因此您无法订阅或管理订阅。请联系支持团队。"
     },
     "usage": {
       "title": "本周期用量",
@@ -279,7 +279,7 @@
       "no_active_subscription": "未找到有效的订阅。",
       "no_open_period": "此额度没有进行中的用量周期。",
       "already_reserved": "此资源已被预留。",
-      "providerNotConfigured": "此环境尚未启用付款功能。请稍后再试。",
+      "providerNotConfigured": "付款功能尚不可用。请稍后再试。",
       "planNotMirrored": "此套餐暂不可购买。请选择其他套餐或联系支持团队。",
       "checkoutFailed": "无法开始结账。请稍后重试；如仍失败，请联系支持团队。",
       "portalFailed": "无法打开账单门户。请稍后重试。",
@@ -290,13 +290,13 @@
       "quotaExhausted": "您已达到套餐上限。请升级以继续。",
       "addonNotFound": "未找到该加购包。",
       "noSubscription": "您没有可更改的有效订阅。",
-      "planChangeFailed": "目前无法更改套餐。请重试，或使用“管理账单”。",
+      "planChangeFailed": "目前无法更改套餐。请重试，或使用“管理订阅”。",
       "subscriptionSuspended": "您的订阅未处于有效状态，因此新的商品刊登已暂停。选择一个套餐即可恢复，一切都会自动重新开始。",
       "subscriptionSuspendedOrders": "您的订阅未处于有效状态，因此订单自动化已暂停。选择一个套餐即可恢复，一切都会自动重新开始。",
       "listingQuotaExhausted": "您已用完套餐允许的全部在售商品刊登名额。请结束一条商品刊登以腾出名额，或升级套餐。",
-      "alreadySubscribed": "您已有一个有效的订阅。请使用“切换套餐”来更改，而不是重复订阅。",
+      "alreadySubscribed": "您已有一个有效的订阅。如需更改，请在“管理订阅”中选择新套餐，而不是重复订阅。",
       "invoicesFailed": "无法加载发票历史。请稍后重试。",
-      "paymentRequiresAction": "您的银行要求对这张银行卡进行额外确认，因此套餐变更已被取消，您仍在使用当前套餐。请打开“管理账单”更新付款方式，然后重试。",
+      "paymentRequiresAction": "您的银行要求对这张银行卡进行额外确认，因此套餐变更已被取消，您仍在使用当前套餐。请通过“更新付款方式”更新银行卡，然后重试。",
       "invalidCheckoutSession": "此付款确认链接无效。"
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "您已用完本月的热销榜额度。加购后，在周期重置之前可继续浏览 Amazon 榜单。"
       },
       "buy": "购买",
-      "note": "加购仅适用于当前自然月，因此会在您达到上限时提供，而不是提前提供。您的套餐额度会在每月 1 日重置。"
+      "note": "加购仅适用于当前计费周期，因此会在您达到上限时提供，而不是提前提供。您的套餐额度会在周期续订时重置。"
     }
   }
 }

@@ -81,22 +81,22 @@
       },
       "retry": "Încercați din nou",
       "unavailable": {
-        "title": "Cele mai vândute este temporar indisponibil",
-        "description": "Serviciul de liste nu este accesibil momentan. Anunțurile și comenzile dvs. nu sunt afectate."
+        "title": "Căutare produse este temporar indisponibilă",
+        "description": "Listele Amazon nu pot fi încărcate momentan. Anunțurile și comenzile dvs. nu sunt afectate."
       },
       "disabled": {
-        "title": "Cele mai vândute nu este activat pentru acest cont",
+        "title": "Căutare produse nu este activată pentru acest cont",
         "description": "Răsfoirea listelor Amazon este dezactivată pentru contul dvs. Contactați asistența dacă vă așteptați să o vedeți."
       },
       "limitReached": {
-        "title": "Prea multe încărcări live de liste astăzi",
-        "description": "Listele deja încărcate astăzi rămân disponibile — treceți la una dintre ele sau încercați din nou mâine."
+        "title": "Limita zilnică de liste a fost atinsă",
+        "description": "Listele deja încărcate astăzi rămân disponibile. Deschideți una dintre ele sau încercați din nou mâine."
       }
     },
     "errors": {
-      "disabled": "Cele mai vândute nu este activat pentru acest cont.",
-      "dailyLimitReached": "Prea multe încărcări live de liste astăzi. Încercați din nou mâine.",
-      "unavailable": "Cele mai vândute este temporar indisponibil.",
+      "disabled": "Căutare produse nu este activată pentru acest cont.",
+      "dailyLimitReached": "Ați atins limita de liste pentru astăzi. Încercați din nou mâine.",
+      "unavailable": "Căutare produse este temporar indisponibilă.",
       "unsupportedMarketplace": "Această piață nu este acceptată."
     }
   }

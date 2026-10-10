@@ -113,7 +113,7 @@
       "suspended": "Il tuo abbonamento è sospeso, quindi le azioni di annullamento sono in pausa. Salda la fattura nella pagina Fatturazione.",
       "ebayRejected": "eBay ha rifiutato questa azione. Apri la richiesta su eBay per vedere il motivo.",
       "unavailable": "Impossibile raggiungere eBay. Riprova tra un attimo.",
-      "sandbox": "Le azioni di annullamento non sono disponibili nella sandbox di eBay.",
+      "sandbox": "Le azioni di annullamento non sono disponibili nell'ambiente di prova di eBay.",
       "notFound": "Questa richiesta di annullamento non è stata trovata."
     },
     "party": {

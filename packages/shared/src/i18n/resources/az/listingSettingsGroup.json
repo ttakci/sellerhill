@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "Parametr qrupları",
-    "subtitle": "Avtomatik optimallaşdırma üçün strategiya şablonlarını məhsul elanlarınıza təyin edin və idarə edin.",
+    "subtitle": "Qiymət, stok və şablon parametrlərinizi qruplaşdırın və onları elanlarınıza təyin edin.",
     "loadingDescription": "Elan qruplarınız yüklənir.",
     "createNewGroup": "Yeni qrup yarat",
     "editGroup": "Elan qrupunu redaktə et",
@@ -11,7 +11,7 @@
     "groupName": "Qrupun adı",
     "groupNamePlaceholder": "məs., Premium elektronika",
     "description": "Təsvir",
-    "descriptionPlaceholder": "Qrup üçün daxili qeydləri daxil edin...",
+    "descriptionPlaceholder": "Bu qrup haqqında öz qeydlərinizi əlavə edin...",
     "stripBrandFromTitle": "Brendi başlıqdan sil",
     "stripBrandFromTitleInfo": "Amazon brend adını eBay başlığınızdan avtomatik silir. Yalnız yeni elanlara tətbiq olunur.",
     "aiTitleEnabled": "AI dəstəkli başlıq",
@@ -146,7 +146,7 @@
       "templateMinLength": "Şablon ən azı 10 simvol olmalıdır",
       "predefinedTemplateRequired": "Zəhmət olmasa hazır şablon seçin",
       "minOnePriceRange": "Ən azı bir qiymət aralığı tələb olunur",
-      "maxPriceRanges": "Maksimum 10 qiymət aralığına icazə verilir",
+      "maxPriceRanges": "Ən çox 10 qiymət aralığı əlavə edə bilərsiniz",
       "overlappingPriceRanges": "Qiymət aralıqları üst-üstə düşməməlidir",
       "minStockBuffer": "Stok ehtiyatı 0 və ya daha böyük olmalıdır"
     },
@@ -196,7 +196,7 @@
     "addRange": "Aralıq əlavə et",
     "calculator": {
       "title": "Qiymət kalkulyatoru",
-      "subtitle": "Bu parametrləri sınayın — yadda saxlanılmır, yalnız önizləmədir.",
+      "subtitle": "Bu parametrləri burada sınayın. Heç nə yadda saxlanılmır.",
       "amazonPrice": "Amazon alış qiyməti",
       "adRate": "Reklam dərəcəsi sınağı (%)",
       "amazonPriceError": "0-dan böyük Amazon alış qiyməti daxil edin.",
@@ -225,7 +225,7 @@
       "info": "Hesablanan hər qiymət bu sonluqla bitən növbəti məbləğə yuxarı yuvarlaqlaşdırılır, buna görə hədəf mənfəətiniz heç vaxt azalmır. Elanda əl ilə sabitlədiyiniz qiymət dəyişmir.",
       "endingLabel": "Qiymətin sonu (sent, 0–99)",
       "example": "Nümunə: {{from}} → {{to}} olur.",
-      "hint": "0 ilə 99 arasında tam ədəd daxil edin — 99 yazsanız, qiymətlər $24.99 kimi bitir."
+      "hint": "0 ilə 99 arasında tam ədəd daxil edin. Məsələn, 99 yazsanız, qiymətlər $24.99 kimi bitir."
     },
     "amazonTaxRateNote": "Qiymət hesablamanız Amazon-dan alarkən ödədiyiniz təxmini vergini avtomatik nəzərə alır. Bu dərəcəni Mağaza parametrləri → Amazon satış vergisi dərəcəsi bölməsində təyin edin.",
     "stockControl": "Stok nəzarəti",
@@ -277,7 +277,7 @@
         "title": "Nələr elan oluna bilər",
         "minPrice": "Ən aşağı Amazon qiyməti",
         "maxPrice": "Ən yüksək Amazon qiyməti",
-        "priceHint": "Limit istəmirsinizsə, sahəni boş buraxın. Qiyməti aralıqdan kənarda qalan məhsul atlanır və iş səbəbi göstərir.",
+        "priceHint": "Limit istəmirsinizsə, sahəni boş buraxın. Qiyməti aralıqdan kənarda qalan məhsul atlanır və elan işi səbəbi göstərir.",
         "priceError": "Maksimum minimumdan aşağı ola bilməz.",
         "amazonShippedOnly": "Yalnız Amazon-un özünün göndərdiyi məhsullar",
         "amazonShippedOnlyHint": "Başqa satıcının öz stokundan göndərdiyi təklifi atlayır. Avtomatik sifariş və izləmə Amazon-un göndərdiyi məhsullarla ən yaxşı işləyir.",

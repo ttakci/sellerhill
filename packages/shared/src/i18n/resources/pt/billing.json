@@ -19,13 +19,13 @@
       "contactSales": "Falar com vendas",
       "freeTrial": "Avaliação gratuita disponível",
       "mostPopular": "Mais popular",
-      "informationalOnly": "A aplicação do faturamento está desativada — os planos são apenas informativos. Todos os recursos estão atualmente sem restrições.",
+      "informationalOnly": "Os limites dos planos não estão sendo aplicados no momento, então todos os recursos estão disponíveis. Os planos são exibidos apenas para informação.",
       "free": {
         "name": "Gratuito"
       },
       "trial": {
         "name": "Avaliação gratuita",
-        "description": "Uma avaliação do SellerHill por tempo limitado. Não pode ser comprada — começa automaticamente quando você se cadastra."
+        "description": "Uma avaliação do SellerHill por tempo limitado. Não pode ser comprada: começa automaticamente quando você se cadastra."
       },
       "unlimitedOrders": "Pedidos automáticos e rastreio de envios ilimitados",
       "activeListings": "{{limit}} anúncios ativos · adicione e remova sem limite",
@@ -86,13 +86,13 @@
         "description": "Um plano descontinuado. As assinaturas existentes continuam funcionando; novos cadastros escolhem entre os planos acima."
       },
       "switchTo": "Mudar para {{plan}}",
-      "switchDone": "Seu plano foi alterado. O Stripe fará o rateio proporcional da diferença na sua próxima fatura.",
+      "switchDone": "Sua mudança de plano está confirmada.",
       "planNamed": "Plano {{plan}}"
     },
     "planChange": {
       "title": "Confirmar mudança de plano",
       "upgradeBody": "Mudando para {{plan}}. {{amount}} será cobrado agora. Sua próxima fatura será de {{nextAmount}} em {{nextDate}}.",
-      "downgradeBody": "Mudando para {{plan}} em {{date}}. Nada é cobrado agora — você mantém o plano atual até lá.",
+      "downgradeBody": "Mudando para {{plan}} em {{date}}. Nada é cobrado agora, e você mantém o plano atual até lá.",
       "listingLimitWarning": "Você tem {{active}} anúncios ativos e o novo plano permite {{limit}}. A partir de {{date}}, apenas os seus {{limit}} anúncios mais antigos serão acompanhados; os outros {{over}} deixam de receber a sincronização de preço/estoque e o tratamento automático de pedidos. Se quiser escolher quais anúncios continuam sendo acompanhados, encerre os que você não precisa antes dessa data.",
       "confirm": "Confirmar",
       "cancel": "Cancelar"
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Produtos de Mais vendidos",
         "unit": "produtos",
-        "description": "Quantos produtos você pode ver na página Mais vendidos por período de cobrança, tanto de listas em cache quanto ao vivo."
+        "description": "Quantos produtos você pode ver na página Mais vendidos por período de cobrança. Todo produto exibido conta, seja de uma lista já carregada ou buscada na hora."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Gerencie aqui sua forma de pagamento, seu plano e suas faturas.",
       "nextChargeLabel": "Próximo pagamento",
       "nextCharge": "Próximo pagamento: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "Cancela em {{date}} — sem novas cobranças após este período",
+      "cancelsAtPeriodEnd": "Cancela em {{date}}. Sem novas cobranças após este período.",
       "scheduledChange": "Muda para {{plan}} em {{date}}",
       "scheduledChangeUnknownPlan": "Seu plano muda em {{date}}",
       "cancelScheduledChange": "Cancelar",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Acesso total — a aplicação do faturamento está desativada. Todos os recursos estão sem restrições.",
+      "full_access": "Acesso total: os limites dos planos não estão sendo aplicados, então todos os recursos estão disponíveis.",
       "active": "Sua assinatura está ativa.",
-      "no_subscription": "Nenhuma assinatura ativa. Escolha um plano para ativar o faturamento.",
+      "no_subscription": "Nenhuma assinatura ativa. Escolha um plano para continuar.",
       "past_due": "Sua assinatura está em atraso. Atualize sua forma de pagamento para restaurar o acesso."
     },
     "provider": {
-      "unconfiguredTitle": "Faturamento não configurado",
-      "unconfiguredBody": "O checkout e o gerenciamento de assinaturas estão indisponíveis porque nenhum provedor de faturamento está conectado. Entre em contato com o seu operador."
+      "unconfiguredTitle": "Pagamentos indisponíveis",
+      "unconfiguredBody": "Os pagamentos não estão disponíveis no momento, então você não pode assinar nem gerenciar sua assinatura. Entre em contato com o suporte."
     },
     "usage": {
       "title": "Uso neste período",
@@ -279,9 +279,9 @@
       "no_active_subscription": "Nenhuma assinatura ativa encontrada.",
       "no_open_period": "Nenhum período de uso aberto para este limite.",
       "already_reserved": "Este recurso já está reservado.",
-      "providerNotConfigured": "Os pagamentos ainda não estão ativados neste ambiente. Tente novamente mais tarde.",
+      "providerNotConfigured": "Os pagamentos ainda não estão disponíveis. Tente novamente mais tarde.",
       "planNotMirrored": "Este plano ainda não está disponível para compra. Escolha outro plano ou entre em contato com o suporte.",
-      "checkoutFailed": "Não foi possível iniciar o checkout. Tente novamente em instantes — se continuar falhando, entre em contato com o suporte.",
+      "checkoutFailed": "Não foi possível iniciar o checkout. Tente novamente em instantes. Se continuar falhando, entre em contato com o suporte.",
       "portalFailed": "Não foi possível abrir o portal de faturamento. Tente novamente em instantes.",
       "noCustomer": "Ainda não há uma conta de faturamento. Escolha um plano primeiro para configurá-la.",
       "planNotFound": "Esse plano não foi encontrado.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Você atingiu o limite do seu plano. Faça upgrade para continuar.",
       "addonNotFound": "Esse pacote de recarga não foi encontrado.",
       "noSubscription": "Você não tem uma assinatura ativa para alterar.",
-      "planChangeFailed": "Não foi possível alterar o plano agora. Tente novamente ou use \"Gerenciar faturamento\".",
-      "subscriptionSuspended": "Sua assinatura não está ativa, então novos anúncios estão pausados. Escolha um plano para retomar — tudo recomeça sozinho.",
-      "subscriptionSuspendedOrders": "Sua assinatura não está ativa, então a automação de pedidos está pausada. Escolha um plano para retomar — tudo recomeça sozinho.",
+      "planChangeFailed": "Não foi possível alterar o plano agora. Tente novamente ou use \"Gerenciar assinatura\".",
+      "subscriptionSuspended": "Sua assinatura não está ativa, então novos anúncios estão pausados. Escolha um plano para retomar. Tudo recomeça sozinho.",
+      "subscriptionSuspendedOrders": "Sua assinatura não está ativa, então a automação de pedidos está pausada. Escolha um plano para retomar. Tudo recomeça sozinho.",
       "listingQuotaExhausted": "Você usou todos os anúncios ativos que o seu plano permite. Encerre um anúncio para liberar uma vaga ou mude para um plano maior.",
-      "alreadySubscribed": "Você já tem uma assinatura ativa. Use \"Mudar de plano\" para alterá-la em vez de assinar novamente.",
+      "alreadySubscribed": "Você já tem uma assinatura ativa. Para alterá-la, escolha um novo plano em \"Gerenciar assinatura\" em vez de assinar novamente.",
       "invoicesFailed": "Não foi possível carregar o histórico de faturas. Tente novamente em instantes.",
-      "paymentRequiresAction": "Seu banco pediu uma confirmação extra para este cartão, então a mudança de plano foi cancelada e você continua no plano atual. Abra “Gerenciar faturamento” para atualizar sua forma de pagamento e tente novamente.",
+      "paymentRequiresAction": "Seu banco pediu uma confirmação extra para este cartão, então a mudança de plano foi cancelada e você continua no plano atual. Atualize seu cartão em “Atualizar forma de pagamento” e tente novamente.",
       "invalidCheckoutSession": "Este link de confirmação de pagamento não é válido."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Você usou sua franquia mensal de Mais vendidos. Faça uma recarga para continuar navegando pelas listas da Amazon até o período renovar."
       },
       "buy": "Comprar",
-      "note": "Uma recarga vale apenas para o mês civil atual, e é por isso que ela é oferecida quando você atinge o limite, e não antecipadamente. A franquia do seu plano é renovada no dia 1º."
+      "note": "Uma recarga vale apenas para o período de cobrança atual, e é por isso que ela é oferecida quando você atinge o limite, e não antecipadamente. A franquia do seu plano se renova junto com o período."
     }
   }
 }

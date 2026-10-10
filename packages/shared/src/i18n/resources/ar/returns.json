@@ -121,7 +121,7 @@
       "trackingNumber": "رقم التتبع {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "رقم الإرجاع",
-      "actionsOff": "إجراءات الإرجاع داخل التطبيق متوقفة — أجب على eBay."
+      "actionsOff": "إجراءات الإرجاع داخل التطبيق متوقفة. أجب على eBay."
     },
     "actions": {
       "done": {

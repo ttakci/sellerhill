@@ -60,7 +60,7 @@
       },
       "plan": {
         "title": "Forfait et capacité",
-        "subtitle": "Des limites qui vont commencer à refuser du travail."
+        "subtitle": "Des limites qui bloquent toute nouvelle opération une fois atteintes."
       },
       "setup": {
         "title": "Configuration",
@@ -70,9 +70,9 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon a annulé un achat que vous aviez déjà payé",
-        "description_one": "{{count}} commande a été annulée côté Amazon. La vente eBay reste active et due à l'acheteur — passez-la à nouveau ou remboursez avant qu'eBay ne la compte comme un défaut.",
-        "description_many": "{{count}} commandes ont été annulées côté Amazon. Ces ventes eBay restent actives et dues aux acheteurs — passez-les à nouveau ou remboursez avant qu'eBay ne les compte comme des défauts.",
-        "description_other": "{{count}} commandes ont été annulées côté Amazon. Ces ventes eBay restent actives et dues aux acheteurs — passez-les à nouveau ou remboursez avant qu'eBay ne les compte comme des défauts.",
+        "description_one": "{{count}} commande a été annulée côté Amazon. La vente eBay reste active et vous devez toujours l'article à l'acheteur. Commandez-le à nouveau ou remboursez l'acheteur avant qu'eBay ne compte la vente comme un défaut.",
+        "description_many": "{{count}} commandes ont été annulées côté Amazon. Ces ventes eBay restent actives et vous devez toujours les articles aux acheteurs. Commandez-les à nouveau ou remboursez les acheteurs avant qu'eBay ne compte ces ventes comme des défauts.",
+        "description_other": "{{count}} commandes ont été annulées côté Amazon. Ces ventes eBay restent actives et vous devez toujours les articles aux acheteurs. Commandez-les à nouveau ou remboursez les acheteurs avant qu'eBay ne compte ces ventes comme des défauts.",
         "action": "Examiner les commandes"
       },
       "order_fulfillment_blocked": {
@@ -83,7 +83,7 @@
         "action": "Examiner les commandes"
       },
       "order_purchase_unknown": {
-        "title": "Achat non confirmé — vérifiez d'abord Amazon",
+        "title": "Achat non confirmé : vérifiez d'abord Amazon",
         "description_one": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
         "description_many": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
         "description_other": "Commandes dont l'achat Amazon n'a pas pu être confirmé : {{count}}. Le bouton de commande a été actionné mais aucune confirmation n'est revenue ; la commande existe peut-être. Vérifiez Amazon et associez-la avant tout nouvel achat.",
@@ -105,23 +105,23 @@
       },
       "order_tracking_problem": {
         "title": "La conversion du suivi rencontre un problème",
-        "description_one": "{{count}} commande expédiée a un problème ouvert auprès du prestataire de suivi. Tant qu'il n'est pas résolu, cette commande affiche à votre acheteur le numéro de suivi Amazon d'origine au lieu d'un numéro converti.",
-        "description_many": "{{count}} commandes expédiées ont des problèmes ouverts auprès du prestataire de suivi. Tant qu'ils ne sont pas résolus, ces commandes affichent à vos acheteurs les numéros de suivi Amazon d'origine au lieu de numéros convertis.",
-        "description_other": "{{count}} commandes expédiées ont des problèmes ouverts auprès du prestataire de suivi. Tant qu'ils ne sont pas résolus, ces commandes affichent à vos acheteurs les numéros de suivi Amazon d'origine au lieu de numéros convertis.",
+        "description_one": "{{count}} commande expédiée a un problème de conversion du suivi en cours. Ouvrez la commande pour voir ce qu'il faut corriger.",
+        "description_many": "{{count}} commandes expédiées ont des problèmes de conversion du suivi en cours. Ouvrez les commandes pour voir ce qu'il faut corriger.",
+        "description_other": "{{count}} commandes expédiées ont des problèmes de conversion du suivi en cours. Ouvrez les commandes pour voir ce qu'il faut corriger.",
         "action": "Voir les commandes"
       },
       "order_tracking_conversion_held": {
         "title": "Commandes non marquées comme expédiées sur eBay",
-        "description_one": "{{count}} commande a été expédiée sur Amazon il y a plus de {{hours}} heures mais n'a pas été marquée comme expédiée sur eBay, car son numéro de suivi n'a pas pu être converti. Nous n'envoyons jamais le numéro de suivi Amazon d'origine à votre acheteur. Résolvez la cause et la commande sera expédiée automatiquement — d'ici là, elle risque un défaut d'expédition tardive.",
-        "description_many": "{{count}} commandes ont été expédiées sur Amazon il y a plus de {{hours}} heures mais n'ont pas été marquées comme expédiées sur eBay, car leurs numéros de suivi n'ont pas pu être convertis. Nous n'envoyons jamais les numéros de suivi Amazon d'origine à vos acheteurs. Résolvez la cause et elles seront expédiées automatiquement — d'ici là, elles risquent des défauts d'expédition tardive.",
-        "description_other": "{{count}} commandes ont été expédiées sur Amazon il y a plus de {{hours}} heures mais n'ont pas été marquées comme expédiées sur eBay, car leurs numéros de suivi n'ont pas pu être convertis. Nous n'envoyons jamais les numéros de suivi Amazon d'origine à vos acheteurs. Résolvez la cause et elles seront expédiées automatiquement — d'ici là, elles risquent des défauts d'expédition tardive.",
+        "description_one": "{{count}} commande a été expédiée sur Amazon il y a plus de {{hours}} heures mais n'est pas marquée comme expédiée sur eBay, car son numéro de suivi n'a pas pu être converti. Nous n'envoyons jamais le numéro de suivi Amazon d'origine à votre acheteur. Une fois la cause résolue, la commande est automatiquement marquée comme expédiée. D'ici là, elle risque un défaut d'expédition tardive.",
+        "description_many": "{{count}} commandes ont été expédiées sur Amazon il y a plus de {{hours}} heures mais ne sont pas marquées comme expédiées sur eBay, car leurs numéros de suivi n'ont pas pu être convertis. Nous n'envoyons jamais les numéros de suivi Amazon d'origine à vos acheteurs. Une fois la cause résolue, elles sont automatiquement marquées comme expédiées. D'ici là, elles risquent des défauts d'expédition tardive.",
+        "description_other": "{{count}} commandes ont été expédiées sur Amazon il y a plus de {{hours}} heures mais ne sont pas marquées comme expédiées sur eBay, car leurs numéros de suivi n'ont pas pu être convertis. Nous n'envoyons jamais les numéros de suivi Amazon d'origine à vos acheteurs. Une fois la cause résolue, elles sont automatiquement marquées comme expédiées. D'ici là, elles risquent des défauts d'expédition tardive.",
         "action": "Voir les commandes"
       },
       "order_cancelled_amazon_open": {
         "title": "eBay a annulé une vente déjà achetée sur Amazon",
-        "description_one": "{{count}} commande a été annulée sur eBay au cours des {{days}} derniers jours, mais la commande Amazon passée pour elle est toujours ouverte. Plus personne n'attend cet article — annulez la commande Amazon, ou retournez l'article s'il a été expédié.",
-        "description_many": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles — annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
-        "description_other": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles — annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
+        "description_one": "{{count}} commande a été annulée sur eBay au cours des {{days}} derniers jours, mais la commande Amazon passée pour elle est toujours ouverte. Plus personne n'attend cet article. Annulez la commande Amazon, ou retournez l'article s'il a été expédié.",
+        "description_many": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles. Annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
+        "description_other": "{{count}} commandes ont été annulées sur eBay au cours des {{days}} derniers jours, mais les commandes Amazon passées pour elles sont toujours ouvertes. Plus personne n'attend ces articles. Annulez les commandes Amazon, ou retournez les articles s'ils ont été expédiés.",
         "action": "Examiner les commandes"
       },
       "order_late_to_ship": {
@@ -140,8 +140,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Demande d'annulation d'un acheteur",
-        "description_one": "{{count}} acheteur a demandé l'annulation d'une commande — approuvez-la ou refusez-la ici avant l'échéance eBay",
-        "description_other": "{{count}} acheteurs ont demandé l'annulation de commandes — approuvez-les ou refusez-les ici avant l'échéance eBay",
+        "description_one": "{{count}} acheteur a demandé l'annulation d'une commande. Approuvez ou refusez la demande ici avant l'échéance fixée par eBay.",
+        "description_other": "{{count}} acheteurs ont demandé l'annulation de commandes. Approuvez ou refusez les demandes ici avant l'échéance fixée par eBay.",
         "action": "Examiner les demandes"
       },
       "ebay_account_disconnected": {
@@ -188,9 +188,9 @@
       },
       "listing_drafts_pending": {
         "title": "Brouillons jamais publiés",
-        "description_one": "{{count}} brouillon est prêt et ne vous coûte rien — mais il ne vend rien non plus tant qu'il n'est pas en ligne.",
-        "description_many": "{{count}} brouillons sont prêts et ne vous coûtent rien — mais ils ne vendent rien non plus tant qu'ils ne sont pas en ligne.",
-        "description_other": "{{count}} brouillons sont prêts et ne vous coûtent rien — mais ils ne vendent rien non plus tant qu'ils ne sont pas en ligne.",
+        "description_one": "{{count}} brouillon est prêt et ne vous coûte rien, mais il ne vend rien tant qu'il n'est pas en ligne.",
+        "description_many": "{{count}} brouillons sont prêts et ne vous coûtent rien, mais ils ne vendent rien tant qu'ils ne sont pas en ligne.",
+        "description_other": "{{count}} brouillons sont prêts et ne vous coûtent rien, mais ils ne vendent rien tant qu'ils ne sont pas en ligne.",
         "action": "Voir les brouillons"
       },
       "plan_listing_quota": {
@@ -217,22 +217,22 @@
       },
       "setup_no_ebay_store": {
         "title": "Connectez votre boutique eBay",
-        "description": "Rien d'autre dans SellerHill ne peut fonctionner sans boutique eBay connectée — annonces, commandes et automatisation en dépendent. C'est la première chose à faire.",
+        "description": "Rien ne peut fonctionner dans SellerHill sans boutique eBay connectée. Les annonces, les commandes et l'automatisation en dépendent : commencez donc par là.",
         "action": "Connecter eBay"
       },
       "setup_no_amazon_account": {
         "title": "Aucun compte acheteur Amazon pour le moment",
-        "description": "Vous vendez, mais il n'y a aucun compte Amazon pour acheter — chaque commande doit être achetée à la main. En ajouter un active l'exécution automatique.",
+        "description": "Vous vendez, mais aucun compte Amazon n'est disponible pour acheter, donc chaque commande doit être achetée à la main. Ajoutez-en un pour activer l'achat automatique.",
         "action": "Ajouter un compte"
       },
       "setup_no_store_settings": {
         "title": "Paramètres de la boutique pas encore configurés",
-        "description": "Votre origine d'expédition et vos mots-clés de liste noire ne sont pas encore définis. Ils servent à calculer les coûts et à empêcher la publication d'annonces au contenu bloqué.",
+        "description": "L'adresse de votre boutique et les mots de votre liste noire ne sont pas encore définis. L'adresse apparaît sur eBay comme lieu de l'article, et la liste noire empêche la mise en ligne d'annonces contenant des mots bloqués.",
         "action": "Configurer les paramètres"
       },
       "setup_no_listing_settings_group": {
         "title": "Aucun groupe de paramètres d'annonces pour le moment",
-        "description": "Un groupe de paramètres d'annonces définit les règles de prix, de stock et de repricing — chaque annonce en a besoin, vous ne pouvez donc pas créer votre première annonce sans lui.",
+        "description": "Un groupe de paramètres d'annonces définit vos règles de prix, de stock et de repricing. Chaque annonce en a besoin, vous ne pouvez donc pas créer votre première annonce sans lui.",
         "action": "Créer un groupe"
       },
       "setup_auto_fulfill_off": {
@@ -242,12 +242,12 @@
       },
       "plan_conversion_quota": {
         "title": "Limite mensuelle de conversions de suivi presque atteinte",
-        "description": "Vous avez utilisé {{used}} conversions de suivi sur {{limit}} ce mois-ci. Une fois la limite atteinte, les commandes sont toujours expédiées et eBay reçoit toujours un numéro de suivi — mais ce sera celui d'Amazon d'origine, et les acheteurs pourront voir votre fournisseur.",
+        "description": "Vous avez utilisé {{used}} conversions de suivi sur {{limit}} ce mois-ci. Une fois la limite atteinte, les commandes sont toujours expédiées et eBay reçoit toujours un numéro de suivi. Mais ce sera le numéro Amazon d'origine, et les acheteurs pourront voir votre fournisseur.",
         "action": "Voir le forfait"
       },
       "plan_suspended": {
         "title": "L'automatisation est suspendue",
-        "description": "Votre abonnement n'est plus actif : la création d'annonces, les mises à jour de prix et de stock, l'achat automatique et la conversion du suivi sont donc arrêtés. Choisissez un forfait pour reprendre — tout redémarre de lui-même.",
+        "description": "Votre abonnement n'est plus actif : la création d'annonces, les mises à jour de prix et de stock, l'achat automatique et la conversion du suivi sont donc arrêtés. Choisissez un forfait pour reprendre. Tout redémarre de lui-même.",
         "action": "Choisir un forfait"
       },
       "listing_not_selling": {
@@ -260,7 +260,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Nouvelle authentification requise",
+        "needs_reauth": "Reconnexion requise",
         "invalid": "Identifiants invalides",
         "locked": "Verrouillé par Amazon"
       },
@@ -274,9 +274,9 @@
         "tracking_url_mismatch": "Lien de suivi non concordant",
         "needs_tracking_upload": "En attente des détails d'expédition",
         "update_not_applied": "Mise à jour pas encore appliquée",
-        "assign_validation": "Rejeté par le prestataire",
+        "assign_validation": "Conversion refusée",
         "shipment_exception": "Exception du transporteur",
-        "tracking_update_unavailable": "Prestataire indisponible"
+        "tracking_update_unavailable": "Conversion temporairement indisponible"
       }
     }
   }

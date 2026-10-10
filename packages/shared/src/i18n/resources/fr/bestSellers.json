@@ -81,22 +81,22 @@
       },
       "retry": "Réessayer",
       "unavailable": {
-        "title": "Meilleures ventes est temporairement indisponible",
-        "description": "Le service des listes est inaccessible pour le moment. Vos annonces et commandes ne sont pas concernées."
+        "title": "La recherche de produits est temporairement indisponible",
+        "description": "Les listes d’Amazon ne peuvent pas être chargées pour le moment. Vos annonces et commandes ne sont pas concernées."
       },
       "disabled": {
-        "title": "Meilleures ventes n’est pas activé sur ce compte",
+        "title": "La recherche de produits n’est pas activée sur ce compte",
         "description": "La consultation des listes Amazon est désactivée pour votre compte. Contactez l’assistance si vous pensiez y avoir accès."
       },
       "limitReached": {
-        "title": "Trop de chargements de liste en direct aujourd’hui",
-        "description": "Les listes déjà chargées aujourd’hui restent disponibles : passez à l’une d’elles ou réessayez demain."
+        "title": "Limite quotidienne de listes atteinte",
+        "description": "Les listes déjà chargées aujourd’hui restent disponibles : ouvrez l’une d’elles ou réessayez demain."
       }
     },
     "errors": {
-      "disabled": "Meilleures ventes n’est pas activé sur ce compte.",
-      "dailyLimitReached": "Trop de chargements de liste en direct aujourd’hui. Réessayez demain.",
-      "unavailable": "Meilleures ventes est temporairement indisponible.",
+      "disabled": "La recherche de produits n’est pas activée sur ce compte.",
+      "dailyLimitReached": "Vous avez atteint la limite de listes du jour. Réessayez demain.",
+      "unavailable": "La recherche de produits est temporairement indisponible.",
       "unsupportedMarketplace": "Cette place de marché n’est pas prise en charge."
     }
   }

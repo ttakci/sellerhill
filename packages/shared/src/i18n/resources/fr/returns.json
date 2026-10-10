@@ -118,7 +118,7 @@
       "trackingNumber": "Suivi {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "N° de retour",
-      "actionsOff": "Les actions de retour dans l'application sont désactivées — répondez sur eBay."
+      "actionsOff": "Les actions de retour dans l'application sont désactivées. Répondez sur eBay."
     },
     "actions": {
       "done": {
@@ -185,7 +185,7 @@
       "suspended": "Votre abonnement est suspendu, les actions de retour sont donc en pause. Réglez la facture sur la page Facturation.",
       "ebayRejected": "eBay a refusé cette action. Ouvrez le retour sur eBay pour en voir la raison.",
       "unavailable": "eBay est injoignable. Réessayez dans un instant.",
-      "sandbox": "Les actions de retour ne sont pas disponibles sur le sandbox eBay.",
+      "sandbox": "Les actions de retour ne sont pas disponibles dans l'environnement de test d'eBay.",
       "refundAmountUnknown": "eBay n'a pas communiqué de montant de remboursement pour ce retour ; le remboursement doit être effectué sur eBay.",
       "notFound": "Ce retour est introuvable.",
       "labelFileRequired": "Choisissez le fichier de l'étiquette.",

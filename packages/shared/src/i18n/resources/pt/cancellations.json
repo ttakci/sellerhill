@@ -53,9 +53,9 @@
     },
     "bucketHint": {
       "unconfirmed": "O eBay não confirmou este pedido recentemente, por isso o prazo não é exibido.",
-      "action_overdue": "O comprador está aguardando — o prazo do eBay para sua resposta terminou.",
+      "action_overdue": "O comprador está aguardando. O prazo do eBay para sua resposta terminou.",
       "action_due": "O comprador pediu para cancelar. Aceite ou recuse antes do prazo do eBay.",
-      "answered": "Você respondeu a esta solicitação. O eBay está processando — nada mais é necessário de você.",
+      "answered": "Você respondeu a esta solicitação. O eBay está processando e você não precisa fazer mais nada.",
       "in_progress": "No momento, nada é esperado de você.",
       "closed": "O eBay encerrou este pedido."
     },
@@ -91,29 +91,29 @@
     },
     "confirm": {
       "approve": {
-        "body": "O pedido é cancelado e a eBay reembolsa o comprador. Isso não pode ser desfeito.",
+        "body": "O pedido é cancelado e o eBay reembolsa o comprador. Isso não pode ser desfeito.",
         "confirm": "Aprovar cancelamento"
       },
       "reject": {
-        "body": "A eBay é informada de que você recusou e o pedido precisa ser enviado.",
-        "bodyWithTracking": "A eBay é informada de que você recusou e o código de rastreio {{tracking}} é enviado junto. O pedido precisa ser enviado.",
+        "body": "O eBay é informado de que você recusou e o pedido precisa ser enviado.",
+        "bodyWithTracking": "O eBay é informado de que você recusou e o código de rastreio {{tracking}} é enviado junto. O pedido precisa ser enviado.",
         "confirm": "Rejeitar cancelamento"
       }
     },
     "done": {
-      "approve": "Cancelamento aprovado. A eBay vai reembolsar o comprador.",
+      "approve": "Cancelamento aprovado. O eBay vai reembolsar o comprador.",
       "reject": "Cancelamento rejeitado."
     },
-    "actionsOff": "As ações de cancelamento no app estão desativadas — responda na eBay.",
+    "actionsOff": "As ações de cancelamento no app estão desativadas. Responda no eBay.",
     "liveUnavailable": "Não foi possível acessar o eBay agora, então este é o último estado que o SellerHill viu. As respostas ficam disponíveis quando o eBay responder novamente.",
     "errors": {
       "exportFailed": "Não foi possível concluir a exportação. Tente novamente.",
-      "actionsDisabled": "As ações de cancelamento no app estão desativadas nesta plataforma. Responda ao pedido na eBay.",
-      "actionNotAvailable": "A eBay não oferece mais esta ação no pedido. Atualize e veja o que está pendente agora.",
+      "actionsDisabled": "As ações de cancelamento no app estão desativadas nesta plataforma. Responda ao pedido no eBay.",
+      "actionNotAvailable": "O eBay não oferece mais esta ação no pedido. Atualize e veja o que está pendente agora.",
       "suspended": "Sua assinatura está suspensa, então as ações de cancelamento estão pausadas. Quite a fatura na página de Cobrança.",
-      "ebayRejected": "A eBay recusou esta ação. Abra o pedido na eBay para ver o motivo.",
-      "unavailable": "Não foi possível acessar a eBay. Tente novamente em instantes.",
-      "sandbox": "As ações de cancelamento não estão disponíveis no sandbox da eBay.",
+      "ebayRejected": "O eBay recusou esta ação. Abra o pedido no eBay para ver o motivo.",
+      "unavailable": "Não foi possível acessar o eBay. Tente novamente em instantes.",
+      "sandbox": "As ações de cancelamento não estão disponíveis no ambiente de teste do eBay.",
       "notFound": "Este pedido de cancelamento não foi encontrado."
     },
     "party": {

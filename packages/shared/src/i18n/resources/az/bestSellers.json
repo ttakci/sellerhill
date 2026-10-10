@@ -79,22 +79,22 @@
       },
       "retry": "Yenidən cəhd et",
       "unavailable": {
-        "title": "Ən Çox Satılanlar müvəqqəti əlçatan deyil",
-        "description": "Siyahı xidmətinə hazırda çatmaq mümkün deyil. Elanlarınız və sifarişləriniz təsirlənmir."
+        "title": "Məhsul axtarışı müvəqqəti əlçatan deyil",
+        "description": "Amazon siyahılarını hazırda yükləmək mümkün deyil. Elanlarınız və sifarişləriniz təsirlənmir."
       },
       "disabled": {
-        "title": "Ən Çox Satılanlar bu hesabda aktiv deyil",
+        "title": "Məhsul axtarışı bu hesabda aktiv deyil",
         "description": "Amazon siyahılarına baxmaq hesabınız üçün bağlıdır. Görməyi gözləyirdinizsə, dəstəklə əlaqə saxlayın."
       },
       "limitReached": {
-        "title": "Bu gün həddən çox canlı siyahı yükləməsi edildi",
-        "description": "Bu gün artıq yüklənmiş siyahılar hələ də açıqdır — onlardan birinə keçin və ya sabah yenidən cəhd edin."
+        "title": "Gündəlik siyahı limitinə çatıldı",
+        "description": "Bu gün artıq yüklənmiş siyahılar hələ də açıqdır. Onlardan birini açın və ya sabah yenidən cəhd edin."
       }
     },
     "errors": {
-      "disabled": "Ən Çox Satılanlar bu hesabda aktiv deyil.",
-      "dailyLimitReached": "Bu gün həddən çox canlı siyahı yükləməsi edildi. Sabah yenidən cəhd edin.",
-      "unavailable": "Ən Çox Satılanlar müvəqqəti əlçatan deyil.",
+      "disabled": "Məhsul axtarışı bu hesabda aktiv deyil.",
+      "dailyLimitReached": "Bugünkü siyahı limitinə çatdınız. Sabah yenidən cəhd edin.",
+      "unavailable": "Məhsul axtarışı müvəqqəti əlçatan deyil.",
       "unsupportedMarketplace": "Bu bazar dəstəklənmir."
     }
   }

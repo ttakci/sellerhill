@@ -11,7 +11,7 @@
     "locationSectionTitle": "Ajustes de ubicación",
     "locationSectionSubtitle": "Administra la dirección física y la región de tu tienda",
     "country": "País",
-    "state": "Estado/Ubicación",
+    "state": "Estado/Región",
     "zipCode": "Código postal",
     "blacklistType_title": "Título",
     "blacklistType_description": "Descripción",
@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Marca y fabricante",
     "copyright": "© {{year}} SellerHill Platform. Todos los derechos reservados.",
     "amazonTaxRate": "Tasa de impuesto sobre las ventas de Amazon (%)",
-    "amazonTaxRateDesc": "Tasa estimada del impuesto sobre las ventas de Amazon que se aplica al costo de compra. Se usa de dos maneras: sube el precio de tu publicación de eBay para cubrir este costo y, mientras la ganancia de un pedido sigue siendo provisional y el pedido de Amazon aún no se ha realizado, estima la ganancia de ese pedido.",
+    "amazonTaxRateDesc": "Impuesto estimado sobre las ventas de Amazon aplicado al costo de compra. Sube tu precio en eBay para cubrir este costo y estima la ganancia de un pedido hasta que se realice el pedido de Amazon.",
     "autoFulfillEnabled": "Realizar pedidos de Amazon automáticamente tras las ventas de eBay",
     "autoFulfillEnabledHint": "Si está activado, SellerHill compra el artículo en Amazon con tu cuenta de comprador vinculada. Desactívalo para hacer los pedidos manualmente.",
     "autoFulfillEnabledInfo": "Actívalo solo después de conectar y configurar una cuenta de comprador de Amazon. Los pedidos automáticos también requieren que estén activados el ajuste de cumplimiento automático y el límite de gasto de esa cuenta.",
@@ -30,12 +30,12 @@
       "amountHint": "En la moneda de tu tienda. 0 significa no comprar nunca con pérdida."
     },
     "trackingConversionProvider": "Conversión del número de seguimiento",
-    "trackingConversionProviderHint": "Los números de transportistas reales se reenvían tal cual. Amazon Logistics (TBA) pasa sin cambios.",
-    "trackingConversionProviderLocal": "Integrado (local)",
-    "trackingConversionApiComingSoon": "Un proveedor de conversión basado en API está en la hoja de ruta.",
+    "trackingConversionProviderHint": "Los números reales de los transportistas se envían tal cual. Los números de Amazon Logistics (TBA) tampoco se cambian.",
+    "trackingConversionProviderLocal": "Integrado",
+    "trackingConversionApiComingSoon": "Está prevista otra opción de conversión.",
     "messaging": {
       "title": "Mensajes a compradores",
-      "subtitle": "Envía mensajes automáticos a los compradores en los momentos clave del pedido. Opcional y por evento.",
+      "subtitle": "Envía mensajes automáticos a los compradores en los momentos clave del pedido. Puedes activar o desactivar cada evento.",
       "masterEnable": "Activar mensajes automáticos a compradores",
       "shippedWarning": "eBay ya envía una notificación de seguimiento cuando un pedido se marca como enviado. Enviar otra es opcional.",
       "delayDays": "Retraso (días)",
@@ -49,9 +49,9 @@
         "feedback_request": "Solicitud de valoración"
       },
       "eventDescriptions": {
-        "order_received": "Envía el mensaje seleccionado cuando se recibe por primera vez un nuevo pedido de eBay que coincide.",
-        "shipped": "Envía el mensaje seleccionado cuando el seguimiento de Amazon marca el pedido como enviado. eBay también envía su propia notificación de seguimiento.",
-        "delivered": "Envía el mensaje seleccionado cuando el seguimiento de Amazon confirma la entrega.",
+        "order_received": "Envía el mensaje seleccionado cuando llega un pedido nuevo de eBay de una de tus publicaciones de SellerHill.",
+        "shipped": "Envía el mensaje seleccionado cuando Amazon envía el pedido. eBay también envía su propia notificación de seguimiento.",
+        "delivered": "Envía el mensaje seleccionado cuando el seguimiento de Amazon muestra el pedido como entregado.",
         "feedback_request": "Envía la solicitud de valoración seleccionada el número de días elegido después de la entrega."
       },
       "templateSource": "Plantilla",
@@ -74,7 +74,7 @@
           "subtitle": "Consulta, edita o crea tus plantillas de mensajes automáticos a compradores",
           "allEvents": "Todos los eventos",
           "empty": "Aún no hay plantillas para este evento",
-          "emptyDescription": "Crea una plantilla para usar tus propias palabras en los eventos de mensajes a compradores."
+          "emptyDescription": "Crea una plantilla para usar tus propias palabras en los mensajes a compradores."
         },
         "create": {
           "title": "Nueva plantilla de mensaje",
@@ -97,13 +97,13 @@
       }
     },
     "trackingConversionEnabled": "Ocultar los números de seguimiento de mi proveedor",
-    "trackingConversionEnabledHint": "Tu comprador ve un nuevo número de seguimiento emitido por nuestro socio de seguimiento en lugar del original de Amazon, para que nada en eBay apunte a tu proveedor. Si un número no se puede convertir, nunca recurrimos al de Amazon: el pedido se retiene y te lo mostramos en Acciones pendientes.",
+    "trackingConversionEnabledHint": "Tu comprador ve un nuevo número de seguimiento de nuestro socio de seguimiento en lugar del de Amazon, para que nada en eBay apunte a tu proveedor. Si un número no se puede convertir, nunca enviamos el de Amazon. El pedido se retiene y te lo mostramos en Acciones pendientes.",
     "trackingConversionScope": "Qué transportistas convertir",
     "trackingConversionScopeAll": "Todos los transportistas",
     "trackingConversionScopeAmazonOnly": "Solo Amazon Logistics (TBA)",
-    "trackingConversionScopeHint": "Los números de Amazon Logistics (TBA) dicen «Amazon» abiertamente, así que convertir solo esos oculta la señal más clara de tu proveedor y consume mucho menos de tu asignación mensual de conversiones. Convertir todos los transportistas oculta más (un número de UPS o USPS enviado por Amazon a menudo se puede consultar), pero cuesta más, y eBay considera un escaneo nativo del transportista como una prueba de entrega más sólida si un comprador reclama que su artículo nunca llegó.",
+    "trackingConversionScopeHint": "Los números de Amazon Logistics (TBA) dicen «Amazon» abiertamente. Convertir solo esos oculta la señal más clara de tu proveedor y consume mucho menos de tu asignación mensual de conversiones. Convertir todos los transportistas oculta más, porque un número de UPS o USPS enviado por Amazon a menudo se puede consultar, pero cuesta más. Además, si un comprador dice que el artículo nunca llegó, eBay considera el escaneo del transportista original como una prueba de entrega más sólida.",
     "trackingConvertManualOrders": "Convertir pedidos vinculados a mano",
-    "trackingConvertManualOrdersHint": "Un pedido cuenta como vinculado a mano siempre que SellerHill no haya hecho la compra en Amazon: tú lo compraste e ingresaste el número de pedido, o el sistema lo asoció por ti. Si los pedidos automáticos están desactivados, todos tus pedidos entran en este grupo; por eso, al desactivar esto no se convierte ningún número de seguimiento y tu comprador ve el número original de Amazon. Activado por defecto. Con él desactivado, el número original de Amazon se envía a eBay automáticamente en cuanto Amazon envía el pedido, y eBay no permite cambiarlo después.",
+    "trackingConvertManualOrdersHint": "Un pedido cuenta como vinculado a mano cuando SellerHill no lo compró en Amazon por sí mismo: tú lo compraste e ingresaste el número de pedido, o nosotros lo asociamos con tu pedido de Amazon. Si los pedidos automáticos están desactivados, todos tus pedidos entran en este grupo, así que al desactivar esto no se convierte nada y tu comprador ve el número original de Amazon. Activado por defecto. Con él desactivado, el número original de Amazon llega a eBay en cuanto Amazon envía el pedido, y eBay no permite cambiarlo después.",
     "trackingExposure": {
       "conversionOff": "La conversión del número de seguimiento está desactivada. Tus compradores ven el número de seguimiento original de Amazon (TBA…) y pueden rastrear directamente a tu proveedor.",
       "manualAll": "Como los pedidos automáticos están desactivados, TODOS tus pedidos cuentan como vinculados a mano. Con este ajuste desactivado no se convierte nada: el número original de Amazon, incluido el TBA, llega a eBay y expone a tu proveedor.",

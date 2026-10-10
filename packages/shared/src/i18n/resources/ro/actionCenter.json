@@ -60,7 +60,7 @@
       },
       "plan": {
         "title": "Plan și capacitate",
-        "subtitle": "Limite care vor începe să refuze lucrări."
+        "subtitle": "Limite care, odată atinse, opresc activitatea nouă."
       },
       "setup": {
         "title": "Configurare",
@@ -70,9 +70,9 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon a anulat o achiziție pe care ați plătit-o deja",
-        "description_one": "{{count}} comandă a fost anulată de Amazon. Vânzarea eBay este încă activă și încă datorată cumpărătorului — comandați din nou sau rambursați înainte ca eBay să o considere un defect.",
-        "description_few": "{{count}} comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă datorate cumpărătorilor — comandați-le din nou sau rambursați înainte ca eBay să le considere defecte.",
-        "description_other": "{{count}} de comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă datorate cumpărătorilor — comandați-le din nou sau rambursați înainte ca eBay să le considere defecte.",
+        "description_one": "{{count}} comandă a fost anulată de Amazon. Vânzarea eBay este încă activă și încă îi datorați produsul cumpărătorului. Comandați-l din nou sau rambursați cumpărătorul înainte ca eBay să o considere un defect.",
+        "description_few": "{{count}} comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă le datorați produsele cumpărătorilor. Comandați-le din nou sau rambursați cumpărătorii înainte ca eBay să le considere defecte.",
+        "description_other": "{{count}} de comenzi au fost anulate de Amazon. Acele vânzări eBay sunt încă active și încă le datorați produsele cumpărătorilor. Comandați-le din nou sau rambursați cumpărătorii înainte ca eBay să le considere defecte.",
         "action": "Verifică comenzile"
       },
       "order_fulfillment_blocked": {
@@ -83,7 +83,7 @@
         "action": "Verifică comenzile"
       },
       "order_purchase_unknown": {
-        "title": "Achiziție neconfirmată — verifică mai întâi Amazon",
+        "title": "Achiziție neconfirmată: verifică mai întâi Amazon",
         "description_one": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
         "description_few": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
         "description_other": "Comenzi a căror achiziție pe Amazon nu a putut fi confirmată: {{count}}. Butonul de comandă a fost apăsat, dar nu a venit confirmarea, deci comanda poate exista. Verifică Amazon și asociaz-o înainte să se cumpere din nou ceva.",
@@ -105,23 +105,23 @@
       },
       "order_tracking_problem": {
         "title": "Conversia numărului de urmărire are o problemă",
-        "description_one": "{{count}} comandă expediată are o problemă deschisă la furnizorul de urmărire. Până la rezolvare, acea comandă arată cumpărătorului dvs. numărul de urmărire Amazon original în loc de unul convertit.",
-        "description_few": "{{count}} comenzi expediate au probleme deschise la furnizorul de urmărire. Până la rezolvare, acele comenzi arată cumpărătorilor dvs. numerele de urmărire Amazon originale în loc de unele convertite.",
-        "description_other": "{{count}} de comenzi expediate au probleme deschise la furnizorul de urmărire. Până la rezolvare, acele comenzi arată cumpărătorilor dvs. numerele de urmărire Amazon originale în loc de unele convertite.",
+        "description_one": "{{count}} comandă expediată are o problemă deschisă la conversia numărului de urmărire. Deschideți comanda pentru a vedea ce trebuie remediat.",
+        "description_few": "{{count}} comenzi expediate au probleme deschise la conversia numerelor de urmărire. Deschideți comenzile pentru a vedea ce trebuie remediat.",
+        "description_other": "{{count}} de comenzi expediate au probleme deschise la conversia numerelor de urmărire. Deschideți comenzile pentru a vedea ce trebuie remediat.",
         "action": "Vezi comenzile"
       },
       "order_tracking_conversion_held": {
         "title": "Comenzi nemarcate ca expediate pe eBay",
-        "description_one": "{{count}} comandă a fost expediată pe Amazon acum mai mult de {{hours}} ore, dar nu a fost marcată ca expediată pe eBay, deoarece numărul ei de urmărire nu a putut fi convertit. Nu trimitem niciodată cumpărătorului dvs. numărul de urmărire Amazon original. Remediați cauza și comanda se expediază automat — până atunci există riscul unui defect de expediere întârziată.",
-        "description_few": "{{count}} comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu au fost marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. Remediați cauza și comenzile se expediază automat — până atunci există riscul unor defecte de expediere întârziată.",
-        "description_other": "{{count}} de comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu au fost marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. Remediați cauza și comenzile se expediază automat — până atunci există riscul unor defecte de expediere întârziată.",
+        "description_one": "{{count}} comandă a fost expediată pe Amazon acum mai mult de {{hours}} ore, dar nu este marcată ca expediată pe eBay, deoarece numărul ei de urmărire nu a putut fi convertit. Nu trimitem niciodată cumpărătorului dvs. numărul de urmărire Amazon original. După ce remediați cauza, comanda este marcată automat ca expediată. Până atunci există riscul unui defect de expediere întârziată.",
+        "description_few": "{{count}} comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu sunt marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. După ce remediați cauza, comenzile sunt marcate automat ca expediate. Până atunci există riscul unor defecte de expediere întârziată.",
+        "description_other": "{{count}} de comenzi au fost expediate pe Amazon acum mai mult de {{hours}} ore, dar nu sunt marcate ca expediate pe eBay, deoarece numerele lor de urmărire nu au putut fi convertite. Nu trimitem niciodată cumpărătorilor dvs. numerele de urmărire Amazon originale. După ce remediați cauza, comenzile sunt marcate automat ca expediate. Până atunci există riscul unor defecte de expediere întârziată.",
         "action": "Vezi comenzile"
       },
       "order_cancelled_amazon_open": {
         "title": "eBay a anulat o vânzare pe care ați cumpărat-o deja de pe Amazon",
-        "description_one": "{{count}} comandă a fost anulată pe eBay în ultimele {{days}} zile, dar comanda Amazon plasată pentru ea este încă deschisă. Nimeni nu mai așteaptă acest produs — anulați comanda Amazon sau returnați produsul dacă a fost expediat.",
-        "description_few": "{{count}} comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse — anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
-        "description_other": "{{count}} de comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse — anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
+        "description_one": "{{count}} comandă a fost anulată pe eBay în ultimele {{days}} zile, dar comanda Amazon plasată pentru ea este încă deschisă. Nimeni nu mai așteaptă acest produs. Anulați comanda Amazon sau returnați produsul dacă a fost expediat.",
+        "description_few": "{{count}} comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse. Anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
+        "description_other": "{{count}} de comenzi au fost anulate pe eBay în ultimele {{days}} zile, dar comenzile Amazon plasate pentru ele sunt încă deschise. Nimeni nu mai așteaptă aceste produse. Anulați comenzile Amazon sau returnați produsele dacă au fost expediate.",
         "action": "Verifică comenzile"
       },
       "order_late_to_ship": {
@@ -140,8 +140,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Cerere de anulare de la cumpărător",
-        "description_one": "{{count}} cumpărător a cerut anularea unei comenzi — aprobă-o sau respinge-o aici înainte de termenul eBay",
-        "description_other": "{{count}} cumpărători au cerut anularea unor comenzi — aprobă-le sau respinge-le aici înainte de termenul eBay",
+        "description_one": "{{count}} cumpărător a cerut anularea unei comenzi. Aprobă sau respinge cererea aici înainte de termenul eBay.",
+        "description_other": "{{count}} cumpărători au cerut anularea unor comenzi. Aprobă sau respinge cererile aici înainte de termenul eBay.",
         "action": "Verifică cererile"
       },
       "ebay_account_disconnected": {
@@ -188,9 +188,9 @@
       },
       "listing_drafts_pending": {
         "title": "Ciorne care nu au fost niciodată publicate",
-        "description_one": "{{count}} ciornă este pregătită și nu vă costă nimic — dar nici nu vinde nimic până nu devine activă.",
-        "description_few": "{{count}} ciorne sunt pregătite și nu vă costă nimic — dar nici nu vând nimic până nu devin active.",
-        "description_other": "{{count}} de ciorne sunt pregătite și nu vă costă nimic — dar nici nu vând nimic până nu devin active.",
+        "description_one": "{{count}} ciornă este pregătită și nu vă costă nimic, dar nu vinde nimic până nu devine activă.",
+        "description_few": "{{count}} ciorne sunt pregătite și nu vă costă nimic, dar nu vând nimic până nu devin active.",
+        "description_other": "{{count}} de ciorne sunt pregătite și nu vă costă nimic, dar nu vând nimic până nu devin active.",
         "action": "Vezi ciornele"
       },
       "plan_listing_quota": {
@@ -217,22 +217,22 @@
       },
       "setup_no_ebay_store": {
         "title": "Conectați-vă magazinul eBay",
-        "description": "Nimic altceva din SellerHill nu poate funcționa fără un magazin eBay conectat — anunțurile, comenzile și automatizarea depind toate de el. Acesta este lucrul de făcut primul.",
+        "description": "Nimic din SellerHill nu poate funcționa fără un magazin eBay conectat. Anunțurile, comenzile și automatizarea depind toate de el, așa că faceți asta mai întâi.",
         "action": "Conectează eBay"
       },
       "setup_no_amazon_account": {
         "title": "Niciun cont de cumpărător Amazon încă",
-        "description": "Vindeți, dar nu există niciun cont Amazon de la care să cumpărați — fiecare comandă trebuie cumpărată manual. Adăugarea unuia activează îndeplinirea automată.",
+        "description": "Vindeți, dar nu există niciun cont Amazon de la care să cumpărați, așa că fiecare comandă trebuie cumpărată manual. Adăugați unul pentru a activa achiziția automată.",
         "action": "Adaugă cont"
       },
       "setup_no_store_settings": {
         "title": "Setările magazinului nu sunt încă configurate",
-        "description": "Originea expedierii și cuvintele cheie din lista neagră nu sunt încă setate. Acestea sunt folosite pentru calculul costurilor și pentru a împiedica publicarea anunțurilor cu conținut blocat.",
+        "description": "Adresa magazinului și cuvintele cheie din lista neagră nu sunt încă setate. Adresa apare pe eBay ca locație a articolului, iar lista neagră împiedică publicarea anunțurilor cu cuvinte blocate.",
         "action": "Configurează setările"
       },
       "setup_no_listing_settings_group": {
         "title": "Niciun grup de setări pentru anunțuri încă",
-        "description": "Un grup de setări pentru anunțuri definește regulile de preț, stoc și repreț — fiecare anunț are nevoie de unul, așa că nu puteți crea primul anunț fără el.",
+        "description": "Un grup de setări pentru anunțuri stabilește regulile de preț, stoc și repreț. Fiecare anunț are nevoie de unul, așa că nu puteți crea primul anunț fără el.",
         "action": "Creează un grup"
       },
       "setup_auto_fulfill_off": {
@@ -242,12 +242,12 @@
       },
       "plan_conversion_quota": {
         "title": "Limita lunară de conversii de urmărire este aproape atinsă",
-        "description": "Ați folosit {{used}} din {{limit}} conversii de urmărire luna aceasta. După atingerea limitei, comenzile sunt totuși expediate și eBay primește în continuare un număr de urmărire — dar va fi cel Amazon original, deci cumpărătorii vă pot vedea furnizorul.",
+        "description": "Ați folosit {{used}} din {{limit}} conversii de urmărire luna aceasta. După atingerea limitei, comenzile sunt totuși expediate și eBay primește în continuare un număr de urmărire. Dar va fi numărul Amazon original, deci cumpărătorii vă pot vedea furnizorul.",
         "action": "Vezi planul"
       },
       "plan_suspended": {
         "title": "Automatizarea este suspendată",
-        "description": "Abonamentul dvs. nu mai este activ, deci anunțurile noi, actualizările de preț și stoc, achiziția automată și conversia numerelor de urmărire s-au oprit. Alegeți un plan pentru a relua — totul repornește de la sine.",
+        "description": "Abonamentul dvs. nu mai este activ, deci anunțurile noi, actualizările de preț și stoc, achiziția automată și conversia numerelor de urmărire s-au oprit. Alegeți un plan pentru a relua. Totul repornește de la sine.",
         "action": "Alege un plan"
       },
       "listing_not_selling": {
@@ -260,7 +260,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Necesită reautentificare",
+        "needs_reauth": "Necesită o nouă autentificare",
         "invalid": "Date de autentificare invalide",
         "locked": "Blocat de Amazon"
       },
@@ -274,9 +274,9 @@
         "tracking_url_mismatch": "Legătură de urmărire nepotrivită",
         "needs_tracking_upload": "Se așteaptă detaliile expedierii",
         "update_not_applied": "Actualizare încă neaplicată",
-        "assign_validation": "Respins de furnizor",
+        "assign_validation": "Conversie respinsă",
         "shipment_exception": "Excepție a curierului",
-        "tracking_update_unavailable": "Furnizor indisponibil"
+        "tracking_update_unavailable": "Conversie temporar indisponibilă"
       }
     }
   }

@@ -77,16 +77,16 @@
       "in_progress": "Amazon-dan alınır",
       "not_automated": "Avtomatlaşdırılmayıb",
       "manual": "Əl ilə alınıb",
-      "simulated": "Sınaq icrası — alış yoxdur",
+      "simulated": "Sınaq icrası, alış yoxdur",
       "filter": {
         "all": "Bütün yerinə yetirmə vəziyyətləri"
       },
       "detail": {
         "title": "Amazon-da yerinə yetirmə",
         "amazonOrderId": "Amazon sifarişi",
-        "simulatedNotice": "Bu, sınaq icrasıdır. Amazon sifarişi verilməyib və heç bir pul çıxılmayıb — aşağıdakı xərclər və mənfəət simulyasiya olunub.",
+        "simulatedNotice": "Bu, sınaq icrasıdır. Amazon sifarişi verilməyib və heç bir pul çıxılmayıb. Aşağıdakı xərclər və mənfəət simulyasiya olunub.",
         "actionRequiredNotice": "Avtomatlaşdırma almadan əvvəl dayandı. Səbəbə baxın və bu sifarişi əl ilə yerinə yetirin.",
-        "cancelledNotice": "Amazon alışı ləğv edildi. eBay satışı hələ də alıcıya borcludur — onu başqa yolla yerinə yetirin.",
+        "cancelledNotice": "Amazon alışı ləğv edildi. Bu məhsulu eBay alıcısına hələ də borclusunuz, ona görə onu başqa yolla yerinə yetirin.",
         "notAutomatedNotice": "Bu sifariş üçün avtomatik sifariş deaktivdir.",
         "attemptedAt": "Son cəhd"
       }
@@ -95,14 +95,14 @@
       "tracked": "Bir elana bağlıdır",
       "untracked": "Elana bağlı deyil",
       "problem": {
-        "wrongPageType": "İzləmə provayderi Amazon-un sifariş səhifəsini oxuya bilmədi — format dəyişmiş ola bilər. Bu, avtomatik təkrar cəhd ediləcək.",
+        "wrongPageType": "İzləmə nömrəsini çevirmək üçün Amazon-un sifariş səhifəsini oxumaq mümkün olmadı. Amazon səhifəni dəyişmiş ola bilər. Bu, avtomatik təkrar cəhd ediləcək.",
         "amazonSessionExpired": "Bu sifarişi oxumaq üçün istifadə olunan Amazon sessiyasının müddəti bitib və yenidən daxil olmaq lazımdır.",
         "trackingUrlMismatch": "Amazon-un sifariş səhifəsindəki izləmə bağlantısı gözlədiyimizə uyğun gəlmədi. Bu, avtomatik təkrar cəhd ediləcək.",
-        "needsTrackingUpload": "İzləmə nömrəsinin çevrilməsi üçün göndəriş təfərrüatlarının yüklənməsi gözlənilir.",
-        "updateNotApplied": "İzləmə yeniləməsi provayder tərəfindən hələ tətbiq olunmayıb. Bu, avtomatik təkrar cəhd ediləcək.",
-        "assignValidation": "İzləmə provayderi bu sifarişin göndəriş təfərrüatlarını rədd etdi.",
-        "shipmentException": "İzləmə provayderi bu göndəriş üzrə istisna bildirdi.",
-        "trackingUpdateUnavailable": "İzləmə provayderi bu göndərişi hazırda yeniləyə bilmədi.",
+        "needsTrackingUpload": "İzləmə nömrəsinin çevrilməsi üçün göndəriş təfərrüatları gözlənilir.",
+        "updateNotApplied": "İzləmə yeniləməsi hələ tətbiq olunmayıb. Bu, avtomatik təkrar cəhd ediləcək.",
+        "assignValidation": "İzləmə nömrəsi çevrilərkən bu sifarişin göndəriş təfərrüatları rədd edildi.",
+        "shipmentException": "Bu göndəriş üzrə problem bildirildi.",
+        "trackingUpdateUnavailable": "Bu göndərişin izləmə məlumatı hazırda yenilənə bilmədi.",
         "generic": "Bu sifarişin izləmə nömrəsinin çevrilməsində problem var. Avtomatik təkrar cəhd ediləcək."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Məhsul Amazon-da tapılmadı",
         "captcha": "Captcha tələb olunur",
-        "otp": "MFA/OTP yoxlaması",
+        "otp": "Təsdiq kodu tələb olunur",
         "login": "Giriş uğursuz oldu",
         "out_of_stock": "Stokda yoxdur",
         "address": "Ünvan problemi",
         "payment": "Ödəniş rədd edildi",
         "cap": "Xərc limitini aşır",
         "no_confirmation": "Təsdiq yoxdur",
-        "proxy_required": "Proksi konfiqurasiya olunmayıb",
+        "proxy_required": "Hesabın proksisindən istifadə etmək mümkün olmadı",
         "quota_exhausted": "Aylıq kvota dolub",
         "cart": "Səbət uyğunsuzluğu",
         "review_unreadable": "Sifariş məbləği oxunmadı",
-        "interrupted": "Alış yarımçıq qaldı — Amazon'u yoxlayın",
+        "interrupted": "Alış yarımçıq qaldı, Amazon-u yoxlayın",
         "subscription_suspended": "Abunəlik dayandırılıb",
         "listing_over_plan_limit": "Elan plan limitindən kənardadır",
-        "order_already_fulfilled": "Artıq göndərilib — alınacaq heç nə yoxdur",
+        "order_already_fulfilled": "Artıq göndərilib, alınacaq heç nə yoxdur",
         "order_not_paid": "Alıcının ödənişi gözlənilir",
-        "order_cancelled": "eBay-də ləğv edildi — alınacaq bir şey yoxdur",
-        "multi_item_order": "Sifarişdə bir neçə məhsul var — əl ilə alın",
-        "cancel_requested": "Alıcı ləğv istədi — eBay-də cavab verin",
+        "order_cancelled": "eBay-də ləğv edildi, alınacaq heç nə yoxdur",
+        "multi_item_order": "Sifarişdə bir neçə məhsul var, əl ilə alın",
+        "cancel_requested": "Alıcı ləğv istədi, eBay-də cavab verin",
         "loss_limit": "Zərər limitinizdən yuxarıdır"
       },
       "reasonLabel": "Səbəb: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Amazon-da yoxdur",
         "confirmTitle": "Bu satış üçün Amazon-da sifariş olmadığını təsdiqləyirsiniz?",
-        "confirmDescription": "Yalnız bu Amazon hesabının sifarişlərinə baxıb sifarişin orada olmadığını gördükdən sonra davam edin. SellerHill də hesabın sifariş siyahısını yoxlayır və bu yoxlama aparılmayınca təsdiqi qəbul etmir. Bundan sonra avtomatik sifariş yenidən başladıla bilər — sifariş əslində Amazon-da varsa, məhsul iki dəfə alınacaq.",
+        "confirmDescription": "Yalnız bu Amazon hesabının sifarişlərinə baxıb sifarişin orada olmadığını gördükdən sonra davam edin. SellerHill də hesabın sifariş siyahısını yoxlayır və bu yoxlama aparılmayınca təsdiqi qəbul etmir. Bundan sonra avtomatik sifariş yenidən başladıla bilər. Sifariş əslində Amazon-da varsa, məhsul iki dəfə alınacaq.",
         "confirm": "Bəli, orada yoxdur",
         "done": "Alınmamış kimi qeyd edildi. Avtomatik sifarişi yenidən başlada bilərsiniz."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Daha ətraflı bax",
       "updateAmazon": "Amazon məlumatını daxil et",
       "netProfitAnalysis": "XALİS MƏNFƏƏT TƏHLİLİ",
-      "analysisDesc": "Bu hesablama eBay-dən əldə etdiyiniz real qazancı bütün platforma haqları və vergilər çıxıldıqdan sonra nəzərə alır və ilkin Amazon alış xərcini çıxır.",
+      "analysisDesc": "Bütün platforma haqları və vergilər çıxıldıqdan sonra eBay qazancınız, ilkin Amazon alış xərci çıxılmaqla.",
       "calculation": "Hesablama",
       "netProfitResult": "Xalis mənfəət",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Son göndərmə tarixi",
       "shipByNotice": "eBay-də son göndərmə tarixi: {{date}}",
       "shipByHeading": "eBay-də son göndərmə tarixi",
-      "multiItemNotice": "Bu eBay sifarişində {{count}} məhsul var. SellerHill yalnız birincini izləyir və bu sifarişi avtomatik almır — digər məhsulları özünüz alıb göndərin."
+      "multiItemNotice": "Bu eBay sifarişində {{count}} məhsul var. SellerHill yalnız birincini izləyir və bu sifarişi avtomatik almır. Digər məhsulları özünüz alıb göndərin."
     },
     "modal": {
       "title": "Amazon sifariş məlumatını daxil edin",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Təxmini",
-    "estimateNote": "Təxmini mənfəət — Amazon sifarişi veriləndə yekunlaşır. Amazon-un son məlum qiymətinə əsaslanır; Amazon çatdırılması daxil deyil.",
+    "estimateNote": "Təxmini mənfəət. Amazon sifarişi verildikdən sonra yekunlaşır. Amazon-un son məlum qiymətinə əsaslanır; Amazon çatdırılması daxil deyil.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Bütün hüquqlar qorunur."
     },
     "errors": {
       "notFound": "Sifariş tapılmadı.",
-      "noTrackingYet": "Bu sifarişin hələ Amazon izləmə nömrəsi yoxdur — göndərilməyib.",
+      "noTrackingYet": "Bu sifarişin hələ Amazon izləmə nömrəsi yoxdur. Sifariş göndərilməyib.",
       "conversionUnavailable": "İzləmə nömrəsi hazırda çevrilə bilmədi. Plan limitinizi və çevirmə parametrlərinizi yoxlayıb yenidən cəhd edin.",
       "conversionDone": "İzləmə nömrəsi çevrildi.",
       "orderNotTracked": "Bu sifariş elanlarınızdan birinə bağlı deyil, ona görə çevrilmiş izləmə nömrəsi heç vaxt eBay-ə göndərilə bilməz. Əvvəlcə sifarişi öz elanına əlaqələndirin.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "Bu satış Amazon hesabınızın xərc limitini keçir. Limiti Amazon hesabının ayarlarında artırın və ya məhsulu əl ilə alın.",
       "autoFulfillAlreadyStarted": "Bu sifarişin statusu indicə dəyişdi, alış artıq başlamış ola bilər. Səhifəni yeniləyin.",
       "autoFulfillQuotaExhausted": "Planınızın bu dövr üçün avtomatik sifariş limiti bitib.",
-      "purchaseNotYetChecked": "SellerHill alış cəhdindən sonra bu Amazon hesabının sifarişlərini hələ yoxlamayıb. Yoxlama indi başladıldı — bir neçə dəqiqədən sonra yenidən cəhd edin.",
+      "purchaseNotYetChecked": "SellerHill alış cəhdindən sonra bu Amazon hesabının sifarişlərini hələ yoxlamayıb. Yoxlama indi başladıldı. Bir neçə dəqiqədən sonra yenidən cəhd edin.",
       "purchaseNotUnknown": "Bu sifariş alış təsdiqi gözləmir. Artıq bağlanmış və ya icrada ola bilər. Səhifəni yeniləyin.",
       "purchaseFoundOnAmazon": "SellerHill bu məhsul üçün alış cəhdi ilə təxminən eyni vaxtda verilmiş bir Amazon sifarişi tapdı, lakin onu bu satışla dəqiq uyğunlaşdıra bilmədi. Amazon sifarişlərinizi açıb onu əl ilə bağlayın. Həmin sifariş başqa satışa aiddirsə, əvvəlcə onu o satışa bağlayın.",
       "noteTooLong": "Qeyd ən çox 1000 simvol ola bilər.",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "İzləmə saxlanılıb",
-        "meaning": "Amazon göndərdi, amma izləmə hələ eBay-ə çatmayıb — adətən izləmə çevrilməsi gözlənilir.",
+        "meaning": "Amazon göndərdi, amma izləmə nömrəsi hələ eBay-ə çatmayıb. Adətən izləmə nömrəsinin çevrilməsi hələ gözlənilir.",
         "action": "İzləməni çevirin və ya sifarişdə göstərilən səbəbi aradan qaldırın."
       },
       "buying": {

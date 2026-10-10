@@ -113,7 +113,7 @@
       "suspended": "Tu suscripción está suspendida, por lo que las acciones de cancelación están en pausa. Salda la factura en la página de Facturación.",
       "ebayRejected": "eBay rechazó esta acción. Abre la solicitud en eBay para ver el motivo.",
       "unavailable": "No se pudo contactar con eBay. Inténtalo de nuevo en un momento.",
-      "sandbox": "Las acciones de cancelación no están disponibles en el sandbox de eBay.",
+      "sandbox": "Las acciones de cancelación no están disponibles en el entorno de prueba de eBay.",
       "notFound": "No se encontró esta solicitud de cancelación."
     },
     "party": {

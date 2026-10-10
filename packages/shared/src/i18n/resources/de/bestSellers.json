@@ -79,22 +79,22 @@
       },
       "retry": "Erneut versuchen",
       "unavailable": {
-        "title": "Bestseller ist vorübergehend nicht verfügbar",
-        "description": "Der Listendienst ist derzeit nicht erreichbar. Ihre Angebote und Bestellungen sind nicht betroffen."
+        "title": "Die Produktsuche ist vorübergehend nicht verfügbar",
+        "description": "Die Listen von Amazon können gerade nicht geladen werden. Ihre Angebote und Bestellungen sind nicht betroffen."
       },
       "disabled": {
-        "title": "Bestseller ist für dieses Konto nicht aktiviert",
+        "title": "Die Produktsuche ist für dieses Konto nicht aktiviert",
         "description": "Das Durchsuchen von Amazon-Listen ist für Ihr Konto ausgeschaltet. Wenden Sie sich an den Support, wenn Sie es erwartet haben."
       },
       "limitReached": {
-        "title": "Heute zu viele Live-Listenabrufe",
-        "description": "Heute bereits geladene Listen sind weiterhin verfügbar – wechseln Sie zu einer davon oder versuchen Sie es morgen erneut."
+        "title": "Tageslimit für Listen erreicht",
+        "description": "Heute bereits geladene Listen sind weiterhin verfügbar. Öffnen Sie eine davon oder versuchen Sie es morgen erneut."
       }
     },
     "errors": {
-      "disabled": "Bestseller ist für dieses Konto nicht aktiviert.",
-      "dailyLimitReached": "Heute zu viele Live-Listenabrufe. Versuchen Sie es morgen erneut.",
-      "unavailable": "Bestseller ist vorübergehend nicht verfügbar.",
+      "disabled": "Die Produktsuche ist für dieses Konto nicht aktiviert.",
+      "dailyLimitReached": "Sie haben das heutige Listenlimit erreicht. Versuchen Sie es morgen erneut.",
+      "unavailable": "Die Produktsuche ist vorübergehend nicht verfügbar.",
       "unsupportedMarketplace": "Dieser Marktplatz wird nicht unterstützt."
     }
   }

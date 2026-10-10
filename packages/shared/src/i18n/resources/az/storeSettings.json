@@ -5,13 +5,13 @@
     "saveChanges": "Dəyişiklikləri yadda saxla",
     "viewLogs": "Jurnallara bax",
     "globalSettings": "Parametrləri bütün mağazalara tətbiq et",
-    "globalDescription": "Aşağıdakı konfiqurasiyanı bütün qoşulmuş mağazalara yaymaq üçün bunu aktiv edin. Konkret mağaza seçmək üçün deaktiv edin.",
+    "globalDescription": "Aşağıdakı parametrləri bütün qoşulmuş mağazalara tətbiq etmək üçün bunu aktiv edin. Bir mağaza seçmək üçün söndürün.",
     "selectStore": "Mağaza seçin",
     "selectStorePlaceholder": "Mağaza axtarın və seçin...",
     "locationSectionTitle": "Məkan parametrləri",
     "locationSectionSubtitle": "Mağazanızın fiziki ünvanını və regionunu idarə edin",
     "country": "Ölkə",
-    "state": "Ştat/Məkan",
+    "state": "Ştat/Region",
     "zipCode": "Poçt indeksi",
     "blacklistType_title": "Başlıq",
     "blacklistType_description": "Təsvir",
@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Brend və istehsalçı",
     "copyright": "© {{year}} SellerHill Platform. Bütün hüquqlar qorunur.",
     "amazonTaxRate": "Amazon satış vergisi dərəcəsi (%)",
-    "amazonTaxRateDesc": "Alış xərcinə tətbiq olunan təxmini Amazon satış vergisi dərəcəsi. İki məqsədlə istifadə olunur: bu xərcin ödənilməsi üçün eBay elan qiymətinizi artırır və — sifarişin mənfəəti hələ müvəqqəti olduqda və Amazon sifarişi hələ verilmədikdə — həmin sifarişin mənfəətini təxmin edir.",
+    "amazonTaxRateDesc": "Alış xərcinə tətbiq olunan təxmini Amazon satış vergisi. Bu xərci qarşılamaq üçün eBay qiymətinizi artırır və Amazon sifarişi verilənə qədər sifarişin mənfəətini təxmin edir.",
     "autoFulfillEnabled": "eBay satışlarından sonra Amazon sifarişlərini avtomatik ver",
     "autoFulfillEnabledHint": "Aktiv olduqda, SellerHill məhsulu əlaqələndirilmiş alıcı hesabınızla Amazon-dan alır. Sifarişləri əl ilə vermək üçün deaktiv edin.",
     "autoFulfillEnabledInfo": "Bunu yalnız Amazon alıcı hesabını qoşub konfiqurasiya etdikdən sonra aktiv edin. Avtomatik sifariş həm də həmin hesabın avtomatik yerinə yetirmə parametrinin və xərc limitinin aktiv olmasını tələb edir.",
@@ -30,12 +30,12 @@
       "amountHint": "Mağazanızın valyutasında. 0 heç vaxt zərərlə almamaq deməkdir."
     },
     "trackingConversionProvider": "İzləmə nömrəsinin çevrilməsi",
-    "trackingConversionProviderHint": "Real daşıyıcı nömrələri olduğu kimi ötürülür. Amazon Logistics (TBA) dəyişdirilmədən keçir.",
-    "trackingConversionProviderLocal": "Daxili (lokal)",
-    "trackingConversionApiComingSoon": "API əsaslı çevirmə provayderi yol xəritəsindədir.",
+    "trackingConversionProviderHint": "Real daşıyıcı nömrələri olduğu kimi göndərilir. Amazon Logistics (TBA) nömrələri də dəyişdirilmir.",
+    "trackingConversionProviderLocal": "Daxili",
+    "trackingConversionApiComingSoon": "Başqa bir çevirmə seçimi planlaşdırılır.",
     "messaging": {
       "title": "Alıcı mesajları",
-      "subtitle": "Sifarişin əsas məqamlarında alıcılara avtomatik mesaj göndərin. İxtiyaridir və hadisə üzrə ayrıca tənzimlənir.",
+      "subtitle": "Sifarişin əsas məqamlarında alıcılara avtomatik mesaj göndərin. Hər hadisəni ayrıca açıb-söndürə bilərsiniz.",
       "masterEnable": "Avtomatik alıcı mesajlarını aktiv et",
       "shippedWarning": "Sifariş göndərilmiş kimi qeyd olunanda eBay artıq izləmə bildirişi göndərir. Əlavə mesaj göndərmək ixtiyaridir.",
       "delayDays": "Gecikmə (gün)",
@@ -48,9 +48,9 @@
         "feedback_request": "Rəy sorğusu"
       },
       "eventDescriptions": {
-        "order_received": "Yeni uyğunlaşdırılmış eBay sifarişi ilk dəfə qəbul edildikdə seçilmiş mesajı göndərir.",
-        "shipped": "Amazon izləməsi sifarişi göndərilmiş kimi qeyd etdikdən sonra seçilmiş mesajı göndərir. eBay də öz izləmə bildirişini göndərir.",
-        "delivered": "Amazon izləməsi çatdırılmanı təsdiqlədikdə seçilmiş mesajı göndərir.",
+        "order_received": "SellerHill elanlarınızdan biri üçün yeni eBay sifarişi gəldikdə seçilmiş mesajı göndərir.",
+        "shipped": "Amazon sifarişi göndərdikdən sonra seçilmiş mesajı göndərir. eBay də öz izləmə bildirişini göndərir.",
+        "delivered": "Amazon izləməsi sifarişi çatdırılmış kimi göstərdikdə seçilmiş mesajı göndərir.",
         "feedback_request": "Çatdırılmadan seçilmiş gün sayı sonra seçilmiş rəy sorğusunu göndərir."
       },
       "templateSource": "Şablon",
@@ -73,7 +73,7 @@
           "subtitle": "Avtomatik alıcı mesajı şablonlarınıza baxın, onları redaktə edin və ya yenisini yaradın",
           "allEvents": "Bütün hadisələr",
           "empty": "Bu hadisə üçün hələ şablon yoxdur",
-          "emptyDescription": "Alıcı mesajı hadisələri üçün öz mətninizdən istifadə etmək üçün şablon yaradın."
+          "emptyDescription": "Alıcı mesajlarında öz mətninizdən istifadə etmək üçün şablon yaradın."
         },
         "create": {
           "title": "Yeni mesaj şablonu",
@@ -92,20 +92,20 @@
         "delete": "Sil",
         "reset": "Standarta sıfırla",
         "resetConfirm": "Orijinal standart mesaj bərpa olunsun? Mətndə etdiyiniz dəyişikliklər itəcək.",
-        "deleteConfirmDescription": "Bu, \"{{name}}\" şablonunu birdəfəlik siləcək. Hazırda hansısa mesaj hadisəsi ondan istifadə edirsə, siz başqa şablon seçənə qədər həmin hadisə mesaj göndərməyəcək."
+        "deleteConfirmDescription": "Bu, \"{{name}}\" şablonunu birdəfəlik silir. Hansısa hadisə ondan istifadə edirsə, siz başqa şablon seçənə qədər həmin hadisə mesaj göndərməyəcək."
       }
     },
     "trackingConversionEnabled": "Təchizatçımın izləmə nömrələrini gizlət",
-    "trackingConversionEnabledHint": "Alıcınız orijinal Amazon nömrəsi əvəzinə izləmə tərəfdaşımızın verdiyi yeni izləmə nömrəsini görür, beləliklə eBay-də heç nə təchizatçınıza işarə etmir. Nömrə çevrilə bilmirsə, heç vaxt Amazon nömrəsinə qayıtmırıq — bunun əvəzinə sifariş saxlanılır və Gözləyən əməliyyatlarda sizə göstərilir.",
+    "trackingConversionEnabledHint": "Alıcınız Amazon nömrəsi əvəzinə izləmə tərəfdaşımızın verdiyi yeni izləmə nömrəsini görür, beləliklə eBay-də heç nə təchizatçınıza işarə etmir. Nömrə çevrilə bilmirsə, Amazon nömrəsini heç vaxt göndərmirik. Sifariş saxlanılır və Gözləyən əməliyyatlarda sizə göstərilir.",
     "trackingConversionScope": "Hansı daşıyıcılar çevrilsin",
     "trackingConversionScopeAll": "Bütün daşıyıcılar",
     "trackingConversionScopeAmazonOnly": "Yalnız Amazon Logistics (TBA)",
-    "trackingConversionScopeHint": "Amazon Logistics (TBA) nömrələri açıq şəkildə \"Amazon\" deyir, buna görə yalnız onları çevirmək təchizatçınızın ən aydın əlamətini gizlədir və aylıq çevirmə limitinizdən xeyli az istifadə edir. Bütün daşıyıcıları çevirmək daha çox şeyi gizlədir — Amazon tərəfindən göndərilən UPS və ya USPS nömrəsi çox vaxt axtarıla bilir — lakin daha baha başa gəlir və alıcı məhsulunun çatmadığını iddia edərsə, eBay doğma daşıyıcı skanını çatdırılmanın daha güclü sübutu sayır.",
+    "trackingConversionScopeHint": "Amazon Logistics (TBA) nömrələri açıq şəkildə \"Amazon\" deyir. Yalnız onları çevirmək təchizatçınızın ən aydın əlamətini gizlədir və aylıq çevirmə limitinizdən xeyli az istifadə edir. Bütün daşıyıcıları çevirmək daha çoxunu gizlədir, çünki Amazon-un göndərdiyi UPS və ya USPS nömrəsini çox vaxt axtarıb tapmaq olur, lakin daha baha başa gəlir. Həmçinin alıcı məhsulun çatmadığını desə, eBay orijinal daşıyıcının skanını çatdırılmanın daha güclü sübutu sayır.",
     "trackingConvertManualOrders": "Əl ilə əlaqələndirilmiş sifarişləri çevir",
-    "trackingConvertManualOrdersHint": "SellerHill Amazon alışını özü etmədikdə sifariş əl ilə əlaqələndirilmiş sayılır: siz özünüz alıb sifariş nömrəsini daxil etmisiniz və ya sistem onu sizin üçün uyğunlaşdırıb. Avtomatik sifariş deaktivdirsə, bütün sifarişləriniz bu qrupa düşür — deməli, bunu söndürmək heç bir izləmə nömrəsinin çevrilməməsi və alıcınızın xam Amazon nömrəsini görməsi deməkdir. Standart olaraq aktivdir. Söndürülübsə, Amazon sifarişi göndərən kimi xam Amazon nömrəsi avtomatik olaraq eBay-ə göndərilir və eBay onu sonradan dəyişməyə icazə vermir.",
+    "trackingConvertManualOrdersHint": "SellerHill məhsulu Amazon-da özü almadıqda sifariş əl ilə əlaqələndirilmiş sayılır: siz özünüz alıb sifariş nömrəsini daxil etmisiniz və ya biz onu Amazon sifarişinizlə uyğunlaşdırmışıq. Avtomatik sifariş söndürülübsə, bütün sifarişləriniz bu qrupdadır, ona görə bunu söndürmək heç nəyin çevrilməməsi və alıcınızın xam Amazon nömrəsini görməsi deməkdir. Standart olaraq aktivdir. Söndürülübsə, Amazon sifarişi göndərən kimi xam Amazon nömrəsi eBay-ə gedir və eBay onu sonradan dəyişməyə icazə vermir.",
     "trackingExposure": {
       "conversionOff": "İzləmə nömrəsinin çevrilməsi deaktivdir. Alıcılarınız Amazon-un xam izləmə nömrəsini (TBA…) görür və təchizatçınızı birbaşa izləyə bilər.",
-      "manualAll": "Avtomatik sifariş deaktiv olduğuna görə BÜTÜN sifarişləriniz əl ilə əlaqələndirilmiş sayılır. Bu parametr söndürülübsə, heç nə çevrilmir — TBA daxil olmaqla xam Amazon nömrəsi eBay-ə gedir və təchizatçınızı üzə çıxarır.",
+      "manualAll": "Avtomatik sifariş deaktiv olduğuna görə BÜTÜN sifarişləriniz əl ilə əlaqələndirilmiş sayılır. Bu parametr söndürülübsə, heç nə çevrilmir: TBA daxil olmaqla xam Amazon nömrəsi eBay-ə gedir və təchizatçınızı üzə çıxarır.",
       "manualSome": "Əl ilə əlaqələndirdiyiniz sifarişlər xam Amazon izləmə nömrəsi (TBA…) ilə göndəriləcək və bu sifarişlərdə təchizatçınız üzə çıxacaq.",
       "confirmConversionOff": "Çevirməni söndürsəniz, bundan sonrakı hər sifarişdə alıcınız xam Amazon izləmə nömrəsini (TBA…) görəcək və təchizatçınız üzə çıxacaq. İzləmə nömrəsi eBay-ə göndərildikdən sonra dəyişdirilə bilməz. Söndürmək istədiyinizə əminsiniz?",
       "confirmManualOff": "Bunu söndürsəniz, əl ilə əlaqələndirdiyiniz sifarişlər xam Amazon izləmə nömrəsi (TBA…) ilə göndəriləcək. Avtomatik sifariş deaktiv olduqda bu, bütün sifarişləriniz deməkdir. İzləmə nömrəsi eBay-ə göndərildikdən sonra dəyişdirilə bilməz. Söndürmək istədiyinizə əminsiniz?",

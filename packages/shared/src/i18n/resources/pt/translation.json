@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Conta Amazon",
-          "subtitle": "Gerencie suas contas de comprador para a coleta de pedidos"
+          "subtitle": "Gerencie as contas de comprador da Amazon usadas nos seus pedidos"
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Conectada desde",
         "reconnect": {
           "action": "Reconectar",
-          "hint": "Entre no eBay novamente para renovar as permissões desta loja. A loja, seus pedidos e anúncios continuam como estão — não é preciso desconectá-la antes."
+          "hint": "Entre no eBay novamente para renovar as permissões desta loja. A loja, seus pedidos e anúncios continuam como estão. Não é preciso desconectá-la antes."
         },
         "disconnect": {
           "action": "Desconectar",
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Contas Amazon",
-        "subtitle": "Suas contas de comprador para a coleta de pedidos",
+        "subtitle": "Suas contas de comprador da Amazon usadas nos pedidos",
         "addNew": {
           "title": "Nova conta Amazon",
-          "subtitle": "Conecte uma nova conta de comprador para a coleta de pedidos"
+          "subtitle": "Conecte uma nova conta de comprador para seus pedidos"
         },
         "empty": {
           "title": "Ainda não há contas de comprador",
-          "description": "Conecte uma conta de comprador da Amazon para varrer seus pedidos e capturar os custos reais."
+          "description": "Conecte uma conta de comprador da Amazon para que possamos ler seus pedidos da Amazon e registrar os custos reais."
         },
         "viewAll": {
           "title": "Todas"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Adicionar conta Amazon",
-        "subtitle": "Informe as credenciais para a coleta de pedidos",
+        "subtitle": "Informe os dados de login da sua conta de comprador da Amazon",
         "label": "Nome da conta",
         "email": "E-mail",
         "password": "Senha",
         "twoFactorSecret": "Chave secreta 2FA",
-        "twoFactorSecretHint": "Obrigatório. A Amazon pede um código de verificação em quase todo login automatizado, e uma chave de autenticador é a única que podemos responder por você. Nas configurações de Login e segurança da Amazon, ative um aplicativo autenticador e cole aqui a chave de configuração — não um código de 6 dígitos. Ao editar uma conta existente, deixe em branco para manter a chave salva."
+        "twoFactorSecretHint": "Obrigatório. A Amazon pede um código de verificação em quase todo login automático, e uma chave de autenticador é a única forma de inserirmos esse código por você. Nas configurações de Login e segurança da Amazon, ative um aplicativo autenticador e cole aqui a chave de configuração dele, não um código de 6 dígitos. Ao editar uma conta, deixe em branco para manter a chave salva."
       },
       "amazonEdit": {
         "title": "Editar conta Amazon",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Preço e estoque acompanhados 4 vezes ao dia",
-        "description": "O preço e o estoque da origem são verificados quatro vezes por dia, e qualquer mudança chega ao seu anúncio no eBay na mesma passagem. Mesmo quando uma verificação diária já seria rara, você deixa de vender o que está sem estoque e de manter preços que dão prejuízo.",
+        "description": "O preço e o estoque da origem são verificados quatro vezes por dia, e qualquer mudança chega ao seu anúncio no eBay na mesma passagem. Você deixa de vender o que está sem estoque e de manter preços que dão prejuízo. Nesta categoria, até uma verificação por dia é rara.",
         "caption": "Uma verificação a cada 6 horas"
       },
       "specifics": {
         "title": "Características do item, de fato preenchidas",
-        "description": "Não pulamos campos obrigatórios com \"Não se aplica\". Cada atributo é associado a um valor que a categoria do eBay aceita, para que seu anúncio apareça nos filtros dos compradores.",
+        "description": "Os campos obrigatórios são preenchidos com os dados reais do produto sempre que existem, ajustados aos valores que a categoria do eBay aceita. Assim seu anúncio aparece nos filtros dos compradores.",
         "others": "Outros",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Automação acessível",
-        "description": "O conjunto completo de automação profissional por uma mensalidade bem menor. Todos os recursos estão em todos os planos, os pedidos automáticos são ilimitados; os planos só diferem em anúncios, conversões de rastreio e navegação em Mais vendidos.",
+        "description": "O conjunto completo de automação profissional por uma mensalidade acessível. Todos os recursos estão em todos os planos, os pedidos automáticos são ilimitados e os planos só diferem em anúncios, conversões de rastreio e navegação em Mais vendidos.",
         "cta": "Ver planos"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Anúncios em lote por ASIN",
-          "description": "Cole centenas de ASINs e deixe os anúncios serem criados na fila."
+          "description": "Cole centenas de ASINs e os anúncios são criados para você."
         },
         "aiTitle": {
           "title": "Títulos otimizados por IA",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Preços",
       "sectionTitle": "Automação acessível.",
-      "sectionSubtitle": "Todos os planos incluem todos os recursos. Os planos diferem pelos anúncios ativos, pelas conversões de rastreio e pela franquia de navegação em Mais vendidos; os pedidos automáticos são ilimitados em todos os planos, então recursos que outras ferramentas reservam para os planos mais caros são seus até no menor plano.",
+      "sectionSubtitle": "Todos os planos incluem todos os recursos. Os planos diferem pelos anúncios ativos, pelas conversões de rastreio e pela franquia de navegação em Mais vendidos. Os pedidos automáticos são ilimitados em todos os planos, então recursos que outras ferramentas reservam para os planos mais caros são seus até no menor plano.",
       "billingNote": "Cancele quando quiser. Os preços não incluem impostos locais, quando aplicáveis.",
       "perMonth": "/mês",
       "mostPopular": "Mais popular",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Como vocês preenchem as características do item?",
-        "answer": "Reunimos todos os atributos que o catálogo de origem tem sobre um produto e os associamos aos campos definidos pela categoria do eBay. Quando uma categoria só aceita certos valores, escolhemos o certo na lista. Em vez de pular campos obrigatórios com \"Não se aplica\", preenchemos com valores reais, enviando até 45 características por anúncio."
+        "answer": "Reunimos todos os atributos que o catálogo de origem tem sobre um produto e os associamos aos campos definidos pela categoria do eBay. Quando uma categoria só aceita certos valores, escolhemos o certo na lista. Os campos obrigatórios recebem valores reais sempre que os dados do produto os têm, e cada anúncio leva até 45 características."
       },
       "q4": {
         "question": "Como funciona o pedido automático?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Automação mais inteligente. Um preço menor.",
+        "headline": "Automação mais inteligente. A um preço acessível.",
         "subheading": "Estratégias por grupo de produtos, sincronização quatro vezes ao dia, características do item completas e uma tela de Ações pendentes que orienta você. Experimente grátis por um mês, sem cartão de crédito.",
         "button": "Começar grátis"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demonstração",
-      "description": "Dados de exemplo — nada é salvo.",
+      "description": "Dados de exemplo. Nada é salvo.",
       "exit": "Sair da demonstração",
       "signUp": "Criar conta gratuita"
     },

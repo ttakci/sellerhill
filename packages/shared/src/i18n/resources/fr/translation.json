@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Compte Amazon",
-          "subtitle": "Gérez vos comptes acheteur pour la collecte des commandes"
+          "subtitle": "Gérez les comptes acheteur Amazon utilisés pour vos commandes"
         }
       },
       "ebay": {
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Comptes Amazon",
-        "subtitle": "Vos comptes acheteur pour la collecte des commandes",
+        "subtitle": "Vos comptes acheteur Amazon utilisés pour les commandes",
         "addNew": {
           "title": "Nouveau compte Amazon",
-          "subtitle": "Connectez un nouveau compte acheteur pour la collecte des commandes"
+          "subtitle": "Connectez un nouveau compte acheteur pour vos commandes"
         },
         "empty": {
           "title": "Aucun compte acheteur pour le moment",
-          "description": "Connectez un compte acheteur Amazon pour analyser vos commandes et enregistrer les coûts réels."
+          "description": "Connectez un compte acheteur Amazon pour que nous puissions lire vos commandes Amazon et enregistrer leurs coûts réels."
         },
         "viewAll": {
           "title": "Tout"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Ajouter un compte Amazon",
-        "subtitle": "Fournissez les identifiants pour la collecte des commandes",
+        "subtitle": "Saisissez les identifiants de votre compte acheteur Amazon",
         "label": "Libellé du compte",
         "email": "E-mail",
         "password": "Mot de passe",
         "twoFactorSecret": "Clé secrète 2FA",
-        "twoFactorSecretHint": "Obligatoire. Amazon demande un code de vérification à presque chaque connexion automatisée, et une clé d'authentification est la seule que nous pouvons saisir pour vous. Dans les paramètres Connexion et sécurité d'Amazon, activez une application d'authentification et collez ici la clé de configuration, et non un code à 6 chiffres. Lors de la modification d'un compte existant, laissez ce champ vide pour conserver la clé enregistrée."
+        "twoFactorSecretHint": "Obligatoire. Amazon demande un code de vérification à presque chaque connexion automatique, et seule une clé d'authentification nous permet de saisir ce code pour vous. Dans les paramètres Connexion et sécurité d'Amazon, activez une application d'authentification et collez ici sa clé de configuration, et non un code à 6 chiffres. Lors de la modification d'un compte, laissez ce champ vide pour conserver la clé enregistrée."
       },
       "amazonEdit": {
         "title": "Modifier le compte Amazon",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Vérifier les mots-clés de la liste noire",
         "checkBlacklistDesc": "Analyse les titres, descriptions, caractéristiques et marques des annonces par rapport à votre liste noire avant publication. La sélection de champs propre à chaque mot-clé détermine où il est vérifié.",
         "allowCrossStoreAsins": "Autoriser les ASIN déjà présents dans mes autres boutiques",
-        "allowCrossStoreAsinsDesc": "Activé pour toutes les boutiques, chaque boutique peut publier n'importe quel ASIN ; activé pour une seule boutique, seule celle-ci peut ajouter des ASIN que vos autres boutiques proposent déjà. Un ASIN déjà présent dans cette boutique est toujours ignoré.",
+        "allowCrossStoreAsinsDesc": "Si l'option est activée pour toutes les boutiques, chaque boutique peut publier n'importe quel ASIN. Si elle est activée pour une seule boutique, seule celle-ci peut ajouter des ASIN que vos autres boutiques proposent déjà. Un ASIN déjà présent dans cette boutique est toujours ignoré.",
         "allowCrossStoreAsinsInherited": "Le réglage de toutes les boutiques s'applique tant que vous n'avez pas enregistré de choix pour cette boutique.",
         "country": "Pays",
         "countryPlaceholder": "Sélectionnez un pays",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Prix et stock suivis 4 fois par jour",
-        "description": "Le prix et le stock de la source sont vérifiés quatre fois par jour, et chaque changement parvient à votre annonce eBay dans la même passe. Vous cessez de vendre ce qui est en rupture de stock et de conserver des prix qui font perdre de l'argent.",
+        "description": "Le prix et le stock de la source sont vérifiés quatre fois par jour, et chaque changement parvient à votre annonce eBay dans la même passe. Vous cessez de vendre ce qui est en rupture de stock et de conserver des prix qui font perdre de l'argent. Dans ce secteur, même une vérification par jour est rare.",
         "caption": "Un contrôle toutes les 6 heures"
       },
       "specifics": {
         "title": "Des caractéristiques d'article réellement renseignées",
-        "description": "Nous ne contournons pas les champs obligatoires avec « Non applicable ». Chaque attribut est associé à une valeur acceptée par la catégorie eBay, afin que votre annonce apparaisse dans les filtres des acheteurs.",
+        "description": "Les champs obligatoires sont remplis avec les vraies données du produit dès qu'elles existent, et alignés sur les valeurs acceptées par la catégorie eBay. Votre annonce apparaît ainsi dans les filtres des acheteurs.",
         "others": "Les autres",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Une automatisation abordable",
-        "description": "L'ensemble complet de l'automatisation professionnelle pour un abonnement mensuel bien plus bas. Toutes les fonctionnalités sont dans tous les forfaits, les commandes automatiques sont illimitées ; les forfaits ne diffèrent que par les annonces, les conversions de suivi et la consultation des Meilleures ventes.",
+        "description": "L'ensemble complet de l'automatisation professionnelle pour un abonnement mensuel abordable. Toutes les fonctionnalités sont dans tous les forfaits, les commandes automatiques sont illimitées, et les forfaits ne diffèrent que par les annonces, les conversions de suivi et la consultation des Meilleures ventes.",
         "cta": "Voir les forfaits"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Mise en ligne d'ASIN en masse",
-          "description": "Collez des centaines d'ASIN et laissez les annonces se construire dans la file d'attente."
+          "description": "Collez des centaines d'ASIN et les annonces sont créées pour vous."
         },
         "aiTitle": {
           "title": "Titres optimisés par IA",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Tarifs",
       "sectionTitle": "Une automatisation abordable.",
-      "sectionSubtitle": "Chaque forfait inclut toutes les fonctionnalités. Les forfaits diffèrent par les annonces actives, les conversions de suivi et le quota de consultation des Meilleures ventes ; les commandes automatiques sont illimitées dans tous les forfaits, si bien que les fonctionnalités que d'autres outils réservent à leurs forfaits supérieurs sont à vous, même avec le plus petit.",
+      "sectionSubtitle": "Chaque forfait inclut toutes les fonctionnalités. Les forfaits diffèrent par les annonces actives, les conversions de suivi et le quota de consultation des Meilleures ventes. Les commandes automatiques sont illimitées dans tous les forfaits, si bien que les fonctionnalités que d'autres outils réservent à leurs forfaits supérieurs sont à vous, même avec le plus petit.",
       "billingNote": "Résiliable à tout moment. Les prix s'entendent hors taxes locales le cas échéant.",
       "perMonth": "/mois",
       "mostPopular": "Le plus populaire",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Comment renseignez-vous les caractéristiques d'article ?",
-        "answer": "Nous collectons tous les attributs du catalogue source pour un produit et les associons aux champs définis par la catégorie eBay. Lorsqu'une catégorie n'accepte que certaines valeurs, nous choisissons la bonne dans sa liste. Au lieu de contourner les champs obligatoires avec « Non applicable », nous les remplissons avec de vraies valeurs, en envoyant jusqu'à 45 caractéristiques par annonce."
+        "answer": "Nous collectons tous les attributs du catalogue source pour un produit et les associons aux champs définis par la catégorie eBay. Lorsqu'une catégorie n'accepte que certaines valeurs, nous choisissons la bonne dans sa liste. Les champs obligatoires reçoivent de vraies valeurs dès que les données du produit en contiennent, et chaque annonce porte jusqu'à 45 caractéristiques."
       },
       "q4": {
         "question": "Comment fonctionne la commande automatique ?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Une automatisation plus intelligente. Un prix plus bas.",
+        "headline": "Une automatisation plus intelligente. À un prix abordable.",
         "subheading": "Des stratégies par groupe de produits, une synchronisation quatre fois par jour, des caractéristiques d'article complètes et un écran d'actions en attente qui vous guide. Essayez gratuitement pendant un mois, sans carte bancaire.",
         "button": "Commencer gratuitement"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Démo",
-      "description": "Données d'exemple — rien n'est enregistré.",
+      "description": "Données d'exemple. Rien n'est enregistré.",
       "exit": "Quitter la démo",
       "signUp": "Créer un compte gratuit"
     },

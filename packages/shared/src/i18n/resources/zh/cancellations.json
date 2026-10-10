@@ -51,9 +51,9 @@
     },
     "bucketHint": {
       "unconfirmed": "eBay 近期未确认此请求，因此不显示截止时间。",
-      "action_overdue": "买家正在等待——eBay 给您答复的期限已过。",
+      "action_overdue": "买家正在等待。eBay 给您答复的期限已过。",
       "action_due": "买家申请取消订单。请在 eBay 的截止时间前接受或拒绝。",
-      "answered": "您已答复此请求。eBay 正在处理 — 您无需再做任何操作。",
+      "answered": "您已答复此请求。eBay 正在处理，您无需再做任何操作。",
       "in_progress": "目前无需您处理。",
       "closed": "eBay 已关闭此请求。"
     },
@@ -102,7 +102,7 @@
       "approve": "已批准取消，eBay 将向买家退款。",
       "reject": "已拒绝取消。"
     },
-    "actionsOff": "应用内取消操作已关闭——请在 eBay 上回复。",
+    "actionsOff": "应用内取消操作已关闭。请在 eBay 上回复。",
     "liveUnavailable": "暂时无法连接 eBay，因此显示的是 SellerHill 最后看到的状态。eBay 恢复响应后即可答复。",
     "errors": {
       "exportFailed": "导出未能完成，请重试。",
@@ -111,7 +111,7 @@
       "suspended": "您的订阅已暂停，取消操作已停用。请在“账单”页面结清发票。",
       "ebayRejected": "eBay 拒绝了此操作。请在 eBay 上打开该请求查看原因。",
       "unavailable": "无法连接到 eBay，请稍后再试。",
-      "sandbox": "eBay 沙盒不支持取消操作。",
+      "sandbox": "eBay 测试环境不支持取消操作。",
       "notFound": "未找到此取消请求。"
     },
     "party": {

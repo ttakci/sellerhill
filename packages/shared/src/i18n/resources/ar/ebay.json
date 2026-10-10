@@ -25,7 +25,7 @@
       "statusRevoked": "ملغى",
       "statusError": "خطأ",
       "disconnectButton": "فصل الربط",
-      "refreshTokenButton": "تحديث الرمز"
+      "refreshTokenButton": "تحديث الاتصال"
     },
     "callback": {
       "processing": "جارٍ معالجة الربط مع eBay...",
@@ -34,12 +34,12 @@
       "cancelled": "تم إلغاء الربط مع eBay."
     },
     "errors": {
-      "invalidState": "معامل الحالة غير صالح",
+      "invalidState": "تعذّر التحقق من الاتصال بـ eBay. يرجى المحاولة مرة أخرى.",
       "authorizationFailed": "فشل التفويض من eBay",
-      "tokenExchangeFailed": "تعذّر استبدال رمز التفويض بالرموز المطلوبة",
+      "tokenExchangeFailed": "تعذّر علينا إكمال ربط متجر eBay الخاص بك. يرجى المحاولة مرة أخرى.",
       "accountAlreadyConnected": "متجر eBay هذا مربوط بحساب SellerHill آخر. سجّل الدخول بالحساب الذي ربطته به، وإذا تعذّر عليك الوصول إليه فتواصل مع الدعم.",
       "ebayTrialAlreadyUsed": "استخدم متجر eBay هذا فترته التجريبية المجانية بالفعل. اختر خطة لربطه.",
-      "noAuthorizationCode": "لم يتم استلام رمز التفويض من eBay",
+      "noAuthorizationCode": "لم يؤكد eBay الاتصال. يرجى المحاولة مرة أخرى.",
       "storeOwnedByAnotherAccount": "متجر eBay هذا مرتبط بحساب SellerHill مختلف. تواصل مع الدعم لنقله.",
       "accountNotFound": "لم يتم العثور على متجر eBay هذا.",
       "identityUnavailable": "تعذّر تأكيد حساب eBay الخاص بك لدى eBay. لم يتم ربط أي شيء، يرجى المحاولة مرة أخرى بعد قليل.",
@@ -53,7 +53,7 @@
       "title": "اربط متجرك على eBay",
       "header": "إعداد السوق",
       "description": "لبدء مزامنة منتجاتك، عليك أولاً ربط متجرك على eBay.",
-      "connectButton": "حساب eBay",
+      "connectButton": "ربط حساب eBay",
       "skipButton": "تخطي الآن",
       "usOnlyNote": "سوق الولايات المتحدة هو الوحيد المدعوم حالياً. ستتوفر مناطق أخرى قريباً.",
       "brandingDescription": "اربط متجرك على eBay بـ SellerHill لإدارة جميع عمليات البيع من مكان واحد."

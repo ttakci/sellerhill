@@ -19,13 +19,13 @@
       "contactSales": "Satış şöbəsi ilə əlaqə",
       "freeTrial": "Pulsuz sınaq mövcuddur",
       "mostPopular": "Ən populyar",
-      "informationalOnly": "Ödəniş məhdudiyyətləri deaktivdir — planlar yalnız məlumat xarakterlidir. Bütün funksiyalar hazırda məhdudiyyətsizdir.",
+      "informationalOnly": "Plan limitləri hazırda tətbiq olunmur, ona görə bütün funksiyalar əlçatandır. Planlar yalnız məlumat üçün göstərilir.",
       "free": {
         "name": "Pulsuz"
       },
       "trial": {
         "name": "Pulsuz sınaq",
-        "description": "SellerHill-in müddətlə məhdud sınağı. Satın alına bilməz — qeydiyyatdan keçdikdə avtomatik başlayır."
+        "description": "SellerHill-in müddətlə məhdud sınağı. Satın alına bilməz, qeydiyyatdan keçdikdə avtomatik başlayır."
       },
       "unlimitedOrders": "Limitsiz avtomatik sifariş və çatdırılma izləməsi",
       "activeListings": "{{limit}} aktiv elan · limitsiz elan əlavə etmə və silmə",
@@ -86,13 +86,13 @@
         "description": "Ləğv edilmiş plan. Mövcud abunəliklər işləməyə davam edir; yeni qeydiyyatlar yuxarıdakı planlardan seçir."
       },
       "switchTo": "{{plan}} planına keç",
-      "switchDone": "Planınız dəyişdirildi. Stripe fərqi növbəti fakturanızda mütənasib şəkildə hesablayacaq.",
+      "switchDone": "Plan dəyişikliyiniz təsdiqləndi.",
       "planNamed": "{{plan}} planı"
     },
     "planChange": {
       "title": "Plan dəyişikliyini təsdiqləyin",
       "upgradeBody": "{{plan}} planına keçilir. İndi {{amount}} tutulacaq. Növbəti fakturanız {{nextDate}} tarixində {{nextAmount}} olacaq.",
-      "downgradeBody": "{{plan}} planına {{date}} tarixində keçilir. İndi heç nə tutulmur — o vaxta qədər cari planınız qalır.",
+      "downgradeBody": "{{plan}} planına {{date}} tarixində keçilir. İndi heç nə tutulmur və o vaxta qədər cari planınız qalır.",
       "listingLimitWarning": "{{active}} aktiv elanınız var, yeni plan isə {{limit}} elana icazə verir. {{date}} tarixindən yalnız ən köhnə {{limit}} elanınız izlənəcək; qalan {{over}} elan üçün qiymət/stok sinxronizasiyası və avtomatik sifariş emalı dayanacaq. Hansı elanların izlənməsini seçmək istəyirsinizsə, həmin tarixdən əvvəl lazım olmayanları bitirin.",
       "confirm": "Təsdiqlə",
       "cancel": "Ləğv et"
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Ən Çox Satılanlar məhsulları",
         "unit": "məhsul",
-        "description": "Ən Çox Satılanlar səhifəsində faktura dövrü ərzində görə biləcəyiniz məhsul sayı; keşlənmiş və canlı siyahılar eyni cür sayılır."
+        "description": "Ən Çox Satılanlar səhifəsində hər faktura dövründə görə biləcəyiniz məhsul sayı. Siyahı əvvəlcədən yüklənmiş olsa da, yenidən gətirilsə də, göstərilən hər məhsul sayılır."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Ödəniş üsulunuzu, planınızı və fakturalarınızı buradan idarə edin.",
       "nextChargeLabel": "Növbəti ödəniş",
       "nextCharge": "Növbəti ödəniş: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "{{date}} tarixində ləğv olunur — bu dövrdən sonra əlavə ödəniş tutulmayacaq",
+      "cancelsAtPeriodEnd": "{{date}} tarixində ləğv olunur. Bu dövrdən sonra əlavə ödəniş tutulmayacaq.",
       "scheduledChange": "{{date}} tarixində {{plan}} planına keçir",
       "scheduledChangeUnknownPlan": "Planınız {{date}} tarixində dəyişir",
       "cancelScheduledChange": "Ləğv et",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Tam giriş — ödəniş məhdudiyyətləri deaktivdir. Bütün funksiyalar məhdudiyyətsizdir.",
+      "full_access": "Tam giriş: plan limitləri tətbiq olunmur, ona görə bütün funksiyalar əlçatandır.",
       "active": "Abunəliyiniz aktivdir.",
-      "no_subscription": "Aktiv abunəlik yoxdur. Ödənişləri aktiv etmək üçün plan seçin.",
+      "no_subscription": "Aktiv abunəlik yoxdur. Davam etmək üçün plan seçin.",
       "past_due": "Abunəliyiniz gecikib. Girişi bərpa etmək üçün ödəniş üsulunuzu yeniləyin."
     },
     "provider": {
-      "unconfiguredTitle": "Ödəniş konfiqurasiya olunmayıb",
-      "unconfiguredBody": "Ödəniş provayderi qoşulmadığı üçün ödəniş və abunəlik idarəetməsi əlçatmazdır. Operatorunuzla əlaqə saxlayın."
+      "unconfiguredTitle": "Ödənişlər əlçatan deyil",
+      "unconfiguredBody": "Ödənişlər hazırda əlçatan deyil, ona görə abunə ola və ya abunəliyinizi idarə edə bilməzsiniz. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın."
     },
     "usage": {
       "title": "Bu dövrdə istifadə",
@@ -279,9 +279,9 @@
       "no_active_subscription": "Aktiv abunəlik tapılmadı.",
       "no_open_period": "Bu limit üçün açıq istifadə dövrü yoxdur.",
       "already_reserved": "Bu resurs artıq rezerv edilib.",
-      "providerNotConfigured": "Ödənişlər bu mühitdə hələ aktiv deyil. Zəhmət olmasa daha sonra yenidən cəhd edin.",
+      "providerNotConfigured": "Ödənişlər hələ əlçatan deyil. Zəhmət olmasa daha sonra yenidən cəhd edin.",
       "planNotMirrored": "Bu plan hələ satın alınmaq üçün əlçatan deyil. Zəhmət olmasa başqa plan seçin və ya dəstək xidməti ilə əlaqə saxlayın.",
-      "checkoutFailed": "Ödəniş başlana bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin — davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın.",
+      "checkoutFailed": "Ödəniş başlana bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin. Problem davam edərsə, dəstək xidməti ilə əlaqə saxlayın.",
       "portalFailed": "Ödəniş portalı açıla bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin.",
       "noCustomer": "Hələ ödəniş hesabı yoxdur. Onu yaratmaq üçün əvvəlcə plan seçin.",
       "planNotFound": "Bu plan tapılmadı.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Plan limitinizə çatmısınız. Davam etmək üçün planı yüksəldin.",
       "addonNotFound": "Bu əlavə paket tapılmadı.",
       "noSubscription": "Dəyişdirmək üçün aktiv abunəliyiniz yoxdur.",
-      "planChangeFailed": "Plan hazırda dəyişdirilə bilmədi. Zəhmət olmasa yenidən cəhd edin və ya \"Ödənişləri idarə et\" bölməsindən istifadə edin.",
-      "subscriptionSuspended": "Abunəliyiniz aktiv deyil, ona görə yeni elanlar dayandırılıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
-      "subscriptionSuspendedOrders": "Abunəliyiniz aktiv deyil, ona görə sifariş avtomatlaşdırması dayandırılıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
+      "planChangeFailed": "Plan hazırda dəyişdirilə bilmədi. Zəhmət olmasa yenidən cəhd edin və ya \"Abunəliyi idarə et\" bölməsindən istifadə edin.",
+      "subscriptionSuspended": "Abunəliyiniz aktiv deyil, ona görə yeni elanlar dayandırılıb. Bərpa etmək üçün plan seçin. Hər şey özü yenidən başlayır.",
+      "subscriptionSuspendedOrders": "Abunəliyiniz aktiv deyil, ona görə sifariş avtomatlaşdırması dayandırılıb. Bərpa etmək üçün plan seçin. Hər şey özü yenidən başlayır.",
       "listingQuotaExhausted": "Planınızın icazə verdiyi bütün aktiv elanlardan istifadə etmisiniz. Yer boşaltmaq üçün bir elanı bitirin və ya planı yüksəldin.",
-      "alreadySubscribed": "Artıq aktiv abunəliyiniz var. Yenidən abunə olmaq əvəzinə onu dəyişmək üçün \"Plana keç\" seçimindən istifadə edin.",
+      "alreadySubscribed": "Artıq aktiv abunəliyiniz var. Onu dəyişmək üçün yenidən abunə olmaq əvəzinə \"Abunəliyi idarə et\" bölməsində yeni plan seçin.",
       "invoicesFailed": "Faktura tarixçəsi yüklənə bilmədi. Zəhmət olmasa bir azdan yenidən cəhd edin.",
-      "paymentRequiresAction": "Bankınız bu kart üçün əlavə təsdiq tələb etdi, ona görə plan dəyişikliyi ləğv edildi və siz hələ də cari plandasınız. Ödəniş üsulunuzu yeniləmək üçün “Ödənişləri idarə et” bölməsini açın, sonra yenidən cəhd edin.",
+      "paymentRequiresAction": "Bankınız bu kart üçün əlavə təsdiq tələb etdi, ona görə plan dəyişikliyi ləğv edildi və siz hələ də cari plandasınız. Kartınızı “Ödəniş üsulunu yenilə” ilə yeniləyin, sonra yenidən cəhd edin.",
       "invalidCheckoutSession": "Bu ödəniş təsdiqi bağlantısı etibarlı deyil."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Aylıq Ən Çox Satılanlar limitinizi istifadə etmisiniz. Dövr yenilənənə qədər Amazon siyahılarına baxmağa davam etmək üçün əlavə paket alın."
       },
       "buy": "Al",
-      "note": "Əlavə paket yalnız cari təqvim ayına tətbiq olunur, buna görə əvvəlcədən yox, limitə çatdıqda təklif olunur. Plan limitiniz hər ayın 1-də sıfırlanır."
+      "note": "Əlavə paket yalnız cari faktura dövrünə tətbiq olunur, buna görə əvvəlcədən yox, limitə çatdıqda təklif olunur. Plan limitiniz dövr yeniləndikdə sıfırlanır."
     }
   }
 }

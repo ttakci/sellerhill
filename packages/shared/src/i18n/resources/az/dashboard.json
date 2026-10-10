@@ -129,12 +129,12 @@
       "confirmedLabel": "Təsdiqlənmiş",
       "confirmedTooltip": "Real Amazon xərcləri qeydə alınmış sifarişlərin mənfəəti. Naməlum xərc heç vaxt sıfır kimi hesablanmır.",
       "estimatedLabel": "Təxmini",
-      "estimatedTooltip": "Amazon-da yerinə yetirilməsi gözlənilən sifarişlər təxmini xərcdən istifadə edir (Amazon vergisi sizin təyin etdiyiniz {{rate}}% dərəcəsi ilə).",
+      "estimatedTooltip": "Real Amazon xərcləri hələ daxil olmayan sifarişlər təxmini xərcdən istifadə edir, Amazon vergisi sizin {{rate}}% dərəcənizlə hesablanır.",
       "uncostedLabel": "Maya dəyəri olmayan gəlir",
-      "uncostedTooltip": "Amazon xərci hələ müəyyən edilə bilməyən satışlar — yalnız gəlir, mənfəət nəzərdə tutulmur.",
+      "uncostedTooltip": "Amazon xərci hələ məlum olmayan satışlar. Bu, yalnız gəlirdir və mənfəət haqqında heç nə demir.",
       "untrackedExcludedLabel_one": "{{count}} izlənməyən sifariş daxil edilməyib",
       "untrackedExcludedLabel_other": "{{count}} izlənməyən sifariş daxil edilməyib",
-      "untrackedExcludedTooltip": "SellerHill elanı ilə uyğunlaşmayan sifarişlər bu paneldəki heç bir rəqəmə daxil edilmir. Onlar Sifarişlər səhifəsində «İzlənmir» olaraq qalır; daxil etmək üçün elanı idxal edin."
+      "untrackedExcludedTooltip": "SellerHill elanı ilə uyğunlaşmayan sifarişlər bu paneldəki heç bir rəqəmə daxil edilmir. Onlar Sifarişlər səhifəsində «İzlənmir» altında qalır. Daxil etmək üçün elanı idxal edin."
     },
     "topSellers": {
       "result_one": "<b>{{count}}</b> elan satılıb",

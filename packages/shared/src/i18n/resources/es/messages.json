@@ -48,7 +48,7 @@
       "delete": "Eliminar",
       "refresh": "Actualizar",
       "selected": "{{count}} seleccionado(s)",
-      "deleteConfirm": "¿Eliminar la(s) conversación(es) seleccionada(s)? Ya no aparecerán en ninguna carpeta."
+      "deleteConfirm": "¿Eliminar las conversaciones seleccionadas? Se moverán a la carpeta Eliminados."
     },
     "reconnect": {
       "title": "Reconecta esta tienda",

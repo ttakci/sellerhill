@@ -29,8 +29,8 @@
       "title": "Detalii campanie",
       "breadcrumb": "Detalii campanie",
       "subtitle": "Anunțurile din această campanie.",
-      "metricsNote": "Valorile indisponibile așteaptă rapoartele eBay; reconcilierea poate dura aproximativ 72 de ore.",
-      "eligibilityUnavailable": "Eligibilitatea pentru publicitate nu este cunoscută. Modificările sunt dezactivate."
+      "metricsNote": "Valorile lipsă așteaptă rapoartele eBay. Pot trece aproximativ 72 de ore până se stabilizează.",
+      "eligibilityUnavailable": "Nu am putut verifica dacă acest magazin poate face publicitate, așa că modificările campaniilor sunt dezactivate."
     },
     "campaign": {
       "name": "Numele campaniei",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Nicio campanie încă",
-      "description": "Campaniile magazinului activ vor apărea aici după sincronizare.",
+      "description": "Campaniile magazinului activ vor apărea aici după ce sunt încărcate de pe eBay.",
       "noStore": "Selectează un magazin eBay în bara de sus."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Campanie doar pentru citire",
-      "marginOverride": "Marjă personalizată: rata publicitară nu se aplică prețului SellerHill.",
+      "marginOverride": "Acest anunț are propria marjă, deci rata publicitară nu este inclusă în prețul stabilit de SellerHill.",
       "rule_based": "Campaniile bazate pe reguli pot fi doar citite.",
       "cost_per_click": "Campaniile cu cost pe clic pot fi doar citite.",
       "dynamic_rate": "Campaniile cu rată dinamică pot fi doar citite.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Adaugă anunțuri",
       "group": "Grup de setări",
-      "groupHint": "Grupul completează o singură dată selecția cu oferte eligibile fără campanie. Nu creează o regulă permanentă.",
+      "groupHint": "Alegerea unui grup selectează anunțurile sale eligibile care nu sunt încă în nicio campanie. Se întâmplă o singură dată: anunțurile adăugate ulterior în grup nu sunt incluse.",
       "groupsError": "Grupurile de setări nu au putut fi încărcate.",
       "groupError": "Întregul grup nu a putut fi încărcat. Selecția a fost păstrată.",
       "retryGroup": "Reîncearcă selecția grupului",
@@ -134,7 +134,7 @@
     "rate": {
       "title": "Modifică rata",
       "defaultTitle": "Schimbă rata publicitară implicită",
-      "retryMembers": "Reîncearcă ofertele nereușite",
+      "retryMembers": "Reîncearcă anunțurile nereușite",
       "success": "Rata publicitară a fost actualizată."
     },
     "lifecycle": {
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "Publicitatea nu este disponibilă pentru acest magazin.",
-      "unavailable": "Eligibilitatea pentru publicitate nu este disponibilă. Crearea campaniilor este dezactivată."
+      "unavailable": "Nu am putut verifica dacă acest magazin poate face publicitate, așa că momentan nu puteți crea campanii."
     },
     "results": {
       "summary": "Modificări confirmate: {{changed}}. Deja în campanie: {{already}}. Neconfirmate sau nereușite: {{failed}}.",
-      "retryHint": "Ofertele nereușite sau neconfirmate rămân disponibile pentru reîncercare.",
-      "unconfirmed": "Nicio actualizare confirmată. Reîncarcă datele campaniei pentru a verifica rata implicită."
+      "retryHint": "Puteți reîncerca anunțurile nereușite sau neconfirmate.",
+      "unconfirmed": "Nicio actualizare a anunțurilor nu a fost confirmată. Reîncarcă campania pentru a verifica rata implicită."
     }
   }
 }

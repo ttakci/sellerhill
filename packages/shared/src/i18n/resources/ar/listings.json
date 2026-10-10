@@ -96,7 +96,7 @@
         "zero_stock_detail": "مخزون Amazon ({{stock}}) أقل من هامش المخزون لديك ({{buffer}})، لذلك ستكون الكمية 0.",
         "zero_stock_detail_at_least": "مخزون Amazon (على الأقل {{stock}}) أقل من هامش المخزون لديك ({{buffer}})، لذلك ستكون الكمية 0.",
         "quota_exhausted": "تم بلوغ حد الخطة. رقِّ خطتك أو حرّر خانات إدراج للمتابعة.",
-        "asin_not_found": "لم يتم العثور على ASIN، فلا يوجد منتج مطابق لهذا المعرّف.",
+        "asin_not_found": "لم يتم العثور على ASIN. لا يوجد منتج يطابق رقم ASIN هذا.",
         "product_data_unavailable": "تعذّر جلب بيانات منتج Amazon لرقم ASIN هذا.",
         "source_price_unavailable": "لا تعرض Amazon سعرًا في صفحة هذا المنتج (قد يظهر السعر في السلة فقط أو داخل عرض خاص)، لذلك لا يمكننا حساب سعر البيع الخاص بك. أضف الـ ASIN مرة أخرى عندما يصبح السعر ظاهرًا في الصفحة.",
         "no_buy_box": "لا يوجد لهذا المنتج حاليًا عرض رئيسي على Amazon، بل عروض من بائعين آخرين فقط، لذلك لا يمكننا تسعيره أو طلبه نيابةً عنك. أضف الـ ASIN مرة أخرى عندما تعرض Amazon زر «أضف إلى السلة» لهذا المنتج.",
@@ -110,14 +110,14 @@
         "image_invalid": "رفض eBay صور المنتج.",
         "ebay_policy_missing": "سياسة أعمال eBay الخاصة بك غير موجودة أو غير صالحة لهذا السوق.",
         "ebay_auth": "يجب تجديد ربط حساب eBay الخاص بك.",
-        "ebay_rate_limited": "قيّد eBay معدل الطلبات. إعادة المحاولة لاحقاً تنجح عادةً.",
+        "ebay_rate_limited": "يتلقى eBay طلبات كثيرة جداً حالياً. إعادة المحاولة لاحقاً تنجح عادةً.",
         "ebay_unavailable": "كان eBay غير متاح أثناء النشر. إعادة المحاولة تنجح عادةً.",
         "ebay_restricted_item": "يقيّد eBay هذا المنتج أو هذه الفئة لحسابك.",
         "ebay_category_mismatch": "يفهم eBay من هذا العنوان أنه منتج من فئة أخرى، ورفضه في الفئة التي اخترناها.",
         "ebay_category_mismatch_named": "يفهم eBay من هذا العنوان أنه منتج ينتمي إلى «{{category}}»، ورفضه في الفئة التي اخترناها.",
         "ebay_condition_invalid": "لا يسمح eBay بحالة المنتج التي أرسلناها ضمن فئة هذا المنتج.",
         "ebay_description_link": "رفض eBay الإدراج لأن وصف Amazon احتوى على رابط (مثل رابط مختصر) أو عنوان بريد إلكتروني. نحن نحذف هذه العناصر الآن من الأوصاف، لذلك يجب أن تنجح إضافة الـ ASIN مرة أخرى.",
-        "provider_budget_exhausted": "تم استهلاك حصة eBay API لهذا اليوم. هذا الإدراج في قائمة الانتظار وسيتابع تلقائياً.",
+        "provider_budget_exhausted": "تم بلوغ حد eBay اليومي. هذا الإدراج في قائمة الانتظار وسيتابع تلقائياً.",
         "blacklisted_keyword": "حجبت القائمة السوداء في إعدادات المتجر هذا الإدراج (الكلمة: \"{{keyword}}\"). أزل الكلمة أو عدّل قالب إدراجك.",
         "blacklisted_keyword_any": "حجبت القائمة السوداء في إعدادات المتجر هذه الإدراجات. أزل الكلمة أو عدّل قالب الإدراج.",
         "cancelled": "أُلغي قبل معالجة رقم ASIN هذا.",
@@ -148,7 +148,7 @@
       "resultCount": "{{count}} نتائج",
       "min": "الأدنى",
       "max": "الأقصى",
-      "sourceStockNote": "المخزون الذي يتجاوز 20 غير معروف، ويُحتسب \"+20\" على أنه 20.",
+      "sourceStockNote": "لا تعرض Amazon مخزوناً دقيقاً فوق 20، لذا يُحتسب \"+20\" على أنه 20.",
       "resultListed": "تم عرض <b>{{count}}</b> نتيجة",
       "sortLabel": "ترتيب:",
       "listedFrom": "تاريخ الإدراج من",
@@ -212,7 +212,7 @@
       "stockLabel": "المخزون",
       "asinLabel": "ASIN: {{asin}}",
       "ebayIdLabel": "eBay: {{id}}",
-      "sourceStock": "المصدر: {{stock}}",
+      "sourceStock": "Amazon: {{stock}}",
       "amazonStock": "مخزون Amazon"
     },
     "card": {
@@ -242,8 +242,8 @@
     },
     "listingSettings": {
       "title": "إعدادات الإدراج",
-      "strategyGroup": "مجموعة الإعدادات",
-      "strategyGroupPlaceholder": "اختر مجموعة إعدادات",
+      "strategyGroup": "مجموعة إعدادات الإدراج",
+      "strategyGroupPlaceholder": "اختر مجموعة إعدادات الإدراج",
       "strategyGroupHelp": "تحدد هوامش الربح وقواعد التقريب وقوالب الوصف."
     },
     "businessPolicies": {
@@ -330,7 +330,7 @@
       "xlsxOnly": "XLSX فقط · يجب أن تبقى معرّفات العناصر نصاً دقيقاً",
       "start": "بدء الاستيراد",
       "syncFailed": "تعذّرت مزامنة متجر eBay.",
-      "importFailed": "تعذّر وضع ملف Excel في قائمة الاستيراد."
+      "importFailed": "تعذّر بدء الاستيراد."
     },
     "notifications": {
       "endSuccessTitle": "تم إنهاء الإدراجات",
@@ -363,19 +363,19 @@
       "deleteOneTitle": "حذف هذه المسودة؟",
       "deleteOneDescription": "لم تُنشر المسودة على eBay وسيتم إزالتها من متجرك. لا يمكن التراجع عن هذا.",
       "publishTitle": "نشر المسودات المحددة؟",
-      "publishDescription": "انشر {{count}} من الإدراجات المسودة على eBay الآن. سيُنشر كل منتج بأسعار ومخزون الاستراتيجية الحالية.",
+      "publishDescription": "انشر {{count}} من الإدراجات المسودة على eBay الآن. سيُنشر كل منتج بسعره ومخزونه الحاليين.",
       "publishOneTitle": "نشر هذه المسودة؟",
       "publishOneDescription": "سيتم إنشاء هذا الإدراج على eBay ويصبح نشطاً. يمكنك بعد ذلك تعديل الأتمتة والإعدادات."
     },
     "validation": {
       "invalidAsin": "لا يبدو أن أياً من المعرّفات المدخلة رقم ASIN صالح (10 أحرف وأرقام).",
       "minOneAsin": "يرجى إدخال رقم ASIN واحد على الأقل",
-      "maxAsins": "يُسمح بـ 1000 رقم ASIN كحد أقصى في كل عملية استيراد",
+      "maxAsins": "يمكنك إضافة 1000 رقم ASIN كحد أقصى في كل مرة",
       "paymentPolicyRequired": "سياسة الدفع مطلوبة",
       "shippingPolicyRequired": "سياسة الشحن مطلوبة",
       "returnPolicyRequired": "سياسة الإرجاع مطلوبة",
       "ebayAccountRequired": "متجر eBay مطلوب",
-      "listingSettingsGroupRequired": "مجموعة استراتيجية الإدراج مطلوبة",
+      "listingSettingsGroupRequired": "مجموعة إعدادات الإدراج مطلوبة",
       "titleRequired": "العنوان مطلوب",
       "titleMax": "يجب ألا يتجاوز العنوان 80 حرفاً"
     },
@@ -385,9 +385,9 @@
       "queuedDraft": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار، ولن تُنشر إلى أن تنشرها بنفسك",
       "queuedWithSkipped": "تم وضع {{count}} إدراجاً في قائمة المعالجة (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)",
       "queuedDraftWithSkipped": "تم وضع {{count}} إدراجاً مسودة في قائمة الانتظار (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك)، ولن تُنشر إلى أن تنشرها بنفسك",
-      "allSkippedDuplicates": "جميع {{skipped}} من رموز ASIN موجودة بالفعل في إدراجاتك — لم تبدأ أي عملية جديدة",
+      "allSkippedDuplicates": "جميع {{skipped}} من رموز ASIN موجودة بالفعل في إدراجاتك، لذا لم يُضف شيء جديد إلى قائمة الانتظار.",
       "scheduled": "تمت جدولة {{count}} منتج. تبدأ آخر المنتجات في {{date}}.",
-      "scheduledWithSkipped": "تمت جدولة {{count}} منتج (تم تخطي {{skipped}} — موجودة بالفعل في إدراجاتك). تبدأ آخر المنتجات في {{date}}."
+      "scheduledWithSkipped": "تمت جدولة {{count}} منتج (تم تخطي {{skipped}} لأنها موجودة بالفعل في إدراجاتك). تبدأ آخر المنتجات في {{date}}."
     },
     "errors": {
       "createFailed": "تعذّر إنشاء الإدراجات",
@@ -415,7 +415,7 @@
       "updatedAt": "تاريخ التحديث",
       "revisions": {
         "action": "المراجعات",
-        "lastChecked": "آخر فحص {{date}} — لا تغيير",
+        "lastChecked": "آخر فحص {{date}}، لا تغيير",
         "title": "المراجعات",
         "subtitle": "تغييرات السعر والمخزون لهذا الإدراج",
         "previousPrice": "السعر السابق",
@@ -427,7 +427,7 @@
         "quantityChange": "مخزون eBay",
         "quantityTooltip": "الكمية التي أُرسلت إلى eBay، وليست مخزون أمازون الخام.",
         "sourceStockChange": "مخزون أمازون",
-        "sourceStockTooltip": "المخزون الذي أظهرته أمازون في هذا الفحص. 20+ تعني 20 على الأقل — لا تعرض أمازون عددًا دقيقًا فوق ذلك.",
+        "sourceStockTooltip": "المخزون الذي أظهرته أمازون في هذا الفحص. 20+ تعني 20 على الأقل، لأن أمازون لا تعرض عددًا دقيقًا فوق ذلك.",
         "unchanged": "لا تغيير",
         "empty": "لا توجد مراجعات بعد",
         "emptySubtitle": "ستظهر هنا تغييرات السعر والمخزون فور حدوثها.",
@@ -488,7 +488,7 @@
       "customMarginNaLabel": "غير متاح",
       "customMarginNaDetail": "ما دام السعر الثابت مفعّلاً",
       "marginPercentOverride": "الهامش %",
-      "marginFixedOverride": "هامش ثابت $",
+      "marginFixedOverride": "هامش ثابت ($)",
       "saveOverrides": "حفظ الأتمتة",
       "publish": "النشر على eBay",
       "publishHint": "هذه المسودة غير منشورة على eBay بعد. انشرها عندما تبدو الأسعار والمخزون مناسبة.",

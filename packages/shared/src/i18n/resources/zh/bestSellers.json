@@ -77,22 +77,22 @@
       },
       "retry": "重试",
       "unavailable": {
-        "title": "热销榜暂时不可用",
-        "description": "榜单服务当前无法访问。您的刊登和订单不受影响。"
+        "title": "商品搜索暂时不可用",
+        "description": "目前无法加载 Amazon 榜单。您的刊登和订单不受影响。"
       },
       "disabled": {
-        "title": "此账户未启用热销榜",
+        "title": "此账户未启用商品搜索",
         "description": "您的账户已关闭 Amazon 榜单浏览。如果您认为应该可见，请联系客服。"
       },
       "limitReached": {
-        "title": "今天实时加载榜单的次数过多",
-        "description": "今天已加载过的榜单仍可查看——切换到其中一个，或明天再试。"
+        "title": "已达到每日榜单上限",
+        "description": "今天已加载过的榜单仍可查看。请打开其中一个，或明天再试。"
       }
     },
     "errors": {
-      "disabled": "此账户未启用热销榜。",
-      "dailyLimitReached": "今天实时加载榜单的次数过多。请明天再试。",
-      "unavailable": "热销榜暂时不可用。",
+      "disabled": "此账户未启用商品搜索。",
+      "dailyLimitReached": "您已达到今天的榜单上限。请明天再试。",
+      "unavailable": "商品搜索暂时不可用。",
       "unsupportedMarketplace": "不支持该商城。"
     }
   }

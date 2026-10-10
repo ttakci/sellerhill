@@ -77,16 +77,16 @@
       "in_progress": "Comprando na Amazon",
       "not_automated": "Não automatizado",
       "manual": "Comprado manualmente",
-      "simulated": "Execução de teste — sem compra",
+      "simulated": "Execução de teste, sem compra",
       "filter": {
         "all": "Todos os estados de atendimento"
       },
       "detail": {
         "title": "Atendimento na Amazon",
         "amazonOrderId": "Pedido na Amazon",
-        "simulatedNotice": "Esta é uma execução de teste. Nenhum pedido foi feito na Amazon e nenhum valor foi cobrado — os custos e o lucro abaixo são simulados.",
+        "simulatedNotice": "Esta é uma execução de teste. Nenhum pedido foi feito na Amazon e nenhum valor foi cobrado. Os custos e o lucro abaixo são simulados.",
         "actionRequiredNotice": "A automação parou antes de comprar. Revise o motivo e atenda este pedido manualmente.",
-        "cancelledNotice": "A compra na Amazon foi cancelada. A venda no eBay ainda é devida ao comprador — atenda-a de outra forma.",
+        "cancelledNotice": "A compra na Amazon foi cancelada. Você ainda deve este item ao comprador do eBay, então atenda o pedido de outra forma.",
         "notAutomatedNotice": "O pedido automático está desativado para este pedido.",
         "attemptedAt": "Última tentativa"
       }
@@ -95,14 +95,14 @@
       "tracked": "Vinculado a um anúncio",
       "untracked": "Não vinculado a um anúncio",
       "problem": {
-        "wrongPageType": "O provedor de rastreamento não conseguiu ler a página do pedido da Amazon — o formato pode ter mudado. Uma nova tentativa será feita automaticamente.",
+        "wrongPageType": "Não foi possível ler a página do pedido da Amazon para converter o código de rastreio. A Amazon pode ter mudado a página. Uma nova tentativa será feita automaticamente.",
         "amazonSessionExpired": "A sessão da Amazon usada para ler este pedido expirou e precisa entrar novamente.",
         "trackingUrlMismatch": "O link de rastreio na página do pedido da Amazon não correspondeu ao esperado. Uma nova tentativa será feita automaticamente.",
-        "needsTrackingUpload": "Aguardando o envio dos detalhes da remessa para que o código de rastreio possa ser convertido.",
-        "updateNotApplied": "A atualização do rastreio ainda não foi aplicada pelo provedor. Uma nova tentativa será feita automaticamente.",
-        "assignValidation": "O provedor de rastreamento rejeitou os detalhes da remessa deste pedido.",
-        "shipmentException": "O provedor de rastreamento relatou uma exceção nesta remessa.",
-        "trackingUpdateUnavailable": "O provedor de rastreamento não conseguiu atualizar esta remessa agora.",
+        "needsTrackingUpload": "Aguardando os detalhes da remessa para que o código de rastreio possa ser convertido.",
+        "updateNotApplied": "A atualização do rastreio ainda não foi aplicada. Uma nova tentativa será feita automaticamente.",
+        "assignValidation": "Os detalhes da remessa deste pedido foram rejeitados na conversão do rastreio.",
+        "shipmentException": "Foi relatado um problema nesta remessa.",
+        "trackingUpdateUnavailable": "Não foi possível atualizar o rastreio desta remessa agora.",
         "generic": "Há um problema com a conversão do rastreio deste pedido. Uma nova tentativa será feita automaticamente."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Produto não encontrado na Amazon",
         "captcha": "Captcha necessário",
-        "otp": "Desafio MFA/OTP",
+        "otp": "Código de verificação necessário",
         "login": "Falha no login",
         "out_of_stock": "Sem estoque",
         "address": "Problema de endereço",
         "payment": "Pagamento recusado",
-        "cap": "Acima do limite de custo",
+        "cap": "Acima do limite de gasto",
         "no_confirmation": "Sem confirmação",
-        "proxy_required": "Nenhum proxy configurado",
+        "proxy_required": "Não foi possível usar o proxy da conta",
         "quota_exhausted": "Cota mensal atingida",
         "cart": "Carrinho divergente",
         "review_unreadable": "Total do pedido ilegível",
-        "interrupted": "Compra interrompida — verifique a Amazon",
+        "interrupted": "Compra interrompida, verifique a Amazon",
         "subscription_suspended": "Assinatura suspensa",
         "listing_over_plan_limit": "Anúncio fora do limite do plano",
-        "order_already_fulfilled": "Já enviado — nada a comprar",
+        "order_already_fulfilled": "Já enviado, nada a comprar",
         "order_not_paid": "Aguardando o pagamento do comprador",
-        "order_cancelled": "Cancelado no eBay — nada a comprar",
-        "multi_item_order": "O pedido tem vários itens — compre manualmente",
-        "cancel_requested": "O comprador pediu cancelamento — responda no eBay",
+        "order_cancelled": "Cancelado no eBay, nada a comprar",
+        "multi_item_order": "O pedido tem vários itens, compre manualmente",
+        "cancel_requested": "O comprador pediu cancelamento, responda no eBay",
         "loss_limit": "Acima do seu limite de prejuízo"
       },
       "reasonLabel": "Motivo: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Não está na Amazon",
         "confirmTitle": "Confirmar que a Amazon não tem um pedido para esta venda?",
-        "confirmDescription": "Continue somente depois de olhar os pedidos desta conta Amazon e ver que o pedido não está lá. O SellerHill também verifica a lista de pedidos da conta e recusa até que essa verificação tenha sido feita. Depois disso, o pedido automático pode ser iniciado novamente — se o pedido existir na Amazon, o item será comprado duas vezes.",
+        "confirmDescription": "Continue somente depois de olhar os pedidos desta conta Amazon e ver que o pedido não está lá. O SellerHill também verifica a lista de pedidos da conta e recusa até que essa verificação tenha sido feita. Depois disso, o pedido automático pode ser iniciado novamente. Se o pedido existir na Amazon, o item será comprado duas vezes.",
         "confirm": "Sim, não está lá",
         "done": "Marcado como não comprado. Você pode iniciar o pedido automático novamente."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Ver mais detalhes",
       "updateAmazon": "Informar dados da Amazon",
       "netProfitAnalysis": "ANÁLISE DO LUCRO LÍQUIDO",
-      "analysisDesc": "Este cálculo considera seus ganhos reais do eBay depois de todas as taxas e impostos da plataforma, subtraídos do custo original da compra na Amazon.",
+      "analysisDesc": "Seus ganhos no eBay depois de todas as taxas e impostos da plataforma, menos o custo original da compra na Amazon.",
       "calculation": "Cálculo",
       "netProfitResult": "Lucro líquido",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Enviar até",
       "shipByNotice": "Prazo de envio do eBay: {{date}}",
       "shipByHeading": "Prazo de envio do eBay",
-      "multiItemNotice": "Itens neste pedido do eBay: {{count}}. O SellerHill acompanha apenas o primeiro e não compra este pedido automaticamente — compre e envie os outros itens você mesmo."
+      "multiItemNotice": "Itens neste pedido do eBay: {{count}}. O SellerHill acompanha apenas o primeiro e não compra este pedido automaticamente. Compre e envie os outros itens você mesmo."
     },
     "modal": {
       "title": "Informar dados do pedido da Amazon",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Estimado",
-    "estimateNote": "Lucro estimado — é finalizado quando o pedido na Amazon é feito. Baseado no último preço conhecido da Amazon; frete da Amazon não incluído.",
+    "estimateNote": "Lucro estimado. Ele se torna definitivo quando o pedido na Amazon é feito. Baseado no último preço conhecido da Amazon; frete da Amazon não incluído.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Todos os direitos reservados."
     },
     "errors": {
       "notFound": "Pedido não encontrado.",
-      "noTrackingYet": "Este pedido ainda não tem código de rastreio da Amazon — ele ainda não foi enviado.",
+      "noTrackingYet": "Este pedido ainda não tem código de rastreio da Amazon. Ele ainda não foi enviado.",
       "conversionUnavailable": "Não foi possível converter o rastreio agora. Verifique o limite do seu plano e as configurações de conversão e tente novamente.",
       "conversionDone": "Rastreio convertido.",
       "orderNotTracked": "Este pedido não está vinculado a nenhum dos seus anúncios, então um código de rastreio convertido nunca poderia ser enviado ao eBay. Vincule primeiro o pedido ao seu anúncio.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "Esta venda passa do limite de gastos da sua conta Amazon. Aumente o limite nas configurações da conta Amazon ou compre o item manualmente.",
       "autoFulfillAlreadyStarted": "O status deste pedido acabou de mudar, então a compra pode já ter começado. Atualize a página.",
       "autoFulfillQuotaExhausted": "O limite de pedidos automáticos do seu plano neste período foi atingido.",
-      "purchaseNotYetChecked": "O SellerHill ainda não verificou os pedidos desta conta Amazon desde a tentativa de compra. A verificação foi iniciada agora — tente novamente em alguns minutos.",
+      "purchaseNotYetChecked": "O SellerHill ainda não verificou os pedidos desta conta Amazon desde a tentativa de compra. A verificação foi iniciada agora. Tente novamente em alguns minutos.",
       "purchaseNotUnknown": "Este pedido não está aguardando uma confirmação de compra. Ele pode já estar vinculado ou em andamento. Atualize a página.",
       "purchaseFoundOnAmazon": "O SellerHill encontrou um pedido na Amazon para este produto, feito por volta da tentativa de compra, mas não conseguiu associá-lo a esta venda com certeza. Abra seus pedidos na Amazon e vincule-o manualmente. Se esse pedido pertencer a outra venda, vincule-o primeiro a essa venda.",
       "noteTooLong": "A nota pode ter no máximo 1.000 caracteres.",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Rastreio retido",
-        "meaning": "A Amazon enviou, mas o rastreio ainda não chegou ao eBay — normalmente a conversão do rastreio ainda está pendente.",
+        "meaning": "A Amazon enviou, mas o código de rastreio ainda não chegou ao eBay. Normalmente a conversão do rastreio ainda está pendente.",
         "action": "Converta o rastreio ou corrija a causa mostrada no pedido."
       },
       "buying": {

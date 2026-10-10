@@ -48,7 +48,7 @@
       "delete": "Löschen",
       "refresh": "Aktualisieren",
       "selected": "{{count}} ausgewählt",
-      "deleteConfirm": "Ausgewählte Unterhaltung(en) löschen? Sie erscheinen danach in keinem Ordner mehr."
+      "deleteConfirm": "Ausgewählte Unterhaltungen löschen? Sie werden in den Ordner „Gelöscht“ verschoben."
     },
     "reconnect": {
       "title": "Diesen Shop erneut verbinden",

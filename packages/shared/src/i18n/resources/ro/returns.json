@@ -118,7 +118,7 @@
       "trackingNumber": "Urmărire {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "ID returnare",
-      "actionsOff": "Acțiunile pentru returnări din aplicație sunt dezactivate — răspunde pe eBay."
+      "actionsOff": "Acțiunile pentru returnări din aplicație sunt dezactivate. Răspunde pe eBay."
     },
     "actions": {
       "done": {
@@ -185,7 +185,7 @@
       "suspended": "Abonamentul tău este suspendat, așa că acțiunile pentru retururi sunt oprite. Achită factura din pagina Facturare.",
       "ebayRejected": "eBay a refuzat această acțiune. Deschide returul pe eBay ca să vezi motivul.",
       "unavailable": "eBay nu a putut fi contactat. Încearcă din nou peste puțin timp.",
-      "sandbox": "Acțiunile pentru retururi nu sunt disponibile în sandbox-ul eBay.",
+      "sandbox": "Acțiunile pentru retururi nu sunt disponibile în mediul de test eBay.",
       "refundAmountUnknown": "eBay nu a raportat o sumă de rambursat pentru acest retur, așa că rambursarea trebuie emisă pe eBay.",
       "notFound": "Acest retur nu a fost găsit.",
       "labelFileRequired": "Alege fișierul etichetei.",

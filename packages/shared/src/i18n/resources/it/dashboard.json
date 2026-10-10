@@ -133,13 +133,13 @@
       "confirmedLabel": "Confermato",
       "confirmedTooltip": "Profitto degli ordini di cui sono stati acquisiti i costi Amazon reali. Un costo sconosciuto non viene mai conteggiato come zero.",
       "estimatedLabel": "Stimato",
-      "estimatedTooltip": "Gli ordini in attesa dell'evasione Amazon usano un costo stimato (imposte Amazon all'aliquota configurata del {{rate}}%).",
+      "estimatedTooltip": "Gli ordini i cui costi Amazon reali non sono ancora arrivati usano un costo stimato, con le imposte Amazon alla tua aliquota del {{rate}}%.",
       "uncostedLabel": "Ricavi senza costo",
-      "uncostedTooltip": "Vendite il cui costo Amazon non è ancora stato determinato: solo ricavi, nessun profitto implicito.",
+      "uncostedTooltip": "Vendite il cui costo Amazon non è ancora noto. Sono solo ricavi e non dicono nulla sul profitto.",
       "untrackedExcludedLabel_one": "{{count}} ordine non tracciato escluso",
       "untrackedExcludedLabel_many": "{{count}} ordini non tracciati esclusi",
       "untrackedExcludedLabel_other": "{{count}} ordini non tracciati esclusi",
-      "untrackedExcludedTooltip": "Gli ordini che non corrispondono a un’inserzione SellerHill sono esclusi da tutte le cifre di questa dashboard. Restano nella pagina Ordini come «Non tracciato»; importa l’inserzione per includerli."
+      "untrackedExcludedTooltip": "Gli ordini che non corrispondono a un’inserzione SellerHill sono esclusi da tutte le cifre di questa dashboard. Restano nella pagina Ordini come «Non tracciato». Importa l’inserzione per includerli."
     },
     "topSellers": {
       "result_one": "<b>{{count}}</b> inserzione venduta",

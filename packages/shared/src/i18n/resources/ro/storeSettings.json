@@ -5,13 +5,13 @@
     "saveChanges": "Salvează modificările",
     "viewLogs": "Vezi jurnalele",
     "globalSettings": "Aplică setările tuturor magazinelor",
-    "globalDescription": "Activați pentru a transmite configurarea de mai jos tuturor magazinelor conectate. Dezactivați pentru a selecta un anumit magazin.",
+    "globalDescription": "Activați pentru a aplica setările de mai jos tuturor magazinelor conectate. Dezactivați pentru a alege un singur magazin.",
     "selectStore": "Selectați magazinul",
     "selectStorePlaceholder": "Căutați și selectați un magazin...",
     "locationSectionTitle": "Setările locației",
     "locationSectionSubtitle": "Gestionați adresa fizică și regiunea magazinului dvs.",
     "country": "Țară",
-    "state": "Regiune/Locație",
+    "state": "Stat/Regiune",
     "zipCode": "Cod poștal",
     "blacklistType_title": "Titlu",
     "blacklistType_description": "Descriere",
@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Brand și producător",
     "copyright": "© {{year}} Platforma SellerHill. Toate drepturile rezervate.",
     "amazonTaxRate": "Rata taxei pe vânzări Amazon (%)",
-    "amazonTaxRateDesc": "Rata estimată a taxei pe vânzări Amazon aplicată costului de achiziție. Este folosită în două moduri: crește prețul anunțului dvs. eBay astfel încât acest cost să fie acoperit și — cât timp profitul unei comenzi este încă provizoriu, iar comanda Amazon nu a fost încă plasată — estimează profitul acelei comenzi.",
+    "amazonTaxRateDesc": "Taxa estimată pe vânzări Amazon aplicată costului de achiziție. Crește prețul eBay pentru a acoperi acest cost și estimează profitul unei comenzi până la plasarea comenzii Amazon.",
     "autoFulfillEnabled": "Plasează automat comenzi Amazon după vânzările eBay",
     "autoFulfillEnabledHint": "Când este activat, SellerHill cumpără articolul pe Amazon cu contul dvs. de cumpărător asociat. Dezactivați pentru a comanda manual.",
     "autoFulfillEnabledInfo": "Activați acest lucru doar după conectarea și configurarea unui cont de cumpărător Amazon. Comandarea automată necesită și ca setarea de îndeplinire automată și plafonul de cheltuieli ale acelui cont să fie activate.",
@@ -30,12 +30,12 @@
       "amountHint": "În moneda magazinului tău. 0 înseamnă să nu cumperi niciodată în pierdere."
     },
     "trackingConversionProvider": "Conversia numărului de urmărire",
-    "trackingConversionProviderHint": "Numerele reale ale curierilor sunt transmise ca atare. Amazon Logistics (TBA) trece nemodificat.",
-    "trackingConversionProviderLocal": "Încorporat (local)",
-    "trackingConversionApiComingSoon": "Un furnizor de conversie bazat pe API este în plan.",
+    "trackingConversionProviderHint": "Numerele reale ale curierilor sunt trimise ca atare. Nici numerele Amazon Logistics (TBA) nu sunt modificate.",
+    "trackingConversionProviderLocal": "Încorporat",
+    "trackingConversionApiComingSoon": "Este planificată o altă opțiune de conversie.",
     "messaging": {
       "title": "Mesaje pentru cumpărători",
-      "subtitle": "Trimiteți automat mesaje cumpărătorilor în momente cheie ale comenzii. Opțional și pentru fiecare eveniment.",
+      "subtitle": "Trimiteți automat mesaje cumpărătorilor în momente cheie ale comenzii. Puteți activa sau dezactiva fiecare eveniment.",
       "masterEnable": "Activează mesajele automate pentru cumpărători",
       "shippedWarning": "eBay trimite deja o notificare de urmărire când o comandă este marcată ca expediată. Trimiterea alteia este opțională.",
       "delayDays": "Întârziere (zile)",
@@ -49,9 +49,9 @@
         "feedback_request": "Solicitare de feedback"
       },
       "eventDescriptions": {
-        "order_received": "Trimite mesajul selectat când o comandă eBay nouă și asociată este primită pentru prima dată.",
-        "shipped": "Trimite mesajul selectat după ce urmărirea Amazon marchează comanda ca expediată. eBay trimite și propria notificare de urmărire.",
-        "delivered": "Trimite mesajul selectat când urmărirea Amazon confirmă livrarea.",
+        "order_received": "Trimite mesajul selectat când sosește o comandă eBay nouă pentru unul dintre anunțurile dvs. SellerHill.",
+        "shipped": "Trimite mesajul selectat după ce Amazon a expediat comanda. eBay trimite și propria notificare de urmărire.",
+        "delivered": "Trimite mesajul selectat când urmărirea Amazon arată comanda ca livrată.",
         "feedback_request": "Trimite solicitarea de feedback selectată la un număr ales de zile după livrare."
       },
       "templateSource": "Șablon",
@@ -74,7 +74,7 @@
           "subtitle": "Vizualizați, editați sau creați șabloanele de mesaje automate pentru cumpărători",
           "allEvents": "Toate evenimentele",
           "empty": "Niciun șablon pentru acest eveniment încă",
-          "emptyDescription": "Creați un șablon pentru a folosi propria formulare la evenimentele de mesagerie cu cumpărătorii."
+          "emptyDescription": "Creați un șablon pentru a folosi propria formulare în mesajele către cumpărători."
         },
         "create": {
           "title": "Șablon de mesaj nou",
@@ -93,20 +93,20 @@
         "delete": "Șterge",
         "reset": "Resetează la implicit",
         "resetConfirm": "Restaurați mesajul implicit original? Modificările aduse textului se vor pierde.",
-        "deleteConfirmDescription": "Această acțiune va șterge definitiv „{{name}}”. Dacă un eveniment de mesagerie îl folosește în prezent, acel eveniment nu va mai trimite mesaje până când alegeți alt șablon."
+        "deleteConfirmDescription": "„{{name}}” va fi șters definitiv. Dacă un eveniment îl folosește, acel eveniment nu mai trimite mesaje până când alegeți alt șablon."
       }
     },
     "trackingConversionEnabled": "Ascunde numerele de urmărire ale furnizorului meu",
-    "trackingConversionEnabledHint": "Cumpărătorul dvs. vede un nou număr de urmărire emis de partenerul nostru de urmărire în locul celui Amazon original, astfel încât nimic de pe eBay să nu indice spre furnizorul dvs. Dacă un număr nu poate fi convertit, nu revenim niciodată la cel Amazon — comanda este reținută și vă este afișată în schimb în Acțiuni în așteptare.",
+    "trackingConversionEnabledHint": "Cumpărătorul dvs. vede un nou număr de urmărire de la partenerul nostru de urmărire în locul celui Amazon, astfel încât nimic de pe eBay să nu indice spre furnizorul dvs. Dacă un număr nu poate fi convertit, nu trimitem niciodată numărul Amazon. Comanda este reținută și vă este afișată în Acțiuni în așteptare.",
     "trackingConversionScope": "Ce curieri se convertesc",
     "trackingConversionScopeAll": "Toți curierii",
     "trackingConversionScopeAmazonOnly": "Doar Amazon Logistics (TBA)",
-    "trackingConversionScopeHint": "Numerele Amazon Logistics (TBA) spun direct „Amazon”, deci convertirea doar a acestora ascunde cel mai clar semn al furnizorului dvs. și consumă mult mai puțin din alocarea lunară de conversii. Convertirea tuturor curierilor ascunde mai mult — un număr UPS sau USPS expediat de Amazon poate fi adesea căutat — dar costă mai mult, iar eBay consideră scanarea unui curier nativ o dovadă mai puternică a livrării dacă un cumpărător pretinde că nu și-a primit articolul.",
+    "trackingConversionScopeHint": "Numerele Amazon Logistics (TBA) spun direct „Amazon”. Convertirea doar a acestora ascunde cel mai clar semn al furnizorului dvs. și consumă mult mai puțin din alocarea lunară de conversii. Convertirea tuturor curierilor ascunde mai mult, deoarece un număr UPS sau USPS expediat de Amazon poate fi adesea căutat, dar costă mai mult. În plus, dacă un cumpărător spune că articolul nu a ajuns niciodată, eBay consideră scanarea curierului original o dovadă mai puternică a livrării.",
     "trackingConvertManualOrders": "Convertește comenzile asociate manual",
-    "trackingConvertManualOrdersHint": "O comandă este considerată asociată manual ori de câte ori SellerHill nu a făcut singur achiziția Amazon: ați cumpărat-o dvs. și ați introdus numărul comenzii sau sistemul a asociat-o pentru dvs. Dacă comandarea automată este dezactivată, fiecare dintre comenzile dvs. intră în acest grup — deci dezactivarea acestei opțiuni înseamnă că niciun număr de urmărire nu este convertit, iar cumpărătorul dvs. îl vede pe cel Amazon brut. Activat implicit. Cu opțiunea dezactivată, numărul Amazon brut este trimis automat către eBay imediat ce Amazon expediază comanda, iar eBay nu permite modificarea lui ulterior.",
+    "trackingConvertManualOrdersHint": "O comandă este considerată asociată manual când SellerHill nu a cumpărat-o singur pe Amazon: ați cumpărat-o dvs. și ați introdus numărul comenzii sau am asociat-o noi cu comanda dvs. Amazon. Dacă comandarea automată este dezactivată, toate comenzile dvs. intră în acest grup, deci dezactivarea acestei opțiuni înseamnă că nu se convertește nimic, iar cumpărătorul dvs. vede numărul Amazon brut. Activat implicit. Cu opțiunea dezactivată, numărul Amazon brut ajunge la eBay imediat ce Amazon expediază comanda, iar eBay nu permite modificarea lui ulterior.",
     "trackingExposure": {
       "conversionOff": "Conversia numărului de urmărire este dezactivată. Cumpărătorii dvs. văd numărul de urmărire Amazon brut (TBA…) și vă pot identifica direct furnizorul.",
-      "manualAll": "Deoarece comandarea automată este dezactivată, FIECARE dintre comenzile dvs. este considerată asociată manual. Cu această setare dezactivată nu se convertește nimic — numărul Amazon brut, inclusiv TBA, ajunge la eBay și vă expune furnizorul.",
+      "manualAll": "Deoarece comandarea automată este dezactivată, FIECARE dintre comenzile dvs. este considerată asociată manual. Cu această setare dezactivată nu se convertește nimic: numărul Amazon brut, inclusiv TBA, ajunge la eBay și vă expune furnizorul.",
       "manualSome": "Comenzile pe care le asociați manual vor fi expediate cu numărul de urmărire Amazon brut (TBA…), expunându-vă furnizorul pentru acele comenzi.",
       "confirmConversionOff": "Dacă dezactivați conversia, fiecare comandă de acum înainte arată cumpărătorului dvs. numărul de urmărire Amazon brut (TBA…) și vă expune furnizorul. După ce un număr de urmărire a fost trimis către eBay, acesta nu mai poate fi schimbat. Sigur doriți să o dezactivați?",
       "confirmManualOff": "Dacă dezactivați aceasta, comenzile pe care le asociați manual vor fi expediate cu numărul de urmărire Amazon brut (TBA…). Cu comandarea automată dezactivată, asta înseamnă toate comenzile dvs. După ce un număr de urmărire a fost trimis către eBay, acesta nu mai poate fi schimbat. Sigur doriți să o dezactivați?",

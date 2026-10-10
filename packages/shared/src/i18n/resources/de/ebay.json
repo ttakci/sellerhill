@@ -25,7 +25,7 @@
       "statusRevoked": "Widerrufen",
       "statusError": "Fehler",
       "disconnectButton": "Trennen",
-      "refreshTokenButton": "Token aktualisieren"
+      "refreshTokenButton": "Verbindung aktualisieren"
     },
     "callback": {
       "processing": "eBay-Verbindung wird verarbeitet ...",
@@ -34,16 +34,16 @@
       "cancelled": "Die eBay-Verbindung wurde abgebrochen."
     },
     "errors": {
-      "invalidState": "Ungültiger State-Parameter",
+      "invalidState": "Die eBay-Verbindung konnte nicht bestätigt werden. Bitte versuchen Sie es erneut.",
       "authorizationFailed": "eBay-Autorisierung fehlgeschlagen",
-      "tokenExchangeFailed": "Autorisierungscode konnte nicht gegen Tokens eingetauscht werden",
+      "tokenExchangeFailed": "Wir konnten die Verbindung Ihres eBay-Shops nicht abschließen. Bitte versuchen Sie es erneut.",
       "accountAlreadyConnected": "Dieser eBay-Shop ist mit einem anderen SellerHill-Konto verbunden. Melden Sie sich mit dem Konto an, mit dem Sie ihn verbunden haben; falls Sie darauf keinen Zugriff haben, wenden Sie sich an den Support.",
       "ebayTrialAlreadyUsed": "Für diesen eBay-Shop wurde die kostenlose Testphase bereits genutzt. Wählen Sie einen Tarif, um ihn zu verbinden.",
-      "noAuthorizationCode": "Von eBay wurde kein Autorisierungscode empfangen",
+      "noAuthorizationCode": "eBay hat die Verbindung nicht bestätigt. Bitte versuchen Sie es erneut.",
       "storeOwnedByAnotherAccount": "Dieser eBay-Shop ist mit einem anderen SellerHill-Konto verknüpft. Wenden Sie sich an den Support, um ihn zu übertragen.",
       "accountNotFound": "Dieser eBay-Shop wurde nicht gefunden.",
-      "identityUnavailable": "Wir konnten Ihr eBay-Konto bei eBay nicht bestätigen. Es wurde nichts verbunden – bitte versuchen Sie es in Kürze erneut.",
-      "messagingScopeMissing": "Verbinden Sie Ihren eBay-Shop erneut, um Nachrichten zu aktivieren – die aktuelle Autorisierung umfasst keine Nachrichten.",
+      "identityUnavailable": "Wir konnten Ihr eBay-Konto bei eBay nicht bestätigen, daher wurde nichts verbunden. Bitte versuchen Sie es in Kürze erneut.",
+      "messagingScopeMissing": "Verbinden Sie Ihren eBay-Shop erneut, um Nachrichten zu aktivieren. Ihre aktuelle Verbindung umfasst keine Nachrichten.",
       "messagingReplyNotAllowed": "Auf Nachrichten von eBay kann hier nicht geantwortet werden.",
       "messagingUnavailable": "eBay-Nachrichten sind vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
       "messagingRejected": "eBay hat diese Anfrage nicht angenommen. Bitte prüfen Sie die Nachricht und versuchen Sie es erneut.",
@@ -53,7 +53,7 @@
       "title": "Verbinden Sie Ihren eBay-Shop",
       "header": "Marktplatz-Einrichtung",
       "description": "Um Ihre Artikel zu synchronisieren, müssen Sie zuerst Ihren eBay-Shop verbinden.",
-      "connectButton": "eBay-Konto",
+      "connectButton": "eBay-Konto verbinden",
       "skipButton": "Vorerst überspringen",
       "usOnlyNote": "Derzeit wird nur der US-Marktplatz unterstützt. Weitere Regionen folgen in Kürze.",
       "brandingDescription": "Verknüpfen Sie Ihren eBay-Shop mit SellerHill, um alle Verkaufsprozesse zentral zu steuern."

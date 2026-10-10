@@ -95,15 +95,15 @@
       "tracked": "已关联刊登",
       "untracked": "未关联刊登",
       "problem": {
-        "wrongPageType": "物流服务商无法读取 Amazon 的订单页面，可能是页面格式已更改。系统将自动重试。",
+        "wrongPageType": "无法读取 Amazon 订单页面以转换物流单号。Amazon 可能更改了该页面。我们将自动重试。",
         "amazonSessionExpired": "用于读取此订单的 Amazon 会话已过期，需要重新登录。",
-        "trackingUrlMismatch": "Amazon 订单页面上的物流链接与我们预期的不符。系统将自动重试。",
-        "needsTrackingUpload": "正在等待上传货件详情，之后才能转换物流单号。",
-        "updateNotApplied": "服务商尚未应用此物流更新。系统将自动重试。",
-        "assignValidation": "物流服务商拒绝了此订单的货件详情。",
-        "shipmentException": "物流服务商报告此货件出现异常。",
-        "trackingUpdateUnavailable": "物流服务商目前无法更新此货件。",
-        "generic": "此订单的物流单号转换出现问题。系统将自动重试。"
+        "trackingUrlMismatch": "Amazon 订单页面上的物流链接与我们预期的不符。我们将自动重试。",
+        "needsTrackingUpload": "正在等待货件详情，之后才能转换物流单号。",
+        "updateNotApplied": "此物流更新尚未生效。我们将自动重试。",
+        "assignValidation": "转换物流单号时，此订单的货件详情被拒绝。",
+        "shipmentException": "此货件被报告出现问题。",
+        "trackingUpdateUnavailable": "目前无法更新此货件的物流信息。",
+        "generic": "此订单的物流单号转换出现问题。我们将自动重试。"
       }
     },
     "autoFulfill": {
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "在 Amazon 上未找到商品",
         "captcha": "需要验证码",
-        "otp": "MFA/OTP 验证",
+        "otp": "需要验证码",
         "login": "登录失败",
         "out_of_stock": "缺货",
         "address": "地址问题",
         "payment": "付款被拒",
-        "cap": "超出成本上限",
+        "cap": "超出支出上限",
         "no_confirmation": "无确认信息",
-        "proxy_required": "未配置代理",
+        "proxy_required": "无法使用账号代理",
         "quota_exhausted": "已达月度额度",
         "cart": "购物车不匹配",
         "review_unreadable": "无法读取订单总额",
-        "interrupted": "购买被中断 — 请检查 Amazon",
+        "interrupted": "购买被中断，请检查 Amazon",
         "subscription_suspended": "订阅已暂停",
         "listing_over_plan_limit": "商品刊登超出套餐上限",
         "order_already_fulfilled": "已发货，无需采购",
         "order_not_paid": "等待买家付款",
         "order_cancelled": "已在 eBay 取消，无需采购",
-        "multi_item_order": "订单含多件商品 — 请手动购买",
-        "cancel_requested": "买家申请取消 — 请在 eBay 上回复",
+        "multi_item_order": "订单含多件商品，请手动购买",
+        "cancel_requested": "买家申请取消，请在 eBay 上回复",
         "loss_limit": "超出您的亏损上限"
       },
       "reasonLabel": "原因：{{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Amazon 上没有",
         "confirmTitle": "确认 Amazon 上没有这笔销售对应的订单？",
-        "confirmDescription": "只有在您查看过该 Amazon 账户的订单并且确实没有这笔订单之后才继续。SellerHill 也会检查该账户的订单列表，在检查完成之前不会接受确认。之后可以重新启动自动下单——如果订单其实已在 Amazon 上存在，商品将被购买两次。",
+        "confirmDescription": "只有在您查看过该 Amazon 账户的订单并且确实没有这笔订单之后才继续。SellerHill 也会检查该账户的订单列表，在检查完成之前不会接受确认。之后可以重新启动自动下单。如果订单其实已在 Amazon 上存在，商品将被购买两次。",
         "confirm": "是的，没有",
         "done": "已标记为未购买。您可以重新启动自动下单。"
       }
@@ -202,7 +202,7 @@
       "viewMore": "查看更多详情",
       "updateAmazon": "填写 Amazon 信息",
       "netProfitAnalysis": "净利润分析",
-      "analysisDesc": "此计算以您从 eBay 获得的实际收入（已扣除所有平台费用和税费）为基础，再减去最初的 Amazon 采购成本。",
+      "analysisDesc": "您在扣除所有平台费用和税费后的 eBay 收入，减去最初的 Amazon 采购成本。",
       "calculation": "计算",
       "netProfitResult": "净利润",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "最晚发货时间",
       "shipByNotice": "eBay 最晚发货时间：{{date}}",
       "shipByHeading": "eBay 最晚发货时间",
-      "multiItemNotice": "这笔 eBay 订单包含 {{count}} 件商品。SellerHill 只跟踪第一件，并且不会自动购买此订单——请自行购买并发出其余商品。"
+      "multiItemNotice": "这笔 eBay 订单包含 {{count}} 件商品。SellerHill 只跟踪第一件，并且不会自动购买此订单。请自行购买并发出其余商品。"
     },
     "modal": {
       "title": "填写 Amazon 订单信息",
@@ -264,7 +264,7 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "预估",
-    "estimateNote": "预估利润，将在 Amazon 订单下达后确定。基于最近已知的 Amazon 价格；不含 Amazon 运费。",
+    "estimateNote": "预估利润。Amazon 订单下达后才会确定。基于最近已知的 Amazon 价格；不含 Amazon 运费。",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. 保留所有权利。"
     },
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "这笔销售超过了你的 Amazon 账户的消费上限。请在 Amazon 账户设置中提高上限，或手动购买该商品。",
       "autoFulfillAlreadyStarted": "此订单的状态刚刚发生变化，购买可能已经开始。请刷新页面。",
       "autoFulfillQuotaExhausted": "你的套餐在本周期内的自动下单额度已用完。",
-      "purchaseNotYetChecked": "自本次购买尝试以来，SellerHill 尚未检查该 Amazon 账户的订单。检查现已启动——请几分钟后重试。",
+      "purchaseNotYetChecked": "自本次购买尝试以来，SellerHill 尚未检查该 Amazon 账户的订单。检查现已启动。请几分钟后重试。",
       "purchaseNotUnknown": "该订单并未在等待购买确认。它可能已被关联或正在处理中。请刷新页面。",
       "purchaseFoundOnAmazon": "SellerHill 在 Amazon 上找到了一笔该商品的订单，下单时间与本次购买尝试相近，但无法确定它对应这笔销售。请打开您的 Amazon 订单并手动关联。如果该订单属于另一笔销售，请先将其关联到那笔销售。",
       "noteTooLong": "备注最多 1,000 个字符。",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "物流信息暂缓",
-        "meaning": "Amazon 已发货，但物流信息尚未到达 eBay——通常是物流转换仍在等待中。",
+        "meaning": "Amazon 已发货，但物流单号尚未到达 eBay。通常是物流单号转换仍在等待中。",
         "action": "请转换物流信息，或处理订单中显示的原因。"
       },
       "buying": {
@@ -378,14 +378,14 @@
         "bought_linked": "此销售已关联一个 Amazon 订单。",
         "purchase_not_recorded": "SellerHill 中没有此销售对应的 Amazon 订单。",
         "amazon_shipped": "Amazon 已将包裹交给承运商。",
-        "waiting_shipment": "等待 Amazon 发货。系统会定期检查该订单。",
+        "waiting_shipment": "等待 Amazon 发货。我们会定期检查该订单。",
         "shipment_not_observed": "SellerHill 未跟踪此销售的 Amazon 发货。",
         "upcoming_shipment": "Amazon 发货后会显示在这里。",
         "tracking_pushed": "运单号已发送到 eBay；买家可以跟踪包裹。",
         "tracking_not_by_us": "此销售的运单号不是由 SellerHill 发送的。",
         "upcoming_tracking": "Amazon 发货后会发送到 eBay。",
         "delivered": "Amazon 显示包裹已送达。",
-        "waiting_delivery": "等待送达。系统会定期检查该订单。",
+        "waiting_delivery": "等待送达。我们会定期检查该订单。",
         "delivery_not_tracked": "SellerHill 未跟踪此销售的送达情况。",
         "upcoming_delivery": "包裹送达后会显示在这里。",
         "message_sent": "已发送给买家。",

@@ -58,7 +58,7 @@
       },
       "plan": {
         "title": "套餐与容量",
-        "subtitle": "即将开始拒绝执行任务的额度限制。"
+        "subtitle": "达到后会停止新任务的额度限制。"
       },
       "setup": {
         "title": "设置",
@@ -77,7 +77,7 @@
         "action": "查看订单"
       },
       "order_purchase_unknown": {
-        "title": "购买未确认 — 请先查看 Amazon",
+        "title": "购买未确认：请先查看 Amazon",
         "description_other": "无法确认 Amazon 购买的订单数：{{count}}。已点击下单按钮但未收到确认，订单可能已经生成。再次购买任何东西之前，请先查看 Amazon 并关联订单。",
         "action": "查看订单"
       },
@@ -93,17 +93,17 @@
       },
       "order_tracking_problem": {
         "title": "物流单号转换出现问题",
-        "description_other": "有 {{count}} 笔已发货订单与物流服务商之间存在未解决的问题。在问题解决之前，这些订单向买家显示的是原始的 Amazon 物流单号，而不是转换后的单号。",
+        "description_other": "有 {{count}} 笔已发货订单存在未解决的物流单号转换问题。请打开订单查看需要处理的内容。",
         "action": "查看订单"
       },
       "order_tracking_conversion_held": {
         "title": "订单尚未在 eBay 标记为已发货",
-        "description_other": "有 {{count}} 笔订单在 {{hours}} 多小时前已在 Amazon 发货，但因物流单号无法转换，尚未在 eBay 标记为已发货。我们绝不会把原始的 Amazon 物流单号发给您的买家。解决原因后，订单会自动发货，在此之前存在延迟发货缺陷的风险。",
+        "description_other": "有 {{count}} 笔订单在 {{hours}} 多小时前已在 Amazon 发货，但因物流单号无法转换，尚未在 eBay 标记为已发货。我们绝不会把原始的 Amazon 物流单号发给您的买家。解决原因后，订单会自动标记为已发货。在此之前存在延迟发货缺陷的风险。",
         "action": "查看订单"
       },
       "order_cancelled_amazon_open": {
         "title": "eBay 取消了一笔您已在 Amazon 采购的订单",
-        "description_other": "最近 {{days}} 天内有 {{count}} 笔订单在 eBay 被取消，但为其下的 Amazon 订单仍未关闭。已经没有买家在等这些商品——请取消 Amazon 订单；如已发货，请办理退货。",
+        "description_other": "最近 {{days}} 天内有 {{count}} 笔订单在 eBay 被取消，但为其下的 Amazon 订单仍未关闭。已经没有买家在等这些商品。请取消 Amazon 订单；如已发货，请办理退货。",
         "action": "查看订单"
       },
       "order_late_to_ship": {
@@ -118,7 +118,7 @@
       },
       "cancel_request_seller_action_due": {
         "title": "买家取消请求",
-        "description_other": "有 {{count}} 位买家要求取消订单——请在 eBay 截止时间前在此批准或拒绝",
+        "description_other": "有 {{count}} 位买家要求取消订单。请在 eBay 截止时间前在此批准或拒绝这些请求。",
         "action": "查看请求"
       },
       "ebay_account_disconnected": {
@@ -178,17 +178,17 @@
       },
       "setup_no_ebay_store": {
         "title": "连接您的 eBay 店铺",
-        "description": "没有连接 eBay 店铺，SellerHill 中的其他功能都无法运行，商品刊登、订单和自动化都依赖于它。这是需要首先完成的一件事。",
+        "description": "没有连接 eBay 店铺，SellerHill 的任何功能都无法运行。商品刊登、订单和自动化都依赖于它，所以请先完成这一步。",
         "action": "连接 eBay"
       },
       "setup_no_amazon_account": {
         "title": "尚无 Amazon 买家账号",
-        "description": "您正在销售，但没有可用于采购的 Amazon 账号，每笔订单都必须手动采购。添加一个账号即可启用自动履约。",
+        "description": "您正在销售，但没有可用于采购的 Amazon 账号，每笔订单都必须手动采购。添加一个账号即可开启自动采购。",
         "action": "添加账号"
       },
       "setup_no_store_settings": {
         "title": "尚未配置店铺设置",
-        "description": "您的发货地和黑名单关键词仍未设置。它们用于计算成本，并防止商品刊登带着被屏蔽的内容发布。",
+        "description": "您的店铺地址和黑名单关键词尚未设置。地址会在 eBay 上显示为商品所在地，黑名单可防止含有屏蔽词的刊登上线。",
         "action": "配置设置"
       },
       "setup_no_listing_settings_group": {
@@ -198,7 +198,7 @@
       },
       "setup_auto_fulfill_off": {
         "title": "自动采购已关闭",
-        "description": "您的 Amazon 账号已连接，但没有一个被允许采购。设置支出上限并开启后，新订单将由系统为您采购。",
+        "description": "您的 Amazon 账号已连接，但没有一个被允许采购。设置支出上限并开启后，新订单将自动为您采购。",
         "action": "开启"
       },
       "plan_conversion_quota": {
@@ -219,7 +219,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "需要重新验证",
+        "needs_reauth": "需要重新登录",
         "invalid": "凭据无效",
         "locked": "被 Amazon 锁定"
       },
@@ -233,9 +233,9 @@
         "tracking_url_mismatch": "物流链接不匹配",
         "needs_tracking_upload": "等待发货信息",
         "update_not_applied": "更新尚未生效",
-        "assign_validation": "被服务商拒绝",
+        "assign_validation": "转换被拒绝",
         "shipment_exception": "承运商异常",
-        "tracking_update_unavailable": "服务商不可用"
+        "tracking_update_unavailable": "转换暂时不可用"
       }
     }
   }

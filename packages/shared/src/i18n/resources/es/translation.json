@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Cuenta de Amazon",
-          "subtitle": "Administra tus cuentas de comprador para la lectura de pedidos"
+          "subtitle": "Administra las cuentas de comprador de Amazon que se usan para tus pedidos"
         }
       },
       "ebay": {
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Cuentas de Amazon",
-        "subtitle": "Tus cuentas de comprador para la lectura de pedidos",
+        "subtitle": "Tus cuentas de comprador de Amazon que se usan para los pedidos",
         "addNew": {
           "title": "Nueva cuenta de Amazon",
-          "subtitle": "Conecta una nueva cuenta de comprador para la lectura de pedidos"
+          "subtitle": "Conecta una nueva cuenta de comprador para tus pedidos"
         },
         "empty": {
           "title": "Aún no hay cuentas de comprador",
-          "description": "Conecta una cuenta de comprador de Amazon para leer tus pedidos y capturar los costos reales."
+          "description": "Conecta una cuenta de comprador de Amazon para que podamos leer tus pedidos de Amazon y registrar sus costos reales."
         },
         "viewAll": {
           "title": "Todas"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Agregar cuenta de Amazon",
-        "subtitle": "Proporciona las credenciales para la lectura de pedidos",
+        "subtitle": "Ingresa los datos de inicio de sesión de tu cuenta de comprador de Amazon",
         "label": "Etiqueta de la cuenta",
         "email": "Correo electrónico",
         "password": "Contraseña",
         "twoFactorSecret": "Clave secreta de 2FA",
-        "twoFactorSecretHint": "Obligatoria. Amazon pide un código de verificación en casi todos los inicios de sesión automáticos, y una clave de autenticador es la única que podemos responder por ti. En los ajustes de Inicio de sesión y seguridad de Amazon activa una aplicación de autenticación y pega aquí la clave de configuración, no un código de 6 dígitos. Al editar una cuenta existente, déjala en blanco para conservar la clave guardada."
+        "twoFactorSecretHint": "Obligatoria. Amazon pide un código de verificación en casi todos los inicios de sesión automáticos, y una clave de autenticador es la única forma en que podemos ingresar ese código por ti. En los ajustes de Inicio de sesión y seguridad de Amazon, activa una aplicación de autenticación y pega aquí su clave de configuración, no un código de 6 dígitos. Al editar una cuenta, déjala en blanco para conservar la clave guardada."
       },
       "amazonEdit": {
         "title": "Editar cuenta de Amazon",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Precio y stock monitoreados 4 veces al día",
-        "description": "El precio y el stock de origen se revisan cuatro veces cada día, y cualquier cambio llega a tu publicación de eBay en la misma pasada. Así dejas de vender lo que está agotado y de mantener precios que pierden dinero.",
+        "description": "El precio y el stock de origen se revisan cuatro veces cada día, y cualquier cambio llega a tu publicación de eBay en la misma pasada. Así dejas de vender lo que está agotado y de mantener precios que pierden dinero. En esta categoría, incluso una revisión al día es poco común.",
         "caption": "Una revisión cada 6 horas"
       },
       "specifics": {
         "title": "Características del artículo, realmente completas",
-        "description": "No omitimos los campos obligatorios con «No aplica». Cada atributo se asocia a un valor que la categoría de eBay acepta, para que tu publicación aparezca en los filtros de los compradores.",
+        "description": "Los campos obligatorios se completan con los datos reales del producto siempre que existan, y se ajustan a los valores que acepta la categoría de eBay. Así tu anuncio aparece en los filtros de los compradores.",
         "others": "Otros",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Automatización accesible",
-        "description": "El conjunto completo de automatización profesional por una cuota mensual mucho menor. Todas las funciones están en todos los planes, los pedidos automáticos son ilimitados; los planes solo se diferencian por publicaciones, conversiones de seguimiento y exploración de Más vendidos.",
+        "description": "El conjunto completo de automatización profesional por una cuota mensual asequible. Todas las funciones están en todos los planes, los pedidos automáticos son ilimitados y los planes solo se diferencian por publicaciones, conversiones de seguimiento y exploración de Más vendidos.",
         "cta": "Ver planes"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Publicación masiva por ASIN",
-          "description": "Pega cientos de ASIN y deja que las publicaciones se creen en la cola."
+          "description": "Pega cientos de ASIN y las publicaciones se crean por ti."
         },
         "aiTitle": {
           "title": "Títulos optimizados con IA",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Precios",
       "sectionTitle": "Automatización accesible.",
-      "sectionSubtitle": "Todos los planes incluyen todas las funciones. Los planes se diferencian por las publicaciones activas, las conversiones de seguimiento y el límite de exploración de Más vendidos; los pedidos automáticos son ilimitados en todos los planes, así que las funciones que otras herramientas reservan para sus planes superiores son tuyas incluso en el plan más pequeño.",
+      "sectionSubtitle": "Todos los planes incluyen todas las funciones. Los planes se diferencian por las publicaciones activas, las conversiones de seguimiento y el límite de exploración de Más vendidos. Los pedidos automáticos son ilimitados en todos los planes, así que las funciones que otras herramientas reservan para sus planes superiores son tuyas incluso en el plan más pequeño.",
       "billingNote": "Cancela cuando quieras. Los precios no incluyen impuestos locales cuando corresponda.",
       "perMonth": "/mes",
       "mostPopular": "Más popular",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "¿Cómo se completan las características del artículo?",
-        "answer": "Reunimos todos los atributos que el catálogo de origen tiene de un producto y los asociamos a los campos que define la categoría de eBay. Cuando una categoría solo acepta ciertos valores, elegimos el correcto de su lista. En lugar de omitir los campos obligatorios con «No aplica», los completamos con valores reales, enviando hasta 45 características por publicación."
+        "answer": "Reunimos todos los atributos que el catálogo de origen tiene de un producto y los asociamos a los campos que define la categoría de eBay. Cuando una categoría solo acepta ciertos valores, elegimos el correcto de su lista. Los campos obligatorios reciben valores reales siempre que los datos del producto los tengan, y cada anuncio lleva hasta 45 características."
       },
       "q4": {
         "question": "¿Cómo funcionan los pedidos automáticos?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Automatización más inteligente. Un precio menor.",
+        "headline": "Automatización más inteligente. A un precio asequible.",
         "subheading": "Estrategias por grupo de productos, sincronización cuatro veces al día, características del artículo completas y una pantalla de Acciones pendientes que te guía. Pruébalo gratis durante un mes, sin tarjeta de crédito.",
         "button": "Empieza gratis"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Datos de ejemplo — no se guarda nada.",
+      "description": "Datos de ejemplo. No se guarda nada.",
       "exit": "Salir de la demo",
       "signUp": "Crear cuenta gratis"
     },

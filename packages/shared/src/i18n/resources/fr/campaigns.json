@@ -29,8 +29,8 @@
       "title": "Détails de la campagne",
       "breadcrumb": "Détails de la campagne",
       "subtitle": "Annonces de cette campagne.",
-      "metricsNote": "Les indicateurs indisponibles attendent les rapports eBay ; leur rapprochement peut prendre environ 72 heures.",
-      "eligibilityUnavailable": "L’éligibilité publicitaire est inconnue. Les modifications sont désactivées."
+      "metricsNote": "Les chiffres manquants attendent les rapports d’eBay. Ils peuvent mettre environ 72 heures à se stabiliser.",
+      "eligibilityUnavailable": "Nous n’avons pas pu vérifier si cette boutique peut faire de la publicité, les modifications de campagne sont donc désactivées."
     },
     "campaign": {
       "name": "Nom de la campagne",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Aucune campagne pour le moment",
-      "description": "Les campagnes de votre boutique active apparaîtront ici après synchronisation.",
+      "description": "Les campagnes de votre boutique active apparaîtront ici dès qu’elles auront été chargées depuis eBay.",
       "noStore": "Sélectionnez une boutique eBay dans la barre supérieure."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Campagne en lecture seule",
-      "marginOverride": "Marge personnalisée : le taux publicitaire ne s’applique pas au prix SellerHill.",
+      "marginOverride": "Cette annonce a sa propre marge : le taux publicitaire n’est donc pas inclus dans le prix fixé par SellerHill.",
       "rule_based": "Les campagnes basées sur des règles sont en lecture seule.",
       "cost_per_click": "Les campagnes au coût par clic sont en lecture seule.",
       "dynamic_rate": "Les campagnes à taux dynamique sont en lecture seule.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Ajouter des annonces",
       "group": "Groupe de paramètres",
-      "groupHint": "Le groupe remplit une seule fois la sélection avec les annonces éligibles sans campagne. Aucune règle permanente n’est créée.",
+      "groupHint": "Choisir un groupe sélectionne ses annonces éligibles qui ne sont encore dans aucune campagne. Cela se fait une seule fois : les annonces ajoutées au groupe plus tard ne sont pas incluses.",
       "groupsError": "Impossible de charger les groupes de paramètres.",
       "groupError": "Impossible de charger tout le groupe. Votre sélection est conservée.",
       "retryGroup": "Réessayer la sélection du groupe",
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "La publicité est indisponible pour cette boutique.",
-      "unavailable": "L’éligibilité publicitaire est indisponible. La création de campagnes est désactivée."
+      "unavailable": "Nous n’avons pas pu vérifier si cette boutique peut faire de la publicité, vous ne pouvez donc pas créer de campagne pour le moment."
     },
     "results": {
       "summary": "Modifications confirmées : {{changed}}. Déjà dans la campagne : {{already}}. Non confirmées ou en échec : {{failed}}.",
-      "retryHint": "Les annonces en échec ou non confirmées restent disponibles pour réessayer.",
-      "unconfirmed": "Aucune mise à jour d’annonce confirmée. Actualisez les détails pour vérifier le taux par défaut."
+      "retryHint": "Vous pouvez réessayer les annonces en échec ou non confirmées.",
+      "unconfirmed": "Aucune mise à jour d’annonce confirmée. Actualisez la campagne pour vérifier son taux par défaut."
     }
   }
 }

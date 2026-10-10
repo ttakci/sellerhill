@@ -25,7 +25,7 @@
       "statusRevoked": "Ləğv edilib",
       "statusError": "Xəta",
       "disconnectButton": "Bağlantını kəs",
-      "refreshTokenButton": "Tokeni yenilə"
+      "refreshTokenButton": "Bağlantını yenilə"
     },
     "callback": {
       "processing": "eBay bağlantısı emal olunur...",
@@ -34,16 +34,16 @@
       "cancelled": "eBay bağlantısı ləğv edildi."
     },
     "errors": {
-      "invalidState": "Yanlış state parametri",
+      "invalidState": "eBay bağlantısını təsdiqləmək mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.",
       "authorizationFailed": "eBay avtorizasiyası alınmadı",
-      "tokenExchangeFailed": "Avtorizasiya kodunu tokenlərlə əvəzləmək alınmadı",
+      "tokenExchangeFailed": "eBay mağazanızın qoşulmasını tamamlaya bilmədik. Zəhmət olmasa yenidən cəhd edin.",
       "accountAlreadyConnected": "Bu eBay mağazası başqa SellerHill hesabına qoşulub. Onu qoşduğunuz hesabla daxil olun; əgər ona giriş yoxdursa, dəstək xidməti ilə əlaqə saxlayın.",
       "ebayTrialAlreadyUsed": "Bu eBay mağazası pulsuz sınaq müddətindən artıq istifadə edib. Onu qoşmaq üçün plan seçin.",
-      "noAuthorizationCode": "eBay-dən avtorizasiya kodu alınmadı",
+      "noAuthorizationCode": "eBay bağlantını təsdiqləmədi. Zəhmət olmasa yenidən cəhd edin.",
       "storeOwnedByAnotherAccount": "Bu eBay mağazası başqa SellerHill hesabı ilə əlaqələndirilib. Onu köçürmək üçün dəstək xidməti ilə əlaqə saxlayın.",
       "accountNotFound": "Həmin eBay mağazası tapılmadı.",
-      "identityUnavailable": "eBay hesabınızı eBay ilə təsdiqləyə bilmədik. Heç nə qoşulmadı — zəhmət olmasa bir azdan yenidən cəhd edin.",
-      "messagingScopeMissing": "Mesajları aktivləşdirmək üçün eBay mağazanızı yenidən qoşun — cari icazə mesajlaşmanı əhatə etmir.",
+      "identityUnavailable": "eBay hesabınızı eBay ilə təsdiqləyə bilmədik, ona görə heç nə qoşulmadı. Zəhmət olmasa bir azdan yenidən cəhd edin.",
+      "messagingScopeMissing": "Mesajları aktivləşdirmək üçün eBay mağazanızı yenidən qoşun. Cari bağlantınız mesajlaşmanı əhatə etmir.",
       "messagingReplyNotAllowed": "eBay-dən gələn mesajlara burada cavab vermək olmaz.",
       "messagingUnavailable": "eBay mesajlaşması müvəqqəti olaraq əlçatan deyil. Zəhmət olmasa yenidən cəhd edin.",
       "messagingRejected": "eBay bu sorğunu qəbul etmədi. Mesajı yoxlayıb yenidən cəhd edin.",
@@ -53,7 +53,7 @@
       "title": "eBay mağazanızı qoşun",
       "header": "Bazar qurulumu",
       "description": "Məhsullarınızı sinxronlaşdırmağa başlamaq üçün əvvəlcə eBay mağazanızı qoşmalısınız.",
-      "connectButton": "eBay hesabı",
+      "connectButton": "eBay hesabını qoş",
       "skipButton": "İndilik keç",
       "usOnlyNote": "Hazırda yalnız ABŞ bazarı dəstəklənir. Daha çox region tezliklə əlavə olunacaq.",
       "brandingDescription": "Bütün satış proseslərinizi tək mərkəzdən idarə etmək üçün eBay mağazanızı SellerHill-ə bağlayın."

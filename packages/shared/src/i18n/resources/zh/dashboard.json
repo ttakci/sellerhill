@@ -125,11 +125,11 @@
       "confirmedLabel": "已确认",
       "confirmedTooltip": "来自已获取真实 Amazon 成本的订单的利润。未知的成本绝不会被当作零。",
       "estimatedLabel": "预估",
-      "estimatedTooltip": "等待 Amazon 履约的订单使用预估成本（按您配置的 {{rate}}% 税率估算 Amazon 税费）。",
+      "estimatedTooltip": "尚未获得真实 Amazon 成本的订单使用预估成本，Amazon 税费按您设定的 {{rate}}% 税率估算。",
       "uncostedLabel": "无成本数据的营收",
-      "uncostedTooltip": "其 Amazon 成本尚无法确定的销售，仅显示营收，不暗示任何利润。",
+      "uncostedTooltip": "Amazon 成本尚未知的销售。这里仅为营收，不代表任何利润。",
       "untrackedExcludedLabel_other": "已排除 {{count}} 个未跟踪订单",
-      "untrackedExcludedTooltip": "未匹配到 SellerHill 刊登的订单不计入此面板的任何数据。它们仍显示在“订单”页面的“未跟踪”下；导入该刊登即可将其纳入。"
+      "untrackedExcludedTooltip": "未匹配到 SellerHill 刊登的订单不计入此面板的任何数据。它们仍显示在“订单”页面的“未跟踪”下。导入该刊登即可将其纳入。"
     },
     "topSellers": {
       "result_other": "已售出 <b>{{count}}</b> 个刊登",

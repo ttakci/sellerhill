@@ -5,13 +5,13 @@
     "saveChanges": "保存更改",
     "viewLogs": "查看日志",
     "globalSettings": "将设置应用于所有店铺",
-    "globalDescription": "开启后，将把下方配置同步到每个已连接的店铺。关闭则可选择某个特定店铺。",
+    "globalDescription": "开启后，下方设置将应用于每个已连接的店铺。关闭后可选择单个店铺。",
     "selectStore": "选择店铺",
     "selectStorePlaceholder": "搜索并选择店铺…",
     "locationSectionTitle": "位置设置",
     "locationSectionSubtitle": "管理您店铺的实际地址和所在地区",
     "country": "国家/地区",
-    "state": "州/省或所在地",
+    "state": "州/地区",
     "zipCode": "邮政编码",
     "blacklistType_title": "标题",
     "blacklistType_description": "描述",
@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "品牌与制造商",
     "copyright": "© {{year}} SellerHill Platform. 保留所有权利。",
     "amazonTaxRate": "Amazon 销售税率 (%)",
-    "amazonTaxRateDesc": "应用于采购成本的预估 Amazon 销售税率。它有两种用途：一是提高您的 eBay 商品刊登价格以覆盖这部分成本；二是在订单利润仍为暂估、Amazon 订单尚未下达时，用于估算该订单的利润。",
+    "amazonTaxRateDesc": "按采购成本估算的 Amazon 销售税。它会提高您的 eBay 价格以覆盖这部分成本，并在 Amazon 订单下达之前用于估算订单利润。",
     "autoFulfillEnabled": "eBay 售出后自动下达 Amazon 订单",
     "autoFulfillEnabledHint": "开启后，SellerHill 会使用您已关联的买家账号在 Amazon 上购买商品。关闭则需手动下单。",
     "autoFulfillEnabledInfo": "请仅在连接并配置好 Amazon 买家账号之后再开启。自动下单还要求该账号的自动履约设置和支出上限已启用。",
@@ -30,12 +30,12 @@
       "amountHint": "以您店铺的货币计。0 表示绝不亏本购买。"
     },
     "trackingConversionProvider": "物流单号转换",
-    "trackingConversionProviderHint": "真实的承运商单号将原样转发。Amazon Logistics（TBA）单号保持不变。",
-    "trackingConversionProviderLocal": "内置（本地）",
-    "trackingConversionApiComingSoon": "基于 API 的转换服务商已在规划中。",
+    "trackingConversionProviderHint": "真实的承运商单号将原样发送。Amazon Logistics（TBA）单号也不会更改。",
+    "trackingConversionProviderLocal": "内置",
+    "trackingConversionApiComingSoon": "我们正在规划另一种转换选项。",
     "messaging": {
       "title": "买家消息",
-      "subtitle": "在订单的关键节点自动向买家发送消息。可选，并可按事件分别设置。",
+      "subtitle": "在订单的关键节点自动向买家发送消息。您可以分别开启或关闭每个事件。",
       "masterEnable": "启用买家自动消息",
       "shippedWarning": "订单标记为已发货时，eBay 已经会发送物流通知。再发送一条是可选的。",
       "delayDays": "延迟（天）",
@@ -47,9 +47,9 @@
         "feedback_request": "评价请求"
       },
       "eventDescriptions": {
-        "order_received": "首次收到匹配的新 eBay 订单时，发送所选消息。",
-        "shipped": "Amazon 物流将订单标记为已发货后，发送所选消息。eBay 也会发送其自己的物流通知。",
-        "delivered": "Amazon 物流确认送达时，发送所选消息。",
+        "order_received": "当您的某条 SellerHill 刊登收到新的 eBay 订单时，发送所选消息。",
+        "shipped": "Amazon 发出订单后，发送所选消息。eBay 也会发送其自己的物流通知。",
+        "delivered": "Amazon 物流显示订单已送达时，发送所选消息。",
         "feedback_request": "在送达后的指定天数发送所选的评价请求。"
       },
       "templateSource": "模板",
@@ -72,7 +72,7 @@
           "subtitle": "查看、编辑或创建您的买家自动消息模板",
           "allEvents": "所有事件",
           "empty": "此事件暂无模板",
-          "emptyDescription": "创建模板，即可在买家消息事件中使用您自己的措辞。"
+          "emptyDescription": "创建模板，即可在买家消息中使用您自己的措辞。"
         },
         "create": {
           "title": "新建消息模板",
@@ -91,17 +91,17 @@
         "delete": "删除",
         "reset": "恢复默认",
         "resetConfirm": "要恢复原始的默认消息吗？您对文本所做的修改将会丢失。",
-        "deleteConfirmDescription": "这将永久删除“{{name}}”。如果某个消息事件正在使用它，则该事件将停止发送，直到您选择另一个模板。"
+        "deleteConfirmDescription": "这将永久删除“{{name}}”。如果某个事件正在使用它，该事件将停止发送消息，直到您选择另一个模板。"
       }
     },
     "trackingConversionEnabled": "隐藏我的供应商物流单号",
-    "trackingConversionEnabledHint": "您的买家看到的是由我们的物流合作方签发的新物流单号，而不是原始的 Amazon 单号，因此 eBay 上没有任何信息会指向您的供应商。如果某个单号无法转换，我们绝不会退回使用 Amazon 单号，订单会被暂扣，并在待处理事项中提示您。",
+    "trackingConversionEnabledHint": "您的买家看到的是由我们的物流合作方签发的新物流单号，而不是 Amazon 单号，因此 eBay 上没有任何信息会指向您的供应商。如果某个单号无法转换，我们绝不会发送 Amazon 单号。订单会被暂扣，并在待处理事项中提示您。",
     "trackingConversionScope": "转换哪些承运商",
     "trackingConversionScopeAll": "所有承运商",
     "trackingConversionScopeAmazonOnly": "仅 Amazon Logistics（TBA）",
-    "trackingConversionScopeHint": "Amazon Logistics（TBA）单号会直接显示“Amazon”，因此只转换这类单号，就能隐藏最明显的供应商痕迹，并且占用的每月转换额度要少得多。转换所有承运商能隐藏更多信息（由 Amazon 发出的 UPS 或 USPS 单号往往也能被查到），但成本更高；而且如果买家声称没有收到商品，eBay 会把承运商自身的扫描记录视为更有力的送达证明。",
+    "trackingConversionScopeHint": "Amazon Logistics（TBA）单号会直接显示“Amazon”。只转换这类单号，就能隐藏最明显的供应商痕迹，并且占用的每月转换额度要少得多。转换所有承运商能隐藏更多信息，因为由 Amazon 发出的 UPS 或 USPS 单号往往也能被查到，但成本更高。此外，如果买家称未收到商品，eBay 会把原承运商的扫描记录视为更有力的送达证明。",
     "trackingConvertManualOrders": "转换手动关联的订单",
-    "trackingConvertManualOrdersHint": "只要 Amazon 采购不是由 SellerHill 自己完成的，订单就算作手动关联：即您自己购买并填写了订单号，或由系统为您匹配。如果自动下单已关闭，您的每一笔订单都属于这一类，因此关闭此选项意味着完全不会转换任何物流单号，您的买家会看到原始的 Amazon 单号。默认开启；关闭后，Amazon 一发货，原始的 Amazon 单号就会自动发送到 eBay，且 eBay 之后不允许更改。",
+    "trackingConvertManualOrdersHint": "只要不是 SellerHill 自己在 Amazon 上购买的订单，就算作手动关联：即您自己购买并填写了订单号，或我们将其匹配到了您的 Amazon 订单。如果自动下单已关闭，您的所有订单都属于这一类，因此关闭此选项意味着不会转换任何单号，您的买家会看到原始的 Amazon 单号。默认开启。关闭后，Amazon 一发货，原始的 Amazon 单号就会发送到 eBay，且 eBay 之后不允许更改。",
     "trackingExposure": {
       "conversionOff": "物流单号转换已关闭。您的买家会看到 Amazon 的原始物流单号（TBA…），并可直接追查到您的供应商。",
       "manualAll": "由于自动下单已关闭，您的每一笔订单都算作手动关联。此设置关闭时不会转换任何单号，原始的 Amazon 单号（包括 TBA）会发送到 eBay，从而暴露您的供应商。",

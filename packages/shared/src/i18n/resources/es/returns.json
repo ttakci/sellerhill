@@ -185,7 +185,7 @@
       "suspended": "Tu suscripción está suspendida, así que las acciones de devolución están en pausa. Paga la factura en la página de Facturación.",
       "ebayRejected": "eBay rechazó esta acción. Abre la devolución en eBay para ver el motivo.",
       "unavailable": "No se pudo contactar con eBay. Inténtalo de nuevo en un momento.",
-      "sandbox": "Las acciones de devolución no están disponibles en el sandbox de eBay.",
+      "sandbox": "Las acciones de devolución no están disponibles en el entorno de prueba de eBay.",
       "refundAmountUnknown": "eBay no informó un monto de reembolso para esta devolución, así que el reembolso debe emitirse en eBay.",
       "notFound": "No se encontró esta devolución.",
       "labelFileRequired": "Elige el archivo de la etiqueta.",

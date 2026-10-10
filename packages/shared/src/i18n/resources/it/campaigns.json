@@ -29,8 +29,8 @@
       "title": "Dettagli della campagna",
       "breadcrumb": "Dettagli della campagna",
       "subtitle": "Inserzioni di questa campagna.",
-      "metricsNote": "Le metriche non disponibili attendono i rapporti eBay; la riconciliazione può richiedere circa 72 ore.",
-      "eligibilityUnavailable": "L’idoneità pubblicitaria è sconosciuta. Le modifiche sono disabilitate."
+      "metricsNote": "I valori mancanti sono in attesa dei rapporti eBay. Possono servire circa 72 ore perché si assestino.",
+      "eligibilityUnavailable": "Non siamo riusciti a verificare se questo negozio può fare pubblicità, quindi le modifiche alle campagne sono disattivate."
     },
     "campaign": {
       "name": "Nome della campagna",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Nessuna campagna per ora",
-      "description": "Le campagne del negozio attivo appariranno qui dopo la sincronizzazione.",
+      "description": "Le campagne del negozio attivo appariranno qui una volta caricate da eBay.",
       "noStore": "Seleziona un negozio eBay nella barra superiore."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Campagna in sola lettura",
-      "marginOverride": "Margine personalizzato: la tariffa pubblicitaria non si applica al prezzo SellerHill.",
+      "marginOverride": "Questa inserzione ha un margine proprio, quindi la tariffa pubblicitaria non è inclusa nel prezzo impostato da SellerHill.",
       "rule_based": "Le campagne basate su regole sono di sola lettura.",
       "cost_per_click": "Le campagne a costo per clic sono di sola lettura.",
       "dynamic_rate": "Le campagne a tasso dinamico sono di sola lettura.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Aggiungi inserzioni",
       "group": "Gruppo di impostazioni",
-      "groupHint": "Il gruppo riempie la selezione una sola volta con inserzioni idonee senza campagna. Non crea una regola permanente.",
+      "groupHint": "Scegliendo un gruppo vengono selezionate le sue inserzioni idonee che non sono ancora in nessuna campagna. Avviene una sola volta: le inserzioni aggiunte al gruppo in seguito non vengono incluse.",
       "groupsError": "Impossibile caricare i gruppi di impostazioni.",
       "groupError": "Impossibile caricare tutto il gruppo. La selezione è stata mantenuta.",
       "retryGroup": "Riprova la selezione del gruppo",
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "La pubblicità non è disponibile per questo negozio.",
-      "unavailable": "L’idoneità pubblicitaria non è disponibile. La creazione di campagne è disattivata."
+      "unavailable": "Non siamo riusciti a verificare se questo negozio può fare pubblicità, quindi al momento non puoi creare campagne."
     },
     "results": {
       "summary": "Modifiche confermate: {{changed}}. Già nella campagna: {{already}}. Non confermate o non riuscite: {{failed}}.",
-      "retryHint": "Le inserzioni non riuscite o non confermate restano disponibili per riprovare.",
-      "unconfirmed": "Nessun aggiornamento confermato. Aggiorna i dettagli della campagna per verificare il tasso predefinito."
+      "retryHint": "Puoi riprovare le inserzioni non riuscite o non confermate.",
+      "unconfirmed": "Nessun aggiornamento delle inserzioni confermato. Aggiorna la campagna per verificare il tasso predefinito."
     }
   }
 }

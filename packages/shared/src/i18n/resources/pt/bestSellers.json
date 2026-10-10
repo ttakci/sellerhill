@@ -81,22 +81,22 @@
       },
       "retry": "Tentar de novo",
       "unavailable": {
-        "title": "Mais vendidos está temporariamente indisponível",
-        "description": "O serviço de listas não está acessível no momento. Seus anúncios e pedidos não são afetados."
+        "title": "A Busca de produtos está temporariamente indisponível",
+        "description": "Não é possível carregar as listas da Amazon no momento. Seus anúncios e pedidos não são afetados."
       },
       "disabled": {
-        "title": "Mais vendidos não está habilitado nesta conta",
+        "title": "A Busca de produtos não está habilitada nesta conta",
         "description": "A navegação pelas listas da Amazon está desligada para a sua conta. Fale com o suporte se esperava vê-la."
       },
       "limitReached": {
-        "title": "Muitos carregamentos de lista ao vivo hoje",
-        "description": "As listas já carregadas hoje continuam disponíveis — mude para uma delas ou tente de novo amanhã."
+        "title": "Limite diário de listas atingido",
+        "description": "As listas já carregadas hoje continuam disponíveis. Abra uma delas ou tente de novo amanhã."
       }
     },
     "errors": {
-      "disabled": "Mais vendidos não está habilitado nesta conta.",
-      "dailyLimitReached": "Muitos carregamentos de lista ao vivo hoje. Tente de novo amanhã.",
-      "unavailable": "Mais vendidos está temporariamente indisponível.",
+      "disabled": "A Busca de produtos não está habilitada nesta conta.",
+      "dailyLimitReached": "Você atingiu o limite de listas de hoje. Tente de novo amanhã.",
+      "unavailable": "A Busca de produtos está temporariamente indisponível.",
       "unsupportedMarketplace": "Este marketplace não é compatível."
     }
   }

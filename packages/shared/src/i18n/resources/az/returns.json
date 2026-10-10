@@ -117,7 +117,7 @@
       "trackingNumber": "İzləmə {{number}}",
       "rma": "RMA {{rma}}",
       "returnId": "Qaytarma nömrəsi",
-      "actionsOff": "Tətbiqdaxili qaytarma əməliyyatları söndürülüb — eBay-də cavab verin."
+      "actionsOff": "Tətbiqdaxili qaytarma əməliyyatları söndürülüb. eBay-də cavab verin."
     },
     "actions": {
       "done": {
@@ -184,7 +184,7 @@
       "suspended": "Abunəliyiniz dayandırıldığı üçün qaytarma əməliyyatları durdurulub. Fakturanı Ödənişlər səhifəsindən ödəyin.",
       "ebayRejected": "eBay bu əməliyyatı rədd etdi. Səbəbi görmək üçün qaytarmanı eBay-də açın.",
       "unavailable": "eBay-ə çatmaq mümkün olmadı. Bir az sonra yenidən cəhd edin.",
-      "sandbox": "Qaytarma əməliyyatları eBay sandbox mühitində mövcud deyil.",
+      "sandbox": "Qaytarma əməliyyatları eBay-in sınaq mühitində mövcud deyil.",
       "refundAmountUnknown": "eBay bu qaytarma üçün geri ödəniş məbləği bildirməyib, ona görə geri ödəniş eBay-də edilməlidir.",
       "notFound": "Bu qaytarma tapılmadı.",
       "labelFileRequired": "Etiket faylını seçin.",

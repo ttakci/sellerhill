@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Amazon hesabı",
-          "subtitle": "Sifarişlərin oxunması üçün alıcı hesablarınızı idarə edin"
+          "subtitle": "Sifarişləriniz üçün istifadə olunan Amazon alıcı hesablarını idarə edin"
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Qoşulma tarixi",
         "reconnect": {
           "action": "Yenidən qoş",
-          "hint": "Bu mağazanın icazələrini yeniləmək üçün eBay-ə yenidən daxil olun. Mağaza, sifarişləri və elanları olduğu kimi qalır — əvvəlcə ayırmağa ehtiyac yoxdur."
+          "hint": "Bu mağazanın icazələrini yeniləmək üçün eBay-ə yenidən daxil olun. Mağaza, onun sifarişləri və elanları olduğu kimi qalır. Əvvəlcə bağlantını kəsməyə ehtiyac yoxdur."
         },
         "disconnect": {
           "action": "Bağlantını kəs",
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Amazon hesabları",
-        "subtitle": "Sifarişlərin oxunması üçün alıcı hesablarınız",
+        "subtitle": "Sifarişlər üçün istifadə olunan Amazon alıcı hesablarınız",
         "addNew": {
           "title": "Yeni Amazon hesabı",
-          "subtitle": "Sifarişlərin oxunması üçün yeni alıcı hesabı qoşun"
+          "subtitle": "Sifarişləriniz üçün yeni alıcı hesabı qoşun"
         },
         "empty": {
           "title": "Hələ alıcı hesabı yoxdur",
-          "description": "Sifarişlərinizi skan etmək və real xərcləri qeydə almaq üçün Amazon alıcı hesabı qoşun."
+          "description": "Amazon sifarişlərinizi oxuya və onların real xərclərini qeydə ala bilməyimiz üçün Amazon alıcı hesabı qoşun."
         },
         "viewAll": {
           "title": "Hamısı"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Amazon hesabı əlavə et",
-        "subtitle": "Sifarişlərin oxunması üçün giriş məlumatlarını təqdim edin",
+        "subtitle": "Amazon alıcı hesabınızın giriş məlumatlarını daxil edin",
         "label": "Hesab etiketi",
         "email": "E-poçt",
         "password": "Parol",
         "twoFactorSecret": "2FA gizli açarı",
-        "twoFactorSecretHint": "Tələb olunur. Amazon demək olar ki, hər avtomatik girişdə təsdiq kodu istəyir və autentifikator açarı yeganə cavabdır ki, biz onu sizin əvəzinizə verə bilərik. Amazon-un Giriş və Təhlükəsizlik parametrlərində autentifikator tətbiqini aktiv edin və qurulum açarını bura yapışdırın — 6 rəqəmli kodu yox. Mövcud hesabı redaktə edərkən saxlanılmış açarı qorumaq üçün bunu boş buraxın."
+        "twoFactorSecretHint": "Tələb olunur. Amazon demək olar ki, hər avtomatik girişdə təsdiq kodu istəyir və autentifikator açarı bu kodu sizin əvəzinizə daxil etməyimizin yeganə yoludur. Amazon-un Giriş və Təhlükəsizlik parametrlərində autentifikator tətbiqini aktiv edin və onun qurulum açarını bura yapışdırın, 6 rəqəmli kodu yox. Hesabı redaktə edərkən saxlanılmış açarı qorumaq üçün bunu boş buraxın."
       },
       "amazonEdit": {
         "title": "Amazon hesabını redaktə et",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Qara siyahı açar sözlərini yoxla",
         "checkBlacklistDesc": "Dərc etməzdən əvvəl elan başlıqlarını, təsvirlərini, xüsusiyyətlərini və brendi qara siyahınıza qarşı skan edin. Hər açar sözün öz sahə seçimi onun harada yoxlanılacağını müəyyən edir.",
         "allowCrossStoreAsins": "Digər mağazalarımda olan ASIN-lər bu mağazaya da əlavə oluna bilsin",
-        "allowCrossStoreAsinsDesc": "Bütün mağazalar üçün açsanız, hər mağaza istənilən ASIN-i siyahıya sala bilər; bir mağaza üçün açsanız, yalnız həmin mağaza digər mağazalarınızda artıq olan ASIN-ləri əlavə edə bilər. Bu mağazada artıq olan ASIN həmişə ötürülür.",
+        "allowCrossStoreAsinsDesc": "Bütün mağazalar üçün açıq olduqda, hər mağaza istənilən ASIN-i siyahıya sala bilər. Bir mağaza üçün açıq olduqda, yalnız həmin mağaza digər mağazalarınızda artıq olan ASIN-ləri əlavə edə bilər. Bu mağazada artıq olan ASIN həmişə ötürülür.",
         "allowCrossStoreAsinsInherited": "Bu mağaza üçün seçim yadda saxlayana qədər bütün mağazaların ayarı keçərlidir.",
         "country": "Ölkə",
         "countryPlaceholder": "Ölkə seçin",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Qiymət və stok gündə 4 dəfə izlənir",
-        "description": "Mənbə qiyməti və stoku hər gün dörd dəfə yoxlanılır və hər dəyişiklik eyni keçiddə eBay elanınıza çatır. Gündəlik yoxlama belə nadir olduqda, stokda olmayanı satmağı və zərər gətirən qiymətlərdə qalmağı dayandırırsınız.",
+        "description": "Mənbə qiyməti və stoku hər gün dörd dəfə yoxlanılır və hər dəyişiklik eyni keçiddə eBay elanınıza çatır. Stokda olmayanı satmır və zərər gətirən qiymətlərdə qalmırsınız. Bu sahədə gündə bir yoxlama belə nadirdir.",
         "caption": "Hər 6 saatdan bir yoxlama"
       },
       "specifics": {
         "title": "Məhsul xüsusiyyətləri, həqiqətən doldurulmuş",
-        "description": "Tələb olunan sahələri \"Tətbiq olunmur\" ilə keçmirik. Hər atribut eBay kateqoriyasının qəbul etdiyi dəyərlə uyğunlaşdırılır ki, elanınız alıcıların filtrlərində görünsün.",
+        "description": "Tələb olunan sahələr məhsulun real məlumatı olan hər yerdə həmin məlumatla doldurulur və eBay kateqoriyasının qəbul etdiyi dəyərlərə uyğunlaşdırılır. Belə ki, elanınız alıcıların filtrlərində görünür.",
         "others": "Digərləri",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Əlverişli avtomatlaşdırma",
-        "description": "Tam peşəkar avtomatlaşdırma dəsti xeyli aşağı aylıq haqla. Hər funksiya hər planda var, avtomatik sifarişlər limitsizdir; planlar yalnız elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxışına görə fərqlənir.",
+        "description": "Əlverişli aylıq haqla tam peşəkar avtomatlaşdırma dəsti. Hər funksiya hər planda var, avtomatik sifarişlər limitsizdir; planlar yalnız elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxışına görə fərqlənir.",
         "cta": "Planlara bax"
       }
     },
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Kütləvi ASIN ilə elan",
-          "description": "Yüzlərlə ASIN yapışdırın, elanlar növbədə qurulsun."
+          "description": "Yüzlərlə ASIN yapışdırın, elanlar sizin üçün qurulsun."
         },
         "aiTitle": {
           "title": "AI ilə optimallaşdırılmış başlıqlar",
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Qiymətlər",
       "sectionTitle": "Əlverişli avtomatlaşdırma.",
-      "sectionSubtitle": "Hər plan bütün funksiyaları əhatə edir. Planlar aktiv elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxış limitinə görə fərqlənir; avtomatik sifarişlər hər planda limitsizdir, beləliklə digər alətlərin yalnız yüksək səviyyələr üçün saxladığı funksiyalar ən kiçik planda da sizindir.",
+      "sectionSubtitle": "Hər plan bütün funksiyaları əhatə edir. Planlar aktiv elanlara, izləmə çevirmələrinə və Ən Çox Satılanlar baxış limitinə görə fərqlənir. Avtomatik sifarişlər hər planda limitsizdir, beləliklə digər alətlərin yalnız yüksək səviyyələr üçün saxladığı funksiyalar ən kiçik planda da sizindir.",
       "billingNote": "İstənilən vaxt ləğv edin. Qiymətlərə tətbiq olunan yerlərdə yerli vergilər daxil deyil.",
       "perMonth": "/ay",
       "mostPopular": "Ən populyar",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Məhsul xüsusiyyətlərini necə doldurursunuz?",
-        "answer": "Mənbə kataloqunda məhsul üçün olan hər atributu toplayıb eBay kateqoriyasının müəyyən etdiyi sahələrlə uyğunlaşdırırıq. Kateqoriya yalnız müəyyən dəyərləri qəbul edirsə, siyahıdan düzgününü seçirik. Tələb olunan sahələri \"Tətbiq olunmur\" ilə keçmək əvəzinə real dəyərlərlə doldurur və hər elana 45-ə qədər xüsusiyyət göndəririk."
+        "answer": "Mənbə kataloqunda məhsul üçün olan hər atributu toplayıb eBay kateqoriyasının müəyyən etdiyi sahələrlə uyğunlaşdırırıq. Kateqoriya yalnız müəyyən dəyərləri qəbul edirsə, siyahıdan düzgününü seçirik. Məhsul məlumatında dəyər olan hər yerdə tələb olunan sahələr real dəyərlə doldurulur və hər elanda 45-ə qədər xüsusiyyət olur."
       },
       "q4": {
         "question": "Avtomatik sifariş necə işləyir?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Daha ağıllı avtomatlaşdırma. Daha aşağı qiymət.",
+        "headline": "Daha ağıllı avtomatlaşdırma. Əlverişli qiymətə.",
         "subheading": "Məhsul qrupu üzrə strategiyalar, gündə dörd dəfə sinxronizasiya, tam məhsul xüsusiyyətləri və sizi yönləndirən Gözləyən əməliyyatlar ekranı. Bir ay pulsuz sınayın, kredit kartı tələb olunmur.",
         "button": "Pulsuz başla"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Nümunə məlumatlar — heç nə yadda saxlanılmır.",
+      "description": "Nümunə məlumatlar. Heç nə yadda saxlanılmır.",
       "exit": "Demodan çıx",
       "signUp": "Pulsuz hesab yarat"
     },

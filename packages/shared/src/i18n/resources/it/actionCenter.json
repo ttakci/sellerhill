@@ -60,7 +60,7 @@
       },
       "plan": {
         "title": "Piano e capacità",
-        "subtitle": "Limiti che inizieranno a rifiutare il lavoro."
+        "subtitle": "Limiti che, una volta raggiunti, bloccano le nuove attività."
       },
       "setup": {
         "title": "Configurazione",
@@ -70,9 +70,9 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon ha annullato un acquisto che avevi già pagato",
-        "description_one": "{{count}} ordine è stato annullato da Amazon. La vendita su eBay è ancora attiva e ancora dovuta all'acquirente: riordinalo o rimborsalo prima che eBay lo conti come difetto.",
-        "description_many": "{{count}} ordini sono stati annullati da Amazon. Quelle vendite su eBay sono ancora attive e ancora dovute agli acquirenti: riordinale o rimborsale prima che eBay le conti come difetti.",
-        "description_other": "{{count}} ordini sono stati annullati da Amazon. Quelle vendite su eBay sono ancora attive e ancora dovute agli acquirenti: riordinale o rimborsale prima che eBay le conti come difetti.",
+        "description_one": "{{count}} ordine è stato annullato da Amazon. La vendita su eBay è ancora attiva e devi ancora l'articolo all'acquirente. Riordinalo o rimborsa l'acquirente prima che eBay lo conti come difetto.",
+        "description_many": "{{count}} ordini sono stati annullati da Amazon. Quelle vendite su eBay sono ancora attive e devi ancora gli articoli agli acquirenti. Riordinali o rimborsa gli acquirenti prima che eBay li conti come difetti.",
+        "description_other": "{{count}} ordini sono stati annullati da Amazon. Quelle vendite su eBay sono ancora attive e devi ancora gli articoli agli acquirenti. Riordinali o rimborsa gli acquirenti prima che eBay li conti come difetti.",
         "action": "Controlla gli ordini"
       },
       "order_fulfillment_blocked": {
@@ -83,7 +83,7 @@
         "action": "Controlla gli ordini"
       },
       "order_purchase_unknown": {
-        "title": "Acquisto non confermato — controlla prima Amazon",
+        "title": "Acquisto non confermato: controlla prima Amazon",
         "description_one": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
         "description_many": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
         "description_other": "Ordini il cui acquisto su Amazon non è stato confermato: {{count}}. Il pulsante dell'ordine è stato premuto ma non è arrivata conferma, quindi l'ordine potrebbe esistere. Controlla Amazon e collegalo prima di acquistare di nuovo.",
@@ -105,16 +105,16 @@
       },
       "order_tracking_problem": {
         "title": "La conversione del tracciamento ha un problema",
-        "description_one": "{{count}} ordine spedito ha un problema aperto con il fornitore del tracciamento. Finché non viene risolto, quell'ordine mostra al tuo acquirente il numero di tracciamento Amazon originale invece di uno convertito.",
-        "description_many": "{{count}} ordini spediti hanno problemi aperti con il fornitore del tracciamento. Finché non vengono risolti, quegli ordini mostrano ai tuoi acquirenti i numeri di tracciamento Amazon originali invece di quelli convertiti.",
-        "description_other": "{{count}} ordini spediti hanno problemi aperti con il fornitore del tracciamento. Finché non vengono risolti, quegli ordini mostrano ai tuoi acquirenti i numeri di tracciamento Amazon originali invece di quelli convertiti.",
+        "description_one": "{{count}} ordine spedito ha un problema aperto nella conversione del tracciamento. Apri l'ordine per vedere cosa va sistemato.",
+        "description_many": "{{count}} ordini spediti hanno problemi aperti nella conversione del tracciamento. Apri gli ordini per vedere cosa va sistemato.",
+        "description_other": "{{count}} ordini spediti hanno problemi aperti nella conversione del tracciamento. Apri gli ordini per vedere cosa va sistemato.",
         "action": "Vedi gli ordini"
       },
       "order_tracking_conversion_held": {
         "title": "Ordini non segnati come spediti su eBay",
-        "description_one": "{{count}} ordine è stato spedito su Amazon da oltre {{hours}} ore ma non è stato segnato come spedito su eBay, perché il suo numero di tracciamento non ha potuto essere convertito. Non inviamo mai il numero di tracciamento Amazon originale al tuo acquirente. Risolvi la causa e l'ordine verrà spedito automaticamente: fino ad allora rischia un difetto per spedizione in ritardo.",
-        "description_many": "{{count}} ordini sono stati spediti su Amazon da oltre {{hours}} ore ma non sono stati segnati come spediti su eBay, perché i loro numeri di tracciamento non hanno potuto essere convertiti. Non inviamo mai i numeri di tracciamento Amazon originali ai tuoi acquirenti. Risolvi la causa e verranno spediti automaticamente: fino ad allora rischiano difetti per spedizione in ritardo.",
-        "description_other": "{{count}} ordini sono stati spediti su Amazon da oltre {{hours}} ore ma non sono stati segnati come spediti su eBay, perché i loro numeri di tracciamento non hanno potuto essere convertiti. Non inviamo mai i numeri di tracciamento Amazon originali ai tuoi acquirenti. Risolvi la causa e verranno spediti automaticamente: fino ad allora rischiano difetti per spedizione in ritardo.",
+        "description_one": "{{count}} ordine è stato spedito su Amazon da oltre {{hours}} ore ma non è segnato come spedito su eBay, perché il suo numero di tracciamento non ha potuto essere convertito. Non inviamo mai il numero di tracciamento Amazon originale al tuo acquirente. Quando risolvi la causa, l'ordine viene segnato come spedito automaticamente. Fino ad allora rischia un difetto per spedizione in ritardo.",
+        "description_many": "{{count}} ordini sono stati spediti su Amazon da oltre {{hours}} ore ma non sono segnati come spediti su eBay, perché i loro numeri di tracciamento non hanno potuto essere convertiti. Non inviamo mai i numeri di tracciamento Amazon originali ai tuoi acquirenti. Quando risolvi la causa, vengono segnati come spediti automaticamente. Fino ad allora rischiano difetti per spedizione in ritardo.",
+        "description_other": "{{count}} ordini sono stati spediti su Amazon da oltre {{hours}} ore ma non sono segnati come spediti su eBay, perché i loro numeri di tracciamento non hanno potuto essere convertiti. Non inviamo mai i numeri di tracciamento Amazon originali ai tuoi acquirenti. Quando risolvi la causa, vengono segnati come spediti automaticamente. Fino ad allora rischiano difetti per spedizione in ritardo.",
         "action": "Vedi gli ordini"
       },
       "order_cancelled_amazon_open": {
@@ -140,8 +140,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Richiesta di annullamento dell'acquirente",
-        "description_one": "{{count}} acquirente ha chiesto di annullare un ordine: approvalo o rifiutalo qui prima della scadenza di eBay",
-        "description_other": "{{count}} acquirenti hanno chiesto di annullare ordini: approvali o rifiutali qui prima della scadenza di eBay",
+        "description_one": "{{count}} acquirente ha chiesto di annullare un ordine. Approva o rifiuta la richiesta qui prima della scadenza di eBay.",
+        "description_other": "{{count}} acquirenti hanno chiesto di annullare un ordine. Approva o rifiuta le richieste qui prima della scadenza di eBay.",
         "action": "Esamina le richieste"
       },
       "ebay_account_disconnected": {
@@ -222,12 +222,12 @@
       },
       "setup_no_amazon_account": {
         "title": "Nessun account acquirente Amazon per ora",
-        "description": "Stai vendendo, ma non c'è un account Amazon da cui acquistare: ogni ordine deve essere acquistato a mano. Aggiungerne uno abilita l'evasione automatica.",
+        "description": "Stai vendendo, ma non c'è un account Amazon da cui acquistare, quindi ogni ordine va acquistato a mano. Aggiungine uno per attivare gli acquisti automatici.",
         "action": "Aggiungi un account"
       },
       "setup_no_store_settings": {
         "title": "Impostazioni del negozio non ancora configurate",
-        "description": "L'origine della spedizione e le parole chiave della lista nera non sono ancora impostate. Servono a calcolare i costi e a evitare che le inserzioni vengano pubblicate con contenuti bloccati.",
+        "description": "L'indirizzo del negozio e le parole chiave della lista nera non sono ancora impostati. L'indirizzo compare su eBay come posizione dell'articolo e la lista nera impedisce la pubblicazione delle inserzioni con parole bloccate.",
         "action": "Configura le impostazioni"
       },
       "setup_no_listing_settings_group": {
@@ -242,7 +242,7 @@
       },
       "plan_conversion_quota": {
         "title": "Limite mensile di conversioni del tracciamento quasi raggiunto",
-        "description": "Hai usato {{used}} di {{limit}} conversioni del tracciamento questo mese. Una volta raggiunto, gli ordini vengono comunque spediti ed eBay riceve comunque un numero di tracciamento, ma sarà quello Amazon originale, quindi gli acquirenti potranno vedere il tuo fornitore.",
+        "description": "Hai usato {{used}} di {{limit}} conversioni del tracciamento questo mese. Raggiunto il limite, gli ordini vengono comunque spediti ed eBay riceve comunque un numero di tracciamento. Ma sarà il numero Amazon originale, quindi gli acquirenti potranno vedere il tuo fornitore.",
         "action": "Vedi il piano"
       },
       "plan_suspended": {
@@ -260,7 +260,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Richiede una nuova autenticazione",
+        "needs_reauth": "Richiede un nuovo accesso",
         "invalid": "Credenziali non valide",
         "locked": "Bloccato da Amazon"
       },
@@ -274,9 +274,9 @@
         "tracking_url_mismatch": "Link di tracciamento non corrispondente",
         "needs_tracking_upload": "In attesa dei dettagli di spedizione",
         "update_not_applied": "Aggiornamento non ancora applicato",
-        "assign_validation": "Rifiutato dal fornitore",
+        "assign_validation": "Conversione rifiutata",
         "shipment_exception": "Eccezione del corriere",
-        "tracking_update_unavailable": "Fornitore non disponibile"
+        "tracking_update_unavailable": "Conversione temporaneamente non disponibile"
       }
     }
   }

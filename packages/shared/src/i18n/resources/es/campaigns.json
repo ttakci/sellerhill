@@ -29,8 +29,8 @@
       "title": "Detalles de la campaña",
       "breadcrumb": "Detalles de la campaña",
       "subtitle": "Anuncios de esta campaña.",
-      "metricsNote": "Las métricas no disponibles esperan los informes de eBay; la conciliación puede tardar unas 72 horas.",
-      "eligibilityUnavailable": "Se desconoce la elegibilidad publicitaria. Los cambios están desactivados."
+      "metricsNote": "Las cifras que faltan esperan los informes de eBay. Pueden tardar unas 72 horas en ajustarse.",
+      "eligibilityUnavailable": "No pudimos comprobar si esta tienda puede publicitarse, así que los cambios de campaña están desactivados."
     },
     "campaign": {
       "name": "Nombre de la campaña",
@@ -67,7 +67,7 @@
     },
     "empty": {
       "title": "Todavía no hay campañas",
-      "description": "Las campañas de tu tienda activa aparecerán aquí tras la sincronización.",
+      "description": "Las campañas de tu tienda activa aparecerán aquí cuando se carguen desde eBay.",
       "noStore": "Selecciona una tienda eBay en la barra superior."
     },
     "errors": {
@@ -85,7 +85,7 @@
     },
     "readOnly": {
       "title": "Campaña de solo lectura",
-      "marginOverride": "Margen personalizado: la tarifa publicitaria no se aplica al precio de SellerHill.",
+      "marginOverride": "Esta publicación tiene su propio margen, así que la tarifa publicitaria no se incluye en el precio que fija SellerHill.",
       "rule_based": "Las campañas basadas en reglas son de solo lectura.",
       "cost_per_click": "Las campañas de coste por clic son de solo lectura.",
       "dynamic_rate": "Las campañas de tasa dinámica son de solo lectura.",
@@ -115,7 +115,7 @@
     "add": {
       "title": "Añadir anuncios",
       "group": "Grupo de ajustes",
-      "groupHint": "El grupo llena esta selección una vez con publicaciones elegibles sin campaña. No crea una regla permanente.",
+      "groupHint": "Al elegir un grupo se seleccionan sus publicaciones elegibles que aún no están en ninguna campaña. Esto ocurre una sola vez: las publicaciones que se agreguen al grupo después no se incluyen.",
       "groupsError": "No se pudieron cargar los grupos de ajustes.",
       "groupError": "No se pudo cargar todo el grupo. Se conservó tu selección.",
       "retryGroup": "Reintentar selección del grupo",
@@ -148,12 +148,12 @@
     },
     "eligibility": {
       "ineligible": "La publicidad no está disponible para esta tienda.",
-      "unavailable": "No se puede consultar la elegibilidad publicitaria. La creación de campañas está desactivada."
+      "unavailable": "No pudimos comprobar si esta tienda puede publicitarse, así que por ahora no puedes crear campañas."
     },
     "results": {
       "summary": "Cambios confirmados: {{changed}}. Ya en campaña: {{already}}. Sin confirmar o fallidos: {{failed}}.",
-      "retryHint": "Las publicaciones fallidas o sin confirmar se conservan para reintentar.",
-      "unconfirmed": "No se confirmó ninguna actualización. Actualiza los datos de la campaña para comprobar la tasa predeterminada."
+      "retryHint": "Puedes reintentar las publicaciones fallidas o sin confirmar.",
+      "unconfirmed": "No se confirmó ninguna actualización de publicaciones. Actualiza la campaña para comprobar su tasa predeterminada."
     }
   }
 }

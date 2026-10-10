@@ -25,7 +25,7 @@
       "statusRevoked": "已撤销",
       "statusError": "错误",
       "disconnectButton": "断开连接",
-      "refreshTokenButton": "刷新令牌"
+      "refreshTokenButton": "刷新连接"
     },
     "callback": {
       "processing": "正在处理 eBay 连接…",
@@ -34,16 +34,16 @@
       "cancelled": "eBay 连接已取消。"
     },
     "errors": {
-      "invalidState": "无效的 state 参数",
+      "invalidState": "无法验证 eBay 连接。请重试。",
       "authorizationFailed": "eBay 授权失败",
-      "tokenExchangeFailed": "无法用授权码换取令牌",
+      "tokenExchangeFailed": "我们无法完成 eBay 店铺的连接。请重试。",
       "accountAlreadyConnected": "此 eBay 店铺已连接到另一个 SellerHill 账号。请使用您连接它时所用的账号登录；如果无法访问，请联系支持团队。",
       "ebayTrialAlreadyUsed": "此 eBay 店铺已使用过免费试用。请选择一个套餐以连接它。",
-      "noAuthorizationCode": "未从 eBay 收到授权码",
+      "noAuthorizationCode": "eBay 未确认此连接。请重试。",
       "storeOwnedByAnotherAccount": "此 eBay 店铺已关联到另一个 SellerHill 账号。请联系支持团队进行转移。",
       "accountNotFound": "未找到该 eBay 店铺。",
       "identityUnavailable": "我们无法通过 eBay 确认您的 eBay 账号。未连接任何内容，请稍后重试。",
-      "messagingScopeMissing": "请重新连接您的 eBay 店铺以启用消息——当前授权不包含消息功能。",
+      "messagingScopeMissing": "请重新连接您的 eBay 店铺以开启消息。当前连接不包含消息功能。",
       "messagingReplyNotAllowed": "无法在此回复来自 eBay 的消息。",
       "messagingUnavailable": "eBay 消息服务暂时不可用，请重试。",
       "messagingRejected": "eBay 未接受此请求，请检查消息后重试。",
@@ -53,7 +53,7 @@
       "title": "连接您的 eBay 店铺",
       "header": "站点设置",
       "description": "要开始同步您的商品，您需要先连接 eBay 店铺。",
-      "connectButton": "eBay 账号",
+      "connectButton": "连接 eBay 账号",
       "skipButton": "暂时跳过",
       "usOnlyNote": "目前仅支持美国站点。更多地区即将推出。",
       "brandingDescription": "将您的 eBay 店铺关联到 SellerHill，在一个平台中管理您所有的销售流程。"

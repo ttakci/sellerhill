@@ -81,22 +81,22 @@
       },
       "retry": "Riprova",
       "unavailable": {
-        "title": "Più venduti è temporaneamente non disponibile",
-        "description": "Il servizio delle classifiche non è raggiungibile al momento. Le tue inserzioni e i tuoi ordini non ne risentono."
+        "title": "La Ricerca prodotti è temporaneamente non disponibile",
+        "description": "Al momento non è possibile caricare le classifiche di Amazon. Le tue inserzioni e i tuoi ordini non ne risentono."
       },
       "disabled": {
-        "title": "Più venduti non è attivo su questo account",
+        "title": "La Ricerca prodotti non è attiva su questo account",
         "description": "La consultazione delle classifiche Amazon è disattivata per il tuo account. Contatta l’assistenza se ti aspettavi di vederla."
       },
       "limitReached": {
-        "title": "Troppi caricamenti di classifica in tempo reale oggi",
-        "description": "Le classifiche già caricate oggi restano disponibili: passa a una di esse o riprova domani."
+        "title": "Limite giornaliero delle classifiche raggiunto",
+        "description": "Le classifiche già caricate oggi restano disponibili. Aprine una o riprova domani."
       }
     },
     "errors": {
-      "disabled": "Più venduti non è attivo su questo account.",
-      "dailyLimitReached": "Troppi caricamenti di classifica in tempo reale oggi. Riprova domani.",
-      "unavailable": "Più venduti è temporaneamente non disponibile.",
+      "disabled": "La Ricerca prodotti non è attiva su questo account.",
+      "dailyLimitReached": "Hai raggiunto il limite di classifiche di oggi. Riprova domani.",
+      "unavailable": "La Ricerca prodotti è temporaneamente non disponibile.",
       "unsupportedMarketplace": "Questo marketplace non è supportato."
     }
   }

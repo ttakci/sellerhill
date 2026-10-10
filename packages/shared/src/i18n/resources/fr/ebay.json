@@ -25,7 +25,7 @@
       "statusRevoked": "Révoqué",
       "statusError": "Erreur",
       "disconnectButton": "Déconnecter",
-      "refreshTokenButton": "Actualiser le jeton"
+      "refreshTokenButton": "Actualiser la connexion"
     },
     "callback": {
       "processing": "Traitement de la connexion eBay...",
@@ -34,16 +34,16 @@
       "cancelled": "La connexion eBay a été annulée."
     },
     "errors": {
-      "invalidState": "Paramètre d'état invalide",
+      "invalidState": "La connexion eBay n'a pas pu être vérifiée. Veuillez réessayer.",
       "authorizationFailed": "Échec de l'autorisation eBay",
-      "tokenExchangeFailed": "Échec de l'échange du code d'autorisation contre des jetons",
+      "tokenExchangeFailed": "Nous n'avons pas pu finaliser la connexion de votre boutique eBay. Veuillez réessayer.",
       "accountAlreadyConnected": "Cette boutique eBay est connectée à un autre compte SellerHill. Connectez-vous avec le compte auquel vous l'avez connectée ; si vous n'y avez plus accès, contactez l'assistance.",
       "ebayTrialAlreadyUsed": "Cette boutique eBay a déjà utilisé son essai gratuit. Choisissez un forfait pour la connecter.",
-      "noAuthorizationCode": "Aucun code d'autorisation reçu d'eBay",
+      "noAuthorizationCode": "eBay n'a pas confirmé la connexion. Veuillez réessayer.",
       "storeOwnedByAnotherAccount": "Cette boutique eBay est liée à un autre compte SellerHill. Contactez l'assistance pour la transférer.",
       "accountNotFound": "Cette boutique eBay est introuvable.",
-      "identityUnavailable": "Nous n'avons pas pu confirmer votre compte eBay auprès d'eBay. Rien n'a été connecté — veuillez réessayer dans un instant.",
-      "messagingScopeMissing": "Reconnectez votre boutique eBay pour activer les messages — l'autorisation actuelle n'inclut pas la messagerie.",
+      "identityUnavailable": "Nous n'avons pas pu confirmer votre compte eBay auprès d'eBay, rien n'a donc été connecté. Veuillez réessayer dans un instant.",
+      "messagingScopeMissing": "Reconnectez votre boutique eBay pour activer les messages. Votre connexion actuelle n'inclut pas la messagerie.",
       "messagingReplyNotAllowed": "Il n'est pas possible de répondre ici aux messages d'eBay.",
       "messagingUnavailable": "La messagerie eBay est temporairement indisponible. Veuillez réessayer.",
       "messagingRejected": "eBay n'a pas accepté cette demande. Vérifiez le message et réessayez.",
@@ -53,7 +53,7 @@
       "title": "Connectez votre boutique eBay",
       "header": "Configuration de la place de marché",
       "description": "Pour commencer à synchroniser vos articles, vous devez d'abord connecter votre boutique eBay.",
-      "connectButton": "Compte eBay",
+      "connectButton": "Connecter un compte eBay",
       "skipButton": "Passer pour l'instant",
       "usOnlyNote": "Seule la place de marché des États-Unis est prise en charge actuellement. D'autres régions arrivent bientôt.",
       "brandingDescription": "Liez votre boutique eBay à SellerHill pour gérer tous vos processus de vente depuis un seul espace."

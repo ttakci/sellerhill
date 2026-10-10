@@ -48,7 +48,7 @@
       "delete": "Elimina",
       "refresh": "Aggiorna",
       "selected": "{{count}} selezionati",
-      "deleteConfirm": "Eliminare le conversazioni selezionate? Non compariranno più in nessuna cartella."
+      "deleteConfirm": "Eliminare le conversazioni selezionate? Verranno spostate nella cartella Eliminati."
     },
     "reconnect": {
       "title": "Ricollega questo negozio",

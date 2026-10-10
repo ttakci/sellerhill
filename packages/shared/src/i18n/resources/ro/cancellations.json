@@ -53,9 +53,9 @@
     },
     "bucketHint": {
       "unconfirmed": "eBay nu a confirmat recent această cerere, deci termenul nu este afișat.",
-      "action_overdue": "Cumpărătorul așteaptă — termenul eBay pentru răspunsul tău a expirat.",
+      "action_overdue": "Cumpărătorul așteaptă. Termenul eBay pentru răspunsul tău a expirat.",
       "action_due": "Cumpărătorul a cerut anularea. Acceptă sau refuză înainte de termenul eBay.",
-      "answered": "Ați răspuns la această solicitare. eBay o procesează — nu mai este nevoie de nimic din partea dvs.",
+      "answered": "Ați răspuns la această solicitare. eBay o procesează și nu mai trebuie să faceți nimic.",
       "in_progress": "Momentan nu se așteaptă nimic de la tine.",
       "closed": "eBay a închis această cerere."
     },
@@ -104,7 +104,7 @@
       "approve": "Anulare aprobată. eBay va rambursa cumpărătorul.",
       "reject": "Anulare respinsă."
     },
-    "actionsOff": "Acțiunile de anulare din aplicație sunt oprite — răspunde pe eBay.",
+    "actionsOff": "Acțiunile de anulare din aplicație sunt oprite. Răspunde pe eBay.",
     "liveUnavailable": "eBay nu a putut fi contactat acum, așa că este afișată ultima stare văzută de SellerHill. Răspunsurile vor fi disponibile când eBay răspunde din nou.",
     "errors": {
       "exportFailed": "Exportul nu a putut fi finalizat. Încercați din nou.",
@@ -113,7 +113,7 @@
       "suspended": "Abonamentul tău este suspendat, deci acțiunile de anulare sunt oprite. Achită factura pe pagina Facturare.",
       "ebayRejected": "eBay a refuzat această acțiune. Deschide cererea pe eBay ca să vezi motivul.",
       "unavailable": "Nu s-a putut contacta eBay. Încearcă din nou peste puțin timp.",
-      "sandbox": "Acțiunile de anulare nu sunt disponibile în sandbox-ul eBay.",
+      "sandbox": "Acțiunile de anulare nu sunt disponibile în mediul de test eBay.",
       "notFound": "Această cerere de anulare nu a fost găsită."
     },
     "party": {

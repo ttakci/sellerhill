@@ -226,7 +226,7 @@
         },
         "amazon": {
           "title": "Amazon-Konto",
-          "subtitle": "Verwalten Sie Ihre Käuferkonten zum Auslesen von Bestellungen"
+          "subtitle": "Verwalten Sie die Amazon-Käuferkonten für Ihre Bestellungen"
         }
       },
       "ebay": {
@@ -234,7 +234,7 @@
         "connectedSince": "Verbunden seit",
         "reconnect": {
           "action": "Erneut verbinden",
-          "hint": "Melden Sie sich erneut bei eBay an, um die Berechtigungen dieses Shops zu erneuern. Shop, Bestellungen und Angebote bleiben unverändert – Sie müssen die Verbindung nicht erst trennen."
+          "hint": "Melden Sie sich erneut bei eBay an, um die Berechtigungen dieses Shops zu erneuern. Shop, Bestellungen und Angebote bleiben unverändert. Sie müssen die Verbindung nicht erst trennen."
         },
         "disconnect": {
           "action": "Trennen",
@@ -353,14 +353,14 @@
       },
       "amazonAccounts": {
         "title": "Amazon-Konten",
-        "subtitle": "Ihre Käuferkonten zum Auslesen von Bestellungen",
+        "subtitle": "Ihre Amazon-Käuferkonten für Bestellungen",
         "addNew": {
           "title": "Neues Amazon-Konto",
-          "subtitle": "Ein neues Käuferkonto zum Auslesen von Bestellungen verbinden"
+          "subtitle": "Ein neues Käuferkonto für Ihre Bestellungen verbinden"
         },
         "empty": {
           "title": "Noch keine Käuferkonten",
-          "description": "Verbinden Sie ein Amazon-Käuferkonto, um Ihre Bestellungen zu erfassen und die tatsächlichen Kosten zu ermitteln."
+          "description": "Verbinden Sie ein Amazon-Käuferkonto, damit wir Ihre Amazon-Bestellungen lesen und ihre tatsächlichen Kosten erfassen können."
         },
         "viewAll": {
           "title": "Alle"
@@ -372,12 +372,12 @@
       },
       "amazonAdd": {
         "title": "Amazon-Konto hinzufügen",
-        "subtitle": "Zugangsdaten zum Auslesen von Bestellungen angeben",
+        "subtitle": "Geben Sie die Anmeldedaten Ihres Amazon-Käuferkontos ein",
         "label": "Kontobezeichnung",
         "email": "E-Mail",
         "password": "Passwort",
         "twoFactorSecret": "2FA-Geheimschlüssel",
-        "twoFactorSecretHint": "Erforderlich. Amazon verlangt bei fast jeder automatisierten Anmeldung einen Bestätigungscode, und ein Authenticator-Schlüssel ist der einzige, den wir für Sie beantworten können. Aktivieren Sie in den Amazon-Einstellungen unter „Anmelden und Sicherheit“ eine Authenticator-App und fügen Sie den Einrichtungsschlüssel hier ein – nicht einen 6-stelligen Code. Lassen Sie das Feld beim Bearbeiten eines bestehenden Kontos leer, um den gespeicherten Schlüssel beizubehalten."
+        "twoFactorSecretHint": "Erforderlich. Amazon verlangt bei fast jeder automatischen Anmeldung einen Bestätigungscode, und nur mit einem Authenticator-Schlüssel können wir diesen Code für Sie eingeben. Aktivieren Sie in den Amazon-Einstellungen unter „Anmelden und Sicherheit“ eine Authenticator-App und fügen Sie hier deren Einrichtungsschlüssel ein, keinen 6-stelligen Code. Lassen Sie das Feld beim Bearbeiten eines Kontos leer, um den gespeicherten Schlüssel beizubehalten."
       },
       "amazonEdit": {
         "title": "Amazon-Konto bearbeiten",
@@ -410,7 +410,7 @@
         "checkBlacklist": "Sperrlisten-Schlüsselwörter prüfen",
         "checkBlacklistDesc": "Prüft Angebotstitel, Beschreibungen, Artikelmerkmale und Marke vor der Veröffentlichung anhand Ihrer Sperrliste. Die Feldauswahl jedes einzelnen Schlüsselworts bestimmt, wo geprüft wird.",
         "allowCrossStoreAsins": "ASINs zulassen, die bereits in meinen anderen Shops gelistet sind",
-        "allowCrossStoreAsinsDesc": "Für alle Shops aktiviert, darf jeder Shop jede ASIN listen; für einen Shop aktiviert, darf nur dieser Shop ASINs hinzufügen, die Ihre anderen Shops bereits führen. Eine ASIN, die bereits in diesem Shop ist, wird immer übersprungen.",
+        "allowCrossStoreAsinsDesc": "Ist die Option für alle Shops aktiviert, darf jeder Shop jede ASIN listen. Ist sie für einen Shop aktiviert, darf nur dieser Shop ASINs hinzufügen, die Ihre anderen Shops bereits führen. Eine ASIN, die bereits in diesem Shop ist, wird immer übersprungen.",
         "allowCrossStoreAsinsInherited": "Es gilt die Einstellung für alle Shops, bis Sie für diesen Shop eine Auswahl speichern.",
         "country": "Land",
         "countryPlaceholder": "Land auswählen",
@@ -593,12 +593,12 @@
       },
       "sync": {
         "title": "Preis und Bestand 4 Mal täglich verfolgt",
-        "description": "Quellpreis und -bestand werden jeden Tag viermal geprüft, und jede Änderung erreicht Ihr eBay-Angebot im selben Durchlauf. Wenn schon eine tägliche Prüfung selten ist, verkaufen Sie nichts mehr, was nicht auf Lager ist, und halten nicht an Preisen fest, mit denen Sie Verlust machen.",
+        "description": "Quellpreis und -bestand werden jeden Tag viermal geprüft, und jede Änderung erreicht Ihr eBay-Angebot im selben Durchlauf. So verkaufen Sie nichts mehr, was nicht auf Lager ist, und halten nicht an Preisen fest, mit denen Sie Verlust machen. In dieser Branche ist schon eine Prüfung pro Tag selten.",
         "caption": "Eine Prüfung alle 6 Stunden"
       },
       "specifics": {
         "title": "Artikelmerkmale, wirklich ausgefüllt",
-        "description": "Wir überspringen Pflichtfelder nicht mit „Nicht zutreffend“. Jedes Attribut wird einem Wert zugeordnet, den die eBay-Kategorie akzeptiert, sodass Ihr Angebot in den Filtern der Käufer auftaucht.",
+        "description": "Pflichtfelder werden überall dort mit echten Produktdaten gefüllt, wo es sie gibt, und auf Werte abgestimmt, die die eBay-Kategorie akzeptiert. So erscheint Ihr Angebot in den Filtern der Käufer.",
         "others": "Andere",
         "us": "SellerHill"
       },
@@ -618,7 +618,7 @@
       },
       "price": {
         "title": "Automatisierung zu fairem Preis",
-        "description": "Das komplette professionelle Automatisierungspaket für eine deutlich niedrigere Monatsgebühr. Jede Funktion ist in jedem Tarif enthalten, automatische Bestellungen sind unbegrenzt; die Tarife unterscheiden sich nur in Angeboten, Sendungsnummern-Umwandlungen und Bestseller-Kontingent.",
+        "description": "Das komplette professionelle Automatisierungspaket zu einer erschwinglichen Monatsgebühr. Jede Funktion ist in jedem Tarif enthalten, automatische Bestellungen sind unbegrenzt, und die Tarife unterscheiden sich nur in Angeboten, Sendungsnummern-Umwandlungen und Bestseller-Kontingent.",
         "cta": "Tarife ansehen"
       }
     },
@@ -698,12 +698,12 @@
       "sectionSubtitle": "Das sind keine Design-Mockups, sondern echte Bildschirme aus unserem Demokonto, das keine Registrierung erfordert.",
       "actionCenter": {
         "title": "Offene Aufgaben: Ihre nächste Aufgabe ist immer klar",
-        "detail": "Alles, was die Automatisierung nicht selbst lösen kann, landet hier: Bestellungen, die auf Freigabe warten, durch Ihre Sperrliste gestoppte Angebote, getrennte Konten, bald ausgeschöpfte Tariflimits. Jeder Eintrag sagt, was passiert ist, warum es wichtig ist und wohin Sie gehen müssen – mit einem Klick.",
+        "detail": "Alles, was die Automatisierung nicht selbst lösen kann, landet hier: Bestellungen, die auf Freigabe warten, durch Ihre Sperrliste gestoppte Angebote, getrennte Konten, bald ausgeschöpfte Tariflimits. Jeder Eintrag sagt, was passiert ist, warum es wichtig ist und wohin Sie gehen müssen. Ein Klick genügt.",
         "point": "Der Zähler in der Seitenleiste zeigt Ihnen von jedem Bildschirm aus, wie viel auf Sie wartet."
       },
       "itemSpecifics": {
         "title": "Die Artikelmerkmale, die eBay verlangt, vollständig",
-        "detail": "SellerHill sammelt jedes Attribut, das der Quellkatalog zu einem Produkt hat, und ordnet es den Feldern zu, die die eBay-Kategorie definiert. Wenn eine Kategorie nur Werte aus einer Liste akzeptiert, wählt es den passenden aus – und sendet bis zu 45 Merkmale pro Angebot.",
+        "detail": "SellerHill sammelt jedes Attribut, das der Quellkatalog zu einem Produkt hat, und ordnet es den Feldern zu, die die eBay-Kategorie definiert. Wenn eine Kategorie nur Werte aus einer Liste akzeptiert, wählt es den passenden aus und sendet bis zu 45 Merkmale pro Angebot.",
         "point": "Angebote, die in den Filtern der Käufer auftauchen, werden in der Suche häufiger angezeigt."
       },
       "orders": {
@@ -803,7 +803,7 @@
       "items": {
         "bulkAsin": {
           "title": "Massenerstellung per ASIN",
-          "description": "Fügen Sie Hunderte von ASINs ein und lassen Sie die Angebote in der Warteschlange entstehen."
+          "description": "Fügen Sie Hunderte von ASINs ein, und die Angebote werden für Sie erstellt."
         },
         "aiTitle": {
           "title": "KI-optimierte Titel",
@@ -856,7 +856,7 @@
       },
       "step5": {
         "title": "Offene Aufgaben verfolgen",
-        "description": "Alles, was Ihre Entscheidung braucht, auf einem Bildschirm – und der echte Gewinn jeder Bestellung."
+        "description": "Alles, was Ihre Entscheidung braucht, auf einem Bildschirm, dazu der echte Gewinn jeder Bestellung."
       }
     },
     "demo": {
@@ -873,7 +873,7 @@
     "pricing": {
       "eyebrow": "Preise",
       "sectionTitle": "Automatisierung zu fairem Preis.",
-      "sectionSubtitle": "Jeder Tarif enthält jede Funktion. Die Tarife unterscheiden sich durch aktive Angebote, Sendungsnummern-Umwandlungen und das Bestseller-Kontingent; automatische Bestellungen sind in jedem Tarif unbegrenzt – Funktionen, die andere Tools für ihre höchsten Stufen reservieren, gehören also schon im kleinsten Tarif Ihnen.",
+      "sectionSubtitle": "Jeder Tarif enthält jede Funktion. Die Tarife unterscheiden sich durch aktive Angebote, Sendungsnummern-Umwandlungen und das Bestseller-Kontingent. Automatische Bestellungen sind in jedem Tarif unbegrenzt. Funktionen, die andere Tools für ihre höchsten Stufen reservieren, gehören also schon im kleinsten Tarif Ihnen.",
       "billingNote": "Jederzeit kündbar. Preise verstehen sich ohne lokale Steuern, sofern zutreffend.",
       "perMonth": "/Monat",
       "mostPopular": "Am beliebtesten",
@@ -955,7 +955,7 @@
       },
       "q3": {
         "question": "Wie füllen Sie Artikelmerkmale aus?",
-        "answer": "Wir sammeln jedes Attribut, das der Quellkatalog zu einem Produkt hat, und ordnen es den Feldern zu, die die eBay-Kategorie definiert. Wenn eine Kategorie nur bestimmte Werte akzeptiert, wählen wir den passenden aus ihrer Liste. Statt Pflichtfelder mit „Nicht zutreffend“ zu überspringen, füllen wir sie mit echten Werten und senden bis zu 45 Merkmale pro Angebot."
+        "answer": "Wir sammeln jedes Attribut, das der Quellkatalog zu einem Produkt hat, und ordnen es den Feldern zu, die die eBay-Kategorie definiert. Wenn eine Kategorie nur bestimmte Werte akzeptiert, wählen wir den passenden aus ihrer Liste. Pflichtfelder erhalten echte Werte, wo immer die Produktdaten sie enthalten, und jedes Angebot erhält bis zu 45 Merkmale."
       },
       "q4": {
         "question": "Wie funktioniert die automatische Bestellung?",
@@ -983,7 +983,7 @@
       },
       "q10": {
         "question": "Kann ich es von meinem Smartphone aus nutzen?",
-        "answer": "Ja. SellerHill läuft in Ihrem Browser, und die Oberfläche passt sich jeder Bildschirmgröße an. Alles, was Sie am Desktop tun – einschließlich Produkte hinzufügen, Einstellungen ändern und Bestellungen und offene Aufgaben verfolgen –, funktioniert auch auf Ihrem Smartphone, ohne dass eine App installiert werden muss."
+        "answer": "Ja. SellerHill läuft in Ihrem Browser, und die Oberfläche passt sich jeder Bildschirmgröße an. Alles, was Sie am Desktop tun, funktioniert auch auf Ihrem Smartphone, etwa Produkte hinzufügen, Einstellungen ändern sowie Bestellungen und offene Aufgaben verfolgen. Eine App müssen Sie dafür nicht installieren."
       },
       "q11": {
         "question": "Wie wird der echte Gewinn berechnet?",
@@ -996,7 +996,7 @@
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "Intelligentere Automatisierung. Ein niedrigerer Preis.",
+        "headline": "Intelligentere Automatisierung. Zu einem erschwinglichen Preis.",
         "subheading": "Strategien pro Produktgruppe, Abgleich viermal täglich, vollständige Artikelmerkmale und ein Bildschirm für Offene Aufgaben, der Sie leitet. Testen Sie einen Monat kostenlos, ohne Kreditkarte.",
         "button": "Kostenlos starten"
       }
@@ -1026,7 +1026,7 @@
   "demo": {
     "banner": {
       "label": "Demo",
-      "description": "Beispieldaten – nichts wird gespeichert.",
+      "description": "Beispieldaten. Nichts wird gespeichert.",
       "exit": "Demo beenden",
       "signUp": "Kostenloses Konto erstellen"
     },

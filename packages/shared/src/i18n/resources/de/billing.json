@@ -19,13 +19,13 @@
       "contactSales": "Vertrieb kontaktieren",
       "freeTrial": "Kostenlose Testphase verfügbar",
       "mostPopular": "Am beliebtesten",
-      "informationalOnly": "Die Durchsetzung der Abrechnung ist deaktiviert – die Tarife dienen nur zur Information. Alle Funktionen sind derzeit uneingeschränkt nutzbar.",
+      "informationalOnly": "Tariflimits werden derzeit nicht durchgesetzt, daher sind alle Funktionen verfügbar. Die Tarife dienen nur zur Information.",
       "free": {
         "name": "Kostenlos"
       },
       "trial": {
         "name": "Kostenlose Testphase",
-        "description": "Eine zeitlich begrenzte Testphase von SellerHill. Nicht käuflich – sie startet automatisch bei der Registrierung."
+        "description": "Eine zeitlich begrenzte Testphase von SellerHill. Sie kann nicht gekauft werden, sondern startet automatisch bei der Registrierung."
       },
       "unlimitedOrders": "Unbegrenzte automatische Bestellungen und Sendungsverfolgung",
       "activeListings": "{{limit}} aktive Angebote · unbegrenzt hinzufügen und entfernen",
@@ -86,13 +86,13 @@
         "description": "Ein eingestellter Tarif. Bestehende Abonnements funktionieren weiter; Neukunden wählen aus den obigen Tarifen."
       },
       "switchTo": "Zu {{plan}} wechseln",
-      "switchDone": "Ihr Tarif wurde geändert. Stripe berechnet die Differenz anteilig auf Ihrer nächsten Rechnung.",
+      "switchDone": "Ihr Tarifwechsel ist bestätigt.",
       "planNamed": "Tarif {{plan}}"
     },
     "planChange": {
       "title": "Tarifwechsel bestätigen",
       "upgradeBody": "Wechsel zu {{plan}}. {{amount}} werden jetzt berechnet. Ihre nächste Rechnung beträgt {{nextAmount}} am {{nextDate}}.",
-      "downgradeBody": "Wechsel zu {{plan}} am {{date}}. Jetzt wird nichts berechnet – bis dahin behalten Sie Ihren aktuellen Tarif.",
+      "downgradeBody": "Wechsel zu {{plan}} am {{date}}. Jetzt wird nichts berechnet, und bis dahin behalten Sie Ihren aktuellen Tarif.",
       "listingLimitWarning": "Sie haben {{active}} aktive Angebote, und der neue Tarif erlaubt {{limit}}. Ab dem {{date}} werden nur Ihre ältesten {{limit}} Angebote verfolgt; die übrigen {{over}} erhalten keinen Preis-/Bestandsabgleich und keine automatische Bestellabwicklung mehr. Wenn Sie selbst wählen möchten, welche Angebote verfolgt bleiben, beenden Sie die nicht benötigten vor diesem Datum.",
       "confirm": "Bestätigen",
       "cancel": "Abbrechen"
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Bestseller-Produkte",
         "unit": "Produkte",
-        "description": "Wie viele Produkte Sie pro Abrechnungszeitraum auf der Bestseller-Seite ansehen können – aus zwischengespeicherten und live geladenen Listen gleichermaßen."
+        "description": "Wie viele Produkte Sie pro Abrechnungszeitraum auf der Bestseller-Seite ansehen können. Jedes angezeigte Produkt zählt, egal ob die Liste schon geladen war oder neu abgerufen wurde."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Verwalten Sie hier Ihre Zahlungsmethode, Ihren Tarif und Ihre Rechnungen.",
       "nextChargeLabel": "Nächste Zahlung",
       "nextCharge": "Nächste Zahlung: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "Endet am {{date}} – nach diesem Zeitraum fallen keine weiteren Kosten an",
+      "cancelsAtPeriodEnd": "Endet am {{date}}. Nach diesem Zeitraum fallen keine weiteren Kosten an.",
       "scheduledChange": "Wechsel zu {{plan}} am {{date}}",
       "scheduledChangeUnknownPlan": "Ihr Tarif ändert sich am {{date}}",
       "cancelScheduledChange": "Abbrechen",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Voller Zugriff – die Durchsetzung der Abrechnung ist deaktiviert. Alle Funktionen sind uneingeschränkt nutzbar.",
+      "full_access": "Voller Zugriff: Tariflimits werden nicht durchgesetzt, daher sind alle Funktionen verfügbar.",
       "active": "Ihr Abonnement ist aktiv.",
-      "no_subscription": "Kein aktives Abonnement. Wählen Sie einen Tarif, um die Abrechnung zu aktivieren.",
+      "no_subscription": "Kein aktives Abonnement. Wählen Sie einen Tarif, um fortzufahren.",
       "past_due": "Ihr Abonnement ist überfällig. Aktualisieren Sie Ihre Zahlungsmethode, um den Zugriff wiederherzustellen."
     },
     "provider": {
-      "unconfiguredTitle": "Abrechnung nicht konfiguriert",
-      "unconfiguredBody": "Checkout und Abonnementverwaltung sind nicht verfügbar, da kein Zahlungsanbieter verbunden ist. Wenden Sie sich an Ihren Betreiber."
+      "unconfiguredTitle": "Zahlungen nicht verfügbar",
+      "unconfiguredBody": "Zahlungen sind gerade nicht verfügbar, daher können Sie kein Abonnement abschließen oder verwalten. Bitte wenden Sie sich an den Support."
     },
     "usage": {
       "title": "Nutzung in diesem Zeitraum",
@@ -279,9 +279,9 @@
       "no_active_subscription": "Kein aktives Abonnement gefunden.",
       "no_open_period": "Kein offener Nutzungszeitraum für dieses Limit.",
       "already_reserved": "Diese Ressource ist bereits reserviert.",
-      "providerNotConfigured": "Zahlungen sind in dieser Umgebung noch nicht aktiviert. Bitte versuchen Sie es später erneut.",
+      "providerNotConfigured": "Zahlungen sind noch nicht verfügbar. Bitte versuchen Sie es später erneut.",
       "planNotMirrored": "Dieser Tarif ist noch nicht buchbar. Bitte wählen Sie einen anderen Tarif oder wenden Sie sich an den Support.",
-      "checkoutFailed": "Der Checkout konnte nicht gestartet werden. Bitte versuchen Sie es in Kürze erneut – wenn es weiterhin fehlschlägt, wenden Sie sich an den Support.",
+      "checkoutFailed": "Der Checkout konnte nicht gestartet werden. Bitte versuchen Sie es in Kürze erneut. Wenn es weiterhin fehlschlägt, wenden Sie sich an den Support.",
       "portalFailed": "Das Abrechnungsportal konnte nicht geöffnet werden. Bitte versuchen Sie es in Kürze erneut.",
       "noCustomer": "Noch kein Abrechnungskonto. Wählen Sie zuerst einen Tarif, um eines einzurichten.",
       "planNotFound": "Dieser Tarif wurde nicht gefunden.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Sie haben Ihr Tariflimit erreicht. Führen Sie ein Upgrade durch, um fortzufahren.",
       "addonNotFound": "Dieses Aufladepaket wurde nicht gefunden.",
       "noSubscription": "Sie haben kein aktives Abonnement, das geändert werden könnte.",
-      "planChangeFailed": "Der Tarif konnte im Moment nicht geändert werden. Bitte versuchen Sie es erneut oder nutzen Sie „Abrechnung verwalten“.",
-      "subscriptionSuspended": "Ihr Abonnement ist nicht aktiv, daher sind neue Angebote pausiert. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
-      "subscriptionSuspendedOrders": "Ihr Abonnement ist nicht aktiv, daher ist die Bestellautomatisierung pausiert. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
+      "planChangeFailed": "Der Tarif konnte im Moment nicht geändert werden. Bitte versuchen Sie es erneut oder nutzen Sie „Abonnement verwalten“.",
+      "subscriptionSuspended": "Ihr Abonnement ist nicht aktiv, daher sind neue Angebote pausiert. Wählen Sie einen Tarif, um fortzufahren. Alles startet von selbst wieder.",
+      "subscriptionSuspendedOrders": "Ihr Abonnement ist nicht aktiv, daher ist die Bestellautomatisierung pausiert. Wählen Sie einen Tarif, um fortzufahren. Alles startet von selbst wieder.",
       "listingQuotaExhausted": "Sie haben alle aktiven Angebote genutzt, die Ihr Tarif erlaubt. Beenden Sie ein Angebot, um einen Platz freizugeben, oder wechseln Sie in einen höheren Tarif.",
-      "alreadySubscribed": "Sie haben bereits ein aktives Abonnement. Nutzen Sie „Tarif wechseln“, um es zu ändern, statt erneut zu abonnieren.",
+      "alreadySubscribed": "Sie haben bereits ein aktives Abonnement. Um es zu ändern, wählen Sie unter „Abonnement verwalten“ einen neuen Tarif, statt erneut zu abonnieren.",
       "invoicesFailed": "Der Rechnungsverlauf konnte nicht geladen werden. Bitte versuchen Sie es in Kürze erneut.",
-      "paymentRequiresAction": "Ihre Bank hat für diese Karte eine zusätzliche Bestätigung verlangt, daher wurde der Tarifwechsel abgebrochen und Sie bleiben in Ihrem aktuellen Tarif. Öffnen Sie „Abrechnung verwalten“, um Ihre Zahlungsmethode zu aktualisieren, und versuchen Sie es dann erneut.",
+      "paymentRequiresAction": "Ihre Bank hat für diese Karte eine zusätzliche Bestätigung verlangt, daher wurde der Tarifwechsel abgebrochen und Sie bleiben in Ihrem aktuellen Tarif. Aktualisieren Sie Ihre Karte über „Zahlungsmethode aktualisieren“ und versuchen Sie es dann erneut.",
       "invalidCheckoutSession": "Dieser Link zur Zahlungsbestätigung ist ungültig."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Sie haben Ihr monatliches Bestseller-Kontingent aufgebraucht. Laden Sie auf, um bis zur Erneuerung des Zeitraums weiter in Amazons Listen zu stöbern."
       },
       "buy": "Kaufen",
-      "note": "Eine Aufladung gilt nur für den laufenden Kalendermonat, weshalb sie beim Erreichen des Limits angeboten wird und nicht im Voraus. Ihr Tarifkontingent wird am 1. zurückgesetzt."
+      "note": "Eine Aufladung gilt nur für den laufenden Abrechnungszeitraum. Deshalb wird sie angeboten, wenn Sie das Limit erreichen, und nicht im Voraus. Ihr Tarifkontingent wird zurückgesetzt, wenn sich der Zeitraum erneuert."
     }
   }
 }

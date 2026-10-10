@@ -77,16 +77,16 @@
       "in_progress": "Wird bei Amazon gekauft",
       "not_automated": "Nicht automatisiert",
       "manual": "Manuell gekauft",
-      "simulated": "Testlauf – kein Kauf",
+      "simulated": "Testlauf, kein Kauf",
       "filter": {
         "all": "Alle Abwicklungsstatus"
       },
       "detail": {
         "title": "Amazon-Abwicklung",
         "amazonOrderId": "Amazon-Bestellung",
-        "simulatedNotice": "Dies ist ein Testlauf. Es wurde keine Amazon-Bestellung aufgegeben und kein Geld abgebucht – die folgenden Kosten und der Gewinn sind simuliert.",
+        "simulatedNotice": "Dies ist ein Testlauf. Es wurde keine Amazon-Bestellung aufgegeben und kein Geld abgebucht. Die folgenden Kosten und der Gewinn sind simuliert.",
         "actionRequiredNotice": "Die Automatisierung wurde vor dem Kauf gestoppt. Prüfen Sie den Grund und wickeln Sie diese Bestellung manuell ab.",
-        "cancelledNotice": "Der Amazon-Einkauf wurde storniert. Der eBay-Verkauf ist dem Käufer weiterhin geschuldet – wickeln Sie ihn auf anderem Weg ab.",
+        "cancelledNotice": "Der Amazon-Einkauf wurde storniert. Sie schulden dem eBay-Käufer diesen Artikel noch, wickeln Sie die Bestellung also auf anderem Weg ab.",
         "notAutomatedNotice": "Die automatische Bestellung ist für diese Bestellung deaktiviert.",
         "attemptedAt": "Letzter Versuch"
       }
@@ -95,14 +95,14 @@
       "tracked": "Mit einem Angebot verknüpft",
       "untracked": "Mit keinem Angebot verknüpft",
       "problem": {
-        "wrongPageType": "Der Tracking-Anbieter konnte die Bestellseite von Amazon nicht lesen – möglicherweise hat sich das Format geändert. Es wird automatisch erneut versucht.",
+        "wrongPageType": "Die Bestellseite von Amazon konnte für die Umwandlung der Sendungsnummer nicht gelesen werden. Möglicherweise hat Amazon die Seite geändert. Es wird automatisch erneut versucht.",
         "amazonSessionExpired": "Die Amazon-Sitzung, mit der diese Bestellung gelesen wurde, ist abgelaufen und muss neu angemeldet werden.",
         "trackingUrlMismatch": "Der Tracking-Link auf der Bestellseite von Amazon entsprach nicht unserer Erwartung. Es wird automatisch erneut versucht.",
-        "needsTrackingUpload": "Es wird auf das Hochladen der Versanddetails gewartet, bevor die Sendungsnummer umgewandelt werden kann.",
-        "updateNotApplied": "Die Tracking-Aktualisierung wurde vom Anbieter noch nicht angewendet. Es wird automatisch erneut versucht.",
-        "assignValidation": "Der Tracking-Anbieter hat die Versanddetails für diese Bestellung abgelehnt.",
-        "shipmentException": "Der Tracking-Anbieter hat für diese Sendung eine Ausnahme gemeldet.",
-        "trackingUpdateUnavailable": "Der Tracking-Anbieter konnte diese Sendung im Moment nicht aktualisieren.",
+        "needsTrackingUpload": "Es wird auf die Versanddetails gewartet, bevor die Sendungsnummer umgewandelt werden kann.",
+        "updateNotApplied": "Die Tracking-Aktualisierung wurde noch nicht angewendet. Es wird automatisch erneut versucht.",
+        "assignValidation": "Die Versanddetails dieser Bestellung wurden bei der Umwandlung der Sendungsnummer abgelehnt.",
+        "shipmentException": "Für diese Sendung wurde ein Problem gemeldet.",
+        "trackingUpdateUnavailable": "Die Sendungsverfolgung dieser Sendung konnte gerade nicht aktualisiert werden.",
         "generic": "Bei der Umwandlung der Sendungsnummer dieser Bestellung ist ein Problem aufgetreten. Es wird automatisch erneut versucht."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Produkt bei Amazon nicht gefunden",
         "captcha": "Captcha erforderlich",
-        "otp": "MFA/OTP-Abfrage",
+        "otp": "Bestätigungscode erforderlich",
         "login": "Anmeldung fehlgeschlagen",
         "out_of_stock": "Nicht auf Lager",
         "address": "Adressproblem",
         "payment": "Zahlung abgelehnt",
-        "cap": "Kostenlimit überschritten",
+        "cap": "Ausgabenlimit überschritten",
         "no_confirmation": "Keine Bestätigung",
-        "proxy_required": "Kein Proxy konfiguriert",
+        "proxy_required": "Proxy des Kontos konnte nicht verwendet werden",
         "quota_exhausted": "Monatskontingent erreicht",
         "cart": "Warenkorb weicht ab",
         "review_unreadable": "Bestellsumme nicht lesbar",
-        "interrupted": "Kauf unterbrochen — Amazon prüfen",
+        "interrupted": "Kauf unterbrochen, Amazon prüfen",
         "subscription_suspended": "Abonnement ausgesetzt",
         "listing_over_plan_limit": "Angebot außerhalb des Tariflimits",
-        "order_already_fulfilled": "Bereits versendet – nichts zu kaufen",
+        "order_already_fulfilled": "Bereits versendet, nichts zu kaufen",
         "order_not_paid": "Wartet auf Zahlung des Käufers",
-        "order_cancelled": "Bei eBay storniert — nichts zu kaufen",
-        "multi_item_order": "Bestellung enthält mehrere Artikel — manuell kaufen",
-        "cancel_requested": "Käufer hat Stornierung angefragt — auf eBay antworten",
+        "order_cancelled": "Bei eBay storniert, nichts zu kaufen",
+        "multi_item_order": "Bestellung enthält mehrere Artikel, manuell kaufen",
+        "cancel_requested": "Käufer hat Stornierung angefragt, auf eBay antworten",
         "loss_limit": "Über Ihrem Verlustlimit"
       },
       "reasonLabel": "Grund: {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Nicht bei Amazon vorhanden",
         "confirmTitle": "Bestätigen, dass es bei Amazon keine Bestellung für diesen Verkauf gibt?",
-        "confirmDescription": "Fahren Sie nur fort, nachdem Sie die Bestellungen dieses Amazon-Kontos angesehen haben und die Bestellung dort nicht zu finden ist. SellerHill prüft die Bestellliste des Kontos ebenfalls und lehnt ab, solange diese Prüfung nicht gelaufen ist. Danach kann die automatische Bestellung erneut gestartet werden — existiert die Bestellung doch bei Amazon, wird der Artikel zweimal gekauft.",
+        "confirmDescription": "Fahren Sie nur fort, nachdem Sie die Bestellungen dieses Amazon-Kontos angesehen haben und die Bestellung dort nicht zu finden ist. SellerHill prüft die Bestellliste des Kontos ebenfalls und lehnt ab, solange diese Prüfung nicht gelaufen ist. Danach kann die automatische Bestellung erneut gestartet werden. Existiert die Bestellung doch bei Amazon, wird der Artikel zweimal gekauft.",
         "confirm": "Ja, sie ist nicht dort",
         "done": "Als nicht gekauft markiert. Sie können die automatische Bestellung erneut starten."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Weitere Details anzeigen",
       "updateAmazon": "Amazon-Daten eingeben",
       "netProfitAnalysis": "NETTOGEWINN-ANALYSE",
-      "analysisDesc": "Diese Berechnung berücksichtigt Ihre tatsächlichen Einnahmen von eBay nach Abzug aller Plattformgebühren und Steuern, abzüglich der ursprünglichen Amazon-Einkaufskosten.",
+      "analysisDesc": "Ihre eBay-Einnahmen nach allen Plattformgebühren und Steuern, abzüglich der ursprünglichen Amazon-Einkaufskosten.",
       "calculation": "Berechnung",
       "netProfitResult": "Nettogewinn",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Versand bis",
       "shipByNotice": "eBay-Versandfrist: {{date}}",
       "shipByHeading": "eBay-Versandfrist",
-      "multiItemNotice": "Diese eBay-Bestellung enthält {{count}} Artikel. SellerHill verfolgt nur den ersten und kauft diese Bestellung nicht automatisch — kaufen und versenden Sie die übrigen Artikel selbst."
+      "multiItemNotice": "Diese eBay-Bestellung enthält {{count}} Artikel. SellerHill verfolgt nur den ersten und kauft diese Bestellung nicht automatisch. Kaufen und versenden Sie die übrigen Artikel selbst."
     },
     "modal": {
       "title": "Amazon-Bestelldaten eingeben",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Geschätzt",
-    "estimateNote": "Geschätzter Gewinn – wird endgültig, sobald die Amazon-Bestellung aufgegeben wurde. Basiert auf dem zuletzt bekannten Amazon-Preis; Amazon-Versand nicht enthalten.",
+    "estimateNote": "Geschätzter Gewinn. Er wird endgültig, sobald die Amazon-Bestellung aufgegeben ist. Basiert auf dem zuletzt bekannten Amazon-Preis; Amazon-Versand ist nicht enthalten.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Alle Rechte vorbehalten."
     },
     "errors": {
       "notFound": "Bestellung nicht gefunden.",
-      "noTrackingYet": "Diese Bestellung hat noch keine Amazon-Sendungsnummer – sie wurde noch nicht versendet.",
+      "noTrackingYet": "Diese Bestellung hat noch keine Amazon-Sendungsnummer. Sie wurde noch nicht versendet.",
       "conversionUnavailable": "Die Sendungsnummer konnte im Moment nicht umgewandelt werden. Prüfen Sie Ihr Tariflimit und Ihre Umwandlungseinstellungen und versuchen Sie es erneut.",
       "conversionDone": "Sendungsnummer umgewandelt.",
       "orderNotTracked": "Diese Bestellung ist mit keinem Ihrer Angebote verknüpft, daher könnte eine umgewandelte Sendungsnummer nie an eBay gesendet werden. Verknüpfen Sie die Bestellung zuerst mit ihrem Angebot.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "Dieser Verkauf liegt über dem Ausgabelimit deines Amazon-Kontos. Erhöhe das Limit in den Einstellungen des Amazon-Kontos oder kaufe den Artikel manuell.",
       "autoFulfillAlreadyStarted": "Der Status dieser Bestellung hat sich gerade geändert, der Kauf wurde vielleicht schon gestartet. Lade die Seite neu.",
       "autoFulfillQuotaExhausted": "Das Limit deines Tarifs für automatische Bestellungen ist für diesen Zeitraum aufgebraucht.",
-      "purchaseNotYetChecked": "SellerHill hat die Bestellungen dieses Amazon-Kontos seit dem Kaufversuch noch nicht geprüft. Die Prüfung wurde jetzt gestartet — versuchen Sie es in ein paar Minuten erneut.",
+      "purchaseNotYetChecked": "SellerHill hat die Bestellungen dieses Amazon-Kontos seit dem Kaufversuch noch nicht geprüft. Die Prüfung wurde jetzt gestartet. Versuchen Sie es in ein paar Minuten erneut.",
       "purchaseNotUnknown": "Diese Bestellung wartet nicht auf eine Kaufbestätigung. Sie ist möglicherweise bereits verknüpft oder in Bearbeitung. Laden Sie die Seite neu.",
       "purchaseFoundOnAmazon": "SellerHill hat eine Amazon-Bestellung für diesen Artikel gefunden, die etwa zum Zeitpunkt des Kaufversuchs aufgegeben wurde, konnte sie diesem Verkauf aber nicht sicher zuordnen. Öffnen Sie Ihre Amazon-Bestellungen und verknüpfen Sie sie manuell. Gehört die Bestellung zu einem anderen Verkauf, verknüpfen Sie sie zuerst mit diesem.",
       "noteTooLong": "Die Notiz darf höchstens 1.000 Zeichen lang sein.",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Tracking zurückgehalten",
-        "meaning": "Amazon hat versandt, aber das Tracking ist noch nicht bei eBay — meist steht die Tracking-Umwandlung noch aus.",
+        "meaning": "Amazon hat versandt, aber die Sendungsnummer ist noch nicht bei eBay. Meist steht die Umwandlung der Sendungsnummer noch aus.",
         "action": "Wandeln Sie das Tracking um oder beheben Sie die in der Bestellung angezeigte Ursache."
       },
       "buying": {

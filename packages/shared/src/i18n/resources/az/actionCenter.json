@@ -59,7 +59,7 @@
       },
       "plan": {
         "title": "Plan və tutum",
-        "subtitle": "İşləri rədd etməyə başlayacaq limitlər."
+        "subtitle": "Çatdıqda yeni işləri dayandıran limitlər."
       },
       "setup": {
         "title": "Qurulum",
@@ -69,8 +69,8 @@
     "items": {
       "order_amazon_cancelled": {
         "title": "Amazon artıq ödədiyiniz alışı ləğv etdi",
-        "description_one": "{{count}} sifariş Amazon tərəfində ləğv edildi. eBay satışı hələ də qüvvədədir və alıcıya borcludur — eBay bunu qüsur saymadan əvvəl yenidən sifariş verin və ya pulu qaytarın.",
-        "description_other": "{{count}} sifariş Amazon tərəfində ləğv edildi. Həmin eBay satışları hələ də qüvvədədir və alıcılara borcludur — eBay bunları qüsur saymadan əvvəl yenidən sifariş verin və ya pulu qaytarın.",
+        "description_one": "{{count}} sifariş Amazon tərəfində ləğv edildi. eBay satışı hələ də qüvvədədir və məhsulu alıcıya hələ də borclusunuz. eBay bunu qüsur saymadan əvvəl yenidən sifariş verin və ya alıcıya pulu qaytarın.",
+        "description_other": "{{count}} sifariş Amazon tərəfində ləğv edildi. Həmin eBay satışları hələ də qüvvədədir və məhsulları alıcılara hələ də borclusunuz. eBay bunları qüsur saymadan əvvəl yenidən sifariş verin və ya alıcılara pulu qaytarın.",
         "action": "Sifarişlərə bax"
       },
       "order_fulfillment_blocked": {
@@ -80,7 +80,7 @@
         "action": "Sifarişlərə bax"
       },
       "order_purchase_unknown": {
-        "title": "Alış təsdiqlənmədi — əvvəlcə Amazon-u yoxlayın",
+        "title": "Alış təsdiqlənmədi: əvvəlcə Amazon-u yoxlayın",
         "description_one": "Amazon alışı təsdiqlənə bilməyən sifarişlərin sayı: {{count}}. Sifariş düyməsi basıldı, amma təsdiq gəlmədi; sifariş yaranmış ola bilər. Yenidən nəsə alınmazdan əvvəl Amazon-u yoxlayıb sifarişi bağlayın.",
         "description_other": "Amazon alışı təsdiqlənə bilməyən sifarişlərin sayı: {{count}}. Sifariş düyməsi basıldı, amma təsdiq gəlmədi; sifariş yaranmış ola bilər. Yenidən nəsə alınmazdan əvvəl Amazon-u yoxlayıb sifarişi bağlayın.",
         "action": "Sifarişlərə bax"
@@ -99,20 +99,20 @@
       },
       "order_tracking_problem": {
         "title": "İzləmə nömrəsinin çevrilməsində problem var",
-        "description_one": "Göndərilmiş {{count}} sifarişin izləmə provayderi ilə açıq problemi var. Problem həll olunanadək bu sifariş alıcınıza çevrilmiş nömrə əvəzinə orijinal Amazon izləmə nömrəsini göstərir.",
-        "description_other": "Göndərilmiş {{count}} sifarişin izləmə provayderi ilə açıq problemləri var. Problemlər həll olunanadək bu sifarişlər alıcılarınıza çevrilmiş nömrələr əvəzinə orijinal Amazon izləmə nömrələrini göstərir.",
+        "description_one": "Göndərilmiş {{count}} sifarişdə izləmə nömrəsinin çevrilməsi ilə bağlı həll olunmamış problem var. Nəyin düzəldilməli olduğunu görmək üçün sifarişi açın.",
+        "description_other": "Göndərilmiş {{count}} sifarişdə izləmə nömrələrinin çevrilməsi ilə bağlı həll olunmamış problemlər var. Nəyin düzəldilməli olduğunu görmək üçün sifarişləri açın.",
         "action": "Sifarişlərə bax"
       },
       "order_tracking_conversion_held": {
         "title": "Sifarişlər eBay-də göndərilmiş kimi qeyd olunmayıb",
-        "description_one": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrəsi çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrəsini alıcınıza göndərmirik. Səbəbi aradan qaldırın, sifariş avtomatik göndəriləcək — o vaxta qədər gecikmiş göndəriş qüsuru riski var.",
-        "description_other": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrələri çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrələrini alıcılarınıza göndərmirik. Səbəbi aradan qaldırın, sifarişlər avtomatik göndəriləcək — o vaxta qədər gecikmiş göndəriş qüsuru riski var.",
+        "description_one": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrəsi çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrəsini alıcınıza göndərmirik. Səbəbi aradan qaldırdıqdan sonra sifariş avtomatik olaraq göndərilmiş kimi qeyd olunacaq. O vaxta qədər gecikmiş göndəriş qüsuru riski var.",
+        "description_other": "{{count}} sifariş {{hours}} saatdan çox əvvəl Amazon-da göndərilib, lakin izləmə nömrələri çevrilə bilmədiyi üçün eBay-də göndərilmiş kimi qeyd olunmayıb. Biz heç vaxt orijinal Amazon izləmə nömrələrini alıcılarınıza göndərmirik. Səbəbi aradan qaldırdıqdan sonra sifarişlər avtomatik olaraq göndərilmiş kimi qeyd olunacaq. O vaxta qədər gecikmiş göndəriş qüsuru riski var.",
         "action": "Sifarişlərə bax"
       },
       "order_cancelled_amazon_open": {
         "title": "eBay, Amazon-dan artıq aldığınız bir satışı ləğv etdi",
-        "description_one": "Son {{days}} gündə {{count}} sifariş eBay-də ləğv edildi, amma onun üçün verilmiş Amazon sifarişi hələ də açıqdır. Bu məhsulu artıq heç kim gözləmir — Amazon sifarişini ləğv edin, göndərilibsə, məhsulu geri qaytarın.",
-        "description_other": "Son {{days}} gündə {{count}} sifariş eBay-də ləğv edildi, amma onlar üçün verilmiş Amazon sifarişləri hələ də açıqdır. Bu məhsulları artıq heç kim gözləmir — Amazon sifarişlərini ləğv edin, göndərilibsə, məhsulları geri qaytarın.",
+        "description_one": "Son {{days}} gündə {{count}} sifariş eBay-də ləğv edildi, amma onun üçün verilmiş Amazon sifarişi hələ də açıqdır. Bu məhsulu artıq heç kim gözləmir. Amazon sifarişini ləğv edin, göndərilibsə, məhsulu geri qaytarın.",
+        "description_other": "Son {{days}} gündə {{count}} sifariş eBay-də ləğv edildi, amma onlar üçün verilmiş Amazon sifarişləri hələ də açıqdır. Bu məhsulları artıq heç kim gözləmir. Amazon sifarişlərini ləğv edin, göndərilibsə, məhsulları geri qaytarın.",
         "action": "Sifarişlərə bax"
       },
       "order_late_to_ship": {
@@ -129,8 +129,8 @@
       },
       "cancel_request_seller_action_due": {
         "title": "Alıcının ləğv sorğusu",
-        "description_one": "{{count}} alıcı sifarişi ləğv etməyi xahiş etdi — eBay-in son tarixindən əvvəl burada təsdiqləyin və ya rədd edin",
-        "description_other": "{{count}} alıcı sifarişləri ləğv etməyi xahiş etdi — eBay-in son tarixindən əvvəl burada təsdiqləyin və ya rədd edin",
+        "description_one": "{{count}} alıcı sifarişi ləğv etməyi xahiş etdi. eBay-in son tarixindən əvvəl sorğunu burada təsdiqləyin və ya rədd edin.",
+        "description_other": "{{count}} alıcı sifarişlərini ləğv etməyi xahiş etdi. eBay-in son tarixindən əvvəl sorğuları burada təsdiqləyin və ya rədd edin.",
         "action": "Sorğulara bax"
       },
       "ebay_account_disconnected": {
@@ -171,8 +171,8 @@
       },
       "listing_drafts_pending": {
         "title": "Heç vaxt dərc olunmamış qaralamalar",
-        "description_one": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir — lakin aktiv olana qədər heç nə də satmır.",
-        "description_other": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir — lakin aktiv olana qədər heç nə də satmır.",
+        "description_one": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir, lakin aktiv olana qədər heç nə satmır.",
+        "description_other": "{{count}} qaralama hazırdır və sizə heç nəyə başa gəlmir, lakin aktiv olana qədər heç nə satmır.",
         "action": "Qaralamalara bax"
       },
       "plan_listing_quota": {
@@ -198,22 +198,22 @@
       },
       "setup_no_ebay_store": {
         "title": "eBay mağazanızı qoşun",
-        "description": "eBay mağazası qoşulmadan SellerHill-də başqa heç nə işləyə bilməz — elanlar, sifarişlər və avtomatlaşdırma hamısı ondan asılıdır. Ən əvvəl bunu etməlisiniz.",
+        "description": "Qoşulmuş eBay mağazası olmadan SellerHill-də heç nə işləyə bilməz. Elanlar, sifarişlər və avtomatlaşdırma ondan asılıdır, ona görə ilk olaraq bunu edin.",
         "action": "eBay-i qoş"
       },
       "setup_no_amazon_account": {
         "title": "Hələ Amazon alıcı hesabı yoxdur",
-        "description": "Satış edirsiniz, lakin alış üçün Amazon hesabı yoxdur — hər sifariş əl ilə alınmalıdır. Hesab əlavə etmək avtomatik yerinə yetirməni aktiv edir.",
+        "description": "Satış edirsiniz, lakin alış üçün Amazon hesabı yoxdur, ona görə hər sifariş əl ilə alınmalıdır. Avtomatik alışı aktivləşdirmək üçün hesab əlavə edin.",
         "action": "Hesab əlavə et"
       },
       "setup_no_store_settings": {
         "title": "Mağaza parametrləri hələ konfiqurasiya olunmayıb",
-        "description": "Göndəriş məkanınız və qara siyahı açar sözləriniz hələ təyin edilməyib. Bunlar xərcləri hesablamaq və elanların bloklanmış məzmunla dərc olunmasının qarşısını almaq üçün istifadə olunur.",
+        "description": "Mağaza ünvanınız və qara siyahı sözləriniz hələ təyin edilməyib. Ünvan eBay-də məhsulun yeri kimi göstərilir, qara siyahı isə qadağan olunmuş sözlər olan elanların dərc olunmasının qarşısını alır.",
         "action": "Parametrləri konfiqurasiya et"
       },
       "setup_no_listing_settings_group": {
         "title": "Hələ parametr qrupu yoxdur",
-        "description": "Parametr qrupu qiymət, stok və yenidən qiymətləndirmə qaydalarını müəyyən edir — hər elanın birinə ehtiyacı var, ona görə onsuz ilk elanınızı yarada bilməzsiniz.",
+        "description": "Parametr qrupu qiymət, stok və yenidən qiymətləndirmə qaydalarınızı təyin edir. Hər elanın bir qrupa ehtiyacı var, ona görə onsuz ilk elanınızı yarada bilməzsiniz.",
         "action": "Qrup yarat"
       },
       "setup_auto_fulfill_off": {
@@ -223,12 +223,12 @@
       },
       "plan_conversion_quota": {
         "title": "Aylıq izləmə çevirmə limiti demək olar ki, dolub",
-        "description": "Bu ay {{limit}} izləmə çevirməsindən {{used}} qədərini istifadə etmisiniz. Limitə çatdıqdan sonra sifarişlər yenə də göndərilir və eBay yenə də izləmə nömrəsi alır — lakin bu, orijinal Amazon nömrəsi olacaq və alıcılar təchizatçınızı görə biləcək.",
+        "description": "Bu ay {{limit}} izləmə çevirməsindən {{used}} qədərini istifadə etmisiniz. Limitə çatdıqdan sonra sifarişlər yenə də göndərilir və eBay yenə də izləmə nömrəsi alır. Lakin bu, orijinal Amazon nömrəsi olacaq və alıcılar təchizatçınızı görə biləcək.",
         "action": "Plana bax"
       },
       "plan_suspended": {
         "title": "Avtomatlaşdırma dayandırılıb",
-        "description": "Abunəliyiniz artıq aktiv deyil, ona görə yeni elanlar, qiymət və stok yenilənmələri, avtomatik alış və izləmə çevirməsi dayanıb. Bərpa etmək üçün plan seçin — hər şey özü yenidən başlayır.",
+        "description": "Abunəliyiniz artıq aktiv deyil, ona görə yeni elanlar, qiymət və stok yenilənmələri, avtomatik alış və izləmə çevirməsi dayanıb. Bərpa etmək üçün plan seçin. Hər şey özü yenidən başlayır.",
         "action": "Plan seç"
       },
       "listing_not_selling": {
@@ -240,7 +240,7 @@
     },
     "reasons": {
       "amazonAccount": {
-        "needs_reauth": "Yenidən avtorizasiya tələb olunur",
+        "needs_reauth": "Yenidən daxil olmaq lazımdır",
         "invalid": "Yanlış giriş məlumatları",
         "locked": "Amazon tərəfindən bloklanıb"
       },
@@ -254,9 +254,9 @@
         "tracking_url_mismatch": "İzləmə bağlantısı uyğun gəlmir",
         "needs_tracking_upload": "Göndəriş təfərrüatları gözlənilir",
         "update_not_applied": "Yeniləmə hələ tətbiq olunmayıb",
-        "assign_validation": "Provayder tərəfindən rədd edilib",
+        "assign_validation": "Çevirmə rədd edildi",
         "shipment_exception": "Daşıyıcı istisnası",
-        "tracking_update_unavailable": "Provayder əlçatmazdır"
+        "tracking_update_unavailable": "Çevirmə müvəqqəti əlçatan deyil"
       }
     }
   }

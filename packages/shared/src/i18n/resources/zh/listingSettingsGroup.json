@@ -1,7 +1,7 @@
 {
   "listingSettingsGroup": {
     "title": "刊登设置组",
-    "subtitle": "管理策略模板并将其分配给您的商品刊登，实现自动化优化。",
+    "subtitle": "将您的定价、库存和模板设置归为一组，并分配给您的刊登。",
     "loadingDescription": "正在获取您的刊登设置组。",
     "createNewGroup": "创建新设置组",
     "editGroup": "编辑刊登设置组",
@@ -11,7 +11,7 @@
     "groupName": "设置组名称",
     "groupNamePlaceholder": "例如：高端电子产品",
     "description": "说明",
-    "descriptionPlaceholder": "输入设置组内部备注…",
+    "descriptionPlaceholder": "添加关于此设置组的备注…",
     "stripBrandFromTitle": "从标题中移除品牌",
     "stripBrandFromTitleInfo": "自动从您的 eBay 标题中移除 Amazon 品牌名称。仅适用于新的商品刊登。",
     "aiTitleEnabled": "AI 辅助标题",
@@ -96,11 +96,11 @@
         "description": "高对比度的技术型版式，带有清晰的适配警示和硬朗的风格"
       },
       "ds-apparel-fashion": {
-        "name": "服饰时尚",
+        "name": "服饰与时尚",
         "description": "画册风格的优雅版式，突出尺码表和面料护理"
       },
       "ds-beauty-health": {
-        "name": "美容健康",
+        "name": "美容与健康",
         "description": "水疗般的简洁设计，为成分和使用方法设置了结构化的板块"
       },
       "ds-pet-supplies": {
@@ -108,7 +108,7 @@
         "description": "活泼而有条理的版式，明亮的点缀色，专注于材质安全和尺寸"
       },
       "ds-fitness-sports": {
-        "name": "运动健身",
+        "name": "健身与运动",
         "description": "充满活力、字体醒目的版式，专注于耐用性、材质和活跃的生活方式"
       },
       "ds-outdoor-survival": {
@@ -120,7 +120,7 @@
         "description": "有趣、色彩丰富的版式，专注于安全认证和适龄性"
       },
       "ds-kitchen-dining": {
-        "name": "厨房餐饮",
+        "name": "厨房与餐饮",
         "description": "简洁的食谱书风格版式，专注于材质安全和尺寸"
       }
     },
@@ -145,7 +145,7 @@
       "templateMinLength": "模板至少需要 10 个字符",
       "predefinedTemplateRequired": "请选择一个预设模板",
       "minOnePriceRange": "至少需要一个价格区间",
-      "maxPriceRanges": "最多允许 10 个价格区间",
+      "maxPriceRanges": "最多可添加 10 个价格区间",
       "overlappingPriceRanges": "价格区间不能重叠",
       "minStockBuffer": "库存缓冲必须大于或等于 0"
     },
@@ -195,7 +195,7 @@
     "addRange": "添加区间",
     "calculator": {
       "title": "价格计算器",
-      "subtitle": "测试这些设置，不会保存，仅供预览。",
+      "subtitle": "在这里试用这些设置，不会保存任何内容。",
       "amazonPrice": "Amazon 采购价",
       "adRate": "广告费率试算 (%)",
       "amazonPriceError": "请输入大于 0 的 Amazon 采购价。",
@@ -224,7 +224,7 @@
       "info": "每个计算出的价格都会向上取整到以该尾数结尾的下一个金额，因此您的目标利润不会减少。您在商品上手动固定的价格不会改变。",
       "endingLabel": "价格尾数（美分，0–99）",
       "example": "示例：{{from}} 变为 {{to}}。",
-      "hint": "请输入 0 到 99 之间的整数 — 输入 99 时价格形如 $24.99。"
+      "hint": "请输入 0 到 99 之间的整数。例如，输入 99 时价格形如 $24.99。"
     },
     "amazonTaxRateNote": "您的价格计算会自动计入您从 Amazon 采购时所付的预估税费。请在“店铺设置 → Amazon 销售税率”中设置此税率。",
     "stockControl": "库存控制",
@@ -276,7 +276,7 @@
         "title": "可刊登的商品",
         "minPrice": "Amazon 最低价格",
         "maxPrice": "Amazon 最高价格",
-        "priceHint": "字段留空表示不设限。价格超出范围的商品会被跳过，任务中会显示原因。",
+        "priceHint": "字段留空表示不设限。价格超出范围的商品会被跳过，刊登任务中会显示原因。",
         "priceError": "最高价格不能低于最低价格。",
         "amazonShippedOnly": "仅限 Amazon 自己发货的商品",
         "amazonShippedOnlyHint": "跳过由其他卖家用自己的库存发货的报价。自动下单和物流跟踪对 Amazon 发货的商品效果最好。",

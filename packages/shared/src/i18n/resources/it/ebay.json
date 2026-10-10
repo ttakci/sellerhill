@@ -25,7 +25,7 @@
       "statusRevoked": "Revocato",
       "statusError": "Errore",
       "disconnectButton": "Scollega",
-      "refreshTokenButton": "Aggiorna il token"
+      "refreshTokenButton": "Aggiorna la connessione"
     },
     "callback": {
       "processing": "Elaborazione della connessione eBay...",
@@ -34,16 +34,16 @@
       "cancelled": "La connessione a eBay è stata annullata."
     },
     "errors": {
-      "invalidState": "Parametro di stato non valido",
+      "invalidState": "Non è stato possibile verificare la connessione a eBay. Riprova.",
       "authorizationFailed": "Autorizzazione eBay non riuscita",
-      "tokenExchangeFailed": "Impossibile scambiare il codice di autorizzazione con i token",
+      "tokenExchangeFailed": "Non siamo riusciti a completare il collegamento del tuo negozio eBay. Riprova.",
       "accountAlreadyConnected": "Questo negozio eBay è collegato a un altro account SellerHill. Accedi con l'account a cui lo hai collegato; se non riesci ad accedervi, contatta l'assistenza.",
       "ebayTrialAlreadyUsed": "Questo negozio eBay ha già usato la sua prova gratuita. Scegli un piano per collegarlo.",
-      "noAuthorizationCode": "Nessun codice di autorizzazione ricevuto da eBay",
+      "noAuthorizationCode": "eBay non ha confermato la connessione. Riprova.",
       "storeOwnedByAnotherAccount": "Questo negozio eBay è collegato a un altro account SellerHill. Contatta l'assistenza per trasferirlo.",
       "accountNotFound": "Impossibile trovare quel negozio eBay.",
       "identityUnavailable": "Non siamo riusciti a confermare il tuo account eBay con eBay. Non è stato collegato nulla: riprova tra un momento.",
-      "messagingScopeMissing": "Ricollega il tuo negozio eBay per attivare i messaggi: l'autorizzazione attuale non include la messaggistica.",
+      "messagingScopeMissing": "Ricollega il tuo negozio eBay per attivare i messaggi. La connessione attuale non include la messaggistica.",
       "messagingReplyNotAllowed": "Non è possibile rispondere qui ai messaggi di eBay.",
       "messagingUnavailable": "La messaggistica eBay non è temporaneamente disponibile. Riprova.",
       "messagingRejected": "eBay non ha accettato questa richiesta. Controlla il messaggio e riprova.",
@@ -53,7 +53,7 @@
       "title": "Collega il tuo negozio eBay",
       "header": "Configurazione del marketplace",
       "description": "Per iniziare a sincronizzare i tuoi articoli, devi prima collegare il tuo negozio eBay.",
-      "connectButton": "Account eBay",
+      "connectButton": "Collega l'account eBay",
       "skipButton": "Salta per ora",
       "usOnlyNote": "Al momento è supportato solo il marketplace degli Stati Uniti. Altre regioni arriveranno presto.",
       "brandingDescription": "Collega il tuo negozio eBay a SellerHill per gestire tutti i processi di vendita da un unico punto."

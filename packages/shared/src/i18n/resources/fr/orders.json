@@ -77,16 +77,16 @@
       "in_progress": "Achat en cours sur Amazon",
       "not_automated": "Non automatisée",
       "manual": "Achetée manuellement",
-      "simulated": "Simulation — aucun achat",
+      "simulated": "Simulation, aucun achat",
       "filter": {
         "all": "Tous les états d'exécution"
       },
       "detail": {
         "title": "Exécution Amazon",
         "amazonOrderId": "Commande Amazon",
-        "simulatedNotice": "Il s'agit d'une simulation. Aucune commande Amazon n'a été passée et aucun montant n'a été débité — les coûts et le profit ci-dessous sont simulés.",
+        "simulatedNotice": "Il s'agit d'une simulation. Aucune commande Amazon n'a été passée et aucun montant n'a été débité. Les coûts et le profit ci-dessous sont simulés.",
         "actionRequiredNotice": "L'automatisation s'est arrêtée avant l'achat. Examinez le motif et exécutez cette commande manuellement.",
-        "cancelledNotice": "L'achat Amazon a été annulé. La vente eBay reste due à l'acheteur — exécutez-la d'une autre manière.",
+        "cancelledNotice": "L'achat Amazon a été annulé. Vous devez toujours cet article à l'acheteur eBay : expédiez-le d'une autre manière.",
         "notAutomatedNotice": "La commande automatique est désactivée pour cette commande.",
         "attemptedAt": "Dernière tentative"
       }
@@ -95,14 +95,14 @@
       "tracked": "Liée à une annonce",
       "untracked": "Non liée à une annonce",
       "problem": {
-        "wrongPageType": "Le prestataire de suivi n'a pas pu lire la page de commande d'Amazon — son format a peut-être changé. Une nouvelle tentative aura lieu automatiquement.",
+        "wrongPageType": "La page de commande d'Amazon n'a pas pu être lue pour convertir le numéro de suivi. Amazon a peut-être modifié la page. Une nouvelle tentative aura lieu automatiquement.",
         "amazonSessionExpired": "La session Amazon utilisée pour lire cette commande a expiré et doit être reconnectée.",
         "trackingUrlMismatch": "Le lien de suivi de la page de commande d'Amazon ne correspondait pas à ce que nous attendions. Une nouvelle tentative aura lieu automatiquement.",
-        "needsTrackingUpload": "En attente de l'envoi des détails d'expédition avant de pouvoir convertir le numéro de suivi.",
-        "updateNotApplied": "La mise à jour du suivi n'a pas encore été appliquée par le prestataire. Une nouvelle tentative aura lieu automatiquement.",
-        "assignValidation": "Le prestataire de suivi a rejeté les détails d'expédition de cette commande.",
-        "shipmentException": "Le prestataire de suivi a signalé une exception sur cet envoi.",
-        "trackingUpdateUnavailable": "Le prestataire de suivi n'a pas pu mettre à jour cet envoi pour le moment.",
+        "needsTrackingUpload": "En attente des détails d'expédition avant de pouvoir convertir le numéro de suivi.",
+        "updateNotApplied": "La mise à jour du suivi n'a pas encore été appliquée. Une nouvelle tentative aura lieu automatiquement.",
+        "assignValidation": "Les détails d'expédition de cette commande ont été rejetés lors de la conversion du suivi.",
+        "shipmentException": "Un problème a été signalé sur cet envoi.",
+        "trackingUpdateUnavailable": "Le suivi de cet envoi n'a pas pu être mis à jour pour le moment.",
         "generic": "Un problème affecte la conversion du suivi de cette commande. Une nouvelle tentative aura lieu automatiquement."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Produit introuvable sur Amazon",
         "captcha": "Captcha requis",
-        "otp": "Vérification MFA/OTP",
+        "otp": "Code de vérification requis",
         "login": "Échec de connexion",
         "out_of_stock": "En rupture de stock",
         "address": "Problème d'adresse",
         "payment": "Paiement refusé",
-        "cap": "Plafond de coût dépassé",
+        "cap": "Plafond de dépense dépassé",
         "no_confirmation": "Aucune confirmation",
-        "proxy_required": "Aucun proxy configuré",
+        "proxy_required": "Le proxy du compte n'a pas pu être utilisé",
         "quota_exhausted": "Quota mensuel atteint",
         "cart": "Panier non conforme",
         "review_unreadable": "Total de la commande illisible",
-        "interrupted": "Achat interrompu — vérifiez Amazon",
+        "interrupted": "Achat interrompu, vérifiez Amazon",
         "subscription_suspended": "Abonnement suspendu",
         "listing_over_plan_limit": "Annonce hors limite du forfait",
-        "order_already_fulfilled": "Déjà expédiée — rien à acheter",
+        "order_already_fulfilled": "Déjà expédiée, rien à acheter",
         "order_not_paid": "En attente du paiement de l'acheteur",
-        "order_cancelled": "Annulée sur eBay — rien à acheter",
-        "multi_item_order": "La commande contient plusieurs articles — achetez à la main",
-        "cancel_requested": "L'acheteur a demandé l'annulation — répondez sur eBay",
+        "order_cancelled": "Annulée sur eBay, rien à acheter",
+        "multi_item_order": "La commande contient plusieurs articles, achetez à la main",
+        "cancel_requested": "L'acheteur a demandé l'annulation, répondez sur eBay",
         "loss_limit": "Au-dessus de votre limite de perte"
       },
       "reasonLabel": "Motif : {{reason}}",
@@ -158,7 +158,7 @@
       "notPurchased": {
         "button": "Elle n'est pas sur Amazon",
         "confirmTitle": "Confirmer qu'Amazon n'a aucune commande pour cette vente ?",
-        "confirmDescription": "Ne continuez qu'après avoir consulté les commandes de ce compte Amazon et constaté que la commande n'y figure pas. SellerHill vérifie aussi la liste des commandes du compte et refuse tant que cette vérification n'a pas eu lieu. Ensuite, la commande automatique peut être relancée — si la commande existe bien sur Amazon, l'article sera acheté deux fois.",
+        "confirmDescription": "Ne continuez qu'après avoir consulté les commandes de ce compte Amazon et constaté que la commande n'y figure pas. SellerHill vérifie aussi la liste des commandes du compte et refuse tant que cette vérification n'a pas eu lieu. Ensuite, la commande automatique peut être relancée. Si la commande existe bien sur Amazon, l'article sera acheté deux fois.",
         "confirm": "Oui, elle n'y est pas",
         "done": "Marquée comme non achetée. Vous pouvez relancer la commande automatique."
       }
@@ -202,7 +202,7 @@
       "viewMore": "Voir plus de détails",
       "updateAmazon": "Saisir les infos Amazon",
       "netProfitAnalysis": "ANALYSE DU PROFIT NET",
-      "analysisDesc": "Ce calcul prend en compte vos gains réels d'eBay après tous les frais de plateforme et taxes, diminués du coût d'achat Amazon d'origine.",
+      "analysisDesc": "Vos gains eBay après tous les frais de plateforme et taxes, moins le coût d'achat Amazon d'origine.",
       "calculation": "Calcul",
       "netProfitResult": "Profit net",
       "roi": "ROI",
@@ -249,7 +249,7 @@
       "shipBy": "Expédier avant le",
       "shipByNotice": "Date limite d'expédition eBay : {{date}}",
       "shipByHeading": "Date limite d'expédition eBay",
-      "multiItemNotice": "Nombre d'articles dans cette commande eBay : {{count}}. SellerHill ne suit que le premier et n'achète pas cette commande automatiquement — achetez et expédiez les autres articles vous-même."
+      "multiItemNotice": "Nombre d'articles dans cette commande eBay : {{count}}. SellerHill ne suit que le premier et n'achète pas cette commande automatiquement. Achetez et expédiez les autres articles vous-même."
     },
     "modal": {
       "title": "Saisir les infos de la commande Amazon",
@@ -264,13 +264,13 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Estimé",
-    "estimateNote": "Profit estimé — finalisé lorsque la commande Amazon est passée. Basé sur le dernier prix Amazon connu ; livraison Amazon non incluse.",
+    "estimateNote": "Profit estimé. Il devient définitif une fois la commande Amazon passée. Basé sur le dernier prix Amazon connu ; la livraison Amazon n'est pas incluse.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Tous droits réservés."
     },
     "errors": {
       "notFound": "Commande introuvable.",
-      "noTrackingYet": "Cette commande n'a pas encore de numéro de suivi Amazon — elle n'a pas été expédiée.",
+      "noTrackingYet": "Cette commande n'a pas encore de numéro de suivi Amazon. Elle n'a pas encore été expédiée.",
       "conversionUnavailable": "Le suivi n'a pas pu être converti pour le moment. Vérifiez la limite de votre forfait et vos paramètres de conversion, puis réessayez.",
       "conversionDone": "Suivi converti.",
       "orderNotTracked": "Cette commande n'est liée à aucune de vos annonces, un numéro de suivi converti ne pourrait donc jamais être envoyé à eBay. Liez d'abord la commande à son annonce.",
@@ -282,7 +282,7 @@
       "autoFulfillOverCap": "Cette vente dépasse le plafond de dépenses de votre compte Amazon. Augmentez le plafond dans les paramètres du compte Amazon ou achetez l'article manuellement.",
       "autoFulfillAlreadyStarted": "Le statut de cette commande vient de changer : l'achat a peut-être déjà démarré. Actualisez la page.",
       "autoFulfillQuotaExhausted": "La limite de commandes automatiques de votre forfait est atteinte pour cette période.",
-      "purchaseNotYetChecked": "SellerHill n'a pas encore vérifié les commandes de ce compte Amazon depuis la tentative d'achat. La vérification vient d'être lancée — réessayez dans quelques minutes.",
+      "purchaseNotYetChecked": "SellerHill n'a pas encore vérifié les commandes de ce compte Amazon depuis la tentative d'achat. La vérification vient d'être lancée. Réessayez dans quelques minutes.",
       "purchaseNotUnknown": "Cette commande n'attend pas de confirmation d'achat. Elle est peut-être déjà associée ou en cours. Actualisez la page.",
       "purchaseFoundOnAmazon": "SellerHill a trouvé une commande Amazon pour ce produit, passée vers le moment de la tentative d'achat, mais n'a pas pu la rattacher à cette vente avec certitude. Ouvrez vos commandes Amazon et associez-la à la main. Si cette commande correspond à une autre vente, associez-la d'abord à cette vente.",
       "noteTooLong": "La note peut contenir 1 000 caractères au maximum.",
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Suivi en attente",
-        "meaning": "Amazon a expédié, mais le suivi n'est pas encore arrivé sur eBay — la conversion du suivi est généralement en cours.",
+        "meaning": "Amazon a expédié, mais le numéro de suivi n'est pas encore arrivé sur eBay. En général, la conversion du suivi est encore en cours.",
         "action": "Convertissez le suivi ou corrigez la cause affichée sur la commande."
       },
       "buying": {

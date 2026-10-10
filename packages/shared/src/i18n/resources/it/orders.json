@@ -77,7 +77,7 @@
       "in_progress": "Acquisto su Amazon in corso",
       "not_automated": "Non automatizzato",
       "manual": "Acquistato a mano",
-      "simulated": "Prova — nessun acquisto",
+      "simulated": "Prova, nessun acquisto",
       "filter": {
         "all": "Tutti gli stati di evasione"
       },
@@ -86,7 +86,7 @@
         "amazonOrderId": "Ordine Amazon",
         "simulatedNotice": "Questa è una prova. Nessun ordine Amazon è stato effettuato e nessun importo è stato addebitato: i costi e il profitto qui sotto sono simulati.",
         "actionRequiredNotice": "L'automazione si è fermata prima di acquistare. Controlla il motivo ed evadi questo ordine manualmente.",
-        "cancelledNotice": "L'acquisto su Amazon è stato annullato. La vendita su eBay è ancora dovuta all'acquirente: evadila in un altro modo.",
+        "cancelledNotice": "L'acquisto su Amazon è stato annullato. Devi ancora questo articolo all'acquirente eBay, quindi evadi l'ordine in un altro modo.",
         "notAutomatedNotice": "L'ordine automatico è disattivato per questo ordine.",
         "attemptedAt": "Ultimo tentativo"
       }
@@ -95,14 +95,14 @@
       "tracked": "Collegato a un'inserzione",
       "untracked": "Non collegato a un'inserzione",
       "problem": {
-        "wrongPageType": "Il fornitore del tracciamento non è riuscito a leggere la pagina dell'ordine Amazon: potrebbe averne cambiato il formato. Verrà ritentato automaticamente.",
+        "wrongPageType": "Non è stato possibile leggere la pagina dell'ordine Amazon per convertire il numero di tracciamento. Amazon potrebbe aver cambiato la pagina. Verrà ritentato automaticamente.",
         "amazonSessionExpired": "La sessione Amazon usata per leggere questo ordine è scaduta e richiede un nuovo accesso.",
         "trackingUrlMismatch": "Il link di tracciamento nella pagina dell'ordine Amazon non corrispondeva a quello previsto. Verrà ritentato automaticamente.",
-        "needsTrackingUpload": "In attesa del caricamento dei dettagli di spedizione prima di poter convertire il numero di tracciamento.",
-        "updateNotApplied": "L'aggiornamento del tracciamento non è ancora stato applicato dal fornitore. Verrà ritentato automaticamente.",
-        "assignValidation": "Il fornitore del tracciamento ha rifiutato i dettagli di spedizione di questo ordine.",
-        "shipmentException": "Il fornitore del tracciamento ha segnalato un'eccezione per questa spedizione.",
-        "trackingUpdateUnavailable": "Al momento il fornitore del tracciamento non è riuscito ad aggiornare questa spedizione.",
+        "needsTrackingUpload": "In attesa dei dettagli di spedizione prima di poter convertire il numero di tracciamento.",
+        "updateNotApplied": "L'aggiornamento del tracciamento non è ancora stato applicato. Verrà ritentato automaticamente.",
+        "assignValidation": "I dettagli di spedizione di questo ordine sono stati rifiutati durante la conversione del tracciamento.",
+        "shipmentException": "È stato segnalato un problema su questa spedizione.",
+        "trackingUpdateUnavailable": "Al momento non è stato possibile aggiornare il tracciamento di questa spedizione.",
         "generic": "C'è un problema con la conversione del tracciamento di questo ordine. Verrà ritentata automaticamente."
       }
     },
@@ -120,25 +120,25 @@
       "reason": {
         "no_asin": "Prodotto non trovato su Amazon",
         "captcha": "Captcha richiesto",
-        "otp": "Verifica MFA/OTP",
+        "otp": "Codice di verifica richiesto",
         "login": "Accesso non riuscito",
         "out_of_stock": "Esaurito",
         "address": "Problema con l'indirizzo",
         "payment": "Pagamento rifiutato",
-        "cap": "Oltre il limite di costo",
+        "cap": "Oltre il limite di spesa",
         "no_confirmation": "Nessuna conferma",
-        "proxy_required": "Nessun proxy configurato",
+        "proxy_required": "Impossibile usare il proxy dell'account",
         "quota_exhausted": "Limite mensile raggiunto",
         "cart": "Carrello non corrispondente",
         "review_unreadable": "Totale dell'ordine illeggibile",
-        "interrupted": "Acquisto interrotto — controlla Amazon",
+        "interrupted": "Acquisto interrotto, controlla Amazon",
         "subscription_suspended": "Abbonamento sospeso",
         "listing_over_plan_limit": "Inserzione oltre il limite del piano",
-        "order_already_fulfilled": "Già spedito — nulla da acquistare",
+        "order_already_fulfilled": "Già spedito, nulla da acquistare",
         "order_not_paid": "In attesa del pagamento dell'acquirente",
         "order_cancelled": "Annullato su eBay: niente da acquistare",
-        "multi_item_order": "L'ordine contiene più articoli — acquista a mano",
-        "cancel_requested": "L'acquirente ha chiesto l'annullamento — rispondi su eBay",
+        "multi_item_order": "L'ordine contiene più articoli, acquista a mano",
+        "cancel_requested": "L'acquirente ha chiesto l'annullamento, rispondi su eBay",
         "loss_limit": "Oltre il tuo limite di perdita"
       },
       "reasonLabel": "Motivo: {{reason}}",
@@ -202,7 +202,7 @@
       "viewMore": "Vedi più dettagli",
       "updateAmazon": "Inserisci i dati Amazon",
       "netProfitAnalysis": "ANALISI DEL PROFITTO NETTO",
-      "analysisDesc": "Questo calcolo considera i tuoi utili effettivi da eBay dopo tutte le commissioni e le imposte della piattaforma, meno il costo d'acquisto originale su Amazon.",
+      "analysisDesc": "I tuoi guadagni eBay dopo tutte le commissioni e le imposte della piattaforma, meno il costo d'acquisto originale su Amazon.",
       "calculation": "Calcolo",
       "netProfitResult": "Profitto netto",
       "roi": "ROI",
@@ -264,7 +264,7 @@
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
     "estimateBadge": "Stimato",
-    "estimateNote": "Profitto stimato — si definisce quando l'ordine Amazon viene effettuato. Basato sull'ultimo prezzo Amazon noto; spedizione Amazon non inclusa.",
+    "estimateNote": "Profitto stimato. Diventa definitivo quando l'ordine Amazon viene effettuato. Basato sull'ultimo prezzo Amazon noto; spedizione Amazon non inclusa.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. Tutti i diritti riservati."
     },
@@ -312,7 +312,7 @@
       },
       "tracking_held": {
         "label": "Tracking in attesa",
-        "meaning": "Amazon ha spedito, ma il tracking non è ancora arrivato su eBay — di solito la conversione del tracking è ancora in corso.",
+        "meaning": "Amazon ha spedito, ma il numero di tracciamento non è ancora arrivato su eBay. Di solito la conversione del tracciamento è ancora in corso.",
         "action": "Converti il tracking o risolvi la causa mostrata nell'ordine."
       },
       "buying": {

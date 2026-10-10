@@ -19,7 +19,7 @@
       "contactSales": "Contatta le vendite",
       "freeTrial": "Prova gratuita disponibile",
       "mostPopular": "Il più scelto",
-      "informationalOnly": "L'applicazione dei limiti di fatturazione è disattivata: i piani sono solo informativi. Al momento tutte le funzionalità sono senza restrizioni.",
+      "informationalOnly": "Al momento i limiti dei piani non vengono applicati, quindi ogni funzionalità è disponibile. I piani sono mostrati solo a titolo informativo.",
       "free": {
         "name": "Gratuito"
       },
@@ -86,7 +86,7 @@
         "description": "Un piano non più in vendita. Gli abbonamenti esistenti continuano a funzionare; i nuovi iscritti scelgono tra i piani qui sopra."
       },
       "switchTo": "Passa a {{plan}}",
-      "switchDone": "Il tuo piano è stato modificato. Stripe calcolerà in proporzione la differenza nella prossima fattura.",
+      "switchDone": "Il cambio di piano è confermato.",
       "planNamed": "Piano {{plan}}"
     },
     "planChange": {
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Prodotti Più venduti",
         "unit": "prodotti",
-        "description": "Quanti prodotti puoi visualizzare nella pagina Più venduti per periodo di fatturazione, sia da classifiche in cache sia in tempo reale."
+        "description": "Quanti prodotti puoi visualizzare nella pagina Più venduti per periodo di fatturazione. Conta ogni prodotto mostrato, sia che la classifica fosse già caricata sia che venga caricata da zero."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Gestisci qui il metodo di pagamento, il piano e le fatture.",
       "nextChargeLabel": "Prossimo pagamento",
       "nextCharge": "Prossimo pagamento: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "Si annulla il {{date}} — nessun ulteriore addebito dopo questo periodo",
+      "cancelsAtPeriodEnd": "Si annulla il {{date}}. Nessun ulteriore addebito dopo questo periodo.",
       "scheduledChange": "Passa a {{plan}} il {{date}}",
       "scheduledChangeUnknownPlan": "Il tuo piano cambia il {{date}}",
       "cancelScheduledChange": "Annulla",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Accesso completo: l'applicazione dei limiti di fatturazione è disattivata. Tutte le funzionalità sono senza restrizioni.",
+      "full_access": "Accesso completo: i limiti dei piani non vengono applicati, quindi ogni funzionalità è disponibile.",
       "active": "Il tuo abbonamento è attivo.",
-      "no_subscription": "Nessun abbonamento attivo. Scegli un piano per attivare la fatturazione.",
+      "no_subscription": "Nessun abbonamento attivo. Scegli un piano per continuare.",
       "past_due": "Il tuo abbonamento è scaduto. Aggiorna il metodo di pagamento per ripristinare l'accesso."
     },
     "provider": {
-      "unconfiguredTitle": "Fatturazione non configurata",
-      "unconfiguredBody": "Il pagamento e la gestione dell'abbonamento non sono disponibili perché non è collegato alcun fornitore di fatturazione. Contatta il tuo operatore."
+      "unconfiguredTitle": "Pagamenti non disponibili",
+      "unconfiguredBody": "Al momento i pagamenti non sono disponibili, quindi non puoi abbonarti né gestire l'abbonamento. Contatta l'assistenza."
     },
     "usage": {
       "title": "Utilizzo in questo periodo",
@@ -279,7 +279,7 @@
       "no_active_subscription": "Nessun abbonamento attivo trovato.",
       "no_open_period": "Nessun periodo di utilizzo aperto per questo limite.",
       "already_reserved": "Questa risorsa è già riservata.",
-      "providerNotConfigured": "I pagamenti non sono ancora attivi in questo ambiente. Riprova più tardi.",
+      "providerNotConfigured": "I pagamenti non sono ancora disponibili. Riprova più tardi.",
       "planNotMirrored": "Questo piano non è ancora disponibile per l'acquisto. Scegli un altro piano o contatta l'assistenza.",
       "checkoutFailed": "Non è stato possibile avviare il pagamento. Riprova tra un momento; se il problema persiste, contatta l'assistenza.",
       "portalFailed": "Non è stato possibile aprire il portale di fatturazione. Riprova tra un momento.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Hai raggiunto il limite del tuo piano. Passa a un piano superiore per continuare.",
       "addonNotFound": "Impossibile trovare quel pacchetto di ricarica.",
       "noSubscription": "Non hai un abbonamento attivo da modificare.",
-      "planChangeFailed": "Al momento non è stato possibile cambiare il piano. Riprova oppure usa «Gestisci la fatturazione».",
+      "planChangeFailed": "Al momento non è stato possibile cambiare il piano. Riprova oppure usa «Gestisci l'abbonamento».",
       "subscriptionSuspended": "Il tuo abbonamento non è attivo, quindi le nuove inserzioni sono in pausa. Scegli un piano per riprendere: tutto riparte da solo.",
       "subscriptionSuspendedOrders": "Il tuo abbonamento non è attivo, quindi l'automazione degli ordini è in pausa. Scegli un piano per riprendere: tutto riparte da solo.",
       "listingQuotaExhausted": "Hai usato tutte le inserzioni attive consentite dal tuo piano. Termina un'inserzione per liberare un posto, oppure passa a un piano superiore.",
-      "alreadySubscribed": "Hai già un abbonamento attivo. Usa «Cambia piano» per modificarlo invece di abbonarti di nuovo.",
+      "alreadySubscribed": "Hai già un abbonamento attivo. Per cambiarlo, scegli un nuovo piano in «Gestisci l'abbonamento» invece di abbonarti di nuovo.",
       "invoicesFailed": "Non è stato possibile caricare lo storico delle fatture. Riprova tra un momento.",
-      "paymentRequiresAction": "La tua banca ha richiesto una conferma aggiuntiva per questa carta, quindi il cambio di piano è stato annullato e resti sul piano attuale. Apri «Gestisci la fatturazione» per aggiornare il metodo di pagamento, poi riprova.",
+      "paymentRequiresAction": "La tua banca ha richiesto una conferma aggiuntiva per questa carta, quindi il cambio di piano è stato annullato e resti sul piano attuale. Aggiorna la carta con «Aggiorna il metodo di pagamento», poi riprova.",
       "invalidCheckoutSession": "Questo link di conferma del pagamento non è valido."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Hai usato il limite mensile di Più venduti. Ricarica per continuare a sfogliare le classifiche Amazon fino al rinnovo del periodo."
       },
       "buy": "Acquista",
-      "note": "Una ricarica vale solo per il mese di calendario in corso, ed è per questo che viene proposta quando raggiungi il limite e non in anticipo. La quota del tuo piano si azzera il 1° del mese."
+      "note": "Una ricarica vale solo per il periodo di fatturazione in corso, ed è per questo che viene proposta quando raggiungi il limite e non in anticipo. La quota del tuo piano si azzera al rinnovo del periodo."
     }
   }
 }

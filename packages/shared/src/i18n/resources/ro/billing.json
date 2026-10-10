@@ -19,13 +19,13 @@
       "contactSales": "Contactează vânzările",
       "freeTrial": "Perioadă de încercare gratuită disponibilă",
       "mostPopular": "Cel mai popular",
-      "informationalOnly": "Aplicarea facturării este dezactivată — planurile au doar rol informativ. Toate funcțiile sunt momentan nerestricționate.",
+      "informationalOnly": "Limitele planurilor nu sunt aplicate momentan, deci toate funcțiile sunt disponibile. Planurile sunt afișate doar cu titlu informativ.",
       "free": {
         "name": "Gratuit"
       },
       "trial": {
         "name": "Încercare gratuită",
-        "description": "O încercare limitată în timp a SellerHill. Nu poate fi achiziționată — începe automat la înregistrare."
+        "description": "O încercare limitată în timp a SellerHill. Nu poate fi cumpărată: începe automat la înregistrare."
       },
       "unlimitedOrders": "Comenzi automate și urmărire a livrărilor nelimitate",
       "activeListings": "{{limit}} anunțuri active · adăugări și eliminări nelimitate",
@@ -86,13 +86,13 @@
         "description": "Un plan retras. Abonamentele existente continuă să funcționeze; înregistrările noi aleg dintre planurile de mai sus."
       },
       "switchTo": "Treci la {{plan}}",
-      "switchDone": "Planul dvs. a fost schimbat. Stripe va calcula proporțional diferența la următoarea factură.",
+      "switchDone": "Schimbarea planului este confirmată.",
       "planNamed": "Planul {{plan}}"
     },
     "planChange": {
       "title": "Confirmați schimbarea planului",
       "upgradeBody": "Treceți la {{plan}}. Suma de {{amount}} va fi taxată acum. Următoarea factură va fi de {{nextAmount}} pe {{nextDate}}.",
-      "downgradeBody": "Treceți la {{plan}} pe {{date}}. Nu se taxează nimic acum — păstrați planul curent până atunci.",
+      "downgradeBody": "Treceți la {{plan}} pe {{date}}. Nu se taxează nimic acum și păstrați planul curent până atunci.",
       "listingLimitWarning": "Aveți {{active}} anunțuri active, iar noul plan permite {{limit}}. Începând cu {{date}}, sunt urmărite doar cele mai vechi {{limit}} anunțuri ale dvs.; celelalte {{over}} nu mai primesc sincronizarea prețului/stocului și gestionarea automată a comenzilor. Dacă doriți să alegeți ce anunțuri rămân urmărite, încheiați-le pe cele de care nu aveți nevoie înainte de această dată.",
       "confirm": "Confirmă",
       "cancel": "Anulează"
@@ -123,7 +123,7 @@
       "best_sellers_products_per_month": {
         "label": "Produse Cele mai vândute",
         "unit": "produse",
-        "description": "Câte produse puteți vizualiza pe pagina Cele mai vândute pe perioadă de facturare, din liste din cache și din liste live deopotrivă."
+        "description": "Câte produse puteți vizualiza pe pagina Cele mai vândute pe perioadă de facturare. Se numără fiecare produs afișat, fie că lista era deja încărcată, fie că a fost preluată din nou."
       }
     },
     "subscription": {
@@ -169,7 +169,7 @@
       "manageHint": "Gestionați aici metoda de plată, planul și facturile.",
       "nextChargeLabel": "Următoarea plată",
       "nextCharge": "Următoarea plată: {{date}} · {{amount}}",
-      "cancelsAtPeriodEnd": "Se anulează pe {{date}} — nu se mai taxează nimic după această perioadă",
+      "cancelsAtPeriodEnd": "Se anulează pe {{date}}. Nu se mai taxează nimic după această perioadă.",
       "scheduledChange": "Trece la {{plan}} pe {{date}}",
       "scheduledChangeUnknownPlan": "Planul dvs. se schimbă pe {{date}}",
       "cancelScheduledChange": "Anulează",
@@ -222,14 +222,14 @@
       }
     },
     "transition": {
-      "full_access": "Acces complet — aplicarea facturării este dezactivată. Toate funcțiile sunt nerestricționate.",
+      "full_access": "Acces complet: limitele planurilor nu sunt aplicate, deci toate funcțiile sunt disponibile.",
       "active": "Abonamentul dvs. este activ.",
-      "no_subscription": "Niciun abonament activ. Alegeți un plan pentru a activa facturarea.",
+      "no_subscription": "Niciun abonament activ. Alegeți un plan pentru a continua.",
       "past_due": "Abonamentul dvs. este restant. Actualizați metoda de plată pentru a restabili accesul."
     },
     "provider": {
-      "unconfiguredTitle": "Facturare neconfigurată",
-      "unconfiguredBody": "Finalizarea plății și gestionarea abonamentului sunt indisponibile deoarece nu este conectat niciun furnizor de facturare. Contactați operatorul."
+      "unconfiguredTitle": "Plăți indisponibile",
+      "unconfiguredBody": "Plățile nu sunt disponibile momentan, deci nu vă puteți abona și nu vă puteți gestiona abonamentul. Contactați asistența."
     },
     "usage": {
       "title": "Utilizarea în această perioadă",
@@ -279,9 +279,9 @@
       "no_active_subscription": "Nu s-a găsit niciun abonament activ.",
       "no_open_period": "Nicio perioadă de utilizare deschisă pentru această limită.",
       "already_reserved": "Această resursă este deja rezervată.",
-      "providerNotConfigured": "Plățile nu sunt încă activate în acest mediu. Încercați din nou mai târziu.",
+      "providerNotConfigured": "Plățile nu sunt încă disponibile. Încercați din nou mai târziu.",
       "planNotMirrored": "Acest plan nu este încă disponibil pentru achiziție. Alegeți alt plan sau contactați asistența.",
-      "checkoutFailed": "Finalizarea plății nu a putut fi pornită. Încercați din nou peste puțin timp — dacă problema persistă, contactați asistența.",
+      "checkoutFailed": "Finalizarea plății nu a putut fi pornită. Încercați din nou peste puțin timp. Dacă problema persistă, contactați asistența.",
       "portalFailed": "Portalul de facturare nu a putut fi deschis. Încercați din nou peste puțin timp.",
       "noCustomer": "Niciun cont de facturare încă. Alegeți mai întâi un plan pentru a-l configura.",
       "planNotFound": "Planul respectiv nu a fost găsit.",
@@ -290,13 +290,13 @@
       "quotaExhausted": "Ați atins limita planului. Treceți la un plan superior pentru a continua.",
       "addonNotFound": "Pachetul suplimentar respectiv nu a fost găsit.",
       "noSubscription": "Nu aveți un abonament activ de modificat.",
-      "planChangeFailed": "Planul nu a putut fi schimbat acum. Încercați din nou sau folosiți „Gestionează facturarea”.",
-      "subscriptionSuspended": "Abonamentul dvs. nu este activ, deci anunțurile noi sunt puse pe pauză. Alegeți un plan pentru a relua — totul repornește de la sine.",
-      "subscriptionSuspendedOrders": "Abonamentul dvs. nu este activ, deci automatizarea comenzilor este pusă pe pauză. Alegeți un plan pentru a relua — totul repornește de la sine.",
+      "planChangeFailed": "Planul nu a putut fi schimbat acum. Încercați din nou sau folosiți „Gestionează abonamentul”.",
+      "subscriptionSuspended": "Abonamentul dvs. nu este activ, deci anunțurile noi sunt puse pe pauză. Alegeți un plan pentru a relua. Totul repornește de la sine.",
+      "subscriptionSuspendedOrders": "Abonamentul dvs. nu este activ, deci automatizarea comenzilor este pusă pe pauză. Alegeți un plan pentru a relua. Totul repornește de la sine.",
       "listingQuotaExhausted": "Ați folosit toate anunțurile active permise de plan. Încheiați un anunț pentru a elibera un loc sau treceți la un plan superior.",
-      "alreadySubscribed": "Aveți deja un abonament activ. Folosiți „Treci la alt plan” pentru a-l schimba, în loc să vă abonați din nou.",
+      "alreadySubscribed": "Aveți deja un abonament activ. Pentru a-l schimba, alegeți un plan nou din „Gestionează abonamentul”, în loc să vă abonați din nou.",
       "invoicesFailed": "Istoricul facturilor nu a putut fi încărcat. Încercați din nou peste puțin timp.",
-      "paymentRequiresAction": "Banca dvs. a cerut o confirmare suplimentară pentru acest card, așa că schimbarea planului a fost anulată și rămâneți pe planul curent. Deschideți „Gestionează facturarea” pentru a actualiza metoda de plată, apoi încercați din nou.",
+      "paymentRequiresAction": "Banca dvs. a cerut o confirmare suplimentară pentru acest card, așa că schimbarea planului a fost anulată și rămâneți pe planul curent. Actualizați cardul din „Actualizează metoda de plată”, apoi încercați din nou.",
       "invalidCheckoutSession": "Acest link de confirmare a plății nu este valid."
     },
     "actions": {
@@ -342,7 +342,7 @@
         "best_sellers_products_per_month": "Ați folosit alocarea lunară Cele mai vândute. Suplimentați-o pentru a continua să răsfoiți listele Amazon până la reînnoirea perioadei."
       },
       "buy": "Cumpără",
-      "note": "O suplimentare se aplică doar lunii calendaristice curente, motiv pentru care este oferită la atingerea limitei, nu în avans. Alocarea planului dvs. se resetează pe 1."
+      "note": "O suplimentare se aplică doar perioadei de facturare curente, motiv pentru care este oferită la atingerea limitei, nu în avans. Alocarea planului dvs. se resetează la reînnoirea perioadei."
     }
   }
 }
