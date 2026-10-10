@@ -273,7 +273,7 @@ describe('campaign detail and writes', () => {
       })
     );
     mount();
-    await screen.findByText('Margin override: ad rate is not applied to the SellerHill price.');
+    await screen.findByText('This listing has its own margin, so the ad rate is not included in the price SellerHill sets.');
     const marginRow = screen.getByText('margin').closest('tr');
     if (!marginRow) {
       throw new Error('Missing margin member');
@@ -306,7 +306,7 @@ describe('campaign detail and writes', () => {
     expect(screen.getByRole('button', { name: 'Add listings' })).toBeDisabled();
     expect(
       screen.getByText(
-        status ? 'Advertising is unavailable for this store.' : 'Advertising eligibility is unavailable. Campaign changes are disabled.'
+        status ? 'Advertising is unavailable for this store.' : 'We could not check whether this store can advertise, so campaign changes are turned off.'
       )
     ).toBeInTheDocument();
   });
@@ -444,7 +444,7 @@ describe('campaign detail and writes', () => {
     fireEvent.change(within(dialog).getByRole('textbox', { name: 'Ad rate (%)' }), { target: { value: '7' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }));
     await within(dialog).findByText('two');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Retry failed members' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Retry failed listings' }));
     await waitFor(() => expect(success).toHaveBeenCalledWith('Ad rate updated.'));
     expect(bodies).toEqual([
       { ebayAccountId: 'store-a', bidPercentage: 7 },

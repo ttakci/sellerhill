@@ -288,7 +288,7 @@
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka plan Keepa yenileme zamanlayıcısının ana anahtarı. Kapatınca arka plandaki token harcaması yeniden başlatma gerekmeden hemen durur.",
-        "keepa.refresh.intervalMinutes": "Zamanlayıcının Keepa'dan yenilenecek ürün partisini ne sıklıkla talep ettiği. Düşük değer daha sık yeniler ama Keepa tokenlarını daha hızlı tüketir.",
+        "keepa.refresh.intervalMinutes": "Aktif ilanı olan her ürünün ne sıklıkla yenilendiği (scraper veya Keepa ile). Varsayılan 360 (günde dört kez), tanıtım sayfasının verdiği sözdür. Daha düşük değer daha fazla proxy kapasitesi veya Keepa token'ı harcar.",
         "keepa.refresh.batchSize": "Her yenileme turunda talep edilen ürün sayısı. 100'ü aşan partiler otomatik olarak bölünür, bu yüzden değer Keepa'nın istek başına limitini rahatça aşabilir.",
         "keepa.refresh.claimLeaseMinutes": "Talep edilen bir partinin yeniden sıraya girmeden önce ayrılmış kaldığı süre. Yeniden denemeler dahil en uzun parti süresinden büyük olmalı, yoksa bir ürün iki kez talep edilebilir.",
         "keepa.refresh.maxFailures": "Bir ürün karantinaya alınıp yenilenmesi durmadan önce izin verilen art arda veri hatası sayısı (yanıtta ASIN yok ya da sayfa okunamadı).",

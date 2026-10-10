@@ -288,7 +288,7 @@
       },
       "descriptions": {
         "keepa.refresh.enabled": "Master switch for the background Keepa refresh scheduler. Turning it off stops all background token spend immediately, with no restart needed.",
-        "keepa.refresh.intervalMinutes": "How often the scheduler claims a batch of products to refresh from Keepa. Lower values refresh more often but spend Keepa tokens faster.",
+        "keepa.refresh.intervalMinutes": "How often each product with an active listing is refreshed, by the scraper or by Keepa. The default 360 (four times a day) is what the landing page promises. Lower values use more proxy capacity or Keepa tokens.",
         "keepa.refresh.batchSize": "How many products are claimed per refresh tick. Batches over 100 are chunked automatically, so this can safely exceed Keepa's per-call limit.",
         "keepa.refresh.claimLeaseMinutes": "How long a claimed batch is reserved before it becomes due again. Must exceed the worst-case batch runtime including retries, or a product could be claimed twice.",
         "keepa.refresh.maxFailures": "Number of consecutive data failures (ASIN missing from the response, or the page could not be read) before a product is quarantined and stops being refreshed.",

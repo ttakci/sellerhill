@@ -598,7 +598,7 @@
       },
       "specifics": {
         "title": "Ürün özellikleri gerçekten dolu",
-        "description": "Zorunlu alanları \"Does not apply\" ile geçmeyiz. Her özellik, eBay kategorisinin kabul ettiği değerle eşleştirilir; ilanınız alıcı filtrelerinde görünür.",
+        "description": "Zorunlu alanlar, veri olan her yerde ürünün gerçek bilgileriyle doldurulur ve eBay kategorisinin kabul ettiği değerlerle eşleştirilir. İlanınız alıcı filtrelerinde görünür.",
         "others": "Diğerleri",
         "us": "SellerHill"
       },
@@ -967,7 +967,7 @@
       },
       "q3": {
         "question": "Ürün özelliklerini (item specifics) nasıl dolduruyorsunuz?",
-        "answer": "Ürünün kaynak katalogdaki tüm özelliklerini toplar ve eBay kategorisinin tanımladığı alanlarla eşleştiririz. Kategori yalnızca belirli değerleri kabul ediyorsa listeden uygun değeri seçeriz. Zorunlu alanları \"Does not apply\" ile geçmek yerine gerçek değerle doldururuz ve ilan başına 45'e kadar özellik göndeririz."
+        "answer": "Ürünün kaynak katalogdaki tüm özelliklerini toplar ve eBay kategorisinin tanımladığı alanlarla eşleştiririz. Kategori yalnızca belirli değerleri kabul ediyorsa listeden uygun değeri seçeriz. Zorunlu alanlar, ürün verisinde karşılığı olan her yerde gerçek değerle doldurulur ve her ilan 45'e kadar özellik taşır."
       },
       "q4": {
         "question": "Otomatik sipariş nasıl çalışır?",

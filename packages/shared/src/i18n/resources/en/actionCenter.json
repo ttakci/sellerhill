@@ -99,8 +99,8 @@
       },
       "order_tracking_problem": {
         "title": "Tracking conversion has a problem",
-        "description_one": "{{count}} shipped order has an open tracking conversion problem. Until it is resolved, that order shows the original Amazon tracking number to your buyer instead of a converted one.",
-        "description_other": "{{count}} shipped orders have open tracking conversion problems. Until they are resolved, those orders show the original Amazon tracking numbers to your buyers instead of converted ones.",
+        "description_one": "{{count}} shipped order has an open tracking conversion problem. Open the order to see what needs fixing.",
+        "description_other": "{{count}} shipped orders have open tracking conversion problems. Open the orders to see what needs fixing.",
         "action": "View orders"
       },
       "order_tracking_conversion_held": {
@@ -208,7 +208,7 @@
       },
       "setup_no_store_settings": {
         "title": "Store settings not configured yet",
-        "description": "Your shipping origin and blacklist keywords are still unset. These are used to compute costs and to keep listings from publishing with blocked content.",
+        "description": "Your store address and blacklist keywords are not set yet. The address is shown on eBay as your item location, and the blacklist keeps listings with blocked words from going live.",
         "action": "Configure settings"
       },
       "setup_no_listing_settings_group": {

@@ -99,8 +99,8 @@
       },
       "order_tracking_problem": {
         "title": "Takip dönüşümünde sorun var",
-        "description_one": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık bir sorun var. Sorun çözülene kadar o sipariş, alıcınıza dönüştürülmüş numara yerine orijinal Amazon takip numarasını gösteriyor.",
-        "description_other": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık sorunlar var. Sorunlar çözülene kadar o siparişler, alıcılarınıza dönüştürülmüş numara yerine orijinal Amazon takip numaralarını gösteriyor.",
+        "description_one": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık bir sorun var. Neyin düzeltilmesi gerektiğini görmek için siparişi açın.",
+        "description_other": "Kargoya verilmiş {{count}} siparişte takip numarası dönüşümüyle ilgili açık sorunlar var. Neyin düzeltilmesi gerektiğini görmek için siparişleri açın.",
         "action": "Siparişleri görüntüle"
       },
       "order_tracking_conversion_held": {
@@ -208,7 +208,7 @@
       },
       "setup_no_store_settings": {
         "title": "Mağaza ayarları henüz yapılmadı",
-        "description": "Kargo gönderim yeriniz ve kara liste anahtar kelimeleriniz hâlâ ayarlanmadı. Bunlar maliyet hesaplamada ve engellenen içerikle ilan yayınlanmasını önlemede kullanılır.",
+        "description": "Mağaza adresiniz ve kara liste kelimeleriniz henüz ayarlanmadı. Adres eBay'de ürün konumu olarak görünür. Kara liste ise yasaklı kelime içeren ilanların yayına girmesini önler.",
         "action": "Ayarları yapılandır"
       },
       "setup_no_listing_settings_group": {

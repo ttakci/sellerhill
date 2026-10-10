@@ -170,12 +170,12 @@ describe('campaign list and create', () => {
     mount();
     await screen.findByText('Summer campaign');
     expect(
-      screen.getByText('Advertising eligibility is unavailable. Creating campaigns is disabled.')
+      screen.getByText('We could not check whether this store can advertise, so you cannot create campaigns right now.')
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create campaign' })).toBeDisabled();
     // Unknown figures are an em dash (never 0), and the hero says they wait for eBay's report.
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9);
-    expect(screen.getByText(/pending eBay reports/)).toBeInTheDocument();
+    expect(screen.getByText(/waiting for eBay's reports/)).toBeInTheDocument();
     expect(screen.queryByText('$0.00')).not.toBeInTheDocument();
     expect(screen.queryByText('0×')).not.toBeInTheDocument();
   });

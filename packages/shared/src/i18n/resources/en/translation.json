@@ -598,7 +598,7 @@
       },
       "specifics": {
         "title": "Item specifics, actually filled in",
-        "description": "We don't skip required fields with \"Does not apply\". Every attribute is matched to a value the eBay category accepts, so your listing shows up in buyers' filters.",
+        "description": "Required fields are filled from the product's real data wherever it exists, matched to values the eBay category accepts. Your listing shows up in buyers' filters.",
         "others": "Others",
         "us": "SellerHill"
       },
@@ -967,7 +967,7 @@
       },
       "q3": {
         "question": "How do you fill in item specifics?",
-        "answer": "We collect every attribute the source catalogue has for a product and map it to the fields the eBay category defines. When a category only accepts certain values, we pick the right one from its list. Instead of skipping required fields with \"Does not apply\", we fill them with real values, sending up to 45 specifics per listing."
+        "answer": "We collect every attribute the source catalogue has for a product and map it to the fields the eBay category defines. When a category only accepts certain values, we pick the right one from its list. Required fields get real values wherever the product data has them, and each listing carries up to 45 specifics."
       },
       "q4": {
         "question": "How does automatic ordering work?",
