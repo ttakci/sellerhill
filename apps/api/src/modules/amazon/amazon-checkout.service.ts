@@ -23,7 +23,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { AutoFulfillEventLog, type AutoFulfillEventDetail } from '../orders/auto-fulfill-event-log.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
-import { addressBlockMatchesBuyer } from './address-match';
+import { addressBlockMatchesBuyer, amazonAddressLine2 } from './address-match';
 import { isOnAmazonAuthChallenge, probeAmazonAuth } from './amazon-auth-state';
 import { AmazonOrderSyncQueueService } from './amazon-order-sync.queue';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
@@ -1717,8 +1717,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         .locator('#address-ui-widgets-enterAddressLine1')
         .first()
         .fill(ship.street ?? '');
-      if (ship.street2) {
-        await page.locator('#address-ui-widgets-enterAddressLine2').first().fill(ship.street2);
+      // An eIS hub reference goes in as the bare code (`evtn:l27rd8q` → `L27RD8Q`).
+      const line2 = amazonAddressLine2(ship.street2);
+      if (line2) {
+        await page.locator('#address-ui-widgets-enterAddressLine2').first().fill(line2);
       }
       await page
         .locator('#address-ui-widgets-enterAddressCity')

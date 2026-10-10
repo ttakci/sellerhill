@@ -106,6 +106,19 @@ function unitLinePresent(haystack: string, unitNorm: string): boolean {
   return bareReference !== undefined && containsTokens(haystack, bareReference);
 }
 
+/**
+ * eBay's street2 as written into Amazon's "Address line 2" when the checkout
+ * adds the buyer's address. An eBay International Shipping reference
+ * (`evtn:l27rd8q`) is written as the bare upper-case code (`L27RD8Q`) — the
+ * form on delivered, hand-placed eIS orders (operator decision, 2026-10-10).
+ * Any other line is written as eBay sent it.
+ */
+export function amazonAddressLine2(street2: string | null | undefined): string {
+  const line = (street2 ?? '').trim();
+  const reference = /^evtn\s*:?\s*([a-z0-9]+)$/i.exec(line)?.[1];
+  return reference ? reference.toUpperCase() : line;
+}
+
 /** Leading house/building number of a street line, when present. */
 function streetNumber(street: string): string | null {
   return /^\s*(\d+)/.exec(street)?.[1] ?? null;

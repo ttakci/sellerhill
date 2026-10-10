@@ -1,4 +1,34 @@
-import { addressBlockMatchesBuyer, recipientMatchesBuyer, type MatchableAddress } from './address-match';
+import {
+  addressBlockMatchesBuyer,
+  amazonAddressLine2,
+  recipientMatchesBuyer,
+  type MatchableAddress,
+} from './address-match';
+
+describe('amazonAddressLine2', () => {
+  it('writes an eIS reference as the bare upper-case code, the form on delivered orders', () => {
+    expect(amazonAddressLine2('evtn:l27rd8q')).toBe('L27RD8Q');
+    expect(amazonAddressLine2('EVTN: C2BJWPK ')).toBe('C2BJWPK');
+    expect(amazonAddressLine2('evtn h2cmh4f')).toBe('H2CMH4F');
+  });
+
+  it('leaves every other line exactly as eBay sent it', () => {
+    expect(amazonAddressLine2('Apt 4B')).toBe('Apt 4B');
+    expect(amazonAddressLine2('Evtnsville Office Park')).toBe('Evtnsville Office Park');
+    expect(amazonAddressLine2('')).toBe('');
+    expect(amazonAddressLine2(undefined)).toBe('');
+  });
+
+  it('writes a line the matcher then accepts for that buyer', () => {
+    const eis: MatchableAddress = {
+      street: '110 Internationale Blvd',
+      street2: 'evtn:l27rd8q',
+      zipCode: '60139-2080',
+    };
+    const saved = `eIS C/O Pat EXAMPLE ${amazonAddressLine2(eis.street2)} 110 INTERNATIONALE BLVD GLENDALE HEIGHTS, IL 60139-2080`;
+    expect(addressBlockMatchesBuyer(saved, eis)).toBe(true);
+  });
+});
 
 const buyer: MatchableAddress = {
   fullName: 'Jane Buyer',
