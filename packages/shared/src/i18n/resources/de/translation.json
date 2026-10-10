@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Noch keine eBay-Shops verbunden"
-        }
+        },
+        "marketplace": "Marktplatz"
       },
       "amazon": {
         "noAccounts": "Keine Amazon-Konten verbunden",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Der Anmeldevorgang von Amazon konnte nicht automatisch abgeschlossen werden. Versuchen Sie es in Kürze erneut; wenn es weiterhin fehlschlägt, wenden Sie sich an den Support.",
           "transport": "Amazon konnte zur Prüfung dieses Kontos nicht erreicht werden. Versuchen Sie es in Kürze erneut.",
           "unknown": "Dieses Konto konnte nicht geprüft werden. Versuchen Sie es in Kürze erneut; wenn es weiterhin fehlschlägt, wenden Sie sich an den Support."
-        }
+        },
+        "emailLabel": "E-Mail",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Automatische Bestellungen",
+        "statusOn": "An",
+        "statusOff": "Aus",
+        "autoFulfillCap": "An · Limit {{cap}}"
       },
       "storeConfig": {
         "title": "Shop-Konfiguration",
@@ -418,6 +425,15 @@
           "automation": "Automatisierung",
           "messaging": "Käufernachrichten",
           "blacklist": "Sperrliste"
+        },
+        "reset": {
+          "usingOwn": "Dieser Shop verwendet eigene Einstellungen.",
+          "usingGlobal": "Dieser Shop verwendet die Einstellungen „{{global}}“. Wenn Sie hier speichern, erhält der Shop eigene Einstellungen.",
+          "action": "Zurück zu den globalen Einstellungen",
+          "confirmDescription": "Die eigenen Einstellungen dieses Shops werden gelöscht: Adresse, Automatisierung, Käufernachrichten, Sperrliste und gesperrte ASINs. Danach verwendet der Shop die Einstellungen „{{global}}“. Dies kann nicht rückgängig gemacht werden.",
+          "success": "Der Shop verwendet jetzt die Einstellungen „{{global}}“.",
+          "globalUsedBy": "Shops mit diesen Einstellungen: {{stores}}",
+          "globalOwn": "Shops mit eigenen Einstellungen: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "Gesperrte ASINs",
-          "hint": "Diese Produkte werden nie eingestellt. Ein Shop ohne eigene Liste verwendet die Liste für alle Shops.",
-          "placeholder": "Eine ASIN pro Zeile oder durch Kommas getrennt",
-          "count": "Gültige ASINs in dieser Liste: {{count}}",
-          "inherited": "Dieser Shop hat keine eigene Liste und verwendet die Liste für alle Shops. Wenn Sie sie hier bearbeiten, erhält dieser Shop eine eigene Liste."
+          "hint": "Diese Produkte werden nie eingestellt. Schreiben Sie jede ASIN in eine eigene Zeile oder trennen Sie sie mit Kommas oder Leerzeichen. Zusätzliche Leerzeichen, Kleinbuchstaben und Duplikate stören nicht; alles, was keine 10-stellige ASIN ist, wird übersprungen.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "Gültige ASINs in dieser Liste: {{count}}"
         }
       },
       "listingGroup": {

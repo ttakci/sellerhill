@@ -51,7 +51,6 @@ export const ListingGroupDrawerComponent = ({
   onNext,
   onBack,
   onSubmit,
-  canProceed,
   rulesStep,
 }: ListingGroupDrawerComponentProps) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
@@ -140,11 +139,7 @@ export const ListingGroupDrawerComponent = ({
                   {t('listingSettingsGroup.aiTitleEnabled')}
                 </Text>
                 <Tooltip content={t('listingSettingsGroup.aiTitleEnabledInfo')} position="top" variant="dark">
-                  <S.InfoButton
-                    type="button"
-                    variant="ghost"
-                    aria-label={t('listingSettingsGroup.aiTitleEnabledInfo')}
-                  >
+                  <S.InfoButton type="button" variant="ghost" aria-label={t('listingSettingsGroup.aiTitleEnabledInfo')}>
                     <Icon name="info" size={14} color="text.tertiary" />
                   </S.InfoButton>
                 </Tooltip>
@@ -189,7 +184,7 @@ export const ListingGroupDrawerComponent = ({
         {fields.map((field, index) => (
           <S.RepricingCard key={field.id}>
             <S.RepricingCardHeader>
-              <Text variant="body" weight="semibold">
+              <Text variant="body" weight="bold">
                 {t('listingSettingsGroup.priceRangeLabel', { index: index + 1 })}
               </Text>
               {fields.length > 1 && (
@@ -321,7 +316,7 @@ export const ListingGroupDrawerComponent = ({
               )}
             />
             <S.KeywordSection>
-              <Text variant="h5" weight="semibold">
+              <Text variant="h4" weight="bold">
                 {t('listingSettingsGroup.keywords.title')}
               </Text>
               <Text variant="body-sm" color="text.secondary">
@@ -330,7 +325,12 @@ export const ListingGroupDrawerComponent = ({
               <S.KeywordList>
                 {LISTING_TEMPLATE_SAFE_PLACEHOLDERS.map((key) => (
                   <S.KeywordItem key={key}>
-                    <S.KeywordButton type="button" variant="secondary" size="small" onClick={() => onInsertKeyword(key)}>
+                    <S.KeywordButton
+                      type="button"
+                      variant="secondary"
+                      size="small"
+                      onClick={() => onInsertKeyword(key)}
+                    >
                       <Text variant="caption">{`{{${key}}}`}</Text>
                     </S.KeywordButton>
                     <Text variant="body-sm" color="text.secondary">
@@ -345,28 +345,28 @@ export const ListingGroupDrawerComponent = ({
       </S.FormCard>
       <S.PreviewCard variant="elevated">
         <S.PreviewCardHeader>
-          <Text variant="h4" weight="semibold">
+          <Text variant="h4" weight="bold">
             {t('listingSettingsGroup.livePreview')}
           </Text>
           <S.PreviewHeaderActions>
-          {watchedValues.templates?.type !== TemplateType.CUSTOM && (
+            {watchedValues.templates?.type !== TemplateType.CUSTOM && (
+              <S.PreviewIconButton
+                type="button"
+                variant="ghost"
+                onClick={onEditTemplate}
+                aria-label={t('listingSettingsGroup.editTemplate')}
+              >
+                <Icon name="edit" size={16} />
+              </S.PreviewIconButton>
+            )}
             <S.PreviewIconButton
               type="button"
               variant="ghost"
-              onClick={onEditTemplate}
-              aria-label={t('listingSettingsGroup.editTemplate')}
+              onClick={onOpenPreview}
+              aria-label={t('listingSettingsGroup.livePreview')}
             >
-              <Icon name="edit" size={16} />
+              <Icon name="external-link" size={16} />
             </S.PreviewIconButton>
-          )}
-          <S.PreviewIconButton
-            type="button"
-            variant="ghost"
-            onClick={onOpenPreview}
-            aria-label={t('listingSettingsGroup.livePreview')}
-          >
-            <Icon name="external-link" size={16} />
-          </S.PreviewIconButton>
           </S.PreviewHeaderActions>
         </S.PreviewCardHeader>
         <S.PreviewCardBody>
@@ -395,6 +395,7 @@ export const ListingGroupDrawerComponent = ({
       primaryAction={
         isLastStep
           ? {
+              icon: 'save',
               label: t('translation:common.save'),
               onClick: onSubmit,
               isLoading: isSaving,
@@ -402,8 +403,8 @@ export const ListingGroupDrawerComponent = ({
             }
           : {
               label: t('translation:common.continue'),
+              icon: 'arrow-right',
               onClick: onNext,
-              disabled: !canProceed,
             }
       }
     >

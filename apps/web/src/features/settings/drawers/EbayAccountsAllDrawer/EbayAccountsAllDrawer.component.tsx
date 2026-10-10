@@ -1,4 +1,4 @@
-import { Drawer, Text } from '@repo/ui';
+import { Drawer, EmptyState } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -39,14 +39,13 @@ export const EbayAccountsAllDrawerComponent: React.FC<EbayAccountsAllDrawerCompo
           ))}
         </S.StoreList>
       ) : (
-        <S.EmptyState>
-          <S.EmptyIconCircle>
-            <Text variant="body" weight="semibold">eBay</Text>
-          </S.EmptyIconCircle>
-          <Text variant="body" color="text.secondary">
-            {t('translation:settingsHub.sections.ebay.manageStores.empty')}
-          </Text>
-        </S.EmptyState>
+        <S.FormCard>
+          <EmptyState
+            icon="storefront"
+            title={t('translation:settingsHub.sections.ebay.manageStores.empty')}
+            description={t('translation:settingsHub.drawer.ebayAccounts.addNew.subtitle')}
+          />
+        </S.FormCard>
       )}
     </Drawer>
   );

@@ -1,4 +1,4 @@
-import { Drawer, Text } from '@repo/ui';
+import { Drawer, EmptyState } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -33,14 +33,13 @@ export const AmazonAccountsAllDrawerComponent: React.FC<AmazonAccountsAllDrawerC
           ))}
         </S.AccountList>
       ) : (
-        <S.EmptyState>
-          <S.EmptyIconCircle>
-            <Text variant="body" weight="semibold">Amazon</Text>
-          </S.EmptyIconCircle>
-          <Text variant="body" color="text.secondary">
-            {t('translation:settingsHub.sections.amazon.noAccounts')}
-          </Text>
-        </S.EmptyState>
+        <S.FormCard>
+          <EmptyState
+            icon="shopping-bag"
+            title={t('translation:settingsHub.drawer.amazonAccounts.empty.title')}
+            description={t('translation:settingsHub.drawer.amazonAccounts.empty.description')}
+          />
+        </S.FormCard>
       )}
     </Drawer>
   );

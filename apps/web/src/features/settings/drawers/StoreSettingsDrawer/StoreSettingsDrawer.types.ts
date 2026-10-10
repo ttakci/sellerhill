@@ -24,6 +24,18 @@ export interface StoreSettingsDrawerComponentProps {
   onBack: () => void;
   onContinue: () => void;
   isSaving: boolean;
+  /**
+   * For a store scope: whether it has settings of its own (true) or runs on
+   * "all stores" (false). `null` on the global scope.
+   */
+  usesOwnSettings: boolean | null;
+  /** Global scope only: who follows these settings, who has their own. Empty on a store scope. */
+  globalScopeLines: string[];
+  /** Asks to drop the store's own settings — opens the confirmation. */
+  onRequestReset: () => void;
+  isConfirmingReset: boolean;
+  onCancelReset: () => void;
+  onConfirmReset: () => void;
   isContinueDisabled: boolean;
   scopeOptions: Array<{ value: string; label: string }>;
   selectedScope: string;

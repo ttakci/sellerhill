@@ -45,7 +45,10 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
       {showViewAll && (
         <S.CarouselTopBar>
           <S.ViewAllButton variant="text" size="small" onClick={onViewAll}>
-            <Text variant="body-sm" weight="semibold">{viewAllLabel}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {viewAllLabel}
+            </Text>
+            <Icon name="chevron-right" size={16} />
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}

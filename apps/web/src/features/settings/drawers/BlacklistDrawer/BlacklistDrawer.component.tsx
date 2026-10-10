@@ -3,9 +3,9 @@ import {
   Checkbox,
   ConfirmModal,
   Drawer,
-  InfoMessage,
   SearchField,
   SegmentedControl,
+  Stepper,
   Text,
   Textarea,
   Icon,
@@ -31,6 +31,10 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   isOpen,
   onClose,
   onBack,
+  steps,
+  step,
+  onStepClick,
+  onNext,
   keywords,
   onKeywordsChange,
   selectedTypes,
@@ -81,7 +85,6 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   blockedAsinsHint,
   blockedAsinsPlaceholder,
   blockedAsinsCountLabel,
-  blockedAsinsInheritedLabel,
 }) => {
   const { t } = useTranslation(['translation']);
 
@@ -97,135 +100,147 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
       title={titleLabel}
       subtitle={subtitleLabel}
       size="md"
-      primaryAction={{
-        icon: 'save',
-        label: t('translation:common.save'),
-        onClick: onSave,
-        isLoading: isSaving,
-        disabled: isSaveDisabled,
-      }}
+      primaryAction={
+        step === steps.length - 1
+          ? {
+              icon: 'save',
+              label: t('translation:common.save'),
+              onClick: onSave,
+              isLoading: isSaving,
+              disabled: isSaveDisabled,
+            }
+          : { icon: 'arrow-right', label: t('translation:common.continue'), onClick: onNext }
+      }
     >
       <BodyStack>
-        <FormCard>
-          <Text variant="body-sm" weight="semibold">
-            {actionLabel}
-          </Text>
-          <SegmentedControl options={actionOptions} value={action} onChange={onActionChange} />
-          <Text variant="caption" color="text.tertiary">
-            {actionHint}
-          </Text>
-          <Text variant="body-sm" weight="semibold">
-            {typeLabel}
-          </Text>
-          <TypeOptionsRow>
-            {typeOptions.map((option) => (
-              <Checkbox
-                key={option.value}
-                checked={selectedTypes.includes(option.value)}
-                onChange={() => onToggleType(option.value)}
-                label={option.label}
-              />
-            ))}
-          </TypeOptionsRow>
-          <AddStack>
-            <Textarea
-              value={keywords}
-              onChange={onKeywordsChange}
-              placeholder={keywordsPlaceholder}
-              fullWidth
-              rows={4}
-              aria-label={keywordsLabel}
-            />
-            <Text variant="caption" color="text.tertiary">
-              {keywordsHint}
-            </Text>
-            <Button variant="primary" onClick={onAdd}>
-              <Icon name="plus" size={16} />
-              <Text weight="semibold">{addLabel}</Text>
-            </Button>
-            {errorMessage && (
-              <Text variant="caption" color="semantic.error">
-                {errorMessage}
+        <Stepper steps={steps} currentStep={step} clickable onStepClick={onStepClick} />
+        {step === 0 && (
+          <>
+            <FormCard>
+              <Text variant="body-sm" weight="semibold">
+                {actionLabel}
               </Text>
-            )}
-          </AddStack>
-        </FormCard>
-        <FormCard>
-          {hasKeywords ? (
-            <>
-              <SearchField
-                value={searchValue}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder={searchPlaceholder}
-                fullWidth
-                aria-label={searchPlaceholder}
-              />
-              {hasItems ? (
+              <SegmentedControl options={actionOptions} value={action} onChange={onActionChange} />
+              <Text variant="caption" color="text.tertiary">
+                {actionHint}
+              </Text>
+              <Text variant="body-sm" weight="semibold">
+                {typeLabel}
+              </Text>
+              <TypeOptionsRow>
+                {typeOptions.map((option) => (
+                  <Checkbox
+                    key={option.value}
+                    checked={selectedTypes.includes(option.value)}
+                    onChange={() => onToggleType(option.value)}
+                    label={option.label}
+                  />
+                ))}
+              </TypeOptionsRow>
+              <AddStack>
+                <Textarea
+                  value={keywords}
+                  onChange={onKeywordsChange}
+                  placeholder={keywordsPlaceholder}
+                  fullWidth
+                  rows={10}
+                  aria-label={keywordsLabel}
+                />
+                <Text variant="caption" color="text.tertiary">
+                  {keywordsHint}
+                </Text>
+                <Button variant="primary" onClick={onAdd}>
+                  <Icon name="plus" size={16} />
+                  <Text weight="semibold">{addLabel}</Text>
+                </Button>
+                {errorMessage && (
+                  <Text variant="caption" color="semantic.error">
+                    {errorMessage}
+                  </Text>
+                )}
+              </AddStack>
+            </FormCard>
+            <FormCard>
+              {hasKeywords ? (
                 <>
-                  <ToolbarRow>
-                    <ToolbarLeft>
-                      <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
-                      {hasSelection && (
-                        <Text variant="caption" color="text.secondary">
-                          {selectedCountLabel}
-                        </Text>
-                      )}
-                    </ToolbarLeft>
-                    {hasSelection && (
-                      <ToolbarRight>
-                        <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
-                          <Icon name="trash" size={16} />
-                          <Text weight="semibold">{bulkDeleteLabel}</Text>
-                        </Button>
-                      </ToolbarRight>
-                    )}
-                  </ToolbarRow>
-                  <CardGrid>
-                    {items.map((item) => (
-                      <BlacklistCard
-                        key={item.keyword}
-                        keyword={item.keyword}
-                        types={item.types}
-                        action={item.action}
-                        onRemove={() => onRemove(item.keyword)}
-                        selectable
-                        selected={selectedItems.includes(item.keyword)}
-                        onSelect={() => onToggleSelect(item.keyword)}
-                      />
-                    ))}
-                  </CardGrid>
+                  <SearchField
+                    value={searchValue}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder={searchPlaceholder}
+                    fullWidth
+                    aria-label={searchPlaceholder}
+                  />
+                  {hasItems ? (
+                    <>
+                      <ToolbarRow>
+                        <ToolbarLeft>
+                          <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
+                          {hasSelection && (
+                            <Text variant="caption" color="text.secondary">
+                              {selectedCountLabel}
+                            </Text>
+                          )}
+                        </ToolbarLeft>
+                        {hasSelection && (
+                          <ToolbarRight>
+                            <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
+                              <Icon name="trash" size={16} />
+                              <Text weight="semibold">{bulkDeleteLabel}</Text>
+                            </Button>
+                          </ToolbarRight>
+                        )}
+                      </ToolbarRow>
+                      <CardGrid>
+                        {items.map((item) => (
+                          <BlacklistCard
+                            key={item.keyword}
+                            keyword={item.keyword}
+                            types={item.types}
+                            action={item.action}
+                            onRemove={() => onRemove(item.keyword)}
+                            selectable
+                            selected={selectedItems.includes(item.keyword)}
+                            onSelect={() => onToggleSelect(item.keyword)}
+                          />
+                        ))}
+                      </CardGrid>
+                    </>
+                  ) : (
+                    <Text variant="body-sm" color="text.secondary">
+                      {noResultsMessage}
+                    </Text>
+                  )}
                 </>
               ) : (
                 <Text variant="body-sm" color="text.secondary">
-                  {noResultsMessage}
+                  {emptyMessage}
                 </Text>
               )}
-            </>
-          ) : (
-            <Text variant="body-sm" color="text.secondary">
-              {emptyMessage}
+            </FormCard>
+          </>
+        )}
+        {step === 1 && (
+          <FormCard>
+            <Text variant="h4" weight="bold">
+              {blockedAsinsTitle}
             </Text>
-          )}
-        </FormCard>
-        <FormCard>
-          <Text variant="h5">{blockedAsinsTitle}</Text>
-          <Text variant="caption" color="text.tertiary">
-            {blockedAsinsHint}
-          </Text>
-          <Textarea
-            value={blockedAsinsText}
-            onChange={onBlockedAsinsChange}
-            placeholder={blockedAsinsPlaceholder}
-            fullWidth
-            rows={4}
-            mono
-            aria-label={blockedAsinsTitle}
-          />
-          <Text variant="caption" color="text.tertiary">
-            {blockedAsinsCountLabel}
-          </Text>
-          {blockedAsinsInheritedLabel && <InfoMessage>{blockedAsinsInheritedLabel}</InfoMessage>}
-        </FormCard>
+            <Text variant="caption" color="text.tertiary">
+              {blockedAsinsHint}
+            </Text>
+            <Textarea
+              value={blockedAsinsText}
+              onChange={onBlockedAsinsChange}
+              placeholder={blockedAsinsPlaceholder}
+              fullWidth
+              rows={4}
+              mono
+              aria-label={blockedAsinsTitle}
+            />
+            <Text variant="caption" color="text.tertiary">
+              {blockedAsinsCountLabel}
+            </Text>
+          </FormCard>
+        )}
       </BodyStack>
 
       <ConfirmModal

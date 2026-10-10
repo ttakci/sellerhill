@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Henüz bağlı eBay mağaza yok"
-        }
+        },
+        "marketplace": "Pazar yeri"
       },
       "amazon": {
         "noAccounts": "Bağlı Amazon hesabı yok",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Amazon giriş akışı otomatik olarak tamamlanamadı. Kısa süre sonra tekrar deneyin; sürerse destekle iletişime geçin.",
           "transport": "Bu hesabı doğrulamak için Amazon'a ulaşılamadı. Kısa süre sonra tekrar deneyin.",
           "unknown": "Bu hesap doğrulanamadı. Kısa süre sonra tekrar deneyin; sürerse destekle iletişime geçin."
-        }
+        },
+        "emailLabel": "E-posta",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Otomatik sipariş",
+        "statusOn": "Açık",
+        "statusOff": "Kapalı",
+        "autoFulfillCap": "Açık · limit {{cap}}"
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırması",
@@ -418,6 +425,15 @@
           "automation": "Otomasyon",
           "messaging": "Alıcı mesajları",
           "blacklist": "Kara liste"
+        },
+        "reset": {
+          "usingOwn": "Bu mağaza kendi ayarlarını kullanıyor.",
+          "usingGlobal": "Bu mağaza “{{global}}” ayarlarını kullanıyor. Burada kaydederseniz mağazaya özel ayarlar oluşur.",
+          "action": "Genel ayarlara dön",
+          "confirmDescription": "Bu mağazanın özel ayarları silinecek: adres, otomasyon, alıcı mesajları, kara liste ve engelli ASIN’ler. Mağaza bundan sonra “{{global}}” ayarlarını kullanır. Bu işlem geri alınamaz.",
+          "success": "Mağaza artık “{{global}}” ayarlarını kullanıyor.",
+          "globalUsedBy": "Bu ayarları kullanan mağazalar: {{stores}}",
+          "globalOwn": "Kendi ayarı olan mağazalar: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "Engelli ASIN'ler",
-          "hint": "Bu ürünler hiç listelenmez. Kendi listesi olmayan mağaza, tüm mağazalar listesini kullanır.",
-          "placeholder": "Her satıra bir ASIN ya da virgülle ayırarak",
-          "count": "Bu listedeki geçerli ASIN sayısı: {{count}}",
-          "inherited": "Bu mağazanın kendi listesi yok, tüm mağazalar listesini kullanıyor. Burada düzenlerseniz bu mağazaya ait bir liste oluşur."
+          "hint": "Bu ürünler hiç listelenmez. ASIN'leri alt alta yazın ya da virgül veya boşlukla ayırın. Fazla boşluk, küçük harf ve tekrar sorun olmaz; 10 karakterlik ASIN olmayan değerler atlanır.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "Bu listedeki geçerli ASIN sayısı: {{count}}"
         }
       },
       "listingGroup": {

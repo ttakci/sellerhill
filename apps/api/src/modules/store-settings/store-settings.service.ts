@@ -78,7 +78,7 @@ export class StoreSettingsService {
   async listSettings(userId: string): Promise<StoreSettingsResponse[]> {
     const results = await this.databaseService.query<StoreSettingsEntity>(
       `SELECT * FROM store_settings WHERE user_id = $1 ORDER BY is_global DESC, updated_at DESC`,
-      [userId],
+      [userId]
     );
     return results.map((row) => this.mapToDto(row));
   }
@@ -107,7 +107,9 @@ export class StoreSettingsService {
         checkBlacklist: true,
         blacklist: createDefaultBlacklist(),
         amazonTaxRate: 0,
-        autoFulfillEnabled: false,
+        // Automatic orders are ON by default (migration 151). Still gated per
+        // buyer account (enabled + spend cap), which is off by default.
+        autoFulfillEnabled: true,
         autoFulfillMaxLoss: null,
         // Conversion is ON by default (migration 112). A seller with no row has
         // not chosen the raw Amazon number — they have chosen nothing.
@@ -138,7 +140,7 @@ export class StoreSettingsService {
       blockedAsins: resolveBlockedAsins(settings.blockedAsins, globalSettings.blockedAsins),
       allowCrossStoreAsins: resolveAllowCrossStoreAsins(
         settings.allowCrossStoreAsins,
-        globalSettings.allowCrossStoreAsins,
+        globalSettings.allowCrossStoreAsins
       ),
     });
 
@@ -163,6 +165,28 @@ export class StoreSettingsService {
       ...resolved,
       buyerMessaging: resolved.buyerMessaging ?? globalSettings.buyerMessaging,
     });
+  }
+
+  /**
+   * "Back to the global settings" for ONE store: deletes that store's own row,
+   * so every reader (`getResolvedSettings`) falls back to the global row for
+   * everything — address, automation, buyer messaging, blacklist, blocked
+   * ASINs, cross-store rule (operator decision, 2026-10-10: a store either
+   * runs on its own settings or on "all stores", and resetting starts over).
+   * The global row is never touched (`is_global = FALSE`); nothing references
+   * `store_settings` by key, so the delete leaves nothing dangling.
+   */
+  async resetStoreSettings(userId: string, storeId: string): Promise<{ reset: boolean }> {
+    const rows = await this.databaseService.query<{ id: string }>(
+      `DELETE FROM store_settings
+        WHERE user_id = $1 AND store_id = $2 AND is_global = FALSE
+        RETURNING id`,
+      [userId, storeId]
+    );
+    if (rows.length > 0) {
+      this.logger.log(`Store settings reset to global for store ${storeId}`);
+    }
+    return { reset: rows.length > 0 };
   }
 
   /**
@@ -263,7 +287,7 @@ export class StoreSettingsService {
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
             INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city, auto_fulfill_max_loss, blocked_asins, allow_cross_store_asins)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), COALESCE($7::numeric, 0), COALESCE($8, FALSE), COALESCE($9, 'aquiline'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb, $23::boolean)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), COALESCE($7::numeric, 0), COALESCE($8, TRUE), COALESCE($9, 'aquiline'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18, $19::numeric, $21::jsonb, $23::boolean)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -337,7 +361,7 @@ export class StoreSettingsService {
                    COALESCE($6::boolean, g.check_blacklist, TRUE),
                    COALESCE($7::jsonb, g.blacklist, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb),
                    COALESCE($8::numeric, g.amazon_tax_rate, 0),
-                   COALESCE($9::boolean, g.auto_fulfill_enabled, FALSE),
+                   COALESCE($9::boolean, g.auto_fulfill_enabled, TRUE),
                    COALESCE($10::varchar, g.tracking_conversion_provider, 'aquiline'),
                    COALESCE($13::varchar, g.tracking_conversion_scope, 'amazon_logistics_only'),
                    COALESCE($14::boolean, g.tracking_convert_manual_orders, TRUE),
@@ -464,8 +488,7 @@ export class StoreSettingsService {
       // NULL stays null so the resolver can tell "inherit the global row" from
       // "this row's own (possibly empty) list".
       blockedAsins: Array.isArray(entity.blocked_asins) ? parseBlockedAsins(entity.blocked_asins.map(String)) : null,
-      allowCrossStoreAsins:
-        typeof entity.allow_cross_store_asins === 'boolean' ? entity.allow_cross_store_asins : null,
+      allowCrossStoreAsins: typeof entity.allow_cross_store_asins === 'boolean' ? entity.allow_cross_store_asins : null,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

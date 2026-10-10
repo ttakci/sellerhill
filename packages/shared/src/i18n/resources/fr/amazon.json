@@ -90,7 +90,6 @@
       "autoFulfillCapTotal": "Total maximal de commande (plafond d'exécution automatique)",
       "autoFulfillCapTotalHint": "Plafond de dépense par compte (USD). Les commandes dépassant ce total ignorent ce compte. Obligatoire pour activer l'exécution automatique.",
       "autoFulfillCapTotalPlaceholder": "p. ex. 250",
-      "cartOwnershipNote": "Utilisez ce compte Amazon uniquement pour SellerHill. Son panier est vidé avant chaque commande automatique : tout ce que vous y avez mis vous-même est supprimé.",
       "autoFulfillDryRun": "Simulation (exécuter le processus sans passer la commande)",
       "autoFulfillDryRunHint": "Exécute tout le processus de paiement jusqu'à Passer la commande (exclu), afin que le total de la page de vérification puisse être relevé et présenté pour examen."
     },
@@ -104,7 +103,7 @@
       "port": "Saisissez le port",
       "username": "Nom d'utilisateur",
       "password": "Mot de passe",
-      "hint": "Facultatif. Ajoutez votre propre proxy pour y faire passer l'automatisation de ce compte — utile si vous souhaitez une protection supplémentaire contre les blocages par IP. Laissez-le désactivé et le compte se connecte directement ; c'est le comportement par défaut normal."
+      "hint": "Facultatif. Ajoutez votre propre proxy pour y faire passer l'automatisation de ce compte — utile si vous souhaitez une protection supplémentaire contre les blocages par IP."
     },
     "marketplace": {
       "label": "Place de marché",

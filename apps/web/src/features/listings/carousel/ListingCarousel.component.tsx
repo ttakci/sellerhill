@@ -2,7 +2,6 @@ import { EmptyState, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-
 import { toListingCardProps } from '../shared/listing-card.mapper';
 
 import * as S from './ListingCarousel.style';
@@ -44,7 +43,10 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
       {showViewAll && (
         <S.CarouselTopBar>
           <S.ViewAllButton variant="text" size="small" onClick={onViewAll}>
-            <Text variant="body-sm" weight="semibold">{viewAllLabel}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {viewAllLabel}
+            </Text>
+            <Icon name="chevron-right" size={16} />
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
@@ -64,12 +66,24 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
         })}
       </S.CarouselViewport>
       {currentSlide > 0 && (
-        <S.CarouselArrow $side="left" variant="elevated" className="carousel-arrow" onClick={onPrev} aria-label={t('listings.carousel.previous')}>
+        <S.CarouselArrow
+          $side="left"
+          variant="elevated"
+          className="carousel-arrow"
+          onClick={onPrev}
+          aria-label={t('listings.carousel.previous')}
+        >
           <Icon name="chevron-left" size={20} />
         </S.CarouselArrow>
       )}
       {currentSlide < listings.length - 1 && (
-        <S.CarouselArrow $side="right" variant="elevated" className="carousel-arrow" onClick={onNext} aria-label={t('listings.carousel.next')}>
+        <S.CarouselArrow
+          $side="right"
+          variant="elevated"
+          className="carousel-arrow"
+          onClick={onNext}
+          aria-label={t('listings.carousel.next')}
+        >
           <Icon name="chevron-right" size={20} />
         </S.CarouselArrow>
       )}

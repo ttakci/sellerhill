@@ -9,6 +9,45 @@ export const BodyStack = styled.div`
   gap: ${tkn('spacing.lg')};
 `;
 
+/**
+ * Under the scope picker: whether the chosen store runs on its own settings
+ * or on "all stores", and — when it has its own — the way back. Wraps so the
+ * button drops under the sentence on a phone.
+ */
+export const ScopeStatus = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.glass.tint')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  /* The sentence takes the spare room; the button keeps its own width.
+     (Not :first-of-type — that matches the first span AND the first button.) */
+  & > :first-child {
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
+
+  & > :not(:first-child) {
+    flex: 0 0 auto;
+  }
+`;
+
+/** The global scope's "who follows these settings" lines — same tinted box as `ScopeStatus`. */
+export const ScopeSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.glass.tint')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+`;
+
 export const ToggleRow = styled.div`
   display: flex;
   align-items: center;

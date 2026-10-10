@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Ainda não há lojas eBay conectadas"
-        }
+        },
+        "marketplace": "Marketplace"
       },
       "amazon": {
         "noAccounts": "Nenhuma conta Amazon conectada",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Não foi possível concluir automaticamente o fluxo de login da Amazon. Tente novamente em instantes; se continuar falhando, entre em contato com o suporte.",
           "transport": "Não foi possível acessar a Amazon para verificar esta conta. Tente novamente em instantes.",
           "unknown": "Não foi possível verificar esta conta. Tente novamente em instantes; se continuar falhando, entre em contato com o suporte."
-        }
+        },
+        "emailLabel": "E-mail",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Pedidos automáticos",
+        "statusOn": "Ativado",
+        "statusOff": "Desativado",
+        "autoFulfillCap": "Ativado · limite {{cap}}"
       },
       "storeConfig": {
         "title": "Configuração da loja",
@@ -418,6 +425,15 @@
           "automation": "Automação",
           "messaging": "Mensagens ao comprador",
           "blacklist": "Lista de bloqueio"
+        },
+        "reset": {
+          "usingOwn": "Esta loja usa configurações próprias.",
+          "usingGlobal": "Esta loja usa as configurações “{{global}}”. Salvar aqui cria configurações próprias para a loja.",
+          "action": "Voltar às configurações globais",
+          "confirmDescription": "As configurações próprias desta loja serão excluídas: endereço, automação, mensagens ao comprador, lista negra e ASINs bloqueados. A partir de agora a loja usará as configurações “{{global}}”. Isso não pode ser desfeito.",
+          "success": "A loja agora usa as configurações “{{global}}”.",
+          "globalUsedBy": "Lojas que usam estas configurações: {{stores}}",
+          "globalOwn": "Lojas com configurações próprias: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "ASINs bloqueados",
-          "hint": "Esses produtos nunca são anunciados. Uma loja sem lista própria usa a lista de todas as lojas.",
-          "placeholder": "Um ASIN por linha ou separados por vírgulas",
-          "count": "ASINs válidos nesta lista: {{count}}",
-          "inherited": "Esta loja não tem lista própria e usa a lista de todas as lojas. Se você editá-la aqui, a loja terá a própria lista."
+          "hint": "Esses produtos nunca são anunciados. Escreva um ASIN por linha ou separe-os com vírgulas ou espaços. Espaços extras, letras minúsculas e duplicados não importam; o que não for um ASIN de 10 caracteres é ignorado.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "ASINs válidos nesta lista: {{count}}"
         }
       },
       "listingGroup": {

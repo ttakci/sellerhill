@@ -80,11 +80,11 @@ describe('buildInheritedStoreFields', () => {
     });
   });
 
-  it('uses the read-side defaults (conversion ON) without a global row', () => {
+  it('uses the read-side defaults (conversion and automatic orders ON) without a global row', () => {
     expect(buildInheritedStoreFields(null)).toEqual({
       amazonTaxRate: 0,
       checkBlacklist: true,
-      autoFulfillEnabled: false,
+      autoFulfillEnabled: true,
       trackingConversionProvider: TrackingConversionProvider.AQUILINE,
       trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
       trackingConvertManualOrders: true,

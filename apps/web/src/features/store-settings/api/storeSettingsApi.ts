@@ -1,8 +1,4 @@
-import {
-    BuyerMessagingConfig,
-    SaveStoreSettingsRequest,
-    StoreSettingsResponse
-} from '@repo/shared';
+import { BuyerMessagingConfig, SaveStoreSettingsRequest, StoreSettingsResponse } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -21,10 +17,7 @@ export const storeSettingsApi = baseApi.injectEndpoints({
       }),
       providesTags: (result) =>
         result
-          ? [
-              ...result.map(({ id }) => ({ type: 'StoreSettings' as const, id })),
-              { type: 'StoreSettings', id: 'LIST' },
-            ]
+          ? [...result.map(({ id }) => ({ type: 'StoreSettings' as const, id })), { type: 'StoreSettings', id: 'LIST' }]
           : [{ type: 'StoreSettings', id: 'LIST' }],
     }),
     saveStoreSettings: builder.mutation<StoreSettingsResponse, SaveStoreSettingsRequest>({
@@ -35,6 +28,15 @@ export const storeSettingsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['StoreSettings'],
     }),
+    /** Deletes one store's own settings so it runs on the global ("all stores") ones again. */
+    resetStoreSettings: builder.mutation<{ reset: boolean }, { storeId: string }>({
+      query: ({ storeId }) => ({
+        url: '/store-settings',
+        method: 'DELETE',
+        params: { storeId },
+      }),
+      invalidatesTags: ['StoreSettings', 'BuyerMessagingConfig'],
+    }),
     getBuyerMessagingConfig: builder.query<BuyerMessagingConfig | null, { storeId?: string } | void>({
       query: (args) => ({
         url: '/store-settings/buyer-messaging',
@@ -42,7 +44,10 @@ export const storeSettingsApi = baseApi.injectEndpoints({
       }),
       providesTags: ['BuyerMessagingConfig'],
     }),
-    updateBuyerMessagingConfig: builder.mutation<BuyerMessagingConfig, { config: BuyerMessagingConfig; storeId?: string }>({
+    updateBuyerMessagingConfig: builder.mutation<
+      BuyerMessagingConfig,
+      { config: BuyerMessagingConfig; storeId?: string }
+    >({
       query: ({ config, storeId }) => ({
         url: '/store-settings/buyer-messaging',
         method: 'PUT',
@@ -55,9 +60,10 @@ export const storeSettingsApi = baseApi.injectEndpoints({
 });
 
 export const {
-    useGetStoreSettingsQuery,
-    useGetAllStoreSettingsQuery,
-    useSaveStoreSettingsMutation,
-    useGetBuyerMessagingConfigQuery,
-    useUpdateBuyerMessagingConfigMutation
+  useGetStoreSettingsQuery,
+  useGetAllStoreSettingsQuery,
+  useSaveStoreSettingsMutation,
+  useResetStoreSettingsMutation,
+  useGetBuyerMessagingConfigQuery,
+  useUpdateBuyerMessagingConfigMutation,
 } = storeSettingsApi;

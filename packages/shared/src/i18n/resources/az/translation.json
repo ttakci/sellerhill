@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Hələ heç bir eBay mağazası qoşulmayıb"
-        }
+        },
+        "marketplace": "Bazar"
       },
       "amazon": {
         "noAccounts": "Heç bir Amazon hesabı qoşulmayıb",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Amazon-un giriş axını avtomatik tamamlana bilmədi. Bir azdan yenidən cəhd edin; davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın.",
           "transport": "Bu hesabı yoxlamaq üçün Amazon-a çatmaq mümkün olmadı. Bir azdan yenidən cəhd edin.",
           "unknown": "Bu hesabı yoxlamaq mümkün olmadı. Bir azdan yenidən cəhd edin; davamlı uğursuz olarsa, dəstək xidməti ilə əlaqə saxlayın."
-        }
+        },
+        "emailLabel": "E-poçt",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Avtomatik sifariş",
+        "statusOn": "Aktiv",
+        "statusOff": "Deaktiv",
+        "autoFulfillCap": "Aktiv · limit {{cap}}"
       },
       "storeConfig": {
         "title": "Mağaza konfiqurasiyası",
@@ -418,6 +425,15 @@
           "automation": "Avtomatlaşdırma",
           "messaging": "Alıcı mesajları",
           "blacklist": "Qara siyahı"
+        },
+        "reset": {
+          "usingOwn": "Bu mağaza öz ayarlarından istifadə edir.",
+          "usingGlobal": "Bu mağaza “{{global}}” ayarlarından istifadə edir. Burada yadda saxlasanız, mağazanın öz ayarları yaranır.",
+          "action": "Ümumi ayarlara qayıt",
+          "confirmDescription": "Bu mağazanın öz ayarları silinəcək: ünvan, avtomatlaşdırma, alıcı mesajları, qara siyahı və bloklanmış ASIN-lər. Bundan sonra mağaza “{{global}}” ayarlarından istifadə edəcək. Bu əməliyyat geri qaytarıla bilməz.",
+          "success": "Mağaza artıq “{{global}}” ayarlarından istifadə edir.",
+          "globalUsedBy": "Bu ayarlardan istifadə edən mağazalar: {{stores}}",
+          "globalOwn": "Öz ayarları olan mağazalar: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "Bloklanmış ASIN-lər",
-          "hint": "Bu məhsullar heç vaxt listələnmir. Öz siyahısı olmayan mağaza bütün mağazalar üçün olan siyahını istifadə edir.",
-          "placeholder": "Hər sətirdə bir ASIN və ya vergüllə ayrılmış",
-          "count": "Bu siyahıdakı etibarlı ASIN-lər: {{count}}",
-          "inherited": "Bu mağazanın öz siyahısı yoxdur, bütün mağazalar üçün olan siyahını istifadə edir. Burada redaktə etsəniz, mağazanın öz siyahısı yaranacaq."
+          "hint": "Bu məhsullar heç vaxt listələnmir. Hər ASIN-i ayrı sətirdə yazın və ya vergül, yaxud boşluqla ayırın. Artıq boşluq, kiçik hərf və təkrarlar problem deyil; 10 simvolluq ASIN olmayan dəyərlər ötürülür.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "Bu siyahıdakı etibarlı ASIN-lər: {{count}}"
         }
       },
       "listingGroup": {

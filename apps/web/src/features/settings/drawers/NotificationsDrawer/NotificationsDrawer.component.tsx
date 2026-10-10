@@ -1,4 +1,4 @@
-import { Button, Drawer, InfoMessage, ModernSelect, Text, Toggle } from '@repo/ui';
+import { Button, Drawer, Icon, InfoMessage, ModernSelect, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -57,9 +57,14 @@ export const NotificationsDrawerComponent: React.FC<NotificationsDrawerComponent
           <InfoMessage type="info">
             {t('translation:settingsHub.drawer.notifications.timezoneNote', { timezone })}
           </InfoMessage>
-          <Button variant="text" size="small" onClick={onOpenProfile}>
-            <Text variant="body-sm">{t('translation:settingsHub.drawer.notifications.changeTimezone')}</Text>
-          </Button>
+          <S.LinkRow>
+            <Button variant="text" size="small" onClick={onOpenProfile}>
+              <Icon name="globe" size={16} />
+              <Text variant="body-sm" weight="semibold">
+                {t('translation:settingsHub.drawer.notifications.changeTimezone')}
+              </Text>
+            </Button>
+          </S.LinkRow>
         </S.FormCard>
       </S.BodyStack>
     </Drawer>

@@ -54,11 +54,13 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
         <Stepper steps={steps} currentStep={step} />
         {isProxyStep ? (
           <S.FormCard>
-            <Text variant="h5" weight="semibold">
+            <Text variant="h4" weight="bold">
               {t('amazon:amazon.proxy.sectionTitle')}
             </Text>
             <S.ToggleRow>
-              <Text variant="body-sm">{t('amazon:amazon.proxy.enabledHint')}</Text>
+              <Text variant="body-sm" weight="semibold">
+                {t('amazon:amazon.proxy.enabledHint')}
+              </Text>
               <Toggle checked={fields.proxyEnabled} onChange={onProxyEnabledChange} />
             </S.ToggleRow>
             <ModernSelect
@@ -137,7 +139,9 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
             <InfoMessage>{t('translation:settingsHub.drawer.amazonAdd.twoFactorSecretHint')}</InfoMessage>
             <S.ToggleRow>
               <S.ToggleTitleRow>
-                <Text variant="body-sm">{t('amazon:amazon.autoFulfill.autoFulfillEnabled')}</Text>
+                <Text variant="body-sm" weight="semibold">
+                  {t('amazon:amazon.autoFulfill.autoFulfillEnabled')}
+                </Text>
                 <Tooltip content={t('amazon:amazon.autoFulfill.autoFulfillEnabledHint')} position="top" variant="dark">
                   <S.InfoButton
                     type="button"
@@ -161,12 +165,6 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
               errorMessage={accountFieldErrors.autoFulfillCapTotal ? requiredError : undefined}
             />
             <InfoMessage>{t('amazon:amazon.autoFulfill.autoFulfillCapTotalHint')}</InfoMessage>
-            {/* Amazon checks out the WHOLE cart, so the cart is emptied before
-                every automatic order. Said only while automatic orders are on
-                for this account — that is when it starts to apply. */}
-            {fields.autoFulfillEnabled && (
-              <InfoMessage type="warning">{t('amazon:amazon.autoFulfill.cartOwnershipNote')}</InfoMessage>
-            )}
           </S.FormCard>
         )}
       </S.BodyStack>

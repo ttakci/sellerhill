@@ -30,7 +30,7 @@ export const PriceCalculatorSectionComponent = ({
 
   return (
     <S.FormCard>
-      <Text variant="body-sm" weight="semibold">
+      <Text variant="h4" weight="bold">
         {t('listingSettingsGroup.calculator.title')}
       </Text>
       <Text variant="caption" color="text.secondary">

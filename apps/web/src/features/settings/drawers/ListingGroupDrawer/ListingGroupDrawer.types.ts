@@ -86,7 +86,6 @@ export interface ListingGroupDrawerComponentProps {
   onNext: () => void;
   onBack: () => void;
   onSubmit: () => void;
-  canProceed: boolean;
   /** The Rules step (step 4 of 5). */
   rulesStep: ListingRulesStepProps;
 }

@@ -1,4 +1,9 @@
-import { DEFAULT_DIGEST_SEND_HOUR, DIGEST_SEND_HOUR_MAX, DIGEST_SEND_HOUR_MIN, type UpdateProfileRequest } from '@repo/shared';
+import {
+  DEFAULT_DIGEST_SEND_HOUR,
+  DIGEST_SEND_HOUR_MAX,
+  DIGEST_SEND_HOUR_MIN,
+  type UpdateProfileRequest,
+} from '@repo/shared';
 import { useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

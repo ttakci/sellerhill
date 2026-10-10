@@ -90,7 +90,6 @@
       "autoFulfillCapTotal": "订单金额上限（自动履约上限）",
       "autoFulfillCapTotalHint": "每个账号的支出上限（美元）。超过此金额的订单会跳过此账号。启用自动履约时必填。",
       "autoFulfillCapTotalPlaceholder": "例如：250",
-      "cartOwnershipNote": "请仅将此 Amazon 账户用于 SellerHill。每次自动下单前都会清空其购物车，因此您自己放入的任何商品都会被移除。",
       "autoFulfillDryRun": "试运行（运行流程但不下单）",
       "autoFulfillDryRunHint": "运行完整的结账流程，直至（不含）提交订单这一步，以便获取并展示订单核对总额供您查看。"
     },
@@ -104,7 +103,7 @@
       "port": "输入端口",
       "username": "用户名",
       "password": "密码",
-      "hint": "可选。添加您自己的代理，让此账号的自动化通过它运行，如果您希望对基于 IP 的封锁有额外防护，这会很有帮助。保持关闭则账号直接连接，这是正常的默认设置。"
+      "hint": "可选。添加您自己的代理，让此账号的自动化通过它运行，如果您希望对基于 IP 的封锁有额外防护，这会很有帮助。"
     },
     "marketplace": {
       "label": "站点",

@@ -1,10 +1,32 @@
 import { StoreSettingsDrawerStep, TrackingConversionScope } from '@repo/shared';
-import { ConfirmModal, Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle, Tooltip } from '@repo/ui';
+import {
+  Button,
+  ConfirmModal,
+  Drawer,
+  Icon,
+  InfoMessage,
+  ModernSelect,
+  ModernTextInput,
+  Stepper,
+  Text,
+  Toggle,
+  Tooltip,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { BuyerMessagingSection } from './BuyerMessagingSection/BuyerMessagingSection.container';
-import { AutomationField, BodyStack, FieldGroup, FormCard, InfoButton, LabelWithInfo, ToggleRow } from './StoreSettingsDrawer.style';
+import {
+  AutomationField,
+  BodyStack,
+  FieldGroup,
+  FormCard,
+  InfoButton,
+  LabelWithInfo,
+  ToggleRow,
+  ScopeStatus,
+  ScopeSummary,
+} from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
 
 /** Label text plus an "i" that reveals the field's explanation on hover/focus —
@@ -55,8 +77,39 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               searchPlaceholder={t('translation:common.search')}
               noResultsMessage={t('translation:common.noResults')}
             />
+            {props.globalScopeLines.length > 0 && (
+              <ScopeSummary>
+                {props.globalScopeLines.map((line) => (
+                  <Text key={line} variant="body-sm" color="text.secondary">
+                    {line}
+                  </Text>
+                ))}
+              </ScopeSummary>
+            )}
+            {props.usesOwnSettings !== null && (
+              <ScopeStatus>
+                <Text variant="body-sm" color="text.secondary">
+                  {t(
+                    props.usesOwnSettings
+                      ? 'translation:settingsHub.drawer.storeSettings.reset.usingOwn'
+                      : 'translation:settingsHub.drawer.storeSettings.reset.usingGlobal',
+                    { global: t('translation:settingsHub.drawer.storeSettings.global') }
+                  )}
+                </Text>
+                {props.usesOwnSettings && (
+                  <Button variant="danger" size="small" onClick={props.onRequestReset}>
+                    <Icon name="refresh" size={16} />
+                    <Text variant="body-sm" weight="semibold">
+                      {t('translation:settingsHub.drawer.storeSettings.reset.action')}
+                    </Text>
+                  </Button>
+                )}
+              </ScopeStatus>
+            )}
             <FieldGroup>
-              <Text variant="h5">{t('storeSettings:storeSettings.address.title')}</Text>
+              <Text variant="h4" weight="bold">
+                {t('storeSettings:storeSettings.address.title')}
+              </Text>
               <ModernSelect
                 label={t('translation:settingsHub.drawer.storeSettings.country')}
                 options={props.countryOptions}
@@ -67,11 +120,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
                 placeholder={t('translation:settingsHub.drawer.storeSettings.countryPlaceholder')}
                 searchPlaceholder={t('translation:common.search')}
                 noResultsMessage={t('translation:common.noResults')}
-                error={
-                  props.addressFieldErrors.country
-                    ? { message: t('translation:validation.required') }
-                    : undefined
-                }
+                error={props.addressFieldErrors.country ? { message: t('translation:validation.required') } : undefined}
               />
               <ModernTextInput
                 name="region"
@@ -102,14 +151,18 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           <FormCard>
             <ToggleRow>
               <LabelWithInfo>
-                <Text variant="body-sm">{t('storeSettings:storeSettings.autoFulfillEnabled')}</Text>
+                <Text variant="body-sm" weight="semibold">
+                  {t('storeSettings:storeSettings.autoFulfillEnabled')}
+                </Text>
                 <InfoTip text={t('storeSettings:storeSettings.autoFulfillEnabledHint')} />
               </LabelWithInfo>
               <Toggle checked={props.autoFulfillEnabled} onChange={props.onAutoFulfillEnabledChange} />
             </ToggleRow>
             <AutomationField>
               <LabelWithInfo>
-                <Text variant="body-sm">{t('storeSettings:storeSettings.amazonTaxRate')}</Text>
+                <Text variant="body-sm" weight="semibold">
+                  {t('storeSettings:storeSettings.amazonTaxRate')}
+                </Text>
                 <InfoTip text={t('storeSettings:storeSettings.amazonTaxRateDesc')} />
               </LabelWithInfo>
               <ModernTextInput
@@ -123,7 +176,9 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             </AutomationField>
             <ToggleRow>
               <LabelWithInfo>
-                <Text variant="body-sm">{t('storeSettings:storeSettings.lossLimit.enabled')}</Text>
+                <Text variant="body-sm" weight="semibold">
+                  {t('storeSettings:storeSettings.lossLimit.enabled')}
+                </Text>
                 <InfoTip text={t('storeSettings:storeSettings.lossLimit.enabledHint')} />
               </LabelWithInfo>
               <Toggle checked={props.lossLimitEnabled} onChange={props.onLossLimitEnabledChange} />
@@ -131,7 +186,9 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             {props.lossLimitEnabled && (
               <AutomationField>
                 <LabelWithInfo>
-                  <Text variant="body-sm">{t('storeSettings:storeSettings.lossLimit.amount')}</Text>
+                  <Text variant="body-sm" weight="semibold">
+                    {t('storeSettings:storeSettings.lossLimit.amount')}
+                  </Text>
                   <InfoTip text={t('storeSettings:storeSettings.lossLimit.amountHint')} />
                 </LabelWithInfo>
                 <ModernTextInput
@@ -144,24 +201,19 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             )}
             <ToggleRow>
               <LabelWithInfo>
-                <Text variant="body-sm">
+                <Text variant="body-sm" weight="semibold">
                   {t('storeSettings:storeSettings.trackingConversionEnabled')}
                 </Text>
                 <InfoTip text={t('storeSettings:storeSettings.trackingConversionEnabledHint')} />
               </LabelWithInfo>
-              <Toggle
-                checked={props.trackingConversionEnabled}
-                onChange={props.onTrackingConversionEnabledChange}
-              />
+              <Toggle checked={props.trackingConversionEnabled} onChange={props.onTrackingConversionEnabledChange} />
             </ToggleRow>
             {props.showConversionOffWarning && (
-              <InfoMessage type="error">
-                {t('storeSettings:storeSettings.trackingExposure.conversionOff')}
-              </InfoMessage>
+              <InfoMessage type="error">{t('storeSettings:storeSettings.trackingExposure.conversionOff')}</InfoMessage>
             )}
             <AutomationField>
               <LabelWithInfo>
-                <Text variant="body-sm">
+                <Text variant="body-sm" weight="semibold">
                   {t('storeSettings:storeSettings.trackingConversionScope')}
                 </Text>
                 <InfoTip text={t('storeSettings:storeSettings.trackingConversionScopeHint')} />
@@ -186,7 +238,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             </AutomationField>
             <ToggleRow>
               <LabelWithInfo>
-                <Text variant="body-sm">
+                <Text variant="body-sm" weight="semibold">
                   {t('storeSettings:storeSettings.trackingConvertManualOrders')}
                 </Text>
                 <InfoTip text={t('storeSettings:storeSettings.trackingConvertManualOrdersHint')} />
@@ -221,12 +273,16 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
         {isLast && (
           <FormCard>
             <ToggleRow>
-              <Text variant="body-sm">{t('translation:settingsHub.drawer.storeSettings.checkBlacklist')}</Text>
+              <Text variant="body-sm" weight="semibold">
+                {t('translation:settingsHub.drawer.storeSettings.checkBlacklist')}
+              </Text>
               <Toggle checked={props.checkBlacklist} onChange={props.onToggleCheckBlacklist} />
             </ToggleRow>
             <InfoMessage>{t('translation:settingsHub.drawer.storeSettings.checkBlacklistDesc')}</InfoMessage>
             <ToggleRow>
-              <Text variant="body-sm">{t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsins')}</Text>
+              <Text variant="body-sm" weight="semibold">
+                {t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsins')}
+              </Text>
               <Toggle checked={props.allowCrossStoreAsins} onChange={props.onAllowCrossStoreAsinsChange} />
             </ToggleRow>
             <InfoMessage>{t('translation:settingsHub.drawer.storeSettings.allowCrossStoreAsinsDesc')}</InfoMessage>
@@ -246,6 +302,23 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           "Error" over a question nobody has answered yet; nothing has failed
           here, the seller is being asked to confirm. Severity and tense are
           separate things, and only the severity belongs to `type`. */}
+      <ConfirmModal
+        isOpen={props.isConfirmingReset}
+        onClose={props.onCancelReset}
+        onConfirm={props.onConfirmReset}
+        type="warning"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('translation:settingsHub.drawer.storeSettings.reset.confirmDescription', {
+          global: t('translation:settingsHub.drawer.storeSettings.global'),
+        })}
+        confirmLabel={t('translation:settingsHub.drawer.storeSettings.reset.action')}
+        cancelLabel={t('translation:common.cancel')}
+      />
       <ConfirmModal
         isOpen={props.isConfirmingConversionOff}
         onClose={props.onCancelConversionOff}

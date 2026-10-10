@@ -18,7 +18,7 @@ const ALL_BLACKLIST_TYPES = Object.values(BlacklistType);
 
 /** Normalize a persisted blacklist entry into the local draft shape. */
 const toItems = (
-  entries: Array<{ keyword: string; types: BlacklistType[]; action?: BlacklistAction }> | undefined,
+  entries: Array<{ keyword: string; types: BlacklistType[]; action?: BlacklistAction }> | undefined
 ): BlacklistItem[] =>
   // An entry saved before the action existed has none, and means "block".
   (entries ?? []).map((b) => ({ keyword: b.keyword, types: [...b.types], action: b.action ?? BlacklistAction.BLOCK }));
@@ -27,7 +27,7 @@ const toItems = (
 const REMOVABLE_TYPES = ALL_BLACKLIST_TYPES.filter((type) => type !== BlacklistType.BRAND_MANUFACTURER);
 
 const typesFor = (action: BlacklistAction): BlacklistType[] =>
-  (action === BlacklistAction.REMOVE ? REMOVABLE_TYPES : ALL_BLACKLIST_TYPES);
+  action === BlacklistAction.REMOVE ? REMOVABLE_TYPES : ALL_BLACKLIST_TYPES;
 
 export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   isOpen,
@@ -51,7 +51,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   const isGlobalScope = selectedScope === GLOBAL_SCOPE;
   const originalBlocked = useMemo(
     () => blockedAsinsDraft(config?.blockedAsins, globalConfig?.blockedAsins, isGlobalScope),
-    [config, globalConfig, isGlobalScope],
+    [config, globalConfig, isGlobalScope]
   );
 
   // Draft state — add/remove mutate this; Save commits it.
@@ -64,6 +64,8 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [blockedText, setBlockedText] = useState(originalBlocked.text);
+  // Two steps: 0 = keywords, 1 = blocked ASINs. One Save at the end commits both.
+  const [step, setStep] = useState(0);
 
   // Reset draft + form when the drawer opens or the inherited scope changes.
   // React-recommended render-time state adjustment.
@@ -89,6 +91,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       setSelectedItems([]);
       setIsConfirmOpen(false);
       setBlockedText(originalBlocked.text);
+      setStep(0);
     }
   }
 
@@ -96,19 +99,16 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   // Display-only: the draft keeps its own order, so what gets saved is unchanged.
   const items = useMemo(() => {
     const query = searchValue.toLowerCase().trim();
-    const visible = query
-      ? blacklist.filter((item) => item.keyword.toLowerCase().includes(query))
-      : blacklist;
-    return [...visible].sort((a, b) =>
-      a.keyword.localeCompare(b.keyword, i18n.language, { sensitivity: 'base' }));
+    const visible = query ? blacklist.filter((item) => item.keyword.toLowerCase().includes(query)) : blacklist;
+    return [...visible].sort((a, b) => a.keyword.localeCompare(b.keyword, i18n.language, { sensitivity: 'base' }));
   }, [blacklist, searchValue, i18n.language]);
 
-  const isAllSelected =
-    items.length > 0 && items.every((item) => selectedItems.includes(item.keyword));
+  const isAllSelected = items.length > 0 && items.every((item) => selectedItems.includes(item.keyword));
 
   const handleToggleType = useCallback((type: BlacklistType): void => {
     setSelectedTypes((current) =>
-      current.includes(type) ? current.filter((item) => item !== type) : [...current, type]);
+      current.includes(type) ? current.filter((item) => item !== type) : [...current, type]
+    );
   }, []);
 
   const handleActionChange = useCallback((value: string): void => {
@@ -149,13 +149,16 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       }
     }
 
-    const changed = next.length !== blacklist.length
-      || next.some((item) => {
+    const changed =
+      next.length !== blacklist.length ||
+      next.some((item) => {
         const old = blacklist.find((b) => b.keyword.toLowerCase() === item.keyword.toLowerCase());
-        return !old
-          || old.action !== item.action
-          || old.types.length !== item.types.length
-          || !old.types.every((type) => item.types.includes(type));
+        return (
+          !old ||
+          old.action !== item.action ||
+          old.types.length !== item.types.length ||
+          !old.types.every((type) => item.types.includes(type))
+        );
       });
     if (!changed) {
       setErrorMessage(t('translation:settingsHub.drawer.blacklist.add.duplicate'));
@@ -173,8 +176,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   }, []);
 
   const handleToggleSelect = useCallback((keyword: string) => {
-    setSelectedItems((prev) =>
-      (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]));
+    setSelectedItems((prev) => (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]));
   }, []);
 
   const handleToggleSelectAll = useCallback(() => {
@@ -198,16 +200,32 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     }
     return blacklist.some((b) => {
       const old = originalBlacklist.find((o) => o.keyword === b.keyword);
-      return !old
-        || old.action !== b.action
-        || old.types.length !== b.types.length
-        || !old.types.every((type) => b.types.includes(type));
+      return (
+        !old ||
+        old.action !== b.action ||
+        old.types.length !== b.types.length ||
+        !old.types.every((type) => b.types.includes(type))
+      );
     });
   }, [blacklist, originalBlacklist, blockedText, originalBlocked]);
 
   const blockedCount = useMemo(() => parseBlockedAsins(blockedText).length, [blockedText]);
 
   const isSaveDisabled = isSaving || !hasChanges;
+
+  const steps = [
+    { label: t('translation:settingsHub.drawer.blacklist.add.keywordsLabel') },
+    { label: t('translation:settingsHub.drawer.blacklist.blockedAsins.title') },
+  ];
+
+  // Header back arrow: the keywords step from the ASIN step, otherwise back to store settings.
+  const handleBack = (): void => {
+    if (step > 0) {
+      setStep(0);
+      return;
+    }
+    onBack();
+  };
 
   const handleSave = (): void => {
     const isGlobal = selectedScope === GLOBAL_SCOPE;
@@ -220,9 +238,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       // A store with no row yet is CREATED by this save, and on insert an
       // omitted field takes the column default — so the new row is seeded from
       // the global row instead, keeping the store on the settings it already used.
-      ...(config || isGlobal
-        ? { amazonTaxRate: config?.amazonTaxRate ?? 0 }
-        : buildInheritedStoreFields(globalConfig)),
+      ...(config || isGlobal ? { amazonTaxRate: config?.amazonTaxRate ?? 0 } : buildInheritedStoreFields(globalConfig)),
       blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types, action: b.action })),
       // Untouched = omitted, so a store on the global list keeps inheriting it.
       blockedAsins: toSaveBlockedAsins(blockedText, originalBlocked),
@@ -239,7 +255,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
             descriptionKey: getErrorI18nKey(error),
             primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
           },
-          t,
+          t
         );
       });
   };
@@ -248,7 +264,11 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     <BlacklistDrawerComponent
       isOpen={isOpen}
       onClose={onClose}
-      onBack={onBack}
+      onBack={handleBack}
+      steps={steps}
+      step={step}
+      onStepClick={setStep}
+      onNext={() => setStep(1)}
       keywords={keywords}
       onKeywordsChange={(e) => setKeywords(e.target.value)}
       selectedTypes={selectedTypes}
@@ -309,11 +329,6 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       blockedAsinsHint={t('translation:settingsHub.drawer.blacklist.blockedAsins.hint')}
       blockedAsinsPlaceholder={t('translation:settingsHub.drawer.blacklist.blockedAsins.placeholder')}
       blockedAsinsCountLabel={t('translation:settingsHub.drawer.blacklist.blockedAsins.count', { count: blockedCount })}
-      blockedAsinsInheritedLabel={
-        originalBlocked.inherited && blockedText === originalBlocked.text
-          ? t('translation:settingsHub.drawer.blacklist.blockedAsins.inherited')
-          : ''
-      }
     />
   );
 };

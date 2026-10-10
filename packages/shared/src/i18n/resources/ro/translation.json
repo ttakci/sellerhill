@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Niciun magazin eBay conectat încă"
-        }
+        },
+        "marketplace": "Piață"
       },
       "amazon": {
         "noAccounts": "Niciun cont Amazon conectat",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Fluxul de autentificare Amazon nu a putut fi finalizat automat. Încercați din nou în scurt timp; dacă problema persistă, contactați asistența.",
           "transport": "Nu s-a putut contacta Amazon pentru verificarea acestui cont. Încercați din nou în scurt timp.",
           "unknown": "Contul nu a putut fi verificat. Încercați din nou în scurt timp; dacă problema persistă, contactați asistența."
-        }
+        },
+        "emailLabel": "E-mail",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Comenzi automate",
+        "statusOn": "Activat",
+        "statusOff": "Dezactivat",
+        "autoFulfillCap": "Activat · limită {{cap}}"
       },
       "storeConfig": {
         "title": "Configurarea magazinului",
@@ -418,6 +425,15 @@
           "automation": "Automatizare",
           "messaging": "Mesaje pentru cumpărători",
           "blacklist": "Listă neagră"
+        },
+        "reset": {
+          "usingOwn": "Acest magazin folosește setări proprii.",
+          "usingGlobal": "Acest magazin folosește setările „{{global}}”. Dacă salvați aici, magazinul primește setări proprii.",
+          "action": "Înapoi la setările globale",
+          "confirmDescription": "Setările proprii ale acestui magazin vor fi șterse: adresă, automatizare, mesaje către cumpărători, listă neagră și ASIN-uri blocate. De acum magazinul folosește setările „{{global}}”. Acțiunea nu poate fi anulată.",
+          "success": "Magazinul folosește acum setările „{{global}}”.",
+          "globalUsedBy": "Magazine care folosesc aceste setări: {{stores}}",
+          "globalOwn": "Magazine cu setări proprii: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "ASIN-uri blocate",
-          "hint": "Aceste produse nu sunt listate niciodată. Un magazin fără listă proprie folosește lista pentru toate magazinele.",
-          "placeholder": "Un ASIN pe linie sau separate prin virgulă",
-          "count": "ASIN-uri valide în această listă: {{count}}",
-          "inherited": "Acest magazin nu are o listă proprie și folosește lista pentru toate magazinele. Dacă o modificați aici, magazinul va avea propria listă."
+          "hint": "Aceste produse nu sunt listate niciodată. Scrieți câte un ASIN pe rând sau separați-le prin virgule ori spații. Spațiile în plus, literele mici și duplicatele nu contează; tot ce nu este un ASIN de 10 caractere este ignorat.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "ASIN-uri valide în această listă: {{count}}"
         }
       },
       "listingGroup": {

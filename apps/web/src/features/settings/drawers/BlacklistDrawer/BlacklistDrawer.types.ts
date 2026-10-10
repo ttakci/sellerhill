@@ -1,4 +1,5 @@
 import type { BlacklistAction, BlacklistType, StoreSettingsResponse } from '@repo/shared';
+import type { StepItem } from '@repo/ui';
 
 export type BlacklistItem = { keyword: string; types: BlacklistType[]; action: BlacklistAction };
 
@@ -26,6 +27,11 @@ export interface BlacklistDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
   onBack: () => void;
+  /** Wizard: step 0 = keywords, step 1 = blocked ASINs; Save sits on the last step. */
+  steps: StepItem[];
+  step: number;
+  onStepClick: (step: number) => void;
+  onNext: () => void;
   // inline add form
   keywords: string;
   onKeywordsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -84,8 +90,6 @@ export interface BlacklistDrawerComponentProps {
   blockedAsinsHint: string;
   blockedAsinsPlaceholder: string;
   blockedAsinsCountLabel: string;
-  /** Shown when a store is running on the global list; empty otherwise. */
-  blockedAsinsInheritedLabel: string;
 }
 
 /** The blocked-ASIN card's starting text, and whether it is the global list shown to a store without its own. */

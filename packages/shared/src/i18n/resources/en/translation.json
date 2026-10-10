@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "No eBay stores connected yet"
-        }
+        },
+        "marketplace": "Marketplace"
       },
       "amazon": {
         "noAccounts": "No Amazon accounts connected",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Amazon's sign-in flow could not be completed automatically. Try again shortly; if it keeps failing, contact support.",
           "transport": "Could not reach Amazon to verify this account. Try again shortly.",
           "unknown": "Could not verify this account. Try again shortly; if it keeps failing, contact support."
-        }
+        },
+        "emailLabel": "Email",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Automatic orders",
+        "statusOn": "On",
+        "statusOff": "Off",
+        "autoFulfillCap": "On · limit {{cap}}"
       },
       "storeConfig": {
         "title": "Store Configuration",
@@ -418,6 +425,15 @@
           "automation": "Automation",
           "messaging": "Buyer messaging",
           "blacklist": "Blacklist"
+        },
+        "reset": {
+          "usingOwn": "This store uses its own settings.",
+          "usingGlobal": "This store uses the “{{global}}” settings. Saving here gives the store settings of its own.",
+          "action": "Back to global settings",
+          "confirmDescription": "This store's own settings will be deleted: address, automation, buyer messages, blacklist and blocked ASINs. From now on the store uses the “{{global}}” settings. This cannot be undone.",
+          "success": "The store now uses the “{{global}}” settings.",
+          "globalUsedBy": "Stores using these settings: {{stores}}",
+          "globalOwn": "Stores with their own settings: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "Blocked ASINs",
-          "hint": "These products are never listed. A store without its own list uses the list for all stores.",
-          "placeholder": "One ASIN per line, or separated by commas",
-          "count": "Valid ASINs in this list: {{count}}",
-          "inherited": "This store has no list of its own and uses the list for all stores. Editing it here gives this store its own list."
+          "hint": "These products are never listed. Put each ASIN on its own line, or separate them with commas or spaces. Extra spaces, lowercase letters and duplicates don't matter; anything that isn't a 10-character ASIN is skipped.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "Valid ASINs in this list: {{count}}"
         }
       },
       "listingGroup": {

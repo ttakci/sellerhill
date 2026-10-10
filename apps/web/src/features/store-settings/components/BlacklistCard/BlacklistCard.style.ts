@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 import { IconButton as IconButtonAtom, tkn } from '@repo/ui';
 
-export const CardWrapper = styled.div<{ $selectable?: boolean }>`
+export const CardWrapper = styled.div<{ $selectable?: boolean; $selected?: boolean }>`
   background: ${tkn('colors.surface.primary')};
-  /* Light border at rest; turns brand-blue on hover, matching the job /
-     listing card pattern. */
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
+  /* Light border at rest; brand-blue when selected or hovered, matching the
+     job / listing card pattern. */
+  border: 0.0625rem solid
+    ${({ $selected, theme }) => ($selected ? theme.colors.brand.primary : theme.colors.border.primary)};
+  border-radius: ${tkn('radius.md')};
   box-sizing: border-box;
   width: 100%;
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   cursor: ${({ $selectable }) => ($selectable ? 'pointer' : 'default')};
   transition:
     border-color ${tkn('transitions.fast')},
@@ -17,7 +18,7 @@ export const CardWrapper = styled.div<{ $selectable?: boolean }>`
 
   &:hover {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${tkn('shadows.md')};
+    box-shadow: ${tkn('shadows.sm')};
   }
 `;
 

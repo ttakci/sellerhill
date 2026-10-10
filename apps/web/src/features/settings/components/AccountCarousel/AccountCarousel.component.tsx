@@ -40,7 +40,10 @@ export const AccountCarouselComponent = <T,>({
       {hasMore && (
         <S.CarouselTopBar>
           <S.ViewAllButton variant="text" size="small" onClick={onViewAll}>
-            <Text variant="body-sm" weight="semibold">{viewAllLabel}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {viewAllLabel}
+            </Text>
+            <Icon name="chevron-right" size={16} />
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
@@ -58,12 +61,24 @@ export const AccountCarouselComponent = <T,>({
               ))}
             </S.CarouselViewport>
             {currentSlide > 0 && (
-              <S.CarouselArrow $side="left" variant="elevated" className="carousel-arrow" onClick={onPrev} aria-label={t('translation:common.previous')}>
+              <S.CarouselArrow
+                $side="left"
+                variant="elevated"
+                className="carousel-arrow"
+                onClick={onPrev}
+                aria-label={t('translation:common.previous')}
+              >
                 <Icon name="chevron-left" size={20} />
               </S.CarouselArrow>
             )}
             {currentSlide < visibleItems.length - 1 && (
-              <S.CarouselArrow $side="right" variant="elevated" className="carousel-arrow" onClick={onNext} aria-label={t('translation:common.next')}>
+              <S.CarouselArrow
+                $side="right"
+                variant="elevated"
+                className="carousel-arrow"
+                onClick={onNext}
+                aria-label={t('translation:common.next')}
+              >
                 <Icon name="chevron-right" size={20} />
               </S.CarouselArrow>
             )}

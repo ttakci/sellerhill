@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, ParseUUIDPipe, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { StoreSettingsResponse } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -12,9 +12,7 @@ export class StoreSettingsController {
   constructor(private readonly storeSettingsService: StoreSettingsService) {}
 
   @Get('all')
-  async listSettings(
-    @Request() req: { user: { sub: string } },
-  ): Promise<StoreSettingsResponse[]> {
+  async listSettings(@Request() req: { user: { sub: string } }): Promise<StoreSettingsResponse[]> {
     return this.storeSettingsService.listSettings(req.user.sub);
   }
 
@@ -32,5 +30,14 @@ export class StoreSettingsController {
     @Body() dto: SaveStoreSettingsDto
   ): Promise<StoreSettingsResponse> {
     return this.storeSettingsService.saveSettings(req.user.sub, dto);
+  }
+
+  /** Drops one store's own settings so it runs on the global ("all stores") row again. */
+  @Delete()
+  async resetStoreSettings(
+    @Request() req: { user: { sub: string } },
+    @Query('storeId', ParseUUIDPipe) storeId: string
+  ): Promise<{ reset: boolean }> {
+    return this.storeSettingsService.resetStoreSettings(req.user.sub, storeId);
   }
 }

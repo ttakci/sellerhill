@@ -35,10 +35,14 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
       <InfoMessage>{k('subtitle')}</InfoMessage>
 
       <FormCard>
-        <Text variant="h5">{k('brand.title')}</Text>
+        <Text variant="h4" weight="bold">
+          {k('brand.title')}
+        </Text>
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('brand.vero')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('brand.vero')}
+            </Text>
             <InfoTip text={k('brand.veroHint')} />
           </LabelWithInfo>
           <Toggle
@@ -50,7 +54,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
         {!draft.veroProtectionEnabled && <InfoMessage type="warning">{k('brand.veroOffWarning')}</InfoMessage>}
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('brand.hideBrand')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('brand.hideBrand')}
+            </Text>
             <InfoTip text={k('brand.hideBrandHint')} />
           </LabelWithInfo>
           <Toggle
@@ -62,7 +68,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
       </FormCard>
 
       <FormCard>
-        <Text variant="h5">{k('filters.title')}</Text>
+        <Text variant="h4" weight="bold">
+          {k('filters.title')}
+        </Text>
         <FieldGroup>
           <PriceRow>
             <ModernTextInput
@@ -89,7 +97,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
         </FieldGroup>
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('filters.amazonShippedOnly')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('filters.amazonShippedOnly')}
+            </Text>
             <InfoTip text={k('filters.amazonShippedOnlyHint')} />
           </LabelWithInfo>
           <Toggle
@@ -100,7 +110,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
         </ToggleRow>
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('filters.primeOnly')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('filters.primeOnly')}
+            </Text>
             <InfoTip text={k('filters.primeOnlyHint')} />
           </LabelWithInfo>
           <Toggle
@@ -111,7 +123,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
         </ToggleRow>
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('filters.pesticideProtection')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('filters.pesticideProtection')}
+            </Text>
             <InfoTip text={k('filters.pesticideProtectionHint')} />
           </LabelWithInfo>
           <Toggle
@@ -149,7 +163,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
       </FormCard>
 
       <FormCard>
-        <Text variant="h5">{k('cleanup.title')}</Text>
+        <Text variant="h4" weight="bold">
+          {k('cleanup.title')}
+        </Text>
         <ModernSelect
           name="outOfStockEndDays"
           label={k('cleanup.outOfStock')}
@@ -163,7 +179,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
         </Text>
         <ToggleRow>
           <LabelWithInfo>
-            <Text variant="body-sm">{k('cleanup.cold')}</Text>
+            <Text variant="body-sm" weight="semibold">
+              {k('cleanup.cold')}
+            </Text>
             <InfoTip text={k('cleanup.coldHint')} />
           </LabelWithInfo>
           <Toggle
@@ -184,7 +202,9 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
               fullWidth
             />
             <Field>
-              <Text variant="body-sm">{k('cleanup.coldMode')}</Text>
+              <Text variant="body-sm" weight="semibold">
+                {k('cleanup.coldMode')}
+              </Text>
               <SegmentedControl
                 options={props.coldListingModeOptions}
                 value={draft.coldListingMode}

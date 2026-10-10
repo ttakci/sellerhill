@@ -51,11 +51,41 @@ export const SectionInfoMessage = styled.div`
 export const ColumnStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.lg')};
+  gap: ${tkn('spacing.md')};
   min-width: 0;
 
+  /* Cards share the column's height, so the stack ends level with the card
+     beside it (StackedGrid stretches both columns to one height). */
   && > * {
     height: auto;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+  }
+
+  /* One-row cards: tighter header, body and row insets than a long card, so
+     three of them stack to the height of the card beside them. Card anatomy:
+     header, divider, body > rows. */
+  && > * > :first-of-type {
+    padding-top: ${tkn('spacing.md')};
+    padding-bottom: ${tkn('spacing.sm')};
+  }
+
+  && > * > :last-child {
+    padding-bottom: ${tkn('spacing.xs')};
+  }
+
+  && > * > :last-child > * {
+    padding-top: ${tkn('spacing.sm')};
+    padding-bottom: ${tkn('spacing.sm')};
+  }
+`;
+
+/**
+ * The grid of a one-card column beside a `ColumnStack` (operator request,
+ * 2026-10-10): both columns end on one line. The single card keeps a normal
+ * foot; the stacked cards take their share of the same height.
+ */
+export const StackedGrid = styled(TwoColGrid)`
+  && > :first-of-type > :last-child {
+    padding-bottom: ${tkn('spacing.md')};
   }
 `;

@@ -17,26 +17,35 @@ import { useTranslation } from 'react-i18next';
 import { getCountryOptions } from '../../utils/countryOptions';
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
 import { resolveSeedAllowCrossStore, resolveSeedMaxLoss, resolveStoreDraftSeed } from '../storeDraftSeed';
-import { buildScopeOptions, GLOBAL_SCOPE } from '../storeScope';
+import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { StoreSettingsDrawerComponent } from './StoreSettingsDrawer.component';
 import type { StoreSettingsDrawerProps } from './StoreSettingsDrawer.types';
 
 import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
-import { useGetBuyerMessagingConfigQuery, useSaveStoreSettingsMutation, useUpdateBuyerMessagingConfigMutation } from '@/features/store-settings/api/storeSettingsApi';
+import {
+  useGetBuyerMessagingConfigQuery,
+  useResetStoreSettingsMutation,
+  useSaveStoreSettingsMutation,
+  useUpdateBuyerMessagingConfigMutation,
+} from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
 const buildDefaultBuyerMessagingConfig = (templates: BuyerMessageTemplate[]): BuyerMessagingConfig => {
   const templateFor = (event: BuyerMessageEventType): BuyerMessageTemplateRef => {
-    const match = templates.find((template) => template.eventType === event && template.isDefault)
-      ?? templates.find((template) => template.eventType === event);
+    const match =
+      templates.find((template) => template.eventType === event && template.isDefault) ??
+      templates.find((template) => template.eventType === event);
     return { kind: BuyerMessageTemplateKind.CUSTOM, id: match?.id ?? '' };
   };
 
   return {
     enabled: false,
     events: {
-      [BuyerMessageEventType.ORDER_RECEIVED]: { enabled: false, template: templateFor(BuyerMessageEventType.ORDER_RECEIVED) },
+      [BuyerMessageEventType.ORDER_RECEIVED]: {
+        enabled: false,
+        template: templateFor(BuyerMessageEventType.ORDER_RECEIVED),
+      },
       [BuyerMessageEventType.SHIPPED]: { enabled: false, template: templateFor(BuyerMessageEventType.SHIPPED) },
       [BuyerMessageEventType.DELIVERED]: { enabled: false, template: templateFor(BuyerMessageEventType.DELIVERED) },
       [BuyerMessageEventType.FEEDBACK_REQUEST]: {
@@ -71,8 +80,71 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const buyerMessageTemplates = useMemo(() => buyerMessageTemplatesData ?? [], [buyerMessageTemplatesData]);
   const [saveSettings, { isLoading: isSavingSettings }] = useSaveStoreSettingsMutation();
   const [updateBuyerMessaging, { isLoading: isSavingMessaging }] = useUpdateBuyerMessagingConfigMutation();
+  const [resetSettings, { isLoading: isResetting }] = useResetStoreSettingsMutation();
   const isSaving = isSavingSettings || isSavingMessaging;
-  useLoading(isSaving);
+  useLoading(isSaving || isResetting);
+  // A store either runs on its own settings or on "all stores" (operator
+  // decision, 2026-10-10). `null` on the global scope, where the question does
+  // not arise; for a store: does it have a row of its own?
+  const usesOwnSettings = storeId ? Boolean(resolveScopeConfig(storeConfigs, selectedScope)) : null;
+  // On the global scope: which stores follow these settings and which have
+  // left them — so a store that went its own way is visible at a glance.
+  const globalScopeLines = useMemo((): string[] => {
+    if (storeId) {
+      return [];
+    }
+    const own = availableStores.filter((store) => resolveScopeConfig(storeConfigs, store.id));
+    const following = availableStores.filter((store) => !resolveScopeConfig(storeConfigs, store.id));
+    const lines: string[] = [];
+    if (following.length > 0) {
+      lines.push(
+        t('translation:settingsHub.drawer.storeSettings.reset.globalUsedBy', {
+          stores: following.map((store) => store.name).join(', '),
+        })
+      );
+    }
+    if (own.length > 0) {
+      lines.push(
+        t('translation:settingsHub.drawer.storeSettings.reset.globalOwn', {
+          stores: own.map((store) => store.name).join(', '),
+        })
+      );
+    }
+    return lines;
+  }, [storeId, availableStores, storeConfigs, t]);
+  const [isConfirmingReset, setIsConfirmingReset] = useState(false);
+
+  // "Back to the global settings": deletes the store's own row, then closes
+  // like every other settings drawer's finished job.
+  const handleConfirmReset = (): void => {
+    setIsConfirmingReset(false);
+    if (!storeId) {
+      return;
+    }
+    resetSettings({ storeId })
+      .unwrap()
+      .then(() => {
+        notifyDrawerDone({
+          onClose,
+          showMessage,
+          closeMessage,
+          t,
+          descriptionKey: 'translation:settingsHub.drawer.storeSettings.reset.success',
+          descriptionParams: { global: t('translation:settingsHub.drawer.storeSettings.global') },
+        });
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t
+        );
+      });
+  };
 
   const [step, setStep] = useState(StoreSettingsDrawerStep.ADDRESS);
   const [country, setCountry] = useState(config?.country ?? '');
@@ -86,7 +158,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [allowCrossStoreAsins, setAllowCrossStoreAsins] = useState(seedCrossStore.value);
   const [allowCrossStoreOwn, setAllowCrossStoreOwn] = useState<boolean | null>(seedCrossStore.own);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
-  const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
+  const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? true);
   // The loss limit is stored as one nullable number (NULL = no limit, 0 = never
   // at a loss) but presented as a switch plus an amount, so "off" and "0" are
   // two visibly different choices.
@@ -99,8 +171,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [trackingConversionEnabled, setTrackingConversionEnabled] = useState(
     // Conversion is ON by default (migration 112), so an absent config reads as
     // enabled — the toggle must not show OFF for a store that will convert.
-    (config?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
-      TrackingConversionProvider.LOCAL
+    (config?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !== TrackingConversionProvider.LOCAL
   );
   const [trackingConversionScope, setTrackingConversionScope] = useState<TrackingConversionScope>(
     config?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
@@ -119,8 +190,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // figure out how to unlock. This flips true only after a first failed
   // attempt, so a fresh drawer never opens already showing red fields.
   const [addressSubmitAttempted, setAddressSubmitAttempted] = useState(false);
-  const [buyerMessagingConfig, setBuyerMessagingConfig] = useState<BuyerMessagingConfig>(() =>
-    remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
+  const [buyerMessagingConfig, setBuyerMessagingConfig] = useState<BuyerMessagingConfig>(
+    () => remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates)
+  );
 
   const [prevOpen, setPrevOpen] = useState(isOpen);
   const [prevScope, setPrevScope] = useState(selectedScope);
@@ -128,11 +200,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [prevRemoteBuyerMessaging, setPrevRemoteBuyerMessaging] = useState(remoteBuyerMessaging);
   const [prevBuyerMessageTemplates, setPrevBuyerMessageTemplates] = useState(buyerMessageTemplates);
   if (
-    isOpen !== prevOpen
-    || selectedScope !== prevScope
-    || config !== prevConfig
-    || remoteBuyerMessaging !== prevRemoteBuyerMessaging
-    || buyerMessageTemplates !== prevBuyerMessageTemplates
+    isOpen !== prevOpen ||
+    selectedScope !== prevScope ||
+    config !== prevConfig ||
+    remoteBuyerMessaging !== prevRemoteBuyerMessaging ||
+    buyerMessageTemplates !== prevBuyerMessageTemplates
   ) {
     const didOpen = isOpen && !prevOpen;
     const scopeChanged = selectedScope !== prevScope;
@@ -166,16 +238,13 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setAllowCrossStoreAsins(seedCrossStore.value);
       setAllowCrossStoreOwn(seedCrossStore.own);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
-      setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
+      setAutoFulfillEnabled(next?.autoFulfillEnabled ?? true);
       setLossLimitEnabled(seedMaxLoss !== null);
       setLossLimitAmount(seedMaxLoss ?? 0);
       setTrackingConversionEnabled(
-        (next?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
-          TrackingConversionProvider.LOCAL
+        (next?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !== TrackingConversionProvider.LOCAL
       );
-      setTrackingConversionScope(
-        next?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
-      );
+      setTrackingConversionScope(next?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY);
       setTrackingConvertManualOrders(next?.trackingConvertManualOrders ?? true);
       // A confirmation left open across a scope switch would apply to the row
       // the seller is no longer looking at.
@@ -227,7 +296,15 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       await updateBuyerMessaging({ config: buyerMessagingConfig, storeId }).unwrap();
       notifyDrawerDone({ onClose, showMessage, closeMessage, t });
     } catch (error) {
-      showMessage({ type: 'error', headerKey: 'translation:message.error.header', descriptionKey: getErrorI18nKey(error as Parameters<typeof getErrorI18nKey>[0]), primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage } }, t);
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: getErrorI18nKey(error as Parameters<typeof getErrorI18nKey>[0]),
+          primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+        },
+        t
+      );
     }
   };
 
@@ -245,9 +322,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // hold a country NAME — and eBay refuses that as a missing field. Requiring a
   // real code here is what forces such a seller to re-pick instead of saving
   // the old value straight back through the new control.
-  const isAddressComplete = Boolean(
-    isValidCountryCode(country) && stateField.trim() && city.trim() && zipCode.trim()
-  );
+  const isAddressComplete = Boolean(isValidCountryCode(country) && stateField.trim() && city.trim() && zipCode.trim());
 
   const handleContinue = (): void => {
     if (step === StoreSettingsDrawerStep.ADDRESS && !isAddressComplete) {
@@ -290,7 +365,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
     setTrackingConvertManualOrders(true);
   };
 
-  const updateEvent = (event: BuyerMessageEventType, update: (current: BuyerMessageEventConfig) => BuyerMessageEventConfig): void => {
+  const updateEvent = (
+    event: BuyerMessageEventType,
+    update: (current: BuyerMessageEventConfig) => BuyerMessageEventConfig
+  ): void => {
     setBuyerMessagingConfig((current) => ({
       ...current,
       events: { ...current.events, [event]: update(current.events[event]!) },
@@ -311,6 +389,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onBack={() => setStep((step - 1) as StoreSettingsDrawerStep)}
       onContinue={handleContinue}
       isSaving={isSaving}
+      usesOwnSettings={usesOwnSettings}
+      globalScopeLines={globalScopeLines}
+      onRequestReset={() => setIsConfirmingReset(true)}
+      isConfirmingReset={isConfirmingReset}
+      onCancelReset={() => setIsConfirmingReset(false)}
+      onConfirmReset={handleConfirmReset}
       isContinueDisabled={isSaving}
       scopeOptions={buildScopeOptions(availableStores, t('translation:settingsHub.drawer.storeSettings.global'))}
       selectedScope={selectedScope}
@@ -358,7 +442,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       buyerMessageTemplates={buyerMessageTemplates}
       onToggleBuyerMessagingMaster={(enabled) => setBuyerMessagingConfig((current) => ({ ...current, enabled }))}
       onToggleBuyerMessagingEvent={(event, enabled) => updateEvent(event, (current) => ({ ...current, enabled }))}
-      onPickBuyerMessageTemplate={(event, templateId) => updateEvent(event, (current) => ({ ...current, template: { kind: BuyerMessageTemplateKind.CUSTOM, id: templateId } }))}
+      onPickBuyerMessageTemplate={(event, templateId) =>
+        updateEvent(event, (current) => ({
+          ...current,
+          template: { kind: BuyerMessageTemplateKind.CUSTOM, id: templateId },
+        }))
+      }
       onChangeBuyerMessageDelayDays={(event, delayDays) => updateEvent(event, (current) => ({ ...current, delayDays }))}
       onCountryChange={setCountry}
       onStateChange={(e) => setStateField(e.target.value)}

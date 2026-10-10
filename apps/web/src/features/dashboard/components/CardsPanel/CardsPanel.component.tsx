@@ -3,7 +3,7 @@
  * Period KPI cards + the period-filtered listings/orders sections.
  */
 
-import { Button, Skeleton, Text } from '@repo/ui';
+import { Button, Icon, Skeleton, Text } from '@repo/ui';
 import React from 'react';
 
 import { PeriodCard } from '../PeriodCard';
@@ -70,6 +70,7 @@ export const CardsPanelComponent = ({
               <Text variant="body-sm" weight="semibold">
                 {listingsViewAllLabel}
               </Text>
+              <Icon name="chevron-right" size={16} />
             </Button>
           )}
         </S.SectionHeading>
@@ -108,6 +109,7 @@ export const CardsPanelComponent = ({
               <Text variant="body-sm" weight="semibold">
                 {ordersViewAllLabel}
               </Text>
+              <Icon name="chevron-right" size={16} />
             </Button>
           )}
         </S.SectionHeading>

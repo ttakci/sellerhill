@@ -19,19 +19,16 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   footer,
   className,
 }) => {
-  if (!isOpen) {return null;}
+  if (!isOpen) {
+    return null;
+  }
 
   const showHeader = title || subtitle || onBack;
 
   return (
     <>
       <S.Overlay $isOpen={isOpen} onClick={onClose} />
-      <S.Panel
-        $isOpen={isOpen}
-        className={className}
-        role="dialog"
-        aria-modal="true"
-      >
+      <S.Panel $isOpen={isOpen} className={className} role="dialog" aria-modal="true">
         {showHeader && (
           <S.Header>
             {onBack && (
@@ -41,7 +38,7 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
             )}
             <S.HeaderText>
               {title && (
-                <Text variant="h3" weight="semibold" color="text.primary">
+                <Text variant="h3" weight="bold" color="text.primary">
                   {title}
                 </Text>
               )}

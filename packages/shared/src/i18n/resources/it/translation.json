@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "Nessun negozio eBay ancora collegato"
-        }
+        },
+        "marketplace": "Marketplace"
       },
       "amazon": {
         "noAccounts": "Nessun account Amazon collegato",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "Non è stato possibile completare automaticamente la procedura di accesso di Amazon. Riprova tra poco; se il problema persiste, contatta l'assistenza.",
           "transport": "Impossibile raggiungere Amazon per verificare questo account. Riprova tra poco.",
           "unknown": "Impossibile verificare questo account. Riprova tra poco; se il problema persiste, contatta l'assistenza."
-        }
+        },
+        "emailLabel": "Email",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "Ordini automatici",
+        "statusOn": "Attivo",
+        "statusOff": "Disattivo",
+        "autoFulfillCap": "Attivo · limite {{cap}}"
       },
       "storeConfig": {
         "title": "Configurazione del negozio",
@@ -418,6 +425,15 @@
           "automation": "Automazione",
           "messaging": "Messaggi agli acquirenti",
           "blacklist": "Lista nera"
+        },
+        "reset": {
+          "usingOwn": "Questo negozio usa impostazioni proprie.",
+          "usingGlobal": "Questo negozio usa le impostazioni «{{global}}». Salvando qui, il negozio avrà impostazioni proprie.",
+          "action": "Torna alle impostazioni globali",
+          "confirmDescription": "Le impostazioni proprie di questo negozio verranno eliminate: indirizzo, automazione, messaggi agli acquirenti, lista nera e ASIN bloccati. Da ora il negozio userà le impostazioni «{{global}}». L’operazione non è reversibile.",
+          "success": "Il negozio ora usa le impostazioni «{{global}}».",
+          "globalUsedBy": "Negozi che usano queste impostazioni: {{stores}}",
+          "globalOwn": "Negozi con impostazioni proprie: {{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "ASIN bloccati",
-          "hint": "Questi prodotti non vengono mai messi in vendita. Un negozio senza un proprio elenco usa l'elenco di tutti i negozi.",
-          "placeholder": "Un ASIN per riga, oppure separati da virgole",
-          "count": "ASIN validi in questo elenco: {{count}}",
-          "inherited": "Questo negozio non ha un proprio elenco e usa quello di tutti i negozi. Modificandolo qui, il negozio avrà un proprio elenco."
+          "hint": "Questi prodotti non vengono mai messi in vendita. Scrivi un ASIN per riga, oppure separali con virgole o spazi. Spazi in più, minuscole e duplicati non sono un problema; ciò che non è un ASIN di 10 caratteri viene ignorato.",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "ASIN validi in questo elenco: {{count}}"
         }
       },
       "listingGroup": {

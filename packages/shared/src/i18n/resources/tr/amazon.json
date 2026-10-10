@@ -90,7 +90,6 @@
       "autoFulfillCapTotal": "Maksimum sipariş tutarı (otomatik karşılama limiti)",
       "autoFulfillCapTotalHint": "Hesap başına harcama tavanı (USD). Bu tutarın üzerindeki siparişler bu hesabı atlar. Otomatik karşılamanın etkinleştirilmesi için gereklidir.",
       "autoFulfillCapTotalPlaceholder": "ör. 250",
-      "cartOwnershipNote": "Bu Amazon hesabını yalnızca SellerHill için kullanın. Her otomatik siparişten önce sepeti boşaltılır; sepete kendiniz eklediğiniz ürünler silinir.",
       "autoFulfillDryRun": "Deneme modu (sipariş oluşturmadan akışı çalıştır)",
       "autoFulfillDryRunHint": "Sipariş Verme adımı hariç tam ödeme akışını çalıştırır; inceleme toplamı yakalanır ve gösterilir."
     },
@@ -104,7 +103,7 @@
       "port": "Port girin",
       "username": "Kullanıcı adı",
       "password": "Parola",
-      "hint": "İsteğe bağlıdır. Bu hesabın otomasyon trafiğini kendi proxy'niz üzerinden yönlendirmek isterseniz ekleyin — IP tabanlı engellemelere karşı ekstra koruma sağlar. Boş bırakırsanız hesap doğrudan bağlanır; normal ve varsayılan kullanım budur."
+      "hint": "İsteğe bağlıdır. Bu hesabın otomasyon trafiğini kendi proxy'niz üzerinden yönlendirmek isterseniz ekleyin — IP tabanlı engellemelere karşı ekstra koruma sağlar."
     },
     "marketplace": {
       "label": "Pazar Yeri",

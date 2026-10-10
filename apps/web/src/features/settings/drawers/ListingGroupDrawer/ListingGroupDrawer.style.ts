@@ -1,13 +1,8 @@
 import styled from '@emotion/styled';
-import { Button, Card, CardBody, IconButton as IconButtonAtom, Textarea, tkn } from '@repo/ui';
+import { Button, Card, CardBody, glassSurface, IconButton as IconButtonAtom, Textarea, tkn } from '@repo/ui';
 
+/** Bare, like every other wizard drawer's stepper — no box of its own. */
 export const StepperWrapper = styled.div`
-  margin-bottom: 0;
-  background: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   box-sizing: border-box;
 `;
 
@@ -76,17 +71,11 @@ export const RepricingCardList = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
+/** One price range — the drawer's form-card pane with a tinted title strip. */
 export const RepricingCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
+  ${({ theme }) => glassSurface(theme)}
+  border-radius: ${tkn('radius.lg')};
   overflow: hidden;
-  transition: box-shadow ${tkn('transitions.fast')};
-
-  &:hover {
-    box-shadow: ${tkn('shadows.md')};
-  }
 `;
 
 export const RepricingCardHeader = styled.div`
@@ -94,13 +83,12 @@ export const RepricingCardHeader = styled.div`
   align-items: center;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm-md')} ${tkn('spacing.lg')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-  background: ${tkn('colors.surface.primary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.glass.tint')};
 `;
 
 export const RepricingCardBody = styled.div`
   padding: ${tkn('spacing.lg')};
-  background: ${tkn('colors.surface.primary')};
 `;
 
 export const RepricingFieldGrid = styled.div`

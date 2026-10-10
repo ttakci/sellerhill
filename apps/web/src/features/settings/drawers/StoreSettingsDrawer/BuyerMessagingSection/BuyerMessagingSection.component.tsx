@@ -25,7 +25,7 @@ export const BuyerMessagingSectionComponent: React.FC<BuyerMessagingSectionProps
     <S.Section>
       <S.MasterCard>
         <S.ToggleRow>
-          <Text variant="body-sm" weight="semibold">
+          <Text variant="h4" weight="bold">
             {t('storeSettings:storeSettings.messaging.title')}
           </Text>
           <Toggle checked={enabled} onChange={onToggleMaster} />

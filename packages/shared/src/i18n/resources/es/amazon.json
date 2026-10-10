@@ -90,7 +90,6 @@
       "autoFulfillCapTotal": "Total máximo del pedido (límite del cumplimiento automático)",
       "autoFulfillCapTotalHint": "Tope de gasto por cuenta (USD). Los pedidos que superen este total omiten esta cuenta. Obligatorio para activar el cumplimiento automático.",
       "autoFulfillCapTotalPlaceholder": "p. ej., 250",
-      "cartOwnershipNote": "Usa esta cuenta de Amazon solo para SellerHill. Su carrito se vacía antes de cada pedido automático, así que se elimina cualquier cosa que hayas puesto tú.",
       "autoFulfillDryRun": "Simulación (ejecuta el flujo sin realizar el pedido)",
       "autoFulfillDryRunHint": "Ejecuta todo el flujo de compra hasta antes de Realizar pedido, para poder capturar el total de la revisión y mostrarlo para su revisión."
     },
@@ -104,7 +103,7 @@
       "port": "Ingresa el puerto",
       "username": "Usuario",
       "password": "Contraseña",
-      "hint": "Opcional. Agrega tu propio proxy para enrutar la automatización de esta cuenta a través de él; es útil si quieres protección adicional contra bloqueos por IP. Si lo dejas desactivado, la cuenta se conecta directamente; ese es el valor normal por defecto."
+      "hint": "Opcional. Agrega tu propio proxy para enrutar la automatización de esta cuenta a través de él; es útil si quieres protección adicional contra bloqueos por IP."
     },
     "marketplace": {
       "label": "Marketplace",

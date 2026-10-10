@@ -246,7 +246,8 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   const watchedFees = useWatch({ control, name: 'fees' });
   const isPriceRoundingEnabled = Boolean(watchedFees?.priceRoundingEnabled);
   const rawEnding = watchedFees?.priceEndingCents as unknown;
-  const endingCents = rawEnding === undefined || rawEnding === null || String(rawEnding).trim() === '' ? NaN : Number(rawEnding);
+  const endingCents =
+    rawEnding === undefined || rawEnding === null || String(rawEnding).trim() === '' ? NaN : Number(rawEnding);
   const isEndingValid = Number.isInteger(endingCents) && endingCents >= 0 && endingCents <= 99;
   const priceRoundingExample = isEndingValid
     ? t('listingSettingsGroup.priceRounding.example', {
@@ -298,11 +299,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
             'Low-latency mode for gaming',
             'IPX5 sweat and water resistant',
           ],
-          product_details: [
-            'Connectivity: Bluetooth 5.3',
-            'Battery Life: 40 Hours',
-            'Color: Black',
-          ],
+          product_details: ['Connectivity: Bluetooth 5.3', 'Battery Life: 40 Hours', 'Color: Black'],
         },
       };
     }
@@ -358,7 +355,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   const selectedTemplateValue =
     watchedTemplates?.type === TemplateType.CUSTOM
       ? CUSTOM_TEMPLATE_OPTION
-      : (watchedTemplates?.predefinedTemplateId ?? '');
+      : watchedTemplates?.predefinedTemplateId ?? '';
 
   /**
    * Picking a row in the Active Template select DISCARDS any custom HTML.
@@ -466,7 +463,8 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
         }
         if (v.fees?.priceRoundingEnabled) {
           const rawCents = v.fees.priceEndingCents as unknown;
-          const cents = rawCents === undefined || rawCents === null || String(rawCents).trim() === '' ? NaN : Number(rawCents);
+          const cents =
+            rawCents === undefined || rawCents === null || String(rawCents).trim() === '' ? NaN : Number(rawCents);
           if (!Number.isInteger(cents) || cents < 0 || cents > 99) {
             return false;
           }
@@ -474,8 +472,14 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
         return ranges.every((r) => {
           const min = Number(r.minPrice);
           const max = Number(r.maxPrice);
-          const hasMargin = r.profitMarginPercent !== undefined && r.profitMarginPercent !== null && !Number.isNaN(Number(r.profitMarginPercent));
-          const hasFixed = r.fixedProfitAmount !== undefined && r.fixedProfitAmount !== null && !Number.isNaN(Number(r.fixedProfitAmount));
+          const hasMargin =
+            r.profitMarginPercent !== undefined &&
+            r.profitMarginPercent !== null &&
+            !Number.isNaN(Number(r.profitMarginPercent));
+          const hasFixed =
+            r.fixedProfitAmount !== undefined &&
+            r.fixedProfitAmount !== null &&
+            !Number.isNaN(Number(r.fixedProfitAmount));
           return Number.isFinite(min) && Number.isFinite(max) && max > min && (hasMargin || hasFixed);
         });
       }
@@ -496,8 +500,11 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   // The gate above only reads values, so it cannot tell "025" from "25" (Number()
   // accepts both). The schema can: on Continue, run it over THIS step's fields and
   // stay put with the error painted under the field if it refuses.
+  // Continue is never disabled (validate on click): an incomplete step runs the
+  // schema over its own fields so the empty / wrong field turns red under itself,
+  // and the wizard stays put.
   const handleNext = async () => {
-    if (!canProceed || currentStep >= LAST_STEP) {
+    if (currentStep >= LAST_STEP) {
       return;
     }
     if (currentStep === RULES_STEP && rulesError !== null) {
@@ -505,7 +512,8 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       return;
     }
     const stepFields = STEP_FIELDS[currentStep];
-    if (stepFields && !(await trigger(stepFields))) {
+    const fieldsValid = stepFields ? await trigger(stepFields) : true;
+    if (!fieldsValid || !canProceed) {
       return;
     }
     clearErrors();
@@ -595,7 +603,6 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       onNext={() => void handleNext()}
       onBack={handleBack}
       onSubmit={handleSubmit}
-      canProceed={canProceed}
       rulesStep={{
         draft: rulesDraft,
         onChange: (changes) => setRulesDraft((current) => ({ ...current, ...changes })),

@@ -248,7 +248,8 @@
         },
         "manageStores": {
           "empty": "尚未连接任何 eBay 店铺"
-        }
+        },
+        "marketplace": "市场"
       },
       "amazon": {
         "noAccounts": "未连接 Amazon 账号",
@@ -265,7 +266,13 @@
           "unexpected_login_page": "无法自动完成 Amazon 的登录流程。请稍后重试；如仍失败，请联系支持团队。",
           "transport": "无法连接 Amazon 以验证此账号。请稍后重试。",
           "unknown": "无法验证此账号。请稍后重试；如仍失败，请联系支持团队。"
-        }
+        },
+        "emailLabel": "电子邮件",
+        "twoFactorLabel": "2FA",
+        "autoFulfillLabel": "自动下单",
+        "statusOn": "开启",
+        "statusOff": "关闭",
+        "autoFulfillCap": "开启 · 限额 {{cap}}"
       },
       "storeConfig": {
         "title": "店铺配置",
@@ -418,6 +425,15 @@
           "automation": "自动化",
           "messaging": "买家消息",
           "blacklist": "黑名单"
+        },
+        "reset": {
+          "usingOwn": "此店铺使用自己的设置。",
+          "usingGlobal": "此店铺使用“{{global}}”设置。在此保存会为店铺创建自己的设置。",
+          "action": "恢复为全局设置",
+          "confirmDescription": "将删除此店铺自己的设置：地址、自动化、买家消息、黑名单和屏蔽的 ASIN。此后店铺将使用“{{global}}”设置。此操作无法撤销。",
+          "success": "店铺现在使用“{{global}}”设置。",
+          "globalUsedBy": "使用这些设置的店铺：{{stores}}",
+          "globalOwn": "有自己设置的店铺：{{stores}}"
         }
       },
       "blacklist": {
@@ -462,10 +478,9 @@
         },
         "blockedAsins": {
           "title": "已屏蔽的 ASIN",
-          "hint": "这些商品永远不会上架。没有自己列表的店铺使用所有店铺的列表。",
-          "placeholder": "每行一个 ASIN，或用逗号分隔",
-          "count": "此列表中的有效 ASIN：{{count}}",
-          "inherited": "此店铺没有自己的列表，正在使用所有店铺的列表。在此处编辑后，此店铺将拥有自己的列表。"
+          "hint": "这些商品永远不会上架。每行写一个 ASIN，或用逗号或空格分隔。多余的空格、小写字母和重复项都没有影响；不是 10 位 ASIN 的内容会被跳过。",
+          "placeholder": "B0XXXXXXXX\nB0YYYYYYYY",
+          "count": "此列表中的有效 ASIN：{{count}}"
         }
       },
       "listingGroup": {

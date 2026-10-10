@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { IconButton, tkn } from '@repo/ui';
+import { glassSurface, IconButton, tkn } from '@repo/ui';
 
 export const Section = styled.div`
   display: flex;
@@ -7,14 +7,14 @@ export const Section = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
+/** This section sits straight on the drawer canvas, so it takes the drawer's form-card pane. */
 export const MasterCard = styled.div`
+  ${({ theme }) => glassSurface(theme)}
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.glass.tint')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.md')};
+  padding: ${tkn('spacing.lg')};
+  border-radius: ${tkn('radius.lg')};
 `;
 
 export const ToggleRow = styled.div`
@@ -34,11 +34,9 @@ export const EventRow = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
+  ${({ theme }) => glassSurface(theme)}
+  padding: ${tkn('spacing.md+')} ${tkn('spacing.lg')};
+  border-radius: ${tkn('radius.lg')};
 `;
 
 export const EventRowHeader = styled.div`

@@ -48,6 +48,7 @@ const PersonalInfoSection = ({
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.profile.tabs.personalInfo'),
       }}
     >
@@ -88,6 +89,7 @@ const AccountsSection = ({
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.accounts.title'),
       }}
     >
@@ -121,6 +123,7 @@ const StoreManagementSection = ({
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.storeManagement.title'),
       }}
     >
@@ -155,6 +158,7 @@ const ListingGroupsSection = ({ onManage }: { onManage: () => void }): React.Rea
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.listingGroups.title'),
       }}
     >
@@ -174,16 +178,13 @@ const ListingGroupsSection = ({ onManage }: { onManage: () => void }): React.Rea
 // support (see the Terms' §20 e-mail route). A self-service button that
 // blocked login while keeping every row was a destructive action nobody asked
 // for and that support had to undo by hand.
-const AccountSecuritySection = ({
-  onAction,
-}: {
-  onAction: (key: 'password') => void;
-}): React.ReactElement => {
+const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password') => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.account.title'),
       }}
     >
@@ -216,6 +217,7 @@ const NotificationsSection = ({
     <SettingsCard
       variant="section"
       header={{
+        emphasis: true,
         title: t('translation:settingsHub.sections.notifications.title'),
       }}
     >
@@ -283,7 +285,7 @@ export const SettingsHubPageComponent = ({
         />
       </S.TwoColGrid>
 
-      <S.TwoColGrid>
+      <S.StackedGrid>
         <StoreManagementSection
           onOpenStoreSettings={() => onOpenDrawer('storeSettings')}
           onOpenMessageTemplates={() => onOpenDrawer('buyerMessageTemplates')}
@@ -294,7 +296,7 @@ export const SettingsHubPageComponent = ({
           <NotificationsSection profile={profile ?? null} onOpen={() => onOpenDrawer('notifications')} />
           <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} />
         </S.ColumnStack>
-      </S.TwoColGrid>
+      </S.StackedGrid>
 
       <NotificationsDrawer
         isOpen={activeDrawer === 'notifications'}
@@ -408,7 +410,6 @@ export const SettingsHubPageComponent = ({
         templates={buyerMessageTemplates}
         onEdit={onEditBuyerMessageTemplate}
       />
-
 
       <ConfirmModal
         isOpen={Boolean(pendingDisconnectId)}

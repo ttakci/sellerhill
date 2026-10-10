@@ -76,7 +76,7 @@ export function buildInheritedStoreFields(
   return {
     amazonTaxRate: globalConfig?.amazonTaxRate ?? 0,
     checkBlacklist: globalConfig?.checkBlacklist ?? true,
-    autoFulfillEnabled: globalConfig?.autoFulfillEnabled ?? false,
+    autoFulfillEnabled: globalConfig?.autoFulfillEnabled ?? true,
     trackingConversionProvider: globalConfig?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE,
     trackingConversionScope: globalConfig?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
     trackingConvertManualOrders: globalConfig?.trackingConvertManualOrders ?? true,
