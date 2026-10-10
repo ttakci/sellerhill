@@ -133,6 +133,22 @@ describe('ProductSourceService', () => {
     expect(out.get('B000000002')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
   });
 
+  it('a page about another ASIN is refused and names it; a matching or silent page is a product', async () => {
+    const { svc } = service(
+      { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },
+      [
+        { asin: 'B000000001', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content, signals: { ...signals, pageAsin: 'B0NEWPROD1' } },
+        { asin: 'B000000002', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content, signals: { ...signals, pageAsin: 'b000000002' } },
+        // An older service image sends no pageAsin: "could not tell" is not "different".
+        { asin: 'B000000003', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content, signals },
+      ],
+    );
+    const out = await svc.fetchForCreate(['B000000001', 'B000000002', 'B000000003'], AmazonMarketplace.AMAZON_US);
+    expect(out.get('B000000001')).toEqual({ kind: 'asin_redirected', resolvedAsin: 'B0NEWPROD1' });
+    expect(out.get('B000000002')).toMatchObject({ kind: 'product' });
+    expect(out.get('B000000003')).toMatchObject({ kind: 'product' });
+  });
+
   it('an out-of-stock page with no price is still a product (price 0, stock 0) — a permanent condition, not a retry', async () => {
     const { svc } = service(
       { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },

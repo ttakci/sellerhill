@@ -98,6 +98,28 @@ export const ListingRulesStep: React.FC<ListingRulesStepProps> = (props) => {
             ariaLabel={k('filters.amazonShippedOnly')}
           />
         </ToggleRow>
+        <ToggleRow>
+          <LabelWithInfo>
+            <Text variant="body-sm">{k('filters.primeOnly')}</Text>
+            <InfoTip text={k('filters.primeOnlyHint')} />
+          </LabelWithInfo>
+          <Toggle
+            checked={draft.primeOnly}
+            onChange={(enabled) => onChange({ primeOnly: enabled })}
+            ariaLabel={k('filters.primeOnly')}
+          />
+        </ToggleRow>
+        <ToggleRow>
+          <LabelWithInfo>
+            <Text variant="body-sm">{k('filters.pesticideProtection')}</Text>
+            <InfoTip text={k('filters.pesticideProtectionHint')} />
+          </LabelWithInfo>
+          <Toggle
+            checked={draft.pesticideProtection}
+            onChange={(enabled) => onChange({ pesticideProtection: enabled })}
+            ariaLabel={k('filters.pesticideProtection')}
+          />
+        </ToggleRow>
         <FieldGroup>
           <ModernTextInput
             name="minRating"

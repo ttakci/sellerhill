@@ -71,3 +71,22 @@ def test_soft_404_page_is_not_found(monkeypatch):
 def test_page_without_title_is_parse_failed(monkeypatch):
     monkeypatch.setattr(fetch, "page", lambda *a, **k: "<html><body>odd</body></html>")
     assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "parse_failed"
+
+
+def test_found_reports_the_asin_the_page_is_about(monkeypatch):
+    monkeypatch.setattr(fetch, "page", lambda *a, **k: page("plain_in_stock"))
+    r = fetcher.fetch_one("B09ZKQH99B", "US", "commerce")
+    assert r["signals"]["pageAsin"] == "B09ZKQH99B"
+
+
+def test_a_redirected_asin_stays_found_and_names_the_other_product(monkeypatch):
+    # Amazon answered the requested ASIN with another product's page.
+    monkeypatch.setattr(fetch, "page", lambda *a, **k: page("plain_in_stock"))
+    r = fetcher.fetch_one("B000000001", "US", "commerce")
+    assert r["outcome"] == "found" and r["signals"]["pageAsin"] == "B09ZKQH99B"
+
+
+def test_page_asin_never_reads_the_canonical_link():
+    # plain_in_stock's canonical link names B0FHHXPBR6 although the page is B09ZKQH99B.
+    assert fetcher.page_asin(page("plain_in_stock")) == "B09ZKQH99B"
+    assert fetcher.page_asin('<link rel="canonical" href="https://www.amazon.com/x/dp/B0FHHXPBR6">') is None

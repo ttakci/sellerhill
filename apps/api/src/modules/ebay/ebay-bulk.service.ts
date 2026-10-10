@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_MARKETPLACE_CONFIG,
@@ -28,10 +28,12 @@ import {
   type EbayBulkEnvelope,
   type EbayBulkResponseEntry,
 } from './ebay-bulk.helpers';
+import { EbayConditionPolicyService } from './ebay-condition-policy.service';
 import { withEbayRateLimitRetry } from './ebay-http-retry';
 import { buildInventoryItemPayload, buildOfferPayload } from './ebay-listing-payload';
 import { ListingPublishExhaustedError } from './ebay.errors';
 import { EbayService } from './ebay.service';
+import { resolveEbayCondition } from './listing-condition';
 
 /** One listing's desired commerce state, as the fan-out computed it. */
 export interface BulkPriceQuantityItem {
@@ -147,7 +149,8 @@ export class EbayBulkService {
     private readonly configService: ConfigService,
     private readonly ebayService: EbayService,
     private readonly budget: EbayCallBudgetService,
-    private readonly aspectResolver: AspectResolverService
+    private readonly aspectResolver: AspectResolverService,
+    @Optional() private readonly conditionPolicy?: EbayConditionPolicyService
   ) {}
 
   /** Charge one Inventory-API call against the shared daily quota. */
@@ -340,11 +343,21 @@ export class EbayBulkService {
     // the request" when it's missing. eBay's LocaleEnum uses underscores
     // (`en_US`), unlike the header's hyphenated form (`en-US`).
     const locale = context.contentLanguage.replace('-', '_');
-    const itemRequests = states.map((state) => {
+    // Condition settled against the resolved category policy (fail-soft: an
+    // unknown policy keeps the title-derived condition).
+    const conditions = await Promise.all(
+      states.map((state) =>
+        this.conditionPolicy
+          ? this.conditionPolicy.resolveCondition(state.draft.data.title, context.marketplaceId, state.draft.categoryId)
+          : Promise.resolve(resolveEbayCondition(state.draft.data.title))
+      )
+    );
+    const itemRequests = states.map((state, index) => {
       const { payload, usedPlaceholderImage } = buildInventoryItemPayload(
         state.draft.data,
         state.draft.resolution,
-        context.marketplaceId
+        context.marketplaceId,
+        conditions[index]
       );
       if (usedPlaceholderImage) {
         this.logger.warn(`No valid images for SKU ${state.draft.sku}, using placeholder`);

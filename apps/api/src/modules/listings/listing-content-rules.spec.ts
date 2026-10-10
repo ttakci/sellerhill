@@ -24,6 +24,16 @@ const keyword = (word: string, types: BlacklistType[], action?: BlacklistAction)
 });
 
 describe('stripContactDetails', () => {
+  it('removes a shortened link written without a scheme (eBay refuses the whole listing for one)', () => {
+    const out = stripContactDetails('Setup video: bit.ly/3xYzAb and manual at amzn.to/4Kq. Works with A.CO/d/9xY too.');
+    expect(out).not.toMatch(/bit\.ly|amzn\.to|a\.co/i);
+    expect(out).toContain('Setup video');
+  });
+
+  it('leaves words that only look like a shortener host alone', () => {
+    expect(stripContactDetails('Made in a.co-op workshop. Bit.ly-shaped label.')).toBe('Made in a.co-op workshop. Bit.ly-shaped label.');
+  });
+
   it('removes e-mail, web addresses and separated phone numbers', () => {
     const out = stripContactDetails(product().description);
     expect(out).not.toMatch(/acme\.com|@|555/);

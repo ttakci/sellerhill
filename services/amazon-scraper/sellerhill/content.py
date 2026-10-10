@@ -80,6 +80,36 @@ def current_variation_attributes(variations):
     return {}
 
 
+# The NEW-condition Buy Box's delivery block (a used-offer row has its own,
+# under `usedDeliveryBlockContainer`, and must never decide).
+_DELIVERY_CONTAINER = 'id="deliveryBlockContainer"'
+# What Amazon prints for a Prime-eligible offer even to a NON-Prime visitor —
+# which the scraper always is ("isPrimeCustomer": false), so no Prime badge is
+# ever drawn for it. An offer that is not Prime-eligible says "Or fastest
+# delivery …" instead (fixture `only_left`).
+_PRIME_PROMISE = re.compile(r"prime\s+members\s+get\s+(?:free|fast)", re.I)
+
+
+def extract_prime_eligible(html):
+    """True / False from the Buy Box's delivery promise; None when the page
+    has no Buy Box delivery block (out of stock, no featured offer).
+
+    Upstream's `is_prime` looks for a Prime badge, which Amazon does not draw
+    for a non-Prime visitor: it read False on nine of ten Prime-eligible
+    fixtures. A Prime badge inside the block (a Prime session) still counts."""
+    html = html or ""
+    start = html.find(_DELIVERY_CONTAINER)
+    if start == -1:
+        return None
+    tag_start = html.rfind("<", 0, start)
+    block = P.first(P.soup(html[tag_start: tag_start + _FRAGMENT_CHARS]), "#deliveryBlockMessage")
+    if block is None:
+        return None
+    if P.first(block, ".a-icon-prime") is not None:
+        return True
+    return bool(_PRIME_PROMISE.search(block.get_text(" ", strip=True)))
+
+
 def build_content(html, site):
     d = P.product_page(html, site)
     details = d.get("details") or {}
@@ -102,4 +132,6 @@ def build_content(html, site):
         "rating": (d.get("rating") or {}).get("average"),
         "ratingCount": (d.get("rating") or {}).get("count"),
         "isPrime": d.get("is_prime"),
+        # The value the Prime-only listing rule reads (see extract_prime_eligible).
+        "primeEligible": extract_prime_eligible(html),
     }

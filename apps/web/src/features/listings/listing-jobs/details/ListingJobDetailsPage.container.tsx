@@ -180,18 +180,25 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         });
         return ruleText === rulePath ? t('listings.jobs.failure.blocked_by_rule') : ruleText;
       }
-      const code =
-        item.failureCode === ListingFailureCode.ZERO_STOCK && d?.amazonStock !== undefined && d.amazonStock > 0
-          ? d.amazonStockAtLeast
-            ? 'zero_stock_detail_at_least'
-            : 'zero_stock_detail'
-          : item.failureCode;
+      // A variant key when the failure carries the figure that makes it
+      // actionable: the refused value, the category eBay named.
+      let code: string = item.failureCode;
+      if (item.failureCode === ListingFailureCode.ZERO_STOCK && d?.amazonStock !== undefined && d.amazonStock > 0) {
+        code = d.amazonStockAtLeast ? 'zero_stock_detail_at_least' : 'zero_stock_detail';
+      } else if (item.failureCode === ListingFailureCode.ASPECT_REJECTED && d?.rejectedValue) {
+        code = 'aspect_rejected_value';
+      } else if (item.failureCode === ListingFailureCode.EBAY_CATEGORY_MISMATCH && d?.categoryName) {
+        code = 'ebay_category_mismatch_named';
+      }
       const path = `listings.jobs.failure.${code}`;
       const translated = t(path, {
         aspects: (d?.aspectNames ?? []).join(', '),
         keyword: d?.blacklistedKeyword ?? '',
         stock: d?.amazonStock ?? '',
         buffer: d?.stockBuffer ?? '',
+        value: d?.rejectedValue ?? '',
+        category: d?.categoryName ?? '',
+        resolvedAsin: d?.resolvedAsin ?? '',
       });
       return translated === path ? null : translated;
     },

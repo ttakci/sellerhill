@@ -44,6 +44,14 @@ export enum ListingFailureCode {
    * Amazon shows one again.
    */
   NO_BUY_BOX = 'no_buy_box',
+  /**
+   * Amazon opened a DIFFERENT product for this ASIN: the page's own ASIN is
+   * not the one requested (a merged/retired ASIN redirected, or a variation
+   * parent that shows one of its children). Pricing and buying would follow
+   * the other product, so the create is refused. The ASIN Amazon showed
+   * travels in `resolvedAsin`. Terminal.
+   */
+  ASIN_REDIRECTED = 'asin_redirected',
   /** eBay's taxonomy could not name a listable leaf category. */
   CATEGORY_UNRESOLVED = 'category_unresolved',
   /** Category aspect metadata is unavailable and nothing was cached. */
@@ -52,6 +60,19 @@ export enum ListingFailureCode {
   ASPECT_MISSING = 'aspect_missing',
   /** eBay refused a value we supplied for an item specific. */
   ASPECT_REJECTED = 'aspect_rejected',
+  /**
+   * eBay says the title describes something that belongs in another category
+   * ("you appear to be selling … should be listed under …"). The category it
+   * names, when it names one, travels in `categoryName`.
+   */
+  EBAY_CATEGORY_MISMATCH = 'ebay_category_mismatch',
+  /** eBay does not accept the item condition we sent in this category. */
+  EBAY_CONDITION_INVALID = 'ebay_condition_invalid',
+  /**
+   * eBay's links policy refused the description (a shortened URL, an e-mail
+   * address, a link off eBay) — text that came from the Amazon copy.
+   */
+  EBAY_DESCRIPTION_LINK = 'ebay_description_link',
   /** UPC/EAN/MPN rejected by eBay. */
   INVALID_IDENTIFIER = 'invalid_identifier',
   /** Images missing or rejected. */
@@ -101,6 +122,10 @@ export enum ListingFailureCode {
 export interface ListingFailureDetails {
   /** Item specifics involved (missing or rejected). */
   aspectNames?: string[];
+  /** The value eBay refused for the item specific in `aspectNames` (ASPECT_REJECTED). */
+  rejectedValue?: string;
+  /** The ASIN Amazon actually opened for the requested one (ASIN_REDIRECTED). */
+  resolvedAsin?: string;
   categoryId?: string;
   categoryName?: string;
   ebayErrorIds?: number[];

@@ -4,7 +4,9 @@ import {
   buildScraperSpecs,
   mapScraperIdentifiers,
   mapScraperProduct,
+  mapSourceQuality,
   parseDimensionsCell,
+  readStoredSourceQuality,
   parseWeightCell,
   translateScraperSpecs,
 } from './source-content-mapper';
@@ -152,5 +154,18 @@ describe('mapScraperProduct', () => {
     const p = mapScraperProduct('B077PVLBZ4', content(), { ...commerce, stockStatus: SourceStockStatus.UNKNOWN, stock: null }, AmazonMarketplace.AMAZON_US);
     expect(p.stock).toBe(0);
     expect(p.stockStatus).toBe(SourceStockStatus.OUT_OF_STOCK);
+  });
+});
+
+describe('Prime eligibility in the source quality', () => {
+  it('carries the service value, and leaves it absent when the service sent none', () => {
+    expect(mapSourceQuality({ rating: 4, ratingCount: 9, isPrime: false, primeEligible: true }, null)?.primeEligible).toBe(true);
+    expect(mapSourceQuality({ rating: 4, ratingCount: 9, isPrime: false, primeEligible: null }, null)?.primeEligible).toBeNull();
+    expect(mapSourceQuality({ rating: 4, ratingCount: 9, isPrime: false }, null)).not.toHaveProperty('primeEligible');
+  });
+
+  it('reads a row cached before eligibility existed as never captured, not as "not Prime"', () => {
+    expect(readStoredSourceQuality({ quality: { rating: 4, ratingCount: 9, isPrime: false } })).not.toHaveProperty('primeEligible');
+    expect(readStoredSourceQuality({ quality: { isPrime: false, primeEligible: false } })?.primeEligible).toBe(false);
   });
 });

@@ -17,6 +17,8 @@ export interface ListingRulesDraft {
   minPrice: string;
   maxPrice: string;
   amazonShippedOnly: boolean;
+  primeOnly: boolean;
+  pesticideProtection: boolean;
   minRating: string;
   minReviewCount: string;
   outOfStockEndDays: string;

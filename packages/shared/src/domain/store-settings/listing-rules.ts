@@ -22,6 +22,14 @@ export enum ListingRuleKind {
   NOT_SHIPPED_BY_AMAZON = 'not_shipped_by_amazon',
   LOW_RATING = 'low_rating',
   LOW_REVIEW_COUNT = 'low_review_count',
+  /** The Buy Box offer is not Prime-eligible, or the page did not say. */
+  NOT_PRIME = 'not_prime',
+  /**
+   * The product reads as a pesticide (pest killer, repellent, weed killer,
+   * disinfectant, pool chemical) and its Amazon copy shows no EPA registration
+   * number, which eBay's pesticide policy requires.
+   */
+  PESTICIDE_NO_EPA = 'pesticide_no_epa',
 }
 
 /**
@@ -34,7 +42,20 @@ export enum ListingRuleKind {
 export interface SourceQuality {
   rating: number | null;
   ratingCount: number | null;
+  /**
+   * Upstream's Prime badge read. Not used by any rule: the scraper visits as a
+   * non-Prime customer, and Amazon draws no badge for that visitor, so it read
+   * `false` on nearly every page.
+   */
   isPrime: boolean | null;
+  /**
+   * The Buy Box offer is Prime-eligible, read from the delivery promise Amazon
+   * prints even for a non-Prime visitor ("Or Prime members get FREE delivery").
+   * Optional and separate from `isPrime` on purpose: rows cached before it
+   * existed carry upstream's wrong `isPrime: false`, and an absent field reads
+   * as "never captured", which a rule passes.
+   */
+  primeEligible?: boolean | null;
   soldByAmazon: boolean | null;
   shippedByAmazon: boolean | null;
 }
@@ -55,6 +76,13 @@ export interface ListingRulesConfig {
   maxSourcePrice: number | null;
   /** Only list offers Amazon itself ships. */
   amazonShippedOnly: boolean;
+  /** Only list Prime-eligible offers. */
+  primeOnly: boolean;
+  /**
+   * Skip a product that reads as a pesticide when its Amazon copy shows no
+   * EPA registration number (eBay's pesticide policy). On unless switched off.
+   */
+  pesticideProtection: boolean;
   /** Minimum star rating, 1.0–5.0 at one decimal, typed by the seller; null = no minimum. */
   minRating: number | null;
   /** Minimum number of ratings; null = no minimum. */
@@ -94,6 +122,8 @@ export const DEFAULT_LISTING_RULES: Readonly<ListingRulesConfig> = Object.freeze
   minSourcePrice: null,
   maxSourcePrice: null,
   amazonShippedOnly: false,
+  primeOnly: false,
+  pesticideProtection: true,
   minRating: null,
   minReviewCount: null,
   outOfStockEndDays: null,
@@ -148,6 +178,8 @@ export function normalizeListingRules(raw: unknown): ListingRulesConfig {
     minSourcePrice: minSourcePrice !== null && minSourcePrice > 0 ? minSourcePrice : null,
     maxSourcePrice: maxSourcePrice !== null && maxSourcePrice > 0 ? maxSourcePrice : null,
     amazonShippedOnly: source.amazonShippedOnly === true,
+    primeOnly: source.primeOnly === true,
+    pesticideProtection: source.pesticideProtection !== false,
     minRating: normalizeMinRating(source.minRating),
     minReviewCount: minReviewCount !== null ? Math.floor(minReviewCount) : null,
     outOfStockEndDays: outOfStockEndDays !== null ? Math.floor(outOfStockEndDays) : null,
@@ -171,6 +203,66 @@ export interface ListingRuleSubject {
   /** Amazon price; 0 or less means unknown and is never compared. */
   price: number;
   sourceQuality?: SourceQuality;
+  /** Amazon title and category path — what the pesticide check reads. */
+  title?: string;
+  categoryPath?: string;
+  /** Description, bullets and spec values — where an EPA number would be printed. */
+  copy?: readonly string[];
+}
+
+/**
+ * Words that make a product a pesticide in eBay's sense: something sold to
+ * kill, repel or control pests, weeds or germs. Matched as whole words on the
+ * title and the Amazon category path. Deliberately chemical: a mouse trap or a
+ * fly swatter sits in the same Amazon "Pest Control" category but carries no
+ * EPA registration, so the category alone never decides.
+ */
+const PESTICIDE_PATTERNS: readonly RegExp[] = [
+  /\b(?:pesticides?|insecticides?|herbicides?|fungicides?|rodenticides?|miticides?|larvicides?|algaecides?|algicides?|acaricides?)\b/i,
+  /\b(?:ant|roach|cockroach|bug|insect|wasp|hornet|flea|tick|mosquito|fly|spider|grub|moss|weed|termite|bed ?bug|mole|slug|snail)s?[\s-]*(?:killer|spray|bait|poison|repellent|repellant)s?\b/i,
+  /\bweed[\s-]*(?:and|&)[\s-]*(?:grass|feed)[\s-]*killer\b/i,
+  /\b(?:rat|mouse|mice|rodent)[\s-]*(?:poison|bait)s?\b/i,
+  /\b(?:insect|mosquito|tick|bug|deer|rabbit|rodent|squirrel|animal)[\s-]*repell[ae]nts?\b/i,
+  /\bflea[\s-]*(?:and|&)[\s-]*tick[\s-]*(?:treatment|collar|spray|shampoo|prevention|drops)s?\b/i,
+  /\bdisinfect(?:ant|ing)[\s-]*(?:wipes?|sprays?|cleaners?|tablets?)?\b/i,
+  /\bpool[\s-]*(?:shock|chlorine|algaecide)\b|\bchlorine[\s-]*(?:tablets?|tabs|granules|shock)\b/i,
+];
+
+/** Category-path segments that are pesticides by definition (not devices). */
+const PESTICIDE_CATEGORY_PATTERNS: readonly RegExp[] = [
+  /\binsect repellents?\b/i,
+  /\bweed (?:&|and) moss control\b/i,
+  /\bpool (?:&|and) spa chemicals\b/i,
+  /\bdisinfectants?\b/i,
+];
+
+/**
+ * "EPA Reg. No. 1234-56", "EPA Registration Number: 1234-56-789",
+ * "EPA Reg #1234-56". An EPA registration number is the company number, a dash
+ * and the product number (and a distributor number for a relabelled product).
+ */
+const EPA_REGISTRATION = /\bEPA\s*Reg(?:istration|\.)?\s*(?:No\.?|Number|Nr\.?|#)?\s*[:#.]?\s*(\d{1,7}-\d{1,7}(?:-\d{1,7})?)\b/i;
+
+/** True when the title or category path says this is a pesticide. */
+export function looksLikePesticide(title: string | undefined, categoryPath: string | undefined): boolean {
+  const name = title ?? '';
+  const path = categoryPath ?? '';
+  return (
+    PESTICIDE_PATTERNS.some((pattern) => pattern.test(name)) ||
+    PESTICIDE_CATEGORY_PATTERNS.some((pattern) => pattern.test(path))
+  );
+}
+
+/** The first EPA registration number printed in the given copy, or null. */
+export function findEpaRegistrationNumber(copy: readonly string[] | undefined): string | null {
+  for (const text of copy ?? []) {
+    // The description may be HTML ("EPA Reg. No.</b> 1234-56").
+    const match = text ? EPA_REGISTRATION.exec(text.replace(/<[^>]*>/g, ' ')) : null;
+    if (match) {
+      return match[1];
+    }
+  }
+  return null;
 }
 
 /** True when the seller's own list names this ASIN. Needs no product data. */
@@ -197,6 +289,14 @@ export function evaluateListingRules(
     }
   }
 
+  if (
+    rules.pesticideProtection &&
+    looksLikePesticide(subject.title, subject.categoryPath) &&
+    findEpaRegistrationNumber([subject.title ?? '', ...(subject.copy ?? [])]) === null
+  ) {
+    return { kind: ListingRuleKind.PESTICIDE_NO_EPA };
+  }
+
   // Never captured (Keepa, or a cached row from before this existed): nothing
   // to judge, and refusing every such product would stop listing altogether.
   const quality = subject.sourceQuality;
@@ -206,6 +306,11 @@ export function evaluateListingRules(
 
   if (rules.amazonShippedOnly && quality.shippedByAmazon !== true) {
     return { kind: ListingRuleKind.NOT_SHIPPED_BY_AMAZON };
+  }
+  // `undefined` = a row read before Prime eligibility was captured: passes,
+  // like a missing quality object. `null` = read and not shown: refused.
+  if (rules.primeOnly && quality.primeEligible !== undefined && quality.primeEligible !== true) {
+    return { kind: ListingRuleKind.NOT_PRIME };
   }
   if (rules.minRating !== null && !(quality.rating !== null && quality.rating >= rules.minRating)) {
     return { kind: ListingRuleKind.LOW_RATING, actual: quality.rating, limit: rules.minRating };

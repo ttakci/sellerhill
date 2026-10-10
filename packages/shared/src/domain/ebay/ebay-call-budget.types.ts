@@ -83,6 +83,13 @@ export enum EbayApiResource {
    * the reason the billing sweep visits each store only every 4 hours.
    */
   FINANCES = 'sell.finances',
+  /**
+   * Sell Metadata API (`/sell/metadata/v1/marketplace/{id}/get_item_condition_policies`):
+   * which item conditions a leaf category accepts. eBay publishes no figure we
+   * have measured; the governor counts it and gates only once `getRateLimits`
+   * reports `sell.metadata`.
+   */
+  METADATA = 'sell.metadata',
 }
 
 /**

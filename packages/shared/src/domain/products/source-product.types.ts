@@ -75,6 +75,12 @@ export interface ScraperSignals {
   shippedByAmazon?: boolean | null;
   /** No Buy Box on the page (only "See All Buying Options"). Optional: an older service image omits it. */
   noFeaturedOffer?: boolean;
+  /**
+   * The ASIN the page is actually about (the add-to-cart form's `ASIN` input).
+   * Differs from the requested one when Amazon redirected a merged ASIN or a
+   * variation parent showed a child. Optional: an older service image omits it.
+   */
+  pageAsin?: string | null;
 }
 
 /** Catalog content extracted from an Amazon product page (`mode: 'full'` only). */
@@ -97,8 +103,10 @@ export interface ScraperContent {
   /** Star rating and number of ratings on the page. Optional: an older service build omits them. */
   rating?: number | null;
   ratingCount?: number | null;
-  /** The Buy Box carries the Prime badge. */
+  /** Upstream's Prime badge read — unreliable for our non-Prime session; no rule reads it. */
   isPrime?: boolean | null;
+  /** The Buy Box offer is Prime-eligible, from its delivery promise. Null = no Buy Box delivery block. */
+  primeEligible?: boolean | null;
 }
 
 /** One ASIN's result from the scraper service. */

@@ -101,6 +101,7 @@ describe('parseRateLimitsResponse', () => {
 
 it('campaign and ad calls are governed by sell.marketing.ads.campaign', () => {
   expect(RESOURCE_SOURCE[EbayApiResource.MARKETING_ADS]).toEqual({ trading: false, name: 'sell.marketing.ads.campaign' });
+  expect(RESOURCE_SOURCE[EbayApiResource.METADATA]).toEqual({ trading: false, name: 'sell.metadata' });
 });
 
 describe('pickDailyWindow', () => {

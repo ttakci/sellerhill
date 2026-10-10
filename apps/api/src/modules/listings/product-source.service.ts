@@ -17,12 +17,13 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { chunkAsins, dedupeAsins } from './keepa-normalizer';
 import { ScraperClient } from './scraper.client';
 import { mapScraperProduct } from './source-content-mapper';
-import { normalizeScraperCommerce } from './source-product-normalizer';
+import { normalizeScraperCommerce, redirectedAsin } from './source-product-normalizer';
 
 export type CreateFetchResult =
   | { kind: 'product'; product: ProductData }
   | { kind: 'not_found' }
   | { kind: 'no_buy_box' }
+  | { kind: 'asin_redirected'; resolvedAsin: string }
   | { kind: 'unavailable'; outcome: SourceFetchOutcome };
 
 const MAX_ASINS_PER_REQUEST = 100;
@@ -83,6 +84,16 @@ export class ProductSourceService {
       }
       if (r.outcome === SourceFetchOutcome.NOT_FOUND) {
         out.set(asin, { kind: 'not_found' });
+        continue;
+      }
+      // Amazon opened another product for this ASIN (a merged ASIN redirected,
+      // or a variation parent showing a child). Its title, price and stock are
+      // the OTHER product's, and the automatic purchase would buy that one, so
+      // nothing is saved under the requested ASIN. Create only: the refresh
+      // keeps its own handling for listings already live.
+      const resolvedAsin = r.outcome === SourceFetchOutcome.FOUND ? redirectedAsin(asin, r.signals?.pageAsin) : null;
+      if (resolvedAsin) {
+        out.set(asin, { kind: 'asin_redirected', resolvedAsin });
         continue;
       }
       // Checked before the normalizer, which reads a page with neither price

@@ -310,3 +310,74 @@ describe('formatEbayErrors', () => {
     ).toBe('Bad thing (aspect: Department)');
   });
 });
+
+describe('eBay refusals a seller must be able to read (competitor parity, 2026-10-10)', () => {
+  it('reads a links-policy refusal as a description link, never as a missing business policy', () => {
+    const failure = classifyListingFailure(
+      ebayError([
+        {
+          errorId: 21916860,
+          message:
+            "We've noticed that your listing included a shortened URL. eBay no longer permits shortened URLs (e.g. bitly or tinyurl) in item descriptions, payment instructions, return instructions, etc, regardless of where they link to. To learn what else is no longer permitted in our updated Links policy, please see: http://pages.ebay.com/sellerinformation/news/links2011.html",
+        },
+      ])
+    );
+    expect(failure.code).toBe(ListingFailureCode.EBAY_DESCRIPTION_LINK);
+    expect(failure.details.retryable).toBe(false);
+  });
+
+  it('still reads a real business-policy refusal as one', () => {
+    expect(classifyListingFailure(ebayError([{ message: 'The fulfillmentPolicyId is invalid.' }])).code).toBe(
+      ListingFailureCode.EBAY_POLICY_MISSING
+    );
+    expect(classifyListingFailure(ebayError([{ message: 'Return policy is required.' }])).code).toBe(
+      ListingFailureCode.EBAY_POLICY_MISSING
+    );
+  });
+
+  it('reads a category mismatch and keeps the category eBay names', () => {
+    const failure = classifyListingFailure(
+      ebayError([
+        {
+          message:
+            'From your title, you appear to be selling a GPS accessories. Accessories for GPS, including bundles that only include accessories, should be listed under the Electronics > GPS Navigation> Accessories category. If you are selling a GPS with accessories, please include the word "bundle" in your title.',
+        },
+      ])
+    );
+    expect(failure.code).toBe(ListingFailureCode.EBAY_CATEGORY_MISMATCH);
+    expect(failure.details.categoryName).toBe('Electronics > GPS Navigation > Accessories');
+  });
+
+  it('reads an invalid condition for the category', () => {
+    expect(
+      classifyListingFailure(ebayError([{ message: 'The provided condition id is invalid for the selected primary category id.' }])).code
+    ).toBe(ListingFailureCode.EBAY_CONDITION_INVALID);
+  });
+
+  it('reads "X is a required field" as a missing item specific, not as the item condition', () => {
+    const failure = classifyListingFailure(ebayError([{ message: 'Coin Condition (2) is a required field.' }]));
+    expect(failure.code).toBe(ListingFailureCode.ASPECT_MISSING);
+    expect(failure.details.aspectNames).toEqual(['Coin Condition']);
+  });
+
+  it('keeps the value eBay refused, in both of its wordings', () => {
+    const trading = classifyListingFailure(
+      ebayError([{ message: '"10.5" is not a valid value for EU Shoe Size. Select a value from the available options.' }])
+    );
+    expect(trading.code).toBe(ListingFailureCode.ASPECT_REJECTED);
+    expect(trading.details).toMatchObject({ aspectNames: ['EU Shoe Size'], rejectedValue: '10.5' });
+
+    const inventory = classifyListingFailure(ebayError([{ message: 'Color has an invalid value of "Blu".' }]));
+    expect(inventory.details).toMatchObject({ aspectNames: ['Color'], rejectedValue: 'Blu' });
+  });
+
+  it('carries the ASIN Amazon opened instead of the requested one', () => {
+    const error = Object.assign(new Error('B0OLD00001 opened B0NEW00001'), {
+      name: 'AsinRedirectedError',
+      resolvedAsin: 'B0NEW00001',
+    });
+    const failure = classifyListingFailure(error);
+    expect(failure.code).toBe(ListingFailureCode.ASIN_REDIRECTED);
+    expect(failure.details).toMatchObject({ resolvedAsin: 'B0NEW00001', retryable: false });
+  });
+});

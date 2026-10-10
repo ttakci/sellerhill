@@ -98,10 +98,31 @@ export function extractMissingAspectName(entry: EbayApiErrorEntry): string | nul
   );
 }
 
-/** "MPN has an invalid value of "021500000529"" → { aspect, value }. */
+/**
+ * The aspect and value eBay refused, in either wording it uses:
+ * `MPN has an invalid value of "021500000529"` (Inventory API) or
+ * `"9" is not a valid value for EU Shoe Size. Select a value…` (Trading).
+ */
 export function extractRejectedAspect(entry: EbayApiErrorEntry): { aspectName: string; value: string } | null {
-  const match = entry.message?.match(/^(.*?) has an invalid value of "(.*?)"/i);
-  return match ? { aspectName: match[1].trim(), value: match[2] } : null;
+  const message = entry.message ?? '';
+  const invalidValueOf = message.match(/^(.*?) has an invalid value of "(.*?)"/i);
+  if (invalidValueOf) {
+    return { aspectName: invalidValueOf[1].trim(), value: invalidValueOf[2] };
+  }
+  const notValidFor = message.match(/^"(.*?)" is not a valid value for (.+?)(?:\.\s|\.$|$)/i);
+  return notValidFor ? { aspectName: notValidFor[2].trim(), value: notValidFor[1] } : null;
+}
+
+/** `Coin Condition (2) is a required field.` → `Coin Condition`. */
+export function extractRequiredFieldName(entry: EbayApiErrorEntry): string | null {
+  const match = entry.message?.match(/^(.+?)\s*(?:\(\d+\))?\s+is a required field\b/i);
+  return match ? match[1].trim() : null;
+}
+
+/** `…should be listed under the Electronics > GPS Navigation> Accessories category.` → the path. */
+export function extractSuggestedCategory(entry: EbayApiErrorEntry): string | null {
+  const match = entry.message?.match(/listed (?:under|in) the (.+?) category/i);
+  return match ? match[1].replace(/\s*>\s*/g, ' > ').trim() : null;
 }
 
 /** Flatten eBay's error array into one readable line (kept as technical detail). */
@@ -193,6 +214,17 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   // nothing to price from or buy through. A retry cannot change that.
   if (name === 'NoBuyBoxError') {
     return { code: ListingFailureCode.NO_BUY_BOX, message: raw, details: { retryable: false } };
+  }
+  // Amazon answered the ASIN with another product's page. Terminal: the same
+  // request opens the same other product, and listing it would price and buy
+  // something the seller never chose.
+  if (name === 'AsinRedirectedError') {
+    const resolvedAsin = (error as Error & { resolvedAsin?: string }).resolvedAsin;
+    return {
+      code: ListingFailureCode.ASIN_REDIRECTED,
+      message: raw,
+      details: { retryable: false, ...(resolvedAsin ? { resolvedAsin } : {}) },
+    };
   }
   // One of the seller's own listing rules. Terminal, and reported with the
   // rule and the figures behind it so the reason reads as their own setting.
@@ -290,8 +322,61 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
     return {
       code: isIdentifier ? ListingFailureCode.INVALID_IDENTIFIER : ListingFailureCode.ASPECT_REJECTED,
       message,
-      details: { aspectNames: [rejected.aspectName], ebayErrorIds, retryable: false },
+      details: { aspectNames: [rejected.aspectName], rejectedValue: rejected.value, ebayErrorIds, retryable: false },
     };
+  }
+
+  // The same "required item specific" refusal in the wording that names the
+  // field without the words "item specific" ("Coin Condition (2) is a required
+  // field."). Checked before the condition bucket below: "Coin Condition" is an
+  // item specific, not the item condition.
+  const requiredFields = entries.map(extractRequiredFieldName).filter((name): name is string => Boolean(name));
+  if (requiredFields.length > 0) {
+    return {
+      code: ListingFailureCode.ASPECT_MISSING,
+      message,
+      details: { aspectNames: requiredFields, ebayErrorIds, retryable: false },
+    };
+  }
+
+  // eBay's links policy: a shortened URL, an e-mail address or an off-eBay
+  // link in the description. Checked before the policy bucket — the refusal
+  // ends with "…see our updated Links policy", and matching "policy" there
+  // told the seller their BUSINESS policies were broken.
+  if (
+    entries.some((entry) =>
+      /shortened URL|links policy|bit\.?ly|tinyurl|email address(?:es)? (?:is|are) not (?:allowed|permitted)|links? to (?:an )?(?:external|off-eBay)/i.test(
+        entry.message ?? ''
+      )
+    )
+  ) {
+    return { code: ListingFailureCode.EBAY_DESCRIPTION_LINK, message, details: { ebayErrorIds, retryable: false } };
+  }
+
+  // eBay reads the title as an item that belongs in another category
+  // ("From your title, you appear to be selling … should be listed under …").
+  const mismatch = entries.find((entry) =>
+    /appear to be selling|should be listed (?:under|in)|wrong category|listed in an incorrect category/i.test(entry.message ?? '')
+  );
+  if (mismatch) {
+    const categoryName = extractSuggestedCategory(mismatch);
+    return {
+      code: ListingFailureCode.EBAY_CATEGORY_MISMATCH,
+      message,
+      details: { ebayErrorIds, retryable: false, ...(categoryName ? { categoryName } : {}) },
+    };
+  }
+
+  // The item condition (not an item specific named "… Condition") is not one
+  // the category accepts.
+  if (
+    entries.some((entry) =>
+      /condition ?id is (?:invalid|not valid)|condition (?:is )?(?:invalid|not (?:valid|supported|allowed|available)) for (?:the |this )?(?:selected )?(?:primary )?category|invalid (?:item )?condition/i.test(
+        entry.message ?? ''
+      )
+    )
+  ) {
+    return { code: ListingFailureCode.EBAY_CONDITION_INVALID, message, details: { ebayErrorIds, retryable: false } };
   }
 
   // A required product identifier (UPC/EAN/ISBN) we did not send. That is a
@@ -324,14 +409,21 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
   if (entries.some((entry) => /image|picture/i.test(entry.message ?? ''))) {
     return { code: ListingFailureCode.IMAGE_INVALID, message, details: { ebayErrorIds, retryable: false } };
   }
-  if (entries.some((entry) => /policy/i.test(entry.message ?? ''))) {
+  // A BUSINESS policy (payment / shipping / return). A bare /policy/ also
+  // matched eBay's content policies (links, pictures, pesticides) and sent the
+  // seller to fix settings that were fine.
+  if (
+    entries.some((entry) =>
+      /(?:fulfil?lment|payment|return|shipping|postage|business)\s*polic(?:y|ies)|policy ?id/i.test(entry.message ?? '')
+    )
+  ) {
     return {
       code: ListingFailureCode.EBAY_POLICY_MISSING,
       message,
       details: { ebayErrorIds, retryable: false },
     };
   }
-  if (entries.some((entry) => /restricted|not allowed|prohibited/i.test(entry.message ?? ''))) {
+  if (entries.some((entry) => /restricted|not allowed|prohibited|pesticide|EPA registration/i.test(entry.message ?? ''))) {
     return { code: ListingFailureCode.EBAY_RESTRICTED_ITEM, message, details: { ebayErrorIds, retryable: false } };
   }
   if (entries.some((entry) => /token|expired|invalid access/i.test(entry.message ?? ''))) {

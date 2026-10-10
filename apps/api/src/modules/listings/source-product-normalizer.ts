@@ -24,6 +24,28 @@ export type NormalizedObservation =
   | { kind: 'data_failure' }
   | { kind: 'transport' };
 
+/**
+ * The ASIN Amazon actually showed, when it is NOT the one requested. Null when
+ * they match or the page did not say (an older service image, a captcha, an
+ * unusual layout) — "could not tell" is never read as a different product.
+ * `pageAsin` is the add-to-cart form's own ASIN: what Amazon would put in the
+ * cart for this page, so a difference is not a guess.
+ */
+export function redirectedAsin(requested: string, pageAsin: string | null | undefined): string | null {
+  if (!pageAsin) {
+    return null;
+  }
+  return pageAsin.toUpperCase() === requested.toUpperCase() ? null : pageAsin.toUpperCase();
+}
+
+const REMOVED: SourceCommerce = {
+  price: null,
+  stockStatus: SourceStockStatus.OUT_OF_STOCK,
+  stock: 0,
+  maxOrderQuantity: null,
+  removed: true,
+};
+
 export function normalizeScraperCommerce(result: ScraperProductResult, inStockFloor: number): NormalizedObservation {
   switch (result.outcome) {
     case SourceFetchOutcome.BLOCKED:
@@ -32,10 +54,7 @@ export function normalizeScraperCommerce(result: ScraperProductResult, inStockFl
     case SourceFetchOutcome.PARSE_FAILED:
       return { kind: 'data_failure' };
     case SourceFetchOutcome.NOT_FOUND:
-      return {
-        kind: 'observed',
-        commerce: { price: null, stockStatus: SourceStockStatus.OUT_OF_STOCK, stock: 0, maxOrderQuantity: null, removed: true },
-      };
+      return { kind: 'observed', commerce: REMOVED };
     case SourceFetchOutcome.FOUND:
       break;
     default:
@@ -45,6 +64,15 @@ export function normalizeScraperCommerce(result: ScraperProductResult, inStockFl
   const s = result.signals;
   if (!s) {
     return { kind: 'data_failure' };
+  }
+  // Amazon now answers this ASIN with ANOTHER product's page (operator
+  // decision, 2026-10-10): the product this listing sells is gone from that
+  // address, and an automatic purchase would buy the other one. Read exactly
+  // like a 404 — quantity 0 on eBay, `source_removed_at` set — which clears by
+  // itself if the page ever shows the requested ASIN again. The create path
+  // refuses the ASIN before it reaches here (ASIN_REDIRECTED).
+  if (redirectedAsin(result.asin, s.pageAsin)) {
+    return { kind: 'observed', commerce: REMOVED };
   }
   // No Buy Box: the page was read fine and nothing on it can be bought, so for
   // automation it IS out of stock — quantity 0 on eBay, since auto-fulfill adds

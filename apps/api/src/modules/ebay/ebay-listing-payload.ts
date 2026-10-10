@@ -94,7 +94,9 @@ export function resolveImageUrls(data: ListingCreationData): { imageUrls: string
 export function buildInventoryItemPayload(
   data: ListingCreationData,
   resolution: AspectResolution,
-  marketplaceId: EbayMarketplaceId = EbayMarketplaceId.EBAY_US
+  marketplaceId: EbayMarketplaceId = EbayMarketplaceId.EBAY_US,
+  /** Condition already settled against the resolved category's policy; defaults to the title-derived one. */
+  condition: string = resolveEbayCondition(data.title)
 ): { payload: InventoryItemPayload; usedPlaceholderImage: boolean } {
   const identifiers = resolveCatalogIdentifiers(data, marketplaceId);
   const { imageUrls, usedPlaceholder } = resolveImageUrls(data);
@@ -103,7 +105,7 @@ export function buildInventoryItemPayload(
     usedPlaceholderImage: usedPlaceholder,
     payload: {
       availability: { shipToLocationAvailability: { quantity: data.quantity || 1 } },
-      condition: resolveEbayCondition(data.title),
+      condition,
       product: {
         title: data.title ? data.title.substring(0, EBAY_TITLE_MAX_LENGTH) : 'New Product',
         // Inventory-item description is catalog metadata capped at 4,000 chars —

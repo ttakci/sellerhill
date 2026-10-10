@@ -204,7 +204,7 @@ export function mapScraperIdentifiers(raw: Record<string, string>, brand: string
  * "no ratings" or "not shipped by Amazon".
  */
 export function mapSourceQuality(
-  content: Pick<ScraperContent, 'rating' | 'ratingCount' | 'isPrime'>,
+  content: Pick<ScraperContent, 'rating' | 'ratingCount' | 'isPrime' | 'primeEligible'>,
   signals: Pick<ScraperSignals, 'soldByAmazon' | 'shippedByAmazon'> | null | undefined,
 ): SourceQuality | undefined {
   const captured =
@@ -219,6 +219,9 @@ export function mapSourceQuality(
     rating: number(content.rating),
     ratingCount: number(content.ratingCount),
     isPrime: flag(content.isPrime),
+    // Absent on the wire (an older service image) stays absent, so the
+    // Prime-only rule reads it as "never captured" and passes.
+    ...(content.primeEligible !== undefined ? { primeEligible: flag(content.primeEligible) } : {}),
     soldByAmazon: flag(signals?.soldByAmazon),
     shippedByAmazon: flag(signals?.shippedByAmazon),
   };
@@ -238,6 +241,10 @@ export function readStoredSourceQuality(raw: Record<string, unknown> | undefined
     rating: number(q.rating),
     ratingCount: number(q.ratingCount),
     isPrime: flag(q.isPrime),
+    // A row cached before Prime eligibility existed has no such key: it stays
+    // absent (not null), so the Prime-only rule does not refuse it on
+    // upstream's unreliable `isPrime: false`.
+    ...('primeEligible' in q ? { primeEligible: flag(q.primeEligible) } : {}),
     soldByAmazon: flag(q.soldByAmazon),
     shippedByAmazon: flag(q.shippedByAmazon),
   };

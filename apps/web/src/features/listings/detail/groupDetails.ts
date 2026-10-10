@@ -73,6 +73,8 @@ export function buildGroupDetailSections(
     row(k('rules.filters.minPrice'), money(rules.minSourcePrice)),
     row(k('rules.filters.maxPrice'), money(rules.maxSourcePrice)),
     row(k('rules.filters.amazonShippedOnly'), flag(rules.amazonShippedOnly)),
+    row(k('rules.filters.primeOnly'), flag(rules.primeOnly)),
+    row(k('rules.filters.pesticideProtection'), flag(rules.pesticideProtection)),
     row(k('rules.filters.minRating'), [typeof rules.minRating === 'number' ? fmtRating(rules.minRating) : dash]),
     row(k('rules.filters.minReviewCount'), num(rules.minReviewCount)),
     row(k('rules.cleanup.outOfStock'), [outOfStock]),

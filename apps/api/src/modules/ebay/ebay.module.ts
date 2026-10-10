@@ -13,6 +13,7 @@ import { AspectResolverService } from './aspect-resolver.service';
 import { EbayAccountDeletionController } from './ebay-account-deletion.controller';
 import { EbayAccountDeletionService } from './ebay-account-deletion.service';
 import { EbayBulkService } from './ebay-bulk.service';
+import { EbayConditionPolicyService } from './ebay-condition-policy.service';
 import { EbayFeedService } from './ebay-feed.service';
 import { EbayImageResolver } from './ebay-image-resolver.service';
 import { EbayMediaService } from './ebay-media.service';
@@ -42,6 +43,7 @@ import { EbayNotificationService } from './notifications/ebay-notification.servi
     EbayMediaService,
     EbayOAuthService,
     EbayTaxonomyService,
+    EbayConditionPolicyService,
     AspectResolverService,
     AspectLlmService,
     EmailVerifiedGuard,

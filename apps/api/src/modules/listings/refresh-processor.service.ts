@@ -9,6 +9,7 @@ import {
   ListingStatus,
   PlatformSettingKey,
   ProductDataProviderKind,
+  SourceFetchOutcome,
   SourceStockStatus,
   type KeepaApiMeta,
   type KeepaProduct,
@@ -29,6 +30,7 @@ import { dataFailureDelayMinutes } from './refresh-backoff';
 import { resolveRefreshBatchSize } from './refresh-batch-size';
 import { buildRefreshEntitlementSql } from './refresh-entitlement-sql';
 import { planKeepaRollback, planScraperRefresh, resolveScraperRefreshBatchSize, type ScraperRefreshPlan } from './scraper-refresh';
+import { redirectedAsin } from './source-product-normalizer';
 
 interface ProductRow {
   id: string;
@@ -426,6 +428,12 @@ export class RefreshProcessorService extends WorkerHost {
     for (const [marketplace, group] of byMarketplace) {
       for (const r of await this.productSource.fetchCommerce(group.map((p) => p.asin), marketplace)) {
         results.set(r.asin, r);
+        const resolved = r.outcome === SourceFetchOutcome.FOUND ? redirectedAsin(r.asin, r.signals?.pageAsin) : null;
+        if (resolved) {
+          // The normalizer reads it as removed: quantity 0 on eBay until the
+          // page shows the requested ASIN again.
+          this.logger.warn(`ASIN ${r.asin} now opens ${resolved} on Amazon — treated as unavailable (quantity 0).`);
+        }
       }
     }
     const pending: PendingListingUpdate[] = [];

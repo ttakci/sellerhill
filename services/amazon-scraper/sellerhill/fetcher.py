@@ -1,6 +1,7 @@
 """One ASIN → one result dict. Classifies every failure into an outcome; the
 pool maps the stat-only `proxy_error` to the wire's `blocked` before the
 NestJS normalizer sees it. Never raises except NoProxyError."""
+import re
 import time
 from datetime import datetime, timezone
 
@@ -19,6 +20,25 @@ _SOFT_NOT_FOUND_MARKERS = (
     "couldn’t find that page",
     "<title>page not found</title>",
 )
+
+
+# The product page's own ASIN: the add-to-cart form's hidden `ASIN` input, then
+# the twister's `currentAsin`. Never the canonical link, which on live pages
+# names a different (parent / sibling) ASIN for an ordinary buyable product.
+_PAGE_ASIN_PATTERNS = (
+    re.compile(r'name="ASIN"\s+value="([A-Z0-9]{10})"'),
+    re.compile(r'value="([A-Z0-9]{10})"\s+name="ASIN"'),
+    re.compile(r'"currentAsin"\s*:\s*"([A-Z0-9]{10})"'),
+)
+
+
+def page_asin(html):
+    """The ASIN the page is actually about, or None when it does not say."""
+    for pattern in _PAGE_ASIN_PATTERNS:
+        match = pattern.search(html)
+        if match:
+            return match.group(1)
+    return None
 
 
 def _elapsed_ms(started):
@@ -61,4 +81,10 @@ def fetch_one(asin, marketplace, mode):
             return {**base, "outcome": "not_found"}
         return {**base, "outcome": "parse_failed"}
     signals, content = parsing.run_parse(html, site, mode)
+    # Amazon answers a merged/retired ASIN with a redirect to another product,
+    # and a variation parent with one of its children. The outcome stays
+    # `found` (the page was read); the caller compares `pageAsin` with the
+    # requested ASIN and decides — a create refuses a different product.
+    if isinstance(signals, dict):
+        signals = {**signals, "pageAsin": page_asin(html)}
     return {**base, "outcome": "found", "signals": signals, "content": content}

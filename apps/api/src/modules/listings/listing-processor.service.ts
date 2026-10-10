@@ -84,6 +84,17 @@ export class NoBuyBoxError extends Error {
   }
 }
 
+/** Amazon answered the requested ASIN with another product's page. */
+export class AsinRedirectedError extends Error {
+  override name = 'AsinRedirectedError';
+  constructor(
+    asin: string,
+    readonly resolvedAsin: string
+  ) {
+    super(`${asin} opens a different product on Amazon (${resolvedAsin})`);
+  }
+}
+
 /**
  * One of the seller's own listing rules refused the product (a blocked ASIN,
  * VeRO protection, the price range, "shipped by Amazon only", a rating or
@@ -650,6 +661,13 @@ export class ListingProcessorService extends WorkerHost {
       asin: product.asin,
       price: Number(product.price?.current) || 0,
       sourceQuality: product.sourceQuality,
+      title: product.title,
+      categoryPath: product.categoryPath ?? product.category,
+      copy: [
+        product.description ?? '',
+        ...(product.features ?? []),
+        ...Object.entries(product.specs ?? {}).map(([name, value]) => `${name}: ${value}`),
+      ],
     });
     if (violation) {
       throw new ListingRuleBlockedError(product.asin, violation);
@@ -896,6 +914,9 @@ export class ListingProcessorService extends WorkerHost {
           prefetched?.get(asin) ?? (await this.productSource.fetchForCreate([asin], marketplace)).get(asin);
         if (result?.kind === 'no_buy_box') {
           throw new NoBuyBoxError(asin);
+        }
+        if (result?.kind === 'asin_redirected') {
+          throw new AsinRedirectedError(asin, result.resolvedAsin);
         }
         if (!result || result.kind === 'unavailable') {
           throw new ProductDataUnavailableError(asin, result?.outcome ?? SourceFetchOutcome.BLOCKED);

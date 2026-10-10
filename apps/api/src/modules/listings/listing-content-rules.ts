@@ -40,6 +40,14 @@ const BARE_HOST = /\b(?:[A-Za-z0-9][A-Za-z0-9-]{0,62}\.)+(?:com|net|org|io)\b(?:
  * deliberately not matched — that is what a UPC or a model number looks like.
  */
 const PHONE = /(?<![\w.-])(?:\+?1[\s.-]?)?(?:\(\d{3}\)\s?|\d{3}[\s.-])\d{3}[\s.-]\d{4}(?![\w-])/g;
+/**
+ * Link shorteners written without a scheme (`bit.ly/3xYz`, `amzn.to/abc`,
+ * `a.co/d/xyz`). eBay refuses a listing that carries one anywhere in the
+ * description, and none ends in the four TLDs `BARE_HOST` knows. Named hosts
+ * only, any case, and only with a path — `a.co` alone is not a link.
+ */
+const SHORT_LINK =
+  /(?<![\w.-])(?:bit\.ly|bitly\.com|tinyurl\.com|t\.co|goo\.gl|ow\.ly|is\.gd|buff\.ly|rebrand\.ly|cutt\.ly|shorturl\.at|rb\.gy|tiny\.cc|amzn\.to|amzn\.eu|a\.co)\/[^\s<>"')\]]+/gi;
 
 const HTML_TAG_SPLIT = /(<[^>]+>)/;
 
@@ -72,6 +80,7 @@ export function stripContactDetails(input: string): string {
     const cleaned = text
       .replace(EMAIL, '')
       .replace(WEB_ADDRESS, '')
+      .replace(SHORT_LINK, '')
       .replace(BARE_HOST, '')
       .replace(PHONE, '');
     return cleaned === text ? text : tidy(cleaned);
