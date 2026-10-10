@@ -101,7 +101,7 @@
     "trackingConversionScopeAmazonOnly": "仅 Amazon Logistics（TBA）",
     "trackingConversionScopeHint": "Amazon Logistics（TBA）单号会直接显示“Amazon”，因此只转换这类单号，就能隐藏最明显的供应商痕迹，并且占用的每月转换额度要少得多。转换所有承运商能隐藏更多信息（由 Amazon 发出的 UPS 或 USPS 单号往往也能被查到），但成本更高；而且如果买家声称没有收到商品，eBay 会把承运商自身的扫描记录视为更有力的送达证明。",
     "trackingConvertManualOrders": "转换手动关联的订单",
-    "trackingConvertManualOrdersHint": "只要 Amazon 采购不是由 SellerHill 自己完成的，订单就算作手动关联：即您自己购买并填写了订单号，或由系统为您匹配。如果自动下单已关闭，您的每一笔订单都属于这一类，因此关闭此选项意味着完全不会转换任何物流单号，您的买家会看到原始的 Amazon 单号。默认开启；即使关闭，您仍可在订单页面逐笔转换这些订单。",
+    "trackingConvertManualOrdersHint": "只要 Amazon 采购不是由 SellerHill 自己完成的，订单就算作手动关联：即您自己购买并填写了订单号，或由系统为您匹配。如果自动下单已关闭，您的每一笔订单都属于这一类，因此关闭此选项意味着完全不会转换任何物流单号，您的买家会看到原始的 Amazon 单号。默认开启；关闭后，Amazon 一发货，原始的 Amazon 单号就会自动发送到 eBay，且 eBay 之后不允许更改。",
     "trackingExposure": {
       "conversionOff": "物流单号转换已关闭。您的买家会看到 Amazon 的原始物流单号（TBA…），并可直接追查到您的供应商。",
       "manualAll": "由于自动下单已关闭，您的每一笔订单都算作手动关联。此设置关闭时不会转换任何单号，原始的 Amazon 单号（包括 TBA）会发送到 eBay，从而暴露您的供应商。",

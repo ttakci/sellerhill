@@ -17,6 +17,8 @@ export const SegmentedControl = ({
           key={option.value}
           $active={value === option.value}
           $size={size}
+          type="button"
+          aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
         >
           {option.icon}

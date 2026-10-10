@@ -8,6 +8,10 @@ import { tkn } from '../../theme/tkn';
  * so the box geometry is byte-identical across types. `info` predates the
  * other variants and is rendered on ~40 existing surfaces; a 1px border on it
  * would nudge every one of them.
+ *
+ * `warning` shares the info surface (operator decision, 2026-10-10): an amber
+ * box beside the blue notes of the same drawer read as a foreign element. What
+ * marks it as a warning is the solid red disc, the same one `Dialog` uses.
  */
 export const Container = styled.div<{ $type: MessageType }>`
   display: flex;
@@ -21,8 +25,6 @@ export const Container = styled.div<{ $type: MessageType }>`
     switch ($type) {
       case 'error':
         return theme.colors.semanticTint.error;
-      case 'warning':
-        return theme.colors.semanticTint.warning;
       case 'success':
         return theme.colors.semanticTint.success;
       case 'info':
@@ -34,8 +36,6 @@ export const Container = styled.div<{ $type: MessageType }>`
     switch ($type) {
       case 'error':
         return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.error}`;
-      case 'warning':
-        return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.warning}`;
       case 'success':
         return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.success}`;
       case 'info':

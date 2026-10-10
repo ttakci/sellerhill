@@ -7,7 +7,7 @@ import type { StepperOrientation } from './Stepper.types';
 export const StepperContainer = styled.div<{ $orientation: StepperOrientation }>`
   display: flex;
   ${(props) =>
-    props.$orientation === 'horizontal' ? 'flex-direction: row; align-items: flex-start;' : 'flex-direction: column;'}
+    props.$orientation === 'horizontal' ? 'flex-direction: row; align-items: stretch;' : 'flex-direction: column;'}
 `;
 
 export const StepWrapper = styled.div<{ $orientation: StepperOrientation }>`
@@ -46,7 +46,11 @@ export const StepLabel = styled.div<{ $status: 'completed' | 'current' | 'upcomi
   display: flex;
   flex-direction: column;
   align-items: center;
-  ${(props) => (props.$noMargin ? '' : `margin-bottom: ${tkn('spacing.sm')(props)};`)}
+  /* Horizontal: the label grows to the tallest label in the row and sits on
+     its floor, so a label that wraps to two lines never pushes its own dot
+     below the others (the connectors are drawn per row and would break). */
+  ${(props) =>
+    props.$noMargin ? '' : `flex: 1; justify-content: flex-end; margin-bottom: ${tkn('spacing.sm')(props)};`}
   gap: 0.0625rem;
   text-align: center;
 
