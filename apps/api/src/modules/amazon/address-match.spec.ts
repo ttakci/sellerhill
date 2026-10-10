@@ -84,6 +84,25 @@ describe('addressBlockMatchesBuyer', () => {
       ).toBe(true);
     });
 
+    it('matches an address saved with the bare reference code, without "EVTN"', () => {
+      // How hand-placed, delivered eIS orders show the line on Amazon.
+      expect(
+        addressBlockMatchesBuyer(
+          'eIS C/O Pat EXAMPLE A1BCD2E 110 INTERNATIONALE BLVD GLENDALE HEIGHTS, IL 60139-2080 United States',
+          eis,
+        ),
+      ).toBe(true);
+    });
+
+    it('still requires the code itself when the prefix is dropped', () => {
+      expect(
+        addressBlockMatchesBuyer(
+          'eIS C/O Pat EXAMPLE 110 INTERNATIONALE BLVD GLENDALE HEIGHTS, IL 60139-2080 United States',
+          eis,
+        ),
+      ).toBe(false);
+    });
+
     it("still refuses another parcel's reference at the same hub", () => {
       expect(
         addressBlockMatchesBuyer(

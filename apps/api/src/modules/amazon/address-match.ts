@@ -90,6 +90,22 @@ function containsTokens(haystack: string, needle: string): boolean {
   return ` ${haystack} `.includes(` ${needle} `);
 }
 
+/**
+ * eBay International Shipping sends the hub parcel reference as `evtn:<code>`
+ * in street2. Saved Amazon addresses carry it either with the prefix
+ * ("EVTN H2CMH4F", what our checkout writes) or as the bare code
+ * ("L27RD8Q 110 INTERNATIONALE BLVD", seen on delivered orders placed by
+ * hand). The code is what identifies the parcel, so it stays REQUIRED; only the
+ * `evtn` word is optional.
+ */
+function unitLinePresent(haystack: string, unitNorm: string): boolean {
+  if (containsTokens(haystack, unitNorm)) {
+    return true;
+  }
+  const bareReference = /^evtn (.+)$/.exec(unitNorm)?.[1];
+  return bareReference !== undefined && containsTokens(haystack, bareReference);
+}
+
 /** Leading house/building number of a street line, when present. */
 function streetNumber(street: string): string | null {
   return /^\s*(\d+)/.exec(street)?.[1] ?? null;
@@ -185,7 +201,7 @@ export function addressBlockMatchesBuyer(
   // Unit/suite line: if the buyer has one it must be present, otherwise a
   // same-street neighbouring unit would be accepted.
   const unit = buyer.street2?.trim();
-  if (unit && !containsTokens(haystack, normalize(unit))) {
+  if (unit && !unitLinePresent(haystack, normalize(unit))) {
     return false;
   }
 
