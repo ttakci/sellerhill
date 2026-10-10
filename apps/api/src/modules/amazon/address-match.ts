@@ -68,7 +68,13 @@ function normalize(value: string): string {
   return (
     value
       .toLowerCase()
-      .replace(/[.,#]/g, ' ')
+      // Every mark that is not a letter, digit or hyphen separates words, on
+      // both sides alike. eBay International Shipping sends its parcel
+      // reference as `evtn:h2cmh4f` and Amazon prints `EVTN H2CMH4F`; with only
+      // `. , #` stripped the colon glued "evtn:h" into one word and every
+      // international order was blocked on its correct address (2026-10-10).
+      // The hyphen stays: ZIP+4 is split on it below.
+      .replace(/[^a-z0-9\s-]/g, ' ')
       // "121Daniel" -> "121 daniel": Amazon inserts the space when it saves.
       .replace(/(\d)([a-z])/g, '$1 $2')
       .replace(/([a-z])(\d)/g, '$1 $2')

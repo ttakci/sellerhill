@@ -61,6 +61,45 @@ describe('addressBlockMatchesBuyer', () => {
     ).toBe(true);
   });
 
+  describe('eBay International Shipping (production, 2026-10-10)', () => {
+    // An international sale ships to eBay's Illinois hub. eBay sends the parcel
+    // reference as `evtn:xxxx` in street2; Amazon prints it upper-cased with a
+    // space ("EVTN XXXX"). The colon used to survive normalisation, so every
+    // such order was blocked as "ship-to does not match" on the right address.
+    const eis: MatchableAddress = {
+      fullName: 'eIS C/O Pat EXAMPLE',
+      street: '110 Internationale Blvd',
+      street2: 'evtn:a1bcd2e',
+      city: 'Glendale Heights',
+      state: 'IL',
+      zipCode: '60139-2080',
+    };
+
+    it('matches the hub address with the reference Amazon prints', () => {
+      expect(
+        addressBlockMatchesBuyer(
+          'eIS C/O Pat EXAMPLE EVTN A1BCD2E, 110 INTERNATIONALE BLVD, GLENDALE HEIGHTS, IL, 60139-2080, United States',
+          eis,
+        ),
+      ).toBe(true);
+    });
+
+    it("still refuses another parcel's reference at the same hub", () => {
+      expect(
+        addressBlockMatchesBuyer(
+          'eIS C/O Sam OTHER EVTN Z9YXW8V, 110 INTERNATIONALE BLVD, GLENDALE HEIGHTS, IL, 60139-2080, United States',
+          eis,
+        ),
+      ).toBe(false);
+    });
+  });
+
+  it('treats any punctuation as a separator on both sides, never as part of a word', () => {
+    const slashed: MatchableAddress = { ...buyer, street: '30 N Gould St', street2: 'Unit 4/B' };
+    expect(addressBlockMatchesBuyer('JANE BUYER 30 N GOULD ST UNIT 4 B, SHERIDAN, WY 82801', slashed)).toBe(true);
+    expect(addressBlockMatchesBuyer('JANE BUYER 30 N GOULD ST UNIT 5 B, SHERIDAN, WY 82801', slashed)).toBe(false);
+  });
+
   it('requires the buyer unit line when present', () => {
     const withUnit: MatchableAddress = { ...buyer, street: '30 N Gould St', street2: 'Ste 567' };
     expect(
